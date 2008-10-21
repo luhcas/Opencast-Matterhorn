@@ -1,0 +1,40 @@
+----------------------------------------------------------------
+2008-10-21 18:58:56.577 GMT:
+ Booting Derby version The Apache Software Foundation - Apache Derby - 10.4.2.0 - (689064): instance a816c00e-011d-20c6-26fe-0000000b15b0
+on database directory /Users/josh/dev/src/jackrabbit_tests/opencast-jcr/target/jackrabbit_repo/version/db  
+
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+2008-10-21 18:58:57.459 GMT:
+ Booting Derby version The Apache Software Foundation - Apache Derby - 10.4.2.0 - (689064): instance 004b0019-011d-20c6-26fe-0000000b15b0
+on database directory /Users/josh/dev/src/jackrabbit_tests/opencast-jcr/target/jackrabbit_repo/workspaces/default/db  
+
+Database Class Loader started - derby.database.classpath=''
+
+2008-10-21 18:58:58.160 GMT:
+Shutting down instance 004b0019-011d-20c6-26fe-0000000b15b0
+----------------------------------------------------------------
+
+2008-10-21 18:58:58.173 GMT:
+Shutting down instance a816c00e-011d-20c6-26fe-0000000b15b0
+----------------------------------------------------------------
+----------------------------------------------------------------
+2008-10-21 18:58:58.386 GMT:
+ Booting Derby version The Apache Software Foundation - Apache Derby - 10.4.2.0 - (689064): instance d89d8024-011d-20c6-26fe-0000000b15b0
+on database directory /Users/josh/dev/src/jackrabbit_tests/opencast-jcr/target/jackrabbit_repo/version/db  
+
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+2008-10-21 18:58:58.542 GMT:
+ Booting Derby version The Apache Software Foundation - Apache Derby - 10.4.2.0 - (689064): instance 610e402f-011d-20c6-26fe-0000000b15b0
+on database directory /Users/josh/dev/src/jackrabbit_tests/opencast-jcr/target/jackrabbit_repo/workspaces/default/db  
+
+Database Class Loader started - derby.database.classpath=''
+
+2008-10-21 18:58:58.894 GMT:
+Shutting down instance 610e402f-011d-20c6-26fe-0000000b15b0
+----------------------------------------------------------------
+
+2008-10-21 18:58:58.904 GMT:
+Shutting down instance d89d8024-011d-20c6-26fe-0000000b15b0
+----------------------------------------------------------------
