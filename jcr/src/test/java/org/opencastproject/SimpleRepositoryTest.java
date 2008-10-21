@@ -1,17 +1,15 @@
 package org.opencastproject;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import javax.jcr.Node;
-import javax.jcr.Property;
 import javax.jcr.Repository;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -19,15 +17,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class SimpleRepositoryTest {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleRepositoryTest.class);
 	
-	// TODO Configure a cluster-able JCR Repo (via spring ?)
-	// TODO Configure login to JCR.  Not sure how this is going to be done
-	
 	Repository repo;
 	ClassPathXmlApplicationContext appContext;
 	
 	@Before
 	public void setUp() throws Exception {
-		appContext = new ClassPathXmlApplicationContext("classpath:/jcr-test.xml");
+		appContext = new ClassPathXmlApplicationContext("classpath:/simple-test.xml");
 		repo = (Repository) appContext.getBean("jcrRepository");
 	}
 
