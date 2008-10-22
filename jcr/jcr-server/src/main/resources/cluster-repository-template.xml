@@ -22,7 +22,7 @@
             <param name="path" value="${wsp.home}"/>
         </FileSystem>
         <PersistenceManager class="org.apache.jackrabbit.core.persistence.bundle.OraclePersistenceManager">
-          <param name="url" value="jdbc:oracle:thin:@hodr:1521:db"/>
+          <param name="url" value="jdbc:oracle:thin:@host:1521:db"/>
           <param name="user" value=""/>
           <param name="password" value=""/>
           <param name="driver" value="oracle.jdbc.driver.OracleDriver"/>          
@@ -58,7 +58,7 @@
         <param name="supportHighlighting" value="true"/>
     </SearchIndex -->
 
-	<Cluster id="node1">
+	<Cluster id="NODE_ID">
 	  <Journal class="org.apache.jackrabbit.core.journal.OracleDatabaseJournal">
 	    <param name="revision" value="${rep.home}/revision.log" />
 	    <param name="driver" value="oracle.jdbc.driver.OracleDriver" />

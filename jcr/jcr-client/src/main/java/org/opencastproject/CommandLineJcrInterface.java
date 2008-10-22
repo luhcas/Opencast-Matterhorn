@@ -2,7 +2,6 @@ package org.opencastproject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import javax.jcr.Node;
@@ -10,31 +9,19 @@ import javax.jcr.Repository;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
 
-import org.springframework.core.io.DefaultResourceLoader;
-
 public class CommandLineJcrInterface {
 	
 	public static void main(String... args) {
 		try {
-			System.out.print("Enter node number (1 or 2): ");
+			System.out.print("Enter a unique name for this node: ");
 			String nodeNumberInput;
 			try {
 				nodeNumberInput = new BufferedReader(new InputStreamReader(System.in)).readLine();
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			
-			String jcrConfig;
-			if("1".equals(nodeNumberInput)) {
-				jcrConfig = "cluster-repository-1.xml";
-			} else {
-				jcrConfig = "cluster-repository-2.xml";
-			}
 
-		    InputStream config = new DefaultResourceLoader().getResource(
-	          "classpath:" + jcrConfig).getInputStream();
-
-			OpencastJcrServer server = new OpencastJcrServer(config, "./target/cluster_repo_" + nodeNumberInput + "_home/");
+			OpencastJcrServer server = new OpencastJcrServer(nodeNumberInput, "./target/cluster_repo_" + nodeNumberInput + "_home/");
 			try {
 				Repository repo = server.getRepository();
 				Session s = repo.login(new SimpleCredentials("username", "password".toCharArray()));
@@ -59,13 +46,21 @@ public class CommandLineJcrInterface {
 						// Strip off the write and whitespace
 						int whiteSpaceIndex = input.indexOf(" ");
 						String nodeName = input.substring(whiteSpaceIndex + 1);
-						s.getRootNode().addNode(nodeName, "nt:folder");
-						s.save();
+						try {
+							s.getRootNode().addNode(nodeName, "nt:folder");
+							s.save();
+						} catch (Exception e) {
+							System.out.println(e.getMessage());
+						}
 					} else if(input.startsWith("read")) {
 						int whiteSpaceIndex = input.indexOf(" ");
 						String nodeName = input.substring(whiteSpaceIndex + 1);
-						Node node = s.getRootNode().getNode(nodeName);
-						System.out.println(node.getPath());
+						try {
+							Node node = s.getRootNode().getNode(nodeName);
+							System.out.println(node.getPath());
+						} catch (Exception e) {
+							System.out.println(e.getMessage());
+						}
 					} else {
 						System.out.println("Unknown command: " + input);
 					}
