@@ -1,22 +1,30 @@
 package org.opencastproject;
 
+import java.io.InputStream;
+
 import javax.jcr.Repository;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.apache.jackrabbit.api.JackrabbitRepository;
+import org.apache.jackrabbit.core.RepositoryImpl;
+import org.apache.jackrabbit.core.config.RepositoryConfig;
 
 public class OpencastJcrServer {
-	private ClassPathXmlApplicationContext appContext;
-	
-	public OpencastJcrServer() {
-		appContext = new ClassPathXmlApplicationContext("classpath:/spring-cluster-repository.xml");
+	JackrabbitRepository repo;
+	public OpencastJcrServer(InputStream config, String repoHome) {
+		try {
+			RepositoryConfig rc = RepositoryConfig.create(config, repoHome);
+			repo = RepositoryImpl.create(rc);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public void closeRepository() {
-		appContext.destroy();
+		repo.shutdown();
 	}
 	
 	public Repository getRepository() {
-		return (Repository) appContext.getBean("jcrRepository");
+		return repo;
 	}
 
 }
