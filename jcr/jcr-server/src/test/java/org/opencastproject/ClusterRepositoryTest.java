@@ -14,15 +14,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public class SimpleRepositoryTest {
-	private static final Logger logger = LoggerFactory.getLogger(SimpleRepositoryTest.class);
+public class ClusterRepositoryTest {
+	private static final Logger logger = LoggerFactory.getLogger(ClusterRepositoryTest.class);
 	
 	Repository repo;
 	ClassPathXmlApplicationContext appContext;
 	
 	@Before
 	public void setUp() throws Exception {
-		appContext = new ClassPathXmlApplicationContext("classpath:/simple-test.xml");
+		appContext = new ClassPathXmlApplicationContext("classpath:/spring-cluster-repository.xml");
 		repo = (Repository) appContext.getBean("jcrRepository");
 	}
 
