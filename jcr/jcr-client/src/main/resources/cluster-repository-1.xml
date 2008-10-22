@@ -22,8 +22,8 @@
             <param name="path" value="${wsp.home}"/>
         </FileSystem>
         <PersistenceManager class="org.apache.jackrabbit.core.persistence.bundle.OraclePersistenceManager">
-          <param name="url" value="jdbc:oracle:thin:@butte.ist.berkeley.edu:1521:studev"/>
-          <param name="user" value="josh"/>
+          <param name="url" value="jdbc:oracle:thin:@hodr:1521:db"/>
+          <param name="user" value=""/>
           <param name="password" value=""/>
           <param name="driver" value="oracle.jdbc.driver.OracleDriver"/>          
           <param name="schemaObjectPrefix" value="${wsp.name}_"/>
@@ -41,8 +41,8 @@
             <param name="path" value="${rep.home}/version" />
         </FileSystem>
         <PersistenceManager class="org.apache.jackrabbit.core.persistence.bundle.OraclePersistenceManager">
-          <param name="url" value="jdbc:oracle:thin:@butte.ist.berkeley.edu:1521:studev"/>
-          <param name="user" value="josh"/>
+          <param name="url" value="jdbc:oracle:thin:@host:1521:db"/>
+          <param name="user" value=""/>
           <param name="password" value=""/>
           <param name="driver" value="oracle.jdbc.driver.OracleDriver"/>          
           <param name="schemaObjectPrefix" value="version_"/>
@@ -62,8 +62,8 @@
 	  <Journal class="org.apache.jackrabbit.core.journal.OracleDatabaseJournal">
 	    <param name="revision" value="${rep.home}/revision.log" />
 	    <param name="driver" value="oracle.jdbc.driver.OracleDriver" />
-	    <param name="url" value="jdbc:oracle:thin:@butte.ist.berkeley.edu:1521:studev" />
-	    <param name="user" value="josh"/>
+	    <param name="url" value="jdbc:oracle:thin:@host:1521:db" />
+	    <param name="user" value=""/>
 	    <param name="password" value=""/>
 	  </Journal>
 	</Cluster>
