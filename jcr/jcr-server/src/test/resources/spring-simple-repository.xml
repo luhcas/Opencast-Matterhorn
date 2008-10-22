@@ -5,8 +5,8 @@
 	http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 	
 	<bean id="jcrRepository" class="org.apache.jackrabbit.core.TransientRepository" destroy-method="shutdown">
-		<constructor-arg index="0" value="./src/main/resources/cluster-repository.xml" />
-		<constructor-arg index="1" value="./target/cluster_repo/" />
+		<constructor-arg index="0" value="./src/test/resources/simple-repository.xml" />
+		<constructor-arg index="1" value="./target/simple_repo/" />
 	</bean>
 
 </beans>
