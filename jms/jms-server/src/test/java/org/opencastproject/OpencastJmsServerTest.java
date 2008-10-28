@@ -9,32 +9,22 @@ import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 public class OpencastJmsServerTest {
-	private static final Log log = LogFactory.getLog(OpencastJmsServerTest.class);
 
 	protected OpencastJmsServer jmsServer;
-	boolean encodeMessageReceived;
-	boolean statusMessageReceived;
-	
 
 	@Before
 	public void setUp() {
 		jmsServer = new OpencastJmsServer();
-		encodeMessageReceived = false;
-		statusMessageReceived = false;
 	}
 	
 	@After
 	public void tearDown() {
 		jmsServer.closeServer();
-		encodeMessageReceived = false;
-		statusMessageReceived = false;
 	}
 	
 	@Test
@@ -49,13 +39,11 @@ public class OpencastJmsServerTest {
 	public void testTopic() throws Exception {
 		Connection conn = null;
 		conn = jmsServer.getConnection("testConn");
-		conn.start();
-		Session session = conn.createSession(true, Session.SESSION_TRANSACTED);
+		Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
 		Topic encodeTopic = session.createTopic("encode");
-		TopicSubscriber encodeSubscriber = session.createDurableSubscriber(encodeTopic, "testEncodeSubscription");
-
-		log.info("created durable subscriber for the encode topic");
+		TopicSubscriber encodeSubscriber1 = session.createDurableSubscriber(encodeTopic, "testEncodeSubscription1");
+		TopicSubscriber encodeSubscriber2 = session.createDurableSubscriber(encodeTopic, "testEncodeSubscription2");
 
 		// Send an encode message
 		MessageProducer encodeMessageProducer = session.createProducer(encodeTopic);
@@ -63,18 +51,22 @@ public class OpencastJmsServerTest {
 		outboundEncodeMessage.setJMSDestination(encodeTopic);
 		outboundEncodeMessage.setStringProperty("node", "/video/12345");
 		encodeMessageProducer.send(outboundEncodeMessage);
-		session.commit();
 
-		log.info("sent a message to the encode topic");
-		
-		Message inboundEncodeMessage = encodeSubscriber.receive();
-		assertNotNull(inboundEncodeMessage);
-		assertEquals("/video/12345", inboundEncodeMessage.getStringProperty("node"));
-		
-		encodeSubscriber.close();
+		conn.start(); // messages may start arriving now
+
+		// Ensure that the encode message arrives at the two subscribers
+		Message inboundEncodeMessage1 = encodeSubscriber1.receive(); // for production code, use a MessageListener instead
+		assertNotNull(inboundEncodeMessage1);
+		assertEquals("/video/12345", inboundEncodeMessage1.getStringProperty("node"));
+
+		Message inboundEncodeMessage2 = encodeSubscriber2.receive(); // for production code, use a MessageListener instead
+		assertNotNull(inboundEncodeMessage2);
+		assertEquals("/video/12345", inboundEncodeMessage2.getStringProperty("node"));
+
+		// Shut it down
+		encodeSubscriber1.close();
+		encodeSubscriber2.close();
 		session.close();
 		conn.close();
-
-		log.info("closed");
 	}
 }
