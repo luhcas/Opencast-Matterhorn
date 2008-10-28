@@ -15,6 +15,7 @@
       </activation>
       <modules>
         <module>jms-server</module>
+        <module>jms-client</module>
       </modules>
     </profile>
   </profiles>
