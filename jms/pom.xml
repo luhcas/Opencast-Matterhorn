@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
-  <name>opencast-jcr</name>
+  <name>opencast-jms</name>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-jcr</artifactId>
+  <artifactId>opencast-jms</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
@@ -14,8 +14,7 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>jcr-server</module>
-        <module>jcr-client</module>
+        <module>jms-server</module>
       </modules>
     </profile>
   </profiles>
