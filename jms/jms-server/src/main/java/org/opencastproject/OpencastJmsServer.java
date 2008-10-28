@@ -11,17 +11,25 @@ public class OpencastJmsServer {
 	protected ActiveMQConnectionFactory connectionFactory;
 	protected BrokerService broker;
 	
-	public OpencastJmsServer() {
+	protected final String classPathToConfigFile;
+	protected final String connectionUri;
+	
+	public OpencastJmsServer(String classPathToConfigFile, String connectionUri) {
+		this.classPathToConfigFile = classPathToConfigFile;
+		this.connectionUri = connectionUri;
+	}
+
+	public void init() {
 		try {
-			broker = BrokerFactory.createBroker("xbean:jms-config.xml");
+			broker = BrokerFactory.createBroker("xbean:" + classPathToConfigFile);
 			broker.start();
-			connectionFactory = new ActiveMQConnectionFactory("tcp://127.0.0.1:61616");
+			connectionFactory = new ActiveMQConnectionFactory(connectionUri);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	public void closeServer() {
+	public void destroy() {
 		if(broker != null) {
 			try {
 				broker.stop();

@@ -13,7 +13,13 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 public class CommandLineJmsInterface {
+	private static final Log log = LogFactory.getLog(CommandLineJmsInterface.class);
+	
 	public static final String TOPIC_ID = "the_test_topic";
 	public static final String SUBSCRIBER_ID = "test_subscriber";
 
@@ -26,8 +32,9 @@ public class CommandLineJmsInterface {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
+			ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("classpath:opencast-jms-server.xml");
+			OpencastJmsServer server = (OpencastJmsServer)ac.getBean("jmsServer");
 
-			OpencastJmsServer server = new OpencastJmsServer();
 			Connection conn = server.getConnection("CommandLineJmsInterface_"+ nodeNumberInput);
 			Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			Topic topic = session.createTopic(TOPIC_ID);
@@ -73,8 +80,9 @@ public class CommandLineJmsInterface {
 								}
 							});
 						}
-					} else if(input.startsWith("subscribe")) {
+					} else if(input.startsWith("unsubscribe")) {
 						if(subscriber != null) {
+							subscriber.close();
 							session.unsubscribe(SUBSCRIBER_ID);
 							subscriber = null;
 						}
@@ -85,7 +93,7 @@ public class CommandLineJmsInterface {
 			} finally {
 				session.close();
 				conn.close();
-				server.closeServer();
+				server.destroy();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

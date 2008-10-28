@@ -12,6 +12,7 @@ import javax.jms.TopicSubscriber;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class OpencastJmsServerTest {
 
@@ -19,12 +20,13 @@ public class OpencastJmsServerTest {
 
 	@Before
 	public void setUp() {
-		jmsServer = new OpencastJmsServer();
+		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("classpath:opencast-jms-server.xml");
+		jmsServer = (OpencastJmsServer)ac.getBean("jmsServer");
 	}
 	
 	@After
 	public void tearDown() {
-		jmsServer.closeServer();
+		jmsServer.destroy();
 	}
 	
 	@Test
