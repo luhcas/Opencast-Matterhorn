@@ -15,7 +15,8 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>jcr/</module>
+        <module>parent</module>
+        <module>jcr</module>
         <module>jms</module>
       </modules>
     </profile>

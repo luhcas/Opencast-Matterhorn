@@ -8,26 +8,24 @@ import javax.jcr.Repository;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
 
+import org.apache.jackrabbit.core.TransientRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class SimpleRepositoryTest {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleRepositoryTest.class);
 	
-	Repository repo;
-	ClassPathXmlApplicationContext appContext;
+	TransientRepository repo;
 	
 	@Before
 	public void setUp() throws Exception {
-		appContext = new ClassPathXmlApplicationContext("classpath:/spring-simple-repository.xml");
-		repo = (Repository) appContext.getBean("jcrRepository");
+		repo = new TransientRepository("./src/test/resources/simple-repository.xml", "./target/simple_repo/");
 	}
 
 	public void tearDown() throws Exception {
-		appContext.destroy();
+		repo.shutdown();
 	}
 
 	@Test
