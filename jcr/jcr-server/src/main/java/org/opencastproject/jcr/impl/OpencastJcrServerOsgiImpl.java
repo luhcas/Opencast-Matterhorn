@@ -2,10 +2,9 @@ package org.opencastproject.jcr.impl;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 
 import javax.jcr.Repository;
 
@@ -43,14 +42,22 @@ public class OpencastJcrServerOsgiImpl implements OpencastJcrServer, BundleActiv
 	public void start(BundleContext context) throws Exception {
 		nodeId = System.getProperty("nodeId");
 		repoHome = System.getProperty("repoHome");
+		
+		// Just in case
+		if(nodeId == null) {
+			nodeId = "node1";
+		}
+		
+		if(repoHome == null) {
+			repoHome = System.getProperty("java.io.tmpdir") + "/" + System.currentTimeMillis() + "/";
+			File dir = new File(repoHome);
+			dir.mkdirs();
+		}
 		impl = new OpencastJcrServerOsgiImpl(nodeId, repoHome);
 		serviceRegistration = context.registerService(OpencastJcrServer.class.getName(), impl, null);
 		try {
 		    // Find the configuration template
-			URL url = new URL("classpath:cluster-repository-template.xml");
-			URLConnection conn = url.openConnection();
-			conn.setUseCaches(false);
-			InputStream configTemplate = conn.getInputStream();
+			InputStream configTemplate = context.getBundle().getEntry("/cluster-repository-template.xml").openStream();
 
 		    // This is just a hack to replace the node id... better to use an xml parser
 		    BufferedReader br = new BufferedReader(new InputStreamReader(configTemplate));

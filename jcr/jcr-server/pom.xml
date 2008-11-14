@@ -1,369 +1,206 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-jcr-server</artifactId>
-  <packaging>bundle</packaging>
-  <version>0.1-SNAPSHOT</version>
-  <name>opencast-jcr-server</name>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.opencastproject</groupId>
+	<artifactId>opencast-jcr-server</artifactId>
+	<packaging>bundle</packaging>
+	<version>0.1-SNAPSHOT</version>
+	<name>opencast-jcr-server</name>
 
-    <parent>
-        <groupId>org.opencastproject</groupId>
-        <artifactId>parent</artifactId>
-        <version>0.1-SNAPSHOT</version>
-        <relativePath>../../parent/pom.xml</relativePath>
-    </parent>
+	<parent>
+		<groupId>org.opencastproject</groupId>
+		<artifactId>parent</artifactId>
+		<version>0.1-SNAPSHOT</version>
+		<relativePath>../../parent/pom.xml</relativePath>
+	</parent>
 
-  <repositories>
-<!--
-    <repository>
-      <id>jboss</id>
-      <url>http://mirrors.ibiblio.org/pub/mirrors/maven2/</url>
-    </repository>
+	<dependencies>
 
-    <repository>
-      <id>jboss</id>
-      <url>http://repository.jboss.org/maven2/</url>
-    </repository>
+		<!-- Testing Dependencies -->
 
-    <repository>
-      <id>safehaus-repository</id>
-      <name>Safehaus Repository</name>
-      <url>http://m2.safehaus.org</url>
-    </repository>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-    <repository>
-    	<id>com.springsource.repository.bundles.release</id>
-    	<name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
-    	<url>http://repository.springsource.com/maven/bundles/release</url>
-    </repository>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.15</version>
+			<scope>test</scope>
+		</dependency>
 
-    <repository>
-    	<id>com.springsource.repository.bundles.external</id>
-    	<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-    	<url>http://repository.springsource.com/maven/bundles/external</url>
-    </repository>
--->
-  </repositories>
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.1</version>
+			<scope>test</scope>
+		</dependency>
 
-  <dependencies>
-  
-<!-- Testing Dependencies -->
+		<!-- Runtime Dependencies -->
+		<dependency>
+			<groupId>javax.jcr</groupId>
+			<artifactId>jcr</artifactId>
+		</dependency>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+		</dependency>
 
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.15</version>
-      <scope>test</scope>
-    </dependency>
+		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-api</artifactId>
+		</dependency>
 
-    <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-      <version>3.1</version>
-      <scope>test</scope>
-    </dependency>
+		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-core</artifactId>
+		</dependency>
 
-<!-- Dependencies -->
-            <dependency>
-                <groupId>javax.jcr</groupId>
-                <artifactId>jcr</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.jackrabbit</groupId>
-                <artifactId>jackrabbit-api</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.jackrabbit</groupId>
-                <artifactId>jackrabbit-core</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-            </dependency>
+		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-text-extractors</artifactId>
+		</dependency>
 
-<!-- OSGI -->
+		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-spi-commons</artifactId>
+		</dependency>
 
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.osgi.service.obr</artifactId>
-      <version>1.0.2</version>
-    </dependency>
+		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-spi</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+		</dependency>
 
-<!--
-    <dependency>
-      <groupId>org.apache.jackrabbit</groupId>
-      <artifactId>jackrabbit-core</artifactId>
-      <version>1.4.6</version>
-    </dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
 
-    <dependency>
-      <groupId>javax.jcr</groupId>
-      <artifactId>jcr</artifactId>
-      <version>1.0</version>
-    </dependency>
+		<dependency>
+			<groupId>concurrent</groupId>
+			<artifactId>concurrent</artifactId>
+		</dependency>
 
-    <dependency>
-    	<groupId>org.slf4j</groupId>
-    	<artifactId>com.springsource.slf4j.api</artifactId>
-    	<version>1.5.3</version>
-    </dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+		</dependency>
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.5.3</version>
-    </dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+		</dependency>
 
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.5.3</version>
-      <scope>test</scope>
-    </dependency>
+		<dependency>
+			<groupId>org.textmining</groupId>
+			<artifactId>tm-extractors</artifactId>
+		</dependency>
 
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-      <version>1.1.1</version>
-    </dependency>
+		<dependency>
+			<groupId>pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+		</dependency>
 
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-core</artifactId>
-      <version>2.4.0</version>
-    </dependency>
+		<dependency>
+			<groupId>nekohtml</groupId>
+			<artifactId>nekohtml</artifactId>
+		</dependency>
 
-    <dependency>
-      <groupId>org.apache.derby</groupId>
-      <artifactId>derby</artifactId>
-      <version>10.4.2.0</version>
-    </dependency>
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc14_g</artifactId>
+			<version>10.2.0.1.0</version>
+		</dependency>
 
-    <dependency>
-      <groupId>concurrent</groupId>
-      <artifactId>concurrent</artifactId>
-      <version>1.3.4</version>
-    </dependency>
+		<!-- OSGI Dependencies -->
 
-    <dependency>
-		<groupId>org.apache.felix</groupId>
-		<artifactId>org.osgi.compendium</artifactId>
-		<version>1.2.0</version>
-    </dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.service.obr</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 
-	<dependency>
-		<groupId>javax.jcr</groupId>
-		<artifactId>com.springsource.javax.jcr</artifactId>
-		<version>1.0.0</version>
-	</dependency>
-	
-	<dependency>
-		<groupId>org.apache.jackrabbit</groupId>
-		<artifactId>com.springsource.org.apache.jackrabbit.api</artifactId>
-		<version>1.4.0</version>
-	</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+		</dependency>
 
-	<dependency>
-		<groupId>org.apache.jackrabbit</groupId>
-		<artifactId>com.springsource.org.apache.jackrabbit.core</artifactId>
-		<version>1.4.5</version>
-	</dependency>
+	</dependencies>
 
-    <dependency>
-    	<groupId>org.apache.jackrabbit</groupId>
-    	<artifactId>com.springsource.org.apache.jackrabbit.commons</artifactId>
-    	<version>1.4.2</version>
-    </dependency>
+	<build>
+		<plugins>
 
-    <dependency>
-    	<groupId>org.apache.jackrabbit</groupId>
-    	<artifactId>
-    		com.springsource.org.apache.jackrabbit.spi
-    	</artifactId>
-    	<version>1.4.0</version>
-    </dependency>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
 
-    <dependency>
-    	<groupId>org.apache.jackrabbit</groupId>
-    	<artifactId>
-    		com.springsource.org.apache.jackrabbit.spi.commons
-    	</artifactId>
-    	<version>1.4.0</version>
-    </dependency>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<useFile>false</useFile>
+				</configuration>
+			</plugin>
 
-    <dependency>
-    	<groupId>javax.transaction</groupId>
-    	<artifactId>com.springsource.javax.transaction</artifactId>
-    	<version>1.1.0</version>
-    </dependency>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Export-Package>
+							org.opencastproject.api,org.opencastproject.jcr.impl
+						</Export-Package>
+						<Bundle-SymbolicName>
+							${pom.artifactId}
+						</Bundle-SymbolicName>
+						<Bundle-Activator>
+							org.opencastproject.jcr.impl.OpencastJcrServerOsgiImpl
+						</Bundle-Activator>
+						<Export-Service>
+							org.opencastproject.api.OpencastJcrServer
+						</Export-Service>
+						<Embed-Dependency>
+							jackrabbit-core,jackrabbit-spi-commons,jackrabbit-spi,
+							jackrabbit-text-extractors,lucene-core,concurrent,poi,
+							xercesImpl,tm-extractors,pdfbox,nekohtml,ojdbc14_g
+						</Embed-Dependency>
+						<Import-Package>
+							!org.apache.jackrabbit.test.*,
+							!org.apache.lucene.demo.*,
+							!org.apache.log4j.spi.*,
+							!org.apache.tools.ant.*,
+							!org.apache.xml.resolver.*, !sun.*,
+							!oracle.security.pki.*,
+							!oracle.i18n.text.converter, !oracle.ons, *
+						</Import-Package>
 
-    <dependency>
-    	<groupId>edu.oswego.cs.concurrent</groupId>
-    	<artifactId>
-    		com.springsource.edu.oswego.cs.dl.util.concurrent
-    	</artifactId>
-    	<version>1.3.4</version>
-    </dependency>
+						<DynamicImport-Package>
+							org.apache.felix.shell
+						</DynamicImport-Package>
 
-    <dependency>
-    	<groupId>org.apache.commons</groupId>
-    	<artifactId>
-    		com.springsource.org.apache.commons.collections
-    	</artifactId>
-    	<version>3.2.0</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.slf4j</groupId>
-    	<artifactId>com.springsource.slf4j.api</artifactId>
-    	<version>1.5.3</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.slf4j</groupId>
-    	<artifactId>com.springsource.slf4j.log4j</artifactId>
-    	<version>1.5.3</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.slf4j</groupId>
-    	<artifactId>com.springsource.slf4j.simple</artifactId>
-    	<version>1.5.3</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.slf4j</groupId>
-    	<artifactId>com.springsource.slf4j.jcl</artifactId>
-    	<version>1.5.3</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.apache.poi</groupId>
-    	<artifactId>com.springsource.org.apache.poi</artifactId>
-    	<version>3.0.2.FINAL</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.apache.commons</groupId>
-    	<artifactId>
-    		com.springsource.org.apache.commons.logging
-    	</artifactId>
-    	<version>1.1.1</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.apache.xerces</groupId>
-    	<artifactId>com.springsource.org.apache.xerces</artifactId>
-    	<version>2.8.1</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.apache.xmlcommons</groupId>
-    	<artifactId>com.springsource.org.apache.xmlcommons</artifactId>
-    	<version>1.3.3</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.apache.xml</groupId>
-    	<artifactId>
-    		com.springsource.org.apache.xml.resolver
-    	</artifactId>
-    	<version>1.2.0</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.cyberneko</groupId>
-    	<artifactId>com.springsource.org.cyberneko.html</artifactId>
-    	<version>0.9.5</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.pdfbox</groupId>
-    	<artifactId>com.springsource.org.pdfbox</artifactId>
-    	<version>0.7.3</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.fontbox</groupId>
-    	<artifactId>com.springsource.org.fontbox</artifactId>
-    	<version>0.1.0</version>
-    </dependency>
-
-    <dependency>
-    	<groupId>org.textmining</groupId>
-    	<artifactId>
-    		com.springsource.org.textmining.extraction
-    	</artifactId>
-    	<version>1.0.0</version>
-    </dependency>
--->
-
-  </dependencies>
-
-  <build>
-    <plugins>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-        </configuration>
-      </plugin>
-
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <useFile>false</useFile>
-        </configuration>
-      </plugin>
-
-      <plugin>
-      	<groupId>org.apache.felix</groupId>
-      	<artifactId>maven-bundle-plugin</artifactId>
-      	<extensions>true</extensions>
-      	<configuration>
-      		<instructions>
-      			<Export-Package>org.opencastproject.api,org.opencastproject.jcr.impl</Export-Package>
-				<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-      			<Bundle-Activator>org.opencastproject.jcr.impl.OpencastJcrServerOsgiImpl</Bundle-Activator>
-				<Export-Service>org.opencastproject.api.OpencastJcrServer</Export-Service>
-
-                <Import-Package>
-                    !javax.xml.*, !org.xml.sax.*, *
-                </Import-Package>
-
-                <DynamicImport-Package>
-                    org.apache.felix.shell
-                </DynamicImport-Package>
-
-      		</instructions>
-      	</configuration>
-      </plugin>
-    </plugins>
-  </build>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
