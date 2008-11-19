@@ -21,6 +21,8 @@ public class Main implements BundleActivator {
 	private static final String REPO = "file:/Users/josh/.m2/repository";
 	private static final String REPO_FELIX = REPO + "/org/apache/felix";
 	private static final String REPO_SLING = REPO + "/org/apache/sling";
+	private static final String REPO_SERVICEMIX = REPO + "/org/apache/servicemix";
+	private static final String REPO_CXF = REPO + "/org/apache/cxf";
 	private static final String REPO_JR = REPO + "/org/apache/jackrabbit";
 	private static final String REPO_OC = REPO + "/org/opencastproject";
 
@@ -35,7 +37,6 @@ public class Main implements BundleActivator {
 				deleteFileOrDir(cachedir);
 			}
 		});
-
 		StringMap configMap = new StringMap(false);
 		configMap.put(Constants.FRAMEWORK_SYSTEMPACKAGES,
 				"org.osgi.framework; version=1.3.0,"
@@ -46,7 +47,14 @@ public class Main implements BundleActivator {
 				+ "org.osgi.service.http; version=1.2.0,"
 				+ "org.osgi.service.prefs; version=1.1.0,"
 				+ "org.osgi.util.tracker; version=1.3.2,"
+				+ "org.omg.CosNaming; version=0.0.0,"
+				+ "org.omg.CORBA; version=0.0.0,"
+				+ "org.omg.CORBA.portable; version=0.0.0,"
+				+ "org.omg.CORBA.TypeCodePackage; version=0.0.0,"
+				+ "org.omg.PortableServer; version=0.0.0,"
+				+ "org.omg.PortableServer.POAPackage; version=0.0.0,"
 				+ "org.w3c.dom; version=0.0.0,"
+				+ "org.w3c.dom.bootstrap; version=0.0.0,"
 				+ "org.w3c.dom.ls; version=0.0.0,"
 				+ "org.w3c.dom.events; version=0.0.0,"
 				+ "org.w3c.dom.ranges; version=0.0.0,"
@@ -54,10 +62,20 @@ public class Main implements BundleActivator {
 				+ "org.xml.sax; version=0.0.0,"
 				+ "org.xml.sax.ext; version=0.0.0,"
 				+ "org.xml.sax.helpers; version=0.0.0,"
+				+ "javax.activation; version=1.1.0,"
+				+ "javax.annotation; version=1.0.0,"
 				+ "javax.imageio; version=0.0.0,"
 				+ "javax.imageio.stream; version=0.0.0,"
 				+ "javax.imageio.metadata; version=0.0.0,"
 				+ "javax.imageio.spi; version=0.0.0,"
+				+ "javax.jws; version=2.0.0,"
+				+ "javax.jws.soap; version=2.0.0,"
+				+ "javax.mail; version=1.4.0,"
+				+ "javax.mail.internet; version=1.4.0,"
+				+ "javax.mail.util; version=1.4.0,"
+				+ "javax.management; version=0.0.0,"
+				+ "javax.management.modelmbean; version=0.0.0,"
+				+ "javax.management.remote; version=0.0.0,"
 				+ "javax.naming; version=0.0.0,"
 				+ "javax.naming.spi; version=0.0.0,"
 				+ "javax.naming.directory; version=0.0.0,"
@@ -69,6 +87,7 @@ public class Main implements BundleActivator {
 				+ "javax.resource.spi.security; version=0.0.0,"
 				+ "javax.security.auth; version=0.0.0,"
 				+ "javax.security.auth.spi; version=0.0.0,"
+				+ "javax.security.auth.x500; version=0.0.0,"
 				+ "javax.security.auth.login; version=0.0.0,"
 				+ "javax.security.auth.callback; version=0.0.0,"
 				+ "javax.security.cert; version=0.0.0,"
@@ -93,7 +112,29 @@ public class Main implements BundleActivator {
 				+ "javax.xml.transform.sax; version=0.0.0,"
 				+ "javax.xml.transform.stream; version=0.0.0,"
 				+ "javax.xml.parsers; version=0.0.0,"
-				+ "javax.xml.validation; version=0.0.0");
+				+ "javax.xml.soap; version=0.0.0,"
+				+ "javax.xml.stream; version=1.0.0,"
+				+ "javax.xml.stream.events; version=1.0.0,"
+				+ "javax.xml.stream.util; version=1.0.0,"
+				+ "javax.xml.validation; version=0.0.0,"
+				+ "javax.xml.xpath; version=0.0.0,"
+				+ "javax.xml.ws; version=2.1.0,"
+				+ "javax.xml.ws.wsaddressing; version=2.1.0,"
+				+ "javax.xml.ws.handler; version=2.1.0,"
+				+ "javax.xml.ws.handler.soap; version=2.1.0,"
+				+ "javax.xml.ws.http; version=2.1.0,"
+				+ "javax.xml.ws.spi; version=2.1.0,"
+				+ "javax.xml.ws.soap; version=2.1.0,"
+				+ "javax.wsdl; version=1.2.0,"
+				+ "javax.wsdl.extensions; version=1.2.0,"
+				+ "javax.wsdl.extensions.http; version=1.2.0,"
+				+ "javax.wsdl.extensions.mime; version=1.2.0,"
+				+ "javax.wsdl.extensions.schema; version=1.2.0,"
+				+ "javax.wsdl.extensions.soap; version=1.2.0,"
+				+ "javax.wsdl.extensions.soap12; version=1.2.0,"
+				+ "javax.wsdl.factory; version=0.0.0,"
+				+ "javax.wsdl.xml; version=1.2.0,"
+				);
 
 		// A space-separated set of bundles to install
 		configMap.put("felix.auto.start.1",
@@ -104,6 +145,13 @@ public class Main implements BundleActivator {
 			+ REPO_FELIX + "/org.apache.felix.eventadmin/1.0.0/org.apache.felix.eventadmin-1.0.0.jar "
 			+ REPO_FELIX + "/org.apache.felix.metatype/1.0.0/org.apache.felix.metatype-1.0.0.jar "
 			+ REPO_FELIX + "/org.apache.felix.webconsole/1.2.0/org.apache.felix.webconsole-1.2.0.jar "
+
+			+ REPO_CXF + "/cxf-bundle/2.2-SNAPSHOT/cxf-bundle-2.2-SNAPSHOT.jar "
+			+ REPO_SERVICEMIX + "/bundles/org.apache.servicemix.bundles.jaxb-api-2.0/4.0-m1/org.apache.servicemix.bundles.jaxb-api-2.0-4.0-m1.jar "
+			+ REPO_SERVICEMIX + "/bundles/org.apache.servicemix.bundles.asm/2.2.3_1/org.apache.servicemix.bundles.asm-2.2.3_1.jar "
+			+ REPO_SERVICEMIX + "/bundles/org.apache.servicemix.bundles.xmlschema/1.4.2_1/org.apache.servicemix.bundles.xmlschema-1.4.2_1.jar "
+			+ REPO_SERVICEMIX + "/bundles/org.apache.servicemix.bundles.xmlresolver/1.2_1/org.apache.servicemix.bundles.xmlresolver-1.2_1.jar "
+			+ REPO_SERVICEMIX + "/bundles/org.apache.servicemix.bundles.neethi-2.0.2/4.0-m1/org.apache.servicemix.bundles.neethi-2.0.2-4.0-m1.jar "
 
 			+ REPO_SLING + "/org.apache.sling.jcr.api/2.0.3-incubator-SNAPSHOT/org.apache.sling.jcr.api-2.0.3-incubator-SNAPSHOT.jar "
 			+ REPO_SLING + "/org.apache.sling.launchpad.base/2.0.3-incubator-SNAPSHOT/org.apache.sling.launchpad.base-2.0.3-incubator-SNAPSHOT.jar "
