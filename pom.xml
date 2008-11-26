@@ -18,6 +18,8 @@
         <module>parent</module>
         <module>jcr</module>
         <module>jms</module>
+        <module>osgi</module>
+        <module>sample-component</module>
       </modules>
     </profile>
   </profiles>

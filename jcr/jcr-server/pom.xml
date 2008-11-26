@@ -188,9 +188,11 @@
 							!org.apache.lucene.demo.*,
 							!org.apache.log4j.spi.*,
 							!org.apache.tools.ant.*,
-							!org.apache.xml.resolver.*, !sun.*,
+							!org.apache.xml.resolver.*,
+							!sun.*,
 							!oracle.security.pki.*,
-							!oracle.i18n.text.converter, !oracle.ons, *
+							!oracle.i18n.text.converter,
+							!oracle.ons, *
 						</Import-Package>
 
 						<DynamicImport-Package>

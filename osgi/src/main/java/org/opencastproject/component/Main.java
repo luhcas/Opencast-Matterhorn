@@ -30,6 +30,9 @@ public class Main implements BundleActivator {
 
 	@SuppressWarnings("unchecked")
 	public static void main(String... args) throws Exception {
+		// Set up any system properties
+		System.setProperty("org.apache.cxf.bus.factory", "org.apache.cxf.bus.CXFBusFactory");
+		
 		final File cachedir = File.createTempFile("octmp", null);
 		cachedir.delete();
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -125,6 +128,9 @@ public class Main implements BundleActivator {
 				+ "javax.xml.ws.http; version=2.1.0,"
 				+ "javax.xml.ws.spi; version=2.1.0,"
 				+ "javax.xml.ws.soap; version=2.1.0,"
+				+ "javax.ws.rs; version=1.0.0,"
+				+ "javax.ws.rs.core; version=1.0.0,"
+				+ "javax.ws.rs.ext; version=1.0.0,"
 				+ "javax.wsdl; version=1.2.0,"
 				+ "javax.wsdl.extensions; version=1.2.0,"
 				+ "javax.wsdl.extensions.http; version=1.2.0,"
@@ -145,8 +151,8 @@ public class Main implements BundleActivator {
 			+ REPO_FELIX + "/org.apache.felix.eventadmin/1.0.0/org.apache.felix.eventadmin-1.0.0.jar "
 			+ REPO_FELIX + "/org.apache.felix.metatype/1.0.0/org.apache.felix.metatype-1.0.0.jar "
 			+ REPO_FELIX + "/org.apache.felix.webconsole/1.2.0/org.apache.felix.webconsole-1.2.0.jar "
-
 			+ REPO_CXF + "/cxf-bundle/2.2-SNAPSHOT/cxf-bundle-2.2-SNAPSHOT.jar "
+
 			+ REPO_SERVICEMIX + "/bundles/org.apache.servicemix.bundles.jaxb-api-2.0/4.0-m1/org.apache.servicemix.bundles.jaxb-api-2.0-4.0-m1.jar "
 			+ REPO_SERVICEMIX + "/bundles/org.apache.servicemix.bundles.asm/2.2.3_1/org.apache.servicemix.bundles.asm-2.2.3_1.jar "
 			+ REPO_SERVICEMIX + "/bundles/org.apache.servicemix.bundles.xmlschema/1.4.2_1/org.apache.servicemix.bundles.xmlschema-1.4.2_1.jar "
@@ -158,9 +164,11 @@ public class Main implements BundleActivator {
 			+ REPO_SLING + "/org.apache.sling.jcr.jackrabbit.api/2.0.3-incubator-SNAPSHOT/org.apache.sling.jcr.jackrabbit.api-2.0.3-incubator-SNAPSHOT.jar "
 			+ REPO_SLING + "/org.apache.sling.commons.log/2.0.3-incubator-SNAPSHOT/org.apache.sling.commons.log-2.0.3-incubator-SNAPSHOT.jar "
 
+			
 			+ REPO_JR + "/jackrabbit-jcr-commons/1.4.2/jackrabbit-jcr-commons-1.4.2.jar "
 
 			+ REPO_OC + "/opencast-jcr-server/0.1-SNAPSHOT/opencast-jcr-server-0.1-SNAPSHOT.jar "
+			+ REPO_OC + "/opencast-sample-component/0.1-SNAPSHOT/opencast-sample-component-0.1-SNAPSHOT.jar "
 		);
 
 		configMap.put(FelixConstants.LOG_LEVEL_PROP, "1");

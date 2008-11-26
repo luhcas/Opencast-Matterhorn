@@ -1,0 +1,123 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.opencastproject</groupId>
+	<artifactId>opencast-sample-component</artifactId>
+	<packaging>bundle</packaging>
+	<name>opencast-sample-component</name>
+
+	<parent>
+		<groupId>org.opencastproject</groupId>
+		<artifactId>parent</artifactId>
+		<version>0.1-SNAPSHOT</version>
+		<relativePath>../parent/pom.xml</relativePath>
+	</parent>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.jcr</groupId>
+			<artifactId>jcr</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.opencastproject</groupId>
+			<artifactId>opencast-jcr-server</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-jaxws_2.1_spec</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<resources>
+		<resource>
+		  <directory>src/main/resources</directory>
+		  <includes>
+		  	<include>**/*</include>
+		  </includes>
+		</resource>
+		</resources>
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<useFile>false</useFile>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>
+							${pom.artifactId}
+						</Bundle-SymbolicName>
+						<Bundle-Activator>
+							org.opencastproject.samplecomponent.OsgiActivator
+						</Bundle-Activator>
+                        <Import-Package>
+                        	javax.jcr,
+                            javax.jws,
+                            javax.wsdl,
+                        	javax.xml.ws,
+                        	org.osgi.framework,
+                            META-INF.cxf,
+                            META-INF.cxf.osgi,
+                            org.apache.cxf.bus,
+                            org.apache.cxf.bus.spring,
+                            org.apache.cxf.bus.resource,
+                            org.apache.cxf.configuration.spring,
+                            org.apache.cxf.resource,
+                            org.apache.servicemix.cxf.transport.http_osgi,
+                            org.springframework.beans.factory.config,
+                            org.opencastproject.api,
+                        </Import-Package>
+                        <Private-Package>org.opencastproject.samplecomponent</Private-Package>
+                        <Require-Bundle>org.apache.cxf.cxf-bundle</Require-Bundle>
+
+					</instructions>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>

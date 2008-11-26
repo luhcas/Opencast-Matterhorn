@@ -1,0 +1,26 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:osgi="http://www.springframework.org/schema/osgi" 
+	xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
+		http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+    <import resource="classpath:META-INF/cxf/cxf.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-extension-http.xml" />
+    <import resource="classpath:META-INF/cxf/osgi/cxf-extension-osgi.xml" />
+
+	<osgi:reference id="opencastJcrServer" interface="org.opencastproject.api.OpencastJcrServer"/>
+	
+	<bean id="org.opencastproject.sampleComponent.SampleWebService" class="org.opencastproject.samplecomponent.SampleWebServiceImpl">
+		<constructor-arg index="0" ref="opencastJcrServer" />
+	</bean>
+
+	<jaxws:endpoint id="sample" address="/sample">
+		<jaxws:implementor>
+			<bean parent="org.opencastproject.sampleComponent.SampleWebService" />
+		</jaxws:implementor>
+	</jaxws:endpoint>
+
+</beans>
