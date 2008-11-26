@@ -1,0 +1,15 @@
+osgi install http://mirrors.ibiblio.org/pub/mirrors/maven2/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar
+osgi install http://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/geronimo/specs/geronimo-jta_1.1_spec/1.1.1/geronimo-jta_1.1_spec-1.1.1.jar
+osgi install http://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/geronimo/specs/geronimo-j2ee-connector_1.5_spec/2.0.0/geronimo-j2ee-connector_1.5_spec-2.0.0.jar
+
+osgi install http://people.apache.org/repo/m2-snapshot-repository/org/apache/sling/org.apache.sling.jcr.api/2.0.3-incubator-SNAPSHOT/org.apache.sling.jcr.api-2.0.3-incubator-20080709.065548-1.jar
+osgi install http://people.apache.org/repo/m2-snapshot-repository/org/apache/sling/org.apache.sling.launchpad.base/2.0.3-incubator-SNAPSHOT/org.apache.sling.launchpad.base-2.0.3-incubator-20080709.065548-1.jar
+osgi install http://people.apache.org/repo/m2-snapshot-repository/org/apache/sling/org.apache.sling.jcr.jackrabbit.api/2.0.3-incubator-SNAPSHOT/org.apache.sling.jcr.jackrabbit.api-2.0.3-incubator-20080709.065548-1.jar
+osgi install http://people.apache.org/repo/m2-snapshot-repository/org/apache/sling/org.apache.sling.commons.log/2.0.3-incubator-SNAPSHOT/org.apache.sling.commons.log-2.0.3-incubator-20080709.065548-1.jar
+osgi install http://mirrors.ibiblio.org/pub/mirrors/maven2/org/apache/jackrabbit/jackrabbit-jcr-commons/1.4.2/jackrabbit-jcr-commons-1.4.2.jar
+
+features addUrl mvn:org.apache.servicemix.features/apache-servicemix/4.0-m2-SNAPSHOT/xml/features
+features install cxf-osgi
+
+osgi install file:/Users/josh/.m2/repository/org/opencastproject/opencast-jcr-server/0.1-SNAPSHOT/opencast-jcr-server-0.1-SNAPSHOT.jar
+osgi install file:/Users/josh/.m2/repository/org/opencastproject/opencast-sample-component/0.1-SNAPSHOT/opencast-sample-component-0.1-SNAPSHOT.jar
