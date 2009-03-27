@@ -1,11 +1,10 @@
-This is a proof-of-concept for an OSGI / Servicemix-based model for developing Matterhorn.
+This is a proof-of-concept for a Distributed OSGI environment for developing Matterhorn.
 
 To install and run this software:
 
-1) Install Servicemix 4 kernel.  I'm using v1.1.0.
-2) Configure jcr/jcr-server/src/main/resources/cluster-repository-template.xml to point to your data store and transaction-capable database.
+1) Download Felix 1.4.1.  Equinox should work too, but I haven't put a config file together for equinox.
+2) Configure jcr/jcr-server/src/main/resources/cluster-repository-template.xml to point to your data store and transaction-capable database.  The default points to mysql on localhost, user=root, password=root.
 3) Build this software using maven2 (mvn -DskipTests install)
-4) Start servicemix (cd servicemix_home; java -jar bin/servicemix[.bat])
-5) Install the Matterhorn components you want to run.  Currently, the only useful components are the JCR Server and the Sample Component.  The file 'servicemix_opencast_installation.txt' contains the commands to install all of the required third party OSGI bundles as well as the Matterhorn components.
-6) It's easier to restart servicemix than to start each of the individual osgi bundles.
-7) Visit http://localhost:8080/cxf/sample?wsdl to see the sample web service endpoint.
+4) Copy felix_config.properties to <felix_root>/conf/config.properties
+5) Start felix with cd <felix_root>; java -DM2_REPO=~/.m2/repository/ -jar bin/felix.jar
+6) Visit http://localhost:8080/samplews?wsdl to see the sample web service endpoint or http://localhost:8080/static/js/sample.js to see a js file mounted to the servlet container.
