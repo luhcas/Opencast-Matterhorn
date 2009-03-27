@@ -18,10 +18,10 @@ public class SampleWebServiceImpl implements SampleWebService {
 	public static final String PROPERTY_KEY = "sample-property";
 
 	protected Repository repo;
-	public SampleWebServiceImpl(OpencastJcrServer jcrServer) {
+	public void setJcrServer(OpencastJcrServer jcrServer) {
 		this.repo = jcrServer.getRepository();
 	}
-
+	
 	protected Session getSession() {
 		Session session = null;
 		try {

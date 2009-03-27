@@ -25,7 +25,11 @@
 		<dependency>
 			<groupId>javax.jcr</groupId>
 			<artifactId>jcr</artifactId>
-			<version>1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.servicemix.specs</groupId>
+			<artifactId>org.apache.servicemix.specs.jsr311-api-1.0</artifactId>
 		</dependency>
 
 		<dependency>
@@ -42,15 +46,22 @@
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
-			<version>1.1.2</version>
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-jaxws_2.1_spec</artifactId>
-			<version>1.0</version>
+			<groupId>org.apache.servicemix.specs</groupId>
+			<artifactId>org.apache.servicemix.specs.jaxws-api-2.1</artifactId>
 		</dependency>
 
+        <dependency>
+            <groupId>org.ops4j.pax.web-extender</groupId>
+            <artifactId>pax-web-ex-whiteboard</artifactId>
+        </dependency>
+
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -93,26 +104,14 @@
 						<Bundle-Activator>
 							org.opencastproject.samplecomponent.OsgiActivator
 						</Bundle-Activator>
-                        <Import-Package>
-                        	javax.jcr,
-                            javax.jws,
-                            javax.wsdl,
-                        	javax.xml.ws,
-                        	org.osgi.framework,
-                            META-INF.cxf,
-                            META-INF.cxf.osgi,
-                            org.apache.cxf.bus,
-                            org.apache.cxf.bus.spring,
-                            org.apache.cxf.bus.resource,
-                            org.apache.cxf.configuration.spring,
-                            org.apache.cxf.resource,
-                            org.apache.servicemix.cxf.transport.http_osgi,
-                            org.springframework.beans.factory.config,
-                            org.opencastproject.api,
-                        </Import-Package>
+						<Import-Package>
+							org.osgi.service.component, META-INF.cxf, org.apache.cxf, org.apache.cxf.wsdl, *
+						</Import-Package>
+						<!-- Service-Component>OSGI-INF/samplews.xml</Service-Component -->
                         <Private-Package>org.opencastproject.samplecomponent</Private-Package>
+                        
+                        <!-- FIXME: This is a hack to fix cxf not showing up in the import-package instructions -->
                         <Require-Bundle>org.apache.cxf.cxf-bundle</Require-Bundle>
-
 					</instructions>
 				</configuration>
 			</plugin>

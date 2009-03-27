@@ -16,9 +16,6 @@
 	</parent>
 
 	<dependencies>
-
-		<!-- Testing Dependencies -->
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -48,77 +45,108 @@
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>
+			<version>2.4.0</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.jackrabbit</groupId>
-			<artifactId>jackrabbit-api</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.jackrabbit</groupId>
+            <artifactId>jackrabbit-api</artifactId>
+            <version>1.4</version>
+            <scope>provided</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.apache.jackrabbit</groupId>
-			<artifactId>jackrabbit-core</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.jackrabbit</groupId>
+            <artifactId>jackrabbit-core</artifactId>
+            <version>1.4.3</version>
+            <scope>provided</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.apache.jackrabbit</groupId>
-			<artifactId>jackrabbit-text-extractors</artifactId>
-		</dependency>
+            <dependency>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>jackrabbit-text-extractors</artifactId>
+                <version>1.4</version>
+            </dependency>
 
-		<dependency>
-			<groupId>org.apache.jackrabbit</groupId>
-			<artifactId>jackrabbit-spi-commons</artifactId>
-		</dependency>
+            <dependency>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>jackrabbit-spi-commons</artifactId>
+                <version>1.4</version>
+            </dependency>
 
-		<dependency>
-			<groupId>org.apache.jackrabbit</groupId>
-			<artifactId>jackrabbit-spi</artifactId>
-		</dependency>
+            <dependency>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>jackrabbit-spi</artifactId>
+                <version>1.4</version>
+            </dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-		</dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>1.5.2</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.5.2</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>1.5.2</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>log4j-over-slf4j</artifactId>
+                <version>1.5.2</version>
+                <scope>provided</scope>
+            </dependency>
+	        <dependency>
+	            <groupId>org.slf4j</groupId>
+	            <artifactId>slf4j-log4j12</artifactId>
+                <version>1.5.2</version>
+                <scope>provided</scope>
+	        </dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
+			<dependency>
+				<groupId>concurrent</groupId>
+				<artifactId>concurrent</artifactId>
+				<version>1.3.4</version>
+			</dependency>
+		    <dependency>
+		    	<groupId>org.apache.poi</groupId>
+		    	<artifactId>poi</artifactId>
+		    	<version>3.0.1-FINAL</version>
+		    </dependency>
 
-		<dependency>
-			<groupId>concurrent</groupId>
-			<artifactId>concurrent</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-		</dependency>
+			<dependency>
+				<groupId>xerces</groupId>
+				<artifactId>xercesImpl</artifactId>
+		    	<version>2.8.1</version>
+			</dependency>
 
 		<dependency>
 			<groupId>org.textmining</groupId>
 			<artifactId>tm-extractors</artifactId>
+		    	<version>0.4</version>
 		</dependency>
-
 		<dependency>
 			<groupId>pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
+		    	<version>0.7.1</version>
 		</dependency>
-
 		<dependency>
 			<groupId>nekohtml</groupId>
 			<artifactId>nekohtml</artifactId>
+		    	<version>0.9.4</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.oracle</groupId>
-			<artifactId>ojdbc14_g</artifactId>
-			<version>10.2.0.1.0</version>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
 
 		<!-- OSGI Dependencies -->
@@ -181,7 +209,8 @@
 						<Embed-Dependency>
 							jackrabbit-core,jackrabbit-spi-commons,jackrabbit-spi,
 							jackrabbit-text-extractors,lucene-core,concurrent,poi,
-							xercesImpl,tm-extractors,pdfbox,nekohtml,ojdbc14_g
+							xercesImpl,tm-extractors,pdfbox,nekohtml,
+							mysql-connector-java
 						</Embed-Dependency>
 						<Import-Package>
 							!org.apache.jackrabbit.test.*,
@@ -190,9 +219,10 @@
 							!org.apache.tools.ant.*,
 							!org.apache.xml.resolver.*,
 							!sun.*,
-							!oracle.security.pki.*,
-							!oracle.i18n.text.converter,
-							!oracle.ons, *
+							!oracle.*,
+							!org.jboss.resource.adapter.jdbc.*,
+							!com.mchange.v2.c3p0.*,
+							*
 						</Import-Package>
 
 						<DynamicImport-Package>
