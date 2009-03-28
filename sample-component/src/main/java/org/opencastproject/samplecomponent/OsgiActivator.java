@@ -12,7 +12,6 @@ import org.osgi.framework.ServiceRegistration;
 public class OsgiActivator implements BundleActivator {
 	
 	protected ServiceRegistration webServiceRegistration;
-	protected ServiceRegistration restServiceRegistration;
 	
 	public void start(BundleContext context) throws Exception {
 		// Register web resources
@@ -21,7 +20,6 @@ public class OsgiActivator implements BundleActivator {
 		staticResourcesProps.put( "alias", "/static/js" );
 		context.registerService( Resources.class.getName(),
 				new Resources( "/js" ), staticResourcesProps );
-
 
 		// Publish the webservice endpoint
 		Dictionary<String, String> wsProps = new Hashtable<String, String>();
@@ -36,9 +34,7 @@ public class OsgiActivator implements BundleActivator {
 	}
 
     public void stop(BundleContext context) throws Exception {
-//    	if(e != null) {
-//    		e.stop();
-//    	}
+    	webServiceRegistration.unregister();
     }
 
 }

@@ -1,0 +1,3 @@
+function doTheDeed() {
+	alert('done');
+}
