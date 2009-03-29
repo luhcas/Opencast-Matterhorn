@@ -1,4 +1,4 @@
-package org.opencastproject.samplecomponent;
+package org.opencastproject.sampleservice;
 
 import javax.jcr.ItemNotFoundException;
 import javax.jcr.LoginException;
@@ -11,9 +11,10 @@ import javax.jcr.SimpleCredentials;
 import javax.jws.WebService;
 
 import org.opencastproject.api.OpencastJcrServer;
+import org.opencastproject.sampleservice.api.SampleService;
 
 @WebService(endpointInterface="org.opencastproject.samplecomponent.SampleWebService", serviceName="SampleWebService")
-public class SampleWebServiceImpl implements SampleWebService {
+public class SampleServiceImpl implements SampleService {
 
 	public static final String PROPERTY_KEY = "sample-property";
 

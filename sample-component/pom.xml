@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.opencastproject</groupId>
-	<artifactId>opencast-sample-component</artifactId>
+	<artifactId>opencast-sample-service-impl</artifactId>
 	<packaging>bundle</packaging>
-	<name>opencast-sample-component</name>
+	<name>opencast-sample-service-impl</name>
 
 	<parent>
 		<groupId>org.opencastproject</groupId>
@@ -35,6 +35,12 @@
 		<dependency>
 			<groupId>org.opencastproject</groupId>
 			<artifactId>opencast-jcr-server</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.opencastproject</groupId>
+			<artifactId>opencast-sample-service-api</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 
@@ -102,13 +108,17 @@
 							${pom.artifactId}
 						</Bundle-SymbolicName>
 						<Bundle-Activator>
-							org.opencastproject.samplecomponent.OsgiActivator
+							org.opencastproject.sampleservice.OsgiActivator
 						</Bundle-Activator>
 						<Import-Package>
-							org.osgi.service.component, META-INF.cxf, org.apache.cxf, org.apache.cxf.wsdl, *
+							org.osgi.service.component,
+							META-INF.cxf,
+							org.apache.cxf,
+							org.apache.cxf.wsdl,
+							org.opencastproject.sampleservice.api,
+							*
 						</Import-Package>
-						<!-- Service-Component>OSGI-INF/samplews.xml</Service-Component -->
-                        <Private-Package>org.opencastproject.samplecomponent</Private-Package>
+                        <Private-Package>org.opencastproject.sampleservice</Private-Package>
                         
                         <!-- FIXME: This is a hack to fix cxf not showing up in the import-package instructions -->
                         <Require-Bundle>org.apache.cxf.cxf-bundle</Require-Bundle>
