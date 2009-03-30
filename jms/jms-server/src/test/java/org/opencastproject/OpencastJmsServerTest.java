@@ -51,8 +51,7 @@ public class OpencastJmsServerTest {
         encodeTopic, "testEncodeSubscription2");
 
     // Send an encode message
-    MessageProducer encodeMessageProducer = session
-        .createProducer(encodeTopic);
+    MessageProducer encodeMessageProducer = session.createProducer(encodeTopic);
     Message outboundEncodeMessage = session.createMessage();
     outboundEncodeMessage.setJMSDestination(encodeTopic);
     outboundEncodeMessage.setStringProperty("node", "/video/12345");
@@ -62,21 +61,21 @@ public class OpencastJmsServerTest {
 
     // Ensure that the encode message arrives at the two subscribers
     Message inboundEncodeMessage1 = encodeSubscriber1.receive(); // for
-                                    // production
-                                    // code,
-                                    // use a
-                                    // MessageListener
-                                    // instead
+    // production
+    // code,
+    // use a
+    // MessageListener
+    // instead
     assertNotNull(inboundEncodeMessage1);
     assertEquals("/video/12345", inboundEncodeMessage1
         .getStringProperty("node"));
 
     Message inboundEncodeMessage2 = encodeSubscriber2.receive(); // for
-                                    // production
-                                    // code,
-                                    // use a
-                                    // MessageListener
-                                    // instead
+    // production
+    // code,
+    // use a
+    // MessageListener
+    // instead
     assertNotNull(inboundEncodeMessage2);
     assertEquals("/video/12345", inboundEncodeMessage2
         .getStringProperty("node"));

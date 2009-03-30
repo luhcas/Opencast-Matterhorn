@@ -21,8 +21,7 @@ public class OpencastJmsServer {
 
   public void init() {
     try {
-      broker = BrokerFactory.createBroker("xbean:"
-          + classPathToConfigFile);
+      broker = BrokerFactory.createBroker("xbean:" + classPathToConfigFile);
       broker.start();
       connectionFactory = new ActiveMQConnectionFactory(connectionUri);
     } catch (Exception e) {

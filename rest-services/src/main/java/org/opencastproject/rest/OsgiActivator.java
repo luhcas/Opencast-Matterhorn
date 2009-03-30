@@ -47,10 +47,8 @@ public class OsgiActivator implements BundleActivator {
       }
 
       @Override
-      public void removedService(ServiceReference reference,
-          Object service) {
-        registry.removeRegistrations(context.getService(reference)
-            .getClass());
+      public void removedService(ServiceReference reference, Object service) {
+        registry.removeRegistrations(context.getService(reference).getClass());
         super.removedService(reference, service);
       }
     };

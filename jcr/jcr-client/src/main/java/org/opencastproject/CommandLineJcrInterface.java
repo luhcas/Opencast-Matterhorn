@@ -19,15 +19,14 @@ public class CommandLineJcrInterface {
       System.out.print("Enter a unique name for this node: ");
       String nodeNumberInput;
       try {
-        nodeNumberInput = new BufferedReader(new InputStreamReader(
-            System.in)).readLine();
+        nodeNumberInput = new BufferedReader(new InputStreamReader(System.in))
+            .readLine();
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
 
-      OpencastJcrServer server = new OpencastJcrServerOsgiImpl(
-          nodeNumberInput, "./target/cluster_repo_" + nodeNumberInput
-              + "_home/");
+      OpencastJcrServer server = new OpencastJcrServerOsgiImpl(nodeNumberInput,
+          "./target/cluster_repo_" + nodeNumberInput + "_home/");
       Repository repo = server.getRepository();
       Session s = repo.login(new SimpleCredentials("username", "password"
           .toCharArray()));
@@ -36,8 +35,7 @@ public class CommandLineJcrInterface {
       System.out.println("Type 'quit' to exit.");
       while (true) {
         System.out.print("> ");
-        BufferedReader br = new BufferedReader(new InputStreamReader(
-            System.in));
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String input;
         try {
           input = br.readLine();

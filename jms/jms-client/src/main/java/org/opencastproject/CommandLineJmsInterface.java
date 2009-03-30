@@ -29,20 +29,18 @@ public class CommandLineJmsInterface {
       System.out.print("Enter a unique name for this JMS client: ");
       String nodeNumberInput;
       try {
-        nodeNumberInput = new BufferedReader(new InputStreamReader(
-            System.in)).readLine();
+        nodeNumberInput = new BufferedReader(new InputStreamReader(System.in))
+            .readLine();
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
       ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
           "classpath:opencast-jms-server.xml");
-      OpencastJmsServer server = (OpencastJmsServer) ac
-          .getBean("jmsServer");
+      OpencastJmsServer server = (OpencastJmsServer) ac.getBean("jmsServer");
 
       Connection conn = server.getConnection("CommandLineJmsInterface_"
           + nodeNumberInput);
-      Session session = conn.createSession(false,
-          Session.AUTO_ACKNOWLEDGE);
+      Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
       Topic topic = session.createTopic(TOPIC_ID);
       conn.start();
 
@@ -58,8 +56,8 @@ public class CommandLineJmsInterface {
         System.out.println("Type 'quit' to exit.");
         while (true) {
           System.out.print("> ");
-          BufferedReader br = new BufferedReader(
-              new InputStreamReader(System.in));
+          BufferedReader br = new BufferedReader(new InputStreamReader(
+              System.in));
           String input;
           try {
             input = br.readLine();
@@ -73,13 +71,10 @@ public class CommandLineJmsInterface {
           if ("quit".equals(input)) {
             break;
           } else if (input.startsWith("send")) {
-            String messageText = input
-                .substring(input.indexOf(" ") + 1);
+            String messageText = input.substring(input.indexOf(" ") + 1);
             try {
-              MessageProducer producer = session
-                  .createProducer(topic);
-              TextMessage message = session
-                  .createTextMessage(messageText);
+              MessageProducer producer = session.createProducer(topic);
+              TextMessage message = session.createTextMessage(messageText);
               message.setJMSDestination(topic);
               producer.send(message);
             } catch (Exception e) {
@@ -87,15 +82,13 @@ public class CommandLineJmsInterface {
             }
           } else if (input.startsWith("subscribe")) {
             if (subscriber == null) {
-              subscriber = session.createDurableSubscriber(topic,
-                  SUBSCRIBER_ID);
-              subscriber
-                  .setMessageListener(new MessageListener() {
-                    public void onMessage(
-                        Message inboundMessage) {
-                      System.out.println(inboundMessage);
-                    }
-                  });
+              subscriber = session
+                  .createDurableSubscriber(topic, SUBSCRIBER_ID);
+              subscriber.setMessageListener(new MessageListener() {
+                public void onMessage(Message inboundMessage) {
+                  System.out.println(inboundMessage);
+                }
+              });
             }
           } else if (input.startsWith("unsubscribe")) {
             if (subscriber != null) {

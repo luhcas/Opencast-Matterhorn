@@ -26,8 +26,7 @@ public class OsgiActivator implements BundleActivator {
   public void start(BundleContext context) throws Exception {
     // Register the (distributed) OSGI service.
     sampleServiceRegistration = OpencastServiceRegistrationUtil.register(
-        context, new SampleServiceImpl(), SampleService.class,
-        "/samplews");
+        context, new SampleServiceImpl(), SampleService.class, "/samplews");
 
     // Register the restful service
     jaxRsRegistration = context.registerService(OpencastRestService.class
@@ -46,7 +45,7 @@ public class OsgiActivator implements BundleActivator {
   public void registerStaticWebResources(BundleContext context) {
     Dictionary<String, String> staticResourcesProps = new Hashtable<String, String>();
     staticResourcesProps.put("alias", "/samplejs");
-    staticFilesRegistration = context.registerService(Resources.class
-        .getName(), new Resources("/js"), staticResourcesProps);
+    staticFilesRegistration = context.registerService(
+        Resources.class.getName(), new Resources("/js"), staticResourcesProps);
   }
 }

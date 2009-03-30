@@ -14,13 +14,13 @@ public class OpencastServiceRegistrationUtil {
    * TODO Move this to a utilities bundle ???
    * 
    * @param context
-   *            The bundle context of this service
+   *          The bundle context of this service
    * @param serviceImpl
-   *            The implementation of the service
+   *          The implementation of the service
    * @param serviceInterface
-   *            The interface for which this service is to be registered
+   *          The interface for which this service is to be registered
    * @param webServicePath
-   *            The path to the service's endpoint
+   *          The path to the service's endpoint
    * @return The {@link ServiceRegistration}
    */
   public static ServiceRegistration register(BundleContext context,

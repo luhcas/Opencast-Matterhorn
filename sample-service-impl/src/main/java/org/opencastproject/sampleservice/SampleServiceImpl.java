@@ -27,8 +27,7 @@ public class SampleServiceImpl implements SampleService {
   protected Session getSession() {
     Session session = null;
     try {
-      session = repo.login(new SimpleCredentials("foo", "bar"
-          .toCharArray()));
+      session = repo.login(new SimpleCredentials("foo", "bar".toCharArray()));
     } catch (LoginException e) {
       e.printStackTrace();
     } catch (RepositoryException e) {
