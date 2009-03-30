@@ -1,3 +1,4 @@
 package org.opencastproject.component;
 
-public class Main {}
+public class Main {
+}

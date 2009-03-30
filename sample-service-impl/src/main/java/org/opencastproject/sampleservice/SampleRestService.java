@@ -10,9 +10,9 @@ import org.opencastproject.rest.OpencastRestService;
 
 @Path("/samplerest")
 public class SampleRestService implements OpencastRestService {
-	@GET
-	@Produces(MediaType.TEXT_HTML)
-	public String getSomething(@QueryParam("path") String path) {
-		return "sample";
-	}
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  public String getSomething(@QueryParam("path") String path) {
+    return "sample";
+  }
 }

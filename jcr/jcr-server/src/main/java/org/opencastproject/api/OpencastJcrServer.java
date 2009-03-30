@@ -7,6 +7,6 @@ import javax.jcr.Repository;
  */
 public interface OpencastJcrServer {
 
-	public Repository getRepository();
+  public Repository getRepository();
 
 }

@@ -15,67 +15,73 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SimpleRepositoryTest {
-	private static final Logger logger = LoggerFactory.getLogger(SimpleRepositoryTest.class);
-	
-	TransientRepository repo;
-	
-	@Before
-	public void setUp() throws Exception {
-		repo = new TransientRepository("./src/test/resources/simple-repository.xml", "./target/simple_repo/");
-	}
+  private static final Logger logger = LoggerFactory
+      .getLogger(SimpleRepositoryTest.class);
 
-	public void tearDown() throws Exception {
-		repo.shutdown();
-	}
+  TransientRepository repo;
 
-	@Test
-	public void testTransientRepositoryExists() throws Exception {
-		assertNotNull(repo);
-	}
-	
-	@Test
-	public void testLogin() throws Exception {
-		Session session = repo.login();
-        try {
-            String user = session.getUserID();
-            String name = repo.getDescriptor(Repository.REP_NAME_DESC);
-            logger.info("Logged in as " + user + " to a " + name + " repository.");
-        } finally {
-            session.logout();
-        }
-	}
+  @Before
+  public void setUp() throws Exception {
+    repo = new TransientRepository(
+        "./src/test/resources/simple-repository.xml",
+        "./target/simple_repo/");
+  }
 
-	@Test
-	public void testStoreAndRetrieveContent() throws Exception {
-		Session session1 = repo.login(new SimpleCredentials("username", "password".toCharArray()));
-		Session session2 = repo.login(new SimpleCredentials("username", "password".toCharArray()));
+  public void tearDown() throws Exception {
+    repo.shutdown();
+  }
 
-		try {
-            // Store content under session 1
-            Node root1 = session1.getRootNode();
-            Node hello1 = root1.addNode("hello");
-            Node world1 = hello1.addNode("world");
-            world1.setProperty("message", "Hello, World!");
-            root1.save();
-            session1.save();
+  @Test
+  public void testTransientRepositoryExists() throws Exception {
+    assertNotNull(repo);
+  }
 
-            // Retrieve content under session2
-            Node root2 = session2.getRootNode();
-            Node hello2 = root2.getNode("hello");
-            Node world2 = hello2.getNode("world");
-            logger.info(world2.getPath());
-            logger.info(world2.getProperty("message").getString());
+  @Test
+  public void testLogin() throws Exception {
+    Session session = repo.login();
+    try {
+      String user = session.getUserID();
+      String name = repo.getDescriptor(Repository.REP_NAME_DESC);
+      logger.info("Logged in as " + user + " to a " + name
+          + " repository.");
+    } finally {
+      session.logout();
+    }
+  }
 
-            // Remove content
-            hello2.remove();
-            root2.save();
-            session2.save();
-            assertFalse(root2.hasNode("hello"));
-            assertFalse(root2.hasNode("hello/world"));
-        } finally {
-            session1.logout();
-            session2.logout();
-        }
-	}
-	
+  @Test
+  public void testStoreAndRetrieveContent() throws Exception {
+    Session session1 = repo.login(new SimpleCredentials("username",
+        "password".toCharArray()));
+    Session session2 = repo.login(new SimpleCredentials("username",
+        "password".toCharArray()));
+
+    try {
+      // Store content under session 1
+      Node root1 = session1.getRootNode();
+      Node hello1 = root1.addNode("hello");
+      Node world1 = hello1.addNode("world");
+      world1.setProperty("message", "Hello, World!");
+      root1.save();
+      session1.save();
+
+      // Retrieve content under session2
+      Node root2 = session2.getRootNode();
+      Node hello2 = root2.getNode("hello");
+      Node world2 = hello2.getNode("world");
+      logger.info(world2.getPath());
+      logger.info(world2.getProperty("message").getString());
+
+      // Remove content
+      hello2.remove();
+      root2.save();
+      session2.save();
+      assertFalse(root2.hasNode("hello"));
+      assertFalse(root2.hasNode("hello/world"));
+    } finally {
+      session1.logout();
+      session2.logout();
+    }
+  }
+
 }
