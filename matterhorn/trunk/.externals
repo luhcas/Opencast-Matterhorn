@@ -1,8 +1,8 @@
 osgi	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/osgi/trunk
 parent	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/parent/trunk
 docs	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/docs
-jcr	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/jcr/trunk
-rest	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/rest-services/trunk
-sample-service-api	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/sample-service-api
-sample-service-impl	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/sample-service-impl
+opencast-jcr-server	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/jcr/trunk
+opencast-rest-services	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/rest-services/trunk
+opencast-sample-service-api	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/sample-service-api
+opencast-sample-service-impl	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/sample-service-impl
 
