@@ -16,12 +16,12 @@
       </activation>
       <modules>
         <module>parent</module>
-        <module>jcr</module>
+        <module>opencast-jcr-server</module>
         <!--module>jms</module-->
         <module>osgi</module>
-	<module>rest-services</module>
-        <module>sample-service-api</module>
-	<module>sample-service-impl</module>
+	<module>opencast-rest-services</module>
+        <module>opencast-sample-service-api</module>
+	<module>opencast-sample-service-impl</module>
       </modules>
     </profile>
   </profiles>
