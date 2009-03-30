@@ -17,7 +17,7 @@
       <modules>
         <module>parent</module>
         <module>jcr</module>
-        <module>jms</module>
+        <!--module>jms</module-->
         <module>osgi</module>
 	<module>rest-services</module>
         <module>sample-service-api</module>
