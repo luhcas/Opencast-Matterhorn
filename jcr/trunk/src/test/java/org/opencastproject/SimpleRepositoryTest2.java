@@ -23,7 +23,8 @@ public class SimpleRepositoryTest {
   @Before
   public void setUp() throws Exception {
     repo = new TransientRepository(
-        "./src/test/resources/simple-repository.xml", "./target/simple_repo/");
+        "./src/test/resources/simple-repository.xml",
+        "./target/simple_repo/");
   }
 
   public void tearDown() throws Exception {
@@ -41,7 +42,8 @@ public class SimpleRepositoryTest {
     try {
       String user = session.getUserID();
       String name = repo.getDescriptor(Repository.REP_NAME_DESC);
-      logger.info("Logged in as " + user + " to a " + name + " repository.");
+      logger.info("Logged in as " + user + " to a " + name
+          + " repository.");
     } finally {
       session.logout();
     }
@@ -49,10 +51,10 @@ public class SimpleRepositoryTest {
 
   @Test
   public void testStoreAndRetrieveContent() throws Exception {
-    Session session1 = repo.login(new SimpleCredentials("username", "password"
-        .toCharArray()));
-    Session session2 = repo.login(new SimpleCredentials("username", "password"
-        .toCharArray()));
+    Session session1 = repo.login(new SimpleCredentials("username",
+        "password".toCharArray()));
+    Session session2 = repo.login(new SimpleCredentials("username",
+        "password".toCharArray()));
 
     try {
       // Store content under session 1
