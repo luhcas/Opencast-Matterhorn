@@ -40,6 +40,12 @@
 
 		<dependency>
 			<groupId>org.opencastproject</groupId>
+			<artifactId>opencast-rest-services</artifactId>
+			<version>0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.opencastproject</groupId>
 			<artifactId>opencast-sample-service-api</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
@@ -63,11 +69,6 @@
             <groupId>org.ops4j.pax.web-extender</groupId>
             <artifactId>pax-web-ex-whiteboard</artifactId>
         </dependency>
-
-		<dependency>
-			<groupId>org.apache.cxf</groupId>
-			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -116,6 +117,7 @@
 							org.apache.cxf,
 							org.apache.cxf.wsdl,
 							org.opencastproject.sampleservice.api,
+							org.opencastproject.rest,
 							*
 						</Import-Package>
                         <Private-Package>org.opencastproject.sampleservice</Private-Package>

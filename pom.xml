@@ -19,6 +19,7 @@
         <module>jcr</module>
         <module>jms</module>
         <module>osgi</module>
+	<module>rest-services</module>
         <module>sample-service-api</module>
 	<module>sample-service-impl</module>
       </modules>

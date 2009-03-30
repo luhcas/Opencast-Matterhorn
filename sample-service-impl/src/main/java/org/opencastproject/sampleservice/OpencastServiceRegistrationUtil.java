@@ -6,10 +6,12 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-public class OpencastServiceRegistration {
+public class OpencastServiceRegistrationUtil {
 	/**
 	 * Registers an OSGI service, simultaneously exposing it as a webservice
 	 * endpoint.  Use this to avoid duplicating boilerplate code.
+	 * 
+	 * TODO Move this to a utilities bundle ???
 	 * 
 	 * @param context The bundle context of this service
 	 * @param serviceImpl The implementation of the service
