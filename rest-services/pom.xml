@@ -1,0 +1,153 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.opencastproject</groupId>
+	<artifactId>opencast-rest-services</artifactId>
+	<packaging>bundle</packaging>
+	<name>opencast-rest-services</name>
+
+	<parent>
+		<groupId>org.opencastproject</groupId>
+		<artifactId>parent</artifactId>
+		<version>0.1-SNAPSHOT</version>
+		<relativePath>../parent/pom.xml</relativePath>
+	</parent>
+
+  <repositories>
+    <repository>
+      <id>jboss</id>
+      <name>jboss repo</name>
+      <url>http://repository.jboss.org/maven2</url>
+    </repository>
+  </repositories>
+
+	<dependencies>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+	    <dependency>
+	        <groupId>org.apache.felix</groupId>
+	        <artifactId>org.apache.felix.framework</artifactId>
+	        <scope>provided</scope>
+	    </dependency>
+	    <dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>jaxrs-api</artifactId>
+			<version>1.0.2.GA</version>
+		</dependency>
+	    <dependency>
+	        <groupId>org.jboss.resteasy</groupId>
+	        <artifactId>resteasy-jaxrs</artifactId>
+	        <version>1.0.2.GA</version>
+	        <!-- filter out unwanted jars -->
+	        <exclusions>
+	            <exclusion>
+	                <groupId>tjws</groupId>
+	                <artifactId>webserver</artifactId>
+	            </exclusion>
+	        </exclusions>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.jboss.resteasy</groupId>
+	      <artifactId>resteasy-jaxb-provider</artifactId>
+	      <version>1.0.2.GA</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>net.sf.json-lib</groupId>
+	      <artifactId>json-lib</artifactId>
+	      <version>2.2</version>
+	      <classifier>jdk15</classifier>
+	    </dependency>
+		<dependency>
+			<groupId>net.sf.ezmorph</groupId>
+			<artifactId>ezmorph</artifactId>
+			<version>1.0.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.scannotation</groupId>
+			<artifactId>scannotation</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.10.0.GA</version>
+		</dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-service</artifactId>
+        </dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<useFile>false</useFile>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>
+							${pom.artifactId}
+						</Bundle-SymbolicName>
+						<Import-Package>
+							!Acme.Serve,
+							!com.sun.*,
+							!org.apache.commons.httpclient.*,
+							!org.codehaus.groovy.*,
+							!org.junit.*,
+							!org.scannotation.*,
+							!groovy.lang,
+							!junit.framework.*,
+							!nu.xom,
+							net.sf.ezmorph.*,
+							org.apache.commons.*,
+							org.jboss.resteasy.*,
+							org.codehaus.jettison.*,
+							org.scannotation.*,
+							javassist.bytecode.*,
+							*
+						</Import-Package>
+						<Embed-Dependency>
+							resteasy-jaxrs, resteasy-jaxb-provider, json-lib,
+							ezmorph, scannotation, javassist, jaxrs-api
+						</Embed-Dependency>
+						<Export-Package>
+							org.opencastproject.rest
+						</Export-Package>
+						<Bundle-Activator>
+							org.opencastproject.rest.OsgiActivator
+						</Bundle-Activator>
+					</instructions>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>
+
