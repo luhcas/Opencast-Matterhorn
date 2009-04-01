@@ -18,23 +18,18 @@ import java.io.InputStreamReader;
 
 import javax.jcr.Repository;
 
-public class OpencastJcrServerOsgiImpl implements OpencastJcrServer,
-    BundleActivator {
+public class OpencastJcrServerOsgiImpl implements OpencastJcrServer, BundleActivator {
   private static final Logger logger = LoggerFactory
       .getLogger(OpencastJcrServerOsgiImpl.class);
 
-  String nodeId, repoHome;
-
   Repository repo;
   ServiceRegistration serviceRegistration;
-  OpencastJcrServerOsgiImpl impl;
 
   public OpencastJcrServerOsgiImpl() {
   }
 
-  public OpencastJcrServerOsgiImpl(String nodeId, String repoHome) {
-    this.nodeId = nodeId;
-    this.repoHome = repoHome;
+  public OpencastJcrServerOsgiImpl(Repository repo) {
+    this.repo = repo;
   }
 
   public Repository getRepository() {
@@ -42,8 +37,8 @@ public class OpencastJcrServerOsgiImpl implements OpencastJcrServer,
   }
 
   public void start(BundleContext context) throws Exception {
-    nodeId = System.getProperty("nodeId");
-    repoHome = System.getProperty("repoHome");
+    String nodeId = System.getProperty("nodeId");
+    String repoHome = System.getProperty("repoHome");
 
     // Just in case
     if (nodeId == null) {
@@ -56,9 +51,6 @@ public class OpencastJcrServerOsgiImpl implements OpencastJcrServer,
       File dir = new File(repoHome);
       dir.mkdirs();
     }
-    impl = new OpencastJcrServerOsgiImpl(nodeId, repoHome);
-    serviceRegistration = context.registerService(OpencastJcrServer.class
-        .getName(), impl, null);
     try {
       // Find the configuration template
       InputStream configTemplate = context.getBundle().getEntry(
@@ -86,6 +78,8 @@ public class OpencastJcrServerOsgiImpl implements OpencastJcrServer,
           + rc.getClusterConfig().getId());
 
       repo = RepositoryImpl.create(rc);
+      serviceRegistration = context.registerService(OpencastJcrServer.class
+          .getName(), this, null);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -94,7 +88,6 @@ public class OpencastJcrServerOsgiImpl implements OpencastJcrServer,
   public void stop(BundleContext context) throws Exception {
     serviceRegistration.unregister();
     ((JackrabbitRepository) repo).shutdown();
-    repo = null;
   }
 
 }

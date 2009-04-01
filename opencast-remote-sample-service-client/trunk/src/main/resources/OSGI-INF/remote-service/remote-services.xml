@@ -1,0 +1,10 @@
+<service-descriptions xmlns="http://www.osgi.org/xmlns/sd/v1.0.0">
+  <service-description>
+    <provide interface="org.opencastproject.sampleservice.api.SampleService" />
+    <property name="osgi.remote.interfaces">*</property>
+    <property name="osgi.remote.configuration.type">pojo</property>
+    
+    <!-- Also try matterhorn1.ethz.ch:8080 -->
+    <property name="osgi.remote.configuration.pojo.address">http://localhost:8080/samplews</property>
+  </service-description>
+</service-descriptions>

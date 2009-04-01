@@ -1,10 +1,12 @@
 package org.opencastproject.sampleservice;
 
+import org.opencastproject.api.OpencastJcrServer;
 import org.opencastproject.rest.OpencastRestService;
 import org.opencastproject.sampleservice.api.SampleService;
 import org.ops4j.pax.web.extender.whiteboard.Resources;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 import java.util.Dictionary;
@@ -21,11 +23,19 @@ public class OsgiActivator implements BundleActivator {
    * web resources at /samplejs.
    */
   public void start(BundleContext context) throws Exception {
-    // Register the (distributed) OSGI service.
+    // Look up the repository service.  This should be changed to use a service tracker
+    ServiceReference jcrServerRef = context.getServiceReference(OpencastJcrServer.class.getName());
+    OpencastJcrServer jcrServer = (OpencastJcrServer)context.getService(jcrServerRef);
+      
+    // Construct the sample service impl
+    SampleServiceImpl sampleService = new SampleServiceImpl();
+    sampleService.setJcrServer(jcrServer);
+    
+    // Register the DOSGI sample service.
     sampleServiceRegistration = OpencastServiceRegistrationUtil.register(
-        context, new SampleServiceImpl(), SampleService.class, "/samplews");
+        context, sampleService, SampleService.class, "/samplews");
 
-    // Register the restful service
+    // Register the restful service (not working yet)
     jaxRsRegistration = context.registerService(OpencastRestService.class
         .getName(), new SampleRestService(), null);
 
