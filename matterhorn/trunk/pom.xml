@@ -26,6 +26,7 @@
         <module>opencast-encoder-impl</module>
         <module>opencast-workflow-api</module>
         <module>opencast-workflow-impl</module>
+        <module>opencast-remote-sample-service-client</module>
       </modules>
     </profile>
   </profiles>
