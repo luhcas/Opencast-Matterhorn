@@ -5,4 +5,8 @@ opencast-jcr-server	https://opencastproject.svn.sourceforge.net/svnroot/opencast
 opencast-rest-services	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/rest-services/trunk
 opencast-sample-service-api	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/sample-service-api/trunk
 opencast-sample-service-impl	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/sample-service-impl/trunk
+opencast-encoder-api	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-encoder-api/trunk
+opencast-encoder-impl	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-encoder-impl/trunk
+opencast-workflow-api	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-workflow-api/trunk
+opencast-workflow-impl	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-workflow-impl/trunk
 
