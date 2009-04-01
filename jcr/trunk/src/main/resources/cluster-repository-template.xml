@@ -49,7 +49,7 @@
         </PersistenceManager>
     </Versioning>
 
-	<!-- The search index relies on dependencies such as POI.  TODO Add search dependencies to pom.xml  -->
+    <!-- The search index relies on dependencies such as POI.  TODO Add search dependencies to pom.xml  -->
 
     <!-- SearchIndex class="org.apache.jackrabbit.core.query.lucene.SearchIndex">
         <param name="path" value="${rep.home}/repository/index"/>
@@ -58,15 +58,15 @@
         <param name="supportHighlighting" value="true"/>
     </SearchIndex -->
 
-	<Cluster id="NODE_ID">
-	  <Journal class="org.apache.jackrabbit.core.journal.DatabaseJournal">
-	    <param name="revision" value="${rep.home}/revision.log" />
-	    <param name="driver" value="com.mysql.jdbc.Driver" />
-	    <param name="url" value="jdbc:mysql://localhost/oc?useUnicode=true&amp;characterEncoding=UTF-8" />
-	    <param name="user" value="root"/>
-	    <param name="password" value="root"/>
-	  </Journal>
-	</Cluster>
+    <Cluster id="NODE_ID">
+      <Journal class="org.apache.jackrabbit.core.journal.DatabaseJournal">
+        <param name="revision" value="${rep.home}/revision.log" />
+        <param name="driver" value="com.mysql.jdbc.Driver" />
+        <param name="url" value="jdbc:mysql://localhost/oc?useUnicode=true&amp;characterEncoding=UTF-8" />
+        <param name="user" value="root"/>
+        <param name="password" value="root"/>
+      </Journal>
+    </Cluster>
 
     <DataStore class="org.apache.jackrabbit.core.data.FileDataStore">
         <param name="path" value="${rep.home}/repository/datastore"/>

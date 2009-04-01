@@ -43,7 +43,7 @@
         </PersistenceManager>
     </Versioning>
 
-	<!-- The search index relies on dependencies such as POI.  TODO Add search dependencies to pom.xml  -->
+    <!-- The search index relies on dependencies such as POI.  TODO Add search dependencies to pom.xml  -->
 
     <!-- SearchIndex class="org.apache.jackrabbit.core.query.lucene.SearchIndex">
         <param name="path" value="${rep.home}/repository/index"/>

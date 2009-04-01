@@ -3,16 +3,16 @@ package org.opencastproject;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-import javax.jcr.Node;
-import javax.jcr.Repository;
-import javax.jcr.Session;
-import javax.jcr.SimpleCredentials;
-
 import org.apache.jackrabbit.core.TransientRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.jcr.Node;
+import javax.jcr.Repository;
+import javax.jcr.Session;
+import javax.jcr.SimpleCredentials;
 
 public class SimpleRepositoryTest {
   private static final Logger logger = LoggerFactory
@@ -23,8 +23,7 @@ public class SimpleRepositoryTest {
   @Before
   public void setUp() throws Exception {
     repo = new TransientRepository(
-        "./src/test/resources/simple-repository.xml",
-        "./target/simple_repo/");
+        "./src/test/resources/simple-repository.xml", "./target/simple_repo/");
   }
 
   public void tearDown() throws Exception {
@@ -42,8 +41,7 @@ public class SimpleRepositoryTest {
     try {
       String user = session.getUserID();
       String name = repo.getDescriptor(Repository.REP_NAME_DESC);
-      logger.info("Logged in as " + user + " to a " + name
-          + " repository.");
+      logger.info("Logged in as " + user + " to a " + name + " repository.");
     } finally {
       session.logout();
     }
@@ -51,10 +49,10 @@ public class SimpleRepositoryTest {
 
   @Test
   public void testStoreAndRetrieveContent() throws Exception {
-    Session session1 = repo.login(new SimpleCredentials("username",
-        "password".toCharArray()));
-    Session session2 = repo.login(new SimpleCredentials("username",
-        "password".toCharArray()));
+    Session session1 = repo.login(new SimpleCredentials("username", "password"
+        .toCharArray()));
+    Session session2 = repo.login(new SimpleCredentials("username", "password"
+        .toCharArray()));
 
     try {
       // Store content under session 1

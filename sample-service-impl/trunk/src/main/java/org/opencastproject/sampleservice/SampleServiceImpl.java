@@ -1,5 +1,8 @@
 package org.opencastproject.sampleservice;
 
+import org.opencastproject.api.OpencastJcrServer;
+import org.opencastproject.sampleservice.api.SampleService;
+
 import javax.jcr.ItemNotFoundException;
 import javax.jcr.LoginException;
 import javax.jcr.Node;
@@ -9,9 +12,6 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
 import javax.jws.WebService;
-
-import org.opencastproject.api.OpencastJcrServer;
-import org.opencastproject.sampleservice.api.SampleService;
 
 @WebService(endpointInterface = "org.opencastproject.samplecomponent.SampleWebService", serviceName = "SampleWebService")
 public class SampleServiceImpl implements SampleService {
@@ -27,8 +27,7 @@ public class SampleServiceImpl implements SampleService {
   protected Session getSession() {
     Session session = null;
     try {
-      session = repo.login(new SimpleCredentials("foo", "bar"
-          .toCharArray()));
+      session = repo.login(new SimpleCredentials("foo", "bar".toCharArray()));
     } catch (LoginException e) {
       e.printStackTrace();
     } catch (RepositoryException e) {
