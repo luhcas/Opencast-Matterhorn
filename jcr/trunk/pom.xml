@@ -164,21 +164,6 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <useFile>false</useFile>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <extensions>true</extensions>
@@ -193,7 +178,10 @@
               xercesImpl,tm-extractors,pdfbox,nekohtml, mysql-connector-java </Embed-Dependency>
             <Import-Package> !org.apache.jackrabbit.test.*, !org.apache.lucene.demo.*,
               !org.apache.log4j.spi.*, !org.apache.tools.ant.*, !org.apache.xml.resolver.*, !sun.*,
-              !oracle.*, !org.jboss.resource.adapter.jdbc.*, !com.mchange.v2.c3p0.*, * </Import-Package>
+              !org.apache.xpath.*, !org.apache.xml.utils.*, !org.apache.xalan.*,
+              !org.apache.derby.impl.drda, !org.jboss.resource.adapter.jdbc.*,
+              !com.mchange.v2.c3p0.*, *
+            </Import-Package>
             <DynamicImport-Package> org.apache.felix.shell </DynamicImport-Package>
           </instructions>
         </configuration>
