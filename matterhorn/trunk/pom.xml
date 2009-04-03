@@ -29,7 +29,6 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>parent</module>
         <module>opencast-jcr-server</module>
         <module>osgi</module>
         <module>opencast-authentication-api</module>
