@@ -1,0 +1,65 @@
+<Bundle id="00000/2" start="2007-12-05T13:40:00" duration="10044">
+	<Media>
+		<!-- also contained in target by id and filename -->
+		<Track id="track-1" type="track/presentation">
+			<MimeType>video/quicktime</MimeType>
+			<File>tracks/vonly.mov</File>
+			<Checksum type="md5">43b7d843b02c4a429b2f547a4f230d31</Checksum>
+			<Duration>10044</Duration>
+			<Video>
+				<Device type="UFG03" version="30112007" vendor="Unigraf"/>
+				<Encoder type="H.264" version="7.4" vendor="Apple Inc"/>
+				<Size>640x480</Size>
+				<ScanType type="progressive"/>
+				<BitRate>540520</BitRate>
+				<FrameRate>2</FrameRate>
+			</Video>
+		</Track>
+		<!-- not contained in target by id but filename -->
+		<Track id="track-3" type="track/audio">
+			<MimeType>video/quicktime</MimeType>
+			<File>tracks/aonly.mov</File>
+			<Checksum type="md5">950f9fa49caa8f1c5bbc36892f6fd062</Checksum>
+			<Duration>10044</Duration>
+			<Audio>
+				<Device type="UFG03" version="30112007" vendor="Unigraf"/>
+				<Encoder type="AAC" version="7.4" vendor="Apple Inc"/>
+				<Channels>2</Channels>
+				<BitDepth>16</BitDepth>
+				<SamplingRate>44100</SamplingRate>
+			</Audio>
+		</Track>
+	</Media>
+	<Metadata>
+		<!-- also contained in target by id and filename -->
+		<Catalog id="catalog-1" type="metadata/dublincore">
+			<MimeType>text/xml</MimeType>
+			<File>metadata/dublincore.xml</File>
+			<Checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</Checksum>
+		</Catalog>
+		<!-- also contained in target by id but not filename -->
+		<Catalog id="catalog-2" type="metadata/dublincore" ref="series:1">
+			<MimeType>text/xml</MimeType>
+			<File>metadata/series-dublincore-new.xml</File>
+			<Checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</Checksum>
+		</Catalog>
+		<!-- not contained in target by id but filename -->
+		<Catalog id="catalog-99" type="metadata/dublincore" ref="series:1">
+			<MimeType>text/xml</MimeType>
+			<File>metadata/series-dublincore.xml</File>
+			<Checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</Checksum>
+		</Catalog>
+	</Metadata>
+	<Attachments>
+		<Attachment id="cover" type="attachment/cover">
+			<MimeType>image/png</MimeType>
+			<File>attachments/cover.png</File>
+			<Checksum type="md5">6d535f61a1b31a3edeb01be0951a2b4e</Checksum>
+		</Attachment>
+		<Attachment id="series-cover" type="attachment/cover">
+			<MimeType>image/png</MimeType>
+			<File>attachments/series-cover.png</File>
+			<Checksum type="md5">6d535f61a1b31a3edeb01be0951a2b4e</Checksum>
+		</Attachment>
+	</Attachments>
+</Bundle>
