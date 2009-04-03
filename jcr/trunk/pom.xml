@@ -137,6 +137,14 @@
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
     </dependency>
+    <dependency>
+      <groupId>postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+    </dependency>
 
     <!-- OSGI Dependencies -->
     <dependency>
@@ -181,7 +189,7 @@
             <Bundle-Activator> org.opencastproject.jcr.impl.OsgiActivator </Bundle-Activator>
             <Export-Service> org.opencastproject.api.OpencastJcrServer </Export-Service>
             <Embed-Dependency> jackrabbit-core,jackrabbit-spi-commons,jackrabbit-spi,
-              jackrabbit-text-extractors,lucene-core,concurrent,poi,
+              jackrabbit-text-extractors,lucene-core,concurrent,poi, postgresql, derby,
               xercesImpl,tm-extractors,pdfbox,nekohtml, mysql-connector-java </Embed-Dependency>
             <Import-Package> !org.apache.jackrabbit.test.*, !org.apache.lucene.demo.*,
               !org.apache.log4j.spi.*, !org.apache.tools.ant.*, !org.apache.xml.resolver.*, !sun.*,
