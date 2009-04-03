@@ -38,8 +38,7 @@ public class OpencastServiceRegistrationUtil {
    *          The path to the service's endpoint
    * @return The {@link ServiceRegistration}
    */
-  public static ServiceRegistration register(BundleContext context,
-      Object serviceImpl, Class<?> serviceInterface, String webServicePath) {
+  public static ServiceRegistration register(BundleContext context, Object serviceImpl, Class<?> serviceInterface, String webServicePath) {
     Dictionary<String, String> props = new Hashtable<String, String>();
     props.put("osgi.remote.interfaces", "*");
     props.put("osgi.remote.requires.intents", "SOAP.1_2");

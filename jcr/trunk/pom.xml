@@ -8,9 +8,8 @@
   <name>opencast-jcr-server</name>
   <parent>
     <groupId>org.opencastproject</groupId>
-    <artifactId>parent</artifactId>
+    <artifactId>base</artifactId>
     <version>0.1-SNAPSHOT</version>
-    <relativePath>../../parent/pom.xml</relativePath>
   </parent>
   <dependencies>
     <dependency>
