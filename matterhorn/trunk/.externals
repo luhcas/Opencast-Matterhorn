@@ -10,4 +10,4 @@ opencast-encoder-impl	https://opencastproject.svn.sourceforge.net/svnroot/openca
 opencast-workflow-api	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-workflow-api/trunk
 opencast-workflow-impl	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-workflow-impl/trunk
 opencast-remote-sample-service-client	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-remote-sample-service-client/trunk
-
+opencast-authentication-api	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-authentication-api/trunk
