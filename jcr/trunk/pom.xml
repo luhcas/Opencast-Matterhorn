@@ -178,7 +178,7 @@
           <instructions>
             <Export-Package> org.opencastproject.api,org.opencastproject.jcr.impl </Export-Package>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator> org.opencastproject.jcr.impl.OpencastJcrServerOsgiImpl </Bundle-Activator>
+            <Bundle-Activator> org.opencastproject.jcr.impl.OsgiActivator </Bundle-Activator>
             <Export-Service> org.opencastproject.api.OpencastJcrServer </Export-Service>
             <Embed-Dependency> jackrabbit-core,jackrabbit-spi-commons,jackrabbit-spi,
               jackrabbit-text-extractors,lucene-core,concurrent,poi,
