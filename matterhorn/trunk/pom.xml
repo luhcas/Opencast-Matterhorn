@@ -21,7 +21,6 @@
     <system>jira</system>
     <url>http://jira.media.berkeley.edu/jira/browse/OPENCAST</url>
   </issueManagement>
-
   <profiles>
     <profile>
       <id>full</id>
@@ -31,7 +30,9 @@
       <modules>
         <module>opencast-jcr-server</module>
         <module>osgi</module>
-        <module>opencast-authentication-api</module>
+	<module>opencast-util</module>
+	<module>opencast-media</module>
+	<module>opencast-authentication-api</module>
         <module>opencast-rest-services</module>
         <module>opencast-encoder-api</module>
         <module>opencast-encoder-impl</module>
@@ -542,6 +543,24 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.5.6</version>
 		</dependency>
+
+                <dependency>
+                        <groupId>commons-collections</groupId>
+                        <artifactId>commons-collections</artifactId>
+                        <version>3.2.1</version>
+                </dependency>
+
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.4</version>
+		</dependency>
+
+                <dependency>
+                        <groupId>joda-time</groupId>
+                        <artifactId>joda-time</artifactId>
+                        <version>1.6</version>
+                </dependency>
 
       </dependencies>
     </dependencyManagement>
