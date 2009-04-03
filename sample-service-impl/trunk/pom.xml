@@ -104,7 +104,7 @@
             <Bundle-Activator> org.opencastproject.sampleservice.OsgiActivator </Bundle-Activator>
             <Import-Package> org.osgi.service.component, META-INF.cxf, org.apache.cxf,
               org.apache.cxf.wsdl, org.opencastproject.sampleservice.api, org.opencastproject.rest,
-              * </Import-Package>
+              org.opencastproject.api, javax.jcr, * </Import-Package>
             <Private-Package>org.opencastproject.sampleservice</Private-Package>
             <!--
               FIXME: This is a hack to fix cxf not showing up in the import-package instructions

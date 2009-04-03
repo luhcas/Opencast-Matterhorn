@@ -12,6 +12,14 @@
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
   <dependencies>
+    <dependency>
+        <groupId>org.apache.jackrabbit</groupId>
+        <artifactId>jackrabbit-jcr-commons</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>commons-collections</groupId>
+        <artifactId>commons-collections</artifactId>
+    </dependency>
     <!-- Pulling the Felix Dependencies -->
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -68,8 +76,15 @@
       <artifactId>servlet-api-2.5</artifactId>
       <version>6.1.14</version>
     </dependency>
-
-
+    <!-- Sling -->
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.jcr.api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.sling</groupId>
+      <artifactId>org.apache.sling.jcr.jackrabbit.api</artifactId>
+    </dependency>
     <!-- CXF -->
     <dependency>
       <groupId>org.apache.cxf</groupId>
