@@ -92,13 +92,6 @@
         <version>1.2</version>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <configuration>
-          <configLocation>docs/etc/checkstyle.xml</configLocation>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>cobertura-maven-plugin</artifactId>
       </plugin>
@@ -637,6 +630,12 @@
 			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
 			<url>http://repository.springsource.com/maven/bundles/external</url>
 		</repository>
+		<repository>
+			<id>spring-maven-snapshot</id>
+			<snapshots><enabled>true</enabled></snapshots>
+			<name>Springframework Maven SNAPSHOT Repository</name>
+			<url>http://s3.amazonaws.com/maven.springframework.org/snapshot</url>
+		</repository> 
         <repository>
             <id>ops4j</id>
             <name>OPS4J Repository</name>
