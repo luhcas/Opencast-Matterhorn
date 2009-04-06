@@ -1,3 +1,4 @@
+build-tools	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/build-tools/trunk
 osgi	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/osgi/trunk
 docs	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/docs
 opencast-jcr-server	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/jcr/trunk
