@@ -16,6 +16,10 @@
       <artifactId>opencast-media</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

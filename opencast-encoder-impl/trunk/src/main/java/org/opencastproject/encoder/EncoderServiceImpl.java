@@ -21,9 +21,6 @@ import org.opencastproject.status.impl.StatusMessageImpl;
 
 import java.util.UUID;
 
-import javax.jws.WebService;
-@WebService(endpointInterface = "org.opencastproject.encoder.api.EncoderService",
-    serviceName = "EncoderService")
 public class EncoderServiceImpl implements EncoderService {
 
   public StatusMessage encode(String pathIn, String pathOut, String statusServiceEndpoint) {

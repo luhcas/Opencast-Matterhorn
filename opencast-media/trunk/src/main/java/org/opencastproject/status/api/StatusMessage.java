@@ -15,26 +15,34 @@
  */
 package org.opencastproject.status.api;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+
 /**
  * TODO Does this really belong in the media osgi bundle?
  *
  */
+@XmlAccessorType(XmlAccessType.PUBLIC_MEMBER)
 public interface StatusMessage {
   /**
    * The source of the message.  This should be an ID or description of the component generating
    * the message.
    */
+  @XmlElement(required=true, nillable=false)
   String getSource();
   
   /**
    * A reference to the job or task this status describes.
    * @return
    */
+  @XmlElement(required=true, nillable=false)
   String getReference();
 
   /**
    * The details of the status message.
    * @return
    */
+  @XmlElement(required=true, nillable=false)
   String getMessage();
 }

@@ -17,6 +17,12 @@ package org.opencastproject.encoder.api;
 
 import org.opencastproject.status.api.StatusMessage;
 
+import javax.jws.WebService;
+/**
+ * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this
+ * encoding job.
+ */
+@WebService(serviceName="EncoderService")
 public interface EncoderService {
   public StatusMessage encode(String pathIn, String pathOut, String statusServiceEndpoint);
 }

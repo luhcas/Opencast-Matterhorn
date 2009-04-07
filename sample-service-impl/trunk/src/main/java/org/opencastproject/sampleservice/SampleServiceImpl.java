@@ -26,9 +26,7 @@ import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
-import javax.jws.WebService;
 
-@WebService(endpointInterface = "org.opencastproject.sampleservice.api.SampleService", serviceName = "SampleService")
 public class SampleServiceImpl implements SampleService {
 
   public static final String PROPERTY_KEY = "sample-property";
