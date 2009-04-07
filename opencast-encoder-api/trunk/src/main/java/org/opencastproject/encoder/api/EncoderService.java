@@ -15,6 +15,8 @@
  */
 package org.opencastproject.encoder.api;
 
+import org.opencastproject.status.api.StatusMessage;
+
 public interface EncoderService {
-  public String encode(String pathIn, String pathOut);
+  public StatusMessage encode(String pathIn, String pathOut, String statusServiceEndpoint);
 }

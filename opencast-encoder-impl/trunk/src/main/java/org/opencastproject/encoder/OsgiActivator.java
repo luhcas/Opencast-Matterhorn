@@ -15,13 +15,31 @@
  */
 package org.opencastproject.encoder;
 
+import org.opencastproject.encoder.api.EncoderService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 public class OsgiActivator implements BundleActivator {
+  protected ServiceRegistration encoderServiceRegistration;
+
   public void start(BundleContext context) throws Exception {
+    EncoderServiceImpl encoderServiceImpl = new EncoderServiceImpl();
+    
+    Dictionary<String, String> props = new Hashtable<String, String>();
+    props.put("osgi.remote.interfaces", "*");
+    props.put("osgi.remote.requires.intents", "SOAP.1_2");
+    props.put("osgi.remote.configuration.type", "pojo");
+    props.put("osgi.remote.configuration.pojo.httpservice.context",
+        "/encoder");
+    encoderServiceRegistration = context.registerService(EncoderService.class.getName(),
+        encoderServiceImpl, props);
   }
 
   public void stop(BundleContext context) throws Exception {
+    encoderServiceRegistration.unregister();
   }
 }

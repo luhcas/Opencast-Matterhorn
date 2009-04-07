@@ -13,16 +13,28 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.media.bundle.mpeg7;
+package org.opencastproject.status.api;
 
 /**
- * This element encapsulates the information about a single audio track.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id$
+ * TODO Does this really belong in the media osgi bundle?
+ *
  */
-public interface Audio extends MultimediaContentType {
+public interface StatusMessage {
+  /**
+   * The source of the message.  This should be an ID or description of the component generating
+   * the message.
+   */
+  String getSource();
+  
+  /**
+   * A reference to the job or task this status describes.
+   * @return
+   */
+  String getReference();
 
-  // Marker Interface
-
+  /**
+   * The details of the status message.
+   * @return
+   */
+  String getMessage();
 }
