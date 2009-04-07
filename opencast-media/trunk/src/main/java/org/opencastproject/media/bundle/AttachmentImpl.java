@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -37,126 +37,148 @@ import java.security.NoSuchAlgorithmException;
  */
 public class AttachmentImpl extends AbstractBundleElement implements Attachment {
 
-	/** Serial version UID */
-	private static final long serialVersionUID = 6626531251856698138L;
+  /** Serial version UID */
+  private static final long serialVersionUID = 6626531251856698138L;
 
-	/**
-	 * Creates an attachment.
-	 * 
-	 * @param flavor the attachment type
-	 * @param file the file
-	 * @param checksum the attachment's checksum
-	 * @throws IOException 
-	 * 		if the specified file does not exist or cannot be created
-	 * @throws UnknownFileTypeException 
-	 * 		if the attachment's mime type is not supported
-	 */
-	protected AttachmentImpl(BundleElementFlavor flavor, File file, Checksum checksum) throws IOException, UnknownFileTypeException {
-		super(Type.Attachment, flavor, file, checksum);
-	}
+  /**
+   * Creates an attachment.
+   * 
+   * @param flavor
+   *          the attachment type
+   * @param file
+   *          the file
+   * @param checksum
+   *          the attachment's checksum
+   * @throws IOException
+   *           if the specified file does not exist or cannot be created
+   * @throws UnknownFileTypeException
+   *           if the attachment's mime type is not supported
+   */
+  protected AttachmentImpl(BundleElementFlavor flavor, File file,
+      Checksum checksum) throws IOException, UnknownFileTypeException {
+    super(Type.Attachment, flavor, file, checksum);
+  }
 
-	/**
-	 * Creates an attachment.
-	 * 
-	 * @param flavor the attachment type
-	 * @param mimeType the attachment's mime type
-	 * @param file the file
-	 * @param checksum the attachment's checksum
-	 * @throws IOException 
-	 * 		if the specified file does not exist or cannot be created
-	 */
-	protected AttachmentImpl(BundleElementFlavor flavor, MimeType mimeType, File file, Checksum checksum) throws IOException {
-		super(Type.Attachment, flavor, mimeType, file, checksum);
-	}
+  /**
+   * Creates an attachment.
+   * 
+   * @param flavor
+   *          the attachment type
+   * @param mimeType
+   *          the attachment's mime type
+   * @param file
+   *          the file
+   * @param checksum
+   *          the attachment's checksum
+   * @throws IOException
+   *           if the specified file does not exist or cannot be created
+   */
+  protected AttachmentImpl(BundleElementFlavor flavor, MimeType mimeType,
+      File file, Checksum checksum) throws IOException {
+    super(Type.Attachment, flavor, mimeType, file, checksum);
+  }
 
-	/**
-	 * Creates an attachment.
-	 * 
-	 * @param flavor the attachment type
-	 * @param mimeType the attachment's mime type
-	 * @param file the file
-	 * @throws IOException 
-	 * 		if the specified file does not exist or cannot be created
-	 * @throws NoSuchAlgorithmException
-	 * 		if the attachment's checksum cannot be computed
-	 */
-	protected AttachmentImpl(BundleElementFlavor flavor, MimeType mimeType, File file) throws IOException, NoSuchAlgorithmException {
-		super(Type.Attachment, flavor, mimeType, file);
-	}
+  /**
+   * Creates an attachment.
+   * 
+   * @param flavor
+   *          the attachment type
+   * @param mimeType
+   *          the attachment's mime type
+   * @param file
+   *          the file
+   * @throws IOException
+   *           if the specified file does not exist or cannot be created
+   * @throws NoSuchAlgorithmException
+   *           if the attachment's checksum cannot be computed
+   */
+  protected AttachmentImpl(BundleElementFlavor flavor, MimeType mimeType,
+      File file) throws IOException, NoSuchAlgorithmException {
+    super(Type.Attachment, flavor, mimeType, file);
+  }
 
-	/**
-	 * Creates an attachment.
-	 * 
-	 * @param id the identifier within the bundle
-	 * @param flavor the attachment type
-	 * @param mimeType the attachment's mime type
-	 * @param file the file
-	 * @param checksum the attachment's checksum
-	 * @throws IOException 
-	 * 		if the specified file does not exist or cannot be created
-	 */
-	protected AttachmentImpl(String id, BundleElementFlavor flavor, MimeType mimeType, File file, Checksum checksum) throws IOException {
-		super(id, Type.Attachment, flavor, mimeType, file, checksum);
-	}
+  /**
+   * Creates an attachment.
+   * 
+   * @param id
+   *          the identifier within the bundle
+   * @param flavor
+   *          the attachment type
+   * @param mimeType
+   *          the attachment's mime type
+   * @param file
+   *          the file
+   * @param checksum
+   *          the attachment's checksum
+   * @throws IOException
+   *           if the specified file does not exist or cannot be created
+   */
+  protected AttachmentImpl(String id, BundleElementFlavor flavor,
+      MimeType mimeType, File file, Checksum checksum) throws IOException {
+    super(id, Type.Attachment, flavor, mimeType, file, checksum);
+  }
 
-	/**
-	 * Creates an attachment object for the given file.
-	 * 
-	 * @param flavor the attachment type
-	 * @param file the file
-	 * @throws IOException 
-	 * 		if the specified file does not exist or cannot be created
-	 * @throws UnknownFileTypeException 
-	 * 		if the attachment's mime type is not supported
-	 * @throws NoSuchAlgorithmException
-	 * 		if the attachment's checksum cannot be computed
-	 */
-	protected AttachmentImpl(BundleElementFlavor flavor, File file) throws IOException, NoSuchAlgorithmException, UnknownFileTypeException {
-		super(Type.Attachment, flavor, file);
-	}
+  /**
+   * Creates an attachment object for the given file.
+   * 
+   * @param flavor
+   *          the attachment type
+   * @param file
+   *          the file
+   * @throws IOException
+   *           if the specified file does not exist or cannot be created
+   * @throws UnknownFileTypeException
+   *           if the attachment's mime type is not supported
+   * @throws NoSuchAlgorithmException
+   *           if the attachment's checksum cannot be computed
+   */
+  protected AttachmentImpl(BundleElementFlavor flavor, File file)
+      throws IOException, NoSuchAlgorithmException, UnknownFileTypeException {
+    super(Type.Attachment, flavor, file);
+  }
 
-    /**
-     * Reads the attachment from the specified file and returns it.
-     *
-     * @param file the dublin core metadata container file
-     * @return the dublin core object
-	 * @throws IOException
-	 * 		if reading the metadata fails
-	 * @throws UnknownFileTypeException
-	 * 		if the dublin core file is of an unknown file type
-	 * @throws NoSuchAlgorithmException
-	 * 		if the md5 checksum cannot be computed
-     */
-    public static AttachmentImpl fromFile(File file) throws IOException, UnknownFileTypeException, NoSuchAlgorithmException {
-    	AttachmentImpl attachment = new AttachmentImpl(Attachment.FLAVOR, file);
-        return attachment;
-    }
+  /**
+   * Reads the attachment from the specified file and returns it.
+   * 
+   * @param file
+   *          the dublin core metadata container file
+   * @return the dublin core object
+   * @throws IOException
+   *           if reading the metadata fails
+   * @throws UnknownFileTypeException
+   *           if the dublin core file is of an unknown file type
+   * @throws NoSuchAlgorithmException
+   *           if the md5 checksum cannot be computed
+   */
+  public static AttachmentImpl fromFile(File file) throws IOException,
+      UnknownFileTypeException, NoSuchAlgorithmException {
+    AttachmentImpl attachment = new AttachmentImpl(Attachment.FLAVOR, file);
+    return attachment;
+  }
 
-	/**
-	 * @see org.opencastproject.media.bundle.AbstractBundleElement#toManifest(org.w3c.dom.Document)
-	 */
-	@Override
-	public Node toManifest(Document document) {
-		Node node = super.toManifest(document);
+  /**
+   * @see org.opencastproject.media.bundle.AbstractBundleElement#toManifest(org.w3c.dom.Document)
+   */
+  @Override
+  public Node toManifest(Document document) {
+    Node node = super.toManifest(document);
 
-		// File
-		Element fileNode = document.createElement("File");
-		String attachmentPath = PathSupport.concat(
-			getFile().getParentFile().getName(),
-			fileName
-		);
-		fileNode.appendChild(document.createTextNode(attachmentPath));
-		node.appendChild(fileNode);
+    // File
+    Element fileNode = document.createElement("File");
+    String attachmentPath = PathSupport.concat(getFile().getParentFile()
+        .getName(), fileName);
+    fileNode.appendChild(document.createTextNode(attachmentPath));
+    node.appendChild(fileNode);
 
-		return node;
-	}
+    return node;
+  }
 
-	/**
-	 * @see org.opencastproject.media.bundle.AbstractBundleElement#toString()
-	 */
-	@Override
-	public String toString() {
-		return "attachment (" + getMimeType() + ")";
-	}
+  /**
+   * @see org.opencastproject.media.bundle.AbstractBundleElement#toString()
+   */
+  @Override
+  public String toString() {
+    return "attachment (" + getMimeType() + ")";
+  }
 
 }

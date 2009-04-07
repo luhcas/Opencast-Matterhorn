@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -21,28 +21,28 @@ package org.opencastproject.media.bundle.mpeg7;
  * may have properties like text annotations attached to it.
  * 
  * <pre>
- * <complexType name="AudioSegmentType">
- *   <complexContent>
- *       <extension base="mpeg7:SegmentType">
- *           <sequence>
- *               <choice minOccurs="0">
- *                   <element name="MediaTime" type="mpeg7:MediaTimeType"/>
- *                   <element name="TemporalMask" type="mpeg7:TemporalMaskType"/>
- *               </choice>
- *               <choice minOccurs="0" maxOccurs="unbounded">
- *                   <element name="AudioDescriptor" type="mpeg7:AudioDType"/>
- *                   <element name="AudioDescriptionScheme" type="mpeg7:AudioDSType"/>
- *               </choice>
- *               <choice minOccurs="0" maxOccurs="unbounded">
- *                   <element name="TemporalDecomposition"
- *                       type="mpeg7:AudioSegmentTemporalDecompositionType"/>
- *                   <element name="MediaSourceDecomposition"
- *                       type="mpeg7:AudioSegmentMediaSourceDecompositionType"/>
- *               </choice>
- *           </sequence>
- *       </extension>
- *   </complexContent>
- * </complexType>
+ * &lt;complexType name=&quot;AudioSegmentType&quot;&gt;
+ *   &lt;complexContent&gt;
+ *       &lt;extension base=&quot;mpeg7:SegmentType&quot;&gt;
+ *           &lt;sequence&gt;
+ *               &lt;choice minOccurs=&quot;0&quot;&gt;
+ *                   &lt;element name=&quot;MediaTime&quot; type=&quot;mpeg7:MediaTimeType&quot;/&gt;
+ *                   &lt;element name=&quot;TemporalMask&quot; type=&quot;mpeg7:TemporalMaskType&quot;/&gt;
+ *               &lt;/choice&gt;
+ *               &lt;choice minOccurs=&quot;0&quot; maxOccurs=&quot;unbounded&quot;&gt;
+ *                   &lt;element name=&quot;AudioDescriptor&quot; type=&quot;mpeg7:AudioDType&quot;/&gt;
+ *                   &lt;element name=&quot;AudioDescriptionScheme&quot; type=&quot;mpeg7:AudioDSType&quot;/&gt;
+ *               &lt;/choice&gt;
+ *               &lt;choice minOccurs=&quot;0&quot; maxOccurs=&quot;unbounded&quot;&gt;
+ *                   &lt;element name=&quot;TemporalDecomposition&quot;
+ *                       type=&quot;mpeg7:AudioSegmentTemporalDecompositionType&quot;/&gt;
+ *                   &lt;element name=&quot;MediaSourceDecomposition&quot;
+ *                       type=&quot;mpeg7:AudioSegmentMediaSourceDecompositionType&quot;/&gt;
+ *               &lt;/choice&gt;
+ *           &lt;/sequence&gt;
+ *       &lt;/extension&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
@@ -50,6 +50,6 @@ package org.opencastproject.media.bundle.mpeg7;
  */
 public interface AudioSegment extends ContentSegment {
 
-	// Marker interface only
-	
+  // Marker interface only
+
 }

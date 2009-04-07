@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -20,10 +20,10 @@ import java.io.File;
 
 /**
  * Interface for tools that analyze media files.
- *
+ * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public interface MediaAnalyzer {
 
-    MediaContainerMetadata analyze(File media) throws MediaAnalyzerException;
+  MediaContainerMetadata analyze(File media) throws MediaAnalyzerException;
 }

@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -16,22 +16,22 @@
 
 package org.opencastproject.media.bundle;
 
-
 /**
- * This interface describes methods and fields for attachments as part of a bundle.
+ * This interface describes methods and fields for attachments as part of a
+ * bundle.
  * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id$
  */
 public interface Attachment extends BundleElement {
-	
-	/** Bundle element type */
-	BundleElement.Type TYPE = BundleElement.Type.Attachment;
 
-	/** Element flavor definition */
-	BundleElementFlavor FLAVOR = new BundleElementFlavor("attachment", "(unkown)");
+  /** Bundle element type */
+  BundleElement.Type TYPE = BundleElement.Type.Attachment;
 
-	/** Attachment flavor description */
-	String FLAVOR_DESCRIPTION = "Unspecified attachment";
+  /** Element flavor definition */
+  BundleElementFlavor FLAVOR = new BundleElementFlavor("attachment", "(unkown)");
+
+  /** Attachment flavor description */
+  String FLAVOR_DESCRIPTION = "Unspecified attachment";
 
 }

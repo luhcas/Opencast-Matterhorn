@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -24,21 +24,21 @@ package org.opencastproject.media.bundle;
  */
 public interface PdfDocument extends Attachment {
 
-	/** Element type definition */
-	BundleElementFlavor FLAVOR = new BundleElementFlavor("attachment", "pdf");
+  /** Element type definition */
+  BundleElementFlavor FLAVOR = new BundleElementFlavor("attachment", "pdf");
 
-	/**
-	 * Returns the document title.
-	 * 
-	 * @return the document title
-	 */
-	String getTitle();
-	
-	/**
-	 * Returns the name of the document author.
-	 * 
-	 * @return the author name
-	 */
-	String getAuthor();
-	
+  /**
+   * Returns the document title.
+   * 
+   * @return the document title
+   */
+  String getTitle();
+
+  /**
+   * Returns the name of the document author.
+   * 
+   * @return the author name
+   */
+  String getAuthor();
+
 }

@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -22,35 +22,38 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 /**
- * Takes {@link ch.ethz.replay.core.api.common.media.analysis.AudioStreamMetadata} in the Bundle context.
- *
+ * Takes
+ * {@link ch.ethz.replay.core.api.common.media.analysis.AudioStreamMetadata} in
+ * the Bundle context.
+ * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @author Christoph E. Driessen <ced@neopoly.de>
  * @version $Id$
  */
 public interface AudioSettings extends Cloneable {
 
-    /**
-     * Returns the audio metadata.
-     */
-    AudioStreamMetadata getMetadata();
+  /**
+   * Returns the audio metadata.
+   */
+  AudioStreamMetadata getMetadata();
 
-    /**
-     * Normally the system determines the technical metadata for a track. But there may
-     * be some situations where it comes handy to provide the metadata from the outside, e.g.
-     * when they are edited manually.
-     */
-    void setMetadata(AudioStreamMetadata metadata);
+  /**
+   * Normally the system determines the technical metadata for a track. But
+   * there may be some situations where it comes handy to provide the metadata
+   * from the outside, e.g. when they are edited manually.
+   */
+  void setMetadata(AudioStreamMetadata metadata);
 
-	/**
-	 * Returns the xml representation of this settings object as found in the
-	 * bundle manifest.
-	 * 
-	 * @param document the manifest dom
-	 * @return the serialized settings object
-	 */
-	Node toManifest(Document document);
+  /**
+   * Returns the xml representation of this settings object as found in the
+   * bundle manifest.
+   * 
+   * @param document
+   *          the manifest dom
+   * @return the serialized settings object
+   */
+  Node toManifest(Document document);
 
-	Object clone() throws CloneNotSupportedException;
+  Object clone() throws CloneNotSupportedException;
 
 }

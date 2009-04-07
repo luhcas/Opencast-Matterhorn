@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -27,53 +27,57 @@ import org.opencastproject.media.bundle.XmlElement;
  */
 public interface MultimediaContentType extends XmlElement {
 
-	/**
-	 * Multimedia content element type definitions.
-	 */
-	enum Type { Audio, Video, AudioVisual };
+  /**
+   * Multimedia content element type definitions.
+   */
+  enum Type {
+    Audio, Video, AudioVisual
+  };
 
-	/**
-	 * Returns the element identifier.
-	 * 
-	 * @return the identifier
-	 */
-	String getId();
+  /**
+   * Returns the element identifier.
+   * 
+   * @return the identifier
+   */
+  String getId();
 
-	/**
-	 * Returns the track's media location.
-	 * 
-	 * @return the media location
-	 */
-	MediaLocator getMediaLocator(); 
-	
-	/**
-	 * Sets the media locator for this multimedia content element.
-	 * 
-	 * @param locator the media locator
-	 */
-	void setMediaLocator(MediaLocator locator);
+  /**
+   * Returns the track's media location.
+   * 
+   * @return the media location
+   */
+  MediaLocator getMediaLocator();
 
-	/**
-	 * Returns the track's time constraints. Usually, the media time point will
-	 * be <code>T00:00:00</code>, while the duration will reflect the duration
-	 * of the whole video clip.
-	 * 
-	 * @return the track's time constraints
-	 */
-	MediaTime getMediaTime();
+  /**
+   * Sets the media locator for this multimedia content element.
+   * 
+   * @param locator
+   *          the media locator
+   */
+  void setMediaLocator(MediaLocator locator);
 
-	/**
-	 * Sets the media time constraints for this multimedia content element.
-	 * 
-	 * @param time the media time constraints
-	 */
-	void setMediaTime(MediaTime time);
-	
-	/**
-	 * Returns the temmporal decomposition (segments) of the content element.
-	 * 
-	 * @return the temporal decomposition
-	 */
-	TemporalDecomposition<? extends ContentSegment> getTemporalDecomposition();
+  /**
+   * Returns the track's time constraints. Usually, the media time point will be
+   * <code>T00:00:00</code>, while the duration will reflect the duration of the
+   * whole video clip.
+   * 
+   * @return the track's time constraints
+   */
+  MediaTime getMediaTime();
+
+  /**
+   * Sets the media time constraints for this multimedia content element.
+   * 
+   * @param time
+   *          the media time constraints
+   */
+  void setMediaTime(MediaTime time);
+
+  /**
+   * Returns the temmporal decomposition (segments) of the content element.
+   * 
+   * @return the temporal decomposition
+   */
+  TemporalDecomposition<? extends ContentSegment> getTemporalDecomposition();
 
 }

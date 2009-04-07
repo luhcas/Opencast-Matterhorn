@@ -28,11 +28,12 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>opencast-jcr-server</module>
+        <module>build-tools</module>
         <module>osgi</module>
-	<module>opencast-util</module>
-	<module>opencast-media</module>
-	<module>opencast-authentication-api</module>
+        <module>opencast-jcr-server</module>
+        <module>opencast-util</module>
+        <module>opencast-media</module>
+        <module>opencast-authentication-api</module>
         <module>opencast-rest-services</module>
         <module>opencast-encoder-api</module>
         <module>opencast-encoder-impl</module>
@@ -42,35 +43,6 @@
         <module>opencast-sample-service-impl</module>
         <module>opencast-remote-sample-service-client</module>
       </modules>
-      <build>
-        <plugins>
-         <plugin>
-            <groupId>com.google.code.maven-license-plugin</groupId>
-            <artifactId>maven-license-plugin</artifactId>
-            <version>1.4.0</version>
-            <configuration>
-              <basedir>${basedir}</basedir>
-              <header>docs/etc/header.txt</header>
-              <quiet>false</quiet>
-              <failIfMissing>true</failIfMissing>
-              <includes>
-                <include>**/src/**/*.java</include>
-              </includes>
-              <aggregate>true</aggregate>
-              <useDefaultExcludes>true</useDefaultExcludes>
-              <useDefaultMapping>true</useDefaultMapping>
-              <encoding>UTF-8</encoding>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>check</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
     </profile>
   </profiles>
 
@@ -131,6 +103,14 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <configLocation>checkstyle.xml</configLocation>
+          <headerLocation>header.txt</headerLocation>
+        </configuration>
       </plugin>
     </plugins>
   </reporting>
@@ -195,6 +175,26 @@
         <configuration>
           <useFile>false</useFile>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.opencastproject</groupId>
+            <artifactId>opencast-build-tools</artifactId>
+            <version>0.1-SNAPSHOT</version>
+			<scope>test</scope>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
     </plugins>

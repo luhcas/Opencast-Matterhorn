@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -18,52 +18,52 @@ package org.opencastproject.media.analysis.types;
 
 /**
  * Describes colorimetry.
- *
+ * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class Colorimetry {
 
-    private int luma;
-    private int cb;
-    private int cr;
+  private int luma;
+  private int cb;
+  private int cr;
 
-    public Colorimetry(int luma, int cb, int cr) {
-        this.luma = luma;
-        this.cb = cb;
-        this.cr = cr;
-    }
+  public Colorimetry(int luma, int cb, int cr) {
+    this.luma = luma;
+    this.cb = cb;
+    this.cr = cr;
+  }
 
-    public int getLuma() {
-        return luma;
-    }
+  public int getLuma() {
+    return luma;
+  }
 
-    public void setLuma(int luma) {
-        this.luma = luma;
-    }
+  public void setLuma(int luma) {
+    this.luma = luma;
+  }
 
-    public int getCb() {
-        return cb;
-    }
+  public int getCb() {
+    return cb;
+  }
 
-    public void setCb(int cb) {
-        this.cb = cb;
-    }
+  public void setCb(int cb) {
+    this.cb = cb;
+  }
 
-    public int getCr() {
-        return cr;
-    }
+  public int getCr() {
+    return cr;
+  }
 
-    public void setCr(int cr) {
-        this.cr = cr;
-    }
+  public void setCr(int cr) {
+    this.cr = cr;
+  }
 
-    public Colorimetry fromString(String c) {
-        // todo
-        throw new RuntimeException("Not yet implemented");
-    }
+  public Colorimetry fromString(String c) {
+    // todo
+    throw new RuntimeException("Not yet implemented");
+  }
 
-    @Override
-    public String toString() {
-        return luma + ":" + cb + ":" + cr;
-    }
+  @Override
+  public String toString() {
+    return luma + ":" + cb + ":" + cr;
+  }
 }

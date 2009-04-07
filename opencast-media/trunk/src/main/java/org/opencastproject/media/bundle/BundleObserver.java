@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -16,7 +16,6 @@
 
 package org.opencastproject.media.bundle;
 
-
 /**
  * Interface for classes that are observing a bundle.
  * 
@@ -25,25 +24,28 @@ package org.opencastproject.media.bundle;
  */
 public interface BundleObserver {
 
-	/**
-	 * This method is called if an element is added to the bundle.
-	 * 
-	 * @param element the added element
-	 */
-	void bundleElementAdded(BundleElement element);
+  /**
+   * This method is called if an element is added to the bundle.
+   * 
+   * @param element
+   *          the added element
+   */
+  void bundleElementAdded(BundleElement element);
 
-	/**
-	 * This method is called if an element is removed from a bundle.
-	 * 
-	 * @param element the removed element
-	 */
-	void bundleElementRemoved(BundleElement element);
+  /**
+   * This method is called if an element is removed from a bundle.
+   * 
+   * @param element
+   *          the removed element
+   */
+  void bundleElementRemoved(BundleElement element);
 
-	/**
-	 * This method is called if the bundle was moved to another location.
-	 * 
-	 * @param bundle the moved bundle
-	 */
-	void bundleMoved(Bundle bundle);
+  /**
+   * This method is called if the bundle was moved to another location.
+   * 
+   * @param bundle
+   *          the moved bundle
+   */
+  void bundleMoved(Bundle bundle);
 
 }

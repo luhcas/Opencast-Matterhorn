@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -38,14 +38,17 @@ public class OsgiActivator implements BundleActivator {
    * web resources at /samplejs.
    */
   public void start(BundleContext context) throws Exception {
-    // Look up the repository service.  This should be changed to use a service tracker
-    ServiceReference jcrServerRef = context.getServiceReference(OpencastJcrServer.class.getName());
-    OpencastJcrServer jcrServer = (OpencastJcrServer)context.getService(jcrServerRef);
-      
+    // Look up the repository service. This should be changed to use a service
+    // tracker
+    ServiceReference jcrServerRef = context
+        .getServiceReference(OpencastJcrServer.class.getName());
+    OpencastJcrServer jcrServer = (OpencastJcrServer) context
+        .getService(jcrServerRef);
+
     // Construct the sample service impl
     SampleServiceImpl sampleService = new SampleServiceImpl();
     sampleService.setJcrServer(jcrServer);
-    
+
     // Register the DOSGI sample service.
     sampleServiceRegistration = OpencastServiceRegistrationUtil.register(
         context, sampleService, SampleService.class, "/samplews");

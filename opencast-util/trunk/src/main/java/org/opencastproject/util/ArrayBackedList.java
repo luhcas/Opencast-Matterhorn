@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -19,33 +19,36 @@ package org.opencastproject.util;
 import java.util.AbstractList;
 
 /**
- * Wraps an array into a list for reading. Changes to the array are reflected by the list.
- * Write operations are not supported. This class allows arrays to be used in situations
- * where a list is requested.
- *
+ * Wraps an array into a list for reading. Changes to the array are reflected by
+ * the list. Write operations are not supported. This class allows arrays to be
+ * used in situations where a list is requested.
+ * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class ArrayBackedList<E> extends AbstractList<E> {
 
-    private E[] array;
+  private E[] array;
 
-    /**
-     * Creates a new wrapper.
-     *
-     * @param array may not be null
-     */
-    public ArrayBackedList(E[] array) {
-        if (array != null)
-            this.array = array;
-        else
-            this.array = (E[]) new Object[0];
-    }
+  /**
+   * Creates a new wrapper.
+   * 
+   * @param array
+   *          may not be null
+   */
+  public ArrayBackedList(E[] array) {
+    if (array != null)
+      this.array = array;
+    else
+      this.array = (E[]) new Object[0];
+  }
 
-    public E get(int index) {
-        return array[index];
-    }
+  @Override
+  public E get(int index) {
+    return array[index];
+  }
 
-    public int size() {
-        return array.length;
-    }
+  @Override
+  public int size() {
+    return array.length;
+  }
 }

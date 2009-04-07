@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -27,58 +27,61 @@ import java.util.TimeZone;
  */
 public class DateTimeSupport {
 
-	/**
-	 * This methods reads a utc date string and returns it's unix time
-	 * equivalent in milliseconds.
-	 * 
-	 * @param s the utc string
-	 * @return the date/time in milliseconds
-	 * @throws IllegalStateException
-	 * @throws ParseException
-	 * 		if the date string is malformed 
-	 */
-	public static long fromUTC(String s) throws IllegalStateException, ParseException {
-		if (s == null)
-			throw new IllegalArgumentException("UTC date string is null");
-		String[] parts = s.split("T");
-		if (parts.length != 2)
-			throw new IllegalArgumentException("UTC date string is malformed");
+  /**
+   * This methods reads a utc date string and returns it's unix time equivalent
+   * in milliseconds.
+   * 
+   * @param s
+   *          the utc string
+   * @return the date/time in milliseconds
+   * @throws IllegalStateException
+   * @throws ParseException
+   *           if the date string is malformed
+   */
+  public static long fromUTC(String s) throws IllegalStateException,
+      ParseException {
+    if (s == null)
+      throw new IllegalArgumentException("UTC date string is null");
+    String[] parts = s.split("T");
+    if (parts.length != 2)
+      throw new IllegalArgumentException("UTC date string is malformed");
 
-		long utc = 0;
+    long utc = 0;
 
-		// Parse date and time
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		df.setTimeZone(TimeZone.getTimeZone("UTC"));
-		utc = df.parse(parts[0]).getTime();
-		SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
-		tf.setTimeZone(TimeZone.getTimeZone("UTC"));
-		utc += tf.parse(parts[1]).getTime();
+    // Parse date and time
+    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+    df.setTimeZone(TimeZone.getTimeZone("UTC"));
+    utc = df.parse(parts[0]).getTime();
+    SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
+    tf.setTimeZone(TimeZone.getTimeZone("UTC"));
+    utc += tf.parse(parts[1]).getTime();
 
-		return utc;
-	}
-	
-	/**
-	 * Returns the date and time in milliseconds as a utc formatted string.
-	 * 
-	 * @param time the utc time string
-	 * @return the local time
-	 */
-	public static String toUTC(long time) {
-		StringBuffer utc = new StringBuffer();
-		Date d = new Date(time);
+    return utc;
+  }
 
-		// Format the date
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		df.setTimeZone(TimeZone.getTimeZone("UTC"));
-		utc.append(df.format(d));
-		utc.append("T");
-		
-		// Format the time
-		SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
-		tf.setTimeZone(TimeZone.getTimeZone("UTC"));
-		utc.append(tf.format(d));
+  /**
+   * Returns the date and time in milliseconds as a utc formatted string.
+   * 
+   * @param time
+   *          the utc time string
+   * @return the local time
+   */
+  public static String toUTC(long time) {
+    StringBuffer utc = new StringBuffer();
+    Date d = new Date(time);
 
-		return utc.toString();
-	}
-	
+    // Format the date
+    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+    df.setTimeZone(TimeZone.getTimeZone("UTC"));
+    utc.append(df.format(d));
+    utc.append("T");
+
+    // Format the time
+    SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
+    tf.setTimeZone(TimeZone.getTimeZone("UTC"));
+    utc.append(tf.format(d));
+
+    return utc.toString();
+  }
+
 }

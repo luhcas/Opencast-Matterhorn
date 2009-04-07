@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -15,24 +15,23 @@
  */
 package org.opencastproject.media.bundle;
 
-
 /**
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id$
  */
 public interface AudioTrack extends Track {
 
-	/** Element flavor definition */
-	BundleElementFlavor FLAVOR = new BundleElementFlavor("track", "audio");
+  /** Element flavor definition */
+  BundleElementFlavor FLAVOR = new BundleElementFlavor("track", "audio");
 
-	/** Audio track flavor description */
-	String FLAVOR_DESCRIPTION = "Audio track";
+  /** Audio track flavor description */
+  String FLAVOR_DESCRIPTION = "Audio track";
 
-	/**
-	 * Returns the track's audio settings.
-	 * 
-	 * @return the audio settings
-	 */
-	AudioSettings getAudioSettings();
+  /**
+   * Returns the track's audio settings.
+   * 
+   * @return the audio settings
+   */
+  AudioSettings getAudioSettings();
 
 }

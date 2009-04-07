@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -17,27 +17,28 @@
 package org.opencastproject.media.bundle;
 
 /**
- * Exception thrown by {@link XMLCatalog} in case of any namespace binding errors.
- *
+ * Exception thrown by {@link XMLCatalog} in case of any namespace binding
+ * errors.
+ * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class NamespaceBindingException extends RuntimeException {
 
-    /** Serial version uid */
-	private static final long serialVersionUID = 3520050243419468968L;
+  /** Serial version uid */
+  private static final long serialVersionUID = 3520050243419468968L;
 
-	public NamespaceBindingException() {
-    }
+  public NamespaceBindingException() {
+  }
 
-    public NamespaceBindingException(String message) {
-        super(message);
-    }
+  public NamespaceBindingException(String message) {
+    super(message);
+  }
 
-    public NamespaceBindingException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public NamespaceBindingException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-    public NamespaceBindingException(Throwable cause) {
-        super(cause);
-    }
+  public NamespaceBindingException(Throwable cause) {
+    super(cause);
+  }
 }

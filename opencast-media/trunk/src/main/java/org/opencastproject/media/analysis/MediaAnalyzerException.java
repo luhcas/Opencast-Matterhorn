@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -18,28 +18,28 @@ package org.opencastproject.media.analysis;
 
 /**
  * Exception thrown by the {@link MediaAnalyzer}.
- *
+ * 
  * @author Christoph E. Drießen <ced@neopoly.de>
  */
 public class MediaAnalyzerException extends RuntimeException {
 
-    /** Serial version uid */
-	private static final long serialVersionUID = 1336936343567817393L;
+  /** Serial version uid */
+  private static final long serialVersionUID = 1336936343567817393L;
 
-	public MediaAnalyzerException() {
-        super();
-    }
+  public MediaAnalyzerException() {
+    super();
+  }
 
-    public MediaAnalyzerException(String message) {
-        super(message);
-    }
+  public MediaAnalyzerException(String message) {
+    super(message);
+  }
 
-    public MediaAnalyzerException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public MediaAnalyzerException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-    public MediaAnalyzerException(Throwable cause) {
-        super(cause);
-    }
+  public MediaAnalyzerException(Throwable cause) {
+    super(cause);
+  }
 
 }

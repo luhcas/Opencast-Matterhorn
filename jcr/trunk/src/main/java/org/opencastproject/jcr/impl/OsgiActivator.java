@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -32,14 +32,16 @@ import java.io.InputStreamReader;
 
 import javax.jcr.Repository;
 
-public class OsgiActivator implements BundleActivator{
-  private static final Logger logger = LoggerFactory.getLogger(OsgiActivator.class);
-  protected ServiceRegistration serviceRegistration;
-  protected Repository repo;
+public class OsgiActivator implements BundleActivator {
+  private static final Logger logger = LoggerFactory
+      .getLogger(OsgiActivator.class);
+  private ServiceRegistration serviceRegistration;
+  private Repository repository;
+
   public void start(BundleContext context) throws Exception {
     // Open the configuration template from within this bundle
-    InputStream configTemplate = context.getBundle().getEntry("/cluster-repository-template.xml")
-      .openStream();
+    InputStream configTemplate = context.getBundle().getEntry(
+        "/cluster-repository-template.xml").openStream();
 
     // Get the configuration settings from the framework or system properties
     String nodeId = context.getProperty("matterhorn.jcr.nodeId");
@@ -51,8 +53,8 @@ public class OsgiActivator implements BundleActivator{
     String pm = context.getProperty("matterhorn.jcr.persistence.manager");
 
     // This is just a hack... better to use an xml parser
-    BufferedReader br = new BufferedReader(new InputStreamReader(
-        configTemplate));
+    BufferedReader br = new BufferedReader(
+        new InputStreamReader(configTemplate));
     StringBuilder sb = new StringBuilder();
     String line = null;
     while ((line = br.readLine()) != null) {
@@ -61,16 +63,12 @@ public class OsgiActivator implements BundleActivator{
     br.close();
     configTemplate.close();
     String templateString = sb.toString();
-    String configString = templateString
-      .replaceAll("PERSISTENCE_MGR", pm)
-      .replaceAll("NODE_ID", nodeId)
-      .replaceAll("DB_DRIVER", dbDriver)
-      .replaceAll("DB_USER", dbUser)
-      .replaceAll("DB_PASS", dbPass)
-      .replaceAll("DB_URL", dbUrl);
-    
-    InputStream config = new ByteArrayInputStream(configString
-        .getBytes("UTF8"));
+    String configString = templateString.replaceAll("PERSISTENCE_MGR", pm)
+        .replaceAll("NODE_ID", nodeId).replaceAll("DB_DRIVER", dbDriver)
+        .replaceAll("DB_USER", dbUser).replaceAll("DB_PASS", dbPass)
+        .replaceAll("DB_URL", dbUrl);
+
+    InputStream config = new ByteArrayInputStream(configString.getBytes("UTF8"));
 
     // Build the repository
     RepositoryConfig rc = RepositoryConfig.create(config, repoHome);
@@ -78,16 +76,16 @@ public class OsgiActivator implements BundleActivator{
     logger.info("Creating a new JCR instance with cluster id="
         + rc.getClusterConfig().getId());
 
-    repo = RepositoryImpl.create(rc);
+    repository = RepositoryImpl.create(rc);
 
-    serviceRegistration = context.registerService(OpencastJcrServer.class.getName(),
-        new OpencastJcrServerOsgiImpl(repo), null);
+    serviceRegistration = context.registerService(OpencastJcrServer.class
+        .getName(), new OpencastJcrServerOsgiImpl(repository), null);
   }
 
   public void stop(BundleContext context) throws Exception {
     serviceRegistration.unregister();
-    if(repo != null) {
-      ((JackrabbitRepository) repo).shutdown();
+    if (repository != null) {
+      ((JackrabbitRepository) repository).shutdown();
     }
   }
 }

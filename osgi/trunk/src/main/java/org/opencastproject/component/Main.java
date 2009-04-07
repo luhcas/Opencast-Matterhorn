@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -15,5 +15,10 @@
  */
 package org.opencastproject.component;
 
+/**
+ * This is a dummy java file for the opencast-bootstrap module. This module's
+ * purpose is to download runtime dependencies from maven repositories. It
+ * provides no code itself.
+ */
 public class Main {
 }

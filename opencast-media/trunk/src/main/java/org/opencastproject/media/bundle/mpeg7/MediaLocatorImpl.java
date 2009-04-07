@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -13,9 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-
 package org.opencastproject.media.bundle.mpeg7;
-
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -28,52 +26,55 @@ import java.net.URI;
  */
 public class MediaLocatorImpl implements MediaLocator {
 
-	/** The locator's media uri */
-	private URI mediaUri = null;
+  /** The locator's media uri */
+  private URI mediaUri = null;
 
-	/**
-	 * Creates a new and empty (read: invalid) media locator.
-	 */
-	public MediaLocatorImpl() { }
+  /**
+   * Creates a new and empty (read: invalid) media locator.
+   */
+  public MediaLocatorImpl() {
+  }
 
-	/**
-	 * Creates a new media locator with the specified uri.
-	 * 
-	 * @param mediaURI the media uri
-	 */
-	public MediaLocatorImpl(URI mediaURI) {
-		if (mediaURI == null)
-			throw new IllegalArgumentException("Argument mediaURI must not be null");
-		this.mediaUri = mediaURI;
-	}
-	
-	/**
-	 * @see org.opencastproject.media.bundle.mpeg7.MediaLocator#getMediaURI()
-	 */
-	public URI getMediaURI() {
-		return mediaUri;
-	}
+  /**
+   * Creates a new media locator with the specified uri.
+   * 
+   * @param mediaURI
+   *          the media uri
+   */
+  public MediaLocatorImpl(URI mediaURI) {
+    if (mediaURI == null)
+      throw new IllegalArgumentException("Argument mediaURI must not be null");
+    this.mediaUri = mediaURI;
+  }
 
-	/**
-	 * Sets the media uri.
-	 * 
-	 * @param mediaURI the uri
-	 */
-	public void setMediaURI(URI mediaURI) {
-		if (mediaURI == null)
-			throw new IllegalArgumentException("Argument mediaURI must not be null");
-		this.mediaUri = mediaURI;
-	}
+  /**
+   * @see org.opencastproject.media.bundle.mpeg7.MediaLocator#getMediaURI()
+   */
+  public URI getMediaURI() {
+    return mediaUri;
+  }
 
-	/**
-	 * @see org.opencastproject.media.bundle.XmlElement#toXml(org.w3c.dom.Document)
-	 */
-	public Node toXml(Document document) {
-		Element node = document.createElement("MediaLocator");
-		Element uriNode = document.createElement("MediaUri");
-		uriNode.setTextContent(mediaUri.toString());
-		node.appendChild(uriNode);
-		return node;
-	}
+  /**
+   * Sets the media uri.
+   * 
+   * @param mediaURI
+   *          the uri
+   */
+  public void setMediaURI(URI mediaURI) {
+    if (mediaURI == null)
+      throw new IllegalArgumentException("Argument mediaURI must not be null");
+    this.mediaUri = mediaURI;
+  }
+
+  /**
+   * @see org.opencastproject.media.bundle.XmlElement#toXml(org.w3c.dom.Document)
+   */
+  public Node toXml(Document document) {
+    Element node = document.createElement("MediaLocator");
+    Element uriNode = document.createElement("MediaUri");
+    uriNode.setTextContent(mediaUri.toString());
+    node.appendChild(uriNode);
+    return node;
+  }
 
 }

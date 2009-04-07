@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -19,7 +19,7 @@ package org.opencastproject.media.bundle.mpeg7;
 import org.opencastproject.media.bundle.XmlElement;
 
 /**
- * This interface defines the time constraints (start and duration) of a 
+ * This interface defines the time constraints (start and duration) of a
  * multimedia content element or segment.
  * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
@@ -27,19 +27,19 @@ import org.opencastproject.media.bundle.XmlElement;
  */
 public interface MediaTime extends XmlElement {
 
-	/**
-	 * Returns the media time point, i. e. the starting time of the vidoe
-	 * segement.
-	 * 
-	 * @return the media time point
-	 */
-	MediaTimePoint getMediaTimePoint();
-	
-	/**
-	 * Returns the media duration.
-	 * 
-	 * @return the media duration
-	 */
-	MediaDuration getMediaDuration();
-	
+  /**
+   * Returns the media time point, i. e. the starting time of the vidoe
+   * segement.
+   * 
+   * @return the media time point
+   */
+  MediaTimePoint getMediaTimePoint();
+
+  /**
+   * Returns the media duration.
+   * 
+   * @return the media duration
+   */
+  MediaDuration getMediaDuration();
+
 }

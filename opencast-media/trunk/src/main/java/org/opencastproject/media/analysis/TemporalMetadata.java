@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -20,71 +20,71 @@ import org.opencastproject.media.analysis.types.BitRateMode;
 
 /**
  * Common metadata for all kind of temporal media.
- *
+ * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public abstract class TemporalMetadata extends CommonMetadata {
 
-    // ms
-    protected Long duration;
+  // ms
+  protected Long duration;
 
-    protected BitRateMode bitRateMode;
-    // b/s
-    protected Float bitRate;
-    protected Float bitRateMinimum;
-    protected Float bitRateMaximum;
-    protected Float bitRateNominal;
+  protected BitRateMode bitRateMode;
+  // b/s
+  protected Float bitRate;
+  protected Float bitRateMinimum;
+  protected Float bitRateMaximum;
+  protected Float bitRateNominal;
 
-    public Long getDuration() {
-        return duration;
-    }
+  public Long getDuration() {
+    return duration;
+  }
 
-    public void setDuration(Long duration) {
-        this.duration = duration;
-    }
+  public void setDuration(Long duration) {
+    this.duration = duration;
+  }
 
-    public BitRateMode getBitRateMode() {
-        return bitRateMode;
-    }
+  public BitRateMode getBitRateMode() {
+    return bitRateMode;
+  }
 
-    public void setBitRateMode(BitRateMode bitRateMode) {
-        this.bitRateMode = bitRateMode;
-    }
+  public void setBitRateMode(BitRateMode bitRateMode) {
+    this.bitRateMode = bitRateMode;
+  }
 
-    /** Returns the bit rate in bits per second. */
-    public Float getBitRate() {
-        return bitRate;
-    }
+  /** Returns the bit rate in bits per second. */
+  public Float getBitRate() {
+    return bitRate;
+  }
 
-    public void setBitRate(Float bitRate) {
-        this.bitRate = bitRate;
-    }
+  public void setBitRate(Float bitRate) {
+    this.bitRate = bitRate;
+  }
 
-    /** Returns the maximum bit rate in bits per second. */
-    public Float getBitRateMinimum() {
-        return bitRateMinimum;
-    }
+  /** Returns the maximum bit rate in bits per second. */
+  public Float getBitRateMinimum() {
+    return bitRateMinimum;
+  }
 
-    public void setBitRateMinimum(Float bitRateMinimum) {
-        this.bitRateMinimum = bitRateMinimum;
-    }
+  public void setBitRateMinimum(Float bitRateMinimum) {
+    this.bitRateMinimum = bitRateMinimum;
+  }
 
-    public Float getBitRateMaximum() {
-        return bitRateMaximum;
-    }
+  public Float getBitRateMaximum() {
+    return bitRateMaximum;
+  }
 
-    public void setBitRateMaximum(Float bitRateMaximum) {
-        this.bitRateMaximum = bitRateMaximum;
-    }
+  public void setBitRateMaximum(Float bitRateMaximum) {
+    this.bitRateMaximum = bitRateMaximum;
+  }
 
-    /**
-     * Returns the nominal bit rate in bits per second.
-     */
-    public Float getBitRateNominal() {
-        return bitRateNominal;
-    }
+  /**
+   * Returns the nominal bit rate in bits per second.
+   */
+  public Float getBitRateNominal() {
+    return bitRateNominal;
+  }
 
-    public void setBitRateNominal(Float bitRateNominal) {
-        this.bitRateNominal = bitRateNominal;
-    }
+  public void setBitRateNominal(Float bitRateNominal) {
+    this.bitRateNominal = bitRateNominal;
+  }
 }

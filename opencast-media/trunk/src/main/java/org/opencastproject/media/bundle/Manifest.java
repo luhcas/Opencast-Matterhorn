@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -30,51 +30,52 @@ import java.io.File;
  */
 public interface Manifest {
 
-	/** The manifest file name */
-	String FILENAME="index.xml";
-	
-	/** Bundle element type */
-	BundleElement.Type TYPE = BundleElement.Type.Manifest;
+  /** The manifest file name */
+  String FILENAME = "index.xml";
 
-	/** The manifest element type */
-	BundleElementFlavor ELEMENT_TYPE = new BundleElementFlavor("metadata", "manifest");
+  /** Bundle element type */
+  BundleElement.Type TYPE = BundleElement.Type.Manifest;
 
-	/** The manifest element type */
-	MimeType MIME_TYPE = MimeTypes.XML;
+  /** The manifest element type */
+  BundleElementFlavor ELEMENT_TYPE = new BundleElementFlavor("metadata",
+      "manifest");
 
-	/**
-	 * Returns the bundle identifier as indicated in the manifest's head section.
-	 * 
-	 * @return the bundle identifier
-	 */
-	Handle getIdentifier();
-	
-	/**
-	 * Returns a list of files listed by this manifest as being bundle members.
-	 * 
-	 * @return the list of files
-	 */
-	BundleElement[] getEntries();
+  /** The manifest element type */
+  MimeType MIME_TYPE = MimeTypes.XML;
 
-	/**
-	 * Returns a reference to the element's file object.
-	 * 
-	 * @return the file reference
-	 */
-	File getFile();
-	
-	/**
-	 * Returns the bundle start time.
-	 * 
-	 * @return the start time
-	 */
-	long getStartDate();
+  /**
+   * Returns the bundle identifier as indicated in the manifest's head section.
+   * 
+   * @return the bundle identifier
+   */
+  Handle getIdentifier();
 
-	/**
-	 * Returns the bundle duration in milliseconds.
-	 * 
-	 * @return the duration
-	 */
-	long getDuration();
+  /**
+   * Returns a list of files listed by this manifest as being bundle members.
+   * 
+   * @return the list of files
+   */
+  BundleElement[] getEntries();
+
+  /**
+   * Returns a reference to the element's file object.
+   * 
+   * @return the file reference
+   */
+  File getFile();
+
+  /**
+   * Returns the bundle start time.
+   * 
+   * @return the start time
+   */
+  long getStartDate();
+
+  /**
+   * Returns the bundle duration in milliseconds.
+   * 
+   * @return the duration
+   */
+  long getDuration();
 
 }

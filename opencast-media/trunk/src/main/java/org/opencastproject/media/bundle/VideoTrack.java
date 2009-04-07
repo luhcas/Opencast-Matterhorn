@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -16,7 +16,6 @@
 
 package org.opencastproject.media.bundle;
 
-
 /**
  * Interface description for video tracks.
  * 
@@ -25,17 +24,17 @@ package org.opencastproject.media.bundle;
  */
 public interface VideoTrack extends Track {
 
-	/** Element flavor definition */
-	BundleElementFlavor FLAVOR = new BundleElementFlavor("track", "video");
+  /** Element flavor definition */
+  BundleElementFlavor FLAVOR = new BundleElementFlavor("track", "video");
 
-	/** Video track flavor description */
-	String FLAVOR_DESCRIPTION = "Video track";
+  /** Video track flavor description */
+  String FLAVOR_DESCRIPTION = "Video track";
 
-	/**
-	 * Returns the track's video settings.
-	 * 
-	 * @return the video settings
-	 */
-	VideoSettings getVideoSettings();
+  /**
+   * Returns the track's video settings.
+   * 
+   * @return the video settings
+   */
+  VideoSettings getVideoSettings();
 
 }

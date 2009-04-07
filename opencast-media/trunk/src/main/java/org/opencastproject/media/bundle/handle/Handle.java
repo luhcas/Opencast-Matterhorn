@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -27,40 +27,40 @@ import java.net.URL;
  */
 public interface Handle extends Serializable {
 
-	/** The handle protocol identifier */
-	String PROTOCOL = "hdl";
+  /** The handle protocol identifier */
+  String PROTOCOL = "hdl";
 
-	/** The handle prefix */
-	String PREFIX = "10.";
+  /** The handle prefix */
+  String PREFIX = "10.";
 
-	/**
-	 * Returns the naming authority (or prefix) for the handle.
-	 * 
-	 * @return the naming authority
-	 */
-	String getNamingAuthority();
+  /**
+   * Returns the naming authority (or prefix) for the handle.
+   * 
+   * @return the naming authority
+   */
+  String getNamingAuthority();
 
-	/**
-	 * Returs the handle local name.
-	 * 
-	 * @return the handle local name
-	 */
-	String getLocalName();
+  /**
+   * Returs the handle local name.
+   * 
+   * @return the handle local name
+   */
+  String getLocalName();
 
-	/**
-	 * Resolves this handle to the target url by using the configured handle
-	 * server. If the server cannot be reached, or resolving fails, a
-	 * {@link HandleException} is thrown. 
-	 * 
-	 * @return the handle target
-	 */
-	URL resolve() throws HandleException;
+  /**
+   * Resolves this handle to the target url by using the configured handle
+   * server. If the server cannot be reached, or resolving fails, a
+   * {@link HandleException} is thrown.
+   * 
+   * @return the handle target
+   */
+  URL resolve() throws HandleException;
 
-	/**
-	 * Updates the value of this handle to the new target url by using the
-	 * configured handle server. If the server cannot be reached, or updating
-	 * fails, a {@link HandleException} is thrown. 
-	 */
-	void update(URL value) throws HandleException;
-	
+  /**
+   * Updates the value of this handle to the new target url by using the
+   * configured handle server. If the server cannot be reached, or updating
+   * fails, a {@link HandleException} is thrown.
+   */
+  void update(URL value) throws HandleException;
+
 }

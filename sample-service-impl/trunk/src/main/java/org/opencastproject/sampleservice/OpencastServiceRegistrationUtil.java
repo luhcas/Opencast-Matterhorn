@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -38,7 +38,8 @@ public class OpencastServiceRegistrationUtil {
    *          The path to the service's endpoint
    * @return The {@link ServiceRegistration}
    */
-  public static ServiceRegistration register(BundleContext context, Object serviceImpl, Class<?> serviceInterface, String webServicePath) {
+  public static ServiceRegistration register(BundleContext context,
+      Object serviceImpl, Class<?> serviceInterface, String webServicePath) {
     Dictionary<String, String> props = new Hashtable<String, String>();
     props.put("osgi.remote.interfaces", "*");
     props.put("osgi.remote.requires.intents", "SOAP.1_2");

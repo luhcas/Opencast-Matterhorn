@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -19,17 +19,17 @@ package org.opencastproject.media.bundle;
 import org.opencastproject.media.bundle.mpeg7.Mpeg7;
 
 /**
- * The <code>MPEG7</code> catalog encapsulates MPEG-7 metadata. 
+ * The <code>MPEG7</code> catalog encapsulates MPEG-7 metadata.
  * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id$
  */
 public interface Mpeg7Catalog extends Catalog, Mpeg7 {
 
-	/** Element type definition */
-	BundleElementFlavor FLAVOR = new BundleElementFlavor("metadata", "mpeg-7");
+  /** Element type definition */
+  BundleElementFlavor FLAVOR = new BundleElementFlavor("metadata", "mpeg-7");
 
-	/** The MPEG-7 filename */
-	String FILENAME = "mpeg-7.xml";
+  /** The MPEG-7 filename */
+  String FILENAME = "mpeg-7.xml";
 
 }

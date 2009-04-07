@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -26,8 +26,6 @@ import org.opencastproject.media.bundle.BundleException;
 import org.opencastproject.media.bundle.Catalog;
 import org.opencastproject.media.bundle.DublinCoreCatalog;
 import org.opencastproject.media.bundle.PresenterTrack;
-import org.opencastproject.media.bundle.dublincore.DublinCoreTest;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Node;
@@ -41,92 +39,107 @@ import java.io.IOException;
  */
 public class BundleElementBuilderTest {
 
-	/** The bundle builder */
-	BundleElementBuilder bundleElementBuilder = null;
-	
-	/** The catalog name */
-	public static String catalogName ="/dublincore.xml";
-	
-	/** The test catalog */
-	private File catalogFile = null;
+  /** The bundle builder */
+  BundleElementBuilder bundleElementBuilder = null;
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-		bundleElementBuilder = BundleElementBuilderFactory.newInstance().newElementBuilder();
-	}
+  /** The catalog name */
+  public static String catalogName = "/dublincore.xml";
 
-	/**
-	 * Test method for {@link org.opencastproject.media.bundle.BundleElementBuilderImpl#elementFromFile(File file)}.
-	 */
-	@Test
-	public void testElementFromFile() {
-		catalogFile = new File(this.getClass().getResource(catalogName).getPath());
-		BundleElement element = null;
-		try {
-			element = bundleElementBuilder.elementFromFile(catalogFile);
-			assertEquals(element.getElementType(), Catalog.TYPE);
-			assertEquals(element.getFlavor(), DublinCoreCatalog.FLAVOR);
-		} catch (BundleException e) {
-			fail(e.getMessage());
-		}
-	}
+  /** The test catalog */
+  private File catalogFile = null;
 
-	/**
-	 * Test method for {@link org.opencastproject.media.bundle.BundleElementBuilderImpl#elementFromFile(File file, BundleElement.Type type, BundleElementFlavor flavor)}.
-	 */
-	@Test
-	public void testElementFromFileWithHints() {
-		catalogFile = new File(this.getClass().getResource(catalogName).getPath());
-		
-		// Test correct hints
-		try {
-			bundleElementBuilder.elementFromFile(catalogFile, BundleElement.Type.Catalog, DublinCoreCatalog.FLAVOR);
-			bundleElementBuilder.elementFromFile(catalogFile, BundleElement.Type.Catalog, null);
-			bundleElementBuilder.elementFromFile(catalogFile, null, DublinCoreCatalog.FLAVOR);
-			bundleElementBuilder.elementFromFile(catalogFile, null, null);
-		} catch (BundleException e) {
-			fail(e.getMessage());
-		}
+  /**
+   * @throws java.lang.Exception
+   */
+  @Before
+  public void setUp() throws Exception {
+    bundleElementBuilder = BundleElementBuilderFactory.newInstance()
+        .newElementBuilder();
+  }
 
-		// Test incorrect hints
-		try {
-			bundleElementBuilder.elementFromFile(catalogFile, BundleElement.Type.Track, DublinCoreCatalog.FLAVOR);
-			fail("Specified type was wrong but didn't matter");
-		} catch (BundleException e) {
-			// Expected
-		}
+  /**
+   * Test method for
+   * {@link org.opencastproject.media.bundle.BundleElementBuilderImpl#elementFromFile(File file)}
+   * .
+   */
+  @Test
+  public void testElementFromFile() {
+    catalogFile = new File(this.getClass().getResource(catalogName).getPath());
+    BundleElement element = null;
+    try {
+      element = bundleElementBuilder.elementFromFile(catalogFile);
+      assertEquals(element.getElementType(), Catalog.TYPE);
+      assertEquals(element.getFlavor(), DublinCoreCatalog.FLAVOR);
+    } catch (BundleException e) {
+      fail(e.getMessage());
+    }
+  }
 
-		// Test incorrect flavor
-		try {
-			bundleElementBuilder.elementFromFile(catalogFile, BundleElement.Type.Catalog, PresenterTrack.FLAVOR);
-			fail("Specified flavor was wrong but didn't matter");
-		} catch (BundleException e) {
-			// Expected
-		}
+  /**
+   * Test method for
+   * {@link org.opencastproject.media.bundle.BundleElementBuilderImpl#elementFromFile(File file, BundleElement.Type type, BundleElementFlavor flavor)}
+   * .
+   */
+  @Test
+  public void testElementFromFileWithHints() {
+    catalogFile = new File(this.getClass().getResource(catalogName).getPath());
 
-	}
+    // Test correct hints
+    try {
+      bundleElementBuilder.elementFromFile(catalogFile,
+          BundleElement.Type.Catalog, DublinCoreCatalog.FLAVOR);
+      bundleElementBuilder.elementFromFile(catalogFile,
+          BundleElement.Type.Catalog, null);
+      bundleElementBuilder.elementFromFile(catalogFile, null,
+          DublinCoreCatalog.FLAVOR);
+      bundleElementBuilder.elementFromFile(catalogFile, null, null);
+    } catch (BundleException e) {
+      fail(e.getMessage());
+    }
 
-	/**
-	 * Test method for {@link org.opencastproject.media.bundle.BundleElementBuilderImpl#elementFromManifest(Node elementNode, File bundleRoot, boolean verify)}.
-	 */
-	@Test
-	public void testElementFromManifest() {
-		System.out.println("Not yet implemented");
-	}
-	
-	/**
-	 * Test method for {@link org.opencastproject.media.bundle.BundleElementBuilderImpl#newElement(BundleElement.Type type, BundleElementFlavor flavor)}.
-	 */
-	@Test
-	public void testNewElement() {
-		try {
-			bundleElementBuilder.newElement(BundleElement.Type.Catalog, DublinCoreCatalog.FLAVOR);
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-	}
-	
+    // Test incorrect hints
+    try {
+      bundleElementBuilder.elementFromFile(catalogFile,
+          BundleElement.Type.Track, DublinCoreCatalog.FLAVOR);
+      fail("Specified type was wrong but didn't matter");
+    } catch (BundleException e) {
+      // Expected
+    }
+
+    // Test incorrect flavor
+    try {
+      bundleElementBuilder.elementFromFile(catalogFile,
+          BundleElement.Type.Catalog, PresenterTrack.FLAVOR);
+      fail("Specified flavor was wrong but didn't matter");
+    } catch (BundleException e) {
+      // Expected
+    }
+
+  }
+
+  /**
+   * Test method for
+   * {@link org.opencastproject.media.bundle.BundleElementBuilderImpl#elementFromManifest(Node elementNode, File bundleRoot, boolean verify)}
+   * .
+   */
+  @Test
+  public void testElementFromManifest() {
+    System.out.println("Not yet implemented");
+  }
+
+  /**
+   * Test method for
+   * {@link org.opencastproject.media.bundle.BundleElementBuilderImpl#newElement(BundleElement.Type type, BundleElementFlavor flavor)}
+   * .
+   */
+  @Test
+  public void testNewElement() {
+    try {
+      bundleElementBuilder.newElement(BundleElement.Type.Catalog,
+          DublinCoreCatalog.FLAVOR);
+    } catch (IOException e) {
+      fail(e.getMessage());
+    }
+  }
+
 }

@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -13,9 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-
 package org.opencastproject.media.bundle;
-
 
 /**
  * Interface description for presentation tracks. A presentation track mainly
@@ -26,16 +24,16 @@ package org.opencastproject.media.bundle;
  */
 public interface PresentationTrack extends VideoTrack, AudioTrack {
 
-	/** Bundle element type */
-	BundleElement.Type TYPE = BundleElement.Type.Track;
+  /** Bundle element type */
+  BundleElement.Type TYPE = BundleElement.Type.Track;
 
-	/** Element flavor definition */
-	BundleElementFlavor FLAVOR = new BundleElementFlavor("track", "presentation");
+  /** Element flavor definition */
+  BundleElementFlavor FLAVOR = new BundleElementFlavor("track", "presentation");
 
-	/** Presentation track flavor description */
-	String FLAVOR_DESCRIPTION = "Presentation track";
+  /** Presentation track flavor description */
+  String FLAVOR_DESCRIPTION = "Presentation track";
 
-	/** Prefix for presentation track filenames */
-	String FILENAME_PREFIX = "presentation";
+  /** Prefix for presentation track filenames */
+  String FILENAME_PREFIX = "presentation";
 
 }

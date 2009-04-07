@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -13,7 +13,6 @@
  *  permissions and limitations under the License.
  *
  */
-
 package org.opencastproject.media.bundle.mpeg7;
 
 import org.opencastproject.media.bundle.XmlElement;
@@ -26,11 +25,11 @@ import org.opencastproject.media.bundle.XmlElement;
  */
 public interface FreeTextAnnotation extends XmlElement {
 
-	/**
-	 * Returns the text of this free text annotation.
-	 * 
-	 * @return the annotation
-	 */
-	String getText();
-	
+  /**
+   * Returns the text of this free text annotation.
+   * 
+   * @return the annotation
+   */
+  String getText();
+
 }

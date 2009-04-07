@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -30,19 +30,20 @@ import javax.xml.transform.TransformerException;
  */
 public interface Catalog extends BundleElement, Serializable {
 
-	/** Bundle element type */
-	BundleElement.Type TYPE = BundleElement.Type.Catalog;
+  /** Bundle element type */
+  BundleElement.Type TYPE = BundleElement.Type.Catalog;
 
-    /**
-     * Saves the catalog to disk.
-     *
-	 * @throws ParserConfigurationException
-	 * 		if the xml parser environment is not correctly configured
-	 * @throws TransformerException
-	 * 		if serialization of the metadata document fails
-	 * @throws IOException
-	 * 		if an error with catalog file handling occurs
-     */
-    void save() throws ParserConfigurationException, TransformerException, IOException;
+  /**
+   * Saves the catalog to disk.
+   * 
+   * @throws ParserConfigurationException
+   *           if the xml parser environment is not correctly configured
+   * @throws TransformerException
+   *           if serialization of the metadata document fails
+   * @throws IOException
+   *           if an error with catalog file handling occurs
+   */
+  void save() throws ParserConfigurationException, TransformerException,
+      IOException;
 
 }

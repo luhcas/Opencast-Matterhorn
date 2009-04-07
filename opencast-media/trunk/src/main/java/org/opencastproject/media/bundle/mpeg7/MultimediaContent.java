@@ -3,7 +3,7 @@
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
- *  
+ *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
@@ -24,42 +24,46 @@ import java.util.Iterator;
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id$
  */
-public interface MultimediaContent<T extends MultimediaContentType> extends XmlElement {
+public interface MultimediaContent<T extends MultimediaContentType> extends
+    XmlElement {
 
-	/**
-	 * Multimedia content type definitions.
-	 */
-	enum Type { VideoType, AudioType, AudioVisualType };
+  /**
+   * Multimedia content type definitions.
+   */
+  enum Type {
+    VideoType, AudioType, AudioVisualType
+  };
 
-	/**
-	 * Returns the multimedia content type.
-	 * 
-	 * @return the type
-	 */
-	MultimediaContent.Type getType();
-	
-	/**
-	 * Returns the content elements that are enclosed in a multimedia content
-	 * container.
-	 * 
-	 * @return the multimedia content elements
-	 */
-	Iterator<T> elements();
-	
-	/**
-	 * Returns the content element with the given identifier or <code>null</code>
-	 * if element does not exist.
-	 * 
-	 * @param id the element identifier
-	 * @return the content element
-	 */
-	T getElementById(String id);
-	
-	/**
-	 * Returns the number of content elements.
-	 * 
-	 * @return the number of content elements
-	 */
-	int size();
-	
+  /**
+   * Returns the multimedia content type.
+   * 
+   * @return the type
+   */
+  MultimediaContent.Type getType();
+
+  /**
+   * Returns the content elements that are enclosed in a multimedia content
+   * container.
+   * 
+   * @return the multimedia content elements
+   */
+  Iterator<T> elements();
+
+  /**
+   * Returns the content element with the given identifier or <code>null</code>
+   * if element does not exist.
+   * 
+   * @param id
+   *          the element identifier
+   * @return the content element
+   */
+  T getElementById(String id);
+
+  /**
+   * Returns the number of content elements.
+   * 
+   * @return the number of content elements
+   */
+  int size();
+
 }
