@@ -19,9 +19,6 @@ import org.opencastproject.rest.OpencastRestService;
 import org.opencastproject.status.api.StatusMessage;
 import org.opencastproject.status.impl.StatusMessageImpl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
