@@ -1,7 +1,12 @@
 package org.opencastproject.rest;
 
+import org.jboss.resteasy.core.Dispatcher;
+import org.jboss.resteasy.core.SynchronousDispatcher;
+import org.jboss.resteasy.core.ThreadLocalResteasyProviderFactory;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
+import org.jboss.resteasy.spi.Registry;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -19,15 +24,35 @@ public class ResteasyServlet extends HttpServletDispatcher {
   private static final long serialVersionUID = 1L;
 
   public static final String SERVLET_PATH = "/rest";
-
+  public static final String SERVLET_URL_MAPPING = SERVLET_PATH + "/*";
+  
   ServletConfig servletConfig;
   ServletContext servletContext;
-  
+  Registry registry;
+  private ResteasyProviderFactory factory = new ResteasyProviderFactory();
+
   public void init(ServletConfig servletConfig) throws ServletException {
+    // Wrap the servlet config and context objects, since some http service impls (e.g. pax) don't
+    // handle these parts of the servlet spec correctly
     this.servletConfig = new ServletConfigWrapper(servletConfig);
     this.servletContext = this.servletConfig.getServletContext();
+
+    // Handle the bootstrapping that Resteasy normally handles in its context listener
+    bootstrap();
+    
     super.init(this.servletConfig);
-    RegisterBuiltin.register(this.providerFactory); // TODO Why do we need to do this twice?
+  }
+
+  private void bootstrap() {
+    ResteasyProviderFactory defaultInstance = ResteasyProviderFactory.getInstance();
+    ResteasyProviderFactory.setInstance(new ThreadLocalResteasyProviderFactory(defaultInstance));
+
+    servletContext.setAttribute(ResteasyProviderFactory.class.getName(), factory);
+    dispatcher = new SynchronousDispatcher(factory);
+    registry = dispatcher.getRegistry();
+    servletContext.setAttribute(Dispatcher.class.getName(), dispatcher);
+    servletContext.setAttribute(Registry.class.getName(), registry);
+    RegisterBuiltin.register(factory);
   }
   
   public ServletConfig getServletConfig() {
@@ -37,18 +62,28 @@ public class ResteasyServlet extends HttpServletDispatcher {
   public ServletContext getServletContext() {
     return servletContext;
   }
+  
+  public Registry getRegistry() {
+    return registry;
+  }
 }
 
 class ServletConfigWrapper implements ServletConfig {
   private ServletConfig delegate;
+  private ServletContext servletContext;
   public String getInitParameter(String arg0) {
     return delegate.getInitParameter(arg0);
   }
+  @SuppressWarnings("unchecked")
+  @Deprecated
   public Enumeration getInitParameterNames() {
     return delegate.getInitParameterNames();
   }
   public ServletContext getServletContext() {
-    return new ServletContextWrapper(delegate.getServletContext());
+    if(servletContext == null) {
+      servletContext = new ServletContextWrapper(delegate.getServletContext());
+    }
+    return servletContext;
   }
   public String getServletName() {
     return delegate.getServletName();
@@ -66,6 +101,7 @@ class ServletContextWrapper implements ServletContext {
   public Object getAttribute(String arg0) {
     return delegate.getAttribute(arg0);
   }
+  @SuppressWarnings("unchecked")
   public Enumeration getAttributeNames() {
     return delegate.getAttributeNames();
   }
@@ -82,6 +118,7 @@ class ServletContextWrapper implements ServletContext {
       return delegate.getInitParameter(key);
     }
   }
+  @SuppressWarnings("unchecked")
   public Enumeration getInitParameterNames() {
     return delegate.getInitParameterNames();
   }

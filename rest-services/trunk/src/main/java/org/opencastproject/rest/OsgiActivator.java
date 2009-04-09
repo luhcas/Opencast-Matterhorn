@@ -15,51 +15,64 @@
  */
 package org.opencastproject.rest;
 
-import org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap;
 import org.jboss.resteasy.spi.Registry;
-import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import javax.servlet.ServletException;
 
 public class OsgiActivator implements BundleActivator {
   protected Registry registry;
 
   public void start(BundleContext context) throws Exception {
-    // Create a servlet to handle /rest URLs
-    ResteasyServlet restServlet = new ResteasyServlet();
-    ResteasyBootstrap restServletContextListener = new ResteasyBootstrap();
+    // Register the rest servlet when the HTTP service becomes available
+    ServiceTracker httpTracker = new ServiceTracker(context,
+        HttpService.class.getName(), null) {
+      ResteasyServlet restServlet = new ResteasyServlet();
 
-    // FIXME: This is a hack -- it assumes the existence of a pax web
-    // container (and that it's present and active at the time this bundle starts)
-    WebContainer pax = (WebContainer) context.getService(context
-        .getServiceReference(WebContainer.class.getName()));
-    Dictionary<String, String> contextParams = new Hashtable<String, String>();
-    HttpContext httpContext = pax.createDefaultHttpContext();
-    contextParams.put("resteasy.scan", "false");
-    contextParams.put("resteasy.servlet.mapping.prefix", ResteasyServlet.SERVLET_PATH);
-    pax.setContextParam(contextParams, httpContext);
-    pax.registerEventListener(restServletContextListener, httpContext);
-    pax.registerServlet(restServlet, "RestEasy", new String[] { ResteasyServlet.SERVLET_PATH + "/*" },
-        new Hashtable<String, String>(), null);
-
-    // Add the existing JAX-RS resources
-    registry = (Registry) restServlet.getServletContext().getAttribute(
-        Registry.class.getName());
-    ServiceReference[] jaxRsRefs = context.getAllServiceReferences(OpencastRestService.class.getName(), null);
-    if (jaxRsRefs != null) {
-      for (ServiceReference jaxRsRef : jaxRsRefs) {
-        registry.addSingletonResource(context.getService(jaxRsRef));
+      @Override
+      public Object addingService(ServiceReference reference) {
+        HttpService httpService = (HttpService)context.getService(reference);
+        try {
+          httpService.registerServlet(ResteasyServlet.SERVLET_URL_MAPPING, restServlet, null, null);
+        } catch (ServletException e) {
+          e.printStackTrace();
+        } catch (NamespaceException e) {
+          e.printStackTrace();
+        }
+        // The registry is available only after servlet registration
+        registry = restServlet.getRegistry();
+        // Add the existing JAX-RS resources
+        ServiceReference[] jaxRsRefs = null;
+        try {
+          jaxRsRefs = context.getAllServiceReferences(OpencastRestService.class.getName(), null);
+        } catch (InvalidSyntaxException e) {
+          e.printStackTrace();
+        }
+        if (jaxRsRefs != null) {
+          for (ServiceReference jaxRsRef : jaxRsRefs) {
+            registry.addSingletonResource(context.getService(jaxRsRef));
+          }
+        }
+        return super.addingService(reference);
       }
-    }
+
+      @Override
+      public void removedService(ServiceReference reference, Object service) {
+        HttpService httpService = (HttpService)service;
+        httpService.unregister(ResteasyServlet.SERVLET_URL_MAPPING);
+        super.removedService(reference, service);
+      }
+    };
+    httpTracker.open();
 
     // Track JAX-RS Resources that are added and removed
-    ServiceTracker tracker = new ServiceTracker(context,
+    ServiceTracker jaxRsResourceTracker = new ServiceTracker(context,
         OpencastRestService.class.getName(), null) {
       @Override
       public Object addingService(ServiceReference reference) {
@@ -74,7 +87,7 @@ public class OsgiActivator implements BundleActivator {
         super.removedService(reference, service);
       }
     };
-    tracker.open();
+    jaxRsResourceTracker.open();
   }
 
   public void stop(BundleContext arg0) throws Exception {

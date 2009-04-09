@@ -17,6 +17,7 @@ package org.opencastproject.status.impl;
 
 import org.opencastproject.status.api.StatusMessage;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -24,7 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * 
  * @see StatusMessage
  */
-@XmlRootElement
+@XmlRootElement(namespace="ns.opencastproject.org", name="status-message")
 public class StatusMessageImpl implements StatusMessage {
   private String message;
   private String reference;
@@ -40,18 +41,21 @@ public class StatusMessageImpl implements StatusMessage {
     this.source = source;
   }
 
+  @XmlElement(required=true, nillable=false)
   public String getMessage() {
     return message;
   }
   public void setMessage(String message) {
     this.message = message;
   }
+  @XmlElement(required=true, nillable=false)
   public String getReference() {
     return reference;
   }
   public void setReference(String reference) {
     this.reference = reference;
   }
+  @XmlElement(required=true, nillable=false)
   public String getSource() {
     return source;
   }

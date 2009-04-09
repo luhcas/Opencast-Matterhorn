@@ -20,7 +20,7 @@ import javax.jws.WebService;
 /**
  * A sample service to use as a template when building your own Matterhorn services.
  */
-@WebService(serviceName="SampleService")
+@WebService()
 public interface SampleService {
   public String getSomething(String path);
 
