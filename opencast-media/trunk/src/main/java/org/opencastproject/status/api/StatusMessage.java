@@ -18,11 +18,13 @@ package org.opencastproject.status.api;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * TODO Does this really belong in the media osgi bundle?
  *
  */
+@XmlRootElement
 @XmlAccessorType(XmlAccessType.PUBLIC_MEMBER)
 public interface StatusMessage {
   /**

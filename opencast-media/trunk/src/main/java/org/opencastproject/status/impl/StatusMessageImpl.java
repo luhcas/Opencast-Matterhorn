@@ -17,11 +17,14 @@ package org.opencastproject.status.impl;
 
 import org.opencastproject.status.api.StatusMessage;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * TODO Does this really belong in the media osgi bundle?
  * 
  * @see StatusMessage
  */
+@XmlRootElement
 public class StatusMessageImpl implements StatusMessage {
   private String message;
   private String reference;

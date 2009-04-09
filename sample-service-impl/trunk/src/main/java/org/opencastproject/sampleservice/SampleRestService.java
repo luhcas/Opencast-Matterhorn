@@ -16,12 +16,15 @@
 package org.opencastproject.sampleservice;
 
 import org.opencastproject.rest.OpencastRestService;
+import org.opencastproject.status.api.StatusMessage;
+import org.opencastproject.status.impl.StatusMessageImpl;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @Path("/samplerest")
 public class SampleRestService implements OpencastRestService {
@@ -29,5 +32,12 @@ public class SampleRestService implements OpencastRestService {
   @Produces(MediaType.TEXT_HTML)
   public String getSomething(@QueryParam("path") String path) {
     return "sample";
+  }
+  
+  @GET
+  @Path("/xml")
+  @Produces(MediaType.APPLICATION_XML)
+  public StatusMessage getStatusMessage() {
+    return new StatusMessageImpl("a message", "a reference", SampleRestService.class.getName());
   }
 }
