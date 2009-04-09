@@ -19,21 +19,30 @@ import org.opencastproject.rest.OpencastRestService;
 import org.opencastproject.status.api.StatusMessage;
 import org.opencastproject.status.impl.StatusMessageImpl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@Path("/samplerest")
+@Path("/sample")
 public class SampleRestService implements OpencastRestService {
   @GET
+  @Path("/html")
   @Produces(MediaType.TEXT_HTML)
-  public String getSomething(@QueryParam("path") String path) {
-    return "sample";
+  public String getHtml() {
+    return "<h1>sample</h1>";
   }
   
+  @GET
+  @Path("/json")
+  @Produces(MediaType.APPLICATION_JSON)
+  public StatusMessage getJson() {
+    return new StatusMessageImpl("a message", "a reference", SampleRestService.class.getName());
+  }
+
   @GET
   @Path("/xml")
   @Produces(MediaType.APPLICATION_XML)

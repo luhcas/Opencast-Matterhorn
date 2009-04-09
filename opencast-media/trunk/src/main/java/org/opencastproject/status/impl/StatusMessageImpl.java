@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * 
  * @see StatusMessage
  */
-@XmlRootElement(namespace="ns.opencastproject.org", name="status-message")
+@XmlRootElement(name="status-message")
 public class StatusMessageImpl implements StatusMessage {
   private String message;
   private String reference;
