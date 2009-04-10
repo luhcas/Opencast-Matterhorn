@@ -33,7 +33,7 @@ public class SampleServiceImpl implements SampleService {
 
   protected Repository repo;
 
-  public void setJcrServer(OpencastJcrServer jcrServer) {
+  public SampleServiceImpl(OpencastJcrServer jcrServer) {
     this.repo = jcrServer.getRepository();
   }
 

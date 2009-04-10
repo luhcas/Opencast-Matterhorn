@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-remote-sample-service-client</artifactId>
+  <artifactId>opencast-ingest-util</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-remote-sample-service-client</name>
+  <name>opencast-ingest-util</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -12,9 +12,8 @@
   </parent>
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -32,37 +31,34 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.ops4j.pax.web-extender</groupId>
+      <artifactId>pax-web-ex-whiteboard</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-jcr-server</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-sample-service-api</artifactId>
+      <artifactId>opencast-media</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.geronimo.specs</groupId>
-      <artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.jaxws-api-2.1</artifactId>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-rest-services</artifactId>
+      <version>0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <includes>
-          <include>**/*</include>
-        </includes>
-      </resource>
-    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -70,16 +66,9 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator> org.opencastproject.sampleserviceclient.OsgiActivator </Bundle-Activator>
-            <Import-Package> org.osgi.service.component, META-INF.cxf, org.apache.cxf,
-              org.apache.cxf.wsdl, org.opencastproject.sampleservice.api, *
-            </Import-Package>
-            <Private-Package>org.opencastproject.sampleserviceclient</Private-Package>
-            <!--
-              FIXME: This is a hack to fix cxf not showing up in the import-package instructions
-            -->
-            <Require-Bundle>org.apache.cxf.cxf-bundle</Require-Bundle>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Private-Package>org.opencastproject.ingest</Private-Package>
+            <Bundle-Activator> org.opencastproject.ingest.OsgiActivator </Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>

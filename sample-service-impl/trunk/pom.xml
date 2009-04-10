@@ -20,17 +20,10 @@
       <groupId>javax.jcr</groupId>
       <artifactId>jcr</artifactId>
     </dependency>
-<!--
-    <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.jsr311-api-1.0</artifactId>
-    </dependency>
--->
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>jaxrs-api</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-jcr-server</artifactId>

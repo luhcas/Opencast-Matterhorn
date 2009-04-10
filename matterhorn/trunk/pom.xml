@@ -37,6 +37,7 @@
         <module>opencast-rest-services</module>
         <module>opencast-encoder-api</module>
         <module>opencast-encoder-impl</module>
+	<module>opencast-ingest-util</module>
         <module>opencast-workflow-api</module>
         <module>opencast-workflow-impl</module>
         <module>opencast-sample-service-api</module>
@@ -297,12 +298,19 @@
                 <scope>provided</scope>
             </dependency>
 
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.framework</artifactId>
-                <version>1.0.4</version>
-                <scope>provided</scope>
-            </dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.osgi.compendium</artifactId>
+                <version>1.2.0</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.osgi.foundation</artifactId>
+                <version>1.2.0</version>
+				<scope>provided</scope>
+			</dependency>
 
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -574,6 +582,18 @@
 			<artifactId>commons-lang</artifactId>
 			<version>2.4</version>
 		</dependency>
+
+                 <dependency>
+                         <groupId>commons-fileupload</groupId>
+                         <artifactId>commons-fileupload</artifactId>
+                         <version>1.2.1</version>
+                 </dependency>
+
+                 <dependency>
+                         <groupId>commons-io</groupId>
+                         <artifactId>commons-io</artifactId>
+                         <version>1.4</version>
+                 </dependency>
 
                 <dependency>
                         <groupId>joda-time</groupId>

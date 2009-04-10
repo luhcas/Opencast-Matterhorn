@@ -53,6 +53,8 @@ public class ResteasyServlet extends HttpServletDispatcher {
     servletContext.setAttribute(Dispatcher.class.getName(), dispatcher);
     servletContext.setAttribute(Registry.class.getName(), registry);
     RegisterBuiltin.register(factory);
+    // Can't seem to get the resteasy input stream provider to work
+    factory.addMessageBodyWriter(new InputStreamProvider());
   }
   
   public ServletConfig getServletConfig() {
@@ -80,9 +82,6 @@ class ServletConfigWrapper implements ServletConfig {
     return delegate.getInitParameterNames();
   }
   public ServletContext getServletContext() {
-    if(servletContext == null) {
-      servletContext = new ServletContextWrapper(delegate.getServletContext());
-    }
     return servletContext;
   }
   public String getServletName() {
@@ -90,6 +89,7 @@ class ServletConfigWrapper implements ServletConfig {
   }
   ServletConfigWrapper(ServletConfig delegate) {
     this.delegate = delegate;
+    servletContext = new ServletContextWrapper(delegate.getServletContext());
   }
 }
 
