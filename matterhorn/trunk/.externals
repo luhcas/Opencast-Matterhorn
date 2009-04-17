@@ -1,10 +1,10 @@
 build-tools	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/build-tools/trunk
 osgi	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/osgi/trunk
 docs	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/docs
-opencast-jcr-server	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/jcr/trunk
-opencast-rest-services	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/rest-services/trunk
-opencast-sample-service-api	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/sample-service-api/trunk
-opencast-sample-service-impl	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/sample-service-impl/trunk
+opencast-repository	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-repository/trunk
+opencast-rest-services	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-rest-services/trunk
+opencast-sample-service-api	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-sample-service-api/trunk
+opencast-sample-service-impl	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-sample-service-impl/trunk
 opencast-encoder-api	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-encoder-api/trunk
 opencast-encoder-impl	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-encoder-impl/trunk
 opencast-workflow-api	https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/opencast-workflow-api/trunk
