@@ -44,7 +44,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-jcr-server</artifactId>
+      <artifactId>opencast-repository</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
