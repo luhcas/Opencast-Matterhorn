@@ -17,8 +17,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>javax.jcr</groupId>
-      <artifactId>jcr</artifactId>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
@@ -93,7 +93,7 @@
             <Bundle-Activator> org.opencastproject.sampleservice.OsgiActivator </Bundle-Activator>
             <Import-Package> org.osgi.service.component, META-INF.cxf, org.apache.cxf,
               org.apache.cxf.wsdl, org.opencastproject.sampleservice.api, org.opencastproject.rest,
-              org.opencastproject.api, javax.jcr, * </Import-Package>
+              org.opencastproject.repository.api, javax.jcr, * </Import-Package>
             <Private-Package>org.opencastproject.sampleservice</Private-Package>
             <!--
               FIXME: This is a hack to fix cxf not showing up in the import-package instructions

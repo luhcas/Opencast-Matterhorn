@@ -77,7 +77,7 @@
     </Journal>
   </Cluster>
   <DataStore class="org.apache.jackrabbit.core.data.FileDataStore">
-    <param name="path" value="${rep.home}/repository/datastore" />
+    <param name="path" value="DATA_STORE_PATH" />
     <param name="minRecordLength" value="100" />
   </DataStore>
 </Repository>

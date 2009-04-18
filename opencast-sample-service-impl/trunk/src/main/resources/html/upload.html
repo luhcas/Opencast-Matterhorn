@@ -1,0 +1,23 @@
+<html>
+<head>
+<script src="/samplejs/jquery-1.3.1.min.js"></script>
+<script>
+  function updateFormAction(path) {
+	  jQuery('#upload_form').attr('action', '/rest/repository/data' + path);
+  }
+</script>
+</head>
+<body>
+<form id="upload_form" method="post" enctype="multipart/form-data">
+  <div>
+    Path:<input type="text" onchange="updateFormAction(this.value)"/>
+  </div>
+  <div>
+    <input type="file" name="file" />
+  </div>
+  <div>
+    <input type="submit" value="Upload to the repository" />
+  </div>
+</form>
+</body>
+</html>

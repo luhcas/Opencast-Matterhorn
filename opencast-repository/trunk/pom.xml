@@ -12,6 +12,16 @@
     <version>0.1-SNAPSHOT</version>
   </parent>
   <dependencies>
+  	<dependency>
+  	  <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-authentication-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+  	</dependency>
+  	<dependency>
+  	  <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-rest-services</artifactId>
+      <version>0.1-SNAPSHOT</version>
+  	</dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -37,6 +47,10 @@
     </dependency>
 
     <!-- Runtime Dependencies -->
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+    </dependency>
     <dependency>
       <groupId>javax.jcr</groupId>
       <artifactId>jcr</artifactId>
@@ -169,10 +183,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package> org.opencastproject.api,org.opencastproject.jcr.impl </Export-Package>
+            <Export-Package> org.opencastproject.repository.api,org.opencastproject.repository.impl </Export-Package>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator> org.opencastproject.jcr.impl.OsgiActivator </Bundle-Activator>
-            <Export-Service> org.opencastproject.api.OpencastJcrServer </Export-Service>
+            <Bundle-Activator> org.opencastproject.repository.impl.OsgiActivator </Bundle-Activator>
+            <Export-Service> org.opencastproject.repository.api.OpencastRepository </Export-Service>
             <Embed-Dependency> jackrabbit-core,jackrabbit-spi-commons,jackrabbit-spi,
               jackrabbit-text-extractors,lucene-core,concurrent,poi, postgresql, derby,
               xercesImpl,tm-extractors,pdfbox,nekohtml, mysql-connector-java </Embed-Dependency>

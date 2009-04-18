@@ -37,7 +37,6 @@
         <module>opencast-rest-services</module>
         <module>opencast-encoder-api</module>
         <module>opencast-encoder-impl</module>
-	<module>opencast-ingest-util</module>
         <module>opencast-workflow-api</module>
         <module>opencast-workflow-impl</module>
         <module>opencast-sample-service-api</module>
@@ -133,8 +132,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>1.0-alpha-3</version>
+        <version>1.0-beta-1</version>
         <executions>
+          <!--
           <execution>
             <id>enforce-java</id>
             <goals>
@@ -152,6 +152,7 @@
               </rules>
             </configuration>
           </execution>
+          -->
         </executions>
       </plugin>
 
@@ -190,11 +191,13 @@
           </dependency>
         </dependencies>
         <executions>
+        <!--
           <execution>
             <goals>
               <goal>check</goal>
             </goals>
           </execution>
+        -->
         </executions>
       </plugin>
 
