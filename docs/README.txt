@@ -7,6 +7,13 @@ To install and run this software:
 
 export MAVEN_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m"
 
-3) Copy docs/felix_config.properties to <felix_root>/conf/config.properties and edit the matterhorn.* properties at the bottom of the file.
+3) Copy docs/felix_config.properties to <felix_root>/conf/config.properties and edit the matterhorn.* properties at the bottom of the file to match your environment.
 4) Start felix with cd <felix_root>; java -DM2_REPO=~/.m2/repository/ -jar bin/felix.jar
 5) Visit http://localhost:8080/samplews?wsdl to see the sample web service endpoint.  TODO: expose a URL describing all of the service endpoints, static resource aliases, etc.
+
+Other URLs of interest:
+
+Sample HTML form to upload binary data to the repository: http://localhost:8080/samplehtml/upload.html (warning: this returns HTTP 200, so "nothing happens" in the browser)
+Get binary data from the repository: http://localhost:8080/rest/repository/data/[path] (warning: this returns a file with no filename or mime type)
+(TODO) Get metadata from the repository: GET http://localhost:8080/rest/repository/metadata/[key]/[path]
+(TODO) Put metadata into the repository: POST or PUT http://localhost:8080/rest/repository/metadata/[key]/[path]
