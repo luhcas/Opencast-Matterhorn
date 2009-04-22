@@ -15,9 +15,6 @@
  */
 package org.opencastproject.repository.api;
 
-import java.io.Serializable;
-import java.util.Calendar;
-
 /**
  * Provides access to the Opencast Repository
  */

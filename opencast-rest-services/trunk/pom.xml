@@ -98,7 +98,7 @@
               javassist.bytecode.*, * </Import-Package>
             <Embed-Dependency> resteasy-jaxrs, resteasy-jaxb-provider, json-lib, ezmorph,
               scannotation, javassist, jaxrs-api </Embed-Dependency>
-            <Export-Package> org.opencastproject.rest, javax.ws.rs.* </Export-Package>
+            <Export-Package> org.opencastproject.rest, javax.ws.rs.*; version=1.0.0 </Export-Package>
             <Bundle-Activator> org.opencastproject.rest.OsgiActivator </Bundle-Activator>
           </instructions>
         </configuration>

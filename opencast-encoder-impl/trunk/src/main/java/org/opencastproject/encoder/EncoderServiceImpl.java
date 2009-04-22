@@ -21,9 +21,17 @@ import org.opencastproject.status.impl.StatusMessageImpl;
 
 import java.util.UUID;
 
-public class EncoderServiceImpl implements EncoderService {
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
+import javax.jws.WebService;
 
-  public StatusMessage encode(String pathIn, String pathOut, String statusServiceEndpoint) {
+@WebService
+public class EncoderServiceImpl implements EncoderService {
+  @WebMethod
+  public StatusMessage encode(
+      @WebParam(name="pathIn") String pathIn,
+      @WebParam(name="pathOut") String pathOut,
+      @WebParam(name="statusServiceEndpoint") String statusServiceEndpoint) {
     // TODO actually start or queue (and change the message parameter) the encoding job
     return new StatusMessageImpl("encoding job started", UUID.randomUUID().toString(),
         EncoderService.class.getName());
