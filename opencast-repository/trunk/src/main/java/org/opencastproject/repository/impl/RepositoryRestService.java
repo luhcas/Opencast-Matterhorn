@@ -21,6 +21,8 @@ import org.opencastproject.rest.OpencastRestService;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +40,7 @@ import javax.ws.rs.core.MediaType;
 
 @Path("/repository")
 public class RepositoryRestService implements OpencastRestService {
+  private static final Logger logger = LoggerFactory.getLogger(RepositoryRestService.class);
   protected OpencastRepository repo;
   public RepositoryRestService(OpencastRepository repo) {
     this.repo = repo;
@@ -107,6 +110,7 @@ public class RepositoryRestService implements OpencastRestService {
       throw new RuntimeException("unable to connect to media repository");
     }
     try {
+      logger.debug("Putting object into path /" + path);
       repo.putObject(fileItemStream.openStream(), "/" + path);
     } catch (IOException e) {
       throw new RuntimeException(e);

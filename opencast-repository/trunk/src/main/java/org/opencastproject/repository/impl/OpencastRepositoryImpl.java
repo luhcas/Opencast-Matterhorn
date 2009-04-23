@@ -18,6 +18,7 @@ package org.opencastproject.repository.impl;
 import org.opencastproject.authentication.api.AuthenticationService;
 import org.opencastproject.repository.api.OpencastRepository;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,6 @@ public class OpencastRepositoryImpl implements OpencastRepository {
   @SuppressWarnings("unchecked")
   public <T> T getObject(Class<T> type, String path) {
     assertSupported(type);
-    path = path.replaceFirst("/", "");
     logger.debug("getting data from " + path);
     Session session = getSession();
     if (session == null) {
@@ -58,7 +58,7 @@ public class OpencastRepositoryImpl implements OpencastRepository {
     } else {
       Node node = null;
       try {
-        node = session.getRootNode().getNode(path + "/jcr:content");
+        node = (Node)session.getItem(path + "/jcr:content");
         return (T) node.getProperty("jcr:data").getStream();
       } catch (PathNotFoundException e) {
         throw new RuntimeException(e);
@@ -140,11 +140,14 @@ public class OpencastRepositoryImpl implements OpencastRepository {
       } else {
         fileNode = buildPath(session, path);
       }
+      logger.debug("fileNode path=" + fileNode.getPath());
       Node resNode;
       try {
         resNode = (Node) fileNode.getPrimaryItem();
+        logger.debug("resNode exists: " + resNode.getPath());
       } catch(ItemNotFoundException e) {
         resNode = fileNode.addNode("jcr:content", "nt:resource");
+        logger.debug("resNode Created: " + resNode.getPath());
         resNode.addMixin("mix:referenceable");
         resNode.setProperty("jcr:mimeType", "application/octet-stream");
         resNode.setProperty("jcr:encoding", "");
@@ -165,22 +168,23 @@ public class OpencastRepositoryImpl implements OpencastRepository {
    */
   protected Node buildPath(Session session, String path) throws Exception {
     logger.debug("Building nodes for " + path);
-    StringBuilder partialPath = new StringBuilder("/");
+    StringBuilder partialPath = new StringBuilder();
     Node currentNode = session.getRootNode();
     String[] sa = path.split("/");
     for(int i=0; i<sa.length; i++) {
       String pathElement = sa[i];
+      if(StringUtils.isEmpty(pathElement)) continue; // skip any empty path segments
+      partialPath.append("/");
       partialPath.append(pathElement);
-      if( ! session.itemExists(partialPath.toString())) {
+      logger.debug("checking for node " + pathElement + " at path " + partialPath);
+      if(session.itemExists(partialPath.toString())) {
+        currentNode = currentNode.getNode(pathElement);
+      } else {
         logger.debug("Adding node " + pathElement);
-        if(i == sa.length-1) {
-          return currentNode.addNode(pathElement, "nt:unstructured");
-        } else {
-          currentNode = currentNode.addNode(pathElement, "nt:unstructured");
-        }
+        currentNode = currentNode.addNode(pathElement, "nt:unstructured");
       }
     }
-    throw new RuntimeException("josh is a dork");
+    return currentNode;
   }
   protected InputStream convertToStream(Object object) {
     // TODO Handle Media Bundles and anything else this should support
