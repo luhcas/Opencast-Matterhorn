@@ -41,11 +41,15 @@ public class StaticServlet extends HttpServlet {
     }
     String fsPath = fsRoot + "/" + relativePath;
     File f = new File(fsPath);
+    FileInputStream in = null;
     if(f.exists() && f.canRead()) {
       try {
-        IOUtils.copy(new FileInputStream(f), response.getOutputStream());
+        in = new FileInputStream(f);
+        IOUtils.copy(in, response.getOutputStream());
       } catch (Exception e) {
         throw new RuntimeException(e);
+      } finally {
+        IOUtils.closeQuietly(in);
       }
     }
   }
