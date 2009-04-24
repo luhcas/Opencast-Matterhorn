@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
@@ -57,26 +59,40 @@ public class RepositoryRestService implements OpencastRestService {
   }
 
   /**
-   * TODO Returns the metadata from a path in the repository.  Should we specify the return format?
+   * Returns the metadata from a path in the repository.  Should we specify the return format?
    */
   @GET
   @Path("/metadata/{key}/{path:.*}")
   @Produces(MediaType.TEXT_PLAIN)
   public String getMetadata(@PathParam("key") String key, @PathParam("path") String path) {
-    return null;
+    path = "/" + path;
+    logger.debug("looking for metadata at key=" + key + ", path=" + path);
+    Set<Entry<String, String>> entries = repo.getMetadata(path).entrySet();
+    logger.debug("found " + entries.size() + " metadata entries");
+    for(Entry<String, String> entry : entries) {
+      if(key.equals(entry.getKey())) {
+        logger.debug("found " + entry.getValue());
+        return entry.getValue();
+      } else {
+        logger.debug("found key " + entry.getKey());
+      }
+    }
+    return "Did not find metadata for key=" + key + " at path " + path;
   }
 
   /**
-   * TODO Posts new metadata to the key at a path in the repository
+   * Posts new metadata to the key at a path in the repository
    * @param key
    * @param path
    * @param metadata
    */
-  @PUT
   @POST
   @Path("/metadata/{key}/{path:.*}")
   public void putMetadata(@PathParam("key") String key, @PathParam("path") String path,
       @FormParam("metadata") String metadata) {
+    path = "/" + path;
+    logger.debug("saving " + metadata + " at key " + key + " on path " + path);
+    repo.putMetadata(metadata, key, path);
   }
   
   /**
