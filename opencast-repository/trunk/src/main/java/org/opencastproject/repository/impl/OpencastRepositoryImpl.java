@@ -19,16 +19,20 @@ import org.opencastproject.authentication.api.AuthenticationService;
 import org.opencastproject.repository.api.OpencastRepository;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.jackrabbit.api.JackrabbitNodeTypeManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.jcr.ItemNotFoundException;
 import javax.jcr.LoginException;
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
+import javax.jcr.Property;
+import javax.jcr.PropertyIterator;
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
@@ -36,12 +40,24 @@ import javax.jcr.SimpleCredentials;
 
 public class OpencastRepositoryImpl implements OpencastRepository {
   private static final Logger logger = LoggerFactory.getLogger(OpencastRepositoryImpl.class);
-  
+  public static final String PREFIX = "oc:";
   private Repository repo;
   private AuthenticationService authn;
 
   public OpencastRepositoryImpl(Repository repo) {
     this.repo = repo;
+    
+    // TODO Remove jackrabbit-specific dependencies
+    Session session = getSession();
+    try {
+      JackrabbitNodeTypeManager manager = (JackrabbitNodeTypeManager)
+        session.getWorkspace().getNodeTypeManager();
+      manager.registerNodeTypes(this.getClass().getResourceAsStream("/nodeTypes.cnd"),
+          JackrabbitNodeTypeManager.TEXT_X_JCR_CND);
+    } catch (Exception e) {
+      e.printStackTrace();
+      logger.error(e.getLocalizedMessage());
+    }
   }
 
   /**
@@ -126,35 +142,35 @@ public class OpencastRepositoryImpl implements OpencastRepository {
    * {@inheritDoc}
    * @see org.opencastproject.repository.api.OpencastRepository#putObject(java.lang.Object, java.lang.String)
    */
-  public void putObject(Object object, String path) {
+  public String putObject(Object object, String path) {
     assertSupported(object.getClass());
     Session session = getSession();
     if (session == null) {
       throw new RuntimeException("Couldn't log in to the repo");
     }
     try {
-      Node root = session.getRootNode();
       Node fileNode = null;
       if (session.itemExists(path)) {
-        fileNode = root.getNode(path);
+        fileNode = (Node)session.getItem(path);
       } else {
         fileNode = buildPath(session, path);
       }
       logger.debug("fileNode path=" + fileNode.getPath());
       Node resNode;
       try {
-        resNode = (Node) fileNode.getPrimaryItem();
-        logger.debug("resNode exists: " + resNode.getPath());
-      } catch(ItemNotFoundException e) {
+        resNode = (Node) fileNode.getNode("jcr:content");
+        logger.debug("resource node exists: " + resNode.getPath());
+      } catch(PathNotFoundException e) {
         resNode = fileNode.addNode("jcr:content", "nt:resource");
-        logger.debug("resNode Created: " + resNode.getPath());
+        logger.debug("resource node created: " + resNode.getPath());
         resNode.addMixin("mix:referenceable");
         resNode.setProperty("jcr:mimeType", "application/octet-stream");
         resNode.setProperty("jcr:encoding", "");
       }
       resNode.setProperty("jcr:data", convertToStream(object));
       resNode.setProperty("jcr:lastModified", Calendar.getInstance());
-      root.save();
+      session.save();
+      return fileNode.getUUID();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -183,12 +199,61 @@ public class OpencastRepositoryImpl implements OpencastRepository {
         logger.debug("Adding node " + pathElement);
         currentNode = currentNode.addNode(pathElement, "nt:unstructured");
       }
+      currentNode.addMixin("mix:referenceable");
     }
     return currentNode;
   }
   protected InputStream convertToStream(Object object) {
     // TODO Handle Media Bundles and anything else this should support
     return (InputStream)object;
+  }
+
+  public Map<String, String> getMetadata(String path) {
+    Session session = getSession();
+    if (session == null) {
+      throw new RuntimeException("Couldn't log in to the repo");
+    }
+    try {
+      Node node = null;
+      if (session.itemExists(path)) {
+        node = (Node)session.getItem(path);
+        Map<String, String> map = new HashMap<String, String>();
+        PropertyIterator iter = node.getProperties();
+        while(iter.hasNext()) {
+          Property prop = iter.nextProperty();
+          if( ! prop.getName().startsWith(PREFIX)) continue;
+          map.put(prop.getName().substring(PREFIX.length()), prop.getString());
+        }
+        return map;
+      } else {
+        throw new RuntimeException("no object exists at path " + path);
+      }
+    } catch(PathNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch(RepositoryException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void putMetadata(String value, String key, String path) {
+    Session session = getSession();
+    if (session == null) {
+      throw new RuntimeException("Couldn't log in to the repo");
+    }
+    try {
+      Node node = null;
+      if (session.itemExists(path)) {
+        node = (Node)session.getItem(path);
+        node.setProperty(PREFIX + key, value);
+        session.save();
+      } else {
+        throw new RuntimeException("no object exists at path " + path);
+      }
+    } catch(PathNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch(RepositoryException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }
