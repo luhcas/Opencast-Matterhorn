@@ -34,11 +34,16 @@ public class OsgiActivator implements BundleActivator {
     ServiceTracker httpTracker = new ServiceTracker(context,
         HttpService.class.getName(), null) {
       ResteasyServlet restServlet = new ResteasyServlet();
+      final String staticFsPath = context.getProperty("matterhorn.static.path");
 
       @Override
       public Object addingService(ServiceReference reference) {
         HttpService httpService = (HttpService)context.getService(reference);
         try {
+          if(staticFsPath != null) {
+            StaticServlet staticServlet = new StaticServlet(staticFsPath);
+            httpService.registerServlet("/static/*", staticServlet, null, null);
+          }
           httpService.registerServlet(ResteasyServlet.SERVLET_URL_MAPPING, restServlet, null, null);
         } catch (ServletException e) {
           e.printStackTrace();
@@ -66,6 +71,7 @@ public class OsgiActivator implements BundleActivator {
       public void removedService(ServiceReference reference, Object service) {
         HttpService httpService = (HttpService)service;
         httpService.unregister(ResteasyServlet.SERVLET_URL_MAPPING);
+        httpService.unregister("/static/*");
         super.removedService(reference, service);
       }
     };

@@ -81,6 +81,10 @@
       <artifactId>javassist</artifactId>
       <version>3.10.0.GA</version>
     </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

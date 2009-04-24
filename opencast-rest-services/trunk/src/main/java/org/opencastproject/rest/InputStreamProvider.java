@@ -15,6 +15,8 @@
  */
 package org.opencastproject.rest;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,13 +47,11 @@ public class InputStreamProvider implements MessageBodyWriter<InputStream> {
     return -1;
   }
 
-  public void writeTo(InputStream is, Class<?> type, Type genericType,
+  public void writeTo(InputStream in, Class<?> type, Type genericType,
       Annotation[] annotations, MediaType mediaType,
-      MultivaluedMap<String, Object> headers, OutputStream os)
+      MultivaluedMap<String, Object> headers, OutputStream out)
       throws IOException {
-    int c;
-    while ((c = is.read()) != -1) {
-      os.write(c);
-    }
+    IOUtils.copy(in, out);
+    in.close();
   }
 }
