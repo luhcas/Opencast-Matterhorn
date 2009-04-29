@@ -343,6 +343,12 @@
                 <scope>provided</scope>
             </dependency>
 
+	    <dependency>
+	      <groupId>org.apache.derby</groupId>
+	      <artifactId>derby</artifactId>
+	      <version>10.4.2.0</version>
+	    </dependency>
+
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>servlet-api</artifactId>
