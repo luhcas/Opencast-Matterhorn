@@ -2,7 +2,7 @@ This is a proof-of-concept for a Distributed OSGI environment for developing Mat
 
 To install and run this software:
 
-1) Download Felix 1.6.0.  TODO: Test on Equinox.
+1) Download the binary distribution of Felix 1.6.0.  TODO: Test on Equinox.
 2) Build this software using maven2 (mvn -DskipTests install).  The first time you install, maven will download all of the dependencies and transitive dependencies for all of the Matterhorn code.  Don't be surprised if this takes a long time. You may need to increase your JVM memory settings.  I do this in bash with:
 
 export MAVEN_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m"
