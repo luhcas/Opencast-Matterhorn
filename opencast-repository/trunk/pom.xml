@@ -145,6 +145,10 @@
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+    </dependency>
 
     <!-- OSGI Dependencies -->
     <dependency>
@@ -169,13 +173,17 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package> org.opencastproject.repository.api,org.opencastproject.repository.impl </Export-Package>
+            <Export-Package>
+            	org.opencastproject.repository.api,org.opencastproject.repository.impl
+           	</Export-Package>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Bundle-Activator> org.opencastproject.repository.impl.OsgiActivator </Bundle-Activator>
             <Export-Service> org.opencastproject.repository.api.OpencastRepository </Export-Service>
-            <Embed-Dependency> jackrabbit-core,jackrabbit-spi-commons,jackrabbit-spi,
+            <Embed-Dependency>
+              jackrabbit-core,jackrabbit-spi-commons,jackrabbit-spi,
               jackrabbit-text-extractors,lucene-core,concurrent,poi, postgresql, derby,
-              xercesImpl,tm-extractors,pdfbox,nekohtml, mysql-connector-java </Embed-Dependency>
+              xercesImpl,tm-extractors,pdfbox,nekohtml, mysql-connector-java, derby
+            </Embed-Dependency>
             <Import-Package> !org.apache.jackrabbit.test.*, !org.apache.lucene.demo.*,
               !org.apache.log4j.spi.*, !org.apache.tools.ant.*, !org.apache.xml.resolver.*, !sun.*,
               !org.apache.xpath.*, !org.apache.xml.utils.*, !org.apache.xalan.*,
