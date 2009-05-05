@@ -18,7 +18,7 @@ package org.opencastproject.util;
 
 /**
  * Assertions.
- * 
+ *
  * @author Christoph Drießen
  */
 public class Assert {
@@ -28,7 +28,7 @@ public class Assert {
 
   /**
    * Assert that a value is not null.
-   * 
+   *
    * @param o
    *          the object to test
    * @param message
@@ -47,7 +47,7 @@ public class Assert {
    * Asserts that the object is not empty. The definition of "empty" depends on
    * the object's type. See
    * {@link ch.ethz.replay.core.common.util.Tool#empty(Object)} for details.
-   * 
+   *
    * @param o
    *          the object to test
    * @param message
@@ -64,7 +64,7 @@ public class Assert {
 
   /**
    * Assert that a condition is true.
-   * 
+   *
    * @param condition
    *          the condition
    * @param message
@@ -80,7 +80,7 @@ public class Assert {
 
   /**
    * Assert that a condition is false.
-   * 
+   *
    * @param condition
    *          the condition
    * @param message
@@ -97,7 +97,7 @@ public class Assert {
   /**
    * Assert that a value is in a certain range. Min and max values belong to the
    * range.
-   * 
+   *
    * @throws IllegalArgumentException
    *           if i is not between the bounds
    */

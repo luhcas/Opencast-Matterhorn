@@ -15,31 +15,20 @@
 </head>
 <body>
 <form id="upload_form" method="post" enctype="multipart/form-data">
-  <div>
-    Path:<input type="text" id="upload_path" onblur="updateUploadFormAction()" />
-  </div>
-  <div>
-    <input type="file" id="file" name="file" onblur="updateUploadFormAction()" />
-  </div>
-  <div>
-    <input type="submit" value="Upload to the repository" />
-  </div>
+<div>Path:<input type="text" id="upload_path"
+	onblur="updateUploadFormAction()" /></div>
+<div><input type="file" id="file" name="file"
+	onblur="updateUploadFormAction()" /></div>
+<div><input type="submit" value="Upload to the repository" /></div>
 </form>
 
 <form id="metadata_form" method="post">
-  <div>
-    Path:
-    <input type="text" id="md_path" onblur="updateMetadataFormAction()" />
-  </div>
-  <div>
-    Key:<input type="text" id="md_key" onblur="updateMetadataFormAction()" />
-  </div>
-  <div>
-    Value:<input type="text" name="metadata" />
-  </div>
-  <div>
-    <input type="submit" value="Add metadata" />
-  </div>
+<div>Path: <input type="text" id="md_path"
+	onblur="updateMetadataFormAction()" /></div>
+<div>Key:<input type="text" id="md_key"
+	onblur="updateMetadataFormAction()" /></div>
+<div>Value:<input type="text" name="metadata" /></div>
+<div><input type="submit" value="Add metadata" /></div>
 </form>
 </body>
 </html>

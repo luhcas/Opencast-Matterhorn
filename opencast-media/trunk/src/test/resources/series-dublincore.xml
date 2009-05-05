@@ -1,9 +1,6 @@
 <?xml version="1.0"?>
-<dublincore
-  xmlns="http://www.replay.ethz.ch/xsd/1.0/dublincore/"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance/"
-  xsi:schemaLocation="http://replay.ethz.ch http://replay.ethz.ch/schema.xsd"
-  xmlns:dc="http://purl.org/dc/elements/1.1/"
+<dublincore xmlns="http://www.replay.ethz.ch/xsd/1.0/dublincore/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance/"
+  xsi:schemaLocation="http://replay.ethz.ch http://replay.ethz.ch/schema.xsd" xmlns:dc="http://purl.org/dc/elements/1.1/"
   xmlns:dcterms="http://purl.org/dc/terms/">
 
   <dc:title xml:lang="en">
@@ -13,7 +10,8 @@
     climate, land, vegetation
   </dc:subject>
   <dc:description xml:lang="en">
-	Introduction lecture from the Institute for Atmospheric and Climate Science.
+    Introduction lecture from the Institute for Atmospheric
+    and Climate Science.
   </dc:description>
   <dc:publisher>
     ETH Zurich, Switzerland

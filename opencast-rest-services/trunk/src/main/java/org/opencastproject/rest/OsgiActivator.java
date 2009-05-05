@@ -26,25 +26,29 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import javax.servlet.ServletException;
 
+/**
+ * Activates the rest services in the OSGI environment.
+ */
 public class OsgiActivator implements BundleActivator {
   protected Registry registry;
 
   public void start(BundleContext context) throws Exception {
     // Register the rest servlet when the HTTP service becomes available
-    ServiceTracker httpTracker = new ServiceTracker(context,
-        HttpService.class.getName(), null) {
+    ServiceTracker httpTracker = new ServiceTracker(context, HttpService.class
+        .getName(), null) {
       ResteasyServlet restServlet = new ResteasyServlet();
       final String staticFsPath = context.getProperty("matterhorn.static.path");
 
       @Override
       public Object addingService(ServiceReference reference) {
-        HttpService httpService = (HttpService)context.getService(reference);
+        HttpService httpService = (HttpService) context.getService(reference);
         try {
-          if(staticFsPath != null) {
+          if (staticFsPath != null) {
             StaticServlet staticServlet = new StaticServlet(staticFsPath);
             httpService.registerServlet("/static/*", staticServlet, null, null);
           }
-          httpService.registerServlet(ResteasyServlet.SERVLET_URL_MAPPING, restServlet, null, null);
+          httpService.registerServlet(ResteasyServlet.SERVLET_URL_MAPPING,
+              restServlet, null, null);
         } catch (ServletException e) {
           e.printStackTrace();
         } catch (NamespaceException e) {
@@ -55,7 +59,8 @@ public class OsgiActivator implements BundleActivator {
         // Add the existing JAX-RS resources
         ServiceReference[] jaxRsRefs = null;
         try {
-          jaxRsRefs = context.getAllServiceReferences(OpencastRestService.class.getName(), null);
+          jaxRsRefs = context.getAllServiceReferences(OpencastRestService.class
+              .getName(), null);
         } catch (InvalidSyntaxException e) {
           e.printStackTrace();
         }
@@ -69,7 +74,7 @@ public class OsgiActivator implements BundleActivator {
 
       @Override
       public void removedService(ServiceReference reference, Object service) {
-        HttpService httpService = (HttpService)service;
+        HttpService httpService = (HttpService) service;
         httpService.unregister(ResteasyServlet.SERVLET_URL_MAPPING);
         httpService.unregister("/static/*");
         super.removedService(reference, service);
@@ -82,7 +87,8 @@ public class OsgiActivator implements BundleActivator {
         OpencastRestService.class.getName(), null) {
       @Override
       public Object addingService(ServiceReference reference) {
-        OpencastRestService jaxRsResource = (OpencastRestService)context.getService(reference);
+        OpencastRestService jaxRsResource = (OpencastRestService) context
+            .getService(reference);
         registry.addSingletonResource(jaxRsResource);
         return super.addingService(reference);
       }

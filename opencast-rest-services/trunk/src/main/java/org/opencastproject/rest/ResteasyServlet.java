@@ -40,7 +40,7 @@ public class ResteasyServlet extends HttpServletDispatcher {
 
   public static final String SERVLET_PATH = "/rest";
   public static final String SERVLET_URL_MAPPING = SERVLET_PATH + "/*";
-  
+
   ServletConfig servletConfig;
   ServletContext servletContext;
   Registry registry;
@@ -54,7 +54,7 @@ public class ResteasyServlet extends HttpServletDispatcher {
 
     // Handle the bootstrapping that Resteasy normally handles in its context listener
     bootstrap();
-    
+
     super.init(this.servletConfig);
   }
 
@@ -71,15 +71,15 @@ public class ResteasyServlet extends HttpServletDispatcher {
     // Can't seem to get the resteasy input stream provider to work
     factory.addMessageBodyWriter(new InputStreamProvider());
   }
-  
+
   public ServletConfig getServletConfig() {
     return servletConfig;
   }
-  
+
   public ServletContext getServletContext() {
     return servletContext;
   }
-  
+
   public Registry getRegistry() {
     return registry;
   }

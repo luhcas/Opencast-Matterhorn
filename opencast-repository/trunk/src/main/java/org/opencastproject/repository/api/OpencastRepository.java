@@ -23,49 +23,49 @@ import java.util.Map;
 public interface OpencastRepository {
   /**
    * Gets an object from the repository.
-   * 
+   *
    * @param type The {@link Class} of object expected
    * @param path The path to the object in the repository
    * @return
    */
   <T> T getObject(Class<T> type, String path);
-  
+
   /**
-   * Gets the types of object this repository can store
-   * 
+   * Gets the types of object this repository can store.
+   *
    * @param <T>
-   * @return An array 
+   * @return An array
    */
   Class<?>[] getSupportedTypes();
 
   /**
    * @param path
-   * @return Whether the repository contains an object at this path
+   * @return Whether the repository contains an object at this path.
    */
   boolean hasObject(String path);
 
   /**
    * Stores an object in the repository at a specific path.  This will clobber any existing object
    * stored at this path.
-   * 
+   *
    * @param object The object to store
    * @param path The path in the repository to store the object.
    * @return The unique ID of this object in the repository.
    */
   String putObject(Object object, String path);
-  
+
   /**
-   * Puts a key/value pair onto an object in the repository
-   * 
+   * Puts a key/value pair onto an object in the repository.
+   *
    * @param value The value to be stored
    * @param key The key under which the value is stored
    * @param path The path to the object in the repository
    */
   void putMetadata(String value, String key, String path);
-  
+
   /**
    * Gets the metadata key/value pairs from the object at path.
-   * 
+   *
    * @param path
    * @return
    */

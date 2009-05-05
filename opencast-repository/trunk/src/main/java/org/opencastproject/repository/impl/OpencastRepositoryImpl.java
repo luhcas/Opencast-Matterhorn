@@ -46,7 +46,6 @@ public class OpencastRepositoryImpl implements OpencastRepository {
 
   public OpencastRepositoryImpl(Repository repo) {
     this.repo = repo;
-    
     // TODO Remove jackrabbit-specific dependencies
     Session session = getSession();
     try {
@@ -137,7 +136,7 @@ public class OpencastRepositoryImpl implements OpencastRepository {
       throw new IllegalArgumentException("Class " + type + " is not a supported object type");
     }
   }
-  
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.repository.api.OpencastRepository#putObject(java.lang.Object, java.lang.String)

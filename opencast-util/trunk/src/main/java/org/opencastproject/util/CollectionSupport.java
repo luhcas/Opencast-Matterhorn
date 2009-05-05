@@ -32,9 +32,9 @@ import java.util.Properties;
  * <p/>
  * Code copied from class <code>appetizer.util.Kollections</code> of project
  * "appetizer", originally create May 24, 2006. Donated to REPLAY by the author.
- * 
+ *
  * todo translate original german documentation
- * 
+ *
  * @author Christoph Drießen
  */
 public class CollectionSupport {
@@ -75,7 +75,7 @@ public class CollectionSupport {
   /**
    * Initialisiert <i>collection</i> mit <i>initElement<i>. Das bedeutet, daß
    * <i>collection</i> vorher geleert wird.
-   * 
+   *
    * @param initElement
    *          darf <i>null</i> sein, wenn es der Collectiontyp zuläßt.
    */
@@ -90,7 +90,7 @@ public class CollectionSupport {
    * Speichert alle Objekte <i>obj</i> in der Collection <i>collection</i>.
    * Nutzt {@link Collections#addAll}, nur daß die Collection zurückgegeben
    * wird und die Methode somit zu Initialisierungszwecken genutzt werden kann.
-   * 
+   *
    * @param obj
    *          die zuzufügenden Objekte oder <i>null</i>
    * @return <i>collection</i>

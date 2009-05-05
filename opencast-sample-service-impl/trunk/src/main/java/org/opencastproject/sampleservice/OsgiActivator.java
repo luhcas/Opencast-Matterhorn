@@ -15,74 +15,31 @@
  */
 package org.opencastproject.sampleservice;
 
-import org.opencastproject.repository.api.OpencastRepository;
-import org.opencastproject.rest.OpencastRestService;
-import org.opencastproject.sampleservice.api.SampleService;
 import org.ops4j.pax.web.extender.whiteboard.Resources;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 public class OsgiActivator implements BundleActivator {
 
-  protected ServiceRegistration sampleServiceRegistration;
-  protected ServiceRegistration jaxRsRegistration;
-  protected ServiceRegistration staticJsRegistration;
-  protected ServiceRegistration staticHtmlRegistration;
-  protected ServiceTracker jcrTracker;
-  
   /**
-   * Starts the {@link SampleWebService} at /samplews and registers the static
-   * web resources at /samplejs.
+   * Registers static web resources at /samplehtml and /samplejs.
    */
   public void start(BundleContext context) throws Exception {
-    jcrTracker = new ServiceTracker(context,
-        OpencastRepository.class.getName(), null) {
-      @Override
-      public Object addingService(ServiceReference reference) {
-        OpencastRepository repo = (OpencastRepository)context.getService(reference);
-
-        // Register the DOSGI sample service.
-        sampleServiceRegistration = OpencastServiceRegistrationUtil.register(
-            context, new SampleServiceImpl(repo), SampleService.class, "/samplews");
-
-        // Register the restful service
-        jaxRsRegistration = context.registerService(OpencastRestService.class
-            .getName(), new SampleRestService(repo), null);
-        return super.addingService(reference);
-      }
-
-      @Override
-      public void removedService(ServiceReference reference, Object service) {
-        sampleServiceRegistration.unregister();
-        jaxRsRegistration.unregister();
-        super.removedService(reference, service);
-      }
-    };
-    jcrTracker.open();
-
     // Register the static web resources.  This handles the http service tracking automatically
     Dictionary<String, String> staticJsProps = new Hashtable<String, String>();
     staticJsProps.put("alias", "/samplejs");
-    staticJsRegistration = context.registerService(
+    context.registerService(
         Resources.class.getName(), new Resources("/js"), staticJsProps);
     Dictionary<String, String> staticHtmlProps = new Hashtable<String, String>();
     staticHtmlProps.put("alias", "/samplehtml");
-    staticHtmlRegistration = context.registerService(
+    context.registerService(
         Resources.class.getName(), new Resources("/html"), staticHtmlProps);
     
   }
 
   public void stop(BundleContext context) throws Exception {
-    sampleServiceRegistration.unregister();
-    jaxRsRegistration.unregister();
-    staticJsRegistration.unregister();
-    staticHtmlRegistration.unregister();
-    jcrTracker.close();
   }
 }

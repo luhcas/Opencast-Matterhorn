@@ -22,7 +22,7 @@ import java.util.AbstractList;
  * Wraps an array into a list for reading. Changes to the array are reflected by
  * the list. Write operations are not supported. This class allows arrays to be
  * used in situations where a list is requested.
- * 
+ *
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class ArrayBackedList<E> extends AbstractList<E> {
@@ -31,7 +31,7 @@ public class ArrayBackedList<E> extends AbstractList<E> {
 
   /**
    * Creates a new wrapper.
-   * 
+   *
    * @param array
    *          may not be null
    */

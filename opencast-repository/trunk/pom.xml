@@ -12,16 +12,16 @@
     <version>0.1-SNAPSHOT</version>
   </parent>
   <dependencies>
-  	<dependency>
-  	  <groupId>org.opencastproject</groupId>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
       <artifactId>opencast-authentication-api</artifactId>
       <version>0.1-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-  	  <groupId>org.opencastproject</groupId>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
       <artifactId>opencast-rest-services</artifactId>
       <version>0.1-SNAPSHOT</version>
-  	</dependency>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -32,12 +32,12 @@
       <artifactId>log4j</artifactId>
       <version>1.2.15</version>
       <scope>test</scope>
-        <exclusions>
-            <exclusion>
-                <groupId>com.sun.jmx</groupId>
-                <artifactId>jmxri</artifactId>
-            </exclusion>
-        </exclusions>
+      <exclusions>
+        <exclusion>
+          <groupId>com.sun.jmx</groupId>
+          <artifactId>jmxri</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>commons-collections</groupId>
@@ -174,7 +174,7 @@
         <configuration>
           <instructions>
             <Export-Package>
-            	org.opencastproject.repository.api,org.opencastproject.repository.impl
+              org.opencastproject.repository.api,org.opencastproject.repository.impl
            	</Export-Package>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Bundle-Activator> org.opencastproject.repository.impl.OsgiActivator </Bundle-Activator>

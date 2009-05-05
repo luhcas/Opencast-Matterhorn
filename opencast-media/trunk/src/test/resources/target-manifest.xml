@@ -1,68 +1,68 @@
 <Bundle id="00000/1" start="2007-12-05T13:40:00" duration="10044">
-	<Media>
-		<Track id="track-1" type="track/presentation">
-			<MimeType>video/quicktime</MimeType>
-			<File>tracks/vonly.mov</File>
-			<Checksum type="md5">43b7d843b02c4a429b2f547a4f230d31</Checksum>
-			<Duration>10044</Duration>
-			<Video>
-				<Device type="UFG03" version="30112007" vendor="Unigraf"/>
-				<Encoder type="H.264" version="7.4" vendor="Apple Inc"/>
-				<Size>640x480</Size>
-				<ScanType type="progressive"/>
-				<BitRate>540520</BitRate>
-				<FrameRate>2</FrameRate>
-			</Video>
-		</Track>
-		<Track id="track-2" type="track/audio">
-			<MimeType>video/quicktime</MimeType>
-			<File>tracks/aonly.mov</File>
-			<Checksum type="md5">950f9fa49caa8f1c5bbc36892f6fd062</Checksum>
-			<Duration>10044</Duration>
-			<Audio>
-				<Device type="UFG03" version="30112007" vendor="Unigraf"/>
-				<Encoder type="AAC" version="7.4" vendor="Apple Inc"/>
-				<Channels>2</Channels>
-				<BitDepth>16</BitDepth>
-				<SamplingRate>44100</SamplingRate>
-			</Audio>
-		</Track>
-		<Track id="track-4" type="track/audio">
-			<MimeType>video/quicktime</MimeType>
-			<File>tracks/aonly2.mov</File>
-			<Checksum type="md5">950f9fa49caa8f1c5bbc36892f6fd062</Checksum>
-			<Duration>10044</Duration>
-			<Audio>
-				<Device type="UFG03" version="30112007" vendor="Unigraf"/>
-				<Encoder type="AAC" version="7.4" vendor="Apple Inc"/>
-				<Channels>2</Channels>
-				<BitDepth>16</BitDepth>
-				<SamplingRate>44100</SamplingRate>
-			</Audio>
-		</Track>
-	</Media>
-	<Metadata>
-		<Catalog id="catalog-1" type="metadata/dublincore">
-			<MimeType>text/xml</MimeType>
-			<File>metadata/dublincore.xml</File>
-			<Checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</Checksum>
-		</Catalog>
-		<Catalog id="catalog-2" type="metadata/dublincore" ref="series:1">
-			<MimeType>text/xml</MimeType>
-			<File>metadata/series-dublincore.xml</File>
-			<Checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</Checksum>
-		</Catalog>
-		<Catalog id="catalog-3" type="metadata/mpeg-7" ref="track:track-1">
-			<MimeType>text/xml</MimeType>
-			<File>metadata/mpeg-7.xml</File>
-			<Checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</Checksum>
-		</Catalog>
-	</Metadata>
-	<Attachments>
-		<Attachment id="cover" type="attachment/cover">
-			<MimeType>image/png</MimeType>
-			<File>attachments/cover.png</File>
-			<Checksum type="md5">6d535f61a1b31a3edeb01be0951a2b4e</Checksum>
-		</Attachment>
-	</Attachments>
+  <Media>
+    <Track id="track-1" type="track/presentation">
+      <MimeType>video/quicktime</MimeType>
+      <File>tracks/vonly.mov</File>
+      <Checksum type="md5">43b7d843b02c4a429b2f547a4f230d31</Checksum>
+      <Duration>10044</Duration>
+      <Video>
+        <Device type="UFG03" version="30112007" vendor="Unigraf" />
+        <Encoder type="H.264" version="7.4" vendor="Apple Inc" />
+        <Size>640x480</Size>
+        <ScanType type="progressive" />
+        <BitRate>540520</BitRate>
+        <FrameRate>2</FrameRate>
+      </Video>
+    </Track>
+    <Track id="track-2" type="track/audio">
+      <MimeType>video/quicktime</MimeType>
+      <File>tracks/aonly.mov</File>
+      <Checksum type="md5">950f9fa49caa8f1c5bbc36892f6fd062</Checksum>
+      <Duration>10044</Duration>
+      <Audio>
+        <Device type="UFG03" version="30112007" vendor="Unigraf" />
+        <Encoder type="AAC" version="7.4" vendor="Apple Inc" />
+        <Channels>2</Channels>
+        <BitDepth>16</BitDepth>
+        <SamplingRate>44100</SamplingRate>
+      </Audio>
+    </Track>
+    <Track id="track-4" type="track/audio">
+      <MimeType>video/quicktime</MimeType>
+      <File>tracks/aonly2.mov</File>
+      <Checksum type="md5">950f9fa49caa8f1c5bbc36892f6fd062</Checksum>
+      <Duration>10044</Duration>
+      <Audio>
+        <Device type="UFG03" version="30112007" vendor="Unigraf" />
+        <Encoder type="AAC" version="7.4" vendor="Apple Inc" />
+        <Channels>2</Channels>
+        <BitDepth>16</BitDepth>
+        <SamplingRate>44100</SamplingRate>
+      </Audio>
+    </Track>
+  </Media>
+  <Metadata>
+    <Catalog id="catalog-1" type="metadata/dublincore">
+      <MimeType>text/xml</MimeType>
+      <File>metadata/dublincore.xml</File>
+      <Checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</Checksum>
+    </Catalog>
+    <Catalog id="catalog-2" type="metadata/dublincore" ref="series:1">
+      <MimeType>text/xml</MimeType>
+      <File>metadata/series-dublincore.xml</File>
+      <Checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</Checksum>
+    </Catalog>
+    <Catalog id="catalog-3" type="metadata/mpeg-7" ref="track:track-1">
+      <MimeType>text/xml</MimeType>
+      <File>metadata/mpeg-7.xml</File>
+      <Checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</Checksum>
+    </Catalog>
+  </Metadata>
+  <Attachments>
+    <Attachment id="cover" type="attachment/cover">
+      <MimeType>image/png</MimeType>
+      <File>attachments/cover.png</File>
+      <Checksum type="md5">6d535f61a1b31a3edeb01be0951a2b4e</Checksum>
+    </Attachment>
+  </Attachments>
 </Bundle>

@@ -12,14 +12,18 @@
   <prerequisites>
     <maven>2.0.6</maven>
   </prerequisites>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
   <scm>
-    <connection>scm:svn:http://opencastproject.svn.sourceforge.net/svnroot/opencastproject/matterhorn/trunk</connection>
-    <developerConnection>scm:svn:https://opencastproject.svn.sourceforge.net/svnroot/opencastproject/matterhorn/trunk</developerConnection>
-    <url>http://opencastproject.svn.sourceforge.net/svnroot/opencastproject/</url>
+    <connection>scm:svn:http://source.opencastproject.org/svn/matterhorn/trunk</connection>
+    <developerConnection>scm:svn:https://source.opencastproject.org/svn/matterhorn/trunk</developerConnection>
+    <url>http://source.opencastproject.org/svn/matterhorn/trunk</url>
   </scm>
   <issueManagement>
     <system>jira</system>
-    <url>http://jira.media.berkeley.edu/jira/browse/OPENCAST</url>
+    <url>https://issues.apache.org/jira</url>
   </issueManagement>
   <profiles>
     <profile>
@@ -126,6 +130,7 @@
         <configuration>
           <source>1.5</source>
           <target>1.5</target>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
 
@@ -187,17 +192,15 @@
             <groupId>org.opencastproject</groupId>
             <artifactId>opencast-build-tools</artifactId>
             <version>0.1-SNAPSHOT</version>
-			<scope>test</scope>
+		<scope>test</scope>
           </dependency>
         </dependencies>
         <executions>
-        <!--
           <execution>
             <goals>
               <goal>check</goal>
             </goals>
           </execution>
-        -->
         </executions>
       </plugin>
 
@@ -525,13 +528,13 @@
 		<dependency>
 			<groupId>org.apache.cxf.dosgi</groupId>
 			<artifactId>cxf-dosgi-ri-discovery-local</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.1-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.apache.cxf.dosgi</groupId>
 			<artifactId>cxf-dosgi-ri-dsw-cxf</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

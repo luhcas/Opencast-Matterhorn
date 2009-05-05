@@ -35,6 +35,13 @@ public class SampleRestService implements OpencastRestService {
   public SampleRestService(OpencastRepository repo) {
     this.repo = repo;
   }
+  
+  public SampleRestService() {
+  }
+  
+  public void setRepository(OpencastRepository repo) {
+    this.repo = repo;
+  }
 
   @GET
   @Path("/html")

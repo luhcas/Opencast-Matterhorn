@@ -37,16 +37,28 @@ import javax.ws.rs.ext.Provider;
 @Provider
 @Produces("*/*")
 public class InputStreamProvider implements MessageBodyWriter<InputStream> {
+  /**
+   * {@inheritDoc}
+   * @see javax.ws.rs.ext.MessageBodyWriter#isWriteable(java.lang.Class, java.lang.reflect.Type, java.lang.annotation.Annotation[], javax.ws.rs.core.MediaType)
+   */
   public boolean isWriteable(Class<?> type, Type genericType,
       Annotation[] annotations, MediaType mediaType) {
     return InputStream.class.isAssignableFrom(type);
   }
 
+  /**
+   * {@inheritDoc}
+   * @see javax.ws.rs.ext.MessageBodyWriter#getSize(java.lang.Object, java.lang.Class, java.lang.reflect.Type, java.lang.annotation.Annotation[], javax.ws.rs.core.MediaType)
+   */
   public long getSize(InputStream inputStream, Class<?> type, Type genericType,
       Annotation[] annotations, MediaType mediaType) {
     return -1;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see javax.ws.rs.ext.MessageBodyWriter#writeTo(java.lang.Object, java.lang.Class, java.lang.reflect.Type, java.lang.annotation.Annotation[], javax.ws.rs.core.MediaType, javax.ws.rs.core.MultivaluedMap, java.io.OutputStream)
+   */
   public void writeTo(InputStream in, Class<?> type, Type genericType,
       Annotation[] annotations, MediaType mediaType,
       MultivaluedMap<String, Object> headers, OutputStream out)

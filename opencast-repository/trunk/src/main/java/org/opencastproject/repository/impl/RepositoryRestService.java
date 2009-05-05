@@ -94,7 +94,7 @@ public class RepositoryRestService implements OpencastRestService {
     logger.debug("saving " + metadata + " at key " + key + " on path " + path);
     repo.putMetadata(metadata, key, path);
   }
-  
+
   /**
    * Copies an servlet request's file upload directly into the repository
    */

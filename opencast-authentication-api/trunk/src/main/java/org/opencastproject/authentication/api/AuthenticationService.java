@@ -16,5 +16,5 @@
 package org.opencastproject.authentication.api;
 
 public interface AuthenticationService {
-  public String getUserId();
+  String getUserId();
 }

@@ -24,7 +24,7 @@ import java.util.Map;
 
 /**
  * Checksum type represents the method used to generate a checksum.
- * 
+ *
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: ChecksumType.java 678 2008-08-05 14:56:22Z wunden $
  */
@@ -44,7 +44,7 @@ public final class ChecksumType implements Serializable {
 
   /**
    * Creates a new checksum type with the given type name.
-   * 
+   *
    * @param type
    *          the type name
    */
@@ -55,7 +55,7 @@ public final class ChecksumType implements Serializable {
 
   /**
    * Returns the checksum value.
-   * 
+   *
    * @return the value
    */
   public String getName() {
@@ -65,7 +65,7 @@ public final class ChecksumType implements Serializable {
   /**
    * Returns a checksum type for the given string. <code>Type</code> is
    * considered to be the name of a checksum type.
-   * 
+   *
    * @param type
    *          the type name
    * @return the checksum type
@@ -88,7 +88,7 @@ public final class ChecksumType implements Serializable {
 
   /**
    * Returns the type of the checksum gathered from the provided value.
-   * 
+   *
    * @param value
    *          the checksum value
    * @return the type

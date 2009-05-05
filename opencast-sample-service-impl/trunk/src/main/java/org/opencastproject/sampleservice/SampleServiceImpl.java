@@ -35,6 +35,10 @@ public class SampleServiceImpl implements SampleService {
   public SampleServiceImpl(OpencastRepository repo) {
     this.repo = repo;
   }
+  public SampleServiceImpl() {}
+  public void setRepository(OpencastRepository repo) {
+    this.repo = repo;
+  }
 
   public String getSomething(String path) {
     InputStream in = repo.getObject(InputStream.class, path);

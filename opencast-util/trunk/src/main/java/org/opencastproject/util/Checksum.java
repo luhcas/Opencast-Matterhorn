@@ -26,7 +26,7 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * This class stores value and type of a generated checksum.
- * 
+ *
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: Checksum.java 1639 2008-12-08 15:45:01Z wunden $
  */
@@ -43,7 +43,7 @@ public final class Checksum implements Serializable {
 
   /**
    * Creates a new checksum object of the specified value and checksum type.
-   * 
+   *
    * @param value
    *          the value
    * @param type
@@ -60,7 +60,7 @@ public final class Checksum implements Serializable {
 
   /**
    * Returns the checksum type.
-   * 
+   *
    * @return the type
    */
   public ChecksumType getType() {
@@ -69,7 +69,7 @@ public final class Checksum implements Serializable {
 
   /**
    * Returns the checksum value.
-   * 
+   *
    * @return the value
    */
   public String getValue() {
@@ -78,7 +78,7 @@ public final class Checksum implements Serializable {
 
   /**
    * Converts the checksum to a hex string.
-   * 
+   *
    * @param data
    *          the digest
    * @return the digest hex representation
@@ -122,7 +122,7 @@ public final class Checksum implements Serializable {
 
   /**
    * Creates a checksum of type <code>type</code> and value <code>value</code>.
-   * 
+   *
    * @param type
    *          the checksum type name
    * @param value
@@ -139,7 +139,7 @@ public final class Checksum implements Serializable {
 
   /**
    * Creates a checksum of type <code>type</code> and value <code>value</code>.
-   * 
+   *
    * @param type
    *          the checksum type
    * @param value
@@ -152,7 +152,7 @@ public final class Checksum implements Serializable {
 
   /**
    * Creates a checksum of type <code>type</code> from the given file.
-   * 
+   *
    * @param type
    *          the checksum type
    * @param file
