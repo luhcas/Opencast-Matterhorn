@@ -16,7 +16,6 @@
 package org.opencastproject.repository.impl;
 
 import org.opencastproject.repository.api.OpencastRepository;
-import org.opencastproject.rest.OpencastRestService;
 
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -41,11 +40,54 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 @Path("/repository")
-public class RepositoryRestService implements OpencastRestService {
+public class RepositoryRestService {
   private static final Logger logger = LoggerFactory.getLogger(RepositoryRestService.class);
   protected OpencastRepository repo;
   public RepositoryRestService(OpencastRepository repo) {
     this.repo = repo;
+  }
+
+  private static final String DOCS;
+  static {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Opencast Repository Service\n");
+    sb.append("===========================\n");
+    sb.append("\n");
+    sb.append("The repository stores files and metadata using the path metaphor.  You can store ");
+    sb.append("files using a path such as /folder1/folder2/file.jpg.  You can also store ");
+    sb.append("arbitrary metadata at a path by specifying a \"key\".\n");
+    sb.append("\n");
+    sb.append("Retrieving Files\n");
+    sb.append("----------------\n");
+    sb.append("To retrieve files stored in the repository, issue a GET to ");
+    sb.append("/rest/repository/data/{path}.\n");
+    sb.append("\n");
+    sb.append("Storing Files\n");
+    sb.append("-------------\n");
+    sb.append("To store files in the repository, issue a PUT or POST to ");
+    sb.append("/rest/repository/data/{path}.\n");
+    sb.append("\n");
+    sb.append("Retrieving Metadata\n");
+    sb.append("-------------------\n");
+    sb.append("To retrieve metadata stored in the repository, issue a GET to ");
+    sb.append("/rest/repository/metadata/{key}/{path}.\n");
+    sb.append("\n");
+    sb.append("Storing Metadata\n");
+    sb.append("----------------\n");
+    sb.append("To store metadata in the repository, issue a PUT or POST to ");
+    sb.append("/rest/repository/metadata/{key}/{path}.\n");
+    DOCS = sb.toString();
+  }
+
+  /**
+   * Gets the documentation for this restful service.
+   * 
+   * @return The documentation as restructured text
+   */
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  public String getDocumentation() {
+    return DOCS;
   }
 
   /**
@@ -86,6 +128,7 @@ public class RepositoryRestService implements OpencastRestService {
    * @param path
    * @param metadata
    */
+  @PUT
   @POST
   @Path("/metadata/{key}/{path:.*}")
   public void putMetadata(@PathParam("key") String key, @PathParam("path") String path,

@@ -22,6 +22,7 @@ import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 import org.jboss.resteasy.spi.Registry;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.osgi.framework.BundleContext;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -41,11 +42,16 @@ public class ResteasyServlet extends HttpServletDispatcher {
   public static final String SERVLET_PATH = "/rest";
   public static final String SERVLET_URL_MAPPING = SERVLET_PATH + "/*";
 
+  BundleContext bundleContext;
   ServletConfig servletConfig;
   ServletContext servletContext;
   Registry registry;
   private ResteasyProviderFactory factory = new ResteasyProviderFactory();
 
+  public ResteasyServlet(BundleContext bundleContext) {
+    this.bundleContext = bundleContext;
+  }
+  
   public void init(ServletConfig servletConfig) throws ServletException {
     // Wrap the servlet config and context objects, since some http service impls (e.g. pax) don't
     // handle these parts of the servlet spec correctly

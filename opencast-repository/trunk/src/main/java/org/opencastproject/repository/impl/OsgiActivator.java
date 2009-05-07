@@ -20,7 +20,6 @@ import org.apache.jackrabbit.core.RepositoryImpl;
 import org.apache.jackrabbit.core.config.RepositoryConfig;
 
 import org.opencastproject.repository.api.OpencastRepository;
-import org.opencastproject.rest.OpencastRestService;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -32,6 +31,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import javax.jcr.Repository;
 
@@ -87,8 +88,10 @@ public class OsgiActivator implements BundleActivator {
     repoRegistration = context.registerService(Repository.class.getName(), jcrRepository, null);
     serviceRegistration = context.registerService(OpencastRepository.class.getName(),
         opencastRepo, null);
-    restRegistration = context.registerService(OpencastRestService.class.getName(),
-        new RepositoryRestService(opencastRepo), null);
+    Dictionary<String, String> props = new Hashtable<String, String>();
+    props.put("opencast.rest.service", Boolean.TRUE.toString());
+    restRegistration = context.registerService(RepositoryRestService.class.getName(),
+        new RepositoryRestService(opencastRepo), props);
   }
 
   public void stop(BundleContext context) throws Exception {

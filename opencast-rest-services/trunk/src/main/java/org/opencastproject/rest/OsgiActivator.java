@@ -30,23 +30,27 @@ import javax.servlet.ServletException;
  * Activates the rest services in the OSGI environment.
  */
 public class OsgiActivator implements BundleActivator {
+  public static final String REST_FILTER = "(opencast.rest.service=true)";
   protected Registry registry;
 
   public void start(BundleContext context) throws Exception {
     // Register the rest servlet when the HTTP service becomes available
     ServiceTracker httpTracker = new ServiceTracker(context, HttpService.class
         .getName(), null) {
-      ResteasyServlet restServlet = new ResteasyServlet();
+      ResteasyServlet restServlet = new ResteasyServlet(context);
       final String staticFsPath = context.getProperty("matterhorn.static.path");
 
       @Override
       public Object addingService(ServiceReference reference) {
         HttpService httpService = (HttpService) context.getService(reference);
+        // TODO Should the /static and /info URLs be moved elsewhere?
         try {
           if (staticFsPath != null) {
             StaticServlet staticServlet = new StaticServlet(staticFsPath);
             httpService.registerServlet("/static/*", staticServlet, null, null);
           }
+          httpService.registerServlet("/info/*",
+              new InfoServlet(context), null, null);
           httpService.registerServlet(ResteasyServlet.SERVLET_URL_MAPPING,
               restServlet, null, null);
         } catch (ServletException e) {
@@ -59,8 +63,7 @@ public class OsgiActivator implements BundleActivator {
         // Add the existing JAX-RS resources
         ServiceReference[] jaxRsRefs = null;
         try {
-          jaxRsRefs = context.getAllServiceReferences(OpencastRestService.class
-              .getName(), null);
+          jaxRsRefs = context.getAllServiceReferences(null, REST_FILTER);
         } catch (InvalidSyntaxException e) {
           e.printStackTrace();
         }
@@ -84,11 +87,10 @@ public class OsgiActivator implements BundleActivator {
 
     // Track JAX-RS Resources that are added and removed
     ServiceTracker jaxRsResourceTracker = new ServiceTracker(context,
-        OpencastRestService.class.getName(), null) {
+        context.createFilter(REST_FILTER), null) {
       @Override
       public Object addingService(ServiceReference reference) {
-        OpencastRestService jaxRsResource = (OpencastRestService) context
-            .getService(reference);
+        Object jaxRsResource = context.getService(reference);
         registry.addSingletonResource(jaxRsResource);
         return super.addingService(reference);
       }

@@ -16,7 +16,6 @@
 package org.opencastproject.sampleservice;
 
 import org.opencastproject.repository.api.OpencastRepository;
-import org.opencastproject.rest.OpencastRestService;
 import org.opencastproject.status.api.StatusMessage;
 import org.opencastproject.status.impl.StatusMessageImpl;
 
@@ -29,7 +28,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 @Path("/sample")
-public class SampleRestService implements OpencastRestService {
+public class SampleRestService {
+  
+  private static final String DOCS;
+  static {
+    StringBuilder sb = new StringBuilder();
+    sb.append("*This* is the first paragraph of the **documentation**.\n");
+    sb.append("\tThis is an indented paragraph.\n");
+    sb.append("See http://docutils.sourceforge.net/docs/user/rst/quickstart.html for help with " +
+        "restructured text.");
+    DOCS = sb.toString();
+  }
+
   protected OpencastRepository repo;
 
   public SampleRestService(OpencastRepository repo) {
@@ -41,6 +51,17 @@ public class SampleRestService implements OpencastRestService {
   
   public void setRepository(OpencastRepository repo) {
     this.repo = repo;
+  }
+
+  /**
+   * Gets the documentation for this restful service.
+   * 
+   * @return The documentation as restructured text
+   */
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  public String getDocumentation() {
+    return DOCS;
   }
 
   @GET
