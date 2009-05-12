@@ -11,6 +11,7 @@
 ../../opencast-workflow-impl/trunk	opencast-workflow-impl
 ../../opencast-remote-sample-service-client/trunk	opencast-remote-sample-service-client
 ../../opencast-authentication-api/trunk	opencast-authentication-api
+../../opencast-authentication-cas/trunk opencast-authentication-cas
 ../../opencast-media/trunk	opencast-media
 ../../opencast-util/trunk	opencast-util
 ../../third-party-tools/trunk	third-party-tools
