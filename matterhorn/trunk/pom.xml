@@ -34,6 +34,7 @@
       <modules>
         <module>build-tools</module>
         <module>osgi</module>
+        <module>opencast-log-config</module>
         <module>opencast-repository</module>
         <module>opencast-util</module>
         <module>opencast-media</module>
