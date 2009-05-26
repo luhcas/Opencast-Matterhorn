@@ -1,7 +1,6 @@
 ../../build-tools/trunk build-tools
 ../../osgi/trunk	osgi
 ../../docs	docs
-../../opencast-log-config/trunk	opencast-log-config
 ../../opencast-repository/trunk	opencast-repository
 ../../opencast-rest-services/trunk	opencast-rest-services
 ../../opencast-sample-service-api/trunk	opencast-sample-service-api
