@@ -19,7 +19,9 @@ import org.opencastproject.authentication.api.AuthenticationService;
 
 public class AuthenticationServiceCasImpl implements AuthenticationService {
   public String getUserId() {
-    // TODO Auto-generated method stub
+    // Get the CAS receipt from threadlocal
+    
+    // FIXME return the user ID
     return null;
   }
 }

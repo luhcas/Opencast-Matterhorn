@@ -163,6 +163,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <build>
@@ -188,9 +189,8 @@
               !org.apache.log4j.spi.*, !org.apache.tools.ant.*, !org.apache.xml.resolver.*, !sun.*,
               !org.apache.xpath.*, !org.apache.xml.utils.*, !org.apache.xalan.*,
               !org.apache.derby.impl.drda, !org.jboss.resource.adapter.jdbc.*,
-              !com.mchange.v2.c3p0.*, *
+              !com.mchange.v2.c3p0.*, !javax.xml.transform.stax, *
             </Import-Package>
-            <DynamicImport-Package> org.apache.felix.shell </DynamicImport-Package>
           </instructions>
         </configuration>
       </plugin>

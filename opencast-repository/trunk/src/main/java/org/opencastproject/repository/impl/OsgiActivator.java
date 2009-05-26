@@ -77,6 +77,8 @@ public class OsgiActivator implements BundleActivator {
 
     InputStream config = new ByteArrayInputStream(configString.getBytes("UTF8"));
 
+    logger.info(configString);
+    
     // Build the repository
     RepositoryConfig rc = RepositoryConfig.create(config, repoHome);
 

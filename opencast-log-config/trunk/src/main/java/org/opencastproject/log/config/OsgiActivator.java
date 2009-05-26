@@ -41,7 +41,7 @@ public class OsgiActivator implements BundleActivator {
     } catch (IOException e) {
         throw new RuntimeException("Failed to load log4j.properties", e);
     }
-   
+
     // Use a Servicetracker to wait for ConfigurationAdmin service
     ServiceTracker tracker = new ServiceTracker(ctx, ConfigurationAdmin.class.getName(), null) {
       @Override
