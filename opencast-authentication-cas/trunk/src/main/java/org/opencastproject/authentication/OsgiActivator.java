@@ -24,12 +24,18 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 
 import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 public class OsgiActivator implements BundleActivator {
   private static final Logger logger = LoggerFactory.getLogger(OsgiActivator.class);
@@ -123,7 +129,31 @@ public class OsgiActivator implements BundleActivator {
       }
       logger.info(sb.toString());
     }
+    
+//    Dictionary myFilterProps = new Hashtable();
+//    myFilterProps.put("filter-name", "Sample Filter");
+//    myFilterProps.put("urlPatterns", protectedUrls.toArray(new String[0]));
+//    context.registerService(Filter.class.getName(), new MyFilter(), myFilterProps);
+    
     return context.registerService(Filter.class.getName(), authenticationFilter,
         getAuthenticationFilterProperties());
   }
+}
+
+class MyFilter implements Filter {
+  private static final Logger logger = LoggerFactory.getLogger(MyFilter.class);
+
+  public void destroy() {
+    logger.info("======================================destroy()");
+  }
+
+  public void doFilter(ServletRequest arg0, ServletResponse arg1,
+      FilterChain arg2) throws IOException, ServletException {
+    logger.info("======================================doFilter()");
+  }
+
+  public void init(FilterConfig arg0) throws ServletException {
+    logger.info("======================================init()");
+  }
+  
 }

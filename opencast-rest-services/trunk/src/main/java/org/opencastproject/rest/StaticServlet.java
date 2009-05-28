@@ -16,10 +16,13 @@
 package org.opencastproject.rest;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class StaticServlet extends HttpServlet {
   private static final long serialVersionUID = 1L;
+  private static final Logger logger = LoggerFactory.getLogger(StaticServlet.class);
   private String fsRoot;
   public StaticServlet(String fsRoot) {
     this.fsRoot = fsRoot;
@@ -41,6 +45,9 @@ public class StaticServlet extends HttpServlet {
     }
     String fsPath = fsRoot + "/" + relativePath;
     File f = new File(fsPath);
+    String mimeType = new MimetypesFileTypeMap().getContentType(f);
+    logger.debug("Returning " + fsPath + ", a file of type " + mimeType);
+    response.setContentType(mimeType);
     FileInputStream in = null;
     if(f.exists() && f.canRead()) {
       try {

@@ -38,7 +38,7 @@
         <module>opencast-util</module>
         <module>opencast-media</module>
         <module>opencast-authentication-api</module>
-        <!-- module>opencast-authentication-cas</module -->
+        <module>opencast-authentication-cas</module>
         <module>opencast-rest-services</module>
         <module>opencast-encoder-api</module>
         <module>opencast-encoder-impl</module>
@@ -508,7 +508,7 @@
       <dependency>
         <groupId>org.apache.cxf</groupId>
         <artifactId>cxf-bundle-minimal</artifactId>
-        <version>2.2.1-SNAPSHOT</version>
+        <version>2.2.1</version>
       </dependency>
 
       <dependency>
