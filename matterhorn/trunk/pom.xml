@@ -256,22 +256,16 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.osgi.core</artifactId>
-        <version>1.2.0</version>
+        <groupId>org.osgi</groupId>
+        <artifactId>osgi_R4_core</artifactId>
+        <version>1.0</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.osgi.compendium</artifactId>
-        <version>1.2.0</version>
+        <groupId>org.osgi</groupId>
+        <artifactId>osgi_R4_compendium</artifactId>
+        <version>1.0</version>
         <scope>provided</scope>
-        <exclusions>
-          <exclusion>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>javax.servlet</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.apache.felix</groupId>
@@ -430,38 +424,8 @@
       <dependency>
         <groupId>org.ops4j.pax.web-extender</groupId>
         <artifactId>pax-web-ex-whiteboard</artifactId>
-        <version>0.3.0</version>
+        <version>0.5.1</version>
       </dependency>
-
-      <dependency>
-        <groupId>org.ops4j.pax.web-extender</groupId>
-        <artifactId>pax-web-ex-war</artifactId>
-        <version>0.3.0</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.ops4j.pax.web</groupId>
-        <artifactId>pax-web-jsp</artifactId>
-        <version>0.3.0</version>
-      </dependency>
-
-      <!-- OSGI Testing -->
-      <dependency>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>pax-exam</artifactId>
-        <version>0.3.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>pax-exam-junit</artifactId>
-        <version>0.3.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.ops4j.pax.exam</groupId>
-        <artifactId>pax-exam-container-default</artifactId>
-        <version>0.3.0</version>
-      </dependency>
-
 
       <dependency>
         <groupId>org.apache.geronimo.specs</groupId>

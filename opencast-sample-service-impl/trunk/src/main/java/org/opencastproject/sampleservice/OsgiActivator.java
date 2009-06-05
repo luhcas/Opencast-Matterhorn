@@ -15,12 +15,10 @@
  */
 package org.opencastproject.sampleservice;
 
-import org.ops4j.pax.web.extender.whiteboard.Resources;
+import org.ops4j.pax.web.extender.whiteboard.ResourceMapping;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultResourceMapping;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
 
 public class OsgiActivator implements BundleActivator {
 
@@ -29,15 +27,14 @@ public class OsgiActivator implements BundleActivator {
    */
   public void start(BundleContext context) throws Exception {
     // Register the static web resources.  This handles the http service tracking automatically
-    Dictionary<String, String> staticJsProps = new Hashtable<String, String>();
-    staticJsProps.put("alias", "/samplejs");
-    context.registerService(
-        Resources.class.getName(), new Resources("/js"), staticJsProps);
-    Dictionary<String, String> staticHtmlProps = new Hashtable<String, String>();
-    staticHtmlProps.put("alias", "/samplehtml");
-    context.registerService(
-        Resources.class.getName(), new Resources("/html"), staticHtmlProps);
-    
+    DefaultResourceMapping js = new DefaultResourceMapping();
+    js.setAlias("/samplejs");
+    js.setPath("/js");
+    context.registerService(ResourceMapping.class.getName(), js, null);
+    DefaultResourceMapping html = new DefaultResourceMapping();
+    html.setAlias("/samplehtml");
+    html.setPath("/html");
+    context.registerService(ResourceMapping.class.getName(), html, null);
   }
 
   public void stop(BundleContext context) throws Exception {

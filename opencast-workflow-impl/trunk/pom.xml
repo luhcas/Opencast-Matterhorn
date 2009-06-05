@@ -46,18 +46,6 @@
       <groupId>org.ops4j.pax.web-extender</groupId>
       <artifactId>pax-web-ex-whiteboard</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-junit</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-container-default</artifactId>
-    </dependency>
   </dependencies>
   <build>
     <resources>
