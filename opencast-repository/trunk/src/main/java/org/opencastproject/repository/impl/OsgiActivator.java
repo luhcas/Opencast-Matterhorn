@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Dictionary;
@@ -59,9 +60,62 @@ public class OsgiActivator implements BundleActivator {
     String pm = context.getProperty("matterhorn.jcr.persistence.manager");
     String dataStorePath = context.getProperty("matterhorn.jcr.datastore.path");
 
+    // load defaults for the values not found
+    File currentDir = new File( System.getProperty("user.dir") );
+    if (nodeId == null) {
+        nodeId = "matterhorn";
+        System.out.println("Opencast Repository: Using default nodeId: " + nodeId);
+    }
+    if (repoHome == null) {
+        File rh = new File(currentDir, "matterhorn"+File.pathSeparatorChar+"repo");
+        if (! rh.exists()) {
+            if (currentDir.canWrite() && rh.mkdirs()) {
+                // created the dir
+            } else {
+                throw new IllegalStateException("No matterhorn.jcr.repoPath specified and the default path ("+rh+") cannot be written to");
+            }
+        }
+        repoHome = rh.getAbsolutePath();
+        System.out.println("Opencast Repository: Using default repoPath: " + repoHome);
+    }
+    if (dbUrl == null || dbDriver == null || pm == null) {
+        // force usage of the derby stuff if any of these are null
+        System.out.println("Opencast Repository: Using default derby database and jcr persistence manager");
+        File mh = new File(currentDir, "matterhorn");
+        if (! mh.exists()) {
+            if (currentDir.canWrite() && mh.mkdirs()) {
+                // created the dir
+            } else {
+                throw new IllegalStateException("No matterhorn.jcr.db.url specified and the default path ("+mh+") cannot be written to");
+            }
+        }
+        dbDriver = "org.apache.derby.jdbc.EmbeddedDriver";
+        dbUrl = "jdbc:derby:matterhorn/db;create=true";
+        dbUser = "sa";
+        dbPass = "";
+        pm = "org.apache.jackrabbit.core.persistence.bundle.DerbyPersistenceManager";
+    }
+    if (dbUser == null) {
+        dbUser = "";
+    }
+    if (dbPass == null) {
+        dbPass = "";
+    }
+    if (dataStorePath == null) {
+        File ds = new File(currentDir, "matterhorn"+File.pathSeparatorChar+"datastore");
+        if (! ds.exists()) {
+            if (currentDir.canWrite() && ds.mkdirs()) {
+                // created the dir
+            } else {
+                throw new IllegalStateException("No matterhorn.jcr.datastore.path specified and the default path ("+ds+") cannot be written to");
+            }
+        }
+        dataStorePath = ds.getAbsolutePath();
+        System.out.println("Opencast Repository: Using default datastore.path: " + dataStorePath);
+    }
+    
     // This is just a hack... better to use an xml parser
-    BufferedReader br = new BufferedReader(
-        new InputStreamReader(configTemplate));
+    BufferedReader br = new BufferedReader( new InputStreamReader(configTemplate) );
     StringBuilder sb = new StringBuilder();
     String line = null;
     while ((line = br.readLine()) != null) {
