@@ -35,7 +35,8 @@ public class OsgiActivator implements BundleActivator {
     props.put("osgi.remote.configuration.type", "pojo");
     props.put("osgi.remote.configuration.pojo.httpservice.context",
         "/encoder");
-    props.put("org.apache.cxf.dosgi.databinding.jaxws", Boolean.TRUE.toString());
+    props.put("org.apache.cxf.dosgi.databinding", "jaxb");
+    props.put("org.apache.cxf.dosgi.frontend", "jaxws");
     encoderServiceRegistration = context.registerService(EncoderService.class.getName(),
         encoderServiceImpl, props);
   }

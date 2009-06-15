@@ -19,6 +19,7 @@ import org.opencastproject.status.api.StatusMessage;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * TODO Does this really belong in the media osgi bundle?
@@ -33,7 +34,6 @@ public class StatusMessageImpl implements StatusMessage {
 
   public StatusMessageImpl() {
   }
-  
   
   public StatusMessageImpl(String message, String reference, String source) {
     this.message = message;
@@ -62,4 +62,13 @@ public class StatusMessageImpl implements StatusMessage {
   public void setSource(String source) {
     this.source = source;
   }
+
+  /**
+   * Allows the StatusMessage interface to be serialized via jaxb
+   */
+  public static class Adapter extends XmlAdapter<StatusMessageImpl,StatusMessage> {
+    public StatusMessage unmarshal(StatusMessageImpl v) { return v; }
+    public StatusMessageImpl marshal(StatusMessage v) { return (StatusMessageImpl)v; }
+  }
+
 }

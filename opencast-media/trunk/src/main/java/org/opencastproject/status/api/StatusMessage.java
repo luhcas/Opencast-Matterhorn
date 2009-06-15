@@ -15,10 +15,14 @@
  */
 package org.opencastproject.status.api;
 
+import org.opencastproject.status.impl.StatusMessageImpl;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * TODO Does this really belong in the media osgi bundle?
  *
  */
+@XmlJavaTypeAdapter(StatusMessageImpl.Adapter.class)
 public interface StatusMessage {
   /**
    * The source of the message.  This should be an ID or description of the component generating

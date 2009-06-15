@@ -20,11 +20,13 @@ import org.opencastproject.status.api.StatusMessage;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
+import javax.jws.soap.SOAPBinding;
 /**
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this
  * encoding job.
  */
 @WebService
+@SOAPBinding(style=SOAPBinding.Style.DOCUMENT)
 public interface EncoderService {
   @WebMethod
   public StatusMessage encode(
