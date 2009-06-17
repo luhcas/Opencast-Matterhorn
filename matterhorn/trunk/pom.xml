@@ -51,6 +51,28 @@
         <module>opencast-remote-sample-service-client</module>
       </modules>
     </profile>
+    <profile>
+      <!-- This profile will just build the modules and when combined with 
+          pax-runner it will start up an osgi instance -->
+      <id>paxrun</id>
+      <modules>
+        <module>build-tools</module>
+        <module>opencast-repository</module>
+        <module>opencast-media-package-api</module>
+        <module>opencast-media-package-impl</module>
+        <module>opencast-util</module>
+        <module>opencast-media</module>
+        <module>opencast-authentication-api</module>
+        <module>opencast-authentication-cas</module>
+        <module>opencast-rest-services</module>
+        <module>opencast-encoder-api</module>
+        <module>opencast-encoder-impl</module>
+        <module>opencast-workflow-api</module>
+        <module>opencast-workflow-impl</module>
+        <module>opencast-sample-service-api</module>
+        <module>opencast-sample-service-impl</module>
+      </modules>
+    </profile>
   </profiles>
 
   <mailingLists>
@@ -125,6 +147,23 @@
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
+        <!-- Setup pax-runner -->
+        <plugin>
+            <groupId>org.ops4j</groupId>
+            <artifactId>maven-pax-plugin</artifactId>
+            <version>1.4</version>
+            <configuration>
+                <!-- including profiles for http (web), dosgi, DS, Config, Prefs spring -->
+                <!-- NOTE: cxf.dosgi profile is currently failing -AZ -->
+                <!-- NOTE: I could have included the felix.webconsole here but I probably should not -AZ -->
+                <profiles>cxf.dosgi/1.2,web,ds,config,prefs,spring.dm,spring</profiles>
+                <provision>
+                    <param>scan-pom:file:${basedir}/runner.xml</param>
+                    <param>--repositories=+http://scm.ops4j.org/repos/ops4j/projects/pax/runner-repository/</param>
+                    <param>--vmOptions=-server -Xmx512M</param>
+                </provision>
+            </configuration>
+        </plugin>
 
       <!-- Require Java 5 or higher for building -->
       <plugin>
@@ -378,6 +417,7 @@
         <artifactId>jcr</artifactId>
         <version>1.0</version>
       </dependency>
+
       <dependency>
         <groupId>org.apache.jackrabbit</groupId>
         <artifactId>jackrabbit-jcr-commons</artifactId>
@@ -595,10 +635,15 @@
 
   <pluginRepositories>
     <pluginRepository>
+        <id>ops4j.releases</id>
+        <url>http://repository.ops4j.org/maven2</url>
+        <snapshots>
+            <enabled>false</enabled>
+        </snapshots>
+    </pluginRepository>
+    <pluginRepository>
       <id>apache Snapshots</id>
-      <url>
-                http://people.apache.org/repo/m2-snapshot-repository
-            </url>
+      <url>http://people.apache.org/repo/m2-snapshot-repository</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
