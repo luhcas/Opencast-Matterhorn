@@ -35,6 +35,7 @@
         <module>build-tools</module>
         <module>osgi</module>
         <module>opencast-repository</module>
+        <module>opencast-notification-api</module>
         <module>opencast-media-package-api</module>
         <module>opencast-media-package-impl</module>
         <module>opencast-util</module>
@@ -58,6 +59,7 @@
       <modules>
         <module>build-tools</module>
         <module>opencast-repository</module>
+        <module>opencast-notification-api</module>
         <module>opencast-media-package-api</module>
         <module>opencast-media-package-impl</module>
         <module>opencast-util</module>
