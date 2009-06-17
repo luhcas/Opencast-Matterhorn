@@ -13,29 +13,27 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.status.impl;
+package org.opencastproject.notification.api;
 
-import org.opencastproject.status.api.StatusMessage;
+import org.opencastproject.notification.api.NotificationMessage;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- * TODO Does this really belong in the media osgi bundle?
- * 
- * @see StatusMessage
+ * @see NotificationMessage
  */
 @XmlRootElement(name="status-message")
-public class StatusMessageImpl implements StatusMessage {
+public class NotificationMessageImpl implements NotificationMessage {
   private String message;
   private String reference;
   private String source;
 
-  public StatusMessageImpl() {
+  public NotificationMessageImpl() {
   }
   
-  public StatusMessageImpl(String message, String reference, String source) {
+  public NotificationMessageImpl(String message, String reference, String source) {
     this.message = message;
     this.reference = reference;
     this.source = source;
@@ -66,9 +64,9 @@ public class StatusMessageImpl implements StatusMessage {
   /**
    * Allows the StatusMessage interface to be serialized via jaxb
    */
-  public static class Adapter extends XmlAdapter<StatusMessageImpl,StatusMessage> {
-    public StatusMessage unmarshal(StatusMessageImpl v) { return v; }
-    public StatusMessageImpl marshal(StatusMessage v) { return (StatusMessageImpl)v; }
+  public static class Adapter extends XmlAdapter<NotificationMessageImpl,NotificationMessage> {
+    public NotificationMessage unmarshal(NotificationMessageImpl v) { return v; }
+    public NotificationMessageImpl marshal(NotificationMessage v) { return (NotificationMessageImpl)v; }
   }
 
 }

@@ -15,7 +15,7 @@
  */
 package org.opencastproject.encoder.api;
 
-import org.opencastproject.status.api.StatusMessage;
+import org.opencastproject.notification.api.NotificationMessage;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -29,7 +29,7 @@ import javax.jws.soap.SOAPBinding;
 @SOAPBinding(style=SOAPBinding.Style.DOCUMENT)
 public interface EncoderService {
   @WebMethod
-  public StatusMessage encode(
+  public NotificationMessage encode(
       @WebParam(name="pathIn") String pathIn,
       @WebParam(name="pathOut") String pathOut,
       @WebParam(name="statusServiceEndpoint") String statusServiceEndpoint);

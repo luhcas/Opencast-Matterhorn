@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-encoder-api</artifactId>
+  <artifactId>opencast-notification-api</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-encoder-api</name>
+  <name>opencast-notification-api</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -12,14 +12,8 @@
   </parent>
   <dependencies>
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-notification-api</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-media</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
@@ -35,8 +29,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.encoder.api </Export-Package>
-            <Import-Package> * </Import-Package>
+            <Export-Package> org.opencastproject.notification.api </Export-Package>
           </instructions>
         </configuration>
       </plugin>

@@ -13,17 +13,17 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.status.api;
+package org.opencastproject.notification.api;
 
-import org.opencastproject.status.impl.StatusMessageImpl;
+import org.opencastproject.notification.api.NotificationMessageImpl;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * TODO Does this really belong in the media osgi bundle?
  *
  */
-@XmlJavaTypeAdapter(StatusMessageImpl.Adapter.class)
-public interface StatusMessage {
+@XmlJavaTypeAdapter(NotificationMessageImpl.Adapter.class)
+public interface NotificationMessage {
   /**
    * The source of the message.  This should be an ID or description of the component generating
    * the message.

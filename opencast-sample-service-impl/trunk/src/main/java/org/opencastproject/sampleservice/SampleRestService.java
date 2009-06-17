@@ -15,9 +15,9 @@
  */
 package org.opencastproject.sampleservice;
 
+import org.opencastproject.notification.api.NotificationMessage;
+import org.opencastproject.notification.api.NotificationMessageImpl;
 import org.opencastproject.repository.api.OpencastRepository;
-import org.opencastproject.status.api.StatusMessage;
-import org.opencastproject.status.impl.StatusMessageImpl;
 
 import java.io.InputStream;
 
@@ -74,15 +74,15 @@ public class SampleRestService {
   @GET
   @Path("/json")
   @Produces(MediaType.APPLICATION_JSON)
-  public StatusMessage getJson() {
-    return new StatusMessageImpl("a message", "a reference", SampleRestService.class.getName());
+  public NotificationMessage getJson() {
+    return new NotificationMessageImpl("a message", "a reference", SampleRestService.class.getName());
   }
 
   @GET
   @Path("/xml")
   @Produces(MediaType.APPLICATION_XML)
-  public StatusMessage getStatusMessage() {
-    return new StatusMessageImpl("a message", "a reference", SampleRestService.class.getName());
+  public NotificationMessage getStatusMessage() {
+    return new NotificationMessageImpl("a message", "a reference", SampleRestService.class.getName());
   }
   
   @GET

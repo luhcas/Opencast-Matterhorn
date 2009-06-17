@@ -31,7 +31,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-media</artifactId>
+      <artifactId>opencast-notification-api</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
