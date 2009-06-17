@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.opencastproject</groupId>
+  <artifactId>opencast-media-package-impl</artifactId>
+  <packaging>bundle</packaging>
+  <name>opencast-media-package-impl</name>
+  <parent>
+    <groupId>org.opencastproject</groupId>
+    <artifactId>base</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
+  <dependencies>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-media-package-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-rest-services</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_compendium</artifactId>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Private-Package> org.opencastproject.mediapackage.impl </Private-Package>
+            <Export-Package> org.opencastproject.mediapackage.rest </Export-Package>
+            <Bundle-Activator> org.opencastproject.mediapackage.impl.OsgiActivator </Bundle-Activator>
+            <Service-Component>
+              OSGI-INF/media-package-service.xml, OSGI-INF/media-package-rest.xml
+            </Service-Component>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

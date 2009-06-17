@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="media-package-rest" immediate="true">
+  <implementation class="org.opencastproject.mediapackage.rest.MediaPackageRestService" />
+  <property name="service.description" value="Media Package Rest Service" />
+  <property name="opencast.rest.service" value="true" />
+  <service>
+    <provide interface="org.opencastproject.mediapackage.rest.MediaPackageRestService" />
+  </service>
+  <reference name="mpService" interface="org.opencastproject.mediapackage.api.MediaPackageService"
+    cardinality="1..1" policy="static" bind="setMpService" />
+</component>
