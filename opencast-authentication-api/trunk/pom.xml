@@ -12,6 +12,10 @@
     <version>0.1-SNAPSHOT</version>
   </parent>
   <dependencies>
+		<dependency>
+		  <groupId>javax.servlet</groupId>
+		  <artifactId>servlet-api</artifactId>
+		</dependency>
   </dependencies>
   <build>
     <plugins>

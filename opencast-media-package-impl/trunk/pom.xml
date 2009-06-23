@@ -16,11 +16,10 @@
       <artifactId>opencast-media-package-api</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-rest-services</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+      </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -30,8 +29,8 @@
       <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.geronimo.specs</groupId>
-      <artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jsr311-api-1.0</artifactId>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -55,7 +54,7 @@
             <Export-Package> org.opencastproject.mediapackage.rest </Export-Package>
             <Bundle-Activator> org.opencastproject.mediapackage.impl.OsgiActivator </Bundle-Activator>
             <Service-Component>
-              OSGI-INF/media-package-service.xml, OSGI-INF/media-package-rest.xml
+              OSGI-INF/media-package-service.xml
             </Service-Component>
           </instructions>
         </configuration>

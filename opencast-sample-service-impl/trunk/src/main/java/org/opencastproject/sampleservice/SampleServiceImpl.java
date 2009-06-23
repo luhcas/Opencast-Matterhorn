@@ -18,17 +18,20 @@ package org.opencastproject.sampleservice;
 import org.opencastproject.repository.api.OpencastRepository;
 import org.opencastproject.sampleservice.api.SampleService;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.MultipartBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 
 public class SampleServiceImpl implements SampleService {
-
-  public static final String PROPERTY_KEY = "sample-property";
+  private static final Logger logger = LoggerFactory.getLogger(SampleServiceImpl.class);
+  private static final String DOCS;
+  static {
+    DOCS = "the documentation goes here";
+  }
 
   protected OpencastRepository repo;
 
@@ -40,24 +43,25 @@ public class SampleServiceImpl implements SampleService {
     this.repo = repo;
   }
 
-  public String getSomething(String path) {
-    InputStream in = repo.getObject(InputStream.class, path);
-    StringWriter writer = new StringWriter();
-    try {
-      IOUtils.copy(in, writer);
-      return writer.getBuffer().toString();
-    } catch (IOException e) {
-      e.printStackTrace();
-      return e.toString();
-    }
+  public InputStream getFileFromRepository(String path) {
+    path = "/" + path;
+    logger.debug("Getting content from path " + path);
+    return repo.getObject(InputStream.class, path);
   }
 
-  public void setSomething(String path, String content) {
+  public void setFileInRepository(String path, MultipartBody body) {
+    path = "/" + path;
+    logger.debug("Setting " + body + " to path " + path);
+    Attachment a = body.getAllAttachments().get(0);
     try {
-      ByteArrayInputStream in = new ByteArrayInputStream(content.getBytes("UTF8"));
+      InputStream in = a.getDataHandler().getInputStream();
       repo.putObject(in, path);
-    } catch (UnsupportedEncodingException e) {
+    } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  public String getDocumentation() {
+    return DOCS;
   }
 }

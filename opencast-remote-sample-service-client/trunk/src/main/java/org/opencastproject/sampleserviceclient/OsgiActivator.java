@@ -46,7 +46,7 @@ public class OsgiActivator implements BundleActivator {
         while (tracker != null) {
           try {
             // Use the sample service
-            sampleService.getSomething("getSomething() call #" + counter++);
+            sampleService.getFileFromRepository("getSomething() call #" + counter++);
 
             // Wait a bit
             try {

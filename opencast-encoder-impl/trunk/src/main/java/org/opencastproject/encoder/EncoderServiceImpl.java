@@ -17,24 +17,24 @@ package org.opencastproject.encoder;
 
 import org.opencastproject.encoder.api.EncoderService;
 import org.opencastproject.notification.api.NotificationMessage;
-import org.opencastproject.notification.api.NotificationMessageImpl;
 
 import java.util.UUID;
 
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebService;
-
-@WebService
 public class EncoderServiceImpl implements EncoderService {
-  @WebMethod
-  public NotificationMessage encode(
-      @WebParam(name="pathIn") String pathIn,
-      @WebParam(name="pathOut") String pathOut,
-      @WebParam(name="statusServiceEndpoint") String statusServiceEndpoint) {
+  public NotificationMessage encode(String mediaPackageId, String trackId, String pathOut,
+      String notificationServiceEndpoint) {
     // TODO actually start or queue (and change the message parameter) the encoding job
-    return new NotificationMessageImpl("encoding job started", UUID.randomUUID().toString(),
-        EncoderService.class.getName());
+    StringBuilder message = new StringBuilder();
+    message.append("encoding job started on:\nMedia package=");
+    message.append(mediaPackageId);
+    message.append("\nTrack ID=");
+    message.append(trackId);
+    message.append("\nPath Out=");
+    message.append("\nNotification Endpoint=");
+    message.append(notificationServiceEndpoint);
+
+    return new NotificationMessage(message.toString(), UUID.randomUUID()
+        .toString(), EncoderService.class.getName());
   }
 
 }

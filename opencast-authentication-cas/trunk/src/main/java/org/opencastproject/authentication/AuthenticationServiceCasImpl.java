@@ -16,12 +16,26 @@
 package org.opencastproject.authentication;
 
 import org.opencastproject.authentication.api.AuthenticationService;
+import org.jasig.cas.client.authentication.AuthenticationFilter;
+import java.util.Map;
+import javax.servlet.Filter;
 
 public class AuthenticationServiceCasImpl implements AuthenticationService {
   public String getUserId() {
     // Get the CAS receipt from threadlocal
-    
     // FIXME return the user ID
     return null;
+  }
+  public Filter newAuthenticationFilter(Map<String, String> props) {
+    String casServerLoginUrl = props.get("casServerLoginUrl");
+    String casService = props.get("casService");
+    AuthenticationFilter authenticationFilter = new AuthenticationFilter();
+    authenticationFilter.setIgnoreInitConfiguration(true);
+    authenticationFilter.setCasServerLoginUrl(casServerLoginUrl);
+    authenticationFilter.setRenew(false);
+    authenticationFilter.setGateway(false);
+    authenticationFilter.setService(casService);
+    authenticationFilter.setServerName(casService);
+    return authenticationFilter;
   }
 }

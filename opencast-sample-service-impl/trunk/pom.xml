@@ -21,22 +21,8 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>jaxrs-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-repository</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-notification-api</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-rest-services</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -49,12 +35,12 @@
       <artifactId>servlet-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.geronimo.specs</groupId>
-      <artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jaxws-api-2.1</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.jaxws-api-2.1</artifactId>
+      <artifactId>org.apache.servicemix.specs.jsr311-api-1.0</artifactId>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax.web-extender</groupId>
@@ -80,11 +66,9 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Bundle-Activator> org.opencastproject.sampleservice.OsgiActivator </Bundle-Activator>
             <Service-Component>
-              OSGI-INF/sample-service.xml, OSGI-INF/sample-rest.xml
+              OSGI-INF/sample-service.xml
             </Service-Component>
-            <Import-Package> org.osgi.service.component; version=1.0, META-INF.cxf, org.apache.cxf,
-              org.apache.cxf.wsdl, org.opencastproject.sampleservice.api, org.opencastproject.rest,
-              org.opencastproject.repository.api, javax.jcr, * </Import-Package>
+            <Import-Package> org.osgi.service.component; version=1.0, META-INF.cxf, * </Import-Package>
             <Private-Package>org.opencastproject.sampleservice</Private-Package>
             <!--
               FIXME: This is a hack to fix cxf not showing up in the import-package instructions

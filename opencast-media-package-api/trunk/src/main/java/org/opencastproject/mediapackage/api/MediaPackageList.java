@@ -17,9 +17,24 @@ package org.opencastproject.mediapackage.api;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlJavaTypeAdapter(MediaPackageListImpl.Adapter.class)
-public interface MediaPackageList {
-  List<MediaPackage> getMediaPackages();
+@XmlRootElement(name="media-packages")
+public class MediaPackageList {
+  private List<MediaPackage> mediaPackages;
+
+  public MediaPackageList() {}
+  
+  public MediaPackageList(List<MediaPackage> mediaPackages) {
+    this.mediaPackages = mediaPackages;
+  }
+
+  @XmlElement(name="media-package")
+  public List<MediaPackage> getMediaPackages() {
+    return mediaPackages;
+  }
+  public void setMediaPackages(List<MediaPackage> mediaPackages) {
+    this.mediaPackages = mediaPackages;
+  }
 }

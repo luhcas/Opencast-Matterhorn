@@ -17,20 +17,20 @@ package org.opencastproject.encoder.api;
 
 import org.opencastproject.notification.api.NotificationMessage;
 
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+
 /**
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this
  * encoding job.
  */
-@WebService
-@SOAPBinding(style=SOAPBinding.Style.DOCUMENT)
+@Path("/")
 public interface EncoderService {
-  @WebMethod
+  @POST
   public NotificationMessage encode(
-      @WebParam(name="pathIn") String pathIn,
-      @WebParam(name="pathOut") String pathOut,
-      @WebParam(name="statusServiceEndpoint") String statusServiceEndpoint);
+      @FormParam("mediaPackageId") String mediaPackageHandle,
+      @FormParam("trackId") String track,
+      @FormParam("pathOut") String pathOut,
+      @FormParam("notificationEndpoint") String notificationServiceEndpoint);
 }

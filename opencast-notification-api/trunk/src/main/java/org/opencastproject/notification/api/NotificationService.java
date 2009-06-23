@@ -16,4 +16,5 @@
 package org.opencastproject.notification.api;
 
 public interface NotificationService {
+  void receiveNotificationMessage(NotificationMessage notification);
 }

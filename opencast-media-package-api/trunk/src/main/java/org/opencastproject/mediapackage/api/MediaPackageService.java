@@ -15,21 +15,29 @@
  */
 package org.opencastproject.mediapackage.api;
 
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 /**
  * Gets a {@link MediaPackage} by its handle identifier
  */
-@WebService
-@SOAPBinding(style=SOAPBinding.Style.DOCUMENT)
+@Path("/")
 public interface MediaPackageService {
-  @WebMethod
-  MediaPackage getMediaPackage(@WebParam(name="handle") String handle);
+  @GET
+  @Path("/{id}")
+  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+  MediaPackage getMediaPackage(@PathParam("id") String handle);
 
-  @WebMethod
+  @GET
+  @Path("/all")
+  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
   MediaPackageList getMediaPackages();
   
+  @GET
+  @Path("/docs")
+  @Produces({MediaType.TEXT_HTML})
+  String getDocumentation();
 }

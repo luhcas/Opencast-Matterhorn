@@ -15,30 +15,43 @@
  */
 package org.opencastproject.notification.api;
 
-import org.opencastproject.notification.api.NotificationMessageImpl;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- * TODO Does this really belong in the media osgi bundle?
- *
- */
-@XmlJavaTypeAdapter(NotificationMessageImpl.Adapter.class)
-public interface NotificationMessage {
-  /**
-   * The source of the message.  This should be an ID or description of the component generating
-   * the message.
-   */
-  String getSource();
+@XmlRootElement(name="notification-message")
+public class NotificationMessage {
+  private String message;
+  private String reference;
+  private String source;
+
+  public NotificationMessage() {
+  }
   
-  /**
-   * A reference to the job or task this status describes.
-   * @return
-   */
-  String getReference();
+  public NotificationMessage(String message, String reference, String source) {
+    this.message = message;
+    this.reference = reference;
+    this.source = source;
+  }
 
-  /**
-   * The details of the status message.
-   * @return
-   */
-  String getMessage();
+  @XmlElement(required=true, nillable=false)
+  public String getMessage() {
+    return message;
+  }
+  public void setMessage(String message) {
+    this.message = message;
+  }
+  @XmlElement(required=true, nillable=false)
+  public String getReference() {
+    return reference;
+  }
+  public void setReference(String reference) {
+    this.reference = reference;
+  }
+  @XmlElement(required=true, nillable=false)
+  public String getSource() {
+    return source;
+  }
+  public void setSource(String source) {
+    this.source = source;
+  }
 }

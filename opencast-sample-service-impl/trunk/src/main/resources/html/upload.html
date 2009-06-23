@@ -4,31 +4,18 @@
 <script>
   function updateUploadFormAction() {
 	  var path = jQuery('#upload_path').val();
-	  jQuery('#upload_form').attr('action', '/rest/repository/data' + path);
-  }
-  function updateMetadataFormAction() {
-	  var path = jQuery('#md_path').val();
-	  var key = jQuery('#md_key').val();
-	  jQuery('#metadata_form').attr('action', '/rest/repository/metadata/' + key + path);
+	  jQuery('#upload_form').attr('action', '/samplews/sample' + path);
   }
 </script>
 </head>
 <body>
 <form id="upload_form" method="post" enctype="multipart/form-data">
-<div>Path:<input type="text" id="upload_path"
-	onblur="updateUploadFormAction()" /></div>
-<div><input type="file" id="file" name="file"
-	onblur="updateUploadFormAction()" /></div>
-<div><input type="submit" value="Upload to the repository" /></div>
+  <div>Path:<input type="text" id="upload_path"
+	  onblur="updateUploadFormAction()" /></div>
+  <div><input type="file" id="file" name="file"
+	  onblur="updateUploadFormAction()" /></div>
+  <div><input type="submit" value="Upload to the repository" /></div>
 </form>
 
-<form id="metadata_form" method="post">
-<div>Path: <input type="text" id="md_path"
-	onblur="updateMetadataFormAction()" /></div>
-<div>Key:<input type="text" id="md_key"
-	onblur="updateMetadataFormAction()" /></div>
-<div>Value:<input type="text" name="metadata" /></div>
-<div><input type="submit" value="Add metadata" /></div>
-</form>
 </body>
 </html>

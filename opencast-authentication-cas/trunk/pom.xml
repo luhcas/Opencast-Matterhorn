@@ -59,7 +59,9 @@
             <Import-Package> *;resolution:=optional </Import-Package>
             <Export-Package> org.opencastproject.authentication </Export-Package>
             <Embed-Dependency>cas-client-core, opensaml, bcprov-jdk15</Embed-Dependency>
-            <Bundle-Activator> org.opencastproject.authentication.OsgiActivator </Bundle-Activator>
+            <Service-Component>
+              OSGI-INF/cas-filter.xml
+            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

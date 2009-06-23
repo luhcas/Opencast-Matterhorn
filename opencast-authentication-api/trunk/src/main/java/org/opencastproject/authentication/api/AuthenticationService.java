@@ -15,6 +15,11 @@
  */
 package org.opencastproject.authentication.api;
 
+import java.util.Map;
+
+import javax.servlet.Filter;
+
 public interface AuthenticationService {
   String getUserId();
+  Filter newAuthenticationFilter(Map<String, String> props);
 }

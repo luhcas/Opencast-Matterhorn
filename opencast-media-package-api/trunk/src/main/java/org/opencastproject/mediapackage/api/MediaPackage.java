@@ -18,11 +18,30 @@ package org.opencastproject.mediapackage.api;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlJavaTypeAdapter(MediaPackageImpl.Adapter.class)
-public interface MediaPackage {
-  String getId();
-  List<Track> getTracks();
+@XmlRootElement(name="media-package")
+public class MediaPackage {
+  protected String id;
+  protected List<Track> tracks;
+  public MediaPackage() {}
+  @XmlAttribute(name="handle")
+  public String getId() {
+    return id;
+  }
+  public void setId(String id) {
+    this.id = id;
+  }
+  @XmlElementWrapper(name="track-list")
+  @XmlElement(name="track")
+  public List<Track> getTracks() {
+    return tracks;
+  }
+  public void setTracks(List<Track> tracks) {
+    this.tracks = tracks;
+  }
 }
 

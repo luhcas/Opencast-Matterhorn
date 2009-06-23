@@ -16,13 +16,22 @@
 package org.opencastproject.mediapackage.api;
 
 
-import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-@XmlJavaTypeAdapter(TrackImpl.Adapter.class)
 @XmlType(name="track")
-public interface Track {
-  @XmlAttribute(name="url")
-  String getUrl();
+public class Track {
+  protected String url;
+  public Track() {
+  }
+  public Track(String url) {
+    this.url = url;
+  }
+  @XmlElement
+  public String getUrl() {
+    return url;
+  }
+  public void setUrl(String url) {
+    this.url = url;
+  }
 }
