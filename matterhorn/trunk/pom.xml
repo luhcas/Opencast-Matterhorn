@@ -34,6 +34,7 @@
       <modules>
         <module>build-tools</module>
         <module>osgi</module>
+        <module>opencast-runtime-info</module>
         <module>opencast-repository</module>
         <module>opencast-notification-api</module>
         <module>opencast-media-package-api</module>
@@ -57,6 +58,7 @@
       <id>paxrun</id>
       <modules>
         <module>build-tools</module>
+        <module>opencast-runtime-info</module>
         <module>opencast-repository</module>
         <module>opencast-notification-api</module>
         <module>opencast-media-package-api</module>
