@@ -67,8 +67,13 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
       writer.write("<div>There are no REST services available.</div>");
     } else {
       writer.write("<div>REST Services</div>");
+      writer.write("<table>");
       for (ServiceReference jaxRsRef : jaxRsRefs) {
-        writer.write("<div>");
+        writer.write("<tr>");
+        writer.write("<td>");
+        writer.write((String)jaxRsRef.getProperty("service.description"));
+        writer.write("</td>");
+        writer.write("<td>");
         Object jaxRsResource = bundleContext.getService(jaxRsRef);
         String servletContextPath = (String)jaxRsRef.getProperty("org.apache.cxf.rs.httpservice.context");
         Path pathAnnotation = jaxRsResource.getClass().getAnnotation(Path.class);
@@ -76,9 +81,11 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
         if(pathAnnotation != null && pathAnnotation.value() != null && ! pathAnnotation.value().equals("/")) {
           relativePath += pathAnnotation;
         }
-        writer.write("<a href=\"" + relativePath + "/docs\">" + relativePath + "</a>\n");
-        writer.write("</div>");
+        writer.write("<a href=\"" + relativePath + "/docs\">" + relativePath + "</a>");
+        writer.write("</td>");
+        writer.write("</tr>");
       }
+      writer.write("</table>");
     }
   }
   
