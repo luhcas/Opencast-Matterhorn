@@ -42,7 +42,6 @@
         <module>opencast-media</module>
         <module>opencast-authentication-api</module>
         <module>opencast-authentication-cas</module>
-        <!--module>opencast-rest-services</module-->
         <module>opencast-encoder-api</module>
         <module>opencast-encoder-impl</module>
         <module>opencast-workflow-api</module>
@@ -66,7 +65,6 @@
         <module>opencast-media</module>
         <module>opencast-authentication-api</module>
         <module>opencast-authentication-cas</module>
-        <module>opencast-rest-services</module>
         <module>opencast-encoder-api</module>
         <module>opencast-encoder-impl</module>
         <module>opencast-workflow-api</module>
