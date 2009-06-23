@@ -1,0 +1,116 @@
+/**
+ *  Copyright 2009 Opencast Project (http://www.opencastproject.org)
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+package org.opencastproject.runtimeinfo;
+
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Path;
+
+/**
+ * Lists all service endpoints currently registered with the system.
+ */
+public class InfoServlet extends HttpServlet implements BundleActivator {
+  private static final long serialVersionUID = 1L;
+  private static final Logger logger = LoggerFactory.getLogger(InfoServlet.class);
+  private BundleContext bundleContext;
+  /**
+   * {@inheritDoc}
+   * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   */
+  public void doGet(HttpServletRequest request, HttpServletResponse response)
+    throws IOException, ServletException{
+    PrintWriter writer = response.getWriter();
+    writeJaxRsResources(writer);
+  }
+
+  /**
+   * Writes links to the restful web services registered in the OSGI environment.
+   * 
+   * @param writer
+   */
+  private void writeJaxRsResources(PrintWriter writer) {
+    ServiceReference[] jaxRsRefs = null;
+    try {
+      jaxRsRefs = bundleContext.getAllServiceReferences(null, "(org.apache.cxf.rs.httpservice.context=*)");
+    } catch (InvalidSyntaxException e) {
+      e.printStackTrace();
+    }
+    if (jaxRsRefs == null) {
+      writer.write("<div>There are no REST services available.</div>");
+    } else {
+      writer.write("<div>REST Services</div>");
+      for (ServiceReference jaxRsRef : jaxRsRefs) {
+        writer.write("<div>");
+        Object jaxRsResource = bundleContext.getService(jaxRsRef);
+        String servletContextPath = (String)jaxRsRef.getProperty("org.apache.cxf.rs.httpservice.context");
+        Path pathAnnotation = jaxRsResource.getClass().getAnnotation(Path.class);
+        String relativePath = servletContextPath;
+        if(pathAnnotation != null && pathAnnotation.value() != null && ! pathAnnotation.value().equals("/")) {
+          relativePath += pathAnnotation;
+        }
+        writer.write("<a href=\"" + relativePath + "/docs\">" + relativePath + "</a>\n");
+        writer.write("</div>");
+      }
+    }
+  }
+  
+  private ServiceTracker httpTracker;
+  
+  public void start(BundleContext context) throws Exception {
+    logger.debug("start()");
+    this.bundleContext = context;
+    final HttpServlet servlet = this;
+    httpTracker = new ServiceTracker(context, HttpService.class
+        .getName(), null) {
+      @Override
+      public Object addingService(ServiceReference reference) {
+        HttpService httpService = (HttpService) context.getService(reference);
+        try {
+          httpService.registerServlet("/services/*", servlet, null, null);
+        } catch (ServletException e) {
+          e.printStackTrace();
+        } catch (NamespaceException e) {
+          e.printStackTrace();
+        }
+        return super.addingService(reference);
+      }
+    };
+    httpTracker.open();
+  }
+  
+  public void stop(BundleContext context) throws Exception {
+    logger.debug("stop()");
+    if(httpTracker != null) {
+      httpTracker.close();
+    }
+  }
+}
+
