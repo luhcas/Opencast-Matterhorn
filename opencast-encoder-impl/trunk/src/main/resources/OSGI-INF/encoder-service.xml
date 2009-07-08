@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="encoder-service" immediate="true">
+  <implementation class="org.opencastproject.encoder.EncoderServiceImpl" />
+  <property name="service.description" value="Encoder Service" />
+  <property name="service.exported.interfaces" value="*" />
+  <!-- property name="service.exported.configs" value="org.apache.cxf.rs" / -->
+  <property name="service.exported.configs" value="org.apache.cxf.ws" />
+  <!-- property name="org.apache.cxf.rs.httpservice.context" value="/encoder" / -->
+  <property name="org.apache.cxf.ws.httpservice.context" value="/encoder" />
+  <service>
+    <provide interface="org.opencastproject.encoder.api.EncoderService" />
+  </service>
+</component>

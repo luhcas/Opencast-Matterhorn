@@ -15,7 +15,6 @@
  */
 package org.opencastproject.sampleservice;
 
-
 import org.opencastproject.repository.api.OpencastRepository;
 
 import org.opencastproject.sampleservice.api.SampleService;
@@ -28,6 +27,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.ws.rs.Path;
+
+@Path("/")
 public class SampleServiceImpl implements SampleService {
   private static final Logger logger = LoggerFactory.getLogger(SampleServiceImpl.class);
   private static final String DOCS;

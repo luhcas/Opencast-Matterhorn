@@ -68,12 +68,7 @@
             <Service-Component>
               OSGI-INF/sample-service.xml
             </Service-Component>
-            <Import-Package> org.osgi.service.component; version=1.0, META-INF.cxf, * </Import-Package>
             <Private-Package>org.opencastproject.sampleservice</Private-Package>
-            <!--
-              FIXME: This is a hack to fix cxf not showing up in the import-package instructions
-            -->
-            <Require-Bundle>org.apache.cxf.bundle-minimal</Require-Bundle>
           </instructions>
         </configuration>
       </plugin>

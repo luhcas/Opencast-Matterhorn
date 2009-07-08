@@ -48,34 +48,57 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
   public void doGet(HttpServletRequest request, HttpServletResponse response)
     throws IOException, ServletException{
     PrintWriter writer = response.getWriter();
-    writeJaxRsResources(writer);
+    writeWsdlEndpoints(writer);
+    writeJaxRsEndpoints(writer);
   }
 
-  /**
-   * Writes links to the restful web services registered in the OSGI environment.
-   * 
-   * @param writer
-   */
-  private void writeJaxRsResources(PrintWriter writer) {
-    ServiceReference[] jaxRsRefs = null;
+  private void writeWsdlEndpoints(PrintWriter writer) {
+    ServiceReference[] serviceRefs = null;
     try {
-      jaxRsRefs = bundleContext.getAllServiceReferences(null, "(org.apache.cxf.rs.httpservice.context=*)");
+      serviceRefs = bundleContext.getAllServiceReferences(null, "(org.apache.cxf.ws.httpservice.context=*)");
     } catch (InvalidSyntaxException e) {
       e.printStackTrace();
     }
-    if (jaxRsRefs == null) {
-      writer.write("<div>There are no REST services available.</div>");
+    if (serviceRefs == null) {
+      writer.write("<div>There are no wsdl endpoints available.</div>");
     } else {
-      writer.write("<div>REST Services</div>");
+      writer.write("<div>WSDL Service Endpoints</div>");
       writer.write("<table>");
-      for (ServiceReference jaxRsRef : jaxRsRefs) {
+      for (ServiceReference wsdlRef : serviceRefs) {
+        writer.write("<tr>");
+        writer.write("<td>");
+        writer.write((String)wsdlRef.getProperty("service.description"));
+        writer.write("</td>");
+        writer.write("<td>");
+        String servletContextPath = (String)wsdlRef.getProperty("org.apache.cxf.ws.httpservice.context");
+        writer.write("<a href=\"" + servletContextPath + "?wsdl\">" + servletContextPath + "</a>");
+        writer.write("</td>");
+        writer.write("</tr>");
+      }
+      writer.write("</table>");
+    }
+  }
+
+  private void writeJaxRsEndpoints(PrintWriter writer) {
+    ServiceReference[] serviceRefs = null;
+    try {
+      serviceRefs = bundleContext.getAllServiceReferences(null, "(org.apache.cxf.rs.httpservice.context=*)");
+    } catch (InvalidSyntaxException e) {
+      e.printStackTrace();
+    }
+    if (serviceRefs == null) {
+      writer.write("<div>There are no JAX-RS endpoints available.</div>");
+    } else {
+      writer.write("<div>REST Service Endpoints</div>");
+      writer.write("<table>");
+      for (ServiceReference jaxRsRef : serviceRefs) {
         writer.write("<tr>");
         writer.write("<td>");
         writer.write((String)jaxRsRef.getProperty("service.description"));
         writer.write("</td>");
         writer.write("<td>");
-        String servletContextPath = (String)jaxRsRef.getProperty("org.apache.cxf.ws.httpservice.context");
-        writer.write("<a href=\"" + servletContextPath + "?wsdl\">" + servletContextPath + "</a>");
+        String servletContextPath = (String)jaxRsRef.getProperty("org.apache.cxf.rs.httpservice.context");
+        writer.write("<a href=\"" + servletContextPath + "/docs\">" + servletContextPath + "</a>");
         writer.write("</td>");
         writer.write("</tr>");
       }

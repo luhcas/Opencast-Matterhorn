@@ -15,20 +15,37 @@
  */
 package org.opencastproject.sampleservice.api;
 
-
 import org.apache.cxf.jaxrs.ext.multipart.MultipartBody;
 
 import java.io.InputStream;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
 /**
  * A sample service to use as a template when building your own Matterhorn services.
  */
+@Path("/")
 public interface SampleService {
   
-  InputStream getFileFromRepository(String path);
+  @GET
+  @Path("/{path:.*}")
+  @Produces(MediaType.APPLICATION_OCTET_STREAM)
+  InputStream getFileFromRepository(@PathParam("path") String path);
 
-  void setFileInRepository(String path, MultipartBody body);
+  @POST
+  @Path("/{path:.*}")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  void setFileInRepository(@PathParam("path") String path, MultipartBody body);
 
+  @GET
+  @Path("/docs")
+  @Produces(MediaType.TEXT_HTML)
   public String getDocumentation();
 
 }
