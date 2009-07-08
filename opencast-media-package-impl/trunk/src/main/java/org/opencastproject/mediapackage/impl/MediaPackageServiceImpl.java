@@ -38,7 +38,7 @@ public class MediaPackageServiceImpl implements MediaPackageService {
   }
 
   public MediaPackageList getMediaPackages() {
-    return generateMediaPackages();
+    return generateSampleMediaPackages();
   }
 
   protected static String dummy_url_prefix = "http://localhost:8080/tracks/";
@@ -53,7 +53,7 @@ public class MediaPackageServiceImpl implements MediaPackageService {
     return mp;
   }
 
-  public MediaPackageList generateMediaPackages() {
+  private MediaPackageList generateSampleMediaPackages() {
     List<MediaPackage> mps = new ArrayList<MediaPackage>();
     mps.add(generateMediaPackage("listsample1"));
     mps.add(generateMediaPackage("listsample2"));

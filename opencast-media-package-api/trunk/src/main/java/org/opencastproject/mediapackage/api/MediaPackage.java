@@ -15,7 +15,6 @@
  */
 package org.opencastproject.mediapackage.api;
 
-
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;

@@ -39,5 +39,5 @@ public interface MediaPackageService {
   @GET
   @Path("/docs")
   @Produces({MediaType.TEXT_HTML})
-  String getDocumentation();
+  public String getDocumentation();
 }

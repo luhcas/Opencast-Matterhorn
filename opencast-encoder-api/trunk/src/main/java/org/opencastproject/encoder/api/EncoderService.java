@@ -17,20 +17,16 @@ package org.opencastproject.encoder.api;
 
 import org.opencastproject.notification.api.NotificationMessage;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-
 /**
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this
  * encoding job.
  */
-@Path("/")
 public interface EncoderService {
-  @POST
   public NotificationMessage encode(
-      @FormParam("mediaPackageId") String mediaPackageHandle,
-      @FormParam("trackId") String track,
-      @FormParam("pathOut") String pathOut,
-      @FormParam("notificationEndpoint") String notificationServiceEndpoint);
+      String mediaPackageHandle,
+      String track,
+      String pathOut,
+      String notificationServiceEndpoint);
+
+  public String getDocumentation();
 }

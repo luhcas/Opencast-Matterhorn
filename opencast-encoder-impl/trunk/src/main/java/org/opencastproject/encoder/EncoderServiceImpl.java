@@ -16,6 +16,7 @@
 package org.opencastproject.encoder;
 
 import org.opencastproject.encoder.api.EncoderService;
+
 import org.opencastproject.notification.api.NotificationMessage;
 
 import java.util.UUID;
@@ -37,4 +38,7 @@ public class EncoderServiceImpl implements EncoderService {
         .toString(), EncoderService.class.getName());
   }
 
+  public String getDocumentation() {
+    return "The encoder service documentation needs to be written.";
+  }
 }

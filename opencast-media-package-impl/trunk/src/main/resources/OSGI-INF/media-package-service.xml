@@ -3,8 +3,10 @@
   <implementation class="org.opencastproject.mediapackage.impl.MediaPackageServiceImpl" />
   <property name="service.description" value="Media Package Service" />
   <property name="service.exported.interfaces" value="*" />
-  <property name="service.exported.configs" value="org.apache.cxf.rs" />
-  <property name="org.apache.cxf.rs.httpservice.context" value="/mediapackage" />
+  <!-- property name="service.exported.configs" value="org.apache.cxf.rs" / -->
+  <property name="service.exported.configs" value="org.apache.cxf.ws" />
+  <!-- property name="org.apache.cxf.rs.httpservice.context" value="/mediapackage" / -->
+  <property name="org.apache.cxf.ws.httpservice.context" value="/mediapackage" />
   <service>
     <provide interface="org.opencastproject.mediapackage.api.MediaPackageService" />
   </service>

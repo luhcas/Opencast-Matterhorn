@@ -16,6 +16,7 @@
 package org.opencastproject.runtimeinfo;
 
 import org.osgi.framework.BundleActivator;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -32,7 +33,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
 
 /**
  * Lists all service endpoints currently registered with the system.
@@ -74,14 +74,8 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
         writer.write((String)jaxRsRef.getProperty("service.description"));
         writer.write("</td>");
         writer.write("<td>");
-        Object jaxRsResource = bundleContext.getService(jaxRsRef);
-        String servletContextPath = (String)jaxRsRef.getProperty("org.apache.cxf.rs.httpservice.context");
-        Path pathAnnotation = jaxRsResource.getClass().getAnnotation(Path.class);
-        String relativePath = servletContextPath;
-        if(pathAnnotation != null && pathAnnotation.value() != null && ! pathAnnotation.value().equals("/")) {
-          relativePath += pathAnnotation;
-        }
-        writer.write("<a href=\"" + relativePath + "/docs\">" + relativePath + "</a>");
+        String servletContextPath = (String)jaxRsRef.getProperty("org.apache.cxf.ws.httpservice.context");
+        writer.write("<a href=\"" + servletContextPath + "?wsdl\">" + servletContextPath + "</a>");
         writer.write("</td>");
         writer.write("</tr>");
       }

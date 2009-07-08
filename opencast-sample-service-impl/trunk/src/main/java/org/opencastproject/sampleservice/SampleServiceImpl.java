@@ -15,7 +15,9 @@
  */
 package org.opencastproject.sampleservice;
 
+
 import org.opencastproject.repository.api.OpencastRepository;
+
 import org.opencastproject.sampleservice.api.SampleService;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;

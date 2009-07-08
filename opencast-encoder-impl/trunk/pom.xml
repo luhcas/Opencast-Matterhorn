@@ -31,11 +31,6 @@
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-media</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
@@ -65,14 +60,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator> org.opencastproject.encoder.OsgiActivator </Bundle-Activator>
             <Import-Package> org.osgi.service.component, META-INF.cxf, org.apache.cxf,
               org.apache.cxf.wsdl, org.opencastproject.encoder.api, * </Import-Package>
             <Private-Package>org.opencastproject.encoder</Private-Package>
-            <!--
-              FIXME: This is a hack to fix cxf not showing up in the import-package instructions
-            -->
-            <Require-Bundle>org.apache.cxf.bundle-minimal</Require-Bundle>
+            <Service-Component>OSGI-INF/encoder-service.xml</Service-Component>
           </instructions>
         </configuration>
       </plugin>

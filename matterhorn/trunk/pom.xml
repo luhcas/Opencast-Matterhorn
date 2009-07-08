@@ -39,8 +39,8 @@
         <module>opencast-notification-api</module>
         <module>opencast-media-package-api</module>
         <module>opencast-media-package-impl</module>
-        <module>opencast-util</module>
-        <module>opencast-media</module>
+        <!-- module>opencast-util</module -->
+        <!-- module>opencast-media</module -->
         <module>opencast-authentication-api</module>
         <module>opencast-authentication-cas</module>
         <module>opencast-encoder-api</module>
@@ -63,8 +63,8 @@
         <module>opencast-notification-api</module>
         <module>opencast-media-package-api</module>
         <module>opencast-media-package-impl</module>
-        <module>opencast-util</module>
-        <module>opencast-media</module>
+        <!-- module>opencast-util</module -->
+        <!-- module>opencast-media</module -->
         <module>opencast-authentication-api</module>
         <module>opencast-authentication-cas</module>
         <module>opencast-encoder-api</module>
@@ -80,9 +80,9 @@
   <mailingLists>
     <mailingList>
       <name>Matterhorn Mailing List</name>
-      <subscribe>matterhorn-join@lists.berkeley.edu</subscribe>
-      <unsubscribe>matterhorn-leave@lists.berkeley.edu</unsubscribe>
-      <post>matterhorn@lists.berkeley.edu</post>
+      <subscribe>http://lists.opencastproject.org/mailman/listinfo/matterhorn</subscribe>
+      <unsubscribe>http://lists.opencastproject.org/mailman/listinfo/matterhorn</unsubscribe>
+      <post>matterhorn@opencastproject.org</post>
       <archive>http://n2.nabble.com/Opencast-Matterhorn-f2233301.html</archive>
     </mailingList>
   </mailingLists>
