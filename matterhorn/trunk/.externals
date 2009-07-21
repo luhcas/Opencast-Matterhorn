@@ -2,6 +2,7 @@
 ../../osgi/trunk	osgi
 ../../docs	docs
 ../../opencast-runtime-info/trunk	opencast-runtime-info
+../../opencast-notification-api/trunk	opencast-notification-api
 ../../opencast-sample-service-api/trunk	opencast-sample-service-api
 ../../opencast-sample-service-impl/trunk	opencast-sample-service-impl
 ../../opencast-encoder-api/trunk	opencast-encoder-api
