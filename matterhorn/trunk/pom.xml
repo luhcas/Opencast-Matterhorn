@@ -35,14 +35,14 @@
         <module>build-tools</module>
         <module>osgi</module>
         <module>opencast-runtime-info</module>
-        <module>opencast-repository</module>
+        <!-- module>opencast-repository</module -->
         <module>opencast-notification-api</module>
-        <module>opencast-media-package-api</module>
-        <module>opencast-media-package-impl</module>
+        <!-- module>opencast-media-package-api</module -->
+        <!-- module>opencast-media-package-impl</module -->
         <!-- module>opencast-util</module -->
         <!-- module>opencast-media</module -->
         <module>opencast-authentication-api</module>
-        <module>opencast-authentication-cas</module>
+        <!-- module>opencast-authentication-cas</module -->
         <module>opencast-encoder-api</module>
         <module>opencast-encoder-impl</module>
         <module>opencast-workflow-api</module>
@@ -59,14 +59,14 @@
       <modules>
         <module>build-tools</module>
         <module>opencast-runtime-info</module>
-        <module>opencast-repository</module>
+        <!-- module>opencast-repository</module -->
         <module>opencast-notification-api</module>
-        <module>opencast-media-package-api</module>
-        <module>opencast-media-package-impl</module>
+        <!-- module>opencast-media-package-api</module -->
+        <!-- module>opencast-media-package-impl</module -->
         <!-- module>opencast-util</module -->
         <!-- module>opencast-media</module -->
         <module>opencast-authentication-api</module>
-        <module>opencast-authentication-cas</module>
+        <!-- module>opencast-authentication-cas</module -->
         <module>opencast-encoder-api</module>
         <module>opencast-encoder-impl</module>
         <module>opencast-workflow-api</module>
