@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<component name="cas-filter" immediate="true">
-  <implementation class="org.opencastproject.authentication.AuthenticationServiceCasImpl" />
-  <property name="service.description" value="CAS Authentication Module" />
-  <service>
-    <provide interface="org.opencastproject.authentication.AuthenticationService" />
-  </service>
-</component>
