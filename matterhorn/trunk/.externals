@@ -1,8 +1,6 @@
 ../../build-tools/trunk build-tools
 ../../osgi/trunk	osgi
 ../../docs	docs
-../../opencast-repository/trunk	opencast-repository
-../../opencast-rest-services/trunk	opencast-rest-services
 ../../opencast-sample-service-api/trunk	opencast-sample-service-api
 ../../opencast-sample-service-impl/trunk	opencast-sample-service-impl
 ../../opencast-encoder-api/trunk	opencast-encoder-api
@@ -11,7 +9,6 @@
 ../../opencast-workflow-impl/trunk	opencast-workflow-impl
 ../../opencast-remote-sample-service-client/trunk	opencast-remote-sample-service-client
 ../../opencast-authentication-api/trunk	opencast-authentication-api
-../../opencast-authentication-cas/trunk opencast-authentication-cas
 ../../opencast-media/trunk	opencast-media
 ../../opencast-util/trunk	opencast-util
 ../../third-party-tools/trunk	third-party-tools
