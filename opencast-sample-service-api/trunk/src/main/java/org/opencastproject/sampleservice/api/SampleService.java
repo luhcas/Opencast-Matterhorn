@@ -15,6 +15,7 @@
  */
 package org.opencastproject.sampleservice.api;
 
+
 import org.apache.cxf.jaxrs.ext.multipart.MultipartBody;
 
 import java.io.InputStream;

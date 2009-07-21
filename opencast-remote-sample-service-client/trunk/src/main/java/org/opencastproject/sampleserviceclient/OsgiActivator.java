@@ -15,6 +15,7 @@
  */
 package org.opencastproject.sampleserviceclient;
 
+
 import org.opencastproject.sampleservice.api.SampleService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

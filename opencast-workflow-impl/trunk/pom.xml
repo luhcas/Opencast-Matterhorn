@@ -22,11 +22,6 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-repository</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
       <artifactId>opencast-workflow-api</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
@@ -56,14 +51,12 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator> org.opencastproject.workflow.OsgiActivator </Bundle-Activator>
+            <Service-Component>
+              OSGI-INF/conductor-service.xml
+            </Service-Component>
             <Import-Package> org.osgi.service.component, META-INF.cxf, org.apache.cxf,
               org.apache.cxf.wsdl, org.opencastproject.workflow.api, * </Import-Package>
             <Private-Package>org.opencastproject.workflow</Private-Package>
-            <!--
-              FIXME: This is a hack to fix cxf not showing up in the import-package instructions
-            -->
-            <Require-Bundle>org.apache.cxf.bundle-minimal</Require-Bundle>
           </instructions>
         </configuration>
       </plugin>

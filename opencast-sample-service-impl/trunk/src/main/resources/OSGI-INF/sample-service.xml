@@ -12,6 +12,6 @@
   <service>
     <provide interface="org.opencastproject.sampleservice.api.SampleService" />
   </service>
-  <reference name="REPO" interface="org.opencastproject.repository.api.OpencastRepository"
-    cardinality="1..1" policy="static" bind="setRepository" />
+  <!-- reference name="REPO" interface="org.opencastproject.repository.api.OpencastRepository"
+    cardinality="1..1" policy="static" bind="setRepository" / -->
 </component>

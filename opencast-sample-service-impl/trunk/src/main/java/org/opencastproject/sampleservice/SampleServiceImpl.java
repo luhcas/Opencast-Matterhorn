@@ -15,16 +15,13 @@
  */
 package org.opencastproject.sampleservice;
 
-import org.opencastproject.repository.api.OpencastRepository;
 
 import org.opencastproject.sampleservice.api.SampleService;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.MultipartBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import javax.ws.rs.Path;
@@ -37,35 +34,17 @@ public class SampleServiceImpl implements SampleService {
     DOCS = "the documentation goes here";
   }
 
-  protected OpencastRepository repo;
-
-  public SampleServiceImpl(OpencastRepository repo) {
-    this.repo = repo;
-  }
-  public SampleServiceImpl() {}
-  public void setRepository(OpencastRepository repo) {
-    this.repo = repo;
-  }
-
   public InputStream getFileFromRepository(String path) {
-    path = "/" + path;
-    logger.debug("Getting content from path " + path);
-    return repo.getObject(InputStream.class, path);
+    logger.warn("not implemented");
+    return null;
   }
 
   public void setFileInRepository(String path, MultipartBody body) {
-    path = "/" + path;
-    logger.debug("Setting " + body + " to path " + path);
-    Attachment a = body.getAllAttachments().get(0);
-    try {
-      InputStream in = a.getDataHandler().getInputStream();
-      repo.putObject(in, path);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    logger.warn("not implemented");
   }
   
   public String getDocumentation() {
+    logger.warn("not implemented");
     return DOCS;
   }
 }
