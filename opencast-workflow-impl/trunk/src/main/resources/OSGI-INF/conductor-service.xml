@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="conductor-service" immediate="true">
+  <implementation class="org.opencastproject.sampleservice.WorkflowServiceImpl" />
+  <property name="service.description" value="Workflow Service" />
+  <property name="service.exported.interfaces" value="*" />
+  <property name="service.exported.configs" value="org.apache.cxf.rs" />
+  <property name="org.apache.cxf.rs.httpservice.context" value="/conductor" />
+
+  <!-- property name="service.exported.configs" value="org.apache.cxf.ws" / -->
+  <!-- property name="org.apache.cxf.ws.httpservice.context" value="/conductor" / -->
+
+  <service>
+    <provide interface="org.opencastproject.workflow.api.WorkflowService" />
+  </service>
+  <!-- reference name="REPO" interface="org.opencastproject.repository.api.OpencastRepository"
+    cardinality="1..1" policy="static" bind="setRepository" / -->
+</component>
