@@ -52,6 +52,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     PrintWriter writer = response.getWriter();
     writeWsdlEndpoints(writer);
     writeJaxRsEndpoints(writer);
+    writeSystemConsole(writer);
   }
 
   private void writeWsdlEndpoints(PrintWriter writer) {
@@ -65,7 +66,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
       writer.write("<div>There are no wsdl endpoints available.</div>");
     } else {
       writer.write("<div>WSDL Service Endpoints</div>");
-      writer.write("<table>");
+      writer.write("<table border=\"1\">");
       for (ServiceReference wsdlRef : serviceRefs) {
         writer.write("<tr>");
         writer.write("<td>");
@@ -92,7 +93,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
       writer.write("<div>There are no JAX-RS endpoints available.</div>");
     } else {
       writer.write("<div>REST Service Endpoints</div>");
-      writer.write("<table>");
+      writer.write("<table border=\"1\">");
       for (ServiceReference jaxRsRef : serviceRefs) {
         writer.write("<tr>");
         writer.write("<td>");
@@ -108,6 +109,12 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     }
   }
   
+  private void writeSystemConsole(PrintWriter writer) {
+    writer.write("<p>\n");
+    writer.write("<a href=\"/system/console\">System Console</a>\n");
+    writer.write("</p>\n");
+  }
+  
   private ServiceTracker httpTracker;
   
   public void start(BundleContext context) throws Exception {
@@ -121,7 +128,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
         HttpService httpService = (HttpService) context.getService(reference);
         try {
           HttpContext httpContext = httpService.createDefaultHttpContext();
-          httpService.registerServlet("/*", servlet, null, httpContext);
+          httpService.registerServlet("/", servlet, null, httpContext);
         } catch (ServletException e) {
           e.printStackTrace();
         } catch (NamespaceException e) {
