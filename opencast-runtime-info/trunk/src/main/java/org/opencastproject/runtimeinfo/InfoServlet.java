@@ -20,6 +20,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
@@ -47,6 +48,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
    */
   public void doGet(HttpServletRequest request, HttpServletResponse response)
     throws IOException, ServletException{
+    response.setContentType("text/html");
     PrintWriter writer = response.getWriter();
     writeWsdlEndpoints(writer);
     writeJaxRsEndpoints(writer);
@@ -118,7 +120,8 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
       public Object addingService(ServiceReference reference) {
         HttpService httpService = (HttpService) context.getService(reference);
         try {
-          httpService.registerServlet("/services/*", servlet, null, null);
+          HttpContext httpContext = httpService.createDefaultHttpContext();
+          httpService.registerServlet("/*", servlet, null, httpContext);
         } catch (ServletException e) {
           e.printStackTrace();
         } catch (NamespaceException e) {
