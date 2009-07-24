@@ -1,0 +1,11 @@
+--- configure	2008-04-22 14:17:14.000000000 +0200
++++ configure_	2008-04-22 14:04:08.000000000 +0200
+@@ -943,7 +943,7 @@
+ DEPEND_CMD='$(CC) $(CFLAGS) -MM -MG $< | sed "1s,^,$(@D)/,"'
+ 
+ # find source path
+-source_path="`dirname \"$0\"`"
++#source_path="`dirname \"$0\"`"
+ enable source_path_used
+ if test -z "$source_path" -o "$source_path" = "." ; then
+     source_path="`pwd`"
