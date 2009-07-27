@@ -14,8 +14,8 @@
 ../../opencast-media/trunk	opencast-media
 ../../opencast-util/trunk	opencast-util
 ../../third-party-tools/trunk	third-party-tools
-../../opencast-working-file-repo-api	opencast-working-file-repo-api
-../../opencast-working-file-repo-impl	opencast-working-file-repo-impl
-../../opencast-workspace-api	opencast-workspace-api
-../../opencast-workspace-impl	opencast-workspace-impl
+../../opencast-working-file-repo-api/trunk	opencast-working-file-repo-api
+../../opencast-working-file-repo-impl/trunk	opencast-working-file-repo-impl
+../../opencast-workspace-api/trunk	opencast-workspace-api
+../../opencast-workspace-impl/trunk	opencast-workspace-impl
 
