@@ -4,7 +4,7 @@
   <!-- ===== Set general properties for this script ======== -->
 
   <property file="thirdparty.properties"/>
-
+  <property name="thirdparty.repository" value="http://releases.opencastproject.org/3rd%20Party" />
   <property name="svnkit.version" value="1.2.2" />
   <property name="svnkit.revision" value="5405" />
   <property name="svnkit.jar" value="${build.lib}/svnkit-${svnkit.version}.jar" />
@@ -14,7 +14,7 @@
 	
   <!-- ===== Set properties for libpng ====================== -->
 
-  <property name="libpng.url" value="http://prdownloads.sourceforge.net/libpng/libpng-${libpng.version}.tar.gz"/>
+  <property name="libpng.url" value="${thirdparty.repository}/libpng${libpng.version}.tar.gz"/>
   <property name="build.libpng" value="${build.thirdparty}/libpng"/>
   <property name="libpng.workdir" value="${build.libpng}/libpng-${libpng.version}"/>
   <available file="${libpng.workdir}/png.h" property="libpng.downloaded"/>
@@ -22,7 +22,7 @@
 
   <!-- ===== Set properties for libjpeg ===================== -->
 
-  <property name="libjpeg.url" value="ftp://ftp.uu.net/graphics/jpeg/jpegsrc.${libjpeg.version}.tar.gz"/>
+  <property name="libjpeg.url" value="${thirdparty.repository}/jpegsrc.${libjpeg.version}.tar.gz"/>
   <property name="build.libjpeg" value="${build.thirdparty}/libjpeg"/>
   <property name="libjpeg.workdir" value="${build.libjpeg}/libjpeg-${libjpeg.version}"/>
   <available file="${libjpeg.workdir}/jpeglib.h" property="libjpeg.downloaded"/>
@@ -30,7 +30,7 @@
 
   <!-- ===== Set properties for libtiff ===================== -->
 
-  <property name="libtiff.url" value="http://dl.maptools.org/dl/libtiff/tiff-${libtiff.version}.zip"/>
+  <property name="libtiff.url" value="${thirdparty.repository}/tiff${libtiff.version}.zip"/>
   <property name="build.libtiff" value="${build.thirdparty}/libtiff"/>
   <property name="libtiff.workdir" value="${build.libtiff}/libtiff-${libtiff.version}"/>
   <available file="${libtiff.workdir}/autogen.sh" property="libtiff.downloaded"/>
@@ -38,7 +38,7 @@
 
   <!-- ===== Set properties for jam ========================= -->
 
-  <property name="jam.url" value="http://public.perforce.com/public/jam/jam-${jam.version}.zip"/>
+  <property name="jam.url" value="${thirdparty.repository}/jam${jam.version}.zip"/>
   <property name="build.jam" value="${build.thirdparty}/jam"/>
   <property name="jam.workdir" value="${build.jam}/jam-${jam.version}"/>
   <available file="${jam.workdir}/jam.h" property="jam.downloaded"/>
@@ -54,7 +54,7 @@
 
   <!-- ===== Set properties for libfaad ===================== -->
 
-  <property name="libfaad.url" value="http://downloads.sourceforge.net/faac/faad2-2.6.1.zip"/>
+  <property name="libfaad.url" value="${thirdparty.repository}/faad22.6.1.zip"/>
   <property name="build.libfaad" value="${build.thirdparty}/libfaad"/>
   <property name="libfaad.workdir" value="${build.libfaad}/faad2"/>
     <available file="${libfaad.workdir}/bootstrap" property="libfaad.downloaded"/>
@@ -62,7 +62,7 @@
 
   <!-- ===== Set properties for mediainfo ==================== -->
 
-  <property name="mediainfo.url" value="http://releases.opencastproject.org/3rd%20Party/MediaInfo_CLI_${mediainfo.version}_GNU_FromSource.tar.bz2"/>
+  <property name="mediainfo.url" value="${thirdparty.repository}/MediaInfo_CLI_${mediainfo.version}_GNU_FromSource.tar.bz2"/>
   <property name="build.mediainfo" value="${build.thirdparty}/mediainfo"/>
   <property name="mediainfo.workdir" value="${build.mediainfo}/mediainfo-${mediainfo.version}"/>
   <available file="${mediainfo.workdir}/CLI_Compile.sh" property="mediainfo.downloaded"/>
@@ -70,7 +70,7 @@
 
   <!-- ===== Set properties for opencv ===================== -->
 
-  <property name="opencv.url" value="http://downloads.sourceforge.net/opencvlibrary/opencv-${opencv.version}.tar.gz"/>
+  <property name="opencv.url" value="${thirdparty.repository}/opencv${opencv.version}.tar.gz"/>
   <property name="build.opencv" value="${build.thirdparty}/opencv"/>
   <property name="opencv.workdir" value="${build.opencv}/opencv-${opencv.version}"/>
   <available file="${opencv.workdir}/configure.in" property="opencv.downloaded"/>
@@ -78,13 +78,13 @@
 
   <!-- ===== Set properties for tesseract =================== -->
 
-  <property name="tesseract.url" value="http://tesseract-ocr.googlecode.com/files/tesseract-${tesseract.version}.tar.gz"/>
+  <property name="tesseract.url" value="${thirdparty.repository}/tesseract${tesseract.version}.tar.gz"/>
   <property name="build.tesseract" value="${build.thirdparty}/tesseract"/>
   <property name="tesseract.workdir" value="${build.tesseract}/tesseract-${tesseract.version}"/>
   <available file="${tesseract.workdir}/eurotext.tif" property="tesseract.downloaded"/>
   <available file="${tesseract.workdir}/ccmain/adaptions.o" property="tesseract.built"/>
   
-  <property name="tesseract.lang.url" value="http://tesseract-ocr.googlecode.com/files/tesseract-${tesseract.lang.version}.tar.gz"/>
+  <property name="tesseract.lang.url" value="${thirdparty.repository}/tesseract${tesseract.lang.version}.tar.gz"/>
   
   <!-- ===== Set properties for ocropus ===================== -->
 
@@ -96,7 +96,7 @@
 
   <!-- ===== Set properties for videosegmenter =============== -->
 
-  <property name="videosegmenter.url" value="http://www.yovisto.com/downloads/vsegmenter/vsegmenter-${videosegmenter.version}.tar.gz"/>
+  <property name="videosegmenter.url" value="${thirdparty.repository}/vsegmenter${videosegmenter.version}.tar.gz"/>
   <property name="build.videosegmenter" value="${build.thirdparty}/videosegmenter"/>
   <property name="videosegmenter.workdir" value="${build.videosegmenter}/vsegmenter-${videosegmenter.version}"/>
   <available file="${videosegmenter.workdir}/videosegmenter.c" property="videosegmenter.downloaded"/>
@@ -104,7 +104,7 @@
 
   <!-- ===== Set properties for mplayer ====================== -->
 
-  <property name="mplayer.url" value="http://www1.mplayerhq.hu/MPlayer/releases/MPlayer-${mplayer.version}.tar.bz2"/>
+  <property name="mplayer.url" value="${thirdparty.repository}/MPlayer${mplayer.version}.tar.bz2"/>
   <property name="build.mplayer" value="${build.thirdparty}/mplayer"/>
   <property name="mplayer.workdir" value="${build.mplayer}/MPlayer-${mplayer.version}"/>
   <available file="${mplayer.workdir}/mplayer.h" property="mplayer.downloaded"/>
@@ -112,7 +112,7 @@
 
   <!-- ===== Set properties for flvtool ====================== -->
 
-  <property name="flvtool.url" value="http://rubyforge.org/frs/download.php/17497/flvtool2-${flvtool.version}.tgz"/>
+  <property name="flvtool.url" value="${thirdparty.repository}/flvtool2${flvtool.version}.tgz"/>
   <property name="build.flvtool" value="${build.thirdparty}/flvtool"/>
   <property name="flvtool.workdir" value="${build.flvtool}/flvtool2-${flvtool.version}"/>
   <available file="${flvtool.workdir}/setup.rb" property="flvtool.downloaded"/>
@@ -120,7 +120,7 @@
 
   <!-- ===== Set properties for sphinx4 language model ====================== -->
   <property name="sphinx4.url.zip" value="HUB4_trigram_lm.zip"/>
-  <property name="sphinx4.url" value="http://downloads.sourceforge.net/cmusphinx/${sphinx4.url.zip}"/>
+  <property name="sphinx4.url" value="${thirdparty.repository}/HUB4_trigram_lm.zip"/>
   <property name="sphinx4.workdir" value="/usr/local/share/sphinx4-lm-hub4"/>
   
   <!--
