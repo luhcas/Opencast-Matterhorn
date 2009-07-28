@@ -18,6 +18,10 @@
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_core</artifactId>
     </dependency>
@@ -29,6 +33,10 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
+      <dependency>
+        <groupId>commons-fileupload</groupId>
+        <artifactId>commons-fileupload</artifactId>
+      </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -55,7 +63,8 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Private-Package> org.opencastproject.workingfilerepository.impl </Private-Package>
             <Service-Component>
-              OSGI-INF/working-file-repo.xml
+              OSGI-INF/working-file-repo.xml,
+              OSGI-INF/working-file-repo-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

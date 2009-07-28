@@ -50,11 +50,21 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     throws IOException, ServletException{
     response.setContentType("text/html");
     PrintWriter writer = response.getWriter();
+    writeHtmlHeader(writer);
     writeWsdlEndpoints(writer);
     writeJaxRsEndpoints(writer);
     writeSystemConsole(writer);
+    writeHtmlFooter(writer);
   }
 
+  private void writeHtmlHeader(PrintWriter writer) {
+    writer.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">");
+    writer.println("<html><head>");
+    writer.println("<title>Matterhorn Service Endpoints</title>");
+    writer.println("</head>");
+    writer.println("<body>");
+  }
+  
   private void writeWsdlEndpoints(PrintWriter writer) {
     ServiceReference[] serviceRefs = null;
     try {
@@ -63,22 +73,29 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
       e.printStackTrace();
     }
     if (serviceRefs == null) {
-      writer.write("<div>There are no wsdl endpoints available.</div>");
+      writer.println("<div>There are no wsdl endpoints available.</div>");
     } else {
-      writer.write("<div>WSDL Service Endpoints</div>");
-      writer.write("<table border=\"1\">");
+      writer.println("<table border=\"1\">");
+      writer.println("<title>WSDL Service Endpoints</title>");
+      writer.println("<th>Base URL</th>");
+      writer.println("<th>Description</th>");
+      writer.println("<th>WSDL</th>");
       for (ServiceReference wsdlRef : serviceRefs) {
-        writer.write("<tr>");
-        writer.write("<td>");
-        writer.write((String)wsdlRef.getProperty("service.description"));
-        writer.write("</td>");
-        writer.write("<td>");
+        String description = (String)wsdlRef.getProperty("service.description");
         String servletContextPath = (String)wsdlRef.getProperty("org.apache.cxf.ws.httpservice.context");
-        writer.write("<a href=\"" + servletContextPath + "?wsdl\">" + servletContextPath + "</a>");
-        writer.write("</td>");
-        writer.write("</tr>");
+        writer.println("<tr>");
+        writer.println("<td>");
+        writer.println(servletContextPath);
+        writer.println("</td>");
+        writer.println("<td>");
+        writer.println(description);
+        writer.println("</td>");
+        writer.println("<td>");
+        writer.println("<a href=\"" + servletContextPath + "?wsdl\">" + servletContextPath + "</a>");
+        writer.println("</td>");
+        writer.println("</tr>");
       }
-      writer.write("</table>");
+      writer.println("</table>");
     }
   }
 
@@ -90,31 +107,46 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
       e.printStackTrace();
     }
     if (serviceRefs == null) {
-      writer.write("<div>There are no JAX-RS endpoints available.</div>");
+      writer.println("<div>There are no JAX-RS endpoints available.</div>");
     } else {
-      writer.write("<div>REST Service Endpoints</div>");
-      writer.write("<table border=\"1\">");
+      writer.println("<table border=\"1\">");
+      writer.println("<title>REST Service Endpoints</title>");
+      writer.println("<th>Base URL</th>");
+      writer.println("<th>Description</th>");
+      writer.println("<th>Documentation</th>");
+      writer.println("<th>WADL</th>");
       for (ServiceReference jaxRsRef : serviceRefs) {
-        writer.write("<tr>");
-        writer.write("<td>");
-        writer.write((String)jaxRsRef.getProperty("service.description"));
-        writer.write("</td>");
-        writer.write("<td>");
+        String description = (String)jaxRsRef.getProperty("service.description");
         String servletContextPath = (String)jaxRsRef.getProperty("org.apache.cxf.rs.httpservice.context");
-        writer.write("<a href=\"" + servletContextPath + "/docs\">" + servletContextPath + "</a>");
-        writer.write("</td>");
-        writer.write("</tr>");
+        writer.println("<tr>");
+        writer.println("<td>");
+        writer.println(servletContextPath);
+        writer.println("</td>");
+        writer.println("<td>");
+        writer.println(description);
+        writer.println("</td>");
+        writer.println("<td>");
+        writer.println("<a href=\"" + servletContextPath + "/docs\">" + servletContextPath + "/docs</a>");
+        writer.println("</td>");
+        writer.println("<td>");
+        writer.println("<a href=\"" + servletContextPath + "/?_wadl&_type=xml\">" + servletContextPath + "/?_wadl&_type=xml</a>");
+        writer.println("</td>");
+        writer.println("</tr>");
       }
-      writer.write("</table>");
+      writer.println("</table>");
     }
   }
   
   private void writeSystemConsole(PrintWriter writer) {
-    writer.write("<p>\n");
-    writer.write("<a href=\"/system/console\">System Console</a>\n");
-    writer.write("</p>\n");
+    writer.println("<p>");
+    writer.println("<a href=\"/system/console\">System Console</a>");
+    writer.println("</p>");
   }
-  
+
+  private void writeHtmlFooter(PrintWriter writer) {
+    writer.println("</body></html>");
+  }
+
   private ServiceTracker httpTracker;
   
   public void start(BundleContext context) throws Exception {

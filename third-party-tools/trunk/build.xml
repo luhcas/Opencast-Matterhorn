@@ -118,11 +118,6 @@
   <available file="${flvtool.workdir}/setup.rb" property="flvtool.downloaded"/>
   <available file="${flvtool.workdir}/.made" property="flvtool.built"/>
 
-  <!-- ===== Set properties for sphinx4 language model ====================== -->
-  <property name="sphinx4.url.zip" value="HUB4_trigram_lm.zip"/>
-  <property name="sphinx4.url" value="${thirdparty.repository}/HUB4_trigram_lm.zip"/>
-  <property name="sphinx4.workdir" value="/usr/local/share/sphinx4-lm-hub4"/>
-  
   <!--
   Setup things that are needed for the build.
   -->
@@ -166,9 +161,6 @@
     <antcall target="ocropus.install"/>
     <antcall target="videosegmenter.install"/>
     <antcall target="mplayer.install"/>
-    <!--
-    <antcall target="sphinx4.install"/>
-    -->
   </target>
 
   <!-- ============================================================== -->
@@ -806,17 +798,6 @@
       <arg line="install"/>
     </exec>
   </target>
-  
-  <!--
-  Downloads sphinx4 language model
-  -->
-  <target name="sphinx4.install">
-    <echo message="Downloading sphinx4 englisch language model"/>
-    <sleep seconds="1"/>
-    <mkdir dir="${sphinx4.workdir}"/>
-    <get src="${sphinx4.url}" dest="${sphinx4.workdir}/${sphinx4.url.zip}" verbose="true" usetimestamp="true"/>
-    <unzip src="${sphinx4.workdir}/${sphinx4.url.zip}" dest="${sphinx4.workdir}"/>
-  </target> 
 
     <!-- ================================================================== -->
     <!-- Deploy thirdparty tools                                            -->

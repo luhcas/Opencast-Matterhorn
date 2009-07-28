@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryRestEndpoint" immediate="true">
+  <implementation class="org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryRestEndpoint" />
+  <property name="service.description" value="Working File Repository REST Endpoint" />
+  <property name="service.exported.interfaces" value="*" />
+  <property name="service.exported.configs" value="org.apache.cxf.rs" />
+  <property name="org.apache.cxf.rs.httpservice.context" value="/files" />
+  <service>
+    <provide interface="org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryRestEndpoint" />
+  </service>
+  <reference name="REPO" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository"
+    cardinality="1..1" policy="static" bind="setRepository" />
+</component>
