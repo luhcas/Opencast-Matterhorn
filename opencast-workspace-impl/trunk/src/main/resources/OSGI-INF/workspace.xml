@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="workspace" immediate="true">
+  <implementation class="org.opencastproject.workspace.impl.WorkspaceImpl" />
+  <property name="service.description" value="Workspace" />
+  <property name="service.pid" value="org.opencastproject.workspace.api.Workspace" />
+  <service>
+    <provide interface="org.osgi.service.cm.ManagedService" />
+  </service>
+</component>

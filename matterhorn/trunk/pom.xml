@@ -35,14 +35,8 @@
         <module>build-tools</module>
         <module>osgi</module>
         <module>opencast-runtime-info</module>
-        <!-- module>opencast-repository</module -->
         <module>opencast-notification-api</module>
-        <!-- module>opencast-media-package-api</module -->
-        <!-- module>opencast-media-package-impl</module -->
-        <!-- module>opencast-util</module -->
-        <!-- module>opencast-media</module -->
         <module>opencast-authentication-api</module>
-        <!-- module>opencast-authentication-cas</module -->
         <module>opencast-encoder-api</module>
         <module>opencast-encoder-impl</module>
         <module>opencast-workflow-api</module>
@@ -50,6 +44,10 @@
         <module>opencast-sample-service-api</module>
         <module>opencast-sample-service-impl</module>
         <module>opencast-remote-sample-service-client</module>
+        <module>opencast-workspace-api</module>
+        <module>opencast-workspace-impl</module>
+        <module>opencast-working-file-repo-api</module>
+        <module>opencast-working-file-repo-impl</module>
       </modules>
     </profile>
     <profile>
@@ -59,20 +57,18 @@
       <modules>
         <module>build-tools</module>
         <module>opencast-runtime-info</module>
-        <!-- module>opencast-repository</module -->
         <module>opencast-notification-api</module>
-        <!-- module>opencast-media-package-api</module -->
-        <!-- module>opencast-media-package-impl</module -->
-        <!-- module>opencast-util</module -->
-        <!-- module>opencast-media</module -->
         <module>opencast-authentication-api</module>
-        <!-- module>opencast-authentication-cas</module -->
         <module>opencast-encoder-api</module>
         <module>opencast-encoder-impl</module>
         <module>opencast-workflow-api</module>
         <module>opencast-workflow-impl</module>
         <module>opencast-sample-service-api</module>
         <module>opencast-sample-service-impl</module>
+        <module>opencast-workspace-api</module>
+        <module>opencast-workspace-impl</module>
+        <module>opencast-working-file-repo-api</module>
+        <module>opencast-working-file-repo-impl</module>
       </modules>
     </profile>
   </profiles>
@@ -453,6 +449,12 @@
         <groupId>commons-collections</groupId>
         <artifactId>commons-collections</artifactId>
         <version>3.2.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>com.springsource.org.apache.commons.codec</artifactId>
+        <version>1.3.0</version>
       </dependency>
 
       <!-- HttpService extender -->

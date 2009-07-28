@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="working-file-repo" immediate="true">
+  <implementation class="org.opencastproject.workingfilerepository" />
+  <property name="service.description" value="Working File Repository" />
+  <property name="service.pid" value="org.opencastproject.workingfilerepository.api.WorkingFileRepository" />
+  <!-- TODO: Expose this as a RESTful (JAX-RS / JSR-311) service -->
+  <service>
+    <provide interface="org.osgi.service.cm.ManagedService" />
+  </service>
+</component>
