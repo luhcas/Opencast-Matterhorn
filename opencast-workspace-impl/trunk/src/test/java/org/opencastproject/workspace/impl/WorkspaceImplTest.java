@@ -15,12 +15,11 @@
  */
 package org.opencastproject.workspace.impl;
 
-import junit.framework.TestCase;
+import junit.framework.Assert;
 
 import org.junit.Test;
 
 import java.io.File;
-import java.net.URI;
 import java.net.URISyntaxException;
 
 public class WorkspaceImplTest {
@@ -28,9 +27,10 @@ public class WorkspaceImplTest {
   public void testGetRemoteFile() {
     WorkspaceImpl workspace = new WorkspaceImpl();
     try {
-      File f = workspace.get(new URI("http://www.opencastproject.org/sites/all/themes/ad_blueprint/images/opencast_header.gif"));
+      File f = workspace.get(getClass().getClassLoader().getResource("opencast_header.gif").toURI());
+      Assert.assertTrue(f.exists());
     } catch (URISyntaxException e) {
-      TestCase.fail();
+      Assert.fail();
     }
   }
 }

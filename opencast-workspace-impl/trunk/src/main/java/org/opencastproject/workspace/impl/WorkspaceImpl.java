@@ -66,6 +66,10 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     repo.put(mediaPackageID, mediaPackageElementID, in);
   }
 
+  public void setRepository(WorkingFileRepository repo) {
+    this.repo = repo;
+  }
+  
   public void updated(Dictionary props) throws ConfigurationException {
     if(props.get("root") != null) {
       rootDirectory = (String)props.get("root");

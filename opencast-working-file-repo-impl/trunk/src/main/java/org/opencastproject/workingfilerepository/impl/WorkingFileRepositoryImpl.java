@@ -17,12 +17,18 @@ package org.opencastproject.workingfilerepository.impl;
 
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Dictionary;
 
@@ -33,11 +39,12 @@ import java.util.Dictionary;
  *
  */
 public class WorkingFileRepositoryImpl implements WorkingFileRepository, ManagedService {
-  
+  private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryImpl.class);
   private String rootDirectory = "/tmp/matterhorn/workingfilerepo";
   
   public void delete(String mediaPackageID, String mediaPackageElementID) {
     File f = getFile(mediaPackageID, mediaPackageElementID);
+    logger.info("Attempting to delete file " + f.getAbsolutePath());
     if(f.canWrite()) {
       f.delete();
     } else {
@@ -48,6 +55,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
 
   public InputStream get(String mediaPackageID, String mediaPackageElementID) {
     File f = getFile(mediaPackageID, mediaPackageElementID);
+    logger.info("Attempting to read file " + f.getAbsolutePath());
     try {
       return new FileInputStream(f);
     } catch (FileNotFoundException e) {
@@ -56,16 +64,28 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   }
 
   public void put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
+    File f = getFile(mediaPackageID, mediaPackageElementID);
+    logger.info("Attempting to write a file to " + f.getAbsolutePath());
+    try {
+      if( ! f.exists()) {
+        logger.info("Attempting to create a new file at " + f.getAbsolutePath());
+        File mediaPackageDirectory = new File(rootDirectory + File.separator + mediaPackageID);
+        if( ! mediaPackageDirectory.exists()) {
+          logger.info("Attempting to create a new directory at " + mediaPackageDirectory.getAbsolutePath());
+          FileUtils.forceMkdir(mediaPackageDirectory);
+        }
+        f.createNewFile();
+      } else {
+        logger.info("Attempting to overwrite the file at " + f.getAbsolutePath());
+      }
+      IOUtils.copy(in, new FileOutputStream(f));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private File getFile(String mediaPackageID, String mediaPackageElementID) {
-    File f = new File(rootDirectory + File.separator + mediaPackageElementID + File.separator + mediaPackageElementID);
-    if(f.exists() && f.canRead()) {
-      return f;
-    } else {
-      throw new RuntimeException("Can not find file for mediaPackage/mediaElement: " + mediaPackageID
-          + "/" + mediaPackageElementID);
-    }
+    return new File(rootDirectory + File.separator + mediaPackageID + File.separator + mediaPackageElementID);
   }
 
   public void updated(Dictionary props) throws ConfigurationException {
