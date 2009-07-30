@@ -24,8 +24,8 @@
             <configuration>
               <tasks>
                 <ant />
-			        </tasks>
-			      </configuration>
+			  </tasks>
+			</configuration>
             <goals>
               <goal>run</goal>
             </goals>
