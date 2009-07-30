@@ -1,17 +1,11 @@
 <?xml version="1.0"?>
-<project name="thirdparty" default="thirdparty" basedir=".">
+<project name="thirdparty" default="install" basedir=".">
 
   <!-- ===== Set general properties for this script ======== -->
 
   <property file="thirdparty.properties"/>
   <property name="thirdparty.repository" value="http://releases.opencastproject.org/3rd%20Party" />
-  <property name="svnkit.version" value="1.2.2" />
-  <property name="svnkit.revision" value="5405" />
-  <property name="svnkit.jar" value="${build.lib}/svnkit-${svnkit.version}.jar" />
-  <property name="svnkitcli.jar" value="${build.lib}/svnkit-cli-${svnkit.version}.jar" />
-
-  <available file="${svnkit.jar}" property="svn.present" />
-	
+    
   <!-- ===== Set properties for libpng ====================== -->
 
   <property name="libpng.url" value="${thirdparty.repository}/libpng${libpng.version}.tar.gz"/>
@@ -46,18 +40,18 @@
 
   <!-- ===== Set properties for ffmpeg ===================== -->
 
-  <property name="ffmpeg.url" value="svn://svn.ffmpeg.org/ffmpeg/trunk"/>
+  <property name="ffmpeg.url" value="${thirdparty.repository}/ffmpeg${ffmpeg.revision}.tar.bz2"/>
   <property name="build.ffmpeg" value="${build.thirdparty}/ffmpeg"/>
-  <property name="ffmpeg.workdir" value="${build.ffmpeg}/ffmpeg"/>
+  <property name="ffmpeg.workdir" value="${build.ffmpeg}/ffmpeg-${ffmpeg.revision}"/>
   <available file="${ffmpeg.workdir}/version.sh" property="ffmpeg.downloaded"/>
   <available file="${ffmpeg.workdir}/ffmpeg" property="ffmpeg.built"/>
 
   <!-- ===== Set properties for libfaad ===================== -->
 
-  <property name="libfaad.url" value="${thirdparty.repository}/faad22.6.1.zip"/>
+  <property name="libfaad.url" value="${thirdparty.repository}/faad2${libfaad.version}.tar.gz"/>
   <property name="build.libfaad" value="${build.thirdparty}/libfaad"/>
-  <property name="libfaad.workdir" value="${build.libfaad}/faad2"/>
-    <available file="${libfaad.workdir}/bootstrap" property="libfaad.downloaded"/>
+  <property name="libfaad.workdir" value="${build.libfaad}/faad2-${libfaad.version}"/>
+    <available file="${libfaad.workdir}/configure.in" property="libfaad.downloaded"/>
   <available file="${libfaad.workdir}/libfaad/common.o" property="libfaad.built"/>
 
   <!-- ===== Set properties for mediainfo ==================== -->
@@ -88,7 +82,7 @@
   
   <!-- ===== Set properties for ocropus ===================== -->
 
-  <property name="ocropus.url" value="http://ocropus.googlecode.com/svn/trunk/"/>
+  <property name="ocropus.url" value="${thirdparty.repository}/ocropus${ocropus.revision}.tar.gz"/>
   <property name="build.ocropus" value="${build.thirdparty}/ocropus"/>
   <property name="ocropus.workdir" value="${build.ocropus}/ocropus"/>
   <available file="${ocropus.workdir}/generate_version_cc.sh" property="ocropus.downloaded"/>
@@ -101,23 +95,7 @@
   <property name="videosegmenter.workdir" value="${build.videosegmenter}/vsegmenter-${videosegmenter.version}"/>
   <available file="${videosegmenter.workdir}/videosegmenter.c" property="videosegmenter.downloaded"/>
   <available file="${videosegmenter.workdir}/videosegmenter" property="videosegmenter.built"/>
-
-  <!-- ===== Set properties for mplayer ====================== -->
-
-  <property name="mplayer.url" value="${thirdparty.repository}/MPlayer${mplayer.version}.tar.bz2"/>
-  <property name="build.mplayer" value="${build.thirdparty}/mplayer"/>
-  <property name="mplayer.workdir" value="${build.mplayer}/MPlayer-${mplayer.version}"/>
-  <available file="${mplayer.workdir}/mplayer.h" property="mplayer.downloaded"/>
-  <available file="${mplayer.workdir}/mencoder" property="mplayer.built"/>
-
-  <!-- ===== Set properties for flvtool ====================== -->
-
-  <property name="flvtool.url" value="${thirdparty.repository}/flvtool2${flvtool.version}.tgz"/>
-  <property name="build.flvtool" value="${build.thirdparty}/flvtool"/>
-  <property name="flvtool.workdir" value="${build.flvtool}/flvtool2-${flvtool.version}"/>
-  <available file="${flvtool.workdir}/setup.rb" property="flvtool.downloaded"/>
-  <available file="${flvtool.workdir}/.made" property="flvtool.built"/>
-
+  
   <!--
   Setup things that are needed for the build.
   -->
@@ -133,12 +111,31 @@
   </target>
 
   <!-- ============================================================== -->
-  <!-- [thirdparty.install]                                           -->
+  <!-- [download]                                                     -->
+  <!--                                                                -->
+  <!-- Downloads sources for the tools built using 'thirdparty.make'  -->
+  <!-- ============================================================== -->
+
+  <target name="download" description="Downloads the sources used for the thirdparty tools build">
+    <antcall target="libpng.download"/>
+    <antcall target="libjpeg.download"/>
+    <antcall target="libtiff.download"/>
+    <antcall target="jam.download"/>
+    <antcall target="ffmpeg.download"/>
+    <antcall target="mediainfo.download"/>
+    <antcall target="opencv.download"/>
+    <antcall target="tesseract.download"/>
+    <antcall target="ocropus.download"/>
+    <antcall target="videosegmenter.download"/>
+  </target>
+
+  <!-- ============================================================== -->
+  <!-- [install]                                                      -->
   <!--                                                                -->
   <!-- Installs the tools built using 'thirdparty.make'               -->
   <!-- ============================================================== -->
 
-  <target name="thirdparty" description="Compiles and installs thirdparty tools">
+  <target name="install" description="Compiles and installs thirdparty tools">
     <echo/>
     <echo message="Make sure you execute this command as a privileged"/>
     <echo message="user, otherwise you will get 'permission denied' errors"/>
@@ -155,12 +152,10 @@
     <!-- main packages -->
     <antcall target="ffmpeg.install"/>
     <antcall target="mediainfo.install"/>
-    <antcall target="flvtool.install"/>
     <antcall target="opencv.install"/>
     <antcall target="tesseract.install"/>
     <antcall target="ocropus.install"/>
     <antcall target="videosegmenter.install"/>
-    <antcall target="mplayer.install"/>
   </target>
 
   <!-- ============================================================== -->
@@ -174,7 +169,7 @@
   -->
   <target name="libpng.download" unless="libpng.downloaded">
     <mkdir dir="${build.libpng}" />
-    <get src="${libpng.url}" dest="${build.libpng}/libpng-${libpng.version}.tar.gz" verbose="true"/>
+    <get src="${libpng.url}" dest="${build.libpng}/libpng-${libpng.version}.tar.gz"/>
     <gunzip src="${build.libpng}/libpng-${libpng.version}.tar.gz" dest="${build.libpng}/libpng-${libpng.version}.tar"/>
     <untar src="${build.libpng}/libpng-${libpng.version}.tar" dest="${build.libpng}"/>
     <delete file="${build.libpng}/libpng-${libpng.version}.tar.gz"/>
@@ -184,7 +179,7 @@
   <target name="libpng.make" depends="setup, libpng.download" unless="libpng.built">
     <echo message="Building libpng ${libpng.version}"/>
     <property name="libpng.absworkdir" value="${pwd}/build/thirdparty/libpng/libpng-${libpng.version}"/>
-  	
+    
     <!-- configure -->
     <chmod perm="755" file="${libpng.workdir}/configure"/>
     <echo message="Configuring libpng build environment"/>
@@ -221,7 +216,7 @@
   -->
   <target name="libjpeg.download" unless="libjpeg.downloaded">
     <mkdir dir="${build.libjpeg}"/>
-    <get src="${libjpeg.url}" dest="${build.libjpeg}/libjpeg-${libjpeg.version}.tar.gz" verbose="true"/>
+    <get src="${libjpeg.url}" dest="${build.libjpeg}/libjpeg-${libjpeg.version}.tar.gz"/>
     <gunzip src="${build.libjpeg}/libjpeg-${libjpeg.version}.tar.gz" dest="${build.libjpeg}/libjpeg-${libjpeg.version}.tar"/>
     <untar src="${build.libjpeg}/libjpeg-${libjpeg.version}.tar" dest="${build.libjpeg}"/>
     <move  file="${build.libjpeg}/jpeg-6b" tofile="${libjpeg.workdir}"/>
@@ -280,7 +275,7 @@
   -->
   <target name="libtiff.download" unless="libtiff.downloaded">
     <mkdir dir="${build.libtiff}"/>
-    <get src="${libtiff.url}" dest="${build.libtiff}/libtiff-${libtiff.version}.zip" verbose="true"/>
+    <get src="${libtiff.url}" dest="${build.libtiff}/libtiff-${libtiff.version}.zip"/>
     <unzip src="${build.libtiff}/libtiff-${libtiff.version}.zip" dest="${build.libtiff}"/>
     <move  file="${build.libtiff}/tiff-${libtiff.version}" tofile="${libtiff.workdir}"/>
     <delete file="${build.libtiff}/libtiff-${libtiff.version}.zip"/>
@@ -334,6 +329,9 @@
     <delete file="${build.jam}/jam-${jam.version}.zip"/>
   </target>
 
+  <!--
+  Builds jam
+  -->
   <target name="jam.make" depends="setup,jam.download" unless="jam.built">
     <echo message="Building jam ${jam.version}"/>
     <property name="jam.absworkdir" value="${pwd}/build/thirdparty/jam/jam-${jam.version}"/>
@@ -365,17 +363,13 @@
   <!--
   Downloads and patches ffmpeg
   -->
-  <target name="ffmpeg.download" depends="svnkit,libfaad.install" unless="ffmpeg.downloaded">
+  <target name="ffmpeg.download" unless="ffmpeg.downloaded">
     <mkdir dir="${build.ffmpeg}"/>
-    <java classname="org.tmatesoft.svn.cli.SVN" dir="${build.ffmpeg}" fork="true">
-      <arg value="co" />
-      <arg value="${ffmpeg.url}@${ffmpeg.revision}" />
-      <arg value="ffmpeg" />
-      <classpath>
-        <pathelement location="${svnkit.jar}" />
-        <pathelement location="${svnkitcli.jar}" />
-      </classpath>
-    </java>
+    <get src="${ffmpeg.url}" dest="${build.ffmpeg}/ffmpeg-${ffmpeg.revision}.tar.bz2"/>
+    <bunzip2 src="${build.ffmpeg}/ffmpeg-${ffmpeg.revision}.tar.bz2" dest="${build.ffmpeg}/ffmpeg-${ffmpeg.revision}.tar"/>
+    <untar src="${build.ffmpeg}/ffmpeg-${ffmpeg.revision}.tar" dest="${build.ffmpeg}"/>
+    <delete file="${build.ffmpeg}/ffmpeg-${ffmpeg.revision}.tar.bz2"/>
+    <delete file="${build.ffmpeg}/ffmpeg-${ffmpeg.revision}.tar"/>
     
     <!-- patch configure script to correctly handle source-path -->
     <echo message="Patching ${ffmpeg.workdir}/configure with ${pwd}/patches/ffmpeg/configure.patch"/>
@@ -387,18 +381,22 @@
       <arg line="./patches/ffmpeg/configure.patch"/>      
     </exec>
     <echo message="Patched ffmpeg"/>
-
   </target>
 
-  <target name="ffmpeg.make" depends="setup,svnkit,ffmpeg.download" unless="ffmpeg.built">
+  <!--
+  Builds ffmpeg
+  -->
+  <target name="ffmpeg.make" depends="setup,ffmpeg.download,libfaad.install" unless="ffmpeg.built">
     <echo message="Building ffmpeg export snapshot"/>
-    <property name="ffmpeg.absworkdir" value="${pwd}/build/thirdparty/ffmpeg/ffmpeg"/>
+    <property name="ffmpeg.absworkdir" value="${pwd}/${ffmpeg.workdir}"/>
     
     <!-- configure -->
     <chmod perm="755" file="${ffmpeg.workdir}/configure"/>
     <echo message="Configuring ffmpeg build environment"/>
     <exec executable="${ffmpeg.absworkdir}/configure" dir="${ffmpeg.absworkdir}" resolveexecutable="true" failonerror="true">
-      <arg line="--source-path=${ffmpeg.absworkdir} --enable-gpl --enable-libfaad"/>
+      <arg line="--source-path=${ffmpeg.absworkdir}"/>
+      <arg line="--enable-gpl"/>
+      <arg line="--enable-libfaad"/>
     </exec>
 
     <!-- make -->
@@ -431,13 +429,16 @@
   -->
   <target name="mediainfo.download" unless="mediainfo.downloaded">
     <mkdir dir="${build.mediainfo}"/>
-    <get src="${mediainfo.url}" dest="${build.mediainfo}/mediainfo-${mediainfo.version}.tar.bz2" verbose="true"/>
+    <get src="${mediainfo.url}" dest="${build.mediainfo}/mediainfo-${mediainfo.version}.tar.bz2"/>
     <bunzip2 src="${build.mediainfo}/mediainfo-${mediainfo.version}.tar.bz2" dest="${build.mediainfo}/mediainfo-${mediainfo.version}.tar"/>
     <untar src="${build.mediainfo}/mediainfo-${mediainfo.version}.tar" dest="${build.mediainfo}/mediainfo-${mediainfo.version}"/>
     <delete file="${build.mediainfo}/mediainfo-${mediainfo.version}.tar.bz2"/>
     <delete file="${build.mediainfo}/mediainfo-${mediainfo.version}.tar"/>
   </target>
 
+  <!--
+  Builds mediainfo
+  -->
   <target name="mediainfo.make" depends="setup,mediainfo.download" unless="mediainfo.built">
     <echo message="Building mediainfo ${mediainfo.version}"/>
     <property name="mediainfo.absworkdir" value="${pwd}/build/thirdparty/mediainfo/mediainfo-${mediainfo.version}/MediaInfo_CLI_GNU_FromSource"/>
@@ -464,47 +465,51 @@
     </exec>
   </target>
 
-    <!-- ============================================================== -->
-    <!-- [libfaad] library used by ffmpeg to encode/decode aac/mp4a     -->
-    <!-- ============================================================== -->
+  <!-- ============================================================== -->
+  <!-- [libfaad] library used by ffmpeg to encode/decode aac/mp4a     -->
+  <!-- ============================================================== -->
 
-    <target name="libfaad.download" unless="libfaad.downloaded">
-        <mkdir dir="${build.libfaad}"/>
-        <get src="${libfaad.url}" dest="${build.libfaad}/libfaad-${libfaad.version}.zip" verbose="true"/>
-        <unzip src="${build.libfaad}/libfaad-${libfaad.version}.zip" dest="${build.libfaad}"/>
-        <delete file="${build.libfaad}/libfaad-${libfaad.version}.zip"/>
-    </target>
+  <target name="libfaad.download" unless="libfaad.downloaded">
+     <mkdir dir="${build.libfaad}"/>
+     <get src="${libfaad.url}" dest="${build.libfaad}/libfaad-${libfaad.version}.tar.gz"/>
 
-    <target name="libfaad.make" depends="setup,libfaad.download" unless="libfaad.built">
-        <echo message="Building libfaad ${libfaad.version}"/>
-        <property name="libfaad.absworkdir" value="${pwd}/build/thirdparty/libfaad/faad2"/>
+     <gunzip src="${build.libfaad}/libfaad-${libfaad.version}.tar.gz" dest="${build.libfaad}/libfaad-${libfaad.version}.tar"/>
+     <untar src="${build.libfaad}/libfaad-${libfaad.version}.tar" dest="${build.libfaad}"/>
+     <delete file="${build.libfaad}/libfaad-${libfaad.version}.tar.gz"/>
+     <delete file="${build.libfaad}/libfaad-${libfaad.version}.tar"/>
+  </target>
 
-        <!-- bootstrap -->
-        <chmod perm="755" file="${libfaad.absworkdir}/bootstrap"/>
-        <echo message="Bootstrapping libfaad build environment"/>
-        <exec executable="${libfaad.absworkdir}/bootstrap" dir="${libfaad.absworkdir}" resolveexecutable="true" failonerror="true"/>
+  <target name="libfaad.make" depends="setup,libfaad.download" unless="libfaad.built">
+     <echo message="Building libfaad ${libfaad.version}"/>
+     <property name="libfaad.absworkdir" value="${pwd}/build/thirdparty/libfaad/faad2-${libfaad.version}"/>
 
-        <!-- configure -->
-        <chmod perm="755" file="${libfaad.absworkdir}/configure"/>
-        <echo message="Configuring libfaad build environment"/>
-        <exec executable="${libfaad.absworkdir}/configure" dir="${libfaad.absworkdir}" resolveexecutable="true" failonerror="true"/>
+     <!-- bootstrap -->
+     <chmod perm="755" file="${libfaad.absworkdir}/bootstrap"/>
+     <echo message="Bootstrapping libfaad build environment"/>
+     <exec executable="${libfaad.absworkdir}/bootstrap" dir="${libfaad.absworkdir}" resolveexecutable="true" failonerror="true"/>
 
-        <!-- make -->
-        <echo message="Making libfaad"/>
-        <exec executable="make" searchpath="true" failonerror="true">
-            <arg line="-C ${libfaad.absworkdir}"/>
-        </exec>
-    </target>
+     <!-- configure -->
+     <chmod perm="755" file="${libfaad.absworkdir}/configure"/>
+     <echo message="Configuring libfaad build environment"/>
+     <exec executable="${libfaad.absworkdir}/configure" dir="${libfaad.absworkdir}" resolveexecutable="true" failonerror="true"/>
 
-    <target name="libfaad.install" depends="libfaad.make">
-        <echo message="Installing libfaad ${libfaad.version}"/>
-        <sleep seconds="1"/>
-        <exec executable="sudo" searchpath="true" failonerror="true">
-            <arg line="make -C ${libfaad.workdir} install"/>
-        </exec>
-    </target>
+     <!-- make -->
+     <echo message="Making libfaad"/>
+     <exec executable="make" searchpath="true" failonerror="true">
+         <arg line="-C ${libfaad.absworkdir}"/>
+     </exec>
+  </target>
 
-    <!-- ============================================================== -->
+  <target name="libfaad.install" depends="libfaad.make">
+     <echo message="Installing libfaad ${libfaad.version}"/>
+     <sleep seconds="1"/>
+     <chmod perm="755" file="${libfaad.workdir}/install-sh"/>
+     <exec executable="sudo" searchpath="true" failonerror="true">
+         <arg line="make -C ${libfaad.workdir} install"/>
+     </exec>
+  </target>
+
+  <!-- ============================================================== -->
   <!-- [opencv]                                                       -->
   <!--                                                                -->
   <!-- Downloads, builds and installs opencv                          -->
@@ -515,7 +520,7 @@
   -->
   <target name="opencv.download" unless="opencv.downloaded">
     <mkdir dir="${build.opencv}"/>
-    <get src="${opencv.url}" dest="${build.opencv}/opencv-${opencv.version}.tar.gz" verbose="true"/>
+    <get src="${opencv.url}" dest="${build.opencv}/opencv-${opencv.version}.tar.gz"/>
     <gunzip src="${build.opencv}/opencv-${opencv.version}.tar.gz" dest="${build.opencv}/opencv-${opencv.version}.tar"/>
     <untar src="${build.opencv}/opencv-${opencv.version}.tar" dest="${build.opencv}"/>
     <delete file="${build.opencv}/opencv-${opencv.version}.tar.gz"/>
@@ -566,7 +571,7 @@
   -->
   <target name="tesseract.download" unless="tesseract.downloaded">
     <mkdir dir="${build.tesseract}"/>
-    <get src="${tesseract.url}" dest="${build.tesseract}/tesseract-${tesseract.version}.tar.gz" verbose="true"/>
+    <get src="${tesseract.url}" dest="${build.tesseract}/tesseract-${tesseract.version}.tar.gz"/>
     <gunzip src="${build.tesseract}/tesseract-${tesseract.version}.tar.gz" dest="${build.tesseract}/tesseract-${tesseract.version}.tar"/>
     <untar src="${build.tesseract}/tesseract-${tesseract.version}.tar" dest="${build.tesseract}"/>
     <delete file="${build.tesseract}/tesseract-${tesseract.version}.tar.gz"/>
@@ -621,17 +626,13 @@
   <!--
   Downloads ocropus
   -->
-  <target name="ocropus.download" depends="svnkit" unless="ocropus.downloaded">
+  <target name="ocropus.download" unless="ocropus.downloaded">
     <mkdir dir="${build.ocropus}"/>
-    <java classname="org.tmatesoft.svn.cli.SVN" dir="${build.ocropus}" fork="true">
-      <arg value="co" />
-      <arg value="${ocropus.url}@${ocropus.revision}" />
-      <arg value="ocropus" />
-      <classpath>
-        <pathelement location="${svnkit.jar}" />
-        <pathelement location="${svnkitcli.jar}" />
-      </classpath>
-    </java>
+    <get src="${ocropus.url}" dest="${build.ocropus}/ocropus-${ocropus.revision}.tar.gz"/>
+    <gunzip src="${build.ocropus}/ocropus-${ocropus.revision}.tar.gz" dest="${build.ocropus}/ocropus-${ocropus.revision}.tar"/>
+    <untar src="${build.ocropus}/ocropus-${ocropus.revision}.tar" dest="${build.ocropus}"/>
+    <delete file="${build.ocropus}/ocropus-${ocropus.revision}.tar.gz"/>
+    <delete file="${build.ocropus}/ocropus-${ocropus.revision}.tar"/>
   </target>
 
   <target name="ocropus.make" depends="setup, ocropus.download" unless="ocropus.built">
@@ -672,14 +673,14 @@
   -->
   <target name="videosegmenter.download" unless="videosegmenter.downloaded">
     <mkdir dir="${build.videosegmenter}"/>
-    <get src="${videosegmenter.url}" dest="${build.videosegmenter}/videosegmenter-${videosegmenter.version}.tar.gz" verbose="true"/>
+    <get src="${videosegmenter.url}" dest="${build.videosegmenter}/videosegmenter-${videosegmenter.version}.tar.gz"/>
     <gunzip src="${build.videosegmenter}/videosegmenter-${videosegmenter.version}.tar.gz" dest="${build.videosegmenter}/videosegmenter-${videosegmenter.version}.tar"/>
     <untar src="${build.videosegmenter}/videosegmenter-${videosegmenter.version}.tar" dest="${build.videosegmenter}"/>
     <delete file="${build.videosegmenter}/videosegmenter-${videosegmenter.version}.tar.gz"/>
     <delete file="${build.videosegmenter}/videosegmenter-${videosegmenter.version}.tar"/>
   </target>
 
-  <target name="videosegmenter.make" depends="setup,svnkit,videosegmenter.download" unless="videosegmenter.built">
+  <target name="videosegmenter.make" depends="setup,videosegmenter.download" unless="videosegmenter.built">
     <echo message="Building videosegmenter ${videosegmenter.version}"/>
     <property name="videosegmenter.absworkdir" value="${pwd}/build/thirdparty/videosegmenter/videosegmenter-${videosegmenter.version}"/>
     
@@ -702,197 +703,43 @@
     </exec>
   </target>
 
-  <!-- ============================================================== -->
-  <!-- [mplayer]                                                      -->
-  <!--                                                                -->
-  <!-- Downloads, builds and installs mplayer                         -->
-  <!-- ============================================================== -->
-
-  <!--
-  Downloads mplayer
-  -->
-  <target name="mplayer.download" unless="mplayer.downloaded">
-    <mkdir dir="${build.mplayer}"/>
-    <get src="${mplayer.url}" dest="${build.mplayer}/mplayer-${mplayer.version}.tar.bz2" verbose="true"/>
-    <bunzip2 src="${build.mplayer}/mplayer-${mplayer.version}.tar.bz2" dest="${build.mplayer}/mplayer-${mplayer.version}.tar"/>
-    <untar src="${build.mplayer}/mplayer-${mplayer.version}.tar" dest="${build.mplayer}"/>
-    <delete file="${build.mplayer}/mplayer-${mplayer.version}.tar.bz2"/>
-    <delete file="${build.mplayer}/mplayer-${mplayer.version}.tar"/>
-  </target>
-
-  <target name="mplayer.make" depends="setup,svnkit,mplayer.download" unless="mplayer.built">
-    <echo message="Building mplayer ${mplayer.version}"/>
-    <property name="mplayer.absworkdir" value="${pwd}/build/thirdparty/mplayer/MPlayer-${mplayer.version}"/>
+  <!-- ================================================================== -->
+  <!-- Deploy thirdparty tools                                            -->
+  <!-- ================================================================== -->
+  <target name="installation">
+    <fail unless="catalina.home" message="Please define CATALINA_HOME in your environment"/>
+    <fail unless="catalina.present" message="The tomcat installation at ${catalina.home} seems to be damaged"/>
+    <mkdir dir="${catalina.home}/thirdparty"/>
     
-    <!-- configure -->
-    <chmod perm="755" file="${mplayer.workdir}/configure"/>
-    <chmod perm="755" file="${mplayer.workdir}/version.sh"/>
-    <echo message="Configuring mplayer build environment"/>
-    <exec executable="${mplayer.absworkdir}/configure" dir="${mplayer.absworkdir}" resolveexecutable="true" failonerror="true"/>
+    <!-- install ant files and scripts -->
+    <copy tofile="${catalina.home}/thirdparty/build.xml" file="build/scripts/thirdparty-standalone.xml"/>
+    <copy todir="${catalina.home}/thirdparty">
+       <fileset dir=".">
+         <include name="build.properties"/>
+         <include name="thirdparty.properties"/>
+       </fileset>
+       <fileset dir="build/scripts">
+         <include name="thirdparty.xml"/>
+         <include name="subversion.xml"/>
+       </fileset>
+       <fileset dir="build/bin">
+         <include name="thirdparty.sh"/>
+       </fileset>
+     </copy>
+     <chmod file="${catalina.home}/thirdparty/thirdparty.sh" perm="755"/>
 
-    <!-- make -->
-    <echo message="Making mplayer"/>
-    <exec executable="make" searchpath="true" failonerror="true">
-      <arg line="-C ${mplayer.workdir}"/>
-    </exec>
+    <!-- add patches -->
+     <mkdir dir="${catalina.home}/thirdparty/build/patches"/>
+     <copy todir="${catalina.home}/thirdparty/build/patches">
+       <fileset dir="build/patches"/>
+     </copy>
   </target>
 
-  <!--
-  Installs mplayer
-  -->
-  <target name="mplayer.install" depends="mplayer.make">
-    <echo message="Installing mplayer ${mplayer.version}"/>
-    <sleep seconds="1"/>
-    <exec executable="make" searchpath="true" failonerror="true">
-      <arg line="-C ${mplayer.workdir}"/>
-      <arg line="install"/>
-    </exec>
-  </target>
-
-    <!-- ============================================================== -->
-  <!-- [flvtool]                                                      -->
-  <!--                                                                -->
-  <!-- Downloads, builds and installs flvtool                         -->
-  <!-- ============================================================== -->
-
-  <!--
-  Downloads flvtool
-  -->
-  <target name="flvtool.download" unless="flvtool.downloaded">
-    <mkdir dir="${build.flvtool}"/>
-    <get src="${flvtool.url}" dest="${build.flvtool}/flvtool-${flvtool.version}.tgz" verbose="true"/>
-    <gunzip src="${build.flvtool}/flvtool-${flvtool.version}.tgz" dest="${build.flvtool}/flvtool-${flvtool.version}.tar"/>
-    <untar src="${build.flvtool}/flvtool-${flvtool.version}.tar" dest="${build.flvtool}"/>
-    <delete file="${build.flvtool}/flvtool-${flvtool.version}.tgz"/>
-    <delete file="${build.flvtool}/flvtool-${flvtool.version}.tar"/>
-  </target>
-
-  <target name="flvtool.make" depends="setup, flvtool.download" unless="flvtool.built">
-    <echo message="Building flvtool ${flvtool.version}"/>
-    
-    <!-- configure -->
-    <echo message="Configuring flvtool build environment"/>
-    <exec executable="ruby" dir="${flvtool.workdir}" searchpath="true" failonerror="true">
-      <arg line="setup.rb"/>
-      <arg line="config"/>
-      <arg line="--prefix=/usr/local"/>
-    </exec>
-
-    <!-- make -->
-    <echo message="Making flvtool"/>
-    <exec executable="ruby" dir="${flvtool.workdir}" searchpath="true" failonerror="true">
-      <arg line="setup.rb"/>
-      <arg line="setup"/>
-    </exec>
-    <touch file="${flvtool.workdir}/.made"/>
-  </target>
-
-  <!--
-  Installs flvtool
-  -->
-  <target name="flvtool.install" depends="flvtool.make">
-    <echo message="Installing flvtool ${flvtool.version}"/>
-    <sleep seconds="1"/>
-    <exec executable="ruby" dir="${flvtool.workdir}" searchpath="true" failonerror="true">
-      <arg line="setup.rb"/>
-      <arg line="install"/>
-    </exec>
-  </target>
-
-    <!-- ================================================================== -->
-    <!-- Deploy thirdparty tools                                            -->
-    <!-- ================================================================== -->
-    <target name="install.thirdparty">
-        <fail unless="catalina.home" message="Please define CATALINA_HOME in your environment"/>
-        <fail unless="catalina.present" message="The tomcat installation at ${catalina.home} seems to be damaged"/>
-      <mkdir dir="${catalina.home}/thirdparty"/>
-      
-      <!-- install ant files and scripts -->
-      <copy tofile="${catalina.home}/thirdparty/build.xml" file="build/scripts/thirdparty-standalone.xml"/>
-        <copy todir="${catalina.home}/thirdparty">
-          <fileset dir=".">
-            <include name="build.properties"/>
-            <include name="thirdparty.properties"/>
-          </fileset>
-          <fileset dir="build/scripts">
-            <include name="thirdparty.xml"/>
-            <include name="subversion.xml"/>
-          </fileset>
-          <fileset dir="build/bin">
-            <include name="thirdparty.sh"/>
-          </fileset>
-        </copy>
-      <chmod file="${catalina.home}/thirdparty/thirdparty.sh" perm="755"/>
-
-      <!-- add libraries -->
-        <mkdir dir="${catalina.home}/thirdparty/build/lib"/>
-        <copy todir="${catalina.home}/thirdparty/build/lib">
-          <fileset dir="build/lib">
-            <include name="svnkit-cli.jar"/>
-            <include name="svnkit.jar"/>
-          </fileset>
-        </copy>
-
-      <!-- add patches -->
-        <mkdir dir="${catalina.home}/thirdparty/build/patches"/>
-        <copy todir="${catalina.home}/thirdparty/build/patches">
-          <fileset dir="build/patches"/>
-        </copy>
-    </target>
-  
-    <!-- ================================================================== -->
-    <!-- Cleanup thirdparty files from the build directory                  -->
-    <!-- ================================================================== -->
-    <target name="clean.thirdparty" description="Remove files from the build directory">
-    <echo/>
-    <echo message="Make sure you execute this command as a privileged"/>
-    <echo message="user, otherwise you will get 'permission denied' errors."/>
-    <echo/>
-      <delete dir="${build.thirdparty}"/>
-    </target>
-
-  <!-- 
-    Download jar files from maven2 repository. Typically this is an older version
-    of the library, but the download size is significantly smaller.
-  -->
-  <target name="svnkit" unless="svn.present" description="Download subversion library">
-    <get src="http://www.svnkit.com/org.tmatesoft.svn_${svnkit.version}.standalone.zip" dest="${java.io.tmpdir}/svnkit-${svnkit.version}.zip" verbose="true"/>
-    <unzip src="${java.io.tmpdir}/svnkit-${svnkit.version}.zip" dest="${java.io.tmpdir}"/>
-    <move file="${java.io.tmpdir}/svnkit-${svnkit.version}.${svnkit.revision}/svnkit.jar" tofile="${svnkit.jar}"/>
-    <move file="${java.io.tmpdir}/svnkit-${svnkit.version}.${svnkit.revision}/svnkit-cli.jar" tofile="${svnkitcli.jar}"/>
-    <delete file="${java.io.tmpdir}/svnkit-${svnkit.version}.zip"/>
-    <delete dir="${java.io.tmpdir}/svnkit-${svnkit.version}.${svnkit.revision}"/>
-  </target>
-  <!-- 
-    Create a patch.
-  -->
-  <target name="svn-diff" depends="svnkit" description="Create a patch">
-    <echo>Generating patch file '${svn.patch.file}'....</echo>
-    <java classname="org.tmatesoft.svn.cli.SVN" dir="." fork="true" output="replay.patch">
-      <arg value="diff" />
-      <arg value="." />
-      <classpath>
-        <pathelement location="${svnkit.jar}" />
-        <pathelement location="${svnkitcli.jar}" />
-      </classpath>
-    </java>
-  </target>
-
-  <!-- 
-    Check out / update sources from subversion code archive.
-  -->
-  <target name="svn-update" depends="svnkit" description="Update project from subversion archive">
-    <property name="project.dir" value="." />
-    <fail unless="${svn.repository}" message="SVN repository url is unspecified"/>
-    <java classname="org.tmatesoft.svn.cli.SVN" dir="." fork="true">
-      <arg value="co" />
-      <arg value="${svn.repository}" />
-      <arg value="${project.dir}" />
-      <classpath>
-        <pathelement location="${svnkit.jar}" />
-        <pathelement location="${svnkitcli.jar}" />
-      </classpath>
-    </java>
+  <!-- ================================================================== -->
+  <!-- Cleanup thirdparty files from the build directory                  -->
+  <!-- ================================================================== -->
+  <target name="clean" description="Remove files from the build directory">
+    <delete dir="${build.thirdparty}"/>
   </target>
 
 </project>
