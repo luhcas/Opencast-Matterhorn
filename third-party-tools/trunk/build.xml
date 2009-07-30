@@ -150,7 +150,9 @@
     <antcall target="jam.install"/>
 
     <!-- main packages -->
+	<!--
     <antcall target="ffmpeg.install"/>
+	-->
     <antcall target="mediainfo.install"/>
     <antcall target="opencv.install"/>
     <antcall target="tesseract.install"/>
