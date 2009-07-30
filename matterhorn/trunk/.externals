@@ -18,4 +18,5 @@
 ../../opencast-working-file-repo-impl/trunk	opencast-working-file-repo-impl
 ../../opencast-workspace-api/trunk	opencast-workspace-api
 ../../opencast-workspace-impl/trunk	opencast-workspace-impl
+../../modules/opencast-maven-plugin/trunk	opencast-maven-plugin
 
