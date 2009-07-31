@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-encoder-api</artifactId>
+  <artifactId>opencast-composer-service-api</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-encoder-api</name>
+  <name>opencast-composer-service-api</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -13,7 +13,7 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-notification-api</artifactId>
+      <artifactId>opencast-notification-service-api</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>

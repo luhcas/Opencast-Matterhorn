@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>thirdparty-tools</artifactId>
+  <artifactId>opencast-av-tools</artifactId>
   <packaging>jar</packaging>
-  <name>thirdparty-tools</name>
+  <name>opencast-av-tools</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
