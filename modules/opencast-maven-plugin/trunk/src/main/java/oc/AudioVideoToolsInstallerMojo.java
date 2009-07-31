@@ -19,12 +19,12 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
+/**
+ * Runs the AV Tools installation
+ * @goal av
+ */
 public class AudioVideoToolsInstallerMojo extends AbstractMojo {
 
-  /**
-   * Runs the AV Tools installation
-   * @goal av
-   */
   public void execute() throws MojoExecutionException, MojoFailureException {
     getLog().info("From AV Tools Installer Plugin");
   }

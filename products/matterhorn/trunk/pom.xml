@@ -32,6 +32,7 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
+        <module>opencast-maven-plugin</module>
         <module>opencast-build-tools</module>
         <module>opencast-authentication-api</module>
         <module>opencast-composer-service-api</module>

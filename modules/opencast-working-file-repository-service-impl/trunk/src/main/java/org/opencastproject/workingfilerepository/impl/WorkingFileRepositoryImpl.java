@@ -88,6 +88,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     return new File(rootDirectory + File.separator + mediaPackageID + File.separator + mediaPackageElementID);
   }
 
+  @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {
     if(props.get("root") != null) {
       rootDirectory = (String)props.get("root");

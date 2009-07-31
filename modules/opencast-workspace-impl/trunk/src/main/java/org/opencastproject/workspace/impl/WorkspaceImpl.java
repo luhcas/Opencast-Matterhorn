@@ -70,6 +70,7 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     this.repo = repo;
   }
   
+  @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {
     if(props.get("root") != null) {
       rootDirectory = (String)props.get("root");
