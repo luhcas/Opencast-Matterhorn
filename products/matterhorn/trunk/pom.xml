@@ -48,6 +48,8 @@
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
+        <module>opencast-inspection-service-api</module>
+        <module>opencast-inspection-service-impl</module>
       </modules>
     </profile>
     <profile>
@@ -69,6 +71,8 @@
         <module>opencast-workspace-impl</module>
         <module>opencast-working-file-repo-api</module>
         <module>opencast-working-file-repo-impl</module>
+        <module>opencast-inspection-service-api</module>
+        <module>opencast-inspection-service-impl</module>
       </modules>
     </profile>
   </profiles>
