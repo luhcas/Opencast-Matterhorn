@@ -32,8 +32,9 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>opencast-maven-plugin</module>
         <module>opencast-build-tools</module>
+        <module>opencast-maven-plugin</module>
+        <module>opencast-av-tools</module>
         <module>opencast-authentication-api</module>
         <module>opencast-composer-service-api</module>
         <module>opencast-composer-service-impl</module>
@@ -57,20 +58,22 @@
           pax-runner it will start up an osgi instance -->
       <id>paxrun</id>
       <modules>
-        <module>build-tools</module>
-        <module>opencast-runtime-info</module>
-        <module>opencast-notification-api</module>
+        <module>opencast-build-tools</module>
+        <module>opencast-maven-plugin</module>
+        <module>opencast-av-tools</module>
         <module>opencast-authentication-api</module>
-        <module>opencast-encoder-api</module>
-        <module>opencast-encoder-impl</module>
-        <module>opencast-workflow-api</module>
-        <module>opencast-workflow-impl</module>
+        <module>opencast-composer-service-api</module>
+        <module>opencast-composer-service-impl</module>
+        <module>opencast-conductor-service-api</module>
+        <module>opencast-conductor-service-impl</module>
+        <module>opencast-notification-service-api</module>
+        <module>opencast-runtime-info-ui</module>
         <module>opencast-sample-service-api</module>
         <module>opencast-sample-service-impl</module>
+        <module>opencast-working-file-repository-service-api</module>
+        <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
-        <module>opencast-working-file-repo-api</module>
-        <module>opencast-working-file-repo-impl</module>
         <module>opencast-inspection-service-api</module>
         <module>opencast-inspection-service-impl</module>
       </modules>
