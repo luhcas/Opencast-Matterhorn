@@ -11,7 +11,7 @@
 ../../../modules/opencast-authentication-api/trunk	opencast-authentication-api
 ../../../modules/opencast-media/trunk	opencast-media
 ../../../modules/opencast-util/trunk	opencast-util
-../../../modules/opencast-av-tools/trunk	opencast-av-tools
+../../../modules/opencast-runtime-tools/trunk	opencast-runtime-tools
 ../../../modules/opencast-working-file-repository-service-api/trunk	opencast-working-file-repository-service-api
 ../../../modules/opencast-working-file-repository-service-impl/trunk	opencast-working-file-repository-service-impl
 ../../../modules/opencast-workspace-api/trunk	opencast-workspace-api

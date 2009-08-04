@@ -34,7 +34,7 @@
       <modules>
         <module>opencast-build-tools</module>
         <module>opencast-maven-plugin</module>
-        <module>opencast-av-tools</module>
+        <module>opencast-runtime-tools</module>
         <module>opencast-authentication-api</module>
         <module>opencast-composer-service-api</module>
         <module>opencast-composer-service-impl</module>
@@ -60,7 +60,7 @@
       <modules>
         <module>opencast-build-tools</module>
         <module>opencast-maven-plugin</module>
-        <module>opencast-av-tools</module>
+        <module>opencast-runtime-tools</module>
         <module>opencast-authentication-api</module>
         <module>opencast-composer-service-api</module>
         <module>opencast-composer-service-impl</module>
