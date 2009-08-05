@@ -43,6 +43,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   private String rootDirectory = "/tmp/matterhorn/workingfilerepo";
   
   public void delete(String mediaPackageID, String mediaPackageElementID) {
+    checkId(mediaPackageID);
+    checkId(mediaPackageElementID);
     File f = getFile(mediaPackageID, mediaPackageElementID);
     logger.info("Attempting to delete file " + f.getAbsolutePath());
     if(f.canWrite()) {
@@ -54,6 +56,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   }
 
   public InputStream get(String mediaPackageID, String mediaPackageElementID) {
+    checkId(mediaPackageID);
+    checkId(mediaPackageElementID);
     File f = getFile(mediaPackageID, mediaPackageElementID);
     logger.info("Attempting to read file " + f.getAbsolutePath());
     try {
@@ -64,6 +68,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   }
 
   public void put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
+    checkId(mediaPackageID);
+    checkId(mediaPackageElementID);
     File f = getFile(mediaPackageID, mediaPackageElementID);
     logger.info("Attempting to write a file to " + f.getAbsolutePath());
     try {
@@ -84,6 +90,13 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     }
   }
 
+  private void checkId(String id) {
+    if(id == null) throw new NullPointerException("IDs can not be null");
+    if(id.indexOf("..") > -1 || id.indexOf(File.separator) > -1) {
+      throw new IllegalArgumentException("Invalid media package / element ID");
+    }
+  }
+  
   private File getFile(String mediaPackageID, String mediaPackageElementID) {
     return new File(rootDirectory + File.separator + mediaPackageID + File.separator + mediaPackageElementID);
   }

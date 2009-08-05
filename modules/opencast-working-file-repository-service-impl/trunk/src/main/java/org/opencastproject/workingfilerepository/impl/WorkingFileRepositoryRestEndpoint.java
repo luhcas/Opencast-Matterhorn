@@ -15,23 +15,27 @@
  */
 package org.opencastproject.workingfilerepository.impl;
 
+
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
+import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.IOUtils;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @Path("/")
 public class WorkingFileRepositoryRestEndpoint implements WorkingFileRepository {
@@ -40,47 +44,61 @@ public class WorkingFileRepositoryRestEndpoint implements WorkingFileRepository 
     this.repo = repo;
   }
 
-  @DELETE
-  @Path("/{mediaPackageID}/{mediaPackageElementID}")
-  public void delete(
+  @POST
+  @Produces(MediaType.TEXT_HTML)
+  @Path("{mediaPackageID}/{mediaPackageElementID}")
+  public Response put(
       @PathParam("mediaPackageID") String mediaPackageID,
-      @PathParam("mediaPackageElementID") String mediaPackageElementID) {
-    repo.delete(mediaPackageID, mediaPackageElementID);
+      @PathParam("mediaPackageElementID") String mediaPackageElementID,
+      @Context HttpServletRequest request) throws Exception {
+    if(ServletFileUpload.isMultipartContent(request)) {
+      for(FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
+        FileItemStream item = iter.next();
+        if(item.isFormField()) continue;
+        put(mediaPackageID, mediaPackageElementID, item.openStream());
+        return Response.ok("File stored for media package " + mediaPackageID + ", element " + mediaPackageElementID).build();
+      }
+    }
+    return Response.serverError().status(400).build();
   }
 
+  @DELETE
+  @Produces(MediaType.TEXT_HTML)
+  @Path("{mediaPackageID}/{mediaPackageElementID}")
+  public Response deleteViaHttp(
+      @PathParam("mediaPackageID") String mediaPackageID,
+      @PathParam("mediaPackageElementID") String mediaPackageElementID) {
+    delete(mediaPackageID, mediaPackageElementID);
+    return Response.ok().build();
+  }
+  
   @GET
-  @Path("/{mediaPackageID}/{mediaPackageElementID}")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
+  @Path("{mediaPackageID}/{mediaPackageElementID}")
   public InputStream get(
       @PathParam("mediaPackageID") String mediaPackageID,
       @PathParam("mediaPackageElementID") String mediaPackageElementID) {
     return repo.get(mediaPackageID, mediaPackageElementID);
   }
-
-  @PUT
-  @POST
-  @Path("/{mediaPackageID}/{mediaPackageElementID}")
-  public void put(
-      @PathParam("mediaPackageID") String mediaPackageID,
-      @PathParam("mediaPackageElementID") String mediaPackageElementID,
-      @Context HttpServletRequest request) throws Exception {
-    if(ServletFileUpload.isMultipartContent(request)) {
-      FileItemStream item = new ServletFileUpload().getItemIterator(request).next();
-      put(mediaPackageID, mediaPackageElementID, item.openStream());
-    } else {
-      throw new IllegalArgumentException("this method expects a file upload");
+  
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("docs")
+  public String getTestForm() {
+    try {
+      return IOUtils.toString(getClass().getResourceAsStream("/html/index.html"));
+    } catch (IOException e) {
+      e.printStackTrace();
+      return e.getMessage();
     }
   }
 
   public void put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
     repo.put(mediaPackageID, mediaPackageElementID, in);
   }
-  
-  @GET
-  @Path("/docs")
-  @Produces(MediaType.TEXT_HTML)
-  public String getDocumentation() {
-    return "Please Document Me!";
+
+  public void delete(String mediaPackageID, String mediaPackageElementID) {
+    repo.delete(mediaPackageID, mediaPackageElementID);
   }
 
 }

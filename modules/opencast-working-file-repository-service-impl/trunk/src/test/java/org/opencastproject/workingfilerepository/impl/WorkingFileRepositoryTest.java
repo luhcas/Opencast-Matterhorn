@@ -45,4 +45,24 @@ public class WorkingFileRepositoryTest {
       // expect a thrown exception
     }
   }
+  
+  @Test
+  public void testPutBadId() throws Exception {
+    // Try adding a file with a bad ID
+    String badId = "../etc";
+    InputStream in = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
+    try {
+      repo.put(badId, mediaPackageElementID, in);
+      Assert.fail();
+    } catch (Exception e) {}
+  }
+
+  @Test
+  public void testGetBadId() throws Exception {
+    String badId = "../etc";
+    try {
+      repo.get(badId, mediaPackageElementID);
+      Assert.fail();
+    } catch (Exception e) {}
+  }
 }
