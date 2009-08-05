@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.encoder.api;
+package org.opencastproject.composer.api;
 
 import org.opencastproject.notification.api.NotificationMessage;
 
@@ -21,7 +21,7 @@ import org.opencastproject.notification.api.NotificationMessage;
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this
  * encoding job.
  */
-public interface EncoderService {
+public interface ComposerService {
   public NotificationMessage encode(
       String mediaPackageHandle,
       String track,

@@ -55,9 +55,8 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Import-Package> org.osgi.service.component, META-INF.cxf, org.apache.cxf,
-              org.apache.cxf.wsdl, org.opencastproject.encoder.api, * </Import-Package>
-            <Private-Package>org.opencastproject.encoder</Private-Package>
+            <Import-Package> org.osgi.service.component, * </Import-Package>
+            <Private-Package>org.opencastproject.composer.impl</Private-Package>
             <Service-Component>OSGI-INF/encoder-service.xml</Service-Component>
           </instructions>
         </configuration>

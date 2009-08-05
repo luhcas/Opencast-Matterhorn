@@ -33,6 +33,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     // TODO Implement me
   }
 
+  @SuppressWarnings("unchecked")
   public void updated(Dictionary properties) throws ConfigurationException {
     // TODO Update the local path to the mediainfo binary
   }

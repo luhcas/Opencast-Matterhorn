@@ -13,15 +13,15 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.encoder;
+package org.opencastproject.composer.impl;
 
-import org.opencastproject.encoder.api.EncoderService;
+import org.opencastproject.composer.api.ComposerService;
 
 import org.opencastproject.notification.api.NotificationMessage;
 
 import java.util.UUID;
 
-public class EncoderServiceImpl implements EncoderService {
+public class ComposerServiceImpl implements ComposerService {
   public NotificationMessage encode(String mediaPackageId, String trackId, String pathOut,
       String notificationServiceEndpoint) {
     // TODO actually start or queue (and change the message parameter) the encoding job
@@ -35,7 +35,7 @@ public class EncoderServiceImpl implements EncoderService {
     message.append(notificationServiceEndpoint);
 
     return new NotificationMessage(message.toString(), UUID.randomUUID()
-        .toString(), EncoderService.class.getName());
+        .toString(), ComposerService.class.getName());
   }
 
   public String getDocumentation() {
