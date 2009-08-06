@@ -15,7 +15,6 @@
  */
 package org.opencastproject.workingfilerepository.impl;
 
-
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
 import org.apache.commons.fileupload.FileItemIterator;

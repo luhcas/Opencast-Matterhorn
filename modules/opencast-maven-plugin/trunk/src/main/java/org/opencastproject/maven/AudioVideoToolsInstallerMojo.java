@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package oc;
+package org.opencastproject.maven;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;

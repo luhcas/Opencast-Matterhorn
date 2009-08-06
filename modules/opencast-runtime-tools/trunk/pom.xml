@@ -300,11 +300,6 @@
 -->
       </plugin>
 
-      <plugin>
-        <groupId>org.opencastproject</groupId>
-        <artifactId>maven-oc-plugin</artifactId>
-        <version>1.0</version>
-      </plugin>
     </plugins>
   </build>
 </project>
