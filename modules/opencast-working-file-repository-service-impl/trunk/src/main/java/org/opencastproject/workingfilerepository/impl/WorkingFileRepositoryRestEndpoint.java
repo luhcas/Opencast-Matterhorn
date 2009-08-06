@@ -22,6 +22,8 @@ import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,11 +41,29 @@ import javax.ws.rs.core.Response;
 
 @Path("/")
 public class WorkingFileRepositoryRestEndpoint implements WorkingFileRepository {
+  private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryRestEndpoint.class);
   WorkingFileRepository repo;
   public void setRepository(WorkingFileRepository repo) {
     this.repo = repo;
   }
 
+  protected final String docs;
+  
+  public WorkingFileRepositoryRestEndpoint() {
+    String docsFromClassloader = null;
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/html/index.html");
+      docsFromClassloader = IOUtils.toString(in);
+    } catch (IOException e) {
+      logger.error("failed to read documentation", e);
+      docsFromClassloader = "unable to load documentation for " + WorkingFileRepositoryRestEndpoint.class.getName();
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+    docs = docsFromClassloader;
+  }
+  
   @POST
   @Produces(MediaType.TEXT_HTML)
   @Path("{mediaPackageID}/{mediaPackageElementID}")
@@ -84,13 +104,8 @@ public class WorkingFileRepositoryRestEndpoint implements WorkingFileRepository 
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
-  public String getTestForm() {
-    try {
-      return IOUtils.toString(getClass().getResourceAsStream("/html/index.html"));
-    } catch (IOException e) {
-      e.printStackTrace();
-      return e.getMessage();
-    }
+  public String getDocumentation() {
+    return docs;
   }
 
   public void put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
