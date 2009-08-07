@@ -17,9 +17,9 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
   <scm>
-    <connection>scm:svn:http://source.opencastproject.org/svn/matterhorn/trunk</connection>
-    <developerConnection>scm:svn:https://source.opencastproject.org/svn/matterhorn/trunk</developerConnection>
-    <url>http://source.opencastproject.org/svn/matterhorn/trunk</url>
+    <connection>scm:svn:http://source.opencastproject.org/svn/products/matterhorn/trunk</connection>
+    <developerConnection>scm:svn:https://source.opencastproject.org/svn/products/matterhorn/trunk</developerConnection>
+    <url>http://source.opencastproject.org/svn/products/matterhorn/trunk</url>
   </scm>
   <issueManagement>
     <system>jira</system>
