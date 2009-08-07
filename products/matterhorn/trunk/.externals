@@ -1,13 +1,10 @@
 ../../../modules/opencast-build-tools/trunk opencast-build-tools
 ../../../modules/opencast-runtime-info-ui/trunk	opencast-runtime-info-ui
 ../../../modules/opencast-notification-service-api/trunk	opencast-notification-service-api
-../../../modules/opencast-sample-service-api/trunk	opencast-sample-service-api
-../../../modules/opencast-sample-service-impl/trunk	opencast-sample-service-impl
 ../../../modules/opencast-composer-service-api/trunk	opencast-composer-service-api
 ../../../modules/opencast-composer-service-impl/trunk	opencast-composer-service-impl
 ../../../modules/opencast-conductor-service-api/trunk	opencast-conductor-service-api
 ../../../modules/opencast-conductor-service-impl/trunk	opencast-conductor-service-impl
-../../../modules/opencast-sample-service-remote-client/trunk	opencast-sample-service-remote-client
 ../../../modules/opencast-authentication-api/trunk	opencast-authentication-api
 ../../../modules/opencast-media/trunk	opencast-media
 ../../../modules/opencast-util/trunk	opencast-util
