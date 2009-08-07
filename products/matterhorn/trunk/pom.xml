@@ -42,9 +42,6 @@
         <module>opencast-conductor-service-impl</module>
         <module>opencast-notification-service-api</module>
         <module>opencast-runtime-info-ui</module>
-        <module>opencast-sample-service-api</module>
-        <module>opencast-sample-service-impl</module>
-        <module>opencast-sample-service-remote-client</module>
         <module>opencast-working-file-repository-service-api</module>
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
@@ -68,8 +65,6 @@
         <module>opencast-conductor-service-impl</module>
         <module>opencast-notification-service-api</module>
         <module>opencast-runtime-info-ui</module>
-        <module>opencast-sample-service-api</module>
-        <module>opencast-sample-service-impl</module>
         <module>opencast-working-file-repository-service-api</module>
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
