@@ -17,10 +17,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>javax.jcr</groupId>
-      <artifactId>jcr</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-composer-service-api</artifactId>
       <version>0.1-SNAPSHOT</version>
