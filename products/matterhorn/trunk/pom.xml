@@ -297,12 +297,14 @@
         <version>1.0</version>
         <scope>provided</scope>
       </dependency>
+
       <dependency>
         <groupId>org.osgi</groupId>
         <artifactId>osgi_R4_compendium</artifactId>
         <version>1.0</version>
         <scope>provided</scope>
       </dependency>
+
       <dependency>
         <groupId>org.apache.felix</groupId>
         <artifactId>org.apache.felix.webconsole</artifactId>
@@ -376,24 +378,6 @@
       </dependency>
 
       <dependency>
-        <groupId>org.jasig.cas</groupId>
-        <artifactId>cas-client-core</artifactId>
-        <version>3.1.6</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.opensaml</groupId>
-        <artifactId>opensaml</artifactId>
-        <version>2.2.1</version>
-      </dependency>
-
-      <dependency>
-        <groupId>bouncycastle</groupId>
-        <artifactId>bcprov-jdk15</artifactId>
-        <version>140</version>
-      </dependency>
-
-      <dependency>
         <groupId>org.apache.derby</groupId>
         <artifactId>derby</artifactId>
         <version>10.4.2.0</version>
@@ -414,29 +398,10 @@
       </dependency>
 
       <dependency>
-        <groupId>javax.jcr</groupId>
-        <artifactId>jcr</artifactId>
-        <version>1.0</version>
-      </dependency>
-
-      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.3</version>
         <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.jmock</groupId>
-        <artifactId>jmock-junit4</artifactId>
-        <version>2.2.0</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>nekohtml</groupId>
-        <artifactId>nekohtml</artifactId>
-        <version>1.9.6.2</version>
       </dependency>
 
       <dependency>
@@ -547,11 +512,13 @@
         <artifactId>org.springframework.core</artifactId>
         <version>2.5.6.A</version>
       </dependency>
+
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>org.springframework.beans</artifactId>
         <version>2.5.6.A</version>
       </dependency>
+
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>org.springframework.context</artifactId>
