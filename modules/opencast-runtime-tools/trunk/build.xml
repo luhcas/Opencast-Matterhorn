@@ -135,7 +135,7 @@
   <!-- Installs the tools built using 'thirdparty.make'               -->
   <!-- ============================================================== -->
 
-  <target name="install" description="Compiles and installs thirdparty tools">
+  <target name="install" description="Compiles and installs thirdparty tools" if="thirdparty">
     <echo/>
     <echo message="Make sure you execute this command as a privileged"/>
     <echo message="user, otherwise you will get 'permission denied' errors"/>

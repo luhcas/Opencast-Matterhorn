@@ -50,8 +50,7 @@
             <Service-Component>
               OSGI-INF/conductor-service.xml
             </Service-Component>
-            <Import-Package> org.osgi.service.component, META-INF.cxf, org.apache.cxf,
-              org.apache.cxf.wsdl, org.opencastproject.workflow.api, * </Import-Package>
+            <Import-Package> * </Import-Package>
             <Private-Package>org.opencastproject.workflow</Private-Package>
           </instructions>
         </configuration>
