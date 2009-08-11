@@ -16,4 +16,5 @@
 ../../../modules/opencast-maven-plugin/trunk	opencast-maven-plugin
 ../../../modules/opencast-inspection-service-api/trunk	opencast-inspection-service-api
 ../../../modules/opencast-inspection-service-impl/trunk	opencast-inspection-service-impl
-
+../../../modules/opencast-delivery-service-api/trunk opencast-delivery-service-api
+../../../modules/opencast-delivery-service-impl/trunk opencast-delivery-service-impl
