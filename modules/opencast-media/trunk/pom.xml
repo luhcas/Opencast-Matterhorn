@@ -57,8 +57,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Export-Package>org.opencastproject.media.*,
-              org.opencastproject.status.*</Export-Package>
+            <Export-Package>
+            	org.opencastproject.media.analysis.*,
+            	org.opencastproject.media.mediapackage.*
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>
