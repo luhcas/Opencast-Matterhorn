@@ -1,4 +1,4 @@
-<Bundle id="00000/1" start="2007-12-05T13:40:00" duration="10044">
+<MediaPackage id="00000/1" start="2007-12-05T13:40:00" duration="10044">
   <Media>
     <Track id="track-1" type="track/presentation">
       <MimeType>video/quicktime</MimeType>
@@ -14,7 +14,7 @@
         <FrameRate>2</FrameRate>
       </Video>
     </Track>
-    <Track id="track-2" type="track/audio">
+    <Track id="track-2" type="track/presenter">
       <MimeType>video/quicktime</MimeType>
       <File>tracks/aonly.mov</File>
       <Checksum type="md5">950f9fa49caa8f1c5bbc36892f6fd062</Checksum>
@@ -52,4 +52,4 @@
       <Checksum type="md5">6d535f61a1b31a3edeb01be0951a2b4e</Checksum>
     </Attachment>
   </Attachments>
-</Bundle>
+</MediaPackage>
