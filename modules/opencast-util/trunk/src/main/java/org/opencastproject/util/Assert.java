@@ -46,7 +46,7 @@ public class Assert {
   /**
    * Asserts that the object is not empty. The definition of "empty" depends on
    * the object's type. See
-   * {@link ch.ethz.replay.core.common.util.Tool#empty(Object)} for details.
+   * {@link org.opencastproject.util.Tool#empty(Object)} for details.
    *
    * @param o
    *          the object to test
