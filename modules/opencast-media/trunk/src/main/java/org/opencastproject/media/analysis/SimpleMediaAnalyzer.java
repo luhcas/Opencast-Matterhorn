@@ -33,4 +33,5 @@ public interface SimpleMediaAnalyzer {
    * @return the result of the analysis
    */
   SimpleMediaInfo analyze(String file);
+
 }

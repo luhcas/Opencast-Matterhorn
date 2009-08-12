@@ -26,4 +26,5 @@ import java.io.File;
 public interface MediaAnalyzer {
 
   MediaContainerMetadata analyze(File media) throws MediaAnalyzerException;
+
 }

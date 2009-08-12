@@ -19,14 +19,13 @@ package org.opencastproject.media.analysis;
 import org.opencastproject.util.ConfigurationException;
 
 /**
- * Factory to create a {@link MediaAnalyzer} for media files. Use the static
- * method {@link #newInstance()} to obtain a reference to a concrete
- * implementation of a <code>MediaAnalyzerFactory</code>. This instance can then
- * be used to create a media analzer.
+ * Factory to create a {@link MediaAnalyzer} for media files. Use the static method {@link #newInstance()} to obtain a
+ * reference to a concrete implementation of a <code>MediaAnalyzerFactory</code>. This instance can then be used to
+ * create a media analzer.
  * 
  * <p>
- * The factory can be configured by specifying the concrete implementation class
- * through the system property <code>opencast.mediaanalyzer</code>.
+ * The factory can be configured by specifying the concrete implementation class through the system property
+ * <code>opencast.mediaanalyzer</code>.
  * </p>
  * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
@@ -34,9 +33,8 @@ import org.opencastproject.util.ConfigurationException;
  */
 public class MediaAnalyzerFactory {
 
-  /** Class name for the default bundler builder */
-  private static final String BUILDER_CLASS =
-    "org.opencastproject.media.analysis.MediaInfoAnalyzer";
+  /** Class name for the default media package builder */
+  private static final String BUILDER_CLASS = "org.opencastproject.media.analysis.MediaInfoAnalyzer";
 
   /** Name of the system property */
   public static final String PROPERTY_NAME = "opencast.mediaanalyzer";
@@ -64,20 +62,17 @@ public class MediaAnalyzerFactory {
    * @throws ConfigurationException
    *           if the factory cannot be instantiated
    */
-  public static MediaAnalyzerFactory newInstance()
-      throws ConfigurationException {
+  public static MediaAnalyzerFactory newInstance() throws ConfigurationException {
     return factory;
   }
 
   /**
-   * Factory method that returns a new instance of the default media analyzer
-   * implementation.
+   * Factory method that returns a new instance of the default media analyzer implementation.
    * <p>
-   * It uses the following ordered lookup procedure to determine which
-   * implementation of the {@link MediaAnalyzer} interface to use:
+   * It uses the following ordered lookup procedure to determine which implementation of the {@link MediaAnalyzer}
+   * interface to use:
    * <ul>
-   * <li>Implementation specified using the <code>opencast.mediaanalyzer</code>
-   * system property</li>
+   * <li>Implementation specified using the <code>opencast.mediaanalyzer</code> system property</li>
    * <li>Platform default implementation</li>
    * </ul>
    * 
@@ -90,16 +85,11 @@ public class MediaAnalyzerFactory {
       Class<?> builderClass = Class.forName(analyzerClassName);
       return (MediaAnalyzer) builderClass.newInstance();
     } catch (ClassNotFoundException e) {
-      throw new ConfigurationException(
-          "Class not found while creating media analyzer: " + e.getMessage(), e);
+      throw new ConfigurationException("Class not found while creating media analyzer: " + e.getMessage(), e);
     } catch (InstantiationException e) {
-      throw new ConfigurationException(
-          "Instantiation exception while creating media analyzer: "
-              + e.getMessage(), e);
+      throw new ConfigurationException("Instantiation exception while creating media analyzer: " + e.getMessage(), e);
     } catch (IllegalAccessException e) {
-      throw new ConfigurationException(
-          "Access exception while creating media analyzer: " + e.getMessage(),
-          e);
+      throw new ConfigurationException("Access exception while creating media analyzer: " + e.getMessage(), e);
     }
   }
 

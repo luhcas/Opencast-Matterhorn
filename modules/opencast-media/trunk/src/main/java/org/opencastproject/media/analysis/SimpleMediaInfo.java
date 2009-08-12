@@ -44,8 +44,7 @@ public class SimpleMediaInfo {
   private Float sampleRate;
 
   /**
-   * Returns <code>true</code> if this media info contains video track
-   * information.
+   * Returns <code>true</code> if this media info contains video track information.
    * 
    * @return <code>true</code> if this info describes a video track
    */
@@ -54,8 +53,7 @@ public class SimpleMediaInfo {
   }
 
   /**
-   * Returns <code>true</code> if this media info contains audio track
-   * information.
+   * Returns <code>true</code> if this media info contains audio track information.
    * 
    * @return <code>true</code> if this info describes an audio track
    */

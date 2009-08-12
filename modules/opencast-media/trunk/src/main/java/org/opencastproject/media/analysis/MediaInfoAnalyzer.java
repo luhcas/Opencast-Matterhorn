@@ -37,65 +37,51 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * This MediaAnalyzer implementation leverages MediaInfo (<a
- * href="http://mediainfo.sourceforge.net/"
+ * This MediaAnalyzer implementation leverages MediaInfo (<a href="http://mediainfo.sourceforge.net/"
  * >http://mediainfo.sourceforge.net</a>) for analysis.
  * <p/>
- * <strong>Please note</strong> that this implementation is stateful and cannot
- * be shared or used multiple times.
+ * <strong>Please note</strong> that this implementation is stateful and cannot be shared or used multiple times.
  * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
-  private static final Logger log_ = LoggerFactory
-      .getLogger(MediaInfoAnalyzer.class);
+  private static final Logger log_ = LoggerFactory.getLogger(MediaInfoAnalyzer.class);
 
-  private static final Map<String, Setter> CommonStreamProperties = new MapBuilder<String, Setter>()
-      .put("Format", new Setter("format", "string")).put("Format_Profile",
-          new Setter("formatProfile", "string")).put("Format/Info",
-          new Setter("formatInfo", "string")).put("Format/Url",
-          new Setter("formatURL", "url")).put("Duration",
-          new Setter("duration", "duration")).put("BitRate",
-          new Setter("bitRate", "float")).put("BitRate_Mode",
-          new Setter("bitRateMode", "bitRateMode")).put("BitRate_Minimum",
-          new Setter("bitRateMinimum", "float")).put("BitRate_Maximum",
-          new Setter("bitRateMaximum", "float")).put("BitRate_Nominal",
-          new Setter("bitRateNominal", "float")).put("Resolution",
-          new Setter("resolution", "int")).put("Encoded_Date",
-          new Setter("encodedDate", "date")).toMap();
+  private static final Map<String, Setter> CommonStreamProperties = new MapBuilder<String, Setter>().put("Format",
+          new Setter("format", "string")).put("Format_Profile", new Setter("formatProfile", "string")).put(
+          "Format/Info", new Setter("formatInfo", "string")).put("Format/Url", new Setter("formatURL", "url")).put(
+          "Duration", new Setter("duration", "duration")).put("BitRate", new Setter("bitRate", "float")).put(
+          "BitRate_Mode", new Setter("bitRateMode", "bitRateMode")).put("BitRate_Minimum",
+          new Setter("bitRateMinimum", "float")).put("BitRate_Maximum", new Setter("bitRateMaximum", "float")).put(
+          "BitRate_Nominal", new Setter("bitRateNominal", "float")).put("Resolution", new Setter("resolution", "int"))
+          .put("Encoded_Date", new Setter("encodedDate", "date")).toMap();
 
-  private static final Map<StreamSection, Map<String, Setter>> Parser =
-    new MapBuilder<StreamSection, Map<String, Setter>>()
-      .put(
-          StreamSection.general,
-          new MapBuilder<String, Setter>().put("FileName",
-              new Setter("fileName", "string")).put("FileExtension",
-              new Setter("fileExtension", "string")).put("FileSize",
-              new Setter("size", "long")).put("Duration",
-              new Setter("duration", "duration")).put("OverallBitRate",
-              new Setter("bitRate", "float")).put("Encoded_Date",
-              new Setter("encodedDate", "date")).toMap())
-      .put(
-          StreamSection.video,
-          new MapBuilder<String, Setter>().putAll(CommonStreamProperties)
-          //
-              .put("Width", new Setter("frameWidth", "int")).put("Height",
-                  new Setter("frameHeight", "int")).put("PixelAspectRatio",
-                  new Setter("pixelAspectRatio", "float")).put("FrameRate",
-                  new Setter("frameRate", "float")).put("FrameRate_Mode",
-                  new Setter("frameRateMode", "frameRateMode")).put("ScanType",
-                  new Setter("scanType", "scanType")).put("ScanOrder",
-                  new Setter("scanOrder", "scanOrder")).toMap())
-      .put(
-          StreamSection.audio,
-          new MapBuilder<String, Setter>().putAll(CommonStreamProperties)
-              //
-              .put("Channel(s)", new Setter("channels", "int")).put(
-                  "ChannelPositions", new Setter("channelPositions", "string"))
-              .put("SamplingRate", new Setter("samplingRate", "int")).put(
-                  "SamplingCount", new Setter("samplingCount", "long")).toMap())
-      .toMap();
+  private static final Map<StreamSection, Map<String, Setter>> Parser = new MapBuilder<StreamSection, Map<String, Setter>>()
+          .put(
+                  StreamSection.general,
+                  new MapBuilder<String, Setter>().put("FileName", new Setter("fileName", "string")).put(
+                          "FileExtension", new Setter("fileExtension", "string")).put("FileSize",
+                          new Setter("size", "long")).put("Duration", new Setter("duration", "duration")).put(
+                          "OverallBitRate", new Setter("bitRate", "float")).put("Encoded_Date",
+                          new Setter("encodedDate", "date")).toMap()).put(
+                  StreamSection.video,
+                  new MapBuilder<String, Setter>().putAll(CommonStreamProperties)
+                          //
+                          .put("Width", new Setter("frameWidth", "int"))
+                          .put("Height", new Setter("frameHeight", "int")).put("PixelAspectRatio",
+                                  new Setter("pixelAspectRatio", "float")).put("FrameRate",
+                                  new Setter("frameRate", "float")).put("FrameRate_Mode",
+                                  new Setter("frameRateMode", "frameRateMode")).put("ScanType",
+                                  new Setter("scanType", "scanType")).put("ScanOrder",
+                                  new Setter("scanOrder", "scanOrder")).toMap()).put(
+                  StreamSection.audio,
+                  new MapBuilder<String, Setter>().putAll(CommonStreamProperties)
+                  //
+                          .put("Channel(s)", new Setter("channels", "int")).put("ChannelPositions",
+                                  new Setter("channelPositions", "string")).put("SamplingRate",
+                                  new Setter("samplingRate", "int")).put("SamplingCount",
+                                  new Setter("samplingCount", "long")).toMap()).toMap();
 
   private StreamSection streamSection;
 
@@ -130,17 +116,14 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
           break;
         case video:
           currentMetadata = new VideoStreamMetadata();
-          metadata.getVideoStreamMetadata().add(
-              (VideoStreamMetadata) currentMetadata);
+          metadata.getVideoStreamMetadata().add((VideoStreamMetadata) currentMetadata);
           break;
         case audio:
           currentMetadata = new AudioStreamMetadata();
-          metadata.getAudioStreamMetadata().add(
-              (AudioStreamMetadata) currentMetadata);
+          metadata.getAudioStreamMetadata().add((AudioStreamMetadata) currentMetadata);
           break;
         default:
-          throw new RuntimeException("Bug: Unknown stream section "
-              + streamSection);
+          throw new RuntimeException("Bug: Unknown stream section " + streamSection);
         }
         return; // LEAVE
       }
@@ -167,7 +150,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
   @Override
   protected boolean onVersionCheck(String line) {
-    return "MediaInfoLib - v0.7.8".equals(line);
+    return "MediaInfoLib - v0.7.19".equals(line);
   }
 
   // --------------------------------------------------------------------------------------------
@@ -235,14 +218,12 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
     private Setter(String property, String type) {
       this.property = property;
-      this.converterMethodName = CONVERTER_METHOD_PREFIX
-          + StringSupport.capitalize(type);
+      this.converterMethodName = CONVERTER_METHOD_PREFIX + StringSupport.capitalize(type);
     }
 
     public void set(Object target, String value) {
       try {
-        Method converter = MediaInfoAnalyzer.class.getDeclaredMethod(
-            converterMethodName, String.class);
+        Method converter = MediaInfoAnalyzer.class.getDeclaredMethod(converterMethodName, String.class);
         Object converted = converter.invoke(null, value);
         ReflectionSupport.setProperty(property, target, converted);
       } catch (NoSuchMethodException e) {
@@ -259,4 +240,5 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
     general, video, audio
   }
+
 }

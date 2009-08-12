@@ -1,0 +1,210 @@
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+
+package org.opencastproject.media.mediapackage;
+
+import org.opencastproject.util.Checksum;
+import org.opencastproject.util.MimeType;
+
+import java.io.File;
+import java.io.IOException;
+
+/**
+ * All classes that will be part of a media package must implement this interface.
+ * 
+ * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
+ * @version $Id: MediaPackageElement.java 2905 2009-07-15 16:16:05Z ced $
+ */
+public interface MediaPackageElement extends ManifestContributor, Comparable<MediaPackageElement> {
+
+  /**
+   * The element type todo is the type definitly needed or can the flavor take its resposibilities?
+   */
+  enum Type {
+    Manifest, Timeline, Track, Catalog, Attachment, Other
+  }
+
+  /**
+   * Returns the element identifier.
+   * 
+   * @return the element identifier
+   */
+  String getIdentifier();
+
+  /**
+   * Sets the element identifier.
+   * 
+   * @param id
+   *          the new element identifier
+   */
+  void setIdentifier(String id);
+
+  /**
+   * Returns the element's manifest type.
+   * 
+   * @return the manifest type
+   */
+  Type getElementType();
+
+  /**
+   * Returns a human readable name for this media package element. If no name was provided, the filename is returned
+   * instead.
+   * 
+   * @return the element name
+   */
+  String getElementDescription();
+
+  /**
+   * Returns the media package if the element has been added, <code>null</code> otherwise.
+   * 
+   * @return the media package
+   */
+  MediaPackage getMediaPackage();
+
+  /**
+   * Returns a reference to another entitiy, both inside or outside the media package.
+   * 
+   * @return the reference
+   */
+  MediaPackageReference getReference();
+
+  /**
+   * Returns the element's filename without the path.
+   * <p/>
+   * For example, if the track is located at <code>
+     * /home/matterhorn/archive/mymediapackage/tracks/slides.mjpeg</code>, this
+   * method will return <code>slides.mpeg</code>.
+   * 
+   * @return the filename
+   */
+  // todo getURI(): URI
+  String getFilename();
+
+  /**
+   * Returns a reference to the element's file object.
+   * 
+   * @return the file reference
+   */
+  // todo getURI(): URI
+  File getFile();
+
+  /**
+   * Returns the file's checksum.
+   * 
+   * @return the checksum
+   */
+  Checksum getChecksum();
+
+  /**
+   * Returns the element's mimetype as found in the ISO Mime Type Registrations.
+   * <p/>
+   * For example, in case of motion jpeg slides, this method will return the mime type for <code>video/mj2</code>.
+   * 
+   * @return the mime type
+   */
+  MimeType getMimeType();
+
+  /**
+   * Returns the element's type as defined for the specific media package element.
+   * <p/>
+   * For example, in case of a video track, the type could be <code>video/x-presentation</code>.
+   * 
+   * @return the element flavor
+   */
+  MediaPackageElementFlavor getFlavor();
+
+  /**
+   * Returns the number of bytes that are occupied by this media package element.
+   * 
+   * @return the size
+   */
+  long getSize();
+
+  /**
+   * Wraps the element by calculating it's checksums and other properties, updating it should the underlying file have
+   * changed.
+   * 
+   * @throws MediaPackageException
+   *           if wrapping the element failed
+   */
+  void wrap() throws MediaPackageException;
+
+  /**
+   * Verifies the integrity of the media package element.
+   * 
+   * @throws MediaPackageException
+   *           if the media package element is in an incosistant state
+   */
+  void verify() throws MediaPackageException;
+
+  /**
+   * Tells the element that the media package was moved to the specified location.
+   * 
+   * @param oldRoot
+   *          the former media package root directory
+   * @param newRoot
+   *          the new media package root directory
+   */
+  void mediaPackageMoved(File oldRoot, File newRoot);
+
+  /**
+   * Integrates the element by copying the underlying resource file to the given destination.
+   * 
+   * @param dest
+   *          the element's new destination. Note that a <em>file</em>, not a directory must be provided here
+   * @throws IOException
+   */
+  void integrate(File dest) throws IOException;
+
+  /**
+   * Adds a reference to the media package <code>mediaPackage</code>.
+   * <p/>
+   * Note that an element can only refer to one object. Therefore, any existing reference will be replaced.
+   * 
+   * @param mediaPackage
+   *          the media package to refere to
+   */
+  void referTo(MediaPackage mediaPackage);
+
+  /**
+   * Adds a reference to the media package element <code>element</code>.
+   * <p/>
+   * Note that an element can only refere to one object. Therefore, any existing reference will be replaced. Also note
+   * that if this element is part of a media package, a consistency check will be made making sure the refered element
+   * is also part of the same media package. If not, a {@link MediaPackageException} will be thrown.
+   * 
+   * @param element
+   *          the element to refere to
+   */
+  void referTo(MediaPackageElement element);
+
+  /**
+   * Adds an arbitrary reference.
+   * <p/>
+   * Note that an element can only have one reference. Therefore, any existing reference will be replaced. Also note
+   * that if this element is part of a media package, a consistency check will be made making sure the refered element
+   * is also part of the same media package. If not, a {@link MediaPackageException} will be thrown.
+   * 
+   * @param reference
+   *          the reference
+   */
+  void referTo(MediaPackageReference reference);
+
+  /**
+   * Removes any reference.
+   */
+  void clearReference();
+}
