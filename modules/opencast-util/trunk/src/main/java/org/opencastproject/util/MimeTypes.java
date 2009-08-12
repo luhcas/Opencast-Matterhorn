@@ -40,8 +40,7 @@ import javax.xml.parsers.SAXParserFactory;
  * This class represents the mime type registry that is responsible for
  * providing resolving mime types through all system components.
  * <p>
- * The registry is initialized from the file <code>MimeTypes.xml</code> which is
- * located in the package <code>ch.ethz.chid.mms.pd.replay.common</code>.
+ * The registry is initialized from the file <code>MimeTypes.xml</code>.
  * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: MimeTypes.java 1637 2008-12-08 10:44:18Z ced $
@@ -139,7 +138,7 @@ public class MimeTypes {
 
   /**
    * Initializes the mime type registry with those types that are relevant for
-   * replay, e. g. <code>video/dv</code> and <code>video/mj2</code>.
+   * matterhorn, e. g. <code>video/dv</code> and <code>video/mj2</code>.
    */
   static void initFromDefaults() {
     MimeType mimeType = null;

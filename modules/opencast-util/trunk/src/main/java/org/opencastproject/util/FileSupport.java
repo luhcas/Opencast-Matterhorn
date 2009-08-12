@@ -685,7 +685,7 @@ public class FileSupport {
     }
 
     /**
-     * @see ch.ethz.replay.core.common.util.StreamHelper#log(java.lang.String)
+     * @see org.opencastproject.util.StreamHelper#log(java.lang.String)
      */
     protected void log(String output) {
       if (output.endsWith("Invalid cross-device link"))
