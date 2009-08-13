@@ -20,8 +20,8 @@ public class GenerateServiceMojoTest {
   @After
   public void teardown() throws Exception {
     // Clean up the newly created directories
-//    FileUtils.deleteDirectory(new File("opencast-my-service-api"));
-//    FileUtils.deleteDirectory(new File("opencast-my-service-impl"));
+    FileUtils.deleteDirectory(new File("opencast-my-service-api"));
+    FileUtils.deleteDirectory(new File("opencast-my-service-impl"));
     mojo = null;
   }
   
