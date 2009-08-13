@@ -146,6 +146,7 @@
         <configuration>
           <configLocation>checkstyle.xml</configLocation>
           <headerLocation>header.txt</headerLocation>
+          <excludes>**/package-info.java</excludes>
         </configuration>
       </plugin>
     </plugins>

@@ -15,6 +15,7 @@
  */
 package org.opencastproject.maven;
 
+import org.apache.commons.io.DirectoryWalker;
 import org.apache.commons.io.FileUtils;
 
 import org.apache.commons.io.IOUtils;
@@ -23,12 +24,18 @@ import org.apache.maven.plugin.AbstractMojo;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -37,6 +44,8 @@ import java.util.zip.ZipFile;
  * @goal generate
  */
 public class GenerateServiceMojo extends AbstractMojo {
+  private static final Logger logger = LoggerFactory.getLogger(GenerateServiceMojo.class);
+
   /**
    * @parameter expression="${serviceName}" default-value="my"
    */
@@ -45,6 +54,7 @@ public class GenerateServiceMojo extends AbstractMojo {
     this.serviceName = serviceName;
   }
   
+  @SuppressWarnings("unchecked")
   public void execute() throws MojoExecutionException, MojoFailureException {
     String apiArtifactId = "opencast-" + serviceName + "-service-api";
     File apiProject = new File(apiArtifactId);
@@ -60,86 +70,15 @@ public class GenerateServiceMojo extends AbstractMojo {
     try {
       FileUtils.moveDirectory(new File("opencast-template-service-api"), apiProject);
       FileUtils.moveDirectory(new File("opencast-template-service-impl"), implProject);
-    
-    // Fix the pom.xml files
-    File apiPomFile = new File(apiProject, "pom.xml");
-    File implPomFile = new File(implProject, "pom.xml");
-    String apiPom = FileUtils.readFileToString(apiPomFile);
-    String implPom = FileUtils.readFileToString(implPomFile);
-    apiPom = apiPom.replaceAll("template", serviceName);
-    implPom = implPom.replaceAll("template", serviceName);
-    FileUtils.writeStringToFile(apiPomFile, apiPom, "UTF-8");
-    FileUtils.writeStringToFile(implPomFile, implPom, "UTF-8");
-    
     } catch (Exception e) {
       throw new MojoExecutionException("failed to generate service " + serviceName, e);
     }
-    
-    // Rename the Java packages
-    File apiPackage = new File(apiArtifactId + "/src/main/java/org/opencastproject/template");
-    apiPackage.renameTo(new File(apiArtifactId + "/src/main/java/org/opencastproject/" + serviceName));
-    File implPackage = new File(implArtifactId + "/src/main/java/org/opencastproject/template");
-    implPackage.renameTo(new File(implArtifactId + "/src/main/java/org/opencastproject/" + serviceName));
-    File testPackage = new File(implArtifactId + "/src/test/java/org/opencastproject/template");
-    testPackage.renameTo(new File(implArtifactId + "/src/test/java/org/opencastproject/" + serviceName));
-
-    // Rename the Java files
-    File serviceApi = new File(apiArtifactId + "/src/main/java/org/opencastproject/" + serviceName + "/api/TemplateService.java");
-    serviceApi.renameTo(new File(apiArtifactId + "/src/main/java/org/opencastproject/" + serviceName + "/api/" + WordUtils.capitalizeFully(serviceName) +"Service.java"));
-    File serviceImpl = new File(implArtifactId + "/src/main/java/org/opencastproject/" + serviceName + "/impl/TemplateServiceImpl.java");
-    serviceImpl.renameTo(new File(implArtifactId + "/src/main/java/org/opencastproject/" + serviceName + "/impl/" + WordUtils.capitalizeFully(serviceName) +"ServiceImpl.java"));
-    File serviceRestImpl = new File(implArtifactId + "/src/main/java/org/opencastproject/" + serviceName + "/impl/TemplateServiceRestImpl.java");
-    serviceRestImpl.renameTo(new File(implArtifactId + "/src/main/java/org/opencastproject/" + serviceName + "/impl/" + WordUtils.capitalizeFully(serviceName) +"ServiceRestImpl.java"));
-    File serviceTest = new File(implArtifactId + "/src/test/java/org/opencastproject/" + serviceName + "/impl/TemplateServiceImplTest.java");
-    serviceTest.renameTo(new File(implArtifactId + "/src/test/java/org/opencastproject/" + serviceName + "/impl/" + WordUtils.capitalizeFully(serviceName) +"ServiceImplTest.java"));
-
-    // Rename the service component files
-    File serviceComponent = new File(implArtifactId + "/src/main/resources/OSGI-INF/template-service.xml");
-    serviceComponent.renameTo(new File(implArtifactId + "/src/main/resources/OSGI-INF/" + serviceName + "-service.xml"));
-    File serviceRestComponent = new File(implArtifactId + "/src/main/resources/OSGI-INF/template-service-rest.xml");
-    serviceRestComponent.renameTo(new File(implArtifactId + "/src/main/resources/OSGI-INF/" + serviceName + "-service-rest.xml"));
-
-    try {
-      // Fix the Java files
-      File javaApiFile = new File(apiArtifactId + "/src/main/java/org/opencastproject/" + serviceName + "/api/" + WordUtils.capitalizeFully(serviceName) +"Service.java");
-      String javaApiString = FileUtils.readFileToString(javaApiFile, "UTF-8");
-      javaApiString = javaApiString.replaceAll("template", serviceName);
-      javaApiString = javaApiString.replaceAll("Template", WordUtils.capitalizeFully(serviceName));
-      FileUtils.writeStringToFile(javaApiFile, javaApiString, "UTF-8");
-      
-      File javaImplFile = new File(implArtifactId + "/src/main/java/org/opencastproject/" + serviceName + "/impl/" + WordUtils.capitalizeFully(serviceName) +"ServiceImpl.java");
-      String javaImplString = FileUtils.readFileToString(javaImplFile, "UTF-8");
-      javaImplString = javaImplString.replaceAll("template", serviceName);
-      javaImplString = javaImplString.replaceAll("Template", WordUtils.capitalizeFully(serviceName));
-      FileUtils.writeStringToFile(javaImplFile, javaImplString, "UTF-8");
-
-      File javaRestFile = new File(implArtifactId + "/src/main/java/org/opencastproject/" + serviceName + "/impl/" + WordUtils.capitalizeFully(serviceName) +"ServiceRestImpl.java");
-      String javaRestString = FileUtils.readFileToString(javaRestFile, "UTF-8");
-      javaRestString = javaRestString.replaceAll("template", serviceName);
-      javaRestString = javaRestString.replaceAll("Template", WordUtils.capitalizeFully(serviceName));
-      FileUtils.writeStringToFile(javaRestFile, javaRestString, "UTF-8");
-
-      File javaTestFile = new File(implArtifactId + "/src/test/java/org/opencastproject/" + serviceName + "/impl/" + WordUtils.capitalizeFully(serviceName) +"ServiceImplTest.java");
-      String javaTestString = FileUtils.readFileToString(javaTestFile, "UTF-8");
-      javaTestString = javaTestString.replaceAll("template", serviceName);
-      javaTestString = javaTestString.replaceAll("Template", WordUtils.capitalizeFully(serviceName));
-      FileUtils.writeStringToFile(javaTestFile, javaTestString, "UTF-8");
-
-      // Fix the service component files
-      File serviceComponentFile = new File(implArtifactId + "/src/main/resources/OSGI-INF/" + serviceName + "-service.xml");
-      String serviceComponentString = FileUtils.readFileToString(serviceComponentFile, "UTF-8");
-      serviceComponentString = serviceComponentString.replaceAll("template", serviceName);
-      serviceComponentString = serviceComponentString.replaceAll("Template", WordUtils.capitalizeFully(serviceName));
-      FileUtils.writeStringToFile(serviceComponentFile, serviceComponentString, "UTF-8");
-      
-      File serviceComponentRestFile = new File(implArtifactId + "/src/main/resources/OSGI-INF/" + serviceName + "-service-rest.xml");
-      String serviceComponentRestString = FileUtils.readFileToString(serviceComponentRestFile, "UTF-8");
-      serviceComponentRestString = serviceComponentRestString.replaceAll("template", serviceName);
-      serviceComponentRestString = serviceComponentRestString.replaceAll("Template", WordUtils.capitalizeFully(serviceName));
-      FileUtils.writeStringToFile(serviceComponentRestFile, serviceComponentRestString, "UTF-8");
-    } catch (Exception e) {
-      throw new MojoExecutionException("failed to generate service " + serviceName, e);
-    }
+    new DirectoryMover(serviceName, apiArtifactId);
+    new DirectoryMover(serviceName, implArtifactId);
+    new FileMover(serviceName, apiArtifactId);
+    new FileMover(serviceName, implArtifactId);
+    new FileFixer(serviceName, apiArtifactId);
+    new FileFixer(serviceName, implArtifactId);
   }
   
   public void expand(String artifactId, String template) throws MojoExecutionException, MojoFailureException {
@@ -175,6 +114,92 @@ public class GenerateServiceMojo extends AbstractMojo {
       FileOutputStream fileOut = new FileOutputStream(entry.getName());
       IOUtils.copy(zip.getInputStream(entry), fileOut);
       IOUtils.closeQuietly(fileOut);
+    }
+  }
+}
+
+class DirectoryMover extends DirectoryWalker {
+  
+  String serviceName = null;
+  String artifactName = null;
+  @SuppressWarnings("unchecked")
+  List results = new ArrayList();
+  @SuppressWarnings("unchecked")
+  public DirectoryMover(String serviceName, String artifactName) {
+    super();
+    this.serviceName = serviceName;
+    this.artifactName = artifactName;
+    try {
+      super.walk(new File(artifactName), results);
+      for(Iterator iter = results.iterator(); iter.hasNext();) {
+        System.out.println("### result=" + iter.next());
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  @SuppressWarnings("unchecked")
+  protected boolean handleDirectory(File directory, int depth, Collection results) {
+    if("template".equals(directory.getName())) {
+      directory.renameTo(new File(directory.getParent(), serviceName));
+    }
+    return true;
+  }
+}
+
+class FileMover extends DirectoryWalker {
+  String serviceName = null;
+  String artifactName = null;
+  @SuppressWarnings("unchecked")
+  Collection results = new ArrayList();
+  public FileMover(String serviceName, String artifactName) {
+    super();
+    this.serviceName = serviceName;
+    this.artifactName = artifactName;
+    try {
+      super.walk(new File(artifactName), results);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+ 
+  @SuppressWarnings("unchecked")
+  protected void handleFile(File file, int depth, Collection results) {
+    // Rename the file
+    String originalFileName = file.getName();
+    String newFileName = originalFileName.replaceAll("template", serviceName).
+      replaceAll("Template", WordUtils.capitalizeFully(serviceName));
+    file.renameTo(new File(file.getParent(), newFileName));
+  }
+}
+
+class FileFixer extends DirectoryWalker {
+  String serviceName = null;
+  String artifactName = null;
+  @SuppressWarnings("unchecked")
+  Collection results = new ArrayList();
+  public FileFixer(String serviceName, String artifactName) {
+    super();
+    this.serviceName = serviceName;
+    this.artifactName = artifactName;
+    try {
+      super.walk(new File(artifactName), results);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+ 
+  @SuppressWarnings("unchecked")
+  protected void handleFile(File file, int depth, Collection results) {
+    // Fix the file's contents
+    try {
+      String originalContents = FileUtils.readFileToString(file, "UTF-8");
+      String newContents = originalContents.replaceAll("template", serviceName)
+      .replaceAll("Template", WordUtils.capitalizeFully(serviceName));
+    FileUtils.writeStringToFile(file, newContents, "UTF-8");
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 }
