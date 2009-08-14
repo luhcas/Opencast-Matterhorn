@@ -23,8 +23,6 @@ import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.DateTimeSupport;
 import org.opencastproject.util.UnknownFileTypeException;
 
-import com.sun.org.apache.xml.internal.security.signature.Manifest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
