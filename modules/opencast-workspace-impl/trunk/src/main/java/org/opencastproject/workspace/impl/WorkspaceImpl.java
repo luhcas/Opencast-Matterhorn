@@ -36,8 +36,13 @@ import java.util.Dictionary;
  */
 public class WorkspaceImpl implements Workspace, ManagedService {
   private WorkingFileRepository repo;
-  private String rootDirectory = "/tmp/matterhorn/workspace";
-  
+  private String rootDirectory = null;
+
+  public WorkspaceImpl() {
+    rootDirectory = "/tmp/matterhorn/workspace";
+    createRootDirectory();
+  }
+
   public File get(URI uri) {
     String uriHash = DigestUtils.md5Hex(uri.toString());
     // See if there's a matching file under the root directory
@@ -74,6 +79,18 @@ public class WorkspaceImpl implements Workspace, ManagedService {
   public void updated(Dictionary props) throws ConfigurationException {
     if(props.get("root") != null) {
       rootDirectory = (String)props.get("root");
+      createRootDirectory();
+    }
+  }
+
+  private void createRootDirectory() {
+    File f = new File(rootDirectory);
+    if( ! f.exists()) {
+      try {
+        FileUtils.forceMkdir(f);
+      } catch(Exception e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 }

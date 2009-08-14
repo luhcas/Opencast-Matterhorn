@@ -40,7 +40,12 @@ import java.util.Dictionary;
  */
 public class WorkingFileRepositoryImpl implements WorkingFileRepository, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryImpl.class);
-  private String rootDirectory = "/tmp/matterhorn/workingfilerepo";
+  private String rootDirectory = null;
+  
+  public WorkingFileRepositoryImpl() {
+    rootDirectory = "/tmp/matterhorn/workingfilerepo";
+    createRootDirectory();
+  }
   
   public void delete(String mediaPackageID, String mediaPackageElementID) {
     checkId(mediaPackageID);
@@ -105,7 +110,18 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   public void updated(Dictionary props) throws ConfigurationException {
     if(props.get("root") != null) {
       rootDirectory = (String)props.get("root");
+      createRootDirectory();
     }
   }
 
+  private void createRootDirectory() {
+    File f = new File(rootDirectory);
+    if( ! f.exists()) {
+      try {
+        FileUtils.forceMkdir(f);
+      } catch(Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
 }
