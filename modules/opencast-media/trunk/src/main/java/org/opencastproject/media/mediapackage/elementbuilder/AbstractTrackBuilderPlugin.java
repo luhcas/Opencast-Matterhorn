@@ -127,19 +127,19 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
       String flavor = xpath.evaluate("@type", elementNode);
 
       // mime type
-      mimeType = (String) xpath.evaluate("MimeType/text()", elementNode, XPathConstants.STRING);
+      mimeType = (String) xpath.evaluate("mimetype/text()", elementNode, XPathConstants.STRING);
       mimeType = mimeType.trim();
 
       // file
-      trackPath = (String) xpath.evaluate("File/text()", elementNode, XPathConstants.STRING);
+      trackPath = (String) xpath.evaluate("url/text()", elementNode, XPathConstants.STRING);
       trackPath = PathSupport.concat(packageRoot.getAbsolutePath(), trackPath.trim());
 
       // reference
       reference = (String) xpath.evaluate("@ref", elementNode, XPathConstants.STRING);
 
       // checksum
-      String checksumValue = (String) xpath.evaluate("Checksum/text()", elementNode, XPathConstants.STRING);
-      String checksumType = (String) xpath.evaluate("Checksum/@type", elementNode, XPathConstants.STRING);
+      String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
+      String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
       Checksum checksum = Checksum.create(checksumType.trim(), checksumValue.trim());
 
       // verify the track
@@ -160,13 +160,13 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
         track.referTo(MediaPackageReferenceImpl.fromString(reference));
 
       // description
-      String description = (String) xpath.evaluate("Description/text()", elementNode, XPathConstants.STRING);
+      String description = (String) xpath.evaluate("description/text()", elementNode, XPathConstants.STRING);
       if (description != null && !description.trim().equals(""))
         track.setElementDescription(description.trim());
 
       // duration
       try {
-        String strDuration = (String) xpath.evaluate("Duration/text()", elementNode, XPathConstants.STRING);
+        String strDuration = (String) xpath.evaluate("duration/text()", elementNode, XPathConstants.STRING);
         long duration = Long.parseLong(strDuration.trim());
         if (duration <= 0)
           throw new MediaPackageException("Invalid duration for track " + trackPath + " found in manifest: " + duration);
@@ -176,7 +176,7 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
       }
 
       // audio settings
-      Node audioSettingsNode = (Node) xpath.evaluate("Audio", elementNode, XPathConstants.NODE);
+      Node audioSettingsNode = (Node) xpath.evaluate("audio", elementNode, XPathConstants.NODE);
       if (audioSettingsNode != null && audioSettingsNode.hasChildNodes()) {
         try {
           AudioStreamImpl as = AudioStreamImpl.fromManifest(createStreamID(track), audioSettingsNode, xpath);
@@ -191,7 +191,7 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
       }
 
       // video settings
-      Node videoSettingsNode = (Node) xpath.evaluate("Video", elementNode, XPathConstants.NODE);
+      Node videoSettingsNode = (Node) xpath.evaluate("video", elementNode, XPathConstants.NODE);
       if (videoSettingsNode != null && videoSettingsNode.hasChildNodes()) {
         try {
           VideoStreamImpl vs = VideoStreamImpl.fromManifest(createStreamID(track), videoSettingsNode, xpath);

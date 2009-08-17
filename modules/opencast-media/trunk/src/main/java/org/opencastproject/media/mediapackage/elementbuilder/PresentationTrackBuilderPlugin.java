@@ -20,8 +20,8 @@ import org.opencastproject.media.analysis.MediaAnalyzerException;
 import org.opencastproject.media.analysis.MediaContainerMetadata;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
@@ -114,7 +114,7 @@ public class PresentationTrackBuilderPlugin extends AbstractTrackBuilderPlugin {
     try {
       String name = elementNode.getNodeName();
       String flavor = xpath.evaluate("@type", elementNode);
-      return name.equals(MediaPackageElement.Type.Track.toString())
+      return name.equalsIgnoreCase(MediaPackageElement.Type.Track.toString())
               && MediaPackageElements.PRESENTATION_TRACK.eq(flavor);
     } catch (XPathExpressionException e) {
       return false;

@@ -56,7 +56,7 @@ class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
     node.setAttribute("id", getIdentifier());
 
     // Device
-    Element deviceNode = document.createElement("Device");
+    Element deviceNode = document.createElement("device");
     boolean hasAttr = false;
     if (captureDevice != null) {
       deviceNode.setAttribute("type", captureDevice);
@@ -74,7 +74,7 @@ class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
       node.appendChild(deviceNode);
 
     // Encoder
-    Element encoderNode = document.createElement("Encoder");
+    Element encoderNode = document.createElement("encoder");
     hasAttr = false;
     if (format != null) {
       encoderNode.setAttribute("type", format);
@@ -93,28 +93,28 @@ class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
 
     // Channels
     if (channels != null) {
-      Element channelsNode = document.createElement("Channels");
+      Element channelsNode = document.createElement("channels");
       channelsNode.appendChild(document.createTextNode(channels.toString()));
       node.appendChild(channelsNode);
     }
 
     // Bit depth
     if (resolution != null) {
-      Element bitdepthNode = document.createElement("BitDepth");
+      Element bitdepthNode = document.createElement("bitdepth");
       bitdepthNode.appendChild(document.createTextNode(resolution.toString()));
       node.appendChild(bitdepthNode);
     }
 
     // Bit rate
     if (bitRate != null) {
-      Element bitratenode = document.createElement("BitRate");
+      Element bitratenode = document.createElement("bitrate");
       bitratenode.appendChild(document.createTextNode(bitRate.toString()));
       node.appendChild(bitratenode);
     }
 
     // Sampling rate
     if (samplingRate != null) {
-      Element samplingrateNode = document.createElement("SamplingRate");
+      Element samplingrateNode = document.createElement("samplingrate");
       samplingrateNode.appendChild(document.createTextNode(samplingRate.toString()));
       node.appendChild(samplingrateNode);
     }
@@ -139,7 +139,7 @@ class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
 
     // bit depth
     try {
-      String bd = (String) xpath.evaluate("BitDepth/text()", node, XPathConstants.STRING);
+      String bd = (String) xpath.evaluate("bitdepth/text()", node, XPathConstants.STRING);
       if (!StringUtils.isBlank(bd))
         as.resolution = new Integer(bd.trim());
     } catch (NumberFormatException e) {
@@ -148,7 +148,7 @@ class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
 
     // channels
     try {
-      String strChannels = (String) xpath.evaluate("Channels/text()", node, XPathConstants.STRING);
+      String strChannels = (String) xpath.evaluate("channels/text()", node, XPathConstants.STRING);
       if (!StringUtils.isBlank(strChannels))
         as.channels = new Integer(strChannels.trim());
     } catch (NumberFormatException e) {
@@ -157,7 +157,7 @@ class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
 
     // sampling rate
     try {
-      String sr = (String) xpath.evaluate("FrameRate/text()", node, XPathConstants.STRING);
+      String sr = (String) xpath.evaluate("framerate/text()", node, XPathConstants.STRING);
       if (!StringUtils.isBlank(sr))
         as.samplingRate = new Integer(sr.trim());
     } catch (NumberFormatException e) {
@@ -166,7 +166,7 @@ class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
 
     // Bit rate
     try {
-      String br = (String) xpath.evaluate("BitRate/text()", node, XPathConstants.STRING);
+      String br = (String) xpath.evaluate("bitrate/text()", node, XPathConstants.STRING);
       if (!StringUtils.isBlank(br))
         as.bitRate = new Float(br.trim());
     } catch (NumberFormatException e) {
@@ -174,24 +174,24 @@ class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
     }
 
     // device
-    String captureDevice = (String) xpath.evaluate("Device/@type", node, XPathConstants.STRING);
+    String captureDevice = (String) xpath.evaluate("device/@type", node, XPathConstants.STRING);
     if (!StringUtils.isBlank(captureDevice))
       as.captureDevice = captureDevice;
-    String captureDeviceVersion = (String) xpath.evaluate("Device/@version", node, XPathConstants.STRING);
+    String captureDeviceVersion = (String) xpath.evaluate("device/@version", node, XPathConstants.STRING);
     if (!StringUtils.isBlank(captureDeviceVersion))
       as.captureDeviceVersion = captureDeviceVersion;
-    String captureDeviceVendor = (String) xpath.evaluate("Device/@vendor", node, XPathConstants.STRING);
+    String captureDeviceVendor = (String) xpath.evaluate("device/@vendor", node, XPathConstants.STRING);
     if (!StringUtils.isBlank(captureDeviceVendor))
       as.captureDeviceVendor = captureDeviceVendor;
 
     // encoder
-    String format = (String) xpath.evaluate("Encoder/@type", node, XPathConstants.STRING);
+    String format = (String) xpath.evaluate("encoder/@type", node, XPathConstants.STRING);
     if (!StringUtils.isBlank(format))
       as.format = format;
-    String formatVersion = (String) xpath.evaluate("Encoder/@version", node, XPathConstants.STRING);
+    String formatVersion = (String) xpath.evaluate("encoder/@version", node, XPathConstants.STRING);
     if (!StringUtils.isBlank(formatVersion))
       as.formatVersion = formatVersion;
-    String encoderLibraryVendor = (String) xpath.evaluate("Encoder/@vendor", node, XPathConstants.STRING);
+    String encoderLibraryVendor = (String) xpath.evaluate("encoder/@vendor", node, XPathConstants.STRING);
     if (!StringUtils.isBlank(encoderLibraryVendor))
       as.encoderLibraryVendor = encoderLibraryVendor;
 
@@ -279,4 +279,5 @@ class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
   void setEncoderLibraryVendor(String encoderLibraryVendor) {
     this.encoderLibraryVendor = encoderLibraryVendor;
   }
+  
 }

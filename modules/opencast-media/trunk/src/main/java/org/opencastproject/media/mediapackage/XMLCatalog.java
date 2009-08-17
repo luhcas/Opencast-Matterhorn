@@ -519,7 +519,7 @@ public abstract class XMLCatalog extends AbstractMediaPackageElement implements 
     Node node = super.toManifest(document);
 
     // File
-    Element fileNode = document.createElement("File");
+    Element fileNode = document.createElement("url");
     String catalogPath = PathSupport.concat(getFile().getParentFile().getName(), fileName);
     fileNode.appendChild(document.createTextNode(catalogPath));
     node.appendChild(fileNode);

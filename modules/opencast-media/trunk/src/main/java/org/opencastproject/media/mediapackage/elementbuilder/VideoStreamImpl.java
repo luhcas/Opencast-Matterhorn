@@ -30,7 +30,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathException;
 
 /**
- * Implementation of {@link org.opencastproject.media.mediapackage.VideoStream}.
+ * Implementation of {@link org.opencastproject.media.mediapackage.videoStream}.
  * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
@@ -42,8 +42,8 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
   private Integer frameHeight;
   private ScanType scanType;
   private ScanOrder scanOrder;
-  private String captureDevice;
-  private String captureDeviceVersion;
+  private String capturedevice;
+  private String capturedeviceVersion;
   private String captureDeviceVendor;
   private String format;
   private String formatVersion;
@@ -70,7 +70,7 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
 
     // bit rate
     try {
-      String strBitrate = (String) xpath.evaluate("BitRate/text()", node, XPathConstants.STRING);
+      String strBitrate = (String) xpath.evaluate("bitrate/text()", node, XPathConstants.STRING);
       if (strBitrate != null && !strBitrate.trim().equals(""))
         vs.bitRate = new Float(strBitrate.trim());
     } catch (NumberFormatException e) {
@@ -79,7 +79,7 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
 
     // frame rate
     try {
-      String strFrameRate = (String) xpath.evaluate("FrameRate/text()", node, XPathConstants.STRING);
+      String strFrameRate = (String) xpath.evaluate("framerate/text()", node, XPathConstants.STRING);
       if (strFrameRate != null && !strFrameRate.trim().equals(""))
         vs.frameRate = new Float(strFrameRate.trim());
     } catch (NumberFormatException e) {
@@ -87,13 +87,13 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
     }
 
     // size
-    String size = (String) xpath.evaluate("Size/text()", node, XPathConstants.STRING);
+    String size = (String) xpath.evaluate("size/text()", node, XPathConstants.STRING);
     if (size == null || size.trim().equals(""))
-      throw new IllegalStateException("Video size is missing");
+      throw new IllegalStateException("video size is missing");
     try {
       String[] s = size.trim().split("x");
       if (s.length != 2)
-        throw new IllegalStateException("Video size must be of the form <hsize>x<vsize>, found " + size);
+        throw new IllegalStateException("video size must be of the form <hsize>x<vsize>, found " + size);
       vs.frameWidth = new Integer(s[0].trim());
       vs.frameHeight = new Integer(s[1].trim());
     } catch (NumberFormatException e) {
@@ -101,37 +101,37 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
     }
 
     // interlacing
-    String scanType = (String) xpath.evaluate("ScanType/@type", node, XPathConstants.STRING);
+    String scanType = (String) xpath.evaluate("scantype/@type", node, XPathConstants.STRING);
     if (scanType != null && !scanType.trim().equals(""))
       vs.scanType = ScanType.fromString(scanType);
 
-    String scanOrder = (String) xpath.evaluate("Interlacing/@order", node, XPathConstants.STRING);
+    String scanOrder = (String) xpath.evaluate("interlacing/@order", node, XPathConstants.STRING);
     if (scanOrder != null && !scanOrder.trim().equals(""))
       vs.scanOrder = ScanOrder.fromString(scanOrder);
 
     // device
-    String deviceType = (String) xpath.evaluate("Device/@type", node, XPathConstants.STRING);
+    String deviceType = (String) xpath.evaluate("device/@type", node, XPathConstants.STRING);
     if (deviceType != null && !deviceType.trim().equals(""))
-      vs.captureDevice = deviceType;
+      vs.capturedevice = deviceType;
 
-    String deviceVersion = (String) xpath.evaluate("Device/@version", node, XPathConstants.STRING);
+    String deviceVersion = (String) xpath.evaluate("device/@version", node, XPathConstants.STRING);
     if (deviceVersion != null && !deviceVersion.trim().equals(""))
-      vs.captureDeviceVersion = deviceVersion;
+      vs.capturedeviceVersion = deviceVersion;
 
-    String deviceVendor = (String) xpath.evaluate("Device/@vendor", node, XPathConstants.STRING);
-    if (deviceVendor != null && !deviceVendor.trim().equals(""))
-      vs.captureDeviceVendor = deviceVendor;
+    String DeviceVendor = (String) xpath.evaluate("device/@vendor", node, XPathConstants.STRING);
+    if (DeviceVendor != null && !DeviceVendor.trim().equals(""))
+      vs.captureDeviceVendor = DeviceVendor;
 
     // encoder
-    String encoderType = (String) xpath.evaluate("Encoder/@type", node, XPathConstants.STRING);
+    String encoderType = (String) xpath.evaluate("encoder/@type", node, XPathConstants.STRING);
     if (encoderType != null && !encoderType.trim().equals(""))
       vs.format = encoderType;
 
-    String encoderVersion = (String) xpath.evaluate("Encoder/@version", node, XPathConstants.STRING);
+    String encoderVersion = (String) xpath.evaluate("encoder/@version", node, XPathConstants.STRING);
     if (encoderVersion != null && !encoderVersion.trim().equals(""))
       vs.formatVersion = encoderVersion;
 
-    String encoderVendor = (String) xpath.evaluate("Encoder/@vendor", node, XPathConstants.STRING);
+    String encoderVendor = (String) xpath.evaluate("encoder/@vendor", node, XPathConstants.STRING);
     if (encoderVendor != null && !encoderVendor.trim().equals(""))
       vs.encoderLibraryVendor = encoderVendor;
 
@@ -139,19 +139,19 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
   }
 
   public Node toManifest(Document document) {
-    Element node = document.createElement("Video");
+    Element node = document.createElement("video");
     // Stream ID
     node.setAttribute("id", getIdentifier());
 
-    // Device
-    Element deviceNode = document.createElement("Device");
+    // device
+    Element deviceNode = document.createElement("device");
     boolean hasAttr = false;
-    if (captureDevice != null) {
-      deviceNode.setAttribute("type", captureDevice);
+    if (capturedevice != null) {
+      deviceNode.setAttribute("type", capturedevice);
       hasAttr = true;
     }
-    if (captureDeviceVersion != null) {
-      deviceNode.setAttribute("version", captureDeviceVersion);
+    if (capturedeviceVersion != null) {
+      deviceNode.setAttribute("version", capturedeviceVersion);
       hasAttr = true;
     }
     if (captureDeviceVendor != null) {
@@ -161,8 +161,8 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
     if (hasAttr)
       node.appendChild(deviceNode);
 
-    // Encoder
-    Element encoderNode = document.createElement("Encoder");
+    // encoder
+    Element encoderNode = document.createElement("encoder");
     hasAttr = false;
     if (format != null) {
       encoderNode.setAttribute("type", format);
@@ -180,14 +180,14 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
       node.appendChild(encoderNode);
 
     // Size
-    Element sizeNode = document.createElement("Size");
+    Element sizeNode = document.createElement("size");
     String size = frameWidth + "x" + frameHeight;
     sizeNode.appendChild(document.createTextNode(size));
     node.appendChild(sizeNode);
 
     // Interlacing
     if (scanType != null) {
-      Element interlacingNode = document.createElement("ScanType");
+      Element interlacingNode = document.createElement("scantype");
       interlacingNode.setAttribute("type", scanType.toString());
       if (scanOrder != null)
         interlacingNode.setAttribute("order", scanOrder.toString());
@@ -196,14 +196,14 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
 
     // Bit rate
     if (bitRate != null) {
-      Element bitrateNode = document.createElement("BitRate");
+      Element bitrateNode = document.createElement("bitrate");
       bitrateNode.appendChild(document.createTextNode(bitRate.toString()));
       node.appendChild(bitrateNode);
     }
 
     // Frame rate
     if (frameRate != null) {
-      Element framerateNode = document.createElement("FrameRate");
+      Element framerateNode = document.createElement("framerate");
       framerateNode.appendChild(document.createTextNode(frameRate.toString()));
       node.appendChild(framerateNode);
     }
@@ -236,11 +236,11 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
   }
 
   public String getCaptureDevice() {
-    return captureDevice;
+    return capturedevice;
   }
 
   public String getCaptureDeviceVersion() {
-    return captureDeviceVersion;
+    return capturedeviceVersion;
   }
 
   public String getCaptureDeviceVendor() {
@@ -285,12 +285,12 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
     this.scanOrder = scanOrder;
   }
 
-  void setCaptureDevice(String captureDevice) {
-    this.captureDevice = captureDevice;
+  void setCaptureDevice(String capturedevice) {
+    this.capturedevice = capturedevice;
   }
 
-  void setCaptureDeviceVersion(String captureDeviceVersion) {
-    this.captureDeviceVersion = captureDeviceVersion;
+  void setCaptureDeviceVersion(String capturedeviceVersion) {
+    this.capturedeviceVersion = capturedeviceVersion;
   }
 
   void setCaptureDeviceVendor(String captureDeviceVendor) {
@@ -308,4 +308,5 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
   void setEncoderLibraryVendor(String encoderLibraryVendor) {
     this.encoderLibraryVendor = encoderLibraryVendor;
   }
+  
 }

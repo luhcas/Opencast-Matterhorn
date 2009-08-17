@@ -129,13 +129,13 @@ class TrackImpl extends AbstractMediaPackageElement implements Track {
     Node node = super.toManifest(document);
 
     // File
-    Element fileNode = document.createElement("File");
+    Element fileNode = document.createElement("url");
     String trackPath = PathSupport.concat(getFile().getParentFile().getName(), fileName);
     fileNode.appendChild(document.createTextNode(trackPath));
     node.appendChild(fileNode);
 
     // duration
-    Node durationNode = document.createElement("Duration");
+    Node durationNode = document.createElement("duration");
     durationNode.appendChild(document.createTextNode(Long.toString(duration)));
     node.appendChild(durationNode);
 

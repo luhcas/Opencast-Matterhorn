@@ -151,14 +151,14 @@ public final class ManifestImpl {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.Manifest#getIdentifier()
+   * @see org.opencastproject.media.mediapackage.ManifestImpl#getIdentifier()
    */
   public Handle getIdentifier() {
     return identifier;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.Manifest#getFile()
+   * @see org.opencastproject.media.mediapackage.ManifestImpl#getFile()
    */
   public File getFile() {
     return file;
@@ -177,21 +177,21 @@ public final class ManifestImpl {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.Manifest#getDuration()
+   * @see org.opencastproject.media.mediapackage.ManifestImpl#getDuration()
    */
   public long getDuration() {
     return duration;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.Manifest#getStartDate()
+   * @see org.opencastproject.media.mediapackage.ManifestImpl#getStartDate()
    */
   public long getStartDate() {
     return startTime;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.Manifest#getEntries()
+   * @see org.opencastproject.media.mediapackage.ManifestImpl#getEntries()
    */
   public MediaPackageElement[] getEntries() {
     ArrayList<MediaPackageElement> entries = new ArrayList<MediaPackageElement>();
@@ -795,7 +795,7 @@ public final class ManifestImpl {
     Document doc = docBuilder.newDocument();
 
     // Root element "mediapackage"
-    Element mediaPackage = doc.createElement("MediaPackage");
+    Element mediaPackage = doc.createElement("mediapackage");
     doc.appendChild(mediaPackage);
 
     // Handle
@@ -830,7 +830,7 @@ public final class ManifestImpl {
 
     // Tracks
     if (tracks.size() > 0) {
-      Element tracksNode = doc.createElement("Media");
+      Element tracksNode = doc.createElement("media");
       Collections.sort(tracks);
       for (Track t : tracks) {
         tracksNode.appendChild(t.toManifest(doc));
@@ -838,19 +838,9 @@ public final class ManifestImpl {
       mediaPackage.appendChild(tracksNode);
     }
 
-    // Attachments
-    if (attachments.size() > 0) {
-      Element attachmentsNode = doc.createElement("Attachments");
-      Collections.sort(attachments);
-      for (Attachment a : attachments) {
-        attachmentsNode.appendChild(a.toManifest(doc));
-      }
-      mediaPackage.appendChild(attachmentsNode);
-    }
-
     // Metadata
     if (metadata.size() > 0) {
-      Element metadataNode = doc.createElement("Metadata");
+      Element metadataNode = doc.createElement("metadata");
       Collections.sort(metadata);
       for (Catalog m : metadata) {
         metadataNode.appendChild(m.toManifest(doc));
@@ -858,9 +848,19 @@ public final class ManifestImpl {
       mediaPackage.appendChild(metadataNode);
     }
 
+    // Attachments
+    if (attachments.size() > 0) {
+      Element attachmentsNode = doc.createElement("attachments");
+      Collections.sort(attachments);
+      for (Attachment a : attachments) {
+        attachmentsNode.appendChild(a.toManifest(doc));
+      }
+      mediaPackage.appendChild(attachmentsNode);
+    }
+
     // Unclassified
     if (others.size() > 0) {
-      Element othersNode = doc.createElement("Unclassified");
+      Element othersNode = doc.createElement("unclassified");
       Collections.sort(others);
       for (MediaPackageElement e : others) {
         othersNode.appendChild(e.toManifest(doc));
@@ -914,7 +914,7 @@ public final class ManifestImpl {
   }
 
   /**
-   * Reads a manifest from the specified file and returns it encapsulated in a {@link Manifest} object. The integrity of
+   * Reads a manifest from the specified file and returns it encapsulated in a manifest object. The integrity of
    * all elements is verified before they are added to the media package.
    * 
    * @param file
@@ -951,7 +951,7 @@ public final class ManifestImpl {
   }
 
   /**
-   * Reads a manifest from the specified file and returns it encapsulated in a {@link Manifest} object.
+   * Reads a manifest from the specified file and returns it encapsulated in a manifest object.
    * 
    * @param file
    *          the manifest file
@@ -1003,7 +1003,7 @@ public final class ManifestImpl {
       throw new IllegalStateException("Unable to create a media package element builder");
 
     // Handle
-    String id = xPath.evaluate("/MediaPackage/@id", doc);
+    String id = xPath.evaluate("/mediapackage/@id", doc);
     if (id != null && !"".equals(id)) {
       manifest.identifier = HandleBuilderFactory.newInstance().newHandleBuilder().fromValue(id);
     } else {
@@ -1013,13 +1013,13 @@ public final class ManifestImpl {
     }
 
     // Start time
-    String strStart = xPath.evaluate("/MediaPackage/@start", doc);
+    String strStart = xPath.evaluate("/mediapackage/@start", doc);
     if (strStart != null && !"".equals(strStart)) {
       manifest.startTime = DateTimeSupport.fromUTC(strStart);
     }
 
     // Duration
-    String strDuration = xPath.evaluate("/MediaPackage/@duration", doc);
+    String strDuration = xPath.evaluate("/mediapackage/@duration", doc);
     if (strDuration != null && !"".equals(strDuration)) {
       manifest.duration = Long.parseLong(strDuration);
     }
@@ -1028,7 +1028,7 @@ public final class ManifestImpl {
     File packageRoot = file.getParentFile();
 
     // Read tracks
-    NodeList trackNodes = (NodeList) xPath.evaluate("/MediaPackage/Media/Track", doc, XPathConstants.NODESET);
+    NodeList trackNodes = (NodeList) xPath.evaluate("/mediapackage/media/track", doc, XPathConstants.NODESET);
     for (int i = 0; i < trackNodes.getLength(); i++) {
       try {
         MediaPackageElement track = elementBuilder
@@ -1061,7 +1061,7 @@ public final class ManifestImpl {
     }
 
     // Read catalogs
-    NodeList catalogNodes = (NodeList) xPath.evaluate("/MediaPackage/Metadata/Catalog", doc, XPathConstants.NODESET);
+    NodeList catalogNodes = (NodeList) xPath.evaluate("/mediapackage/metadata/catalog", doc, XPathConstants.NODESET);
     for (int i = 0; i < catalogNodes.getLength(); i++) {
       try {
         MediaPackageElement catalog = elementBuilder.elementFromManifest(catalogNodes.item(i), packageRoot, !wrap
@@ -1094,7 +1094,7 @@ public final class ManifestImpl {
     }
 
     // Read attachments
-    NodeList attachmentNodes = (NodeList) xPath.evaluate("/MediaPackage/Attachments/Attachment", doc,
+    NodeList attachmentNodes = (NodeList) xPath.evaluate("/mediapackage/attachments/attachment", doc,
             XPathConstants.NODESET);
     for (int i = 0; i < attachmentNodes.getLength(); i++) {
       try {

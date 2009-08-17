@@ -16,13 +16,13 @@
 
 package org.opencastproject.media.mediapackage.elementbuilder;
 
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ConfigurationException;
@@ -162,7 +162,7 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
     try {
       String name = elementNode.getNodeName();
       String flavor = xpath.evaluate("@type", elementNode);
-      return name.equals(MediaPackageElement.Type.Catalog.toString())
+      return name.equalsIgnoreCase(MediaPackageElement.Type.Catalog.toString())
               && MediaPackageElements.DUBLINCORE_CATALOG.eq(flavor);
     } catch (XPathExpressionException e) {
       return false;
@@ -183,7 +183,7 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
       catalogId = (String) xpath.evaluate("@id", elementNode, XPathConstants.STRING);
 
       // file
-      catalogPath = xpath.evaluate("File/text()", elementNode).trim();
+      catalogPath = xpath.evaluate("url/text()", elementNode).trim();
       catalogPath = PathSupport.concat(packageRoot.getAbsolutePath(), catalogPath);
 
       // reference
@@ -199,8 +199,8 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
         dc.referTo(MediaPackageReferenceImpl.fromString(reference));
 
       // checksum
-      String checksumValue = (String) xpath.evaluate("Checksum/text()", elementNode, XPathConstants.STRING);
-      String checksumType = (String) xpath.evaluate("Checksum/@type", elementNode, XPathConstants.STRING);
+      String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
+      String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
       Checksum checksum = Checksum.create(checksumType.trim(), checksumValue.trim());
 
       // verify the catalog

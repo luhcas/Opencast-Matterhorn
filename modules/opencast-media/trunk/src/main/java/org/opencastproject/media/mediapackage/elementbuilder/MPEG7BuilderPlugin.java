@@ -16,11 +16,11 @@
 
 package org.opencastproject.media.mediapackage.elementbuilder;
 
+import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
-import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.Mpeg7Catalog;
 import org.opencastproject.media.mediapackage.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.util.Checksum;
@@ -128,7 +128,7 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
     try {
       String name = elementNode.getNodeName();
       String flavor = xpath.evaluate("@type", elementNode);
-      return name.equals(MediaPackageElement.Type.Catalog.toString()) && Mpeg7Catalog.FLAVOR.eq(flavor);
+      return name.equalsIgnoreCase(MediaPackageElement.Type.Catalog.toString()) && Mpeg7Catalog.FLAVOR.eq(flavor);
     } catch (XPathExpressionException e) {
       return false;
     }
@@ -211,7 +211,7 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
       catalogId = (String) xpath.evaluate("@id", elementNode, XPathConstants.STRING);
 
       // file
-      catalogPath = xpath.evaluate("File/text()", elementNode).trim();
+      catalogPath = xpath.evaluate("url/text()", elementNode).trim();
       catalogPath = PathSupport.concat(packageRoot.getAbsolutePath(), catalogPath);
 
       // reference
@@ -227,8 +227,8 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
         mpeg7.referTo(MediaPackageReferenceImpl.fromString(reference));
 
       // checksum
-      String checksumValue = (String) xpath.evaluate("Checksum/text()", elementNode, XPathConstants.STRING);
-      String checksumType = (String) xpath.evaluate("Checksum/@type", elementNode, XPathConstants.STRING);
+      String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
+      String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
       Checksum checksum = Checksum.create(checksumType.trim(), checksumValue.trim());
 
       // verify the catalog

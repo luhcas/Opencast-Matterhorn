@@ -39,4 +39,5 @@ public interface ManifestContributor {
    * @return the object's xml representation
    */
   Node toManifest(Document document);
+
 }

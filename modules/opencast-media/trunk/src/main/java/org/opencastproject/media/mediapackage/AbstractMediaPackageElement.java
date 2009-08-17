@@ -503,7 +503,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    * @see org.opencastproject.media.mediapackage.MediaPackageElement#toManifest(Document)
    */
   public Node toManifest(Document document) {
-    Element node = document.createElement(elementType.toString());
+    Element node = document.createElement(elementType.toString().toLowerCase());
     node.setAttribute("id", id);
     node.setAttribute("type", flavor.toString());
     if (reference != null && (mediaPackage == null || !reference.matches(new MediaPackageReferenceImpl(mediaPackage))))
@@ -511,18 +511,18 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
 
     // Description
     if (description != null) {
-      Element descriptionNode = document.createElement("Description");
+      Element descriptionNode = document.createElement("description");
       descriptionNode.appendChild(document.createTextNode(description));
       node.appendChild(descriptionNode);
     }
 
     // MimeType
-    Element mimeNode = document.createElement("MimeType");
+    Element mimeNode = document.createElement("mimetype");
     mimeNode.appendChild(document.createTextNode(mimeType.toString()));
     node.appendChild(mimeNode);
 
     // Checksum
-    Element checksumNode = document.createElement("Checksum");
+    Element checksumNode = document.createElement("checksum");
     checksumNode.setAttribute("type", checksum.getType().getName());
     checksumNode.appendChild(document.createTextNode(checksum.getValue()));
     node.appendChild(checksumNode);

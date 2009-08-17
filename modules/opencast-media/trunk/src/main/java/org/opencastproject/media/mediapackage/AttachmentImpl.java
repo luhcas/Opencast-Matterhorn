@@ -164,7 +164,7 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
     Node node = super.toManifest(document);
 
     // File
-    Element fileNode = document.createElement("File");
+    Element fileNode = document.createElement("url");
     String attachmentPath = PathSupport.concat(getFile().getParentFile().getName(), fileName);
     fileNode.appendChild(document.createTextNode(attachmentPath));
     node.appendChild(fileNode);

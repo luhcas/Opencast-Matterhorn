@@ -18,10 +18,10 @@ package org.opencastproject.media.mediapackage.elementbuilder;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Timeline;
 import org.opencastproject.media.mediapackage.TimelineImpl;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.MimeType;
@@ -126,7 +126,7 @@ public class TimelineBuilderPlugin extends AbstractElementBuilderPlugin implemen
     try {
       String name = elementNode.getNodeName();
       String flavor = xpath.evaluate("@type", elementNode);
-      return name.equals(MediaPackageElement.Type.Catalog.toString()) && Timeline.FLAVOR.eq(flavor);
+      return name.equalsIgnoreCase(MediaPackageElement.Type.Catalog.toString()) && Timeline.FLAVOR.eq(flavor);
     } catch (XPathExpressionException e) {
       return false;
     }
@@ -165,7 +165,7 @@ public class TimelineBuilderPlugin extends AbstractElementBuilderPlugin implemen
       catalogId = (String) xpath.evaluate("@id", elementNode, XPathConstants.STRING);
 
       // file
-      catalogPath = xpath.evaluate("File/text()", elementNode);
+      catalogPath = xpath.evaluate("url/text()", elementNode);
       catalogPath = PathSupport.concat(packageRoot.getAbsolutePath(), catalogPath);
 
       // create the catalog
@@ -174,8 +174,8 @@ public class TimelineBuilderPlugin extends AbstractElementBuilderPlugin implemen
         timeline.setIdentifier(catalogId);
 
       // checksum
-      String checksumValue = (String) xpath.evaluate("Checksum/text()", elementNode, XPathConstants.STRING);
-      String checksumType = (String) xpath.evaluate("Checksum/@type", elementNode, XPathConstants.STRING);
+      String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
+      String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
       Checksum checksum = Checksum.create(checksumType, checksumValue);
 
       // verify the catalog
@@ -185,7 +185,7 @@ public class TimelineBuilderPlugin extends AbstractElementBuilderPlugin implemen
       }
 
       // description
-      String description = xpath.evaluate("Description/text()", elementNode);
+      String description = xpath.evaluate("description/text()", elementNode);
       if (description != null && !description.equals(""))
         timeline.setElementDescription(description);
 

@@ -100,7 +100,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
   public boolean accept(MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     if (this.flavor != null && !this.flavor.equals(flavor))
       return false;
-    return type == null || MediaPackageElement.Type.Attachment.equals(type);
+    return type == null || MediaPackageElement.Type.Attachment.toString().equalsIgnoreCase(type.toString());
   }
 
   /**
@@ -112,7 +112,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
     try {
       // Test for attachment
       String nodeName = elementNode.getNodeName();
-      if (!MediaPackageElement.Type.Attachment.toString().equals(nodeName))
+      if (!MediaPackageElement.Type.Attachment.toString().equalsIgnoreCase(nodeName))
         return false;
       // Check flavor
       if (this.flavor != null) {
@@ -122,7 +122,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       }
       // Check mime type
       if (mimeTypes != null && mimeTypes.size() > 0) {
-        String nodeMimeType = (String) xpath.evaluate("MimeType", elementNode, XPathConstants.STRING);
+        String nodeMimeType = (String) xpath.evaluate("mimetype", elementNode, XPathConstants.STRING);
         try {
           MimeType mimeType = MimeTypes.parseMimeType(nodeMimeType);
           if (!mimeTypes.contains(mimeType))
@@ -177,7 +177,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       reference = (String) xpath.evaluate("@ref", elementNode, XPathConstants.STRING);
 
       // file
-      attachmentPath = xpath.evaluate("File/text()", elementNode).trim();
+      attachmentPath = xpath.evaluate("url/text()", elementNode).trim();
       attachmentPath = PathSupport.concat(packageRoot.getAbsolutePath(), attachmentPath);
 
       // create the attachment
@@ -200,8 +200,8 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       }
 
       // checksum
-      String checksumValue = (String) xpath.evaluate("Checksum/text()", elementNode, XPathConstants.STRING);
-      String checksumType = (String) xpath.evaluate("Checksum/@type", elementNode, XPathConstants.STRING);
+      String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
+      String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
       Checksum checksum = Checksum.create(checksumType.trim(), checksumValue.trim());
 
       // verify the catalog
@@ -211,7 +211,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       }
 
       // description
-      String description = xpath.evaluate("Description/text()", elementNode);
+      String description = xpath.evaluate("description/text()", elementNode);
       if (description != null && !description.equals(""))
         attachment.setElementDescription(description.trim());
 
