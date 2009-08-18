@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.example.api.ExampleService" immediate="true">
+  <implementation class="org.opencastproject.example.impl.ExampleServiceImpl" />
+  <property name="service.description" value="Example Service" />
+  <service>
+    <provide interface="org.opencastproject.example.api.ExampleService" />
+    <provide interface="org.osgi.service.cm.ManagedService" />
+  </service>
+</component>
