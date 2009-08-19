@@ -81,7 +81,7 @@
     <!-- CXF -->
     <dependency>
       <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-bundle-minimal</artifactId>
+      <artifactId>cxf-bundle</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.cxf.dosgi</groupId>
@@ -188,9 +188,9 @@
       <version>1.6.1_1</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.jettison</artifactId>
-      <version>1.0.1_1</version>
+      <groupId>org.codehaus.jettison</groupId>
+      <artifactId>jettison</artifactId>
+      <version>1.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
