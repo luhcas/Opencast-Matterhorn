@@ -6,5 +6,5 @@
     <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
   <reference name="REPO" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository"
-    cardinality="1..1" policy="static" bind="setRepository" />
+    cardinality="0..1" policy="dynamic" bind="setRepository" unbind="unsetRepository" />
 </component>

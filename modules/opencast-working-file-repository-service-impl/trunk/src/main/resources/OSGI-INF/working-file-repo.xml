@@ -4,6 +4,5 @@
   <property name="service.description" value="Working File Repository" />
   <service>
     <provide interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository" />
-    <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
 </component>

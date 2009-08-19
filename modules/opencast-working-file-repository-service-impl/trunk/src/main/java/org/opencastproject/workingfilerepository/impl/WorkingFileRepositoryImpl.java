@@ -36,7 +36,6 @@ import java.util.Dictionary;
  * A very simple (read: inadequate) implementation that stores all files under a root directory
  * using the media package ID as a subdirectory and the media package element ID as the
  * file name.
- *
  */
 public class WorkingFileRepositoryImpl implements WorkingFileRepository, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryImpl.class);

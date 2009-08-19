@@ -74,7 +74,11 @@ public class WorkspaceImpl implements Workspace, ManagedService {
   public void setRepository(WorkingFileRepository repo) {
     this.repo = repo;
   }
-  
+
+  public void unsetRepository(WorkingFileRepository repo) {
+    this.repo = null;
+  }
+
   @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {
     if(props.get("root") != null) {

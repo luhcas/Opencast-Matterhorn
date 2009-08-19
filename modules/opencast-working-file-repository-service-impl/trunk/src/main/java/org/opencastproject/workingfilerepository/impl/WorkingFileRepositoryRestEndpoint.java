@@ -39,11 +39,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("/")
-public class WorkingFileRepositoryRestEndpoint implements WorkingFileRepository {
+public class WorkingFileRepositoryRestEndpoint {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryRestEndpoint.class);
   WorkingFileRepository repo;
   public void setRepository(WorkingFileRepository repo) {
     this.repo = repo;
+  }
+  public void unsetRepository(WorkingFileRepository repo) {
+    this.repo = null;
   }
 
   protected final String docs;
@@ -70,11 +73,12 @@ public class WorkingFileRepositoryRestEndpoint implements WorkingFileRepository 
       @PathParam("mediaPackageID") String mediaPackageID,
       @PathParam("mediaPackageElementID") String mediaPackageElementID,
       @Context HttpServletRequest request) throws Exception {
+    checkService();
     if(ServletFileUpload.isMultipartContent(request)) {
       for(FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
         FileItemStream item = iter.next();
         if(item.isFormField()) continue;
-        put(mediaPackageID, mediaPackageElementID, item.openStream());
+        repo.put(mediaPackageID, mediaPackageElementID, item.openStream());
         return Response.ok("File stored for media package " + mediaPackageID + ", element " + mediaPackageElementID).build();
       }
     }
@@ -87,7 +91,8 @@ public class WorkingFileRepositoryRestEndpoint implements WorkingFileRepository 
   public Response deleteViaHttp(
       @PathParam("mediaPackageID") String mediaPackageID,
       @PathParam("mediaPackageElementID") String mediaPackageElementID) {
-    delete(mediaPackageID, mediaPackageElementID);
+    checkService();
+    repo.delete(mediaPackageID, mediaPackageElementID);
     return Response.ok().build();
   }
   
@@ -97,6 +102,7 @@ public class WorkingFileRepositoryRestEndpoint implements WorkingFileRepository 
   public InputStream get(
       @PathParam("mediaPackageID") String mediaPackageID,
       @PathParam("mediaPackageElementID") String mediaPackageElementID) {
+    checkService();
     return repo.get(mediaPackageID, mediaPackageElementID);
   }
   
@@ -106,13 +112,11 @@ public class WorkingFileRepositoryRestEndpoint implements WorkingFileRepository 
   public String getDocumentation() {
     return docs;
   }
-
-  public void put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
-    repo.put(mediaPackageID, mediaPackageElementID, in);
+  
+  protected void checkService() {
+    if(repo == null) {
+      // TODO What should we do in this case?
+      throw new RuntimeException("Working File Repository is currently unavailable");
+    }
   }
-
-  public void delete(String mediaPackageID, String mediaPackageElementID) {
-    repo.delete(mediaPackageID, mediaPackageElementID);
-  }
-
 }
