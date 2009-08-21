@@ -237,22 +237,12 @@
       <artifactId>commons-lang</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.oro</groupId>
-      <artifactId>com.springsource.org.apache.oro</artifactId>
-      <version>2.0.8</version>
-    </dependency>
-    <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
     </dependency>
       <dependency>
         <groupId>org.apache.mina</groupId>
         <artifactId>mina-core</artifactId>
-      </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>com.springsource.org.apache.commons.beanutils</artifactId>
-      <version>1.8.0</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
