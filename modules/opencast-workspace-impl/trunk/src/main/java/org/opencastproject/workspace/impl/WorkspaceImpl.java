@@ -25,7 +25,7 @@ import org.osgi.service.cm.ManagedService;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URI;
+import java.net.URL;
 import java.util.Dictionary;
 
 /**
@@ -43,15 +43,15 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     createRootDirectory();
   }
 
-  public File get(URI uri) {
-    String uriHash = DigestUtils.md5Hex(uri.toString());
+  public File get(URL url) {
+    String uriHash = DigestUtils.md5Hex(url.toString());
     // See if there's a matching file under the root directory
     File f = new File(rootDirectory + File.separator + uriHash);
     if(f.exists()) {
       return f;
     } else {
       try {
-        FileUtils.copyURLToFile(uri.toURL(), f);
+        FileUtils.copyURLToFile(url, f);
         return f;
       } catch (Exception e) {
         throw new RuntimeException(e);

@@ -19,6 +19,7 @@ import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URL;
 
 /**
  * Provides efficient access java.io.File objects from potentially remote URIs. This helper service
@@ -36,5 +37,5 @@ public interface Workspace extends WorkingFileRepository {
    * @param uri
    * @return
    */
-  File get(URI uri);
+  File get(URL uri);
 }

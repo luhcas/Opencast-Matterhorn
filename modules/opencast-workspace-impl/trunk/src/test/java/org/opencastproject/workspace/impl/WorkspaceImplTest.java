@@ -20,17 +20,12 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import java.io.File;
-import java.net.URISyntaxException;
 
 public class WorkspaceImplTest {
   @Test
   public void testGetRemoteFile() {
     WorkspaceImpl workspace = new WorkspaceImpl();
-    try {
-      File f = workspace.get(getClass().getClassLoader().getResource("opencast_header.gif").toURI());
-      Assert.assertTrue(f.exists());
-    } catch (URISyntaxException e) {
-      Assert.fail();
-    }
+    File f = workspace.get(getClass().getClassLoader().getResource("opencast_header.gif"));
+    Assert.assertTrue(f.exists());
   }
 }
