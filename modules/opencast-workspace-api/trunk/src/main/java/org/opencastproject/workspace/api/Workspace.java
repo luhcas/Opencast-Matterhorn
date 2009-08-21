@@ -18,7 +18,6 @@ package org.opencastproject.workspace.api;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
 import java.io.File;
-import java.net.URI;
 import java.net.URL;
 
 /**
