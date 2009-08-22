@@ -58,8 +58,13 @@
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Export-Package>
-            	org.opencastproject.media.analysis.*,
-            	org.opencastproject.media.mediapackage.*
+            	org.opencastproject.media.mediapackage,
+            	org.opencastproject.media.mediapackage.attachment,
+            	org.opencastproject.media.mediapackage.dublincore,
+            	org.opencastproject.media.mediapackage.elementbuilder,
+            	org.opencastproject.media.mediapackage.handle,
+            	org.opencastproject.media.mediapackage.mpeg7,
+            	org.opencastproject.media.mediapackage.track
             </Export-Package>
           </instructions>
         </configuration>
