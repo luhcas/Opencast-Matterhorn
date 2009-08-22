@@ -23,12 +23,12 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -264,34 +264,26 @@ public class MimeTypes {
    * If no mime type can be derived from either the file name or its contents, a
    * <code>UnknownFileTypeException</code> is thrown.
    * 
-   * @param file
+   * @param url
    *          the file
    * @return the corresponding mime type
    * @throws UnknownFileTypeException
    *           if the mime type cannot be derived from the file
    */
-  public static MimeType fromFile(File file) throws UnknownFileTypeException,
-      IOException {
-    if (file == null)
+  public static MimeType fromURL(URL url) throws UnknownFileTypeException {
+    if (url == null)
       throw new IllegalArgumentException("Argument 'file' is null");
-    if (!file.exists())
-      throw new IOException("File " + file + " does not exist");
-    if (!file.isFile())
-      throw new IOException(file + " is not a file");
-    if (!file.canRead())
-      throw new IOException("File " + file + " cannot be read");
 
     MimeType mimeType = null;
 
     // Extract suffix
-    String filename = file.getName();
+    String filename = url.getFile();
     String suffix = null;
     int separatorPos = filename.lastIndexOf('.');
     if (separatorPos > 0 && separatorPos < filename.length() - 1) {
       suffix = filename.substring(separatorPos + 1);
     } else {
-      throw new UnknownFileTypeException(
-          "Unable to get mime type without suffix", file);
+      throw new UnknownFileTypeException("Unable to get mime type without suffix");
     }
 
     // Try to get mime type for file suffix
@@ -303,6 +295,7 @@ public class MimeTypes {
       throw e;
     }
 
+    // TODO
     // Try to match according to file contents
     // if (mimeType == null) {
     // for (MimeType m : mimeTypes_.values()) {
@@ -310,7 +303,7 @@ public class MimeTypes {
     // }
     // }
 
-    throw new UnknownFileTypeException("File '" + file.getAbsolutePath()
+    throw new UnknownFileTypeException("File '" + url
         + "' cannot be matched to any mime type");
   }
 
