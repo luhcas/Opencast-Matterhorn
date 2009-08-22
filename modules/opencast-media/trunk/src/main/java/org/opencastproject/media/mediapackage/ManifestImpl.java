@@ -30,10 +30,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -44,12 +43,7 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -65,9 +59,6 @@ public final class ManifestImpl {
 
   /** The media package's identifier */
   private Handle identifier = null;
-
-  /** The manifest file */
-  private File file = null;
 
   /** The start date and time */
   private long startTime = 0L;
@@ -95,44 +86,14 @@ public final class ManifestImpl {
 
   /**
    * Creates a new manifest implementation used to be filled up using the manifest SAX parser.
-   * 
-   * @param packageRoot
-   *          the media package root
-   * @throws IOException
-   *           if the specified file does not exist or cannot be created
-   * @throws UnknownFileTypeException
-   *           if the manifest is of an unknown file type
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
    */
-  private ManifestImpl(File packageRoot) throws IOException, UnknownFileTypeException, NoSuchAlgorithmException {
-    this(packageRoot, null);
-  }
-
-  /**
-   * Creates a new media package manifest for the given media package.
-   * 
-   * @param mediaPackage
-   *          the associated media package
-   * @param identifier
-   *          the media package identifier
-   * @throws IOException
-   *           if the specified file does not exist or cannot be created
-   * @throws UnknownFileTypeException
-   *           if the manifest is of an unknown file type
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
-   */
-  ManifestImpl(MediaPackage mediaPackage, Handle identifier) throws IOException, UnknownFileTypeException,
-          NoSuchAlgorithmException {
-    this(mediaPackage.getRoot(), identifier);
+  ManifestImpl() {
+    this(null);
   }
 
   /**
    * Creates a new media package manifest within the given root folder.
    * 
-   * @param packageRoot
-   *          the media package root folder
    * @param identifier
    *          the media package identifier
    * @throws IOException
@@ -142,11 +103,7 @@ public final class ManifestImpl {
    * @throws NoSuchAlgorithmException
    *           if the md5 checksum cannot be computed
    */
-  ManifestImpl(File packageRoot, Handle identifier) throws IOException, UnknownFileTypeException,
-          NoSuchAlgorithmException {
-    this.file = new File(packageRoot, MediaPackageElements.MANIFEST_FILENAME);
-    if (!this.file.exists())
-      file.createNewFile();
+  ManifestImpl(Handle identifier) {
     this.identifier = identifier;
   }
 
@@ -158,22 +115,13 @@ public final class ManifestImpl {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.ManifestImpl#getFile()
-   */
-  public File getFile() {
-    return file;
-  }
-
-  /**
-   * Tells the manifest that the media package has been moved to a new location.
+   * Sets the media package identifier.
    * 
-   * @param oldRoot
-   *          the former media package root directory
-   * @param newRoot
-   *          the new media package root directory
+   * @param identifier
+   *          the identifier
    */
-  void mediaPackageMoved(File oldRoot, File newRoot) {
-    file = new File(newRoot, file.getName());
+  void setIdentifier(Handle identifier) {
+    this.identifier = identifier;
   }
 
   /**
@@ -279,17 +227,6 @@ public final class ManifestImpl {
         catalogs--;
       else
         others--;
-    }
-
-    try {
-      save();
-    } catch (ParserConfigurationException e) {
-      throw new MediaPackageException("Parser configuration exception while updating media package manifest: "
-              + e.getMessage());
-    } catch (TransformerException e) {
-      throw new MediaPackageException("Transformer exception while updating media package manifest: " + e.getMessage());
-    } catch (IOException e) {
-      throw new MediaPackageException("I/O exception while updating media package manifest: " + e.getMessage());
     }
   }
 
@@ -767,20 +704,7 @@ public final class ManifestImpl {
   }
 
   /**
-   * Reconsiders the elements from the manifest and calculates their checksums, then updates the manifest to reflect any
-   * updated elements.
-   * 
-   * @throws MediaPackageException
-   *           if the checksum cannot be recalculated
-   */
-  void wrap() throws MediaPackageException {
-    for (MediaPackageElement element : elements) {
-      element.wrap();
-    }
-  }
-
-  /**
-   * Saves the manifest to disk.
+   * Returns an xml presentation of the manifest.
    * 
    * @throws TransformerException
    *           if serializing the document fails
@@ -788,7 +712,7 @@ public final class ManifestImpl {
    *           if the creating a document builder fails
    * @throws IOException
    */
-  void save() throws TransformerException, ParserConfigurationException, IOException {
+  Document toXml() throws TransformerException, ParserConfigurationException {
     DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
     docBuilderFactory.setNamespaceAware(true);
     DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
@@ -868,23 +792,7 @@ public final class ManifestImpl {
       mediaPackage.appendChild(othersNode);
     }
 
-    // Create the file
-    if (!file.exists())
-      if (!file.createNewFile())
-        throw new IOException("Unable to create manifest " + file);
-
-    // Save document to disk
-    FileOutputStream fos = new FileOutputStream(getFile());
-    StreamResult streamResult = new StreamResult(fos);
-    TransformerFactory tf = TransformerFactory.newInstance();
-    Transformer serializer = tf.newTransformer();
-    serializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-    serializer.setOutputProperty(OutputKeys.METHOD, "xml");
-    serializer.setOutputProperty(OutputKeys.INDENT, "yes");
-    serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-    serializer.transform(new DOMSource(doc), streamResult);
-    fos.flush();
-    fos.close();
+    return mediaPackage.getOwnerDocument();
   }
 
   /**
@@ -906,61 +814,20 @@ public final class ManifestImpl {
    * @throws NoSuchAlgorithmException
    *           if the md5 checksum cannot be computed
    */
-  static ManifestImpl newInstance(File packageRoot, Handle identifier) throws IOException, UnknownFileTypeException,
-          ParserConfigurationException, TransformerException, NoSuchAlgorithmException {
-    ManifestImpl m = new ManifestImpl(packageRoot, identifier);
-    m.save();
+  static ManifestImpl newInstance(Handle identifier) {
+    ManifestImpl m = new ManifestImpl(identifier);
     return m;
-  }
-
-  /**
-   * Reads a manifest from the specified file and returns it encapsulated in a manifest object. The integrity of
-   * all elements is verified before they are added to the media package.
-   * 
-   * @param file
-   *          the manifest file
-   * @return the manifest object
-   * @throws MediaPackageException
-   *           if the media package is in an inconsistent state
-   * @throws IOException
-   *           if reading the manifest file fails
-   * @throws UnknownFileTypeException
-   *           if the manifest file is of an unknown file type
-   * @throws ParserConfigurationException
-   *           if the manifest parser cannot be created
-   * @throws SAXException
-   *           if reading the manifest fails
-   * @throws XPathExpressionException
-   *           if querying the manifest failed
-   * @throws HandleException
-   *           if reading the handle from the manifest fails
-   * @throws ConfigurationException
-   *           if a configuration error occurs
-   * @throws ParseException
-   *           if the manifest contains a malformed start date
-   */
-  public static ManifestImpl fromFile(File file) throws MediaPackageException, IOException, UnknownFileTypeException,
-          ParserConfigurationException, SAXException, TransformerException, XPathExpressionException,
-          ConfigurationException, HandleException, ParseException {
-    try {
-      return fromFile(file, false, false, false);
-    } catch (NoSuchAlgorithmException e) {
-      // This will not happen, since verify is false
-      throw new IllegalStateException("Unpredicted application state reached");
-    }
   }
 
   /**
    * Reads a manifest from the specified file and returns it encapsulated in a manifest object.
    * 
-   * @param file
-   *          the manifest file
+   * @param url
+   *          the manifest location
+   * @param serializer
+   *          the media package serializer
    * @param ignoreMissingElements
    *          <code>true</code> to ignore and remove missing elements
-   * @param wrap
-   *          <code>true</code> to ignore and recreate wrong checksums
-   * @param verify
-   *          <code>true</code> to verify the media package element's integrity
    * @return the manifest object
    * @throws MediaPackageException
    *           if the media package is in an inconsistent state
@@ -972,8 +839,6 @@ public final class ManifestImpl {
    *           if the manifest parser cannot be created
    * @throws SAXException
    *           if reading the manifest fails
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
    * @throws XPathExpressionException
    *           if querying the manifest failed
    * @throws HandleException
@@ -983,20 +848,17 @@ public final class ManifestImpl {
    * @throws ParseException
    *           if the manifest contains a malformed start date
    */
-  public static ManifestImpl fromFile(File file, boolean ignoreMissingElements, boolean wrap, boolean verify)
-          throws MediaPackageException, IOException, UnknownFileTypeException, NoSuchAlgorithmException,
+  public static ManifestImpl fromStream(InputStream is, MediaPackageSerializer serializer, boolean ignoreMissingElements)
+          throws MediaPackageException, IOException,
           ParserConfigurationException, SAXException, TransformerException, XPathExpressionException,
           ConfigurationException, HandleException, ParseException {
+
     DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-    Document doc = docBuilder.parse(new FileInputStream(file));
-
-    // True if the manifest has been updated while beeing parsed. If the
-    // checksums are being recreated, we do a save just to make sure
-    boolean updated = wrap;
+    Document doc = docBuilder.parse(is);
 
     // Prepare xpath and element builder
-    ManifestImpl manifest = new ManifestImpl(file.getParentFile());
+    ManifestImpl manifest = new ManifestImpl();
     XPath xPath = XPathFactory.newInstance().newXPath();
     MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
     if (elementBuilder == null)
@@ -1008,8 +870,7 @@ public final class ManifestImpl {
       manifest.identifier = HandleBuilderFactory.newInstance().newHandleBuilder().fromValue(id);
     } else {
       manifest.identifier = HandleBuilderFactory.newInstance().newHandleBuilder().createNew();
-      updated = true;
-      log_.info("Created handle " + manifest.identifier + " for manifest " + file);
+      log_.info("Created handle " + manifest.identifier + " for manifest");
     }
 
     // Start time
@@ -1024,23 +885,17 @@ public final class ManifestImpl {
       manifest.duration = Long.parseLong(strDuration);
     }
 
-    // Set the media package root
-    File packageRoot = file.getParentFile();
-
     // Read tracks
     NodeList trackNodes = (NodeList) xPath.evaluate("/mediapackage/media/track", doc, XPathConstants.NODESET);
     for (int i = 0; i < trackNodes.getLength(); i++) {
       try {
-        MediaPackageElement track = elementBuilder
-                .elementFromManifest(trackNodes.item(i), packageRoot, !wrap && verify);
+        MediaPackageElement track = elementBuilder.elementFromManifest(trackNodes.item(i), serializer);
         if (track != null) {
-          File elementFile = track.getFile();
-          if (track != null && (elementFile == null || elementFile.exists()))
+          URL elementUrl = track.getURL();
+          if (elementUrl != null) // TODO: Check existence
             manifest.add(track);
           else if (!ignoreMissingElements)
-            throw new MediaPackageException("Track file " + elementFile + " is missing");
-          if (wrap)
-            track.wrap();
+            throw new MediaPackageException("Track file " + elementUrl + " is missing");
         }
       } catch (IllegalStateException e) {
         log_.warn("Unable to create tracks from manifest: " + e.getMessage());
@@ -1050,13 +905,11 @@ public final class ManifestImpl {
           log_.warn("Error while creating track from manifest:" + e.getMessage());
           throw e;
         }
-        updated = true;
       } catch (Throwable t) {
         if (!ignoreMissingElements) {
           log_.warn("Error reading track: " + t.getMessage());
           throw new IllegalStateException(t);
         }
-        updated = true;
       }
     }
 
@@ -1064,29 +917,24 @@ public final class ManifestImpl {
     NodeList catalogNodes = (NodeList) xPath.evaluate("/mediapackage/metadata/catalog", doc, XPathConstants.NODESET);
     for (int i = 0; i < catalogNodes.getLength(); i++) {
       try {
-        MediaPackageElement catalog = elementBuilder.elementFromManifest(catalogNodes.item(i), packageRoot, !wrap
-                && verify);
+        MediaPackageElement catalog = elementBuilder.elementFromManifest(catalogNodes.item(i), serializer);
         if (catalog != null) {
-          File elementFile = catalog.getFile();
-          if (elementFile == null || elementFile.exists())
+          URL elementUrl = catalog.getURL();
+          if (elementUrl != null) // TODO: Check existence
             manifest.add(catalog);
           else if (!ignoreMissingElements)
-            throw new MediaPackageException("Catalog file " + elementFile + " is missing");
-          if (wrap)
-            catalog.wrap();
+            throw new MediaPackageException("Catalog file " + elementUrl + " is missing");
         }
       } catch (IllegalStateException e) {
         if (!ignoreMissingElements) {
           log_.warn("Unable to load catalog from manifest: " + e.getMessage());
           throw e;
         }
-        updated = true;
       } catch (MediaPackageException e) {
         if (!ignoreMissingElements) {
           log_.warn("Error while loading catalog from manifest:" + e.getMessage());
           throw e;
         }
-        updated = true;
       } catch (Throwable t) {
         log_.warn("Error reading catalog: " + t.getMessage());
         throw new IllegalStateException(t);
@@ -1098,39 +946,28 @@ public final class ManifestImpl {
             XPathConstants.NODESET);
     for (int i = 0; i < attachmentNodes.getLength(); i++) {
       try {
-        MediaPackageElement attachment = elementBuilder.elementFromManifest(attachmentNodes.item(i), packageRoot, !wrap
-                && verify);
+        MediaPackageElement attachment = elementBuilder.elementFromManifest(attachmentNodes.item(i), serializer);
         if (attachment != null) {
-          File elementFile = attachment.getFile();
-          if (elementFile == null || elementFile.exists())
+          URL elementUrl = attachment.getURL();
+          if (elementUrl != null) // TODO: Check existence
             manifest.add(attachment);
           else if (!ignoreMissingElements)
-            throw new MediaPackageException("Attachment file " + elementFile + " is missing");
-          if (wrap)
-            attachment.wrap();
+            throw new MediaPackageException("Attachment file " + elementUrl + " is missing");
         }
       } catch (IllegalStateException e) {
         if (!ignoreMissingElements) {
           log_.warn("Unable to load attachment from manifest: " + e.getMessage());
           throw e;
         }
-        updated = true;
       } catch (MediaPackageException e) {
         if (!ignoreMissingElements) {
           log_.warn("Error while loading attachment from manifest:" + e.getMessage());
           throw e;
         }
-        updated = true;
       } catch (Throwable t) {
         log_.warn("Error reading attachment: " + t.getMessage());
         throw new IllegalStateException(t);
       }
-    }
-
-    // Has the manifest been updated?
-    if (updated) {
-      log_.debug("Updating manifest " + manifest);
-      manifest.save();
     }
 
     return manifest;

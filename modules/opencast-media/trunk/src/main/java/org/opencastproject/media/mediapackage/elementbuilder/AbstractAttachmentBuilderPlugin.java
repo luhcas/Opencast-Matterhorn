@@ -16,29 +16,27 @@
 
 package org.opencastproject.media.mediapackage.elementbuilder;
 
-import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.AttachmentImpl;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
-import org.opencastproject.util.Checksum;
-import org.opencastproject.util.ConfigurationException;
-import org.opencastproject.util.MimeType;
-import org.opencastproject.util.MimeTypes;
-import org.opencastproject.util.PathSupport;
-import org.opencastproject.util.UnknownFileTypeException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Node;
-
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
+
+import org.opencastproject.media.mediapackage.Attachment;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
+import org.opencastproject.media.mediapackage.MediaPackageSerializer;
+import org.opencastproject.media.mediapackage.attachment.AttachmentImpl;
+import org.opencastproject.util.Checksum;
+import org.opencastproject.util.MimeType;
+import org.opencastproject.util.MimeTypes;
+import org.opencastproject.util.UnknownFileTypeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
 
 /**
  * This implementation of the {@link MediaPackageElementBuilderPlugin} recognizes attachments and provides utility
@@ -80,14 +78,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type ,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public boolean accept(File file, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws IOException {
-    if (mimeTypes != null && mimeTypes.size() > 0)
-      try {
-        if (!checkMimeType(file))
-          return false;
-      } catch (UnknownFileTypeException e) {
-        return false;
-      }
+  public boolean accept(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     return accept(type, flavor);
   }
 
@@ -148,27 +139,21 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
   }
 
   /**
-   * Utility method that returns an attachment object from the given manifest node.
-   * 
-   * @param elementNode
-   *          the attachment node in the manifest
-   * @param packageRoot
-   *          media package root in the filesystem
-   * @param verify
-   *          <code>true</code> to verify the file
-   * @return the attachment object
-   * @throws MediaPackageException
-   *           if the attachment cannot be read
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromManifest(org.w3c.dom.Node, org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
-  public MediaPackageElement elementFromManifest(Node elementNode, File packageRoot, boolean verify)
-          throws MediaPackageException {
-    String attachmentId = null;
+  public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer) throws MediaPackageException {
+
+    String id = null;
     String attachmentFlavor = null;
     String reference = null;
-    String attachmentPath = null;
+    URL url = null;
+    long size = -1;
+    Checksum checksum = null;
+    MimeType mimeType = null;
+
     try {
       // id
-      attachmentId = (String) xpath.evaluate("@id", elementNode, XPathConstants.STRING);
+      id = (String) xpath.evaluate("@id", elementNode, XPathConstants.STRING);
 
       // flavor
       attachmentFlavor = (String) xpath.evaluate("@type", elementNode, XPathConstants.STRING);
@@ -176,14 +161,35 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       // reference
       reference = (String) xpath.evaluate("@ref", elementNode, XPathConstants.STRING);
 
-      // file
-      attachmentPath = xpath.evaluate("url/text()", elementNode).trim();
-      attachmentPath = PathSupport.concat(packageRoot.getAbsolutePath(), attachmentPath);
+      // url
+      url = serializer.resolve(xpath.evaluate("url/text()", elementNode).trim());
+
+      // size
+      try {
+        size = Long.parseLong(xpath.evaluate("size/text()", elementNode).trim());
+      } catch (Exception e) {
+        // size may not be present
+      }
+
+      // checksum
+      String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
+      String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
+      if (checksumValue != null && checksumType != null)
+        checksum = Checksum.create(checksumType.trim(), checksumValue.trim());
+
+      // mimetype
+      String mimeTypeValue = (String) xpath.evaluate("mimetype/text()", elementNode, XPathConstants.STRING);
+      if (mimeTypeValue != null)
+        mimeType = MimeTypes.parseMimeType(mimeTypeValue);
 
       // create the attachment
-      AttachmentImpl attachment = AttachmentImpl.fromFile(new File(attachmentPath));
-      if (attachmentId != null && !attachmentId.equals(""))
-        attachment.setIdentifier(attachmentId);
+      AttachmentImpl attachment = (AttachmentImpl) AttachmentImpl.fromURL(url);
+
+      if (id != null && !id.equals(""))
+        attachment.setIdentifier(id);
+
+      // Add url
+      attachment.setURL(url);
 
       // Add reference
       if (reference != null && !reference.equals(""))
@@ -199,16 +205,17 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
         }
       }
 
-      // checksum
-      String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
-      String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
-      Checksum checksum = Checksum.create(checksumType.trim(), checksumValue.trim());
+      // Set the size
+      if (size > 0)
+        attachment.setSize(size);
 
-      // verify the catalog
-      if (verify) {
-        log_.debug("Verifying integrity of attachment " + attachmentPath);
-        verifyFileIntegrity(new File(attachmentPath), checksum);
-      }
+      // Set checksum
+      if (checksum != null)
+        attachment.setChecksum(checksum);
+
+      // Set mimetype
+      if (mimeType != null)
+        attachment.setMimeType(mimeType);
 
       // description
       String description = xpath.evaluate("description/text()", elementNode);
@@ -220,43 +227,35 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       throw new MediaPackageException("Error while reading attachment from manifest: " + e.getMessage());
     } catch (NoSuchAlgorithmException e) {
       throw new MediaPackageException("Unsupported digest algorithm: " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      throw new ConfigurationException("Filetype not supported: " + e.getMessage());
     } catch (IOException e) {
-      throw new MediaPackageException("Error while reading attachment file " + attachmentPath + ": " + e.getMessage());
+      throw new MediaPackageException("Error while reading attachment file " + url + ": " + e.getMessage());
+    } catch (UnknownFileTypeException e) {
+      throw new MediaPackageException("Attachment " + url + " is of unknown mime type: " + e.getMessage());
     }
   }
 
   /**
-   * Utility method that returns an attachment object from the given file.
+   * Utility method that returns an attachment object from the given url.
    * 
-   * @param file
-   *          the file
+   * @param url
+   *          the element location
    * @return an attachment object
    * @throws MediaPackageException
    *           if the attachment cannto be read
    */
-  public MediaPackageElement elementFromFile(File file) throws MediaPackageException {
-    try {
-      log_.trace("Creating attachment from " + file);
-      return specializeAttachment(AttachmentImpl.fromFile(file));
-    } catch (IOException e) {
-      throw new MediaPackageException("Error reading dublin core from " + file + " : " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      throw new MediaPackageException("Dublin core metadata " + file + " has an unknown file type: " + e.getMessage());
-    } catch (NoSuchAlgorithmException e) {
-      throw new MediaPackageException("Dublin core document " + file + " cannot be checksummed: " + e.getMessage());
-    }
+  public MediaPackageElement elementFromURL(URL url) throws MediaPackageException {
+    log_.trace("Creating attachment from " + url);
+    return specializeAttachment(AttachmentImpl.fromURL(url));
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromFile(java.io.File,
+   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromURL(java.io.File,
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type ,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement elementFromFile(File file, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
+  public MediaPackageElement elementFromURL(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
           throws MediaPackageException {
-    return elementFromFile(file);
+    return elementFromURL(url);
   }
 
   /**

@@ -27,6 +27,9 @@ import org.w3c.dom.Node;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
@@ -38,7 +41,7 @@ public class MediaPackageElementBuilderTest {
   MediaPackageElementBuilder mediaPackageElementBuilder = null;
 
   /** The test catalog */
-  private File catalogFile = null;
+  private URL catalogFile = null;
 
   /**
    * @throws java.lang.Exception
@@ -54,40 +57,48 @@ public class MediaPackageElementBuilderTest {
    */
   @Test
   public void testElementFromFile() {
-    catalogFile = new File(DublinCoreTest.class.getResource("/dublincore.xml").getPath());
-    MediaPackageElement element = null;
     try {
-      element = mediaPackageElementBuilder.elementFromFile(catalogFile);
-      assertEquals(element.getElementType(), Catalog.TYPE);
-      assertEquals(element.getFlavor(), MediaPackageElements.DUBLINCORE_CATALOG);
+      catalogFile = DublinCoreTest.class.getResource("/dublincore.xml").toURI().toURL();
+      MediaPackageElement element = mediaPackageElementBuilder.elementFromURL(catalogFile);
+      assertEquals(Catalog.TYPE, element.getElementType());
+      assertEquals(MediaPackageElements.DUBLINCORE_CATALOG, element.getFlavor());
     } catch (MediaPackageException e) {
+      fail(e.getMessage());
+    } catch (MalformedURLException e) {
+      fail(e.getMessage());
+    } catch (URISyntaxException e) {
       fail(e.getMessage());
     }
   }
 
   /**
    * Test method for
-   * {@link org.opencastproject.media.mediapackage.MediaPackageElementBuilderImpl#elementFromFile(File file, org.opencastproject.media.mediapackage.MediaPackageElement.Type type, MediaPackageElementFlavor flavor)}
+   * {@link org.opencastproject.media.mediapackage.MediaPackageElementBuilderImpl#elementFromURL(File file, org.opencastproject.media.mediapackage.MediaPackageElement.Type type, MediaPackageElementFlavor flavor)}
    * .
    */
   @Test
   public void testElementFromFileWithHints() {
-    catalogFile = new File(DublinCoreTest.class.getResource("/dublincore.xml").getPath());
 
     // Test correct hints
+
     try {
-      mediaPackageElementBuilder.elementFromFile(catalogFile, MediaPackageElement.Type.Catalog,
+      catalogFile = DublinCoreTest.class.getResource("/dublincore.xml").toURI().toURL();
+      mediaPackageElementBuilder.elementFromURL(catalogFile, MediaPackageElement.Type.Catalog,
               MediaPackageElements.DUBLINCORE_CATALOG);
-      mediaPackageElementBuilder.elementFromFile(catalogFile, MediaPackageElement.Type.Catalog, null);
-      mediaPackageElementBuilder.elementFromFile(catalogFile, null, MediaPackageElements.DUBLINCORE_CATALOG);
-      mediaPackageElementBuilder.elementFromFile(catalogFile, null, null);
+      mediaPackageElementBuilder.elementFromURL(catalogFile, MediaPackageElement.Type.Catalog, null);
+      mediaPackageElementBuilder.elementFromURL(catalogFile, null, MediaPackageElements.DUBLINCORE_CATALOG);
+      mediaPackageElementBuilder.elementFromURL(catalogFile, null, null);
     } catch (MediaPackageException e) {
+      fail(e.getMessage());
+    } catch (MalformedURLException e) {
+       fail(e.getMessage());
+    } catch (URISyntaxException e) {
       fail(e.getMessage());
     }
 
     // Test incorrect hints
     try {
-      mediaPackageElementBuilder.elementFromFile(catalogFile, MediaPackageElement.Type.Track,
+      mediaPackageElementBuilder.elementFromURL(catalogFile, MediaPackageElement.Type.Track,
               MediaPackageElements.DUBLINCORE_CATALOG);
       fail("Specified type was wrong but didn't matter");
     } catch (MediaPackageException e) {
@@ -96,7 +107,7 @@ public class MediaPackageElementBuilderTest {
 
     // Test incorrect flavor
     try {
-      mediaPackageElementBuilder.elementFromFile(catalogFile, MediaPackageElement.Type.Catalog,
+      mediaPackageElementBuilder.elementFromURL(catalogFile, MediaPackageElement.Type.Catalog,
               MediaPackageElements.PRESENTER_TRACK);
       fail("Specified flavor was wrong but didn't matter");
     } catch (MediaPackageException e) {

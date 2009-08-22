@@ -17,21 +17,14 @@
 package org.opencastproject.media.mediapackage;
 
 import org.opencastproject.util.Checksum;
-import org.opencastproject.util.ChecksumType;
-import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.MimeType;
-import org.opencastproject.util.MimeTypes;
-import org.opencastproject.util.PathSupport;
-import org.opencastproject.util.UnknownFileTypeException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
+import java.net.URL;
 
 /**
  * This class provides base functionality for media package elements.
@@ -59,13 +52,10 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   /** The element's type, e. g. 'track/slide' */
   protected MediaPackageElementFlavor flavor = null;
 
-  /** Path to the parent directory */
-  protected String path = null;
+  /** The element's location */
+  protected URL url = null;
 
-  /** Complete file name, including suffix */
-  protected String fileName = null;
-
-  /** File size in bytes */
+  /** Size in bytes */
   protected long size = -1L;
 
   /** The element's checksum */
@@ -78,125 +68,67 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   protected MediaPackageReference reference = null;
 
   /**
-   * Creates a new media package element, consisting of the given file.
+   * Creates a new media package element.
    * 
    * @param elementType
    *          the type, e. g. Track, Catalog etc.
    * @param flavor
    *          the flavor
-   * @param file
-   *          the element file
-   * @throws IOException
-   *           if the file cannot be accessed
-   * @throws UnknownFileTypeException
-   *           if the file type is unknown
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
+   * @param url
+   *          the elements location
    */
-  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, File file)
-          throws IOException, UnknownFileTypeException, NoSuchAlgorithmException {
-    this(null, elementType, flavor, MimeTypes.fromFile(file), file, Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, URL url) {
+    this(null, elementType, flavor, url, -1, null, null);
   }
 
   /**
-   * Creates a new media package element, consisting of the given file.
+   * Creates a new media package element.
    * 
    * @param elementType
    *          the type, e. g. Track, Catalog etc.
    * @param flavor
    *          the flavor
-   * @param file
-   *          the element file
+   * @param url
+   *          the elements location
+   * @param size
+   *          the element size in bytes
    * @param checksum
-   *          the file's checksum
-   * @throws IOException
-   *           if the file cannot be accessed
-   * @throws UnknownFileTypeException
-   *           if the file type is unknown
-   */
-  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, File file, Checksum checksum)
-          throws IOException, UnknownFileTypeException {
-    this(null, elementType, flavor, MimeTypes.fromFile(file), file, checksum);
-  }
-
-  /**
-   * Creates a new media package element, consisting of the given file.
-   * 
-   * @param elementType
-   *          the type, e. g. Track, Catalog etc.
-   * @param flavor
-   *          the flavor
+   *          the element checksum
    * @param mimeType
-   *          the file's mime type
-   * @param file
-   *          the element file
-   * @throws IOException
-   *           if the file cannot be accessed
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
+   *          the element mime type
    */
-  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, MimeType mimeType, File file)
-          throws IOException, NoSuchAlgorithmException {
-    this(null, elementType, flavor, mimeType, file, Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, URL url, long size,
+          Checksum checksum, MimeType mimeType) {
+    this(null, elementType, flavor, url, size, checksum, mimeType);
   }
 
   /**
-   * Creates a new media package element, consisting of the given file.
-   * 
-   * @param elementType
-   *          the type, e. g. Track, Catalog etc.
-   * @param flavor
-   *          the flavor
-   * @param mimeType
-   *          the file's mime type
-   * @param file
-   *          the element file
-   * @param checksum
-   *          the file's checksum
-   * @throws IOException
-   *           if the file cannot be accessed
-   */
-  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, MimeType mimeType,
-          File file, Checksum checksum) throws IOException {
-    this(null, elementType, flavor, mimeType, file, checksum);
-  }
-
-  /**
-   * Creates a new media package element, consisting of the given file and mime type.
+   * Creates a new media package element.
    * 
    * @param id
-   *          the element identifier
+   *          the element identifier withing the package
    * @param elementType
    *          the type, e. g. Track, Catalog etc.
    * @param flavor
    *          the flavor
-   * @param mimeType
-   *          the file's mime type
-   * @param file
-   *          the element file
+   * @param url
+   *          the elements location
+   * @param size
+   *          the element size in bytes
    * @param checksum
-   *          the file's checksum
-   * @throws IOException
-   *           if the file cannot be accessed
+   *          the element checksum
+   * @param mimeType
+   *          the element mime type
    */
-  protected AbstractMediaPackageElement(String id, Type elementType, MediaPackageElementFlavor flavor,
-          MimeType mimeType, File file, Checksum checksum) throws IOException {
+  protected AbstractMediaPackageElement(String id, Type elementType, MediaPackageElementFlavor flavor, URL url,
+          long size, Checksum checksum, MimeType mimeType) {
     if (elementType == null)
       throw new IllegalArgumentException("Argument 'elementType' is null");
-    if (file == null)
-      throw new IllegalArgumentException("Argument 'file' is null");
-    if (flavor == null)
-      throw new IllegalArgumentException("Argument 'flavor' is null");
-    if (mimeType == null)
-      throw new IllegalArgumentException("Argument 'mimeType' is null");
-    if (checksum == null)
-      throw new IllegalArgumentException("Argument 'checksum' is null");
     this.id = id;
     this.elementType = elementType;
     this.flavor = flavor;
     this.mimeType = mimeType;
-    this.fileName = file.getName();
-    this.path = file.getParentFile().getAbsolutePath();
+    this.url = url;
     this.checksum = checksum;
   }
 
@@ -235,7 +167,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    * @see org.opencastproject.media.mediapackage.MediaPackageElement#getElementDescription()
    */
   public String getElementDescription() {
-    return (description != null) ? description : getFilename();
+    return (description != null) ? description : url.toString();
   }
 
   /**
@@ -266,36 +198,22 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElement#getFilename()
+   * @see org.opencastproject.media.mediapackage.MediaPackageElement#getURL()
    */
-  public String getFilename() {
-    return fileName;
+  public URL getURL() {
+    return url;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElement#getPath()
-   */
-  public String getPath() {
-    return path;
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElement#getFile()
-   */
-  public File getFile() {
-    return new File(this.path, fileName);
-  }
-
-  /**
-   * Sets the file that is used to store the media package element. Only call this method if you know what you are
-   * doing.
+   * Sets the url that is used to store the media package element.
+   * <p>
+   * Make sure you know what you are doing, since usually, the media package will take care of the elements locations.
    * 
-   * @param file
-   *          the file
+   * @param url
+   *          the elements url
    */
-  public void setFile(File file) {
-    this.fileName = file.getName();
-    this.path = file.getParentFile().getAbsolutePath();
+  public void setURL(URL url) {
+    this.url = url;
   }
 
   /**
@@ -306,10 +224,30 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   }
 
   /**
+   * Sets the element checksum.
+   * 
+   * @param checksum
+   *          the checksum
+   */
+  public void setChecksum(Checksum checksum) {
+    this.checksum = checksum;
+  }
+
+  /**
    * @see org.opencastproject.media.mediapackage.MediaPackageElement#getMimeType()
    */
   public MimeType getMimeType() {
     return mimeType;
+  }
+
+  /**
+   * Sets the element mimetype.
+   * 
+   * @param mimeType
+   *          the element mimetype
+   */
+  public void setMimeType(MimeType mimeType) {
+    this.mimeType = mimeType;
   }
 
   /**
@@ -333,28 +271,17 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    * @see org.opencastproject.media.mediapackage.MediaPackageElement#getSize()
    */
   public long getSize() {
-    if (size < 0) {
-      size = getFile().length();
-    }
     return size;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElement#mediaPackageMoved(File, java.io.File)
-   */
-  public void mediaPackageMoved(File oldRoot, File newRoot) {
-    String relativePath = this.path.substring(oldRoot.getAbsolutePath().length());
-    this.path = PathSupport.concat(newRoot.getAbsolutePath(), relativePath);
-  }
-
-  /**
-   * Deletes the media package element from its current location.
+   * Sets the element size in bytes.
    * 
-   * @throws IOException
-   *           if the element cannot be deleted
+   * @param size
+   *          size in bytes
    */
-  void delete() throws IOException {
-    getFile().delete();
+  public void setSize(long size) {
+    this.size = size;
   }
 
   /**
@@ -406,75 +333,24 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
     this.reference = null;
   }
 
-  public void integrate(File dest) throws IOException {
-    if (dest == null)
-      throw new IllegalArgumentException("Integration destination must not be null");
-    if (dest.exists())
-      throw new IllegalArgumentException("Integration destination already exists");
-
-    File currentLocation = getFile();
-    fileName = dest.getName();
-    String parent = dest.getParent();
-    path = parent != null ? parent : "";
-    FileSupport.copy(currentLocation, dest);
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElement#wrap()
-   */
-  public void wrap() throws MediaPackageException {
-    checksum = null;
-    Checksum c = calculateChecksum();
-    if (checksum == null || !checksum.equals(c)) {
-      checksum = c;
-    }
-  }
-
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackageElement#verify()
    */
   public void verify() throws MediaPackageException {
-    Checksum c = calculateChecksum();
-    if (checksum != null && !checksum.equals(c)) {
-      throw new MediaPackageException("Checksum mismatch for " + this);
-    }
-    checksum = c;
-  }
-
-  /**
-   * Calculates and returns the underlying file's checksum.
-   * 
-   * @return the checksum
-   * @throws MediaPackageException
-   *           if the file could not be accessed or the checsum could not be created
-   */
-  private Checksum calculateChecksum() throws MediaPackageException {
-    Checksum c = null;
-    File file = getFile();
-    if (!file.exists())
-      throw new MediaPackageException(this + " " + file.getName() + " not found");
-    if (!file.canRead())
-      throw new MediaPackageException(this + " " + file.getName() + " not readable");
-    if (!file.canRead())
-      throw new MediaPackageException(this + " " + file.getName() + " not a file");
-    if (checksum != null) {
-      try {
-        c = Checksum.create(checksum.getType(), file);
-      } catch (NoSuchAlgorithmException e) {
-        throw new MediaPackageException("Unable to compute checksum for " + this + ": Checksum algorithm for "
-                + checksum.getType() + " not found: " + e);
-      } catch (Throwable t) {
-        throw new MediaPackageException("Unable to compute checksum for " + this + ": " + t.getMessage());
-      }
-    }
-    return c;
+    // TODO: Check availability at url
+    // TODO: Download (?) and check checksum
+    // Checksum c = calculateChecksum();
+    // if (checksum != null && !checksum.equals(c)) {
+    // throw new MediaPackageException("Checksum mismatch for " + this);
+    // }
+    // checksum = c;
   }
 
   /**
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
   public int compareTo(MediaPackageElement o) {
-    return getFile().getAbsolutePath().compareTo(o.getFile().getAbsolutePath());
+    return url.toString().compareTo(o.getURL().toString());
   }
 
   /**
@@ -486,7 +362,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
       MediaPackageElement e = (MediaPackageElement) obj;
       if (mediaPackage != null && !mediaPackage.equals(e.getMediaPackage()))
         return false;
-      return getFile().equals(e.getFile());
+      return url.equals(e.getURL());
     }
     return false;
   }
@@ -496,7 +372,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    */
   @Override
   public int hashCode() {
-    return getFilename().hashCode();
+    return url.hashCode();
   }
 
   /**
@@ -505,7 +381,12 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   public Node toManifest(Document document) {
     Element node = document.createElement(elementType.toString().toLowerCase());
     node.setAttribute("id", id);
-    node.setAttribute("type", flavor.toString());
+
+    // Flavor
+    if (flavor != null)
+      node.setAttribute("type", flavor.toString());
+
+    // Reference
     if (reference != null && (mediaPackage == null || !reference.matches(new MediaPackageReferenceImpl(mediaPackage))))
       node.setAttribute("ref", reference.toString());
 
@@ -516,16 +397,32 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
       node.appendChild(descriptionNode);
     }
 
+    // Url
+    Element urlNode = document.createElement("url");
+    urlNode.appendChild(document.createTextNode(url.toExternalForm()));
+    node.appendChild(urlNode);
+
     // MimeType
-    Element mimeNode = document.createElement("mimetype");
-    mimeNode.appendChild(document.createTextNode(mimeType.toString()));
-    node.appendChild(mimeNode);
+    if (mimeType != null) {
+      Element mimeNode = document.createElement("mimetype");
+      mimeNode.appendChild(document.createTextNode(mimeType.toString()));
+      node.appendChild(mimeNode);
+    }
+
+    // Size
+    if (size != -1) {
+      Element sizeNode = document.createElement("size");
+      sizeNode.appendChild(document.createTextNode(Long.toString(size)));
+      node.appendChild(sizeNode);
+    }
 
     // Checksum
-    Element checksumNode = document.createElement("checksum");
-    checksumNode.setAttribute("type", checksum.getType().getName());
-    checksumNode.appendChild(document.createTextNode(checksum.getValue()));
-    node.appendChild(checksumNode);
+    if (checksum != null) {
+      Element checksumNode = document.createElement("checksum");
+      checksumNode.setAttribute("type", checksum.getType().getName());
+      checksumNode.appendChild(document.createTextNode(checksum.getValue()));
+      node.appendChild(checksumNode);
+    }
 
     return node;
   }
@@ -535,7 +432,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    */
   @Override
   public String toString() {
-    String s = (description != null) ? description : fileName;
+    String s = (description != null) ? description : url.toString();
     s += " (" + flavor + ", " + mimeType + ")";
     return s.toLowerCase();
   }

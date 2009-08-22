@@ -16,37 +16,34 @@
 
 package org.opencastproject.media.mediapackage.elementbuilder;
 
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
-import org.opencastproject.media.mediapackage.Mpeg7Catalog;
-import org.opencastproject.media.mediapackage.mpeg7.Mpeg7CatalogImpl;
-import org.opencastproject.util.Checksum;
-import org.opencastproject.util.ConfigurationException;
-import org.opencastproject.util.MimeType;
-import org.opencastproject.util.MimeTypes;
-import org.opencastproject.util.PathSupport;
-import org.opencastproject.util.UnknownFileTypeException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
-
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.opencastproject.media.mediapackage.Catalog;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
+import org.opencastproject.media.mediapackage.MediaPackageSerializer;
+import org.opencastproject.media.mediapackage.Mpeg7Catalog;
+import org.opencastproject.media.mediapackage.mpeg7.Mpeg7CatalogImpl;
+import org.opencastproject.media.mediapackage.mpeg7.Mpeg7Parser;
+import org.opencastproject.util.Checksum;
+import org.opencastproject.util.MimeType;
+import org.opencastproject.util.MimeTypes;
+import org.opencastproject.util.UnknownFileTypeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
 /**
- * This implementation of the {@link MediaPackageElementBuilderPlugin} recognises the mpeg-7 file format and provides
+ * This implementation of the {@link MediaPackageElementBuilderPlugin} recognizes the mpeg-7 file format and provides
  * the functionality of reading it on behalf of the media package.
  * <p>
  * The test currently depends on the filename and mimetype only.
@@ -57,15 +54,6 @@ import javax.xml.xpath.XPathExpressionException;
  */
 public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements MediaPackageElementBuilderPlugin {
 
-  /** The mime type identifier */
-  private static String[] MIME_TYPES = { "text/xml" };
-
-  /** MPEG-7 metadata mime type flavor */
-  private static final String FLAVOR_DESCRIPTION = "MPEG-7 Metadata";
-
-  /** MPEG-7 metadata mime type */
-  private static MimeType[] mimeTypes = null;
-
   /** the logging facility provided by log4j */
   private final static Logger log_ = LoggerFactory.getLogger(MPEG7BuilderPlugin.class);
 
@@ -74,43 +62,12 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
   }
 
   /**
-   * This method does the setup of mime types that is required for the plugin.
-   * 
-   * @see org.opencastproject.media.mediapackage.elementbuilder.AbstractElementBuilderPlugin#setup()
-   */
-  @Override
-  public void setup() throws Exception {
-    super.setup();
-    if (mimeTypes == null) {
-      List<MimeType> types = new ArrayList<MimeType>();
-      for (String m : MIME_TYPES) {
-        try {
-          MimeType mimeType = MimeTypes.parseMimeType(m);
-          mimeType.setFlavor(Mpeg7Catalog.FLAVOR.getSubtype(), FLAVOR_DESCRIPTION);
-          types.add(mimeType);
-          log_.debug("Building of mpeg-7 catalogs enabled");
-        } catch (Exception e) {
-          log_.warn("Unable to create mpeg7 documents: mimetype " + m + " is not supported");
-          throw e;
-        }
-      }
-      mimeTypes = types.toArray(new MimeType[types.size()]);
-    }
-  }
-
-  /**
    * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#newElement(org.opencastproject.media.mediapackage.MediaPackageElement.Type
    *      , org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   public MediaPackageElement newElement(MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
           throws IOException {
-    try {
-      return Mpeg7CatalogImpl.newInstance();
-    } catch (NoSuchAlgorithmException e) {
-      throw new ConfigurationException("Unable to calculate checksum", e);
-    } catch (UnknownFileTypeException e) {
-      throw new ConfigurationException("XML files are not supported", e);
-    }
+    return Mpeg7CatalogImpl.newInstance();
   }
 
   /**
@@ -135,10 +92,11 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#accept(File,
-   *      org.opencastproject.media.mediapackage.MediaPackageElement.Type , MediaPackageElementFlavor)
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(java.net.URL,
+   *      org.opencastproject.media.mediapackage.MediaPackageElement.Type,
+   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public boolean accept(File file, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws IOException {
+  public boolean accept(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     try {
       // Check type and flavor
       if (type != null && flavor != null)
@@ -148,44 +106,35 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
       else if (flavor != null && !flavor.equals(Mpeg7Catalog.FLAVOR))
         return false;
 
-      // Check mime type
-      if (!checkMimeType(file, mimeTypes))
-        return false;
-
       // Still uncertain. Let's try to read the catalog
-      Mpeg7CatalogImpl.fromFile(file);
+      Mpeg7Parser parser = new Mpeg7Parser();
+      parser.parse(url.openStream());
       return true;
     } catch (IllegalArgumentException e) {
-      return false;
-    } catch (UnknownFileTypeException e) {
-      return false;
-    } catch (NoSuchAlgorithmException e) {
       return false;
     } catch (ParserConfigurationException e) {
       return false;
     } catch (SAXException e) {
+      return false;
+    } catch (IOException e) {
       return false;
     }
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#elementFromFile(File)
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURL(java.net.URL)
    */
-  public MediaPackageElement elementFromFile(File file) throws MediaPackageException {
+  public MediaPackageElement elementFromURL(URL url) throws MediaPackageException {
     try {
-      log_.trace("Creating mpeg-7 metadata container from " + file);
-      return Mpeg7CatalogImpl.fromFile(file);
+      log_.trace("Creating mpeg-7 metadata container from " + url);
+      return Mpeg7CatalogImpl.fromURL(url);
     } catch (IOException e) {
-      throw new MediaPackageException("Error reading mpeg-7 from " + file + " : " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      throw new MediaPackageException("MPEG-7 metadata " + file + " has an unknown file type: " + e.getMessage());
+      throw new MediaPackageException("Error reading mpeg-7 from " + url + " : " + e.getMessage());
     } catch (ParserConfigurationException e) {
-      throw new MediaPackageException("Parser configuration exception while reading mpeg-7 metadata from " + file
+      throw new MediaPackageException("Parser configuration exception while reading mpeg-7 metadata from " + url
               + " : " + e.getMessage());
-    } catch (NoSuchAlgorithmException e) {
-      throw new MediaPackageException("MPEG-7 metadata " + file + " cannot be checksummed: " + e.getMessage());
     } catch (SAXException e) {
-      throw new MediaPackageException("Error parsing mpeg-7 catalog " + file + " : " + e.getMessage());
+      throw new MediaPackageException("Error parsing mpeg-7 catalog " + url + " : " + e.getMessage());
     }
   }
 
@@ -198,58 +147,83 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromManifest(org.w3c.dom.Node, File,
-   *      boolean)
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromManifest(org.w3c.dom.Node, org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
-  public MediaPackageElement elementFromManifest(Node elementNode, File packageRoot, boolean verify)
-          throws MediaPackageException {
-    String catalogId = null;
-    String catalogPath = null;
+  public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer) throws MediaPackageException {
+
+    String id = null;
     String reference = null;
+    URL url = null;
+    long size = -1;
+    Checksum checksum = null;
+    MimeType mimeType = null;
+
     try {
       // id
-      catalogId = (String) xpath.evaluate("@id", elementNode, XPathConstants.STRING);
+      id = (String) xpath.evaluate("@id", elementNode, XPathConstants.STRING);
 
-      // file
-      catalogPath = xpath.evaluate("url/text()", elementNode).trim();
-      catalogPath = PathSupport.concat(packageRoot.getAbsolutePath(), catalogPath);
+      // url
+      url = serializer.resolve(xpath.evaluate("url/text()", elementNode).trim());
+
+      // size
+      try {
+        size = Long.parseLong(xpath.evaluate("size/text()", elementNode).trim());
+      } catch (Exception e) {
+        // size may not be present
+      }
 
       // reference
       reference = (String) xpath.evaluate("@ref", elementNode, XPathConstants.STRING);
 
+      // checksum
+      String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
+      String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
+      if (checksumValue != null && checksumType != null)
+        checksum = Checksum.create(checksumType.trim(), checksumValue.trim());
+
+      // mimetype
+      String mimeTypeValue = (String) xpath.evaluate("mimetype/text()", elementNode, XPathConstants.STRING);
+      if (mimeTypeValue != null)
+        mimeType = MimeTypes.parseMimeType(mimeTypeValue);
+
       // create the catalog
-      Mpeg7Catalog mpeg7 = Mpeg7CatalogImpl.fromFile(new File(catalogPath));
-      if (catalogId != null && !catalogId.equals(""))
-        mpeg7.setIdentifier(catalogId);
+      Mpeg7Parser mpeg7Parser = new Mpeg7Parser();
+      Mpeg7CatalogImpl mpeg7 = mpeg7Parser.parse(url.openStream());
+      if (id != null && !id.equals(""))
+        mpeg7.setIdentifier(id);
+      
+      // Add url
+      mpeg7.setURL(url);
 
       // Add reference
       if (reference != null && !reference.equals(""))
         mpeg7.referTo(MediaPackageReferenceImpl.fromString(reference));
 
-      // checksum
-      String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
-      String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
-      Checksum checksum = Checksum.create(checksumType.trim(), checksumValue.trim());
+      // Set size
+      if (size > 0)
+        mpeg7.setSize(size);
 
-      // verify the catalog
-      if (verify) {
-        log_.debug("Verifying integrity of mpeg-7 catalog " + catalogPath);
-        verifyFileIntegrity(new File(catalogPath), checksum);
-      }
+      // Set checksum
+      if (checksum != null)
+        mpeg7.setChecksum(checksum);
+
+      // Set the mime type
+      if (mimeType != null)
+        mpeg7.setMimeType(mimeType);
+
       return mpeg7;
     } catch (XPathExpressionException e) {
       throw new MediaPackageException("Error while reading catalog information from manifest: " + e.getMessage());
     } catch (NoSuchAlgorithmException e) {
       throw new MediaPackageException("Unsupported digest algorithm: " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      throw new ConfigurationException("XML files are not supported: " + e.getMessage());
     } catch (ParserConfigurationException e) {
-      throw new MediaPackageException("Unable to create parser for mpeg-7 catalog " + catalogPath + ": "
-              + e.getMessage());
+      throw new MediaPackageException("Unable to create parser for mpeg-7 catalog " + url + ": " + e.getMessage());
     } catch (IOException e) {
-      throw new MediaPackageException("Error while reading mpeg-7 file " + catalogPath + ": " + e.getMessage());
+      throw new MediaPackageException("Error while reading mpeg-7 file " + url + ": " + e.getMessage());
     } catch (SAXException e) {
-      throw new MediaPackageException("Error while parsing mpeg-7 catalog " + catalogPath + ": " + e.getMessage());
+      throw new MediaPackageException("Error while parsing mpeg-7 catalog " + url + ": " + e.getMessage());
+    } catch (UnknownFileTypeException e) {
+      throw new MediaPackageException("Mpeg-7 catalog " + url + " is of unknown mime type: " + e.getMessage());
     }
   }
 

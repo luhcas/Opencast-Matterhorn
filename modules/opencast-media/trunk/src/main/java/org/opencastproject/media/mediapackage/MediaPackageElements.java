@@ -27,9 +27,6 @@ package org.opencastproject.media.mediapackage;
  */
 public interface MediaPackageElements {
 
-  /** The timeline's filename */
-  String TIMELINE_FILENAME = "timeline.xml";
-
   /** The MPEG-7 filename */
   String MPEG7_FILENAME = "mpeg-7.xml";
 

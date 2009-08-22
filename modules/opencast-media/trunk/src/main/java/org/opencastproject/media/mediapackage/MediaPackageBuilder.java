@@ -16,11 +16,10 @@
 
 package org.opencastproject.media.mediapackage;
 
-import org.opencastproject.media.mediapackage.handle.Handle;
-
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.opencastproject.media.mediapackage.handle.Handle;
 
 /**
  * A media package builder provides factory methods for the creation of media packages from manifest files, packages,
@@ -57,124 +56,15 @@ public interface MediaPackageBuilder {
   MediaPackage createNew(Handle identifier) throws MediaPackageException;
 
   /**
-   * Creates a new media package in the temporary directory defined by the java runtime property
-   * <code>java.io.tmpdir</code>.
+   * Loads a media package from the manifest.
    * 
-   * @param handle
-   *          the media package identifier
-   * @param rootFolder
-   *          the media package root folder
-   * @return the new media package
-   * @throws MediaPackageException
-   *           if creation of the new media package fails
-   */
-  MediaPackage createNew(Handle identifier, File rootFolder) throws MediaPackageException;
-
-  /**
-   * Loads a media package from the manifest document.
-   * 
-   * @param manifest
-   *          the media package manifest file
+   * @param is
+   *          the media package manifest input stream
    * @return the media package
    * @throws MediaPackageException
    *           if loading of the media package fails
    */
-  MediaPackage loadFromManifest(File manifest) throws MediaPackageException;
-
-  /**
-   * Loads a media package from the manifest document.
-   * 
-   * @param manifest
-   *          the media package manifest file
-   * @param wrap
-   *          <code>true</code> to wrap the media package (ignore checksum errors)
-   * @return the media package
-   * @throws MediaPackageException
-   *           if loading of the media package fails
-   */
-  MediaPackage loadFromManifest(File manifest, boolean wrap) throws MediaPackageException;
-
-  /**
-   * Creates a media package from the given root directory by trying to locate and evaluate the media package manifest.
-   * 
-   * @param dir
-   *          the media package directory
-   * @return the new media package
-   * @throws IllegalStateException
-   *           if the manifest was not found
-   * @throws MediaPackageException
-   *           if a media package element cannot be added
-   */
-  MediaPackage loadFromDirectory(File dir) throws MediaPackageException;
-
-  /**
-   * Creates a media package from the given root directory by trying to locate and evaluate the media package manifest.
-   * In addition to {@link #loadFromDirectory(File)} this method will ignore missing media package elements, allowing
-   * for handling of only parts of a media package.
-   * <p>
-   * Note however, that the media package manifest will be saved to reflect the current media package state.
-   * </p>
-   * 
-   * @param dir
-   *          the media package directory
-   * @return the new media package
-   * @throws IllegalStateException
-   *           if the manifest was not found
-   * @throws MediaPackageException
-   *           if a media package element cannot be added
-   */
-  MediaPackage rebuildFromDirectory(File dir) throws MediaPackageException;
-
-  /**
-   * Creates a media package from the given root directory by trying to locate and evaluate the media package manifest.
-   * In addition to {@link #loadFromDirectory(File)} this method will ignore missing media package elements, allowing
-   * for handling of only parts of a media package. If <code>ignoreChecksums</code> is set to <code>true</code>, the
-   * media package builder will also handle edited media package elements that differ in terms of the checksum.
-   * <p>
-   * Note however, that the media package manifest will be saved to reflect the current media package state.
-   * </p>
-   * 
-   * @param dir
-   *          the media package directory
-   * @param ignoreChecksums
-   *          <code>true</code> to ignore checksum errors
-   * @return the new media package
-   * @throws IllegalStateException
-   *           if the manifest was not found
-   * @throws MediaPackageException
-   *           if a media package element cannot be added
-   */
-  MediaPackage rebuildFromDirectory(File dir, boolean ignoreChecksums) throws MediaPackageException;
-
-  /**
-   * Creates a media package from the given root directory by trying to locate and evaluate the media package manifest.
-   * In addition to {@link #loadFromDirectory(File)} this method will ignore missing media package elements, allowing
-   * for handling of only parts of a media package.
-   * <p>
-   * If <code>ignoreChecksums</code> is set to <code>true</code>, the media package builder will also handle edited
-   * media package elements that differ in terms of the checksum.
-   * </p>
-   * <p>
-   * If <code>verify</code> is set to <code>true</code>, the media package builder will make sure that the media package
-   * has a valid identifier.
-   * </p>
-   * <p>
-   * Note however, that the media package manifest will be saved to reflect the current media package state.
-   * </p>
-   * 
-   * @param dir
-   *          the media package directory
-   * @param ignoreChecksums
-   *          <code>true</code> to ignore checksum errors
-   * @param verify
-   *          <code>true</code> to verify the media package contents
-   * @return the new media package
-   * @throws IllegalStateException
-   *           if the manifest was not found
-   * @throws MediaPackageException
-   *           if a media package element cannot be added
-   */
-  MediaPackage rebuildFromDirectory(File dir, boolean ignoreChecksums, boolean verify) throws MediaPackageException;
+  MediaPackage loadFromManifest(InputStream is) throws MediaPackageException;
 
   /**
    * Loads a media package from the input stream, using the provided packager to decode the stream.
@@ -188,22 +78,24 @@ public interface MediaPackageBuilder {
    *           if loading of the media package fails
    */
   MediaPackage loadFromPackage(MediaPackagePackager packager, InputStream in) throws IOException, MediaPackageException;
-
+  
   /**
-   * Creates a media package from the elements found in the specified directory. The builder also tries to retreive an
-   * identifier for the newly created media package.
+   * Sets the media package serializer that is used to resolve urls and helps
+   * in serialization and deserialization of media package elements.
    * 
-   * @param dir
-   *          the directory
-   * @param ignoreUnknown
-   *          <code>true</code> to ignore unknown or unsupported elements
-   * @return the media package
-   * @throws MediaPackageException
-   *           if creation of the media package fails
-   * @throws UnsupportedElementException
-   *           if an unsupported file was found
+   * @param serializer
+   *          the serializer
    */
-  MediaPackage createFromElements(File dir, boolean ignoreUnknown) throws MediaPackageException,
-          UnsupportedElementException;
+  void setSerializer(MediaPackageSerializer serializer);
+ 
+  /**
+   * Returns the currently active serializer. The serializer is used to resolve
+   * urls and helps in serialization and deserialization of media package
+   * elements.
+   * 
+   * @return the serializer
+   * @see #setSerializer(MediaPackageSerializer)
+   */
+  MediaPackageSerializer getSerializer();
 
 }

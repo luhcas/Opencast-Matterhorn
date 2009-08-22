@@ -14,23 +14,22 @@
  *
  */
 
-package org.opencastproject.media.mediapackage.elementbuilder;
+package org.opencastproject.media.mediapackage.track;
 
 import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Stream;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
-import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UnknownFileTypeException;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +42,7 @@ import java.util.List;
  * @author Christoph E. Driessen <ced@neopoly.de>
  * @version $Id: TrackImpl.java 2905 2009-07-15 16:16:05Z ced $
  */
-class TrackImpl extends AbstractMediaPackageElement implements Track {
+public class TrackImpl extends AbstractMediaPackageElement implements Track {
 
   /** Serial version UID */
   private static final long serialVersionUID = -1092781733885994038L;
@@ -58,20 +57,15 @@ class TrackImpl extends AbstractMediaPackageElement implements Track {
    * 
    * @param flavor
    *          the track flavor
-   * @param mimeType
-   *          the file's mime type
-   * @param file
-   *          the file
+   * @param url
+   *          the track location
    * @param checksum
-   *          the file's checksum
-   * @throws IOException
-   *           if the track file cannot be accessed
-   * @throws UnknownFileTypeException
-   *           if the file is of an unknown file type
+   *          the track checksum
+   * @param mimeType
+   *          the track mime type
    */
-  TrackImpl(MediaPackageElementFlavor flavor, MimeType mimeType, File file, Checksum checksum) throws IOException,
-          UnknownFileTypeException {
-    super(Type.Track, flavor, mimeType, file, checksum);
+  TrackImpl(MediaPackageElementFlavor flavor, MimeType mimeType, URL url, long size, Checksum checksum) {
+    super(Type.Track, flavor, url, size, checksum, mimeType);
   }
 
   /**
@@ -79,8 +73,8 @@ class TrackImpl extends AbstractMediaPackageElement implements Track {
    * 
    * @param flavor
    *          the track flavor
-   * @param track
-   *          the file
+   * @param url
+   *          the track location
    * @throws IOException
    *           if the track file cannot be accessed
    * @throws UnknownFileTypeException
@@ -88,9 +82,19 @@ class TrackImpl extends AbstractMediaPackageElement implements Track {
    * @throws NoSuchAlgorithmException
    *           if the track's checksum cannot be computed
    */
-  TrackImpl(MediaPackageElementFlavor flavor, File track) throws IOException, UnknownFileTypeException,
-          NoSuchAlgorithmException {
-    super(Type.Track, flavor, track);
+  TrackImpl(MediaPackageElementFlavor flavor, URL url) {
+    super(Type.Track, flavor, url);
+  }
+
+  /**
+   * Creates a new track from the given url.
+   * 
+   * @param url
+   *          the track location
+   * @return the track
+   */
+  public static TrackImpl fromURL(URL url) {
+    return new TrackImpl(MediaPackageElements.INDEFINITE_TRACK, url);
   }
 
   /**
@@ -99,7 +103,7 @@ class TrackImpl extends AbstractMediaPackageElement implements Track {
    * @param duration
    *          the duration
    */
-  protected void setDuration(long duration) {
+  public void setDuration(long duration) {
     this.duration = duration;
   }
 
@@ -117,7 +121,7 @@ class TrackImpl extends AbstractMediaPackageElement implements Track {
   /**
    * Add a stream to the track.
    */
-  protected void addStream(AbstractStreamImpl stream) {
+  public void addStream(AbstractStreamImpl stream) {
     streams.add(stream);
   }
 
@@ -127,12 +131,6 @@ class TrackImpl extends AbstractMediaPackageElement implements Track {
   @Override
   public Node toManifest(Document document) {
     Node node = super.toManifest(document);
-
-    // File
-    Element fileNode = document.createElement("url");
-    String trackPath = PathSupport.concat(getFile().getParentFile().getName(), fileName);
-    fileNode.appendChild(document.createTextNode(trackPath));
-    node.appendChild(fileNode);
 
     // duration
     Node durationNode = document.createElement("duration");

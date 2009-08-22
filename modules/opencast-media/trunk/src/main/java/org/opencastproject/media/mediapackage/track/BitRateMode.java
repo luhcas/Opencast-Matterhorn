@@ -14,25 +14,20 @@
  *
  */
 
-package org.opencastproject.media.mediapackage.elementbuilder;
+package org.opencastproject.media.mediapackage.track;
 
-import org.opencastproject.media.mediapackage.Stream;
+import org.opencastproject.util.EnumSupport;
 
 /**
- * X
+ * Contains the several bitrate modes.
  * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
-abstract class AbstractStreamImpl implements Stream {
+public enum BitRateMode {
 
-  private String identifier;
+  VariableBitRate, ConstantBitRate;
 
-  protected AbstractStreamImpl(String identifier) {
-    this.identifier = identifier;
+  public static BitRateMode fromString(String value) {
+    return EnumSupport.fromString(BitRateMode.class, value);
   }
-
-  public String getIdentifier() {
-    return identifier;
-  }
-
 }

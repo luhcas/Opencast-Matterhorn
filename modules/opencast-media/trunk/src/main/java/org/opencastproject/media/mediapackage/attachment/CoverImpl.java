@@ -17,13 +17,11 @@
 package org.opencastproject.media.mediapackage.attachment;
 
 import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.AttachmentImpl;
 import org.opencastproject.media.mediapackage.Cover;
-import org.opencastproject.util.UnknownFileTypeException;
+import org.opencastproject.util.Checksum;
+import org.opencastproject.util.MimeType;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
+import java.net.URL;
 
 /**
  * This is a specialized implementation for a media package cover.
@@ -38,53 +36,78 @@ public class CoverImpl extends AttachmentImpl implements Cover {
   private static final long serialVersionUID = -7420968157749682999L;
 
   /**
-   * Creates a new cover attachment.
+   * Creates a cover attachment.
+   * 
+   * @parm identifier the cover identifier
+   * @param url
+   *          the cover location
+   * @param size
+   *          the cover size in bytes
+   * @param checksum
+   *          the cover checksum
+   * @param mimeType
+   *          the cover mime type
+   */
+  protected CoverImpl(String identifier, URL url, long size, Checksum checksum, MimeType mimeType) {
+    super(identifier, Cover.FLAVOR, url, size, checksum, mimeType);
+  }
+
+  /**
+   * Creates a cover attachment.
+   * 
+   * @param url
+   *          the covers location
+   * @param size
+   *          the covers size in bytes
+   * @param checksum
+   *          the covers checksum
+   * @param mimeType
+   *          the covers mime type
+   */
+  protected CoverImpl(URL url, long size, Checksum checksum, MimeType mimeType) {
+    super(Cover.FLAVOR, url, size, checksum, mimeType);
+  }
+
+  /**
+   * Creates a cover attachment.
+   * 
+   * @param url
+   *          the covers location
+   */
+  protected CoverImpl(URL url) {
+    this(null, url, -1, null, null);
+  }
+
+  /**
+   * Dresses the attachment as a {@link Cover}.
    * 
    * @param attachment
    *          the general attachment representation
-   * @throws Exception
-   *           throw an exception if the document cannot be read
    */
-  public CoverImpl(Attachment attachment) throws Exception {
-    super(attachment.getIdentifier(), Cover.FLAVOR, attachment.getMimeType(), attachment.getFile(), attachment
-            .getChecksum());
+  public static CoverImpl fromAttachment(Attachment attachment) {
+    return new CoverImpl(attachment.getIdentifier(), attachment.getURL(), attachment.getSize(), attachment
+            .getChecksum(), attachment.getMimeType());
   }
 
   /**
-   * Creates a new cover object for the given file.
+   * Creates a new {@link Cover} object.
    * 
-   * @param cover
-   *          the file
-   * @throws IOException
-   *           if the track file cannot be accessed
-   * @throws UnknownFileTypeException
-   *           if the file is of an unknown file type
-   * @throws NoSuchAlgorithmException
-   *           if the track's checksum cannot be computed
-   */
-  protected CoverImpl(File cover) throws IOException, UnknownFileTypeException, NoSuchAlgorithmException {
-    super(Cover.FLAVOR, cover);
-  }
-
-  /**
-   * Reads a cover from the specified file and returns it encapsulated in a {@link Cover} object.
-   * 
-   * @param file
-   *          the track file
+   * @param url
+   *          the cover location
+   * @param size
+   *          the covers size in bytes
+   * @param checksum
+   *          the file checksum
+   * @param mimeType
+   *          the mime type
    * @return the cover object
-   * @throws IOException
-   *           if reading the manifest file fails
-   * @throws UnknownFileTypeException
-   *           if the manifest file is of an unknown file type
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
    */
-  public static CoverImpl fromFile(File file) throws IOException, UnknownFileTypeException, NoSuchAlgorithmException {
-    return new CoverImpl(file);
+  public static CoverImpl fromURL(URL url) {
+    return new CoverImpl(url);
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.AttachmentImpl#toString()
+   * @see org.opencastproject.media.mediapackage.attachment.AttachmentImpl#toString()
    */
   @Override
   public String toString() {

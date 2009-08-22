@@ -16,26 +16,22 @@
 
 package org.opencastproject.media.mediapackage.mpeg7;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.Mpeg7Catalog;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.XMLCatalog;
+import org.opencastproject.media.mediapackage.XMLCatalogImpl;
+import org.opencastproject.util.Checksum;
+import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.UnknownFileTypeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
-import java.security.NoSuchAlgorithmException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,8 +39,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.TransformerException;
 
 /**
@@ -53,7 +47,7 @@ import javax.xml.transform.TransformerException;
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: Mpeg7CatalogImpl.java 2905 2009-07-15 16:16:05Z ced $
  */
-public class Mpeg7CatalogImpl extends XMLCatalog implements Mpeg7Catalog {
+public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
 
   /** Serial version UID */
   private static final long serialVersionUID = 5521535164920498997L;
@@ -68,85 +62,107 @@ public class Mpeg7CatalogImpl extends XMLCatalog implements Mpeg7Catalog {
   final static Logger log_ = LoggerFactory.getLogger(Mpeg7CatalogImpl.class.getName());
 
   /**
-   * Creates a new mpeg-7 metadata container from the specified file.
+   * Creates a new mpeg-7 metadata container.
    * 
-   * @param file
-   *          the timeline file
-   * @throws IOException
-   *           if reading of the file fails
-   * @throws UnknownFileTypeException
-   *           if the file is of an unknown filetype
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
+   * @param id
+   *          the element identifier withing the package
+   * @param url
+   *          the document location
+   * @param size
+   *          the catalog size in bytes
+   * @param checksum
+   *          the catalog checksum
+   * @param mimeType
+   *          the catalog mime type
    */
-  private Mpeg7CatalogImpl(File file) throws IOException, UnknownFileTypeException, NoSuchAlgorithmException {
-    super(Mpeg7Catalog.FLAVOR, file);
+  protected Mpeg7CatalogImpl(String id, URL url, long size, Checksum checksum) {
+    super(id, Mpeg7Catalog.FLAVOR, url, size, checksum, MimeTypes.XML);
     multimediaContent = new HashMap<MultimediaContent.Type, MultimediaContentImpl<? extends MultimediaContentType>>();
+  }
+
+  /**
+   * Creates a new mpeg-7 metadata container.
+   * 
+   * @param url
+   *          the document location
+   * @param size
+   *          the catalog size in bytes
+   * @param checksum
+   *          the catalog checksum
+   * @param mimeType
+   *          the catalog mime type
+   */
+  protected Mpeg7CatalogImpl(URL url, long size, Checksum checksum) {
+    this(null, url, size, checksum);
+  }
+
+  /**
+   * Creates a new mpeg-7 metadata container.
+   * 
+   * @param id
+   *          the element identifier withing the package
+   */
+  protected Mpeg7CatalogImpl(String id) {
+    this(id, null, 0, null);
+  }
+
+  /**
+   * Creates a new mpeg-7 metadata container.
+   */
+  protected Mpeg7CatalogImpl() {
+    this(null, null, 0, null);
   }
 
   /**
    * Reads the metadata from the specified file and returns it encapsulated in a {@link Mpeg7Catalog} object.
    * 
-   * @param catalog
-   *          the dublin core metadata container file
-   * @return the dublin core object
+   * @param url
+   *          the mpeg7 metadata container file
+   * @return the mpeg7 catalog
    * @throws IOException
    *           if reading the metadata fails
-   * @throws UnknownFileTypeException
-   *           if the dublin core file is of an unknown file type
    * @throws ParserConfigurationException
-   *           if the dublin core parser cannot be created
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
+   *           if the mpeg7 parser cannot be created
    * @throws SAXException
    *           if reading the catalog fails
    */
-  public static Mpeg7Catalog fromFile(File catalog) throws IOException, UnknownFileTypeException,
-          ParserConfigurationException, NoSuchAlgorithmException, SAXException {
-    MPEG7Parser parser = new MPEG7Parser();
-    Mpeg7Catalog doc = parser.parse(catalog);
+  public static Mpeg7Catalog fromURL(URL url) throws IOException, ParserConfigurationException, SAXException {
+    Mpeg7Parser parser = new Mpeg7Parser();
+    Mpeg7CatalogImpl doc = (Mpeg7CatalogImpl) parser.parse(url.openStream());
+    doc.setURL(url);
     return doc;
   }
 
   /**
-   * Creates a new mpeg-7 metadata catalog for the given media package.
+   * Reads the metadata from the specified file and returns it encapsulated in a {@link Mpeg7Catalog} object.
    * 
-   * @param mediaPackage
-   *          the media package
-   * @return the new mpeg-7 metadata container
-   * @throws UnknownFileTypeException
-   *           if the mpeg-7 file type is unknown (very unlikely)
+   * @param file
+   *          the mpeg7 metadata container file
+   * @return the mpeg7 catalog
    * @throws IOException
-   *           if creating the mpeg-7 file fails
-   * @throws TransformerException
-   *           if saving the mpeg-7 file fails
+   *           if reading the metadata fails
+   * @throws UnknownFileTypeException
+   *           if the mpeg7 file is of an unknown file type
    * @throws ParserConfigurationException
-   *           if creating the xml parser fails
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
+   *           if the mpeg7 parser cannot be created
+   * @throws SAXException
+   *           if reading the catalog fails
    */
-  static Mpeg7CatalogImpl newInstance(MediaPackage mediaPackage) throws IOException, UnknownFileTypeException,
-          ParserConfigurationException, TransformerException, NoSuchAlgorithmException {
-    Mpeg7CatalogImpl mpeg7 = new Mpeg7CatalogImpl(new File(mediaPackage.getRoot(), MediaPackageElements.MPEG7_FILENAME));
-    mpeg7.save();
-    return mpeg7;
+  public static Mpeg7Catalog fromFile(File file) throws IOException, UnknownFileTypeException,
+          ParserConfigurationException, SAXException {
+    Mpeg7Parser parser = new Mpeg7Parser();
+    Mpeg7CatalogImpl doc = (Mpeg7CatalogImpl) parser.parse(new FileInputStream(file));
+    doc.setURL(file.toURI().toURL());
+    return doc;
   }
 
   /**
    * Creates a new mpeg-7 metadata container file.
    * 
    * @return the new mpeg-7 metadata container
-   * @throws UnknownFileTypeException
-   *           if the mpeg-7 file type is unknown (very unlikely)
-   * @throws IOException
-   *           if creating the mpeg-7 file fails
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
    */
-  public static Mpeg7CatalogImpl newInstance() throws IOException, UnknownFileTypeException, NoSuchAlgorithmException {
-    String[] name = MediaPackageElements.MPEG7_FILENAME.split("\\.");
-    File file = File.createTempFile(name[0], "." + name[1]);
-    Mpeg7CatalogImpl mpeg7 = new Mpeg7CatalogImpl(file);
+  public static Mpeg7CatalogImpl newInstance() {
+    Mpeg7CatalogImpl mpeg7 = new Mpeg7CatalogImpl();
     return mpeg7;
   }
 
@@ -178,7 +194,7 @@ public class Mpeg7CatalogImpl extends XMLCatalog implements Mpeg7Catalog {
    * @throws IOException
    *           if an error with catalog file handling occurs
    */
-  public void save() throws ParserConfigurationException, TransformerException, IOException {
+  public Document toXml() throws ParserConfigurationException, TransformerException, IOException {
     Document doc = createDocument();
 
     // Root element
@@ -194,24 +210,7 @@ public class Mpeg7CatalogImpl extends XMLCatalog implements Mpeg7Catalog {
       descriptionNode.appendChild(mc.toXml(doc));
     }
 
-    // Save document to disk
-    saveToXml(doc);
-  }
-
-  /**
-   * Outputs the mpeg-7 metadata container to the given output stream.
-   * 
-   * @param out
-   *          the output stream
-   * @throws ParserConfigurationException
-   *           if the xml parser environment is not correctly configured
-   * @throws TransformerException
-   *           if serialization of the metadata document fails
-   * @throws IOException
-   *           if an error with catalog file handling occurs
-   */
-  public void save(OutputStream out) throws ParserConfigurationException, TransformerException, IOException {
-    saveToXml(createDocument(), out);
+    return doc;
   }
 
   /**
@@ -426,311 +425,6 @@ public class Mpeg7CatalogImpl extends XMLCatalog implements Mpeg7Catalog {
     if (content != null)
       return content.remove(id);
     return null;
-  }
-
-  /**
-   * Parser implementation for mpeg-7 files. Note that this implementation does by far not cover the full mpeg-7
-   * standard but only deals with those parts relevant to matterhorn, mainly temporal decompositions.
-   * 
-   * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
-   */
-  static class MPEG7Parser extends DefaultHandler {
-
-    /** The current parser state */
-    enum ParserState {
-      Document, MultimediaContent, Segment
-    };
-
-    /** The manifest */
-    private Mpeg7CatalogImpl mpeg7Doc = null;
-
-    /** The element content */
-    private StringBuffer tagContent = new StringBuffer();
-
-    /** The multimedia content */
-    private MultimediaContentType multimediaContent = null;
-
-    /** Current multimedia content type (audio, video, audiovisual) */
-    private MultimediaContentType.Type contentType = null;
-
-    /** The multimedia content identifier */
-    private String contentId = null;
-
-    /** The content media locator */
-    private MediaLocator contentMediaLocator = null;
-
-    /** The content media time and duration */
-    private MediaTimeImpl contentMediaTime = null;
-
-    /** The content media time point (will usually refer to 0:00:00) */
-    private MediaTimePoint contentTimePoint = null;
-
-    /** The content duration */
-    private MediaDuration contentDuration = null;
-
-    /** The segment time point (relative to the content time point) */
-    private MediaTimePoint segmentTimePoint = null;
-
-    /** The segment duration */
-    private MediaDuration segmentDuration = null;
-
-    /** The segment media time and duration */
-    private MediaTime segmentMediaTime = null;
-
-    /** The temporal decomposition container */
-    private TemporalDecomposition<?> temporalDecomposition = null;
-
-    /** The temporal segment */
-    private ContentSegment segment = null;
-
-    /** The text annoation */
-    private TextAnnotation textAnnotation = null;
-
-    /** The current parser state */
-    private ParserState state = ParserState.Document;
-
-    /** Flag to check if this is not just an arbitrary xml document */
-    private boolean isMpeg7 = false;
-
-    /**
-     * Creates a new parser for mpeg-7 files.
-     */
-    MPEG7Parser() {
-    }
-
-    /**
-     * Parses the mpeg-7 catalog file and returns its object representation.
-     * 
-     * @param file
-     *          the file containing the catalog
-     * @return the catalog representation
-     * @throws ParserConfigurationException
-     *           if setting up the parser failed
-     * @throws SAXException
-     *           if an error occured while parsing the document
-     * @throws IOException
-     *           if the file cannot be accessed in a proper way
-     * @throws UnknownFileTypeException
-     *           if the catalog file type is unknown
-     * @throws NoSuchAlgorithmException
-     *           if the checksum cannot be calculated
-     * @throws IllegalArgumentException
-     *           if the provided file does not contain mpeg-7 data
-     */
-    public Mpeg7Catalog parse(File file) throws ParserConfigurationException, SAXException, IOException,
-            NoSuchAlgorithmException, UnknownFileTypeException {
-      mpeg7Doc = new Mpeg7CatalogImpl(file);
-      SAXParserFactory factory = SAXParserFactory.newInstance();
-      // REPLAY does not use a DTD here
-      factory.setValidating(false);
-      factory.setNamespaceAware(true);
-      SAXParser parser = factory.newSAXParser();
-      parser.parse(file, this);
-
-      // Did we parse an mpeg-7 document?
-      if (!isMpeg7)
-        throw new IllegalArgumentException(file + " is no mpeg-7 document");
-
-      return mpeg7Doc;
-    }
-
-    /**
-     * Read <code>type</code> attribute from track or catalog element.
-     * 
-     * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String, java.lang.String, java.lang.String,
-     *      org.xml.sax.Attributes)
-     */
-    @Override
-    public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException {
-      super.startElement(uri, localName, name, attributes);
-      tagContent = new StringBuffer();
-
-      // Make sure this is an mpeg-7 catalog
-      // TODO: Improve this test, add namespace awareness
-      if (!isMpeg7 && name.equals("Mpeg7"))
-        isMpeg7 = true;
-
-      // Handle parser state
-      if ("MultimediaContent".equals(localName)) {
-        state = ParserState.MultimediaContent;
-      }
-
-      // Content type
-      if ("Audio".equals(localName) || "Video".equals(localName) || "AudioVisual".equals(localName)) {
-        contentType = MultimediaContentType.Type.valueOf(localName);
-        contentId = attributes.getValue("id");
-        if (MultimediaContentType.Type.Audio.equals(contentType))
-          multimediaContent = mpeg7Doc.addAudioContent(contentId, contentMediaTime, contentMediaLocator);
-        else if (MultimediaContentType.Type.Video.equals(contentType))
-          multimediaContent = mpeg7Doc.addVideoContent(contentId, contentMediaTime, contentMediaLocator);
-        else if (MultimediaContentType.Type.AudioVisual.equals(contentType))
-          multimediaContent = mpeg7Doc.addAudioVisualContent(contentId, contentMediaTime, contentMediaLocator);
-      }
-
-      // Temporal decomposition
-      if ("TemporalDecomposition".equals(localName)) {
-        String hasGap = attributes.getValue("gap");
-        String isOverlapping = attributes.getValue("overlap");
-        String criteria = attributes.getValue("criteria");
-        if (!"temporal".equals(criteria))
-          throw new IllegalStateException("Decompositions other than temporal are not supported");
-        temporalDecomposition = multimediaContent.getTemporalDecomposition();
-        temporalDecomposition.setGap("true".equals(hasGap));
-        temporalDecomposition.setOverlapping("overlap".equals(isOverlapping));
-      }
-
-      // Segment
-      if ("AudioSegment".equals(localName) || "VideoSegment".equals(localName)
-              || "AudioVisualSegment".equals(localName)) {
-        String segmentId = attributes.getValue("id");
-        segment = temporalDecomposition.createSegment(segmentId);
-        state = ParserState.Segment;
-      }
-
-      // TextAnnotation
-      if ("TextAnnotation".equals(localName)) {
-        String language = attributes.getValue("xml:lang");
-        float confidence = -1.0f;
-        float relevance = -1.0f;
-        try {
-          confidence = Float.parseFloat(attributes.getValue("confidence"));
-        } catch (Exception e) {
-          confidence = -1.0f;
-        }
-        try {
-          relevance = Float.parseFloat(attributes.getValue("relevance"));
-        } catch (Exception e) {
-          relevance = -1.0f;
-        }
-        textAnnotation = segment.createTextAnnotation(confidence, relevance, language);
-      }
-    }
-
-    /**
-     * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
-     */
-    @Override
-    public void endElement(String uri, String localName, String name) throws SAXException {
-      super.endElement(uri, localName, name);
-
-      // Handle parser state
-      if ("MultimediaContent".equals(localName))
-        state = ParserState.Document;
-      else if ("AudioSegment".equals(localName) || "VideoSegment".equals(localName)
-              || "AudioVisualSegment".equals(localName))
-        state = ParserState.MultimediaContent;
-
-      // Media locator uri
-      if ("MediaUri".equals(localName)) {
-        MediaLocatorImpl locator = new MediaLocatorImpl();
-        URI mediaUri = URI.create(getTagContent());
-        locator.setMediaURI(mediaUri);
-        if (ParserState.MultimediaContent.equals(state)) {
-          multimediaContent.setMediaLocator(locator);
-        }
-      }
-
-      // Media/Segment time
-      if ("MediaTime".equals(localName)) {
-        if (ParserState.MultimediaContent.equals(state)) {
-          contentMediaTime = new MediaTimeImpl(contentTimePoint, contentDuration);
-          multimediaContent.setMediaTime(contentMediaTime);
-        } else if (ParserState.Segment.equals(state)) {
-          segmentMediaTime = new MediaTimeImpl(segmentTimePoint, segmentDuration);
-          segment.setMediaTime(segmentMediaTime);
-        }
-      }
-
-      // Media/Segment time point
-      if ("MediaTimePoint".equals(localName)) {
-        MediaTimePointImpl tp = MediaTimePointImpl.parseTimePoint(getTagContent());
-        if (ParserState.MultimediaContent.equals(state))
-          contentTimePoint = tp;
-        else if (ParserState.Segment.equals(state)) {
-          segmentTimePoint = tp;
-        }
-      }
-
-      // Media/Segment time point
-      if ("MediaRelTimePoint".equals(localName)) {
-        MediaTimePointImpl tp = MediaTimePointImpl.parseTimePoint(getTagContent());
-        if (ParserState.MultimediaContent.equals(state))
-          contentTimePoint = tp;
-        else if (ParserState.Segment.equals(state)) {
-          segmentTimePoint = tp;
-          tp.setReferenceTimePoint(contentTimePoint);
-        }
-      }
-
-      // Media/Segment duration
-      if ("MediaDuration".equals(localName)) {
-        MediaDuration td = MediaDurationImpl.parseDuration(getTagContent());
-        if (ParserState.MultimediaContent.equals(state))
-          contentDuration = td;
-        else if (ParserState.Segment.equals(state))
-          segmentDuration = td;
-      }
-
-      // Keyword
-      if ("Keyword".equals(localName)) {
-        KeywordAnnotation keyword = new KeywordAnnotationImpl(tagContent.toString());
-        textAnnotation.addKeywordAnnotation(keyword);
-      }
-
-      // Free text
-      if ("FreeTextAnnotation".equals(localName)) {
-        FreeTextAnnotation freeText = new FreeTextAnnotationImpl(tagContent.toString());
-        textAnnotation.addFreeTextAnnotation(freeText);
-      }
-
-    }
-
-    /**
-     * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
-     */
-    @Override
-    public void characters(char[] ch, int start, int length) throws SAXException {
-      super.characters(ch, start, length);
-      tagContent.append(ch, start, length);
-    }
-
-    /**
-     * Returns the element content.
-     * 
-     * @return the element content
-     */
-    private String getTagContent() {
-      String str = tagContent.toString().trim();
-      return str;
-    }
-
-    /**
-     * @see org.xml.sax.helpers.DefaultHandler#error(org.xml.sax.SAXParseException)
-     */
-    @Override
-    public void error(SAXParseException e) throws SAXException {
-      log_.warn("Error while parsing mpeg-7 catalog: " + e.getMessage());
-      super.error(e);
-    }
-
-    /**
-     * @see org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
-     */
-    @Override
-    public void fatalError(SAXParseException e) throws SAXException {
-      log_.warn("Fatal error while parsing mpeg-7 catalog: " + e.getMessage());
-      super.fatalError(e);
-    }
-
-    /**
-     * @see org.xml.sax.helpers.DefaultHandler#warning(org.xml.sax.SAXParseException)
-     */
-    @Override
-    public void warning(SAXParseException e) throws SAXException {
-      log_.warn("Warning while parsing mpeg-7 catalog: " + e.getMessage());
-      super.warning(e);
-    }
-
   }
 
 }

@@ -21,13 +21,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.MediaPackageSupport;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageSupport.MergeMode;
 import org.opencastproject.util.FileSupport;
 
@@ -35,7 +28,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,10 +49,10 @@ public class MediaPackageMergeTest {
   protected MediaPackageBuilder mediaPackageBuilder = null;
 
   /** The source media package directory for merge tests */
-  File sourceDir = null;
+  MediaPackage sourcePackage = null;
 
   /** The target media package directory for merge tests */
-  File targetDir = null;
+  MediaPackage targetPackage = null;
 
   @Before
   public void setUp() throws Exception {
@@ -92,7 +87,7 @@ public class MediaPackageMergeTest {
     attachmentDir.mkdirs();
 
     // Setup test files
-    File manifestTestFile = new File(MediaPackageBuilderTest.class.getResource("/source-manifest.xml").getPath());
+    File sourceManifestFile = new File(MediaPackageBuilderTest.class.getResource("/source-manifest.xml").getPath());
     File videoTestFile = new File(MediaPackageBuilderTest.class.getResource("/vonly.mov").getPath());
     File audioTestFile = new File(MediaPackageBuilderTest.class.getResource("/aonly.mov").getPath());
     File dcTestFile = new File(MediaPackageBuilderTest.class.getResource("/dublincore.xml").getPath());
@@ -101,7 +96,8 @@ public class MediaPackageMergeTest {
     File coverTestFile = new File(MediaPackageBuilderTest.class.getResource("/cover.png").getPath());
 
     // Copy files into place
-    FileSupport.copy(manifestTestFile, new File(packageDir, MediaPackageElements.MANIFEST_FILENAME));
+    File manifestFile = new File(packageDir, MediaPackageElements.MANIFEST_FILENAME);
+    FileSupport.copy(sourceManifestFile, manifestFile);
     FileSupport.copy(videoTestFile, trackDir);
     FileSupport.copy(audioTestFile, trackDir);
     FileSupport.copy(dcTestFile, metadataDir);
@@ -112,11 +108,9 @@ public class MediaPackageMergeTest {
     FileSupport.copy(coverTestFile, new File(attachmentDir, "series-cover.png"));
 
     // Test the media package
-    MediaPackage mediaPackage = mediaPackageBuilder.loadFromDirectory(packageDir);
-    mediaPackage.verify();
-
-    // Set the media package directory
-    sourceDir = packageDir;
+    mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(manifestFile.getParentFile()));
+    sourcePackage = mediaPackageBuilder.loadFromManifest(new FileInputStream(manifestFile));
+    sourcePackage.verify();
   }
 
   /**
@@ -138,7 +132,7 @@ public class MediaPackageMergeTest {
     attachmentDir.mkdirs();
 
     // Setup test files
-    File manifestTestFile = new File(MediaPackageBuilderTest.class.getResource("/target-manifest.xml").getPath());
+    File sourceManifestFile = new File(MediaPackageBuilderTest.class.getResource("/target-manifest.xml").getPath());
     File videoTestFile = new File(MediaPackageBuilderTest.class.getResource("/vonly.mov").getPath());
     File audioTestFile = new File(MediaPackageBuilderTest.class.getResource("/aonly.mov").getPath());
     File dcTestFile = new File(MediaPackageBuilderTest.class.getResource("/dublincore.xml").getPath());
@@ -147,7 +141,8 @@ public class MediaPackageMergeTest {
     File coverTestFile = new File(MediaPackageBuilderTest.class.getResource("/cover.png").getPath());
 
     // Copy files into place
-    FileSupport.copy(manifestTestFile, new File(packageDir, MediaPackageElements.MANIFEST_FILENAME));
+    File manifestFile = new File(packageDir, MediaPackageElements.MANIFEST_FILENAME);
+    FileSupport.copy(sourceManifestFile, manifestFile);
     FileSupport.copy(videoTestFile, trackDir);
     FileSupport.copy(audioTestFile, trackDir);
     FileSupport.copy(audioTestFile, new File(trackDir, "aonly2.mov"));
@@ -157,12 +152,9 @@ public class MediaPackageMergeTest {
     FileSupport.copy(coverTestFile, attachmentDir);
 
     // Test the media package
-    mediaPackageBuilder.loadFromDirectory(packageDir);
-    MediaPackage mediaPackage = mediaPackageBuilder.loadFromDirectory(packageDir);
-    mediaPackage.verify();
-
-    // Set the media package directory
-    targetDir = packageDir;
+    mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(manifestFile.getParentFile()));
+    targetPackage = mediaPackageBuilder.loadFromManifest(new FileInputStream(manifestFile));
+    targetPackage.verify();
   }
 
   /**
@@ -174,21 +166,21 @@ public class MediaPackageMergeTest {
    */
   private void testMediaPackageConsistency(MediaPackage mediaPackage) throws MediaPackageException {
     List<String> ids = new ArrayList<String>();
-    List<File> files = new ArrayList<File>();
+    List<URL> files = new ArrayList<URL>();
     for (MediaPackageElement e : mediaPackage.elements()) {
       if (ids.contains(e.getIdentifier()))
         throw new MediaPackageException("Duplicate id " + e.getIdentifier() + "' found");
       ids.add(e.getIdentifier());
-      if (files.contains(e.getFile()))
-        throw new MediaPackageException("Duplicate filename " + e.getFile() + "' found");
-      files.add(e.getFile());
+      if (files.contains(e.getURL()))
+        throw new MediaPackageException("Duplicate filename " + e.getURL() + "' found");
+      files.add(e.getURL());
     }
   }
 
   @Test
   public void testMergeByMerging() {
     try {
-      MediaPackage mediaPackage = MediaPackageSupport.merge(targetDir, sourceDir, true, MergeMode.Merge);
+      MediaPackage mediaPackage = MediaPackageSupport.merge(targetPackage, sourcePackage, MergeMode.Merge);
       assertTrue(mediaPackage.getTracks().length == 5);
       assertTrue(mediaPackage.getCatalogs().length == 6);
       assertTrue(mediaPackage.getAttachments().length == 3);
@@ -201,39 +193,37 @@ public class MediaPackageMergeTest {
   @Test
   public void testMergeByReplacing() {
     try {
-      MediaPackage mediaPackage = mediaPackageBuilder.loadFromDirectory(targetDir);
-
       // Should be replaced
-      MediaPackageElement track1 = mediaPackage.getElementById("track-1");
-      MediaPackageElement catalog1 = mediaPackage.getElementById("catalog-1");
-      MediaPackageElement catalog2 = mediaPackage.getElementById("catalog-2");
-      MediaPackageElement cover = mediaPackage.getElementById("cover");
+      MediaPackageElement track1 = targetPackage.getElementById("track-1");
+      MediaPackageElement catalog1 = targetPackage.getElementById("catalog-1");
+      MediaPackageElement catalog2 = targetPackage.getElementById("catalog-2");
+      MediaPackageElement cover = targetPackage.getElementById("cover");
 
       // Should remain untouched
-      MediaPackageElement track2 = mediaPackage.getElementById("track-2");
-      MediaPackageElement track4 = mediaPackage.getElementById("track-4");
-      MediaPackageElement catalog3 = mediaPackage.getElementById("catalog-3");
+      MediaPackageElement track2 = targetPackage.getElementById("track-2");
+      MediaPackageElement track4 = targetPackage.getElementById("track-4");
+      MediaPackageElement catalog3 = targetPackage.getElementById("catalog-3");
 
       // Merge the media package
-      mediaPackage = MediaPackageSupport.merge(targetDir, sourceDir, true, MergeMode.Replace);
+      MediaPackage mergedPackage = MediaPackageSupport.merge(targetPackage, sourcePackage, MergeMode.Replace);
 
       // Test number of elements
-      assertEquals(mediaPackage.getTracks().length, 4);
-      assertEquals(mediaPackage.getCatalogs().length, 4);
-      assertEquals(mediaPackage.getAttachments().length, 2);
+      assertEquals(mergedPackage.getTracks().length, 4);
+      assertEquals(mergedPackage.getCatalogs().length, 4);
+      assertEquals(mergedPackage.getAttachments().length, 2);
 
       // Test for replaced elements
-      assertNotSame(track1, mediaPackage.getElementById("track-1"));
-      assertNotSame(catalog1, mediaPackage.getElementById("catalog-1"));
-      assertNotSame(catalog2, mediaPackage.getElementById("catalog-2"));
-      assertNotSame(cover, mediaPackage.getElementById("cover"));
+      assertNotSame(track1, mergedPackage.getElementById("track-1"));
+      assertNotSame(catalog1, mergedPackage.getElementById("catalog-1"));
+      assertNotSame(catalog2, mergedPackage.getElementById("catalog-2"));
+      assertNotSame(cover, mergedPackage.getElementById("cover"));
 
       // Test for untouched elements
-      assertEquals(track2, mediaPackage.getElementById("track-2"));
-      assertEquals(track4, mediaPackage.getElementById("track-4"));
-      assertEquals(catalog3, mediaPackage.getElementById("catalog-3"));
+      assertEquals(track2, mergedPackage.getElementById("track-2"));
+      assertEquals(track4, mergedPackage.getElementById("track-4"));
+      assertEquals(catalog3, mergedPackage.getElementById("catalog-3"));
 
-      testMediaPackageConsistency(mediaPackage);
+      testMediaPackageConsistency(mergedPackage);
     } catch (MediaPackageException e) {
       fail(e.getMessage());
     }
@@ -242,29 +232,27 @@ public class MediaPackageMergeTest {
   @Test
   public void testMergeBySkipping() {
     try {
-      MediaPackage targetMediaPackage = mediaPackageBuilder.loadFromDirectory(targetDir);
-
       // Should remain untouched
-      MediaPackageElement track1 = targetMediaPackage.getElementById("track-1");
-      MediaPackageElement catalog1 = targetMediaPackage.getElementById("catalog-1");
-      MediaPackageElement catalog2 = targetMediaPackage.getElementById("catalog-2");
-      MediaPackageElement cover = targetMediaPackage.getElementById("cover");
+      MediaPackageElement track1 = targetPackage.getElementById("track-1");
+      MediaPackageElement catalog1 = targetPackage.getElementById("catalog-1");
+      MediaPackageElement catalog2 = targetPackage.getElementById("catalog-2");
+      MediaPackageElement cover = targetPackage.getElementById("cover");
 
       // Merge the media package
-      MediaPackage mediaPackage = MediaPackageSupport.merge(targetDir, sourceDir, true, MergeMode.Skip);
+      MediaPackage mergedPackage = MediaPackageSupport.merge(targetPackage, sourcePackage, MergeMode.Skip);
 
       // Test number of elements
-      assertEquals(mediaPackage.getTracks().length, 4);
-      assertEquals(mediaPackage.getCatalogs().length, 4);
-      assertEquals(mediaPackage.getAttachments().length, 2);
+      assertEquals(mergedPackage.getTracks().length, 4);
+      assertEquals(mergedPackage.getCatalogs().length, 4);
+      assertEquals(mergedPackage.getAttachments().length, 2);
 
       // Test for untouched elements
-      assertEquals(track1, mediaPackage.getElementById("track-1"));
-      assertEquals(catalog1, mediaPackage.getElementById("catalog-1"));
-      assertEquals(catalog2, mediaPackage.getElementById("catalog-2"));
-      assertEquals(cover, mediaPackage.getElementById("cover"));
+      assertEquals(track1, mergedPackage.getElementById("track-1"));
+      assertEquals(catalog1, mergedPackage.getElementById("catalog-1"));
+      assertEquals(catalog2, mergedPackage.getElementById("catalog-2"));
+      assertEquals(cover, mergedPackage.getElementById("cover"));
 
-      testMediaPackageConsistency(mediaPackage);
+      testMediaPackageConsistency(mergedPackage);
     } catch (MediaPackageException e) {
       fail(e.getMessage());
     }
@@ -273,7 +261,7 @@ public class MediaPackageMergeTest {
   @Test
   public void testMergeByFailing() {
     try {
-      MediaPackageSupport.merge(targetDir, sourceDir, true, MergeMode.Fail);
+      MediaPackageSupport.merge(targetPackage, sourcePackage, MergeMode.Fail);
       fail("Merging should have failed but didn't");
     } catch (MediaPackageException e) {
       // This is excpected

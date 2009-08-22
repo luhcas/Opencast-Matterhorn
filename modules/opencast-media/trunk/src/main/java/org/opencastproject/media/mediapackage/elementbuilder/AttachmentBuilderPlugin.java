@@ -23,8 +23,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 
 import org.w3c.dom.Node;
 
-import java.io.File;
-import java.io.IOException;
+import java.net.URL;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -40,7 +39,7 @@ public class AttachmentBuilderPlugin extends AbstractAttachmentBuilderPlugin imp
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   @Override
-  public boolean accept(File file, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws IOException {
+  public boolean accept(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     if (type != null && flavor != null) {
       if (!type.equals(MediaPackageElement.Type.Attachment) || flavor != null)
         return false;
@@ -49,7 +48,7 @@ public class AttachmentBuilderPlugin extends AbstractAttachmentBuilderPlugin imp
     } else if (flavor != null && !flavor.equals(Attachment.FLAVOR)) {
       return false;
     }
-    return super.accept(file, type, flavor);
+    return super.accept(url, type, flavor);
   }
 
   /**

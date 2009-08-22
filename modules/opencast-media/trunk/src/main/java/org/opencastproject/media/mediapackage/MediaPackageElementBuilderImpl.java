@@ -17,16 +17,14 @@
 package org.opencastproject.media.mediapackage;
 
 import org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin;
-import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.PluginLoader;
-import org.opencastproject.util.UnknownFileTypeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -70,46 +68,35 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     }
   }
 
-  /** @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromFile(java.io.File) */
-  public MediaPackageElement elementFromFile(File file) throws MediaPackageException {
-    return elementFromFile(file, null, null);
+  /**
+   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromURL(java.net.URL)
+   */
+  public MediaPackageElement elementFromURL(URL url) throws MediaPackageException {
+    return elementFromURL(url, null, null);
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromFile(java.io.File,
+   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromURL(java.io.File,
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type ,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement elementFromFile(File file, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
+  public MediaPackageElement elementFromURL(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
           throws MediaPackageException {
-    // Check system support for the file
-    try {
-      MimeTypes.fromFile(file);
-    } catch (UnknownFileTypeException e) {
-      throw new MediaPackageException("File type not supported: " + e.getMessage());
-    } catch (IOException e) {
-      throw new MediaPackageException("IO Exception while reading media package element " + file + ": "
-              + e.getMessage());
-    }
 
     // Feed the file to the element builder plugins
     List<MediaPackageElementBuilderPlugin> candidates = new ArrayList<MediaPackageElementBuilderPlugin>();
     {
       MediaPackageElementBuilderPlugin plugin = null;
       for (Class<? extends MediaPackageElementBuilderPlugin> pluginClass : plugins) {
-        try {
-          plugin = createPlugin(pluginClass);
-          if (plugin.accept(file, type, flavor))
-            candidates.add(plugin);
-        } catch (IOException e) {
-          log_.warn("IO Exception while analyzing " + file + " using element plugin " + plugin);
-        }
+        plugin = createPlugin(pluginClass);
+        if (plugin.accept(url, type, flavor))
+          candidates.add(plugin);
       }
     }
 
     // Check the plugins
     if (candidates.size() == 0)
-      throw new MediaPackageException("No suitable element builder plugin found for " + file);
+      throw new MediaPackageException("No suitable element builder plugin found for " + url);
     candidates = filterPreferred(candidates);
     if (candidates.size() > 1) {
       StringBuffer buf = new StringBuffer();
@@ -118,20 +105,21 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
           buf.append(", ");
         buf.append(plugin.toString());
       }
-      log_.warn("More than one element builder plugin with the same priority claims responsibilty for " + file + ": "
+      log_.warn("More than one element builder plugin with the same priority claims responsibilty for " + url + ": "
               + buf.toString());
     }
 
     // Create media package element depending on mime type flavor
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
-    MediaPackageElement element = builderPlugin.elementFromFile(file);
+    MediaPackageElement element = builderPlugin.elementFromURL(url);
     builderPlugin.cleanup();
     return element;
   }
 
-  /** @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromManifest(Node, File, boolean) */
-  public MediaPackageElement elementFromManifest(Node node, File packageRoot, boolean verify)
-          throws MediaPackageException {
+  /**
+   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromManifest(org.w3c.dom.Node, org.opencastproject.media.mediapackage.MediaPackageSerializer)
+   */
+  public MediaPackageElement elementFromManifest(Node node, MediaPackageSerializer serializer) throws MediaPackageException {
     List<MediaPackageElementBuilderPlugin> candidates = new ArrayList<MediaPackageElementBuilderPlugin>();
     for (Class<? extends MediaPackageElementBuilderPlugin> pluginClass : plugins) {
       MediaPackageElementBuilderPlugin plugin = createPlugin(pluginClass);
@@ -165,7 +153,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
 
     // Create a new media package element
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
-    MediaPackageElement element = builderPlugin.elementFromManifest(node, packageRoot, verify);
+    MediaPackageElement element = builderPlugin.elementFromManifest(node, serializer);
     builderPlugin.cleanup();
     return element;
   }

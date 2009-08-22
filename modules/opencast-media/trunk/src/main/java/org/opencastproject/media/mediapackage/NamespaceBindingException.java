@@ -17,7 +17,7 @@
 package org.opencastproject.media.mediapackage;
 
 /**
- * Exception thrown by {@link XMLCatalog} in case of any namespace binding errors.
+ * Exception thrown by {@link XMLCatalogImpl} in case of any namespace binding errors.
  * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */

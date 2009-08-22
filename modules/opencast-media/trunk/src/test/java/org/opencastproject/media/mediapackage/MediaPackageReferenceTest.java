@@ -23,7 +23,9 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * Test case for media package references.
@@ -64,33 +66,34 @@ public class MediaPackageReferenceTest extends AbstractMediaPackageTest {
   public void testMediaPackageReference() {
     try {
       // Add first catalog without any reference
-      File catalogXTestFile = new File(MediaPackageTest.class.getResource("/dublincore.xml").getPath());
-      MediaPackageElement catalogX = mediaPackage.add(catalogXTestFile, false);
+      URL catalogXTestFile = MediaPackageReferenceTest.class.getResource("/dublincore.xml").toURI().toURL();
+      MediaPackageElement catalogX = mediaPackage.add(catalogXTestFile);
       catalogX.setIdentifier("catalog-x");
 
       // Add second catalog with media package reference
-      File catalogYTestFile = new File(MediaPackageTest.class.getResource("/dublincore.xml").getPath());
-      MediaPackageElement catalogY = mediaPackage.add(catalogYTestFile, false);
+      URL catalogYTestFile = MediaPackageReferenceTest.class.getResource("/dublincore.xml").toURI().toURL();
+      MediaPackageElement catalogY = mediaPackage.add(catalogYTestFile);
       catalogY.referTo(new MediaPackageReferenceImpl(mediaPackage));
       catalogY.setIdentifier("catalog-y");
 
       // Add third catalog with track reference
-      File catalogZTestFile = new File(MediaPackageTest.class.getResource("/dublincore.xml").getPath());
-      MediaPackageElement catalogZ = mediaPackage.add(catalogZTestFile, false);
+      URL catalogZTestFile = MediaPackageReferenceTest.class.getResource("/dublincore.xml").toURI().toURL();
+      MediaPackageElement catalogZ = mediaPackage.add(catalogZTestFile);
       catalogZ.referTo(new MediaPackageReferenceImpl("track", "track-1"));
       catalogZ.setIdentifier("catalog-z");
 
-      // Save the media package
-      mediaPackage.save();
     } catch (MediaPackageException e) {
       fail("Adding of catalog failed: " + e.getMessage());
     } catch (UnsupportedElementException e) {
+      fail("Adding of catalog failed: " + e.getMessage());
+    } catch (MalformedURLException e) {
+      fail("Adding of catalog failed: " + e.getMessage());
+    } catch (URISyntaxException e) {
       fail("Adding of catalog failed: " + e.getMessage());
     }
 
     // Re-read the media package and test the references
     try {
-      mediaPackage = mediaPackageBuilder.loadFromManifest(manifestFile);
       MediaPackageElement catalogX = mediaPackage.getElementById("catalog-x");
       assertNotNull(catalogX.getReference());
       MediaPackageElement catalogY = mediaPackage.getElementById("catalog-y");
@@ -100,8 +103,6 @@ public class MediaPackageReferenceTest extends AbstractMediaPackageTest {
       assertTrue(catalogZ.getReference().matches(new MediaPackageReferenceImpl("track", "track-1")));
     } catch (ConfigurationException e) {
       fail("Configuration error while loading media package from manifest: " + e.getMessage());
-    } catch (MediaPackageException e) {
-      fail("Media package exception while loading media package from manifest: " + e.getMessage());
     }
   }
 

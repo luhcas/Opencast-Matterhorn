@@ -14,30 +14,25 @@
  *
  */
 
-package org.opencastproject.media.mediapackage;
+package org.opencastproject.media.mediapackage.track;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
+import org.opencastproject.media.mediapackage.Stream;
 
 /**
- * Utility class for handling {@link org.opencastproject.media.mediapackage.Track}s and
- * {@link org.opencastproject.media.mediapackage.Stream}s.
+ * X
  * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
-public class TrackSupport {
+abstract class AbstractStreamImpl implements Stream {
 
-  private TrackSupport() {
+  private String identifier;
+
+  protected AbstractStreamImpl(String identifier) {
+    this.identifier = identifier;
   }
 
-  public static <T extends Stream> T[] byType(Stream[] streams, Class<T> streamType) {
-    List<Stream> f = new ArrayList<Stream>();
-    for (Stream s : streams) {
-      if (streamType.isAssignableFrom(s.getClass()))
-        f.add(s);
-    }
-    return f.toArray((T[]) Array.newInstance(streamType, f.size()));
+  public String getIdentifier() {
+    return identifier;
   }
 
 }

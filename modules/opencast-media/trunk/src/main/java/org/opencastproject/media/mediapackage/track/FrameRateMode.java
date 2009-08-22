@@ -14,30 +14,14 @@
  *
  */
 
-package org.opencastproject.media.mediapackage;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
+package org.opencastproject.media.mediapackage.track;
 
 /**
- * Utility class for handling {@link org.opencastproject.media.mediapackage.Track}s and
- * {@link org.opencastproject.media.mediapackage.Stream}s.
+ * Defines the different types of frame rate modes.
  * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
-public class TrackSupport {
+public enum FrameRateMode {
 
-  private TrackSupport() {
-  }
-
-  public static <T extends Stream> T[] byType(Stream[] streams, Class<T> streamType) {
-    List<Stream> f = new ArrayList<Stream>();
-    for (Stream s : streams) {
-      if (streamType.isAssignableFrom(s.getClass()))
-        f.add(s);
-    }
-    return f.toArray((T[]) Array.newInstance(streamType, f.size()));
-  }
-
+  ConstantFrameRate, VariableFrameRate
 }

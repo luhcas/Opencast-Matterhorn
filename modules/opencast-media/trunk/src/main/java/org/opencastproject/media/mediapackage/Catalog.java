@@ -16,11 +16,7 @@
 
 package org.opencastproject.media.mediapackage;
 
-import java.io.IOException;
 import java.io.Serializable;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 
 /**
  * General definition for metadata catalogs.
@@ -33,17 +29,4 @@ public interface Catalog extends MediaPackageElement, Serializable {
   /** Media package element type */
   Type TYPE = Type.Catalog;
 
-  /**
-   * Saves the catalog to disk.
-   * 
-   * todo think about hiding technical exceptions
-   * 
-   * @throws ParserConfigurationException
-   *           if the xml parser environment is not correctly configured
-   * @throws TransformerException
-   *           if serialization of the metadata document fails
-   * @throws IOException
-   *           if an error with catalog file handling occurs
-   */
-  void save() throws ParserConfigurationException, TransformerException, IOException;
 }

@@ -16,14 +16,15 @@
 
 package org.opencastproject.media.mediapackage.elementbuilder;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
-
+import org.opencastproject.media.mediapackage.MediaPackageSerializer;
 import org.w3c.dom.Node;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * An element builder plugin is an object that is able to recognize one ore more filetypes slated for ingest into
@@ -81,17 +82,15 @@ public interface MediaPackageElementBuilderPlugin {
    * Otherwise, <code>null</code> should be returned.
    * </p>
    * 
-   * @param file
-   *          the file to check
+   * @param url
+   *          the element location
    * @param type
-   *          the type
+   *          the element type
    * @param flavor
    *          the element flavor
-   * @return the file's mime type or <code>null</code>
-   * @throws IOException
-   *           if the file cannot be accessed
+   * @return <code>true</code> if the plugin can handle the element
    */
-  boolean accept(File file, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws IOException;
+  boolean accept(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor);
 
   /**
    * This method is called while the media package builder parses a media package manifest.
@@ -128,33 +127,30 @@ public interface MediaPackageElementBuilderPlugin {
   void setPriority(int priority);
 
   /**
-   * Creates a media package element from the given file that was previously accepted.
+   * Creates a media package element from the given url that was previously accepted.
    * 
-   * @param file
-   *          the file to ingest
+   * @param url
+   *          the element location
    * @return the new media package element
    * @throws MediaPackageException
    *           if creating the media package element fails
    */
-  MediaPackageElement elementFromFile(File file) throws MediaPackageException;
+  MediaPackageElement elementFromURL(URL url) throws MediaPackageException;
 
   /**
    * Creates a media package element from the DOM element.
    * 
    * @param elementNode
    *          the DOM node
-   * @param packageRoot
-   *          the media package root directory
-   * @param verify
-   *          <code>true</code> to verify the element's integrity
+   * @param serializer
+   *          the media package serializer
    * @return the media package element
    * @throws MediaPackageException
    */
-  MediaPackageElement elementFromManifest(Node elementNode, File packageRoot, boolean verify)
-          throws MediaPackageException;
+  MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer) throws MediaPackageException;
 
   /**
-   * Creates a new media package elment of the specified type.
+   * Creates a new media package element of the specified type.
    * 
    * @param type
    *          the element type

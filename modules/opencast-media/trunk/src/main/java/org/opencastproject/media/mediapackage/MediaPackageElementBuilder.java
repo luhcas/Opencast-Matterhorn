@@ -18,8 +18,8 @@ package org.opencastproject.media.mediapackage;
 
 import org.w3c.dom.Node;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 /**
  * A media package element builder provides factory methods for the creation and loading of media package elements from
@@ -38,13 +38,13 @@ public interface MediaPackageElementBuilder {
    * plugin for details.
    * </p>
    * 
-   * @param file
-   *          the file to ingest
+   * @param url
+   *          the element location
    * @return the new media package element
    * @throws MediaPackageException
    *           if creating the media package element fails
    */
-  MediaPackageElement elementFromFile(File file) throws MediaPackageException;
+  MediaPackageElement elementFromURL(URL url) throws MediaPackageException;
 
   /**
    * Creates a media package element from the given file that was previously accepted, while <code>type</code> and
@@ -55,8 +55,8 @@ public interface MediaPackageElementBuilder {
    * corresponding builder plugin for details.
    * </p>
    * 
-   * @param file
-   *          the file to ingest
+   * @param url
+   *          the element location
    * @param type
    *          the element type
    * @param flavor
@@ -65,7 +65,7 @@ public interface MediaPackageElementBuilder {
    * @throws MediaPackageException
    *           if creating the media package element fails
    */
-  MediaPackageElement elementFromFile(File file, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
+  MediaPackageElement elementFromURL(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
           throws MediaPackageException;
 
   /**
@@ -73,16 +73,13 @@ public interface MediaPackageElementBuilder {
    * 
    * @param elementNode
    *          the DOM node
-   * @param packageRoot
-   *          the media package root directory
-   * @param verify
-   *          <code>true</code> to verify the element's integrity
+   * @param serializer
+   *          the media package serializer
    * @return the media package element
    * @throws MediaPackageException
    *           if reading the file from manifest fails
    */
-  MediaPackageElement elementFromManifest(Node elementNode, File packageRoot, boolean verify)
-          throws MediaPackageException;
+  MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer) throws MediaPackageException;
 
   /**
    * Creates a new media package elment of the specified type.

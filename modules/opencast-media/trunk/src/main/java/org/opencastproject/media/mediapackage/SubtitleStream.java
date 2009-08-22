@@ -22,4 +22,5 @@ package org.opencastproject.media.mediapackage;
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public interface SubtitleStream extends Stream {
+
 }

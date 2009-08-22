@@ -18,11 +18,11 @@ package org.opencastproject.media.mediapackage.dublincore;
 
 import static org.opencastproject.util.Tool.cast;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.EName;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.XMLCatalog;
+import org.opencastproject.media.mediapackage.XMLCatalogImpl;
+import org.opencastproject.util.Checksum;
+import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.UnknownFileTypeException;
 
 import org.apache.commons.collections.Closure;
@@ -40,10 +40,12 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,7 +67,7 @@ import javax.xml.transform.TransformerException;
  * @author Christoph E. Driessen <ced@neopoly.de>
  * @version $Id: DublinCoreCatalogImpl.java 2905 2009-07-15 16:16:05Z ced $
  */
-public class DublinCoreCatalogImpl extends XMLCatalog implements DublinCoreCatalog {
+public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreCatalog {
 
   /** Serial version UID */
   private static final long serialVersionUID = -4240831568101931784L;
@@ -103,20 +105,21 @@ public class DublinCoreCatalogImpl extends XMLCatalog implements DublinCoreCatal
   }
 
   /**
-   * Creates a new dublin core metadata container from the specified file.
+   * Creates a new dublin core metadata container.
    * 
-   * @param file
-   *          the timeline file
-   * @throws IOException
-   *           if reading of the file fails
-   * @throws UnknownFileTypeException
-   *           if the file is of an unknown filetype
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
+   * @param id
+   *          the element identifier withing the package
+   * @param url
+   *          the document location
+   * @param size
+   *          the catalog size in bytes
+   * @param checksum
+   *          the catalog checksum
+   * @param mimeType
+   *          the catalog mime type
    */
-  DublinCoreCatalogImpl(File file) throws IOException, UnknownFileTypeException, NoSuchAlgorithmException {
-    super(MediaPackageElements.DUBLINCORE_CATALOG, file);
-    // Namespace bindings
+  protected DublinCoreCatalogImpl(String id, URL url, long size, Checksum checksum) {
+    super(id, DublinCoreCatalog.FLAVOR, url, size, checksum, MimeTypes.XML);
     bindings.bindPrefix(XMLConstants.DEFAULT_NS_PREFIX, OPENCASTPROJECT_DUBLIN_CORE_NS_URI);
     bindings.bindPrefix("dc", ELEMENTS_1_1_NS_URI);
     bindings.bindPrefix("dcterms", TERMS_NS_URI);
@@ -124,44 +127,45 @@ public class DublinCoreCatalogImpl extends XMLCatalog implements DublinCoreCatal
   }
 
   /**
-   * Creates a new dublin core metadata container file at the specified location for a media package with the given
-   * identifier.
+   * Creates a new dublin core metadata container.
    * 
-   * @return the new dublin core metadata container
-   * @throws UnknownFileTypeException
-   *           if the dublin core file type is unknown (very unlikely)
-   * @throws IOException
-   *           if creating the dublin core file fails
-   * @throws TransformerException
-   *           if saving the dublin core file fails
-   * @throws ParserConfigurationException
-   *           if creating the xml parser fails
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
+   * @param url
+   *          the document location
+   * @param size
+   *          the catalog size in bytes
+   * @param checksum
+   *          the catalog checksum
+   * @param mimeType
+   *          the catalog mime type
    */
-  static DublinCoreCatalog newInstance(MediaPackage mediaPackage) throws IOException, UnknownFileTypeException,
-          ParserConfigurationException, TransformerException, NoSuchAlgorithmException {
-    DublinCoreCatalogImpl dc = new DublinCoreCatalogImpl(new File(mediaPackage.getRoot(), FILENAME));
-    return dc;
+  protected DublinCoreCatalogImpl(URL url, long size, Checksum checksum) {
+    this(null, url, size, checksum);
   }
 
   /**
-   * Creates a new dublin core metadata container file at the specified location for a media package with the given
-   * identifier.
+   * Creates a new dublin core metadata container.
+   * 
+   * @param id
+   *          the element identifier withing the package
+   */
+  protected DublinCoreCatalogImpl(String id) {
+    this(id, null, 0, null);
+  }
+
+  /**
+   * Creates a new dublin core metadata container.
+   */
+  protected DublinCoreCatalogImpl() {
+    this(null, null, 0, null);
+  }
+
+  /**
+   * Creates a new dublin core metadata container.
    * 
    * @return the new dublin core metadata container
-   * @throws IOException
-   *           if creating the dublin core file fails
-   * @throws UnknownFileTypeException
-   *           if the dublin core file type is unknown (very unlikely)
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
    */
-  public static DublinCoreCatalog newInstance() throws IOException, NoSuchAlgorithmException, UnknownFileTypeException {
-    String[] name = FILENAME.split("\\.");
-    File file = File.createTempFile(name[0], "." + name[1]);
-    DublinCoreCatalogImpl dc = new DublinCoreCatalogImpl(file);
-    return dc;
+  public static DublinCoreCatalog newInstance() {
+    return new DublinCoreCatalogImpl();
   }
 
   /**
@@ -181,10 +185,31 @@ public class DublinCoreCatalogImpl extends XMLCatalog implements DublinCoreCatal
    * @throws SAXException
    *           if reading the catalog fails
    */
-  public static DublinCoreCatalog fromFile(File catalog) throws IOException, UnknownFileTypeException,
-          ParserConfigurationException, NoSuchAlgorithmException, SAXException {
+  public static DublinCoreCatalog fromFile(File catalog) throws IOException, ParserConfigurationException, SAXException {
     DublinCoreParser parser = new DublinCoreParser();
-    return parser.parse(catalog);
+    DublinCoreCatalogImpl dc = parser.parse(new FileInputStream(catalog));
+    dc.setURL(catalog.toURI().toURL());
+    return dc;
+  }
+
+  /**
+   * Reads the metadata from the specified file and returns it encapsulated in a {@link DublinCoreCatalog} object.
+   * 
+   * @param url
+   *          the dublin core metadata container file
+   * @return the dublin core object
+   * @throws IOException
+   *           if reading the metadata fails
+   * @throws ParserConfigurationException
+   *           if the dublin core parser cannot be created
+   * @throws SAXException
+   *           if reading the catalog fails
+   */
+  public static DublinCoreCatalogImpl fromURL(URL url) throws IOException, ParserConfigurationException, SAXException {
+    DublinCoreParser parser = new DublinCoreParser();
+    DublinCoreCatalogImpl dc = parser.parse(url.openStream());
+    dc.setURL(url);
+    return dc;
   }
 
   /**
@@ -526,40 +551,16 @@ public class DublinCoreCatalogImpl extends XMLCatalog implements DublinCoreCatal
   }
 
   /**
-   * Saves the dublin core metadata container to disk.
+   * Saves the dublin core metadata container to a dom.
    * 
    * @throws ParserConfigurationException
    *           if the xml parser environment is not correctly configured
    * @throws TransformerException
    *           if serialization of the metadata document fails
    * @throws IOException
-   *           if an error with catalog file handling occurs
+   *           if an error with catalog serialization occurs
    */
-  public void save() throws ParserConfigurationException, TransformerException, IOException {
-    Document doc = createDocument();
-    saveToXml(doc);
-  }
-
-  /**
-   * Outputs the dublin core metadata container to the given output stream.
-   * 
-   * @param out
-   *          the output stream
-   * @throws ParserConfigurationException
-   *           if the xml parser environment is not correctly configured
-   * @throws TransformerException
-   *           if serialization of the metadata document fails
-   * @throws IOException
-   *           if an error with catalog file handling occurs
-   */
-  public void save(OutputStream out) throws ParserConfigurationException, TransformerException, IOException {
-    saveToXml(createDocument(), out);
-  }
-
-  /**
-   * Create a DOM representation of the DublinCore.
-   */
-  private Document createDocument() throws ParserConfigurationException {
+  public Document toXml() throws ParserConfigurationException, TransformerException, IOException {
     // Create the DOM document
     Document doc = newDocument();
     Element rootElement = doc.createElementNS(ROOT_ELEMENT.getNamespaceName(), toQName(ROOT_ELEMENT));
@@ -631,43 +632,37 @@ public class DublinCoreCatalogImpl extends XMLCatalog implements DublinCoreCatal
     private boolean isDublinCore = false;
 
     /**
-     * Creates a new parser for dublin core files.
+     * Creates a new parser for dublin core documents.
      */
-    DublinCoreParser() {
-    }
+    DublinCoreParser() { }
 
     /**
-     * Parses the catalog file and returns its object representation.
+     * Parses the catalog and returns an object representation for it.
      * 
-     * @param file
-     *          the file containing the dublin core catalog
+     * @param is
+     *          the input stream containing the dublin core catalog
      * @return the catalog representation
      * @throws javax.xml.parsers.ParserConfigurationException
      *           if setting up the parser failed
      * @throws org.xml.sax.SAXException
      *           if an error occured while parsing the document
      * @throws java.io.IOException
-     *           if the file cannot be accessed in a proper way
-     * @throws org.opencastproject.util.UnknownFileTypeException
-     *           if the catalog file type is unknown
-     * @throws java.security.NoSuchAlgorithmException
-     *           if the checksum cannot be calculated
+     *           if the stream cannot be accessed in a proper way
      * @throws IllegalArgumentException
      *           if the document is not a dublincore document
      */
-    public DublinCoreCatalogImpl parse(File file) throws SAXException, IOException, ParserConfigurationException,
-            NoSuchAlgorithmException, UnknownFileTypeException {
-      this.dcDoc = new DublinCoreCatalogImpl(file);
+    public DublinCoreCatalogImpl parse(InputStream is) throws SAXException, IOException, ParserConfigurationException {
+      this.dcDoc = new DublinCoreCatalogImpl();
       SAXParserFactory factory = SAXParserFactory.newInstance();
       // REPLAY does not use a DTD here
       factory.setValidating(false);
       factory.setNamespaceAware(true);
       SAXParser parser = factory.newSAXParser();
-      parser.parse(file, this);
+      parser.parse(is, this);
 
       // Did we parse a dublin core document?
       if (!isDublinCore)
-        throw new IllegalArgumentException(file + " is no dublin core document");
+        throw new IllegalArgumentException("Stream does not contain a dublin core document");
 
       return dcDoc;
     }

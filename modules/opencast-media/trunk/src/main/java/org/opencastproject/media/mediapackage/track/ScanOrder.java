@@ -14,30 +14,20 @@
  *
  */
 
-package org.opencastproject.media.mediapackage;
+package org.opencastproject.media.mediapackage.track;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
+import org.opencastproject.util.EnumSupport;
 
 /**
- * Utility class for handling {@link org.opencastproject.media.mediapackage.Track}s and
- * {@link org.opencastproject.media.mediapackage.Stream}s.
+ * Defines the different types of scan order.
  * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
-public class TrackSupport {
+public enum ScanOrder {
 
-  private TrackSupport() {
+  TopFieldFirst, BottomFieldFirst;
+
+  public static ScanOrder fromString(String value) {
+    return EnumSupport.fromString(ScanOrder.class, value);
   }
-
-  public static <T extends Stream> T[] byType(Stream[] streams, Class<T> streamType) {
-    List<Stream> f = new ArrayList<Stream>();
-    for (Stream s : streams) {
-      if (streamType.isAssignableFrom(s.getClass()))
-        f.add(s);
-    }
-    return f.toArray((T[]) Array.newInstance(streamType, f.size()));
-  }
-
 }

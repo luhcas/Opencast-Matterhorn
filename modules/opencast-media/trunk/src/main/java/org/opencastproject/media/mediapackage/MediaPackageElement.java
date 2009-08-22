@@ -19,8 +19,7 @@ package org.opencastproject.media.mediapackage;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 
-import java.io.File;
-import java.io.IOException;
+import java.net.URL;
 
 /**
  * All classes that will be part of a media package must implement this interface.
@@ -82,24 +81,19 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
   MediaPackageReference getReference();
 
   /**
-   * Returns the element's filename without the path.
-   * <p/>
-   * For example, if the track is located at <code>
-     * /home/matterhorn/archive/mymediapackage/tracks/slides.mjpeg</code>, this
-   * method will return <code>slides.mpeg</code>.
+   * Returns a reference to the element location.
    * 
-   * @return the filename
+   * @return the element location
    */
-  // todo getURI(): URI
-  String getFilename();
+  URL getURL();
 
   /**
-   * Returns a reference to the element's file object.
+   * Sets the elements location.
    * 
-   * @return the file reference
+   * @param url
+   *          the element location
    */
-  // todo getURI(): URI
-  File getFile();
+  void setURL(URL url);
 
   /**
    * Returns the file's checksum.
@@ -134,40 +128,12 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
   long getSize();
 
   /**
-   * Wraps the element by calculating it's checksums and other properties, updating it should the underlying file have
-   * changed.
-   * 
-   * @throws MediaPackageException
-   *           if wrapping the element failed
-   */
-  void wrap() throws MediaPackageException;
-
-  /**
    * Verifies the integrity of the media package element.
    * 
    * @throws MediaPackageException
    *           if the media package element is in an incosistant state
    */
   void verify() throws MediaPackageException;
-
-  /**
-   * Tells the element that the media package was moved to the specified location.
-   * 
-   * @param oldRoot
-   *          the former media package root directory
-   * @param newRoot
-   *          the new media package root directory
-   */
-  void mediaPackageMoved(File oldRoot, File newRoot);
-
-  /**
-   * Integrates the element by copying the underlying resource file to the given destination.
-   * 
-   * @param dest
-   *          the element's new destination. Note that a <em>file</em>, not a directory must be provided here
-   * @throws IOException
-   */
-  void integrate(File dest) throws IOException;
 
   /**
    * Adds a reference to the media package <code>mediaPackage</code>.
@@ -207,4 +173,5 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
    * Removes any reference.
    */
   void clearReference();
+
 }

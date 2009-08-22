@@ -17,7 +17,7 @@
 package org.opencastproject.media.mediapackage;
 
 /**
- * Factory to retreive instances of a media package builder. Use the static method {@link #newInstance()} to obtain a
+ * Factory to retrieve instances of a media package builder. Use the static method {@link #newInstance()} to obtain a
  * reference to a concrete implementation of a <code>MediaPackageBuilderFactory</code>. This instance can then be used
  * to create or load media packages.
  * <p>

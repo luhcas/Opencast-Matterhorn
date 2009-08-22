@@ -18,6 +18,13 @@ package org.opencastproject.media.mediapackage;
 
 import org.opencastproject.media.mediapackage.dublincore.DublinCore;
 
+import org.w3c.dom.Document;
+
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
 /**
  * The Dublin Core catalog encapsulates dublin core metadata. For a reference to this standard, see
  * <code>http://dublincore.org/</code>.
@@ -25,10 +32,25 @@ import org.opencastproject.media.mediapackage.dublincore.DublinCore;
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: DublinCoreCatalog.java 2905 2009-07-15 16:16:05Z ced $
  */
-public interface DublinCoreCatalog extends Catalog, DublinCore, Cloneable {
+public interface DublinCoreCatalog extends XMLCatalog, DublinCore, Cloneable {
 
-  /** The dublin core filename */
-  public static final String FILENAME = "dublincore.xml";
+  /** Element type definition */
+  MediaPackageElementFlavor FLAVOR = new MediaPackageElementFlavor("metadata", "dublincore", "Dublin core catalog");
 
   public Object clone() throws CloneNotSupportedException;
+
+  /**
+   * Saves the catalog to disk.
+   * 
+   * todo think about hiding technical exceptions
+   * 
+   * @throws ParserConfigurationException
+   *           if the xml parser environment is not correctly configured
+   * @throws TransformerException
+   *           if serialization of the metadata document fails
+   * @throws IOException
+   *           if an error with catalog file handling occurs
+   */
+  Document toXml() throws ParserConfigurationException, TransformerException, IOException;
+
 }

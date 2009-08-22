@@ -16,8 +16,8 @@
 
 package org.opencastproject.media.mediapackage;
 
-import org.opencastproject.media.analysis.types.ScanOrder;
-import org.opencastproject.media.analysis.types.ScanType;
+import org.opencastproject.media.mediapackage.track.ScanOrder;
+import org.opencastproject.media.mediapackage.track.ScanType;
 
 /**
  * A stream containing video data.

@@ -23,26 +23,28 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.opencastproject.media.mediapackage.Mpeg7Catalog;
-import org.opencastproject.media.mediapackage.mpeg7.MediaTime;
-import org.opencastproject.media.mediapackage.mpeg7.Mpeg7CatalogImpl;
-import org.opencastproject.media.mediapackage.mpeg7.MultimediaContent;
-import org.opencastproject.media.mediapackage.mpeg7.MultimediaContentType;
-import org.opencastproject.media.mediapackage.mpeg7.TemporalDecomposition;
-import org.opencastproject.media.mediapackage.mpeg7.TextAnnotation;
-import org.opencastproject.media.mediapackage.mpeg7.VideoSegment;
-import org.opencastproject.util.UnknownFileTypeException;
+import org.opencastproject.util.FileSupport;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
-import java.security.NoSuchAlgorithmException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * Test class for the dublin core implementation.
@@ -73,8 +75,12 @@ public class Mpeg7Test {
    */
   @Test
   public void testFromFile() {
-    Mpeg7Catalog mpeg7 = parse(catalogFile);
-    testContent(mpeg7);
+    try {
+      Mpeg7Catalog mpeg7 = parse(catalogFile.toURI().toURL());
+      testContent(mpeg7);
+    } catch (MalformedURLException e) {
+      fail(e.getMessage());
+    }
   }
 
   /**
@@ -82,35 +88,48 @@ public class Mpeg7Test {
    */
   @Test
   public void testNewInstance() {
-    // Read the sample catalog
-    Mpeg7Catalog mpeg7Sample = parse(catalogFile);
-
-    // Create a new catalog and fill it with a few fields
-    Mpeg7Catalog mpeg7New = null;
     try {
-      mpeg7New = Mpeg7CatalogImpl.newInstance();
+      // Read the sample catalog
+      Mpeg7Catalog mpeg7Sample = parse(catalogFile.toURI().toURL());
+
+      // Create a new catalog and fill it with a few fields
+      Mpeg7Catalog mpeg7New = Mpeg7CatalogImpl.newInstance();
+      File mpeg7TempFile = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
+      mpeg7New.setURL(mpeg7TempFile.toURI().toURL());
 
       // TODO: Add sample tracks to new catalog
       // TODO: Add sample video segments to new catalog
       // TODO: Add sample annotations to new catalog
 
       // Store the catalog
-      mpeg7New.save();
-    } catch (NoSuchAlgorithmException e) {
-      fail("Error verifying the catalog checksum: " + e.getMessage());
+      TransformerFactory transfac = TransformerFactory.newInstance();
+      Transformer trans = transfac.newTransformer();
+      trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+      trans.setOutputProperty(OutputKeys.METHOD,"xml");
+      FileWriter sw = new FileWriter(new File(mpeg7New.getURL().toURI()));
+      StreamResult result = new StreamResult(sw);
+      DOMSource source = new DOMSource(mpeg7New.toXml());
+      trans.transform(source, result);
+      
+      // Re-read the saved catalog and test for its content
+      Mpeg7Catalog mpeg7NewFromDisk = parse(mpeg7New.getURL());
+      // TODO: Test content
+      //testContent(mpeg7NewFromDisk);
+      
     } catch (IOException e) {
       fail("Error creating the catalog: " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      fail("The catalog's mime type is not supported: " + e.getMessage());
+    } catch (URISyntaxException e) {
+      fail("Error storing the catalog: " + e.getMessage());
+    } catch (TransformerConfigurationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     } catch (ParserConfigurationException e) {
-      fail("Error creating a parser for the catalog: " + e.getMessage());
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     } catch (TransformerException e) {
-      fail("Error saving the catalog: " + e.getMessage());
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
-
-    // Re-read the saved catalog and test for its content
-    Mpeg7Catalog mpeg7NewFromDisk = parse(mpeg7New.getFile());
-    // testContent(mpeg7NewFromDisk);
   }
 
   /**
@@ -242,21 +261,17 @@ public class Mpeg7Test {
   /**
    * Parses the test catalog.
    * 
-   * @param file
+   * @param url
    *          the file containing the catalog
    * @return the mpeg-7 object representation
    */
-  private Mpeg7Catalog parse(File file) {
+  private Mpeg7Catalog parse(URL url) {
     Mpeg7Catalog mpeg7 = null;
     try {
-      mpeg7 = Mpeg7CatalogImpl.fromFile(file);
+      mpeg7 = Mpeg7CatalogImpl.fromURL(url);
       return mpeg7;
-    } catch (NoSuchAlgorithmException e) {
-      fail("Error verifying the catalog checksum: " + e.getMessage());
     } catch (IOException e) {
       fail("Error accessing the catalog: " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      fail("The catalog's mime type is not supported: " + e.getMessage());
     } catch (ParserConfigurationException e) {
       fail("Error creating a parser for the catalog: " + e.getMessage());
     } catch (SAXException e) {

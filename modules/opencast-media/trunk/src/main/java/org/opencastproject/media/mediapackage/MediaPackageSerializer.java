@@ -13,21 +13,24 @@
  *  permissions and limitations under the License.
  *
  */
-
 package org.opencastproject.media.mediapackage;
 
-/**
- * <code>Timeline</code> contains events on the timeline of a multimedia production like beginning and end, scene or
- * slide changes etc.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: Timeline.java 2905 2009-07-15 16:16:05Z ced $
- */
-public interface Timeline extends Catalog {
+import java.net.MalformedURLException;
+import java.net.URL;
 
-  /** Media package element type */
-  Type TYPE = Type.Timeline;
+public interface MediaPackageSerializer {
 
-  /** Timeline flavor */
-  MediaPackageElementFlavor FLAVOR = new MediaPackageElementFlavor("metadata", "timeline");
+  /**
+   * This method is called everytime a url is being read from a media package manifest. By implementing this method,
+   * serializers are able to redirect urls to local caches which might make sense when it comes to dealing with huge
+   * media files.
+   * 
+   * @param path
+   *          the original path from the manifest
+   * @return the resolved url
+   * @throws MalformedURLException
+   *          if the path cannot be converted into a url
+   */
+  public URL resolve(String path) throws MalformedURLException;
+  
 }

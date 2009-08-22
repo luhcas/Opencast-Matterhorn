@@ -16,10 +16,6 @@
 
 package org.opencastproject.media.mediapackage;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.handle.Handle;
 import org.opencastproject.media.mediapackage.handle.HandleBuilder;
 import org.opencastproject.media.mediapackage.handle.HandleBuilderFactory;
@@ -29,6 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.io.File;
+import java.io.FileInputStream;
 
 /**
  * Base class for media package tests.
@@ -102,7 +99,8 @@ public abstract class AbstractMediaPackageTest {
   public void setUp() throws Exception {
 
     // Create a media package builder
-    mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
+    MediaPackageBuilderFactory builderFactory = MediaPackageBuilderFactory.newInstance();
+    mediaPackageBuilder = builderFactory.newMediaPackageBuilder();
 
     // Create a handle builder
     handleBuilder = HandleBuilderFactory.newInstance().newHandleBuilder();
@@ -142,7 +140,8 @@ public abstract class AbstractMediaPackageTest {
     coverFile = FileSupport.copy(coverTestFile, attachmentDir);
 
     // Create a media package
-    mediaPackage = mediaPackageBuilder.loadFromDirectory(packageDir);
+    mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(packageDir));
+    mediaPackage = mediaPackageBuilder.loadFromManifest(new FileInputStream(manifestFile));
   }
 
   /**

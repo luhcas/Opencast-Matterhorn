@@ -46,7 +46,7 @@ public class CoverBuilderPlugin extends AbstractAttachmentBuilderPlugin implemen
   @Override
   protected Attachment specializeAttachment(Attachment attachment) throws MediaPackageException {
     try {
-      return new CoverImpl(attachment);
+      return CoverImpl.fromAttachment(attachment);
     } catch (Exception e) {
       throw new MediaPackageException("Failed to specialize cover " + attachment + ": " + e.getMessage());
     }

@@ -14,7 +14,7 @@
  *
  */
 
-package org.opencastproject.media.mediapackage.elementbuilder;
+package org.opencastproject.media.mediapackage.track;
 
 import org.opencastproject.media.mediapackage.AudioStream;
 import org.opencastproject.util.StringSupport;
@@ -33,7 +33,7 @@ import javax.xml.xpath.XPathException;
  * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
-class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
+public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
 
   private Integer resolution;
   private Integer channels;
@@ -46,7 +46,7 @@ class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
   private String formatVersion;
   private String encoderLibraryVendor;
 
-  AudioStreamImpl(String identifier) {
+  public AudioStreamImpl(String identifier) {
     super(identifier);
   }
 
@@ -240,44 +240,44 @@ class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
 
   // Setter
 
-  void setResolution(Integer resolution) {
+  public void setResolution(Integer resolution) {
     this.resolution = resolution;
   }
 
-  void setChannels(Integer channels) {
+  public void setChannels(Integer channels) {
     this.channels = channels;
   }
 
-  void setSamplingRate(Integer samplingRate) {
+  public void setSamplingRate(Integer samplingRate) {
     this.samplingRate = samplingRate;
   }
 
-  void setBitRate(Float bitRate) {
+  public void setBitRate(Float bitRate) {
     this.bitRate = bitRate;
   }
 
-  void setCaptureDevice(String captureDevice) {
+  public void setCaptureDevice(String captureDevice) {
     this.captureDevice = captureDevice;
   }
 
-  void setCaptureDeviceVersion(String captureDeviceVersion) {
+  public void setCaptureDeviceVersion(String captureDeviceVersion) {
     this.captureDeviceVersion = captureDeviceVersion;
   }
 
-  void setCaptureDeviceVendor(String captureDeviceVendor) {
+  public void setCaptureDeviceVendor(String captureDeviceVendor) {
     this.captureDeviceVendor = captureDeviceVendor;
   }
 
-  void setFormat(String format) {
+  public void setFormat(String format) {
     this.format = format;
   }
 
-  void setFormatVersion(String formatVersion) {
+  public void setFormatVersion(String formatVersion) {
     this.formatVersion = formatVersion;
   }
 
-  void setEncoderLibraryVendor(String encoderLibraryVendor) {
+  public void setEncoderLibraryVendor(String encoderLibraryVendor) {
     this.encoderLibraryVendor = encoderLibraryVendor;
   }
-  
+
 }

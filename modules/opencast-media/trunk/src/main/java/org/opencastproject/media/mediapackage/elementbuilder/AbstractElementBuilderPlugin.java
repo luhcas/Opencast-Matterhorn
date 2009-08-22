@@ -129,7 +129,7 @@ public abstract class AbstractElementBuilderPlugin implements MediaPackageElemen
     if (mimeTypes != null) {
       if (mimeTypes.length > 0) {
         for (MimeType m : mimeTypes) {
-          if (m.equals(MimeTypes.fromFile(file)))
+          if (m.equals(MimeTypes.fromURL(file)))
             return true;
         }
       } else {
@@ -163,7 +163,7 @@ public abstract class AbstractElementBuilderPlugin implements MediaPackageElemen
     if (mimeTypes != null) {
       if (mimeTypes.size() > 0) {
         for (MimeType m : mimeTypes) {
-          if (m.equals(MimeTypes.fromFile(file)))
+          if (m.equals(MimeTypes.fromURL(file)))
             return true;
         }
       } else {
@@ -203,17 +203,13 @@ public abstract class AbstractElementBuilderPlugin implements MediaPackageElemen
    * @param prefix
    *          the filename prefix
    * @return <code>true</code> if the filename matches
-   * @throws IOException
-   *           if the file cannot be accessed
    */
-  protected boolean checkFilenamePrefix(File file, String prefix) throws IOException {
+  protected boolean checkFilenamePrefix(String file, String prefix) {
     if (file == null)
       throw new IllegalArgumentException("File is null");
-    else if (!file.isFile())
-      return false;
 
     // Check filename
-    return (file.getName().startsWith(prefix));
+    return (file.startsWith(prefix));
   }
 
   /**

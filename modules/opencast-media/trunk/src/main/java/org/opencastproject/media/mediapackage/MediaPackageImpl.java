@@ -17,17 +17,14 @@
 package org.opencastproject.media.mediapackage;
 
 import org.opencastproject.media.mediapackage.handle.Handle;
-import org.opencastproject.util.FileSupport;
-import org.opencastproject.util.PathSupport;
-import org.opencastproject.util.UnknownFileTypeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.NoSuchAlgorithmException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,9 +39,6 @@ import javax.xml.transform.TransformerException;
  * @version $Id: MediaPackageImpl.java 2908 2009-07-17 16:51:07Z ced $
  */
 public final class MediaPackageImpl implements MediaPackage {
-
-  /** The media package root directory */
-  File rootDir = null;
 
   /** The media media package meta data */
   ManifestImpl manifest = null;
@@ -62,23 +56,20 @@ public final class MediaPackageImpl implements MediaPackage {
   private final static Logger log_ = LoggerFactory.getLogger(MediaPackageImpl.class.getName());
 
   /**
-   * Creates a media package object from the given root directory and media package identifier.
+   * Creates a media package object.
+   */
+  MediaPackageImpl() {
+    this.manifest = new ManifestImpl();
+  }
+
+  /**
+   * Creates a media package object with the media package identifier.
    * 
-   * @param directory
-   *          the media package root directory
    * @param handle
    *          the media package identifier
-   * @throws IOException
-   *           if the media package contents cannot be accessed
-   * @throws UnknownFileTypeException
-   *           if the media package contains unknown file types
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
    */
-  MediaPackageImpl(File directory, Handle handle) throws IOException, UnknownFileTypeException,
-          NoSuchAlgorithmException {
-    this.rootDir = directory;
-    this.manifest = new ManifestImpl(this, handle);
+  MediaPackageImpl(Handle handle) {
+    this.manifest = new ManifestImpl(handle);
   }
 
   /**
@@ -89,7 +80,6 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   MediaPackageImpl(ManifestImpl manifest) {
     this.manifest = manifest;
-    this.rootDir = manifest.getFile().getParentFile();
 
     // Set a reference to the media package
     for (MediaPackageElement element : manifest.getEntries()) {
@@ -99,25 +89,13 @@ public final class MediaPackageImpl implements MediaPackage {
     }
   }
 
-  public File getManifestFile() {
-    return manifest.getFile();
-  }
-
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#getIdentifier()
    */
   public Handle getIdentifier() {
     return manifest.getIdentifier();
   }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#isLocked()
-   */
-  public boolean isLocked() {
-    File lockfile = new File(rootDir, LOCKFILE);
-    return lockfile.exists();
-  }
-
+  
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#getDuration()
    */
@@ -193,12 +171,8 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#add(org.opencastproject.media.mediapackage.Catalog)
    */
   public void add(Catalog catalog) throws MediaPackageException, UnsupportedElementException {
-    add(catalog, true);
-  }
-
-  public void add(Catalog catalog, boolean move) throws MediaPackageException, UnsupportedElementException {
     try {
-      integrateCatalog(catalog, move);
+      integrateCatalog(catalog);
       manifest.add(catalog);
       fireElementAdded(catalog);
     } catch (IOException e) {
@@ -210,15 +184,8 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#add(org.opencastproject.media.mediapackage.Track)
    */
   public void add(Track track) throws MediaPackageException, UnsupportedElementException {
-    add(track, true);
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#add(org.opencastproject.media.mediapackage.Track, boolean)
-   */
-  public void add(Track track, boolean move) throws MediaPackageException, UnsupportedElementException {
     try {
-      integrateTrack(track, move);
+      integrateTrack(track);
       manifest.add(track);
       fireElementAdded(track);
     } catch (IOException e) {
@@ -230,12 +197,8 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#add(org.opencastproject.media.mediapackage.Attachment)
    */
   public void add(Attachment attachment) throws MediaPackageException, UnsupportedElementException {
-    add(attachment, true);
-  }
-
-  public void add(Attachment attachment, boolean move) throws MediaPackageException, UnsupportedElementException {
     try {
-      integrateAttachment(attachment, move);
+      integrateAttachment(attachment);
       manifest.add(attachment);
       fireElementAdded(attachment);
     } catch (IOException e) {
@@ -452,7 +415,6 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   protected void removeElement(MediaPackageElement element) throws MediaPackageException {
     try {
-      element.getFile().delete();
       if (element instanceof AbstractMediaPackageElement) {
         ((AbstractMediaPackageElement) element).setMediaPackage(null);
       }
@@ -483,18 +445,10 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#setCover(org.opencastproject.media.mediapackage.Cover)
    */
   public void setCover(Cover cover) throws MediaPackageException, UnsupportedElementException {
-    setCover(cover, true);
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#setCover(org.opencastproject.media.mediapackage.Cover,
-   *      boolean)
-   */
-  public void setCover(Cover cover, boolean move) throws MediaPackageException, UnsupportedElementException {
     Cover oldCover = getCover();
     if (oldCover != null)
       remove(oldCover);
-    add(cover, move);
+    add(cover);
   }
 
   /**
@@ -517,48 +471,6 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#getRoot()
-   */
-  public File getRoot() {
-    return rootDir;
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#getCatalogRoot()
-   */
-  public File getCatalogRoot() {
-    return new File(rootDir, CATALOG_DIR);
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#getTrackRoot()
-   */
-  public File getTrackRoot() {
-    return new File(rootDir, TRACK_DIR);
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#getAttachmentRoot()
-   */
-  public File getAttachmentRoot() {
-    return new File(rootDir, ATTACHMENT_DIR);
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#getDistributionRoot()
-   */
-  public File getDistributionRoot() {
-    return new File(rootDir, TEMP_DIR);
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#wrap()
-   */
-  public void wrap() throws MediaPackageException {
-    manifest.wrap();
-  }
-
-  /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#pack(org.opencastproject.media.mediapackage.MediaPackagePackager,
    *      java.io.OutputStream)
    */
@@ -571,42 +483,30 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#add(java.io.File)
-   */
-  public MediaPackageElement add(File file) throws MediaPackageException, UnsupportedElementException {
-    return add(file, true);
-  }
-
-  /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#add(java.io.File, boolean)
    */
-  public MediaPackageElement add(File file, boolean move) throws MediaPackageException, UnsupportedElementException {
+  public MediaPackageElement add(URL url) throws MediaPackageException, UnsupportedElementException {
     if (mediaPackageElementBuilder == null) {
       mediaPackageElementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
     }
-    MediaPackageElement element = mediaPackageElementBuilder.elementFromFile(file);
-    add(element, move);
+    MediaPackageElement element = mediaPackageElementBuilder.elementFromURL(url);
+    add(element);
     return element;
   }
 
   /**
-   * Adds a new element to this media package.
+   * {@inheritDoc}
    * 
-   * @param element
-   *          the new element
+   * @see org.opencastproject.media.mediapackage.MediaPackage#add(org.opencastproject.media.mediapackage.MediaPackageElement)
    */
   public void add(MediaPackageElement element) throws MediaPackageException, UnsupportedElementException {
-    add(element, true);
-  }
-
-  public void add(MediaPackageElement element, boolean move) throws MediaPackageException, UnsupportedElementException {
     try {
       if (element.getElementType().equals(MediaPackageElement.Type.Track) && element instanceof Track) {
-        integrateTrack((Track) element, move);
+        integrateTrack((Track) element);
       } else if (element.getElementType().equals(MediaPackageElement.Type.Catalog) && element instanceof Catalog) {
-        integrateCatalog((Catalog) element, move);
+        integrateCatalog((Catalog) element);
       } else if (element.getElementType().equals(MediaPackageElement.Type.Attachment) && element instanceof Attachment) {
-        integrateAttachment((Attachment) element, move);
+        integrateAttachment((Attachment) element);
       } else {
         integrate(element);
       }
@@ -654,53 +554,10 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#copyTo(java.io.File)
-   */
-  public void copyTo(File destination) throws IOException {
-    destination = new File(destination, rootDir.getName());
-    FileSupport.copy(rootDir, destination);
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#delete()
-   */
-  public boolean delete() {
-    return FileSupport.delete(rootDir, FileSupport.DELETE_ROOT);
-  }
-
-  /**
-   * @throws IOException
-   * @see org.opencastproject.media.mediapackage.MediaPackage#moveTo(java.io.File)
-   */
-  public boolean moveTo(File destination) throws IOException {
-    File oldRoot = rootDir;
-    try {
-      MediaPackageSupport.lockMediaPackage(oldRoot);
-      rootDir = FileSupport.move(oldRoot, destination);
-
-      // Tell the media package elements about the new location
-      manifest.mediaPackageMoved(oldRoot, rootDir);
-      for (MediaPackageElement e : manifest.getEntries()) {
-        e.mediaPackageMoved(oldRoot, rootDir);
-      }
-    } catch (Throwable t) {
-      rootDir = oldRoot;
-      throw new IOException(t.getMessage());
-    } finally {
-      try {
-        MediaPackageSupport.unlockMediaPackage(rootDir);
-      } catch (MediaPackageException e) {
-        log_.error("Unable to unlock media package after moving", e);
-      }
-    }
-    return true;
-  }
-
-  /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#renameTo(org.opencastproject.media.mediapackage.handle.Handle)
    */
-  public boolean renameTo(Handle identifier) {
-    return rootDir.renameTo(new File(rootDir.getParentFile(), identifier.toString()));
+  public void renameTo(Handle identifier) {
+    manifest.setIdentifier(identifier);
   }
 
   /**
@@ -711,7 +568,12 @@ public final class MediaPackageImpl implements MediaPackage {
       return size;
     size = 0;
     for (MediaPackageElement e : manifest.getEntries()) {
-      size += e.getFile().length();
+      long elementSize = e.getSize();
+      if (elementSize < 0) {
+        log_.warn("Package element " + e + " returned invalid size " + elementSize);
+        return -1;
+      }
+      size += e.getSize();
     }
     return size;
   }
@@ -726,8 +588,8 @@ public final class MediaPackageImpl implements MediaPackage {
    *           if integration of the element failed
    */
   private void integrate(MediaPackageElement element) throws IOException {
-    // TODO: Add element as an attachment?
-    throw new IllegalStateException("This element is not supported by this media package implementation");
+    if (element instanceof AbstractMediaPackageElement)
+      ((AbstractMediaPackageElement) element).setMediaPackage(this);
   }
 
   /**
@@ -736,18 +598,17 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @param catalog
    *          the catalog to integrate
-   * @param move
    * @throws IOException
    *           if integration of the catalog failed
    */
-  private void integrateCatalog(Catalog catalog, boolean move) throws IOException {
+  private void integrateCatalog(Catalog catalog) throws IOException {
     // Check (uniqueness of) catalog identifier
     String id = catalog.getIdentifier();
     if (id == null || contains(id)) {
       id = createElementIdentifier("catalog", manifest.getCatalogs().length + 1);
       catalog.setIdentifier(id.toString());
     }
-    integrate(catalog, getCatalogRoot());
+    integrate(catalog);
   }
 
   /**
@@ -756,18 +617,17 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @param track
    *          the track to integrate
-   * @param move
    * @throws IOException
    *           if integration of the track failed
    */
-  private void integrateTrack(Track track, boolean move) throws IOException {
+  private void integrateTrack(Track track) throws IOException {
     // Check (uniqueness of) track identifier
     String id = track.getIdentifier();
     if (id == null || contains(id)) {
       id = createElementIdentifier("track", manifest.getTracks().length + 1);
       track.setIdentifier(id.toString());
     }
-    integrate(track, getTrackRoot());
+    integrate(track);
   }
 
   /**
@@ -776,50 +636,17 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @param attachment
    *          the attachment to integrate
-   * @param move
    * @throws IOException
    *           if integration of the attachment failed
    */
-  private void integrateAttachment(Attachment attachment, boolean move) throws IOException {
+  private void integrateAttachment(Attachment attachment) throws IOException {
     // Check (uniqueness of) attachment identifier
     String id = attachment.getIdentifier();
     if (id == null || contains(id)) {
       id = createElementIdentifier("attachment", manifest.getAttachments().length + 1);
       attachment.setIdentifier(id.toString());
     }
-    integrate(attachment, getAttachmentRoot());
-  }
-
-  /**
-   * Integrates (= copies) the elements underlying resource into the media package and wires the element with the media
-   * package
-   * 
-   * @param element
-   *          the element to integrate
-   * @param elementRoot
-   *          the directory, where the element shall reside within the media package
-   * @throws IOException
-   */
-  private void integrate(MediaPackageElement element, File elementRoot) throws IOException {
-    // Only integrate if not already in media package
-    if (!FileSupport.equals(elementRoot, element.getFile().getParentFile())) {
-      // Ensure uniqueness of filename
-      File dest = new File(elementRoot, element.getFilename());
-      if (dest.exists()) {
-        dest = createElementFilename(elementRoot, element.getFilename());
-      }
-      // Put track into place
-      File src = element.getFile();
-      if (!src.canRead())
-        throw new IllegalStateException("Cannot read track file " + src);
-      elementRoot.mkdirs();
-      element.integrate(dest);
-    }
-
-    // Set a reference to the media package
-    if (element instanceof AbstractMediaPackageElement) {
-      ((AbstractMediaPackageElement) element).setMediaPackage(this);
-    }
+    integrate(attachment);
   }
 
   /**
@@ -842,29 +669,6 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Creates a unique filename inside the root folder, based on the parameter <code>filename</code>.
-   * 
-   * @param root
-   *          the root folder
-   * @param filename
-   *          the original filename
-   * @return the new and unique filename
-   */
-  private File createElementFilename(File root, String filename) {
-    String baseName = PathSupport.removeFileExtension(filename);
-    String extension = PathSupport.getFileExtension(filename);
-    int count = 1;
-    StringBuffer name = null;
-    File f = new File(root, filename);
-    while (f.exists()) {
-      name = new StringBuffer(baseName).append("-").append(count).append(".").append(extension);
-      f = new File(root, name.toString());
-      count++;
-    }
-    return f;
-  }
-
-  /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#verify()
    */
   public void verify() throws MediaPackageException {
@@ -874,16 +678,18 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
+   * Serializes the media package to a dom document.
+   * 
+   * @throws ParserConfigurationException 
+   * @throws TransformerException 
    * @see org.opencastproject.media.mediapackage.MediaPackage#save()
    */
-  public void save() throws MediaPackageException {
+  public Document toXml() throws MediaPackageException {
     try {
-      manifest.save();
+      return manifest.toXml();
     } catch (TransformerException e) {
       throw new MediaPackageException(e);
     } catch (ParserConfigurationException e) {
-      throw new MediaPackageException(e);
-    } catch (IOException e) {
       throw new MediaPackageException(e);
     }
   }
@@ -958,4 +764,5 @@ public final class MediaPackageImpl implements MediaPackage {
     else
       return "Unknown media package";
   }
+
 }

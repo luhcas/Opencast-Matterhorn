@@ -14,10 +14,8 @@
  *
  */
 
-package org.opencastproject.media.mediapackage.elementbuilder;
+package org.opencastproject.media.mediapackage.track;
 
-import org.opencastproject.media.analysis.types.ScanOrder;
-import org.opencastproject.media.analysis.types.ScanType;
 import org.opencastproject.media.mediapackage.VideoStream;
 import org.opencastproject.util.StringSupport;
 
@@ -34,7 +32,7 @@ import javax.xml.xpath.XPathException;
  * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
-class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
+public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
 
   private Float bitRate;
   private Float frameRate;
@@ -49,7 +47,7 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
   private String formatVersion;
   private String encoderLibraryVendor;
 
-  VideoStreamImpl(String identifier) {
+  public VideoStreamImpl(String identifier) {
     super(identifier);
   }
 
@@ -261,52 +259,52 @@ class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
 
   // Setter
 
-  void setBitRate(Float bitRate) {
+  public void setBitRate(Float bitRate) {
     this.bitRate = bitRate;
   }
 
-  void setFrameRate(Float frameRate) {
+  public void setFrameRate(Float frameRate) {
     this.frameRate = frameRate;
   }
 
-  void setFrameWidth(Integer frameWidth) {
+  public void setFrameWidth(Integer frameWidth) {
     this.frameWidth = frameWidth;
   }
 
-  void setFrameHeight(Integer frameHeight) {
+  public void setFrameHeight(Integer frameHeight) {
     this.frameHeight = frameHeight;
   }
 
-  void setScanType(ScanType scanType) {
+  public void setScanType(ScanType scanType) {
     this.scanType = scanType;
   }
 
-  void setScanOrder(ScanOrder scanOrder) {
+  public void setScanOrder(ScanOrder scanOrder) {
     this.scanOrder = scanOrder;
   }
 
-  void setCaptureDevice(String capturedevice) {
+  public void setCaptureDevice(String capturedevice) {
     this.capturedevice = capturedevice;
   }
 
-  void setCaptureDeviceVersion(String capturedeviceVersion) {
+  public void setCaptureDeviceVersion(String capturedeviceVersion) {
     this.capturedeviceVersion = capturedeviceVersion;
   }
 
-  void setCaptureDeviceVendor(String captureDeviceVendor) {
+  public void setCaptureDeviceVendor(String captureDeviceVendor) {
     this.captureDeviceVendor = captureDeviceVendor;
   }
 
-  void setFormat(String format) {
+  public void setFormat(String format) {
     this.format = format;
   }
 
-  void setFormatVersion(String formatVersion) {
+  public void setFormatVersion(String formatVersion) {
     this.formatVersion = formatVersion;
   }
 
-  void setEncoderLibraryVendor(String encoderLibraryVendor) {
+  public void setEncoderLibraryVendor(String encoderLibraryVendor) {
     this.encoderLibraryVendor = encoderLibraryVendor;
   }
-  
+
 }

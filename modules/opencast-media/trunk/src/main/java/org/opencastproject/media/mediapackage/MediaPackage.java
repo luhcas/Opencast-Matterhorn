@@ -18,9 +18,11 @@ package org.opencastproject.media.mediapackage;
 
 import org.opencastproject.media.mediapackage.handle.Handle;
 
-import java.io.File;
+import org.w3c.dom.Document;
+
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 
 /**
  * Interface for a media package, which is a data container moving through the system, containing metadata, tracks and
@@ -49,34 +51,12 @@ public interface MediaPackage {
     }
   }
 
-  /** Name of the lock file */
-  String LOCKFILE = "__lock.lck";
-
-  /** Relative path to media package catalogs */
-  String CATALOG_DIR = "metadata";
-
-  /** Relative path to media package tracks */
-  String TRACK_DIR = "tracks";
-
-  /** Relative path to media package attachments */
-  String ATTACHMENT_DIR = "attachments";
-
-  /** Relative path to media package temporary files */
-  String TEMP_DIR = "temp";
-
   /**
    * Returns the media package identifier.
    * 
    * @return the identifier
    */
   Handle getIdentifier();
-
-  /**
-   * Returns the media package's root path.
-   * 
-   * @return the root path
-   */
-  File getRoot();
 
   /**
    * Returns the media package start time.
@@ -91,42 +71,6 @@ public interface MediaPackage {
    * @return the duration
    */
   long getDuration();
-
-  /**
-   * Returns the media package's catalog root path.
-   * 
-   * @return the catalog root path
-   */
-  File getCatalogRoot();
-
-  /**
-   * Returns the media package's track root path.
-   * 
-   * @return the track root path
-   */
-  File getTrackRoot();
-
-  /**
-   * Returns the media package's attachment root path.
-   * 
-   * @return the attachment root path
-   */
-  File getAttachmentRoot();
-
-  /**
-   * Returns the media package's temporary items folder.
-   * 
-   * @return the temporary items folder
-   */
-  File getDistributionRoot();
-
-  /**
-   * Returns <code>true</code> if the media package is locked. A media package is considered locked, if it contains a
-   * {@link #LOCKFILE}.
-   * 
-   * @return <code>true</code> if the media package is locked
-   */
-  boolean isLocked();
 
   /**
    * Returns <code>true</code> if the given element is part of the media package.
@@ -370,51 +314,21 @@ public interface MediaPackage {
   boolean hasUnclassifiedElements(MediaPackageElementFlavor flavor);
 
   /**
-   * Adds an arbitrary {@link File} to this media package, utilizing a {@link MediaPackageBuilder} to create a suitable
-   * media package element out of the file. If the file cannot be recognized as being either a metadata catalog or
+   * Adds an arbitrary {@link URL} to this media package, utilizing a {@link MediaPackageBuilder} to create a suitable
+   * media package element out of the url. If the content cannot be recognized as being either a metadata catalog or
    * multimedia track, it is added as an attachment.
-   * <p>
-   * Note that the implementation is actually <em>moving</em> the underlying file in the filesystem. Use this method
-   * <em>only</em> if you do not need the media package element in its originial place anymore.
-   * <p>
-   * Depending on the implementation, this method may provide significant performance benefits over copying the media
-   * package element.
    * 
-   * @param file
-   *          the element file
+   * @param url
+   *          the element location
    * @throws MediaPackageException
    *           if the element cannot be accessed
    * @throws UnsupportedElementException
    *           if the element is of an unsupported format
-   * @see #add(File, boolean)
    */
-  MediaPackageElement add(File file) throws MediaPackageException, UnsupportedElementException;
+  MediaPackageElement add(URL file) throws MediaPackageException, UnsupportedElementException;
 
   /**
-   * Adds an arbitrary {@link File} to this media package, utilizing a {@link MediaPackageBuilder} to create a suitable
-   * media package element out of the file. If the file cannot be recognized as being either a metadata catalog or
-   * multimedia track, it is added as an attachment.
-   * <p>
-   * Depending on the parameter <code>move</code>, the underlying file will be moved or copied to the media package. Use
-   * this <code>move = true</code> <em>only</em> if you do not need the catalog in its originial place anymore.
-   * 
-   * @param file
-   *          the element file
-   * @throws MediaPackageException
-   *           if the element cannot be accessed
-   * @throws UnsupportedElementException
-   *           if the element is of an unsupported format
-   * @see #add(File, boolean)
-   */
-  MediaPackageElement add(File file, boolean move) throws MediaPackageException, UnsupportedElementException;
-
-  /**
-   * Adds an arbitrary {@link MediaPackageElement} to this media package, actually <em>moving</em> the underlying file
-   * in the filesystem. Use this method <em>only</em> if you do not need the media package element in its originial
-   * place anymore.
-   * <p>
-   * Depending on the implementation, this method may provide significant performance benefits over copying the media
-   * package element.
+   * Adds an arbitrary {@link MediaPackageElement} to this media package.
    * 
    * @param element
    *          the element
@@ -422,25 +336,8 @@ public interface MediaPackage {
    *           if the element cannot be accessed
    * @throws UnsupportedElementException
    *           if the element is of an unsupported format
-   * @see #add(MediaPackageElement, boolean)
    */
   void add(MediaPackageElement element) throws MediaPackageException, UnsupportedElementException;
-
-  /**
-   * Adds an arbitrary {@link MediaPackageElement} to this media package. Depending on the parameter <code>move</code>,
-   * the underlying file will be moved or copied to the media package. Use this <code>move = true</code> <em>only</em>
-   * if you do not need the catalog in its originial place anymore.
-   * 
-   * @param element
-   *          the element
-   * @param move
-   *          true = move the underlying file, false = create a copy
-   * @throws MediaPackageException
-   *           if the element cannot be accessed
-   * @throws UnsupportedElementException
-   *           if the element is of an unsupported format
-   */
-  void add(MediaPackageElement element, boolean move) throws MediaPackageException, UnsupportedElementException;
 
   /**
    * Adds a track to this media package, actually <em>moving</em> the underlying file in the filesystem. Use this method
@@ -454,25 +351,8 @@ public interface MediaPackage {
    *           if the track cannot be accessed
    * @throws UnsupportedElementException
    *           if the track is of an unsupported format
-   * @see #add(Track, boolean)
    */
   void add(Track track) throws MediaPackageException, UnsupportedElementException;
-
-  /**
-   * Adds a track to this media package. Depending on the parameter <code>move</code>, the underlying file will be moved
-   * or copied to the media package. Use this <code>move = true</code> <em>only</em> if you do not need the track in its
-   * originial place anymore.
-   * 
-   * @param track
-   *          the track
-   * @param move
-   *          true = move the underlying file, false = create a copy
-   * @throws MediaPackageException
-   *           if the track cannot be accessed
-   * @throws UnsupportedElementException
-   *           if the track is of an unsupported format
-   */
-  void add(Track track, boolean move) throws MediaPackageException, UnsupportedElementException;
 
   /**
    * Removes the track from the media package.
@@ -485,10 +365,7 @@ public interface MediaPackage {
   void remove(Track track) throws MediaPackageException;
 
   /**
-   * Adds catalog information to this media package, actually <em>moving</em> the underlying file in the filesystem. Use
-   * this method <em>only</em> if you do not need the catalog in its originial place anymore.
-   * <p>
-   * Depending on the implementation, this method may provide significant performance benefits over copying the catalog.
+   * Adds catalog information to this media package.
    * 
    * @param catalog
    *          the catalog
@@ -498,22 +375,6 @@ public interface MediaPackage {
    *           if the catalog is of an unsupported format
    */
   void add(Catalog catalog) throws MediaPackageException, UnsupportedElementException;
-
-  /**
-   * Adds catalog information to this media package. Depending on the parameter <code>move</code>, the underlying file
-   * will be moved or copied to the media package. Use this <code>move = true</code> <em>only</em> if you do not need
-   * the catalog in its originial place anymore.
-   * 
-   * @param catalog
-   *          the catalog
-   * @param move
-   *          true = move the underlying file, false = create a copy
-   * @throws MediaPackageException
-   *           if the catalog cannot be accessed
-   * @throws UnsupportedElementException
-   *           if the catalog is of an unsupported format
-   */
-  void add(Catalog catalog, boolean move) throws MediaPackageException, UnsupportedElementException;
 
   /**
    * Removes the catalog from the media package.
@@ -526,37 +387,16 @@ public interface MediaPackage {
   void remove(Catalog catalog) throws MediaPackageException;
 
   /**
-   * Adds an attachment to this media package, actually <em>moving</em> the underlying file in the filesystem. Use this
-   * method <em>only</em> if you do not need the attachment in its originial place anymore.
-   * <p>
-   * Depending on the implementation, this method may provide significant performance benefits over copying the
-   * attachment.
+   * Adds an attachment to this media package.
    * 
    * @param attachment
    *          the attachment
-   * @throws MediaPackageException
-   *           if the attachment cannot be accessed
-   * @throws UnsupportedElementException
-   *           if the attachment is of an unsupported format
-   * @see #add(Attachment, boolean)
-   */
-  void add(Attachment attachment) throws MediaPackageException, UnsupportedElementException;
-
-  /**
-   * Adds an attachment to this media package. Depending on the parameter <code>move</code>, the underlying file will be
-   * moved or copied to the media package. Use this <code>move = true</code> <em>only</em> if you do not need the
-   * attachment in its originial place anymore.
-   * 
-   * @param attachment
-   *          the attachment
-   * @param move
-   *          true = move the underlying file, false = create a copy
    * @throws MediaPackageException
    *           if the attachment cannot be accessed
    * @throws UnsupportedElementException
    *           if the attachment is of an unsupported format
    */
-  void add(Attachment attachment, boolean move) throws MediaPackageException, UnsupportedElementException;
+  void add(Attachment attachment) throws MediaPackageException, UnsupportedElementException;
 
   /**
    * Removes an arbitrary media package element.
@@ -586,10 +426,7 @@ public interface MediaPackage {
   Cover getCover();
 
   /**
-   * Adds a cover to this media package, actually <em>moving</em> the underlying file in the filesystem. Use this method
-   * <em>only</em> if you do not need the cover in its originial place anymore.
-   * <p>
-   * Depending on the implementation, this method may provide significant performance benefits over copying the cover.
+   * Adds a cover to this media package.
    * 
    * @param cover
    *          the cover
@@ -597,25 +434,8 @@ public interface MediaPackage {
    *           if the cover cannot be accessed
    * @throws UnsupportedElementException
    *           if the cover is of an unsupported format
-   * @see #setCover(Cover, boolean)
    */
   void setCover(Cover cover) throws MediaPackageException, UnsupportedElementException;
-
-  /**
-   * Adds a cover to this media package. Depending on the parameter <code>move</code>, the underlying file will be moved
-   * or copied to the media package. Use this <code>move = true</code> <em>only</em> if you do not need the cover in its
-   * originial place anymore.
-   * 
-   * @param cover
-   *          the cover art
-   * @param move
-   *          true = move the underlying file, false = create a copy
-   * @throws MediaPackageException
-   *           if the cover cannot be accessed
-   * @throws UnsupportedElementException
-   *           if the cover is of an unsupported format
-   */
-  void setCover(Cover cover, boolean move) throws MediaPackageException, UnsupportedElementException;
 
   /**
    * Removes the cover from the media package.
@@ -663,14 +483,6 @@ public interface MediaPackage {
   void pack(MediaPackagePackager packager, OutputStream out) throws IOException, MediaPackageException;
 
   /**
-   * Reconsiders the elements from the manifest and calculates their checksums, then updates the manifest to reflect any
-   * updated elements.
-   * 
-   * @throws MediaPackageException
-   */
-  void wrap() throws MediaPackageException;
-
-  /**
    * Verifies the media package consistency by checking the media package elements for mimetypes and checksums.
    * 
    * @throws MediaPackageException
@@ -684,25 +496,7 @@ public interface MediaPackage {
    * @throws MediaPackageException
    *           if saving the manifest failed
    */
-  void save() throws MediaPackageException;
-
-  /**
-   * Deletes the media package with all its content.
-   * 
-   * @return <code>true</code> if the media package could be deleted
-   */
-  boolean delete();
-
-  /**
-   * Moves the media package to <code>destination</code>.
-   * 
-   * @param destination
-   *          the target location
-   * @return <code>true</code> if the media package could be moved to the destination
-   * @throws IOException
-   *           if moving the media package failed
-   */
-  boolean moveTo(File destination) throws IOException;
+  Document toXml() throws MediaPackageException;
 
   /**
    * Renames the media package to the new identifier.
@@ -711,16 +505,6 @@ public interface MediaPackage {
    *          the identifier
    * @return <code>true</code> if the media package could be renamed
    */
-  boolean renameTo(Handle identifier);
-
-  /**
-   * Copies the media package to the given location.
-   * 
-   * @param destination
-   *          the destination folder
-   * @throws IOException
-   *           if moving the media package failed
-   */
-  void copyTo(File destination) throws IOException;
+  void renameTo(Handle identifier);
 
 }

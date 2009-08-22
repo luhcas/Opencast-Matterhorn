@@ -16,6 +16,12 @@
 
 package org.opencastproject.media.mediapackage.dublincore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.opencastproject.media.mediapackage.dublincore.DublinCore.ENC_SCHEME_URI;
 import static org.opencastproject.media.mediapackage.dublincore.DublinCore.LANGUAGE_ANY;
 import static org.opencastproject.media.mediapackage.dublincore.DublinCore.LANGUAGE_UNDEFINED;
@@ -26,19 +32,10 @@ import static org.opencastproject.media.mediapackage.dublincore.DublinCore.PROPE
 import static org.opencastproject.media.mediapackage.dublincore.DublinCore.PROPERTY_TITLE;
 import static org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl.PROPERTY_PROMOTED;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.NamespaceBindingException;
-import org.opencastproject.media.mediapackage.dublincore.DublinCore;
-import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
-import org.opencastproject.media.mediapackage.dublincore.DublinCoreValue;
+import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.UnknownFileTypeException;
 
 import org.junit.Before;
@@ -46,11 +43,20 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * Test class for the dublin core implementation.
@@ -87,7 +93,12 @@ public class DublinCoreTest {
    */
   @Test
   public void testFromFile() {
-    DublinCoreCatalog dc = parse(catalogFile);
+    DublinCoreCatalog dc = null;
+    try {
+      dc = parse(catalogFile.toURI().toURL());
+    } catch (MalformedURLException e) {
+      fail(e.getMessage());
+    }
 
     // Check if the fields are available
     assertEquals("ETH Zurich, Switzerland", dc.getFirst(PROPERTY_PUBLISHER, LANGUAGE_UNDEFINED));
@@ -103,13 +114,15 @@ public class DublinCoreTest {
    */
   @Test
   public void testNewInstance() {
-    // Read the sample catalog
-    DublinCoreCatalog dcSample = parse(catalogFile);
-
-    // Create a new catalog and fill it with a few fields
-    DublinCoreCatalog dcNew = null;
     try {
-      dcNew = DublinCoreCatalogImpl.newInstance();
+
+      // Read the sample catalog
+      DublinCoreCatalog dcSample = parse(catalogFile.toURI().toURL());
+
+      // Create a new catalog and fill it with a few fields
+      DublinCoreCatalog dcNew = DublinCoreCatalogImpl.newInstance();
+      File dcTempFile = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
+      dcNew.setURL(dcTempFile.toURI().toURL());
 
       // Add the required fields
       dcNew.add(PROPERTY_IDENTIFIER, dcSample.getFirst(PROPERTY_IDENTIFIER));
@@ -140,25 +153,31 @@ public class DublinCoreTest {
         // Ok. This exception is expected to occur
       }
 
-      // Store the document
-      dcNew.save();
-    } catch (NoSuchAlgorithmException e) {
-      fail("Error verifying the catalog checksum: " + e.getMessage());
+      // Store the catalog
+      TransformerFactory transfac = TransformerFactory.newInstance();
+      Transformer trans = transfac.newTransformer();
+      trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+      trans.setOutputProperty(OutputKeys.METHOD,"xml");
+      FileWriter sw = new FileWriter(new File(dcNew.getURL().toURI()));
+      StreamResult result = new StreamResult(sw);
+      DOMSource source = new DOMSource(dcNew.toXml());
+      trans.transform(source, result);
+
+      // Re-read the saved catalog and test for its content
+      DublinCoreCatalog dcNewFromDisk = parse(dcNew.getURL());
+      assertEquals(dcSample.getFirst(PROPERTY_IDENTIFIER), dcNewFromDisk.getFirst(PROPERTY_IDENTIFIER));
+      assertEquals(dcSample.getFirst(PROPERTY_TITLE, "en"), dcNewFromDisk.getFirst(PROPERTY_TITLE, "en"));
+      assertEquals(dcSample.getFirst(PROPERTY_PUBLISHER), dcNewFromDisk.getFirst(PROPERTY_PUBLISHER));
+
     } catch (IOException e) {
       fail("Error creating the catalog: " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      fail("The catalog's mime type is not supported: " + e.getMessage());
     } catch (ParserConfigurationException e) {
       fail("Error creating a parser for the catalog: " + e.getMessage());
     } catch (TransformerException e) {
       fail("Error saving the catalog: " + e.getMessage());
+    } catch (URISyntaxException e) {
+      fail("Error saving the catalog: " + e.getMessage());
     }
-
-    // Re-read the saved catalog and test for its content
-    DublinCoreCatalog dcNewFromDisk = parse(dcNew.getFile());
-    assertEquals(dcSample.getFirst(PROPERTY_IDENTIFIER), dcNewFromDisk.getFirst(PROPERTY_IDENTIFIER));
-    assertEquals(dcSample.getFirst(PROPERTY_TITLE, "en"), dcNewFromDisk.getFirst(PROPERTY_TITLE, "en"));
-    assertEquals(dcSample.getFirst(PROPERTY_PUBLISHER), dcNewFromDisk.getFirst(PROPERTY_PUBLISHER));
   }
 
   /**
@@ -166,13 +185,15 @@ public class DublinCoreTest {
    */
   @Test(expected = IllegalStateException.class)
   public void testRequiredFields() {
-    // Read the sample catalog
-    DublinCoreCatalog dcSample = parse(catalogFile);
-
-    // Create a new catalog and fill it with a few fields
-    DublinCoreCatalog dcNew = null;
     try {
-      dcNew = DublinCoreCatalogImpl.newInstance();
+
+      // Read the sample catalog
+      DublinCoreCatalog dcSample = parse(catalogFile.toURI().toURL());
+
+      // Create a new catalog and fill it with a few fields
+      DublinCoreCatalog dcNew = DublinCoreCatalogImpl.newInstance();
+      File dcTempFile = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
+      dcNew.setURL(dcTempFile.toURI().toURL());
 
       // Add the required fields but the title
       dcNew.set(PROPERTY_IDENTIFIER, dcSample.getFirst(PROPERTY_IDENTIFIER));
@@ -180,18 +201,24 @@ public class DublinCoreTest {
       // Add an additional field
       dcNew.set(PROPERTY_PUBLISHER, dcSample.getFirst(PROPERTY_PUBLISHER));
 
-      // Store the document
-      (dcNew).save();
+      // Store the catalog
+      TransformerFactory transfac = TransformerFactory.newInstance();
+      Transformer trans = transfac.newTransformer();
+      trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+      trans.setOutputProperty(OutputKeys.METHOD,"xml");
+      FileWriter sw = new FileWriter(new File(dcNew.getURL().toURI()));
+      StreamResult result = new StreamResult(sw);
+      DOMSource source = new DOMSource(dcNew.toXml());
+      trans.transform(source, result);
+
       fail("Required field was missing but not reported!");
-    } catch (NoSuchAlgorithmException e) {
-      fail("Error verifying the catalog checksum: " + e.getMessage());
     } catch (IOException e) {
       fail("Error creating the catalog: " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      fail("The catalog's mime type is not supported: " + e.getMessage());
     } catch (ParserConfigurationException e) {
       fail("Error creating a parser for the catalog: " + e.getMessage());
     } catch (TransformerException e) {
+      fail("Error saving the catalog: " + e.getMessage());
+    } catch (URISyntaxException e) {
       fail("Error saving the catalog: " + e.getMessage());
     }
   }
@@ -203,25 +230,17 @@ public class DublinCoreTest {
   public void testOverwriting() {
     // Create a new catalog and fill it with a few fields
     DublinCoreCatalog dcNew = null;
-    try {
-      dcNew = DublinCoreCatalogImpl.newInstance();
-      dcNew.set(PROPERTY_TITLE, "Title 1");
-      assertEquals("Title 1", dcNew.getFirst(PROPERTY_TITLE));
+    dcNew = DublinCoreCatalogImpl.newInstance();
+    dcNew.set(PROPERTY_TITLE, "Title 1");
+    assertEquals("Title 1", dcNew.getFirst(PROPERTY_TITLE));
 
-      dcNew.set(PROPERTY_TITLE, "Title 2");
-      assertEquals("Title 2", dcNew.getFirst(PROPERTY_TITLE));
+    dcNew.set(PROPERTY_TITLE, "Title 2");
+    assertEquals("Title 2", dcNew.getFirst(PROPERTY_TITLE));
 
-      dcNew.set(PROPERTY_TITLE, "Title 3", "de");
-      assertEquals("Title 2", dcNew.getFirst(PROPERTY_TITLE));
-      assertEquals("Title 3", dcNew.getFirst(PROPERTY_TITLE, "de"));
-      dcNew = null;
-    } catch (NoSuchAlgorithmException e) {
-      fail("Error verifying the catalog checksum: " + e.getMessage());
-    } catch (IOException e) {
-      fail("Error creating the catalog: " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      fail("The catalog's mime type is not supported: " + e.getMessage());
-    }
+    dcNew.set(PROPERTY_TITLE, "Title 3", "de");
+    assertEquals("Title 2", dcNew.getFirst(PROPERTY_TITLE));
+    assertEquals("Title 3", dcNew.getFirst(PROPERTY_TITLE, "de"));
+    dcNew = null;
   }
 
   @Test
@@ -331,21 +350,17 @@ public class DublinCoreTest {
   /**
    * Parses the test catalog.
    * 
-   * @param file
-   *          the file containing the catalog
+   * @param url
+   *          the url containing the catalog
    * @return the dublin core object representation
    */
-  private DublinCoreCatalog parse(File file) {
+  private DublinCoreCatalog parse(URL url) {
     DublinCoreCatalog dc;
     try {
-      dc = DublinCoreCatalogImpl.fromFile(file);
+      dc = DublinCoreCatalogImpl.fromURL(url);
       return dc;
-    } catch (NoSuchAlgorithmException e) {
-      fail("Error verifying the catalog checksum: " + e.getMessage());
     } catch (IOException e) {
       fail("Error accessing the catalog: " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      fail("The catalog's mime type is not supported: " + e.getMessage());
     } catch (ParserConfigurationException e) {
       fail("Error creating a parser for the catalog: " + e.getMessage());
     } catch (SAXException e) {
