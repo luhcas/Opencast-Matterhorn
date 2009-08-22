@@ -499,6 +499,17 @@ public interface MediaPackage {
   Document toXml() throws MediaPackageException;
 
   /**
+   * Saves the media package, utilizing the serializer when it comes to
+   * creating paths from urls.
+   * 
+   * @param serializer
+   *          the media package serializer
+   * @throws MediaPackageException
+   *           if saving the manifest failed
+   */
+  Document toXml(MediaPackageSerializer serializer) throws MediaPackageException;
+
+  /**
    * Renames the media package to the new identifier.
    * 
    * @param identifier

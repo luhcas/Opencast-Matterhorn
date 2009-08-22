@@ -19,6 +19,7 @@ package org.opencastproject.media.mediapackage.attachment;
 import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageSerializer;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 
@@ -119,11 +120,11 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toManifest(org.w3c.dom.Document)
+   * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toManifest(org.w3c.dom.Document, org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
   @Override
-  public Node toManifest(Document document) {
-    Node node = super.toManifest(document);
+  public Node toManifest(Document document, MediaPackageSerializer serializer) {
+    Node node = super.toManifest(document, serializer);
     return node;
   }
 

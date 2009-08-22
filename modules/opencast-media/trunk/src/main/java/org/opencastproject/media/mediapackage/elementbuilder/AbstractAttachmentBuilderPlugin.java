@@ -16,13 +16,6 @@
 
 package org.opencastproject.media.mediapackage.elementbuilder;
 
-import java.io.IOException;
-import java.net.URL;
-import java.security.NoSuchAlgorithmException;
-
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
@@ -34,9 +27,17 @@ import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.UnknownFileTypeException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
+
+import java.io.IOException;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
 
 /**
  * This implementation of the {@link MediaPackageElementBuilderPlugin} recognizes attachments and provides utility
@@ -162,7 +163,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       reference = (String) xpath.evaluate("@ref", elementNode, XPathConstants.STRING);
 
       // url
-      url = serializer.resolve(xpath.evaluate("url/text()", elementNode).trim());
+      url = serializer.resolvePath(xpath.evaluate("url/text()", elementNode).trim());
 
       // size
       try {

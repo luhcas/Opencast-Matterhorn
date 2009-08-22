@@ -685,8 +685,21 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#save()
    */
   public Document toXml() throws MediaPackageException {
+    return toXml(null);
+  }
+
+  /**
+   * Serializes the media package to a dom document.
+   * 
+   * @param serializer
+   *          the media package serializer
+   * @throws ParserConfigurationException 
+   * @throws TransformerException 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#save()
+   */
+  public Document toXml(MediaPackageSerializer serializer) throws MediaPackageException {
     try {
-      return manifest.toXml();
+      return manifest.toXml(serializer);
     } catch (TransformerException e) {
       throw new MediaPackageException(e);
     } catch (ParserConfigurationException e) {

@@ -16,15 +16,16 @@
 
 package org.opencastproject.media.mediapackage.elementbuilder;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageSerializer;
+
 import org.w3c.dom.Node;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * An element builder plugin is an object that is able to recognize one ore more filetypes slated for ingest into

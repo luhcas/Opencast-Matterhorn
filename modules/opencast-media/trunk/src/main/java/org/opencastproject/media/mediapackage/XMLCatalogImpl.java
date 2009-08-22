@@ -506,11 +506,11 @@ public abstract class XMLCatalogImpl extends AbstractMediaPackageElement impleme
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toManifest(org.w3c.dom.Document)
+   * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toManifest(org.w3c.dom.Document, org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
   @Override
-  public Node toManifest(Document document) {
-    Node node = super.toManifest(document);
+  public Node toManifest(Document document, MediaPackageSerializer serializer) {
+    Node node = super.toManifest(document, serializer);
     return node;
   }
 

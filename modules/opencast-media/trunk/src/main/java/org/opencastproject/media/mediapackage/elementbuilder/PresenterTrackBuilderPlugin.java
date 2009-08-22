@@ -16,18 +16,19 @@
 
 package org.opencastproject.media.mediapackage.elementbuilder;
 
-import java.net.URL;
-
-import javax.xml.xpath.XPathExpressionException;
-
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.track.TrackImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
+
+import java.net.URL;
+
+import javax.xml.xpath.XPathExpressionException;
 
 /**
  * This implementation of the {@link MediaPackageElementBuilderPlugin} recognizes presenter tracks and provides the

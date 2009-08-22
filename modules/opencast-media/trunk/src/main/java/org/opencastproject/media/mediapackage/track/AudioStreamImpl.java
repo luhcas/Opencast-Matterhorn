@@ -17,6 +17,7 @@
 package org.opencastproject.media.mediapackage.track;
 
 import org.opencastproject.media.mediapackage.AudioStream;
+import org.opencastproject.media.mediapackage.MediaPackageSerializer;
 import org.opencastproject.util.StringSupport;
 
 import org.apache.commons.lang.StringUtils;
@@ -50,7 +51,10 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
     super(identifier);
   }
 
-  public Node toManifest(Document document) {
+  /**
+   * @see org.opencastproject.media.mediapackage.ManifestContributor#toManifest(org.w3c.dom.Document, org.opencastproject.media.mediapackage.MediaPackageSerializer)
+   */
+  public Node toManifest(Document document, MediaPackageSerializer serializer) {
     Element node = document.createElement("Audio");
     // Stream ID
     node.setAttribute("id", getIdentifier());

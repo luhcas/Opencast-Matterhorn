@@ -21,7 +21,18 @@ import java.net.URL;
 public interface MediaPackageSerializer {
 
   /**
-   * This method is called everytime a url is being read from a media package manifest. By implementing this method,
+   * This method is called every time a url is being written to a media package manifest. By implementing this method,
+   * serializers are able to store package elements in directories relative to some common root folder, thereby
+   * making it movable.
+   * 
+   * @param url
+   *          the url to encode
+   * @return the encoded path
+   */
+  public String encodeURL(URL url);
+
+  /**
+   * This method is called every time a url is being read from a media package manifest. By implementing this method,
    * serializers are able to redirect urls to local caches which might make sense when it comes to dealing with huge
    * media files.
    * 
@@ -31,6 +42,6 @@ public interface MediaPackageSerializer {
    * @throws MalformedURLException
    *          if the path cannot be converted into a url
    */
-  public URL resolve(String path) throws MalformedURLException;
-  
+  public URL resolvePath(String path) throws MalformedURLException;
+
 }

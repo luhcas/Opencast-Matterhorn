@@ -17,8 +17,8 @@
 package org.opencastproject.media.mediapackage.elementbuilder;
 
 import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Cover;
+import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.attachment.CoverImpl;
 
 /**

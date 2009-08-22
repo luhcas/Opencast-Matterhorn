@@ -16,6 +16,11 @@
 
 package org.opencastproject.media.mediapackage;
 
+import org.opencastproject.media.mediapackage.handle.Handle;
+import org.opencastproject.media.mediapackage.handle.HandleException;
+
+import org.xml.sax.SAXException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -23,10 +28,6 @@ import java.text.ParseException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
-
-import org.opencastproject.media.mediapackage.handle.Handle;
-import org.opencastproject.media.mediapackage.handle.HandleException;
-import org.xml.sax.SAXException;
 
 /**
  * This class provides factory methods for the creation of media packages from

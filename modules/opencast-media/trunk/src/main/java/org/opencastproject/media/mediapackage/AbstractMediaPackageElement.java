@@ -376,9 +376,9 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElement#toManifest(Document)
+   * @see org.opencastproject.media.mediapackage.ManifestContributor#toManifest(org.w3c.dom.Document, org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
-  public Node toManifest(Document document) {
+  public Node toManifest(Document document, MediaPackageSerializer serializer) {
     Element node = document.createElement(elementType.toString().toLowerCase());
     node.setAttribute("id", id);
 
@@ -387,8 +387,9 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
       node.setAttribute("type", flavor.toString());
 
     // Reference
-    if (reference != null && (mediaPackage == null || !reference.matches(new MediaPackageReferenceImpl(mediaPackage))))
-      node.setAttribute("ref", reference.toString());
+    if (reference != null)
+      if (mediaPackage == null || !reference.matches(new MediaPackageReferenceImpl(mediaPackage)))
+        node.setAttribute("ref", reference.toString());
 
     // Description
     if (description != null) {
@@ -399,7 +400,8 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
 
     // Url
     Element urlNode = document.createElement("url");
-    urlNode.appendChild(document.createTextNode(url.toExternalForm()));
+    String urlValue = (serializer != null) ? serializer.encodeURL(url) : url.toExternalForm();
+    urlNode.appendChild(document.createTextNode(urlValue));
     node.appendChild(urlNode);
 
     // MimeType

@@ -36,8 +36,10 @@ public interface ManifestContributor {
    * 
    * @param document
    *          the parent
+   * @param serializer
+   *          the media package serializer
    * @return the object's xml representation
    */
-  Node toManifest(Document document);
+  Node toManifest(Document document, MediaPackageSerializer serializer);
 
 }

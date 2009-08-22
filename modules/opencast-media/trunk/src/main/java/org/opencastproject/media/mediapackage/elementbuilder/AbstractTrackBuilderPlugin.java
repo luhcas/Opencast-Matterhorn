@@ -16,14 +16,6 @@
 
 package org.opencastproject.media.mediapackage.elementbuilder;
 
-import java.io.IOException;
-import java.net.URL;
-import java.security.NoSuchAlgorithmException;
-
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathException;
-import javax.xml.xpath.XPathExpressionException;
-
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
@@ -37,7 +29,16 @@ import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.UnknownFileTypeException;
+
 import org.w3c.dom.Node;
+
+import java.io.IOException;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathException;
+import javax.xml.xpath.XPathExpressionException;
 
 /**
  * Abstract base class for the various track builders.
@@ -94,7 +95,7 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
       id = (String) xpath.evaluate("@id", elementNode, XPathConstants.STRING);
 
       // url
-      url = serializer.resolve(xpath.evaluate("url/text()", elementNode).trim());
+      url = serializer.resolvePath(xpath.evaluate("url/text()", elementNode).trim());
 
       // reference
       reference = (String) xpath.evaluate("@ref", elementNode, XPathConstants.STRING);

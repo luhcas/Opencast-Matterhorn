@@ -51,7 +51,10 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
     if (mediaPackage == null)
       throw new IllegalArgumentException("Parameter media package must not be null");
     type = TYPE_MEDIAPACKAGE;
-    identifier = mediaPackage.getIdentifier().toString();
+    if (mediaPackage.getIdentifier() != null)
+      identifier = mediaPackage.getIdentifier().toString();
+    else
+      identifier = SELF;
   }
 
   /**

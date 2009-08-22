@@ -55,7 +55,7 @@ import javax.xml.xpath.XPathFactory;
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: ManifestImpl.java 2908 2009-07-17 16:51:07Z ced $
  */
-public final class ManifestImpl {
+final class ManifestImpl {
 
   /** The media package's identifier */
   private Handle identifier = null;
@@ -189,7 +189,8 @@ public final class ManifestImpl {
       MediaPackageReference reference = element.getReference();
       if (reference != null) {
         if (reference.getType().equals(MediaPackageReference.TYPE_MEDIAPACKAGE)
-                && reference.getIdentifier().equals(MediaPackageReference.SELF)) {
+                && reference.getIdentifier().equals(MediaPackageReference.SELF)
+                && identifier != null) {
           element
                   .referTo(new MediaPackageReferenceImpl(MediaPackageReference.TYPE_MEDIAPACKAGE, identifier.toString()));
         }
@@ -713,6 +714,21 @@ public final class ManifestImpl {
    * @throws IOException
    */
   Document toXml() throws TransformerException, ParserConfigurationException {
+    return toXml(null);
+  }
+
+  /**
+   * Returns an xml presentation of the manifest.
+   * 
+   * @param serializer
+   *          the media package serializer
+   * @throws TransformerException
+   *           if serializing the document fails
+   * @throws ParserConfigurationException
+   *           if the creating a document builder fails
+   * @throws IOException
+   */
+  Document toXml(MediaPackageSerializer serializer) throws TransformerException, ParserConfigurationException {
     DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
     docBuilderFactory.setNamespaceAware(true);
     DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
@@ -757,7 +773,7 @@ public final class ManifestImpl {
       Element tracksNode = doc.createElement("media");
       Collections.sort(tracks);
       for (Track t : tracks) {
-        tracksNode.appendChild(t.toManifest(doc));
+        tracksNode.appendChild(t.toManifest(doc, serializer));
       }
       mediaPackage.appendChild(tracksNode);
     }
@@ -767,7 +783,7 @@ public final class ManifestImpl {
       Element metadataNode = doc.createElement("metadata");
       Collections.sort(metadata);
       for (Catalog m : metadata) {
-        metadataNode.appendChild(m.toManifest(doc));
+        metadataNode.appendChild(m.toManifest(doc, serializer));
       }
       mediaPackage.appendChild(metadataNode);
     }
@@ -777,7 +793,7 @@ public final class ManifestImpl {
       Element attachmentsNode = doc.createElement("attachments");
       Collections.sort(attachments);
       for (Attachment a : attachments) {
-        attachmentsNode.appendChild(a.toManifest(doc));
+        attachmentsNode.appendChild(a.toManifest(doc, serializer));
       }
       mediaPackage.appendChild(attachmentsNode);
     }
@@ -787,7 +803,7 @@ public final class ManifestImpl {
       Element othersNode = doc.createElement("unclassified");
       Collections.sort(others);
       for (MediaPackageElement e : others) {
-        othersNode.appendChild(e.toManifest(doc));
+        othersNode.appendChild(e.toManifest(doc, serializer));
       }
       mediaPackage.appendChild(othersNode);
     }

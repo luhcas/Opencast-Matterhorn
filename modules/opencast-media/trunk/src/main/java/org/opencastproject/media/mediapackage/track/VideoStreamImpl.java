@@ -16,6 +16,7 @@
 
 package org.opencastproject.media.mediapackage.track;
 
+import org.opencastproject.media.mediapackage.MediaPackageSerializer;
 import org.opencastproject.media.mediapackage.VideoStream;
 import org.opencastproject.util.StringSupport;
 
@@ -136,7 +137,10 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
     return vs;
   }
 
-  public Node toManifest(Document document) {
+  /**
+   * @see org.opencastproject.media.mediapackage.ManifestContributor#toManifest(org.w3c.dom.Document, org.opencastproject.media.mediapackage.MediaPackageSerializer)
+   */
+  public Node toManifest(Document document, MediaPackageSerializer serializer) {
     Element node = document.createElement("video");
     // Stream ID
     node.setAttribute("id", getIdentifier());

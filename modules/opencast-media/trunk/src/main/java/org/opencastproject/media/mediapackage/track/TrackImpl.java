@@ -19,6 +19,7 @@ package org.opencastproject.media.mediapackage.track;
 import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.MediaPackageSerializer;
 import org.opencastproject.media.mediapackage.Stream;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.Checksum;
@@ -129,8 +130,8 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
    * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toManifest(org.w3c.dom.Document)
    */
   @Override
-  public Node toManifest(Document document) {
-    Node node = super.toManifest(document);
+  public Node toManifest(Document document, MediaPackageSerializer serializer) {
+    Node node = super.toManifest(document, serializer);
 
     // duration
     Node durationNode = document.createElement("duration");
@@ -138,7 +139,7 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
     node.appendChild(durationNode);
 
     for (Stream s : streams)
-      node.appendChild(s.toManifest(document));
+      node.appendChild(s.toManifest(document, serializer));
     return node;
   }
 

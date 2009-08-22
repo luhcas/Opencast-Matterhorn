@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Utility class used for media package handling.
@@ -55,7 +54,7 @@ public class MediaPackageSupport {
    * Merges the contents of media package located at <code>sourceDir</code> into the media package located at
    * <code>targetDir</code>.
    * <p>
-   * When choosing to move the media package element into the new place instead of copying them, the souce media package
+   * When choosing to move the media package element into the new place instead of copying them, the source media package
    * folder will be removed afterwards.
    * </p>
    * 
@@ -95,34 +94,6 @@ public class MediaPackageSupport {
       throw new MediaPackageException(e);
     }
     return dest;
-  }
-
-  /**
-   * Integrates (= copies) the elements underlying resource into the media package and wires the element with the media
-   * package
-   * 
-   * @param element
-   *          the element to integrate
-   * @param elementRoot
-   *          the directory, where the element shall reside within the media package
-   * @throws IOException
-   */
-  public static void integrate(MediaPackageElement element, File elementRoot) throws IOException {
-    throw new UnsupportedOperationException("Not yet implemented");
-    // Only integrate if not already in media package
-    // if (!FileSupport.equals(elementRoot, element.getURL().getParentFile())) {
-    // // Ensure uniqueness of filename
-    // File dest = new File(elementRoot, element.getFilename());
-    // if (dest.exists()) {
-    // dest = createElementFilename(elementRoot, element.getFilename());
-    // }
-    // // Put track into place
-    // File src = element.getURL();
-    // if (!src.canRead())
-    // throw new IllegalStateException("Cannot read track file " + src);
-    // elementRoot.mkdirs();
-    // element.integrate(dest);
-    // }
   }
 
   /**

@@ -16,10 +16,10 @@
 
 package org.opencastproject.media.mediapackage;
 
+import org.opencastproject.media.mediapackage.handle.Handle;
+
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.opencastproject.media.mediapackage.handle.Handle;
 
 /**
  * A media package builder provides factory methods for the creation of media packages from manifest files, packages,

@@ -15,11 +15,11 @@
  */
 package org.opencastproject.media.mediapackage;
 
+import org.opencastproject.util.PathSupport;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import org.opencastproject.util.PathSupport;
 
 /**
  * Default implementation of a {@link MediaPackageSerializer} that is able to deal with relative urls in manifest.
@@ -82,6 +82,31 @@ public class DefaultMediaPackageSerializerImpl implements MediaPackageSerializer
   }
 
   /**
+   * This serializer implementation tries to cope with relative urls. Should the root url be set to any value
+   * other than <code>null</code>, the serializer will try to convert element urls to relative paths if possible.
+   * .
+   * @see org.opencastproject.media.mediapackage.MediaPackageSerializer#encodeURL(java.net.URL)
+   */
+  public String encodeURL(URL url) {
+    if (url == null)
+      throw new IllegalArgumentException("Argument url is null");
+
+    String path = url.toExternalForm();
+    
+    // Has a package root been set? If not, no relative paths!
+    if (packageRoot == null)
+      return url.toExternalForm();
+    
+    // A package root has been set
+    String rootPath = packageRoot.toExternalForm();
+    if (path.startsWith(rootPath)) {
+      path = path.substring(rootPath.length());
+    }
+    
+    return path;
+  }
+
+  /**
    * This serializer implementation tries to cope with relative urls. Should the path start with neither a protocol nor
    * a path separator, the packageRoot is used to create the url relative to the root url that was passed in the
    * constructor.
@@ -89,9 +114,9 @@ public class DefaultMediaPackageSerializerImpl implements MediaPackageSerializer
    * Note that for absolute paths without a protocol, the <code>file://</code> protocol is assumed.
    *  
    * @see #DefaultMediaPackageSerializerImpl(URL)
-   * @see org.opencastproject.media.mediapackage.MediaPackageSerializer#resolve(java.lang.String)
+   * @see org.opencastproject.media.mediapackage.MediaPackageSerializer#resolvePath(java.lang.String)
    */
-  public URL resolve(String path) throws MalformedURLException {
+  public URL resolvePath(String path) throws MalformedURLException {
     if (path == null)
       throw new IllegalArgumentException("Argument path is null");
     
