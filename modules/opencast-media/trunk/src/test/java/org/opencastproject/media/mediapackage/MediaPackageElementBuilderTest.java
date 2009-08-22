@@ -23,7 +23,6 @@ import org.opencastproject.media.mediapackage.dublincore.DublinCoreTest;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Node;
 
 import java.io.File;
 import java.io.IOException;
@@ -114,16 +113,6 @@ public class MediaPackageElementBuilderTest {
       // Expected
     }
 
-  }
-
-  /**
-   * Test method for
-   * {@link org.opencastproject.media.mediapackage.MediaPackageElementBuilderImpl#elementFromManifest(Node elementNode, File packageRoot, boolean verify)}
-   * .
-   */
-  @Test
-  public void testElementFromManifest() {
-    System.out.println("Not yet implemented");
   }
 
   /**

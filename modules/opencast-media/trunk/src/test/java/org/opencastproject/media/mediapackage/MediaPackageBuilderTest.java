@@ -28,9 +28,6 @@ import java.io.FileNotFoundException;
 
 /**
  * Test case used to make sure the media package builder works as expected.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageBuilderTest.java 2905 2009-07-15 16:16:05Z ced $
  */
 public class MediaPackageBuilderTest extends AbstractMediaPackageTest {
 
@@ -66,16 +63,6 @@ public class MediaPackageBuilderTest extends AbstractMediaPackageTest {
     } catch (FileNotFoundException e) {
       fail("Configuration exception while reading media package from manifest: " + e.getMessage());
     }
-  }
-
-  /**
-   * Test method for
-   * {@link org.opencastproject.media.mediapackage.MediaPackageBuilderImpl#loadFromPackage(org.opencastproject.media.mediapackage.MediaPackagePackager, java.io.InputStream)}
-   * .
-   */
-  @Test
-  public void testLoadFromPackage() {
-    System.out.println("Not yet implemented");
   }
 
 }
