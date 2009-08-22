@@ -129,7 +129,7 @@ public abstract class AbstractElementBuilderPlugin implements MediaPackageElemen
     if (mimeTypes != null) {
       if (mimeTypes.length > 0) {
         for (MimeType m : mimeTypes) {
-          if (m.equals(MimeTypes.fromURL(file)))
+          if (m.equals(MimeTypes.fromURL(file.toURI().toURL())))
             return true;
         }
       } else {
@@ -163,7 +163,7 @@ public abstract class AbstractElementBuilderPlugin implements MediaPackageElemen
     if (mimeTypes != null) {
       if (mimeTypes.size() > 0) {
         for (MimeType m : mimeTypes) {
-          if (m.equals(MimeTypes.fromURL(file)))
+          if (m.equals(MimeTypes.fromURL(file.toURI().toURL())))
             return true;
         }
       } else {
