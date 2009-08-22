@@ -21,8 +21,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.opencastproject.media.mediapackage.dublincore.DublinCore;
-import org.opencastproject.media.mediapackage.dublincore.DublinCoreValue;
 import org.opencastproject.media.mediapackage.dublincore.utils.DCMIPeriod;
 import org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils;
 import org.opencastproject.media.mediapackage.dublincore.utils.Precision;
