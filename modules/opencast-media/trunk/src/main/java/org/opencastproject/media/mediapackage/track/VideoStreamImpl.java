@@ -85,18 +85,18 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
       throw new IllegalStateException("Frame rate was malformatted: " + e.getMessage());
     }
 
-    // size
-    String size = (String) xpath.evaluate("size/text()", node, XPathConstants.STRING);
-    if (size == null || size.trim().equals(""))
-      throw new IllegalStateException("video size is missing");
+    // resolution
+    String resolution = (String) xpath.evaluate("resolution/text()", node, XPathConstants.STRING);
+    if (resolution == null || resolution.trim().equals(""))
+      throw new IllegalStateException("Video resolution is missing");
     try {
-      String[] s = size.trim().split("x");
+      String[] s = resolution.trim().split("x");
       if (s.length != 2)
-        throw new IllegalStateException("video size must be of the form <hsize>x<vsize>, found " + size);
+        throw new IllegalStateException("video size must be of the form <hsize>x<vsize>, found " + resolution);
       vs.frameWidth = new Integer(s[0].trim());
       vs.frameHeight = new Integer(s[1].trim());
     } catch (NumberFormatException e) {
-      throw new IllegalStateException("Sampling rate was malformatted: " + e.getMessage());
+      throw new IllegalStateException("Resolution was malformatted: " + e.getMessage());
     }
 
     // interlacing
@@ -181,11 +181,11 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
     if (hasAttr)
       node.appendChild(encoderNode);
 
-    // Size
-    Element sizeNode = document.createElement("size");
+    // Resolution
+    Element resolutionNode = document.createElement("resolution");
     String size = frameWidth + "x" + frameHeight;
-    sizeNode.appendChild(document.createTextNode(size));
-    node.appendChild(sizeNode);
+    resolutionNode.appendChild(document.createTextNode(size));
+    node.appendChild(resolutionNode);
 
     // Interlacing
     if (scanType != null) {

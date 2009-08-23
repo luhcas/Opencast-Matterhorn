@@ -8,7 +8,7 @@
       <video>
         <device type="UFG03" version="30112007" vendor="Unigraf" />
         <encoder type="H.264" version="7.4" vendor="Apple Inc" />
-        <size>640x480</size>
+        <resolution>640x480</resolution>
         <scantype type="progressive" />
         <bitrate>540520</bitrate>
         <Framerate>2</Framerate>
