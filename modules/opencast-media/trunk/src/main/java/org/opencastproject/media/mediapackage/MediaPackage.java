@@ -328,6 +328,24 @@ public interface MediaPackage {
   MediaPackageElement add(URL file) throws MediaPackageException, UnsupportedElementException;
 
   /**
+   * Adds an arbitrary {@link URL} to this media package, utilizing a {@link MediaPackageBuilder} to create a suitable
+   * media package element out of the url. If the content cannot be recognized as being either a metadata catalog or
+   * multimedia track, it is added as an attachment.
+   * 
+   * @param url
+   *          the element location
+   * @param type
+   *          the element type
+   * @param flavor
+   *          the element flavor
+   * @throws MediaPackageException
+   *           if the element cannot be accessed
+   * @throws UnsupportedElementException
+   *           if the element is of an unsupported format
+   */
+  MediaPackageElement add(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws MediaPackageException, UnsupportedElementException;
+
+  /**
    * Adds an arbitrary {@link MediaPackageElement} to this media package.
    * 
    * @param element

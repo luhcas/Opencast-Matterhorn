@@ -16,6 +16,7 @@
 
 package org.opencastproject.media.mediapackage;
 
+import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.media.mediapackage.handle.Handle;
 
 import org.slf4j.Logger;
@@ -486,10 +487,32 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#add(java.io.File, boolean)
    */
   public MediaPackageElement add(URL url) throws MediaPackageException, UnsupportedElementException {
+    if (url == null)
+      throw new IllegalArgumentException("Argument 'url' may not be null");
+
     if (mediaPackageElementBuilder == null) {
       mediaPackageElementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
     }
     MediaPackageElement element = mediaPackageElementBuilder.elementFromURL(url);
+    add(element);
+    return element;
+  }
+
+  /**
+   * @see org.opencastproject.media.mediapackage.MediaPackage#add(java.net.URL, org.opencastproject.media.mediapackage.MediaPackageElement.Type, org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
+   */
+  public MediaPackageElement add(URL url, Type type, MediaPackageElementFlavor flavor) throws MediaPackageException, UnsupportedElementException {
+    if (url == null)
+      throw new IllegalArgumentException("Argument 'url' may not be null");
+    if (type == null)
+      throw new IllegalArgumentException("Argument 'type' may not be null");
+    if (flavor == null)
+      throw new IllegalArgumentException("Argument 'flavor' may not be null");
+
+    if (mediaPackageElementBuilder == null) {
+      mediaPackageElementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+    }
+    MediaPackageElement element = mediaPackageElementBuilder.elementFromURL(url, type, flavor);
     add(element);
     return element;
   }
