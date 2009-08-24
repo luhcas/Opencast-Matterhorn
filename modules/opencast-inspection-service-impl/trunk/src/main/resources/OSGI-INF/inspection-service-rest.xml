@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" immediate="true">
+  <implementation class="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" />
+  <property name="service.description" value="Media Inspection REST Endpoint" />
+  <property name="service.exported.interfaces" value="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" />
+  <property name="service.exported.configs" value="org.apache.cxf.rs" />
+  <property name="org.apache.cxf.rs.httpservice.context" value="/inspection" />
+  <service>
+    <provide interface="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" />
+  </service>
+  <reference name="service" interface="org.opencastproject.inspection.api.MediaInspectionService"
+    cardinality="0..1" policy="dynamic" bind="setService" />
+</component>

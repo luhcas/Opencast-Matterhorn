@@ -35,6 +35,8 @@ import java.util.Properties;
  *
  * todo translate original german documentation
  *
+ * FIXME: I had to comment out several methods due to type erasure.  Fix or remove these.
+ * 
  * @author Christoph Drießen
  */
 public class CollectionSupport {
@@ -184,21 +186,21 @@ public class CollectionSupport {
    * 
    * @return ArrayList
    */
-  public static <E> List<E> merge(Collection<Collection<E>> collections) {
-    ArrayList<E> merged = new ArrayList<E>();
-    for (Collection<E> c : collections)
-      merged.addAll(c);
-    return merged;
-  }
+//  public static <E> List<E> merge(Collection<Collection<E>> collections) {
+//    ArrayList<E> merged = new ArrayList<E>();
+//    for (Collection<E> c : collections)
+//      merged.addAll(c);
+//    return merged;
+//  }
 
   /**
    * Vereint alle Collections in einer neuen Liste.
    * 
    * @return ArrayList
    */
-  public static <E> List<E> merge(Collection<E>... collections) {
-    return merge(new ArrayBackedList<Collection<E>>(collections));
-  }
+//  public static <E> List<E> merge(Collection<E>... collections) {
+//    return merge(new ArrayBackedList<Collection<E>>(collections));
+//  }
 
   /**
    * Vereint Collection und Array in einer neuen Liste.
@@ -237,9 +239,9 @@ public class CollectionSupport {
    * 
    * @return HashMap
    */
-  public static <K, V> Map<K, V> merge(Map<K, V>... maps) {
-    return merge(new ArrayBackedList<Map<K, V>>(maps));
-  }
+//  public static <K, V> Map<K, V> merge(Map<K, V>... maps) {
+//    return merge(new ArrayBackedList<Map<K, V>>(maps));
+//  }
 
   /**
    * Vereint alle Properties in einem. Doppelte Keys überschreiben sich in der
@@ -247,12 +249,12 @@ public class CollectionSupport {
    * 
    * @return die vereinten Properties
    */
-  public static Properties merge(Collection<Properties> props) {
-    Properties merged = new Properties();
-    for (Properties p : props)
-      merged.putAll(p);
-    return merged;
-  }
+//  public static Properties merge(Collection<Properties> props) {
+//    Properties merged = new Properties();
+//    for (Properties p : props)
+//      merged.putAll(p);
+//    return merged;
+//  }
 
   /**
    * Vereint alle Properties in einem. Doppelte Keys überschreiben sich in der
@@ -262,9 +264,9 @@ public class CollectionSupport {
    *          darf <i>null</i> sein
    * @return die vereinten Properties
    */
-  public static Properties merge(Properties... props) {
-    return merge(new ArrayBackedList<Properties>(props));
-  }
+//  public static Properties merge(Properties... props) {
+//    return merge(new ArrayBackedList<Properties>(props));
+//  }
 
   /**
    * Erzeugt aus <var>map</var> eine neue Map, in der Keys und Values vertauscht

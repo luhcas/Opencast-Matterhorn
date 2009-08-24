@@ -49,13 +49,13 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
   private static final Class<?> PLUGIN_INTERFACE = MediaPackageElementBuilderPlugin.class;
 
   /** The list of plugins */
-  private static List<Class<? extends MediaPackageElementBuilderPlugin>> plugins = null;
+  private List<Class<? extends MediaPackageElementBuilderPlugin>> plugins = null;
 
   /** the logging facility provided by log4j */
   private final static Logger log_ = LoggerFactory.getLogger(MediaPackageElementBuilderImpl.class.getName());
 
   // Create the list of available element builder pugins
-  static {
+  public MediaPackageElementBuilderImpl() {
     plugins = new ArrayList<Class<? extends MediaPackageElementBuilderPlugin>>();
     ClassLoader cl = MediaPackageElementBuilderImpl.class.getClassLoader();
     Class<?>[] pluginClasses = PluginLoader.findPlugins(PLUGIN_PKG, null, new String[] { PLUGIN_INTERFACE.getName() },

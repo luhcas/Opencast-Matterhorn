@@ -13,15 +13,33 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.inspection.api;
 
-import org.opencastproject.media.mediapackage.Track;
-
-import java.net.URL;
+package org.opencastproject.inspection.impl;
 
 /**
- * Anayzes media to determine its technical metadata.
+ * Exception thrown by the {@link MediaAnalyzer}.
+ * 
+ * @author Christoph E. Drießen <ced@neopoly.de>
  */
-public interface MediaInspectionService {
-   Track inspect(URL url);
+public class MediaAnalyzerException extends RuntimeException {
+
+  /** Serial version uid */
+  private static final long serialVersionUID = 1336936343567817393L;
+
+  public MediaAnalyzerException() {
+    super();
+  }
+
+  public MediaAnalyzerException(String message) {
+    super(message);
+  }
+
+  public MediaAnalyzerException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public MediaAnalyzerException(Throwable cause) {
+    super(cause);
+  }
+
 }

@@ -13,15 +13,24 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.inspection.api;
+package org.opencastproject.inspection.impl;
 
-import org.opencastproject.media.mediapackage.Track;
+import org.junit.Test;
 
 import java.net.URL;
 
 /**
- * Anayzes media to determine its technical metadata.
+ * TODO: Add meaningful tests
  */
-public interface MediaInspectionService {
-   Track inspect(URL url);
+public class MediaInspectionServiceImplTest {
+
+  @Test
+  public void inspectMedia() throws Exception {
+    MediaInspectionServiceImpl service = new MediaInspectionServiceImpl();
+    URL url = this.getClass().getResource("test-video.mp4");
+    // FIXME -- the test movie should always be available
+    if(url != null) {
+      service.inspect(url);
+    }
+  }
 }

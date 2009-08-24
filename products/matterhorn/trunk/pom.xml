@@ -40,14 +40,16 @@
         <module>opencast-composer-service-impl</module>
         <module>opencast-conductor-service-api</module>
         <module>opencast-conductor-service-impl</module>
+        <module>opencast-inspection-service-api</module>
+        <module>opencast-inspection-service-impl</module>
+        <module>opencast-media</module>
         <module>opencast-notification-service-api</module>
         <module>opencast-runtime-info-ui</module>
+        <module>opencast-util</module>
         <module>opencast-working-file-repository-service-api</module>
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
-        <module>opencast-inspection-service-api</module>
-        <module>opencast-inspection-service-impl</module>
 	<module>opencast-delivery-service-api</module>
 	<module>opencast-delivery-service-impl</module>
       </modules>
@@ -65,14 +67,16 @@
         <module>opencast-composer-service-impl</module>
         <module>opencast-conductor-service-api</module>
         <module>opencast-conductor-service-impl</module>
+        <module>opencast-inspection-service-api</module>
+        <module>opencast-inspection-service-impl</module>
+        <module>opencast-media</module>
         <module>opencast-notification-service-api</module>
         <module>opencast-runtime-info-ui</module>
+        <module>opencast-util</module>
         <module>opencast-working-file-repository-service-api</module>
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
-        <module>opencast-inspection-service-api</module>
-        <module>opencast-inspection-service-impl</module>
 	<module>opencast-delivery-service-api</module>
 	<module>opencast-delivery-service-impl</module>      
 </modules>
@@ -103,7 +107,7 @@
           <aggregate>true</aggregate>
           <links>
             <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
-            <link>http://java.sun.com/products/servlet/2.3/javadoc/</link>
+            <link>http://java.sun.com/javaee/5/docs/api/</link>
             <link>http://www.json.org/javadoc/</link>
             <link>http://junit.sourceforge.net/javadoc/</link>
           </links>

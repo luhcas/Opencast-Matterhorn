@@ -5,6 +5,7 @@
   <artifactId>opencast-util</artifactId>
   <packaging>bundle</packaging>
   <name>opencast-util</name>
+  <version>0.1-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -26,7 +27,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Export-Package>org.opencastproject.util</Export-Package>
+            <Export-Package> org.opencastproject.util </Export-Package>
           </instructions>
         </configuration>
       </plugin>

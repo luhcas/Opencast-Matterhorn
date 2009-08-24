@@ -40,7 +40,7 @@ import javax.xml.parsers.SAXParserFactory;
  * This class represents the mime type registry that is responsible for
  * providing resolving mime types through all system components.
  * <p>
- * The registry is initialized from the file <code>MimeTypes.xml</code>.
+ * The registry is initialized from the file <code>org.opencastproject.util.MimeTypes.xml</code>.
  * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: MimeTypes.java 1637 2008-12-08 10:44:18Z ced $
@@ -48,7 +48,7 @@ import javax.xml.parsers.SAXParserFactory;
 public class MimeTypes {
 
   /** Name of the mime type files */
-  public final static String DEFINITION_FILE = "/MimeTypes.xml";
+  public final static String DEFINITION_FILE = "/org/opencastproject/util/MimeTypes.xml";
 
   /** The mime types */
   private static List<MimeType> mimeTypes_ = null;

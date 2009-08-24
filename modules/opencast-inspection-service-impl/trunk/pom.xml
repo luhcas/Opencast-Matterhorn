@@ -18,6 +18,20 @@
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-workspace-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-util</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jsr311-api-1.0</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_core</artifactId>
     </dependency>
@@ -50,9 +64,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Private-Package> org.opencastproject.inspection.impl </Private-Package>
+            <Export-Package> org.opencastproject.inspection.impl.* </Export-Package>
             <Service-Component>
-              OSGI-INF/inspection-service.xml
+              OSGI-INF/inspection-service.xml,
+              OSGI-INF/inspection-service-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

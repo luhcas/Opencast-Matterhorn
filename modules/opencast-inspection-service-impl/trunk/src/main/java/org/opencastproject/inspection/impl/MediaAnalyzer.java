@@ -13,15 +13,18 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.inspection.api;
 
-import org.opencastproject.media.mediapackage.Track;
+package org.opencastproject.inspection.impl;
 
-import java.net.URL;
+import java.io.File;
 
 /**
- * Anayzes media to determine its technical metadata.
+ * Interface for tools that analyze media files.
+ * 
+ * @author Christoph E. Driessen <ced@neopoly.de>
  */
-public interface MediaInspectionService {
-   Track inspect(URL url);
+public interface MediaAnalyzer {
+
+  MediaContainerMetadata analyze(File media) throws MediaAnalyzerException;
+
 }
