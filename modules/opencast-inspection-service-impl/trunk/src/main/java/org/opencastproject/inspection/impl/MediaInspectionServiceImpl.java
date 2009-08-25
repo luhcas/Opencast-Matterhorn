@@ -19,10 +19,11 @@ import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
+import org.opencastproject.media.mediapackage.track.TrackImpl;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.cm.ConfigurationException;
@@ -42,16 +43,16 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   
   Workspace workspace;
   public void setWorkspace(Workspace workspace) {
-    logger.info("###### setting " + workspace);
+    logger.debug("setting " + workspace);
     this.workspace = workspace;
   }
 
   public void unsetWorkspace(Workspace workspace) {
-    logger.info("###### unsetting " + workspace);
+    logger.debug("unsetting " + workspace);
   }
 
   public Track inspect(URL url) {
-    logger.info("inspect(" + url + ") called, using workspace " + workspace);
+    logger.debug("inspect(" + url + ") called, using workspace " + workspace);
     
     // Get the file from the URL
     File file = workspace.get(url);
@@ -71,15 +72,16 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     } else {
       MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
       try {
-        MediaPackageElement element = elementBuilder.elementFromURL(url, Type.Track,
-                new MediaPackageElementFlavor("track", "presenter"));
-        return (Track)element;
+        MediaPackageElement element = elementBuilder.elementFromURL(url, Type.Track, MediaPackageElements.INDEFINITE_TRACK);
+        TrackImpl track = (TrackImpl) element;
+        track.setDuration(metadata.getDuration());
+        return track;
       } catch (MediaPackageException e) {
         throw new RuntimeException(e);
       } // FIXME: how should we determine flavor?
     }
   }
-
+  
   @SuppressWarnings("unchecked")
   public void updated(Dictionary properties) throws ConfigurationException {
     logger.info("Updating configuration on " + this.getClass().getName());

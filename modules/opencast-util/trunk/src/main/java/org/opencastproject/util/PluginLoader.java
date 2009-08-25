@@ -16,6 +16,9 @@
 
 package org.opencastproject.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -40,7 +43,8 @@ import java.util.zip.ZipEntry;
  */
 
 public class PluginLoader {
-
+  private static final Logger logger = LoggerFactory.getLogger(PluginLoader.class);
+  
   private PluginLoader() {
   }
 
@@ -136,18 +140,25 @@ public class PluginLoader {
    */
   public static Class<?>[] findPlugins(String pkg, String ext, String impl[],
       ClassLoader cl) throws IllegalArgumentException {
+    logger.info("Looking for plugins in package " + pkg);
 
     if (pkg == null)
       throw new IllegalArgumentException("Package name must not be null!");
 
     // search classpath for possible locations of the package
     String packagePath = pkg.replace('.', '/').concat("/");
+
+    logger.info("package path = " + packagePath);
+    
     Enumeration<URL> e;
     try {
-      if (cl != null)
+      if (cl != null) {
+        logger.debug("using classloader " + cl);
         e = cl.getResources(packagePath);
-      else
+      } else {
+        logger.debug("Using current classloader ");
         e = ClassLoader.getSystemResources(packagePath);
+      }
     } catch (IOException ex) {
       return new Class[0];
     }
@@ -237,8 +248,10 @@ public class PluginLoader {
     // return an array of classes
     Class<?>[] objs = classes.values().toArray(new Class<?>[classes.size()]);
     Class<?>[] ret = new Class[objs.length];
-    for (int i = 0; i < objs.length; i++)
+    for (int i = 0; i < objs.length; i++) {
+      logger.debug("Found plugin " + objs[i]);
       ret[i] = objs[i];
+    }
     return ret;
   }
 

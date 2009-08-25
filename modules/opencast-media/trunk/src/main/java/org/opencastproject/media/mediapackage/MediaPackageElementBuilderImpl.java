@@ -16,7 +16,14 @@
 
 package org.opencastproject.media.mediapackage;
 
+import org.opencastproject.media.mediapackage.elementbuilder.AttachmentBuilderPlugin;
+import org.opencastproject.media.mediapackage.elementbuilder.CoverBuilderPlugin;
+import org.opencastproject.media.mediapackage.elementbuilder.DublinCoreBuilderPlugin;
+import org.opencastproject.media.mediapackage.elementbuilder.IndefiniteTrackBuilderPlugin;
+import org.opencastproject.media.mediapackage.elementbuilder.MPEG7BuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin;
+import org.opencastproject.media.mediapackage.elementbuilder.PresentationTrackBuilderPlugin;
+import org.opencastproject.media.mediapackage.elementbuilder.PresenterTrackBuilderPlugin;
 import org.opencastproject.util.PluginLoader;
 
 import org.slf4j.Logger;
@@ -60,10 +67,25 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     ClassLoader cl = MediaPackageElementBuilderImpl.class.getClassLoader();
     Class<?>[] pluginClasses = PluginLoader.findPlugins(PLUGIN_PKG, null, new String[] { PLUGIN_INTERFACE.getName() },
             cl);
-    for (Class<?> c : pluginClasses) {
-      if (PLUGIN_INTERFACE.isAssignableFrom(c)) {
-        plugins.add((Class<? extends MediaPackageElementBuilderPlugin>) c);
-        log_.debug("Adding " + c.getName() + " to the list of element builders");
+    log_.debug("Found " + pluginClasses.length + " possible plugins");
+    
+    // FIXME -- either remove the classloading based plugin system, or fix it for OSGi (jmh)
+    if(pluginClasses.length == 0) {
+      // Manually add the plugins
+      log_.info("Unable to find element builder plugins via classloader.  Manually loading the default set.");
+      plugins.add(AttachmentBuilderPlugin.class);
+      plugins.add(CoverBuilderPlugin.class);
+      plugins.add(DublinCoreBuilderPlugin.class);
+      plugins.add(IndefiniteTrackBuilderPlugin.class);
+      plugins.add(MPEG7BuilderPlugin.class);
+      plugins.add(PresentationTrackBuilderPlugin.class);
+      plugins.add(PresenterTrackBuilderPlugin.class);
+    } else {
+      for (Class<?> c : pluginClasses) {
+        log_.info("Inspecting plugin " + c.getName());
+        if (PLUGIN_INTERFACE.isAssignableFrom(c)) {
+          plugins.add((Class<? extends MediaPackageElementBuilderPlugin>) c);
+        }
       }
     }
   }
