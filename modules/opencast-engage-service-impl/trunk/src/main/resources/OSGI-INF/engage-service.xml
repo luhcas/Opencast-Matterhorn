@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.engage.api.EngageService" immediate="true">
+  <implementation class="org.opencastproject.engage.impl.EngageServiceImpl" />
+  <property name="service.description" value="Engage Service" />
+  <service>
+    <provide interface="org.opencastproject.engage.api.EngageService" />
+    <provide interface="org.osgi.service.cm.ManagedService" />
+  </service>
+</component>
