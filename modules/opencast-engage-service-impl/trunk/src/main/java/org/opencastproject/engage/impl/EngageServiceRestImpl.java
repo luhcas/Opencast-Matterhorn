@@ -23,10 +23,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -40,15 +45,6 @@ public class EngageServiceRestImpl implements EngageService {
     this.service = service;
   }
 
-  /**
-   * Says hello, delegating the "logic" to the actual service.
-   */
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  public String sayHi() {
-    return service.sayHi();
-  }
-  
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
@@ -72,4 +68,32 @@ public class EngageServiceRestImpl implements EngageService {
     }
     docs = docsFromClassloader;
   }
+
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("play/{filename}")
+  public String deliverPlayerGET(@PathParam("filename") String filename, @Context HttpServletRequest request) {
+    String mediaHost = "mediahost";
+    
+      try {
+        InetAddress addr = InetAddress.getLocalHost();
+        mediaHost = addr.getHostAddress();
+      } catch (UnknownHostException e) {
+        e.printStackTrace();
+      }
+    // FIXME find out the hostname of the machine the service is running on
+    return deliverPlayer(filename, "vm081.rz.uos.de:8080");
+  }
+  
+  public String deliverPlayer(String filename, String mediaHost) {
+    return service.deliverPlayer(filename, mediaHost);
+  }
+  
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("available")
+  public String listRecordings() {
+    return service.listRecordings();
+  }
+  
 }

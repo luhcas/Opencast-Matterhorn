@@ -42,4 +42,8 @@ function VideodisplayReady() {
 	Videodisplay.pause = function() {
 		b_Videodisplay_root.pause();
 	};
+	
+	Videodisplay.passCharCode = function(argInt){
+		b_Videodisplay_root.passCharCode(argInt);
+	};
 }
