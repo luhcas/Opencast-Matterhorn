@@ -50,8 +50,8 @@
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
-	<module>opencast-delivery-service-api</module>
-	<module>opencast-delivery-service-impl</module>
+				<module>opencast-delivery-service-api</module>
+				<module>opencast-delivery-service-impl</module>
       </modules>
     </profile>
     <profile>
@@ -77,8 +77,8 @@
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
-	<module>opencast-delivery-service-api</module>
-	<module>opencast-delivery-service-impl</module>      
+				<module>opencast-delivery-service-api</module>
+				<module>opencast-delivery-service-impl</module>
 </modules>
     </profile>
   </profiles>
