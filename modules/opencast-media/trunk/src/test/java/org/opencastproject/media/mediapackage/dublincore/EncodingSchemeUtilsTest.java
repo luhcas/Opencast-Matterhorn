@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.*;
 import org.opencastproject.media.mediapackage.dublincore.utils.DCMIPeriod;
@@ -140,11 +141,24 @@ public class EncodingSchemeUtilsTest {
       assertEquals(d2, decodeDuration(encodeDuration(d2).getValue()));
       Long d3 = 234L;
       assertEquals(d3, decodeDuration(encodeDuration(d3).getValue()));
-      assertEquals(new Long(1 * 1000 * 60 * 60 + 10 * 1000 * 60 + 5 * 1000), decodeDuration("01:10:05"));
 
       assertEquals(DublinCore.ENC_SCHEME_ISO8601, encodeDuration(d3).getEncodingScheme());
 
-      assertNull(decodeDuration(new DublinCoreValue("asdsad")));
+      // Try to decode 01:10:05
+      try {
+        assertEquals(new Long(1 * 1000 * 60 * 60 + 10 * 1000 * 60 + 5 * 1000), decodeDuration("01:10:05"));
+        fail("Decoding of duration in ms passed although it should have failed");
+      } catch (IllegalArgumentException e) {
+        // this is expected
+      }
+
+      try {
+        assertNull(decodeDuration(new DublinCoreValue("asdsad")));
+        fail("Decoding of nonsense passed although it should have failed");
+      } catch (IllegalArgumentException e) {
+        // this is expected
+      }
+
       assertNull(decodeDuration(new DublinCoreValue(encodeDuration(d1).getValue(), DublinCore.LANGUAGE_UNDEFINED, DublinCore.ENC_SCHEME_BOX)));
   }
 
