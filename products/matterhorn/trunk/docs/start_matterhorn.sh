@@ -1,8 +1,8 @@
 ##
 # Configure these variables to match your environment
 ##
-FELIX='/Users/josh/dev/felix-1.8.0'
-M2_REPO='/Users/josh/.m2/repository'
+FELIX='/Users/markusketterl/dev/felix-1.8.0'
+M2_REPO='/Users/markusketterl/.m2/repository'
 
 ##
 # Only change the line below if you want to customize the server

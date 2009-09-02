@@ -52,6 +52,8 @@
         <module>opencast-workspace-impl</module>
 				<module>opencast-delivery-service-api</module>
 				<module>opencast-delivery-service-impl</module>
+        <module>opencast-engage-service-api</module>
+        <module>opencast-engage-service-impl</module>
       </modules>
     </profile>
     <profile>

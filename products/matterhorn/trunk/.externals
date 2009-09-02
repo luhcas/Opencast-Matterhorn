@@ -18,3 +18,5 @@
 ../../../modules/opencast-inspection-service-impl/trunk	opencast-inspection-service-impl
 ../../../modules/opencast-delivery-service-api/trunk opencast-delivery-service-api
 ../../../modules/opencast-delivery-service-impl/trunk opencast-delivery-service-impl
+../../../modules/opencast-engage-service-api/trunk opencast-engage-service-api
+../../../modules/opencast-engage-service-impl/trunk opencast-engage-service-impl
