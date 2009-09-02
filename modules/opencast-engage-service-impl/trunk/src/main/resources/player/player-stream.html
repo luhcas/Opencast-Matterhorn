@@ -97,20 +97,20 @@
 	<body>
 		<div style="margin:10px">
 			<h1>Streaming Videoplayer</h1>
-			<object codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" height="360" width="288" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
+			<object codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="288" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
 				<param name ="movie" value="Videodisplay.swf"/>
 				<param name="quality"value="high"/>
 				<param name="allowScriptAccess" value="always" />
 				<param name="bgcolor" value="#FFFFFF"/>
 				<param name="allowFullScreen" value="true"/>
-				<param name="FlashVars" VALUE="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv">
+				<param name="FlashVars" VALUE="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv&autoplay=false">
 				<embed 
 					width="360" 
 					height="288" 
 					allowfullscreen="true" 
 					type="application/x-shockwave-flash" 
 					pluginspage="http://www.macromedia.com/go/getflashplayer" 
-					flashvars="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv" 
+					flashvars="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv&autoplay=false" 
 					quality="high" 
 					allowScriptAccess="always"
 					src="Videodisplay.swf"/>
@@ -119,20 +119,20 @@
 		
 		
 		<div style="margin:10px">
-		<object codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" height="360" width="40" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
+		<object codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="40" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
 				<param name ="movie" value="Scrubber.swf"/>
 				<param name="quality"value="high"/>
 				<param name="allowScriptAccess" value="always" />
 				<param name="bgcolor" value="#FFFFFF"/>
 				<param name="allowFullScreen" value="true"/>
-				<param name="FlashVars" VALUE="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv">
+				<param name="FlashVars" VALUE="bridgeName=b_Videodisplay">
 				<embed 
 					width="360" 
 					height="40" 
 					allowfullscreen="true" 
 					type="application/x-shockwave-flash" 
 					pluginspage="http://www.macromedia.com/go/getflashplayer" 
-					flashvars="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv" 
+					flashvars="bridgeName=b_Videodisplay" 
 					quality="high" 
 					allowScriptAccess="always"
 					src="Scrubber.swf"/>
@@ -160,6 +160,10 @@
 				<td align="right">2.</td>
 				<td>Play/Pause video using keyboard: <b>spacebar</b> or <b>enter</b></td>
 			</tr>
+		  <tr>
+                <td align="right">3.</td>
+                <td>Default auto-play off: To enable it set flashvar <i>autoplay=true</i></td>
+            </tr>
 		</table>
 	</body>
 </html>
