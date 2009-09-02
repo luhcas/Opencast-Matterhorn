@@ -248,70 +248,76 @@ public interface DublinCore {
   EName PROPERTY_TYPE = new EName(TERMS_NS_URI, "type");
 
   /**
-   * Sytnax encoding scheme <def>Box</def>. See <a
+   * Syntax encoding scheme <def>Box</def>. See <a
    * href="http://dublincore.org/documents/dcmi-terms/#H5">http://dublincore.org/documents/dcmi-terms/#H5</a>
    */
   EName ENC_SCHEME_BOX = new EName(TERMS_NS_URI, "Box");
 
   /**
-   * Sytnax encoding scheme <def>ISO3166</def>. See <a
+   * Syntax encoding scheme <def>ISO3166</def>. See <a
    * href="http://dublincore.org/documents/dcmi-terms/#H5">http://dublincore.org/documents/dcmi-terms/#H5</a>
    */
   EName ENC_SCHEME_ISO3166 = new EName(TERMS_NS_URI, "ISO3166");
 
   /**
-   * Sytnax encoding scheme <def>ISO639-1</def>. See <a
+   * Syntax encoding scheme <def>ISO639-1</def>. See <a
    * href="http://dublincore.org/documents/dcmi-terms/#H5">http://dublincore.org/documents/dcmi-terms/#H5</a>
    */
   EName ENC_SCHEME_ISO639_2 = new EName(TERMS_NS_URI, "ISO639-1");
 
   /**
-   * Sytnax encoding scheme <def>ISO639-3</def>. See <a
+   * Syntax encoding scheme <def>ISO639-3</def>. See <a
    * href="http://dublincore.org/documents/dcmi-terms/#H5">http://dublincore.org/documents/dcmi-terms/#H5</a>
    */
   EName ENC_SCHEME_ISO639_3 = new EName(TERMS_NS_URI, "ISO639-3");
 
   /**
-   * Sytnax encoding scheme <def>Period</def>. See <a
+   * Syntax encoding scheme <def>Period</def>. See <a
    * href="http://dublincore.org/documents/dcmi-terms/#H5">http://dublincore.org/documents/dcmi-terms/#H5</a>
    */
   EName ENC_SCHEME_PERIOD = new EName(TERMS_NS_URI, "Period");
 
   /**
-   * Sytnax encoding scheme <def>Point</def>. See <a
+   * Syntax encoding scheme <def>Point</def>. See <a
    * href="http://dublincore.org/documents/dcmi-terms/#H5">http://dublincore.org/documents/dcmi-terms/#H5</a>
    */
   EName ENC_SCHEME_POINT = new EName(TERMS_NS_URI, "Point");
 
   /**
-   * Sytnax encoding scheme <def>RFC1766</def>. See <a
+   * Syntax encoding scheme <def>RFC1766</def>. See <a
    * href="http://dublincore.org/documents/dcmi-terms/#H5">http://dublincore.org/documents/dcmi-terms/#H5</a>
    */
   EName ENC_SCHEME_RFC1766 = new EName(TERMS_NS_URI, "RFC1766");
 
   /**
-   * Sytnax encoding scheme <def>RFC3066</def>. See <a
+   * Syntax encoding scheme <def>RFC3066</def>. See <a
    * href="http://dublincore.org/documents/dcmi-terms/#H5">http://dublincore.org/documents/dcmi-terms/#H5</a>
    */
   EName ENC_SCHEME_RFC3066 = new EName(TERMS_NS_URI, "RFC3066");
 
   /**
-   * Sytnax encoding scheme <def>RFC4646</def>. See <a
+   * Syntax encoding scheme <def>RFC4646</def>. See <a
    * href="http://dublincore.org/documents/dcmi-terms/#H5">http://dublincore.org/documents/dcmi-terms/#H5</a>
    */
   EName ENC_SCHEME_RFC4646 = new EName(TERMS_NS_URI, "RFC4646");
 
   /**
-   * Sytnax encoding scheme <def>URI</def>. See <a
+   * Syntax encoding scheme <def>URI</def>. See <a
    * href="http://dublincore.org/documents/dcmi-terms/#H5">http://dublincore.org/documents/dcmi-terms/#H5</a>
    */
   EName ENC_SCHEME_URI = new EName(TERMS_NS_URI, "URI");
 
   /**
-   * Sytnax encoding scheme <def>W3CDTF</def>. See <a
+   * Syntax encoding scheme <def>W3CDTF</def>. See <a
    * href="http://dublincore.org/documents/dcmi-terms/#H5">http://dublincore.org/documents/dcmi-terms/#H5</a>
    */
   EName ENC_SCHEME_W3CDTF = new EName(TERMS_NS_URI, "W3CDTF");
+
+  /**
+   * Syntax encoding scheme <def>ISO8601</def> used for durations. See <a
+   * href="http://en.wikipedia.org/wiki/ISO_8601#Durations">http://en.wikipedia.org/wiki/ISO_8601#Durations</a>
+   */
+  EName ENC_SCHEME_ISO8601 = new EName(TERMS_NS_URI, "ISO8601");
 
   /* Language constants */
 

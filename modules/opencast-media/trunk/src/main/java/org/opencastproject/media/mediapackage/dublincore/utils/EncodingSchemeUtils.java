@@ -21,7 +21,9 @@ import org.opencastproject.media.mediapackage.dublincore.DublinCoreValue;
 import org.opencastproject.util.Assert;
 import org.opencastproject.util.MapBuilder;
 
+import org.joda.time.Duration;
 import org.joda.time.format.ISODateTimeFormat;
+import org.joda.time.format.ISOPeriodFormat;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -46,7 +48,7 @@ public class EncodingSchemeUtils {
    * Encode a date with the given precision into a Dublin Core string value, using the recommended W3C-DTF scheme and
    * the UTC timezone.
    * <p/>
-   * See <a href="http://www.w3.org/TR/NOTE-datetime">http://www.w3.org/TR/NOTE- datetime</a> for more information about
+   * See <a href="http://www.w3.org/TR/NOTE-datetime">http://www.w3.org/TR/NOTE-datetime</a> for more information about
    * W3C-DTF.
    * 
    * @param date
@@ -67,7 +69,7 @@ public class EncodingSchemeUtils {
    * Encode a period with the given precision into a Dublin Core string value using the recommended DCMI Period scheme
    * and the UTC timezone. One of the dates may be null to create an open interval.
    * <p/>
-   * See <a href="http://dublincore.org/documents/dcmi-period/">http://dublincore .org/documents/dcmi-period/</a> for
+   * See <a href="http://dublincore.org/documents/dcmi-period/">http://dublincore.org/documents/dcmi-period/</a> for
    * more information about DCMI Period.
    * 
    * @param period
@@ -98,6 +100,59 @@ public class EncodingSchemeUtils {
   }
 
   /**
+   * Encode a duration measured in milliseconds into a Dublin Core string using the
+   * {@linkplain ch.ethz.replay.core.api.common.metadata.dublincore.DublinCore#ENC_SCHEME_ISO8601 ISO8601} encoding
+   * scheme.
+   * 
+   * @param duration
+   *          the duration in milliseconds
+   */
+  public static DublinCoreValue encodeDuration(long duration) {
+    return new DublinCoreValue(ISOPeriodFormat.standard().print(new Duration(duration).toPeriod()),
+            DublinCore.LANGUAGE_UNDEFINED, DublinCore.ENC_SCHEME_ISO8601);
+  }
+
+  /**
+   * Decode a string encoded in the ISO8601 encoding scheme.
+   * <p/>
+   * Also supports the REPLAY legacy format <code>hh:mm:ss</code>.
+   * 
+   * @param value
+   *          the ISO encoded string
+   * @return the duration in milliseconds or null, if the value cannot be parsed
+   * @throws IllegalArgumentException
+   *           if the duration cannot be encoded
+   */
+  public static Long decodeDuration(String value) {
+    try {
+      return ISOPeriodFormat.standard().parsePeriod(value).toStandardDuration().getMillis();
+    } catch (IllegalArgumentException ignore) {
+      throw new IllegalArgumentException("Cannot decode duration: " + value);
+    }
+  }
+
+  /**
+   * Decode a string encoded in the ISO8601 encoding scheme.
+   * 
+   * @param value
+   *          the Dublin Core value
+   * @return the duration in milliseconds or null, if the value cannot be parsed or is in a different encoding scheme
+   */
+  public static Long decodeDuration(DublinCoreValue value) {
+    if (value.getEncodingScheme() == null || value.getEncodingScheme().equals(DublinCore.ENC_SCHEME_ISO8601)) {
+      return decodeDuration(value.getValue());
+    }
+    return null;
+  }
+
+  public static Long decodeMandatoryDuration(DublinCoreValue value) {
+    Long l = decodeDuration(value);
+    if (l == null)
+      throw new IllegalArgumentException("Cannot decode duration: " + value);
+    return l;
+  }
+
+  /**
    * Tries to decode the given value as a W3C-DTF encoded date. If decoding fails, null is returned.
    * 
    * @return the date or null if decoding fails
@@ -113,7 +168,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodeDate(org.opencastproject.media.mediapackage.dublincore.DublinCoreValue)} , but throws an
+   * Like {@link #decodeDate(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the date
@@ -180,7 +235,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodePeriod(org.opencastproject.media.mediapackage.dublincore.DublinCoreValue)} , but throws an
+   * Like {@link #decodePeriod(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the period
@@ -214,7 +269,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodeTemporal(org.opencastproject.media.mediapackage.dublincore.DublinCoreValue)} , but throws an
+   * Like {@link #decodeTemporal(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the temporal object of type {@link java.util.Date} or {@link DCMIPeriod}
@@ -236,4 +291,5 @@ public class EncodingSchemeUtils {
   private static final Date parseW3CDTF(String value) {
     return ISODateTimeFormat.dateTimeParser().parseDateTime(value).toDate();
   }
+
 }
