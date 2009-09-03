@@ -13,7 +13,6 @@
  *  permissions and limitations under the License.
  *
  */
-
 package org.opencastproject.media.mediapackage;
 
 import org.opencastproject.util.Checksum;

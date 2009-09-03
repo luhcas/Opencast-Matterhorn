@@ -196,23 +196,6 @@ public abstract class AbstractElementBuilderPlugin implements MediaPackageElemen
   }
 
   /**
-   * Returns <code>true</code> if the file's name starts with <code>prefix</code>.
-   * 
-   * @param file
-   *          the file
-   * @param prefix
-   *          the filename prefix
-   * @return <code>true</code> if the filename matches
-   */
-  protected boolean checkFilenamePrefix(String file, String prefix) {
-    if (file == null)
-      throw new IllegalArgumentException("File is null");
-
-    // Check filename
-    return (file.startsWith(prefix));
-  }
-
-  /**
    * Checks the file for its existence and validates it's checksum with the proviced values.
    * 
    * @param file

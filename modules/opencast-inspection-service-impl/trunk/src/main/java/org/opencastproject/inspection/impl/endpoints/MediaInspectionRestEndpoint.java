@@ -17,6 +17,8 @@ package org.opencastproject.inspection.impl.endpoints;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.jaxb.ObjectFactory;
+import org.opencastproject.media.mediapackage.jaxb.TrackType;
 
 import java.net.URL;
 
@@ -38,8 +40,12 @@ public class MediaInspectionRestEndpoint {
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  public Track getTrack(@QueryParam("url") URL url) {
-    return service.inspect(url);
+  public TrackType getTrack(@QueryParam("url") URL url) {
+    Track t = service.inspect(url);
+    ObjectFactory of = new ObjectFactory();
+    TrackType track = of.createTrackType();
+    track.setDuration((int)t.getDuration());
+    return track;
   }
 
   @GET
