@@ -50,10 +50,10 @@
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
-				<module>opencast-delivery-service-api</module>
-				<module>opencast-delivery-service-impl</module>
-        <module>opencast-engage-service-api</module>
-        <module>opencast-engage-service-impl</module>
+	<module>opencast-delivery-service-api</module>
+	<module>opencast-delivery-service-impl</module>
+        <!--module>opencast-engage-service-api</module -->
+        <!-- module>opencast-engage-service-impl</module -->
       </modules>
     </profile>
     <profile>
@@ -79,8 +79,10 @@
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
-				<module>opencast-delivery-service-api</module>
-				<module>opencast-delivery-service-impl</module>
+	<module>opencast-delivery-service-api</module>
+	<module>opencast-delivery-service-impl</module>
+        <!--module>opencast-engage-service-api</module --> 
+        <!-- module>opencast-engage-service-impl</module --> 
 </modules>
     </profile>
   </profiles>
@@ -700,6 +702,11 @@
       <id>ops4j</id>
       <name>OPS4J Repository</name>
       <url>http://repository.ops4j.org/maven2</url>
+    </repository>
+    <repository>
+      <id>caldav4j</id>
+      <name>caldav4j Repository</name>
+      <url>http://caldav4j.googlecode.com/svn/trunk/maven</url>
     </repository>
   </repositories>
 </project>
