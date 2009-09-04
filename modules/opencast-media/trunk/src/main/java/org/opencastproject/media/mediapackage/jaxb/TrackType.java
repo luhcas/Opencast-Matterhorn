@@ -45,7 +45,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name=&quot;mimetype&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot;/&gt;
  *         &lt;element name=&quot;url&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot;/&gt;
  *         &lt;element name=&quot;checksum&quot; type=&quot;{}checksumType&quot;/&gt;
- *         &lt;element name=&quot;duration&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}int&quot;/&gt;
+ *         &lt;element name=&quot;duration&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}long&quot;/&gt;
  *         &lt;element name=&quot;video&quot; type=&quot;{}videoType&quot; minOccurs=&quot;0&quot;/&gt;
  *         &lt;element name=&quot;audio&quot; type=&quot;{}audioType&quot; minOccurs=&quot;0&quot;/&gt;
  *       &lt;/sequence&gt;
@@ -69,7 +69,7 @@ public class TrackType {
   protected String url;
   @XmlElement(required = true)
   protected ChecksumType checksum;
-  protected int duration;
+  protected long duration;
   protected VideoType video;
   protected AudioType audio;
   @XmlAttribute
@@ -144,7 +144,7 @@ public class TrackType {
    * Gets the value of the duration property.
    * 
    */
-  public int getDuration() {
+  public long getDuration() {
     return duration;
   }
 
@@ -152,7 +152,7 @@ public class TrackType {
    * Sets the value of the duration property.
    * 
    */
-  public void setDuration(int value) {
+  public void setDuration(long value) {
     this.duration = value;
   }
 

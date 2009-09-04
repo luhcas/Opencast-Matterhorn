@@ -20,10 +20,11 @@ import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.media.mediapackage.track.TrackImpl;
+import org.opencastproject.util.Checksum;
+import org.opencastproject.util.ChecksumType;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.cm.ConfigurationException;
@@ -71,14 +72,16 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       return null;
     } else {
       MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+      TrackImpl track;
       try {
         MediaPackageElement element = elementBuilder.elementFromURL(url, Type.Track, MediaPackageElements.INDEFINITE_TRACK);
-        TrackImpl track = (TrackImpl) element;
+        track = (TrackImpl) element;
         track.setDuration(metadata.getDuration());
-        return track;
-      } catch (MediaPackageException e) {
+        track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+      } catch (Exception e) {
         throw new RuntimeException(e);
       } // FIXME: how should we determine flavor?
+      return track;
     }
   }
   

@@ -17,6 +17,7 @@ package org.opencastproject.inspection.impl.endpoints;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.jaxb.ChecksumType;
 import org.opencastproject.media.mediapackage.jaxb.ObjectFactory;
 import org.opencastproject.media.mediapackage.jaxb.TrackType;
 
@@ -44,7 +45,11 @@ public class MediaInspectionRestEndpoint {
     Track t = service.inspect(url);
     ObjectFactory of = new ObjectFactory();
     TrackType track = of.createTrackType();
-    track.setDuration((int)t.getDuration());
+    ChecksumType checksum = of.createChecksumType();
+    checksum.setType(t.getChecksum().getType().getName());
+    checksum.setValue(t.getChecksum().getValue());
+    track.setDuration(t.getDuration());
+    track.setChecksum(checksum);
     return track;
   }
 
