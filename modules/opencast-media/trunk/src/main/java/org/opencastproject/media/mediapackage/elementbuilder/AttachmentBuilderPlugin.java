@@ -41,7 +41,7 @@ public class AttachmentBuilderPlugin extends AbstractAttachmentBuilderPlugin imp
   @Override
   public boolean accept(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     if (type != null && flavor != null) {
-      if (!type.equals(MediaPackageElement.Type.Attachment) || flavor != null)
+      if (!type.equals(MediaPackageElement.Type.Attachment))
         return false;
     } else if (type != null && !type.equals(MediaPackageElement.Type.Attachment)) {
       return false;
