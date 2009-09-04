@@ -16,6 +16,8 @@
 
 package org.opencastproject.media.mediapackage;
 
+import org.opencastproject.util.ConfigurationException;
+
 /**
  * Factory to retreive instances of a media package element builder. Use the static method {@link #newInstance()} to
  * obtain a reference to a concrete implementation of a <code>MediaPackageElementBuilderFactory</code>. This instance

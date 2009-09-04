@@ -18,6 +18,7 @@ package org.opencastproject.media.mediapackage;
 
 import org.opencastproject.media.mediapackage.handle.Handle;
 import org.opencastproject.media.mediapackage.handle.HandleException;
+import org.opencastproject.util.ConfigurationException;
 
 import org.xml.sax.SAXException;
 

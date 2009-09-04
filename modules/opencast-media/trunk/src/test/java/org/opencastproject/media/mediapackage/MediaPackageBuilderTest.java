@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import org.opencastproject.util.ConfigurationException;
+
 import org.junit.Test;
 
 import java.io.File;

@@ -19,6 +19,8 @@ package org.opencastproject.media.mediapackage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import org.opencastproject.util.ConfigurationException;
+
 import org.junit.Test;
 import org.w3c.dom.Document;
 
