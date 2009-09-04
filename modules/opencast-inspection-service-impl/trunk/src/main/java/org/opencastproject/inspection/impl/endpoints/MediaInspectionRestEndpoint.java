@@ -16,10 +16,16 @@
 package org.opencastproject.inspection.impl.endpoints;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.media.mediapackage.Stream;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.jaxb.AudioType;
 import org.opencastproject.media.mediapackage.jaxb.ChecksumType;
 import org.opencastproject.media.mediapackage.jaxb.ObjectFactory;
+import org.opencastproject.media.mediapackage.jaxb.ScanTypeType;
 import org.opencastproject.media.mediapackage.jaxb.TrackType;
+import org.opencastproject.media.mediapackage.jaxb.VideoType;
+import org.opencastproject.media.mediapackage.track.AudioStreamImpl;
+import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
 
 import java.net.URL;
 
@@ -50,6 +56,28 @@ public class MediaInspectionRestEndpoint {
     checksum.setValue(t.getChecksum().getValue());
     track.setDuration(t.getDuration());
     track.setChecksum(checksum);
+    
+    for(Stream stream : t.getStreams()) {
+      if(stream instanceof AudioStreamImpl) {
+        AudioStreamImpl a = (AudioStreamImpl) stream;
+        AudioType audio = of.createAudioType();
+        audio.setBitrate(a.getBitRate());
+        audio.setChannels(a.getChannels());
+        audio.setSamplingrate(a.getSamplingRate());
+        track.setAudio(audio);
+      } else if(stream instanceof VideoStreamImpl) {
+        VideoStreamImpl v = (VideoStreamImpl) stream;
+        VideoType video = of.createVideoType();
+        video.setBitrate(v.getBitRate());
+        video.setFrameRate(v.getFrameRate());
+        ScanTypeType scanType = of.createScanTypeType();
+        scanType.setType(v.getScanType().name());
+        video.setScanType(scanType);
+        track.setVideo(video);
+      } else {
+        throw new IllegalStateException("stream is of an unknown type: " + stream);
+      }
+    }
     return track;
   }
 

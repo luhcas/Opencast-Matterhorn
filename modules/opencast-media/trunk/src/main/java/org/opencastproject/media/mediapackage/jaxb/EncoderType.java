@@ -41,7 +41,7 @@ import javax.xml.bind.annotation.XmlValue;
  *   &lt;simpleContent&gt;
  *     &lt;extension base=&quot;&lt;http://www.w3.org/2001/XMLSchema&gt;string&quot;&gt;
  *       &lt;attribute name=&quot;type&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&gt;
- *       &lt;attribute name=&quot;version&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}float&quot; /&gt;
+ *       &lt;attribute name=&quot;version&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&gt;
  *       &lt;attribute name=&quot;vendor&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&gt;
  *     &lt;/extension&gt;
  *   &lt;/simpleContent&gt;
@@ -59,7 +59,7 @@ public class EncoderType {
   @XmlAttribute
   protected String type;
   @XmlAttribute
-  protected Float version;
+  protected String version;
   @XmlAttribute
   protected String vendor;
 
@@ -108,10 +108,10 @@ public class EncoderType {
   /**
    * Gets the value of the version property.
    * 
-   * @return possible object is {@link Float }
+   * @return possible object is {@link String }
    * 
    */
-  public Float getVersion() {
+  public String getVersion() {
     return version;
   }
 
@@ -119,10 +119,10 @@ public class EncoderType {
    * Sets the value of the version property.
    * 
    * @param value
-   *          allowed object is {@link Float }
+   *          allowed object is {@link String }
    * 
    */
-  public void setVersion(Float value) {
+  public void setVersion(String value) {
     this.version = value;
   }
 

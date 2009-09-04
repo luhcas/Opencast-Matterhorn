@@ -44,8 +44,8 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name=&quot;encoder&quot; type=&quot;{}encoderType&quot;/&gt;
  *         &lt;element name=&quot;resolution&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot;/&gt;
  *         &lt;element name=&quot;scanType&quot; type=&quot;{}scanTypeType&quot;/&gt;
- *         &lt;element name=&quot;bitrate&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}int&quot;/&gt;
- *         &lt;element name=&quot;frameRate&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}byte&quot;/&gt;
+ *         &lt;element name=&quot;bitrate&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}float&quot;/&gt;
+ *         &lt;element name=&quot;frameRate&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}float&quot;/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -66,8 +66,8 @@ public class VideoType {
   protected String resolution;
   @XmlElement(required = true)
   protected ScanTypeType scanType;
-  protected int bitrate;
-  protected byte frameRate;
+  protected float bitrate;
+  protected float frameRate;
 
   /**
    * Gets the value of the device property.
@@ -157,7 +157,7 @@ public class VideoType {
    * Gets the value of the bitrate property.
    * 
    */
-  public int getBitrate() {
+  public float getBitrate() {
     return bitrate;
   }
 
@@ -165,7 +165,7 @@ public class VideoType {
    * Sets the value of the bitrate property.
    * 
    */
-  public void setBitrate(int value) {
+  public void setBitrate(float value) {
     this.bitrate = value;
   }
 
@@ -173,7 +173,7 @@ public class VideoType {
    * Gets the value of the frameRate property.
    * 
    */
-  public byte getFrameRate() {
+  public float getFrameRate() {
     return frameRate;
   }
 
@@ -181,7 +181,7 @@ public class VideoType {
    * Sets the value of the frameRate property.
    * 
    */
-  public void setFrameRate(byte value) {
+  public void setFrameRate(float value) {
     this.frameRate = value;
   }
 

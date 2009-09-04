@@ -22,7 +22,9 @@ import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
+import org.opencastproject.media.mediapackage.track.AudioStreamImpl;
 import org.opencastproject.media.mediapackage.track.TrackImpl;
+import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.workspace.api.Workspace;
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URL;
 import java.util.Dictionary;
+import java.util.List;
 
 /**
  * Inspects media via the 3rd party MediaInfo tool by default, and can be configured to use other media analyzers.
@@ -78,6 +81,36 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         track = (TrackImpl) element;
         track.setDuration(metadata.getDuration());
         track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+        List<AudioStreamMetadata> audioList = metadata.getAudioStreamMetadata();
+        if(audioList != null && ! audioList.isEmpty()) {
+          for(int i=0; i<audioList.size(); i++ ) {
+            AudioStreamImpl audio = new AudioStreamImpl("audio-" + (i+1));
+            AudioStreamMetadata a = audioList.get(i);
+            audio.setBitRate(a.getBitRate());
+            audio.setChannels(a.getChannels());
+            audio.setFormat(a.getFormat());
+            audio.setFormatVersion(a.getFormatVersion());
+            audio.setResolution(a.getResolution());
+            audio.setSamplingRate(a.getSamplingRate());
+            track.addStream(audio);
+          }
+        }
+        List<VideoStreamMetadata> videoList = metadata.getVideoStreamMetadata();
+        if(videoList != null && ! videoList.isEmpty()) {
+          for(int i=0; i<audioList.size(); i++ ) {
+            VideoStreamImpl video = new VideoStreamImpl("video-" + (i+1));
+            VideoStreamMetadata v = videoList.get(i);
+            video.setBitRate(v.getBitRate());
+            video.setFormat(v.getFormat());
+            video.setFormatVersion(v.getFormatVersion());
+            video.setFrameHeight(v.getFrameHeight());
+            video.setFrameRate(v.getFrameRate());
+            video.setFrameWidth(v.getFrameWidth());
+            video.setScanOrder(v.getScanOrder());
+            video.setScanType(v.getScanType());
+            track.addStream(video);
+          }
+        }
       } catch (Exception e) {
         throw new RuntimeException(e);
       } // FIXME: how should we determine flavor?

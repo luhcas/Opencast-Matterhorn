@@ -41,7 +41,7 @@ import javax.xml.bind.annotation.XmlValue;
  *   &lt;simpleContent&gt;
  *     &lt;extension base=&quot;&lt;http://www.w3.org/2001/XMLSchema&gt;string&quot;&gt;
  *       &lt;attribute name=&quot;type&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&gt;
- *       &lt;attribute name=&quot;version&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}int&quot; /&gt;
+ *       &lt;attribute name=&quot;version&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&gt;
  *       &lt;attribute name=&quot;vendor&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&gt;
  *     &lt;/extension&gt;
  *   &lt;/simpleContent&gt;
@@ -59,7 +59,7 @@ public class DeviceType {
   @XmlAttribute
   protected String type;
   @XmlAttribute
-  protected Integer version;
+  protected String version;
   @XmlAttribute
   protected String vendor;
 
@@ -108,10 +108,10 @@ public class DeviceType {
   /**
    * Gets the value of the version property.
    * 
-   * @return possible object is {@link Integer }
+   * @return possible object is {@link String }
    * 
    */
-  public Integer getVersion() {
+  public String getVersion() {
     return version;
   }
 
@@ -119,10 +119,10 @@ public class DeviceType {
    * Sets the value of the version property.
    * 
    * @param value
-   *          allowed object is {@link Integer }
+   *          allowed object is {@link String }
    * 
    */
-  public void setVersion(Integer value) {
+  public void setVersion(String value) {
     this.version = value;
   }
 

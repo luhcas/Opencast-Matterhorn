@@ -42,8 +42,9 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence&gt;
  *         &lt;element name=&quot;device&quot; type=&quot;{}deviceType&quot;/&gt;
  *         &lt;element name=&quot;encoder&quot; type=&quot;{}encoderType&quot;/&gt;
- *         &lt;element name=&quot;channels&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}byte&quot;/&gt;
- *         &lt;element name=&quot;bitdepth&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}byte&quot;/&gt;
+ *         &lt;element name=&quot;channels&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}int&quot;/&gt;
+ *         &lt;element name=&quot;bitdepth&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}int&quot;/&gt;
+ *         &lt;element name=&quot;bitrate&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}float&quot;/&gt;
  *         &lt;element name=&quot;samplingrate&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}int&quot;/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
@@ -54,15 +55,16 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "audioType", propOrder = { "device", "encoder", "channels", "bitdepth", "samplingrate" })
+@XmlType(name = "audioType", propOrder = { "device", "encoder", "channels", "bitdepth", "bitrate", "samplingrate" })
 public class AudioType {
 
   @XmlElement(required = true)
   protected DeviceType device;
   @XmlElement(required = true)
   protected EncoderType encoder;
-  protected byte channels;
-  protected byte bitdepth;
+  protected int channels;
+  protected int bitdepth;
+  protected float bitrate;
   protected int samplingrate;
 
   /**
@@ -111,7 +113,7 @@ public class AudioType {
    * Gets the value of the channels property.
    * 
    */
-  public byte getChannels() {
+  public int getChannels() {
     return channels;
   }
 
@@ -119,7 +121,7 @@ public class AudioType {
    * Sets the value of the channels property.
    * 
    */
-  public void setChannels(byte value) {
+  public void setChannels(int value) {
     this.channels = value;
   }
 
@@ -127,7 +129,7 @@ public class AudioType {
    * Gets the value of the bitdepth property.
    * 
    */
-  public byte getBitdepth() {
+  public int getBitdepth() {
     return bitdepth;
   }
 
@@ -135,8 +137,24 @@ public class AudioType {
    * Sets the value of the bitdepth property.
    * 
    */
-  public void setBitdepth(byte value) {
+  public void setBitdepth(int value) {
     this.bitdepth = value;
+  }
+
+  /**
+   * Gets the value of the bitrate property.
+   * 
+   */
+  public float getBitrate() {
+    return bitrate;
+  }
+
+  /**
+   * Sets the value of the bitrate property.
+   * 
+   */
+  public void setBitrate(float value) {
+    this.bitrate = value;
   }
 
   /**
