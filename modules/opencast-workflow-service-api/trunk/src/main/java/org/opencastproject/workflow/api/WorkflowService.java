@@ -58,11 +58,11 @@ public interface WorkflowService {
   List<WorkflowInstance> fetchAllWorkflowInstances(String workflowDefinitionId);
 
   /**
-   * Creates a new workflow instance.
+   * Creates a new workflow instance and starts the workflow.
    * 
    * @param workflowDefinitionId
    * @param mediaPackage
-   * @return
+   * @return The new workflow instance
    */
   WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage);
 

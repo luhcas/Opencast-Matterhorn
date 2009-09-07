@@ -92,6 +92,20 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     // Update any configuration properties here
   }
 
+  protected Runnable getRunnable(final WorkflowInstance workflowInstance) {
+    return new Runnable() {
+      public void run() {
+        logger.info("starting workflow " + workflowInstance.getId());
+        try {
+          Thread.sleep(5000);
+        } catch (InterruptedException e) {
+          logger.info("workflow " + workflowInstance.getId() + " thread interrupted");
+        }
+        logger.info("finishing workflow " + workflowInstance.getId());
+      }
+    };
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowService#fetchAllWorkflowDefinitions()
@@ -169,12 +183,13 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
     workflowInstance.setId(UUID.randomUUID().toString());
     workflowInstance.setTitle(workflowDefinition.getTitle() + " Instance " + workflowInstance.getId());
-    workflowInstance.setDescription(workflowInstance.getTitle()); // TODO How should this be set?
+    workflowInstance.setDescription(workflowInstance.getTitle());
     workflowInstance.setWorkflowDefinition(workflowDefinition);
     workflowInstance.setMediaPackage(mediaPackage);
     workflowInstance.setState(WorkflowInstance.State.RUNNING);
     instances.put(workflowInstance.getId(), workflowInstance);
-    // TODO Do something with this workflow in another thread
+    workflowInstance.setThread(new Thread(getRunnable(workflowInstance)));
+    workflowInstance.getThread().start();
     return workflowInstance;
   }
 
@@ -185,7 +200,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   public void stop(String workflowInstanceId) {
     WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
     instance.setState(State.STOPPED);
-    // TODO Stop the associated thread
+    instance.getThread().interrupt();
   }
 
   /**
@@ -195,7 +210,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   public void suspend(String workflowInstanceId) {
     WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
     instance.setState(State.PAUSED);
-    // TODO Pause the associated thread?
+    instance.getThread().interrupt();
   }
 
   /**
@@ -203,9 +218,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#resume(java.lang.String)
    */
   public void resume(String workflowInstanceId) {
-    WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
-    instance.setState(State.RUNNING);
-    // TODO Resume the associated thread?
+    WorkflowInstanceImpl workflowInstance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
+    workflowInstance.setThread(new Thread(getRunnable(workflowInstance)));
+    workflowInstance.getThread().start();
+    workflowInstance.setState(State.RUNNING);
   }
-
 }

@@ -48,6 +48,5 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   public void setDescription(String description) {
     this.description = description;
   }
-
 }
 

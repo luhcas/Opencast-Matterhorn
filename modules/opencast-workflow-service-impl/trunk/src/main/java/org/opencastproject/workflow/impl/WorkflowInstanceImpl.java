@@ -29,6 +29,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   private String title;
   private String description;
   private State state;
+  private Thread thread;
 
   public String getId() {
     return id;
@@ -76,6 +77,14 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
 
   public void setMediaPackage(MediaPackage mediaPackage) {
     this.mediaPackage = mediaPackage;
+  }
+
+  public void setThread(Thread thread) {
+    this.thread = thread;
+  }
+
+  public Thread getThread() {
+    return thread;
   }
 
 }
