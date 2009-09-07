@@ -1,0 +1,40 @@
+<mediapackage id="00000/2" start="2007-12-05T13:40:00" duration="10044">
+  <media>
+    <!-- also contained in target by id and urlname -->
+    <track id="track-1" type="track/presentation">
+      <mimetype>video/quicktime</mimetype>
+      <url>/vonly.mov</url>
+      <checksum type="md5">43b7d843b02c4a429b2f547a4f230d31</checksum>
+      <duration>10044</duration>
+      <video>
+        <device type="UFG03" version="30112007" vendor="Unigraf" />
+        <encoder type="H.264" version="7.4" vendor="Apple Inc" />
+        <resolution>640x480</resolution>
+        <ScanType type="progressive" />
+        <bitrate>540520</bitrate>
+        <framerate>2</framerate>
+      </video>
+    </track>
+    <!-- not contained in target by id but urlname -->
+    <track id="track-3" type="track/presenter">
+      <mimetype>video/quicktime</mimetype>
+      <url>/aonly.mov</url>
+      <checksum type="md5">950f9fa49caa8f1c5bbc36892f6fd062</checksum>
+      <duration>10044</duration>
+      <audio>
+        <device type="UFG03" version="30112007" vendor="Unigraf" />
+        <encoder type="AAC" version="7.4" vendor="Apple Inc" />
+        <Channels>2</Channels>
+        <BitDepth>16</BitDepth>
+        <SamplingRate>44100</SamplingRate>
+      </audio>
+    </track>
+  </media>  
+  <attachments>
+    <attachment id="cover" type="attachment/cover">
+      <mimetype>image/png</mimetype>
+      <url>/cover.png</url>
+      <checksum type="md5">6d535f61a1b31a3edeb01be0951a2b4e</checksum>
+    </attachment>    
+  </attachments>
+</mediapackage>

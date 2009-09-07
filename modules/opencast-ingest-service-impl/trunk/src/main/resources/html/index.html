@@ -1,0 +1,54 @@
+<html>
+  <head>
+  <script language="JavaScript">	
+  	function doForm(action, method) {
+      var testForm = document.getElementById("test_form");
+      //var url = document.getElementById("url").value;
+      //var flavor = document.getElementById("flavor").value;
+      //var mediaPackageId = document.getElementById("mediaPackageId").value;
+
+      if(method == 'POST') {
+        testForm.enctype="multipart/form-data";        
+      }
+      testForm.action = action;      
+      testForm.method = method;
+      testForm.submit();
+    }
+  </script>
+  </head>
+  <body>
+    <div>This is the REST endpoint for the ingest service. TO DO: detail documentation</div>
+    <hr />
+    <form id="test_form" action="" method="">
+      <div>
+        <label for="mediaPackageId">Media Package ID: </label><input type="text" name="mediaPackageId" id="mediaPackageId" />
+        <label for="flavor">flavor (i.e. "track/indefinite"): </label><input type="text" name="flavor" id="flavor" />
+        <label for="url">URL to content: </label><input type="text" name="url" id="url" />
+      </div>
+      <div>
+      </div>
+      <hr />
+      <div>
+      	<input type="button" value="Create new Media Package" onclick="doForm('createMediaPackage', 'GET')"/>
+        <input type="button" value="Add Track" onclick="doForm('addTrack', 'POST')"/>
+        <input type="button" value="Add Catalog" onclick="doForm('addCatalog', 'POST')"/>
+        <input type="button" value="Add Attachment" onclick="doForm('addAttachment', 'POST')"/>        
+      </div>
+      <div>
+      	<input type="button" value="Ingest Media Package" onclick="doForm('ingest', 'POST')"/>
+      </div>
+      <div>
+      	TRACKS:<br />
+      	track/presenter<br />
+      	track/presentation<br />
+      	track/indefinite<br />
+      	CATALOGS:<br />
+      	metadata/dublincore<br />  
+      	metadata/mpeg-7<br />
+      	ATTACHMENTS:<br />
+      	attachment/(unknown)<br />
+      	attachment/cover<br />     	
+      </div>
+    </form>
+  </body>
+</html>
