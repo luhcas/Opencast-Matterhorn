@@ -40,6 +40,8 @@
         <module>opencast-composer-service-impl</module>
         <module>opencast-conductor-service-api</module>
         <module>opencast-conductor-service-impl</module>
+        <module>opencast-ingest-service-api</module>
+        <module>opencast-ingest-service-impl</module>
         <module>opencast-inspection-service-api</module>
         <module>opencast-inspection-service-impl</module>
         <module>opencast-media</module>
@@ -69,6 +71,8 @@
         <module>opencast-composer-service-impl</module>
         <module>opencast-conductor-service-api</module>
         <module>opencast-conductor-service-impl</module>
+        <module>opencast-ingest-service-api</module>
+        <module>opencast-ingest-service-impl</module>
         <module>opencast-inspection-service-api</module>
         <module>opencast-inspection-service-impl</module>
         <module>opencast-media</module>

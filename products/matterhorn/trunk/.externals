@@ -14,6 +14,8 @@
 ../../../modules/opencast-workspace-api/trunk	opencast-workspace-api
 ../../../modules/opencast-workspace-impl/trunk	opencast-workspace-impl
 ../../../modules/opencast-maven-plugin/trunk	opencast-maven-plugin
+../../../modules/opencast-ingest-service-api/trunk  opencast-ingest-service-api
+../../../modules/opencast-ingest-service-impl/trunk	opencast-ingest-service-impl
 ../../../modules/opencast-inspection-service-api/trunk	opencast-inspection-service-api
 ../../../modules/opencast-inspection-service-impl/trunk	opencast-inspection-service-impl
 ../../../modules/opencast-delivery-service-api/trunk opencast-delivery-service-api
