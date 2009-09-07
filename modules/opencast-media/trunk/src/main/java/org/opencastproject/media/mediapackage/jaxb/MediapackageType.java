@@ -23,6 +23,16 @@
 
 package org.opencastproject.media.mediapackage.jaxb;
 
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageImpl;
+
+import org.w3c.dom.Document;
+
+import java.io.StringWriter;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -197,6 +207,20 @@ public class MediapackageType {
    */
   public void setDuration(Integer value) {
     this.duration = value;
+  }
+  
+  public String toXml() throws Exception {
+    StringWriter sw = new StringWriter();
+    JAXBContext jaxbContext = JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
+    Marshaller marshaller = jaxbContext.createMarshaller();
+    marshaller.marshal(this, sw);
+    return sw.toString();
+  }
+    
+  public static MediapackageType fromXml(Document mediaPackageXml) throws Exception {
+    JAXBContext jaxbContext= JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    return unmarshaller.unmarshal(mediaPackageXml, MediapackageType.class).getValue();
   }
 
 }

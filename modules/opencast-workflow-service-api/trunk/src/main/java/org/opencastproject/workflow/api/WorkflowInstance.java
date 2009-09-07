@@ -15,15 +15,19 @@
  */
 package org.opencastproject.workflow.api;
 
+import org.opencastproject.media.mediapackage.MediaPackage;
+
 /**
  * FIXME -- An instance of a {@link WorkflowDefinition}
  */
 public interface WorkflowInstance {
+  public enum State {RUNNING, STOPPED, PAUSED}
+  
   /**
    * FIXME -- Add javadocs
    */
   String getId();
-
+  
   /**
    * FIXME -- Add javadocs
    */
@@ -33,5 +37,20 @@ public interface WorkflowInstance {
    * FIXME -- Add javadocs
    */
   String getDescription();
+
+  /**
+   * FIXME -- Add javadocs
+   */
+  public WorkflowDefinition getWorkflowDefinition();
+
+  /**
+   * FIXME -- Add javadocs
+   */
+  public State getState();
+  
+  /**
+   * FIXME -- Add javadocs
+   */
+  public MediaPackage getMediaPackage();
 }
 

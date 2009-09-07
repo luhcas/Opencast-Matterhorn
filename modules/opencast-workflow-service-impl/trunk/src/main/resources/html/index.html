@@ -10,10 +10,10 @@
       Workflow Definitions
     </h4>
     <div>
-      <b>GET defs</b> returns all workflow definition
+      <b>GET defs</b> returns all workflow definitions as a Workflow Definition List
     </div>
     <div>
-      <b>GET def/{id}</b> returns the workflow definition
+      <b>GET def/{id}</b> returns a workflow definition
     </div>
     <div>
       <b>POST def/{id}</b> registers a new workflow definition
@@ -24,13 +24,22 @@
       Workflow Instances
     </h4>
     <div>
-      <b>GET instances/{id}</b> returns all instances for a given workflow definition ID
+      <b>GET instances/{id}</b> returns all instances for a given workflow definition ID as a Workflow Instance List
     </div>
     <div>
       <b>GET instance/{id}</b> returns a workflow instance
     </div>
     <div>
-      <b>POST instance/{id}</b> creates or updates a workflow instance
+      <b>POST instance/{id}</b> starts a workflow instance, based on the workflow definition and media package passed as form parametrs
+    </div>
+    <div>
+      <b>GET stop/{id}</b> stops a running workflow instance (TODO: Change this to post... using GET only to make testing easier)
+    </div>
+    <div>
+      <b>GET suspend/{id}</b> suspends a workflow instance (TODO: Change this to post... using GET only to make testing easier)
+    </div>
+    <div>
+      <b>GET resume/{id}</b> resume a suspended workflow instance (TODO: Change this to post... using GET only to make testing easier)
     </div>
     
     <div>

@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.api;
 
+import org.opencastproject.media.mediapackage.MediaPackage;
+
 import java.util.List;
 
 /**
@@ -44,23 +46,47 @@ public interface WorkflowService {
    * Gets a {@link WorkflowInstace} by its ID.
    */
   WorkflowInstance getWorkflowInstance(String id);
-
-  /**
-   * Adds a {@link WorkflowDefinition}.
-   * 
-   * @param id The ID of the entity
-   * @param entity The entity to save
-   */
-  void saveWorkflowInstance(WorkflowInstance workflowInstance);
   
   /**
    * For a given workflow definition ID, list all associated {@link WorkflowInstance}s.
+   * 
+   * TODO Implement paging
    * 
    * @param workflowDefinitionId
    * @return
    */
   List<WorkflowInstance> fetchAllWorkflowInstances(String workflowDefinitionId);
 
+  /**
+   * Creates a new workflow instance.
+   * 
+   * @param workflowDefinitionId
+   * @param mediaPackage
+   * @return
+   */
+  WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage);
+
+  /**
+   * Stops a running workflow instance.
+   * 
+   * @param workflowInstanceId
+   */
+  void stop(String workflowInstanceId);
+
+  /**
+   * Temporarily suspends a started workflow instance.
+   * 
+   * @param workflowInstanceId
+   */
+  void suspend(String workflowInstanceId);
+
+  /**
+   * Resumes a suspended workflow instance.
+   * 
+   * @param workflowInstanceId
+   */
+  void resume(String workflowInstanceId);
+  
   // TODO Add the findBy* methods once the search service is available.
   
 }

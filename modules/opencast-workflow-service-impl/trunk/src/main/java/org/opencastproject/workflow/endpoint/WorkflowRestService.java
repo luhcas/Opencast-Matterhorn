@@ -15,6 +15,9 @@
  */
 package org.opencastproject.workflow.endpoint;
 
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -27,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -74,13 +78,13 @@ public class WorkflowRestService {
   @Consumes(MediaType.TEXT_XML)
   public Response registerJaxbWorkflowDefinition(WorkflowDefinitionJaxbImpl workflowDefinition) {
     service.registerWorkflowDefinition(workflowDefinition.getEntity());
-    return Response.ok(workflowDefinition).build();
+    return Response.ok("Workflow definition " + workflowDefinition.getId() + " registered").build();
   }
 
   @GET
   @Path("instances/{id}")
   @Produces(MediaType.TEXT_XML)
-  public WorkflowInstanceJaxbImplList fetchAllJaxbWorkflowInstances(@PathParam("id") String workflowDefinitionId) {
+  public WorkflowInstanceJaxbImplList fetchAllJaxbWorkflowInstances(@PathParam("id") String workflowDefinitionId) throws Exception {
     WorkflowInstanceJaxbImplList list = new WorkflowInstanceJaxbImplList();
     for(WorkflowInstance instance : service.fetchAllWorkflowInstances(workflowDefinitionId)) {
       list.getWorkflowInstance().add(new WorkflowInstanceJaxbImpl(instance));
@@ -91,19 +95,57 @@ public class WorkflowRestService {
   @GET
   @Path("instance/{id}")
   @Produces(MediaType.TEXT_XML)
-  public WorkflowInstanceJaxbImpl getJaxbWorkflowInstance(@PathParam("id") String id) {
+  public WorkflowInstanceJaxbImpl getJaxbWorkflowInstance(@PathParam("id") String id) throws Exception {
     return new WorkflowInstanceJaxbImpl(service.getWorkflowInstance(id));
   }
 
   @POST
-  @Path("instance/{id}")
+  @Path("start/{id}")
   @Produces(MediaType.TEXT_XML)
-  public Response saveJaxbWorkflowInstance(WorkflowInstanceJaxbImpl workflowInstance) {
-    service.saveWorkflowInstance(workflowInstance.getEntity());
-    return Response.ok(workflowInstance).build();
+  public WorkflowInstanceJaxbImpl start(@PathParam("id") String workflowDefinitionId,
+          @FormParam("mediapackage") MediapackageType mediaPackage) {
+    WorkflowDefinition workflowDefinition = service.getWorkflowDefinition(workflowDefinitionId);
+    try {
+      InputStream in = IOUtils.toInputStream(mediaPackage.toXml());
+      MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(in);
+      WorkflowInstance instance = service.start(workflowDefinition, mp);
+      return new WorkflowInstanceJaxbImpl(instance);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
+
+  // FIXME Using GET for testing purposes only.
   
+  @GET
+  @Path("stop/{id}")
+  @Produces(MediaType.TEXT_PLAIN)
+  public Response stop(@PathParam("id") String workflowInstanceId) {
+    service.stop(workflowInstanceId);
+    return Response.ok("stopped " + workflowInstanceId).build();
+  }
+
+  // FIXME Using GET for testing purposes only.
+
+  @GET
+  @Path("suspend/{id}")
+  @Produces(MediaType.TEXT_PLAIN)
+  public Response suspend(@PathParam("id") String workflowInstanceId) {
+    service.suspend(workflowInstanceId);
+    return Response.ok("suspended " + workflowInstanceId).build();
+  }
+
+  // FIXME Using GET for testing purposes only.
+
+  @GET
+  @Path("resume/{id}")
+  @Produces(MediaType.TEXT_PLAIN)
+  public Response resume(@PathParam("id") String workflowInstanceId) {
+    service.resume(workflowInstanceId);
+    return Response.ok("resumed " + workflowInstanceId).build();
+  }
+
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
@@ -114,6 +156,7 @@ public class WorkflowRestService {
   protected final String docs;
   
   public WorkflowRestService() {
+    // Pre-load the documentation
     String docsFromClassloader = null;
     InputStream in = null;
     try {

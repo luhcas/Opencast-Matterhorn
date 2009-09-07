@@ -15,9 +15,11 @@
  */
 package org.opencastproject.workflow.impl;
 
+import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowService;
+import org.opencastproject.workflow.api.WorkflowInstance.State;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -31,6 +33,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 /**
@@ -44,6 +47,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   
   public WorkflowServiceImpl() {
     definitions = new HashMap<String, WorkflowDefinition>();
+    instances = new HashMap<String, WorkflowInstance>();
+    
     WorkflowDefinitionImpl def1 = new WorkflowDefinitionImpl();
     def1.setId("1");
     def1.setTitle("Transcode and Distribute");
@@ -56,6 +61,30 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     def2.setTitle("Distribute Only");
     def2.setDescription("A simple workflow that sends media and metadata directly to the distribution channels");
     definitions.put(def2.getId(), def2);
+    
+    WorkflowInstanceImpl instance1 = new WorkflowInstanceImpl();
+    instance1.setId("1");
+    instance1.setTitle("Instance #1 of 'Transcode and Distribute'");
+    instance1.setDescription("An instance of the transcode and distribute workflow definition");
+    instance1.setWorkflowDefinition(def1);
+    instance1.setState(State.PAUSED);
+    instances.put(instance1.getId(), instance1);
+
+    WorkflowInstanceImpl instance2 = new WorkflowInstanceImpl();
+    instance2.setId("2");
+    instance2.setTitle("Instance #2 of 'Transcode and Distribute'");
+    instance2.setDescription("Another instance of the transcode and distribute workflow definition");
+    instance2.setWorkflowDefinition(def1);
+    instance2.setState(State.RUNNING);
+    instances.put(instance2.getId(), instance2);
+
+    WorkflowInstanceImpl instance3 = new WorkflowInstanceImpl();
+    instance3.setId("3");
+    instance3.setTitle("Instance #1 of 'Distribute Only'");
+    instance3.setDescription("An instance of the distribute only workflow definition");
+    instance3.setWorkflowDefinition(def2);
+    instance3.setState(State.STOPPED);
+    instances.put(instance3.getId(), instance3);
   }
   
   @SuppressWarnings("unchecked")
@@ -86,8 +115,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public List<WorkflowInstance> fetchAllWorkflowInstances(String workflowDefinitionId) {
     List<WorkflowInstance> list = new ArrayList<WorkflowInstance>();
+    WorkflowDefinition workflowDefinition = definitions.get(workflowDefinitionId);
     for(Entry<String, WorkflowInstance> entry : instances.entrySet()) {
-      list.add(entry.getValue());
+      WorkflowInstance instance = entry.getValue();
+      if(instance.getWorkflowDefinition().equals(workflowDefinition)) {
+        list.add(instance);
+      }
     }
     Collections.sort(list, new Comparator<WorkflowInstance>() {
       public int compare(WorkflowInstance w1, WorkflowInstance w2) {
@@ -110,7 +143,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowInstance(java.lang.String)
    */
   public WorkflowInstance getWorkflowInstance(String id) {
-    return instances.get(id);
+    WorkflowInstance instance = instances.get(id);
+    if(instance == null) {
+      logger.warn("no workflow instance found with id=" + id);
+    }
+    return instance;
   }
 
   /**
@@ -126,13 +163,49 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#saveWorkflowInstance(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition, org.opencastproject.media.mediapackage.MediaPackage)
    */
-  public void saveWorkflowInstance(WorkflowInstance workflowInstance) {
-    if(instances.put(workflowInstance.getId(), workflowInstance) == null) {
-      logger.info("Updated existing workflow instance id=" + workflowInstance.getId());
-    }
+  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage) {
+    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
+    workflowInstance.setId(UUID.randomUUID().toString());
+    workflowInstance.setTitle(workflowDefinition.getTitle() + " Instance " + workflowInstance.getId());
+    workflowInstance.setDescription(workflowInstance.getTitle()); // TODO How should this be set?
+    workflowInstance.setWorkflowDefinition(workflowDefinition);
+    workflowInstance.setMediaPackage(mediaPackage);
+    workflowInstance.setState(WorkflowInstance.State.RUNNING);
+    instances.put(workflowInstance.getId(), workflowInstance);
+    // TODO Do something with this workflow in another thread
+    return workflowInstance;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#stop(java.lang.String)
+   */
+  public void stop(String workflowInstanceId) {
+    WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
+    instance.setState(State.STOPPED);
+    // TODO Stop the associated thread
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#suspend(java.lang.String)
+   */
+  public void suspend(String workflowInstanceId) {
+    WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
+    instance.setState(State.PAUSED);
+    // TODO Pause the associated thread?
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#resume(java.lang.String)
+   */
+  public void resume(String workflowInstanceId) {
+    WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
+    instance.setState(State.RUNNING);
+    // TODO Resume the associated thread?
   }
 
 }
-

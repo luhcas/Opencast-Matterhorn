@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.impl;
 
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 
 /**
@@ -22,8 +24,11 @@ import org.opencastproject.workflow.api.WorkflowInstance;
  */
 public class WorkflowInstanceImpl implements WorkflowInstance {
   private String id;
+  private WorkflowDefinition workflowDefinition;
+  private MediaPackage mediaPackage;
   private String title;
   private String description;
+  private State state;
 
   public String getId() {
     return id;
@@ -47,6 +52,30 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public WorkflowDefinition getWorkflowDefinition() {
+    return workflowDefinition;
+  }
+
+  public void setWorkflowDefinition(WorkflowDefinition workflowDefinition) {
+    this.workflowDefinition = workflowDefinition;
+  }
+
+  public State getState() {
+    return state;
+  }
+
+  public void setState(State state) {
+    this.state = state;
+  }
+
+  public MediaPackage getMediaPackage() {
+    return mediaPackage;
+  }
+
+  public void setMediaPackage(MediaPackage mediaPackage) {
+    this.mediaPackage = mediaPackage;
   }
 
 }
