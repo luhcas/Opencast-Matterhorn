@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.workflow.WorkflowServiceImpl" immediate="true">
-  <implementation class="org.opencastproject.workflow.WorkflowServiceImpl" />
-  <property name="service.description" value="Workflow Service" />
-  <property name="service.exported.interfaces" value="*" />
+<component name="org.opencastproject.conductor.impl.ConductorServiceImpl" immediate="true">
+  <implementation class="org.opencastproject.conductor.impl.ConductorServiceImpl" />
+  <property name="service.description" value="Conductor Service" />
+  <property name="service.exported.interfaces" value="org.opencastproject.conductor.api.ConductorService" />
   <property name="service.exported.configs" value="org.apache.cxf.ws" />
   <property name="org.apache.cxf.ws.httpservice.context" value="/private/conductor" />
   <service>
-    <provide interface="org.opencastproject.workflow.api.WorkflowService" />
+    <provide interface="org.opencastproject.conductor.api.ConductorService" />
   </service>
 </component>

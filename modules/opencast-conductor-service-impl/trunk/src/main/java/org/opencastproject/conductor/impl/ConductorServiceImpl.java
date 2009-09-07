@@ -13,8 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.workflow.api;
+package org.opencastproject.conductor.impl;
 
-public interface WorkflowService {
+import org.opencastproject.conductor.api.ConductorService;
+
+public class ConductorServiceImpl implements ConductorService {
 
 }
