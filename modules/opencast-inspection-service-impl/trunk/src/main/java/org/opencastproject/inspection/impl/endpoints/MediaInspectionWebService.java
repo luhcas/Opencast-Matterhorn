@@ -16,8 +16,7 @@
 package org.opencastproject.inspection.impl.endpoints;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
-import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
+import org.opencastproject.media.mediapackage.jaxb.TrackType;
 
 import java.net.URL;
 
@@ -34,14 +33,6 @@ public interface MediaInspectionWebService {
    * @param url
    * @return
    */
-  Track inspect(URL url);
+  TrackType inspect(URL url);
   
-  /**
-   * A sample method used to test media package JAXB serialization.  Only for testing... this is not for production.
-   * 
-   * FIXME
-   * 
-   * @return
-   */
-  MediapackageType getMediaPackage();
 }

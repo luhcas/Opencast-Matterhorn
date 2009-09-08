@@ -16,14 +16,15 @@
 package org.opencastproject.inspection.impl.endpoints;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.media.mediapackage.jaxb.AttachmentType;
-import org.opencastproject.media.mediapackage.jaxb.AttachmentsType;
-import org.opencastproject.media.mediapackage.jaxb.ChecksumType;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
-import org.opencastproject.media.mediapackage.jaxb.ObjectFactory;
+import org.opencastproject.media.mediapackage.jaxb.TrackType;
+
+import org.w3c.dom.Document;
 
 import java.net.URL;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * A web service endpoint delegating logic to the {@link MediaInspectionService}
@@ -38,37 +39,15 @@ public class MediaInspectionWebServiceImpl implements MediaInspectionWebService 
    * {@inheritDoc}
    * @see org.opencastproject.inspection.impl.endpoints.MediaInspectionWebService#inspect(java.net.URL)
    */
-  public Track inspect(URL url) {
-    return service.inspect(url);
+  public TrackType inspect(URL url) {
+    Track track = service.inspect(url);
+    Document doc;
+    try {
+      doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+      track.toManifest(doc, new DefaultMediaPackageSerializerImpl());
+      return TrackType.fromXml(doc);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.inspection.impl.endpoints.MediaInspectionWebService#getMediaPackage()
-   */
-  public MediapackageType getMediaPackage() {
-    ObjectFactory of = new ObjectFactory();
-
-    // Create the media package, and set some example values
-    MediapackageType mp = of.createMediapackageType();
-    mp.setId("handle/0000");
-    mp.setDuration(1024);
-
-    // Create an attachment
-    AttachmentType attachment = of.createAttachmentType();
-    ChecksumType attachment1Checksum = of.createChecksumType();
-    attachment1Checksum.setType("md5");
-    attachment1Checksum.setValue("abc123def");
-    attachment.setId("attachment-1");
-    attachment.setChecksum(attachment1Checksum);
-
-    // Create the attachments container
-    AttachmentsType attachments = of.createAttachmentsType();
-
-    // Add the attachment to the container
-    attachments.getAttachment().add(attachment);
-    
-    return mp;
-  }
-  
 }

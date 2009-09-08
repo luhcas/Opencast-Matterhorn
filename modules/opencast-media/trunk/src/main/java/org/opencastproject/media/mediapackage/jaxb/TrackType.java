@@ -23,12 +23,22 @@
 
 package org.opencastproject.media.mediapackage.jaxb;
 
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
+import java.io.StringReader;
+import java.io.StringWriter;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * <p>
@@ -240,4 +250,21 @@ public class TrackType {
     this.type = value;
   }
 
+  public String toXml() throws Exception {
+    StringWriter sw = new StringWriter();
+    JAXBContext jaxbContext = JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
+    Marshaller marshaller = jaxbContext.createMarshaller();
+    marshaller.marshal(this, sw);
+    return sw.toString();
+  }
+
+  public static TrackType fromXml(Document mediaPackageXml) throws Exception {
+    JAXBContext jaxbContext= JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    return unmarshaller.unmarshal(mediaPackageXml, TrackType.class).getValue();
+  }
+
+  public static TrackType valueOf(String xmlString) throws Exception {
+    return fromXml(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(xmlString))));
+  }
 }
