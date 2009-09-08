@@ -20,6 +20,8 @@ import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
+import org.opencastproject.workflow.impl.runner.ComposeMediaRunner;
+import org.opencastproject.workflow.impl.runner.DistributeMediaRunner;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -44,22 +46,37 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   
   Map<String, WorkflowDefinition> definitions;
   Map<String, WorkflowInstance> instances;
-  
+
   public WorkflowServiceImpl() {
     definitions = new HashMap<String, WorkflowDefinition>();
     instances = new HashMap<String, WorkflowInstance>();
-    
+    loadSampleData();
+  }
+  
+  @SuppressWarnings("unchecked")
+  public void updated(Dictionary props) throws ConfigurationException {
+    // Update any configuration properties here
+  }
+
+  protected void loadSampleData() {
     WorkflowDefinitionImpl def1 = new WorkflowDefinitionImpl();
     def1.setId("1");
     def1.setTitle("Transcode and Distribute");
     def1.setDescription("A simple workflow that transcodes the media into distribution formats, then sends the " +
         "resulting distribution files, along with their associated metadata, to the distribution channels");
+    List<String> operations1 = new ArrayList<String>();
+    operations1.add("compose");
+    operations1.add("distribute");
+    def1.setOperations(operations1);
     definitions.put(def1.getId(), def1);
-
+  
     WorkflowDefinitionImpl def2 = new WorkflowDefinitionImpl();
     def2.setId("2");
     def2.setTitle("Distribute Only");
     def2.setDescription("A simple workflow that sends media and metadata directly to the distribution channels");
+    List<String> operations2 = new ArrayList<String>();
+    operations2.add("distribute");
+    def2.setOperations(operations2);
     definitions.put(def2.getId(), def2);
     
     WorkflowInstanceImpl instance1 = new WorkflowInstanceImpl();
@@ -68,16 +85,22 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     instance1.setDescription("An instance of the transcode and distribute workflow definition");
     instance1.setWorkflowDefinition(def1);
     instance1.setState(State.PAUSED);
+    Map<String, String> map1 = new HashMap<String, String>();
+    map1.put("flash", "low-bandwidth");
+    instance1.setProperties(map1);
     instances.put(instance1.getId(), instance1);
-
+  
     WorkflowInstanceImpl instance2 = new WorkflowInstanceImpl();
     instance2.setId("2");
     instance2.setTitle("Instance #2 of 'Transcode and Distribute'");
     instance2.setDescription("Another instance of the transcode and distribute workflow definition");
     instance2.setWorkflowDefinition(def1);
     instance2.setState(State.RUNNING);
+    Map<String, String> map2 = new HashMap<String, String>();
+    map2.put("flash", "high-bandwidth");
+    instance2.setProperties(map2);
     instances.put(instance2.getId(), instance2);
-
+  
     WorkflowInstanceImpl instance3 = new WorkflowInstanceImpl();
     instance3.setId("3");
     instance3.setTitle("Instance #1 of 'Distribute Only'");
@@ -85,25 +108,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     instance3.setWorkflowDefinition(def2);
     instance3.setState(State.STOPPED);
     instances.put(instance3.getId(), instance3);
-  }
-  
-  @SuppressWarnings("unchecked")
-  public void updated(Dictionary props) throws ConfigurationException {
-    // Update any configuration properties here
-  }
-
-  protected Runnable getRunnable(final WorkflowInstance workflowInstance) {
-    return new Runnable() {
-      public void run() {
-        logger.info("starting workflow " + workflowInstance.getId());
-        try {
-          Thread.sleep(5000);
-        } catch (InterruptedException e) {
-          logger.info("workflow " + workflowInstance.getId() + " thread interrupted");
-        }
-        logger.info("finishing workflow " + workflowInstance.getId());
-      }
-    };
   }
   
   /**
@@ -188,20 +192,40 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     workflowInstance.setMediaPackage(mediaPackage);
     workflowInstance.setState(WorkflowInstance.State.RUNNING);
     instances.put(workflowInstance.getId(), workflowInstance);
-    workflowInstance.setThread(new Thread(getRunnable(workflowInstance)));
-    workflowInstance.getThread().start();
+    run(workflowInstance);
     return workflowInstance;
   }
 
+  protected Map<String, Thread> threadMap = new HashMap<String, Thread>();
+
+  // TODO -- this supports serialized execution only.  Add parallel execution if needed.
+  protected void run(final WorkflowInstance wfi) {
+    Thread t = new Thread(new Runnable() {
+      public void run() {
+        if(wfi.getWorkflowDefinition().getOperations().contains("compose")) {
+          new ComposeMediaRunner(wfi).run();
+        }
+        if(wfi.getWorkflowDefinition().getOperations().contains("distribute")) {
+          new DistributeMediaRunner(wfi).run();
+        }
+      }
+    });
+    threadMap.put(wfi.getId(), t);
+    t.start();
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowService#stop(java.lang.String)
    */
   public void stop(String workflowInstanceId) {
     WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
+    Thread t = threadMap.get(workflowInstanceId);
+    if(t != null) {
+      t.interrupt();
+    }
     instance.setState(State.STOPPED);
-    instance.getThread().interrupt();
-  }
+}
 
   /**
    * {@inheritDoc}
@@ -209,8 +233,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public void suspend(String workflowInstanceId) {
     WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
+    Thread t = threadMap.get(workflowInstanceId);
+    if(t != null) {
+      t.interrupt();
+    }
     instance.setState(State.PAUSED);
-    instance.getThread().interrupt();
   }
 
   /**
@@ -219,8 +246,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public void resume(String workflowInstanceId) {
     WorkflowInstanceImpl workflowInstance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
-    workflowInstance.setThread(new Thread(getRunnable(workflowInstance)));
-    workflowInstance.getThread().start();
+    run(workflowInstance);
     workflowInstance.setState(State.RUNNING);
   }
 }

@@ -27,19 +27,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-
-/**
- * FIXME -- Add javadocs
- */
 
 @XmlType(name="workflow-instance", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="workflow-instance", namespace="http://workflow.opencastproject.org/")
@@ -60,6 +60,13 @@ public class WorkflowInstanceJaxbImpl {
     if(mp != null) {
       mediaPackage = MediapackageType.fromXml(mp.toXml());
     }
+    Map<String, String> instanceProps = instance.getProperties();
+    if(instanceProps != null) {
+      this.properties = new HashMap<String, String>(instanceProps);
+      for(Entry<String, String> entry : properties.entrySet()) {
+        logger.info("#### " + entry.getKey() + " = " + entry.getValue());
+      }
+    }
   }
 
   @XmlTransient
@@ -74,6 +81,7 @@ public class WorkflowInstanceJaxbImpl {
       InputStream in = IOUtils.toInputStream(mediaPackage.toXml());
       entity.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(in));
     }
+    entity.setProperties(this.properties);
     return entity;
   }
 
@@ -95,6 +103,9 @@ public class WorkflowInstanceJaxbImpl {
 
   @XmlElement(name="mediapackage")
   private MediapackageType mediaPackage;
+  
+  @XmlElementWrapper(name="properties")
+  private HashMap<String, String> properties;
   
   public String getId() {
     return id;
@@ -138,6 +149,12 @@ public class WorkflowInstanceJaxbImpl {
   }
   public void setMediaPackage(MediapackageType mediaPackage) {
     this.mediaPackage = mediaPackage;
+  }
+  public HashMap<String, String> getProperties() {
+    return properties;
+  }
+  public void setProperties(HashMap<String, String> properties) {
+    this.properties = properties;
   }
 
 }

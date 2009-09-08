@@ -17,40 +17,49 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
+import java.util.Map;
+
 /**
- * FIXME -- An instance of a {@link WorkflowDefinition}
+ * An single instance of a running, paused, or stopped workflow.
  */
 public interface WorkflowInstance {
   public enum State {RUNNING, STOPPED, PAUSED}
   
   /**
-   * FIXME -- Add javadocs
+   * The unique ID of this {@link WorkflowInstance}
    */
   String getId();
   
   /**
-   * FIXME -- Add javadocs
+   * The short title of this {@link WorkflowInstance}
    */
   String getTitle();
 
   /**
-   * FIXME -- Add javadocs
+   * The longer description of this {@link WorkflowInstance}
    */
   String getDescription();
 
   /**
-   * FIXME -- Add javadocs
+   * The {@link WorkflowDefinition} that served as a template for this {@link WorkflowInstance} the moment the instance
+   * was created.
    */
   public WorkflowDefinition getWorkflowDefinition();
 
   /**
-   * FIXME -- Add javadocs
+   * The current {@link State} of this {@link WorkflowInstance}
    */
   public State getState();
   
   /**
-   * FIXME -- Add javadocs
+   * The {@link MediaPackage} associated with this {@link WorkflowInstance}
    */
   public MediaPackage getMediaPackage();
+  
+  /**
+   * The properties associated with this workflow instance.  Properties can be used to affect how
+   * {@link WorkflowDefinition#getOperations()} are eventually run.
+   */
+  public Map<String, String> getProperties();
 }
 

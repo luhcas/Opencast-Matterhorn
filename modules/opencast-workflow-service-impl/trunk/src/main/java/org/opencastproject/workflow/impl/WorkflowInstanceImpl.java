@@ -18,6 +18,10 @@ package org.opencastproject.workflow.impl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.impl.runner.AbstractWorkflowOperationRunner;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * A simple POJO-based implementation of a {@link WorkflowDefinition}
@@ -25,12 +29,13 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 public class WorkflowInstanceImpl implements WorkflowInstance {
   private String id;
   private WorkflowDefinition workflowDefinition;
+  private Map<String, String> properties;
   private MediaPackage mediaPackage;
   private String title;
   private String description;
   private State state;
-  private Thread thread;
-
+  private List<? extends AbstractWorkflowOperationRunner> runners;
+  
   public String getId() {
     return id;
   }
@@ -79,12 +84,20 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     this.mediaPackage = mediaPackage;
   }
 
-  public void setThread(Thread thread) {
-    this.thread = thread;
+  public Map<String, String> getProperties() {
+    return properties;
   }
 
-  public Thread getThread() {
-    return thread;
+  public void setProperties(Map<String, String> properties) {
+    this.properties = properties;
+  }
+
+  public List<? extends AbstractWorkflowOperationRunner> getRunners() {
+    return runners;
+  }
+
+  public void setRunners(List<? extends AbstractWorkflowOperationRunner> runners) {
+    this.runners = runners;
   }
 
 }

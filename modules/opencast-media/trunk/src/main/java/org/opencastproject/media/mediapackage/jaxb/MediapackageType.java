@@ -23,11 +23,10 @@
 
 package org.opencastproject.media.mediapackage.jaxb;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageImpl;
-
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
+import java.io.StringReader;
 import java.io.StringWriter;
 
 import javax.xml.bind.JAXBContext;
@@ -37,8 +36,10 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * <p>
@@ -68,6 +69,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "mediapackageType", propOrder = { "media", "metadata", "attachments" })
+@XmlRootElement(name = "mediapackage")
 public class MediapackageType {
 
   @XmlElement(required = true)
@@ -216,11 +218,14 @@ public class MediapackageType {
     marshaller.marshal(this, sw);
     return sw.toString();
   }
-    
+
   public static MediapackageType fromXml(Document mediaPackageXml) throws Exception {
     JAXBContext jaxbContext= JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(mediaPackageXml, MediapackageType.class).getValue();
   }
 
+  public static MediapackageType valueOf(String xmlString) throws Exception {
+    return fromXml(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(xmlString))));
+  }
 }

@@ -16,7 +16,7 @@
       <b>GET def/{id}</b> returns a workflow definition
     </div>
     <div>
-      <b>POST def/{id}</b> registers a new workflow definition
+      <b>POST def/{id}</b> registers a new workflow definition, which should be passed in the "wfdef" form parameter
     </div>
     
     
@@ -30,7 +30,10 @@
       <b>GET instance/{id}</b> returns a workflow instance
     </div>
     <div>
-      <b>POST instance/{id}</b> starts a workflow instance, based on the workflow definition and media package passed as form parametrs
+      <b>POST start/{id}</b> starts a workflow instance, based on the specified workflow definition ID and media package passed in the "mediapackage" form parameter
+      <form action="start/2" method="POST">
+        Media Package XML<br/><textarea rows="20" cols="80" id="mediapackage" name="mediapackage"></textarea><br/><input type="submit"/>
+      </form>
     </div>
     <div>
       <b>GET stop/{id}</b> stops a running workflow instance (TODO: Change this to post... using GET only to make testing easier)

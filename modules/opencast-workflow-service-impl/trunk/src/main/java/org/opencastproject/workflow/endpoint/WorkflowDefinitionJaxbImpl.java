@@ -21,10 +21,13 @@ import org.opencastproject.workflow.impl.WorkflowDefinitionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -46,6 +49,7 @@ public class WorkflowDefinitionJaxbImpl {
     this.id = def.getId();
     this.title = def.getTitle();
     this.description = def.getDescription();
+    this.operations = def.getOperations();
   }
 
   @XmlTransient
@@ -54,6 +58,7 @@ public class WorkflowDefinitionJaxbImpl {
     entity.setId(id);
     entity.setTitle(title);
     entity.setDescription(description);
+    entity.setOperations(operations);
     return entity;
   }
 
@@ -67,6 +72,10 @@ public class WorkflowDefinitionJaxbImpl {
   @XmlElement(name="description")
   private String description;
 
+  @XmlElement(name="operation")
+  @XmlElementWrapper(name="operations")
+  private List<String> operations;
+  
   public String getId() {
     return id;
   }
@@ -89,6 +98,12 @@ public class WorkflowDefinitionJaxbImpl {
   
   public void setDescription(String description) {
     this.description = description;
+  }
+  public List<String> getOperations() {
+    return operations;
+  }
+  public void setOperations(List<String> operations) {
+    this.operations = operations;
   }
 
 }

@@ -76,7 +76,7 @@ public class WorkflowRestService {
   @POST
   @Path("def/{id}")
   @Consumes(MediaType.TEXT_XML)
-  public Response registerJaxbWorkflowDefinition(WorkflowDefinitionJaxbImpl workflowDefinition) {
+  public Response registerJaxbWorkflowDefinition(@FormParam("wfdef") WorkflowDefinitionJaxbImpl workflowDefinition) {
     service.registerWorkflowDefinition(workflowDefinition.getEntity());
     return Response.ok("Workflow definition " + workflowDefinition.getId() + " registered").build();
   }

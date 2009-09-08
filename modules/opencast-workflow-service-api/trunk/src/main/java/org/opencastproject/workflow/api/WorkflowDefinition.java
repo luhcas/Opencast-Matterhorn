@@ -15,23 +15,31 @@
  */
 package org.opencastproject.workflow.api;
 
+import java.util.List;
+
 /**
  * A workflow definition.
  */
 public interface WorkflowDefinition {
   /**
-   * FIXME -- Add javadocs
+   * The unique ID of this workflow definition
+   * @return
    */
   String getId();
 
   /**
-   * FIXME -- Add javadocs
+   * The short title of this workflow definition
    */
   String getTitle();
 
   /**
-   * FIXME -- Add javadocs
+   * A longer description of this workflow definition
    */
   String getDescription();
+
+  /**
+   * The operations, listed in order, that this workflow definition includes.
+   */
+  List<String> getOperations();
 }
 

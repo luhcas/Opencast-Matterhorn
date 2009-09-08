@@ -17,6 +17,8 @@ package org.opencastproject.workflow.impl;
 
 import org.opencastproject.workflow.api.WorkflowDefinition;
 
+import java.util.List;
+
 /**
  * A simple POJO-based implementation of a {@link WorkflowDefinition}
  */
@@ -24,6 +26,7 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   private String id;
   private String title;
   private String description;
+  private List<String> operations;
 
   public String getId() {
     return id;
@@ -47,6 +50,14 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public List<String> getOperations() {
+    return operations;
+  }
+
+  public void setOperations(List<String> operations) {
+    this.operations = operations;
   }
 }
 
