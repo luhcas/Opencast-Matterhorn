@@ -35,6 +35,7 @@ import java.util.Iterator;
  * FIXME -- Add javadocs
  */
 public class EngageServiceImpl implements EngageService, ManagedService {
+  @SuppressWarnings("unused")
   private static final Logger logger = LoggerFactory.getLogger(EngageServiceImpl.class);
   
   public static String engagePath = "/tmp/matterhorn/workingfilerepo/engage";
@@ -52,6 +53,7 @@ public class EngageServiceImpl implements EngageService, ManagedService {
    * @param filename
    * @return HTML page
    */
+  @SuppressWarnings("unchecked")
   public String deliverPlayer(String filename, String mediaHost) {
     if (!checkFilename(filename)) {
       throw new RuntimeException("File not found " + filename);
@@ -66,6 +68,7 @@ public class EngageServiceImpl implements EngageService, ManagedService {
    * Returns an HTML page that lists all available mediafiles.
    * @return HTML page
    */
+  @SuppressWarnings("unchecked")
   public String listRecordings() {
     StringBuilder sb = new StringBuilder();
     File dir = new File(engagePath);

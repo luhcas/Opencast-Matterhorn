@@ -46,4 +46,13 @@ function VideodisplayReady() {
 	Videodisplay.passCharCode = function(argInt){
 		b_Videodisplay_root.passCharCode(argInt);
 	};
+	
+	Videodisplay.passCharCode = function(argInt){
+		b_Videodisplay_root.passCharCode(argInt);
+	};
+	
+	Videodisplay.setVolume = function(argNumber) {
+		b_Videodisplay_root.setVolume(argNumber);
+	};
+
 }

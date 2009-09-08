@@ -15,15 +15,13 @@
  */
 package org.opencastproject.engage.impl;
 
-import org.opencastproject.engage.api.EngageService;
-
-import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opencastproject.engage.api.EngageService;
 
 public class EngageServiceImplTest {
+  @SuppressWarnings("unused")
   private EngageService service = null;
   @Before
   public void setup() {

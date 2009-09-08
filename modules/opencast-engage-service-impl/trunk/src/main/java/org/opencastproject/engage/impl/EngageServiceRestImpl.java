@@ -73,6 +73,7 @@ public class EngageServiceRestImpl implements EngageService {
   @Produces(MediaType.TEXT_HTML)
   @Path("play/{filename}")
   public String deliverPlayerGET(@PathParam("filename") String filename, @Context HttpServletRequest request) {
+    @SuppressWarnings("unused")
     String mediaHost = "mediahost";
     
       try {

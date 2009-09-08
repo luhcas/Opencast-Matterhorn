@@ -2,8 +2,8 @@
 <head>
 	<title>Accessible Opencast Progressive Download</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<script type="text/javascript" src="bridge/lib/FABridge.js"></script>
-	<script type="text/javascript" src="bridge/Videodisplay.js"></script>
+	<script type="text/javascript" src="/engage/player/bridge/lib/FABridge.js"></script>
+	<script type="text/javascript" src="/engage/player/bridge/Videodisplay.js"></script>
 	
 	<script language="javascript">
 		function doPlay ()
@@ -33,24 +33,23 @@
 	<body>
 		<div style="margin:10px">
 			<h1>Progressive Download Videoplayer</h1>
-			<object codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="203" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
-				<param name ="movie" value="Videodisplay.swf"/>
+			<object codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" height="360" width="203" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
+				<param name ="movie" value="/engage/player/Videodisplay.swf"/>
 				<param name="quality"value="high"/>
 				<param name="allowScriptAccess" value="always" />
-				<param name="bgcolor" value="#000000"/>
+				<param name="bgcolor" value="#FFFFFF"/>
 				<param name="allowFullScreen" value="true"/>
-				<param name="FlashVars" VALUE="bridgeName=b_Videodisplay&video_url=http://vs1.rz.uos.de/public/virtmm/test/Pechakucha-zoo_hd.mp4">
+				<param name="FlashVars" VALUE="bridgeName=b_Videodisplay&video_url=<:videoURL:>">
 				<embed 
 					width="360" 
 					height="203" 
-					bgcolor="#000000"
 					allowfullscreen="true" 
 					type="application/x-shockwave-flash" 
 					pluginspage="http://www.macromedia.com/go/getflashplayer" 
-					flashvars="bridgeName=b_Videodisplay&video_url=http://vs1.rz.uos.de/public/virtmm/test/Pechakucha-zoo_hd.mp4" 
+					flashvars="bridgeName=b_Videodisplay&video_url=<:videoURL:>" 
 					quality="high" 
 					allowScriptAccess="always"
-					src="Videodisplay.swf"/>
+					src="/engage/player/Videodisplay.swf"/>
 			</object>
 		</div>
 		

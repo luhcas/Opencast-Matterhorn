@@ -1,3 +1,4 @@
+<!doctype html>
 <html>
 <head>
 	<title>Accessible Opencast Streaming</title>
@@ -5,7 +6,7 @@
 	<script type="text/javascript" src="bridge/lib/FABridge.js"></script>
 	<script type="text/javascript" src="bridge/Videodisplay.js"></script>
 	
-	<script language="javascript">
+	<script language="javascript" type="text/javascript">
 		function doPlay ()
 		{
 			Videodisplay.play();
@@ -21,6 +22,11 @@
 			Videodisplay.stop();
 		}
 		
+		function doSetVolume (value)
+        {
+            Videodisplay.setVolume(value);
+        }
+		
 		function setTime(text)
 		{
 		   document.getElementById("time").innerHTML = text;
@@ -28,7 +34,7 @@
 	
 	</script>
 
-	<script LANGUAGE="JavaScript" TYPE="text/javascript">
+	<script language="JavaScript" type="text/javascript">
 	
 		function getNamedKey(k)
 		{ 
@@ -91,22 +97,23 @@
 	
 		window.onload=init;	
 	
-	</SCRIPT>
+	</script>
 </head>
 
 	<body>
 		<div style="margin:10px">
 			<h1>Streaming Videoplayer</h1>
 			<object codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="288" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
-				<param name ="movie" value="Videodisplay.swf"/>
+				<param name ="movie" value="Videodisplay.swf" />
 				<param name="quality"value="high"/>
 				<param name="allowScriptAccess" value="always" />
-				<param name="bgcolor" value="#FFFFFF"/>
+				<param name="bgcolor" value="#000000"/>
 				<param name="allowFullScreen" value="true"/>
 				<param name="FlashVars" VALUE="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv&autoplay=false">
 				<embed 
 					width="360" 
 					height="288" 
+					bgcolor="#000000"
 					allowfullscreen="true" 
 					type="application/x-shockwave-flash" 
 					pluginspage="http://www.macromedia.com/go/getflashplayer" 
@@ -120,10 +127,10 @@
 		
 		<div style="margin:10px">
 		<object codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="40" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
-				<param name ="movie" value="Scrubber.swf"/>
+				<param name ="movie" value="Scrubber.swf" />
 				<param name="quality"value="high"/>
 				<param name="allowScriptAccess" value="always" />
-				<param name="bgcolor" value="#FFFFFF"/>
+				<param name="bgcolor" value="#ffffff"/>
 				<param name="allowFullScreen" value="true"/>
 				<param name="FlashVars" VALUE="bridgeName=b_Videodisplay">
 				<embed 
@@ -160,9 +167,17 @@
 				<td align="right">2.</td>
 				<td>Play/Pause video using keyboard: <b>spacebar</b> or <b>enter</b></td>
 			</tr>
-		  <tr>
+		    <tr>
                 <td align="right">3.</td>
                 <td>Default auto-play off: To enable it set flashvar <i>autoplay=true</i></td>
+            </tr>
+            <tr>
+                <td align="right">4.</td>
+                <td>Set volume: 
+                    <input type="button" onclick="doSetVolume(0.0);" value="0.0"/>
+                    <input type="button" onclick="doSetVolume(0.5);" value="0.5"/>
+                    <input type="button" onclick="doSetVolume(1.0);" value="1.0"/>
+                </td>
             </tr>
 		</table>
 	</body>
