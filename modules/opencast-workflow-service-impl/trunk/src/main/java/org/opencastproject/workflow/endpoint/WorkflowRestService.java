@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -102,13 +103,16 @@ public class WorkflowRestService {
   @POST
   @Path("start/{id}")
   @Produces(MediaType.TEXT_XML)
-  public WorkflowInstanceJaxbImpl start(@PathParam("id") String workflowDefinitionId,
-          @FormParam("mediapackage") MediapackageType mediaPackage) {
+  public WorkflowInstanceJaxbImpl start(
+          @PathParam("id") String workflowDefinitionId,
+          @FormParam("mediapackage") MediapackageType mediaPackage,
+          @FormParam("properties") LocalHashMap localMap) {
+    Map<String, String> properties = localMap.getMap();
     WorkflowDefinition workflowDefinition = service.getWorkflowDefinition(workflowDefinitionId);
     try {
       InputStream in = IOUtils.toInputStream(mediaPackage.toXml());
       MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(in);
-      WorkflowInstance instance = service.start(workflowDefinition, mp);
+      WorkflowInstance instance = service.start(workflowDefinition, mp, properties);
       return new WorkflowInstanceJaxbImpl(instance);
     } catch (Exception e) {
       throw new RuntimeException(e);

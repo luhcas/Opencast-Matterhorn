@@ -183,13 +183,14 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition, org.opencastproject.media.mediapackage.MediaPackage)
    */
-  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage) {
+  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage, Map<String, String> properties) {
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
     workflowInstance.setId(UUID.randomUUID().toString());
     workflowInstance.setTitle(workflowDefinition.getTitle() + " Instance " + workflowInstance.getId());
     workflowInstance.setDescription(workflowInstance.getTitle());
     workflowInstance.setWorkflowDefinition(workflowDefinition);
     workflowInstance.setMediaPackage(mediaPackage);
+    workflowInstance.setProperties(properties);
     workflowInstance.setState(WorkflowInstance.State.RUNNING);
     instances.put(workflowInstance.getId(), workflowInstance);
     run(workflowInstance);

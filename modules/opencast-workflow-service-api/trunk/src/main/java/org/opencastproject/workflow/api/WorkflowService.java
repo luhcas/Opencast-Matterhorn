@@ -18,6 +18,7 @@ package org.opencastproject.workflow.api;
 import org.opencastproject.media.mediapackage.MediaPackage;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Manages {@link WorkflowDefinition}s and {@link WorkflowInstance}s.
@@ -62,9 +63,10 @@ public interface WorkflowService {
    * 
    * @param workflowDefinitionId
    * @param mediaPackage
+   * @param properties
    * @return The new workflow instance
    */
-  WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage);
+  WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage, Map<String, String> properties);
 
   /**
    * Stops a running workflow instance.
