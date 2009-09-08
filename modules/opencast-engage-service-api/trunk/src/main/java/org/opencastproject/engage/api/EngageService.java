@@ -19,9 +19,18 @@ package org.opencastproject.engage.api;
  * FIXME -- Add javadocs
  */
 public interface EngageService {
-  /**
-   * Says hello.  Replace this method with your service operations.
+
+  /** 
+   * Returns an HTML page with a player that plays filename.
+   * @param filename
+   * @return HTML page
    */
-  String sayHi();
+  public String deliverPlayer(String filename, String mediaHost);
+  
+  /**
+   * Returns an HTML page that lists all available mediafiles.
+   * @return HTML page
+   */
+  public String listRecordings();
 }
 
