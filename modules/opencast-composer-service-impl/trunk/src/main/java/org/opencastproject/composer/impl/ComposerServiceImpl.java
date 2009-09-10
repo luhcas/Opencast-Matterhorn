@@ -22,8 +22,10 @@ import org.opencastproject.notification.api.NotificationMessage;
 import java.util.UUID;
 
 public class ComposerServiceImpl implements ComposerService {
+  
   public NotificationMessage encode(String mediaPackageId, String trackId, String pathOut,
-      String notificationServiceEndpoint) {
+          String notificationServiceEndpoint) {
+
     // TODO actually start or queue (and change the message parameter) the encoding job
     StringBuilder message = new StringBuilder();
     message.append("encoding job started on:\nMedia package=");
@@ -34,11 +36,11 @@ public class ComposerServiceImpl implements ComposerService {
     message.append("\nNotification Endpoint=");
     message.append(notificationServiceEndpoint);
 
-    return new NotificationMessage(message.toString(), UUID.randomUUID()
-        .toString(), ComposerService.class.getName());
+    return new NotificationMessage(message.toString(), UUID.randomUUID().toString(), ComposerService.class.getName());
   }
 
   public String getDocumentation() {
     return "The encoder service documentation needs to be written.";
   }
+
 }
