@@ -24,6 +24,18 @@
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.jsr311-api-1.0</artifactId>
     </dependency>
+    <dependency>
+    	<groupId>org.opencastproject</groupId>
+    	<artifactId>opencast-media</artifactId>
+    	<version>0.1-SNAPSHOT</version>
+    	<type>bundle</type>
+    </dependency>
+    <dependency>
+    	<groupId>org.opencastproject</groupId>
+    	<artifactId>opencast-util</artifactId>
+    	<version>0.1-SNAPSHOT</version>
+    	<type>bundle</type>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -34,9 +46,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.composer.api </Export-Package>
-            <Import-Package> * </Import-Package>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Export-Package>
+              org.opencastproject.composer.api
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>
