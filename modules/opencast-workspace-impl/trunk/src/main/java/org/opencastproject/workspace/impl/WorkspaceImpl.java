@@ -39,7 +39,7 @@ public class WorkspaceImpl implements Workspace, ManagedService {
   private String rootDirectory = null;
 
   public WorkspaceImpl() {
-    rootDirectory = "/tmp/matterhorn/workspace";
+    rootDirectory = System.getProperty("java.io.tmpdir") + "opencast" + File.separator + "workspace";
     createRootDirectory();
   }
 

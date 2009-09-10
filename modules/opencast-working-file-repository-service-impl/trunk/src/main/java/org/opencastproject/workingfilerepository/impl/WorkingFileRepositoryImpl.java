@@ -42,7 +42,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   private String rootDirectory = null;
   
   public WorkingFileRepositoryImpl() {
-    rootDirectory = "/tmp/matterhorn/workingfilerepo";
+    rootDirectory = System.getProperty("java.io.tmpdir") + "opencast" + File.separator + "workingfilerepo";
     createRootDirectory();
   }
   

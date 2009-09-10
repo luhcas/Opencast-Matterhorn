@@ -25,10 +25,6 @@
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.web-extender</groupId>
-      <artifactId>pax-web-ex-whiteboard</artifactId>
-    </dependency>
   </dependencies>
   <build>
     <resources>
@@ -48,11 +44,11 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Import-Package> * </Import-Package>
+            <Export-Package>org.opencastproject.conductor.*</Export-Package>
             <Service-Component>
               OSGI-INF/conductor-service.xml
             </Service-Component>
-            <Import-Package> * </Import-Package>
-            <Private-Package>org.opencastproject.workflow</Private-Package>
           </instructions>
         </configuration>
       </plugin>
