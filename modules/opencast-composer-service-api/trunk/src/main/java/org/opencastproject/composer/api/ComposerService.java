@@ -18,15 +18,13 @@ package org.opencastproject.composer.api;
 import org.opencastproject.notification.api.NotificationMessage;
 
 /**
- * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this
- * encoding job.
+ * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this encoding job.
  */
 public interface ComposerService {
-  public NotificationMessage encode(
-      String mediaPackageHandle,
-      String track,
-      String pathOut,
-      String notificationServiceEndpoint);
+
+  public NotificationMessage encode(String mediaPackageHandle, String track, String pathOut,
+          String notificationServiceEndpoint);
 
   public String getDocumentation();
+
 }
