@@ -43,7 +43,7 @@ public class Static implements ManagedService {
   StaticContext context;
 
   public Static() {
-    defaultPath = System.getProperty("java.io.tmpdir") + "opencast" + File.separator + "static";
+    defaultPath = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "static";
     logger.info("Registering resources at " + defaultPath + " at URL /static");
     context = new StaticContext(defaultPath);
   }

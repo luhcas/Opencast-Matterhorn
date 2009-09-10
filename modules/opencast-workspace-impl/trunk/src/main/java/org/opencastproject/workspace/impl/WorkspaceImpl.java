@@ -39,7 +39,7 @@ public class WorkspaceImpl implements Workspace, ManagedService {
   private String rootDirectory = null;
 
   public WorkspaceImpl() {
-    rootDirectory = System.getProperty("java.io.tmpdir") + "opencast" + File.separator + "workspace";
+    rootDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workspace";
     createRootDirectory();
   }
 

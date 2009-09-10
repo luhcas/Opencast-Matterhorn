@@ -38,7 +38,8 @@ public class EngageServiceImpl implements EngageService, ManagedService {
   @SuppressWarnings("unused")
   private static final Logger logger = LoggerFactory.getLogger(EngageServiceImpl.class);
   
-  public static String engagePath = System.getProperty("java.io.tmpdir") + "opencast/workingfilerepo/engage";
+  public static String engagePath = System.getProperty("java.io.tmpdir") + File.separator +
+    "opencast" + File.separator + "workingfilerepo" + File.separator + "engage";
   public static String templatePath = "/player/templates";
   public static String playerTemplate = "player-download.html.tmpl";
   public static String mediaList = "availablemedia.html.tmpl";

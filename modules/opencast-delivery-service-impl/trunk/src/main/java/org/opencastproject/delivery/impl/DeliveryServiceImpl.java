@@ -37,7 +37,7 @@ import java.util.Dictionary;
 public class DeliveryServiceImpl implements DeliveryService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(DeliveryServiceImpl.class);
 
-  private String rootDirectory = "/tmp";
+  private String rootDirectory = System.getProperty("java.io.tmpdir");
 
   
   @SuppressWarnings("unchecked")
