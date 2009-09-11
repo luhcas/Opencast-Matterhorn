@@ -67,7 +67,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Import-Package> org.osgi.service.component, * </Import-Package>
+            <Import-Package> org.osgi.service.*, * </Import-Package>
             <Private-Package>org.opencastproject.composer.impl</Private-Package>
             <Service-Component>OSGI-INF/composer-service.xml</Service-Component>
           </instructions>

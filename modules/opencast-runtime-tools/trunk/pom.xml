@@ -16,6 +16,10 @@
       <artifactId>commons-collections</artifactId>
     </dependency>
     <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+    </dependency>
+    <dependency>
       <groupId>commons-pool</groupId>
       <artifactId>commons-pool</artifactId>
     </dependency>
@@ -217,6 +221,16 @@
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.wss4j</artifactId>
       <version>1.5.4_1</version>
+      <exclusions>
+        <exclusion>
+          <groupId>opensaml</groupId>
+          <artifactId>opensaml</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.santuario</groupId>
+          <artifactId>xmlsec</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
