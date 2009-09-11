@@ -28,13 +28,11 @@
     	<groupId>org.opencastproject</groupId>
     	<artifactId>opencast-media</artifactId>
     	<version>0.1-SNAPSHOT</version>
-    	<type>bundle</type>
     </dependency>
     <dependency>
     	<groupId>org.opencastproject</groupId>
     	<artifactId>opencast-util</artifactId>
     	<version>0.1-SNAPSHOT</version>
-    	<type>bundle</type>
     </dependency>
   </dependencies>
   <build>
