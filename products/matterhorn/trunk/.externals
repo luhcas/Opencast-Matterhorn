@@ -25,4 +25,6 @@
 ../../../modules/opencast-workflow-service-api/trunk	opencast-workflow-service-api
 ../../../modules/opencast-workflow-service-impl/trunk opencast-workflow-service-impl
 ../../../modules/opencast-http/trunk	opencast-http
+../../../modules/opencast-distribution-service-api/trunk	opencast-distribution-service-api
+../../../modules/opencast-distribution-service-local-impl/trunk	opencast-distribution-service-local-impl
 
