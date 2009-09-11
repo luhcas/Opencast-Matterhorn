@@ -5,31 +5,32 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<script type="text/javascript" src="bridge/lib/FABridge.js"></script>
 	<script type="text/javascript" src="bridge/Videodisplay.js"></script>
-	
+
+        <link rel="stylesheet" href="jquery/ui/css/base/ui.all.css" type="text/css">
+        <script type="text/javascript" src="jquery/jquery-1.3.2.js"></script>
+        <script type="text/javascript" src="jquery/ui/ui.core.js"></script>
+        <script type="text/javascript" src="jquery/ui/ui.slider.js"></script>
+
+
 	<script language="javascript" type="text/javascript">
-		function doPlay ()
-		{
-			Videodisplay.play();
+		function doPlay () {
+                    Videodisplay.play();
 		}
 			
-		function doPause ()
-		{
-			Videodisplay.pause();
+		function doPause () {
+                    Videodisplay.pause();
 		}
 		
-		function doStop ()
-		{
-			Videodisplay.stop();
+		function doStop () {
+                    Videodisplay.stop();
 		}
 		
-		function doSetVolume (value)
-        {
-            Videodisplay.setVolume(value);
-        }
+		function doSetVolume (value) {
+                    Videodisplay.setVolume(value);
+                }
 		
-		function setTime(text)
-		{
-		   document.getElementById("time").innerHTML = text;
+		function setTime(text) {
+                    document.getElementById("time").innerHTML = text;
 		}
 	
 	</script>
@@ -92,12 +93,66 @@
   			if(document.captureEvents)
    		 		document.captureEvents(Event.KEYPRESS);
 
-	  		document.onkeypress = keyPressed;	
+	  		document.onkeypress = keyPressed;
+
 		}
 	
 		window.onload=init;	
 	
 	</script>
+
+        <!-- js code for slider -->
+        <script type="text/javascript">
+
+            volumeSteps = 0.05;
+
+            $(document).ready(function(){
+                $("#slider").slider();
+                $('#slider').slider('option', 'animate', true);
+                $('#slider').slider('option', 'min', 0);
+                $('#slider').slider('option', 'max', 100);
+                $('#slider').bind('slide', function(event, ui) {
+                    var value = ui.value / 100;
+                    document.getElementById("volumeDisplay").innerHTML = value;
+                    Videodisplay.setVolume(value);
+                });
+            });
+
+            function increaseVolume() {
+                var value = Videodisplay.getVolume();
+                if (value < 1) {
+                    var newValue = value + volumeSteps;
+                    if (newValue > 1) newValue = 1;
+                    Videodisplay.setVolume(newValue);
+                }
+            }
+
+            function decreaseVolume() {
+                var value = Videodisplay.getVolume();
+                if (value > 0) {
+                    var newValue = value - volumeSteps;
+                    if (newValue < 0) newValue = 0;
+                    Videodisplay.setVolume(newValue);
+                }
+            }
+
+            function startIncreaseVolume() {
+                volumeIncreaseInterval = window.setInterval("increaseVolume();", 500);
+            }
+
+            function stopIncreaseVolume() {
+                window.clearInterval(volumeIncreaseInterval);
+            }
+
+            function startDecreaseVolume() {
+                volumeDecreaseInterval = window.setInterval("decreaseVolume();", 500);
+            }
+
+            function stopDecreaseVolume() {
+                window.clearInterval(volumeDecreaseInterval);
+            }
+
+        </script>
 </head>
 
 	<body>
@@ -173,10 +228,11 @@
             </tr>
             <tr>
                 <td align="right">4.</td>
-                <td>Set volume: 
-                    <input type="button" onclick="doSetVolume(0.0);" value="0.0"/>
-                    <input type="button" onclick="doSetVolume(0.5);" value="0.5"/>
-                    <input type="button" onclick="doSetVolume(1.0);" value="1.0"/>
+                <td>Set volume:
+                    <button onmousedown="startDecreaseVolume();" onmouseup="stopDecreaseVolume();">-</button>
+                    <div id="slider" class="ui-slider" style="width:15em; display:inline-block; margin-left:0.5em; margin-right:0.5em;"></div>
+                    <button onmousedown="startIncreaseVolume();" onmouseup="stopIncreaseVolume();">+</button>
+                    <div id="volumeDisplay" style="display:inline"></div>
                 </td>
             </tr>
 		</table>
