@@ -18,23 +18,11 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-conductor-service-api</artifactId>
+      <artifactId>opencast-workflow-service-api</artifactId>
       <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
     </dependency>
   </dependencies>
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <includes>
-          <include>**/*</include>
-        </includes>
-      </resource>
-    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.felix</groupId>
@@ -47,7 +35,8 @@
             <Import-Package> * </Import-Package>
             <Export-Package>org.opencastproject.conductor.*</Export-Package>
             <Service-Component>
-              OSGI-INF/conductor-service.xml
+              OSGI-INF/compose-workflow-runner.xml,
+              OSGI-INF/distribute-workflow-runner.xml
             </Service-Component>
           </instructions>
         </configuration>

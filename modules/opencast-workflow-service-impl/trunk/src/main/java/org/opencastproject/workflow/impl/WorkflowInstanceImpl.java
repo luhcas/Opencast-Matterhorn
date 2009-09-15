@@ -18,9 +18,7 @@ package org.opencastproject.workflow.impl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.impl.runner.AbstractWorkflowOperationRunner;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,7 +32,6 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   private String title;
   private String description;
   private State state;
-  private List<? extends AbstractWorkflowOperationRunner> runners;
   
   public String getId() {
     return id;
@@ -90,14 +87,6 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
 
   public void setProperties(Map<String, String> properties) {
     this.properties = properties;
-  }
-
-  public List<? extends AbstractWorkflowOperationRunner> getRunners() {
-    return runners;
-  }
-
-  public void setRunners(List<? extends AbstractWorkflowOperationRunner> runners) {
-    this.runners = runners;
   }
 
 }

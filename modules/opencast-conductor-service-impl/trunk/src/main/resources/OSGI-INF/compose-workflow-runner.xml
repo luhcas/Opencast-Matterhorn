@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.conductor.ComposeWorkflowRunnerFactory" immediate="true">
+  <implementation class="org.opencastproject.conductor.ComposeWorkflowRunnerFactory" />
+  <property name="service.description" value="Composer Workflow Runner Factory" />
+  <property name="opencast.workflow.operation" value="compose" />
+  <service>
+    <provide interface="org.opencastproject.workflow.api.WorkflowRunnerFactory" />
+  </service>
+</component>

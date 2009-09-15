@@ -143,7 +143,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
   private void writeUserInterfaces(PrintWriter writer) {
     ServiceReference[] serviceRefs = null;
     try {
-      serviceRefs = bundleContext.getAllServiceReferences(StaticResource.class.getName(), "((alias=*)&(classpath=*))");
+      serviceRefs = bundleContext.getAllServiceReferences(StaticResource.class.getName(), "(&(alias=*)(classpath=*))");
     } catch (InvalidSyntaxException e) {
       e.printStackTrace();
     }

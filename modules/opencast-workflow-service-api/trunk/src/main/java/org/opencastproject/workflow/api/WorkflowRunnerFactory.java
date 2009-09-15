@@ -13,10 +13,11 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.conductor.impl;
+package org.opencastproject.workflow.api;
 
-import org.opencastproject.conductor.api.ConductorService;
-
-public class ConductorServiceImpl implements ConductorService {
-
+/**
+ * Generates {@link Runnable}s for an operation on a given {@link WorkflowInstance}.
+ */
+public interface WorkflowRunnerFactory {
+  Runnable getRunnable(WorkflowInstance workflowInstance);
 }

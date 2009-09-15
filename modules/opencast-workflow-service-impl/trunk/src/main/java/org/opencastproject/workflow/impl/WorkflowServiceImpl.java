@@ -18,13 +18,15 @@ package org.opencastproject.workflow.impl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowRunnerFactory;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
-import org.opencastproject.workflow.impl.runner.ComposeMediaRunner;
-import org.opencastproject.workflow.impl.runner.DistributeMediaRunner;
 
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +41,12 @@ import java.util.UUID;
 import java.util.Map.Entry;
 
 /**
- * FIXME -- Add javadocs
+ * Implements {@link WorkflowService} with in-memory data structures to hold the {@link WorkflowDefinition}s and
+ * {@link WorkflowInstance}s.  {@link WorkflowRunnerFactory}s are looked up in the OSGi service registry based on the
+ * "opencast.workflow.operation" property.  If the {@link WorkflowRunnerFactory}'s "opencast.workflow.operation"
+ * service registration property matches an operation from {@link WorkflowDefinition#getOperations()}, then the factory
+ * returns a {@link Runnable} to handle that operation.  This allows for custom runnables to be added or modified
+ * without affecting the workflow service itself.
  */
 public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImpl.class);
@@ -199,15 +206,32 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   protected Map<String, Thread> threadMap = new HashMap<String, Thread>();
 
-  // TODO -- this supports serialized execution only.  Add parallel execution if needed.
+  // TODO Remove OSGI dependency if possible
+  ComponentContext componentContext;
+  public void activate(ComponentContext componentContext) {
+    this.componentContext = componentContext;
+  }
+
   protected void run(final WorkflowInstance wfi) {
     Thread t = new Thread(new Runnable() {
       public void run() {
-        if(wfi.getWorkflowDefinition().getOperations().contains("compose")) {
-          new ComposeMediaRunner(wfi).run();
-        }
-        if(wfi.getWorkflowDefinition().getOperations().contains("distribute")) {
-          new DistributeMediaRunner(wfi).run();
+        // Get all of the runnable workflow services available for each operation (in the order of operations)
+        for(String operation : wfi.getWorkflowDefinition().getOperations()) {
+          ServiceReference[] serviceRefs = null;
+          try {
+            serviceRefs = componentContext.getBundleContext().getAllServiceReferences(WorkflowRunnerFactory.class.getName(),
+                    "(opencast.workflow.operation=" + operation + ")");
+          } catch (InvalidSyntaxException e) {
+            throw new RuntimeException(e);
+          }
+          if (serviceRefs == null) {
+            logger.info("No WorkflowRunners registered for operation " + operation);
+          } else {
+            for(ServiceReference serviceRef : serviceRefs) {
+              WorkflowRunnerFactory runner = (WorkflowRunnerFactory)componentContext.getBundleContext().getService(serviceRef);
+              runner.getRunnable(wfi).run(); // Do not spawn new threads for these runnables yet
+            }
+          }
         }
       }
     });

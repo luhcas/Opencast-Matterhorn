@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -63,9 +62,6 @@ public class WorkflowInstanceJaxbImpl {
     Map<String, String> instanceProps = instance.getProperties();
     if(instanceProps != null) {
       this.properties = new HashMap<String, String>(instanceProps);
-      for(Entry<String, String> entry : properties.entrySet()) {
-        logger.info("#### " + entry.getKey() + " = " + entry.getValue());
-      }
     }
   }
 
