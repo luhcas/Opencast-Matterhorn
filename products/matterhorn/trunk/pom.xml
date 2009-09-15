@@ -38,8 +38,7 @@
         <module>opencast-authentication-api</module>
         <module>opencast-composer-service-api</module>
         <module>opencast-composer-service-impl</module>
-        <module>opencast-conductor-service-api</module>
-        <module>opencast-conductor-service-impl</module>
+        <module>opencast-conductor</module>
         <module>opencast-distribution-service-api</module>
         <module>opencast-distribution-service-local-impl</module>
         <module>opencast-http</module>
@@ -74,8 +73,7 @@
         <module>opencast-authentication-api</module>
         <module>opencast-composer-service-api</module>
         <module>opencast-composer-service-impl</module>
-        <module>opencast-conductor-service-api</module>
-        <module>opencast-conductor-service-impl</module>
+        <module>opencast-conductor</module>
         <module>opencast-distribution-service-api</module>
         <module>opencast-distribution-service-local-impl</module>
         <module>opencast-http</module>
