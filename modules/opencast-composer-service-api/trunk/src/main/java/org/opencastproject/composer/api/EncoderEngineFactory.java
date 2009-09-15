@@ -24,10 +24,10 @@ import org.opencastproject.util.ConfigurationException;
 public class EncoderEngineFactory {
 
   /** Class name for the default engine factory */
-  private static final String FACTORY_CLASS = "org.opencastproject.composer.impl.EncoderEngineFactoryImpl";
+  public static final String FACTORY_CLASS = "org.opencastproject.composer.impl.EncoderEngineFactoryImpl";
 
   /** Class name for the default engine */
-  private static final String DEFAULT_ENGINE_CLASS = "org.opencastproject.composer.impl.ffmpeg.FFmpegEncoderEngine";
+  public static final String DEFAULT_ENGINE_CLASS = "org.opencastproject.composer.impl.ffmpeg.FFmpegEncoderEngine";
 
   /** Name of the system property */
   public static final String PROPERTY_NAME = "org.opencastproject.encoderfactory";
