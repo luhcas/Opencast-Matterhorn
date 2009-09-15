@@ -22,8 +22,8 @@ import org.opencastproject.media.mediapackage.Track;
 import java.util.Map;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: XmlRpcJob.java 2941 2009-08-19 08:00:12Z ced $
+ * Job representation for the telestream episode engine. This class handles the communication with Episode via xmlrpc
+ * and provides access to the job state.
  */
 public class XmlRpcJob {
 

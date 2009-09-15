@@ -30,15 +30,12 @@ import java.util.Properties;
 
 /**
  * Wrapper for the Telestream Episode Compression Engine.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: EpisodeEngine.java 2941 2009-08-19 08:00:12Z ced $
  */
-public class EpisodeEngine extends AbstractEncoderEngine {
+public class EpisodeEncoderEngine extends AbstractEncoderEngine {
 
   /** Name of the properties file */
   public static final String EPISODE_PROPERTIES = "/episode.properties";
-  
+
   /** The episode inbox option name */
   public static final String OPT_MONITORTYPE = "episode.type";
 
@@ -94,18 +91,18 @@ public class EpisodeEngine extends AbstractEncoderEngine {
   private XmlRpcEngineController xmlrpcController = null;
 
   /** the logging facility provided by log4j */
-  static Logger log_ = LoggerFactory.getLogger(EpisodeEngine.class.getName());
+  static Logger log_ = LoggerFactory.getLogger(EpisodeEncoderEngine.class.getName());
 
   /**
    * Creates a new instance of the episode telestream engine wrapper.
    */
-  public EpisodeEngine() {
+  public EpisodeEncoderEngine() {
     super(true);
 
     // Load the local properties file
     try {
       Properties properties = new Properties();
-      properties.load(EpisodeEngine.class.getResourceAsStream(EPISODE_PROPERTIES));
+      properties.load(EpisodeEncoderEngine.class.getResourceAsStream(EPISODE_PROPERTIES));
       configure(properties);
     } catch (IOException e) {
       throw new ConfigurationException("Reading properties for episode engine failed: " + e.getMessage());
@@ -119,7 +116,7 @@ public class EpisodeEngine extends AbstractEncoderEngine {
   /**
    * Creates a new instance of the episode telestream engine wrapper.
    */
-  public EpisodeEngine(Properties config) {
+  public EpisodeEncoderEngine(Properties config) {
     super(true);
 
     // Use the passed in configuration
@@ -232,6 +229,15 @@ public class EpisodeEngine extends AbstractEncoderEngine {
    */
   public String getXmlrpcPath() {
     return xmlrpcPath;
+  }
+
+  /**
+   * Returns the number of seconds that are between two calls for a status update.
+   * 
+   * @return the number of seconds for the monitoring interval
+   */
+  public long getMonitoringFrequency() {
+    return monitorFrequency;
   }
 
   /**

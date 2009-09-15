@@ -21,6 +21,9 @@ import org.opencastproject.notification.api.NotificationMessage;
 
 import java.util.UUID;
 
+/**
+ * Default implementation of the composer service api.
+ */
 public class ComposerServiceImpl implements ComposerService {
   
   public NotificationMessage encode(String mediaPackageId, String trackId, String pathOut,

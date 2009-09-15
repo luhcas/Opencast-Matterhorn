@@ -20,9 +20,6 @@ import java.util.Map;
 
 /**
  * Wrapper class for episode settings.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: EpisodeSettings.java 2818 2009-04-24 14:19:17Z wunden $
  */
 class EpisodeSettings {
 

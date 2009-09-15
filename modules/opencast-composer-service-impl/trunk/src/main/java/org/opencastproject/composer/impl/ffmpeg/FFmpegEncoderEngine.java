@@ -34,9 +34,6 @@ import java.util.Properties;
 
 /**
  * Implementation for the encoder engine backed by ffmpeg.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id$
  */
 public class FFmpegEncoderEngine extends CmdlineEncoderEngine {
 

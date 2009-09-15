@@ -41,12 +41,7 @@ import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Class used to monitor the various jobs, based on xmlrpc communication with episode compression engine.
- * 
- * TODO: Add timeout to act on loss of connection to engine and mark jobs as being failed
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: EpisodeEngine.java 2252 2009-02-09 17:18:10Z wunden $
+ * Class used to monitor the various jobs, based on xmlrpc communication with the Telestream Episode encoder engine.
  */
 public class XmlRpcEngineController implements Runnable {
 
@@ -54,13 +49,13 @@ public class XmlRpcEngineController implements Runnable {
   private static final int COMM_RETRY_TIMEOUT = 30;
 
   /** The engine to notify */
-  private EpisodeEngine engine = null;
+  private EpisodeEncoderEngine engine = null;
 
   /** xmlrpc hostname */
   private String xmlrpcHostname = null;
 
   /** xmlrpc port */
-  private int xmlrpcPort = EpisodeEngine.DEFAULT_XMLRPC_PORT;
+  private int xmlrpcPort = EpisodeEncoderEngine.DEFAULT_XMLRPC_PORT;
 
   /** True if a warning about failing communication has been issued */
   private boolean commWarningIssued = false;
@@ -81,7 +76,7 @@ public class XmlRpcEngineController implements Runnable {
   private final List<XmlRpcJob> joblist = new CopyOnWriteArrayList<XmlRpcJob>();
 
   /** The timeout */
-  private long timeout = EpisodeEngine.DEFAULT_MONITOR_FREQUENCY * 1000L;
+  private long timeout = EpisodeEncoderEngine.DEFAULT_MONITOR_FREQUENCY * 1000L;
 
   /** the logging facility provided by log4j */
   final static Logger log_ = LoggerFactory.getLogger(XmlRpcEngineController.class.getName());
@@ -102,7 +97,7 @@ public class XmlRpcEngineController implements Runnable {
    * @param timeout
    *          the timeout in milliseconds
    */
-  XmlRpcEngineController(EpisodeEngine engine, String host, int port, String path, String password, long timeout) {
+  XmlRpcEngineController(EpisodeEncoderEngine engine, String host, int port, String path, String password, long timeout) {
     this.engine = engine;
     this.xmlrpcHostname = host;
     this.xmlrpcPort = port;
@@ -168,7 +163,7 @@ public class XmlRpcEngineController implements Runnable {
     Map<String, String> metadata = new Hashtable<String, String>();
 
     // The job priority
-    int priority = EpisodeEngine.PRIORITY_MEDIUM;
+    int priority = EpisodeEncoderEngine.PRIORITY_MEDIUM;
 
     // Submit a job for every setting in the settings group
     for (EpisodeSettings setting : settings) {

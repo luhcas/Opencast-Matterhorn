@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +39,7 @@ import java.util.StringTokenizer;
 public class EncodingProfileManager {
 
   /** Default name of the file containing the properties */
-  private static final String PROP_FILENAME = "encodingprofiles.properties";
+  private static final String PROP_FILENAME = "/encodingprofiles.properties";
 
   /** Prefix for encoding profile property keys **/
   private static String PROP_PREFIX = "profile.";
@@ -48,6 +49,7 @@ public class EncodingProfileManager {
   private static final String PROP_APPLICABLE = ".input";
   private static final String PROP_OUTPUT = ".output";
   private static final String PROP_SUFFIX = ".suffix";
+  private static final String PROP_MIMETYPE = ".mimetype";
 
   /** The profiles map */
   private Map<String, EncodingProfile> profiles = null;
@@ -56,7 +58,7 @@ public class EncodingProfileManager {
   private static final Logger log_ = LoggerFactory.getLogger(EncodingProfileManager.class);
 
   /**
-   * Creates a profile manager that will load the profiles from its default location, which is a file calld
+   * Creates a profile manager that will load the profiles from its default location, which is a file called
    * <code>encodingprofiles.properties</code> that needs to be on the classpath.
    * 
    * @throws IOException
@@ -66,7 +68,10 @@ public class EncodingProfileManager {
    */
   public EncodingProfileManager() throws IOException, ConfigurationException {
     Properties props = new Properties();
-    props.load(EncodingProfileManager.class.getResourceAsStream(PROP_FILENAME));
+    InputStream is = EncodingProfileManager.class.getResourceAsStream(PROP_FILENAME);
+    if (is == null)
+      throw new ConfigurationException("Configuration for encoding profiles (" + PROP_FILENAME + ") missing");
+    props.load(is);
     loadFromProperties(props);
   }
 
@@ -126,7 +131,9 @@ public class EncodingProfileManager {
    *          the properties
    */
   private void loadFromProperties(Properties properties) {
-
+    if (properties == null)
+      throw new IllegalArgumentException("Encoding properties cannot be null");
+    
     // Find list of formats in properties
     List<String> profileNames = new ArrayList<String>();
     for (Object fullKey : properties.keySet()) {
@@ -143,9 +150,11 @@ public class EncodingProfileManager {
     }
 
     // Load the formats
+    profiles = new HashMap<String, EncodingProfile>();
     for (String profileId : profileNames) {
       log_.debug("Enabling media format " + profileId);
-      profiles.put(profileId, loadProfile(profileId, properties));
+      EncodingProfile profile = loadProfile(profileId, properties);
+      profiles.put(profileId, profile);
     }
   }
 
@@ -183,6 +192,12 @@ public class EncodingProfileManager {
     if (suffixObj == null || "".equals(suffixObj.toString().trim()))
       throw new ConfigurationException("Suffix of profile '" + profile + "' is missing");
     df.suffix = suffixObj.toString();
+
+    // Mimetype
+    Object mimeTypeObj = getDefaultProperty(profile, PROP_MIMETYPE, properties, defaultProperties);
+    if (mimeTypeObj == null || "".equals(mimeTypeObj.toString().trim()))
+      throw new ConfigurationException("Mime type of profile '" + profile + "' is missing");
+    df.mimeType = mimeTypeObj.toString();
 
     // Applicable to the following track categories
     Object applicableObj = getDefaultProperty(profile, PROP_APPLICABLE, properties, defaultProperties);

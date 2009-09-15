@@ -17,7 +17,6 @@
 package org.opencastproject.composer.impl;
 
 import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.PathSupport;
 
 import java.util.Collections;
@@ -40,6 +39,9 @@ public class EncodingProfileImpl implements EncodingProfile {
 
   /** Suffix */
   protected String suffix = null;
+
+  /** Mime type */
+  protected String mimeType = null;
 
   /** The track types that this profile may be applied to */
   protected MediaType[] applicableTypes = null;
@@ -80,8 +82,8 @@ public class EncodingProfileImpl implements EncodingProfile {
    * {@inheritDoc}
    * @see ch.ethz.replay.core.api.common.media.EncodingProfile#getFilename(ch.ethz.replay.core.api.common.bundle.Track)
    */
-  public String getFilename(Track track) {
-    return PathSupport.removeFileExtension(track.getURL().getPath()) + suffix;
+  public String getFilename(String track) {
+    return PathSupport.removeFileExtension(track) + suffix;
   }
 
   /**
@@ -119,6 +121,14 @@ public class EncodingProfileImpl implements EncodingProfile {
   }
 
   /**
+   * {@inheritDoc}
+   * @see org.opencastproject.composer.api.EncodingProfile#getMimeType()
+   */
+  public String getMimeType() {
+    return mimeType;
+  }
+
+  /**
    * Sets the types that are applicable for that profile. For example, an audio only-track
    * hardly be applicable to a jpeg-slide extraction.
    * 
@@ -130,9 +140,9 @@ public class EncodingProfileImpl implements EncodingProfile {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.EncodingProfile#getApplicableTrackTypes()
+   * @see org.opencastproject.composer.api.EncodingProfile#getApplicableMediaTypes()
    */
-  public MediaType[] getApplicableTrackTypes() {
+  public MediaType[] getApplicableMediaTypes() {
     return applicableTypes;
   }
   
@@ -185,7 +195,7 @@ public class EncodingProfileImpl implements EncodingProfile {
    * @see ch.ethz.replay.core.api.common.media.EncodingProfile#hasExtensions()
    */
   public boolean hasExtensions() {
-    return extension == null || extension.size() == 0;
+    return extension != null && extension.size() > 0;
   }
 
   /**

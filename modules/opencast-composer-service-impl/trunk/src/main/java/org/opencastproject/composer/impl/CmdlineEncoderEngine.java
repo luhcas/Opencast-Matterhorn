@@ -39,14 +39,11 @@ import java.util.Map;
 /**
  * Wrapper around any kind of command line controllable encoder.
  * <p/>
- * <strong>Note:</strong> Registered {@link ch.ethz.replay.core.api.composer.EncoderListener}s <em>won't</em> receive a file in
- * method
+ * <strong>Note:</strong> Registered {@link ch.ethz.replay.core.api.composer.EncoderListener}s <em>won't</em> receive a
+ * file in method
  * {@link ch.ethz.replay.core.api.composer.EncoderListener#trackEncoded(EncoderEngine, Track, EncodingProfile.ethz.replay.core.api.common.media.EncodingFormat , String)}
  * because it cannot be guaranteed that only <em>one</em> file will be the result of the encoding. Imagine encoding to
  * an image series.
- * 
- * @author Christoph E. Drießen <ced@neopoly.de>
- * @version $Id$ todo
  */
 public class CmdlineEncoderEngine extends AbstractEncoderEngine implements EncoderEngine {
 

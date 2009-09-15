@@ -34,9 +34,6 @@ import java.util.StringTokenizer;
 
 /**
  * Factory used to obtain an encoder engine based on the node configuration and an optional encoding profile passed.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: EncoderEngineFactoryImpl.java 2890 2009-06-26 13:19:18Z ced $
  */
 public class EncoderEngineFactoryImpl extends EncoderEngineFactory {
 
@@ -194,7 +191,7 @@ public class EncoderEngineFactoryImpl extends EncoderEngineFactory {
       }
     }
 
-    throw new IllegalStateException("No encoding engine found to serve profile '" + profile + "'");
+    throw new ConfigurationException("No encoding engine found to serve profile '" + profile + "'");
   }
 
 }
