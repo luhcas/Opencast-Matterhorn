@@ -15,6 +15,8 @@
  */
 package org.opencastproject.runtimeinfo;
 
+import org.opencastproject.util.StaticResource;
+
 import org.osgi.framework.BundleActivator;
 
 import org.osgi.framework.BundleContext;
@@ -53,6 +55,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     writeHtmlHeader(writer);
     writeWsdlEndpoints(writer);
     writeJaxRsEndpoints(writer);
+    writeUserInterfaces(writer);
     writeSystemConsole(writer);
     writeHtmlFooter(writer);
   }
@@ -130,6 +133,36 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
         writer.println("</td>");
         writer.println("<td>");
         writer.println("<a href=\"" + servletContextPath + "/?_wadl&_type=xml\">" + servletContextPath + "/?_wadl&_type=xml</a>");
+        writer.println("</td>");
+        writer.println("</tr>");
+      }
+      writer.println("</table>");
+    }
+  }
+  
+  private void writeUserInterfaces(PrintWriter writer) {
+    ServiceReference[] serviceRefs = null;
+    try {
+      serviceRefs = bundleContext.getAllServiceReferences(StaticResource.class.getName(), "((alias=*)&(classpath=*))");
+    } catch (InvalidSyntaxException e) {
+      e.printStackTrace();
+    }
+    if (serviceRefs == null) {
+      writer.println("<div>There are no user interfaces available.</div>");
+    } else {
+      writer.println("<table border=\"1\">");
+      writer.println("<title>User Interfaces</title>");
+      writer.println("<th>Base URL</th>");
+      writer.println("<th>Description</th>");
+      for (ServiceReference uiRef : serviceRefs) {
+        String description = (String)uiRef.getProperty("service.description");
+        String defaultResource = (String)uiRef.getProperty("alias") + "/index.html";
+        writer.println("<tr>");
+        writer.println("<td>");
+        writer.println("<a href=\"" + defaultResource + "\">" + defaultResource + "</a>");
+        writer.println("</td>");
+        writer.println("<td>");
+        writer.println(description);
         writer.println("</td>");
         writer.println("</tr>");
       }
