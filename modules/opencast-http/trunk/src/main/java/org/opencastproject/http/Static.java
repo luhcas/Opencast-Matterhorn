@@ -100,7 +100,7 @@ public class Static implements ManagedService {
         return null;
       }
       try {
-        return f.toURL();
+        return f.toURI().toURL();
       } catch (MalformedURLException e) {
         throw new RuntimeException(e);
       }
