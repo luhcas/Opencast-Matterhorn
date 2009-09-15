@@ -154,15 +154,21 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
       writer.println("<title>User Interfaces</title>");
       writer.println("<th>Base URL</th>");
       writer.println("<th>Description</th>");
+      writer.println("<th>Welcome Page</th>");
       for (ServiceReference uiRef : serviceRefs) {
         String description = (String)uiRef.getProperty("service.description");
-        String defaultResource = (String)uiRef.getProperty("alias") + "/index.html";
+        String alias = (String)uiRef.getProperty("alias");
+        String welcomeFile = (String)uiRef.getProperty("welcome.file");
+        String welcomePath = alias + "/" + welcomeFile;
         writer.println("<tr>");
         writer.println("<td>");
-        writer.println("<a href=\"" + defaultResource + "\">" + defaultResource + "</a>");
+        writer.println(alias);
         writer.println("</td>");
         writer.println("<td>");
         writer.println(description);
+        writer.println("</td>");
+        writer.println("<td>");
+        writer.println("<a href=\"" + welcomePath + "\">" + welcomePath + "</a>");
         writer.println("</td>");
         writer.println("</tr>");
       }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.engage.player" immediate="true" activate="activate">
+  <implementation class="org.opencastproject.util.StaticResource" />
+  <property name="service.description" value="Matterhorn Audio and Video Player" />
+  <property name="alias" value="/engage/player" />
+  <property name="classpath" value="/player" />
+  <property name="welcome.file" value="index.html" />
+  <service>
+    <provide interface="org.opencastproject.util.StaticResource" />
+  </service>
+  <reference name="http-service" interface="org.osgi.service.http.HttpService"
+    cardinality="1..1" policy="static" bind="setHttpService" />
+</component> 
