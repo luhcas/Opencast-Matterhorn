@@ -29,3 +29,5 @@ log4j.appender.stdout.layout.ConversionPattern=%5p [%t] (%C{3}:%L) - %m%n
 log4j.logger.org.apache=WARN
 log4j.logger.org.springframework=WARN
 log4j.logger.org.opencastproject=DEBUG
+
+-
