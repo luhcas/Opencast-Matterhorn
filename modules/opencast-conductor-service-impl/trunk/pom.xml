@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-conductor-service-impl</artifactId>
+  <artifactId>opencast-conductor</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-conductor-service-impl</name>
+  <name>opencast-conductor</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -44,3 +44,4 @@
     </plugins>
   </build>
 </project>
+
