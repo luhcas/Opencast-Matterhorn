@@ -16,8 +16,6 @@
 
 package org.opencastproject.composer.api;
 
-import org.opencastproject.media.mediapackage.Track;
-
 import java.util.Map;
 
 /**
@@ -30,7 +28,8 @@ public interface EncodingProfile {
    * Input and output formats.
    */
   public enum MediaType {
-    Audio, Visual, AudioVisual, EnhancedAudio, Image, Images, Cover;
+
+    Audio, Visual, AudioVisual, EnhancedAudio, Image, ImageSequence, Cover;
 
     /**
      * Try to parse the argument <code>type</code> and produce a {@link MediaType} out of it.
@@ -42,7 +41,15 @@ public interface EncodingProfile {
     public static MediaType parseString(String type) {
       if (type == null || type.length() == 0)
         throw new IllegalArgumentException(type + " is not a valid track type definition");
-      type = type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
+      if ("audiovisual".equalsIgnoreCase(type))
+        return AudioVisual;
+      else if ("enhancedaudio".equalsIgnoreCase(type))
+        return EnhancedAudio;
+      else if ("imagesequence".equalsIgnoreCase(type))
+        return ImageSequence;
+      else {
+        type = type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
+      }
       return MediaType.valueOf(type.trim());
     }
 
@@ -65,11 +72,11 @@ public interface EncodingProfile {
   /**
    * Returns the file name of the encoded track.
    * 
-   * @param track
-   *          the track
+   * @param trackName
+   *          the track name
    * @return the encoded filename
    */
-  String getFilename(Track track);
+  String getFilename(String trackName);
 
   /**
    * Returns the encoding format's media type, which is either video (plus audio) or audio only.
@@ -86,11 +93,18 @@ public interface EncodingProfile {
   String getSuffix();
 
   /**
+   * Returns the media type's mime type.
+   * 
+   * @return the mime type
+   */
+  String getMimeType();
+
+  /**
    * Returns a list of track classes this media format is applicable to.
    * 
    * @return the applicable formats
    */
-  MediaType[] getApplicableTrackTypes();
+  MediaType[] getApplicableMediaTypes();
 
   /**
    * Returns <code>true</code> if the profile is applicable for the given track type.
