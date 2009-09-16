@@ -85,10 +85,20 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.EncoderEngine#encodeTrack(org.opencastproject.media.mediapackage.Track,
-   *      org.opencastproject.composer.api.EncodingProfile)
+   * @see org.opencastproject.composer.api.EncoderEngine#encode(File, org.opencastproject.composer.api.EncodingProfile)
    */
-  public abstract void encodeTrack(Track track, EncodingProfile profile) throws EncoderException;
+  public abstract File encode(File source, EncodingProfile profile) throws EncoderException;
+
+  /**
+   * Returns the location of the output file.
+   * 
+   * @param source
+   *          the source file
+   * @param profile
+   *          the encoding profile
+   * @return the output file
+   */
+  protected abstract File getOutputFile(File source, EncodingProfile profile);
 
   /**
    * {@inheritDoc}
@@ -168,10 +178,10 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * @param profile
    *          the media format
    */
-  protected void fireTrackEncoded(EncoderEngine engine, Track track, EncodingProfile profile) {
+  protected void fireEncoded(EncoderEngine engine, File track, EncodingProfile profile) {
     for (EncoderListener l : listeners) {
       try {
-        l.trackEncoded(engine, track, profile);
+        l.fileEncoded(engine, track, profile);
       } catch (Throwable t) {
         log_.error("Encoder listener " + l + " threw exception while handling callback");
       }
@@ -183,17 +193,17 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * 
    * @param engine
    *          the encoding engine
-   * @param track
-   *          the track that was encoded
+   * @param sourceFile
+   *          the file that was encoded
    * @param profile
    *          the media format
    * @param cause
    *          the reason of failure
    */
-  protected void fireTrackEncodingFailed(EncoderEngine engine, Track track, EncodingProfile profile, Throwable cause) {
+  protected void fireEncodingFailed(EncoderEngine engine, File sourceFile, EncodingProfile profile, Throwable cause) {
     for (EncoderListener l : listeners) {
       try {
-        l.trackEncodingFailed(engine, track, profile, cause);
+        l.fileEncodingFailed(engine, sourceFile, profile, cause);
       } catch (Throwable t) {
         log_.error("Encoder listener " + l + " threw exception while handling callback");
       }
@@ -205,17 +215,17 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * 
    * @param engine
    *          the encoding engine
-   * @param track
-   *          the track that is being encoded
+   * @param sourceFile
+   *          the file that is being encoded
    * @param profile
    *          the media format
    * @param progress
    *          the progress value
    */
-  protected void fireTrackEncodingProgressed(EncoderEngine engine, Track track, EncodingProfile profile, int progress) {
+  protected void fireEncodingProgressed(EncoderEngine engine, File sourceFile, EncodingProfile profile, int progress) {
     for (EncoderListener l : listeners) {
       try {
-        l.trackEncodingProgressed(engine, track, profile, progress);
+        l.fileEncodingProgressed(engine, sourceFile, profile, progress);
       } catch (Throwable t) {
         log_.error("Encoder listener " + l + " threw exception while handling callback");
       }

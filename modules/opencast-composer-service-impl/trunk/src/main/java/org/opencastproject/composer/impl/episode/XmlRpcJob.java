@@ -17,8 +17,8 @@
 package org.opencastproject.composer.impl.episode;
 
 import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.media.mediapackage.Track;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -99,7 +99,7 @@ public class XmlRpcJob {
   private int id = -1;
 
   /** The track to encode */
-  private Track track = null;
+  private File sourceFile = null;
 
   /** The media format */
   private EncodingProfile encodingProfile = null;
@@ -118,16 +118,16 @@ public class XmlRpcJob {
    * 
    * @param id
    *          the job id
-   * @param track
+   * @param sourceFile
    *          the track
    * @param profile
    *          the profile
    * @param settings
    *          the settings
    */
-  XmlRpcJob(int id, Track track, EncodingProfile profile, EpisodeSettings settings) {
+  XmlRpcJob(int id, File sourceFile, EncodingProfile profile, EpisodeSettings settings) {
     this.id = id;
-    this.track = track;
+    this.sourceFile = sourceFile;
     this.encodingProfile = profile;
     this.settings = settings;
     this.state = XmlRpcJobState.Created;
@@ -166,8 +166,8 @@ public class XmlRpcJob {
    * 
    * @return the track
    */
-  Track getTrack() {
-    return track;
+  File getSourceFile() {
+    return sourceFile;
   }
 
   /**
@@ -233,7 +233,7 @@ public class XmlRpcJob {
     StringBuffer buf = new StringBuffer("[");
     buf.append(id);
     buf.append("] ");
-    buf.append(track);
+    buf.append(sourceFile);
     buf.append(" to ");
     buf.append(encodingProfile);
     return buf.toString();

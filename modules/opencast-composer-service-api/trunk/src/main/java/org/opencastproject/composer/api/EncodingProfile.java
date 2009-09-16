@@ -70,15 +70,6 @@ public interface EncodingProfile {
   String getName();
 
   /**
-   * Returns the file name of the encoded track.
-   * 
-   * @param trackName
-   *          the track name
-   * @return the encoded filename
-   */
-  String getFilename(String trackName);
-
-  /**
    * Returns the encoding format's media type, which is either video (plus audio) or audio only.
    * 
    * @return the format type

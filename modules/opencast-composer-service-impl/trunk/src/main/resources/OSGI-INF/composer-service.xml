@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.composer.impl.ComposerServiceImpl" immediate="true">
+<component name="org.opencastproject.composer.impl.ComposerServiceImpl" immediate="true" activate="activate">
   <implementation class="org.opencastproject.composer.impl.ComposerServiceImpl" />
   <property name="service.description" value="Composer (Encoder) Service" />
   <property name="service.exported.interfaces" value="*" />
@@ -10,4 +10,8 @@
   <service>
     <provide interface="org.opencastproject.composer.api.ComposerService" />
   </service>
+  <reference name="inspection-service" interface="org.opencastproject.inspection.api.MediaInspectionService"
+    cardinality="1..1" policy="static" bind="setMediaInspectionService" />
+  <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
+    cardinality="1..1" policy="static" bind="setWorkspace" />
 </component>

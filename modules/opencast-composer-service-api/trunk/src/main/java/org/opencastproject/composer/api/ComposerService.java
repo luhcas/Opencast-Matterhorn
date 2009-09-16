@@ -15,16 +15,16 @@
  */
 package org.opencastproject.composer.api;
 
-import org.opencastproject.notification.api.NotificationMessage;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.Track;
 
 /**
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this encoding job.
  */
 public interface ComposerService {
 
-  public NotificationMessage encode(String mediaPackageHandle, String track, String pathOut,
-          String notificationServiceEndpoint);
+  public Track encode(MediaPackage mediaPackage, String sourceTrackId, String profileId) throws EncoderException;
 
-  public String getDocumentation();
-
+  EncodingProfile[] listProfiles();
+  
 }

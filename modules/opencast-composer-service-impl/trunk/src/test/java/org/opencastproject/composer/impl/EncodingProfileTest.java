@@ -106,16 +106,6 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getFilename(org.opencastproject.media.mediapackage.Track)}.
-   */
-  @Test
-  public void testGetFilename() {
-    EncodingProfile profile = profiles.get(h264ProfileId);
-    String trackName = "movie.mov";
-    assertEquals("movie-sm.mp4", profile.getFilename(trackName));
-  }
-
-  /**
    * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getType()}.
    */
   @Test

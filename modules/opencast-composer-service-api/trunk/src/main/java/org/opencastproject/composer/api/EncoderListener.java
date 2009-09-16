@@ -16,7 +16,7 @@
 
 package org.opencastproject.composer.api;
 
-import org.opencastproject.media.mediapackage.Track;
+import java.io.File;
 
 /**
  * Interface for encoder listener.
@@ -24,47 +24,47 @@ import org.opencastproject.media.mediapackage.Track;
 public interface EncoderListener {
 
   /**
-   * Tells the listener that the given track has been encoded into the
-   * {@link EncodingProfile.ethz.replay.core.api.common.media.DistributionFormat} <code>format</code>.
+   * Tells the listener that the given file has been encoded into the
+   * {@link EncodingProfile} <code>profile</code>.
    * 
    * @param engine
    *          the encoding engine
-   * @param track
-   *          the track that was encoded
+   * @param sourceFile
+   *          the file that was encoded
    * @param profile
    *          the encoding profile
    */
-  void trackEncoded(EncoderEngine engine, Track track, EncodingProfile profile);
+  void fileEncoded(EncoderEngine engine, File sourceFile, EncodingProfile profile);
 
   /**
-   * Tellst the listener that the given track could not be encoded into
-   * {@link EncodingProfile.ethz.replay.core.api.common.media.DistributionFormat} <code>format</code>.
+   * Tells the listener that the given file could not be encoded into
+   * {@link EncodingProfile} <code>profile</code>.
    * 
    * @param engine
    *          the encoding engine
-   * @param track
-   *          the track that was encoded
+   * @param sourceFile
+   *          the file that was encoded
    * @param profile
    *          the encoding profile
    * @param cause
    *          the failure reason
    */
-  void trackEncodingFailed(EncoderEngine engine, Track track, EncodingProfile profile, Throwable cause);
+  void fileEncodingFailed(EncoderEngine engine, File sourceFile, EncodingProfile profile, Throwable cause);
 
   /**
-   * Tells the listener about encoding progress while the track is being encoded into
-   * {@link EncodingProfile.ethz.replay.core.api.common.media.DistributionFormat} <code>format</code>. The value ranges
+   * Tells the listener about encoding progress while the file is being encoded into
+   * {@link EncodingProfile} <code>profile</code>. The value ranges
    * between <code>0</code> (started) and <code>100</code> (finished).
    * 
    * @param engine
    *          the encoding engine
-   * @param track
-   *          the track that was encoded
+   * @param sourceFile
+   *          the file that was encoded
    * @param profile
    *          the encoding profile
    * @param progress
    *          the encoding progress
    */
-  void trackEncodingProgressed(EncoderEngine engine, Track track, EncodingProfile profile, int progress);
+  void fileEncodingProgressed(EncoderEngine engine, File sourceFile, EncodingProfile profile, int progress);
 
 }

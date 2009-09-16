@@ -17,7 +17,8 @@
 package org.opencastproject.composer.api;
 
 import org.opencastproject.composer.api.EncodingProfile.MediaType;
-import org.opencastproject.media.mediapackage.Track;
+
+import java.io.File;
 
 /**
  * Interface for encoding engines like ffmpeg or telestream's episode engine.
@@ -41,17 +42,18 @@ public interface EncoderEngine {
   void removeEncoderListener(EncoderListener listener);
 
   /**
-   * Encodes a track into the specified format.
+   * Encodes a file into the specified format.
    * 
-   * @param track
-   *          the track to encode
+   * @param source
+   *          the file to encode
    * @param format
    *          the media format definition
+   * @return the encoded file
    * 
    * @throws EncoderException
    *           if an error occurs during encoding
    */
-  void encodeTrack(Track track, EncodingProfile format) throws EncoderException;
+  File encode(File source, EncodingProfile format) throws EncoderException;
 
   /**
    * Returns <code>true</code> if the encoder engine supports multithreading.

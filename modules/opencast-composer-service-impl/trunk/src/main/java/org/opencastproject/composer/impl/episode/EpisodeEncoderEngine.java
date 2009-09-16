@@ -19,12 +19,13 @@ package org.opencastproject.composer.impl.episode;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.impl.AbstractEncoderEngine;
-import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.ConfigurationException;
+import org.opencastproject.util.PathSupport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -248,52 +249,66 @@ public class EpisodeEncoderEngine extends AbstractEncoderEngine {
   }
 
   /**
-   * @see ch.ethz.replay.core.composer.AbstractEncoderEngine#encodeTrack(ch.ethz.replay.core.api.common.bundle.Track,
-   *      ch.ethz.replay.core.api.common.media.EncodingProfile)
+   * {@inheritDoc}
+   * @see org.opencastproject.composer.impl.AbstractEncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile)
    */
   @Override
-  public void encodeTrack(Track track, EncodingProfile format) throws EncoderException {
-    xmlrpcController.submitJob(track, format);
+  public File encode(File source, EncodingProfile format) throws EncoderException {
+    xmlrpcController.submitJob(source, format);
+    throw new UnsupportedOperationException("Not yet implemented");
+    // TODO Wait for encoding outcome
+    // File outputFile = null;
+    //return outputFile;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.composer.impl.AbstractEncoderEngine#getOutputFile(java.io.File, org.opencastproject.composer.api.EncodingProfile)
+   */
+  @Override
+  protected File getOutputFile(File source, EncodingProfile profile) {
+    String outputPath = PathSupport.removeFileExtension(source.getAbsolutePath()) + profile.getSuffix();
+    return new File(outputPath);
   }
 
   /**
    * Callback from the engine controllers stating that encoding of the given file has been successful.
    * 
-   * @param track
+   * @param file
    *          the track that was encoded
    * @param profile
    *          the encoding profile
    */
-  void trackEncoded(Track track, EncodingProfile profile) {
-    fireTrackEncoded(this, track, profile);
+  void fileEncoded(File file, EncodingProfile profile) {
+    fireEncoded(this, file, profile);
   }
 
   /**
    * Callback from the engine controllers stating that encoding of the given file has has failed for the specified
    * reason.
    * 
-   * @param track
-   *          the track that was encoded
+   * @param file
+   *          the file that was encoded
    * @param profile
    *          the encoding profile
    * @param reason
    *          the reason of failure
    */
-  void trackEncodingFailed(Track track, EncodingProfile profile, String reason) {
-    fireTrackEncodingFailed(this, track, profile, new EncoderException(this, reason));
+  void fileEncodingFailed(File file, EncodingProfile profile, String reason) {
+    fireEncodingFailed(this, file, profile, new EncoderException(this, reason));
   }
 
   /**
    * Callback from the engine controllers stating that encoding of the given file has progressed to the given value.
    * 
-   * @param track
-   *          the track that is being encoded
+   * @param file
+   *          the file that is being encoded
    * @param profile
    *          the encoding profile
    * @param progress
    */
-  void trackEncodingProgressed(Track track, EncodingProfile profile, int progress) {
-    fireTrackEncodingProgressed(this, track, profile, progress);
+  void fileEncodingProgressed(File file, EncodingProfile profile, int progress) {
+    fireEncodingProgressed(this, file, profile, progress);
   }
 
   /**

@@ -17,7 +17,6 @@
 package org.opencastproject.composer.impl;
 
 import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.util.PathSupport;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,7 +63,7 @@ public class EncodingProfileImpl implements EncodingProfile {
 
   /**
    * {@inheritDoc}
-   * @see ch.ethz.replay.core.api.common.media.EncodingProfile#getIdentifier()
+   * @see org.opencastproject.composer.api.EncodingProfile#getIdentifier()
    */
   public String getIdentifier() {
     return identifier;
@@ -72,18 +71,10 @@ public class EncodingProfileImpl implements EncodingProfile {
 
   /**
    * {@inheritDoc}
-   * @see ch.ethz.replay.core.api.common.media.EncodingProfile#getName()
+   * @see org.opencastproject.composer.api.EncodingProfile#getName()
    */
   public String getName() {
     return name;
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see ch.ethz.replay.core.api.common.media.EncodingProfile#getFilename(ch.ethz.replay.core.api.common.bundle.Track)
-   */
-  public String getFilename(String track) {
-    return PathSupport.removeFileExtension(track) + suffix;
   }
 
   /**
@@ -97,7 +88,7 @@ public class EncodingProfileImpl implements EncodingProfile {
   
   /**
    * {@inheritDoc}
-   * @see ch.ethz.replay.core.api.common.media.EncodingProfile#getType()
+   * @see org.opencastproject.composer.api.EncodingProfile#getType()
    */
   public MediaType getType() {
     return outputType;
@@ -114,7 +105,7 @@ public class EncodingProfileImpl implements EncodingProfile {
   
   /**
    * {@inheritDoc}
-   * @see ch.ethz.replay.core.api.common.media.EncodingProfile#getSuffix()
+   * @see org.opencastproject.composer.api.EncodingProfile#getSuffix()
    */
   public String getSuffix() {
     return suffix;
@@ -172,7 +163,7 @@ public class EncodingProfileImpl implements EncodingProfile {
   
   /**
    * {@inheritDoc}
-   * @see ch.ethz.replay.core.api.common.media.EncodingProfile#getExtension(java.lang.String)
+   * @see org.opencastproject.composer.api.EncodingProfile#getExtension(java.lang.String)
    */
   public String getExtension(String key) {
     if (extension == null)
@@ -182,7 +173,7 @@ public class EncodingProfileImpl implements EncodingProfile {
 
   /**
    * {@inheritDoc}
-   * @see ch.ethz.replay.core.api.common.media.EncodingProfile#getExtensions()
+   * @see org.opencastproject.composer.api.EncodingProfile#getExtensions()
    */
   public Map<String, String> getExtensions() {
     if (extension == null)
@@ -192,7 +183,7 @@ public class EncodingProfileImpl implements EncodingProfile {
 
   /**
    * {@inheritDoc}
-   * @see ch.ethz.replay.core.api.common.media.EncodingProfile#hasExtensions()
+   * @see org.opencastproject.composer.api.EncodingProfile#hasExtensions()
    */
   public boolean hasExtensions() {
     return extension != null && extension.size() > 0;

@@ -18,13 +18,13 @@ package org.opencastproject.composer.impl.ffmpeg;
 
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.composer.impl.CmdlineEncoderEngine;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.composer.impl.AbstractCmdlineEncoderEngine;
 import org.opencastproject.util.ConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +35,7 @@ import java.util.Properties;
 /**
  * Implementation for the encoder engine backed by ffmpeg.
  */
-public class FFmpegEncoderEngine extends CmdlineEncoderEngine {
+public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
 
   /** Default location of the ffmepg binary (resembling the installer) */
   private static final String FFMPEG_BINARY_DEFAULT = "/usr/local/bin/ffmpeg";
@@ -104,21 +104,20 @@ public class FFmpegEncoderEngine extends CmdlineEncoderEngine {
   /**
    * Creates the arguments for the commandline.
    * 
-   * @param track
-   *          the track that is to be encoded
-   * @param format
-   *          the format
+   * @param file
+   *          the file that is to be encoded
    * @param profile
-   *          the encoding profile
+   *          the format
    * @return the argument list
    */
-  protected List<String> buildArgumentList(Track track, EncodingProfile format, String profile) throws EncoderException {
+  @Override
+  protected List<String> buildArgumentList(File file, EncodingProfile profile) throws EncoderException {
     List<String> argumentList = new ArrayList<String>();
-    String commandline = commandlines.get(format.getIdentifier());
+    String commandline = commandlines.get(profile.getIdentifier());
     if (commandline == null) {
-      commandline = format.getExtension(CMD_SUFFIX);
+      commandline = profile.getExtension(CMD_SUFFIX);
       if (commandline == null)
-        throw new EncoderException(this, "No commandline configured for " + format);
+        throw new EncoderException(this, "No commandline configured for " + profile);
     }
     String[] args = commandline.split(" ");
     for (String a : args)
@@ -137,7 +136,7 @@ public class FFmpegEncoderEngine extends CmdlineEncoderEngine {
    *          the message returned by the encoder
    */
   @Override
-  protected void handleEncoderOutput(Track track, EncodingProfile format, String message) {
+  protected void handleEncoderOutput(File track, EncodingProfile format, String message) {
     super.handleEncoderOutput(track, format, message);
     message = message.trim();
     if (message.equals(""))
@@ -171,6 +170,23 @@ public class FFmpegEncoderEngine extends CmdlineEncoderEngine {
   @Override
   public String toString() {
     return "ffmpeg";
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.composer.impl.AbstractEncoderEngine#getOutputFile(java.io.File, org.opencastproject.composer.api.EncodingProfile)
+   */
+  @Override
+  protected File getOutputFile(File source, EncodingProfile profile) {
+    File outputFile = null;
+    try {
+      List<String> arguments = buildArgumentList(source, profile);
+      // TODO: Very unsafe! Improve!
+      outputFile = new File(arguments.get(arguments.size() - 1));
+    } catch (EncoderException e) {
+      // Unlikely. We checked that before
+    }
+    return outputFile;
   }
 
 }

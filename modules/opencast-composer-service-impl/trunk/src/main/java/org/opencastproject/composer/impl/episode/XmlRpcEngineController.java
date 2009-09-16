@@ -20,7 +20,6 @@ import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.impl.episode.XmlRpcJob.XmlRpcJobState;
 import org.opencastproject.composer.impl.episode.XmlRpcJob.XmlRpcReason;
-import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
@@ -31,6 +30,7 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -124,7 +124,7 @@ public class XmlRpcEngineController implements Runnable {
 
     // Notify listeners
     for (XmlRpcJob job : joblist) {
-      engine.trackEncodingFailed(job.getTrack(), job.getEncodingProfile(), reason);
+      engine.fileEncodingFailed(job.getSourceFile(), job.getEncodingProfile(), reason);
     }
     synchronized (joblist) {
       joblist.clear();
@@ -153,7 +153,7 @@ public class XmlRpcEngineController implements Runnable {
    * @param profile
    *          the encoding profile
    */
-  void submitJob(Track track, EncodingProfile format) throws EncoderException {
+  void submitJob(File track, EncodingProfile format) throws EncoderException {
     List<EpisodeSettings> settings = getSettings(track, format);
     if (settings == null || settings.size() == 0)
       throw new EncoderException(engine, 
@@ -174,7 +174,7 @@ public class XmlRpcEngineController implements Runnable {
       desc.append(" ");
       desc.append(settings);
       Vector<Object> arguments = new Vector<Object>(5);
-      arguments.add(track.getURL().getPath());
+      arguments.add(track.getAbsolutePath());
       arguments.add(setting.getPath());
       arguments.add(desc.toString());
       arguments.add(priority);
@@ -232,10 +232,10 @@ public class XmlRpcEngineController implements Runnable {
   /**
    * Returns a list of settings for the specified track and profile. The settings are being looked up in episode's
    * settings folder (usually <tt>/Users/Shared/Episode Engine/Settings</tt>) and inside this folder at location
-   * <tt>Replay/&lt;profile&gt;/&lt;track flavor&gt;</tt>
+   * <tt>Opencast/&lt;profile&gt;</tt>
    * 
-   * @param track
-   *          the track to be encoded
+   * @param sourceFile
+   *          the file to be encoded
    * @param profile
    *          the profile name
    * @return the settings that are available for this combination
@@ -243,9 +243,8 @@ public class XmlRpcEngineController implements Runnable {
    *           if loading the settings failed
    */
   @SuppressWarnings("unchecked")
-  private List<EpisodeSettings> getSettings(Track track, EncodingProfile profile) throws EncoderException {
-    String settingsPath = PathSupport.concat(new String[] { "Replay", profile.getIdentifier(),
-            track.getFlavor().getSubtype() });
+  private List<EpisodeSettings> getSettings(File sourceFile, EncodingProfile profile) throws EncoderException {
+    String settingsPath = PathSupport.concat(new String[] { "Opencast", profile.getIdentifier() });
 
     log_.trace("Looking for episode settings at " + settingsPath);
 
@@ -276,34 +275,35 @@ public class XmlRpcEngineController implements Runnable {
    * Returns <code>true</code> if the engine is processing the specified track for the same media format and profile,
    * using at least one setting.
    * 
-   * @param track
-   *          the track
+   * TODO do we need this?
+   * 
+   * @param file
+   *          the file
    * @param profile
    *          the profile
    * @return <code>true</code> if the track is still processed
    */
-  private boolean trackIsProcessed(Track track, EncodingProfile profile) {
-    List<XmlRpcJob> jobs = getJobs(track, profile);
+  private boolean fileIsProcessed(File file, EncodingProfile profile) {
+    List<XmlRpcJob> jobs = getJobs(file, profile);
     if (jobs.size() > 0)
-      log_.trace("Track " + track + " is still being processed");
+      log_.trace("File " + file + " is still being processed");
     return jobs.size() > 0;
   }
 
   /**
-   * Returns the jobs that are currently in the system processing the given track with the specified media format and
-   * profile.
+   * Returns the jobs that are currently in the system processing the given file with the specified profile.
    * 
-   * @param track
-   *          the track
+   * @param sourceFile
+   *          the file to be encoded
    * @param profile
    *          the profile
    * @return the list of jobs
    */
-  private List<XmlRpcJob> getJobs(Track track, EncodingProfile profile) {
+  private List<XmlRpcJob> getJobs(File sourceFile, EncodingProfile profile) {
     List<XmlRpcJob> jobs = new ArrayList<XmlRpcJob>();
     synchronized (joblist) {
       for (XmlRpcJob job : joblist) {
-        if (job.getTrack().equals(track) && job.getEncodingProfile().equals(profile))
+        if (job.getSourceFile().equals(sourceFile) && job.getEncodingProfile().equals(profile))
           jobs.add(job);
       }
     }
@@ -331,7 +331,7 @@ public class XmlRpcEngineController implements Runnable {
           Map<String, Object> status = (Map<String, Object>) response.get("currentStatus");
           newState = XmlRpcJobState.parseResult(status);
 
-          Track track = job.getTrack();
+          File track = job.getSourceFile();
           EncodingProfile encodingProfile = job.getEncodingProfile();
           EpisodeSettings settings = job.getSettings();
 
@@ -366,14 +366,14 @@ public class XmlRpcEngineController implements Runnable {
               boolean trackIsProcessed = false;
               synchronized (joblist) {
                 joblist.remove(job);
-                trackIsProcessed = trackIsProcessed(track, encodingProfile);
+                trackIsProcessed = fileIsProcessed(track, encodingProfile);
               }
 
               // Tell engine
               log_.debug("Finished encoding of " + track + " to " + encodingProfile
                       + " " + settings);
               if (!trackIsProcessed) {
-                engine.trackEncoded(track, encodingProfile);
+                engine.fileEncoded(track, encodingProfile);
               }
             }
 
@@ -393,7 +393,7 @@ public class XmlRpcEngineController implements Runnable {
                       + " was stopped");
               if (associatedJobs.size() > 0)
                 log_.warn(associatedJobs.size() + " associated jobs have been canceled");
-              engine.trackEncodingFailed(track, encodingProfile, "Canceled");
+              engine.fileEncodingFailed(track, encodingProfile, "Canceled");
             }
 
             else if (newState.equals(XmlRpcJobState.Failed)) {
@@ -413,7 +413,7 @@ public class XmlRpcEngineController implements Runnable {
                       + " failed: " + reason);
               if (associatedJobs.size() > 0)
                 log_.trace(associatedJobs.size() + " associated jobs have been canceled");
-              engine.trackEncodingFailed(track, encodingProfile, reason.toString());
+              engine.fileEncodingFailed(track, encodingProfile, reason.toString());
             } else {
               log_.error("Episode engine discovered job with unkown state '" + newState + "'");
             }
@@ -427,7 +427,7 @@ public class XmlRpcEngineController implements Runnable {
             int progress = ((Integer) status.get("progress")).intValue();
             if (progress - job.getProgress() >= 10) {
               job.setProgress((progress / 10) * 10);
-              engine.trackEncodingProgressed(track, encodingProfile, job.getProgress());
+              engine.fileEncodingProgressed(track, encodingProfile, job.getProgress());
               log_.trace("Encoding of " + track + " to " + encodingProfile + " progressed to "
                       + job.getProgress() + "%");
             }

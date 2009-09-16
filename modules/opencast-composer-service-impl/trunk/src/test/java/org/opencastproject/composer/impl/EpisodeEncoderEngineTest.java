@@ -17,12 +17,11 @@ package org.opencastproject.composer.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.composer.api.EncoderEngine;
 import org.opencastproject.composer.api.EncoderEngineFactory;
 import org.opencastproject.composer.impl.episode.EpisodeEncoderEngine;
-
-import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;
