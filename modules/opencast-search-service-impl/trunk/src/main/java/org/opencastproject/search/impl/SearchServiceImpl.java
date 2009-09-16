@@ -42,7 +42,11 @@ public class SearchServiceImpl implements SearchService {
   public void activate(ComponentContext componentContext) {
     try {
       logger.info("Initializing " + this.getClass().getName() + " with search index directory " + indexDirectory);
-      FileUtils.forceMkdir(new File(indexDirectory));
+      File dir = new File(indexDirectory);
+      if(! dir.exists()) {
+        FileUtils.forceMkdir(dir);
+        dir = new File(indexDirectory);
+      }
       IndexWriter writer = new IndexWriter(indexDirectory, new StandardAnalyzer(), true, IndexWriter.MaxFieldLength.LIMITED);
       System.out.println("Indexing to directory '" + indexDirectory + "'...");
       System.out.println("Optimizing...");
