@@ -15,9 +15,8 @@
  */
 package org.opencastproject.workspace.api;
 
-import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
-
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
@@ -29,7 +28,7 @@ import java.net.URL;
  * achieved across distributed osgi containers.  The methods from WorkingFileRepository are also
  * available as a convenience to clients.
  */
-public interface Workspace extends WorkingFileRepository {
+public interface Workspace {
   /**
    * Gets a locally cached {@link File} for the given URI.
    * 
@@ -37,4 +36,28 @@ public interface Workspace extends WorkingFileRepository {
    * @return
    */
   File get(URL uri);
+
+  /**
+   * Store the data stream under the given media package and element IDs.
+   * @param mediaPackageID
+   * @param mediaPackageElementID
+   * @param in
+   */
+  void put(String mediaPackageID, String mediaPackageElementID, InputStream in);
+  
+  /**
+   * Stream the file stored under the given media package and element IDs.
+   * @param mediaPackageID
+   * @param mediaPackageElementID
+   * @return
+   */
+  InputStream get(String mediaPackageID, String mediaPackageElementID);
+  
+  /**
+   * Delete the file stored at the given media package and element IDs.
+   * @param mediaPackageID
+   * @param mediaPackageElementID
+   */
+  void delete(String mediaPackageID, String mediaPackageElementID);
+
 }
