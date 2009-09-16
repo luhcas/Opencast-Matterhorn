@@ -27,7 +27,6 @@ import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
-import org.opencastproject.util.UnknownFileTypeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -195,8 +194,6 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
       throw new MediaPackageException("Error while reading dublin core file " + url + ": " + e.getMessage());
     } catch (SAXException e) {
       throw new MediaPackageException("Error while parsing dublin core catalog " + url + ": " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      throw new MediaPackageException("Dublin core catalog " + url + " is of unknown mime type: " + e.getMessage());
     }
   }
 

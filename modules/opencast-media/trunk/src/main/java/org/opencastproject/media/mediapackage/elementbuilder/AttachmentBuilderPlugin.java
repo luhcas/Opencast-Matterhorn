@@ -25,8 +25,6 @@ import org.w3c.dom.Node;
 
 import java.net.URL;
 
-import javax.xml.xpath.XPathExpressionException;
-
 /**
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: AttachmentBuilderPlugin.java 2905 2009-07-15 16:16:05Z ced $
@@ -56,16 +54,22 @@ public class AttachmentBuilderPlugin extends AbstractAttachmentBuilderPlugin imp
    */
   @Override
   public boolean accept(Node elementNode) {
-    try {
-      String flavor = xpath.evaluate("@type", elementNode);
-      if (flavor != null && !"".equals(flavor) && !Attachment.FLAVOR.eq(flavor))
-        return false;
-      return super.accept(elementNode);
-    } catch (XPathExpressionException e) {
-      return false;
-    }
+    return super.accept(elementNode);
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * This plugin is an implementation for unknown attachments, therefore it returns <code>-1</code> as its
+   * priority.
+   * 
+   * @see org.opencastproject.media.mediapackage.elementbuilder.AbstractElementBuilderPlugin#getPriority()
+   */
+  @Override
+  public int getPriority() {
+    return -1;
+  }
+  
   /**
    * @see java.lang.Object#toString()
    */

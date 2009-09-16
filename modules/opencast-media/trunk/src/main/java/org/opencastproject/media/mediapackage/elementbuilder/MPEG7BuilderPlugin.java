@@ -28,7 +28,6 @@ import org.opencastproject.media.mediapackage.mpeg7.Mpeg7Parser;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
-import org.opencastproject.util.UnknownFileTypeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -223,8 +222,6 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
       throw new MediaPackageException("Error while reading mpeg-7 file " + url + ": " + e.getMessage());
     } catch (SAXException e) {
       throw new MediaPackageException("Error while parsing mpeg-7 catalog " + url + ": " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      throw new MediaPackageException("Mpeg-7 catalog " + url + " is of unknown mime type: " + e.getMessage());
     }
   }
 

@@ -62,17 +62,18 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
   private final static Logger log_ = LoggerFactory.getLogger(MediaPackageElementBuilderImpl.class.getName());
 
   // Create the list of available element builder pugins
+  @SuppressWarnings("unchecked")
   public MediaPackageElementBuilderImpl() {
     plugins = new ArrayList<Class<? extends MediaPackageElementBuilderPlugin>>();
     ClassLoader cl = MediaPackageElementBuilderImpl.class.getClassLoader();
     Class<?>[] pluginClasses = PluginLoader.findPlugins(PLUGIN_PKG, null, new String[] { PLUGIN_INTERFACE.getName() },
             cl);
     log_.debug("Found " + pluginClasses.length + " possible plugins");
-    
+
     // FIXME -- either remove the classloading based plugin system, or fix it for OSGi (jmh)
-    if(pluginClasses.length == 0) {
+    if (pluginClasses.length == 0) {
       // Manually add the plugins
-      log_.info("Unable to find element builder plugins via classloader.  Manually loading the default set.");
+      log_.warn("Unable to find element builder plugins via classloader.  Manually loading the default set.");
       plugins.add(AttachmentBuilderPlugin.class);
       plugins.add(CoverBuilderPlugin.class);
       plugins.add(DublinCoreBuilderPlugin.class);
@@ -82,7 +83,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
       plugins.add(PresenterTrackBuilderPlugin.class);
     } else {
       for (Class<?> c : pluginClasses) {
-        log_.info("Inspecting plugin " + c.getName());
+        log_.debug("Inspecting plugin " + c.getName());
         if (PLUGIN_INTERFACE.isAssignableFrom(c)) {
           plugins.add((Class<? extends MediaPackageElementBuilderPlugin>) c);
         }
@@ -117,21 +118,21 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     }
 
     // Check the plugins
-    if (candidates.size() == 0)
+    if (candidates.size() == 0) {
       throw new MediaPackageException("No suitable element builder plugin found for " + url);
-    candidates = filterPreferred(candidates);
-    if (candidates.size() > 1) {
+    } else if (candidates.size() > 1) {
       StringBuffer buf = new StringBuffer();
       for (MediaPackageElementBuilderPlugin plugin : candidates) {
         if (buf.length() > 0)
           buf.append(", ");
         buf.append(plugin.toString());
       }
-      log_.warn("More than one element builder plugin with the same priority claims responsibilty for " + url + ": "
+      log_.debug("More than one element builder plugin with the same priority claims responsibilty for " + url + ": "
               + buf.toString());
     }
 
     // Create media package element depending on mime type flavor
+    Collections.sort(candidates, PriorityComparator.INSTANCE);
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
     MediaPackageElement element = builderPlugin.elementFromURL(url);
     builderPlugin.cleanup();
@@ -139,9 +140,11 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromManifest(org.w3c.dom.Node, org.opencastproject.media.mediapackage.MediaPackageSerializer)
+   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromManifest(org.w3c.dom.Node,
+   *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
-  public MediaPackageElement elementFromManifest(Node node, MediaPackageSerializer serializer) throws MediaPackageException {
+  public MediaPackageElement elementFromManifest(Node node, MediaPackageSerializer serializer)
+          throws MediaPackageException {
     List<MediaPackageElementBuilderPlugin> candidates = new ArrayList<MediaPackageElementBuilderPlugin>();
     for (Class<? extends MediaPackageElementBuilderPlugin> pluginClass : plugins) {
       MediaPackageElementBuilderPlugin plugin = createPlugin(pluginClass);
@@ -152,8 +155,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
 
     // Check the plugins
     if (candidates.size() == 0) {
-      log_.warn("No element builder found for node of type " + node.getNodeName());
-      return null;
+      throw new MediaPackageException("No suitable element builder plugin found for node " + node.getNodeName());
     } else if (candidates.size() > 1) {
       StringBuffer buf = new StringBuffer();
       for (MediaPackageElementBuilderPlugin plugin : candidates) {
@@ -169,11 +171,12 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
       } catch (XPathExpressionException e) {
         elementFlavor = "(unknown)";
       }
-      log_.warn("More than one element builder plugin claims responsability for " + name + " of flavor "
+      log_.debug("More than one element builder plugin claims responsability for " + name + " of flavor "
               + elementFlavor + ": " + buf.toString());
     }
 
     // Create a new media package element
+    Collections.sort(candidates, PriorityComparator.INSTANCE);
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
     MediaPackageElement element = builderPlugin.elementFromManifest(node, serializer);
     builderPlugin.cleanup();
@@ -204,17 +207,20 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
           buf.append(", ");
         buf.append(plugin.toString());
       }
-      log_.warn("More than one element builder plugin claims responsibilty for " + flavor + ": " + buf.toString());
+      log_.debug("More than one element builder plugin claims responsibilty for " + flavor + ": " + buf.toString());
     }
 
     // Create a new media package element
+    Collections.sort(candidates, PriorityComparator.INSTANCE);
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
     MediaPackageElement element = builderPlugin.newElement(type, flavor);
     builderPlugin.cleanup();
     return element;
   }
 
-  /** Creates and initializes a new builder plugin. */
+  /**
+   * Creates and initializes a new builder plugin.
+   */
   private MediaPackageElementBuilderPlugin createPlugin(Class<? extends MediaPackageElementBuilderPlugin> clazz) {
     MediaPackageElementBuilderPlugin plugin = null;
     try {
@@ -233,26 +239,9 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     return plugin;
   }
 
-  /** Gets the preferred plugins. */
-  private List<MediaPackageElementBuilderPlugin> filterPreferred(List<MediaPackageElementBuilderPlugin> plugins) {
-    if (plugins.size() > 0) {
-      List<MediaPackageElementBuilderPlugin> preferred = new ArrayList<MediaPackageElementBuilderPlugin>();
-      Collections.sort(plugins, PriorityComparator.INSTANCE);
-      int priority = plugins.get(0).getPriority();
-      for (MediaPackageElementBuilderPlugin plugin : plugins) {
-        if (priority > plugin.getPriority())
-          break;
-        preferred.add(plugin);
-        priority = plugin.getPriority();
-      }
-      return preferred;
-    } else
-      return plugins;
-
-  }
-
-  // --------------------------------------------------------------------------------------------
-
+  /**
+   * Comperator used to sort plugins by priority.
+   */
   private static final class PriorityComparator implements Comparator<MediaPackageElementBuilderPlugin> {
 
     static final PriorityComparator INSTANCE = new PriorityComparator();
@@ -260,5 +249,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     public int compare(MediaPackageElementBuilderPlugin o1, MediaPackageElementBuilderPlugin o2) {
       return o2.getPriority() - o1.getPriority();
     }
+
   }
+
 }

@@ -26,7 +26,6 @@ import org.opencastproject.media.mediapackage.attachment.AttachmentImpl;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
-import org.opencastproject.util.UnknownFileTypeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,13 +114,9 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       // Check mime type
       if (mimeTypes != null && mimeTypes.size() > 0) {
         String nodeMimeType = (String) xpath.evaluate("mimetype", elementNode, XPathConstants.STRING);
-        try {
-          MimeType mimeType = MimeTypes.parseMimeType(nodeMimeType);
-          if (!mimeTypes.contains(mimeType))
-            return false;
-        } catch (UnknownFileTypeException e) {
+        MimeType mimeType = MimeTypes.parseMimeType(nodeMimeType);
+        if (!mimeTypes.contains(mimeType))
           return false;
-        }
       }
 
       return true;
@@ -230,8 +225,6 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       throw new MediaPackageException("Unsupported digest algorithm: " + e.getMessage());
     } catch (IOException e) {
       throw new MediaPackageException("Error while reading attachment file " + url + ": " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      throw new MediaPackageException("Attachment " + url + " is of unknown mime type: " + e.getMessage());
     }
   }
 

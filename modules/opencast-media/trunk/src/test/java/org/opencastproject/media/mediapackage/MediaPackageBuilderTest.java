@@ -56,8 +56,17 @@ public class MediaPackageBuilderTest extends AbstractMediaPackageTest {
   public void testLoadFromManifest() {
     try {
       MediaPackage mediaPackage = mediaPackageBuilder.loadFromManifest(new FileInputStream(manifestFile));
+      
+      // Test presence of tracks
+      assertEquals(2, mediaPackage.getTracks().length);
+
+      // Test presence of catalogs
       assertEquals(3, mediaPackage.getCatalogs().length);
       assertNotNull(mediaPackage.getCatalogs(MediaPackageElements.DUBLINCORE_CATALOG));
+      
+      // Test presence of attachments
+      assertEquals(2, mediaPackage.getAttachments().length);
+
     } catch (MediaPackageException e) {
       fail("Media package excpetion while reading media package from manifest: " + e.getMessage());
     } catch (ConfigurationException e) {

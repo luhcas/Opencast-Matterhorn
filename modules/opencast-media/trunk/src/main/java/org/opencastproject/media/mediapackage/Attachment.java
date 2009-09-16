@@ -29,4 +29,5 @@ public interface Attachment extends MediaPackageElement {
 
   /** Element flavor definition */
   MediaPackageElementFlavor FLAVOR = new MediaPackageElementFlavor("attachment", "(unkown)", "Unspecified attachment");
+
 }

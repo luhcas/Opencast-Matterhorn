@@ -28,7 +28,6 @@ import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
-import org.opencastproject.util.UnknownFileTypeException;
 
 import org.w3c.dom.Node;
 
@@ -195,8 +194,6 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
       throw new MediaPackageException("Unsupported digest algorithm: " + e.getMessage());
     } catch (IOException e) {
       throw new MediaPackageException("Error while reading presenter track " + url + ": " + e.getMessage());
-    } catch (UnknownFileTypeException e) {
-      throw new MediaPackageException("Track " + url + " is of unknown mime type: " + e.getMessage());
     }
   }
 

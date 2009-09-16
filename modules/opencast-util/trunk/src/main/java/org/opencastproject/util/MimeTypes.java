@@ -72,22 +72,18 @@ public class MimeTypes {
 
   // Initialize common mime types
   static {
-    try {
-      XML = MimeTypes.parseMimeType("text/xml");
-      TEXT = MimeTypes.parseMimeType("text/plain");
-      JPG = MimeTypes.parseMimeType("image/jpg");
-      MPEG4 = MimeTypes.parseMimeType("video/mp4");
-      MPEG4_AAC = MimeTypes.parseMimeType("video/x-m4v");
-      DV = MimeTypes.parseMimeType("video/x-dv");
-      MJPEG2000 = MimeTypes.parseMimeType("video/mj2");
-      MP3 = MimeTypes.parseMimeType("audio/mpeg");
-      AAC = MimeTypes.parseMimeType("audio/x-m4a");
-      CALENDAR = MimeTypes.parseMimeType("text/calendar");
-      ZIP = MimeTypes.parseMimeType("application/zip");
-      JAR = MimeTypes.parseMimeType("application/java-archive");
-    } catch (UnknownFileTypeException e) {
-      log_.error("Error initializing common mime types: " + e.getMessage());
-    }
+    XML = MimeTypes.parseMimeType("text/xml");
+    TEXT = MimeTypes.parseMimeType("text/plain");
+    JPG = MimeTypes.parseMimeType("image/jpg");
+    MPEG4 = MimeTypes.parseMimeType("video/mp4");
+    MPEG4_AAC = MimeTypes.parseMimeType("video/x-m4v");
+    DV = MimeTypes.parseMimeType("video/x-dv");
+    MJPEG2000 = MimeTypes.parseMimeType("video/mj2");
+    MP3 = MimeTypes.parseMimeType("audio/mpeg");
+    AAC = MimeTypes.parseMimeType("audio/x-m4a");
+    CALENDAR = MimeTypes.parseMimeType("text/calendar");
+    ZIP = MimeTypes.parseMimeType("application/zip");
+    JAR = MimeTypes.parseMimeType("application/java-archive");
   }
 
   /**
@@ -192,8 +188,7 @@ public class MimeTypes {
    * @throws UnknownFileTypeException
    *           if the mime type is unknown
    */
-  public static MimeType parseMimeType(String mimeType)
-      throws UnknownFileTypeException {
+  public static MimeType parseMimeType(String mimeType) {
     if (mimeType == null)
       throw new IllegalArgumentException("Argument 'mimeType' was null");
 
@@ -215,7 +210,11 @@ public class MimeTypes {
           // MimeTypeImpl.clone() is implemented, so this will never happen.
         }
     }
-    throw new UnknownFileTypeException("MimeType " + mimeType + " is unknown");
+    
+    log_.info("Discovered previously unknown mime type '" + mimeType + "'");
+    MimeType m = new MimeType(t[0], t[1]);
+    mimeTypes_.add(m);
+    return m;
   }
 
   /**
