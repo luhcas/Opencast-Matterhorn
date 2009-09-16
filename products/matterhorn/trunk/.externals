@@ -26,3 +26,6 @@
 ../../../modules/opencast-http/trunk	opencast-http
 ../../../modules/opencast-distribution-service-api/trunk	opencast-distribution-service-api
 ../../../modules/opencast-distribution-service-local-impl/trunk	opencast-distribution-service-local-impl
+../../../modules/opencast-search-service-api/trunk	opencast-search-service-api
+../../../modules/opencast-search-service-impl/trunk      opencast-search-service-impl
+

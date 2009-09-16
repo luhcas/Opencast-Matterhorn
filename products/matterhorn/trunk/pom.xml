@@ -49,6 +49,8 @@
         <module>opencast-media</module>
         <module>opencast-notification-service-api</module>
         <module>opencast-runtime-info-ui</module>
+        <module>opencast-search-service-api</module>
+        <module>opencast-search-service-impl</module>
         <module>opencast-util</module>
         <module>opencast-working-file-repository-service-api</module>
         <module>opencast-working-file-repository-service-impl</module>
@@ -84,6 +86,8 @@
         <module>opencast-media</module>
         <module>opencast-notification-service-api</module>
         <module>opencast-runtime-info-ui</module>
+        <module>opencast-search-service-api</module>
+        <module>opencast-search-service-impl</module>
         <module>opencast-util</module>
         <module>opencast-working-file-repository-service-api</module>
         <module>opencast-working-file-repository-service-impl</module>
