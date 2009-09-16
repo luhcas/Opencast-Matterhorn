@@ -30,4 +30,3 @@ log4j.logger.org.apache=WARN
 log4j.logger.org.springframework=WARN
 log4j.logger.org.opencastproject=DEBUG
 
--
