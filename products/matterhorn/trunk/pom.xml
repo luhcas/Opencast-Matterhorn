@@ -60,7 +60,6 @@
         <module>opencast-engage-service-impl</module>
         <module>opencast-workflow-service-api</module>
         <module>opencast-workflow-service-impl</module>
-     	<module>EngageApp_Scrubber</module>
 	 </modules>
     </profile>
     <profile>
