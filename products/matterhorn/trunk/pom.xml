@@ -60,7 +60,8 @@
         <module>opencast-engage-service-impl</module>
         <module>opencast-workflow-service-api</module>
         <module>opencast-workflow-service-impl</module>
-      </modules>
+     	<module>EngageApp_Scrubber</module>
+	 </modules>
     </profile>
     <profile>
       <!-- This profile will just build the modules and when combined with 
