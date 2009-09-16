@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.search.api.SearchService" immediate="true">
+  <implementation class="org.opencastproject.search.impl.SearchServiceImpl" />
+  <property name="service.description" value="Search Service" />
+  <service>
+    <provide interface="org.opencastproject.search.api.SearchService" />
+  </service>
+</component>
