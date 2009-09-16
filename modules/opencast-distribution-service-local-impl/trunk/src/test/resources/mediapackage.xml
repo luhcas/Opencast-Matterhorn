@@ -21,9 +21,9 @@
       <url>dublincore.xml</url>
       <checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</checksum>
     </catalog>
-    <catalog id="catalog-2" type="metadata/mpeg7" ref="track:track-1">
+    <catalog id="catalog-2" type="metadata/mpeg-7" ref="track:track-1">
       <mimetype>text/xml</mimetype>
-      <url>mpeg-7.xml</url>
+      <url>mpeg7.xml</url>
       <checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</checksum>
     </catalog>
   </metadata>
