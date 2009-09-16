@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * FIXME -- Add javadocs
+ * A Lucene-based {@link SearchService} implementation.
  */
 public class SearchServiceImpl implements SearchService {
   private static final Logger logger = LoggerFactory.getLogger(SearchServiceImpl.class);
@@ -48,8 +48,6 @@ public class SearchServiceImpl implements SearchService {
         dir = new File(indexDirectory);
       }
       IndexWriter writer = new IndexWriter(indexDirectory, new StandardAnalyzer(), true, IndexWriter.MaxFieldLength.LIMITED);
-      System.out.println("Indexing to directory '" + indexDirectory + "'...");
-      System.out.println("Optimizing...");
       writer.optimize();
       writer.close();
     } catch (IOException e) {
