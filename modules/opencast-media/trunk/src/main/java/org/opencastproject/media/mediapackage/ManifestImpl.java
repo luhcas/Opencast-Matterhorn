@@ -51,9 +51,6 @@ import javax.xml.xpath.XPathFactory;
 
 /**
  * Implements a media package manifest that keeps information about a media package's contents.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: ManifestImpl.java 2908 2009-07-17 16:51:07Z ced $
  */
 final class ManifestImpl {
 
@@ -110,7 +107,7 @@ final class ManifestImpl {
   /**
    * @see org.opencastproject.media.mediapackage.ManifestImpl#getIdentifier()
    */
-  public Handle getIdentifier() {
+  Handle getIdentifier() {
     return identifier;
   }
 
@@ -127,21 +124,21 @@ final class ManifestImpl {
   /**
    * @see org.opencastproject.media.mediapackage.ManifestImpl#getDuration()
    */
-  public long getDuration() {
+  long getDuration() {
     return duration;
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.ManifestImpl#getStartDate()
    */
-  public long getStartDate() {
+  long getStartDate() {
     return startTime;
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.ManifestImpl#getEntries()
    */
-  public MediaPackageElement[] getEntries() {
+  MediaPackageElement[] getEntries() {
     ArrayList<MediaPackageElement> entries = new ArrayList<MediaPackageElement>();
     for (MediaPackageElement e : elements) {
       entries.add(e);
@@ -189,8 +186,7 @@ final class ManifestImpl {
       MediaPackageReference reference = element.getReference();
       if (reference != null) {
         if (reference.getType().equals(MediaPackageReference.TYPE_MEDIAPACKAGE)
-                && reference.getIdentifier().equals(MediaPackageReference.SELF)
-                && identifier != null) {
+                && reference.getIdentifier().equals(MediaPackageReference.SELF) && identifier != null) {
           element
                   .referTo(new MediaPackageReferenceImpl(MediaPackageReference.TYPE_MEDIAPACKAGE, identifier.toString()));
         }
@@ -262,6 +258,23 @@ final class ManifestImpl {
   }
 
   /**
+   * Returns the track with id <code>trackId</code> or <code>null</code> if that track doesn't exist.
+   * 
+   * @param trackId
+   *          the track identifier
+   * @return the track
+   */
+  Track getTrack(String trackId) {
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e.getIdentifier().equals(trackId) && e instanceof Track)
+          return (Track) e;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Returns the media package's tracks.
    * 
    * @return the tracks
@@ -300,7 +313,7 @@ final class ManifestImpl {
    *          the reference
    * @return the tracks
    */
-  public Track[] getTracks(MediaPackageReference reference) {
+  Track[] getTracks(MediaPackageReference reference) {
     if (reference == null)
       throw new IllegalArgumentException("Unable to filter by null reference");
 
@@ -324,7 +337,7 @@ final class ManifestImpl {
    *          the reference
    * @return the tracks
    */
-  public Track[] getTracks(MediaPackageElementFlavor flavor, MediaPackageReference reference) {
+  Track[] getTracks(MediaPackageElementFlavor flavor, MediaPackageReference reference) {
     if (flavor == null)
       throw new IllegalArgumentException("Unable to filter by null criterion");
     if (reference == null)
@@ -391,6 +404,23 @@ final class ManifestImpl {
   }
 
   /**
+   * Returns the attachment with id <code>attachmentId</code> or <code>null</code> if that attachment doesn't exist.
+   * 
+   * @param attachmentId
+   *          the attachment identifier
+   * @return the attachment
+   */
+  Attachment getAttachment(String attachmentId) {
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e.getIdentifier().equals(attachmentId) && e instanceof Attachment)
+          return (Attachment) e;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Returns the media package's attachments.
    * 
    * @return the attachments
@@ -429,7 +459,7 @@ final class ManifestImpl {
    *          the reference
    * @return the attachments
    */
-  public Attachment[] getAttachments(MediaPackageReference reference) {
+  Attachment[] getAttachments(MediaPackageReference reference) {
     if (reference == null)
       throw new IllegalArgumentException("Unable to filter by null reference");
 
@@ -453,7 +483,7 @@ final class ManifestImpl {
    *          the reference
    * @return the attachments
    */
-  public Attachment[] getAttachments(MediaPackageElementFlavor flavor, MediaPackageReference reference) {
+  Attachment[] getAttachments(MediaPackageElementFlavor flavor, MediaPackageReference reference) {
     if (flavor == null)
       throw new IllegalArgumentException("Unable to filter by null criterion");
     if (reference == null)
@@ -520,6 +550,23 @@ final class ManifestImpl {
   }
 
   /**
+   * Returns the catalog with id <code>catalogId</code> or <code>null</code> if that catalog doesn't exist.
+   * 
+   * @param catalogId
+   *          the catalog identifier
+   * @return the catalog
+   */
+  Catalog getCatalog(String catalogId) {
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e.getIdentifier().equals(catalogId) && e instanceof Catalog)
+          return (Catalog) e;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Returns the media package's catalogs.
    * 
    * @return the catalogs
@@ -558,7 +605,7 @@ final class ManifestImpl {
    *          the reference
    * @return the catalogs
    */
-  public Catalog[] getCatalogs(MediaPackageReference reference) {
+  Catalog[] getCatalogs(MediaPackageReference reference) {
     if (reference == null)
       throw new IllegalArgumentException("Unable to filter by null reference");
 
@@ -582,7 +629,7 @@ final class ManifestImpl {
    *          the reference
    * @return the catalogs
    */
-  public Catalog[] getCatalogs(MediaPackageElementFlavor flavor, MediaPackageReference reference) {
+  Catalog[] getCatalogs(MediaPackageElementFlavor flavor, MediaPackageReference reference) {
     if (flavor == null)
       throw new IllegalArgumentException("Unable to filter by null criterion");
     if (reference == null)
@@ -650,7 +697,7 @@ final class ManifestImpl {
    * 
    * @return the elements
    */
-  public MediaPackageElement[] getUnclassifiedElements() {
+  MediaPackageElement[] getUnclassifiedElements() {
     return getUnclassifiedElements(null);
   }
 
@@ -661,7 +708,7 @@ final class ManifestImpl {
    *          the mime type
    * @return the elements
    */
-  public MediaPackageElement[] getUnclassifiedElements(MediaPackageElementFlavor type) {
+  MediaPackageElement[] getUnclassifiedElements(MediaPackageElementFlavor type) {
     List<MediaPackageElement> unclassifieds = new ArrayList<MediaPackageElement>();
     synchronized (elements) {
       for (MediaPackageElement e : elements) {
@@ -864,10 +911,9 @@ final class ManifestImpl {
    * @throws ParseException
    *           if the manifest contains a malformed start date
    */
-  public static ManifestImpl fromStream(InputStream is, MediaPackageSerializer serializer, boolean ignoreMissingElements)
-          throws MediaPackageException, IOException,
-          ParserConfigurationException, SAXException, TransformerException, XPathExpressionException,
-          ConfigurationException, HandleException, ParseException {
+  static ManifestImpl fromStream(InputStream is, MediaPackageSerializer serializer, boolean ignoreMissingElements)
+          throws MediaPackageException, IOException, ParserConfigurationException, SAXException, TransformerException,
+          XPathExpressionException, ConfigurationException, HandleException, ParseException {
 
     DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();

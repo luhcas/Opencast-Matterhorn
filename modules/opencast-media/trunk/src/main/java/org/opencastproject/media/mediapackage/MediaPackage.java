@@ -107,6 +107,16 @@ public interface MediaPackage {
   MediaPackageElement getElementById(String id);
 
   /**
+   * Returns the track identified by <code>trackId</code> or <code>null</code> if that
+   * track doesn't exists.
+   * 
+   * @param trackId
+   *          the track identifier
+   * @return the tracks
+   */
+  Track getTrack(String trackId);
+
+  /**
    * Returns the tracks that are part of this media package.
    * 
    * @return the tracks
@@ -161,6 +171,16 @@ public interface MediaPackage {
   boolean hasTracks(MediaPackageElementFlavor flavor);
 
   /**
+   * Returns the attachment identified by <code>attachmentId</code> or <code>null</code> if that
+   * attachment doesn't exists.
+   * 
+   * @param attachmentId
+   *          the attachment identifier
+   * @return the attachments
+   */
+  Attachment getAttachment(String attachmentId);
+
+  /**
    * Returns the attachments that are part of this media package.
    * 
    * @return the attachments
@@ -213,6 +233,16 @@ public interface MediaPackage {
    * @return <code>true</code> if the media package contains attachments
    */
   boolean hasAttachments(MediaPackageElementFlavor flavor);
+
+  /**
+   * Returns the catalog identified by <code>catalogId</code> or <code>null</code> if that
+   * catalog doesn't exists.
+   * 
+   * @param catalogId
+   *          the catalog identifier
+   * @return the catalogs
+   */
+  Catalog getCatalog(String catalogId);
 
   /**
    * Returns the catalogs associated with this media package.
@@ -343,7 +373,8 @@ public interface MediaPackage {
    * @throws UnsupportedElementException
    *           if the element is of an unsupported format
    */
-  MediaPackageElement add(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws MediaPackageException, UnsupportedElementException;
+  MediaPackageElement add(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
+          throws MediaPackageException, UnsupportedElementException;
 
   /**
    * Adds an arbitrary {@link MediaPackageElement} to this media package.
@@ -517,8 +548,7 @@ public interface MediaPackage {
   Document toXml() throws MediaPackageException;
 
   /**
-   * Saves the media package, utilizing the serializer when it comes to
-   * creating paths from urls.
+   * Saves the media package, utilizing the serializer when it comes to creating paths from urls.
    * 
    * @param serializer
    *          the media package serializer

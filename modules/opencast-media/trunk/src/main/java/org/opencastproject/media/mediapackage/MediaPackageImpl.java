@@ -208,6 +208,13 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getCatalog(java.lang.String)
+   */
+  public Catalog getCatalog(String catalogId) {
+    return manifest.getCatalog(catalogId);
+  }
+
+  /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#getCatalogs()
    */
   public Catalog[] getCatalogs() {
@@ -257,6 +264,13 @@ public final class MediaPackageImpl implements MediaPackage {
     return manifest.hasCatalogs(type);
   }
 
+  /**
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getTrack(java.lang.String)
+   */
+  public Track getTrack(String trackId) {
+    return manifest.getTrack(trackId);
+  }
+  
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#getTracks()
    */
@@ -335,6 +349,13 @@ public final class MediaPackageImpl implements MediaPackage {
     synchronized (observers) {
       observers.add(observer);
     }
+  }
+
+  /**
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getAttachment(java.lang.String)
+   */
+  public Attachment getAttachment(String attachmentId) {
+    return manifest.getAttachment(attachmentId);
   }
 
   /**
