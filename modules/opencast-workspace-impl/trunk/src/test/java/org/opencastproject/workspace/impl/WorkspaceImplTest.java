@@ -28,4 +28,14 @@ public class WorkspaceImplTest {
     File f = workspace.get(getClass().getClassLoader().getResource("opencast_header.gif"));
     Assert.assertTrue(f.exists());
   }
+
+  @Test
+  public void testLocalFileUrls() throws Exception {
+    WorkspaceImpl workspace = new WorkspaceImpl();
+    File source1 = new File("target/test-classes/opencast_header.gif");
+    File source2 = new File("target/test-classes/opencast_header2.gif");
+    File fromWorkspace1 = workspace.get(source1.toURI().toURL());
+    File fromWorkspace2 = workspace.get(source2.toURI().toURL());
+    Assert.assertFalse(fromWorkspace1.getAbsolutePath().equals(fromWorkspace2.getAbsolutePath()));
+  }
 }

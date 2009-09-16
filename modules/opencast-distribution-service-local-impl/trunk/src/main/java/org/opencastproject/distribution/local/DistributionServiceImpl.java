@@ -70,6 +70,7 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
         FileUtils.copyFile(attachmentFile, new File(attachmentsDirectory, attachmentFile.getName()));
       }
     } catch (Exception e) {
+      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }

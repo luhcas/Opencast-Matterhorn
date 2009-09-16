@@ -46,8 +46,9 @@ public class DistributionServiceImplTest {
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     service.setWorkspace(workspace);
     EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File("target/test-classes/media.mov"));
+    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File("target/test-classes/dublincore.xml"));
     EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File("target/test-classes/mpeg7.xml"));
-    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File("target/test-classes/notes.txt"));
+    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File("target/test-classes/attachment.txt"));
     EasyMock.replay(workspace);
   }
 

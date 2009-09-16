@@ -22,6 +22,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
@@ -35,6 +37,8 @@ import java.util.Dictionary;
  * TODO Implement cache invalidation using the caching headers, if provided, from the remote server.
  */
 public class WorkspaceImpl implements Workspace, ManagedService {
+  private static final Logger logger = LoggerFactory.getLogger(WorkspaceImpl.class);
+  
   private WorkingFileRepository repo;
   private String rootDirectory = null;
 
@@ -45,6 +49,7 @@ public class WorkspaceImpl implements Workspace, ManagedService {
 
   public File get(URL url) {
     String uriHash = DigestUtils.md5Hex(url.toString());
+    logger.debug("Hashed " + url.toString() + " to " + uriHash);
     // See if there's a matching file under the root directory
     File f = new File(rootDirectory + File.separator + uriHash);
     if(f.exists()) {
