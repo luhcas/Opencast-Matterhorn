@@ -22,7 +22,6 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
-import org.opencastproject.search.impl.Hints;
 import org.opencastproject.search.impl.MediaSegmentImpl;
 import org.opencastproject.search.impl.SearchResultImpl;
 import org.opencastproject.search.impl.SearchResultItemImpl;
@@ -38,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Properties;
 
 /**
  * Class implementing <code>LookupRequester</code> to provide connection to solr indexing facility.
@@ -331,7 +331,7 @@ public class SolrRequester {
             segment.setText(toString(doc.getFieldValue(fieldName)));
 
             // Read the hints for this segment
-            Hints segmentHints = new Hints();
+            Properties segmentHints = new Properties();
             try {
               String hintFieldName = SolrFields.SEGMENT_HINTS + segment.getIndex();
               Object hintFieldValue = doc.getFieldValue(hintFieldName);
