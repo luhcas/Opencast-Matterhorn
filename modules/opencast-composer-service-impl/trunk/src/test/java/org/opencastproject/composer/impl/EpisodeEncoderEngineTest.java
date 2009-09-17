@@ -20,7 +20,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.composer.api.EncoderEngine;
-import org.opencastproject.composer.api.EncoderEngineFactory;
 import org.opencastproject.composer.impl.episode.EpisodeEncoderEngine;
 
 import org.junit.After;

@@ -14,8 +14,9 @@
  *
  */
 
-package org.opencastproject.composer.api;
+package org.opencastproject.composer.impl;
 
+import org.opencastproject.composer.api.EncoderEngine;
 import org.opencastproject.util.ConfigurationException;
 
 /**

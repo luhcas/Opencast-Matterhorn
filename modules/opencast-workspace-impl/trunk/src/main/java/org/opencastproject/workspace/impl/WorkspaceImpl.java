@@ -20,6 +20,7 @@ import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
@@ -48,13 +49,20 @@ public class WorkspaceImpl implements Workspace, ManagedService {
   }
 
   public File get(URL url) {
-    String uriHash = DigestUtils.md5Hex(url.toString());
-    logger.debug("Hashed " + url.toString() + " to " + uriHash);
+    String urlString = url.toString();
+    String urlHash = DigestUtils.md5Hex(urlString);
+    String urlExtension = FilenameUtils.getExtension(urlString);
+    String fileName = rootDirectory + File.separator + urlHash;
+    if( ! org.apache.commons.lang.StringUtils.isEmpty(urlExtension)) {
+      fileName = fileName.concat(".");
+      fileName = fileName.concat(urlExtension);
+    }
     // See if there's a matching file under the root directory
-    File f = new File(rootDirectory + File.separator + uriHash);
+    File f = new File(fileName);
     if(f.exists()) {
       return f;
     } else {
+      logger.info("Copying " + urlString + " to " + f.getAbsolutePath());
       try {
         FileUtils.copyURLToFile(url, f);
         return f;

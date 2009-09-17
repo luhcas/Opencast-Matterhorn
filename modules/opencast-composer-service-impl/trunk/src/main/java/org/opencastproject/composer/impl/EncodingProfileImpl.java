@@ -22,31 +22,50 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * Default implementation for encoding profiles.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name="encoding-profile")
+@XmlRootElement(name="encoding-profile", namespace="http://composer.opencastproject.org/")
 public class EncodingProfileImpl implements EncodingProfile {
 
   /** The profile identifier, e. g. flash.http */
+  @XmlAttribute(name="id")
+  @XmlID
   protected String identifier = null;
 
   /** Format description */
+  @XmlElement(name="name")
   protected String name = null;
 
   /** Format type */
+  @XmlElement(name="mediatype")
   protected MediaType outputType = null;
 
   /** Suffix */
+  @XmlElement(name="suffix")
   protected String suffix = null;
 
   /** Mime type */
+  @XmlElement(name="mimetype")
   protected String mimeType = null;
 
   /** The track types that this profile may be applied to */
+  @XmlElement(name="mediatype")
   protected MediaType[] applicableTypes = null;
 
   /** Installation-specific properties */
-  protected Map<String, String> extension = null;
+  @XmlElement(name="extension")
+  protected HashMap<String, String> extension = null;
 
   /**
    * Private, since the profile should be created using the static factory method.
@@ -60,6 +79,8 @@ public class EncodingProfileImpl implements EncodingProfile {
     this.identifier = identifier;
     this.name = name;
   }
+  // Needed by JAXB
+  public EncodingProfileImpl() {}
 
   /**
    * {@inheritDoc}
@@ -158,7 +179,7 @@ public class EncodingProfileImpl implements EncodingProfile {
    * @param extension the extension properties
    */
   void setExtension(Map<String, String> extension) {
-    this.extension = extension;
+    this.extension = new HashMap<String, String>(extension);
   }
   
   /**
@@ -250,6 +271,33 @@ public class EncodingProfileImpl implements EncodingProfile {
   @Override
   public String toString() {
     return identifier;
+  }
+  public MediaType getOutputType() {
+    return outputType;
+  }
+  public void setOutputType(MediaType outputType) {
+    this.outputType = outputType;
+  }
+  public MediaType[] getApplicableTypes() {
+    return applicableTypes;
+  }
+  public void setApplicableTypes(MediaType[] applicableTypes) {
+    this.applicableTypes = applicableTypes;
+  }
+  public HashMap<String, String> getExtension() {
+    return extension;
+  }
+  public void setExtension(HashMap<String, String> extension) {
+    this.extension = extension;
+  }
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }
+  public void setName(String name) {
+    this.name = name;
+  }
+  public void setMimeType(String mimeType) {
+    this.mimeType = mimeType;
   }
 
 }

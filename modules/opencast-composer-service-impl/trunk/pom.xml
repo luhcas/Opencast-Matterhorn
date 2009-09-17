@@ -87,9 +87,13 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Import-Package> org.osgi.service.*, * </Import-Package>
-            <Private-Package>org.opencastproject.composer.impl</Private-Package>
-            <Service-Component>OSGI-INF/composer-service.xml</Service-Component>
+            <Import-Package> ! org.apache.xmlrpc.*, !org.apache.commons.httpclient.*, org.osgi.service.*, * </Import-Package>
+            <Export-Package>org.opencastproject.composer.impl.*</Export-Package>
+            <Embed-Dependency>xmlrpc-client</Embed-Dependency>
+            <Service-Component>
+              OSGI-INF/composer-service.xml,
+              OSGI-INF/composer-service-rest.xml
+            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

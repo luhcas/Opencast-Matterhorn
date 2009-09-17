@@ -44,7 +44,7 @@ public class MediaInspectionWebServiceImpl implements MediaInspectionWebService 
     Document doc;
     try {
       doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-      track.toManifest(doc, new DefaultMediaPackageSerializerImpl());
+      doc.appendChild(track.toManifest(doc, new DefaultMediaPackageSerializerImpl()));
       return TrackType.fromXml(doc);
     } catch (Exception e) {
       throw new RuntimeException(e);

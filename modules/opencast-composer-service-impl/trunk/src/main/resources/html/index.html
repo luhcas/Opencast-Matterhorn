@@ -1,0 +1,47 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <h2>
+      Composer Service REST endpoint
+    </h2>
+    
+    <div>
+      <b>GET profiles</b> returns all encoding profiles
+    </div>
+    <div>
+      <b>POST encode</b> starts an encoding process, based on the specified encoding profile ID, the media package, and
+      the track ID in the media package to encode.
+      <form action="encode" method="POST">
+        Media Package XML<br/>
+        <textarea rows="20" cols="80" id="mediapackage" name="mediapackage">
+          <mediapackage id="00000/1" start="2007-12-05T13:40:00" duration="1004400000">
+            <media>
+              <track id="track-1" type="track/presentation">
+                <mimetype>video/quicktime</mimetype>
+                <url>http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/av.mov</url>
+                <checksum type="md5">43b7d843b02c4a429b2f547a4f230d31</checksum>
+                <duration>1004400000</duration>
+                <video>
+                  <device type="UFG03" version="30112007" vendor="Unigraf" />
+                  <encoder type="H.264" version="7.4" vendor="Apple Inc" />
+                  <resolution>640x480</resolution>
+                  <scanType type="progressive" />
+                  <bitrate>540520</bitrate>
+                  <frameRate>2</frameRate>
+                </video>
+              </track>
+            </media>
+          </mediapackage>
+        </textarea><br/>
+        Source Track ID: <input type="text" id="sourceTrackId" name="sourceTrackId" value="track-1"/>
+        Profile ID: <input type="text" id="profileId" name="profileId" value="analysis-tracks.http"/>
+        <input type="submit" value="Encode"/>
+      </form>
+    </div>
+    
+    <div>
+      $Rev$
+    </div>
+  </body>
+</html>

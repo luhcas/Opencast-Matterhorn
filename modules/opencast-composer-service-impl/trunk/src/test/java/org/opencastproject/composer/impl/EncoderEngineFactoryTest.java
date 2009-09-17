@@ -20,7 +20,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import org.opencastproject.composer.api.EncoderEngine;
-import org.opencastproject.composer.api.EncoderEngineFactory;
 import org.opencastproject.composer.impl.episode.EpisodeEncoderEngine;
 import org.opencastproject.composer.impl.ffmpeg.FFmpegEncoderEngine;
 import org.opencastproject.util.ConfigurationException;
@@ -74,7 +73,7 @@ public class EncoderEngineFactoryTest {
   }
   
   /**
-   * Test method for {@link org.opencastproject.composer.api.EncoderEngineFactory#newInstance()}.
+   * Test method for {@link org.opencastproject.composer.impl.EncoderEngineFactory#newInstance()}.
    */
   @Test
   public void testNewInstance() {

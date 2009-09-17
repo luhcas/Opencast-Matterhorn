@@ -20,7 +20,6 @@ import org.opencastproject.composer.api.EncoderEngine;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncoderListener;
 import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.IoSupport;
 
 import org.apache.commons.io.FilenameUtils;
@@ -56,9 +55,6 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
   /** the command line options */
   private String cmdlineOptions = "";
 
-  /** Base output directory */
-  private File outRootDir = null;
-
   /** parameters substituted in the command line options string */
   private Map<String, Object> params = new HashMap<String, Object>();
 
@@ -75,16 +71,6 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       throw new IllegalArgumentException("binary is null");
 
     this.binary = binary;
-  }
-
-  /**
-   * Sets the root output directory.
-   * 
-   * @param dir
-   *          the directory
-   */
-  protected void setOutputDirectory(File dir) {
-    outRootDir = dir;
   }
 
   /**
@@ -114,19 +100,13 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
     BufferedReader in = null;
     Process encoderProcess = null;
     try {
-
-      // Set in and out files/directories
-      setInputFile(source.getAbsolutePath());
-      if (outRootDir != null) {
-        File outDir = new File(outRootDir, profile.getIdentifier());
-        if (!outDir.exists()) {
-          log_.trace("Created output directory " + outDir);
-          outDir.mkdirs();
-        }
-        setOutputDirectory(outDir.getAbsolutePath());
-      }
-
-      // Define the suffix as a template
+      // Set encoding parameters
+      String inf = FilenameUtils.normalize(source.getAbsolutePath());
+      params.put("in.path", inf);
+      params.put("in.name", FilenameUtils.getBaseName(inf));
+      params.put("in.extension", FilenameUtils.getExtension(inf));
+      params.put("in.filename", FilenameUtils.getName(inf));
+      params.put("out.dir", source.getParent());
       params.put("out.suffix", profile.getSuffix());
 
       // create encoder process.
@@ -134,6 +114,12 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       // current java process is used.
       // TODO: Parallelisation (threading)
       List<String> command = buildCommand(source, profile);
+      StringBuilder sb = new StringBuilder();
+      for(String cmd : command) {
+        sb.append(cmd);
+        sb.append(" ");
+      }
+      log_.info("Executing encoding command: " + sb.toString());
       ProcessBuilder pbuilder = new ProcessBuilder(command);
       pbuilder.redirectErrorStream(REDIRECT_ERROR_STREAM);
       encoderProcess = pbuilder.start();
@@ -154,7 +140,7 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
 
       log_.info("Track " + source + " successfully encoded to " + profile.getName());
       fireEncoded(this, source, profile);
-      return getOutputFile(source, profile);
+      return new File(source.getParent(), FilenameUtils.getBaseName(inf) + profile.getSuffix());
     } catch (EncoderException e) {
       log_.warn("Error while encoding track " + source + " to " + profile.getName() + ": " + e.getMessage());
       fireEncodingFailed(this, source, profile, e);
@@ -261,32 +247,6 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
    */
   public void setCmdlineOptions(String cmdlineOptions) {
     this.cmdlineOptions = cmdlineOptions;
-  }
-
-  /**
-   * Set the file to encode. If set the following commandline parameters are available.
-   * <ul>
-   * <li>#{in.path} the absolute path of the input file as set in {@link #setInputFile(String)}, e.g. "/movies/track.dv"
-   * <li>#{in.name} the name of the track, e.g. "track"
-   * <li>#{in.extension} the extension, e.g. "dv"
-   * <li>#{in.filename} the complete filename consisting of #{in.name}.#{in.extension}, e.g. "track.dv"
-   * </ul>
-   */
-  protected void setInputFile(String file) {
-    String inf = FilenameUtils.normalize(file);
-    params.put("in.path", inf);
-    params.put("in.name", FilenameUtils.getBaseName(inf));
-    params.put("in.extension", FilenameUtils.getExtension(inf));
-    params.put("in.filename", FilenameUtils.getName(inf));
-  }
-
-  /**
-   * Set the optional output directory. If a directory is specified here registered listeners will receive it via
-   * {@link EncoderListener#fileEncoded(EncoderEngine, File, EncodingProfile)}
-   * and the #{out.dir} commandline parameter will be substituted.
-   */
-  public void setOutputDirectory(String dir) {
-    params.put("out.dir", FilenameUtils.normalize(dir));
   }
 
   /**

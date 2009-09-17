@@ -17,7 +17,6 @@
 package org.opencastproject.composer.impl;
 
 import org.opencastproject.composer.api.EncoderEngine;
-import org.opencastproject.composer.api.EncoderEngineFactory;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.util.ConfigurationException;
 

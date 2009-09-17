@@ -379,7 +379,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    */
   public Node toManifest(Document document, MediaPackageSerializer serializer) {
     Element node = document.createElement(elementType.toString().toLowerCase());
-    node.setAttribute("id", id);
+    if(id != null) node.setAttribute("id", id);
 
     // Flavor
     if (flavor != null)

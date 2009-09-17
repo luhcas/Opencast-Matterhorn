@@ -17,7 +17,6 @@ package org.opencastproject.composer.impl;
 
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderEngine;
-import org.opencastproject.composer.api.EncoderEngineFactory;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.inspection.api.MediaInspectionService;
@@ -121,8 +120,6 @@ public class ComposerServiceImpl implements ComposerService {
     File encodingOutput = engine.encode(workspaceVersion, profile);
 
     // Generate the url to pick up the encoded track
-    String path = track.getURL().toExternalForm();
-    path = PathSupport.removeFileExtension(path) + profile.getSuffix();
     URL returnURL = null;
     try {
       returnURL = encodingOutput.toURI().toURL();
