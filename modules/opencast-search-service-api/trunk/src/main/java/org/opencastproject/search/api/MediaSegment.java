@@ -17,57 +17,57 @@
 package org.opencastproject.search.api;
 
 /**
- * A single result of searching.
+ * TODO: Comment me!
  */
-public interface SearchResult {
+public interface MediaSegment {
 
   /**
-   * The search item list
-   * 
-   * @return Item list.
-   */
-  public abstract SearchResultItem[] getItems();
-
-  /**
-   * Get the user query.
-   * 
-   * @return The user query.
-   */
-  public abstract String getQuery();
-
-  /**
-   * Get the total number of items found.
+   * Get the segment number.
    * 
    * @return The number.
    */
-  public abstract long size();
+  public abstract int getIndex();
 
   /**
-   * Get the offset.
+   * Get the segment time.
    * 
-   * @return The offset.
+   * @return The time.
    */
-  public abstract long getOffset();
+  public abstract long getTime();
 
   /**
-   * Get the limit.
+   * Get the segment duration.
    * 
-   * @return The limit.
+   * @return The duration.
    */
-  public abstract long getLimit();
+  public abstract long getDuration();
 
   /**
-   * Get the search time.
+   * Get the image url.
    * 
-   * @return The time in ms.
+   * @return the image
    */
-  public abstract long getSearchTime();
+  public abstract String getImageUrl();
 
   /**
-   * Get the page of the current result.
+   * Get the segment text.
    * 
-   * @return The page.
+   * @return The text.
    */
-  public abstract long getPage();
+  public abstract String getText();
+
+  /**
+   * Get the 'segment is a hit' flag.
+   * 
+   * @return The flag.
+   */
+  public abstract boolean isHit();
+
+  /**
+   * Get the segment relevance.
+   * 
+   * @return The relevance.
+   */
+  public abstract int getRelevance();
 
 }
