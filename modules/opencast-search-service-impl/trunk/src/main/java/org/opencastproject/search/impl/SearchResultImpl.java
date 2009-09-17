@@ -13,31 +13,160 @@
  *  permissions and limitations under the License.
  *
  */
+
 package org.opencastproject.search.impl;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.search.api.SearchResult;
+import org.opencastproject.search.api.SearchResultItem;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * A simple pojo-based implementation of {@link SearchResult}.
+ * The search result represents a set of result items that has been compiled as a result for a search operation.
  */
 public class SearchResultImpl implements SearchResult {
-  private String summary;
-  private MediaPackage mediaPackage;
-  
-  public String getSummary() {
-    return summary;
-  }
-  public void setSummary(String summary) {
-    this.summary = summary;
-  }
-  public MediaPackage getMediaPackage() {
-    return mediaPackage;
-  }
-  public void setMediaPackage(MediaPackage mediaPackage) {
-    this.mediaPackage = mediaPackage;
+
+  /** Logging facility */
+  static Logger log_ = LoggerFactory.getLogger(SearchResultImpl.class);
+
+  /** A list of search items. */
+  private List<SearchResultItem> resultSet = null;
+
+  /** The query that yielded the result set */
+  private String query = null;
+
+  /** The pagination offset. */
+  private long offset = 0;
+
+  /** The pagination limit. Default is 10. */
+  private long limit = 10;
+
+  /** The search time in milliseconds */
+  private long searchTime = 0;
+
+  /**
+   * Creates a new and empty search result.
+   * 
+   * @param query
+   *          the query
+   */
+  public SearchResultImpl(String query) {
+    if (query == null)
+      throw new IllegalArgumentException("Quey cannot be null");
+    this.query = query;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.impl.SearchResult#getItems()
+   */
+  public SearchResultItem[] getItems() {
+    return resultSet.toArray(new SearchResultItem[resultSet.size()]);
+  }
+
+  /**
+   * Adds an item to the result set.
+   * 
+   * @param item
+   *          the item to add
+   */
+  public void addItem(SearchResultItem item) {
+    if (resultSet == null)
+      throw new IllegalArgumentException("Parameter item cannot be null");
+    if (item == null)
+      resultSet = new ArrayList<SearchResultItem>();
+    resultSet.add(item);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.impl.SearchResult#getQuery()
+   */
+  public String getQuery() {
+    return query;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.impl.SearchResult#size()
+   */
+  public long size() {
+    return resultSet != null ? resultSet.size() : 0;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.impl.SearchResult#getOffset()
+   */
+  public long getOffset() {
+    return offset;
+  }
+
+  /**
+   * Set the offset.
+   * 
+   * @param offset
+   *          The offset.
+   */
+  public void setOffset(long offset) {
+    this.offset = offset;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.impl.SearchResult#getLimit()
+   */
+  public long getLimit() {
+    return limit;
+  }
+
+  /**
+   * Set the limit.
+   * 
+   * @param limit
+   *          The limit.
+   */
+  public void setLimit(long limit) {
+    this.limit = limit;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.impl.SearchResult#getSearchTime()
+   */
+  public long getSearchTime() {
+    return searchTime;
+  }
+
+  /**
+   * Set the search time.
+   * 
+   * @param searchTime
+   *          The time in ms.
+   */
+  public void setSearchTime(long searchTime) {
+    this.searchTime = searchTime;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.impl.SearchResult#getPage()
+   */
+  public long getPage() {
+    if (limit != 0)
+      return offset / limit;
+    return 0;
+  }
 
 }
-

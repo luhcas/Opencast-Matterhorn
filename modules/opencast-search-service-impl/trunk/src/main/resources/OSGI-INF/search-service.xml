@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.search.api.SearchService" immediate="true">
+<component name="org.opencastproject.search.api.SearchService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.search.impl.SearchServiceImpl" />
   <property name="service.description" value="Search Service" />
   <service>
