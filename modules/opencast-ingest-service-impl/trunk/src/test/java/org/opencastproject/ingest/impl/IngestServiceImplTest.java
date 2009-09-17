@@ -15,16 +15,18 @@
  */
 package org.opencastproject.ingest.impl;
 
+import static org.junit.Assert.fail;
+
 import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.media.mediapackage.Cover;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Mpeg7Catalog;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.fail;
 
 import java.net.URL;
 

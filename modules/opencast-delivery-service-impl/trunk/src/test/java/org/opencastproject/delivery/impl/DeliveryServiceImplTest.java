@@ -15,8 +15,6 @@
  */
 package org.opencastproject.delivery.impl;
 
-import java.io.InputStream;
-
 import org.opencastproject.delivery.api.DeliveryService;
 
 import junit.framework.Assert;
@@ -25,6 +23,8 @@ import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.InputStream;
 
 public class DeliveryServiceImplTest {
   private DeliveryService service = null;

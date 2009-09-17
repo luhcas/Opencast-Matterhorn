@@ -21,8 +21,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.decodeDate;
+import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.decodeDuration;
+import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.decodePeriod;
+import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.decodeTemporal;
+import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.encodeDate;
+import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.encodeDuration;
+import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.encodePeriod;
 
-import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.*;
 import org.opencastproject.media.mediapackage.dublincore.utils.DCMIPeriod;
 import org.opencastproject.media.mediapackage.dublincore.utils.Precision;
 

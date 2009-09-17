@@ -18,7 +18,6 @@ package org.opencastproject.runtimeinfo;
 import org.opencastproject.util.StaticResource;
 
 import org.osgi.framework.BundleActivator;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;

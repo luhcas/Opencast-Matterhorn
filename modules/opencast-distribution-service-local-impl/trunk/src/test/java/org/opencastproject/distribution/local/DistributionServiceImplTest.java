@@ -15,7 +15,6 @@
  */
 package org.opencastproject.distribution.local;
 
-import org.opencastproject.distribution.local.DistributionServiceImpl;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;

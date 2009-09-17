@@ -23,7 +23,6 @@ import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.ConfigurationException;
-import org.opencastproject.util.PathSupport;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.component.ComponentContext;

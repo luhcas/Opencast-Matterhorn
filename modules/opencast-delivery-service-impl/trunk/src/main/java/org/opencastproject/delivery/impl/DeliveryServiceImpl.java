@@ -15,9 +15,9 @@
  */
 package org.opencastproject.delivery.impl;
 
-import org.apache.commons.io.IOUtils;
 import org.opencastproject.delivery.api.DeliveryService;
 
+import org.apache.commons.io.IOUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;

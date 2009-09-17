@@ -15,10 +15,11 @@
  */
 package org.opencastproject.engage.impl;
 
+import org.opencastproject.engage.api.EngageService;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opencastproject.engage.api.EngageService;
 
 public class EngageServiceImplTest {
   @SuppressWarnings("unused")

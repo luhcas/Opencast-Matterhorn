@@ -17,11 +17,9 @@ package org.opencastproject.maven;
 
 import org.apache.commons.io.DirectoryWalker;
 import org.apache.commons.io.FileUtils;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.maven.plugin.AbstractMojo;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.slf4j.Logger;
