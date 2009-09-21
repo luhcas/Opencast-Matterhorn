@@ -89,11 +89,11 @@ public class SearchServiceImpl implements SearchService {
    * @param offset
    * @return
    * @throws SearchException
-   * @see org.opencastproject.search.impl.solr.SolrRequester#getEpisodeAndSeriesById(java.lang.String, int, int)
+   * @see org.opencastproject.search.impl.solr.SolrRequester#getEpisodesAndSeriesById(java.lang.String, int, int)
    */
-  public SearchResult getEpisodeAndSeriesById(String seriesId, int limit, int offset) throws SearchException {
+  public SearchResult getEpisodesAndSeriesById(String seriesId, int limit, int offset) throws SearchException {
     try {
-      return solrRequester.getEpisodeAndSeriesById(seriesId, limit, offset);
+      return solrRequester.getEpisodesAndSeriesById(seriesId, limit, offset);
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }

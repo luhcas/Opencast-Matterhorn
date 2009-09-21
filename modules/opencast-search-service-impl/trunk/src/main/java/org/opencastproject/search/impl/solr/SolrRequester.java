@@ -140,9 +140,9 @@ public class SolrRequester {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.solr.Test#getEpisodeAndSeriesById(java.lang.String, int, int)
+   * @see org.opencastproject.search.impl.solr.Test#getEpisodesAndSeriesById(java.lang.String, int, int)
    */
-  public SearchResult getEpisodeAndSeriesById(String seriesId, int limit, int offset) throws SolrServerException {
+  public SearchResult getEpisodesAndSeriesById(String seriesId, int limit, int offset) throws SolrServerException {
     seriesId = cleanQuery(seriesId);
     String q = SolrFields.ID + ":" + seriesId + " OR " + SolrFields.DC_IS_PART_OF + ":" + seriesId;
     SolrQuery query = new SolrQuery(q);

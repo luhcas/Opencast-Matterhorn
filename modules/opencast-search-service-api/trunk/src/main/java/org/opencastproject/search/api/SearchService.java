@@ -120,7 +120,7 @@ public interface SearchService {
    * @return The series result.
    * @throws SearchException
    */
-  SearchResult getEpisodeAndSeriesById(String seriesId, int limit, int offset) throws SearchException;
+  SearchResult getEpisodesAndSeriesById(String seriesId, int limit, int offset) throws SearchException;
 
   /**
    * Processes a series search for a given series id, creates and returns the series metadata.
