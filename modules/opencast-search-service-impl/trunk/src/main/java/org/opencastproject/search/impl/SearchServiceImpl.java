@@ -114,22 +114,6 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * @param q
-   * @param limit
-   * @param offset
-   * @return
-   * @throws SearchException
-   * @see org.opencastproject.search.impl.solr.SolrRequester#getEpisodesAndSeriesByQuery(java.lang.String, int, int)
-   */
-  public SearchResult getEpisodesAndSeriesByQuery(String q, int limit, int offset) throws SearchException {
-    try {
-      return solrRequester.getEpisodesAndSeriesByQuery(q, limit, offset);
-    } catch (SolrServerException e) {
-      throw new SearchException(e);
-    }
-  }
-
-  /**
    * @param text
    * @param offset
    * @param limit

@@ -123,22 +123,6 @@ public interface SearchService {
   SearchResult getEpisodeAndSeriesById(String seriesId, int limit, int offset) throws SearchException;
 
   /**
-   * Processes a simple feed search for a given query (in solr syntax), creates and returns a regular search result. The
-   * feed search should return solely episode items.
-   * 
-   * @param q
-   *          the query
-   * @param offset
-   *          The offset.
-   * @param limit
-   *          The limit.
-   * @return The series feed result.
-   * @throws SearchException
-   * @throws SearchException
-   */
-  SearchResult getEpisodesAndSeriesByQuery(String q, int limit, int offset) throws SearchException;
-
-  /**
    * Processes a series search for a given series id, creates and returns the series metadata.
    * 
    * @param id

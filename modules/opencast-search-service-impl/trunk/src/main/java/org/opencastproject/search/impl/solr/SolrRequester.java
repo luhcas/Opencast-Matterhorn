@@ -176,20 +176,6 @@ public class SolrRequester {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.solr.Test#getEpisodesAndSeriesByQuery(java.lang.String, int, int)
-   */
-  public SearchResult getEpisodesAndSeriesByQuery(String q, int limit, int offset) throws SolrServerException {
-    SolrQuery query = new SolrQuery(q);
-    query.setSortField(SolrFields.DC_CREATED, SolrQuery.ORDER.desc);
-    query.setStart(offset);
-    query.setRows(limit);
-    query.setFields("* score");
-    return createSearchResult(query);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
    * @see org.opencastproject.search.impl.solr.Test#getEpisodeById(java.lang.String)
    */
   public SearchResult getEpisodeById(String episodeId) throws SolrServerException {
