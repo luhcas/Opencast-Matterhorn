@@ -45,11 +45,11 @@ public interface SolrFields {
   public static final String DC_LICENSE = "dc_license";
 
   // Additional fields
-  public static final String MEDIAPACKAGE = "mediapackage";
-  public static final String KEYWORDS = "keywords";
-  public static final String COVER = "cover";
-  public static final String MODIFIED = "modified";
-  public static final String TYPE = "mediatype";
+  public static final String OC_MEDIAPACKAGE = "oc_mediapackage";
+  public static final String OC_KEYWORDS = "oc_keywords";
+  public static final String OC_COVER = "oc_cover";
+  public static final String OC_MODIFIED = "oc_modified";
+  public static final String OC_MEDIATYPE = "oc_mediatype";
 
   /** Solr ranking score */
   public static final String SCORE = "score";

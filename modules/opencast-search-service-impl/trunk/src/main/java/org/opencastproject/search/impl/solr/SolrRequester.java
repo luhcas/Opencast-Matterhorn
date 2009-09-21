@@ -99,7 +99,7 @@ public class SolrRequester {
    * @see org.opencastproject.search.impl.solr.Test#getSeriesByDate(int, int)
    */
   public SearchResult getSeriesByDate(int limit, int offset) throws SolrServerException {
-    String q = SolrFields.TYPE + ":" + SearchResultItemType.Series;
+    String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series;
     SolrQuery query = new SolrQuery(q);
     query.setStart(offset);
     query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
@@ -114,7 +114,7 @@ public class SolrRequester {
    * @see org.opencastproject.search.impl.solr.Test#getSeriesById(java.lang.String, int, int)
    */
   public SearchResult getSeriesById(String seriesId, int limit, int offset) throws SolrServerException {
-    String q = SolrFields.TYPE + ":" + SearchResultItemType.Series + " AND " + SolrFields.ID + ":" + seriesId;
+    String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series + " AND " + SolrFields.ID + ":" + seriesId;
     SolrQuery query = new SolrQuery(q);
     query.setStart(offset);
     query.setRows(limit);
@@ -130,7 +130,7 @@ public class SolrRequester {
   public SearchResult getSeriesByText(String text, int offset, int limit) throws SolrServerException {
     StringBuffer sb = boost(cleanQuery(text));
     SolrQuery query = new SolrQuery(sb.toString());
-    query.setFilterQueries(SolrFields.TYPE + ":" + SearchResultItemType.Series);
+    query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series);
     query.setStart(offset);
     query.setRows(limit);
     query.setFields("* score");
@@ -146,7 +146,7 @@ public class SolrRequester {
     seriesId = cleanQuery(seriesId);
     String q = SolrFields.ID + ":" + seriesId + " OR " + SolrFields.DC_IS_PART_OF + ":" + seriesId;
     SolrQuery query = new SolrQuery(q);
-    query.setSortField(SolrFields.TYPE, SolrQuery.ORDER.asc);
+    query.setSortField(SolrFields.OC_MEDIATYPE, SolrQuery.ORDER.asc);
     query.setSortField(SolrFields.DC_CREATED, SolrQuery.ORDER.desc);
     query.setStart(offset);
     query.setRows(limit);
@@ -181,7 +181,7 @@ public class SolrRequester {
   public SearchResult getEpisodeById(String episodeId) throws SolrServerException {
     String q = SolrFields.ID + ":" + episodeId;
     SolrQuery query = new SolrQuery(q);
-    query.setFilterQueries(SolrFields.TYPE + ":" + SearchResultItemType.AudioVisual);
+    query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
     query.setFields("* score");
     return createSearchResult(query);
   }
@@ -192,7 +192,7 @@ public class SolrRequester {
    * @see org.opencastproject.search.impl.solr.Test#getEpisodesByDate(int, int)
    */
   public SearchResult getEpisodesByDate(int limit, int offset) throws SolrServerException {
-    String q = SolrFields.TYPE + ":" + SearchResultItemType.Series;
+    String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series;
     SolrQuery query = new SolrQuery(q);
     query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
     query.setStart(offset);
@@ -209,7 +209,7 @@ public class SolrRequester {
   public SearchResult getEpisodesByText(String text, int offset, int limit) throws SolrServerException {
     StringBuffer sb = boost(cleanQuery(text));
     SolrQuery query = new SolrQuery(sb.toString());
-    query.setFilterQueries(SolrFields.TYPE + ":" + SearchResultItemType.AudioVisual);
+    query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
     query.setStart(offset);
     query.setRows(limit);
     query.setFields("* score");
@@ -269,7 +269,7 @@ public class SolrRequester {
 
       // the media package
       MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
-      Object mediaPackageFieldValue = doc.getFirstValue(SolrFields.MEDIAPACKAGE);
+      Object mediaPackageFieldValue = doc.getFirstValue(SolrFields.OC_MEDIAPACKAGE);
       try {
         MediaPackage mediaPackage;
         mediaPackage = builder.loadFromManifest(new ByteArrayInputStream(mediaPackageFieldValue.toString().getBytes()));
@@ -279,10 +279,10 @@ public class SolrRequester {
       }
 
       // the media type
-      item.setMediaType(SearchResultItemType.valueOf(doc.getFieldValue(SolrFields.TYPE).toString()));
+      item.setMediaType(SearchResultItemType.valueOf(doc.getFieldValue(SolrFields.OC_MEDIATYPE).toString()));
 
       // the cover image
-      item.setCover(toString(doc.getFieldValue(SolrFields.COVER)));
+      item.setCover(toString(doc.getFieldValue(SolrFields.OC_COVER)));
 
       // the solr ranking score
       item.setScore(Double.parseDouble(toString(doc.getFieldValue(SolrFields.SCORE))));
@@ -301,8 +301,8 @@ public class SolrRequester {
         }
 
         // Add the list of most important keywords
-        String kw[] = toString(doc.getFieldValue(SolrFields.KEYWORDS)).split(" ");
-        log_.trace(toString(doc.getFieldValue(SolrFields.KEYWORDS)));
+        String kw[] = toString(doc.getFieldValue(SolrFields.OC_KEYWORDS)).split(" ");
+        log_.trace(toString(doc.getFieldValue(SolrFields.OC_KEYWORDS)));
         for (String keyword : kw) {
           item.addKeyword(keyword);
         }

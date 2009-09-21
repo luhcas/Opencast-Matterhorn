@@ -196,13 +196,13 @@ public class SolrIndexManager {
 
     // Set common fields
     solrEpisodeDocument.setField(SolrFields.ID, mediaPackage.getIdentifier());
-    solrEpisodeDocument.setField(SolrFields.TYPE, SearchResultItemType.AudioVisual);
+    solrEpisodeDocument.setField(SolrFields.OC_MEDIATYPE, SearchResultItemType.AudioVisual);
     addStandardDublincCoreFields(solrEpisodeDocument, dublinCore);
 
     // Add cover
     Cover cover = mediaPackage.getCover();
     if (cover != null) {
-      solrEpisodeDocument.addField(SolrFields.COVER, cover.getIdentifier());
+      solrEpisodeDocument.addField(SolrFields.OC_COVER, cover.getIdentifier());
     }
 
     // Add mpeg-7
@@ -251,7 +251,7 @@ public class SolrIndexManager {
 
     // Set common fields
     solrSeriesDocument.setField(SolrFields.ID, seriesId);
-    solrSeriesDocument.setField(SolrFields.TYPE, SearchResultItemType.Series);
+    solrSeriesDocument.setField(SolrFields.OC_MEDIATYPE, SearchResultItemType.Series);
     addStandardDublincCoreFields(solrSeriesDocument, dublinCore);
 
     return solrSeriesDocument;
@@ -385,7 +385,7 @@ public class SolrIndexManager {
     // Check if the keywords have been filled by (manually) added dublin
     // core data. If not, look for the most relevant fields in mpeg-7.
     SortedSet<TextAnnotation> sortedAnnotations = null;
-    if (solrInput.getFieldValue(SolrFields.KEYWORDS) == null) {
+    if (solrInput.getFieldValue(SolrFields.OC_KEYWORDS) == null) {
       sortedAnnotations = new TreeSet<TextAnnotation>(new Comparator<TextAnnotation>() {
         public int compare(TextAnnotation a1, TextAnnotation a2) {
           if ((RELEVANCE_BOOST * a1.getRelevance() + a1.getConfidence()) > (RELEVANCE_BOOST * a2.getRelevance() + a2
@@ -474,11 +474,11 @@ public class SolrIndexManager {
     // Put the most important keywords into a special solr field
     if (sortedAnnotations != null) {
       StringBuffer buf = importantKeywordsString(sortedAnnotations);
-      solrInput.addField(SolrFields.KEYWORDS, buf.toString().trim());
+      solrInput.addField(SolrFields.OC_KEYWORDS, buf.toString().trim());
     }
 
     // dont forget the current time in milliseconds
-    solrInput.addField(SolrFields.MODIFIED, dateFormat.format((new Date()).getTime()));
+    solrInput.addField(SolrFields.OC_MODIFIED, dateFormat.format((new Date()).getTime()));
   }
 
   /**
