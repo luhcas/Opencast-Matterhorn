@@ -21,8 +21,8 @@ import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.solr.SolrConnection;
-import org.opencastproject.search.impl.solr.SolrRequester;
 import org.opencastproject.search.impl.solr.SolrIndexManager;
+import org.opencastproject.search.impl.solr.SolrRequester;
 import org.opencastproject.util.PathSupport;
 
 import org.apache.commons.io.FileUtils;
@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * A Solr-based {@link SearchService} implementation.
@@ -62,11 +64,31 @@ public class SearchServiceImpl implements SearchService {
     try {
       pathToSolr = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "searchindex";
       log_.info("Setting up solr search index at " + pathToSolr);
-      File dir = new File(pathToSolr);
-      if (!dir.exists()) {
-        FileUtils.forceMkdir(dir);
-        dir = new File(pathToSolr);
+      File solrRoot = new File(pathToSolr);
+      
+      // Create the root directory
+      if (!solrRoot.exists()) {
+        FileUtils.forceMkdir(solrRoot);
+        solrRoot = new File(pathToSolr);
       }
+      
+      // Make sure there is a configuration in place
+      File solrConfig = new File(solrRoot, "conf");
+      if (!solrConfig.exists()) {
+        URL defaultSolrConfig = SearchServiceImpl.class.getResource("/solr/conf");
+        try {
+          FileUtils.copyDirectoryToDirectory(new File(defaultSolrConfig.toURI()), solrRoot);
+        } catch (URISyntaxException e) {
+          throw new RuntimeException("Error creating the solr configuration directory", e);
+        }
+      }
+      
+      // Test for the existence of a data directory
+      File solrData = new File(solrRoot, "data");
+      if (!solrData.exists()) {
+        FileUtils.forceMkdir(solrData);
+      }
+
       solrConnection = new SolrConnection(pathToSolr, PathSupport.concat(pathToSolr, "data"));
       solrRequester = new SolrRequester(solrConnection);
       solrIndexManager = new SolrIndexManager(solrConnection);
