@@ -185,9 +185,9 @@ public class SearchServiceImpl implements SearchService {
    * @throws SearchException
    * @see org.opencastproject.search.impl.solr.SolrRequester#getEpisodesByDate(int, int)
    */
-  public SearchResult getEpisodesByDate(int limit, int offset) throws SearchException {
+  public SearchResult getEpisodesByDate(int offset, int limit) throws SearchException {
     try {
-      return solrRequester.getEpisodesByDate(limit, offset);
+      return solrRequester.getEpisodesByDate(offset, limit);
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }

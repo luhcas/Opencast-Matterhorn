@@ -77,7 +77,7 @@ public interface SearchService {
    * @return The regular result.
    * @throws SearchException
    */
-  SearchResult getSeriesByDate(int limit, int offset) throws SearchException;
+  SearchResult getSeriesByDate(int offset, int limit) throws SearchException;
 
   /**
    * Processes a series search for a given series id, creates and returns the series metadata.
