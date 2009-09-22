@@ -107,15 +107,13 @@ public class SearchServiceImpl implements SearchService {
 
   /**
    * @param seriesId
-   * @param limit
-   * @param offset
    * @return
    * @throws SearchException
-   * @see org.opencastproject.search.impl.solr.SolrRequester#getEpisodesAndSeriesById(java.lang.String, int, int)
+   * @see org.opencastproject.search.impl.solr.SolrRequester#getEpisodesAndSeriesById(java.lang.String)
    */
-  public SearchResult getEpisodesAndSeriesById(String seriesId, int limit, int offset) throws SearchException {
+  public SearchResult getEpisodeAndSeriesById(String seriesId) throws SearchException {
     try {
-      return solrRequester.getEpisodesAndSeriesById(seriesId, limit, offset);
+      return solrRequester.getEpisodeAndSeriesById(seriesId);
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }
@@ -219,9 +217,9 @@ public class SearchServiceImpl implements SearchService {
    * @throws SearchException
    * @see org.opencastproject.search.impl.solr.SolrRequester#getSeriesById(java.lang.String, int, int)
    */
-  public SearchResult getSeriesById(String seriesId, int limit, int offset) throws SearchException {
+  public SearchResult getSeriesById(String seriesId) throws SearchException {
     try {
-      return solrRequester.getSeriesById(seriesId, limit, offset);
+      return solrRequester.getSeriesById(seriesId);
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }

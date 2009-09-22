@@ -25,27 +25,42 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * The search result represents a set of result items that has been compiled as a result for a search operation.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name="search-result", namespace="http://search.opencastproject.org/")
 public class SearchResultImpl implements SearchResult {
 
   /** Logging facility */
   static Logger log_ = LoggerFactory.getLogger(SearchResultImpl.class);
 
   /** A list of search items. */
-  private List<SearchResultItem> resultSet = null;
+  @XmlElementWrapper(name="search-results")
+  private List<SearchResultItemImpl> resultSet = null;
 
   /** The query that yielded the result set */
+  @XmlElement
   private String query = null;
 
   /** The pagination offset. */
+  @XmlAttribute
   private long offset = 0;
 
   /** The pagination limit. Default is 10. */
+  @XmlAttribute
   private long limit = 10;
 
   /** The search time in milliseconds */
+  @XmlAttribute
   private long searchTime = 0;
 
   /**
@@ -79,8 +94,8 @@ public class SearchResultImpl implements SearchResult {
     if (resultSet == null)
       throw new IllegalArgumentException("Parameter item cannot be null");
     if (item == null)
-      resultSet = new ArrayList<SearchResultItem>();
-    resultSet.add(item);
+      resultSet = new ArrayList<SearchResultItemImpl>();
+    resultSet.add((SearchResultItemImpl)item);
   }
 
   /**

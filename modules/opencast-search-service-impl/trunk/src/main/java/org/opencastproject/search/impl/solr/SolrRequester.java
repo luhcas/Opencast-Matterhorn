@@ -113,11 +113,9 @@ public class SolrRequester {
    * 
    * @see org.opencastproject.search.impl.solr.Test#getSeriesById(java.lang.String, int, int)
    */
-  public SearchResult getSeriesById(String seriesId, int limit, int offset) throws SolrServerException {
+  public SearchResult getSeriesById(String seriesId) throws SolrServerException {
     String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series + " AND " + SolrFields.ID + ":" + seriesId;
     SolrQuery query = new SolrQuery(q);
-    query.setStart(offset);
-    query.setRows(limit);
     query.setFields("* score");
     return createSearchResult(query);
   }
@@ -140,16 +138,14 @@ public class SolrRequester {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.solr.Test#getEpisodesAndSeriesById(java.lang.String, int, int)
+   * @see org.opencastproject.search.impl.solr.Test#getEpisodesAndSeriesById(java.lang.String)
    */
-  public SearchResult getEpisodesAndSeriesById(String seriesId, int limit, int offset) throws SolrServerException {
+  public SearchResult getEpisodeAndSeriesById(String seriesId) throws SolrServerException {
     seriesId = cleanQuery(seriesId);
     String q = SolrFields.ID + ":" + seriesId + " OR " + SolrFields.DC_IS_PART_OF + ":" + seriesId;
     SolrQuery query = new SolrQuery(q);
     query.setSortField(SolrFields.OC_MEDIATYPE, SolrQuery.ORDER.asc);
     query.setSortField(SolrFields.DC_CREATED, SolrQuery.ORDER.desc);
-    query.setStart(offset);
-    query.setRows(limit);
     query.setFields("* score");
     return createSearchResult(query);
   }

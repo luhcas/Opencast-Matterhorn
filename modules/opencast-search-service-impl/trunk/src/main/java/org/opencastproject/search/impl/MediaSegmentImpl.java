@@ -18,30 +18,47 @@ package org.opencastproject.search.impl;
 
 import org.opencastproject.search.api.MediaSegment;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * Part of a search result that models a video segment.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name="media-segment", namespace="http://search.opencastproject.org/")
+@XmlRootElement(name="media-segment", namespace="http://search.opencastproject.org/")
 public class MediaSegmentImpl implements MediaSegment {
 
   /** The segment number **/
+  @XmlAttribute(name="index")
   private int number = -1;
 
   /** The segment time point **/
+  @XmlAttribute(name="time")
   private long time = -1;
 
   /** The segment duration **/
+  @XmlAttribute(name="duration")
   private long duration = -1;
 
   /** The segment text **/
+  @XmlElement(name="text")
   private String text = null;
 
   /** The segment image **/
+  @XmlElement(name="image")
   private String imageUrl = null;
 
   /** The segment relevance **/
+  @XmlAttribute(name="relevance")
   private int relevance = -1;
 
   /** The 'segment is a hit' flag **/
+  @XmlAttribute(name="hit")
   private boolean hit = false;
 
   /**

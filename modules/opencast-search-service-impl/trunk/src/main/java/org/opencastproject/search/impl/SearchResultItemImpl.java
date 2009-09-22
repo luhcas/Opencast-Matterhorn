@@ -17,8 +17,12 @@
 package org.opencastproject.search.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.search.api.MediaSegment;
 import org.opencastproject.search.api.SearchResultItem;
+
+import org.apache.commons.io.IOUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,94 +31,137 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * This class models an item in the search result. It represents a 'video' or 'series' object.
  */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name="search-result", namespace="http://search.opencastproject.org/")
+@XmlRootElement(name="search-result", namespace="http://search.opencastproject.org/")
 public class SearchResultItemImpl implements SearchResultItem {
 
   /** Serial version id **/
   private static final long serialVersionUID = 1L;
 
   /** Media identificator. **/
+  @XmlID
+  @XmlAttribute(name="id")
   private String id = "";
 
   /** The media package */
   private MediaPackage mediaPackage = null;
 
+  /** The jaxb version of the media package, in case this object needs to be serialized to xml */
+  @XmlElement(name="mediapackage")
+  private MediapackageType mediaPackageJaxb = null;
+  
   /** Dublin core field 'dc:extent' */
+  @XmlElement
   private long dcExtent = -1;
 
   /** Dublin core field 'dc:title' */
+  @XmlElement
   private String dcTitle = null;
 
   /** Dublin core field 'dc:subject' */
+  @XmlElement
   private String dcSubject = null;
 
   /** Dublin core field 'dc:creator' */
+  @XmlElement
   private String dcCreator = null;
 
   /** Dublin core field 'cd:publisher' */
+  @XmlElement
   private String dcPublisher = null;
 
   /** Dublin core field 'dc:contributor' */
+  @XmlElement
   private String dcContributor = null;
 
   /** Dublin core field 'dc:abstract' */
+  @XmlElement
   private String dcAbstract = null;
 
   /** Dublin core field 'dc:created' */
+  @XmlElement
   private Date dcCreated = null;
 
   /** Dublin core field 'dc:availablefrom' */
+  @XmlElement
   private Date dcAvailableFrom = null;
 
   /** Dublin core field 'dc:availableto' */
+  @XmlElement
   private Date dcAvailableTo = null;
 
   /** Dublin core field 'dc:language' */
+  @XmlElement
   private String dcLanguage = null;
 
   /** Dublin core field 'dc:rightsholder' */
+  @XmlElement
   private String dcRightsHolder = null;
 
   /** Dublin core field 'dc:spacial' */
+  @XmlElement
   private String dcSpatial = null;
 
   /** Dublin core field 'dc:temporal' */
+  @XmlElement
   private String dcTemporal = null;
 
   /** Dublin core field 'dc:ispartof' */
+  @XmlElement
   private String dcIsPartOf = null;
 
   /** Dublin core field 'dc:replaces' */
+  @XmlElement
   private String dcReplaces = null;
 
   /** Dublin core field 'dc:type' */
+  @XmlElement
   private String dcType = null;
 
   /** Dublin core field 'dc:accessrights' */
+  @XmlElement
   private String dcAccessRights = null;
 
   /** Dublin core field 'dc:license' */
+  @XmlElement
   private String dcLicense = null;
 
   /** Search result item type */
+  @XmlElement
   private SearchResultItemType mediaType = null;
 
   /** Media keyword list */
+  @XmlElementWrapper(name="keywords")
   private List<String> keywords = new ArrayList<String>();
 
   /** The cover url. **/
+  @XmlElement
   private String cover = null;
 
   /** Media date of last modification in milliseconds **/
+  @XmlElement
   private Date modified = null;
 
   /** Result ranking score **/
+  @XmlElement
   private double score = -1;
 
   /** Media segment list **/
-  private SortedSet<MediaSegment> mediaSegments = null;
+  @XmlElementWrapper(name="media-segments")
+  private SortedSet<MediaSegmentImpl> mediaSegments = null;
 
   /**
    * {@inheritDoc}
@@ -492,6 +539,27 @@ public class SearchResultItemImpl implements SearchResultItem {
     return mediaPackage;
   }
 
+  public MediapackageType getMediaPackageJaxb() {
+    if(mediaPackageJaxb == null && mediaPackage != null) {
+      try {
+        mediaPackageJaxb = MediapackageType.fromXml(mediaPackage.toXml());
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return mediaPackageJaxb;
+  }
+
+  public void setMediaPackageJaxb(MediapackageType mediaPackageJaxb) {
+    this.mediaPackageJaxb = mediaPackageJaxb;
+    try {
+      this.mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder()
+        .loadFromManifest(IOUtils.toInputStream(mediaPackageJaxb.toXml()));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -582,8 +650,8 @@ public class SearchResultItemImpl implements SearchResultItem {
    */
   public void addSegment(MediaSegment segment) {
     if (mediaSegments == null)
-      mediaSegments = new TreeSet<MediaSegment>(MediaSegmentComparator.getInstance());
-    mediaSegments.add(segment);
+      mediaSegments = new TreeSet<MediaSegmentImpl>(MediaSegmentComparator.getInstance());
+    mediaSegments.add((MediaSegmentImpl)segment); // TODO: assuming this 
   }
 
   /**
@@ -627,5 +695,4 @@ public class SearchResultItemImpl implements SearchResultItem {
     }
 
   }
-
 }

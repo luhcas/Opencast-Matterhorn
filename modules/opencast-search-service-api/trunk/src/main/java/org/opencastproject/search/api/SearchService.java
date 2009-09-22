@@ -91,7 +91,7 @@ public interface SearchService {
    * @return The regular result.
    * @throws SearchException
    */
-  SearchResult getSeriesById(String seriesId, int limit, int offset) throws SearchException;
+  SearchResult getSeriesById(String seriesId) throws SearchException;
 
   /**
    * Processes a regular search for a given user query, returning all series that match the given query.
@@ -113,14 +113,10 @@ public interface SearchService {
    * 
    * @param seriesId
    *          The series id.
-   * @param offset
-   *          The offset.
-   * @param limit
-   *          The limit.
    * @return The series result.
    * @throws SearchException
    */
-  SearchResult getEpisodesAndSeriesById(String seriesId, int limit, int offset) throws SearchException;
+  SearchResult getEpisodeAndSeriesById(String seriesId) throws SearchException;
 
   /**
    * Processes a series search for a given series id, creates and returns the series metadata.
