@@ -91,9 +91,9 @@ public class SearchResultImpl implements SearchResult {
    *          the item to add
    */
   public void addItem(SearchResultItem item) {
-    if (resultSet == null)
-      throw new IllegalArgumentException("Parameter item cannot be null");
     if (item == null)
+      throw new IllegalArgumentException("Parameter item cannot be null");
+    if (resultSet == null)
       resultSet = new ArrayList<SearchResultItemImpl>();
     resultSet.add((SearchResultItemImpl)item);
   }
