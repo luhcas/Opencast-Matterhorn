@@ -52,6 +52,69 @@ public class SearchServiceImpl implements SearchService {
 
   /** Manager for the solr search index */
   private SolrIndexManager solrIndexManager = null;
+  
+  /** The solr root directory */
+  private String solrRoot = null;
+
+  /**
+   * Creates a search service that puts solr into the given root directory. If the directory doesn't exist, it will be
+   * created by the service.
+   * 
+   * @param solrRoot
+   *          the solr root directory
+   */
+  public SearchServiceImpl(String solrRoot) {
+    this.solrRoot = solrRoot;
+  }
+
+  /**
+   * Creates a search service that places solr into a subdirectory of 
+   * <code>java.io.tmpdir</code> called <code>opencast/searchindex</code>.
+   */
+  public SearchServiceImpl() {
+    this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "searchindex");
+  }
+
+  /**
+   * Prepares the solr environment.
+   * 
+   * @param solrRoot
+   *          the solr root directory
+   */
+  private void setupSolr(String solrRoot) {
+    try {
+      log_.info("Setting up solr search index at " + solrRoot);
+      File solrRootDir = new File(solrRoot);
+
+      // Create the root directory
+      if (!solrRootDir.exists()) {
+        FileUtils.forceMkdir(solrRootDir);
+      }
+
+      // Make sure there is a configuration in place
+      File solrConfig = new File(solrRoot, "conf");
+      if (!solrConfig.exists()) {
+        URL defaultSolrConfig = SearchServiceImpl.class.getResource("/solr/conf");
+        try {
+          FileUtils.copyDirectoryToDirectory(new File(defaultSolrConfig.toURI()), solrRootDir);
+        } catch (URISyntaxException e) {
+          throw new RuntimeException("Error creating the solr configuration directory", e);
+        }
+      }
+
+      // Test for the existence of a data directory
+      File solrData = new File(solrRoot, "data");
+      if (!solrData.exists()) {
+        FileUtils.forceMkdir(solrData);
+      }
+
+      solrConnection = new SolrConnection(solrRoot, PathSupport.concat(solrRoot, "data"));
+      solrRequester = new SolrRequester(solrConnection);
+      solrIndexManager = new SolrIndexManager(solrConnection);
+    } catch (IOException e) {
+      throw new RuntimeException("Error setting up solr index at " + solrRoot, e);
+    }
+  }
 
   /**
    * Service activator, called via declarative services configuration.
@@ -60,41 +123,7 @@ public class SearchServiceImpl implements SearchService {
    *          the component context
    */
   public void activate(ComponentContext componentContext) {
-    String pathToSolr = null;
-    try {
-      pathToSolr = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "searchindex";
-      log_.info("Setting up solr search index at " + pathToSolr);
-      File solrRoot = new File(pathToSolr);
-      
-      // Create the root directory
-      if (!solrRoot.exists()) {
-        FileUtils.forceMkdir(solrRoot);
-        solrRoot = new File(pathToSolr);
-      }
-      
-      // Make sure there is a configuration in place
-      File solrConfig = new File(solrRoot, "conf");
-      if (!solrConfig.exists()) {
-        URL defaultSolrConfig = SearchServiceImpl.class.getResource("/solr/conf");
-        try {
-          FileUtils.copyDirectoryToDirectory(new File(defaultSolrConfig.toURI()), solrRoot);
-        } catch (URISyntaxException e) {
-          throw new RuntimeException("Error creating the solr configuration directory", e);
-        }
-      }
-      
-      // Test for the existence of a data directory
-      File solrData = new File(solrRoot, "data");
-      if (!solrData.exists()) {
-        FileUtils.forceMkdir(solrData);
-      }
-
-      solrConnection = new SolrConnection(pathToSolr, PathSupport.concat(pathToSolr, "data"));
-      solrRequester = new SolrRequester(solrConnection);
-      solrIndexManager = new SolrIndexManager(solrConnection);
-    } catch (IOException e) {
-      throw new RuntimeException("Error setting up solr index at " + pathToSolr, e);
-    }
+    setupSolr(solrRoot);
   }
 
   public void deactivate() {
