@@ -187,8 +187,8 @@ public class SolrRequester {
    * 
    * @see org.opencastproject.search.impl.solr.Test#getEpisodesByDate(int, int)
    */
-  public SearchResult getEpisodesByDate(int limit, int offset) throws SolrServerException {
-    String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series;
+  public SearchResult getEpisodesByDate(int offset, int limit) throws SolrServerException {
+    String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual;
     SolrQuery query = new SolrQuery(q);
     query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
     query.setStart(offset);
@@ -266,12 +266,14 @@ public class SolrRequester {
       // the media package
       MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
       Object mediaPackageFieldValue = doc.getFirstValue(SolrFields.OC_MEDIAPACKAGE);
-      try {
-        MediaPackage mediaPackage;
-        mediaPackage = builder.loadFromManifest(new ByteArrayInputStream(mediaPackageFieldValue.toString().getBytes()));
-        item.setMediaPackage(mediaPackage);
-      } catch (MediaPackageException e) {
-        log_.warn("Unable to read media package from search result", e);
+      if (mediaPackageFieldValue != null) {
+        try {
+          MediaPackage mediaPackage = null;
+          mediaPackage = builder.loadFromManifest(new ByteArrayInputStream(mediaPackageFieldValue.toString().getBytes()));
+          item.setMediaPackage(mediaPackage);
+        } catch (MediaPackageException e) {
+          log_.warn("Unable to read media package from search result", e);
+        }
       }
 
       // the media type
