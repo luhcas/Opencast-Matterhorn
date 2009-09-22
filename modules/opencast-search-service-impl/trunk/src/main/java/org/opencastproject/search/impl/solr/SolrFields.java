@@ -58,13 +58,10 @@ public interface SolrFields {
   public static final String FULLTEXT = "fulltext";
 
   /** Just a constant to set the solr dynamic field name for segment text. */
-  public static final String SEGMENT_TEXT = "text_";
+  public static final String SEGMENT_TEXT = "oc_text_";
 
   /** Just a constant to set the solr dynamic field name for segment hints. */
-  public static final String SEGMENT_HINTS = "hint_";
-
-  /** Dynamic field for distribution format size. **/
-  public static final String FORMAT_SIZE = "format_size_";
+  public static final String SEGMENT_HINTS = "oc_hint_";
 
   /** The solr date format string tag. */
   public static final String SOLR_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
