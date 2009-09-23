@@ -3,26 +3,27 @@
   xsi:schemaLocation="http://www.opencastproject.org http://www.opencastproject.org/schema.xsd" xmlns:dc="http://purl.org/dc/elements/1.1/"
   xmlns:dcterms="http://purl.org/dc/terms/" xmlns:oc="http://www.opencastproject.org/matterhorn">
 
-  <dc:title xml:lang="en">
+  <dcterms:title xml:lang="en">
     Land and Vegetation: Key players on the Climate Scene
-  </dc:title>
-  <dc:subject>
+  </dcterms:title>
+  <dcterms:subject>
     climate, land, vegetation
-  </dc:subject>
-  <dc:description xml:lang="en">
+  </dcterms:subject>
+  <dcterms:description xml:lang="en">
     Introduction lecture from the Institute for Atmospheric
     and Climate Science.
-  </dc:description>
-  <dc:publisher>
+  </dcterms:description>
+  <dcterms:publisher>
     ETH Zurich, Switzerland
-  </dc:publisher>
-  <dc:identifier>
+  </dcterms:publisher>
+  <dcterms:identifier>
     10.245/5819
-  </dc:identifier>
+  </dcterms:identifier>
   <dcterms:modified xsi:type="dcterms:W3CDTF">
     2007-12-05
   </dcterms:modified>
-  <dc:format xsi:type="dcterms:IMT">
+  <dcterms:format xsi:type="dcterms:IMT">
     video/x-dv
-  </dc:format>
+  </dcterms:format>
+
 </dublincore>

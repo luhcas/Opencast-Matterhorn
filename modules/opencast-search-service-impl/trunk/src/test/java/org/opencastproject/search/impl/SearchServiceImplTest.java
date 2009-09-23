@@ -97,5 +97,58 @@ public class SearchServiceImplTest {
     assertEquals(1, service.getEpisodeById("00000/1").size());
     assertEquals(1, service.getEpisodesByDate(0, Integer.MAX_VALUE).size());
   }
+
+  /**
+   * Ads a simple media package that has a dublin core for the episode only.
+   */
+  @Test
+  public void testAddFullMediaPackage() {
+    MediaPackageBuilderFactory builderFactory = MediaPackageBuilderFactory.newInstance();
+    MediaPackageBuilder mediaPackageBuilder = builderFactory.newMediaPackageBuilder();
+    URL rootUrl = SearchServiceImplTest.class.getResource("/");
+    mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(rootUrl));
+    
+    // Load the simple media package
+    MediaPackage mediaPackage = null;
+    try {
+      InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-full.xml");
+      mediaPackage = mediaPackageBuilder.loadFromManifest(is);
+    } catch (MediaPackageException e) {
+      fail("Error loading full media package");
+    }
+
+    // Add the media package to the search index
+    service.add(mediaPackage);
+    
+    // Make sure it's properly indexed and returned
+    assertEquals(1, service.getEpisodeById("00000/1").size());
+    assertEquals(1, service.getEpisodesByDate(0, Integer.MAX_VALUE).size());
+  }
   
+  /**
+   * Test removal from the search index.
+   */
+  @Test
+  public void testDeleteMediaPackage() {
+    MediaPackageBuilderFactory builderFactory = MediaPackageBuilderFactory.newInstance();
+    MediaPackageBuilder mediaPackageBuilder = builderFactory.newMediaPackageBuilder();
+    URL rootUrl = SearchServiceImplTest.class.getResource("/");
+    mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(rootUrl));
+    
+    // Load the simple media package
+    MediaPackage mediaPackage = null;
+    try {
+      InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-simple.xml");
+      mediaPackage = mediaPackageBuilder.loadFromManifest(is);
+    } catch (MediaPackageException e) {
+      fail("Error loading simple media package");
+    }
+
+    // Add the media package to the search index
+    service.add(mediaPackage);
+    service.delete(mediaPackage.getIdentifier().toString());
+    assertEquals(0, service.getEpisodeById("00000/1").size());
+    assertEquals(0, service.getEpisodesByDate(0, Integer.MAX_VALUE).size());
+  }
+
 }
