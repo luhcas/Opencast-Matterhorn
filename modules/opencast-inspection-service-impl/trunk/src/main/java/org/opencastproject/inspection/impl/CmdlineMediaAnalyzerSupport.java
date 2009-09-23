@@ -90,9 +90,16 @@ public abstract class CmdlineMediaAnalyzerSupport implements MediaAnalyzer {
         CmdlineMediaAnalyzerSupport.this.onError(e);
       }
     }.execute();
+    postProcess();
     return metadata;
   }
 
+  /**
+   * Override this method to do any post processing on the gathered metadata.
+   * The default implementation does nothing.
+   */
+  protected void postProcess() {}
+  
   protected abstract String getAnalysisOptions(File media);
 
   protected abstract void onAnalysis(String line);
