@@ -62,6 +62,11 @@ public class MediaSegmentImpl implements MediaSegment {
   private boolean hit = false;
 
   /**
+   * A no-arg constructor, which is needed for JAXB serialization.
+   */
+  public MediaSegmentImpl() {}
+
+  /**
    * Creates a new segment that is located at position <code>sequenceId</code> within the sequence of segments.
    * 
    * @param segment

@@ -24,8 +24,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 /**
- * TODO: Comment me!
- *
+ * Activates the search service implementation.
  */
 public class Activator implements BundleActivator {
 
@@ -35,7 +34,8 @@ public class Activator implements BundleActivator {
    */
   @SuppressWarnings("unchecked")
   public void start(BundleContext context) throws Exception {
-    SearchService search = new SearchServiceImpl();
+    SearchServiceImpl search = new SearchServiceImpl();
+    search.activate(null); // This is supposed to be a component, so we'd pass a component context here
     Dictionary props = new Hashtable();
     props.put("service.description", "Search Service");
     context.registerService(SearchService.class.getName(), search, props);

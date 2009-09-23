@@ -38,6 +38,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -57,6 +58,7 @@ public class SearchResultItemImpl implements SearchResultItem {
   private String id = "";
 
   /** The media package */
+  @XmlTransient
   private MediaPackage mediaPackage = null;
 
   /** The jaxb version of the media package, in case this object needs to be serialized to xml */

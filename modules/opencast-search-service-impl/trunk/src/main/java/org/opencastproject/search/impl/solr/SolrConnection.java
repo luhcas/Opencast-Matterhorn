@@ -26,6 +26,7 @@ import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.core.OpencastSolrConfig;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.BinaryResponseWriter;
@@ -69,7 +70,7 @@ public class SolrConnection {
     // Initialize SolrConfig
     SolrConfig config = null;
     try {
-      config = new SolrConfig(solrDir, SolrConfig.DEFAULT_CONF_FILE, null);
+      config = new OpencastSolrConfig(solrDir, SolrConfig.DEFAULT_CONF_FILE, null);
       solrDir = config.getResourceLoader().getInstanceDir();
 
       // Initialize SolrCore directly

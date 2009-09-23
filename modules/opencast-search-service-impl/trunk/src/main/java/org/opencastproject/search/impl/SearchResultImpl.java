@@ -31,7 +31,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 /**
  * The search result represents a set of result items that has been compiled as a result for a search operation.
@@ -62,6 +61,11 @@ public class SearchResultImpl implements SearchResult {
   /** The search time in milliseconds */
   @XmlAttribute
   private long searchTime = 0;
+
+  /**
+   * A no-arg constructor needed by JAXB
+   */
+  public SearchResultImpl() {}
 
   /**
    * Creates a new and empty search result.

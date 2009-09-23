@@ -109,11 +109,16 @@
       <artifactId>lucene-memory</artifactId>
       <version>2.4.1</version>
     </dependency>
+    <dependency>
+      <groupId>net.java.dev.stax-utils</groupId>
+      <artifactId>stax-utils</artifactId>
+      <version>20040917</version>
+    </dependency>
+    
     <!--
     The following dependencies are part of the solr distribution, but we are leaving out of the search service (for now)
       commons-csv-1.0-SNAPSHOT-r609327.jar (no released version yet)
       solr-commons-csv (not needed?)
-      stax-utils.jar (not needed?)
       wstx-asl-3.2.7.jar (we already have the woodstox osgi bundle deployed)
     -->
     <dependency>
@@ -142,8 +147,21 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Bundle-Activator> org.opencastproject.search.impl.Activator </Bundle-Activator>
-            <Export-Package> org.opencastproject.search.endpoint, org.opencastproject.search.impl.*, org.apache.lucene.*, org.apache.solr.* </Export-Package>
-            <Import-Package> org.opencastproject.search.*, org.apache.lucene.*, org.apache.solr.*, *;resolution:=optional</Import-Package>
+            <Import-Package>
+              org.opencastproject.search.api,
+              *;resolution:=optional
+            </Import-Package>
+            <Private-Package>
+              html,
+              solr.*,
+              org.tartarus.*,
+              org.apache.solr.*,
+              org.apache.lucene.*,
+            </Private-Package>
+            <Export-Package>
+              org.opencastproject.search.impl.*,
+              org.opencastproject.search.endpoint
+            </Export-Package>
             <Embed-Dependency>
               lucene-analyzers;inline=true,
               lucene-memory;inline=true,
@@ -156,7 +174,8 @@
               solr-lucene-highlighter;inline=true,
               solr-lucene-queries;inline=true,
               solr-lucene-snowball;inline=true,
-              solr-lucene-spellchecker;inline=true
+              solr-lucene-spellchecker;inline=true,
+              stax-utils;inline=true
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/search-service-rest.xml
