@@ -2,7 +2,7 @@ This is a proof-of-concept for a Distributed OSGI environment for developing Mat
 
 To install and run this software:
 
-1) Download the binary distribution of Felix 1.8.0.  TODO: Test on Equinox.
+1) Download the binary distribution of Felix 2.0.0.  TODO: Test on Equinox.
 2) Build this software using maven (mvn -DskipTests install).  The first time you install, maven will download all of the dependencies and transitive dependencies for all of the Matterhorn code.  Don't be surprised if this takes a long time. You may need to increase your JVM memory settings.  I do this in bash with:
 
 export MAVEN_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m"
@@ -20,13 +20,5 @@ Get binary data from the repository: http://localhost:8080/rest/repository/data/
 
 Logging:
 
-Logging configuration can be customized before server startup or at runtime.  Create a file named "org.ops4j.pax.logging.cfg" in the <felix_root>/load directory.  This file must contain log4j properties entries, such as:
-
-log4j.rootLogger=INFO, stdout
-log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-log4j.appender.stdout.layout.ConversionPattern=%5p [%t] (%C{3}:%L) - %m%n
-log4j.logger.org.apache=WARN
-log4j.logger.org.springframework=WARN
-log4j.logger.org.opencastproject=DEBUG
+Logging configuration can be customized by modifying the properties file located at $FELIX/conf/services named org.ops4j.pax.logging.properties.
 
