@@ -129,7 +129,7 @@
 			entries) of the cache. (seel java.util.HashMap) autowarmCount - the
 			number of entries to prepopulate from and old cache.
 		-->
-		<filterCache class="solr.LRUCache" size="512" initialSize="512"
+		<filterCache class="org.apache.solr.search.LRUCache" size="512" initialSize="512"
 			autowarmCount="256" />
 
 		<!--
@@ -137,7 +137,7 @@
 			document ids (DocList) based on a query, a sort, and the range of
 			documents requested.
 		-->
-		<queryResultCache class="solr.LRUCache" size="512"
+		<queryResultCache class="org.apache.solr.search.LRUCache" size="512"
 			initialSize="512" autowarmCount="256" />
 
 		<!--
@@ -145,7 +145,7 @@
 			each document). Since Lucene internal document ids are transient,
 			this cache will not be autowarmed.
 		-->
-		<documentCache class="solr.LRUCache" size="512"
+		<documentCache class="org.apache.solr.search.LRUCache" size="512"
 			initialSize="512" autowarmCount="0" />
 
 		<!--
@@ -294,10 +294,10 @@
 		code. To enable solr1.1 behavior, remove the /update handler or change
 		its path
 	-->
-	<requestHandler name="/update" class="solr.XmlUpdateRequestHandler" />
+	<requestHandler name="/update" class="org.apache.solr.handler.XmlUpdateRequestHandler" />
 
 	<!-- CSV update handler, loaded on demand -->
-	<requestHandler name="/update/csv" class="solr.CSVRequestHandler"
+	<requestHandler name="/update/csv" class="org.apache.solr.handler.CSVRequestHandler"
 		startup="lazy" />
 
 
@@ -317,7 +317,7 @@
 		class="org.apache.solr.handler.admin.PropertiesRequestHandler" />
 
 	<!-- Echo the request contents back to the client -->
-	<requestHandler name="/debug/dump" class="solr.DumpRequestHandler">
+	<requestHandler name="/debug/dump" class="org.apache.solr.handler.DumpRequestHandler">
 		<lst name="defaults">
 			<str name="echoParams">explicit</str> <!-- for all params (including the default etc) use: 'all' -->
 			<str name="echoHandler">true</str>

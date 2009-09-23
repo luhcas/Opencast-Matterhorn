@@ -38,6 +38,12 @@ public class SearchRestService {
     this.searchService = searchService;
   }
 
+  @GET
+  @Path("docs")
+  public String getDocs() {
+    return "to be documented";
+  }
+  
   @POST
   @Path("add")
   public void add(@FormParam("mediapackage") MediaPackage mediaPackage) throws SearchException {

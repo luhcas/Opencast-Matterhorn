@@ -141,24 +141,24 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.search.* </Export-Package>
-            <Import-Package>*;resolution:=optional</Import-Package>
+            <Bundle-Activator> org.opencastproject.search.impl.Activator </Bundle-Activator>
+            <Export-Package> org.opencastproject.search.endpoint, org.opencastproject.search.impl.*, org.apache.lucene.*, org.apache.solr.* </Export-Package>
+            <Import-Package> org.opencastproject.search.*, org.apache.lucene.*, org.apache.solr.*, *;resolution:=optional</Import-Package>
             <Embed-Dependency>
-              lucene-analyzers,
-              lucene-memory,
-              solr-common,
-              solr-core,
-              solr-dataimporthandler,
-              solr-solrj,
-              solr-lucene-contrib,
-              solr-lucene-core,
-              solr-lucene-highlighter,
-              solr-lucene-queries,
-              solr-lucene-snowball,
-              solr-lucene-spellchecker
+              lucene-analyzers;inline=true,
+              lucene-memory;inline=true,
+              solr-common;inline=true,
+              solr-core;inline=true,
+              solr-dataimporthandler;inline=true,
+              solr-solrj;inline=true,
+              solr-lucene-contrib;inline=true,
+              solr-lucene-core;inline=true,
+              solr-lucene-highlighter;inline=true,
+              solr-lucene-queries;inline=true,
+              solr-lucene-snowball;inline=true,
+              solr-lucene-spellchecker;inline=true
             </Embed-Dependency>
             <Service-Component>
-              OSGI-INF/search-service.xml,
               OSGI-INF/search-service-rest.xml
             </Service-Component>
           </instructions>

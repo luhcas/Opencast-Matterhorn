@@ -26,15 +26,17 @@ import org.opencastproject.search.impl.solr.SolrRequester;
 import org.opencastproject.util.PathSupport;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.InputStream;
 
 /**
  * A Solr-based {@link SearchService} implementation.
@@ -84,23 +86,23 @@ public class SearchServiceImpl implements SearchService {
   private void setupSolr(String solrRoot) {
     try {
       log_.info("Setting up solr search index at " + solrRoot);
-      File solrRootDir = new File(solrRoot);
+      File solrConfigDir = new File(solrRoot, "conf");
 
-      // Create the root directory
-      if (!solrRootDir.exists()) {
-        FileUtils.forceMkdir(solrRootDir);
+      // Create the config directory
+      if (solrConfigDir.exists()) {
+        log_.info("solr search index found at " + solrConfigDir);        
+      } else {
+        log_.info("solr config directory doesn't exist.  Creating " + solrConfigDir);
+        FileUtils.forceMkdir(solrConfigDir);
       }
 
       // Make sure there is a configuration in place
-      File solrConfig = new File(solrRoot, "conf");
-      if (!solrConfig.exists()) {
-        URL defaultSolrConfig = SearchServiceImpl.class.getResource("/solr/conf");
-        try {
-          FileUtils.copyDirectoryToDirectory(new File(defaultSolrConfig.toURI()), solrRootDir);
-        } catch (URISyntaxException e) {
-          throw new RuntimeException("Error creating the solr configuration directory", e);
-        }
-      }
+      copyClasspathResourceToFile("/solr/conf/protwords.txt", solrConfigDir);
+      copyClasspathResourceToFile("/solr/conf/schema.xml", solrConfigDir);
+      copyClasspathResourceToFile("/solr/conf/scripts.conf", solrConfigDir);
+      copyClasspathResourceToFile("/solr/conf/solrconfig.xml", solrConfigDir);
+      copyClasspathResourceToFile("/solr/conf/stopwords.txt", solrConfigDir);
+      copyClasspathResourceToFile("/solr/conf/synonyms.txt", solrConfigDir);
 
       // Test for the existence of a data directory
       File solrData = new File(solrRoot, "data");
@@ -113,6 +115,17 @@ public class SearchServiceImpl implements SearchService {
       solrIndexManager = new SolrIndexManager(solrConnection);
     } catch (IOException e) {
       throw new RuntimeException("Error setting up solr index at " + solrRoot, e);
+    }
+  }
+
+  private void copyClasspathResourceToFile(String classpath, File dir) {
+    InputStream in = SearchServiceImpl.class.getResourceAsStream(classpath);
+    try {
+      File file = new File(dir, FilenameUtils.getName(classpath));
+      log_.info("copying inputstream " + in + " to file to " + file);
+      IOUtils.copy(in, new FileOutputStream(file));
+    } catch (IOException e) {
+      throw new RuntimeException("Error copying solr classpath resource to the filesystem", e);
     }
   }
 
