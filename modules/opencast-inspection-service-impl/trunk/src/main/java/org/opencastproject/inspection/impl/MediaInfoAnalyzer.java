@@ -34,13 +34,18 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * This MediaAnalyzer implementation leverages MediaInfo (<a href="http://mediainfo.sourceforge.net/"
  * >http://mediainfo.sourceforge.net</a>) for analysis.
  * <p/>
  * <strong>Please note</strong> that this implementation is stateful and cannot be shared or used multiple times.
+ * <p/>
+ * Also this implementation does not keep control-, text- or other non-audio or video streams and purposefully
+ * ignores them during the <code>postProcess()</code> step.
  * 
  * @author Christoph E. Driessen <ced@neopoly.de>
  */
@@ -107,7 +112,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
   protected void onAnalysis(String line) {
     // Detect section
     for (StreamSection section : StreamSection.values()) {
-      if (section.name().equalsIgnoreCase(line)) {
+      if (isNewSection(section, line)) {
         streamSection = section;
         log_.debug("New section " + streamSection);
         switch (streamSection) {
@@ -141,6 +146,25 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
     }
   }
 
+  private boolean isNewSection(StreamSection section, String line) {
+    // Match case insenstive (?i)
+    return Pattern.compile("(?i)" + section.name() + "( \\#[\\d]+)?").matcher(line).matches();
+  }
+  
+  /**
+   * Filter out any non-video or audio streams.
+   */
+  @Override
+  protected void postProcess() {
+    // Filter out "strange" streams. These can be e.g. media control streams.
+    for (Iterator<VideoStreamMetadata> i = metadata.getVideoStreamMetadata().iterator(); i.hasNext();) {
+      if (i.next().getBitRate() == null) i.remove();
+    }
+    for (Iterator<AudioStreamMetadata> i = metadata.getAudioStreamMetadata().iterator(); i.hasNext();) {
+      if (i.next().getBitRate() == null) i.remove();
+    }
+ }
+  
   /* Version check */
 
   @Override
