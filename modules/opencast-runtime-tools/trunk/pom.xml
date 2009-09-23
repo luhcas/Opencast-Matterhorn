@@ -178,7 +178,7 @@
     <dependency>
       <groupId>org.ops4j.pax.confman</groupId>
       <artifactId>pax-confman-propsloader</artifactId>
-      <version>0.2.2</version>
+      <version>0.2.1</version>
     </dependency>
 
     <!-- Bundle-ized 3rd party deps -->
