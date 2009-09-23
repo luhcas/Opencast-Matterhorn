@@ -56,8 +56,8 @@
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
-	<module>opencast-delivery-service-api</module>
-	<module>opencast-delivery-service-impl</module>
+        <module>opencast-delivery-service-api</module>
+        <module>opencast-delivery-service-impl</module>
         <module>opencast-engage-service-api</module>
         <module>opencast-engage-service-impl</module>
         <module>opencast-workflow-service-api</module>
@@ -93,8 +93,8 @@
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
-	<module>opencast-delivery-service-api</module>
-	<module>opencast-delivery-service-impl</module>
+	    <module>opencast-delivery-service-api</module>
+        <module>opencast-delivery-service-impl</module>
         <!--module>opencast-engage-service-api</module --> 
         <!-- module>opencast-engage-service-impl</module --> 
 </modules>
@@ -710,6 +710,11 @@
   </pluginRepositories>
 
   <repositories>
+    <repository>
+      <id>opencast.repo</id>
+      <name>Opencast Maven Repository</name>
+      <url>http://downloads.opencastproject.org/m2</url>
+    </repository>
     <repository>
       <id>maven.repo</id>
       <name>Maven Repository</name>
