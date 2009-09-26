@@ -91,6 +91,11 @@
     	<artifactId>opencast-util</artifactId>
     	<version>0.1-SNAPSHOT</version>
     	<type>bundle</type>
+    </dependency>
+    <dependency>
+    	<groupId>commons-fileupload</groupId>
+    	<artifactId>commons-fileupload</artifactId>
+    	<version>1.2.1</version>
     </dependency>    
   </dependencies>
   <build>
@@ -104,10 +109,12 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.ingest.* </Export-Package>
+            <Import-Package>org.opencastproject.util, *</Import-Package>
             <Service-Component>
               OSGI-INF/ingest-service.xml,
               OSGI-INF/ingest-service-rest.xml,
-              OSGI-INF/ingest-service-soap.xml
+              OSGI-INF/ingest-service-soap.xml,
+              OSGI-INF/ingest-service-ui.xml
             </Service-Component>
           </instructions>
         </configuration>

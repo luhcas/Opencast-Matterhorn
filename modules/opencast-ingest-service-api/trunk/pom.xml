@@ -23,6 +23,18 @@
   		<version>0.1-SNAPSHOT</version>
   		<type>bundle</type>
   	</dependency>
+  	<dependency>
+  		<groupId>org.opencastproject</groupId>
+  		<artifactId>opencast-working-file-repository-service-api</artifactId>
+  		<version>0.1-SNAPSHOT</version>
+  		<type>bundle</type>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.opencastproject</groupId>
+  		<artifactId>opencast-util</artifactId>
+  		<version>0.1-SNAPSHOT</version>
+  		<type>bundle</type>
+  	</dependency>
   </dependencies>
   <build>
     <plugins>

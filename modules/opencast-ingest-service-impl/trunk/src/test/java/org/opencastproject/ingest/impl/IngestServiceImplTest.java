@@ -19,33 +19,41 @@ import static org.junit.Assert.fail;
 
 import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.media.mediapackage.Cover;
+import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Mpeg7Catalog;
+import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.media.mediapackage.handle.HandleBuilderFactory;
+import org.opencastproject.media.mediapackage.handle.HandleException;
+import org.opencastproject.util.ConfigurationException;
+import org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryImpl;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.net.URL;
 
 public class IngestServiceImplTest {
   private IngestService service = null;
-  private String mediaPackageId = null;
+  private MediaPackage mediaPackage = null;
   private URL urlTrack;
   private URL urlCatalog;
   private URL urlAttachment;
-
-  // private URL urlManifest;
+  private URL urlManifest;
+  private String mpId = "IngestServiceTestMediaPackage";
 
   @Before
   public void setup() {
     service = new IngestServiceImpl();
+    service.setWorkingFileRepository(new WorkingFileRepositoryImpl());
     urlTrack = IngestServiceImplTest.class.getResource("/av.mov");
     urlCatalog = IngestServiceImplTest.class.getResource("/mpeg-7.xml");
     urlAttachment = IngestServiceImplTest.class.getResource("/cover.png");
-    // urlManifest = IngestServiceImplTest.class.getResource("/source-manifest.xml");
+    urlManifest = IngestServiceImplTest.class.getResource("/source-manifest.xml");
   }
 
   @After
@@ -54,56 +62,56 @@ public class IngestServiceImplTest {
     urlTrack = null;
     urlCatalog = null;
     urlAttachment = null;
-    // urlManifest = null;
+    urlManifest = null;
   }
 
   @Test
   public void testThinClient() {
     try {
-      mediaPackageId = service.createMediaPackage();
-      service.addTrack(urlTrack, MediaPackageElements.INDEFINITE_TRACK, mediaPackageId);
-      service.addCatalog(urlCatalog, Mpeg7Catalog.FLAVOR, mediaPackageId);
-      service.addAttachment(urlAttachment, Cover.FLAVOR, mediaPackageId);
-      service.ingest(mediaPackageId);
+      mediaPackage = service.createMediaPackage();
+      service.addTrack(urlTrack, MediaPackageElements.INDEFINITE_TRACK, mediaPackage);
+      service.addCatalog(urlCatalog, Mpeg7Catalog.FLAVOR, mediaPackage);
+      service.addAttachment(urlAttachment, Cover.FLAVOR, mediaPackage);
+      service.ingest(mediaPackage);
     } catch (MediaPackageException e) {
       fail("Unable to create or access media Package: " + e.getMessage());
     } catch (NullPointerException e) {
       fail("Media package not found in local ingest memory");
     } catch (UnsupportedElementException e) {
       fail("Error thrown while trying to load media into media package: " + e.getMessage());
+    } catch (ConfigurationException e) {
+      fail("Unable to create a handle for the media package.");
+    } catch (HandleException e) {
+      fail("Unable to create a handle for the media package.");
     }
     // TODO: listen to event of ingest finish check in file repo if files are really there.
   }
 
-  // TODO: Problem with local paths in mediapackage parser
+  // TODO: Check problem with local url paths
   // @Test
-  // public void testThickClient() {
-  // try {
-  // mediaPackageId = service.addMediaPackage(urlManifest.openStream());
-  // service.ingest(mediaPackageId);
-  // } catch (IOException e) {
-  // fail("Unable to load mock manifest file");
-  // } catch (MediaPackageException e) {
-  // fail("Unable to create a mock media package");
-  // }
-  // // TODO: listen to event of ingest finish check in file repo if files are really there.
-  // }
-
-  @Test
-  public void testDiscard() {
+  public void testThickClient() {
     try {
-      mediaPackageId = service.createMediaPackage();
-    } catch (MediaPackageException e1) {
-      fail("Media package could not be created");
+      mediaPackage = service.addMediaPackage(urlManifest.openStream());
+      service.ingest(mediaPackage);
+    } catch (IOException e) {
+      fail("Unable to load mock manifest file");
+    } catch (MediaPackageException e) {
+      fail("Unable to create a mock media package");
     }
-    service.discardMediaPackage(mediaPackageId);
-    try {
-      service.addTrack(urlTrack, MediaPackageElements.INDEFINITE_TRACK, mediaPackageId);
-    } catch (Exception e) {
-      // exception expected and wanted
-      return;
-    }
-    fail("Media package could not be discarded");
+    // TODO: listen to event of ingest finish check in file repo if files are really there.
   }
+
+//  @Test
+//  public void testDiscard() {
+//    service.discardMediaPackage(mediaPackage);
+//    try {
+//      Track t = mediaPackage.getTracks()[0];
+//      //TODO
+//    } catch (Exception e) {
+//      // exception expected and wanted
+//      return;
+//    }
+//    fail("Media package could not be discarded");
+//  }
 
 }

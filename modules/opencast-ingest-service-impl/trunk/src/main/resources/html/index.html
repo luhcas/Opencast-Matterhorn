@@ -1,54 +1,20 @@
 <html>
   <head>
-  <script language="JavaScript">	
-  	function doForm(action, method) {
-      var testForm = document.getElementById("test_form");
-      //var url = document.getElementById("url").value;
-      //var flavor = document.getElementById("flavor").value;
-      //var mediaPackageId = document.getElementById("mediaPackageId").value;
-
-      if(method == 'POST') {
-        testForm.enctype="multipart/form-data";        
-      }
-      testForm.action = action;      
-      testForm.method = method;
-      testForm.submit();
-    }
-  </script>
   </head>
   <body>
-    <div>This is the REST endpoint for the ingest service. TO DO: detail documentation</div>
-    <hr />
-    <form id="test_form" action="" method="">
-      <div>
-        <label for="mediaPackageId">Media Package ID: </label><input type="text" name="mediaPackageId" id="mediaPackageId" />
-        <label for="flavor">flavor (i.e. "track/indefinite"): </label><input type="text" name="flavor" id="flavor" />
-        <label for="url">URL to content: </label><input type="text" name="url" id="url" />
-      </div>
-      <div>
-      </div>
-      <hr />
-      <div>
-      	<input type="button" value="Create new Media Package" onclick="doForm('createMediaPackage', 'GET')"/>
-        <input type="button" value="Add Track" onclick="doForm('addTrack', 'POST')"/>
-        <input type="button" value="Add Catalog" onclick="doForm('addCatalog', 'POST')"/>
-        <input type="button" value="Add Attachment" onclick="doForm('addAttachment', 'POST')"/>        
-      </div>
-      <div>
-      	<input type="button" value="Ingest Media Package" onclick="doForm('ingest', 'POST')"/>
-      </div>
-      <div>
-      	TRACKS:<br />
-      	track/presenter<br />
-      	track/presentation<br />
-      	track/indefinite<br />
-      	CATALOGS:<br />
-      	metadata/dublincore<br />  
-      	metadata/mpeg-7<br />
-      	ATTACHMENTS:<br />
-      	attachment/(unknown)<br />
-      	attachment/cover<br />     	
-      </div>
+    <div>This is the documentation for the REST endpoint for the ingest service.</div>
+    <hr /><br />
+    <div>Thin Client: A simple POST form ingests a new media package. Input types must conform to Opencast metadata.</div>
+    <table>
+    <form id="meta" name="meta" action="addMediaPackage" method="POST" enctype="multipart/form-data" accept-charset="UTF-8" >
+ 	    <tr><td>submiter:</td><td><input type="text" name="publisher" id="publisher" /></td></tr>
+	    <tr><td>title:</td><td><input type="text" name="title" id="title" /></td></tr>
+	    <tr><td>presenter:</td><td><input type="text" name="contributor" id="contributor" /></td></tr>
+	    <tr><td>description:</td><td><input type="text" name="description" id="description" /></td></tr>
+	    <tr><td>language:</td><td><input type="text" name="language" id="language" />
+    	<tr><td>file:</td><td><input type="file" name="mediafile" id="mediafile" /></td></tr>
+	    <tr><td><input type="submit" id="submit" value="Submit"/>
     </form>
+    </table>
   </body>
 </html>

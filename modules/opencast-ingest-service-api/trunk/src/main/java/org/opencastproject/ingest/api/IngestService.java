@@ -19,8 +19,12 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.media.mediapackage.handle.HandleException;
+import org.opencastproject.util.ConfigurationException;
+import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 
@@ -33,66 +37,110 @@ public interface IngestService {
    * Add an existing MediaPackage to the repository 
    * 
    * @param MediaPackageManifest A manifest of a MediaPackage
-   * @return MediaPackageId
+   * @return MediaPackageManifest The manifest of a specific Matterhorn MediaPackage element
    * @throws MediaPackageException 
    */
-  String addMediaPackage(InputStream MediaPackageManifest) throws MediaPackageException;
+  MediaPackage addMediaPackage(InputStream MediaPackageManifest) throws MediaPackageException;
 
   /**
    *  Create a new MediaPackage in the repository.
    *  
-   * @return MediaPackageID  
+   * @return The created MediaPackage 
    * @throws MediaPackageException 
+   * @throws HandleException 
+   * @throws ConfigurationException 
    */
-  String createMediaPackage() throws MediaPackageException;
+  MediaPackage createMediaPackage() throws MediaPackageException, ConfigurationException, HandleException;
 
   /**
    * Add a media track to an existing MediaPackage in the repository
    * 
    * @param url The URL of the file to add
    * @param flavor The flavor of the media that is being added
-   * @param mediaPackageId The ID of a specific Matterhorn MediaPackage
-   * @return MediaPackageElementId  The ID of a specific Matterhorn MediaPackage element
+   * @param mediaPackage The specific Matterhorn MediaPackage to which Media is being added
+   * @return MediaPackageManifest The manifest of a specific Matterhorn MediaPackage element
    * @throws UnsupportedElementException 
    * @throws MediaPackageException 
    */  
-  String addTrack(URL url, MediaPackageElementFlavor flavor, String mediaPackageId) 
-  throws MediaPackageException, UnsupportedElementException;  
+  MediaPackage addTrack(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage) 
+  throws MediaPackageException, UnsupportedElementException;
+  /**
+   * Add a media track to an existing MediaPackage in the repository
+   * 
+   * @param mediaFile The media file to add
+   * @param flavor The flavor of the media that is being added
+   * @param mediaPackage The specific Matterhorn MediaPackage to which Media is being added
+   * @return MediaPackage The updated Matterhorn MediaPackage element
+   * @throws UnsupportedElementException 
+   * @throws MediaPackageException 
+   * @throws MalformedURLException 
+   */  
+  MediaPackage addTrack(InputStream mediaFile, MediaPackageElementFlavor flavor, MediaPackage mediaPackage) 
+  throws MediaPackageException, UnsupportedElementException, MalformedURLException;
 
   /**
    * Add a [metadata catalog] to an existing MediaPackage in the repository
    * @param url The URL of the file to add
    * @param flavor The flavor of the media that is being added
-   * @param mediaPackageId The ID of a specific Matterhorn MediaPackage
-   * @return MediaPackageElementId The ID of a specific Matterhorn MediaPackage element
+   * @param mediaPackage The specific Matterhorn MediaPackage to which Media is being added
+   * @return MediaPackage The updated Matterhorn MediaPackage element
    * @throws UnsupportedElementException 
    * @throws MediaPackageException 
    */
-  String addCatalog(URL url, MediaPackageElementFlavor flavor, String mediaPackageId) 
+  MediaPackage addCatalog(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage) 
   throws MediaPackageException, UnsupportedElementException;
+  /**
+   * Add a [metadata catalog] to an existing MediaPackage in the repository
+   * @param catalog The catalog file to add
+   * @param flavor The flavor of the media that is being added
+   * @param mediaPackage The specific Matterhorn MediaPackage to which Media is being added
+   * @return MediaPackage The updated Matterhorn MediaPackage element
+   * @throws UnsupportedElementException 
+   * @throws MediaPackageException 
+   * @throws MalformedURLException 
+   */
+  MediaPackage addCatalog(InputStream catalog, MediaPackageElementFlavor flavor, MediaPackage mediaPackage) 
+  throws MediaPackageException, UnsupportedElementException, MalformedURLException;
 
   /**
    * Add an attachment to an existing MediaPackage in the repository
    * @param url The URL of the file to add
    * @param flavor The flavor of the media that is being added
-   * @param mediaPackageId The ID of a specific Matterhorn MediaPackage
-   * @return MediaPackageElementId The ID of a specific Matterhorn MediaPackage element
+   * @param mediaPackage The specific Matterhorn MediaPackage to which Media is being added
+   * @return MediaPackage The updated Matterhorn MediaPackage element
    * @throws UnsupportedElementException 
    * @throws MediaPackageException 
    */
-  String addAttachment(URL url, MediaPackageElementFlavor flavor, String mediaPackageId) 
+  MediaPackage addAttachment(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage) 
   throws MediaPackageException, UnsupportedElementException;
+  /**
+   * Add an attachment to an existing MediaPackage in the repository
+   * @param file The file to add
+   * @param flavor The flavor of the media that is being added
+   * @param mediaPackage The specific Matterhorn MediaPackage to which Media is being added
+   * @return MediaPackage The updated Matterhorn MediaPackage element
+   * @throws UnsupportedElementException 
+   * @throws MediaPackageException 
+   * @throws MalformedURLException 
+   */
+  MediaPackage addAttachment(InputStream file, MediaPackageElementFlavor flavor, MediaPackage mediaPackage) 
+  throws MediaPackageException, UnsupportedElementException, MalformedURLException;
 
   /**
    * Copy all files linked to an existing MediaPackage to the repository.
-   * @param mediaPackageId The ID of a specific Matterhorn MediaPackage
+   * @param mediaPackage The specific Matterhorn MediaPackage being ingested
    * @return  MediaPackage A Matterhorn MediaPackage (via EventAdmin)
    */  
-  void ingest(String mediaPackageId);
-  
+  void ingest(MediaPackage mediaPackage);
+
   /**
    * Delete an existing MediaPackage and any linked files from the temporary ingest filestore.
-   * @param mediaPackageId  The ID of a specific Matterhorn MediaPackage
+   * @param mediaPackage The specific Matterhorn MediaPackage
    */
-  void discardMediaPackage(String mediaPackageId);
+  void discardMediaPackage(MediaPackage mediaPackage);
+  /**
+   * Injects the working file repository to be used by the ingest service
+   * @param repo The repository to be used
+   */
+  void setWorkingFileRepository(WorkingFileRepository repo);
 }

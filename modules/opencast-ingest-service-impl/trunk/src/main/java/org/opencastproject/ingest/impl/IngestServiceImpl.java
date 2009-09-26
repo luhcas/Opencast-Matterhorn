@@ -23,8 +23,10 @@ import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.media.mediapackage.handle.Handle;
+import org.opencastproject.media.mediapackage.handle.HandleBuilderFactory;
+import org.opencastproject.media.mediapackage.handle.HandleException;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
-import org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryImpl;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -33,26 +35,22 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.UUID;
 
 /**
- * Creates and augments Matterhorn MediaPackages.
+ * Creates and augments Matterhorn MediaPackages. Stores media into the Working File Repository.
  */
 public class IngestServiceImpl implements IngestService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(IngestServiceImpl.class);
-
-  // FIXME: This implementation assumes either a single instance of this service, or stick sessions behind a load
-  // balancer
-  private HashMap<String, MediaPackage> localMediaPackages = new HashMap<String, MediaPackage>();
-
   private MediaPackageBuilderFactory factory = null;
   private MediaPackageBuilder builder = null;
+  private WorkingFileRepository repo;
 
-  // private MediaInspectionService inspection = new MediaInspectionServiceImpl();
+  // private MediaInspectionService inspection;
 
   public IngestServiceImpl() {
     logger.info("Ingest Service started.");
@@ -69,77 +67,107 @@ public class IngestServiceImpl implements IngestService, ManagedService {
    * {@inheritDoc}
    * 
    * @throws MediaPackageException
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackage(org.w3c.dom.Document)
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackage(java.io.InputStream)
    */
-  public String addMediaPackage(InputStream MediaPackageManifest) throws MediaPackageException {
-    String id = UUID.randomUUID().toString();
-    MediaPackage mp = builder.loadFromManifest(MediaPackageManifest);
-    localMediaPackages.put(id, mp);
-    return id;
+  public MediaPackage addMediaPackage(InputStream MediaPackageManifest) throws MediaPackageException {
+    // String id = UUID.randomUUID().toString();
+    return builder.loadFromManifest(MediaPackageManifest);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @throws MediaPackageException
    * @see org.opencastproject.ingest.api.IngestService#createMediaPackage()
    */
-  public String createMediaPackage() throws MediaPackageException {
-    String id = UUID.randomUUID().toString();
+  public MediaPackage createMediaPackage() throws MediaPackageException,
+          org.opencastproject.util.ConfigurationException, HandleException {
     MediaPackage mediaPackage;
+    Handle h = HandleBuilderFactory.newInstance().newHandleBuilder().createNew();
     try {
-      mediaPackage = builder.createNew();
+      mediaPackage = builder.createNew(h);
     } catch (MediaPackageException e) {
       logger.error("INGEST:Failed to create media package " + e.getLocalizedMessage());
       throw e;
     }
-    localMediaPackages.put(id, mediaPackage);
-    return id;
+    return mediaPackage;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @throws UnsupportedElementException
-   * @throws MediaPackageException
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageTrack( java.net.URI,
-   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor flavor, java.lang.String)
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageTrack( URL,
+   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor flavor, MediaPackage)
    */
-  public String addTrack(URL url, MediaPackageElementFlavor flavor, String mediaPackageId)
+  public MediaPackage addTrack(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException {
     String elementId = UUID.randomUUID().toString();
-    addContentToPackage(mediaPackageId, elementId, url, MediaPackageElement.Type.Track, flavor);
-    return elementId;
+    addContentToPackage(mediaPackage, elementId, url, MediaPackageElement.Type.Track, flavor);
+    return mediaPackage;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @throws UnsupportedElementException
-   * @throws MediaPackageException
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageCatalog( java.net.URI,
-   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor flavor, java.lang.String)
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageTrack( InputStream,
+   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor flavor, MediaPackage)
    */
-  public String addCatalog(URL url, MediaPackageElementFlavor flavor, String mediaPackageId)
-          throws MediaPackageException, UnsupportedElementException {
+  public MediaPackage addTrack(InputStream file, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+          throws MediaPackageException, UnsupportedElementException, MalformedURLException {
     String elementId = UUID.randomUUID().toString();
-    addContentToPackage(mediaPackageId, elementId, url, MediaPackageElement.Type.Catalog, flavor);
-    return elementId;
+    addContentToPackage(mediaPackage, elementId, file, MediaPackageElement.Type.Track, flavor);
+    return mediaPackage;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @throws UnsupportedElementException
-   * @throws MediaPackageException
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageAttachment( java.net.URI,
-   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor flavor, java.lang.String)
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageCatalog( URL,
+   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor flavor, MediaPackage)
    */
-  public String addAttachment(URL url, MediaPackageElementFlavor flavor, String mediaPackageId)
+  public MediaPackage addCatalog(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException {
     String elementId = UUID.randomUUID().toString();
-    addContentToPackage(mediaPackageId, elementId, url, MediaPackageElement.Type.Attachment, flavor);
-    return elementId;
+    addContentToPackage(mediaPackage, elementId, url, MediaPackageElement.Type.Catalog, flavor);
+    return mediaPackage;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageCatalog( InputStream,
+   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor flavor, MediaPackage)
+   */
+  public MediaPackage addCatalog(InputStream file, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+          throws MediaPackageException, UnsupportedElementException, MalformedURLException {
+    String elementId = UUID.randomUUID().toString();
+    addContentToPackage(mediaPackage, elementId, file, MediaPackageElement.Type.Catalog, flavor);
+    return mediaPackage;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageAttachment( URL,
+   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor flavor, MediaPackage)
+   */
+  public MediaPackage addAttachment(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+          throws MediaPackageException, UnsupportedElementException {
+    String elementId = UUID.randomUUID().toString();
+    addContentToPackage(mediaPackage, elementId, url, MediaPackageElement.Type.Attachment, flavor);
+    return mediaPackage;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageAttachment( InputStream,
+   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor flavor, MediaPackage)
+   */
+  public MediaPackage addAttachment(InputStream file, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+          throws MediaPackageException, UnsupportedElementException, MalformedURLException {
+    String elementId = UUID.randomUUID().toString();
+    addContentToPackage(mediaPackage, elementId, file, MediaPackageElement.Type.Attachment, flavor);
+    return mediaPackage;
   }
 
   /**
@@ -149,48 +177,47 @@ public class IngestServiceImpl implements IngestService, ManagedService {
    * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String,
    *      org.opencastproject.notification.api.NotificationService)
    */
-  public void ingest(String mediaPackageId) {
-    final String mpId = mediaPackageId;
+  public void ingest(MediaPackage mediaPackage) {
+    final MediaPackage mp = mediaPackage;
     Thread t = new Thread(new Runnable() {
       public void run() {
-        doIngest(mpId);
+        try {
+          doIngest(mp);
+        } catch (IOException e) {
+          logger.error("IngestService: Ingest failed!");
+        }
       }
     });
     t.start();
   }
 
   // actual work of the method ingest()
-  private void doIngest(String mediaPackageId) {
-    MediaPackage mp = localMediaPackages.get(mediaPackageId);
+  private void doIngest(MediaPackage mp) throws IOException {
+    String mediaPackageId = mp.getIdentifier().getLocalName();
     if (mp == null)
       throw new NullPointerException("Ingest Service: no media Package");
-    // FIXME -- this must be injected by the container. Never "new" a service.
-    WorkingFileRepository repo = new WorkingFileRepositoryImpl();
     for (MediaPackageElement element : mp.getTracks()) {
       URL url = element.getURL();
       String elementId = element.getIdentifier();
       // TODO deal with inspection
       // element = inspection.inspect(url);
       repo.put(mediaPackageId, elementId, getInputStreamFromURL(url));
-      // --------- TODO deal with the repository url ---------------
-      // URL newURL = repo.getUrl(mediaPackageId, elementId);
-      // element.setURL(newURL);
+      URL newURL = repo.getURL(mediaPackageId, elementId);
+      element.setURL(newURL);
     }
     for (MediaPackageElement element : mp.getAttachments()) {
       URL url = element.getURL();
       String elementId = element.getIdentifier();
       repo.put(mediaPackageId, elementId, getInputStreamFromURL(url));
-      // --------- TODO deal with the repository url ---------------
-      // URL newURL = repo.getUrl(mediaPackageId, elementId);
-      // element.setURL(newURL);
+      URL newURL = repo.getURL(mediaPackageId, elementId);
+      element.setURL(newURL);
     }
     for (MediaPackageElement element : mp.getCatalogs()) {
       URL url = element.getURL();
       String elementId = element.getIdentifier();
       repo.put(mediaPackageId, elementId, getInputStreamFromURL(url));
-      // --------- TODO deal with the repository url ---------------
-      // URL newURL = repo.getUrl(mediaPackageId, elementId);
-      // element.setURL(newURL);
+      URL newURL = repo.getURL(mediaPackageId, elementId);
+      element.setURL(newURL);
     }
     // --- TODO broadcast event ---
   }
@@ -200,11 +227,29 @@ public class IngestServiceImpl implements IngestService, ManagedService {
    * 
    * @see org.opencastproject.ingest.api.IngestService#discardMediaPackage(java.lang.String)
    */
-  public void discardMediaPackage(String mediaPackageId) {
-    localMediaPackages.remove(mediaPackageId);
+  public void discardMediaPackage(MediaPackage mp) {
+    String mediaPackageId = mp.getIdentifier().getLocalName();
+    for (MediaPackageElement element : mp.getAttachments()) {
+      repo.delete(mediaPackageId, element.getIdentifier());
+    }
+    for (MediaPackageElement element : mp.getCatalogs()) {
+      repo.delete(mediaPackageId, element.getIdentifier());
+    }
+    for (MediaPackageElement element : mp.getTracks()) {
+      repo.delete(mediaPackageId, element.getIdentifier());
+    }
   }
 
-  private InputStream getInputStreamFromURL(URL url) {
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.ingest.api.IngestService#setWorkingFileRepository(org.opencastproject.workingfilerepository.api.WorkingFileRepository)
+   */
+  public void setWorkingFileRepository(WorkingFileRepository repo) {
+    this.repo = repo;
+  }
+
+  private InputStream getInputStreamFromURL(URL url) throws IOException {
     // Create the streams
     URLConnection urlConn;
     try {
@@ -212,15 +257,12 @@ public class IngestServiceImpl implements IngestService, ManagedService {
       return urlConn.getInputStream();
     } catch (IOException e) {
       logger.error("IngestService: unable to read url into stream");
-      // FIXME: calling methods will happily put this null into the file repo, and the client will never know that there
-      // was a problem.
-      return null;
+      throw e;
     }
   }
 
-  private void addContentToPackage(String mediaPackageId, String elementId, URL url, MediaPackageElement.Type type,
+  private MediaPackage addContentToPackage(MediaPackage mp, String elementId, URL url, MediaPackageElement.Type type,
           MediaPackageElementFlavor flavor) throws MediaPackageException, UnsupportedElementException {
-    MediaPackage mp = localMediaPackages.get(mediaPackageId);
     try {
       MediaPackageElement mpe = mp.add(url, type, flavor);
       mpe.setIdentifier(elementId);
@@ -231,5 +273,14 @@ public class IngestServiceImpl implements IngestService, ManagedService {
       logger.error("IngestService: Unsupported element for ingest");
       throw uee;
     }
+    return mp;
+  }
+
+  private MediaPackage addContentToPackage(MediaPackage mp, String elementId, InputStream file,
+          MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws MediaPackageException,
+          UnsupportedElementException, MalformedURLException {
+    repo.put(mp.getIdentifier().getLocalName(), elementId, file);
+    URL url = repo.getURL(mp.getIdentifier().getLocalName(), elementId);
+    return addContentToPackage(mp, elementId, url, type, flavor);
   }
 }

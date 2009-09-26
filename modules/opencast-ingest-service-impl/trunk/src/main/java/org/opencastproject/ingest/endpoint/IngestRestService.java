@@ -17,46 +17,73 @@ package org.opencastproject.ingest.endpoint;
 
 import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.ingest.impl.IngestServiceImpl;
+import org.opencastproject.media.mediapackage.DublinCoreCatalog;
+import org.opencastproject.media.mediapackage.EName;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilder;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.dublincore.DublinCore;
+import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
+import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 
+import org.apache.commons.fileupload.FileItemIterator;
+import org.apache.commons.fileupload.FileItemStream;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URL;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
- * FIXME -- Add javadocs
+ * Creates and augments Matterhorn MediaPackages using the api. Stores media into the Working File Repository.
  */
 @Path("/")
 public class IngestRestService {
   private static final Logger logger = LoggerFactory.getLogger(IngestRestService.class);
+  private MediaPackageBuilderFactory factory = null;
+  private MediaPackageBuilder builder = null;
   private IngestService service = null;
 
   public void setService(IngestService service) {
     this.service = service;
+    factory = MediaPackageBuilderFactory.newInstance();
+    builder = factory.newMediaPackageBuilder();
   }
 
   @GET
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.TEXT_XML)
   @Path("createMediaPackage")
   public Response createMediaPackage() {
-    String id;
+    MediaPackage mp;
     try {
-      id = service.createMediaPackage();
-      return Response.ok("File temporarily stored for ingest service. Package " + id).build();
-    } catch (MediaPackageException e) {
+      mp = service.createMediaPackage();
+      MediapackageType mpt = new MediapackageType();
+      mpt = MediapackageType.fromXml(mp.toXml());
+      return Response.ok(mpt).build();
+    } catch (Exception e) {
       return Response.serverError().status(400).build();
     }
   }
@@ -64,62 +91,151 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_HTML)
   @Path("discardMediaPackage")
-  public Response discardMediaPackage(String mediaPackageId) {
-    service.discardMediaPackage(mediaPackageId);
-    return Response.ok("Media package " + mediaPackageId + "discarded!.").build();
+  public Response discardMediaPackage(MediapackageType mpt) {
+    try {
+      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
+      service.discardMediaPackage(mp);
+      return Response.ok("Media package discarded.").build();
+    } catch (Exception e) {
+      return Response.serverError().status(400).build();
+    }
   }
 
   @POST
-  @Produces(MediaType.TEXT_HTML)
+  @Produces(MediaType.TEXT_XML)
   @Path("addTrack")
   public Response addMediaPackageTrack(@FormParam("url") String url, @FormParam("flavor") String flavor,
-          @FormParam("mediaPackageId") String mediaPackageId) {
-    URL u;
+          @FormParam("mediaPackage") MediapackageType mpt) {
     try {
-      u = new URL(url);
-      String id = service.addTrack(u, MediaPackageElementFlavor.parseFlavor(flavor), mediaPackageId);
-      return Response.ok("Track added to the MediaPackage: " + mediaPackageId + ", element " + id).build();
+      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
+      URL u = new URL(url);
+      mp = service.addTrack(u, MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      mpt = MediapackageType.fromXml(mp.toXml());
+      return Response.ok(mpt).build();
     } catch (Exception e) {
       return Response.serverError().status(400).build();
     }
   }
 
   @POST
-  @Produces(MediaType.TEXT_HTML)
+  @Produces(MediaType.TEXT_XML)
+  @Path("addTrack")
+  public Response addMediaPackageTrack(@FormParam("file") InputStream file, @FormParam("flavor") String flavor,
+          @FormParam("mediaPackage") MediapackageType mpt) {
+    try {
+      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
+      mp = service.addTrack(file, MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      mpt = MediapackageType.fromXml(mp.toXml());
+      return Response.ok(mpt).build();
+    } catch (Exception e) {
+      return Response.serverError().status(400).build();
+    }
+  }
+
+  @POST
+  @Produces(MediaType.TEXT_XML)
   @Path("addCatalog")
   public Response addMediaPackageCatalog(@FormParam("url") String url, @FormParam("flavor") String flavor,
-          @FormParam("mediaPackageId") String mediaPackageId) {
-    URL u;
+          @FormParam("mediaPackage") MediapackageType mpt) {
     try {
-      u = new URL(url);
-      String id = service.addCatalog(u, MediaPackageElementFlavor.parseFlavor(flavor), mediaPackageId);
-      return Response.ok("Catalog added to the MediaPackage: " + mediaPackageId + ", element " + id).build();
+      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
+      URL u = new URL(url);
+      mp = service.addCatalog(u, MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      mpt = MediapackageType.fromXml(mp.toXml());
+      return Response.ok(mpt).build();
     } catch (Exception e) {
       return Response.serverError().status(400).build();
     }
   }
 
   @POST
-  @Produces(MediaType.TEXT_HTML)
-  @Path("addAttachment")
-  public Response addMediaPackageAttachment(@FormParam("url") String url, @FormParam("flavor") String flavor,
-          @FormParam("mediaPackageId") String mediaPackageId) {
-    URL u;
+  @Produces(MediaType.TEXT_XML)
+  @Path("addCatalog")
+  public Response addMediaPackageCatalog(@FormParam("file") InputStream file, @FormParam("flavor") String flavor,
+          @FormParam("mediaPackage") MediapackageType mpt) {
     try {
-      u = new URL(url);
-      String id = service.addAttachment(u, MediaPackageElementFlavor.parseFlavor(flavor), mediaPackageId);
-      return Response.ok("Attachment added to the MediaPackage: " + mediaPackageId + ", element " + id).build();
+      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
+      mp = service.addCatalog(file, MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      mpt = MediapackageType.fromXml(mp.toXml());
+      return Response.ok(mpt).build();
     } catch (Exception e) {
       return Response.serverError().status(400).build();
     }
+  }
+
+  @POST
+  @Produces(MediaType.TEXT_XML)
+  @Path("addAttachment")
+  public Response addMediaPackageAttachment(@FormParam("url") String url, @FormParam("flavor") String flavor,
+          @FormParam("mediaPackage") MediapackageType mpt) {
+    try {
+      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
+      URL u = new URL(url);
+      mp = service.addAttachment(u, MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      mpt = MediapackageType.fromXml(mp.toXml());
+      return Response.ok(mpt).build();
+    } catch (Exception e) {
+      return Response.serverError().status(400).build();
+    }
+  }
+
+  @POST
+  @Produces(MediaType.TEXT_XML)
+  @Path("addAttachment")
+  public Response addMediaPackageAttachment(@FormParam("file") InputStream file, @FormParam("flavor") String flavor,
+          @FormParam("mediaPackage") MediapackageType mpt) {
+    try {
+      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
+      mp = service.addAttachment(file, MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      mpt = MediapackageType.fromXml(mp.toXml());
+      return Response.ok(mpt).build();
+    } catch (Exception e) {
+      return Response.serverError().status(400).build();
+    }
+  }
+
+  @POST
+  @Produces(MediaType.TEXT_XML)
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  @Path("addMediaPackage")
+  public Response addMediaPackage(@Context HttpServletRequest request) {
+    try {
+      MediaPackage mp = service.createMediaPackage();
+      DublinCoreCatalog dcc = DublinCoreCatalogImpl.newInstance();
+      if (ServletFileUpload.isMultipartContent(request)) {
+        for (FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
+          FileItemStream item = iter.next();
+          if (item.isFormField()) {
+            EName en = new EName(DublinCore.TERMS_NS_URI, item.getFieldName());
+            dcc.add(en, Streams.asString(item.openStream()));
+          } else {
+            service.addTrack(item.openStream(), MediaPackageElements.INDEFINITE_TRACK, mp);
+          }
+        }
+        service.addCatalog(IOUtils.toInputStream(getStringFromDocument(dcc.toXml())),
+                MediaPackageElements.DUBLINCORE_CATALOG, mp);
+        MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
+        return Response.ok(mpt).build();
+      }
+      return Response.serverError().status(400).build();
+    } catch (Exception e) {
+      return Response.serverError().status(400).build();
+    }
+
   }
 
   @POST
   @Produces(MediaType.TEXT_HTML)
   @Path("ingest")
-  public Response ingestMediaPackage2(@FormParam("mediaPackageId") String mediaPackageId) {
-    service.ingest(mediaPackageId);
-    return Response.ok("Media package " + mediaPackageId + " being ingested!").build();
+  public Response ingestMediaPackage(@FormParam("mediaPackage") MediapackageType mpt) {
+    try {
+      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
+      service.ingest(mp);
+      mpt = MediapackageType.fromXml(mp.toXml());
+      return Response.ok(mpt).build();
+    } catch (Exception e) {
+      return Response.serverError().status(400).build();
+    }
   }
 
   @GET
@@ -147,4 +263,19 @@ public class IngestRestService {
     docs = docsFromClassloader;
   }
 
+  // method to convert Document to String
+  private String getStringFromDocument(Document doc) throws Exception {
+    try {
+      DOMSource domSource = new DOMSource(doc);
+      StringWriter writer = new StringWriter();
+      StreamResult result = new StreamResult(writer);
+      TransformerFactory tf = TransformerFactory.newInstance();
+      Transformer transformer = tf.newTransformer();
+      transformer.transform(domSource, result);
+      return writer.toString();
+    } catch (Exception e) {
+      logger.error("Failed transforming xml to string");
+      throw e;
+    }
+  }
 }
