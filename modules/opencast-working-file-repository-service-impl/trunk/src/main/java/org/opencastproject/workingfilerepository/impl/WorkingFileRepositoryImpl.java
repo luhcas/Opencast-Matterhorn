@@ -30,6 +30,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Dictionary;
 
 /**
@@ -69,6 +71,10 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     } catch (FileNotFoundException e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  public URL getURL(String mediaPackageID, String mediaPackageElementID) throws MalformedURLException {
+    return getFile(mediaPackageID, mediaPackageElementID).toURL();
   }
 
   public void put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
@@ -123,4 +129,5 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       }
     }
   }
+
 }

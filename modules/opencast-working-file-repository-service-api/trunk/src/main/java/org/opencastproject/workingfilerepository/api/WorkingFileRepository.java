@@ -16,6 +16,8 @@
 package org.opencastproject.workingfilerepository.api;
 
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * The Working File Repository is a file storage service that supports the lecture capture system.
@@ -37,6 +39,15 @@ public interface WorkingFileRepository {
    * @return
    */
   InputStream get(String mediaPackageID, String mediaPackageElementID);
+  
+  /**
+   * Get the URL of the file stored under the given media package and element IDs.
+   * @param mediaPackageID
+   * @param mediaPackageElementID
+   * @return
+   * @throws MalformedURLException 
+   */
+  URL getURL(String mediaPackageID, String mediaPackageElementID) throws MalformedURLException;
   
   /**
    * Delete the file stored at the given media package and element IDs.
