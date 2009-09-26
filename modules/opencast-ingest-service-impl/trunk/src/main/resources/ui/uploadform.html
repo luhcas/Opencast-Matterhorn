@@ -1,0 +1,103 @@
+<script type="text/javascript">
+    uploadManager.init();           // instantiate the swfUpload, init data
+</script>
+
+<p>&nbsp</p>
+<form id="mediaingest" name="mediaingest">
+<table style="border:1px solid white;" border="0">
+<tr>
+    <td align="right">
+        Submitted by:
+    </td>
+    <td>
+        <!-- <input type="text" id="publisher" name="publisher" value="Admin" disabled="false" class="inputField"> -->
+        <input type="hidden" id="publisher" name="publisher" value="Admin">
+        Admin
+    </td>
+    <td>
+        <!-- <img src="img/help.png" id="help_submitter" onclick="displayHelp(this, event);"> -->
+    </td>
+</tr>
+<tr>
+    <td align="right">
+        Title<span style="color:red;">*</span>:
+    </td>
+    <td>
+        <input type="text" id="title" name="title" class="inputField" onchange="uploadEvents.fieldChanged(this, this.value);">
+    </td>
+     <td>
+        <img src="img/help.png" id="help_title" onclick="displayHelp(this, event);">
+    </td>
+</tr>
+<tr>
+    <td align="right">
+        Presenter:
+    </td>
+    <td>
+        <input type="text" id="contributor" name="contributor" class="inputField" onchange="uploadEvents.fieldChanged(this, this.value);">
+    </td>
+     <td>
+        <img src="img/help.png" id="help_presenter" onclick="displayHelp(this, event);">
+    </td>
+</tr>
+<tr>
+    <td align="right" valign="top">
+        Description:
+    </td>
+    <td>
+        <textarea id="description" name="description" rows="4" class="inputField" onchange="uploadEvents.fieldChanged(this, this.value);"></textarea>
+    </td>
+    <td valign="top">
+        <img src="img/help.png" id="help_description" onclick="displayHelp(this, event);">
+    </td>
+</tr>
+<tr>
+    <td align="right">
+        Language:
+    </td>
+    <td>
+        <input type="text" id="language" name="language" class="inputField" onchange="uploadEvents.fieldChanged(this, this.value);">
+    </td>
+     <td>
+        <img src="img/help.png" id="help_language" onclick="displayHelp(this, event);">
+    </td>
+</tr>
+<tr>
+    <td align="right" valign="top">
+        Distribution channels:
+    </td>
+    <td>
+        <input type="checkbox" id="distSakai" name="distSakai" value="sakai" onchange="uploadEvents.fieldChanged(this, this.checked);">Sakai<br>
+        <input type="checkbox" id="distYouTube" name="distYouTube" value="youtube" onchange="uploadEvents.fieldChanged(this, this.checked);">YouTube<br>
+        <input type="checkbox" id="distITunes" name="distITunes" value="itunes" onchange="uploadEvents.fieldChanged(this, this.checked);">iTunes<br>
+    </td>
+     <td valign="top">
+        <img src="img/help.png" id="help_dist" onclick="displayHelp(this, event);">
+    </td>
+</tr>
+<tr>
+    <td align="right">
+        Media file:
+    </td>
+    <td>
+        <div id="uploader"></div>
+        <button type="button" id="browseButton" class="browseButton">Browse</button>
+        <span id="filename" class="filename">No file selected</span>
+    </td>
+     <td>
+        <img src="img/help.png" id="help_file" onclick="displayHelp(this, event);">
+    </td>
+</tr>
+<tr>
+    <td></td>
+    <td>
+        <button type="button" id="btn_submit" onclick="uploadEvents.btnSubmit();">Submit</button>
+        <button type="button" id="btn_cancel" onclick="uploadEvents.btnClear();">Clear Form</button>
+    </td>
+</tr>
+<tr>
+    <td></td>
+    <td><span style="color:red;">*</span> Required field
+</tr>
+</table>
+</form>

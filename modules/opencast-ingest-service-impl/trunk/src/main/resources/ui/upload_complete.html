@@ -1,0 +1,76 @@
+<script type="text/javascript">
+
+    // FIXME: fields should be populated with the data returned by the ingest service
+    UI.$("field_submitter").innerHTML = uploadManager.metadata.submitter;
+    UI.$("field_title").innerHTML = uploadManager.metadata.title;
+    UI.$("field_presenter").innerHTML = uploadManager.metadata.presenter;
+    UI.$("field_description").innerHTML = uploadManager.metadata.description;
+    UI.$("field_language").innerHTML = uploadManager.metadata.language;
+
+</script>
+
+<p>
+    <div class="notificationHeader">
+        A recording with the following information has been uploaded:
+    </div>
+</p>
+
+<table class="metadataTable" border="1">
+      <tr>
+          <td align="right" valign="top" style="max-width:150px;min-width:150px;width:150px;">
+              Submitter:
+          </td>
+          <td id="field_submitter">
+              
+          </td>
+      </tr>
+      <tr>
+          <td align="right" valign="top">
+              Title:
+          </td>
+          <td id="field_title">
+
+          </td>
+      </tr>
+      <tr>
+          <td align="right" valign="top">
+              Presenter(s):
+          </td>
+          <td id="field_presenter">
+
+          </td>
+      </tr>
+      <tr>
+          <td align="right" valign="top">
+              Description:
+          </td>
+          <td id="field_description">
+
+          </td>
+      </tr>
+      <tr>
+          <td align="right" valign="top">
+              Language:
+          </td>
+          <td id="field_language">
+
+          </td>
+      </tr>
+      <tr>
+          <td align="right" valign="top">
+              Distribution channel(s):
+          </td>
+          <td id="field_dist">
+
+          </td>
+      </tr>
+      <tr>
+          <td colspan="2">
+              <center>
+                  <a href="javascript:uploadEvents.btnAnotherUpload();">
+                  Upload another media file
+              </button>
+              </center>
+          </td>
+      </tr>
+</table>
