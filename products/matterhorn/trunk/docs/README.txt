@@ -18,6 +18,7 @@ Get binary data from the repository: http://localhost:8080/rest/repository/data/
 (TODO) Get metadata from the repository: GET http://localhost:8080/rest/repository/metadata/[key]/[path]
 (TODO) Put metadata into the repository: POST or PUT http://localhost:8080/rest/repository/metadata/[key]/[path]
 
+
 Logging:
 
 Logging configuration can be customized by modifying the properties file located at $FELIX/conf/services named org.ops4j.pax.logging.properties.
