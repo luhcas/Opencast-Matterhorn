@@ -74,7 +74,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   }
   
   public URL getURL(String mediaPackageID, String mediaPackageElementID) throws MalformedURLException {
-    return getFile(mediaPackageID, mediaPackageElementID).toURL();
+    return getFile(mediaPackageID, mediaPackageElementID).toURI().toURL();
   }
 
   public void put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
