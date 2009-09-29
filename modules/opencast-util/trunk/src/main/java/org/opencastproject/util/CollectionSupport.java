@@ -32,11 +32,7 @@ import java.util.Map;
  * Code copied from class <code>appetizer.util.Kollections</code> of project
  * "appetizer", originally create May 24, 2006. Donated to REPLAY by the author.
  *
- * todo translate original german documentation
- *
- * FIXME: I had to comment out several methods due to type erasure.  Fix or remove these.
- * 
- * @author Christoph Drießen
+ * TODO translate original german documentation
  */
 public class CollectionSupport {
 
@@ -181,27 +177,6 @@ public class CollectionSupport {
   }
 
   /**
-   * Vereint alle Collections in einer neuen Liste.
-   * 
-   * @return ArrayList
-   */
-//  public static <E> List<E> merge(Collection<Collection<E>> collections) {
-//    ArrayList<E> merged = new ArrayList<E>();
-//    for (Collection<E> c : collections)
-//      merged.addAll(c);
-//    return merged;
-//  }
-
-  /**
-   * Vereint alle Collections in einer neuen Liste.
-   * 
-   * @return ArrayList
-   */
-//  public static <E> List<E> merge(Collection<E>... collections) {
-//    return merge(new ArrayBackedList<Collection<E>>(collections));
-//  }
-
-  /**
    * Vereint Collection und Array in einer neuen Liste.
    * 
    * @param collection
@@ -231,41 +206,6 @@ public class CollectionSupport {
       merged.putAll(m);
     return merged;
   }
-
-  /**
-   * Vereint alle Maps in einer neuen. Doppelte Keys überschreiben sich in der
-   * Reihenfolge, in der sie übergeben werden.
-   * 
-   * @return HashMap
-   */
-//  public static <K, V> Map<K, V> merge(Map<K, V>... maps) {
-//    return merge(new ArrayBackedList<Map<K, V>>(maps));
-//  }
-
-  /**
-   * Vereint alle Properties in einem. Doppelte Keys überschreiben sich in der
-   * Reihenfolge, in der sie in der Collection vorkommen.
-   * 
-   * @return die vereinten Properties
-   */
-//  public static Properties merge(Collection<Properties> props) {
-//    Properties merged = new Properties();
-//    for (Properties p : props)
-//      merged.putAll(p);
-//    return merged;
-//  }
-
-  /**
-   * Vereint alle Properties in einem. Doppelte Keys überschreiben sich in der
-   * Reihenfolge, in der sie übergeben werden.
-   * 
-   * @param props
-   *          darf <i>null</i> sein
-   * @return die vereinten Properties
-   */
-//  public static Properties merge(Properties... props) {
-//    return merge(new ArrayBackedList<Properties>(props));
-//  }
 
   /**
    * Erzeugt aus <var>map</var> eine neue Map, in der Keys und Values vertauscht
@@ -433,4 +373,5 @@ public class CollectionSupport {
      */
     boolean evaluate(T object, int index);
   }
+
 }
