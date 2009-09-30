@@ -15,25 +15,9 @@
  */
 package org.opencastproject.workflow.api;
 
-import java.util.List;
-
 /**
- * A workflow definition.
+ * Generates {@link Runnable}s for an operation on a given {@link WorkflowInstance}.
  */
-public interface WorkflowDefinition {
-  /**
-   * The short title of this workflow definition
-   */
-  String getTitle();
-
-  /**
-   * A longer description of this workflow definition
-   */
-  String getDescription();
-
-  /**
-   * The operations, listed in order, that this workflow definition includes.
-   */
-  List<WorkflowOperation> getOperations();
+public interface WorkflowOperationHandler {
+  Runnable getRunnable(WorkflowInstance workflowInstance);
 }
-

@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.workflow.api.WorkflowInstance.State;
 
 import java.util.List;
 import java.util.Map;
@@ -24,39 +25,26 @@ import java.util.Map;
  * Manages {@link WorkflowDefinition}s and {@link WorkflowInstance}s.
  */
 public interface WorkflowService {
-
-  /**
-   * Gets a {@link WorkflowDefinition} by its ID.
-   */
-  WorkflowDefinition getWorkflowDefinition(String id);
-
-  /**
-   * Register a {@link WorkflowDefinition}.
-   * 
-   * @param id The ID of the entity
-   * @param entity The entity to save
-   */
-  void registerWorkflowDefinition(WorkflowDefinition workflowDefinition);
-
-  /**
-   * @return ALl registered {@link WorkflowDefinition}s
-   */
-  List<WorkflowDefinition> fetchAllWorkflowDefinitions();
   
   /**
    * Gets a {@link WorkflowInstace} by its ID.
    */
   WorkflowInstance getWorkflowInstance(String id);
+
+  /**
+   * Gets all known {@link WorkflowOperation}s that can be combined to create a {@link WorkflowInstance}.
+   * @return The {@link List} of all known {@link WorkflowOperation}s
+   */
+  List<WorkflowOperation> getWorkflowOperations();
   
   /**
-   * For a given workflow definition ID, list all associated {@link WorkflowInstance}s.
+   * List all {@link WorkflowInstance}s that are currently in the given {@link State}.
    * 
    * TODO Implement paging
    * 
-   * @param workflowDefinitionId
-   * @return
+   * @return The list of {@link WorkflowInstance}s in this {@link State}.
    */
-  List<WorkflowInstance> fetchAllWorkflowInstances(String workflowDefinitionId);
+  List<WorkflowInstance> getWorkflowInstances(State state);
 
   /**
    * Creates a new workflow instance and starts the workflow.
@@ -92,4 +80,3 @@ public interface WorkflowService {
   // TODO Add the findBy* methods once the search service is available.
   
 }
-

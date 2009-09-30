@@ -28,11 +28,6 @@ public class WorkflowServiceImplTest {
   @Before
   public void setup() {
     service = new WorkflowServiceImpl();
-    WorkflowDefinitionImpl workflowDefinition = new WorkflowDefinitionImpl();
-    workflowDefinition.setId("123");
-    workflowDefinition.setTitle("test title");
-    workflowDefinition.setDescription("dest description");
-    service.registerWorkflowDefinition(workflowDefinition);
   }
 
   @After
@@ -41,7 +36,7 @@ public class WorkflowServiceImplTest {
   }
   
   @Test
-  public void testGetWorkflowDefinition() {
-    Assert.assertEquals("test title", service.getWorkflowDefinition("123").getTitle());
+  public void testWorkflowOperationsExist() {
+    Assert.assertTrue( ! service.getWorkflowOperations().isEmpty());
   }
 }

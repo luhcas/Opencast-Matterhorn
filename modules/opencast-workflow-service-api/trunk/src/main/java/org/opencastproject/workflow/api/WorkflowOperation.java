@@ -15,9 +15,18 @@
  */
 package org.opencastproject.workflow.api;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
- * Generates {@link Runnable}s for an operation on a given {@link WorkflowInstance}.
+ * Describes an operation or action to be performed as part of a workflow.
  */
-public interface WorkflowRunnerFactory {
-  Runnable getRunnable(WorkflowInstance workflowInstance);
+@XmlJavaTypeAdapter(WorkflowOperationImpl.Adapter.class)
+public interface WorkflowOperation {
+  /**
+   * A unique name identifying this operation
+   * @return
+   */
+  String getName();
+  String getDescription();
+  boolean isFailOnError();
 }

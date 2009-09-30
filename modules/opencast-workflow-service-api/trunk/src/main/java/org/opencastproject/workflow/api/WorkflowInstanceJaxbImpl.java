@@ -13,22 +13,17 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.workflow.endpoint;
+package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
-import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowInstance.State;
-import org.opencastproject.workflow.impl.WorkflowInstanceImpl;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -37,49 +32,15 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlType(name="workflow-instance", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="workflow-instance", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WorkflowInstanceJaxbImpl {
+public class WorkflowInstanceJaxbImpl implements WorkflowInstance {
   private static final Logger logger = LoggerFactory.getLogger(WorkflowInstanceJaxbImpl.class);
 
   public WorkflowInstanceJaxbImpl() {}
-  public WorkflowInstanceJaxbImpl(WorkflowInstance instance) throws Exception {
-    logger.info("Creating a " + WorkflowInstanceJaxbImpl.class.getName() + " from " + instance);
-    this.id = instance.getId();
-    this.title = instance.getTitle();
-    this.description = instance.getDescription();
-    this.workflowDefinition = new WorkflowDefinitionJaxbImpl(instance.getWorkflowDefinition());
-    State stateEnum = instance.getState();
-    if(stateEnum != null) this.state = stateEnum.name();
-    MediaPackage mp = instance.getMediaPackage();
-    if(mp != null) {
-      mediaPackage = MediapackageType.fromXml(mp.toXml());
-    }
-    Map<String, String> instanceProps = instance.getProperties();
-    if(instanceProps != null) {
-      this.properties = new HashMap<String, String>(instanceProps);
-    }
-  }
-
-  @XmlTransient
-  public WorkflowInstance getEntity() throws Exception {
-    WorkflowInstanceImpl entity = new WorkflowInstanceImpl();
-    entity.setId(id);
-    entity.setTitle(title);
-    entity.setDescription(description);
-    entity.setWorkflowDefinition(workflowDefinition.getEntity());
-    if(state != null) entity.setState(State.valueOf(State.class, this.state));
-    if(this.mediaPackage != null) {
-      InputStream in = IOUtils.toInputStream(mediaPackage.toXml());
-      entity.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(in));
-    }
-    entity.setProperties(this.properties);
-    return entity;
-  }
 
   @XmlID
   @XmlAttribute()
@@ -98,7 +59,7 @@ public class WorkflowInstanceJaxbImpl {
   private String description;
 
   @XmlElement(name="mediapackage")
-  private MediapackageType mediaPackage;
+  private MediapackageType mediaPackageType;
   
   @XmlElementWrapper(name="properties")
   private HashMap<String, String> properties;
@@ -127,30 +88,44 @@ public class WorkflowInstanceJaxbImpl {
     this.description = description;
   }
 
-  public WorkflowDefinitionJaxbImpl getWorkflowDefinition() {
+  public WorkflowDefinition getWorkflowDefinition() {
     return workflowDefinition;
   }
 
   public void setWorkflowDefinition(WorkflowDefinitionJaxbImpl workflowDefinition) {
     this.workflowDefinition = workflowDefinition;
   }
-  public String getState() {
-    return state;
+  public State getState() {
+    return State.valueOf(state);
   }
   public void setState(String state) {
     this.state = state;
   }
-  public MediapackageType getMediaPackage() {
-    return mediaPackage;
+
+  public MediapackageType getMediaPackageType() {
+    return mediaPackageType;
   }
-  public void setMediaPackage(MediapackageType mediaPackage) {
-    this.mediaPackage = mediaPackage;
+  public void setMediaPackageType(MediapackageType mediaPackageType) {
+    this.mediaPackageType = mediaPackageType;
   }
   public HashMap<String, String> getProperties() {
     return properties;
   }
   public void setProperties(HashMap<String, String> properties) {
     this.properties = properties;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#getMediaPackage()
+   */
+  public MediaPackage getMediaPackage() {
+    if(mediaPackageType == null) return null;
+    try {
+      return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

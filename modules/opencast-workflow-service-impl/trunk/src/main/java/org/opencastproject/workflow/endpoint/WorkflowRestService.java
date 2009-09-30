@@ -18,9 +18,15 @@ package org.opencastproject.workflow.endpoint;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
-import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowDefinitionJaxbImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowInstanceJaxbImpl;
+import org.opencastproject.workflow.api.WorkflowInstanceJaxbImplList;
+import org.opencastproject.workflow.api.WorkflowOperation;
+import org.opencastproject.workflow.api.WorkflowOperationImpl;
+import org.opencastproject.workflow.api.WorkflowOperationJaxbImplList;
 import org.opencastproject.workflow.api.WorkflowService;
+import org.opencastproject.workflow.api.WorkflowInstance.State;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -30,7 +36,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -56,39 +61,23 @@ public class WorkflowRestService {
   }
 
   @GET
-  @Path("defs")
+  @Path("operations")
   @Produces(MediaType.TEXT_XML)
-  public WorkflowDefinitionJaxbImplList fetchAllJaxbWorkflowDefinitions() {
-    WorkflowDefinitionJaxbImplList list = new WorkflowDefinitionJaxbImplList();
-    for(WorkflowDefinition def : service.fetchAllWorkflowDefinitions()) {
-      list.getWorkflowDefinition().add(new WorkflowDefinitionJaxbImpl(def));
+  public WorkflowOperationJaxbImplList fetchWorkflowOperations() {
+    WorkflowOperationJaxbImplList list = new WorkflowOperationJaxbImplList();
+    for(WorkflowOperation def : service.getWorkflowOperations()) {
+      list.getOperation().add((WorkflowOperationImpl)def);
     }
     return list;
   }
 
   @GET
-  @Path("def/{id}")
+  @Path("instances/{state}")
   @Produces(MediaType.TEXT_XML)
-  public WorkflowDefinitionJaxbImpl getJaxbWorkflowDefinition(@PathParam("id") String id) {
-    WorkflowDefinition entity = service.getWorkflowDefinition(id);
-    return new WorkflowDefinitionJaxbImpl(entity);
-  }
-
-  @POST
-  @Path("def/{id}")
-  @Consumes(MediaType.TEXT_XML)
-  public Response registerJaxbWorkflowDefinition(@FormParam("wfdef") WorkflowDefinitionJaxbImpl workflowDefinition) {
-    service.registerWorkflowDefinition(workflowDefinition.getEntity());
-    return Response.ok("Workflow definition " + workflowDefinition.getId() + " registered").build();
-  }
-
-  @GET
-  @Path("instances/{id}")
-  @Produces(MediaType.TEXT_XML)
-  public WorkflowInstanceJaxbImplList fetchAllJaxbWorkflowInstances(@PathParam("id") String workflowDefinitionId) throws Exception {
+  public WorkflowInstanceJaxbImplList fetchAllJaxbWorkflowInstances(@PathParam("state") String state) throws Exception {
     WorkflowInstanceJaxbImplList list = new WorkflowInstanceJaxbImplList();
-    for(WorkflowInstance instance : service.fetchAllWorkflowInstances(workflowDefinitionId)) {
-      list.getWorkflowInstance().add(new WorkflowInstanceJaxbImpl(instance));
+    for(WorkflowInstance instance : service.getWorkflowInstances(State.valueOf(state))) {
+      list.getWorkflowInstance().add((WorkflowInstanceJaxbImpl)instance);
     }
     return list;
   }
@@ -97,28 +86,26 @@ public class WorkflowRestService {
   @Path("instance/{id}")
   @Produces(MediaType.TEXT_XML)
   public WorkflowInstanceJaxbImpl getJaxbWorkflowInstance(@PathParam("id") String id) throws Exception {
-    return new WorkflowInstanceJaxbImpl(service.getWorkflowInstance(id));
+    return (WorkflowInstanceJaxbImpl)service.getWorkflowInstance(id);
   }
 
   @POST
-  @Path("start/{id}")
+  @Path("start")
   @Produces(MediaType.TEXT_XML)
   public WorkflowInstanceJaxbImpl start(
-          @PathParam("id") String workflowDefinitionId,
+          @FormParam("definition") WorkflowDefinitionJaxbImpl workflowDefinition,
           @FormParam("mediapackage") MediapackageType mediaPackage,
           @FormParam("properties") LocalHashMap localMap) {
     Map<String, String> properties = localMap.getMap();
-    WorkflowDefinition workflowDefinition = service.getWorkflowDefinition(workflowDefinitionId);
     try {
       InputStream in = IOUtils.toInputStream(mediaPackage.toXml());
       MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(in);
       WorkflowInstance instance = service.start(workflowDefinition, mp, properties);
-      return new WorkflowInstanceJaxbImpl(instance);
+      return (WorkflowInstanceJaxbImpl)instance;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
-
 
   // FIXME Using GET for testing purposes only.
   

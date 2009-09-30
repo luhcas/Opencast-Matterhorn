@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.workflow.endpoint;
+package org.opencastproject.workflow.api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,16 +28,16 @@ import javax.xml.bind.annotation.XmlType;
  * TODO: Comment me!
  *
  */
-@XmlType(name="workflow-definitions", namespace="http://workflow.opencastproject.org/")
-@XmlRootElement(name="workflow-definitions", namespace="http://workflow.opencastproject.org/")
+@XmlType(name="workflow-instances", namespace="http://workflow.opencastproject.org/")
+@XmlRootElement(name="workflow-instances", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WorkflowDefinitionJaxbImplList {
-  @XmlElement(name="workflow-definition")
-  protected List<WorkflowDefinitionJaxbImpl> defs;
-  public List<WorkflowDefinitionJaxbImpl> getWorkflowDefinition() {
-    if (defs == null) {
-      defs = new ArrayList<WorkflowDefinitionJaxbImpl>();
+public class WorkflowInstanceJaxbImplList {
+  @XmlElement(name="workflow-instance")
+  protected List<WorkflowInstanceJaxbImpl> instance;
+  public List<WorkflowInstanceJaxbImpl> getWorkflowInstance() {
+    if (instance == null) {
+      instance = new ArrayList<WorkflowInstanceJaxbImpl>();
     }
-    return defs;
+    return instance;
   }
 }

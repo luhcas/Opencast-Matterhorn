@@ -7,31 +7,36 @@
     </h2>
     
     <h4>
-      Workflow Definitions
+      Workflow Operations
     </h4>
     <div>
-      <b>GET defs</b> returns all workflow definitions as a Workflow Definition List
+      <b>GET operations</b> returns all workflow operations
     </div>
-    <div>
-      <b>GET def/{id}</b> returns a workflow definition
-    </div>
-    <div>
-      <b>POST def/{id}</b> registers a new workflow definition, which should be passed in the "wfdef" form parameter
-    </div>
-    
     
     <h4>
       Workflow Instances
     </h4>
     <div>
-      <b>GET instances/{id}</b> returns all instances for a given workflow definition ID as a Workflow Instance List
+      <b>GET instances/{state}</b> returns all instances in a given state (RUNNING, PAUSED, or STOPPED)
     </div>
     <div>
       <b>GET instance/{id}</b> returns a workflow instance
     </div>
     <div>
-      <b>POST start/{id}</b> starts a workflow instance, based on the specified workflow definition ID and media package passed in the "mediapackage" form parameter
-      <form action="start/2" method="POST">
+      <b>POST start</b> starts a workflow instance, based on the specified xml workflow definition (form element='definition'),
+      the media package xml (form element='mediapackage'), and key-value properties (from element='properties')
+      <form action="start" method="POST">
+        Workflow Definition XML<br/>
+        <textarea rows="20" cols="80" id="definition" name="definition">
+<workflow-definition id="123">
+  <title>A workflow definition title</title>
+  <description>A workflow definition description</description>
+  <operations>
+    <operation name="compose" fail-on-error="true"/>
+    <operation name="distribute" fail-on-error="false"/>
+  </operations>
+</workflow-definition>
+</textarea><br/>
         Media Package XML<br/>
         <textarea rows="20" cols="80" id="mediapackage" name="mediapackage"><mediapackage id="00000/1" start="2007-12-05T13:40:00" duration="1004400000"></mediapackage></textarea><br/>
         Key/Value Properties<br/>

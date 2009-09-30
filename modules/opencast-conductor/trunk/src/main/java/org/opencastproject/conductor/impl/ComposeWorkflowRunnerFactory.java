@@ -13,10 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.conductor;
+package org.opencastproject.conductor.impl;
 
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowRunnerFactory;
+import org.opencastproject.workflow.api.WorkflowOperationHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * TODO: Comment me!
  *
  */
-public class ComposeWorkflowRunnerFactory implements WorkflowRunnerFactory {
+public class ComposeWorkflowRunnerFactory implements WorkflowOperationHandler {
   private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowRunnerFactory.class);
 
   /**

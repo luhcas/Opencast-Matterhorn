@@ -16,9 +16,14 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowDefinitionJaxbImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowRunnerFactory;
+import org.opencastproject.workflow.api.WorkflowInstanceJaxbImpl;
+import org.opencastproject.workflow.api.WorkflowOperation;
+import org.opencastproject.workflow.api.WorkflowOperationHandler;
+import org.opencastproject.workflow.api.WorkflowOperationImpl;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
 
@@ -32,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
@@ -41,23 +45,23 @@ import java.util.UUID;
 import java.util.Map.Entry;
 
 /**
- * Implements {@link WorkflowService} with in-memory data structures to hold the {@link WorkflowDefinition}s and
- * {@link WorkflowInstance}s.  {@link WorkflowRunnerFactory}s are looked up in the OSGi service registry based on the
- * "opencast.workflow.operation" property.  If the {@link WorkflowRunnerFactory}'s "opencast.workflow.operation"
- * service registration property matches an operation from {@link WorkflowDefinition#getOperations()}, then the factory
- * returns a {@link Runnable} to handle that operation.  This allows for custom runnables to be added or modified
- * without affecting the workflow service itself.
+ * Implements {@link WorkflowService} with in-memory data structures to hold {@link WorkflowOperation}s and
+ * {@link WorkflowInstance}s.  {@link WorkflowOperationHandler}s are looked up in the OSGi service registry based on the
+ * "opencast.workflow.operation" property.  If the {@link WorkflowOperationHandler}'s "opencast.workflow.operation"
+ * service registration property matches {@link WorkflowOperation#getName()}, then the factory returns a
+ * {@link Runnable} to handle that operation.  This allows for custom runnables to be added or modified without
+ * affecting the workflow service itself.
  */
 public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImpl.class);
   
-  Map<String, WorkflowDefinition> definitions;
   Map<String, WorkflowInstance> instances;
+  List<WorkflowOperation> operations;
 
   public WorkflowServiceImpl() {
-    definitions = new HashMap<String, WorkflowDefinition>();
     instances = new HashMap<String, WorkflowInstance>();
-    loadSampleData();
+    operations = new ArrayList<WorkflowOperation>();
+    loadOperations();
   }
   
   @SuppressWarnings("unchecked")
@@ -65,102 +69,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     // Update any configuration properties here
   }
 
-  protected void loadSampleData() {
-    WorkflowDefinitionImpl def1 = new WorkflowDefinitionImpl();
-    def1.setId("1");
-    def1.setTitle("Transcode and Distribute");
-    def1.setDescription("A simple workflow that transcodes the media into distribution formats, then sends the " +
-        "resulting distribution files, along with their associated metadata, to the distribution channels");
-    List<String> operations1 = new ArrayList<String>();
-    operations1.add("compose");
-    operations1.add("distribute");
-    def1.setOperations(operations1);
-    definitions.put(def1.getId(), def1);
-  
-    WorkflowDefinitionImpl def2 = new WorkflowDefinitionImpl();
-    def2.setId("2");
-    def2.setTitle("Distribute Only");
-    def2.setDescription("A simple workflow that sends media and metadata directly to the distribution channels");
-    List<String> operations2 = new ArrayList<String>();
-    operations2.add("distribute");
-    def2.setOperations(operations2);
-    definitions.put(def2.getId(), def2);
-    
-    WorkflowInstanceImpl instance1 = new WorkflowInstanceImpl();
-    instance1.setId("1");
-    instance1.setTitle("Instance #1 of 'Transcode and Distribute'");
-    instance1.setDescription("An instance of the transcode and distribute workflow definition");
-    instance1.setWorkflowDefinition(def1);
-    instance1.setState(State.PAUSED);
-    Map<String, String> map1 = new HashMap<String, String>();
-    map1.put("flash", "low-bandwidth");
-    instance1.setProperties(map1);
-    instances.put(instance1.getId(), instance1);
-  
-    WorkflowInstanceImpl instance2 = new WorkflowInstanceImpl();
-    instance2.setId("2");
-    instance2.setTitle("Instance #2 of 'Transcode and Distribute'");
-    instance2.setDescription("Another instance of the transcode and distribute workflow definition");
-    instance2.setWorkflowDefinition(def1);
-    instance2.setState(State.RUNNING);
-    Map<String, String> map2 = new HashMap<String, String>();
-    map2.put("flash", "high-bandwidth");
-    instance2.setProperties(map2);
-    instances.put(instance2.getId(), instance2);
-  
-    WorkflowInstanceImpl instance3 = new WorkflowInstanceImpl();
-    instance3.setId("3");
-    instance3.setTitle("Instance #1 of 'Distribute Only'");
-    instance3.setDescription("An instance of the distribute only workflow definition");
-    instance3.setWorkflowDefinition(def2);
-    instance3.setState(State.STOPPED);
-    instances.put(instance3.getId(), instance3);
-  }
-  
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#fetchAllWorkflowDefinitions()
-   */
-  public List<WorkflowDefinition> fetchAllWorkflowDefinitions() {
-    List<WorkflowDefinition> list = new ArrayList<WorkflowDefinition>();
-    for(Entry<String, WorkflowDefinition> entry : definitions.entrySet()) {
-      list.add(entry.getValue());
-    }
-    Collections.sort(list, new Comparator<WorkflowDefinition>() {
-      public int compare(WorkflowDefinition w1, WorkflowDefinition w2) {
-        return w1.getTitle().compareTo(w2.getTitle());
-      }
-    });
-    return list;
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#fetchAllWorkflowInstances(java.lang.String)
-   */
-  public List<WorkflowInstance> fetchAllWorkflowInstances(String workflowDefinitionId) {
-    List<WorkflowInstance> list = new ArrayList<WorkflowInstance>();
-    WorkflowDefinition workflowDefinition = definitions.get(workflowDefinitionId);
-    for(Entry<String, WorkflowInstance> entry : instances.entrySet()) {
-      WorkflowInstance instance = entry.getValue();
-      if(instance.getWorkflowDefinition().equals(workflowDefinition)) {
-        list.add(instance);
-      }
-    }
-    Collections.sort(list, new Comparator<WorkflowInstance>() {
-      public int compare(WorkflowInstance w1, WorkflowInstance w2) {
-        return w1.getTitle().compareTo(w2.getTitle());
-      }
-    });
-    return list;
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowDefinition(java.lang.String)
-   */
-  public WorkflowDefinition getWorkflowDefinition(String id) {
-    return definitions.get(id);
+  protected void loadOperations() {
+    WorkflowOperationImpl compose = new WorkflowOperationImpl("compose", "Composes new media tracks", true);
+    WorkflowOperationImpl distribute = new WorkflowOperationImpl("distribute", "Distributes media tracks to distribution channels", true);
+    operations.add(compose);
+    operations.add(distribute);
   }
 
   /**
@@ -177,28 +90,22 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#registerWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
-   */
-  public void registerWorkflowDefinition(WorkflowDefinition workflowDefinition) {
-    if(definitions.containsKey(workflowDefinition.getId())) {
-      throw new IllegalArgumentException("Workflow definition " + workflowDefinition.getId() + " already exists");
-    }
-    definitions.put(workflowDefinition.getId(), workflowDefinition);
-  }
-
-  /**
-   * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition, org.opencastproject.media.mediapackage.MediaPackage)
    */
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage, Map<String, String> properties) {
-    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
+    WorkflowInstanceJaxbImpl workflowInstance = new WorkflowInstanceJaxbImpl();
+    WorkflowDefinitionJaxbImpl def = (WorkflowDefinitionJaxbImpl) workflowDefinition;
     workflowInstance.setId(UUID.randomUUID().toString());
     workflowInstance.setTitle(workflowDefinition.getTitle() + " Instance " + workflowInstance.getId());
     workflowInstance.setDescription(workflowInstance.getTitle());
-    workflowInstance.setWorkflowDefinition(workflowDefinition);
-    workflowInstance.setMediaPackage(mediaPackage);
-    workflowInstance.setProperties(properties);
-    workflowInstance.setState(WorkflowInstance.State.RUNNING);
+    workflowInstance.setWorkflowDefinition(def);
+    try {
+      workflowInstance.setMediaPackageType(MediapackageType.fromXml(mediaPackage.toXml()));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    workflowInstance.setProperties(new HashMap<String, String>(properties));
+    workflowInstance.setState(WorkflowInstance.State.RUNNING.name());
     instances.put(workflowInstance.getId(), workflowInstance);
     run(workflowInstance);
     return workflowInstance;
@@ -216,11 +123,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     Thread t = new Thread(new Runnable() {
       public void run() {
         // Get all of the runnable workflow services available for each operation (in the order of operations)
-        for(String operation : wfi.getWorkflowDefinition().getOperations()) {
+        for(WorkflowOperation operation : wfi.getWorkflowDefinition().getOperations()) {
           ServiceReference[] serviceRefs = null;
           try {
-            serviceRefs = componentContext.getBundleContext().getAllServiceReferences(WorkflowRunnerFactory.class.getName(),
-                    "(opencast.workflow.operation=" + operation + ")");
+            serviceRefs = componentContext.getBundleContext().getAllServiceReferences(WorkflowOperationHandler.class.getName(),
+                    "(opencast.workflow.operation=" + operation.getName() + ")");
           } catch (InvalidSyntaxException e) {
             throw new RuntimeException(e);
           }
@@ -228,7 +135,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
             logger.info("No WorkflowRunners registered for operation " + operation);
           } else {
             for(ServiceReference serviceRef : serviceRefs) {
-              WorkflowRunnerFactory runner = (WorkflowRunnerFactory)componentContext.getBundleContext().getService(serviceRef);
+              WorkflowOperationHandler runner = (WorkflowOperationHandler)componentContext.getBundleContext().getService(serviceRef);
               runner.getRunnable(wfi).run(); // Do not spawn new threads for these runnables yet
             }
           }
@@ -244,12 +151,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#stop(java.lang.String)
    */
   public void stop(String workflowInstanceId) {
-    WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
+    WorkflowInstanceJaxbImpl instance = (WorkflowInstanceJaxbImpl)getWorkflowInstance(workflowInstanceId);
     Thread t = threadMap.get(workflowInstanceId);
     if(t != null) {
       t.interrupt();
     }
-    instance.setState(State.STOPPED);
+    instance.setState(State.STOPPED.name());
 }
 
   /**
@@ -257,12 +164,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#suspend(java.lang.String)
    */
   public void suspend(String workflowInstanceId) {
-    WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
+    WorkflowInstanceJaxbImpl instance = (WorkflowInstanceJaxbImpl)getWorkflowInstance(workflowInstanceId);
     Thread t = threadMap.get(workflowInstanceId);
     if(t != null) {
       t.interrupt();
     }
-    instance.setState(State.PAUSED);
+    instance.setState(State.PAUSED.name());
   }
 
   /**
@@ -270,8 +177,30 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#resume(java.lang.String)
    */
   public void resume(String workflowInstanceId) {
-    WorkflowInstanceImpl workflowInstance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
+    WorkflowInstanceJaxbImpl workflowInstance = (WorkflowInstanceJaxbImpl)getWorkflowInstance(workflowInstanceId);
     run(workflowInstance);
-    workflowInstance.setState(State.RUNNING);
+    workflowInstance.setState(State.RUNNING.name());
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowInstances(org.opencastproject.workflow.api.WorkflowInstance.State)
+   */
+  public List<WorkflowInstance> getWorkflowInstances(State state) {
+    List<WorkflowInstance> instancesInState = new ArrayList<WorkflowInstance>();
+    for(Entry<String, WorkflowInstance> entry : instances.entrySet()) {
+      if(entry.getValue().getState().equals(state)) {
+        instancesInState.add(entry.getValue());
+      }
+    }
+    return instancesInState;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowOperations()
+   */
+  public List<WorkflowOperation> getWorkflowOperations() {
+    return Collections.unmodifiableList(operations);
   }
 }

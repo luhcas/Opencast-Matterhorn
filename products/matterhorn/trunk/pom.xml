@@ -38,6 +38,7 @@
         <module>opencast-authentication-api</module>
         <module>opencast-composer-service-api</module>
         <module>opencast-composer-service-impl</module>
+        <module>opencast-conductor-api</module>
         <module>opencast-conductor</module>
         <module>opencast-distribution-service-api</module>
         <module>opencast-distribution-service-local-impl</module>
@@ -50,7 +51,7 @@
         <module>opencast-notification-service-api</module>
         <module>opencast-runtime-info-ui</module>
         <module>opencast-search-service-api</module>
-        <module>opencast-search-service-impl</module>
+        <!-- module>opencast-search-service-impl</module -->
         <module>opencast-util</module>
         <module>opencast-working-file-repository-service-api</module>
         <module>opencast-working-file-repository-service-impl</module>
@@ -75,6 +76,7 @@
         <module>opencast-authentication-api</module>
         <module>opencast-composer-service-api</module>
         <module>opencast-composer-service-impl</module>
+        <module>opencast-conductor-api</module>
         <module>opencast-conductor</module>
         <module>opencast-distribution-service-api</module>
         <module>opencast-distribution-service-local-impl</module>
@@ -87,7 +89,7 @@
         <module>opencast-notification-service-api</module>
         <module>opencast-runtime-info-ui</module>
         <module>opencast-search-service-api</module>
-        <module>opencast-search-service-impl</module>
+        <!-- module>opencast-search-service-impl</module -->
         <module>opencast-util</module>
         <module>opencast-working-file-repository-service-api</module>
         <module>opencast-working-file-repository-service-impl</module>
@@ -580,19 +582,19 @@
       <dependency>
         <groupId>org.apache.cxf</groupId>
         <artifactId>cxf-bundle</artifactId>
-        <version>2.3.0-OCSNAPSHOT</version>
+        <version>2.3.0-SNAPSHOT</version>
       </dependency>
 
       <dependency>
         <groupId>org.apache.cxf.dosgi</groupId>
         <artifactId>cxf-dosgi-ri-discovery-local</artifactId>
-        <version>1.1-OCSNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
       </dependency>
 
       <dependency>
         <groupId>org.apache.cxf.dosgi</groupId>
         <artifactId>cxf-dosgi-ri-dsw-cxf</artifactId>
-        <version>1.1-OCSNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
       </dependency>
 
       <dependency>

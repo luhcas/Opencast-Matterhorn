@@ -13,26 +13,20 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.workflow.impl;
+package org.opencastproject.workflow.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.workflow.api.WorkflowDefinition;
-import org.opencastproject.workflow.api.WorkflowInstance;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * A simple POJO-based implementation of a {@link WorkflowDefinition}
  */
-public class WorkflowInstanceImpl implements WorkflowInstance {
+public class WorkflowDefinitionImpl implements WorkflowDefinition {
   private String id;
-  private WorkflowDefinition workflowDefinition;
-  private Map<String, String> properties;
-  private MediaPackage mediaPackage;
   private String title;
   private String description;
-  private State state;
-  
+  private List<WorkflowOperation> operations;
+
   public String getId() {
     return id;
   }
@@ -57,37 +51,12 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     this.description = description;
   }
 
-  public WorkflowDefinition getWorkflowDefinition() {
-    return workflowDefinition;
+  public List<WorkflowOperation> getOperations() {
+    return operations;
   }
 
-  public void setWorkflowDefinition(WorkflowDefinition workflowDefinition) {
-    this.workflowDefinition = workflowDefinition;
+  public void setOperations(List<WorkflowOperation> operations) {
+    this.operations = operations;
   }
-
-  public State getState() {
-    return state;
-  }
-
-  public void setState(State state) {
-    this.state = state;
-  }
-
-  public MediaPackage getMediaPackage() {
-    return mediaPackage;
-  }
-
-  public void setMediaPackage(MediaPackage mediaPackage) {
-    this.mediaPackage = mediaPackage;
-  }
-
-  public Map<String, String> getProperties() {
-    return properties;
-  }
-
-  public void setProperties(Map<String, String> properties) {
-    this.properties = properties;
-  }
-
 }
 
