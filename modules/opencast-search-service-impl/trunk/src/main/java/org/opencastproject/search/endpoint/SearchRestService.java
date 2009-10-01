@@ -15,10 +15,19 @@
  */
 package org.opencastproject.search.endpoint;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilder;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.SearchResultImpl;
+
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -33,21 +42,46 @@ import javax.ws.rs.core.MediaType;
  */
 @Path("/")
 public class SearchRestService {
+  private static final Logger logger = LoggerFactory.getLogger(SearchRestService.class);
+  
   protected SearchService searchService;
   public void setSearchService(SearchService searchService) {
     this.searchService = searchService;
   }
 
+  protected String docs;
+  
+  public SearchRestService() {
+    // Pre-load the documentation
+    String docsFromClassloader = null;
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/html/index.html");
+      docsFromClassloader = IOUtils.toString(in);
+    } catch (IOException e) {
+      logger.error("failed to read documentation", e);
+      docsFromClassloader = "unable to load documentation for " + SearchRestService.class.getName();
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+    docs = docsFromClassloader;
+  }
+
   @GET
   @Path("docs")
   public String getDocs() {
-    return "to be documented";
+    return docs;
   }
   
   @POST
   @Path("add")
-  public void add(@FormParam("mediapackage") MediaPackage mediaPackage) throws SearchException {
-    searchService.add(mediaPackage);
+  public void add(@FormParam("mediapackage") MediapackageType mediaPackage) throws SearchException {
+    MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
+    try {
+      searchService.add(builder.loadFromManifest(IOUtils.toInputStream(mediaPackage.toXml())));
+    } catch (Exception e) {
+      throw new SearchException(e);
+    }
   }
 
   @POST
@@ -89,17 +123,21 @@ public class SearchRestService {
           @QueryParam("offset") int offset) {
     // Try searching by episode ID first
     if(id != null) {
+      logger.debug("Searching for episodes by episode ID");
       return (SearchResultImpl) searchService.getEpisodeById(id);
     }
     // Then try searching by series ID
     if(seriesId != null) {
+      logger.debug("Searching for episodes by series ID");
       return (SearchResultImpl) searchService.getEpisodesBySeries(seriesId);
     }
     
     // If text is specified, do a free text search.  Otherwise, just return the most recent episodes
     if(text == null) {
+      logger.debug("Searching for all episodes, ordered by date");
       return (SearchResultImpl) searchService.getEpisodesByDate(limit, offset);
     } else {
+      logger.debug("Searching for episodes via free text search");
       return (SearchResultImpl) searchService.getEpisodesByText(text, offset, limit);
     }
   }
