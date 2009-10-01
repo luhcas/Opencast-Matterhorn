@@ -17,15 +17,8 @@ package org.opencastproject.media.mediapackage;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
 
 /**
  * Registers services related to {@link MediaPackage}s, including a JAX-RS {@link MessageBodyReader} and
@@ -34,24 +27,12 @@ import javax.ws.rs.ext.MessageBodyWriter;
 public class Activator implements BundleActivator{
   private static final Logger logger = LoggerFactory.getLogger(Activator.class);
   
-  protected List<ServiceRegistration> readersAndWriters = new ArrayList<ServiceRegistration>();
-  
   /**
    * {@inheritDoc}
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
   public void start(BundleContext context) throws Exception {
     logger.info("starting");
-
-    // Register a Media Package Reader / Writer
-    MediaPackageJaxRsReaderWriter mediaPackageReaderWriter = new MediaPackageJaxRsReaderWriter();
-    readersAndWriters.add(context.registerService(MessageBodyReader.class.getName(), mediaPackageReaderWriter, null));
-    readersAndWriters.add(context.registerService(MessageBodyWriter.class.getName(), mediaPackageReaderWriter, null));
-
-    // Register a Media Package Element Reader / Writer
-    MediaPackageElementJaxRsReaderWriter elementReaderWriter = new MediaPackageElementJaxRsReaderWriter();
-    readersAndWriters.add(context.registerService(MessageBodyReader.class.getName(), elementReaderWriter, null));
-    readersAndWriters.add(context.registerService(MessageBodyWriter.class.getName(), elementReaderWriter, null));
   }
 
   /**
@@ -60,8 +41,5 @@ public class Activator implements BundleActivator{
    */
   public void stop(BundleContext context) throws Exception {
     logger.info("stopping");
-    for(ServiceRegistration reg: readersAndWriters) {
-      reg.unregister();
-    }
   }
 }
