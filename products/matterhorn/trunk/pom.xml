@@ -670,6 +670,29 @@
 
   <pluginRepositories>
     <pluginRepository>
+      <id>opencast</id>
+      <name>Opencast Repo</name>
+      <url>http://repository.opencastproject.org/nexus/content/groups/public</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </pluginRepository>
+    <pluginRepository>
+      <id>opencast.snapshots</id>
+      <name>Opencast SNAPSHOTS</name>
+      <url>http://repository.opencastproject.org/nexus/content/groups/public-snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </pluginRepository>
+    <!-- these are here as a backup in case the matterhorn nexus is down -->
+    <pluginRepository>
         <id>ops4j.releases</id>
         <url>http://repository.ops4j.org/maven2</url>
         <snapshots>
@@ -690,26 +713,28 @@
 
   <repositories>
     <repository>
-      <id>opencast.3rdparty</id>
-      <name>Opencast 3rd party repo</name>
-      <url>http://repository.opencastproject.org/nexus/content/repositories/thirdparty</url>
-    </repository>
-    <repository>
-      <id>opencast.releases</id>
-      <name>Opencast Releases</name>
-      <url>http://repository.opencastproject.org/nexus/content/repositories/releases</url>
+      <id>opencast</id>
+      <name>Opencast Repo</name>
+      <url>http://repository.opencastproject.org/nexus/content/groups/public</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
     </repository>
     <repository>
       <id>opencast.snapshots</id>
       <name>Opencast SNAPSHOTS</name>
-      <url>http://repository.opencastproject.org/nexus/content/repositories/snapshots</url>
+      <url>http://repository.opencastproject.org/nexus/content/groups/public-snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </repository>
-    <!-- eventually remove everything below here -->
-    <repository>
-      <id>apache.incubating</id>
-      <name>Apache Incubating Repository</name>
-      <url>http://people.apache.org/repo/m2-incubating-repository</url>
-    </repository>
+    <!-- these are here as a backup in case the matterhorn nexus is down -->
     <repository>
       <id>com.springsource.repository.bundles.release</id>
       <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
@@ -724,6 +749,11 @@
       <id>ops4j</id>
       <name>OPS4J Repository</name>
       <url>http://repository.ops4j.org/maven2</url>
+    </repository>
+    <repository>
+      <id>apache.incubating</id>
+      <name>Apache Incubating Repository</name>
+      <url>http://people.apache.org/repo/m2-incubating-repository</url>
     </repository>
     <repository>
       <id>codehaus-release-repo</id>
