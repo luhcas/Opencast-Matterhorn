@@ -24,9 +24,10 @@ REM # Create the debug config
 SET DEBUG_OPTS=-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=%DEBUG_PORT%,server=y,suspend=%DEBUG_SUSPEND%
 
 REM # For Java 6, you need some minor xml facility configuration
-SET XML_OPTS=-Djavax.xml.stream.XMLInputFactory=com.ctc.wstx.stax.WstxInputFactory -Djavax.xml.stream.XMLOutputFactory=com.ctc.wstx.stax.WstxOutputFactory -Djavax.xml.stream.XMLEventFactory=com.ctc.wstx.stax.WstxEventFactory
+REM No longer needed for CXF post 01 Oct
+REM SET XML_OPTS=-Djavax.xml.stream.XMLInputFactory=com.ctc.wstx.stax.WstxInputFactory -Djavax.xml.stream.XMLOutputFactory=com.ctc.wstx.stax.WstxOutputFactory -Djavax.xml.stream.XMLEventFactory=com.ctc.wstx.stax.WstxEventFactory
 
 REM # Finally start felix
 rm -rf %FELIX%/felix-cache/*
 cd %FELIX%
-java %DEBUG_OPTS% %XML_OPTS% %MAVEN_OPTS% %FELIX_FILEINSTALL_OPTS% %PAX_CONFMAN_OPTS% %CXF_OPTS% -jar %FELIX%/bin/felix.jar %FELIX_CACHE%
+java %DEBUG_OPTS% %MAVEN_OPTS% %FELIX_FILEINSTALL_OPTS% %PAX_CONFMAN_OPTS% %CXF_OPTS% -jar %FELIX%/bin/felix.jar %FELIX_CACHE%
