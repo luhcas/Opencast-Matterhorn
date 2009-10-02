@@ -1,0 +1,172 @@
+<html>
+<head>
+	<title>Accessible Opencast Streaming</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script type="text/javascript" src="bridge/lib/FABridge.js"></script>
+	<script type="text/javascript" src="bridge/Videodisplay.js"></script>
+
+	<script language="javascript" type="text/javascript">
+		function doPlay () {
+                    Videodisplay.play();
+		}
+			
+		function doPause () {
+                    Videodisplay.pause();
+		}
+		
+		function doStop () {
+                    Videodisplay.stop();
+		}
+		
+		function doSetVolume (value) {
+                    Videodisplay.setVolume(value);
+                }
+		
+		function setTime(text) {
+                    document.getElementById("time").innerHTML = text;
+		}
+	
+	</script>
+
+	<script language="JavaScript" type="text/javascript">
+	
+		function getNamedKey(k)
+		{ 
+  			if(typeof KeyEvent == "undefined") 
+  			{
+    			return ''; 
+  			} 
+  			else
+  			{
+    			for( key in KeyEvent )
+    			{
+      				if(KeyEvent[key] == k)
+        				return key.substr("DOM_VK_".length)
+    			}
+  			}
+		}
+		
+		function keyPressed(evt)
+		{
+  			var e = evt || window.event; 
+  			var objForm=document.forms[0];
+  			var ch='';
+
+  			if(e.keyCode > 0)
+  			{
+		  		Videodisplay.passCharCode(e.keyCode);
+  			}
+  			else
+  			{
+	  			if(document.layers)
+	  			{
+	
+	  			} 
+	  			else if(document.all)
+	  			{
+	
+		  		} 
+	  			else if (document.getElementById)
+				{
+	    			if(e.keyCode == 0)
+	    				Videodisplay.passCharCode(e.charCode);
+	    			else
+	    				Videodisplay.passCharCode(e.keyCode);
+	 			}
+	 			else
+	 			{
+	    			objForm.whichP.value = objForm.keyCodeP.value = objForm.charCodeP = 'not supported';
+	  			}
+  			}
+  			return true;
+		}
+
+		function init()
+		{
+  			if(document.captureEvents)
+   		 		document.captureEvents(Event.KEYPRESS);
+
+	  		document.onkeypress = keyPressed;
+
+		}
+	
+		window.onload=init;	
+	
+	</script>
+
+</head>
+
+	<body>
+		<div style="margin:10px">
+			<h1>Streaming Videoplayer</h1>
+			<object codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="288" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
+				<param name ="movie" value="Videodisplay.swf" />
+				<param name="quality"value="high"/>
+				<param name="allowScriptAccess" value="always" />
+				<param name="bgcolor" value="#000000"/>
+				<param name="allowFullScreen" value="true"/>
+				<param name="FlashVars" VALUE="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv&autoplay=false&captions=http://vm069.rz.uos.de:8080/examples/car.dfxp.xml">
+				<embed 
+					width="360" 
+					height="288" 
+					bgcolor="#000000"
+					allowfullscreen="true" 
+					type="application/x-shockwave-flash" 
+					pluginspage="http://www.macromedia.com/go/getflashplayer" 
+					flashvars="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv&autoplay=false&captions=http://vm069.rz.uos.de:8080/examples/car.dfxp.xml" 
+					quality="high" 
+					allowScriptAccess="always"
+					src="Videodisplay.swf"/>
+			</object>
+		</div>
+		
+		
+		<div style="margin:10px">
+		<object codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="40" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
+				<param name ="movie" value="Scrubber.swf" />
+				<param name="quality"value="high"/>
+				<param name="allowScriptAccess" value="always" />
+				<param name="bgcolor" value="#ffffff"/>
+				<param name="allowFullScreen" value="true"/>
+				<param name="FlashVars" VALUE="bridgeName=b_Videodisplay">
+				<embed 
+					width="360" 
+					height="40" 
+					allowfullscreen="true" 
+					type="application/x-shockwave-flash" 
+					pluginspage="http://www.macromedia.com/go/getflashplayer" 
+					flashvars="bridgeName=b_Videodisplay" 
+					quality="high" 
+					allowScriptAccess="always"
+					src="Scrubber.swf"/>
+		</object>
+			</div>
+		
+		
+		<div style="margin:10px">
+			<input type="button" onclick="doPlay();" value="Play"/>
+			<input type="button" onclick="doPause();" value="Pause"/>
+			<input type="button" onclick="doStop();" value="Stop"/>
+		</div>
+		
+		<div id="time" style="margin:10px">00:00:00 | 00:00:00</div>
+		
+		<table>
+			<tr>
+				<td colspan="2"><b>Feature List</b></td>
+			</tr>
+			<tr>
+				<td align="right">1.</td>
+				<td>Zoom video using the zoom function of the browser</td>
+			</tr>
+			<tr>
+				<td align="right">2.</td>
+				<td>Play/Pause video using keyboard: <b>spacebar</b> or <b>enter</b></td>
+			</tr>
+		    <tr>
+                <td align="right">3.</td>
+                <td>Default auto-play off: To enable it set flashvar <i>autoplay=true</i></td>
+            </tr>
+		</table>
+	</body>
+</html>

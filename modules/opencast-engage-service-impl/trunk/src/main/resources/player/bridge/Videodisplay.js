@@ -55,4 +55,11 @@ function VideodisplayReady() {
 		b_Videodisplay_root.setVolume(argNumber);
 	};
 
+	Videodisplay.getVolume = function(){
+		return b_Videodisplay_root.getVolume();
+	};
+	
+	Videodisplay.seek = function(argNumber) {
+		b_Videodisplay_root.seek(argNumber);
+	};
 }
