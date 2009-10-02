@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>EngageApp</groupId>
+  <artifactId>EngageApp_Player</artifactId>
+  <packaging>pom</packaging>
+  <version>0.1-SNAPSHOT</version>
+  <name>EngageApp_Player</name>
+  <url>http://maven.apache.org</url>
+
+<profiles>
+	 <profile>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+        <id>flex-mojos</id>
+            <repositories>
+                <repository>
+                    <id>flex-mojos-repository</id>
+                    <url>http://repository.sonatype.org/content/groups/flexgroup/</url>
+                    <releases> <enabled>true</enabled> </releases>
+                    <snapshots> <enabled>false</enabled> </snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>local</id>
+                    <url>http://repository.sonatype.org/content/groups/flexgroup/</url>
+                    <releases> <enabled>true</enabled> </releases>
+                    <snapshots> <enabled>false</enabled> </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+
+	<modules>
+		<module>src/main/flex/Scrubber</module>
+		<module>src/main/flex/Videodisplay</module>
+	</modules>
+
+</profile>
+</profiles>
+</project>

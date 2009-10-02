@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+		/**
+		 *  Copyright 2009 The Regents of the University of California
+		 *  Licensed under the Educational Community License, Version 2.0
+		 *  (the "License"); you may not use this file except in compliance
+		 *  with the License. You may obtain a copy of the License at
+		 *
+		 *  http://www.osedu.org/licenses/ECL-2.0
+		 *
+		 *  Unless required by applicable law or agreed to in writing,
+		 *  software distributed under the License is distributed on an "AS IS"
+		 *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+		 *  or implied. See the License for the specific language governing
+		 *  permissions and limitations under the License.
+		 *
+		 */ 
+		-->
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="100%"
+	height="100%"
+	layout="absolute"
+	backgroundColor="#000000"
+	preinitialize="{ onPreinitialize(); }"
+	addedToStage="onAddedToStage()"
+	xmlns:view="org.opencast.engage.brick.videodisplay.view.*"
+	viewSourceURL="srcview/index.html"
+	xmlns:ns1="bridge.*">
+	<mx:Style source="style/standard_videodisplay.css"/>
+	<mx:Script>
+		<![CDATA[
+		  import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
+			import org.opencast.engage.brick.videodisplay.control.event.VideoControlEvent;
+			import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
+			import org.opencast.engage.brick.videodisplay.business.VideodisplayBean;
+			import org.swizframework.Swiz;
+			
+			[Autowire]
+			[Bindable]
+			public var model:VideodisplayModel;
+			
+			/** load Beans */
+			private function onPreinitialize():void 
+			{
+				Swiz.getInstance().loadBeans( [VideodisplayBean ] );
+				Swiz.autowire(this);
+			}
+			
+			public function play():void
+			{
+				Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));		 
+			}
+			
+			public function pause():void
+			{
+				Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));
+			}
+			
+			public function stop():void			
+			{
+				Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.STOP));	
+			}
+			
+			private function onAddedToStage():void
+			{
+				stage.addEventListener(KeyboardEvent.KEY_UP, reportKeyDown);
+			}
+			
+		  public function seek(time:Number):void
+      {
+        model.player.seek(time);
+      }
+      
+      /*
+       *  Expects value between 0 and 1
+       */ 
+      public function setVolume(volume:Number):void
+      {
+        Swiz.dispatchEvent( new SetVolumeEvent(volume) );
+      }
+      
+      public function getVolume():Number
+      {
+        return model.player.volume;
+      }
+      
+			private function reportKeyDown(event:KeyboardEvent):void
+			{
+				passCharCode(event.charCode);
+			}
+			
+			public function passCharCode(charCode:int):void
+			{	
+				if(charCode == 13 || charCode == 32) // Return oder Leertaste
+				{
+					if(model.player.playing)
+						Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));	
+					else
+						Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));	
+				}
+				else if(charCode == 110 || charCode == 88) // n oder N
+				{
+					// Next Slide
+				} 
+				else if(charCode == 112 || charCode == 80) // p oder P
+				{
+					// Previous Slide
+				}        
+			}
+			
+  		]]>
+	</mx:Script>
+	<ns1:FABridge />
+	<view:VideodisplayView id="display"
+		width="100%"
+		height="100%"/>
+	<view:Splashscreen id="splash"
+		width="100%"
+		height="100%"/>
+</mx:Application>

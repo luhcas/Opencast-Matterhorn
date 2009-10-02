@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+	layout="absolute"
+	creationComplete="onCreationComplete();"
+	xmlns="*"
+	xmlns:flexunit="flexunit.flexui.*">
+	<mx:Script>
+		<![CDATA[
+			import flexunit.framework.TestSuite; 
+			import TestVideodisplay_demo;
+			import org.opencast.engage.brick.videodisplay.model.TestVideodisplayModel;			
+			
+			// Create the test suite and run the tests
+			private function onCreationComplete():void
+			{
+  				testRunner.test = createSuite();
+  				testRunner.startTest();
+  			}
+			
+			// Creates the test suite to run
+			private function createSuite():TestSuite {
+  				var testSuite:TestSuite = new TestSuite();
+  				testSuite.addTestSuite(TestVideodisplay_demo);
+  				testSuite.addTestSuite(TestVideodisplayModel);
+  				return testSuite;
+  			}	
+		]]>
+	</mx:Script>
+	<!-- FlexUnit GUI Component -->
+	<flexunit:TestRunnerBase id="testRunner"
+		width="100%"
+		height="100%"/>
+</mx:Application>

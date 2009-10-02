@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas width="100%"
+	height="100%"
+	xmlns:players="com.adobe.strobe.players.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:view="org.opencast.engage.brick.videodisplay.view.*">
+	<mx:Script>
+		<![CDATA[
+		  import org.openvideoplayer.net.NetLoadedContext;
+		  import org.openvideoplayer.events.MediaPlayerCapabilityChangeEvent;
+		  import org.openvideoplayer.events.BufferTimeChangeEvent;
+		  import org.openvideoplayer.events.BufferingChangeEvent;
+		  import org.swizframework.Swiz;
+		  import org.opencast.engage.brick.videodisplay.control.event.VideoControlEvent;
+			import org.opencast.engage.brick.videodisplay.control.util.TimeCode;
+			import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
+			import org.openvideoplayer.events.DurationChangeEvent;
+			import mx.core.Application;
+			import org.openvideoplayer.display.ScaleMode;
+			import org.openvideoplayer.events.PlayheadChangeEvent;
+			import org.openvideoplayer.events.DimensionChangeEvent;
+			import org.openvideoplayer.traits.LoadState;
+			import org.openvideoplayer.events.LoadableStateChangeEvent;
+			import org.openvideoplayer.traits.MediaTraitType;
+			import org.openvideoplayer.traits.ILoadable;
+			import org.openvideoplayer.media.MediaElement;
+		
+		
+			import mx.events.FlexEvent;
+			import org.openvideoplayer.net.NetLoader;
+			import org.openvideoplayer.media.URLResource;
+			import org.openvideoplayer.video.VideoElement;
+			
+			private static const REMOTE_PROGRESSIVE:String	  =	"http://vs1.rz.uos.de/public/virtmm/test/Pechakucha-zoo_hd.mp4";
+			private static const REMOTE_STREAM:String 			  =	"rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv";
+			
+			[Autowire]
+			[Bindable]
+			public var model:VideodisplayModel;
+			
+			private var t:TimeCode;
+			 
+			private var videoURL:String;
+			
+			private var media:VideoElement;
+			
+			private var autoplay:Boolean = false;
+			
+      private const TIMER_INTERVAL_BYTES_LOADED:int = 200;
+
+      private var bytesLodedTimer:Timer;        // ToDo: This timer should be encasulated in some other class
+			
+			protected function initPlayer():void
+			{
+				model.player = this.wrapper;
+				t = new TimeCode();
+				
+				bytesLodedTimer = new Timer(TIMER_INTERVAL_BYTES_LOADED);    
+				bytesLodedTimer.addEventListener(TimerEvent.TIMER, progress);
+				bytesLodedTimer.start();
+				
+				if(Application.application.parameters.video_url != undefined)
+					videoURL = Application.application.parameters.video_url;
+				else
+					videoURL = REMOTE_STREAM;
+					
+				if(Application.application.parameters.autoplay != undefined)
+          autoplay = (Application.application.parameters.autoplay == "true");
+        
+        
+        ExternalInterface.call('setCaptions', "Some captions...");
+/*
+        if(Application.application.parameters.captions != undefined)
+          Swiz.....
+          
+         ToDo: LoadDFXPXML 
+          
+*/
+				// Create the new media.
+				media = new VideoElement(new NetLoader(), new URLResource(videoURL));
+				
+				wrapper.scaleMode = ScaleMode.LETTERBOX;
+				
+				// Listen for events related to the new media.
+				toggleMediaListeners(media, true);
+				
+				wrapper.addEventListener(DimensionChangeEvent.DIMENSION_CHANGE, dimChange);	
+				wrapper.addEventListener(PlayheadChangeEvent.PLAYHEAD_CHANGE, playHeadChange);
+				wrapper.addEventListener(DurationChangeEvent.DURATION_CHANGE, durationChange);
+				
+				wrapper.element = media;
+			}
+			
+			private function autoPlayOff(event:PlayheadChangeEvent):void
+			{
+			    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.STOP));
+  			  wrapper.removeEventListener(PlayheadChangeEvent.PLAYHEAD_CHANGE, autoPlayOff);
+          model.player.volume = 1.0;
+          wrapper.visible = true;
+			}
+			
+			private function durationChange(event:DurationChangeEvent):void
+			{	
+				// Store new duration as current duration in the videodisplay model
+				model.currentDuration = event.newDuration;
+				currentDurationString = t.getTC(model.currentDuration);
+				
+		    ExternalInterface.call('setTime', lastNewPositionString +" | "+ currentDurationString);
+		    ExternalInterface.call('setDuration', event.newDuration);
+			}
+			
+			private function dimChange(event:DimensionChangeEvent):void
+			{	
+			// 	debugDimensions.text = event.newWidth +" "+event.newHeight;
+			
+			//	ExternalInterface.call('setLog', "WidthxHeight: "+event.newWidth +"x"+event.newHeight);
+			}
+			
+			private function progress(event:TimerEvent):void
+      { 
+        var loadable:ILoadable = media.getTrait(MediaTraitType.LOADABLE) as ILoadable;
+        if (loadable)
+        {
+          var context:NetLoadedContext = NetLoadedContext(loadable.loadedContext);
+          ExternalInterface.call('setProgress', context.stream.bytesLoaded / context.stream.bytesTotal * 100);
+        }
+      }
+			
+			private var lastNewPositionString:String = "00:00:00";
+			private var currentDurationString:String = "00:00:00";
+			
+			private function playHeadChange(event:PlayheadChangeEvent):void
+			{	
+				model.currentPlayhead = event.newPosition;
+				
+				var newPositionString:String = t.getTC(event.newPosition);
+				
+				if(newPositionString != lastNewPositionString)
+				{
+					ExternalInterface.call('setTime', newPositionString +" | "+ currentDurationString);
+					lastNewPositionString = newPositionString;
+				}
+				
+				if(!model.player.seeking)
+				  ExternalInterface.call('setPlayhead', event.newPosition);
+				
+				
+//			ToDo Stefan:  new DisplayCaptionEvent(event.newPosition).dispatch(); in Swiz Style
+				
+				/* Im Controller
+				
+				time = event.newPosition;
+            for(var i:int = 0; i<model.currentCaptionSet.length; i++)
+            {
+                tmpCaption = CaptionVO(model.currentCaptionSet[(lastPos+i)%model.currentCaptionSet.length]);
+                
+                if(tmpCaption.begin<time && time<tmpCaption.end)
+                {
+                  lastPos +=i;
+                  break;
+                }
+                else
+                  tmpCaption = null;
+            }
+            if(tmpCaption!=null)
+              subtitle = tmpCaption.text;
+            else
+              subtitle = "";
+              
+          */
+				
+			}
+		
+			private function toggleMediaListeners(media:MediaElement, on:Boolean):void
+			{
+				if (media != null)
+				{
+					var loadable:ILoadable = media.getTrait(MediaTraitType.LOADABLE) as ILoadable;
+					if (loadable)
+					{
+						if (on)
+							loadable.addEventListener(LoadableStateChangeEvent.LOADABLE_STATE_CHANGE, onLoadableStateChange);
+						else
+							loadable.removeEventListener(LoadableStateChangeEvent.LOADABLE_STATE_CHANGE, onLoadableStateChange);
+					}
+				}
+			}
+			
+			private function onLoadableStateChange(event:LoadableStateChangeEvent):void
+			{
+				// debugLoadState.text = event.newState.toString();
+	
+				if (event.newState == LoadState.LOADED)
+				{
+				  if(!autoplay)
+				  {
+				    model.player.volume = 0.0;
+				    wrapper.visible = false;
+				    wrapper.addEventListener(PlayheadChangeEvent.PLAYHEAD_CHANGE, autoPlayOff);
+				  }
+				}
+			}
+		]]>
+	</mx:Script>
+	<players:MediaPlayerWrapper id="wrapper"
+		width="100%"
+		height="100%"
+		addedToStage="initPlayer()"/>
+	<!--
+			<mx:VBox
+				>
+				<mx:Box
+					width="100%"
+					>
+					<mx:Button 
+						label="PLAY/PAUSE"
+						click="{wrapper.playing? wrapper.pause() : wrapper.play()}" 
+						/>
+					<mx:Text
+						id="debugTxt"
+						/>	
+					<mx:Text
+						id="debugLoadState"
+						/>	
+					<mx:Text
+						id="debugDimensions"
+						text="{}"
+						/>	
+				</mx:Box>
+			</mx:VBox>
+			-->
+</mx:Canvas>

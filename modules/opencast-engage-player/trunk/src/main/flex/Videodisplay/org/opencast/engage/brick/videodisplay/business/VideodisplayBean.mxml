@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BeanLoader xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns="org.swizframework.util.*"
+	xmlns:business="org.opencast.engage.brick.videodisplay.business.*"
+	xmlns:model="org.opencast.engage.brick.videodisplay.model.*"
+	xmlns:control="org.opencast.engage.brick.videodisplay.control.*">
+	<business:VideodisplayDelegate id="videodisplayDelegate"/>
+	<model:VideodisplayModel id="videodisplayModel"/>
+	<control:VideodisplayController id="videodisplayController"/>
+</BeanLoader>

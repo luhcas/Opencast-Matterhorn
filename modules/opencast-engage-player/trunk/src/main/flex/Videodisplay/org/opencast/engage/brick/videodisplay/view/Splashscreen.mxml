@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+	backgroundAlpha="1.0"
+	currentState="{model.currentPlayerState}"
+	rollOver="showPauseButton();"
+	rollOut="hidePlayButton();"
+	xmlns:view="org.opencast.engage.brick.videodisplay.view.*">
+	<mx:Script>
+		<![CDATA[
+		  import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
+		  import org.opencast.engage.brick.videodisplay.state.PlayerState;
+		  import org.opencast.engage.brick.videodisplay.control.event.VideoControlEvent;
+		  import org.swizframework.Swiz;
+		  import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
+			
+      [Autowire]
+      [Bindable]
+      public var model:VideodisplayModel;
+		
+			private function showPauseButton():void
+			{
+				if (this.currentState == PlayerState.PLAYING)
+					pauseButton_up.visible = true;	
+			}
+			
+			private function hidePlayButton():void
+			{
+			   if (this.currentState == PlayerState.PLAYING)
+          pauseButton_up.visible = false;  
+			}
+		]]>
+	</mx:Script>
+	<mx:states>
+		<mx:State name="{PlayerState.PLAYING}">
+			<mx:SetProperty target="{playButton_up}"
+				name="visible"
+				value="false"/>
+			<mx:SetProperty target="{pauseButton_up}"
+				name="visible"
+				value="false"/>
+		</mx:State>
+		<mx:State name="{PlayerState.PAUSING}">
+			<mx:SetProperty target="{playButton_up}"
+				name="visible"
+				value="true"/>
+			<mx:SetProperty target="{pauseButton_up}"
+				name="visible"
+				value="false"/>
+		</mx:State>
+	</mx:states>
+	<mx:transitions>
+		<mx:Transition id="fadeOut"
+			fromState="{PlayerState.PLAYING}"
+			toState="{PlayerState.PAUSING}">
+			<mx:Parallel target="{curtain}">
+				<mx:Fade alphaFrom="0"
+					alphaTo="1.0"
+					duration="500"/>
+			</mx:Parallel>
+		</mx:Transition>
+		<mx:Transition id="fadeIn"
+			fromState="{PlayerState.PAUSING}"
+			toState="{PlayerState.PLAYING}">
+			<mx:Parallel target="{curtain}">
+				<mx:Fade alphaFrom="1.0"
+					alphaTo="0.0"
+					duration="500"/>
+			</mx:Parallel>
+		</mx:Transition>
+	</mx:transitions>
+	<mx:Canvas id="curtain"
+		backgroundColor="#000000"
+		backgroundAlpha="0.5"
+		width="100%"
+		height="100%"
+		x="0"
+		y="0"/>
+	<mx:Button id="playButton_up"
+		click="Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));"
+		width="{this.width/3.5}"
+		height="{playButton_up.width}"
+		styleName="Play"
+		visible="false"
+		verticalCenter="0"
+		horizontalCenter="0"
+		buttonMode="true"/>
+	<mx:Button id="pauseButton_up"
+		click="Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));"
+		width="{this.width/3.5}"
+		height="{pauseButton_up.width}"
+		styleName="Pause"
+		visible="false"
+		verticalCenter="0"
+		horizontalCenter="0"
+		buttonMode="true"/>
+</mx:Canvas>

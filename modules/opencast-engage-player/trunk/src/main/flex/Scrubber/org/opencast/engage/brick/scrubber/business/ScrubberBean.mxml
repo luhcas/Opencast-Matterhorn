@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BeanLoader xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns="org.swizframework.util.*"
+	xmlns:business="org.opencast.engage.brick.scrubber.business.*"
+	xmlns:model="org.opencast.engage.brick.scrubber.model.*"
+	xmlns:control="org.opencast.engage.brick.scrubber.control.*">
+	<business:ScrubberDelegate id="scrubberDelegate"/>
+	<model:ScrubberModel id="scrubberModel"/>
+	<control:ScrubberController id="scrubberController"/>
+</BeanLoader>
