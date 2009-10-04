@@ -47,6 +47,12 @@ import java.util.TimeZone;
 public class EncodingSchemeUtilsTest {
 
   @Test
+    public void printTimeZone() {
+        // Not a test case...
+        System.out.println("Time zone = " + TimeZone.getDefault());
+    }
+
+    @Test
   public void testEncodeDate() {
       Date now = new Date();
       assertEquals(4, encodeDate(now, Precision.Year).getValue().length());
@@ -56,15 +62,15 @@ public class EncodingSchemeUtilsTest {
       assertEquals(DublinCore.ENC_SCHEME_W3CDTF,
               encodeDate(now, Precision.Year).getEncodingScheme());
       // Test symmetry
-//      assertEquals(decodeDate(encodeDate(now, Precision.Second)), precisionSecond(now));
-//      assertEquals(decodeDate(encodeDate(now, Precision.Day)), precisionDay(now));
-      //
-      // The following assertion fails for at least some developers.  See http://issues.opencastproject.org/jira/browse/MH-1084
-//      assertEquals("1724-04-22", encodeDate(createDate(1724, 4, 22, 18, 30, 0), Precision.Day).getValue());
-//      assertEquals("1724-04-22T18:30:00Z", encodeDate(createDate(1724, 4, 22, 18, 30, 0, "UTC"), Precision.Second).getValue());
-//      assertEquals("1724-04-22T17:30:10Z", encodeDate(createDate(1724, 4, 22, 18, 30, 10, "GMT+1"), Precision.Second).getValue());
-//      assertEquals("1724-04-22T17:30Z", encodeDate(createDate(1724, 4, 22, 18, 30, 25, "GMT+1"), Precision.Minute).getValue());
-//      assertEquals("1999-03-21", encodeDate(createDate(1999, 3, 21, 18, 30, 25, "GMT+1"), Precision.Day).getValue());
+        assertEquals(decodeDate(encodeDate(now, Precision.Second)), precisionSecond(now));
+        assertEquals(decodeDate(encodeDate(createDate(1999, 3, 21, 14, 0, 0, "UTC"), Precision.Day)),
+                precisionDay(createDate(1999, 3, 21, 14, 0, 0, "UTC")));
+        // Expect the next day, as the given local time is 18:30 and encoding is done using UTC
+        assertEquals("1724-04-23", encodeDate(createDate(1724, 4, 22, 18, 30, 0, "US/Pacific"), Precision.Day).getValue());
+        assertEquals("1724-04-22T18:30:00Z", encodeDate(createDate(1724, 4, 22, 18, 30, 0, "UTC"), Precision.Second).getValue());
+        assertEquals("1724-04-22T17:30:10Z", encodeDate(createDate(1724, 4, 22, 18, 30, 10, "GMT+1"), Precision.Second).getValue());
+        assertEquals("1724-04-22T17:30Z", encodeDate(createDate(1724, 4, 22, 18, 30, 25, "GMT+1"), Precision.Minute).getValue());
+        assertEquals("1999-03-21", encodeDate(createDate(1999, 3, 21, 18, 30, 25, "GMT+1"), Precision.Day).getValue());
       //
       System.out.println(encodeDate(now, Precision.Day).getValue());
       System.out.println(encodeDate(now, Precision.Second).getValue());
