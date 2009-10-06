@@ -26,6 +26,7 @@ import static org.opencastproject.media.mediapackage.dublincore.DublinCore.ENC_S
 import static org.opencastproject.media.mediapackage.dublincore.DublinCore.LANGUAGE_ANY;
 import static org.opencastproject.media.mediapackage.dublincore.DublinCore.LANGUAGE_UNDEFINED;
 import static org.opencastproject.media.mediapackage.dublincore.DublinCore.PROPERTY_CONTRIBUTOR;
+import static org.opencastproject.media.mediapackage.dublincore.DublinCore.PROPERTY_CREATOR;
 import static org.opencastproject.media.mediapackage.dublincore.DublinCore.PROPERTY_IDENTIFIER;
 import static org.opencastproject.media.mediapackage.dublincore.DublinCore.PROPERTY_LICENSE;
 import static org.opencastproject.media.mediapackage.dublincore.DublinCore.PROPERTY_PUBLISHER;
@@ -49,6 +50,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -345,6 +347,15 @@ public class DublinCoreTest {
     assertEquals("undefined", dc.getFirst(PROPERTY_TITLE, LANGUAGE_UNDEFINED));
     assertEquals("undefined", dc.getFirst(PROPERTY_TITLE));
     assertEquals("deutsch", dc.getFirst(PROPERTY_TITLE, "de"));
+  }
+
+  @Test
+  public void testSet() {
+    DublinCoreCatalog dc = new DublinCoreCatalogImpl();
+    dc.set(PROPERTY_CREATOR, Arrays.asList(new DublinCoreValue("Klaus"), new DublinCoreValue("Peter"), new DublinCoreValue("Carl", "en")));
+    assertEquals(2, dc.get(PROPERTY_CREATOR, LANGUAGE_UNDEFINED).size());
+    assertEquals(3, dc.get(PROPERTY_CREATOR).size());
+    assertEquals("Klaus", dc.get(PROPERTY_CREATOR, LANGUAGE_UNDEFINED).get(0));
   }
 
   /**

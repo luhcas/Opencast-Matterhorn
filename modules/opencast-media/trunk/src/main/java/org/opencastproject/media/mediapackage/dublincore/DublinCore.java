@@ -478,6 +478,14 @@ public interface DublinCore {
   void set(EName property, DublinCoreValue value);
 
   /**
+   * Set a property to a list of values, overwriting any existing.
+   *
+   * @param property the property name
+   * @param values the values or an empty list
+   */
+  void set(EName property, List<DublinCoreValue> values);
+
+  /**
    * Add a value to a property.
    * <p/>
    * Please note that it is not allowed to pass {@link #LANGUAGE_ANY} as <code>language</code>.

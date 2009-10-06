@@ -259,9 +259,10 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
       final boolean langUndef = LANGUAGE_UNDEFINED.equals(language);
       CollectionUtils.forAllDo(getValuesAsList(property), new Closure() {
         public void execute(Object o) {
-          String lang = ((CatalogEntry) o).getAttribute(XML_LANG_ATTR);
+          CatalogEntry c = (CatalogEntry) o;
+          String lang = c.getAttribute(XML_LANG_ATTR);
           if ((langUndef && lang == null) || (language.equals(lang)))
-            values.add(lang);
+            values.add(c.getValue());
         }
       });
       return values;
@@ -436,6 +437,17 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     } else {
       _remove(property, LANGUAGE_ANY);
     }
+  }
+
+  public void set(EName property, List<DublinCoreValue> values) {
+    if (property == null)
+      throw new IllegalArgumentException("Property name must not be null");
+    if (values == null)
+      throw new IllegalArgumentException("Values must not be null");
+
+    _remove(property, LANGUAGE_ANY);
+    for (DublinCoreValue v : values)
+      add(property, v);
   }
 
   private void _set(EName property, String value, String language, EName encodingScheme) {
@@ -634,7 +646,8 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     /**
      * Creates a new parser for dublin core documents.
      */
-    DublinCoreParser() { }
+    DublinCoreParser() {
+    }
 
     /**
      * Parses the catalog and returns an object representation for it.
