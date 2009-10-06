@@ -30,8 +30,8 @@ public interface MediaPackageReference {
 
   public static final String TYPE_MEDIAPACKAGE = "mediapackage";
   public static final String TYPE_TRACK = "track";
-  public static final String TYPE_CATALOG = "track";
-  public static final String TYPE_ATTACHMENT = "track";
+  public static final String TYPE_CATALOG = "catalog";
+  public static final String TYPE_ATTACHMENT = "attachment";
   public static final String TYPE_SERIES = "series";
   public static final String SELF = "self";
 
