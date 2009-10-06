@@ -8,7 +8,7 @@
 		<version>0.1-SNAPSHOT</version>
 	</parent>
 	<groupId>EngageApp</groupId>
-	<artifactId>opencast-engage-player</artifactId>
+	<artifactId>EngageApp_Videodisplay</artifactId>
 	<version>0.1-SNAPSHOT</version>
 	<packaging>swf</packaging>
 	<name>EngageApp_Videodisplay Flex</name>
