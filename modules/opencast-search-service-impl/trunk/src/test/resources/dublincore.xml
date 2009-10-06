@@ -25,5 +25,8 @@
   <dcterms:format xsi:type="dcterms:IMT">
     video/x-dv
   </dcterms:format>
+  <dcterms:isPartOf>
+    10.0000/foobar-serie
+  </dcterms:isPartOf>
 
 </dublincore>

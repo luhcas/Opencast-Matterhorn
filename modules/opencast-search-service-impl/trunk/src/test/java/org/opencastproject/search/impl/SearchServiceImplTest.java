@@ -94,7 +94,7 @@ public class SearchServiceImplTest {
     service.add(mediaPackage);
     
     // Make sure it's properly indexed and returned
-    assertEquals(1, service.getEpisodeById("00000/1").size());
+    assertEquals(1, service.getEpisodeById("10.0000/1").size());
     assertEquals(1, service.getEpisodesByDate(0, Integer.MAX_VALUE).size());
   }
 
@@ -121,7 +121,7 @@ public class SearchServiceImplTest {
     service.add(mediaPackage);
     
     // Make sure it's properly indexed and returned
-    assertEquals(1, service.getEpisodeById("00000/1").size());
+    assertEquals(1, service.getEpisodeById("10.0000/2").size());
     assertEquals(1, service.getEpisodesByDate(0, Integer.MAX_VALUE).size());
   }
   
@@ -147,7 +147,7 @@ public class SearchServiceImplTest {
     // Add the media package to the search index
     service.add(mediaPackage);
     service.delete(mediaPackage.getIdentifier().toString());
-    assertEquals(0, service.getEpisodeById("00000/1").size());
+    assertEquals(0, service.getEpisodeById("10.0000/1").size());
     assertEquals(0, service.getEpisodesByDate(0, Integer.MAX_VALUE).size());
   }
 
