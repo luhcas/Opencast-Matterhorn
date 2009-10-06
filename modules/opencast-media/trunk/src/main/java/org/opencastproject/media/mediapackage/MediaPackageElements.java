@@ -42,6 +42,12 @@ public interface MediaPackageElements {
   /** Track containing presentational material */
   MediaPackageElementFlavor PRESENTATION_TRACK = new MediaPackageElementFlavor("track", "presentation");
 
+  /** Track capturing the audience */
+  MediaPackageElementFlavor AUDIENCE_TRACK = new MediaPackageElementFlavor("track", "audience");
+
+  /** Track capturing the contents of a document camera */
+  MediaPackageElementFlavor DOCUMENTS_TRACK = new MediaPackageElementFlavor("track", "documents");
+
   /** Track without any known semantics */
   MediaPackageElementFlavor INDEFINITE_TRACK = new MediaPackageElementFlavor("track", "indefinite");
 
