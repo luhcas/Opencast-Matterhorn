@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Default implementation of a handle builder. Note that this implementation is for your convenience only, since all it
@@ -50,6 +52,10 @@ public class HandleBuilderImpl implements HandleBuilder {
 
   /** The default handle url */
   private final static String DEFAULT_URL = "http://localhost";
+
+  /** Regex used to verify proper handle identifier syntax */
+  private final static Pattern HANDLE_PATTERN = Pattern.compile("(?:" + PROTOCOL_PREFIX + ")?(" + Handle.PREFIX
+          + "\\d{4})/(.+)");
 
   /** Handle naming authority */
   private String namingAuthority = "10.0000";
@@ -122,30 +128,10 @@ public class HandleBuilderImpl implements HandleBuilder {
     if (value == null)
       throw new IllegalArgumentException("Unable to create handle from null string");
 
-    // Strip off handle protocol hdl://
-    if (value.startsWith(PROTOCOL_PREFIX)) {
-      value = value.substring(PROTOCOL_PREFIX.length());
-    }
-
-    // Separate naming authority from the local name
-    int sep = value.indexOf('/');
-    String[] parts = new String[2];
-    if (sep < 0) {
-      parts[0] = namingAuthority;
-      parts[1] = value;
-    } else {
-      parts[0] = value.substring(0, sep);
-      parts[1] = value.substring(sep + 1);
-    }
-
-    // First part must be of type long
-    try {
-      Float.parseFloat(parts[0]);
-    } catch (NumberFormatException e) {
+    Matcher m = HANDLE_PATTERN.matcher(value);
+    if (!m.matches())
       throw new HandleException("Handle " + value + " is malformed");
-    }
-
-    return new HandleImpl(parts[0], parts[1], this);
+    return new HandleImpl(m.group(1), m.group(2), this);
   }
 
   /**

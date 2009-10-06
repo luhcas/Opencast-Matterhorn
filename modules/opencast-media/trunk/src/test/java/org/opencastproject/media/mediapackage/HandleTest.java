@@ -55,7 +55,7 @@ public class HandleTest {
   URL url = null;
 
   /** Handle local name */
-  String defaultLocalName = "0001";
+  String defaultHandle = "10.0000/1";
 
   /** The handle value */
   String handleValue = "http://www.opencastproject.org";
@@ -67,7 +67,7 @@ public class HandleTest {
   public void setUp() throws Exception {
     handleBuilder = new HandleBuilderImpl();
     url = new URL(handleValue);
-    handle = handleBuilder.fromValue(defaultLocalName);
+    handle = handleBuilder.fromValue(defaultHandle);
   }
 
   /**
