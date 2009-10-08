@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.captionsHandler.endpoint.CaptionshandlerRestService" immediate="true">
+  <implementation class="org.opencastproject.captionsHandler.endpoint.CaptionshandlerRestService" />
+  <property name="service.description" value="Captionshandler REST Endpoint" />
+  <property name="service.exported.interfaces" value="org.opencastproject.captionsHandler.endpoint.CaptionshandlerRestService" />
+  <property name="service.exported.configs" value="org.apache.cxf.rs" />
+  <property name="org.apache.cxf.rs.httpservice.context" value="/captionsHandler/rest" />
+  <service>
+    <provide interface="org.opencastproject.captionsHandler.endpoint.CaptionshandlerRestService" />
+  </service>
+  <reference name="service-impl" interface="org.opencastproject.captionsHandler.api.CaptionshandlerService"
+    cardinality="0..1" policy="dynamic" bind="setService" unbind="unsetService" />
+</component>

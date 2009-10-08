@@ -1,0 +1,38 @@
+{
+    "page": {page},
+    "perPage": {perPage},
+    "count": {count},
+    "total": 3,
+    "results": [
+        {
+            "id": "1111111",
+            "timestamp": 1234567890,
+            "title": "Title 1",
+            "mediaURL": "http://url.to.media.item1",
+            "captionable": true,
+            "DFXPURL": "http://url.to.caption.file.dfxp",
+            "describable": true,
+            "DAURL": "http://url.to.descriptive.audio.track.mp3" 
+        },
+        {
+            "id": "22222",
+            "timestamp": 1234567890,
+            "title": "Title 2",
+            "mediaURL": "http://url.to.media.item2",
+            "captionable": true,
+            "DFXPURL": null,
+            "describable": false,
+            "DAURL": "http://url.to.descriptive.audio.track.mp3" 
+        },
+        {
+            "id": "3333",
+            "timestamp": 1234567890,
+            "title": "Title 3",
+            "mediaURL": "http://url.to.media.item3",
+            "captionable": false,
+            "DFXPURL": null,
+            "describable": true,
+            "DAURL": null 
+        } 
+    ]
+}

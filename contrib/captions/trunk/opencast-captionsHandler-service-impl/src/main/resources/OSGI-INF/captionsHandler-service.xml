@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.captionsHandler.api.CaptionshandlerService" immediate="true">
+  <implementation class="org.opencastproject.captionsHandler.impl.CaptionshandlerServiceImpl" />
+  <property name="service.description" value="Captionshandler Service" />
+  <service>
+    <provide interface="org.opencastproject.captionsHandler.api.CaptionshandlerService" />
+    <provide interface="org.osgi.service.cm.ManagedService" />
+  </service>
+</component>
