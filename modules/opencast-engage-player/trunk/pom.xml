@@ -28,12 +28,13 @@
 					<showWarnings>false</showWarnings>
 				</configuration>
 				<executions>
-					<!-- creates asdoc (javadocs)
-						<execution> <phase>install</phase> <goals> <goal>asdoc</goal>
-						</goals> <configuration> <mainTitle>Opencast-Matterhorn
-						Videodisplay</mainTitle> <windowTitle>Opencast-Matterhorn
-						Videodisplay</windowTitle> <output>docs/Opencast-Matterhorn
-						Videodisplay</output> </configuration> </execution>
+					<!--
+						creates asdoc (javadocs) <execution> <phase>install</phase>
+						<goals> <goal>asdoc</goal> </goals> <configuration>
+						<mainTitle>Opencast-Matterhorn Videodisplay</mainTitle>
+						<windowTitle>Opencast-Matterhorn Videodisplay</windowTitle>
+						<output>docs/Opencast-Matterhorn Videodisplay</output>
+						</configuration> </execution>
 					-->
 				</executions>
 			</plugin>
@@ -42,6 +43,10 @@
 
 
 	<repositories>
+		<repository>
+			<id>flexmojos</id>
+			<url>http://repository.sonatype.org/content/groups/flexgroup/</url>
+		</repository>
 		<repository>
 			<id>flexmojos-repository</id>
 			<url>http://repository.sonatype.org/content/groups/public/</url>
