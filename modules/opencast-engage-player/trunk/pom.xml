@@ -12,40 +12,10 @@
 		<sourceFile>Videodisplay.mxml</sourceFile>
 	</properties>
 
-	<build>
-		<sourceDirectory>src/main/flex/Videodisplay</sourceDirectory>
-		<!--<testSourceDirectory>src/test/flex</testSourceDirectory>-->
-		<plugins>
-			<plugin>
-				<groupId>org.sonatype.flexmojos</groupId>
-				<artifactId>flexmojos-maven-plugin</artifactId>
-				<version>3.0.0</version>
-				<extensions>true</extensions>
-				<configuration>
-					<targetPlayer>10.0.0</targetPlayer>
-					<accessible>true</accessible>
-					<headlessServer>true</headlessServer>
-					<showWarnings>false</showWarnings>
-				</configuration>
-				<executions>
-					<!--
-						creates asdoc (javadocs) <execution> <phase>install</phase>
-						<goals> <goal>asdoc</goal> </goals> <configuration>
-						<mainTitle>Opencast-Matterhorn Videodisplay</mainTitle>
-						<windowTitle>Opencast-Matterhorn Videodisplay</windowTitle>
-						<output>docs/Opencast-Matterhorn Videodisplay</output>
-						</configuration> </execution>
-					-->
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
-
 	<repositories>
 		<repository>
-			<id>flexmojos</id>
-			<url>http://repository.sonatype.org/content/groups/flexgroup/</url>
+			<id>opencast</id>
+			<url>http://repository.opencastproject.org/nexus/content/groups/public</url>
 		</repository>
 		<repository>
 			<id>flexmojos-repository</id>
@@ -59,8 +29,43 @@
 		</pluginRepository>
 	</pluginRepositories>
 
+	<build>
+		<sourceDirectory>src/main/flex/Videodisplay</sourceDirectory>
+	<!--	<testSourceDirectory>src/test/flex</testSourceDirectory>-->
+		<plugins>
+			<plugin>
+				<groupId>org.sonatype.flexmojos</groupId>
+				<artifactId>flexmojos-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<targetPlayer>10.0.0</targetPlayer>
+					<accessible>true</accessible>
+					<headlessServer>true</headlessServer>
+					<showWarnings>false</showWarnings>
+				</configuration>
+				<executions> 
+                        <!--  <execution> 
+							<phase>install</phase> 
+                                <goals> 
+                                  <goal>asdoc</goal>
+                                </goals>
+                                <configuration> 
+                     			<mainTitle>Opencast-Matterhorn Videodisplay</mainTitle>
+                  				<windowTitle>Opencast-Matterhorn Videodisplay</windowTitle>
+                  				<output>docs/Opencast-Matterhorn Videodisplay</output>
+                  				</configuration> 
+                          </execution> --> 
+                </executions> 
+			</plugin>
+		</plugins>
+	</build>
+
+
+	
+
 	<dependencies>
-		<!--
+	<!--	
 			<dependency> <groupId>org.sonatype.flexmojos</groupId>
 			<artifactId>flexmojos-unittest-support</artifactId>
 			<version>3.3.0</version> <type>swc</type> <scope>test</scope>
@@ -86,15 +91,15 @@
 			<type>swc</type>
 		</dependency>
 		<dependency>
-			<groupId>com.adobe.osmf</groupId>
-			<artifactId>MediaFramework</artifactId>
-			<version>0.6</version>
+			<groupId>com.adobe.osmf</groupId> 
+			<artifactId>MediaFramework</artifactId> 
+			<version>0.6</version> 
 			<type>swc</type>
 		</dependency>
 		<dependency>
-			<groupId>com.adobe.swiz</groupId>
-			<artifactId>swiz</artifactId>
-			<version>0.6.2</version>
+			<groupId>com.adobe.swiz</groupId> 
+			<artifactId>swiz</artifactId> 
+			<version>0.6.2</version> 
 			<type>swc</type>
 		</dependency>
 	</dependencies>
