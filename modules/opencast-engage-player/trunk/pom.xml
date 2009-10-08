@@ -14,7 +14,7 @@
 
 	<build>
 		<sourceDirectory>src/main/flex/Videodisplay</sourceDirectory>
-		<!--<testSourceDirectory>src/test/flex</testSourceDirectory> -->
+		<!--<testSourceDirectory>src/test/flex</testSourceDirectory>-->
 		<plugins>
 			<plugin>
 				<groupId>org.sonatype.flexmojos</groupId>
