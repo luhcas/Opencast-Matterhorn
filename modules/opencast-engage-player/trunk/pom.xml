@@ -6,7 +6,7 @@
 	<artifactId>opencast-engage-player</artifactId>
 	<version>0.1-SNAPSHOT</version>
 	<packaging>swf</packaging>
-	<name>EngageApp_Videodisplay Flex</name>
+	<name>opencast-engage-player</name>
 
 	<properties>
 		<sourceFile>Videodisplay.mxml</sourceFile>
@@ -14,8 +14,7 @@
 
 	<build>
 		<sourceDirectory>src/main/flex/Videodisplay</sourceDirectory>
-	<!--	<testSourceDirectory>src/test/flex</testSourceDirectory>
--->
+		<!--<testSourceDirectory>src/test/flex</testSourceDirectory> -->
 		<plugins>
 			<plugin>
 				<groupId>org.sonatype.flexmojos</groupId>
@@ -28,19 +27,15 @@
 					<headlessServer>true</headlessServer>
 					<showWarnings>false</showWarnings>
 				</configuration>
-				<executions> 
-                          <execution> 
-							<phase>install</phase> 
-                                <goals> 
-                                  <goal>asdoc</goal>
-                                </goals>
-                                <configuration> 
-                     			<mainTitle>Opencast-Matterhorn Videodisplay</mainTitle>
-                  				<windowTitle>Opencast-Matterhorn Videodisplay</windowTitle>
-                  				<output>docs/Opencast-Matterhorn Videodisplay</output>
-                  				</configuration> 
-                          </execution> 
-                </executions> 
+				<executions>
+					<!-- creates asdoc (javadocs)
+						<execution> <phase>install</phase> <goals> <goal>asdoc</goal>
+						</goals> <configuration> <mainTitle>Opencast-Matterhorn
+						Videodisplay</mainTitle> <windowTitle>Opencast-Matterhorn
+						Videodisplay</windowTitle> <output>docs/Opencast-Matterhorn
+						Videodisplay</output> </configuration> </execution>
+					-->
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -60,7 +55,7 @@
 	</pluginRepositories>
 
 	<dependencies>
-	<!--	
+		<!--
 			<dependency> <groupId>org.sonatype.flexmojos</groupId>
 			<artifactId>flexmojos-unittest-support</artifactId>
 			<version>3.3.0</version> <type>swc</type> <scope>test</scope>
@@ -86,15 +81,15 @@
 			<type>swc</type>
 		</dependency>
 		<dependency>
-			<groupId>MediaFramework</groupId>
-			<artifactId>MediaFramework_framework</artifactId>
-			<version>3.3.0.4852</version>
+			<groupId>com.adobe.osmf</groupId>
+			<artifactId>MediaFramework</artifactId>
+			<version>0.6</version>
 			<type>swc</type>
 		</dependency>
 		<dependency>
-			<groupId>swiz-0.6.2</groupId>
-			<artifactId>swiz-0.6.2_framework</artifactId>
-			<version>3.3.0.4852</version>
+			<groupId>com.adobe.swiz</groupId>
+			<artifactId>swiz</artifactId>
+			<version>0.6.2</version>
 			<type>swc</type>
 		</dependency>
 	</dependencies>
