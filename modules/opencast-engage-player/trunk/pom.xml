@@ -24,6 +24,10 @@
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
+			<id>opencast</id>
+			<url>http://repository.opencastproject.org/nexus/content/groups/public</url>
+		</pluginRepository>
+		<pluginRepository>
 			<id>flexmojos-repository</id>
 			<url>http://repository.sonatype.org/content/groups/public/</url>
 		</pluginRepository>
