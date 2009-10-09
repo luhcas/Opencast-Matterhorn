@@ -1,4 +1,6 @@
-FlexBuilder + maven
+General instructions:
+
+FlexBuilder + maven:
 ----------------------
 
 Project uses flexmojos in order to build and maintain the code with maven. (http://code.google.com/p/flex-mojos/)
@@ -25,11 +27,12 @@ in your opencast-engage-player folder.
 After this you should be able to include the project in Eclipse.
 
 
+IMPORTANT: Remove the settings.xml again. Matterhorn won´t build in case you set the repository url.
 
 -------------------
 
 
-If you use maven for building instead of FlexBuilder:
+If you use maven for testing instead of FlexBuilder:
 
 
 Make sure that Flash Player is available on your clathpath; 
@@ -39,27 +42,11 @@ on MacOSX
 export PATH=$PATH:/pathtoflashplayer/Flash\ Player.app/Contents/MacOS
 
 
---------------------
-
-
-
-Missing Maven Plugins for the Swiz and the MediaFramework
-Install this missing libs in your local repository
-
-(this plugins will shortly be availbale in the opnecast maven repository)
-
-Go to EngageApp_Player lib folder in your terminal:
-
-Example:
-mvn install:install-file -DgroupId=swiz-0.6.2 -DartifactId=swiz-0.6.2_framework -Dversion=3.3.0.4852 -Dpackaging=swc -Dfile=swiz-0.6.2.swc
-mvn install:install-file -DgroupId=MediaFramework -DartifactId=MediaFramework_framework -Dversion=3.3.0.4852 -Dpackaging=swc -Dfile=MediaFramework.swc
-
-
 
 ---------------------------
 
 
-IF MAVEN ISN`T YOUR FIRST CHOICE: 
+IF MAVEN ISN`T YOUR CHOICE FOR WORKING WITH FLEX/AJAX/HTML
 
 
 0. Check out as a project in the workspace
@@ -83,6 +70,10 @@ IF MAVEN ISN`T YOUR FIRST CHOICE:
 9. Properties --> Flex Build Path --> Output folder: --> <any_folder_of_your_local_server>
 
 10. Properties --> Flex Build Path --> Output folder: --> <the_localhost_url_your_server_points_to>
+
+
+------
+
 
 
 
