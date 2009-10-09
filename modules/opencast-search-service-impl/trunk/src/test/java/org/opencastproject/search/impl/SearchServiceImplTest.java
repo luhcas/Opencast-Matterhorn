@@ -17,6 +17,7 @@
 package org.opencastproject.search.impl;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
 
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
@@ -25,6 +26,7 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.search.api.SearchResult;
+import org.opencastproject.search.api.SearchResultItem;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -96,6 +98,11 @@ public class SearchServiceImplTest {
     // Make sure it's properly indexed and returned
     assertEquals(1, service.getEpisodeById("10.0000/1").size());
     assertEquals(1, service.getEpisodesByDate(0, Integer.MAX_VALUE).size());
+    
+    // Test for various fields
+    SearchResultItem result = service.getEpisodeById("10.0000/1").getItems()[0];
+    assertNotNull(result.getMediaPackage());
+    assertEquals(1, result.getMediaPackage().getCatalogs().length);
   }
 
   /**

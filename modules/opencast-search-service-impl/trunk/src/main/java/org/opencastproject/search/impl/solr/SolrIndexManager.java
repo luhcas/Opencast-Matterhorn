@@ -20,6 +20,7 @@ import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.Cover;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Mpeg7Catalog;
 import org.opencastproject.media.mediapackage.dublincore.DublinCore;
@@ -42,6 +43,7 @@ import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +53,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * Utility class used to manage the search index.
@@ -95,7 +105,7 @@ public class SolrIndexManager {
   }
 
   /**
-   * Clears the complete search index. Make sure you know what you ared doing.
+   * Clears the search index. Make sure you know what you are doing.
    * 
    * @throws SolrServerException
    *           if an errors occurs while talking to solr
@@ -199,6 +209,24 @@ public class SolrIndexManager {
     solrEpisodeDocument.setField(SolrFields.OC_MEDIATYPE, SearchResultItemType.AudioVisual);
     addStandardDublincCoreFields(solrEpisodeDocument, dublinCore);
 
+    // Add media package
+    try {
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      DOMSource domSource = new DOMSource(mediaPackage.toXml());
+      StreamResult streamResult = new StreamResult(out);
+      TransformerFactory tf = TransformerFactory.newInstance();
+      Transformer serializer = tf.newTransformer();
+      serializer.setOutputProperty(OutputKeys.ENCODING,"ISO-8859-1");
+      serializer.transform(domSource, streamResult); 
+      solrEpisodeDocument.setField(SolrFields.OC_MEDIAPACKAGE, out);
+    } catch (MediaPackageException e) {
+      throw new IllegalStateException("Error serializing media package to search index", e);
+    } catch (TransformerConfigurationException e) {
+      throw new IllegalStateException("Error serializing media package to search index", e);
+    } catch (TransformerException e) {
+      throw new IllegalStateException("Error serializing media package to search index", e);
+    }
+    
     // Add cover
     Cover cover = mediaPackage.getCover();
     if (cover != null) {
