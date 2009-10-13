@@ -11,7 +11,7 @@ DEBUG_SUSPEND="n"
 # Only change the line below if you want to customize the server
 ##
 
-MAVEN_OPTS="-DM2_REPO=$M2_REPO"
+MAVEN_ARG="-DM2_REPO=$M2_REPO"
 FELIX_FILEINSTALL_OPTS="-Dfelix.fileinstall.dir=$FELIX/load"
 PAX_CONFMAN_OPTS="-Dbundles.configuration.location=$FELIX/conf"
 CXF_OPTS="-Djava.util.logging.config.file=$FELIX/conf/cxf.properties"
@@ -30,4 +30,4 @@ XML_OPTS=""
 
 # Finally start felix
 cd $FELIX
-java $DEBUG_OPTS $XML_OPTS $MAVEN_OPTS $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $CXF_OPTS -jar $FELIX/bin/felix.jar $FELIX_CACHE
+java $DEBUG_OPTS $XML_OPTS $MAVEN_ARG $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $CXF_OPTS -jar $FELIX/bin/felix.jar $FELIX_CACHE
