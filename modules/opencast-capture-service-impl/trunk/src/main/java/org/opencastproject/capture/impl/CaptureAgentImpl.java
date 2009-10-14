@@ -16,9 +16,15 @@
 package org.opencastproject.capture.impl;
 
 import org.opencastproject.capture.api.CaptureAgent;
+import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.opencastproject.media.mediapackage.MediaPackage;
 
 import org.apache.commons.io.FileUtils;
+import org.gstreamer.Bus;
+import org.gstreamer.Gst;
+import org.gstreamer.GstObject;
+import org.gstreamer.Pipeline;
+import org.gstreamer.State;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
@@ -30,6 +36,7 @@ import java.io.BufferedWriter;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * FIXME -- Add javadocs
@@ -56,6 +63,35 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public String startCapture() {
     String aux = "start capture";
     //logger.info("public String startCapture() in "  + this.tmpPath + File.separator + "record");
+    Properties props = new Properties();
+    props.setProperty("/dev/video0", "/home/kta719/gst-testing/professor.mpg");
+    props.setProperty("/dev/video1", "/home/kta719/gst-testing/screen.mpg");
+    props.setProperty("hw:0", "/home/kta719/gst-testing/microphone.mp2");
+    
+    long duration = 10;
+    final Pipeline pipe = PipelineFactory.create(props);
+    Bus bus = pipe.getBus();
+    bus.connect(new Bus.EOS() {
+      public void endOfStream(GstObject arg0) {
+        System.out.println(pipe.getName() + " received EOS.");
+        pipe.setState(State.NULL);
+        Gst.quit();
+      }
+    });
+    bus.connect(new Bus.ERROR() {
+      public void errorMessage(GstObject arg0, int arg1, String arg2) {
+        System.err.println(arg0.getName() + ": " + arg2);
+        Gst.quit();
+      }
+    });
+
+    pipe.play();
+    while (pipe.getState() != State.PLAYING);
+    System.out.println(pipe.getName() + " started.");
+    new Thread(new CaptureAgentEOSThread(duration*1000, pipe)).start();
+    Gst.main();
+    Gst.deinit();
+    
     return aux;
   }
 
