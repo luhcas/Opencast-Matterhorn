@@ -22,7 +22,6 @@
 package com.adobe.strobe.players
 {
 	import flash.events.Event;
-	import flash.events.ProgressEvent;
 	import mx.core.UIComponent;
 	import org.openvideoplayer.display.MediaPlayerSprite;
 	import org.openvideoplayer.display.ScaleMode;
@@ -194,12 +193,13 @@ package com.adobe.strobe.players
 		/**
 		*  True when the source mediaElement has the IPausible trait.
 		*/	
+		/*
 		[Event(event = "pausibleChange" , type = "org.openvideoplayer.events.MediaStateChangeEvent")]
 		public function get  pausible() : Boolean
 		{
-			return mediaPlayer.pausible;
+		return mediaPlayer.pausible;
 		}
-
+		*/
 		/**
 		*  True when the source mediaElement has the ISeekable trait.
 		*/

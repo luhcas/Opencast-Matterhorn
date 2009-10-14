@@ -49,7 +49,7 @@
 					<showWarnings>false</showWarnings>
 				</configuration>
 				<executions> 
-                        <!--  <execution> 
+                  <!--    <execution> 
 							<phase>install</phase> 
                                 <goals> 
                                   <goal>asdoc</goal>
@@ -59,8 +59,8 @@
                   				<windowTitle>Opencast-Matterhorn Videodisplay</windowTitle>
                   				<output>docs/Opencast-Matterhorn Videodisplay</output>
                   				</configuration> 
-                          </execution> --> 
-                </executions> 
+                          </execution> -->
+                </executions>
 			</plugin>
 		</plugins>
 	</build>

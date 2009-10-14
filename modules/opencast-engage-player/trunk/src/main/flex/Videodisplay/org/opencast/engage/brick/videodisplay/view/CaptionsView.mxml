@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+	width="100%"
+	height="100%"
+	verticalAlign="bottom">
+	<mx:Script>
+		<![CDATA[
+			import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
+		  	import org.opencast.engage.brick.videodisplay.state.PlayerState;
+		  	import org.opencast.engage.brick.videodisplay.control.event.VideoControlEvent;
+		  	import org.swizframework.Swiz;
+		  	import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
+			
+			[Autowire]
+			[Bindable]
+			public var model:VideodisplayModel;
+			
+		]]>
+	</mx:Script>
+	<mx:Text width="100%"
+		fontSize="{ model.fontSizeCaptions }"
+		htmlText="{ model.currentSubtitle }"
+		styleName="captions"/>
+</mx:VBox>

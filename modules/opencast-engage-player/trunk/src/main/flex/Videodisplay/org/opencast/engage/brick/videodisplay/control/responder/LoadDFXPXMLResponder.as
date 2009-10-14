@@ -1,5 +1,6 @@
 package org.opencast.engage.brick.videodisplay.control.responder
 {
+	import flash.external.ExternalInterface;
 	import mx.collections.ArrayCollection;
 	import mx.rpc.IResponder;
 	import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
@@ -17,24 +18,22 @@ package org.opencast.engage.brick.videodisplay.control.responder
 			Swiz.autowire( this );
 		}
 
-		public function result(data : Object) : void
+		/**  */
+		public function result( data : Object ) : void
 		{
-			var captionSets : ArrayCollection = new ArrayCollection();
+			model.captionSets = new ArrayCollection();
 			var xData : XMLList = new XMLList(data.result);
 			var divs : XMLList = xData.children().children();
 			var div : XML;
 			for each(div in divs)
 			{
 				var lang : String = div.attributes()[0];
-				//div.attribute("xml:lang");  // Funktioniert nicht
 				var style : String = div.attributes()[1];
-				//div.attribute("style");
 				if(lang != null)
 				{
 					var captionSet : CaptionSetVO = new CaptionSetVO();
 					captionSet.lang = lang;
 					captionSet.style = style;
-					//  model.log += lang +" " + style + "\n";  
 					var ps : XMLList = div.children();
 					var p : XML;
 					for each(p in ps)
@@ -53,19 +52,24 @@ package org.opencast.engage.brick.videodisplay.control.responder
 						caption.end = stringToNumber(end);
 						caption.text = text;
 						captionSet.captions.addItem(caption);
-						//  model.log += caption.begin + " " + caption.end + " " + caption.text +"\n";
 					}
 
-					captionSets.addItem(captionSet);
-					if(captionSet.lang == "de")                     // Make this CaptionSet the default set
-						model.currentCaptionSet = captionSet.captions.toArray();
-					// TODO: Refactor this to CaptionSetVO
+					// Add the captionSet to the array
+					model.captionSets.addItem( captionSet );
+					for(var i : int = 0; i < model.languages.length; i++)
+					{
+						if( model.languages[i].short_name == lang )
+						{
+							// Add the language to the combo box on the html
+							ExternalInterface.call('setLangugageOptions' , model.languages[i].long_name);
+						}
+					}
 				}
 			}
 		}
 
-		/*
-		*  TODO: Test this function by various Unit Tests
+		/**
+		*  stringToNumber
 		*/
 		public function stringToNumber(timestamp : String) : Number
 		{

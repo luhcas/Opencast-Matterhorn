@@ -2,20 +2,36 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<artifactId>EngageApp_Player</artifactId>
-		<groupId>EngageApp</groupId>
-		<version>0.1-SNAPSHOT</version>
-	</parent>
 	<groupId>EngageApp</groupId>
-	<artifactId>EngageApp_Scrubber</artifactId>
+	<artifactId>opencast-engage-player-scrubber</artifactId>
 	<version>0.1-SNAPSHOT</version>
 	<packaging>swf</packaging>
-	<name>EngageApp_Scrubber Flex</name>
+	<name>opencast-engage-player-scrubber</name>
 
 	<properties>
 		<sourceFile>Scrubber.mxml</sourceFile>
 	</properties>
+
+	<repositories>
+		<repository>
+			<id>opencast</id>
+			<url>http://repository.opencastproject.org/nexus/content/groups/public</url>
+		</repository>
+		<repository>
+			<id>flexmojos-repository</id>
+			<url>http://repository.sonatype.org/content/groups/public/</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>opencast</id>
+			<url>http://repository.opencastproject.org/nexus/content/groups/public</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>flexmojos-repository</id>
+			<url>http://repository.sonatype.org/content/groups/public/</url>
+		</pluginRepository>
+	</pluginRepositories>
 
 	<build>
 		<sourceDirectory>.</sourceDirectory>
@@ -38,18 +54,6 @@
 	</build>
 
 
-	<repositories>
-		<repository>
-			<id>flexmojos-repository</id>
-			<url>http://repository.sonatype.org/content/groups/public/</url>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>flexmojos-repository</id>
-			<url>http://repository.sonatype.org/content/groups/public/</url>
-		</pluginRepository>
-	</pluginRepositories>
 
 	<dependencies>
 		<!--
@@ -78,15 +82,15 @@
 			<type>swc</type>
 		</dependency>
 		<dependency>
-			<groupId>MediaFramework</groupId>
-			<artifactId>MediaFramework_framework</artifactId>
-			<version>3.3.0.4852</version>
+			<groupId>com.adobe.osmf</groupId>
+			<artifactId>MediaFramework</artifactId>
+			<version>0.6</version>
 			<type>swc</type>
 		</dependency>
 		<dependency>
-			<groupId>swiz-0.6.2</groupId>
-			<artifactId>swiz-0.6.2_framework</artifactId>
-			<version>3.3.0.4852</version>
+			<groupId>com.adobe.swiz</groupId>
+			<artifactId>swiz</artifactId>
+			<version>0.6.2</version>
 			<type>swc</type>
 		</dependency>
 	</dependencies>

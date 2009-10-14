@@ -21,15 +21,20 @@
 	height="100%"
 	layout="absolute"
 	backgroundColor="#000000"
-	preinitialize="{ onPreinitialize(); }"
+	preinitialize="{ onPreinitialize(); }" 
 	addedToStage="onAddedToStage()"
 	xmlns:view="org.opencast.engage.brick.videodisplay.view.*"
-	viewSourceURL="srcview/index.html"
-	xmlns:ns1="bridge.*">
+	xmlns:ns1="bridge.*"
+	>
+	
 	<mx:Style source="style/standard_videodisplay.css"/>
+	
 	<mx:Script>
 		<![CDATA[
-		  import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
+			import mx.collections.ArrayCollection;
+			import org.opencast.engage.brick.videodisplay.vo.CaptionSetVO;
+			import mx.controls.Alert;
+			import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
 			import org.opencast.engage.brick.videodisplay.control.event.VideoControlEvent;
 			import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
 			import org.opencast.engage.brick.videodisplay.business.VideodisplayBean;
@@ -66,23 +71,41 @@
 				stage.addEventListener(KeyboardEvent.KEY_UP, reportKeyDown);
 			}
 			
-		  public function seek(time:Number):void
-      {
-        model.player.seek(time);
-      }
+			public function seek(time:Number):void
+		    {
+		    	model.player.seek(time);
+		    }
+		    
+		    /**
+		    * setLanguage
+		    * 
+		    * Set the language of the captions
+		    * 
+		    * */
+		    public function setLanguage( postion:int ):void
+		    {
+		    	if( postion != -1)
+		    	{
+		    		model.currentCaptionSet = CaptionSetVO( model.captionSets.getItemAt( postion ) ).captions.toArray();
+		    	}
+		    	else
+		    	{
+		    		model.currentCaptionSet = new Array();
+		    	}
+		    }
       
-      /*
-       *  Expects value between 0 and 1
-       */ 
-      public function setVolume(volume:Number):void
-      {
-        Swiz.dispatchEvent( new SetVolumeEvent(volume) );
-      }
-      
-      public function getVolume():Number
-      {
-        return model.player.volume;
-      }
+			/**
+			*  Expects value between 0 and 1
+			*/ 
+			public function setVolume(volume:Number):void
+			{
+			Swiz.dispatchEvent( new SetVolumeEvent(volume) );
+			}
+			  
+			public function getVolume():Number
+			{
+			return model.player.volume;
+			}
       
 			private function reportKeyDown(event:KeyboardEvent):void
 			{
@@ -110,11 +133,25 @@
 			
   		]]>
 	</mx:Script>
+	
 	<ns1:FABridge />
-	<view:VideodisplayView id="display"
+	
+	<view:VideodisplayView 
+		id="display"
 		width="100%"
-		height="100%"/>
-	<view:Splashscreen id="splash"
+		height="100%"
+		/>
+		
+	<view:Splashscreen 
+		id="splash"
 		width="100%"
-		height="100%"/>
+		height="100%"
+		/>
+		
+	<view:CaptionsView
+		id="captionsView"
+		width="100%"
+		height="100%"
+		/>
+	
 </mx:Application>

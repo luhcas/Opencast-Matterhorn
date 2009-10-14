@@ -4,7 +4,7 @@
 <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" href="../../../../../../style.css" type="text/css" media="screen">
 <link rel="stylesheet" href="../../../../../../print.css" type="text/css" media="print">
-<meta content="VideodisplayController,org.opencast.engage.brick.videodisplay.control.VideodisplayController,delegate,model,loadDFXPXML,setVolume,videoControl" name="keywords">
+<meta content="VideodisplayController,org.opencast.engage.brick.videodisplay.control.VideodisplayController,delegate,model,displayCaption,loadDFXPXML,setVolume,videoControl" name="keywords">
 <title>org.opencast.engage.brick.videodisplay.control.VideodisplayController</title>
 </head>
 <body>
@@ -82,22 +82,39 @@ if (!isEclipse() || window.name != ECLIPSE_FRAME_NAME) {titleBar_setSubTitle("Cl
 <tr class="">
 <td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
 <div class="summarySignature">
+<a class="signatureLink" href="#displayCaption()">displayCaption</a>(event:<a href="event/DisplayCaptionEvent.html">DisplayCaptionEvent</a>):void</div>
+<div class="summaryTableDescription"> displayCaption 
+  
+  The event give the new Position in the Video.</div>
+</td><td class="summaryTableOwnerCol">VideodisplayController</td>
+</tr>
+<tr class="">
+<td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
+<div class="summarySignature">
 <a class="signatureLink" href="#loadDFXPXML()">loadDFXPXML</a>(event:<a href="event/LoadDFXPXMLEvent.html">LoadDFXPXMLEvent</a>):void</div>
-<div class="summaryTableDescription"> loadDFXP.XML </div>
+<div class="summaryTableDescription"> loadDFXP.XML 
+  
+  
+  
+  </div>
 </td><td class="summaryTableOwnerCol">VideodisplayController</td>
 </tr>
 <tr class="">
 <td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
 <div class="summarySignature">
 <a class="signatureLink" href="#setVolume()">setVolume</a>(event:<a href="event/SetVolumeEvent.html">SetVolumeEvent</a>):void</div>
-<div class="summaryTableDescription"> setVolume </div>
+<div class="summaryTableDescription"> setVolume 
+  
+  </div>
 </td><td class="summaryTableOwnerCol">VideodisplayController</td>
 </tr>
 <tr class="">
 <td class="summaryTablePaddingCol">&nbsp;</td><td class="summaryTableInheritanceCol">&nbsp;</td><td class="summaryTableSignatureCol">
 <div class="summarySignature">
 <a class="signatureLink" href="#videoControl()">videoControl</a>(event:<a href="event/VideoControlEvent.html">VideoControlEvent</a>):void</div>
-<div class="summaryTableDescription"> videoControl </div>
+<div class="summaryTableDescription"> videoControl 
+  
+  </div>
 </td><td class="summaryTableOwnerCol">VideodisplayController</td>
 </tr>
 </table>
@@ -137,14 +154,36 @@ showHideInherited();
 <code>public function VideodisplayController()</code><p> Constructor </p></div>
 <a name="methodDetail"></a>
 <div class="detailSectionHeader">Method detail</div>
-<a name="loadDFXPXML()"></a>
+<a name="displayCaption()"></a>
 <table cellspacing="0" cellpadding="0" class="detailHeader">
 <tr>
-<td class="detailHeaderName">loadDFXPXML</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td>
+<td class="detailHeaderName">displayCaption</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td>
 </tr>
 </table>
 <div class="detailBody">
-<code>public function loadDFXPXML(event:<a href="event/LoadDFXPXMLEvent.html">LoadDFXPXMLEvent</a>):void</code><p> loadDFXP.XML </p><span class="label">Parameters</span>
+<code>public function displayCaption(event:<a href="event/DisplayCaptionEvent.html">DisplayCaptionEvent</a>):void</code><p> displayCaption 
+  
+  The event give the new Position in the Video. Find the right captions in the currentCaptionSet an display the captions with the ExternalInterface.
+  
+  </p><span class="label">Parameters</span>
+<table border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td width="20px"></td><td><code><span class="label">event</span>:<a href="event/DisplayCaptionEvent.html">DisplayCaptionEvent</a></code></td>
+</tr>
+</table>
+</div>
+<a name="loadDFXPXML()"></a>
+<table cellspacing="0" cellpadding="0" class="detailHeader">
+<tr>
+<td class="detailHeaderName">loadDFXPXML</td><td class="detailHeaderParens">()</td><td class="detailHeaderType">method</td><td class="detailHeaderRule">&nbsp;</td>
+</tr>
+</table>
+<div class="detailBody">
+<code>public function loadDFXPXML(event:<a href="event/LoadDFXPXMLEvent.html">LoadDFXPXMLEvent</a>):void</code><p> loadDFXP.XML 
+  
+  
+  
+  </p><span class="label">Parameters</span>
 <table border="0" cellspacing="0" cellpadding="0">
 <tr>
 <td width="20px"></td><td><code><span class="label">event</span>:<a href="event/LoadDFXPXMLEvent.html">LoadDFXPXMLEvent</a></code></td>
@@ -158,7 +197,9 @@ showHideInherited();
 </tr>
 </table>
 <div class="detailBody">
-<code>public function setVolume(event:<a href="event/SetVolumeEvent.html">SetVolumeEvent</a>):void</code><p> setVolume </p><span class="label">Parameters</span>
+<code>public function setVolume(event:<a href="event/SetVolumeEvent.html">SetVolumeEvent</a>):void</code><p> setVolume 
+  
+  </p><span class="label">Parameters</span>
 <table border="0" cellspacing="0" cellpadding="0">
 <tr>
 <td width="20px"></td><td><code><span class="label">event</span>:<a href="event/SetVolumeEvent.html">SetVolumeEvent</a></code></td>
@@ -172,7 +213,9 @@ showHideInherited();
 </tr>
 </table>
 <div class="detailBody">
-<code>public function videoControl(event:<a href="event/VideoControlEvent.html">VideoControlEvent</a>):void</code><p> videoControl </p><span class="label">Parameters</span>
+<code>public function videoControl(event:<a href="event/VideoControlEvent.html">VideoControlEvent</a>):void</code><p> videoControl 
+  
+  </p><span class="label">Parameters</span>
 <table border="0" cellspacing="0" cellpadding="0">
 <tr>
 <td width="20px"></td><td><code><span class="label">event</span>:<a href="event/VideoControlEvent.html">VideoControlEvent</a></code></td>

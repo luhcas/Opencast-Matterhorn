@@ -62,4 +62,8 @@ function VideodisplayReady() {
 	Videodisplay.seek = function(argNumber) {
 		b_Videodisplay_root.seek(argNumber);
 	};
+	
+	Videodisplay.setLanguage = function(argInt) {
+		b_Videodisplay_root.setLanguage(argInt);
+	};
 }

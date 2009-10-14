@@ -31,3 +31,10 @@ Button.Pause
   selectedDownSkin: Embed(source='skin_opencast.swf', symbol='btn_pause_up');
   selectedDisabledSkin: Embed(source='skin_opencast.swf', symbol='btn_pause_up');
 }
+
+.captions
+{
+	color: #ffffff;
+	background-alpha: 0;
+	text-align: center;
+}

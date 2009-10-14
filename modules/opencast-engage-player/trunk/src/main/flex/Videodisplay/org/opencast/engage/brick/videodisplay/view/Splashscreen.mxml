@@ -7,26 +7,26 @@
 	xmlns:view="org.opencast.engage.brick.videodisplay.view.*">
 	<mx:Script>
 		<![CDATA[
-		  import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
-		  import org.opencast.engage.brick.videodisplay.state.PlayerState;
-		  import org.opencast.engage.brick.videodisplay.control.event.VideoControlEvent;
-		  import org.swizframework.Swiz;
-		  import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
+			import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
+		  	import org.opencast.engage.brick.videodisplay.state.PlayerState;
+		  	import org.opencast.engage.brick.videodisplay.control.event.VideoControlEvent;
+		  	import org.swizframework.Swiz;
+		  	import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
 			
-      [Autowire]
-      [Bindable]
-      public var model:VideodisplayModel;
-		
+			[Autowire]
+			[Bindable]
+			public var model:VideodisplayModel;
+			
 			private function showPauseButton():void
 			{
 				if (this.currentState == PlayerState.PLAYING)
 					pauseButton_up.visible = true;	
 			}
-			
+				
 			private function hidePlayButton():void
 			{
-			   if (this.currentState == PlayerState.PLAYING)
-          pauseButton_up.visible = false;  
+				if(this.currentState == PlayerState.PLAYING)
+	      			pauseButton_up.visible = false;  
 			}
 		]]>
 	</mx:Script>

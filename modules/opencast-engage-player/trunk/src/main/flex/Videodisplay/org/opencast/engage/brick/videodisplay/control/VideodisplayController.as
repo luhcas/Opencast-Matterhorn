@@ -1,15 +1,18 @@
 package org.opencast.engage.brick.videodisplay.control
 {
+	import flash.external.ExternalInterface;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.IResponder;
 	import mx.rpc.http.HTTPService;
 	import org.opencast.engage.brick.videodisplay.business.VideodisplayDelegate;
+	import org.opencast.engage.brick.videodisplay.control.event.DisplayCaptionEvent;
 	import org.opencast.engage.brick.videodisplay.control.event.LoadDFXPXMLEvent;
 	import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
 	import org.opencast.engage.brick.videodisplay.control.event.VideoControlEvent;
 	import org.opencast.engage.brick.videodisplay.control.responder.LoadDFXPXMLResponder;
 	import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
 	import org.opencast.engage.brick.videodisplay.state.PlayerState;
+	import org.opencast.engage.brick.videodisplay.vo.CaptionVO;
 	import org.swizframework.Swiz;
 	import org.swizframework.controller.AbstractController;
 	public class VideodisplayController extends AbstractController
@@ -23,12 +26,16 @@ package org.opencast.engage.brick.videodisplay.control
 		/** Constructor */
 		public function VideodisplayController()
 		{
-			Swiz.addEventListener(LoadDFXPXMLEvent.EVENT_NAME , loadDFXPXML );
-			Swiz.addEventListener(SetVolumeEvent.EVENT_NAME , setVolume );
-			Swiz.addEventListener(VideoControlEvent.EVENT_NAME , videoControl );
+			Swiz.addEventListener( LoadDFXPXMLEvent.EVENT_NAME , loadDFXPXML );
+			Swiz.addEventListener( SetVolumeEvent.EVENT_NAME , setVolume );
+			Swiz.addEventListener( VideoControlEvent.EVENT_NAME , videoControl );
+			Swiz.addEventListener( DisplayCaptionEvent.EVENT_NAME , displayCaption );
 		}
 
-		/** videoControl */
+		/** videoControl 
+		* 
+		* @eventType event:VideoControlEvent
+		* */
 		public function videoControl( event : VideoControlEvent ) : void
 		{
 			switch(event.videoControlType)
@@ -49,13 +56,21 @@ package org.opencast.engage.brick.videodisplay.control
 			}
 		}
 
-		/** setVolume */
+		/** setVolume 
+		* 
+		* @eventType event:SetVolumeEvent
+		* */
 		public function setVolume( event : SetVolumeEvent ) : void
 		{
 			model.player.volume = event.volume;
 		}
 
-		/** loadDFXP.XML */
+		/** loadDFXP.XML 
+		* 
+		* 
+		* 
+		* @eventType event:LoadDFXPXMLEvent
+		* */
 		public function loadDFXPXML( event : LoadDFXPXMLEvent ) : void
 		{
 			var responder : IResponder = new LoadDFXPXMLResponder();
@@ -64,6 +79,42 @@ package org.opencast.engage.brick.videodisplay.control
 			service.url = event.source;
 			var token : AsyncToken = service.send();
 			token.addResponder(responder);
+		}
+
+		/** displayCaption 
+		* 
+		* The event give the new Position in the Video. Find the right captions in the currentCaptionSet an display the captions with the ExternalInterface.
+		* 
+		* @eventType event:DisplayCaptionEvent
+		* */
+		public function displayCaption( event : DisplayCaptionEvent ) : void
+		{
+			var time : Number = event.position * 1000;
+			var tmpCaption : CaptionVO = new CaptionVO();
+			var lastPos : int = 0;
+			var subtitle : String = '';
+			// Find the captions
+			if( model.currentCaptionSet != null)
+			{
+				for( var i : int = 0; i < model.currentCaptionSet.length; i++)
+				{
+					tmpCaption = CaptionVO(model.currentCaptionSet[(lastPos + i) % model.currentCaptionSet.length]);
+					if(tmpCaption.begin < time && time < tmpCaption.end)
+					{
+						lastPos += i;
+						subtitle = tmpCaption.text;
+						break;
+					}
+				}
+
+				// When the capions are differently, than send the new captiopns
+				if(model.oldSubtitle != subtitle)
+				{
+					ExternalInterface.call('setCaptions' , subtitle);
+					model.currentSubtitle = subtitle;
+					model.oldSubtitle = subtitle;
+				}
+			}
 		}
 	}
 }
