@@ -94,7 +94,7 @@ public class Activator extends ContextLoaderListener implements BundleActivator 
         props.put("globalScope", "default");
         props.put("parentContextKey", "default.context");
         props.put("webAppRootKey", "/stream");
-        props.put("contextConfigLocation", "*-web.xml");
+        props.put("contextConfigLocation", "classpath:/stream-web.xml");
 
         httpService.setContextParam(props, httpContext);
         // Register listeners

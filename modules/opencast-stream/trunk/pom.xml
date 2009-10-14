@@ -111,6 +111,11 @@
       <artifactId>jaudiotagger</artifactId>
       <version>1.0.8</version>
     </dependency>
+    <dependency>
+      <groupId>bouncycastle</groupId>
+      <artifactId>bcprov-jdk15</artifactId>
+      <version>140</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -134,10 +139,12 @@
               org.apache.mina.integration.ognl,
               org.apache.mina.integration.beans,
               org.opencastproject.stream.red5,
+              org.opencastproject.util,
               *;resolution:=optional
             </Import-Package>
             <Embed-Dependency>
               red5;inline=true,
+              bcprov-jdk15;inline=true,
               jaudiotagger;inline=true,
               xercesImpl;inline=true,
               quartz;inline=true,
@@ -149,6 +156,9 @@
               logback-classic;inline=true,
               commons-httpclient;inline=true
             </Embed-Dependency>
+            <Service-Component>
+              OSGI-INF/stream-ui.xml
+            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

@@ -13,8 +13,12 @@
     <property name="server" ref="red5.server" />
     <property name="parent" ref="global.scope" />
     <property name="context" ref="web.context" />
-    <property name="handler" ref="global.handler" />
+    <property name="handler" ref="web.handler" />
     <property name="contextPath" value="/stream" />
     <property name="virtualHosts" value="*,localhost, localhost:8080, 127.0.0.1:8080" />
   </bean>
+  
+  <bean id="web.handler" 
+    class="org.opencastproject.stream.red5.Application" 
+    singleton="true" />
 </beans>
