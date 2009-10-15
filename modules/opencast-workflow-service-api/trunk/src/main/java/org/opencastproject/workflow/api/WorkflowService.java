@@ -25,7 +25,7 @@ import java.util.Map;
  * Manages {@link WorkflowDefinition}s and {@link WorkflowInstance}s.
  */
 public interface WorkflowService {
-  
+
   /**
    * Gets a {@link WorkflowInstace} by its ID.
    */
@@ -33,10 +33,11 @@ public interface WorkflowService {
 
   /**
    * Gets all known {@link WorkflowOperation}s that can be combined to create a {@link WorkflowInstance}.
+   * 
    * @return The {@link List} of all known {@link WorkflowOperation}s
    */
   List<WorkflowOperation> getWorkflowOperations();
-  
+
   /**
    * List all {@link WorkflowInstance}s that are currently in the given {@link State}.
    * 
@@ -54,7 +55,8 @@ public interface WorkflowService {
    * @param properties
    * @return The new workflow instance
    */
-  WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage, Map<String, String> properties);
+  WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
+          Map<String, String> properties);
 
   /**
    * Stops a running workflow instance.
@@ -76,7 +78,15 @@ public interface WorkflowService {
    * @param workflowInstanceId
    */
   void resume(String workflowInstanceId);
-  
+
+  /**
+   * Updates the given workflow instance with regard to the media package, the properties and the operations involved.
+   * 
+   * @param workflowInstance
+   *          the workflow instance
+   */
+  void update(WorkflowInstance workflowInstance);
+
   // TODO Add the findBy* methods once the search service is available.
-  
+
 }

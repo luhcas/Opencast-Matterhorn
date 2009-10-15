@@ -136,6 +136,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
           } else {
             for(ServiceReference serviceRef : serviceRefs) {
               WorkflowOperationHandler runner = (WorkflowOperationHandler)componentContext.getBundleContext().getService(serviceRef);
+              // TODO: Set current operation on wfi
               runner.getRunnable(wfi).run(); // Do not spawn new threads for these runnables yet
             }
           }
@@ -184,6 +185,14 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#update(org.opencastproject.workflow.api.WorkflowInstance)
+   */
+  public void update(WorkflowInstance workflowInstance) {
+    // TODO: Update the workflow instance
+  }
+
+  /**
+   * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowInstances(org.opencastproject.workflow.api.WorkflowInstance.State)
    */
   public List<WorkflowInstance> getWorkflowInstances(State state) {
@@ -203,4 +212,5 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   public List<WorkflowOperation> getWorkflowOperations() {
     return Collections.unmodifiableList(operations);
   }
+
 }
