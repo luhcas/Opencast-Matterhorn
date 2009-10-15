@@ -27,6 +27,8 @@ import java.io.InputStream;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 /**
  * The REST endpoint for the {@link ConductorService}.
@@ -58,12 +60,14 @@ public class ConductorRestService {
 
   @GET
   @Path("definitions")
+  @Produces(MediaType.TEXT_XML)
   public WorkflowDefinitionList getWorkflowDefinitions() {
     return conductorService.getWorkflowDefinitions();
   }
 
   @GET
   @Path("docs")
+  @Produces(MediaType.TEXT_HTML)
   public String getDocumentation() {
     return docs;
   }
