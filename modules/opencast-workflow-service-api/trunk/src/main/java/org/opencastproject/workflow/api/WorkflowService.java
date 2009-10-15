@@ -48,6 +48,65 @@ public interface WorkflowService {
   List<WorkflowInstance> getWorkflowInstances(State state);
 
   /**
+   * Returns the {@link WorkflowInstance} identified by the given id.
+   * 
+   * @param workflowId
+   *          the workflow identifier
+   * @return the resultset
+   * @throws WorkflowDatabaseException
+   *           if the lookup fails
+   */
+  WorkflowSet getWorkflowsById(String workflowId) throws WorkflowDatabaseException;
+
+  /**
+   * Returns the {@link WorkflowInstance}s ordered by date (descending).
+   * 
+   * @param offset
+   *          starting position of the result set
+   * @param limit
+   *          the maximum size of the result set
+   * @return the resultset
+   * @throws WorkflowDatabaseException
+   *           if the lookup fails
+   */
+  WorkflowSet getWorkflowsByDate(int offset, int limit) throws WorkflowDatabaseException;
+
+  /**
+   * Returns the {@link WorkflowInstance}s that deal with the specified episode.
+   * 
+   * @param episodeId
+   *          the the episode identifier
+   * @return the resultset
+   * @throws WorkflowDatabaseException
+   *           if the lookup fails
+   */
+  WorkflowSet getWorkflowsByEpisode(String episodeId) throws WorkflowDatabaseException;
+
+  /**
+   * Returns the {@link WorkflowInstance}s deal with the specified series.
+   * 
+   * @param seriesId
+   *          the the series identifier
+   * @return the resultset
+   * @throws WorkflowDatabaseException
+   *           if the lookup fails
+   */
+  WorkflowSet getWorkflowsBySeries(String seriesId) throws WorkflowDatabaseException;
+
+  /**
+   * Returns the {@link WorkflowInstance}s that deal with episodes matching the specified search terms.
+   * 
+   * @param offset
+   *          starting position of the result set
+   * @param limit
+   *          the maximum size of the result set
+   * @return the resultset
+   * @throws WorkflowDatabaseException
+   *           if the lookup fails
+   */
+  WorkflowSet getWorkflowsByText(String text, int offset, int limit) throws WorkflowDatabaseException;
+
+  /**
    * Creates a new workflow instance and starts the workflow.
    * 
    * @param workflowDefinitionId
