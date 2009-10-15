@@ -147,7 +147,7 @@ public class SolrIndexManager {
    */
   private SolrUpdateableInputDocument createInputDocument(WorkflowInstance workflow) {
     SolrUpdateableInputDocument solrEpisodeDocument = new SolrUpdateableInputDocument();
-    MediaPackage mediaPackage = workflow.getMediaPackage();
+    MediaPackage mediaPackage = workflow.getSourceMediaPackage();
 
     // If this is the case, try to get a hold on it
     Catalog dcCatalogs[] = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR,

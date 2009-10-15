@@ -15,8 +15,10 @@
  */
 package org.opencastproject.conductor.impl;
 
+import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowOperationHandler;
+import org.opencastproject.workflow.api.WorkflowOperationRunner;
+import org.opencastproject.workflow.api.WorkflowOperationRunnerFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,25 +27,29 @@ import org.slf4j.LoggerFactory;
  * TODO: Comment me!
  *
  */
-public class ComposeWorkflowRunnerFactory implements WorkflowOperationHandler {
-  private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowRunnerFactory.class);
+public class ComposeWorkflowOperationRunnerFactory implements WorkflowOperationRunnerFactory {
+  private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowOperationRunnerFactory.class);
+
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowRunner#getRunnable(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationRunnerFactory#getRunner(org.opencastproject.workflow.api.WorkflowInstance)
    */
-  public Runnable getRunnable(final WorkflowInstance workflowInstance) {
-    return new Runnable() {
-      public void run() {
+  public WorkflowOperationRunner getRunner() {
+    return new WorkflowOperationRunner() {
+      
+      public MediaPackage run(WorkflowInstance workflowInstance) {
         logger.info("run() compose workflow operation");
         if(workflowInstance.getProperties() != null && workflowInstance.getProperties().keySet().contains("flash")) {
-          logger.info("Composing flash media for media package " + workflowInstance.getMediaPackage().getIdentifier());
+          logger.info("Composing flash media for media package " + workflowInstance.getSourceMediaPackage().getIdentifier());
         } else {
-          logger.info("Skipping flash media composition for media package " + workflowInstance.getMediaPackage().getIdentifier());
+          logger.info("Skipping flash media composition for media package " + workflowInstance.getSourceMediaPackage().getIdentifier());
         }
         if(workflowInstance.getProperties() == null || workflowInstance.getProperties().isEmpty()) {
           logger.info("This workflow contains no properties, so we can't compose any media");
         }
+        // TODO Add new media track to the media package
+        return workflowInstance.getSourceMediaPackage();
       }
     };
   }

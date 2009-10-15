@@ -15,22 +15,49 @@
  */
 package org.opencastproject.workflow.api;
 
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-/**
- * A simple POJO-based implementation of a {@link WorkflowDefinition}
- */
-public class WorkflowDefinitionImpl implements WorkflowDefinition {
-  private String id;
-  private String title;
-  private String description;
-  private List<WorkflowOperation> operations;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
+/**
+ * A JAXB-anotated implementation of {@link WorkflowDefinition}
+ */
+@XmlType(name="workflow-definition", namespace="http://workflow.opencastproject.org/")
+@XmlRootElement(name="workflow-definition", namespace="http://workflow.opencastproject.org/")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class WorkflowDefinitionImpl implements WorkflowDefinition {
+  private static final Logger logger = LoggerFactory.getLogger(WorkflowDefinitionImpl.class);
+
+  public WorkflowDefinitionImpl() {}
+
+  @XmlID
+  @XmlAttribute()
+  private String id;
+
+  @XmlElement(name="title")
+  private String title;
+
+  @XmlElement(name="description")
+  private String description;
+
+  @XmlElementWrapper(name="operations")
+  private List<WorkflowOperationDefinition> operations;
+  
   public String getId() {
     return id;
   }
-
+  
   public void setId(String id) {
     this.id = id;
   }
@@ -50,13 +77,25 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   public void setDescription(String description) {
     this.description = description;
   }
-
-  public List<WorkflowOperation> getOperations() {
+  public List<WorkflowOperationDefinition> getOperations() {
     return operations;
   }
 
-  public void setOperations(List<WorkflowOperation> operations) {
+  public void setOperations(List<WorkflowOperationDefinition> operations) {
     this.operations = operations;
+  }
+
+  /**
+   * Since we are posting workflow definitions as one post parameter in a multi-parameter post, we can not rely on
+   * "automatic" JAXB deserialization.  We therefore need to provide a static valueOf(String) method to transform an
+   * XML string into a WorkflowDefinition.
+   * 
+   * @param xmlString The xml describing the workflow
+   * @return A {@link WorkflowDefinitionImpl} instance based on xmlString
+   * @throws Exception If there is a problem marshalling the {@link WorkflowDefinitionImpl} from XML.
+   */
+  public static WorkflowDefinitionImpl valueOf(String xmlString) throws Exception {
+    return (WorkflowDefinitionImpl) WorkflowDefinitionFactory.getInstance().parse(xmlString);
   }
 }
 

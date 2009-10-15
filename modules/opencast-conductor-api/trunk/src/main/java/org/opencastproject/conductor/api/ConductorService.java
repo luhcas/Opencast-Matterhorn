@@ -16,8 +16,7 @@
 package org.opencastproject.conductor.api;
 
 import org.opencastproject.workflow.api.WorkflowDefinition;
-
-import java.util.List;
+import org.opencastproject.workflow.api.WorkflowDefinitionList;
 
 /**
  * An abstraction to access customized workflow definitions.
@@ -27,7 +26,7 @@ public interface ConductorService {
   /**
    * @return All registered {@link WorkflowDefinition}s
    */
-  List<WorkflowDefinition> getWorkflowDefinitions();
+  WorkflowDefinitionList getWorkflowDefinitions();
 
   /**
    * Returns the {@link WorkflowDefinition} whith the specified name or <code>null</code> if no such definition is

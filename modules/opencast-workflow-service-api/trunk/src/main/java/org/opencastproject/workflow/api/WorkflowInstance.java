@@ -47,21 +47,21 @@ public interface WorkflowInstance {
    * The {@link WorkflowDefinition} that served as a template for this {@link WorkflowInstance} the moment the instance
    * was created.
    */
-  public WorkflowDefinition getWorkflowDefinition();
+  WorkflowDefinition getWorkflowDefinition();
 
   /**
    * Returns the {@link WorkflowOperation}s that make up this workflow.
    * 
    * @return the workflow operations
    */
-  public WorkflowOperation[] getWorkflowOperations();
+  public WorkflowOperationInstanceList getWorkflowOperations();
 
   /**
    * Returns the {@link WorkflowOperation} that is currently being executed.
    * 
    * @return the current operation
    */
-  public WorkflowOperation getCurrentOperation();
+  public WorkflowOperationInstance getCurrentOperation();
 
   /**
    * Appends a {@link WorkflowOperation} to the end of the list of operations.
@@ -69,7 +69,7 @@ public interface WorkflowInstance {
    * @param operation
    *          the operation to append
    */
-  public void addWorkflowOperation(WorkflowOperation operation);
+  public void addWorkflowOperation(WorkflowOperationInstance operation);
 
   /**
    * Inserts a {@link WorkflowOperation}s at index <code>location</code> into the list of workflow operations.
@@ -79,7 +79,7 @@ public interface WorkflowInstance {
    * @param operation
    *          the operation to append
    */
-  public void addWorkflowOperation(int location, WorkflowOperation operation);
+  public void addWorkflowOperation(int location, WorkflowOperationInstance operation);
 
   /**
    * Appends a list of {@link WorkflowOperation} to the end of the list of operations.
@@ -87,7 +87,7 @@ public interface WorkflowInstance {
    * @param operations
    *          the operations to append
    */
-  public void addWorkflowOperations(List<WorkflowOperation> operations);
+  public void addWorkflowOperations(WorkflowOperationInstanceList operations);
 
   /**
    * Inserts a list of {@link WorkflowOperation}s at index <code>location</code> into the list of workflow operations.
@@ -97,23 +97,23 @@ public interface WorkflowInstance {
    * @param operations
    *          the operations to append
    */
-  public void addWorkflowOperations(int location, List<WorkflowOperation> operations);
+  public void addWorkflowOperations(int location, WorkflowOperationInstanceList operations);
 
   /**
    * The current {@link State} of this {@link WorkflowInstance}
    */
-  public State getState();
+  State getState();
 
   /**
    * The {@link MediaPackage} associated with this {@link WorkflowInstance}
    */
-  public MediaPackage getMediaPackage();
+  MediaPackage getSourceMediaPackage();
 
   /**
    * The properties associated with this workflow instance. Properties can be used to affect how
    * {@link WorkflowDefinition#getOperations()} are eventually run.
    */
-  public Map<String, String> getProperties();
+  Map<String, String> getProperties();
 
   /**
    * Returns the value of property <code>name</code> or <code>null</code> if no such property has been set.

@@ -31,12 +31,12 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name="workflow-instances", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="workflow-instances", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WorkflowInstanceJaxbImplList {
+public class WorkflowInstanceListImpl {
   @XmlElement(name="workflow-instance")
-  protected List<WorkflowInstanceJaxbImpl> instance;
-  public List<WorkflowInstanceJaxbImpl> getWorkflowInstance() {
+  protected List<WorkflowInstanceImpl> instance;
+  public List<WorkflowInstanceImpl> getWorkflowInstance() {
     if (instance == null) {
-      instance = new ArrayList<WorkflowInstanceJaxbImpl>();
+      instance = new ArrayList<WorkflowInstanceImpl>();
     }
     return instance;
   }

@@ -24,21 +24,31 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- * TODO: Comment me!
- *
+ * A list of {@link WorkflowOperationInstance}s.
  */
 @XmlType(name="operations", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="operations", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WorkflowOperationJaxbImplList {
-  @XmlElement(name="operation")
-  protected List<WorkflowOperationImpl> ops;
-  public List<WorkflowOperationImpl> getOperation() {
+public class WorkflowOperationInstanceListImpl implements WorkflowOperationInstanceList {
+  @XmlElement(name="operation-instance")
+  protected List<WorkflowOperationInstance> ops;
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationDefinitionList#getOperation()
+   */
+  public List<WorkflowOperationInstance> getOperationInstance() {
     if (ops == null) {
-      ops = new ArrayList<WorkflowOperationImpl>();
+      ops = new ArrayList<WorkflowOperationInstance>();
     }
     return ops;
   }
+  
+  static class Adapter extends XmlAdapter<WorkflowOperationInstanceListImpl, WorkflowOperationInstanceList> {
+    public WorkflowOperationInstanceListImpl marshal(WorkflowOperationInstanceList op) throws Exception {return (WorkflowOperationInstanceListImpl)op;}
+    public WorkflowOperationInstanceList unmarshal(WorkflowOperationInstanceListImpl op) throws Exception {return op;}
+  }
+
 }

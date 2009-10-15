@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.api;
 
+import org.opencastproject.media.mediapackage.MediaPackage;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -24,12 +26,12 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 
 /**
- * See {@link WorkflowOperation}
+ * See {@link WorkflowOperationDefinition}
  */
 @XmlType(name="operation", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="operation", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WorkflowOperationImpl implements WorkflowOperation {
+public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinition {
 
   @XmlAttribute(name="name")
   protected String name;
@@ -41,14 +43,14 @@ public class WorkflowOperationImpl implements WorkflowOperation {
   protected boolean failOnError;
 
   /** A no-arg constructor is needed by JAXB */
-  public WorkflowOperationImpl() {}
+  public WorkflowOperationDefinitionImpl() {}
   
   /**
    * @param name The unique name of this operation
    * @param description The description of what this operation does
    * @param failOnError Whether an exception thrown by this operation should fail the entire {@link WorkflowInstance}
    */
-  public WorkflowOperationImpl(String name, String description, boolean failOnError) {
+  public WorkflowOperationDefinitionImpl(String name, String description, boolean failOnError) {
     super();
     this.name = name;
     this.description = description;
@@ -58,41 +60,24 @@ public class WorkflowOperationImpl implements WorkflowOperation {
   public String getName() {
     return name;
   }
-  
   public void setName(String name) {
     this.name = name;
   }
-  
   public String getDescription() {
     return description;
   }
-  
   public void setDescription(String description) {
     this.description = description;
   }
-  
   public boolean isFailOnError() {
     return failOnError;
   }
-  
   public void setFailOnError(boolean failOnError) {
     this.failOnError = failOnError;
   }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * This default implementation does nothing (nop). Overwrite to have your business logic executed.
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowOperation#execute(org.opencastproject.workflow.api.WorkflowInstance)
-   */
-  public void execute(WorkflowInstance workflow) {
-    // Nothing to do. Overwrite to execute logic.
+  
+  static class Adapter extends XmlAdapter<WorkflowOperationDefinitionImpl, WorkflowOperationDefinition> {
+    public WorkflowOperationDefinitionImpl marshal(WorkflowOperationDefinition op) throws Exception {return (WorkflowOperationDefinitionImpl)op;}
+    public WorkflowOperationDefinition unmarshal(WorkflowOperationDefinitionImpl op) throws Exception {return op;}
   }
-
-  static class Adapter extends XmlAdapter<WorkflowOperationImpl, WorkflowOperation> {
-    public WorkflowOperationImpl marshal(WorkflowOperation op) throws Exception {return (WorkflowOperationImpl)op;}
-    public WorkflowOperation unmarshal(WorkflowOperationImpl op) throws Exception {return op;}
-  }
-
 }

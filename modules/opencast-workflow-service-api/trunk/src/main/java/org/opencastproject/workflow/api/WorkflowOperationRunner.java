@@ -13,28 +13,22 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.workflow.impl;
+package org.opencastproject.workflow.api;
 
-import junit.framework.Assert;
+import org.opencastproject.media.mediapackage.MediaPackage;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+/**
+ * Contains the logic for handling a {@link WorkflowOperationDefinition}.  WorkflowOperationRunners are not guaranteed to be
+ * thread safe.
+ */
+public interface WorkflowOperationRunner {
 
-public class WorkflowServiceImplTest {
-  private WorkflowServiceImpl service = null;
-  @Before
-  public void setup() {
-    service = new WorkflowServiceImpl();
-  }
-
-  @After
-  public void teardown() {
-    service = null;
-  }
-  
-  @Test
-  public void testWorkflowOperations() {
-    // TODO 
-  }
+  /**
+   * Runs a single operation within a given {@link WorkflowInstance}
+   * 
+   * @param workflowInstance The workflow instance 
+   * @return The media package, including any changes made to the media package as a result of this workflow
+   * operation's execution.
+   */
+  public MediaPackage run(WorkflowInstance workflowInstance);
 }

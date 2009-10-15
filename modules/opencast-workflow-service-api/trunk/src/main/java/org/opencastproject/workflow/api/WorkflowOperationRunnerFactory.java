@@ -13,28 +13,16 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.workflow.impl;
+package org.opencastproject.workflow.api;
 
-import junit.framework.Assert;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-public class WorkflowServiceImplTest {
-  private WorkflowServiceImpl service = null;
-  @Before
-  public void setup() {
-    service = new WorkflowServiceImpl();
-  }
-
-  @After
-  public void teardown() {
-    service = null;
-  }
-  
-  @Test
-  public void testWorkflowOperations() {
-    // TODO 
-  }
+/**
+ * A factory for generating {@link WorkflowOperationRunner}s.
+ */
+public interface WorkflowOperationRunnerFactory {
+  /**
+   * Gets a new {@link WorkflowOperationRunner}.  Implementations must return a new {@link WorkflowOperationRunner} for
+   * each call.
+   * @return A new {@link WorkflowOperationRunner}.
+   */
+  WorkflowOperationRunner getRunner();
 }

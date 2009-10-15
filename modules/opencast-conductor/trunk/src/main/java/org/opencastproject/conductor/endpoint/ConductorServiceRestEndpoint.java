@@ -13,28 +13,28 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.workflow.impl;
+package org.opencastproject.conductor.endpoint;
 
-import junit.framework.Assert;
+import org.opencastproject.conductor.api.ConductorService;
+import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowDefinitionList;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import java.util.List;
 
-public class WorkflowServiceImplTest {
-  private WorkflowServiceImpl service = null;
-  @Before
-  public void setup() {
-    service = new WorkflowServiceImpl();
+/**
+ * TODO: Comment me!
+ *
+ */
+public class ConductorServiceRestEndpoint {
+  protected ConductorService conductorService;
+
+  public void setConductorService(ConductorService conductorService) {
+    this.conductorService = conductorService;
   }
 
-  @After
-  public void teardown() {
-    service = null;
+  public WorkflowDefinitionList getWorkflowDefinitions() {
+    return conductorService.getWorkflowDefinitions();
   }
   
-  @Test
-  public void testWorkflowOperations() {
-    // TODO 
-  }
+  
 }

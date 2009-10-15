@@ -13,28 +13,17 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.workflow.impl;
+package org.opencastproject.workflow.api;
 
-import junit.framework.Assert;
+import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-public class WorkflowServiceImplTest {
-  private WorkflowServiceImpl service = null;
-  @Before
-  public void setup() {
-    service = new WorkflowServiceImpl();
-  }
-
-  @After
-  public void teardown() {
-    service = null;
-  }
-  
-  @Test
-  public void testWorkflowOperations() {
-    // TODO 
-  }
+/**
+ * A List of {@link WorkflowOperationInstance}s
+ *
+ */
+@XmlJavaTypeAdapter(WorkflowDefinitionListImpl.Adapter.class)
+public interface WorkflowDefinitionList {
+  List<WorkflowDefinition> getWorkflowDefinition();
 }

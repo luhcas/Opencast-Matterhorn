@@ -20,7 +20,7 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.workflow.api.WorkflowInstanceJaxbImpl;
+import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.impl.WorkflowSetImpl;
 
@@ -149,7 +149,7 @@ public class SolrRequester {
     // Walk through response and create new items with title, creator, etc:
     for (SolrDocument doc : solrResponse.getResults()) {
 
-      WorkflowInstanceJaxbImpl item = new WorkflowInstanceJaxbImpl();
+      WorkflowInstanceImpl item = new WorkflowInstanceImpl();
       item.setId(doc.getFieldValue(SolrFields.ID).toString());
       
       // TODO: Read properties

@@ -15,8 +15,10 @@
  */
 package org.opencastproject.conductor.impl;
 
+import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowOperationHandler;
+import org.opencastproject.workflow.api.WorkflowOperationRunner;
+import org.opencastproject.workflow.api.WorkflowOperationRunnerFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,26 +27,31 @@ import org.slf4j.LoggerFactory;
  * TODO: Comment me!
  *
  */
-public class DistributeWorkflowRunnerFactory implements WorkflowOperationHandler {
-  private static final Logger logger = LoggerFactory.getLogger(DistributeWorkflowRunnerFactory.class);
+public class DistributeWorkflowOperationRunnerFactory implements WorkflowOperationRunnerFactory {
+  private static final Logger logger = LoggerFactory.getLogger(DistributeWorkflowOperationRunnerFactory.class);
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowRunner#getRunnable(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationRunnerFactory#getRunner(org.opencastproject.workflow.api.WorkflowInstance)
    */
-  public Runnable getRunnable(final WorkflowInstance workflowInstance) {
-    return new Runnable() {
-      public void run() {
+  public WorkflowOperationRunner getRunner() {
+    return new WorkflowOperationRunner() {
+      
+      public MediaPackage run(WorkflowInstance workflowInstance) {
         logger.info("run() distribution workflow operation");
         if(workflowInstance.getProperties() != null && workflowInstance.getProperties().keySet().contains("itunes")) {
-          logger.info("Distributing media to itunes for media package " + workflowInstance.getMediaPackage().getIdentifier());
+          logger.info("Distributing media to itunes for media package " + workflowInstance.getSourceMediaPackage().getIdentifier());
         }
         if(workflowInstance.getProperties() != null && workflowInstance.getProperties().keySet().contains("youtube")) {
-          logger.info("Distributing media to youTube for media package " + workflowInstance.getMediaPackage().getIdentifier());
+          logger.info("Distributing media to youTube for media package " + workflowInstance.getSourceMediaPackage().getIdentifier());
         }
         if(workflowInstance.getProperties() == null || workflowInstance.getProperties().isEmpty()) {
           logger.info("This workflow contains no properties, so we can't distribute any media");
         }
+        
+        // TODO Add any distributed media to the media package
+        
+        return workflowInstance.getSourceMediaPackage();
       }
     };
   }

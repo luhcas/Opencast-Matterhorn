@@ -32,13 +32,6 @@ public interface WorkflowService {
   WorkflowInstance getWorkflowInstance(String id);
 
   /**
-   * Gets all known {@link WorkflowOperation}s that can be combined to create a {@link WorkflowInstance}.
-   * 
-   * @return The {@link List} of all known {@link WorkflowOperation}s
-   */
-  List<WorkflowOperation> getWorkflowOperations();
-
-  /**
    * List all {@link WorkflowInstance}s that are currently in the given {@link State}.
    * 
    * TODO Implement paging

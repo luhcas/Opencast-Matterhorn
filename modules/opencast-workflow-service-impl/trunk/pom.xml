@@ -139,7 +139,37 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.workflow.* </Export-Package>
+            <Import-Package>
+              org.opencastproject.workflow.api,
+              *;resolution:=optional
+            </Import-Package>
+            <Export-Package>
+              org.opencastproject.workflow.impl,
+              org.opencastproject.workflow.impl.solr,
+              org.opencastproject.workflow.endpoint
+            </Export-Package>
+            <Private-Package>
+              html,
+              solr.*,
+              org.tartarus.*,
+              org.apache.solr.*,
+              org.apache.lucene.*,
+            </Private-Package>
+            <Embed-Dependency>
+              lucene-analyzers;inline=true,
+              lucene-memory;inline=true,
+              solr-common;inline=true,
+              solr-core;inline=true,
+              solr-dataimporthandler;inline=true,
+              solr-solrj;inline=true,
+              solr-lucene-contrib;inline=true,
+              solr-lucene-core;inline=true,
+              solr-lucene-highlighter;inline=true,
+              solr-lucene-queries;inline=true,
+              solr-lucene-snowball;inline=true,
+              solr-lucene-spellchecker;inline=true,
+              stax-utils;inline=true
+            </Embed-Dependency>
             <Service-Component>
               OSGI-INF/workflow-service.xml,
               OSGI-INF/workflow-service-rest.xml

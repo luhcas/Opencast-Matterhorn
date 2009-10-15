@@ -18,7 +18,10 @@ package org.opencastproject.conductor.impl;
 import org.opencastproject.conductor.api.ConductorService;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
-import org.opencastproject.workflow.api.WorkflowOperation;
+import org.opencastproject.workflow.api.WorkflowDefinitionList;
+import org.opencastproject.workflow.api.WorkflowDefinitionListImpl;
+import org.opencastproject.workflow.api.WorkflowOperationDefinition;
+import org.opencastproject.workflow.api.WorkflowOperationDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowService;
 
 import java.util.ArrayList;
@@ -41,7 +44,9 @@ public class ConductorServiceImpl implements ConductorService {
 
   public void init() {
     defs = new HashMap<String, WorkflowDefinition>();
-    List<WorkflowOperation> allOperations = workflowService.getWorkflowOperations();
+    List<WorkflowOperationDefinition> allOperations = new ArrayList<WorkflowOperationDefinition>();
+    allOperations.add(new WorkflowOperationDefinitionImpl("compose", "Compose new media", true));
+    allOperations.add(new WorkflowOperationDefinitionImpl("distribute", "Distribute media to distribution channels", false));
 
     WorkflowDefinitionImpl def1 = new WorkflowDefinitionImpl();
     def1.setId("1");
@@ -55,7 +60,7 @@ public class ConductorServiceImpl implements ConductorService {
     def2.setId("2");
     def2.setTitle("Distribute Only");
     def2.setDescription("A simple workflow that sends media and metadata directly to the distribution channels");
-    List<WorkflowOperation> operations2 = new ArrayList<WorkflowOperation>();
+    List<WorkflowOperationDefinition> operations2 = new ArrayList<WorkflowOperationDefinition>();
     operations2.add(allOperations.get(1));
     def1.setOperations(operations2);
     defs.put(def2.getId(), def2);
@@ -66,10 +71,10 @@ public class ConductorServiceImpl implements ConductorService {
    * 
    * @see org.opencastproject.conductor.api.ConductorService#getWorkflowDefinitions()
    */
-  public List<WorkflowDefinition> getWorkflowDefinitions() {
-    List<WorkflowDefinition> defList = new ArrayList<WorkflowDefinition>(defs.size());
-    defList.addAll(defs.values());
-    return defList;
+  public WorkflowDefinitionList getWorkflowDefinitions() {
+    WorkflowDefinitionListImpl list = new WorkflowDefinitionListImpl();
+    list.getWorkflowDefinition().addAll(defs.values());
+    return list;
   }
 
   /**
