@@ -58,24 +58,41 @@ public class WorkflowOperationImpl implements WorkflowOperation {
   public String getName() {
     return name;
   }
+  
   public void setName(String name) {
     this.name = name;
   }
+  
   public String getDescription() {
     return description;
   }
+  
   public void setDescription(String description) {
     this.description = description;
   }
+  
   public boolean isFailOnError() {
     return failOnError;
   }
+  
   public void setFailOnError(boolean failOnError) {
     this.failOnError = failOnError;
   }
-  
+
+  /**
+   * {@inheritDoc}
+   * 
+   * This default implementation does nothing (nop). Overwrite to have your business logic executed.
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperation#execute(org.opencastproject.workflow.api.WorkflowInstance)
+   */
+  public void execute(WorkflowInstance workflow) {
+    // Nothing to do. Overwrite to execute logic.
+  }
+
   static class Adapter extends XmlAdapter<WorkflowOperationImpl, WorkflowOperation> {
     public WorkflowOperationImpl marshal(WorkflowOperation op) throws Exception {return (WorkflowOperationImpl)op;}
     public WorkflowOperation unmarshal(WorkflowOperationImpl op) throws Exception {return op;}
   }
+
 }

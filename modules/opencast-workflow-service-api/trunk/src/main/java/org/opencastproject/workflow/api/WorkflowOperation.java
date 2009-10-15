@@ -22,11 +22,30 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 @XmlJavaTypeAdapter(WorkflowOperationImpl.Adapter.class)
 public interface WorkflowOperation {
+
   /**
    * A unique name identifying this operation
-   * @return
+   * 
+   * @return the operation name
    */
   String getName();
+
+  /**
+   * Returns a human readable description of the workflow operation.
+   * 
+   * @return the description
+   */
   String getDescription();
+
   boolean isFailOnError();
+
+  /**
+   * Asks the workflow operation to execute its logic based on the media packages and properties found in the workflow
+   * instance.
+   * 
+   * @param workflow
+   *          the workflow instance
+   */
+  void execute(WorkflowInstance workflow);
+
 }
