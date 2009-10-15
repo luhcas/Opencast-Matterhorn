@@ -26,6 +26,18 @@
       <artifactId>opencast-workflow-service-api</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_compendium</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -40,6 +52,8 @@
             <Import-Package> * </Import-Package>
             <Export-Package>org.opencastproject.conductor.*</Export-Package>
             <Service-Component>
+              OSGI-INF/conductor-service.xml,
+              OSGI-INF/conductor-service-rest.xml,
               OSGI-INF/compose-workflow-runner.xml,
               OSGI-INF/distribute-workflow-runner.xml
             </Service-Component>

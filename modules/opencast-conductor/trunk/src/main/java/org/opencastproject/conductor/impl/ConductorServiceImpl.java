@@ -22,7 +22,10 @@ import org.opencastproject.workflow.api.WorkflowDefinitionList;
 import org.opencastproject.workflow.api.WorkflowDefinitionListImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationDefinitionImpl;
-import org.opencastproject.workflow.api.WorkflowService;
+
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,16 +36,11 @@ import java.util.Map;
  * This is the default implementation of the conductor service.
  */
 public class ConductorServiceImpl implements ConductorService {
-
-  protected WorkflowService workflowService;
-
-  public void setWorkflowService(WorkflowService workflowService) {
-    this.workflowService = workflowService;
-  }
-
+  private static final Logger logger = LoggerFactory.getLogger(ConductorServiceImpl.class);
   protected Map<String, WorkflowDefinition> defs;
 
-  public void init() {
+  public void activate(ComponentContext context) {
+    logger.info("init()");
     defs = new HashMap<String, WorkflowDefinition>();
     List<WorkflowOperationDefinition> allOperations = new ArrayList<WorkflowOperationDefinition>();
     allOperations.add(new WorkflowOperationDefinitionImpl("compose", "Compose new media", true));

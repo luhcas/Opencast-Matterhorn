@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.conductor.impl.ConductorServiceImpl" immediate="true" activate="activate">
+  <implementation class="org.opencastproject.conductor.impl.ConductorServiceImpl" />
+  <property name="service.description" value="Conductor Service" />
+  <service>
+    <provide interface="org.opencastproject.conductor.api.ConductorService" />
+  </service>
+</component>

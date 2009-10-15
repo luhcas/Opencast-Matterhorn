@@ -34,6 +34,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowDefinitionListImpl implements WorkflowDefinitionList {
 
+  public WorkflowDefinitionListImpl() {}
+  
   @XmlElement(name="workflow-definition")
   protected List<WorkflowDefinition> ops;
   /**

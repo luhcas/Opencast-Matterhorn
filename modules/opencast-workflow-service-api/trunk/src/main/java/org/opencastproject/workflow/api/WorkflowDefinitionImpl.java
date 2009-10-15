@@ -15,7 +15,6 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +28,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * A JAXB-anotated implementation of {@link WorkflowDefinition}
@@ -97,5 +97,11 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   public static WorkflowDefinitionImpl valueOf(String xmlString) throws Exception {
     return (WorkflowDefinitionImpl) WorkflowDefinitionFactory.getInstance().parse(xmlString);
   }
+  
+  static class Adapter extends XmlAdapter<WorkflowDefinitionImpl, WorkflowDefinition> {
+    public WorkflowDefinitionImpl marshal(WorkflowDefinition op) throws Exception {return (WorkflowDefinitionImpl)op;}
+    public WorkflowDefinition unmarshal(WorkflowDefinitionImpl op) throws Exception {return op;}
+  }
+
 }
 

@@ -17,10 +17,12 @@ package org.opencastproject.workflow.api;
 
 import java.util.List;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * A workflow definition.
  */
-// FIXME: Specify a JavaXmlTypeAdapter
+@XmlJavaTypeAdapter(WorkflowDefinitionImpl.Adapter.class)
 public interface WorkflowDefinition {
   /**
    * The short title of this workflow definition
