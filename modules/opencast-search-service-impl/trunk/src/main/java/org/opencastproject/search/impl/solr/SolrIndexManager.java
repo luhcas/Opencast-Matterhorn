@@ -117,7 +117,7 @@ public class SolrIndexManager {
     try {
       solrConnection.update(solrRequest);
     } catch (Exception e) {
-      log_.error("Cannot clear solr index");
+      log_.error("Cannot clear solr index", e);
     }
   }
 
@@ -163,7 +163,6 @@ public class SolrIndexManager {
 
     // Add the episode metadata
     if (episodeDocument != null) {
-      // episodeDocument.setField(SolrFields.MEDIAPACKAGE, mediaPackage.toXml());
       if (seriesDocument != null)
         episodeDocument.setField(SolrFields.DC_IS_PART_OF, seriesDocument.getField(SolrFields.ID));
       solrRequest.add(episodeDocument);
