@@ -18,11 +18,13 @@ package org.opencastproject.workflow.api;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
+import org.opencastproject.workflow.api.WorkflowInstance.State;
 
 import org.apache.commons.io.IOUtils;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -34,7 +36,17 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 @XmlType(name="operation-instance", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="operation-instance", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WorkflowOperationInstanceImpl extends WorkflowOperationDefinitionImpl implements WorkflowOperationInstance {
+public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance {
+  
+  @XmlAttribute(name="name")
+  protected String name;
+
+  @XmlAttribute(name="state")
+  protected String state;
+
+  @XmlAttribute(name="description")
+  protected String description;
+
   @XmlElement(name="mediapackage")
   protected MediapackageType mediaPackageType;
   
@@ -44,15 +56,30 @@ public class WorkflowOperationInstanceImpl extends WorkflowOperationDefinitionIm
   public WorkflowOperationInstanceImpl() {}
 
   /**
-   * Builds a new workflow operation instance based on a workflow operation definition
-   * @param def The workflow operation definition
+   * Builds a new workflow operation instance based on another workflow operation.
    */
-  public WorkflowOperationInstanceImpl(WorkflowOperationDefinition def) {
-    this.name = def.getName();
-    this.description = def.getDescription();
-    this.failOnError = def.isFailOnError();
+  public WorkflowOperationInstanceImpl(WorkflowOperation op) {
+    this.name = op.getName();
+    this.state = State.RUNNING.name();
+    this.description = op.getDescription();
   }
   
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getResult()
@@ -76,6 +103,27 @@ public class WorkflowOperationInstanceImpl extends WorkflowOperationDefinitionIm
   static class Adapter extends XmlAdapter<WorkflowOperationInstanceImpl, WorkflowOperationInstance> {
     public WorkflowOperationInstanceImpl marshal(WorkflowOperationInstance op) throws Exception {return (WorkflowOperationInstanceImpl)op;}
     public WorkflowOperationInstance unmarshal(WorkflowOperationInstanceImpl op) throws Exception {return op;}
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getOutput()
+   */
+  public MediaPackage getOutput() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getState()
+   */
+  public State getState() {
+    return State.valueOf(state);
+  }
+  
+  public void setState(String state) {
+    this.state = state;
   }
 
 }

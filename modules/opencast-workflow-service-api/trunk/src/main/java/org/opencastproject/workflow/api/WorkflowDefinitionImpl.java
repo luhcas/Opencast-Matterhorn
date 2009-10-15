@@ -42,26 +42,15 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   public WorkflowDefinitionImpl() {}
 
   @XmlID
-  @XmlAttribute()
-  private String id;
-
   @XmlElement(name="title")
   private String title;
 
   @XmlElement(name="description")
   private String description;
 
-  @XmlElementWrapper(name="operations")
-  private List<WorkflowOperationDefinition> operations;
+  @XmlElement(name="operations")
+  private WorkflowOperationDefinitionList operations;
   
-  public String getId() {
-    return id;
-  }
-  
-  public void setId(String id) {
-    this.id = id;
-  }
-
   public String getTitle() {
     return title;
   }
@@ -77,11 +66,11 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   public void setDescription(String description) {
     this.description = description;
   }
-  public List<WorkflowOperationDefinition> getOperations() {
+  public WorkflowOperationDefinitionList getOperations() {
     return operations;
   }
 
-  public void setOperations(List<WorkflowOperationDefinition> operations) {
+  public void setOperations(WorkflowOperationDefinitionList operations) {
     this.operations = operations;
   }
 
@@ -102,6 +91,5 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
     public WorkflowDefinitionImpl marshal(WorkflowDefinition op) throws Exception {return (WorkflowDefinitionImpl)op;}
     public WorkflowDefinition unmarshal(WorkflowDefinitionImpl op) throws Exception {return op;}
   }
-
 }
 

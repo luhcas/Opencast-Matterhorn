@@ -21,17 +21,27 @@
       <form action="start" method="POST">
         Workflow Definition XML<br/>
         <textarea rows="20" cols="80" id="definition" name="definition">
-<workflow-definition id="123">
-  <title>A workflow definition title</title>
-  <description>A workflow definition description</description>
-  <operations>
-    <operation name="compose" fail-on-error="true"/>
-    <operation name="distribute" fail-on-error="false"/>
-  </operations>
-</workflow-definition>
-</textarea><br/>
+          <workflow-definition id="123">
+            <title>A workflow definition title</title>
+            <description>A workflow definition description</description>
+            <operations>
+              <operation name="compose" fail-on-error="true"/>
+              <operation name="distribute" fail-on-error="false"/>
+            </operations>
+          </workflow-definition>
+        </textarea><br/>
         Media Package XML<br/>
-        <textarea rows="20" cols="80" id="mediapackage" name="mediapackage"><mediapackage id="10.0000/1" start="2007-12-05T13:40:00" duration="1004400000"></mediapackage></textarea><br/>
+        <textarea rows="20" cols="80" id="mediapackage" name="mediapackage">
+          <mediapackage id="10.0000/1" start="2007-12-05T13:40:00" duration="1004400000">
+            <metadata>
+              <catalog id="catalog-1" type="metadata/dublincore">
+                <mimetype>text/xml</mimetype>
+                <url>http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/dublincore.xml</url>
+                <checksum type="md5">20e466615251074e127a1627fd0dae3e</checksum>
+              </catalog>
+            </metadata>
+          </mediapackage>
+        </textarea><br/>
         Key/Value Properties<br/>
         <textarea rows="20" cols="80" id="properties" name="properties">this=that</textarea><br/>
         <input type="submit" value="Start workflow"/>

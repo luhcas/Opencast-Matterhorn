@@ -16,18 +16,28 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.workflow.api.WorkflowInstance.State;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
- * An instance of a {@link WorkflowOperationDefinition}.  Instances maintain the {@link MediaPackage} resulting from
- * the execution of a {@link WorkflowOperationRunner#run(WorkflowInstance)}.
+ * An instance of a {@link WorkflowOperationInstance}.  Instances maintain the {@link MediaPackage} resulting from
+ * the execution of {@link WorkflowOperationRunner#run(WorkflowInstance)}.
  */
 @XmlJavaTypeAdapter(WorkflowOperationInstanceImpl.Adapter.class)
-public interface WorkflowOperationInstance extends WorkflowOperationDefinition {
+public interface WorkflowOperationInstance extends WorkflowOperation {
+  
+  /**
+   * The state of this operation.
+   * @return
+   */
+  State getState();
+  
   /**
    * Gets the resulting media package from the execution of {@link WorkflowOperationRunner#run(WorkflowInstance)}.
    * @return The media package, as produced from the execution of a workflow operation runner.
    */
-  MediaPackage getResult();
+  MediaPackage getOutput();
+  
+  
 }

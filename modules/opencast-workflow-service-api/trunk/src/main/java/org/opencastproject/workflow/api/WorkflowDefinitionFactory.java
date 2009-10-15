@@ -23,8 +23,6 @@ import org.xml.sax.InputSource;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -63,7 +61,7 @@ public class WorkflowDefinitionFactory {
    */
   public WorkflowDefinition parse(InputStream in) throws Exception {
     WorkflowDefinitionImpl impl = new WorkflowDefinitionImpl();
-    List<WorkflowOperationDefinition> operations = new ArrayList<WorkflowOperationDefinition>();
+    WorkflowOperationDefinitionListImpl operations = new WorkflowOperationDefinitionListImpl();
     impl.setOperations(operations);
 
     DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -72,7 +70,6 @@ public class WorkflowDefinitionFactory {
     Document doc = db.parse(is);
     XPathFactory factory = XPathFactory.newInstance();
     XPath xpath = factory.newXPath();
-    impl.setId((String)xpath.compile("/workflow-definition[@id]/text()").evaluate(doc, XPathConstants.STRING));
     impl.setTitle((String)xpath.compile("/workflow-definition/title/text()").evaluate(doc, XPathConstants.STRING));
     impl.setDescription((String)xpath.compile("/workflow-definition/description/text()").evaluate(doc, XPathConstants.STRING));
     XPathExpression operationXpath = xpath.compile("/workflow-definition/operations/operation");
@@ -82,7 +79,7 @@ public class WorkflowDefinitionFactory {
       String name = operationNode.getAttribute("name");
       String description = operationNode.getAttribute("description");
       boolean failOnError = Boolean.TRUE.toString().equals(operationNode.getAttribute("fail-on-error"));
-      operations.add(new WorkflowOperationDefinitionImpl(name, description, failOnError));
+      operations.getOperation().add(new WorkflowOperationDefinitionImpl(name, description, failOnError));
     }
     return impl;
   }

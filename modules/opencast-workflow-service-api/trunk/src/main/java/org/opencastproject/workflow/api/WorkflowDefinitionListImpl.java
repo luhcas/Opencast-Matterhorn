@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * A list of {@link WorkflowDefinition}s.
  */
-@XmlType(name="workflow-definitions", namespace="http://workflow.opencastproject.org/")
-@XmlRootElement(name="workflow-definitions", namespace="http://workflow.opencastproject.org/")
+@XmlType(name="workflow-definition-list", namespace="http://workflow.opencastproject.org/")
+@XmlRootElement(name="workflow-definition-list", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowDefinitionListImpl implements WorkflowDefinitionList {
 

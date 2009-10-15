@@ -36,6 +36,6 @@ public interface ConductorService {
    *          name of the workflow defintion
    * @return the workflow definition
    */
-  WorkflowDefinition getWorkflowDefinitionByName(String name);
+  WorkflowDefinition getWorkflowDefinitionByTitle(String name);
 
 }

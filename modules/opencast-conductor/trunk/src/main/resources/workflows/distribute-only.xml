@@ -1,0 +1,8 @@
+<workflow-definition id="1">
+  <title>Distribute Only</title>
+  <description>A simple workflow that sends media and metadata directly to the distribution channels.</description>
+  <operations>
+    <operation fail-on-error="true" name="distribute" description="Distribute media to distribution channels"/>
+  </operations>
+</workflow-definition>
+

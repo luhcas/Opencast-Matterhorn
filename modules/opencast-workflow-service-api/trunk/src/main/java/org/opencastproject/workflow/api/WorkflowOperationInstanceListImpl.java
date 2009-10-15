@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * A list of {@link WorkflowOperationInstance}s.
  */
-@XmlType(name="operations", namespace="http://workflow.opencastproject.org/")
-@XmlRootElement(name="operations", namespace="http://workflow.opencastproject.org/")
+@XmlType(name="operation-instance-list", namespace="http://workflow.opencastproject.org/")
+@XmlRootElement(name="operation-instance-list", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowOperationInstanceListImpl implements WorkflowOperationInstanceList {
   @XmlElement(name="operation-instance")

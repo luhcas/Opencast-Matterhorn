@@ -20,17 +20,20 @@ import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowDefinitionList;
 import org.opencastproject.workflow.api.WorkflowDefinitionListImpl;
-import org.opencastproject.workflow.api.WorkflowOperationDefinition;
-import org.opencastproject.workflow.api.WorkflowOperationDefinitionImpl;
 
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
-import java.util.ArrayList;
+import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * This is the default implementation of the conductor service.
@@ -38,32 +41,28 @@ import java.util.Map;
 public class ConductorServiceImpl implements ConductorService {
   private static final Logger logger = LoggerFactory.getLogger(ConductorServiceImpl.class);
   protected Map<String, WorkflowDefinition> defs;
-
+  protected JAXBContext jaxbContext;
   public void activate(ComponentContext context) {
     logger.info("init()");
     defs = new HashMap<String, WorkflowDefinition>();
-    List<WorkflowOperationDefinition> allOperations = new ArrayList<WorkflowOperationDefinition>();
-    allOperations.add(new WorkflowOperationDefinitionImpl("compose", "Compose new media", true));
-    allOperations.add(new WorkflowOperationDefinitionImpl("distribute", "Distribute media to distribution channels", false));
-
-    WorkflowDefinitionImpl def1 = new WorkflowDefinitionImpl();
-    def1.setId("1");
-    def1.setTitle("Transcode and Distribute");
-    def1.setDescription("A simple workflow that transcodes the media into distribution formats, then sends the "
-            + "resulting distribution files, along with their associated metadata, to the distribution channels");
-    def1.setOperations(allOperations);
-    defs.put(def1.getId(), def1);
-
-    WorkflowDefinitionImpl def2 = new WorkflowDefinitionImpl();
-    def2.setId("2");
-    def2.setTitle("Distribute Only");
-    def2.setDescription("A simple workflow that sends media and metadata directly to the distribution channels");
-    List<WorkflowOperationDefinition> operations2 = new ArrayList<WorkflowOperationDefinition>();
-    operations2.add(allOperations.get(1));
-    def1.setOperations(operations2);
-    defs.put(def2.getId(), def2);
+    try {
+      jaxbContext= JAXBContext.newInstance("org.opencastproject.workflow.api", WorkflowDefinition.class.getClassLoader());
+      InputStream distOnly = ConductorServiceImpl.class.getClassLoader().getResourceAsStream("/workflows/distribute-only.xml");
+      InputStream composeAndDist = ConductorServiceImpl.class.getClassLoader().getResourceAsStream("/workflows/compose-and-distribute.xml");
+      loadWorkflowDefinition(distOnly);
+      loadWorkflowDefinition(composeAndDist);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
+  protected void loadWorkflowDefinition(InputStream in) throws Exception {
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(in));
+    WorkflowDefinitionImpl def = unmarshaller.unmarshal(doc, WorkflowDefinitionImpl.class).getValue();
+    defs.put(def.getTitle(), def);
+  }
+  
   /**
    * {@inheritDoc}
    * 
@@ -78,9 +77,9 @@ public class ConductorServiceImpl implements ConductorService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.conductor.api.ConductorService#getWorkflowDefinitionByName(java.lang.String)
+   * @see org.opencastproject.conductor.api.ConductorService#getWorkflowDefinitionByTitle(java.lang.String)
    */
-  public WorkflowDefinition getWorkflowDefinitionByName(String name) {
+  public WorkflowDefinition getWorkflowDefinitionByTitle(String name) {
     return defs.get(name);
   }
 

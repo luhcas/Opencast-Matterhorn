@@ -15,26 +15,23 @@
  */
 package org.opencastproject.workflow.api;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 /**
- * A workflow definition.
+ * A super-interface for {@link WorkflowOperationDefinition}s and {@link WorkflowOperationInstance}s.  TODO: Is this
+ * actually necessary?
  */
-@XmlJavaTypeAdapter(WorkflowDefinitionImpl.Adapter.class)
-public interface WorkflowDefinition {
-  /**
-   * The short title of this workflow definition
-   */
-  String getTitle();
+public interface WorkflowOperation {
 
   /**
-   * A longer description of this workflow definition
+   * A unique name identifying this operation
+   * @return The unique workflow operation name
+   */
+  String getName();
+  
+  /**
+   * A friendly description of what this workflow operation does.  TODO: i18n
+   * 
+   * @return The description
    */
   String getDescription();
 
-  /**
-   * The operations, listed in order, that this workflow definition includes.
-   */
-  WorkflowOperationDefinitionList getOperations();
 }
-

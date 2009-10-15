@@ -21,19 +21,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * Describes an operation or action to be performed as part of a workflow.
  */
 @XmlJavaTypeAdapter(WorkflowOperationDefinitionImpl.Adapter.class)
-public interface WorkflowOperationDefinition {
-  /**
-   * A unique name identifying this operation
-   * @return The unique workflow operation name
-   */
-  String getName();
-  
-  /**
-   * A friendly description of what this workflow operation does.  TODO: i18n
-   * 
-   * @return The description
-   */
-  String getDescription();
+public interface WorkflowOperationDefinition extends WorkflowOperation {
   
   boolean isFailOnError();
 }

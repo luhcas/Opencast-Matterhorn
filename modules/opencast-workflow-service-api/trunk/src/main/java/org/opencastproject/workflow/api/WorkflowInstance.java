@@ -17,16 +17,13 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
-import java.util.List;
 import java.util.Map;
 
 /**
  * An single instance of a running, paused, or stopped workflow.
  */
 public interface WorkflowInstance {
-  public enum State {
-    RUNNING, STOPPED, PAUSED
-  }
+  public enum State { INSTANTIATED, RUNNING, STOPPED, PAUSED, SUCCEEDED, FAILED }
 
   /**
    * The unique ID of this {@link WorkflowInstance}
@@ -44,17 +41,18 @@ public interface WorkflowInstance {
   String getDescription();
 
   /**
-   * The {@link WorkflowDefinition} that served as a template for this {@link WorkflowInstance} the moment the instance
+   * The {@link WorkflowOperationDefinitionList} that serves as a template for this {@link WorkflowOperationInstanceList}
+   * belonging to this WorkflowInstance
    * was created.
    */
-  WorkflowDefinition getWorkflowDefinition();
+  WorkflowOperationDefinitionList getWorkflowOperationDefinitionList();
 
   /**
    * Returns the {@link WorkflowOperation}s that make up this workflow.
    * 
    * @return the workflow operations
    */
-  public WorkflowOperationInstanceList getWorkflowOperations();
+  public WorkflowOperationInstanceList getWorkflowOperationInstanceList();
 
   /**
    * Returns the {@link WorkflowOperation} that is currently being executed.
@@ -64,40 +62,42 @@ public interface WorkflowInstance {
   public WorkflowOperationInstance getCurrentOperation();
 
   /**
-   * Appends a {@link WorkflowOperation} to the end of the list of operations.
+   * Appends a {@link WorkflowOperationDefinition} to the end of the list of operations to perform.
    * 
    * @param operation
    *          the operation to append
    */
-  public void addWorkflowOperation(WorkflowOperationInstance operation);
+  public void addWorkflowOperationDefinition(WorkflowOperationDefinition operation);
 
   /**
-   * Inserts a {@link WorkflowOperation}s at index <code>location</code> into the list of workflow operations.
+   * Inserts a {@link WorkflowOperationDefinition} at index <code>location</code> into the list of workflow operations
+   * to perform.
    * 
    * @param location
    *          index into the list of operations
    * @param operation
    *          the operation to append
    */
-  public void addWorkflowOperation(int location, WorkflowOperationInstance operation);
+  public void addWorkflowOperationDefinition(int location, WorkflowOperationDefinition operation);
 
   /**
-   * Appends a list of {@link WorkflowOperation} to the end of the list of operations.
+   * Appends a {@link WorkflowOperationDefinitionList} to the end of the list of operations to perform.
    * 
    * @param operations
    *          the operations to append
    */
-  public void addWorkflowOperations(WorkflowOperationInstanceList operations);
+  public void addWorkflowOperationDefinitions(WorkflowOperationDefinitionList operations);
 
   /**
-   * Inserts a list of {@link WorkflowOperation}s at index <code>location</code> into the list of workflow operations.
+   * Inserts the contents of a {@link WorkflowOperationDefinitionList} at index <code>location</code> into the list of
+   * workflow operations to be performed.
    * 
    * @param location
    *          index into the list of operations
    * @param operations
    *          the operations to append
    */
-  public void addWorkflowOperations(int location, WorkflowOperationInstanceList operations);
+  public void addWorkflowOperationDefinitions(int location, WorkflowOperationDefinitionList operations);
 
   /**
    * The current {@link State} of this {@link WorkflowInstance}

@@ -30,8 +30,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  * TODO: Comment me!
  *
  */
-@XmlType(name="operations", namespace="http://workflow.opencastproject.org/")
-@XmlRootElement(name="operations", namespace="http://workflow.opencastproject.org/")
+@XmlType(name="operation-definition-list", namespace="http://workflow.opencastproject.org/")
+@XmlRootElement(name="operation-definition-list", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowOperationDefinitionListImpl implements WorkflowOperationDefinitionList {
   @XmlElement(name="operation")

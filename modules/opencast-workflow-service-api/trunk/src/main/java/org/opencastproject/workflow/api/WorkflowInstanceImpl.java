@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -41,6 +42,12 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   private static final Logger logger = LoggerFactory.getLogger(WorkflowInstanceImpl.class);
 
   public WorkflowInstanceImpl() {}
+  
+  public WorkflowInstanceImpl(WorkflowDefinition def) {
+    this.title = def.getTitle();
+    this.description = def.getDescription();
+    this.workflowOperationDefinitionList = def.getOperations();
+  }
 
   @XmlID
   @XmlAttribute()
@@ -49,23 +56,23 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @XmlAttribute()
   private String state;
 
-  @XmlElement(name="workflow-definition")
-  private WorkflowDefinitionImpl workflowDefinition;
-
   @XmlElement(name="title")
   private String title;
 
   @XmlElement(name="description")
   private String description;
 
-  @XmlElement(name="mediapackage")
-  private MediapackageType sourceMediaPackageType;
-  
   @XmlElementWrapper(name="properties")
   private HashMap<String, String> properties;
 
+  @XmlElement(name="mediapackage")
+  private MediapackageType sourceMediaPackageType;
+  
+  @XmlElement(name="operation-definitions")
+  private WorkflowOperationDefinitionList workflowOperationDefinitionList;
+
   @XmlElement(name="operation-instances")
-  public WorkflowOperationInstanceList workflowOperations;
+  public WorkflowOperationInstanceList workflowOperationInstanceList;
 
   public String getId() {
     return id;
@@ -91,13 +98,6 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     this.description = description;
   }
 
-  public WorkflowDefinition getWorkflowDefinition() {
-    return workflowDefinition;
-  }
-
-  public void setWorkflowDefinition(WorkflowDefinitionImpl workflowDefinition) {
-    this.workflowDefinition = workflowDefinition;
-  }
   public State getState() {
     return State.valueOf(state);
   }
@@ -134,43 +134,13 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#addWorkflowOperation(org.opencastproject.workflow.api.WorkflowOperationInstance)
-   */
-  public void addWorkflowOperation(WorkflowOperationInstance operation) {
-    getWorkflowOperations().getOperationInstance().add(operation);
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#addWorkflowOperation(int, org.opencastproject.workflow.api.WorkflowOperationInstance)
-   */
-  public void addWorkflowOperation(int location, WorkflowOperationInstance operation) {
-    getWorkflowOperations().getOperationInstance().add(location, operation);
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#addWorkflowOperations(org.opencastproject.workflow.api.WorkflowOperationInstanceList)
-   */
-  public void addWorkflowOperations(WorkflowOperationInstanceList operations) {
-    getWorkflowOperations().getOperationInstance().addAll(operations.getOperationInstance());
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#addWorkflowOperations(int, org.opencastproject.workflow.api.WorkflowOperationInstanceList)
-   */
-  public void addWorkflowOperations(int location, WorkflowOperationInstanceList operations) {
-    getWorkflowOperations().getOperationInstance().addAll(location, operations.getOperationInstance());
-  }
-
-  /**
-   * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowInstance#getCurrentOperation()
    */
   public WorkflowOperationInstance getCurrentOperation() {
-    // TODO Auto-generated method stub
-    return null;
+    // Since we add operation instances only once they start, we can just return the last one in the list.
+    List<WorkflowOperationInstance> list = workflowOperationInstanceList.getOperationInstance();
+    if(list.isEmpty()) return null;
+    return list.get(list.size()-1);
   }
 
   /**
@@ -186,8 +156,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * @see org.opencastproject.workflow.api.WorkflowInstance#removeProperty(java.lang.String)
    */
   public void removeProperty(String name) {
-    // TODO Auto-generated method stub
-    
+    properties.remove(name);
   }
 
   /**
@@ -195,21 +164,66 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * @see org.opencastproject.workflow.api.WorkflowInstance#setProperty(java.lang.String, java.lang.String)
    */
   public void setProperty(String name, String value) {
-    // TODO Auto-generated method stub
-    
+    properties.put(name, value);
   }
 
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowInstance#getWorkflowOperations()
    */
-  public WorkflowOperationInstanceList getWorkflowOperations() {
-    if(workflowOperations == null) workflowOperations = new WorkflowOperationInstanceListImpl();
-    return workflowOperations;
+  public WorkflowOperationInstanceList getWorkflowOperationInstanceList() {
+    if(workflowOperationInstanceList == null) workflowOperationInstanceList = new WorkflowOperationInstanceListImpl();
+    return workflowOperationInstanceList;
   }
 
-  public void setWorkflowOperations(WorkflowOperationInstanceList workflowOperations) {
-    this.workflowOperations = workflowOperations;
+  public void setWorkflowOperationInstanceList(WorkflowOperationInstanceList workflowOperationInstanceList) {
+    this.workflowOperationInstanceList = workflowOperationInstanceList;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#addWorkflowOperationDefinition(org.opencastproject.workflow.api.WorkflowOperationDefinition)
+   */
+  public void addWorkflowOperationDefinition(WorkflowOperationDefinition operation) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#addWorkflowOperationDefinition(int, org.opencastproject.workflow.api.WorkflowOperationDefinition)
+   */
+  public void addWorkflowOperationDefinition(int location, WorkflowOperationDefinition operation) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#addWorkflowOperationDefinitions(org.opencastproject.workflow.api.WorkflowOperationDefinitionList)
+   */
+  public void addWorkflowOperationDefinitions(WorkflowOperationDefinitionList operations) {
+    getWorkflowOperationDefinitionList().getOperation().addAll(operations.getOperation());
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#addWorkflowOperationDefinitions(int, org.opencastproject.workflow.api.WorkflowOperationDefinitionList)
+   */
+  public void addWorkflowOperationDefinitions(int location, WorkflowOperationDefinitionList operations) {
+    getWorkflowOperationDefinitionList().getOperation().addAll(location, operations.getOperation());
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#getWorkflowOperationDefinitionList()
+   */
+  public WorkflowOperationDefinitionList getWorkflowOperationDefinitionList() {
+    return workflowOperationDefinitionList;
+  }
+  
+  public void setWorkflowOperationDefinitionList(WorkflowOperationDefinitionList workflowOperationDefinitionList) {
+    this.workflowOperationDefinitionList = workflowOperationDefinitionList;
   }
 
 }
