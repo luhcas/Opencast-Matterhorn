@@ -29,4 +29,14 @@ public interface ConductorService {
    */
   List<WorkflowDefinition> getWorkflowDefinitions();
 
+  /**
+   * Returns the {@link WorkflowDefinition} whith the specified name or <code>null</code> if no such definition is
+   * available.
+   * 
+   * @param name
+   *          name of the workflow defintion
+   * @return the workflow definition
+   */
+  WorkflowDefinition getWorkflowDefinitionByName(String name);
+
 }

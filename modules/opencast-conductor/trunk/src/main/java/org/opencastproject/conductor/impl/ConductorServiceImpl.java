@@ -25,33 +25,32 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
- * TODO: Comment me!
- *
+ * This is the default implementation of the conductor service.
  */
 public class ConductorServiceImpl implements ConductorService {
-  
+
   protected WorkflowService workflowService;
+
   public void setWorkflowService(WorkflowService workflowService) {
     this.workflowService = workflowService;
   }
-  
+
   protected Map<String, WorkflowDefinition> defs;
-  
+
   public void init() {
     defs = new HashMap<String, WorkflowDefinition>();
     List<WorkflowOperation> allOperations = workflowService.getWorkflowOperations();
-    
+
     WorkflowDefinitionImpl def1 = new WorkflowDefinitionImpl();
     def1.setId("1");
     def1.setTitle("Transcode and Distribute");
-    def1.setDescription("A simple workflow that transcodes the media into distribution formats, then sends the " +
-        "resulting distribution files, along with their associated metadata, to the distribution channels");
+    def1.setDescription("A simple workflow that transcodes the media into distribution formats, then sends the "
+            + "resulting distribution files, along with their associated metadata, to the distribution channels");
     def1.setOperations(allOperations);
     defs.put(def1.getId(), def1);
-  
+
     WorkflowDefinitionImpl def2 = new WorkflowDefinitionImpl();
     def2.setId("2");
     def2.setTitle("Distribute Only");
@@ -60,18 +59,26 @@ public class ConductorServiceImpl implements ConductorService {
     operations2.add(allOperations.get(1));
     def1.setOperations(operations2);
     defs.put(def2.getId(), def2);
-    
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.conductor.api.ConductorService#getWorkflowDefinitions()
    */
   public List<WorkflowDefinition> getWorkflowDefinitions() {
-    List<WorkflowDefinition> defList = new ArrayList<WorkflowDefinition>();
-    for(Entry<String, WorkflowDefinition> entry : defs.entrySet()) {
-      defList.add(entry.getValue());
-    }
+    List<WorkflowDefinition> defList = new ArrayList<WorkflowDefinition>(defs.size());
+    defList.addAll(defs.values());
     return defList;
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.conductor.api.ConductorService#getWorkflowDefinitionByName(java.lang.String)
+   */
+  public WorkflowDefinition getWorkflowDefinitionByName(String name) {
+    return defs.get(name);
+  }
+
 }
