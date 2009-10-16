@@ -24,8 +24,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
-import org.opencastproject.capture.impl.StatusServiceImpl;
+import org.opencastproject.capture.api.State;
 import org.opencastproject.capture.api.StatusService;
+import org.opencastproject.capture.impl.StatusServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,15 +45,10 @@ public class StatusRestService {
   }
 
   @GET
-  @Produces(MediaType.TEXT_HTML)
+  @Produces(MediaType.TEXT_XML)
   @Path("GetState")
-  public String getState() {
-    if (this.service == null) {
-      return "Service is null";
-    } else if (this.service.getState() == null) {
-      return "State is null";
-    }
-    return this.service.getState().getMessage();
+  public State getState() {
+    return this.service.getState();
   }
 
   public void setState() {

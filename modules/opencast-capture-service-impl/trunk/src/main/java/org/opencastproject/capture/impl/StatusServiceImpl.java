@@ -17,8 +17,8 @@ package org.opencastproject.capture.impl;
 
 import java.util.Dictionary;
 
-import org.opencastproject.capture.api.StatusService;
 import org.opencastproject.capture.api.State;
+import org.opencastproject.capture.api.StatusService;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ public class StatusServiceImpl implements StatusService, ManagedService {
   private static State cur_status = null;
 
   public StatusServiceImpl() {
-    cur_status = StateImpl.IDLE;
+    cur_status = State.IDLE;
   }
 
   /**
@@ -45,14 +45,14 @@ public class StatusServiceImpl implements StatusService, ManagedService {
   }
 
   public void start() {
-    cur_status = StateImpl.CAPTURING;
+    cur_status = State.CAPTURING;
   }
 
   public void stop() {
-    if (cur_status == StateImpl.CAPTURING) {
-      cur_status = StateImpl.UPLOADING;
+    if (cur_status == State.CAPTURING) {
+      cur_status = State.UPLOADING;
     } else {
-      cur_status = StateImpl.IDLE;
+      cur_status = State.IDLE;
     }
   }
 
