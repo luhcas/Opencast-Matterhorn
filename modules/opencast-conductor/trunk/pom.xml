@@ -38,6 +38,10 @@
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_compendium</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.fileinstall</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -55,7 +59,8 @@
               OSGI-INF/conductor-service.xml,
               OSGI-INF/conductor-service-rest.xml,
               OSGI-INF/compose-workflow-runner.xml,
-              OSGI-INF/distribute-workflow-runner.xml
+              OSGI-INF/distribute-workflow-runner.xml,
+              OSGI-INF/workflow-definition-scanner.xml
             </Service-Component>
           </instructions>
         </configuration>

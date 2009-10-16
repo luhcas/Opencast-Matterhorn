@@ -32,10 +32,21 @@ public interface ConductorService {
    * Returns the {@link WorkflowDefinition} whith the specified name or <code>null</code> if no such definition is
    * available.
    * 
-   * @param name
-   *          name of the workflow defintion
+   * @param title the title of the workflow definition
    * @return the workflow definition
    */
-  WorkflowDefinition getWorkflowDefinitionByTitle(String name);
+  WorkflowDefinition getWorkflowDefinitionByTitle(String title);
 
+  /**
+   * Adds a new workflow definition.
+   * @param def The new workflow definition
+   */
+  void addWorkflowDefinition(WorkflowDefinition def);
+
+  /**
+   * Removes the workflow definition with the given title
+   * @param title The title of the workflow definition to remove
+   * @return The removed workflow definition, or null if nothing was removed
+   */
+  WorkflowDefinition removeWorkflowDefinition(String title);
 }

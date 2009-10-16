@@ -29,7 +29,8 @@ import org.xml.sax.InputSource;
 
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -40,11 +41,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
  */
 public class ConductorServiceImpl implements ConductorService {
   private static final Logger logger = LoggerFactory.getLogger(ConductorServiceImpl.class);
-  protected Map<String, WorkflowDefinition> defs;
+  protected HashMap<String, WorkflowDefinition> defs = new HashMap<String, WorkflowDefinition>();
   protected JAXBContext jaxbContext;
   public void activate(ComponentContext context) {
     logger.info("init()");
-    defs = new HashMap<String, WorkflowDefinition>();
     try {
       jaxbContext= JAXBContext.newInstance("org.opencastproject.workflow.api", WorkflowDefinition.class.getClassLoader());
       InputStream distOnly = ConductorServiceImpl.class.getClassLoader().getResourceAsStream("/workflows/distribute-only.xml");
@@ -81,6 +81,30 @@ public class ConductorServiceImpl implements ConductorService {
    */
   public WorkflowDefinition getWorkflowDefinitionByTitle(String name) {
     return defs.get(name);
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.conductor.api.ConductorService#addWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
+   */
+  public void addWorkflowDefinition(WorkflowDefinition def) {
+    defs.put(def.getTitle(), def);
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.conductor.api.ConductorService#removeWorkflowDefinition(java.lang.String)
+   */
+  public WorkflowDefinition removeWorkflowDefinition(String title) {
+    for(Iterator<Entry<String, WorkflowDefinition>> iter = defs.entrySet().iterator(); iter.hasNext();) {
+      Entry<String, WorkflowDefinition> entry = iter.next();
+      WorkflowDefinition def = entry.getValue();
+      if(title.equals(def.getTitle())) {
+        iter.remove();
+        return def;
+      }
+    }
+    return null;
   }
 
 }
