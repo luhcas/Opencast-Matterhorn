@@ -4,10 +4,15 @@ import java.util.Properties;
 import org.gstreamer.*;
 import org.gstreamer.event.EOSEvent;
 
+import org.junit.Test;
+
 /**
  * TODO: Clarify how gstreamer testing should be done.
  */
 public class PipelineFactoryTest {
+	@Test
+	public void stub(){
+	}
 /*
   public static void main(String[] args) {
     if (args.length != 1) {

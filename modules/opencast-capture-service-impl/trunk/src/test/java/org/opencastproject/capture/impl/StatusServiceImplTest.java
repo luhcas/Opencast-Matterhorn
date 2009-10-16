@@ -15,9 +15,9 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.impl.StateImpl;
 import org.opencastproject.capture.impl.StatusServiceImpl;
 import org.opencastproject.capture.api.StatusService;
+import org.opencastproject.capture.api.State;
 
 import junit.framework.Assert;
 
@@ -39,30 +39,30 @@ public class StatusServiceImplTest {
   
   @Test
   public void testStartup() {
-    Assert.assertEquals(StateImpl.IDLE, service.getState());
+    Assert.assertEquals(State.IDLE, service.getState());
   }
 
   @Test
   public void testStart() {
     service.start();
-    Assert.assertEquals(StateImpl.CAPTURING, service.getState());
+    Assert.assertEquals(State.CAPTURING, service.getState());
   }
 
   @Test
   public void testStop() {
     service.start();
-    Assert.assertEquals(StateImpl.CAPTURING, service.getState());
+    Assert.assertEquals(State.CAPTURING, service.getState());
     service.stop();
-    Assert.assertEquals(StateImpl.UPLOADING, service.getState());
+    Assert.assertEquals(State.UPLOADING, service.getState());
   }
 
   @Test
   public void testHalt() {
     service.start();
-    Assert.assertEquals(StateImpl.CAPTURING, service.getState());
+    Assert.assertEquals(State.CAPTURING, service.getState());
     service.stop();
-    Assert.assertEquals(StateImpl.UPLOADING, service.getState());
+    Assert.assertEquals(State.UPLOADING, service.getState());
     service.stop();
-    Assert.assertEquals(StateImpl.IDLE, service.getState());
+    Assert.assertEquals(State.IDLE, service.getState());
   }  
 }
