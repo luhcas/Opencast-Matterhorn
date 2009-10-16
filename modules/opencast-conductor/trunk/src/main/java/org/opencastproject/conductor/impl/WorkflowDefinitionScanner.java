@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 
 /**
  * Loads, unloads, and reloads {@link WorkflowDefinition}s from "*workflow.xml" files in any of fileinstall's watch
@@ -44,8 +45,14 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
    */
   public void install(File artifact) throws Exception {
     logger.info("Installing workflow from file " + artifact.getAbsolutePath());
-    WorkflowDefinition def = WorkflowDefinitionFactory.getInstance().parse(new FileInputStream(artifact));
-    conductorService.addWorkflowDefinition(def);
+    InputStream stream = null;
+    try {
+      stream = new FileInputStream(artifact);
+      WorkflowDefinition def = WorkflowDefinitionFactory.getInstance().parse(stream);
+      conductorService.addWorkflowDefinition(def);
+    } finally {
+      stream.close();
+    }
   }
 
   /**
@@ -54,8 +61,14 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
    */
   public void uninstall(File artifact) throws Exception {
     logger.info("Uninstalling workflow from file " + artifact.getAbsolutePath());
-    WorkflowDefinition def = WorkflowDefinitionFactory.getInstance().parse(new FileInputStream(artifact));
-    conductorService.removeWorkflowDefinition(def.getTitle());
+    InputStream stream = null;
+    try {
+      stream = new FileInputStream(artifact);
+      WorkflowDefinition def = WorkflowDefinitionFactory.getInstance().parse(stream);
+      conductorService.removeWorkflowDefinition(def.getTitle());
+    } finally {
+      stream.close();
+    }
   }
 
   /**
@@ -78,5 +91,4 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
     }
     return canHandle;
   }
-
 }
