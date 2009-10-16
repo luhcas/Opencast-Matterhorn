@@ -15,14 +15,23 @@
  */
 package org.opencastproject.capture.api;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * TODO: Comment me!
  *
  */
-public interface State {
-  /**
-   * Returns whatever message this state holds.
-   * @return
-   */
-  public String getMessage();
+@XmlType(name="status-entity", namespace="http://status.opencastproject.org/")
+@XmlRootElement(name="status-entity", namespace="http://status.opencastproject.org/")
+@XmlEnum(String.class)
+@XmlAccessorType(XmlAccessType.FIELD)
+public enum State {
+  IDLE(),
+  CAPTURING(),
+  UPLOADING();
 }
