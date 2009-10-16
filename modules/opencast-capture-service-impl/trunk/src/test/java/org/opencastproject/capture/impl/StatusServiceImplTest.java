@@ -27,6 +27,7 @@ import org.junit.Test;
 
 public class StatusServiceImplTest {
   private StatusServiceImpl service = null;
+
   @Before
   public void setup() {
     service = new StatusServiceImpl();
@@ -36,7 +37,7 @@ public class StatusServiceImplTest {
   public void teardown() {
     service = null;
   }
-  
+
   @Test
   public void testStartup() {
     Assert.assertEquals(State.IDLE, service.getState());
@@ -64,5 +65,5 @@ public class StatusServiceImplTest {
     Assert.assertEquals(State.UPLOADING, service.getState());
     service.stop();
     Assert.assertEquals(State.IDLE, service.getState());
-  }  
+  }
 }

@@ -33,8 +33,9 @@ import javax.jws.WebService;
 @WebService()
 public class CaptureWebServiceImpl implements CaptureWebService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureWebServiceImpl.class);
-  
+
   private CaptureAgent service;
+
   public void setService(CaptureAgent service) {
     this.service = service;
   }
@@ -44,26 +45,27 @@ public class CaptureWebServiceImpl implements CaptureWebService {
   }
 
   @WebMethod()
-  @WebResult(name="recorder-info")
-  public String startCapture(){
+  @WebResult(name = "recorder-info")
+  public String startCapture() {
     return service.startCapture();
   }
 
   @WebMethod()
-  @WebResult(name="recorder-info")
-  public String startCapture(@WebParam(name="media-package")MediaPackage mediaPackage){
+  @WebResult(name = "recorder-info")
+  public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage) {
     return service.startCapture(mediaPackage);
   }
 
   @WebMethod()
-  @WebResult(name="recorder-info")
-  public String startCapture(@WebParam(name="configuration")HashMap configuration){
+  @WebResult(name = "recorder-info")
+  public String startCapture(@WebParam(name = "configuration") HashMap configuration) {
     return service.startCapture(configuration);
   }
 
   @WebMethod()
-  @WebResult(name="recorder-info")
-  public String startCapture(@WebParam(name="media-package")MediaPackage mediaPackage, @WebParam(name="configuration")HashMap configuration){
+  @WebResult(name = "recorder-info")
+  public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage,
+          @WebParam(name = "configuration") HashMap configuration) {
     return service.startCapture(mediaPackage, configuration);
   }
 }

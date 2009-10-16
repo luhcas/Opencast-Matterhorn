@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 @Path("/")
 public class StatusRestService {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(StatusRestService.class);
 
   private StatusService service;
@@ -52,7 +52,7 @@ public class StatusRestService {
   }
 
   public void setState() {
-    
+
   }
 
   @GET
@@ -63,7 +63,7 @@ public class StatusRestService {
   }
 
   protected final String docs;
-  
+
   public StatusRestService() {
     service = new StatusServiceImpl();
     String docsFromClassloader = null;

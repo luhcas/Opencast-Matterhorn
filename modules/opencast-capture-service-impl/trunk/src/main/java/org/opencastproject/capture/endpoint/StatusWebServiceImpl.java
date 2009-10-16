@@ -30,13 +30,13 @@ import org.slf4j.LoggerFactory;
 @WebService()
 public class StatusWebServiceImpl implements StatusWebService {
   private static final Logger logger = LoggerFactory.getLogger(StatusWebServiceImpl.class);
-  
+
   private StatusService service;
 
   public StatusWebServiceImpl() {
     service = new StatusServiceImpl();
   }
-  
+
   public void setService(StatusService service) {
     this.service = service;
   }
@@ -44,7 +44,7 @@ public class StatusWebServiceImpl implements StatusWebService {
   public void unsetService(StatusService service) {
     this.service = null;
   }
-  
+
   @WebMethod()
   public State getStatus() {
     return service.getState();

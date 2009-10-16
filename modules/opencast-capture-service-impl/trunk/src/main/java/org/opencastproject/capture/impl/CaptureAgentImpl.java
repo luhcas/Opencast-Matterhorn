@@ -43,14 +43,14 @@ import java.util.Properties;
  */
 public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
-  
+
   public static String tmpPath = System.getProperty("java.io.tmpdir") + File.separator + "opencast";
 
   public CaptureAgentImpl() {
     this.tmpPath = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "tmp";
     createTmpDirectory();
   }
-  
+
   @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {
     // Update any configuration properties here
@@ -58,16 +58,17 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.recorder.api.CaptureAgent#startCapture()
    */
   public String startCapture() {
     String aux = "start capture";
-    //logger.info("public String startCapture() in "  + this.tmpPath + File.separator + "record");
+    // logger.info("public String startCapture() in " + this.tmpPath + File.separator + "record");
     Properties props = new Properties();
     props.setProperty("/dev/video0", "/home/kta719/gst-testing/professor.mpg");
     props.setProperty("/dev/video1", "/home/kta719/gst-testing/screen.mpg");
     props.setProperty("hw:0", "/home/kta719/gst-testing/microphone.mp2");
-    
+
     long duration = 10;
     final Pipeline pipe = PipelineFactory.create(props);
     Bus bus = pipe.getBus();
@@ -86,17 +87,19 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     });
 
     pipe.play();
-    while (pipe.getState() != State.PLAYING);
+    while (pipe.getState() != State.PLAYING)
+      ;
     System.out.println(pipe.getName() + " started.");
-    new Thread(new CaptureAgentEOSThread(duration*1000, pipe)).start();
+    new Thread(new CaptureAgentEOSThread(duration * 1000, pipe)).start();
     Gst.main();
     Gst.deinit();
-    
+
     return aux;
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.recorder.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage)
    */
   public String startCapture(MediaPackage mediaPackage) {
@@ -106,18 +109,22 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.recorder.api.CaptureAgent#startCapture(java.util.HashMap)
    */
-    public String startCapture(HashMap<String, String> properties) {
+  public String startCapture(HashMap<String, String> properties) {
     logger.info("public String startCapture(HashMap properties)");
     return "start capture 3";
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.recorder.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage, HashMap properties)
+   * 
+   * @see 
+   *      org.opencastproject.recorder.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage,
+   *      HashMap properties)
    */
-    public String startCapture(MediaPackage mediaPackage, HashMap<String, String> properties) {
+  public String startCapture(MediaPackage mediaPackage, HashMap<String, String> properties) {
     logger.info("public String startCapture(MediaPackage mediaPackage, HashMap properties)");
     return "start capture 4";
   }
@@ -127,14 +134,13 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   private void createTmpDirectory() {
     File f = new File(this.tmpPath);
-    if( ! f.exists()) {
+    if (!f.exists()) {
       try {
         logger.error("Make directory " + this.tmpPath);
         FileUtils.forceMkdir(f);
-      } catch(Exception e) {
+      } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
   }
 }
-

@@ -4,7 +4,7 @@ import org.gstreamer.Pipeline;
 import org.gstreamer.event.EOSEvent;
 
 public class CaptureAgentEOSThread implements Runnable {
-  
+
   private long timeout;
   private Pipeline pipeline;
 

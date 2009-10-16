@@ -41,6 +41,7 @@ import javax.ws.rs.core.Response;
 public class CaptureRestService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureRestService.class);
   private CaptureAgent service;
+
   public void setService(CaptureAgent service) {
     this.service = service;
   }
@@ -61,7 +62,7 @@ public class CaptureRestService {
       return Response.serverError().status(400).build();
     }
   }
- 
+
   @POST
   @Produces(MediaType.TEXT_PLAIN)
   @Path("startCapture")
@@ -74,7 +75,6 @@ public class CaptureRestService {
       return Response.serverError().status(400).build();
     }
   }
-
 
   @GET
   @Produces(MediaType.TEXT_HTML)
@@ -90,9 +90,8 @@ public class CaptureRestService {
     return "Huevo de pascua!!!!";
   }
 
-
   protected final String docs;
-  
+
   public CaptureRestService() {
     String docsFromClassloader = null;
     InputStream in = null;

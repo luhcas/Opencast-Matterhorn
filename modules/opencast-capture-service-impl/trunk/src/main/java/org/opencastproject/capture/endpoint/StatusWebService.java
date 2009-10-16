@@ -15,8 +15,6 @@
  */
 package org.opencastproject.capture.endpoint;
 
-
-
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 

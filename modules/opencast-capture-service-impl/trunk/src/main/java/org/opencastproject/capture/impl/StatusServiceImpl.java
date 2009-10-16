@@ -38,6 +38,7 @@ public class StatusServiceImpl implements StatusService, ManagedService {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.status.api.StatusService#getState()
    */
   public State getState() {
@@ -58,6 +59,7 @@ public class StatusServiceImpl implements StatusService, ManagedService {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.status.api.StatusService#setState()
    */
   public void setState(State state) {
@@ -69,4 +71,3 @@ public class StatusServiceImpl implements StatusService, ManagedService {
     // Update any configuration properties here
   }
 }
-

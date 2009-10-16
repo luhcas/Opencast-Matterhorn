@@ -10,28 +10,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Given a Properties object describing devices this class will create a 
- * suitable pipeline to capture from all those devices simultaneously.
+ * Given a Properties object describing devices this class will create a suitable pipeline to capture from all those
+ * devices simultaneously.
  */
 public class PipelineFactory {
 
-  private static final Logger logger = 
-    LoggerFactory.getLogger(PipelineFactory.class);
-
+  private static final Logger logger = LoggerFactory.getLogger(PipelineFactory.class);
 
   /**
-   * Create a bin that contains multiple pipelines using each source in 
-   * the properties object as the gstreamer source
-   * @param props		Properties object defining sources 
-   * e.g., {"hw:0"=MICROPHONE, "/dev/video1"=SLIDES, "/dev/video0"=PRESENTER}
-   * @return			The bin to control the pipelines
+   * Create a bin that contains multiple pipelines using each source in the properties object as the gstreamer source
+   * 
+   * @param props
+   *          Properties object defining sources e.g., {"hw:0"=MICROPHONE, "/dev/video1"=SLIDES,
+   *          "/dev/video0"=PRESENTER}
+   * @return The bin to control the pipelines
    * @throws UnsupportedDeviceException
    */
   public static Pipeline create(Properties props) {
     ArrayList<CaptureDevice> devices = new ArrayList<CaptureDevice>();
 
-    /* Identify which candidate video devices are described in the 
-     * properties and create CaptureDevice objects out of them. */
+    /*
+     * Identify which candidate video devices are described in the properties and create CaptureDevice objects out of
+     * them.
+     */
     Enumeration<Object> keys = props.keys();
     while (keys.hasMoreElements()) {
       DeviceName devName;
@@ -53,15 +54,14 @@ public class PipelineFactory {
             logger.error("Device not recognized: " + devicePath);
             continue;
           }
-        }	
+        }
       } catch (JV4LInfoException e) {
         logger.error("Could not access device: " + devicePath);
         continue;
       }
 
       /* devices will store the CaptureDevice list arbitrary order */
-      CaptureDevice capdev = new CaptureDevice(devicePath, devName, 
-              (String) props.getProperty(devicePath));
+      CaptureDevice capdev = new CaptureDevice(devicePath, devName, (String) props.getProperty(devicePath));
       if (!devices.add(capdev))
         logger.error("Unable to add device.");
 
@@ -84,14 +84,15 @@ public class PipelineFactory {
   }
 
   /**
-   * addPipeline will add a pipeline for the specified capture device to the
-   * bin.
-   * @param captureDevice		CaptureDevice to create pipeline around
-   * @param pipeline				The Pipeline bin to add it to
-   * @return							  True, if successful
+   * addPipeline will add a pipeline for the specified capture device to the bin.
+   * 
+   * @param captureDevice
+   *          CaptureDevice to create pipeline around
+   * @param pipeline
+   *          The Pipeline bin to add it to
+   * @return True, if successful
    */
-  private static boolean addPipeline(CaptureDevice captureDevice, 
-          Pipeline pipeline) {
+  private static boolean addPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
 
     String error = null;
 
@@ -104,17 +105,15 @@ public class PipelineFactory {
       Element videoscale = ElementFactory.make("videoscale", null);
       Element videorate = ElementFactory.make("videorate", null);
       Element filter = ElementFactory.make("capsfilter", null);
-      Element mpeg2enc  = ElementFactory.make("ffenc_mpeg2video", null);
+      Element mpeg2enc = ElementFactory.make("ffenc_mpeg2video", null);
       Element mpegtsmux = ElementFactory.make("mpegtsmux", null);
       Element filesink = ElementFactory.make("filesink", null);
 
       v4lsrc.set("device", captureDevice.getLocation());
-      filter.setCaps(Caps.fromString("video/x-raw-yuv, width=1024," +
-      "height=768,framerate=30/1"));
+      filter.setCaps(Caps.fromString("video/x-raw-yuv, width=1024," + "height=768,framerate=30/1"));
       filesink.set("location", captureDevice.getOutputPath());
 
-      pipeline.addMany(v4lsrc, queue, videoscale, videorate, filter, 
-              mpeg2enc, mpegtsmux, filesink);
+      pipeline.addMany(v4lsrc, queue, videoscale, videorate, filter, mpeg2enc, mpegtsmux, filesink);
 
       if (!v4lsrc.link(queue))
         error = formatPipelineError(captureDevice, v4lsrc, queue);
@@ -132,8 +131,7 @@ public class PipelineFactory {
         error = formatPipelineError(captureDevice, mpegtsmux, filesink);
 
       if (error != null) {
-        pipeline.removeMany(v4lsrc, queue, videoscale, videorate, 
-                filter, mpeg2enc, mpegtsmux, filesink);
+        pipeline.removeMany(v4lsrc, queue, videoscale, videorate, filter, mpeg2enc, mpegtsmux, filesink);
         logger.error(error);
         return false;
       }
@@ -152,11 +150,11 @@ public class PipelineFactory {
       filesrc.set("location", captureDevice.getLocation());
       filesink.set("location", captureDevice.getOutputPath());
 
-      pipeline.addMany(filesrc, queue, mpegpsdemux, mpegvideoparse, 
-              mpegtsmux, filesink);
+      pipeline.addMany(filesrc, queue, mpegpsdemux, mpegvideoparse, mpegtsmux, filesink);
 
-      /* mpegpsdemux source pad is only available sometimes, therefore we
-       * need to add a listener to accept dynamic pads */
+      /*
+       * mpegpsdemux source pad is only available sometimes, therefore we need to add a listener to accept dynamic pads
+       */
       mpegpsdemux.connect(new Element.PAD_ADDED() {
         @Override
         public void padAdded(Element arg0, Pad arg1) {
@@ -177,8 +175,7 @@ public class PipelineFactory {
         error = formatPipelineError(captureDevice, mpegtsmux, filesink);
 
       if (error != null) {
-        pipeline.removeMany(filesrc, queue, mpegpsdemux, mpegvideoparse,
-                mpegtsmux, filesink);
+        pipeline.removeMany(filesrc, queue, mpegpsdemux, mpegvideoparse, mpegtsmux, filesink);
         logger.error(error);
         return false;
       }
@@ -214,16 +211,17 @@ public class PipelineFactory {
 
   /**
    * String representation of linking errors that occur when creating pipeline
-   * @param device   The device the error occurred on
-   * @param src      The source element being linked
-   * @param sink     The sink element being linked
-   * @return         String representation of the error
+   * 
+   * @param device
+   *          The device the error occurred on
+   * @param src
+   *          The source element being linked
+   * @param sink
+   *          The sink element being linked
+   * @return String representation of the error
    */
-  private static String formatPipelineError(CaptureDevice device, Element src,
-          Element sink) {
+  private static String formatPipelineError(CaptureDevice device, Element src, Element sink) {
 
-    return device.getLocation() + ": " + "(" + src.toString() + ", " + 
-    sink.toString() + ")";
+    return device.getLocation() + ": " + "(" + src.toString() + ", " + sink.toString() + ")";
   }
 }
-

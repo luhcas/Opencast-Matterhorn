@@ -1,11 +1,9 @@
 package org.opencastproject.capture.pipeline;
 
 /**
- * Simple representation of the location, name, capture type and output file
- * of a capture device. 
+ * Simple representation of the location, name, capture type and output file of a capture device.
  */
 public class CaptureDevice {
-
 
   /** String representation of absolute path to device file */
   private String location;
@@ -18,9 +16,13 @@ public class CaptureDevice {
 
   /**
    * Create a representation of a capture device for the PipelineFactory
-   * @param loc The location of the device on the system
-   * @param ct  The CaptureType of the device
-   * @param name  The name of the device
+   * 
+   * @param loc
+   *          The location of the device on the system
+   * @param ct
+   *          The CaptureType of the device
+   * @param name
+   *          The name of the device
    */
   public CaptureDevice(String loc, DeviceName name, String output) {
     this.location = loc;
@@ -42,7 +44,7 @@ public class CaptureDevice {
   }
 
   public String toString() {
-    return "[" + name + ", " + location  + ": " + outputPath + "]";
+    return "[" + name + ", " + location + ": " + outputPath + "]";
   }
 
 }

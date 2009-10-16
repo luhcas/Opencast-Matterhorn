@@ -29,19 +29,19 @@ import javax.jws.WebService;
 @WebService()
 public interface CaptureWebService {
   @WebMethod()
-  @WebResult(name="recorder-info")
+  @WebResult(name = "recorder-info")
   public String startCapture();
 
   @WebMethod()
-  @WebResult(name="recorder-info")
-  public String startCapture(@WebParam(name="media-package")MediaPackage mediaPackage);
+  @WebResult(name = "recorder-info")
+  public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage);
 
   @WebMethod()
-  @WebResult(name="recorder-info")
-  public String startCapture(@WebParam(name="configuration")HashMap<String, String> configuration);
+  @WebResult(name = "recorder-info")
+  public String startCapture(@WebParam(name = "configuration") HashMap<String, String> configuration);
 
   @WebMethod()
-  @WebResult(name="recorder-info")
-  public String startCapture(@WebParam(name="media-package")MediaPackage mediaPackage, 
-    @WebParam(name="configuration")HashMap<String, String> configuration);
+  @WebResult(name = "recorder-info")
+  public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage,
+          @WebParam(name = "configuration") HashMap<String, String> configuration);
 }
