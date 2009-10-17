@@ -15,8 +15,6 @@
  */
 package org.apache.solr.core;
 
-import org.apache.solr.core.SolrConfig;
-import org.apache.solr.core.SolrResourceLoader;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
