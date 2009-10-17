@@ -20,7 +20,10 @@ import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowDefinitionList;
 import org.opencastproject.workflow.api.WorkflowDefinitionListImpl;
+import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +31,10 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 
 import javax.xml.bind.JAXBContext;
@@ -43,14 +48,18 @@ public class ConductorServiceImpl implements ConductorService {
   private static final Logger logger = LoggerFactory.getLogger(ConductorServiceImpl.class);
   protected HashMap<String, WorkflowDefinition> defs = new HashMap<String, WorkflowDefinition>();
   protected JAXBContext jaxbContext;
-  public void activate(ComponentContext context) {
+  protected ComponentContext componentContext;
+  public void activate(ComponentContext componentContext) {
     logger.info("init()");
+    this.componentContext = componentContext;
     try {
       jaxbContext= JAXBContext.newInstance("org.opencastproject.workflow.api", WorkflowDefinition.class.getClassLoader());
       InputStream distOnly = ConductorServiceImpl.class.getClassLoader().getResourceAsStream("/workflows/distribute-only.xml");
       InputStream composeAndDist = ConductorServiceImpl.class.getClassLoader().getResourceAsStream("/workflows/compose-and-distribute.xml");
+      InputStream errorHandler = ConductorServiceImpl.class.getClassLoader().getResourceAsStream("/workflows/default-error-handler.xml");
       loadWorkflowDefinition(distOnly);
       loadWorkflowDefinition(composeAndDist);
+      loadWorkflowDefinition(errorHandler);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -70,17 +79,55 @@ public class ConductorServiceImpl implements ConductorService {
    */
   public WorkflowDefinitionList getWorkflowDefinitions() {
     WorkflowDefinitionListImpl list = new WorkflowDefinitionListImpl();
-    list.getWorkflowDefinition().addAll(defs.values());
+    for(WorkflowDefinition def : defs.values()) {
+      if(allOperationsAvailable(def)) {
+        list.getWorkflowDefinition().add(def);
+      } else {
+        logger.warn("Workflow definition " + def.getTitle() + " is unavailable due to missing operations");
+      }
+    }
     return list;
   }
 
+  protected boolean allOperationsAvailable(WorkflowDefinition def) {
+    List<String> availableOperationNames = getOperationNames();
+    for(WorkflowOperationDefinition op : def.getOperations().getOperation()) {
+      if( ! availableOperationNames.contains(op.getName())) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  protected List<String> getOperationNames() {
+    List<String> list = new ArrayList<String>();
+    try {
+      for(ServiceReference ref : componentContext.getBundleContext().getServiceReferences(WorkflowOperationDefinition.class.getName(), null)) {
+        list.add(((WorkflowOperationDefinition) componentContext.getBundleContext().getService(ref)).getName());
+      }
+    } catch (InvalidSyntaxException e) {
+      logger.warn(e.getMessage());
+    }
+    return list;
+  }
+  
   /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.conductor.api.ConductorService#getWorkflowDefinitionByTitle(java.lang.String)
    */
   public WorkflowDefinition getWorkflowDefinitionByTitle(String name) {
-    return defs.get(name);
+    WorkflowDefinition def = defs.get(name);
+    if(def == null) {
+      logger.warn("Workflow definition " + name + " is not installed");
+      return null;
+    }
+    if(allOperationsAvailable(def)) {
+      return def;
+    } else {
+      logger.warn("Workflow definition " + name + " is unavailable due to missing operations");
+      return null;
+    }
   }
 
   /**

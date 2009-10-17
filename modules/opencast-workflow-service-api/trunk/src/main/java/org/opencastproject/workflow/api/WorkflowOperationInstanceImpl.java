@@ -58,10 +58,10 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   /**
    * Builds a new workflow operation instance based on another workflow operation.
    */
-  public WorkflowOperationInstanceImpl(WorkflowOperation op) {
-    this.name = op.getName();
+  public WorkflowOperationInstanceImpl(WorkflowOperationDefinition def) {
+    this.name = def.getName();
     this.state = State.RUNNING.name();
-    this.description = op.getDescription();
+    this.description = def.getDescription();
   }
   
   public String getName() {

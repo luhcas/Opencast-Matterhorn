@@ -21,12 +21,24 @@
       <form action="start" method="POST">
         Workflow Definition XML<br/>
         <textarea rows="20" cols="80" id="definition" name="definition">
-          <workflow-definition id="123">
-            <title>A workflow definition title</title>
-            <description>A workflow definition description</description>
+          <workflow-definition>
+            <title>Transcode and Distribute</title>
+            <description>
+              A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
+              along with their associated metadata, to the distribution channels.
+            </description>
             <operations>
-              <operation name="compose" fail-on-error="true"/>
-              <operation name="distribute" fail-on-error="false"/>
+              <operation
+                name="compose"
+                fail-on-error="true"
+                exception-handler-workflow="Default Error Handler"
+                description="Encode media"/>
+          
+              <operation
+                name="distribute"
+                fail-on-error="true"
+                exception-handler-workflow="Default Error Handler"
+                description="Distribute media to distribution channels"/>
             </operations>
           </workflow-definition>
         </textarea><br/>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.conductor.impl.DistributeWorkflowOperationDefinition" immediate="true">
+  <implementation class="org.opencastproject.conductor.impl.DistributeWorkflowOperationDefinition" />
+  <property name="service.description" value="Distribute Workflow Operation" />
+  <service>
+    <provide interface="org.opencastproject.workflow.api.WorkflowOperationDefinition" />
+  </service>
+</component>

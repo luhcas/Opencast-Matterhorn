@@ -16,20 +16,13 @@
 package org.opencastproject.workflow.api;
 
 import org.apache.commons.io.IOUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
-import javax.xml.parsers.DocumentBuilder;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
 
 /**
  * Provides a mechanism to build a workflow definition from an xml inputstream.
@@ -39,14 +32,25 @@ public class WorkflowDefinitionFactory {
   /** The singleton instance for this factory */
   private static WorkflowDefinitionFactory instance = null;
 
+  protected JAXBContext jaxbContext = null;
+  
+  private WorkflowDefinitionFactory() throws JAXBException {
+    jaxbContext= JAXBContext.newInstance("org.opencastproject.workflow.api", WorkflowDefinitionFactory.class.getClassLoader());
+  }
+  
   /**
    * Returns an instance of the {@link WorkflowDefinitionFactory}.
    * 
    * @return a factory
    */
   public static WorkflowDefinitionFactory getInstance() {
-    if (instance == null)
-      instance = new WorkflowDefinitionFactory();
+    if (instance == null) {
+      try {
+        instance = new WorkflowDefinitionFactory();
+      } catch (JAXBException e) {
+        throw new RuntimeException(e);
+      }
+    }
     return instance;
   }
 
@@ -60,28 +64,9 @@ public class WorkflowDefinitionFactory {
    *           if creating the workflow definition fails
    */
   public WorkflowDefinition parse(InputStream in) throws Exception {
-    WorkflowDefinitionImpl impl = new WorkflowDefinitionImpl();
-    WorkflowOperationDefinitionListImpl operations = new WorkflowOperationDefinitionListImpl();
-    impl.setOperations(operations);
-
-    DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    InputSource is = new InputSource();
-    is.setCharacterStream(new InputStreamReader(in, "UTF8"));
-    Document doc = db.parse(is);
-    XPathFactory factory = XPathFactory.newInstance();
-    XPath xpath = factory.newXPath();
-    impl.setTitle((String)xpath.compile("/workflow-definition/title/text()").evaluate(doc, XPathConstants.STRING));
-    impl.setDescription((String)xpath.compile("/workflow-definition/description/text()").evaluate(doc, XPathConstants.STRING));
-    XPathExpression operationXpath = xpath.compile("/workflow-definition/operations/operation");
-    NodeList operationList = (NodeList)operationXpath.evaluate(doc, XPathConstants.NODESET);
-    for(int i=0; i<operationList.getLength(); i++) {
-      Element operationNode = (Element)operationList.item(i);
-      String name = operationNode.getAttribute("name");
-      String description = operationNode.getAttribute("description");
-      boolean failOnError = Boolean.TRUE.toString().equals(operationNode.getAttribute("fail-on-error"));
-      operations.getOperation().add(new WorkflowOperationDefinitionImpl(name, description, failOnError));
-    }
-    return impl;
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
+            WorkflowDefinitionImpl.class).getValue();
   }
   
   /**

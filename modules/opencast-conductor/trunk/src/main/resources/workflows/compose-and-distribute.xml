@@ -1,11 +1,20 @@
-<workflow-definition id="2">
+<workflow-definition>
   <title>Transcode and Distribute</title>
   <description>
     A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
     along with their associated metadata, to the distribution channels.
   </description>
   <operations>
-    <operation fail-on-error="true" name="compose" description="Encode media "/>
-    <operation fail-on-error="false" name="distribute" description="Distribute media to distribution channels"/>
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode media"/>
+
+    <operation
+      name="distribute"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Distribute media to distribution channels"/>
   </operations>
 </workflow-definition>

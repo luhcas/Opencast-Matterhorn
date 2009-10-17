@@ -24,12 +24,12 @@ import org.opencastproject.workflow.api.WorkflowDefinitionList;
 public interface ConductorService {
 
   /**
-   * @return All registered {@link WorkflowDefinition}s
+   * @return All registered {@link WorkflowDefinition}s which have registered operation handlers for each of their operations.
    */
   WorkflowDefinitionList getWorkflowDefinitions();
 
   /**
-   * Returns the {@link WorkflowDefinition} whith the specified name or <code>null</code> if no such definition is
+   * Returns the {@link WorkflowDefinition} with the specified name or <code>null</code> if no such definition is
    * available.
    * 
    * @param title the title of the workflow definition

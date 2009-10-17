@@ -19,6 +19,7 @@ import org.opencastproject.conductor.api.ConductorService;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionFactory;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
       WorkflowDefinition def = WorkflowDefinitionFactory.getInstance().parse(stream);
       conductorService.addWorkflowDefinition(def);
     } finally {
-      stream.close();
+      IOUtils.closeQuietly(stream);
     }
   }
 
@@ -67,7 +68,7 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
       WorkflowDefinition def = WorkflowDefinitionFactory.getInstance().parse(stream);
       conductorService.removeWorkflowDefinition(def.getTitle());
     } finally {
-      stream.close();
+      IOUtils.closeQuietly(stream);
     }
   }
 
@@ -85,10 +86,6 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
    * @see org.apache.felix.fileinstall.ArtifactListener#canHandle(java.io.File)
    */
   public boolean canHandle(File artifact) {
-    boolean canHandle =  artifact.getName().endsWith("workflow.xml");
-    if(canHandle) {
-      logger.info(WorkflowDefinitionScanner.class.getName() + " can handle file " + artifact.getAbsolutePath());
-    }
-    return canHandle;
+    return artifact.getName().endsWith("workflow.xml");
   }
 }

@@ -25,8 +25,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * the execution of {@link WorkflowOperationRunner#run(WorkflowInstance)}.
  */
 @XmlJavaTypeAdapter(WorkflowOperationInstanceImpl.Adapter.class)
-public interface WorkflowOperationInstance extends WorkflowOperation {
+public interface WorkflowOperationInstance {
+
+  String getName();
   
+  String getDescription();
+
   /**
    * The state of this operation.
    * @return

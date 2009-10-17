@@ -23,7 +23,7 @@ import java.util.Map;
  * An single instance of a running, paused, or stopped workflow.
  */
 public interface WorkflowInstance {
-  public enum State { INSTANTIATED, RUNNING, STOPPED, PAUSED, SUCCEEDED, FAILED }
+  public enum State { INSTANTIATED, RUNNING, STOPPED, PAUSED, SUCCEEDED, FAILED, FAILING }
 
   /**
    * The unique ID of this {@link WorkflowInstance}

@@ -19,15 +19,12 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
-import org.opencastproject.workflow.api.WorkflowOperationInstance;
-import org.opencastproject.workflow.api.WorkflowOperationRunner;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
-import org.opencastproject.workflow.api.WorkflowOperationRunnerFactory;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
 import org.opencastproject.workflow.impl.solr.SolrConnection;
@@ -166,12 +163,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   protected void run(final WorkflowInstanceImpl wfi) {
     Thread t = new Thread(new Runnable() {
       public void run() {
+        boolean failed = false;
         // Get all of the runnable workflow services available for each operation (in the order of operations)
         for(WorkflowOperationDefinition operation : wfi.getWorkflowOperationDefinitionList().getOperation()) {
           ServiceReference[] serviceRefs = null;
           try {
-            serviceRefs = componentContext.getBundleContext().getAllServiceReferences(WorkflowOperationRunnerFactory.class.getName(),
-                    "(opencast.workflow.operation=" + operation.getName() + ")");
+            serviceRefs = componentContext.getBundleContext().getAllServiceReferences(WorkflowOperationDefinition.class.getName(), null);
           } catch (InvalidSyntaxException e) {
             throw new RuntimeException(e);
           }
@@ -179,31 +176,40 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
             log_.info("No WorkflowRunners registered for operation " + operation);
           } else {
             for(ServiceReference serviceRef : serviceRefs) {
-              WorkflowOperationRunnerFactory runnerFactory = (WorkflowOperationRunnerFactory)componentContext.getBundleContext().getService(serviceRef);
+              WorkflowOperationDefinition def = (WorkflowOperationDefinition)componentContext.getBundleContext().getService(serviceRef);
+              if( ! def.getName().equals(operation.getName())) continue;
               // Add an operation instance with the resulting media package to the workflow instance
               WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(operation);
               wfi.getWorkflowOperationInstanceList().getOperationInstance().add(opInstance);
               update(wfi); // Update the workflow instance, since it has a new operation instance
               try {
-                opInstance.setResult(runnerFactory.getRunner().run(wfi));
+                opInstance.setResult(def.run(wfi));
                 opInstance.setState(State.SUCCEEDED.name());
               } catch(Exception e) {
-                // Always set the operation instance to "failed" when the runner throws an exception
-                opInstance.setState(State.FAILED.name());
-                // If the operation is set to fail on error, set the workflow to "failed" and stop running operations
-                if(operation.isFailOnError()) {
-                  log_.warn("Operation " + operation + " failed.  Aborting workflow instance " + wfi);
-                  wfi.setState(State.FAILED.name());
-                  update(wfi);
+                log_.warn("Operation " + operation + " failed:" + e.getMessage());
+                // If the operation is set to fail on error, set the workflow to "failed" and run the exception handling
+                // workflow operations
+                if(operation.isFailWorkflowOnException()) {
+                  wfi.setState(State.FAILING.name());
+                  failed = true;
+                  // TODO: Replace the next operations with those from the failure handling workflow
+                  // FIXME: We are going to get concurrent modification exceptions if we modify the operation collection
                   return;
+                } else {
+                  // TODO: Add the operations from the failure handling workflow at the current point in the list
+                  // FIXME: We are going to get concurrent modification exceptions if we modify the operation collection
                 }
               }
               update(wfi); // Update the workflow instance again, since its new operation instance has completed
             }
           }
         }
-        // All of the workflow operation definitions have run, so set the state to success and save it.
-        wfi.setState(State.SUCCEEDED.name());
+        // All of the workflow operation definitions have run, so set the state  and save it.
+        if(failed) {
+          wfi.setState(State.FAILED.name());
+        } else {
+          wfi.setState(State.SUCCEEDED.name());
+        }
         update(wfi);
       }
     });
