@@ -1,11 +1,35 @@
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
 package org.opencastproject.capture.pipeline;
+
+import net.luniks.linux.jv4linfo.JV4LInfo;
+import net.luniks.linux.jv4linfo.JV4LInfoException;
+import net.luniks.linux.jv4linfo.V4LInfo;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import org.gstreamer.*;
-import net.luniks.linux.jv4linfo.*;
+import org.gstreamer.Caps;
+import org.gstreamer.Element;
+import org.gstreamer.ElementFactory;
+import org.gstreamer.Gst;
+import org.gstreamer.Pad;
+import org.gstreamer.PadDirection;
+import org.gstreamer.Pipeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,7 +180,6 @@ public class PipelineFactory {
        * mpegpsdemux source pad is only available sometimes, therefore we need to add a listener to accept dynamic pads
        */
       mpegpsdemux.connect(new Element.PAD_ADDED() {
-        @Override
         public void padAdded(Element arg0, Pad arg1) {
           arg1.link(mpegvideoparse.getStaticPad("sink"));
         }
