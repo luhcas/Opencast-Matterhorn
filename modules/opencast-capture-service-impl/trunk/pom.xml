@@ -17,12 +17,12 @@
       <artifactId>opencast-capture-service-api</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
-	<dependency>
-		<groupId>net.luniks.linux.jv4linfo</groupId>
+    <dependency>
+	  <groupId>net.luniks.linux.jv4linfo</groupId>
 		<artifactId>libjv4linfo</artifactId>
 		<version>0.2.1</version>
 		<type>so</type>
-	</dependency> 
+	</dependency>
 	<dependency>
 		<groupId>net.luniks.linux.jv4linfo</groupId>
 		<artifactId>jv4linfo</artifactId>
@@ -100,7 +100,26 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.capture.* </Export-Package>
+            <Bundle-Activator> org.opencastproject.capture.impl.Activator </Bundle-Activator>
+
+            <Import-Package>
+              org.opencastproject.capture.api.*,
+              *;resolution:=optional
+            </Import-Package>
+            <Private-Package>
+              net.luniks.linux.jv4linfo,
+              org.gstreamer,
+              net.java.dev.jna
+            </Private-Package>
+            <Embed-Dependency>
+              jv4linfo;inline=true,
+              gstreamer-java;inline=true,
+              jna;inline=true
+            </Embed-Dependency>
+            <Export-Package>
+              org.opencastproject.capture.impl.*,
+              org.opencastproject.capture.endpoint
+            </Export-Package>
             <Service-Component>
               OSGI-INF/status-service.xml,
               OSGI-INF/status-service-rest.xml,
