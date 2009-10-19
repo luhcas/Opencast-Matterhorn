@@ -1,24 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>opencast-capture-service-impl</name>
-	<comment>The Opencast Project&apos;s Matterhorn software is a media capture, processing, and distribution system</comment>
-	<projects>
-		<project>opencast-media</project>
-		<project>opencast-util</project>
-	</projects>
-	<buildSpec>
-		<buildCommand>
-			<name>org.eclipse.jdt.core.javabuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
-			<name>org.eclipse.pde.ds.core.builder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-	</buildSpec>
-	<natures>
-		<nature>org.eclipse.jdt.core.javanature</nature>
-	</natures>
+  <name>opencast-capture-service-impl</name>
+  <comment>The Opencast Project&apos;s Matterhorn software is a media capture, processing, and distribution system</comment>
+  <projects>
+    <project>opencast-capture-service-api</project>
+    <project>opencast-media</project>
+    <project>opencast-util</project>
+  </projects>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+    </buildCommand>
+    <buildCommand>
+      <name>org.eclipse.pde.ds.core.builder</name>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+  </natures>
 </projectDescription>

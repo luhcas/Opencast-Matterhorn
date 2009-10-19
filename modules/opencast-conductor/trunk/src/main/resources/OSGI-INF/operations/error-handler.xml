@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.conductor.impl.ErrorLoggingOperation" immediate="true">
-  <implementation class="org.opencastproject.conductor.impl.ErrorLoggingOperation" />
-  <property name="service.description" value="Error Logging Workflow Operation Definition" />
+<component name="org.opencastproject.conductor.impl.ErrorLoggingOperationHandler" immediate="true">
+  <implementation class="org.opencastproject.conductor.impl.ErrorLoggingOperationHandler" />
+  <property name="service.description" value="Error Logging Workflow Operation Handler" />
   <service>
-    <provide interface="org.opencastproject.workflow.api.WorkflowOperationDefinition" />
+    <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
   </service>
 </component>

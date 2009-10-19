@@ -15,19 +15,11 @@
  */
 package org.opencastproject.workflow.api;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 /**
- * Describes an operation or action to be performed as part of a workflow.
+ * Handler for workflow operations.
  */
-@XmlJavaTypeAdapter(WorkflowOperationDefinitionImpl.Adapter.class)
-public interface WorkflowOperationDefinition {
-  
-  String getName();
-  
-  String getDescription();
+public interface WorkflowOperationHandler {
+  String[] getOperationsToHandle();
+  WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException;  
 
-  String getExceptionHandlingWorkflow();
-
-  boolean isFailWorkflowOnException();
 }

@@ -147,6 +147,8 @@ public class SolrIndexManager {
    */
   private SolrUpdateableInputDocument createInputDocument(WorkflowInstance workflow) {
     SolrUpdateableInputDocument solrEpisodeDocument = new SolrUpdateableInputDocument();
+    
+    // TODO Get the mediapackage from the latest operation result
     MediaPackage mediaPackage = workflow.getSourceMediaPackage();
 
     // If this is the case, try to get a hold on it

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.conductor.impl.ComposeWorkflowOperationDefinition" immediate="true">
-  <implementation class="org.opencastproject.conductor.impl.ComposeWorkflowOperationDefinition" />
-  <property name="service.description" value="Compose Workflow Operation Definition" />
+<component name="org.opencastproject.conductor.impl.ComposeWorkflowOperationHandler" immediate="true">
+  <implementation class="org.opencastproject.conductor.impl.ComposeWorkflowOperationHandler" />
+  <property name="service.description" value="Compose Workflow Operation Handler" />
   <service>
-    <provide interface="org.opencastproject.workflow.api.WorkflowOperationDefinition" />
+    <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
   </service>
 </component>

@@ -16,11 +16,7 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
-
-import org.apache.commons.io.IOUtils;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -47,8 +43,8 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   @XmlAttribute(name="description")
   protected String description;
 
-  @XmlElement(name="mediapackage")
-  protected MediapackageType mediaPackageType;
+  @XmlElement(name="result")
+  protected WorkflowOperationResult result;
   
   /**
    * No-arg constructor needed for JAXB serialization
@@ -80,25 +76,25 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
     this.description = description;
   }
 
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getResult()
-   */
-  public MediaPackage getResult() {
-    try {
-      return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
+//  /**
+//   * {@inheritDoc}
+//   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getResult()
+//   */
+//  public MediaPackage getResult() {
+//    try {
+//      return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));
+//    } catch (Exception e) {
+//      throw new RuntimeException(e);
+//    }
+//  }
   
-  public void setResult(MediaPackage mediaPackage) {
-    try {
-      this.mediaPackageType = MediapackageType.fromXml(mediaPackage.toXml());
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
+//  public void setResult(MediaPackage mediaPackage) {
+//    try {
+//      this.mediaPackageType = MediapackageType.fromXml(mediaPackage.toXml());
+//    } catch (Exception e) {
+//      throw new RuntimeException(e);
+//    }
+//  }
 
   static class Adapter extends XmlAdapter<WorkflowOperationInstanceImpl, WorkflowOperationInstance> {
     public WorkflowOperationInstanceImpl marshal(WorkflowOperationInstance op) throws Exception {return (WorkflowOperationInstanceImpl)op;}
@@ -124,6 +120,14 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   
   public void setState(String state) {
     this.state = state;
+  }
+
+  public void setResult(WorkflowOperationResult result) {
+    this.result = result;
+  }
+
+  public WorkflowOperationResult getResult() {
+    return result;
   }
 
 }

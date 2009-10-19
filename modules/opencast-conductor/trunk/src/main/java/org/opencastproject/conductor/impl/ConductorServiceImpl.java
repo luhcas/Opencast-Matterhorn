@@ -21,6 +21,7 @@ import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowDefinitionList;
 import org.opencastproject.workflow.api.WorkflowDefinitionListImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
+import org.opencastproject.workflow.api.WorkflowOperationHandler;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -32,6 +33,7 @@ import org.xml.sax.InputSource;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -102,8 +104,9 @@ public class ConductorServiceImpl implements ConductorService {
   protected List<String> getOperationNames() {
     List<String> list = new ArrayList<String>();
     try {
-      for(ServiceReference ref : componentContext.getBundleContext().getServiceReferences(WorkflowOperationDefinition.class.getName(), null)) {
-        list.add(((WorkflowOperationDefinition) componentContext.getBundleContext().getService(ref)).getName());
+      for(ServiceReference ref : componentContext.getBundleContext().getServiceReferences(WorkflowOperationHandler.class.getName(), null)) {
+        WorkflowOperationHandler handler = (WorkflowOperationHandler) componentContext.getBundleContext().getService(ref);
+        list.addAll(Arrays.asList(handler.getOperationsToHandle()));
       }
     } catch (InvalidSyntaxException e) {
       logger.warn(e.getMessage());

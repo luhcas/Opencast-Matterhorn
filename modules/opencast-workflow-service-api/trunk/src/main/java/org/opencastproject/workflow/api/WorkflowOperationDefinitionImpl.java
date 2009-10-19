@@ -15,8 +15,6 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -71,14 +69,6 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
   }
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationDefinition#run(org.opencastproject.workflow.api.WorkflowInstance)
-   */
-  public MediaPackage run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    throw new WorkflowOperationException("Workflow operations should be run from their respective services");
   }
 
   /**

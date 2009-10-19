@@ -23,6 +23,7 @@ import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
+import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
@@ -48,6 +49,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
@@ -168,7 +170,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         for(WorkflowOperationDefinition operation : wfi.getWorkflowOperationDefinitionList().getOperation()) {
           ServiceReference[] serviceRefs = null;
           try {
-            serviceRefs = componentContext.getBundleContext().getAllServiceReferences(WorkflowOperationDefinition.class.getName(), null);
+            serviceRefs = componentContext.getBundleContext().getAllServiceReferences(WorkflowOperationHandler.class.getName(), null);
           } catch (InvalidSyntaxException e) {
             throw new RuntimeException(e);
           }
@@ -176,14 +178,15 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
             log_.info("No WorkflowRunners registered for operation " + operation);
           } else {
             for(ServiceReference serviceRef : serviceRefs) {
-              WorkflowOperationDefinition def = (WorkflowOperationDefinition)componentContext.getBundleContext().getService(serviceRef);
-              if( ! def.getName().equals(operation.getName())) continue;
+              WorkflowOperationHandler handler = (WorkflowOperationHandler)componentContext.getBundleContext().getService(serviceRef);
+              // Skip this operation handler if it doesn't support this operation
+              if( ! Arrays.asList(handler.getOperationsToHandle()).contains((operation.getName()))) continue;
               // Add an operation instance with the resulting media package to the workflow instance
               WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(operation);
               wfi.getWorkflowOperationInstanceList().getOperationInstance().add(opInstance);
               update(wfi); // Update the workflow instance, since it has a new operation instance
               try {
-                opInstance.setResult(def.run(wfi));
+                opInstance.setResult(handler.run(wfi));
                 opInstance.setState(State.SUCCEEDED.name());
               } catch(Exception e) {
                 log_.warn("Operation " + operation + " failed:" + e.getMessage());

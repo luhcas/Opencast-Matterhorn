@@ -17,21 +17,25 @@ package org.opencastproject.conductor.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationException;
+import org.opencastproject.workflow.api.WorkflowOperationHandler;
+import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowOperationResultBuilder;
+import org.opencastproject.workflow.api.WorkflowOperationResultImpl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 /**
  * The workflow definition for handling "compose" operations
  */
-public class ComposeWorkflowOperationDefinition implements WorkflowOperationDefinition {
-  private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowOperationDefinition.class);
-  protected String name = "compose";
-  protected String description = "Compose new media file(s)"; // TODO i18n
+public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler {
+  private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowOperationHandler.class);
+  protected String[] operationsToHandle = new String[] {"compose"};
 
-  public MediaPackage run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.info("run() compose workflow operation");
     if(workflowInstance.getProperties() != null && workflowInstance.getProperties().keySet().contains("flash")) {
       logger.info("Composing flash media for media package " + workflowInstance.getSourceMediaPackage().getIdentifier());
@@ -41,31 +45,16 @@ public class ComposeWorkflowOperationDefinition implements WorkflowOperationDefi
     if(workflowInstance.getProperties() == null || workflowInstance.getProperties().isEmpty()) {
       logger.info("This workflow contains no properties, so we can't compose any media");
     }
-    // TODO Add new media track to the media package
-    return workflowInstance.getSourceMediaPackage();
+    // TODO Add new media track(s) to the media package
+    return WorkflowOperationResultBuilder.build(workflowInstance.getSourceMediaPackage(), workflowInstance.getProperties(), false);
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationDefinition#getDescription()
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getOperationsToHandle()
    */
-  public String getDescription() {
-    return description;
+  public String[] getOperationsToHandle() {
+    return operationsToHandle;
   }
 
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationDefinition#getName()
-   */
-  public String getName() {
-    return name;
-  }
-
-  public String getExceptionHandlingWorkflow() {
-    throw new UnsupportedOperationException("This should be called from the instance-level workflow operation");
-  }
-
-  public boolean isFailWorkflowOnException() {
-    throw new UnsupportedOperationException("This should be called from the instance-level workflow operation");
-  }
 }

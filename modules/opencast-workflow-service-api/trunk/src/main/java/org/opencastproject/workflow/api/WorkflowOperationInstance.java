@@ -38,10 +38,10 @@ public interface WorkflowOperationInstance {
   State getState();
   
   /**
-   * Gets the resulting media package from the execution of {@link WorkflowOperationRunner#run(WorkflowInstance)}.
+   * Gets the resulting media package from the execution of {@link WorkflowOperationHandler#run(WorkflowInstance)}.
    * @return The media package, as produced from the execution of a workflow operation runner.
    */
-  MediaPackage getOutput();
+  WorkflowOperationResult getResult();
   
   
 }

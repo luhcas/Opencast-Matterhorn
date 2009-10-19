@@ -6,4 +6,5 @@ WorkflowOperationDefinitionImpl
 WorkflowOperationDefinitionListImpl
 WorkflowOperationInstanceImpl
 WorkflowOperationInstanceListImpl
+WorkflowOperationResultImpl
 
