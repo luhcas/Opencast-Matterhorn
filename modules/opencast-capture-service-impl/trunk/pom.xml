@@ -100,7 +100,6 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator> org.opencastproject.capture.impl.Activator </Bundle-Activator>
 
             <Import-Package>
               org.opencastproject.capture.api.*,
