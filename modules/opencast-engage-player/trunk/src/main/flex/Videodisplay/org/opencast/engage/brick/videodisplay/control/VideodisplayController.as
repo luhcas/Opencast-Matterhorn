@@ -1,33 +1,40 @@
 /**
- *  Copyright 2009 The Regents of the University of California
- *  Licensed under the Educational Community License, Version 2.0
- *  (the "License"); you may not use this file except in compliance
- *  with the License. You may obtain a copy of the License at
- *
- *  http://www.osedu.org/licenses/ECL-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an "AS IS"
- *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- *  or implied. See the License for the specific language governing
- *  permissions and limitations under the License.
- *
- */
+*  Copyright 2009 The Regents of the University of California
+*  Licensed under the Educational Community License, Version 2.0
+*  (the "License"); you may not use this file except in compliance
+*  with the License. You may obtain a copy of the License at
+*
+*  http://www.osedu.org/licenses/ECL-2.0
+*
+*  Unless required by applicable law or agreed to in writing,
+*  software distributed under the License is distributed on an "AS IS"
+*  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+*  or implied. See the License for the specific language governing
+*  permissions and limitations under the License.
+*
+*/
 package org.opencast.engage.brick.videodisplay.control
 {
 	import flash.external.ExternalInterface;
+	import mx.controls.Alert;
+	import mx.core.Application;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.IResponder;
 	import mx.rpc.http.HTTPService;
 	import org.opencast.engage.brick.videodisplay.business.VideodisplayDelegate;
+	import org.opencast.engage.brick.videodisplay.control.event.ClosedCaptionsEvent;
 	import org.opencast.engage.brick.videodisplay.control.event.DisplayCaptionEvent;
 	import org.opencast.engage.brick.videodisplay.control.event.LoadDFXPXMLEvent;
+	import org.opencast.engage.brick.videodisplay.control.event.ResizeVideodisplayEvent;
+	import org.opencast.engage.brick.videodisplay.control.event.SetCurrentCaptionsEvent;
 	import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
 	import org.opencast.engage.brick.videodisplay.control.event.VideoControlEvent;
 	import org.opencast.engage.brick.videodisplay.control.responder.LoadDFXPXMLResponder;
 	import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
 	import org.opencast.engage.brick.videodisplay.state.PlayerState;
+	import org.opencast.engage.brick.videodisplay.vo.CaptionSetVO;
 	import org.opencast.engage.brick.videodisplay.vo.CaptionVO;
+	import org.opencast.engage.brick.videodisplay.vo.LanguageVO;
 	import org.swizframework.Swiz;
 	import org.swizframework.controller.AbstractController;
 	public class VideodisplayController extends AbstractController
@@ -45,6 +52,9 @@ package org.opencast.engage.brick.videodisplay.control
 			Swiz.addEventListener( SetVolumeEvent.EVENT_NAME , setVolume );
 			Swiz.addEventListener( VideoControlEvent.EVENT_NAME , videoControl );
 			Swiz.addEventListener( DisplayCaptionEvent.EVENT_NAME , displayCaption );
+			Swiz.addEventListener( ResizeVideodisplayEvent.EVENT_NAME , resizeVideodisplay );
+			Swiz.addEventListener( SetCurrentCaptionsEvent.EVENT_NAME , setCurrentCaptions );
+			Swiz.addEventListener( ClosedCaptionsEvent.EVENT_NAME , closedCaptions );
 		}
 
 		/** videoControl 
@@ -122,13 +132,77 @@ package org.opencast.engage.brick.videodisplay.control
 					}
 				}
 
-				// When the capions are differently, than send the new captiopns
-				if(model.oldSubtitle != subtitle)
+				// When the learner will see the captions	
+				if( model.ccBoolean == true )
 				{
-					ExternalInterface.call('setCaptions' , subtitle);
-					model.currentSubtitle = subtitle;
-					model.oldSubtitle = subtitle;
+					// When the capions are differently, than send the new captiopns
+					if(model.oldSubtitle != subtitle)
+					{
+						ExternalInterface.call('setCaptions' , subtitle);
+						model.currentSubtitle = subtitle;
+						model.oldSubtitle = subtitle;
+					}
+				}else
+				{
+					model.currentSubtitle = '';
+					model.oldSubtitle = 'default';
+					ExternalInterface.call('setCaptions' , '');
 				}
+			}
+		}
+
+		/** resizeVideodisplay 
+		* 
+		* When the learner resize the Videodisplay in the Browser
+		*  
+		* */
+		public function resizeVideodisplay( event : ResizeVideodisplayEvent ) : void
+		{
+			/**
+			* Application max width: 1080px, max Font Size ?, 1080/26 = 41px
+			* Application min widht: 109px, min Font Size ?, 109/26 = 4px
+			* 
+			* */
+			var divisor : int = 26;
+			model.fontSizeCaptions = Application.application.width / divisor;
+		}
+
+		/** setCurrentCaptions 
+		* 
+		* When the learner change the subtitltes from the ComboBox
+		*  
+		* */
+		public function setCurrentCaptions( event : SetCurrentCaptionsEvent ) : void
+		{
+			for(var i : int; i < model.languages.length; i++)
+			{
+				if( LanguageVO( model.languages.getItemAt(i)).long_name == event.language  )
+				{
+					for(var j : int = 0; j < model.captionSets.length; j++)
+					{
+						if( CaptionSetVO( model.captionSets.getItemAt(j) ).lang == LanguageVO( model.languages.getItemAt(i)).short_name )
+						{
+							// set current capitons
+							model.currentCaptionSet = CaptionSetVO( model.captionSets.getItemAt(j) ).captions.toArray();
+						}
+					}
+				}
+			}
+		}
+
+		/** closedCaptions 
+		* 
+		* When the learner change the subtitltes from the ComboBox
+		*  
+		* */
+		public function closedCaptions( event : ClosedCaptionsEvent ) : void
+		{
+			if( model.ccBoolean == true )
+			{
+				model.ccBoolean = false;
+			}else
+			{
+				model.ccBoolean = true;
 			}
 		}
 	}

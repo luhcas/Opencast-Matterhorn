@@ -15,13 +15,14 @@
  *  permissions and limitations under the License.
  *
  */
- -->
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
 	width="100%"
 	height="100%"
-	verticalAlign="bottom">
+	verticalAlign="bottom"
+	creationComplete="{ onCreationComplete() }">
 	<mx:Script>
 		<![CDATA[
+			import mx.events.ValidationResultEvent;
 			import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
 		  	import org.opencast.engage.brick.videodisplay.state.PlayerState;
 		  	import org.opencast.engage.brick.videodisplay.control.event.VideoControlEvent;
@@ -32,9 +33,31 @@
 			[Bindable]
 			public var model:VideodisplayModel;
 			
+			/**
+			 * 
+			 * 
+			 * */
+			private function onCreationComplete():void
+			{
+				var myfilters:Array = [];
+				var dropShadow:DropShadowFilter = new DropShadowFilter();
+				dropShadow.distance = 0;
+				dropShadow.angle = 25;
+				dropShadow.alpha = 1.0;
+				dropShadow.blurX = 3;
+				dropShadow.blurY = 3;
+				dropShadow.strength = 2;
+				dropShadow.quality = 3;
+				
+				myfilters.push(dropShadow);
+				
+				txt_captions.filters = myfilters;
+			}
+			
 		]]>
 	</mx:Script>
-	<mx:Text width="100%"
+	<mx:Text id="txt_captions"
+		width="100%"
 		fontSize="{ model.fontSizeCaptions }"
 		htmlText="{ model.currentSubtitle }"
 		styleName="captions"/>

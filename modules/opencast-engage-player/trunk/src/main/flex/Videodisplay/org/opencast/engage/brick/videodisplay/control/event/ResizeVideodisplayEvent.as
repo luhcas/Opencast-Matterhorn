@@ -13,14 +13,15 @@
 *  permissions and limitations under the License.
 *
 */
-package org.opencast.engage.brick.videodisplay.control.responder
+package org.opencast.engage.brick.videodisplay.control.event
 {
-	import mx.rpc.events.ResultEvent;
-	public interface IResponder
+	import flash.events.Event;
+	public class ResizeVideodisplayEvent extends Event
 	{
-		/**  */
-		function result( result : ResultEvent ) : void;
-		/**  */
-		function fault( info : Object ) : void;
+		public static var EVENT_NAME : String = 'ResizeVideodisplayEvent';
+		public function ResizeVideodisplayEvent(bubbles : Boolean = false , cancelable : Boolean = false)
+		{
+			super(EVENT_NAME , bubbles , cancelable);
+		}
 	}
 }

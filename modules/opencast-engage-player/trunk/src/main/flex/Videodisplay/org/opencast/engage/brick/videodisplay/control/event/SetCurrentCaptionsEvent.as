@@ -13,14 +13,22 @@
 *  permissions and limitations under the License.
 *
 */
-package org.opencast.engage.brick.videodisplay.control.responder
+package org.opencast.engage.brick.videodisplay.control.event
 {
-	import mx.rpc.events.ResultEvent;
-	public interface IResponder
+	import flash.events.Event;
+	public class SetCurrentCaptionsEvent extends Event
 	{
-		/**  */
-		function result( result : ResultEvent ) : void;
-		/**  */
-		function fault( info : Object ) : void;
+		public static var EVENT_NAME : String = 'SetCurrentCaptionsEvent';
+		private var _language : String;
+		public function SetCurrentCaptionsEvent(language : String , bubbles : Boolean = false , cancelable : Boolean = false)
+		{
+			super(EVENT_NAME , bubbles , cancelable);
+			_language = language;
+		}
+
+		public function get language() : String
+		{
+			return _language;
+		}
 	}
 }

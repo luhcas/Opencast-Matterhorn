@@ -1,36 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/**
- *  Copyright 2009 The Regents of the University of California
- *  Licensed under the Educational Community License, Version 2.0
- *  (the "License"); you may not use this file except in compliance
- *  with the License. You may obtain a copy of the License at
- *
- *  http://www.osedu.org/licenses/ECL-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an "AS IS"
- *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- *  or implied. See the License for the specific language governing
- *  permissions and limitations under the License.
- *
-*/ 
--->
+	/**
+	 *  Copyright 2009 The Regents of the University of California
+	 *  Licensed under the Educational Community License, Version 2.0
+	 *  (the "License"); you may not use this file except in compliance
+	 *  with the License. You may obtain a copy of the License at
+	 *
+	 *  http://www.osedu.org/licenses/ECL-2.0
+	 *
+	 *  Unless required by applicable law or agreed to in writing,
+	 *  software distributed under the License is distributed on an "AS IS"
+	 *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+	 *  or implied. See the License for the specific language governing
+	 *  permissions and limitations under the License.
+	 *
+	 */ 
+	-->
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
 	width="100%"
 	height="100%"
 	layout="absolute"
 	backgroundColor="#000000"
-	preinitialize="{ onPreinitialize(); }" 
+	preinitialize="{ onPreinitialize(); }"
 	addedToStage="onAddedToStage()"
 	xmlns:view="org.opencast.engage.brick.videodisplay.view.*"
-	xmlns:ns1="bridge.*"
-	>
-	
+	xmlns:ns1="bridge.*">
 	<mx:Style source="style/standard_videodisplay.css"/>
-	
 	<mx:Script>
 		<![CDATA[
+			import org.opencast.engage.brick.videodisplay.control.event.ClosedCaptionsEvent;
+			import org.opencast.engage.brick.videodisplay.control.event.SetCurrentCaptionsEvent;
 			import mx.collections.ArrayCollection;
 			import org.opencast.engage.brick.videodisplay.vo.CaptionSetVO;
 			import mx.controls.Alert;
@@ -82,19 +81,23 @@
 		    * Set the language of the captions
 		    * 
 		    * */
-		    public function setLanguage( postion:int ):void
+		    public function setLanguage( language:String ):void
 		    {
-		    	if( postion != -1)
-		    	{
-		    		model.currentCaptionSet = CaptionSetVO( model.captionSets.getItemAt( postion ) ).captions.toArray();
-		    	}
-		    	else
-		    	{
-		    		model.currentCaptionSet = new Array();
-		    	}
+		    	Swiz.dispatchEvent( new SetCurrentCaptionsEvent(language));
 		    }
-      
-			/**
+		    
+		    /**
+		    * setClosedCaptions
+		    * 
+		    * To see the captions
+		    * 
+		    * */
+		    public function setClosedCaptions( bool:Boolean ):void
+		    {
+		    	Swiz.dispatchEvent( new ClosedCaptionsEvent(bool) );
+		    }
+		    
+		    /**
 			*  Expects value between 0 and 1
 			*/ 
 			public function setVolume(volume:Number):void
@@ -133,25 +136,14 @@
 			
   		]]>
 	</mx:Script>
-	
 	<ns1:FABridge />
-	
-	<view:VideodisplayView 
-		id="display"
+	<view:VideodisplayView id="display"
 		width="100%"
-		height="100%"
-		/>
-		
-	<view:Splashscreen 
-		id="splash"
+		height="100%"/>
+	<view:Splashscreen id="splash"
 		width="100%"
-		height="100%"
-		/>
-		
-	<view:CaptionsView
-		id="captionsView"
+		height="100%"/>
+	<view:CaptionsView id="captionsView"
 		width="100%"
-		height="100%"
-		/>
-	
+		height="100%"/>
 </mx:Application>

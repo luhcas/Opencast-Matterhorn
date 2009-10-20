@@ -1,23 +1,24 @@
 /**
- *  Copyright 2009 The Regents of the University of California
- *  Licensed under the Educational Community License, Version 2.0
- *  (the "License"); you may not use this file except in compliance
- *  with the License. You may obtain a copy of the License at
- *
- *  http://www.osedu.org/licenses/ECL-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an "AS IS"
- *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- *  or implied. See the License for the specific language governing
- *  permissions and limitations under the License.
- *
- */
+*  Copyright 2009 The Regents of the University of California
+*  Licensed under the Educational Community License, Version 2.0
+*  (the "License"); you may not use this file except in compliance
+*  with the License. You may obtain a copy of the License at
+*
+*  http://www.osedu.org/licenses/ECL-2.0
+*
+*  Unless required by applicable law or agreed to in writing,
+*  software distributed under the License is distributed on an "AS IS"
+*  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+*  or implied. See the License for the specific language governing
+*  permissions and limitations under the License.
+*
+*/
 package org.opencast.engage.brick.videodisplay.control.responder
 {
 	import flash.external.ExternalInterface;
 	import mx.collections.ArrayCollection;
 	import mx.rpc.IResponder;
+	import org.opencast.engage.brick.videodisplay.control.event.SetCurrentCaptionsEvent;
 	import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
 	import org.opencast.engage.brick.videodisplay.vo.CaptionSetVO;
 	import org.opencast.engage.brick.videodisplay.vo.CaptionVO;
@@ -37,6 +38,7 @@ package org.opencast.engage.brick.videodisplay.control.responder
 		public function result( data : Object ) : void
 		{
 			model.captionSets = new ArrayCollection();
+			model.languageComboBox = new Array();
 			var xData : XMLList = new XMLList(data.result);
 			var divs : XMLList = xData.children().children();
 			var div : XML;
@@ -75,12 +77,16 @@ package org.opencast.engage.brick.videodisplay.control.responder
 					{
 						if( model.languages[i].short_name == lang )
 						{
-							// Add the language to the combo box on the html
-							ExternalInterface.call('setLangugageOptions' , model.languages[i].long_name);
+							model.languageComboBox.push( model.languages[i].long_name );
 						}
 					}
 				}
 			}
+
+			// set current Captions, the first language in dfxp
+			Swiz.dispatchEvent( new SetCurrentCaptionsEvent( 'English' ) );
+			//languageComboBox
+			ExternalInterface.call('setLangugageComboBox' , model.languageComboBox);
 		}
 
 		/**
