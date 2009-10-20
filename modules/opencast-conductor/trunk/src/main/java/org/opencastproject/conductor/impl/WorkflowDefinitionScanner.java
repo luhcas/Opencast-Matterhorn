@@ -17,7 +17,7 @@ package org.opencastproject.conductor.impl;
 
 import org.opencastproject.conductor.api.ConductorService;
 import org.opencastproject.workflow.api.WorkflowDefinition;
-import org.opencastproject.workflow.api.WorkflowDefinitionFactory;
+import org.opencastproject.workflow.api.WorkflowBuilder;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.fileinstall.ArtifactInstaller;
@@ -49,7 +49,7 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
     InputStream stream = null;
     try {
       stream = new FileInputStream(artifact);
-      WorkflowDefinition def = WorkflowDefinitionFactory.getInstance().parse(stream);
+      WorkflowDefinition def = WorkflowBuilder.getInstance().parseWorkflowDefinition(stream);
       conductorService.addWorkflowDefinition(def);
     } finally {
       IOUtils.closeQuietly(stream);
@@ -65,7 +65,7 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
     InputStream stream = null;
     try {
       stream = new FileInputStream(artifact);
-      WorkflowDefinition def = WorkflowDefinitionFactory.getInstance().parse(stream);
+      WorkflowDefinition def = WorkflowBuilder.getInstance().parseWorkflowDefinition(stream);
       conductorService.removeWorkflowDefinition(def.getTitle());
     } finally {
       IOUtils.closeQuietly(stream);

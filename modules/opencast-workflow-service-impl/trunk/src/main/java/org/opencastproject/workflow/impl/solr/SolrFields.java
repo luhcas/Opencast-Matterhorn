@@ -21,7 +21,7 @@ package org.opencastproject.workflow.impl.solr;
  */
 public interface SolrFields {
 
-  public static final String ID = "id";
+  public static final String WORKFLOW_ID = "id";
 
   // Dublin core fields
   public static final String DC_IDENTIFIER = "dc_identifier";
@@ -46,11 +46,13 @@ public interface SolrFields {
   public static final String DC_LICENSE = "dc_license";
 
   // Additional fields
-  public static final String OC_MEDIAPACKAGE = "oc_mediapackage";
+  public static final String OC_MEDIA_PACKAGE_ID = "oc_mediapackage_id";
+  public static final String OC_WORKFLOW_INSTANCE = "oc_workflow_instance";
   public static final String OC_OPERATIONS = "oc_operations";
   public static final String OC_PROPERTIES = "oc_properties";
   public static final String OC_CURRENT_OPERATION = "oc_current_operation";
   public static final String OC_MODIFIED = "oc_modified";
+  public static final String OC_STATE = "oc_state";
 
   /** Accumulative fulltext field */
   public static final String FULLTEXT = "fulltext";

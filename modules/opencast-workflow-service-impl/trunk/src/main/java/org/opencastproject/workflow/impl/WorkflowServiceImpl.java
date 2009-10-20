@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 /**
  * Implements {@link WorkflowService} with in-memory data structures to hold {@link WorkflowOperation}s and
@@ -69,9 +68,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /** Logging facility */
   private static final Logger log_ = LoggerFactory.getLogger(WorkflowServiceImpl.class);
-
-  /** The workflow instances */
-  Map<String, WorkflowInstance> instances = null;
 
   /** Connection to the solr database */
   private SolrConnection solrConnection = null;
@@ -94,7 +90,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public WorkflowServiceImpl(String solrRoot) {
     this.solrRoot = solrRoot;
-    instances = new HashMap<String, WorkflowInstance>();
   }
 
   /**
@@ -115,13 +110,51 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowInstance(java.lang.String)
    */
   public WorkflowInstance getWorkflowInstance(String id) {
-    WorkflowInstance instance = instances.get(id);
-    if (instance == null) {
-      log_.warn("no workflow instance found with id=" + id);
+    try {
+      WorkflowSet set = solrRequester.getWorkflowById(id);
+      if(set.getItems().length == 0) return null;
+      return set.getItems()[0];
+    } catch (SolrServerException e) {
+      throw new WorkflowDatabaseException(e);
     }
-    return instance;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsByEpisode(java.lang.String)
+   */
+  public WorkflowSet getWorkflowsByEpisode(String episodeId) throws WorkflowDatabaseException {
+    try {
+      return solrRequester.getWorkflowsByEpisodeId(episodeId);
+    } catch (SolrServerException e) {
+      throw new WorkflowDatabaseException(e);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsByMediaPackage(java.lang.String)
+   */
+  public WorkflowSet getWorkflowsByMediaPackage(String mediaPackageId) {
+    try {
+      return solrRequester.getWorkflowsByMediaPackageId(mediaPackageId);
+    } catch (SolrServerException e) {
+      throw new WorkflowDatabaseException(e);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsInState(org.opencastproject.workflow.api.WorkflowInstance.State)
+   */
+  public WorkflowSet getWorkflowsInState(State state, int offset, int limit) {
+    try {
+      return solrRequester.getWorkflowsInState(state.name(), offset, limit);
+    } catch (SolrServerException e) {
+      throw new WorkflowDatabaseException(e);
+    }
+  }
+  
   /**
    * {@inheritDoc}
    * 
@@ -137,9 +170,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    workflowInstance.setProperties(new HashMap<String, String>(properties));
+    HashMap<String, String> map = new HashMap<String, String>();
+    if(properties != null) map.putAll(properties);
+    workflowInstance.setProperties(map);
     workflowInstance.setState(WorkflowInstance.State.RUNNING.name());
-    instances.put(workflowInstance.getId(), workflowInstance);
+    update(workflowInstance);
     run(workflowInstance);
     return workflowInstance;
   }
@@ -162,52 +197,61 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     }
   }
 
+  protected List<WorkflowOperationHandler> getOperationHandlers() {
+    List<WorkflowOperationHandler> list = new ArrayList<WorkflowOperationHandler>();
+    ServiceReference[] serviceRefs = null;
+    try {
+      serviceRefs = componentContext.getBundleContext().getAllServiceReferences(WorkflowOperationHandler.class.getName(), null);
+    } catch (InvalidSyntaxException e) {
+      throw new RuntimeException(e);
+    }
+    if (serviceRefs == null) {
+      log_.info("No Workflow Operation Handlers registered");
+      return list;
+    } else {
+      for(ServiceReference serviceRef : serviceRefs) {
+        list.add((WorkflowOperationHandler)componentContext.getBundleContext().getService(serviceRef));
+      }
+    }
+    return list;
+  }
+  
   protected void run(final WorkflowInstanceImpl wfi) {
     Thread t = new Thread(new Runnable() {
       public void run() {
         boolean failed = false;
         // Get all of the runnable workflow services available for each operation (in the order of operations)
         for(WorkflowOperationDefinition operation : wfi.getWorkflowOperationDefinitionList().getOperation()) {
-          ServiceReference[] serviceRefs = null;
-          try {
-            serviceRefs = componentContext.getBundleContext().getAllServiceReferences(WorkflowOperationHandler.class.getName(), null);
-          } catch (InvalidSyntaxException e) {
-            throw new RuntimeException(e);
-          }
-          if (serviceRefs == null) {
-            log_.info("No WorkflowRunners registered for operation " + operation);
-          } else {
-            for(ServiceReference serviceRef : serviceRefs) {
-              WorkflowOperationHandler handler = (WorkflowOperationHandler)componentContext.getBundleContext().getService(serviceRef);
-              // Skip this operation handler if it doesn't support this operation
-              if( ! Arrays.asList(handler.getOperationsToHandle()).contains((operation.getName()))) continue;
-              // Add an operation instance with the resulting media package to the workflow instance
-              WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(operation);
-              wfi.getWorkflowOperationInstanceList().getOperationInstance().add(opInstance);
-              update(wfi); // Update the workflow instance, since it has a new operation instance
-              try {
-                opInstance.setResult(handler.run(wfi));
-                opInstance.setState(State.SUCCEEDED.name());
-              } catch(Exception e) {
-                log_.warn("Operation " + operation + " failed:" + e.getMessage());
-                // If the operation is set to fail on error, set the workflow to "failed" and run the exception handling
-                // workflow operations
-                if(operation.isFailWorkflowOnException()) {
-                  wfi.setState(State.FAILING.name());
-                  failed = true;
-                  // TODO: Replace the next operations with those from the failure handling workflow
-                  // FIXME: We are going to get concurrent modification exceptions if we modify the operation collection
-                  return;
-                } else {
-                  // TODO: Add the operations from the failure handling workflow at the current point in the list
-                  // FIXME: We are going to get concurrent modification exceptions if we modify the operation collection
-                }
+          for(WorkflowOperationHandler handler : getOperationHandlers()) {
+            // Skip this operation handler if it doesn't support this operation
+            if( ! Arrays.asList(handler.getOperationsToHandle()).contains((operation.getName()))) continue;
+            // Add an operation instance with the resulting media package to the workflow instance
+            WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(operation);
+            wfi.getWorkflowOperationInstanceList().getOperationInstance().add(opInstance);
+            update(wfi); // Update the workflow instance, since it has a new operation instance
+            try {
+              opInstance.setResult(handler.run(wfi));
+              opInstance.setState(State.SUCCEEDED.name());
+            } catch(Exception e) {
+              log_.warn("Operation " + operation + " failed:" + e.getMessage());
+              // If the operation is set to fail on error, set the workflow to "failed" and run the exception handling
+              // workflow operations
+              if(operation.isFailWorkflowOnException()) {
+                wfi.setState(State.FAILING.name());
+                failed = true;
+                // TODO: Replace the next operations with those from the failure handling workflow
+                // FIXME: We are going to get concurrent modification exceptions if we modify the operation collection
+                return;
+              } else {
+                // TODO: Add the operations from the failure handling workflow at the current point in the list
+                // FIXME: We are going to get concurrent modification exceptions if we modify the operation collection
               }
-              update(wfi); // Update the workflow instance again, since its new operation instance has completed
             }
+            update(wfi); // Update the workflow instance again, since its new operation instance has completed
           }
         }
-        // All of the workflow operation definitions have run, so set the state  and save it.
+
+        // All of the workflow operation definitions have run, so set the state and save it.
         if(failed) {
           wfi.setState(State.FAILED.name());
         } else {
@@ -232,6 +276,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       t.interrupt();
     }
     instance.setState(State.STOPPED.name());
+    update(instance);
   }
 
   /**
@@ -246,6 +291,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       t.interrupt();
     }
     instance.setState(State.PAUSED.name());
+    update(instance);
   }
 
   /**
@@ -257,6 +303,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     WorkflowInstanceImpl workflowInstance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
     run(workflowInstance);
     workflowInstance.setState(State.RUNNING.name());
+    update(workflowInstance);
   }
 
   /**
@@ -270,51 +317,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowInstances(org.opencastproject.workflow.api.WorkflowInstance.State)
-   */
-  public List<WorkflowInstance> getWorkflowInstances(State state) {
-    // TODO: find the workflow instances in solr, not in memory
-    List<WorkflowInstance> instancesInState = new ArrayList<WorkflowInstance>();
-    for (Entry<String, WorkflowInstance> entry : instances.entrySet()) {
-      if (entry.getValue().getState().equals(state)) {
-        instancesInState.add(entry.getValue());
-      }
-    }
-    return instancesInState;
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsById(java.lang.String)
-   */
-  public WorkflowSet getWorkflowsById(String episodeId) throws WorkflowDatabaseException {
-    try {
-      return solrRequester.getWorkflowsById(episodeId);
-    } catch (SolrServerException e) {
-      throw new WorkflowDatabaseException(e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsByDate(int, int)
    */
   public WorkflowSet getWorkflowsByDate(int offset, int limit) throws WorkflowDatabaseException {
     try {
       return solrRequester.getWorkflowsByDate(offset, limit);
-    } catch (SolrServerException e) {
-      throw new WorkflowDatabaseException(e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsByEpisode(java.lang.String)
-   */
-  public WorkflowSet getWorkflowsByEpisode(String episodeId) throws WorkflowDatabaseException {
-    try {
-      return solrRequester.getWorkflowsByEpisode(episodeId);
     } catch (SolrServerException e) {
       throw new WorkflowDatabaseException(e);
     }
@@ -429,5 +436,4 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       throw new RuntimeException("Error copying solr classpath resource to the filesystem", e);
     }
   }
-
 }

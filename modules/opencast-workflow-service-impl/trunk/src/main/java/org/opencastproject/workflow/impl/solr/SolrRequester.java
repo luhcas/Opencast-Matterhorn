@@ -20,6 +20,9 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
+import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.impl.WorkflowSetImpl;
@@ -60,7 +63,14 @@ public class SolrRequester {
     this.solrConnection = connection;
   }
 
-  public WorkflowSet getWorkflowsByEpisode(String episodeId) throws SolrServerException {
+  public WorkflowSet getWorkflowsByMediaPackageId(String mediaPackageId) throws SolrServerException {
+    String q = SolrFields.OC_MEDIA_PACKAGE_ID + ":" + mediaPackageId;
+    SolrQuery query = new SolrQuery(q);
+    query.setFields("* score");
+    return createResultset(query);
+  }
+
+  public WorkflowSet getWorkflowsByEpisodeId(String episodeId) throws SolrServerException {
     String q = SolrFields.DC_IDENTIFIER + ":" + cleanQuery(episodeId);
     SolrQuery query = new SolrQuery(q);
     query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
@@ -95,8 +105,8 @@ public class SolrRequester {
     return createResultset(query);
   }
 
-  public WorkflowSet getWorkflowsById(String episodeId) throws SolrServerException {
-    String q = SolrFields.ID + ":" + episodeId;
+  public WorkflowSet getWorkflowById(String workflowId) throws SolrServerException {
+    String q = SolrFields.WORKFLOW_ID + ":" + workflowId;
     SolrQuery query = new SolrQuery(q);
     query.setFields("* score");
     return createResultset(query);
@@ -115,6 +125,16 @@ public class SolrRequester {
   public WorkflowSet getWorkflowsByText(String text, int offset, int limit) throws SolrServerException {
     StringBuffer sb = boost(cleanQuery(text));
     SolrQuery query = new SolrQuery(sb.toString());
+    query.setStart(offset);
+    query.setRows(limit);
+    query.setFields("* score");
+    return createResultset(query);
+  }
+
+  public WorkflowSet getWorkflowsInState(String state, int offset, int limit) throws SolrServerException {
+    String q = SolrFields.OC_STATE + ":*";
+    SolrQuery query = new SolrQuery(q);
+    query.addSortField(SolrFields.OC_MODIFIED, ORDER.desc);
     query.setStart(offset);
     query.setRows(limit);
     query.setFields("* score");
@@ -148,32 +168,14 @@ public class SolrRequester {
 
     // Walk through response and create new items with title, creator, etc:
     for (SolrDocument doc : solrResponse.getResults()) {
-
-      WorkflowInstanceImpl item = new WorkflowInstanceImpl();
-      item.setId(doc.getFieldValue(SolrFields.ID).toString());
-      
-      // TODO: Read properties
-      
-      // TODO: Read list of operations
-      
-      // TODO: Read current operation
-
-      // the media package
-      MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
-      Object mediaPackageFieldValue = doc.getFirstValue(SolrFields.OC_MEDIAPACKAGE);
-      if (mediaPackageFieldValue != null) {
-        try {
-          MediaPackage mediaPackage = null;
-          mediaPackage = builder.loadFromManifest(new ByteArrayInputStream(mediaPackageFieldValue.toString().getBytes()));
-          // TODO: How do I add the media package?
-          //item.setMediaPackage(mediaPackage);
-        } catch (MediaPackageException e) {
-          log_.warn("Unable to read media package from search result", e);
-        }
+      String workflowInstanceAsString = doc.getFieldValue(SolrFields.OC_WORKFLOW_INSTANCE).toString();
+      WorkflowInstance workflowInstance;
+      try {
+        workflowInstance = WorkflowBuilder.getInstance().parseWorkflowInstance(workflowInstanceAsString);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
-
-      // Add the item to the result set
-      result.addItem(item);
+      result.addItem(workflowInstance);
     }
 
     return result;

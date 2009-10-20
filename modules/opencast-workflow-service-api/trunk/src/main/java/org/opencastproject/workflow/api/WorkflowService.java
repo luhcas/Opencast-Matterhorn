@@ -18,7 +18,6 @@ package org.opencastproject.workflow.api;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,7 +28,12 @@ public interface WorkflowService {
   /**
    * Gets a {@link WorkflowInstace} by its ID.
    */
-  WorkflowInstance getWorkflowInstance(String id);
+  WorkflowInstance getWorkflowInstance(String workflowId);
+
+  /**
+   * Gets {@link WorkflowInstace}s associated with a media package ID.
+   */
+  WorkflowSet getWorkflowsByMediaPackage(String mediaPackageId);
 
   /**
    * List all {@link WorkflowInstance}s that are currently in the given {@link State}.
@@ -38,18 +42,7 @@ public interface WorkflowService {
    * 
    * @return The list of {@link WorkflowInstance}s in this {@link State}.
    */
-  List<WorkflowInstance> getWorkflowInstances(State state);
-
-  /**
-   * Returns the {@link WorkflowInstance} identified by the given id.
-   * 
-   * @param workflowId
-   *          the workflow identifier
-   * @return the resultset
-   * @throws WorkflowDatabaseException
-   *           if the lookup fails
-   */
-  WorkflowSet getWorkflowsById(String workflowId) throws WorkflowDatabaseException;
+  WorkflowSet getWorkflowsInState(State state, int offset, int limit);
 
   /**
    * Returns the {@link WorkflowInstance}s ordered by date (descending).
@@ -65,10 +58,10 @@ public interface WorkflowService {
   WorkflowSet getWorkflowsByDate(int offset, int limit) throws WorkflowDatabaseException;
 
   /**
-   * Returns the {@link WorkflowInstance}s that deal with the specified episode.
+   * Returns the {@link WorkflowInstance}s deal with the specified episode.
    * 
    * @param episodeId
-   *          the the episode identifier
+   *          the episode identifier
    * @return the resultset
    * @throws WorkflowDatabaseException
    *           if the lookup fails
@@ -138,7 +131,5 @@ public interface WorkflowService {
    *          the workflow instance
    */
   void update(WorkflowInstance workflowInstance);
-
-  // TODO Add the findBy* methods once the search service is available.
 
 }

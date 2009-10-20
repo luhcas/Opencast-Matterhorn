@@ -57,12 +57,14 @@ public class WorkflowRestService {
     this.service = null;
   }
 
+  // FIXME Implement paging
+  
   @GET
   @Path("instances/{state}")
   @Produces(MediaType.TEXT_XML)
   public WorkflowInstanceListImpl fetchAllJaxbWorkflowInstances(@PathParam("state") String state) throws Exception {
     WorkflowInstanceListImpl list = new WorkflowInstanceListImpl();
-    for(WorkflowInstance instance : service.getWorkflowInstances(State.valueOf(state))) {
+    for(WorkflowInstance instance : service.getWorkflowsInState(State.valueOf(state), 0, 1000).getItems()) {
       list.getWorkflowInstance().add((WorkflowInstanceImpl)instance);
     }
     return list;

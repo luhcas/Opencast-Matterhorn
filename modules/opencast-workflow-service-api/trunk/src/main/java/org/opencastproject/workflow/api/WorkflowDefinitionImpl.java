@@ -80,7 +80,7 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
    * @throws Exception If there is a problem marshalling the {@link WorkflowDefinitionImpl} from XML.
    */
   public static WorkflowDefinitionImpl valueOf(String xmlString) throws Exception {
-    return (WorkflowDefinitionImpl) WorkflowDefinitionFactory.getInstance().parse(xmlString);
+    return (WorkflowDefinitionImpl) WorkflowBuilder.getInstance().parseWorkflowDefinition(xmlString);
   }
   
   static class Adapter extends XmlAdapter<WorkflowDefinitionImpl, WorkflowDefinition> {

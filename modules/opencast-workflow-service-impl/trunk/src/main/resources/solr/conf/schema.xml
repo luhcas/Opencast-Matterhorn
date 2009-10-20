@@ -230,20 +230,22 @@
 
   <fields>
 
-	<!-- The bundle id. This is the unique identifier. -->
+	<!-- The workflow instance id. This is the unique identifier. -->
     <field name="id" type="string" indexed="true" stored="true" required="true" /> 
    
     <!--  Opencast fields -->
 
-    <field name="oc_mediapackage" type="text" indexed="false" stored="true"/>
+    <field name="oc_workflow_instance" type="text" indexed="false" stored="true"/>
+    <field name="oc_mediapackage_id" type="text" indexed="true" stored="true"/>
+    <field name="oc_state" type="text" indexed="true" stored="true"/>
     <field name="oc_operations" type="text" indexed="false" stored="true"/>
     <field name="oc_properties" type="text" indexed="false" stored="true"/>
     <field name="oc_current_operation" type="text" indexed="false" stored="true"/>
     <field name="oc_modified" type="date" indexed="true" stored="true" omitNorms="true"/>
    
     <!-- Dublin core fields. -->
-    
-   	<field name="dc_identifier" type="integer" indexed="true" stored="true" /> 
+
+   	<field name="dc_identifier" type="text" indexed="true" stored="true" /> 
    	<field name="dc_extent" type="integer" indexed="false" stored="true" /> 
     <field name="dc_title" type="text" indexed="true" stored="true" omitNorms="true"/>
     <field name="dc_subject" type="text" indexed="true" stored="true" omitNorms="true"/>
@@ -251,20 +253,20 @@
     <field name="dc_publisher" type="text" indexed="true" stored="true" omitNorms="true"/>	
     <field name="dc_contributor" type="text" indexed="true" stored="true" omitNorms="true"/>
     <field name="dc_abstract" type="text" indexed="true" stored="true" omitNorms="true"/>
- 	<field name="dc_created" type="date" indexed="true" stored="true" omitNorms="true"/>
- 	<field name="dc_available_from" type="date" indexed="true" stored="true" omitNorms="true"/>
- 	<field name="dc_available_to" type="date" indexed="true" stored="true" omitNorms="true"/>
- 	<field name="dc_language" type="string" indexed="true" stored="true" omitNorms="true"/>
- 	<field name="dc_rights_holder" type="text" indexed="true" stored="true" omitNorms="true"/>
- 	<field name="dc_spatial" type="text" indexed="true" stored="true" omitNorms="true"/>
- 	<field name="dc_temporal" type="text" indexed="true" stored="true" omitNorms="true"/>
- 	<field name="dc_is_part_of" type="string" indexed="true" stored="true" omitNorms="true"/>
- 	<field name="dc_replaces" type="string" indexed="true" stored="true" omitNorms="true"/>
- 	<field name="dc_type" type="text" indexed="true" stored="true" omitNorms="true"/>
- 	<field name="dc_access_rights" type="text" indexed="true" stored="true" omitNorms="true"/>
- 	<field name="dc_license" type="text" indexed="true" stored="true" omitNorms="true"/>
+   	<field name="dc_created" type="date" indexed="true" stored="true" omitNorms="true"/>
+   	<field name="dc_available_from" type="date" indexed="true" stored="true" omitNorms="true"/>
+   	<field name="dc_available_to" type="date" indexed="true" stored="true" omitNorms="true"/>
+   	<field name="dc_language" type="string" indexed="true" stored="true" omitNorms="true"/>
+   	<field name="dc_rights_holder" type="text" indexed="true" stored="true" omitNorms="true"/>
+   	<field name="dc_spatial" type="text" indexed="true" stored="true" omitNorms="true"/>
+   	<field name="dc_temporal" type="text" indexed="true" stored="true" omitNorms="true"/>
+   	<field name="dc_is_part_of" type="string" indexed="true" stored="true" omitNorms="true"/>
+   	<field name="dc_replaces" type="string" indexed="true" stored="true" omitNorms="true"/>
+   	<field name="dc_type" type="text" indexed="true" stored="true" omitNorms="true"/>
+   	<field name="dc_access_rights" type="text" indexed="true" stored="true" omitNorms="true"/>
+   	<field name="dc_license" type="text" indexed="true" stored="true" omitNorms="true"/>
   	
-	<!-- A fulltext copy field. -->
+  	<!-- A fulltext copy field. -->
   	<field name="fulltext" type="text" indexed="true" stored="false" multiValued="true"/>
    	
   </fields>

@@ -24,7 +24,10 @@ import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.dublincore.DublinCore;
 import org.opencastproject.media.mediapackage.dublincore.utils.DCMIPeriod;
 import org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils;
+import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowOperationResult;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.UpdateRequest;
@@ -34,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -147,18 +151,32 @@ public class SolrIndexManager {
    */
   private SolrUpdateableInputDocument createInputDocument(WorkflowInstance workflow) {
     SolrUpdateableInputDocument solrEpisodeDocument = new SolrUpdateableInputDocument();
-    
-    // TODO Get the mediapackage from the latest operation result
-    MediaPackage mediaPackage = workflow.getSourceMediaPackage();
 
-    // If this is the case, try to get a hold on it
-    Catalog dcCatalogs[] = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR,
-            MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
-    DublinCoreCatalog dublinCore = (DublinCoreCatalog) dcCatalogs[0];
+    // Use the latest version of the media package available
+    List<WorkflowOperationInstance> operations = workflow.getWorkflowOperationInstanceList().getOperationInstance();
+    MediaPackage mediaPackage;
+    if(operations.size() == 0) {
+      mediaPackage = workflow.getSourceMediaPackage();
+    } else {
+      WorkflowOperationResult result = operations.get(operations.size()-1).getResult();
+      if(result == null || result.getResultingMediaPackage() == null) {
+        mediaPackage = workflow.getSourceMediaPackage();
+      } else {
+        mediaPackage = result.getResultingMediaPackage();
+      }
+    }
+
+    if(mediaPackage != null) {
+      Catalog dcCatalogs[] = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR,
+              MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
+      solrEpisodeDocument.setField(SolrFields.OC_MEDIA_PACKAGE_ID, mediaPackage.getIdentifier().toString());
+      DublinCoreCatalog dublinCore = (DublinCoreCatalog) dcCatalogs[0];
+      addStandardDublincCoreFields(solrEpisodeDocument, dublinCore);
+    }
 
     // Set common fields
-    solrEpisodeDocument.setField(SolrFields.ID, workflow.getId());
-    addStandardDublincCoreFields(solrEpisodeDocument, dublinCore);
+    solrEpisodeDocument.setField(SolrFields.WORKFLOW_ID, workflow.getId());
+    solrEpisodeDocument.setField(SolrFields.OC_STATE, workflow.getState().name());
 
     // TODO: Store properties SolrFields.OC_PROPERTIES
     
@@ -166,26 +184,13 @@ public class SolrIndexManager {
     
     // TODO: Store current operation SolrFields.OC_CURRENT_OPERATION
 
-    // Add media package
+    // Add the entire workflow instance
     try {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      DOMSource domSource = new DOMSource(mediaPackage.toXml());
-      StreamResult streamResult = new StreamResult(out);
-      TransformerFactory tf = TransformerFactory.newInstance();
-      Transformer serializer = tf.newTransformer();
-      serializer.setOutputProperty(OutputKeys.ENCODING,"ISO-8859-1");
-      serializer.transform(domSource, streamResult); 
-      solrEpisodeDocument.setField(SolrFields.OC_MEDIAPACKAGE, out);
-    } catch (MediaPackageException e) {
-      throw new IllegalStateException("Error serializing media package to workflow database", e);
-    } catch (TransformerConfigurationException e) {
-      throw new IllegalStateException("Error serializing media package to workflow database", e);
-    } catch (TransformerException e) {
-      throw new IllegalStateException("Error serializing media package to workflow database", e);
-    }
-    
-    // TODO: 
-    
+      String xml = WorkflowBuilder.getInstance().toXml(workflow);
+      solrEpisodeDocument.setField(SolrFields.OC_WORKFLOW_INSTANCE, xml);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }    
     return solrEpisodeDocument;
   }
 
