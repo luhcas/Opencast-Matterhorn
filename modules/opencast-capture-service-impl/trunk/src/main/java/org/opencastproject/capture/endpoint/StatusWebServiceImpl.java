@@ -15,14 +15,15 @@
  */
 package org.opencastproject.capture.endpoint;
 
-import javax.jws.WebMethod;
-import javax.jws.WebService;
-
-import org.opencastproject.capture.impl.StatusServiceImpl;
 import org.opencastproject.capture.api.State;
 import org.opencastproject.capture.api.StatusService;
+import org.opencastproject.capture.impl.StatusServiceImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.jws.WebMethod;
+import javax.jws.WebService;
 
 /**
  * @see StatusWebService

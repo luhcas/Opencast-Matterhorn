@@ -79,7 +79,8 @@ public interface MediaPackageElementBuilder {
    * @throws MediaPackageException
    *           if reading the file from manifest fails
    */
-  MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer) throws MediaPackageException;
+  MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
+          throws MediaPackageException;
 
   /**
    * Creates a new media package elment of the specified type.

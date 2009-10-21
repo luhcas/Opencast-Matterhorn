@@ -18,6 +18,7 @@ package org.opencastproject.capture.endpoint;
 import org.opencastproject.media.mediapackage.MediaPackage;
 
 import java.util.HashMap;
+
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebResult;

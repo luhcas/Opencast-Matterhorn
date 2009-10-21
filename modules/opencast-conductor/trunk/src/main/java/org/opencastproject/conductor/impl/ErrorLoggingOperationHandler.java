@@ -15,11 +15,11 @@
  */
 package org.opencastproject.conductor.impl;
 
+import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
-import org.opencastproject.workflow.api.WorkflowOperationResultBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,8 @@ public class ErrorLoggingOperationHandler implements WorkflowOperationHandler {
    */
   public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.warn("Workflow instance failed: " + workflowInstance);
-    return WorkflowOperationResultBuilder.build(workflowInstance.getSourceMediaPackage(), workflowInstance.getProperties(), false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getSourceMediaPackage(),
+            workflowInstance.getProperties(), false);
   }
   
 }

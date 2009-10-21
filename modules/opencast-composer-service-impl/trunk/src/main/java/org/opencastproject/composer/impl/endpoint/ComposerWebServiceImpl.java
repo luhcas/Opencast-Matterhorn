@@ -18,7 +18,6 @@ package org.opencastproject.composer.impl.endpoint;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.impl.EncodingProfileImpl;
-import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;

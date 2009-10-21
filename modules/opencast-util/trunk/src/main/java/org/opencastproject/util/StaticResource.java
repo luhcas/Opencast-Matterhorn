@@ -34,7 +34,7 @@ public class StaticResource {
   public void setHttpService(HttpService service) {
     this.httpService = service;
   }
-  
+
   public void activate(ComponentContext context) {
     alias = (String)context.getProperties().get("alias");
     classpath = (String)context.getProperties().get("classpath");

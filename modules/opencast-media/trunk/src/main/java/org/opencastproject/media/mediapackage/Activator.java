@@ -24,11 +24,12 @@ import org.slf4j.LoggerFactory;
  * Registers services related to {@link MediaPackage}s, including a JAX-RS {@link MessageBodyReader} and
  * {@link MessageBodyWriter}.
  */
-public class Activator implements BundleActivator{
+public class Activator implements BundleActivator {
   private static final Logger logger = LoggerFactory.getLogger(Activator.class);
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
   public void start(BundleContext context) throws Exception {
@@ -37,6 +38,7 @@ public class Activator implements BundleActivator{
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
    */
   public void stop(BundleContext context) throws Exception {

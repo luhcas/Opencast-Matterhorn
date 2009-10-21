@@ -25,8 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * TODO: Comment me!
- *
+ * A {@link List} of {@link WorkflowInstance}s
  */
 @XmlType(name="workflow-instances", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="workflow-instances", namespace="http://workflow.opencastproject.org/")

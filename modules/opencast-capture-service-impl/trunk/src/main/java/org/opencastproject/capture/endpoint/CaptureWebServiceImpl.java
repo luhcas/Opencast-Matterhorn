@@ -16,12 +16,13 @@
 package org.opencastproject.capture.endpoint;
 
 import org.opencastproject.capture.api.CaptureAgent;
-
 import org.opencastproject.media.mediapackage.MediaPackage;
 
-import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebResult;

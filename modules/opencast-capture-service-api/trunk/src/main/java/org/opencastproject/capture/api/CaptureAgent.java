@@ -16,6 +16,7 @@
 package org.opencastproject.capture.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
+
 import java.util.HashMap;
 
 /**

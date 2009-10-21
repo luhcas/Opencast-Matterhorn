@@ -30,8 +30,7 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- * TODO: Comment me!
- *
+ * A {@link List} of {@link WorkflowOperationDefinition}s.
  */
 @XmlType(name="operation-definition-list", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="operation-definition-list", namespace="http://workflow.opencastproject.org/")

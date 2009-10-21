@@ -15,7 +15,6 @@
  */
 package org.opencastproject.capture.api;
 
-import org.opencastproject.capture.api.State;
 
 /**
  * FIXME -- Add javadocs

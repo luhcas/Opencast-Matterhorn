@@ -60,8 +60,7 @@ public class AttachmentBuilderPlugin extends AbstractAttachmentBuilderPlugin imp
   /**
    * {@inheritDoc}
    * 
-   * This plugin is an implementation for unknown attachments, therefore it returns <code>-1</code> as its
-   * priority.
+   * This plugin is an implementation for unknown attachments, therefore it returns <code>-1</code> as its priority.
    * 
    * @see org.opencastproject.media.mediapackage.elementbuilder.AbstractElementBuilderPlugin#getPriority()
    */
@@ -69,7 +68,7 @@ public class AttachmentBuilderPlugin extends AbstractAttachmentBuilderPlugin imp
   public int getPriority() {
     return -1;
   }
-  
+
   /**
    * @see java.lang.Object#toString()
    */

@@ -15,7 +15,6 @@
  */
 package org.opencastproject.composer.impl.endpoint;
 
-import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.media.mediapackage.jaxb.TrackType;
 

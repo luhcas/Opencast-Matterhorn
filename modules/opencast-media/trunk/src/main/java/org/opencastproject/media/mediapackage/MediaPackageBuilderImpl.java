@@ -31,8 +31,8 @@ import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 
 /**
- * This class provides factory methods for the creation of media packages from
- * manifest files, directories or from scratch.
+ * This class provides factory methods for the creation of media packages from manifest files, directories or from
+ * scratch.
  * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: MediaPackageBuilderImpl.java 2908 2009-07-17 16:51:07Z ced $
@@ -41,7 +41,7 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
 
   /** The media package serializer */
   protected MediaPackageSerializer serializer = null;
-  
+
   /**
    * Creates a new media package builder.
    * 
@@ -53,11 +53,11 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
   }
 
   /**
-   * Creates a new media package builder that uses the given serializer to resolve urls while reading manifests
-   * and adding new elements.
+   * Creates a new media package builder that uses the given serializer to resolve urls while reading manifests and
+   * adding new elements.
    * 
    * @param serializer
-   *          the media package serializer 
+   *          the media package serializer
    * @throws IllegalStateException
    *           if the temporary directory cannot be created or is not accessible
    */
@@ -83,6 +83,7 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.media.mediapackage.MediaPackageBuilder#loadFromManifest(java.io.InputStream)
    */
   public MediaPackage loadFromManifest(InputStream is) throws MediaPackageException {

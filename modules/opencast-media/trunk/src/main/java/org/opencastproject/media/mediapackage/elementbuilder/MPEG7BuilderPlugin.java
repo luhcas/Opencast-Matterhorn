@@ -147,9 +147,11 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromManifest(org.w3c.dom.Node, org.opencastproject.media.mediapackage.MediaPackageSerializer)
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromManifest(org.w3c.dom.Node,
+   *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
-  public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer) throws MediaPackageException {
+  public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
+          throws MediaPackageException {
 
     String id = null;
     String reference = null;
@@ -191,7 +193,7 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
       Mpeg7CatalogImpl mpeg7 = mpeg7Parser.parse(url.openStream());
       if (id != null && !id.equals(""))
         mpeg7.setIdentifier(id);
-      
+
       // Add url
       mpeg7.setURL(url);
 

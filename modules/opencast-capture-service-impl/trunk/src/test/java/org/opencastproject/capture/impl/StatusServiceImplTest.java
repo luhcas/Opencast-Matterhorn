@@ -15,8 +15,6 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.impl.StatusServiceImpl;
-import org.opencastproject.capture.api.StatusService;
 import org.opencastproject.capture.api.State;
 
 import junit.framework.Assert;

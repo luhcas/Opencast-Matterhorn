@@ -39,11 +39,11 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
   public void testRelativePaths() {
     try {
       XPath xPath = XPathFactory.newInstance().newXPath();
-      
+
       // Create a media package and add an element
       MediaPackage mediaPackage = mediaPackageBuilder.createNew();
       mediaPackage.add(dcFile.toURI().toURL());
-      
+
       // Test relative path, using serializer
       MediaPackageSerializer serializer = null;
       serializer = new DefaultMediaPackageSerializerImpl(manifestFile.getParentFile());

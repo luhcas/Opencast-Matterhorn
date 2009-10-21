@@ -135,9 +135,11 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromManifest(org.w3c.dom.Node, org.opencastproject.media.mediapackage.MediaPackageSerializer)
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromManifest(org.w3c.dom.Node,
+   *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
-  public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer) throws MediaPackageException {
+  public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
+          throws MediaPackageException {
 
     String id = null;
     String attachmentFlavor = null;

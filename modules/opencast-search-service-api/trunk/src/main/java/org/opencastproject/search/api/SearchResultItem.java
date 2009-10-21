@@ -21,7 +21,7 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import java.util.Date;
 
 /**
- * TODO: Comment me!
+ * An item that was found as part of a search.  Typically a {@link SearchResultItem} will be included in a {@link SearchResult}
  */
 public interface SearchResultItem {
 

@@ -15,7 +15,6 @@
  */
 package org.opencastproject.inspection.impl.endpoints;
 
-import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.jaxb.TrackType;
 
 import java.net.URL;

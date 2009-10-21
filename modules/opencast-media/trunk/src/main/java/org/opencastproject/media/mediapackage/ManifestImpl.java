@@ -21,7 +21,6 @@ import org.opencastproject.media.mediapackage.handle.HandleBuilderFactory;
 import org.opencastproject.media.mediapackage.handle.HandleException;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.DateTimeSupport;
-import org.opencastproject.util.UnknownFileTypeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,6 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;

@@ -105,17 +105,17 @@ public class Mpeg7Test {
       TransformerFactory transfac = TransformerFactory.newInstance();
       Transformer trans = transfac.newTransformer();
       trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-      trans.setOutputProperty(OutputKeys.METHOD,"xml");
+      trans.setOutputProperty(OutputKeys.METHOD, "xml");
       FileWriter sw = new FileWriter(new File(mpeg7New.getURL().toURI()));
       StreamResult result = new StreamResult(sw);
       DOMSource source = new DOMSource(mpeg7New.toXml());
       trans.transform(source, result);
-      
+
       // Re-read the saved catalog and test for its content
       Mpeg7Catalog mpeg7NewFromDisk = parse(mpeg7New.getURL());
       // TODO: Test content
-      //testContent(mpeg7NewFromDisk);
-      
+      // testContent(mpeg7NewFromDisk);
+
     } catch (IOException e) {
       fail("Error creating the catalog: " + e.getMessage());
     } catch (URISyntaxException e) {

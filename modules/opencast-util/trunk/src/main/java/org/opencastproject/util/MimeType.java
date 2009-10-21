@@ -315,19 +315,6 @@ public final class MimeType implements Cloneable, Comparable<MimeType>,
   }
 
   /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
-  @Override
-  public boolean equals(Object o) {
-    if (o instanceof MimeType) {
-      MimeType m = (MimeType) o;
-      return m.isEquivalentTo(type_, subtype_)
-          || this.isEquivalentTo(m.getType(), m.getSubtype());
-    }
-    return super.equals(o);
-  }
-
-  /**
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
   public int compareTo(MimeType m) {
@@ -363,27 +350,100 @@ public final class MimeType implements Cloneable, Comparable<MimeType>,
       subtype_ = subtype.trim().toLowerCase();
     }
 
-    String getType() {
-      return type_;
-    }
-
-    String getSubtype() {
-      return subtype_;
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      MIMEEquivalent other = (MIMEEquivalent) obj;
+      if (!getOuterType().equals(other.getOuterType()))
+        return false;
+      if (subtype_ == null) {
+        if (other.subtype_ != null)
+          return false;
+      } else if (!subtype_.equals(other.subtype_))
+        return false;
+      if (type_ == null) {
+        if (other.type_ != null)
+          return false;
+      } else if (!type_.equals(other.type_))
+        return false;
+      return true;
     }
 
     @Override
-    public boolean equals(Object o) {
-      if (o instanceof MIMEEquivalent) {
-        MIMEEquivalent e = (MIMEEquivalent) o;
-        return this.matches(e.getType(), e.getSubtype());
-      }
-      return super.equals(o);
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + getOuterType().hashCode();
+      result = prime * result + ((subtype_ == null) ? 0 : subtype_.hashCode());
+      result = prime * result + ((type_ == null) ? 0 : type_.hashCode());
+      return result;
     }
 
     boolean matches(String type, String subtype) {
       return type_.equalsIgnoreCase(type) && subtype_.equalsIgnoreCase(subtype);
     }
 
+    private MimeType getOuterType() {
+      return MimeType.this;
+    }
+
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((subtype_ == null) ? 0 : subtype_.hashCode());
+    result = prime * result + ((type_ == null) ? 0 : type_.hashCode());
+    return result;
+  }
+
+///**
+//* @see java.lang.Object#equals(java.lang.Object)
+//*/
+//@Override
+//public boolean equals(Object o) {
+// if (o instanceof MimeType) {
+//   MimeType m = (MimeType) o;
+//   return m.isEquivalentTo(type_, subtype_)
+//       || this.isEquivalentTo(m.getType(), m.getSubtype());
+// }
+// return super.equals(o);
+//}
+
+  /**
+   * {@inheritDoc}
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (!(obj instanceof MimeType))
+      return false;
+    MimeType other = (MimeType) obj;
+    if (subtype_ == null) {
+      if (other.subtype_ != null)
+        return false;
+    } else if (!subtype_.equals(other.subtype_))
+      return false;
+    if (type_ == null) {
+      if (other.type_ != null)
+        return false;
+    } else if (!type_.equals(other.type_))
+      return false;
+    return true;
   }
 
 }

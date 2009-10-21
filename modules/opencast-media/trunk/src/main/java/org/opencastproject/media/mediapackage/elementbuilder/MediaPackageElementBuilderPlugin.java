@@ -23,7 +23,6 @@ import org.opencastproject.media.mediapackage.MediaPackageSerializer;
 
 import org.w3c.dom.Node;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
@@ -148,7 +147,8 @@ public interface MediaPackageElementBuilderPlugin {
    * @return the media package element
    * @throws MediaPackageException
    */
-  MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer) throws MediaPackageException;
+  MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
+          throws MediaPackageException;
 
   /**
    * Creates a new media package element of the specified type.

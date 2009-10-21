@@ -210,7 +210,7 @@ public class MimeTypes {
           // MimeTypeImpl.clone() is implemented, so this will never happen.
         }
     }
-    
+
     log_.info("Discovered previously unknown mime type '" + mimeType + "'");
     MimeType m = new MimeType(t[0], t[1]);
     mimeTypes_.add(m);

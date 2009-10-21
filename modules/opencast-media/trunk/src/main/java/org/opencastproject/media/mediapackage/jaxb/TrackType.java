@@ -70,7 +70,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "trackType", propOrder = { "mimetype", "url", "checksum", "duration", "video", "audio" })
-@XmlRootElement(name="track")
+@XmlRootElement(name = "track")
 public class TrackType {
 
   @XmlElement(required = true)
@@ -259,12 +259,13 @@ public class TrackType {
   }
 
   public static TrackType fromXml(Document mediaPackageXml) throws Exception {
-    JAXBContext jaxbContext= JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
+    JAXBContext jaxbContext = JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(mediaPackageXml, TrackType.class).getValue();
   }
 
   public static TrackType valueOf(String xmlString) throws Exception {
-    return fromXml(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(xmlString))));
+    return fromXml(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
+            new InputSource(new StringReader(xmlString))));
   }
 }

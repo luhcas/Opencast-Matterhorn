@@ -107,8 +107,7 @@ public interface MediaPackage {
   MediaPackageElement getElementById(String id);
 
   /**
-   * Returns the track identified by <code>trackId</code> or <code>null</code> if that
-   * track doesn't exists.
+   * Returns the track identified by <code>trackId</code> or <code>null</code> if that track doesn't exists.
    * 
    * @param trackId
    *          the track identifier
@@ -171,8 +170,8 @@ public interface MediaPackage {
   boolean hasTracks(MediaPackageElementFlavor flavor);
 
   /**
-   * Returns the attachment identified by <code>attachmentId</code> or <code>null</code> if that
-   * attachment doesn't exists.
+   * Returns the attachment identified by <code>attachmentId</code> or <code>null</code> if that attachment doesn't
+   * exists.
    * 
    * @param attachmentId
    *          the attachment identifier
@@ -235,8 +234,7 @@ public interface MediaPackage {
   boolean hasAttachments(MediaPackageElementFlavor flavor);
 
   /**
-   * Returns the catalog identified by <code>catalogId</code> or <code>null</code> if that
-   * catalog doesn't exists.
+   * Returns the catalog identified by <code>catalogId</code> or <code>null</code> if that catalog doesn't exists.
    * 
    * @param catalogId
    *          the catalog identifier

@@ -22,8 +22,8 @@ public interface MediaPackageSerializer {
 
   /**
    * This method is called every time a url is being written to a media package manifest. By implementing this method,
-   * serializers are able to store package elements in directories relative to some common root folder, thereby
-   * making it movable.
+   * serializers are able to store package elements in directories relative to some common root folder, thereby making
+   * it movable.
    * 
    * @param url
    *          the url to encode
@@ -40,7 +40,7 @@ public interface MediaPackageSerializer {
    *          the original path from the manifest
    * @return the resolved url
    * @throws MalformedURLException
-   *          if the path cannot be converted into a url
+   *           if the path cannot be converted into a url
    */
   public URL resolvePath(String path) throws MalformedURLException;
 

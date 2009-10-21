@@ -138,7 +138,8 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.ManifestContributor#toManifest(org.w3c.dom.Document, org.opencastproject.media.mediapackage.MediaPackageSerializer)
+   * @see org.opencastproject.media.mediapackage.ManifestContributor#toManifest(org.w3c.dom.Document,
+   *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
   public Node toManifest(Document document, MediaPackageSerializer serializer) {
     Element node = document.createElement("video");

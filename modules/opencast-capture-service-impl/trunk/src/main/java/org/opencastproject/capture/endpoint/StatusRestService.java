@@ -15,6 +15,14 @@
  */
 package org.opencastproject.capture.endpoint;
 
+import org.opencastproject.capture.api.State;
+import org.opencastproject.capture.api.StatusService;
+import org.opencastproject.capture.impl.StatusServiceImpl;
+
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -22,13 +30,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import org.apache.commons.io.IOUtils;
-import org.opencastproject.capture.api.State;
-import org.opencastproject.capture.api.StatusService;
-import org.opencastproject.capture.impl.StatusServiceImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * FIXME -- Add javadocs

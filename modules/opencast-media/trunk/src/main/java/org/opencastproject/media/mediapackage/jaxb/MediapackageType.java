@@ -210,7 +210,7 @@ public class MediapackageType {
   public void setDuration(Integer value) {
     this.duration = value;
   }
-  
+
   public String toXml() throws Exception {
     StringWriter sw = new StringWriter();
     JAXBContext jaxbContext = JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
@@ -220,12 +220,13 @@ public class MediapackageType {
   }
 
   public static MediapackageType fromXml(Document mediaPackageXml) throws Exception {
-    JAXBContext jaxbContext= JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
+    JAXBContext jaxbContext = JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(mediaPackageXml, MediapackageType.class).getValue();
   }
 
   public static MediapackageType valueOf(String xmlString) throws Exception {
-    return fromXml(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(xmlString))));
+    return fromXml(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
+            new InputSource(new StringReader(xmlString))));
   }
 }

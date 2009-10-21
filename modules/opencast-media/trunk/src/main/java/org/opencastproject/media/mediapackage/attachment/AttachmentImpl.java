@@ -120,7 +120,8 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toManifest(org.w3c.dom.Document, org.opencastproject.media.mediapackage.MediaPackageSerializer)
+   * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toManifest(org.w3c.dom.Document,
+   *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
   @Override
   public Node toManifest(Document document, MediaPackageSerializer serializer) {

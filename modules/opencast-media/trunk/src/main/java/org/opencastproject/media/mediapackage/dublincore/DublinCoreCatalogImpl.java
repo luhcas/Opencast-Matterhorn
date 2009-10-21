@@ -23,7 +23,6 @@ import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.XMLCatalogImpl;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeTypes;
-import org.opencastproject.util.UnknownFileTypeException;
 
 import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.CollectionUtils;
@@ -46,7 +45,6 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

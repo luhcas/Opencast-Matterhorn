@@ -15,11 +15,11 @@
  */
 package org.opencastproject.conductor.impl;
 
+import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
-import org.opencastproject.workflow.api.WorkflowOperationResultBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +41,6 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
       logger.info("This workflow contains no properties, so we can't compose any media");
     }
     // TODO Add new media track(s) to the media package
-    return WorkflowOperationResultBuilder.build(workflowInstance.getSourceMediaPackage(), workflowInstance.getProperties(), false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getSourceMediaPackage(), workflowInstance.getProperties(), false);
   }
 }

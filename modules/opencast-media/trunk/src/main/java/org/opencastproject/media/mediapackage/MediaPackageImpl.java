@@ -96,7 +96,7 @@ public final class MediaPackageImpl implements MediaPackage {
   public Handle getIdentifier() {
     return manifest.getIdentifier();
   }
-  
+
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#getDuration()
    */
@@ -270,7 +270,7 @@ public final class MediaPackageImpl implements MediaPackage {
   public Track getTrack(String trackId) {
     return manifest.getTrack(trackId);
   }
-  
+
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#getTracks()
    */
@@ -520,9 +520,12 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#add(java.net.URL, org.opencastproject.media.mediapackage.MediaPackageElement.Type, org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
+   * @see org.opencastproject.media.mediapackage.MediaPackage#add(java.net.URL,
+   *      org.opencastproject.media.mediapackage.MediaPackageElement.Type,
+   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement add(URL url, Type type, MediaPackageElementFlavor flavor) throws MediaPackageException, UnsupportedElementException {
+  public MediaPackageElement add(URL url, Type type, MediaPackageElementFlavor flavor) throws MediaPackageException,
+          UnsupportedElementException {
     if (url == null)
       throw new IllegalArgumentException("Argument 'url' may not be null");
     if (type == null)
@@ -724,8 +727,8 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * Serializes the media package to a dom document.
    * 
-   * @throws ParserConfigurationException 
-   * @throws TransformerException 
+   * @throws ParserConfigurationException
+   * @throws TransformerException
    * @see org.opencastproject.media.mediapackage.MediaPackage#save()
    */
   public Document toXml() throws MediaPackageException {
@@ -737,8 +740,8 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @param serializer
    *          the media package serializer
-   * @throws ParserConfigurationException 
-   * @throws TransformerException 
+   * @throws ParserConfigurationException
+   * @throws TransformerException
    * @see org.opencastproject.media.mediapackage.MediaPackage#save()
    */
   public Document toXml(MediaPackageSerializer serializer) throws MediaPackageException {

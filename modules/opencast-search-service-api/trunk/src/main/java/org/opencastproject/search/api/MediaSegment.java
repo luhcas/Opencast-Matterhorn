@@ -17,7 +17,7 @@
 package org.opencastproject.search.api;
 
 /**
- * TODO: Comment me!
+ * Part of a search result that models a video segment.
  */
 public interface MediaSegment {
 

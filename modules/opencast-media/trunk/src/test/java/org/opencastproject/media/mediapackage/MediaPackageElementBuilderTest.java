@@ -90,7 +90,7 @@ public class MediaPackageElementBuilderTest {
     } catch (MediaPackageException e) {
       fail(e.getMessage());
     } catch (MalformedURLException e) {
-       fail(e.getMessage());
+      fail(e.getMessage());
     } catch (URISyntaxException e) {
       fail(e.getMessage());
     }

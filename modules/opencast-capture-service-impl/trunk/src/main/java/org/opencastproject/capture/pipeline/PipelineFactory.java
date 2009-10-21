@@ -19,10 +19,6 @@ import net.luniks.linux.jv4linfo.JV4LInfo;
 import net.luniks.linux.jv4linfo.JV4LInfoException;
 import net.luniks.linux.jv4linfo.V4LInfo;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Properties;
-
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
@@ -32,6 +28,10 @@ import org.gstreamer.PadDirection;
 import org.gstreamer.Pipeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Properties;
 
 /**
  * Given a Properties object describing devices this class will create a suitable pipeline to capture from all those

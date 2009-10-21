@@ -141,6 +141,16 @@ public interface WorkflowService {
   WorkflowDefinitionList listAvailableWorkflowDefinitions();
 
   /**
+   * Whether a workflow definition may be run at this moment.  Every {@link WorkflowOperationDefinition} returned by
+   * {@link WorkflowDefinition#getOperations()} must be registered as a {@link WorkflowOperationHandler} for this
+   * {@link WorkflowDefinition} to be runnable.
+   * 
+   * @param workflowDefinition The workflow definition to inspect for runnability
+   * @return Whether this workflow may be run
+   */
+  boolean isRunnable(WorkflowDefinition workflowDefinition);
+
+  /**
    * Registers a new {@link WorkflowDefinition}
    * 
    * @param definition The definition to register

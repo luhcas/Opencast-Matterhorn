@@ -45,17 +45,17 @@ import java.util.List;
  */
 public class HandleBuilderTest {
 
-	/** The handle builder */
-	private HandleBuilder handleBuilder = null;
+  /** The handle builder */
+  private HandleBuilder handleBuilder = null;
 
-	/** The handle url */
-	private URL url = null;
+  /** The handle url */
+  private URL url = null;
 
-	/** The handle naming authority */
-	private static final String namingAuthority = "10.0000";
+  /** The handle naming authority */
+  private static final String namingAuthority = "10.0000";
 
-	/** List of created handles */
-	List<Handle> newHandles = new ArrayList<Handle>();
+  /** List of created handles */
+  List<Handle> newHandles = new ArrayList<Handle>();
 
   /**
    * @throws java.lang.Exception
@@ -63,8 +63,8 @@ public class HandleBuilderTest {
   @Before
   public void setUp() throws Exception {
     System.setProperty(IdBuilderFactory.PROPERTY_NAME, SerialIdBuilder.class.getName());
-		handleBuilder = HandleBuilderFactory.newInstance().newHandleBuilder();
-		assertNotNull(handleBuilder);
+    handleBuilder = HandleBuilderFactory.newInstance().newHandleBuilder();
+    assertNotNull(handleBuilder);
     url = new URL("http://www.opencastproject.org");
   }
 
@@ -124,50 +124,42 @@ public class HandleBuilderTest {
    * .
    */
   @Test
-public void testFromValueOK() {
-    String[] testsOK = new String[]{
-            namingAuthority + "/5636213123",
-            namingAuthority + "/mnvmnmvxvx",
-            "hdl://" + namingAuthority + "/mnvmnmvxvx",
-    };
-	try {
-		for (String t : testsOK) {
-			Handle handle = handleBuilder.fromValue(t);
-			assertNotNull(handle);
-			assertEquals(namingAuthority, handle.getNamingAuthority());
-			assertEquals(10, handle.getLocalName().length());
-		}
-	} catch (HandleException e) {
-		fail("Error creating handle: " + e.getMessage());
-	}
-}
+  public void testFromValueOK() {
+    String[] testsOK = new String[] { namingAuthority + "/5636213123", namingAuthority + "/mnvmnmvxvx",
+            "hdl://" + namingAuthority + "/mnvmnmvxvx", };
+    try {
+      for (String t : testsOK) {
+        Handle handle = handleBuilder.fromValue(t);
+        assertNotNull(handle);
+        assertEquals(namingAuthority, handle.getNamingAuthority());
+        assertEquals(10, handle.getLocalName().length());
+      }
+    } catch (HandleException e) {
+      fail("Error creating handle: " + e.getMessage());
+    }
+  }
 
-/**
- * Test method for {@link org.opencastproject.media.mediapackage.handle.HandleBuilderImpl#fromValue(java.lang.String)}
- * .
- */
-@Test
-public void testFromValueFail() throws HandleException {
-    String[] testsFail = new String[]{
-            "10.12324/5636213123",
-            "11.1221/mnvmnmvxvx",
-            "101221/mnvmnmvxvx",
-            "10.1221/",
-            "hdl://10.12313/mnvmnmvxvx"
-    };
+  /**
+   * Test method for {@link org.opencastproject.media.mediapackage.handle.HandleBuilderImpl#fromValue(java.lang.String)}
+   * .
+   */
+  @Test
+  public void testFromValueFail() throws HandleException {
+    String[] testsFail = new String[] { "10.12324/5636213123", "11.1221/mnvmnmvxvx", "101221/mnvmnmvxvx", "10.1221/",
+            "hdl://10.12313/mnvmnmvxvx" };
     int failCount = testsFail.length;
     for (String t : testsFail) {
-        try {
-            handleBuilder.fromValue(t);
-        } catch (HandleException e) {
-            failCount -= 1;
-        }
+      try {
+        handleBuilder.fromValue(t);
+      } catch (HandleException e) {
+        failCount -= 1;
+      }
     }
     if (failCount != 0)
-        fail(failCount + " not failed");
-}
- 
- /**
+      fail(failCount + " not failed");
+  }
+
+  /**
    * Test method for
    * {@link org.opencastproject.media.mediapackage.handle.HandleBuilderImpl#update(Handle, java.net.URL)} .
    */

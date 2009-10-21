@@ -159,7 +159,7 @@ public class DublinCoreTest {
       TransformerFactory transfac = TransformerFactory.newInstance();
       Transformer trans = transfac.newTransformer();
       trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-      trans.setOutputProperty(OutputKeys.METHOD,"xml");
+      trans.setOutputProperty(OutputKeys.METHOD, "xml");
       FileWriter sw = new FileWriter(new File(dcNew.getURL().toURI()));
       StreamResult result = new StreamResult(sw);
       DOMSource source = new DOMSource(dcNew.toXml());
@@ -207,7 +207,7 @@ public class DublinCoreTest {
       TransformerFactory transfac = TransformerFactory.newInstance();
       Transformer trans = transfac.newTransformer();
       trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-      trans.setOutputProperty(OutputKeys.METHOD,"xml");
+      trans.setOutputProperty(OutputKeys.METHOD, "xml");
       FileWriter sw = new FileWriter(new File(dcNew.getURL().toURI()));
       StreamResult result = new StreamResult(sw);
       DOMSource source = new DOMSource(dcNew.toXml());
@@ -352,7 +352,8 @@ public class DublinCoreTest {
   @Test
   public void testSet() {
     DublinCoreCatalog dc = new DublinCoreCatalogImpl();
-    dc.set(PROPERTY_CREATOR, Arrays.asList(new DublinCoreValue("Klaus"), new DublinCoreValue("Peter"), new DublinCoreValue("Carl", "en")));
+    dc.set(PROPERTY_CREATOR, Arrays.asList(new DublinCoreValue("Klaus"), new DublinCoreValue("Peter"),
+            new DublinCoreValue("Carl", "en")));
     assertEquals(2, dc.get(PROPERTY_CREATOR, LANGUAGE_UNDEFINED).size());
     assertEquals(3, dc.get(PROPERTY_CREATOR).size());
     assertEquals("Klaus", dc.get(PROPERTY_CREATOR, LANGUAGE_UNDEFINED).get(0));

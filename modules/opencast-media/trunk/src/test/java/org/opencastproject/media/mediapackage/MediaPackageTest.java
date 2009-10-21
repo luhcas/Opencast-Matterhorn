@@ -51,11 +51,11 @@ public class MediaPackageTest extends AbstractMediaPackageTest {
   public void testElementUrls() {
     try {
       XPath xPath = XPathFactory.newInstance().newXPath();
-      
+
       // Create a media package and add an element
       MediaPackage mediaPackage = mediaPackageBuilder.createNew();
       mediaPackage.add(dcFile.toURI().toURL());
-      
+
       // Test url
       Document xml = mediaPackage.toXml();
       String expected = dcFile.toURI().toURL().toExternalForm();

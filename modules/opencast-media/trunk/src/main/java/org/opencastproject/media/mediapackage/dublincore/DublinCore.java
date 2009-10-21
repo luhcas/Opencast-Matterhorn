@@ -479,9 +479,11 @@ public interface DublinCore {
 
   /**
    * Set a property to a list of values, overwriting any existing.
-   *
-   * @param property the property name
-   * @param values the values or an empty list
+   * 
+   * @param property
+   *          the property name
+   * @param values
+   *          the values or an empty list
    */
   void set(EName property, List<DublinCoreValue> values);
 

@@ -44,7 +44,7 @@ import java.util.zip.ZipEntry;
 
 public class PluginLoader {
   private static final Logger logger = LoggerFactory.getLogger(PluginLoader.class);
-  
+
   private PluginLoader() {
   }
 
@@ -149,7 +149,7 @@ public class PluginLoader {
     String packagePath = pkg.replace('.', '/').concat("/");
 
     logger.info("package path = " + packagePath);
-    
+
     Enumeration<URL> e;
     try {
       if (cl != null) {

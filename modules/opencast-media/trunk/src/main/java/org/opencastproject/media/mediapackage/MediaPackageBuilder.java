@@ -78,20 +78,19 @@ public interface MediaPackageBuilder {
    *           if loading of the media package fails
    */
   MediaPackage loadFromPackage(MediaPackagePackager packager, InputStream in) throws IOException, MediaPackageException;
-  
+
   /**
-   * Sets the media package serializer that is used to resolve urls and helps
-   * in serialization and deserialization of media package elements.
+   * Sets the media package serializer that is used to resolve urls and helps in serialization and deserialization of
+   * media package elements.
    * 
    * @param serializer
    *          the serializer
    */
   void setSerializer(MediaPackageSerializer serializer);
- 
+
   /**
-   * Returns the currently active serializer. The serializer is used to resolve
-   * urls and helps in serialization and deserialization of media package
-   * elements.
+   * Returns the currently active serializer. The serializer is used to resolve urls and helps in serialization and
+   * deserialization of media package elements.
    * 
    * @return the serializer
    * @see #setSerializer(MediaPackageSerializer)

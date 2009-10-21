@@ -19,6 +19,18 @@ package org.opencastproject.workflow.api;
  * Handler for workflow operations.
  */
 public interface WorkflowOperationHandler {
+  /**
+   * Runs the workflow operation on this {@link WorkflowInstance}.  If the execution fails for some reason, this must
+   * throw a {@link WorkflowOperationException} in order to handle the problem gracefully.  Runtime exceptions will
+   * cause the entire workflow instance to fail.
+   * 
+   * @param workflowInstance the workflow instance
+   * @return the {@link WorkflowOperationResult} containing a potentially modified {@link MediaPackage} and whether to
+   * put the workflow instance into a wait state.
+   * 
+   * @throws WorkflowOperationException If the workflow operation fails to execute properly, and the default error
+   * handling should be invoked.
+   */
   WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException;  
 
 }

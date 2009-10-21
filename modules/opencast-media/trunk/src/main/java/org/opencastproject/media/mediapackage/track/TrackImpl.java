@@ -24,14 +24,11 @@ import org.opencastproject.media.mediapackage.Stream;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
-import org.opencastproject.util.UnknownFileTypeException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import java.io.IOException;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 

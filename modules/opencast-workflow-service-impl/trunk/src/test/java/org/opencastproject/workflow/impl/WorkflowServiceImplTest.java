@@ -26,7 +26,6 @@ import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
-import org.opencastproject.workflow.api.WorkflowOperationResultBuilder;
 
 import junit.framework.Assert;
 
@@ -40,7 +39,7 @@ import java.io.File;
 public class WorkflowServiceImplTest {
 
   /** The solr root directory */
-  private String solrRoot = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workflows";
+  private String solrRoot = "target" + File.separator + "workflows";
 
   private WorkflowServiceImpl service = null;
   private WorkflowDefinition definition1 = null;
@@ -53,6 +52,10 @@ public class WorkflowServiceImplTest {
       @Override
       protected WorkflowOperationHandler selectOperationHandler(WorkflowOperationDefinition operation) {
         return operationHandler;
+      }
+      @Override
+      protected WorkflowDefinition getWorkflowDefinitionByName(String name) {
+        return definition1.getTitle().equals(name) ? definition1 : null;
       }
     };
     service.activate(null);
@@ -71,16 +74,12 @@ public class WorkflowServiceImplTest {
   }
   
   @Test
-  public void testGetWorkflowOperationById() throws Exception {
+  public void testGetWorkflowOperationById() {
     operationHandler = new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false);
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
     // verify that we can retrieve the workflow instance from the service by its ID
     WorkflowInstance instanceFromDb = service.getWorkflowInstance(instance.getId());
 
-    System.out.println("\n\nOriginal: " + WorkflowBuilder.getInstance().toXml(instance));
-    System.out.println("\n\nFrom DB: " + WorkflowBuilder.getInstance().toXml(instanceFromDb));
-    System.out.println("\n\n");
-    
     Assert.assertNotNull(instanceFromDb);
     MediaPackage mediapackageFromDb = instanceFromDb.getSourceMediaPackage();
     Assert.assertNotNull(mediapackageFromDb);
@@ -88,14 +87,14 @@ public class WorkflowServiceImplTest {
             mediapackageFromDb.getIdentifier().toString());
   }
 
-  @Test
-  public void testGetWorkflowOperationByMediaPackageId() {
-    operationHandler = new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false);
-    service.start(definition1, mediapackage1, null);
+//  @Test
+//  public void testGetWorkflowOperationByMediaPackageId() {
+//    operationHandler = new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false);
+//    service.start(definition1, mediapackage1, null);
     // TODO verify that we can retrieve the workflow instance from the service by its source mediapackage ID
 //    Assert.assertEquals(1,
 //            service.getWorkflowsByMediaPackage(mediapackage1.getIdentifier().toString()).getItems().length);
-  }
+//  }
 
   class TestWorkflowOperationHandler implements WorkflowOperationHandler {
     String[] operationsToHandle;
@@ -106,7 +105,7 @@ public class WorkflowServiceImplTest {
     }
     public String[] getOperationsToHandle() {return operationsToHandle;}
     public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return WorkflowOperationResultBuilder.build(mediapackage1, null, wait);
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediapackage1, null, wait);
     }
     
   }

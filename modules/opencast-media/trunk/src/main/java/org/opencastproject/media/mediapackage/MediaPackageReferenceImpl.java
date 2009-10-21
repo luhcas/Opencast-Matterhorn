@@ -26,7 +26,7 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
 
   /** Convenience reference that matches any series */
   public static final MediaPackageReference ANY_SERIES = new MediaPackageReferenceImpl(TYPE_SERIES, "*");
-  
+
   /** The reference identifier */
   protected String identifier = null;
 

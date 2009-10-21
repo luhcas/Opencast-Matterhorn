@@ -15,7 +15,6 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;

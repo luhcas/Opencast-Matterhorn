@@ -26,6 +26,7 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationDefinitionListImpl;
+import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -156,19 +157,22 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public WorkflowDefinitionList listAvailableWorkflowDefinitions() {
     WorkflowDefinitionList list = new WorkflowDefinitionListImpl();
-    List<String> availableOperations = listAvailableOperationNames();
     for(Object registeredDefinition : componentContext.locateServices("WORKFLOW_DEFINITIONS")) {
-      WorkflowDefinition def = (WorkflowDefinition)registeredDefinition;
-      boolean allOperationsAvailable = true;
-      for(WorkflowOperationDefinition op : def.getOperations()) {
-        if( ! availableOperations.contains(op.getName())) {
-          allOperationsAvailable = false;
-          break;
-        }
-      }
-      if(allOperationsAvailable) list.add(def);
+      list.add((WorkflowDefinition)registeredDefinition);
     }
     return list;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#isRunnable(org.opencastproject.workflow.api.WorkflowDefinition)
+   */
+  public boolean isRunnable(WorkflowDefinition workflowDefinition) {
+    List<String> availableOperations = listAvailableOperationNames();
+    for(WorkflowOperationDefinition op : workflowDefinition.getOperations()) {
+      if( ! availableOperations.contains(op.getName())) return false;
+    }
+    return true;
   }
 
   /**
@@ -332,7 +336,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         int runFromOperation = 0;
         List<WorkflowOperationDefinition> operationDefinitions = wfi.getWorkflowOperationDefinitionList();
         while (runFromOperation >= 0 && runFromOperation < operationDefinitions.size()) {
-          // Get all of the runnable workflow services available for each operation (in the order of operations)
+          // Get all of the available handlers for each operation (in the order of operations)
           operationDefinitions = wfi.getWorkflowOperationDefinitionList();
           for (int i = runFromOperation; i < operationDefinitions.size(); i++) {
             WorkflowOperationDefinition operationDefinition = operationDefinitions.get(i);
@@ -350,7 +354,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
             try {
               opInstance.setResult(operationHandler.run(wfi));
               opInstance.setState(State.SUCCEEDED.name());
-            } catch(Exception e) {
+            } catch(WorkflowOperationException e) {
               log_.warn("Operation " + operationDefinition + " failed:" + e.getMessage());
               // If the operation is set to fail on error, set the workflow to "failed" and run the exception handling
               // workflow operations

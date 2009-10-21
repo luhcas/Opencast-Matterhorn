@@ -54,8 +54,8 @@ public class MediaPackageSupport {
    * Merges the contents of media package located at <code>sourceDir</code> into the media package located at
    * <code>targetDir</code>.
    * <p>
-   * When choosing to move the media package element into the new place instead of copying them, the source media package
-   * folder will be removed afterwards.
+   * When choosing to move the media package element into the new place instead of copying them, the source media
+   * package folder will be removed afterwards.
    * </p>
    * 
    * @param targetPackage

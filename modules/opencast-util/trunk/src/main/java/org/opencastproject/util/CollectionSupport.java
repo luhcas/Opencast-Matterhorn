@@ -29,9 +29,9 @@ import java.util.Map;
 /**
  * Utility methods for collections.
  * <p/>
- * Code copied from class <code>appetizer.util.Kollections</code> of project
- * "appetizer", originally create May 24, 2006. Donated to REPLAY by the author.
- *
+ * Code copied from class <code>appetizer.util.Kollections</code> of project "appetizer", originally create May 24,
+ * 2006. Donated to REPLAY by the author.
+ * 
  * TODO translate original german documentation
  */
 public class CollectionSupport {
@@ -70,9 +70,8 @@ public class CollectionSupport {
   }
 
   /**
-   * Initialisiert <i>collection</i> mit <i>initElement<i>. Das bedeutet, daß
-   * <i>collection</i> vorher geleert wird.
-   *
+   * Initialisiert <i>collection</i> mit <i>initElement<i>. Das bedeutet, daß <i>collection</i> vorher geleert wird.
+   * 
    * @param initElement
    *          darf <i>null</i> sein, wenn es der Collectiontyp zuläßt.
    */
@@ -84,10 +83,9 @@ public class CollectionSupport {
   }
 
   /**
-   * Speichert alle Objekte <i>obj</i> in der Collection <i>collection</i>.
-   * Nutzt {@link Collections#addAll}, nur daß die Collection zurückgegeben
-   * wird und die Methode somit zu Initialisierungszwecken genutzt werden kann.
-   *
+   * Speichert alle Objekte <i>obj</i> in der Collection <i>collection</i>. Nutzt {@link Collections#addAll}, nur daß
+   * die Collection zurückgegeben wird und die Methode somit zu Initialisierungszwecken genutzt werden kann.
+   * 
    * @param obj
    *          die zuzufügenden Objekte oder <i>null</i>
    * @return <i>collection</i>
@@ -100,8 +98,7 @@ public class CollectionSupport {
   }
 
   /**
-   * Fügt alle Elemente der <i>cols</i>-Collections der <i>collection</i>
-   * hinzu.
+   * Fügt alle Elemente der <i>cols</i>-Collections der <i>collection</i> hinzu.
    * 
    * @param cols
    *          darf <i>null</i> sein
@@ -115,8 +112,7 @@ public class CollectionSupport {
     return collection;
   }
 
-  public static <E, T extends Collection<E>> T addAll(T collection,
-      Enumeration<E> obj) {
+  public static <E, T extends Collection<E>> T addAll(T collection, Enumeration<E> obj) {
     Assert.notNull(collection, "collection");
     while (obj.hasMoreElements())
       collection.add(obj.nextElement());
@@ -141,8 +137,7 @@ public class CollectionSupport {
   }
 
   /**
-   * Liefert einen Ausschnitt aus <i>array</i>, <i>begin</i> inklusive und
-   * <i>end</i> exklusive.
+   * Liefert einen Ausschnitt aus <i>array</i>, <i>begin</i> inklusive und <i>end</i> exklusive.
    */
   public static <T> T[] slice(T[] array, int begin, int end) {
     Assert.notNull(array, "array");
@@ -151,8 +146,7 @@ public class CollectionSupport {
     if (end > array.length)
       throw new ArrayIndexOutOfBoundsException(end);
     //
-    T[] slice = (T[]) Array.newInstance(array.getClass().getComponentType(),
-        end - begin);
+    T[] slice = (T[]) Array.newInstance(array.getClass().getComponentType(), end - begin);
     System.arraycopy(array, begin, slice, 0, end - begin);
     return slice;
   }
@@ -162,15 +156,13 @@ public class CollectionSupport {
   }
 
   public static <T> T[] copy(T[] a) {
-    T[] copy = (T[]) Array.newInstance(a.getClass().getComponentType(),
-        a.length);
+    T[] copy = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length);
     System.arraycopy(a, 0, copy, 0, a.length);
     return copy;
   }
 
   public static <T> T[] merge(T[] a, T... b) {
-    T[] merged = (T[]) Array.newInstance(a.getClass().getComponentType(),
-        a.length + b.length);
+    T[] merged = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length + b.length);
     System.arraycopy(a, 0, merged, 0, a.length);
     System.arraycopy(b, 0, merged, a.length, b.length);
     return merged;
@@ -195,8 +187,8 @@ public class CollectionSupport {
   }
 
   /**
-   * Vereint alle Maps in einer neuen. Doppelte Keys überschreiben sich in der
-   * Reihenfolge, in der sie in der Collection vorkommen.
+   * Vereint alle Maps in einer neuen. Doppelte Keys überschreiben sich in der Reihenfolge, in der sie in der Collection
+   * vorkommen.
    * 
    * @return HashMap
    */
@@ -208,8 +200,7 @@ public class CollectionSupport {
   }
 
   /**
-   * Erzeugt aus <var>map</var> eine neue Map, in der Keys und Values vertauscht
-   * sind.
+   * Erzeugt aus <var>map</var> eine neue Map, in der Keys und Values vertauscht sind.
    * 
    * @return HashMap
    */
@@ -239,9 +230,8 @@ public class CollectionSupport {
   }
 
   /**
-   * Liefert das "erste" Element von 'o'. Bei Arrays und Listen ist es das erste
-   * Element der jeweiligen Struktur. Ansonsten wird einfach 'o' selbst
-   * zurückgegeben.
+   * Liefert das "erste" Element von 'o'. Bei Arrays und Listen ist es das erste Element der jeweiligen Struktur.
+   * Ansonsten wird einfach 'o' selbst zurückgegeben.
    * 
    * @param o
    *          Object | Object[] | List
@@ -304,8 +294,7 @@ public class CollectionSupport {
   }
 
   /**
-   * Liefert das nächste Elemente des Iterators oder null, falls es keines mehr
-   * gibt.
+   * Liefert das nächste Elemente des Iterators oder null, falls es keines mehr gibt.
    */
   public static <T> T next(Iterator<T> iterator) {
     Assert.notNull(iterator, "iterator");
@@ -313,8 +302,7 @@ public class CollectionSupport {
   }
 
   /**
-   * Liefert alle String-Repräsentierungen der Elemente aus <i>c</i> in
-   * Kleinschrift.
+   * Liefert alle String-Repräsentierungen der Elemente aus <i>c</i> in Kleinschrift.
    */
   public static Collection<String> lowerCase(Collection<?> c) {
     Collection<String> lc = new ArrayList<String>(c.size());
@@ -324,8 +312,7 @@ public class CollectionSupport {
   }
 
   /**
-   * Liefert alle String-Repräsentierungen der Elemente aus <i>c</i> in
-   * Großschrift.
+   * Liefert alle String-Repräsentierungen der Elemente aus <i>c</i> in Großschrift.
    */
   public static Collection<String> upperCase(Collection<?> c) {
     Collection<String> lc = new ArrayList<String>(c.size());
@@ -335,8 +322,7 @@ public class CollectionSupport {
   }
 
   /**
-   * Returns a new collection containing only elements that match a certain
-   * predicate.
+   * Returns a new collection containing only elements that match a certain predicate.
    * 
    * @param c
    *          the source collection

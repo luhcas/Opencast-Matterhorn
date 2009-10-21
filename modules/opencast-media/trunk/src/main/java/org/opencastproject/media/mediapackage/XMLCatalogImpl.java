@@ -24,7 +24,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.Attributes;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -506,7 +505,8 @@ public abstract class XMLCatalogImpl extends AbstractMediaPackageElement impleme
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toManifest(org.w3c.dom.Document, org.opencastproject.media.mediapackage.MediaPackageSerializer)
+   * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toManifest(org.w3c.dom.Document,
+   *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
   @Override
   public Node toManifest(Document document, MediaPackageSerializer serializer) {

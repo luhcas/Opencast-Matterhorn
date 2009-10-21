@@ -181,15 +181,6 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
     return false;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (o instanceof MediaPackageElementFlavor) {
-      MediaPackageElementFlavor m = (MediaPackageElementFlavor) o;
-      return type.equals(m.getType()) && subtype.equals(m.getSubtype());
-    }
-    return super.equals(o);
-  }
-
   /**
    * Defines equality between flavors and strings.
    * 
@@ -254,27 +245,105 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
       subtype_ = subtype.trim().toLowerCase();
     }
 
-    String getType() {
-      return type_;
-    }
+//    String getType() {
+//      return type_;
+//    }
+//
+//    String getSubtype() {
+//      return subtype_;
+//    }
 
-    String getSubtype() {
-      return subtype_;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (o instanceof ElementTypeEquivalent) {
-        ElementTypeEquivalent e = (ElementTypeEquivalent) o;
-        return this.matches(e.getType(), e.getSubtype());
-      }
-      return super.equals(o);
-    }
+//    @Override
+//    public boolean equals(Object o) {
+//      if (o instanceof ElementTypeEquivalent) {
+//        ElementTypeEquivalent e = (ElementTypeEquivalent) o;
+//        return this.matches(e.getType(), e.getSubtype());
+//      }
+//      return super.equals(o);
+//    }
 
     boolean matches(String type, String subtype) {
       return type_.equalsIgnoreCase(type) && subtype_.equalsIgnoreCase(subtype);
     }
 
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + getOuterType().hashCode();
+      result = prime * result + ((subtype_ == null) ? 0 : subtype_.hashCode());
+      result = prime * result + ((type_ == null) ? 0 : type_.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (!(obj instanceof ElementTypeEquivalent))
+        return false;
+      ElementTypeEquivalent other = (ElementTypeEquivalent) obj;
+      if (!getOuterType().equals(other.getOuterType()))
+        return false;
+      if (subtype_ == null) {
+        if (other.subtype_ != null)
+          return false;
+      } else if (!subtype_.equals(other.subtype_))
+        return false;
+      if (type_ == null) {
+        if (other.type_ != null)
+          return false;
+      } else if (!type_.equals(other.type_))
+        return false;
+      return true;
+    }
+
+    private MediaPackageElementFlavor getOuterType() {
+      return MediaPackageElementFlavor.this;
+    }
+
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((subtype == null) ? 0 : subtype.hashCode());
+    result = prime * result + ((type == null) ? 0 : type.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (!(obj instanceof MediaPackageElementFlavor))
+      return false;
+    MediaPackageElementFlavor other = (MediaPackageElementFlavor) obj;
+    if (subtype == null) {
+      if (other.subtype != null)
+        return false;
+    } else if (!subtype.equals(other.subtype))
+      return false;
+    if (type == null) {
+      if (other.type != null)
+        return false;
+    } else if (!type.equals(other.type))
+      return false;
+    return true;
+  }
+
+//  @Override
+//  public boolean equals(Object o) {
+//    if (o instanceof MediaPackageElementFlavor) {
+//      MediaPackageElementFlavor m = (MediaPackageElementFlavor) o;
+//      return type.equals(m.getType()) && subtype.equals(m.getSubtype());
+//    }
+//    return super.equals(o);
+//  }
 
 }

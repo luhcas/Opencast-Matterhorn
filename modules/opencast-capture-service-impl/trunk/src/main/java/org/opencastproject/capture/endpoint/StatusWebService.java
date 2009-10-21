@@ -15,10 +15,10 @@
  */
 package org.opencastproject.capture.endpoint;
 
+import org.opencastproject.capture.api.State;
+
 import javax.jws.WebMethod;
 import javax.jws.WebService;
-
-import org.opencastproject.capture.api.State;
 
 /**
  *

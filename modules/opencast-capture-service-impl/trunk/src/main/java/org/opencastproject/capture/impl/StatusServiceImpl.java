@@ -15,14 +15,15 @@
  */
 package org.opencastproject.capture.impl;
 
-import java.util.Dictionary;
-
 import org.opencastproject.capture.api.State;
 import org.opencastproject.capture.api.StatusService;
+
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Dictionary;
 
 /**
  * FIXME -- Add javadocs

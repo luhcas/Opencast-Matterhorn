@@ -54,7 +54,8 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
    * @throws IllegalStateException
    *           in case of not being able to initialize
    */
-  protected AbstractTrackBuilderPlugin() throws IllegalStateException { }
+  protected AbstractTrackBuilderPlugin() throws IllegalStateException {
+  }
 
   /**
    * Creates a track object from the given url. The method is called when the plugin reads the track information from
@@ -78,9 +79,11 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromManifest(org.w3c.dom.Node, org.opencastproject.media.mediapackage.MediaPackageSerializer)
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromManifest(org.w3c.dom.Node,
+   *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
-  public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer) throws MediaPackageException {
+  public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
+          throws MediaPackageException {
 
     String id = null;
     MimeType mimeType = null;
