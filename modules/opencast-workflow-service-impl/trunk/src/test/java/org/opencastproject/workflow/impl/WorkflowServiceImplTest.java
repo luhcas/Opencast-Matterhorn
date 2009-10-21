@@ -38,7 +38,10 @@ import org.junit.Test;
 import java.io.File;
 
 public class WorkflowServiceImplTest {
-  private String solrRoot = "target/solr";
+
+  /** The solr root directory */
+  private String solrRoot = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workflows";
+
   private WorkflowServiceImpl service = null;
   private WorkflowDefinition definition1 = null;
   private MediaPackage mediapackage1 = null;

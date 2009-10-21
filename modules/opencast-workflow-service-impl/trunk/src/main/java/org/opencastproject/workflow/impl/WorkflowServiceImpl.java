@@ -39,6 +39,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.core.SolrCore;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -59,6 +60,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 /**
  * Implements {@link WorkflowService} with in-memory data structures to hold {@link WorkflowOperation}s and
@@ -596,6 +598,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         FileUtils.forceMkdir(solrData);
       }
 
+      SolrCore.log.getParent().setLevel(Level.WARNING);
       solrConnection = new SolrConnection(solrRoot, PathSupport.concat(solrRoot, "data"));
       solrRequester = new SolrRequester(solrConnection);
       solrIndexManager = new SolrIndexManager(solrConnection);
