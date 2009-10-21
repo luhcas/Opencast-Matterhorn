@@ -15,25 +15,20 @@
  */
 package org.opencastproject.conductor.impl;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResultBuilder;
-import org.opencastproject.workflow.api.WorkflowOperationResultImpl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * The workflow definition for handling "compose" operations
  */
 public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler {
   private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowOperationHandler.class);
-  protected String[] operationsToHandle = new String[] {"compose"};
 
   public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.info("run() compose workflow operation");
@@ -48,13 +43,4 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     // TODO Add new media track(s) to the media package
     return WorkflowOperationResultBuilder.build(workflowInstance.getSourceMediaPackage(), workflowInstance.getProperties(), false);
   }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getOperationsToHandle()
-   */
-  public String[] getOperationsToHandle() {
-    return operationsToHandle;
-  }
-
 }

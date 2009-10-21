@@ -15,38 +15,9 @@
  */
 package org.opencastproject.conductor.api;
 
-import org.opencastproject.workflow.api.WorkflowDefinition;
-import org.opencastproject.workflow.api.WorkflowDefinitionList;
-
 /**
- * An abstraction to access customized workflow definitions.
+ * Implement me.
  */
 public interface ConductorService {
 
-  /**
-   * @return All registered {@link WorkflowDefinition}s which have registered operation handlers for each of their operations.
-   */
-  WorkflowDefinitionList getWorkflowDefinitions();
-
-  /**
-   * Returns the {@link WorkflowDefinition} with the specified name or <code>null</code> if no such definition is
-   * available.
-   * 
-   * @param title the title of the workflow definition
-   * @return the workflow definition
-   */
-  WorkflowDefinition getWorkflowDefinitionByTitle(String title);
-
-  /**
-   * Adds a new workflow definition.
-   * @param def The new workflow definition
-   */
-  void addWorkflowDefinition(WorkflowDefinition def);
-
-  /**
-   * Removes the workflow definition with the given title
-   * @param title The title of the workflow definition to remove
-   * @return The removed workflow definition, or null if nothing was removed
-   */
-  WorkflowDefinition removeWorkflowDefinition(String title);
 }

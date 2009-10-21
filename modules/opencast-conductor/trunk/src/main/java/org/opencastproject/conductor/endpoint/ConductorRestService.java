@@ -16,7 +16,6 @@
 package org.opencastproject.conductor.endpoint;
 
 import org.opencastproject.conductor.api.ConductorService;
-import org.opencastproject.workflow.api.WorkflowDefinitionList;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -58,12 +57,6 @@ public class ConductorRestService {
     this.conductorService = conductorService;
   }
 
-  @GET
-  @Path("definitions")
-  @Produces(MediaType.TEXT_XML)
-  public WorkflowDefinitionList getWorkflowDefinitions() {
-    return conductorService.getWorkflowDefinitions();
-  }
 
   @GET
   @Path("docs")

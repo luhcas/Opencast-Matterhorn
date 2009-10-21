@@ -20,9 +20,12 @@ import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowDefinitionList;
+import org.opencastproject.workflow.api.WorkflowDefinitionListImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
+import org.opencastproject.workflow.api.WorkflowOperationDefinitionListImpl;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -38,6 +41,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
@@ -49,9 +53,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -69,6 +73,15 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   /** Logging facility */
   private static final Logger log_ = LoggerFactory.getLogger(WorkflowServiceImpl.class);
 
+  /** The service registration property we use to identify which workflow operation a {@link WorkflowOperationHandler} should handle. */
+  protected static final String WORKFLOW_OPERATION_PROPERTY = "workflow.operation";
+
+  /** The service registration property we use to identify registered {@link WorkflowDefinition}s. */
+  protected static final String WORKFLOW_DEFINITION_PROPERTY = "workflow.definition.title";
+
+  /** The collection of workflow definition registrations */
+  protected Map<String, ServiceRegistration> workflowDefinitionRegistrations = new HashMap<String, ServiceRegistration>();
+
   /** Connection to the solr database */
   private SolrConnection solrConnection = null;
 
@@ -77,9 +90,15 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /** Manager for the solr search index */
   private SolrIndexManager solrIndexManager = null;
-
+  
   /** The solr root directory */
   private String solrRoot = null;
+
+  /** A collection of the running workflow threads */
+  protected Map<String, Thread> threadMap = new HashMap<String, Thread>();
+
+  /** The OSGi component context, which we use to do service lookups */
+  protected ComponentContext componentContext;
 
   /**
    * Creates a solr service that puts its data into the given root directory. If the directory doesn't exist, it will be
@@ -99,9 +118,97 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workflows");
   }
 
+  /**
+   * Activate this service implementation via the OSGI service component runtime
+   * 
+   * @param componentContext The component context that's instantiating this service.
+   */
+  public void activate(ComponentContext componentContext) {
+    this.componentContext = componentContext;
+    setupSolr(solrRoot);
+  }
+
+  /**
+   * Deactivate this service.
+   */
+  public void deactivate() {
+    try {
+      solrConnection.destroy();
+    } catch (Throwable t) {
+      log_.error("Error closing the solr connection");
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+   */
   @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {
     // Update any configuration properties here
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#listAvailableWorkflowDefinitions()
+   */
+  public WorkflowDefinitionList listAvailableWorkflowDefinitions() {
+    WorkflowDefinitionList list = new WorkflowDefinitionListImpl();
+    List<String> availableOperations = listAvailableOperationNames();
+    for(Object registeredDefinition : componentContext.locateServices("WORKFLOW_DEFINITIONS")) {
+      WorkflowDefinition def = (WorkflowDefinition)registeredDefinition;
+      boolean allOperationsAvailable = true;
+      for(WorkflowOperationDefinition op : def.getOperations()) {
+        if( ! availableOperations.contains(op.getName())) {
+          allOperationsAvailable = false;
+          break;
+        }
+      }
+      if(allOperationsAvailable) list.add(def);
+    }
+    return list;
+  }
+
+  /**
+   * Lists the names of each workflow operation.  Operation names are availalbe for use if there is a registered
+   * {@link WorkflowOperationHandler} with an equal {@link WorkflowServiceImpl#WORKFLOW_OPERATION_PROPERTY} property.
+   * 
+   * @return The {@link List} of available workflow operation names
+   */
+  protected List<String> listAvailableOperationNames() {
+    try {
+      List<String> list = new ArrayList<String>();
+      for(ServiceReference ref :
+        componentContext.getBundleContext().getAllServiceReferences(WorkflowOperationHandler.class.getName(), null)) {
+        list.add((String)ref.getProperty(WORKFLOW_OPERATION_PROPERTY));
+      }
+      return list;
+    } catch (InvalidSyntaxException e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#registerWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
+   */
+  public void registerWorkflowDefinition(WorkflowDefinition workflow) {
+    Hashtable<String, String> props = new Hashtable<String, String>();
+    props.put(WORKFLOW_DEFINITION_PROPERTY, workflow.getTitle());
+    ServiceRegistration reg = componentContext.getBundleContext().registerService(WorkflowDefinition.class.getName(), workflow, props);
+    workflowDefinitionRegistrations.put(workflow.getTitle(), reg);
+  }
+
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#unregisterWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
+   */
+  public void unregisterWorkflowDefinition(String workflowTitle) {
+    ServiceRegistration reg = workflowDefinitionRegistrations.get(workflowTitle);
+    if(reg == null) {throw new IllegalArgumentException("No workflow registered with title " + workflowTitle);}
+    workflowDefinitionRegistrations.remove(workflowTitle);
+    reg.unregister();
   }
 
   /**
@@ -179,75 +286,117 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     return workflowInstance;
   }
 
-  protected Map<String, Thread> threadMap = new HashMap<String, Thread>();
-
-  // TODO Remove OSGI dependency if possible
-  ComponentContext componentContext;
-
-  public void activate(ComponentContext componentContext) {
-    this.componentContext = componentContext;
-    setupSolr(solrRoot);
-  }
-
-  public void deactivate() {
-    try {
-      solrConnection.destroy();
-    } catch (Throwable t) {
-      log_.error("Error closing the solr connection");
-    }
-  }
-
-  protected List<WorkflowOperationHandler> getOperationHandlers() {
-    List<WorkflowOperationHandler> list = new ArrayList<WorkflowOperationHandler>();
+  /**
+   * Does a lookup of available operation handlers for the given workflow operation.
+   * 
+   * @param operation 
+   *          the operation definition
+   * @return the handler or <code>null</code>
+   */
+  protected WorkflowOperationHandler selectOperationHandler(WorkflowOperationDefinition operation) {
+    List<WorkflowOperationHandler> handlerList = new ArrayList<WorkflowOperationHandler>();
     ServiceReference[] serviceRefs = null;
     try {
       serviceRefs = componentContext.getBundleContext().getAllServiceReferences(WorkflowOperationHandler.class.getName(), null);
     } catch (InvalidSyntaxException e) {
       throw new RuntimeException(e);
     }
-    if (serviceRefs == null) {
+    if (serviceRefs == null || serviceRefs.length == 0) {
       log_.info("No Workflow Operation Handlers registered");
-      return list;
+      return null;
     } else {
       for(ServiceReference serviceRef : serviceRefs) {
-        list.add((WorkflowOperationHandler)componentContext.getBundleContext().getService(serviceRef));
+        String operationProperty = (String)serviceRef.getProperty(WORKFLOW_OPERATION_PROPERTY);
+        if (operationProperty != null && operationProperty.equals(operation.getName())) {
+          handlerList.add((WorkflowOperationHandler)componentContext.getBundleContext().getService(serviceRef));
+        }
       }
     }
-    return list;
+    
+    // Select one of the possibly multiple operation handlers.  TODO Allow for a pluggable strategy for this mechanism
+    if (handlerList.size() > 0) {
+      int index = (int)Math.round((handlerList.size() - 1) * Math.random());
+      return handlerList.get(index);
+    }
+
+    log_.info("No workflow operation handlers found for operation " + operation.getName());
+    return null;
   }
   
   protected void run(final WorkflowInstanceImpl wfi) {
     Thread t = new Thread(new Runnable() {
       public void run() {
         boolean failed = false;
-        // Get all of the runnable workflow services available for each operation (in the order of operations)
-        for(WorkflowOperationDefinition operation : wfi.getWorkflowOperationDefinitionList().getOperation()) {
-          for(WorkflowOperationHandler handler : getOperationHandlers()) {
-            // Skip this operation handler if it doesn't support this operation
-            if( ! Arrays.asList(handler.getOperationsToHandle()).contains((operation.getName()))) continue;
+        int runFromOperation = 0;
+        List<WorkflowOperationDefinition> operationDefinitions = wfi.getWorkflowOperationDefinitionList();
+        while (runFromOperation >= 0 && runFromOperation < operationDefinitions.size()) {
+          // Get all of the runnable workflow services available for each operation (in the order of operations)
+          operationDefinitions = wfi.getWorkflowOperationDefinitionList();
+          for (int i = runFromOperation; i < operationDefinitions.size(); i++) {
+            WorkflowOperationDefinition operationDefinition = operationDefinitions.get(i);
+            WorkflowOperationHandler operationHandler = selectOperationHandler(operationDefinition);
+            // If there is no handler for the operation, mark this workflow as failed
+            if (operationHandler == null) {
+              log_.warn("No handler available to execute operation " + operationDefinition);
+              failed = true;
+              break;
+            }
             // Add an operation instance with the resulting media package to the workflow instance
-            WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(operation);
-            wfi.getWorkflowOperationInstanceList().getOperationInstance().add(opInstance);
+            WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(operationDefinition);
+            wfi.getWorkflowOperationInstanceList().add(opInstance);
             update(wfi); // Update the workflow instance, since it has a new operation instance
             try {
-              opInstance.setResult(handler.run(wfi));
+              opInstance.setResult(operationHandler.run(wfi));
               opInstance.setState(State.SUCCEEDED.name());
             } catch(Exception e) {
-              log_.warn("Operation " + operation + " failed:" + e.getMessage());
+              log_.warn("Operation " + operationDefinition + " failed:" + e.getMessage());
               // If the operation is set to fail on error, set the workflow to "failed" and run the exception handling
               // workflow operations
-              if(operation.isFailWorkflowOnException()) {
+              if (operationDefinition.isFailWorkflowOnException()) {
                 wfi.setState(State.FAILING.name());
                 failed = true;
-                // TODO: Replace the next operations with those from the failure handling workflow
-                // FIXME: We are going to get concurrent modification exceptions if we modify the operation collection
-                return;
+  
+                // Replace the next operations with those from the failure handling workflow
+                String catchWorkflowName = operationDefinition.getExceptionHandlingWorkflow();
+                WorkflowDefinition catchWorkflowDefinition = getWorkflowDefinitionByName(catchWorkflowName);
+                if (catchWorkflowDefinition == null) {
+                  log_.warn("Unable to execute catch workflow " + catchWorkflowName + " for operation " + operationDefinition);
+                  return;
+                }
+                
+                // Find the position of the current operation and compile the new operation list
+                int operationIndex = wfi.getWorkflowOperationInstanceList().size();
+                WorkflowOperationDefinitionListImpl updatedOperationDefinitions = new WorkflowOperationDefinitionListImpl();
+                for (int j = 0; j < operationIndex; j++)
+                  updatedOperationDefinitions.add(operationDefinitions.get(j));
+                updatedOperationDefinitions.addAll(catchWorkflowDefinition.getOperations());
+                wfi.setWorkflowOperationDefinitionList(updatedOperationDefinitions);
+                runFromOperation = operationIndex;
+                break;
               } else {
-                // TODO: Add the operations from the failure handling workflow at the current point in the list
-                // FIXME: We are going to get concurrent modification exceptions if we modify the operation collection
+                // Replace the next operations with those from the failure handling workflow
+                String catchWorkflowName = operationDefinition.getExceptionHandlingWorkflow();
+                WorkflowDefinition catchWorkflowDefinition = getWorkflowDefinitionByName(catchWorkflowName);
+                if (catchWorkflowDefinition == null) {
+                  log_.warn("Unable to execute catch workflow " + catchWorkflowName + " for operation " + operationDefinition);
+                  return;
+                }
+
+                // Find the position of the current operation and compile the new operation list
+                int operationIndex = wfi.getWorkflowOperationInstanceList().size();
+                WorkflowOperationDefinitionListImpl updatedOperationDefinitions = new WorkflowOperationDefinitionListImpl();
+                for (int j = 0; j < operationIndex; j++)
+                  updatedOperationDefinitions.add(operationDefinitions.get(j));
+                updatedOperationDefinitions.addAll(catchWorkflowDefinition.getOperations());
+                for (int j = operationIndex; j < operationDefinitions.size(); j++)
+                  updatedOperationDefinitions.add(operationDefinitions.get(j));
+                wfi.setWorkflowOperationDefinitionList(updatedOperationDefinitions);
+                runFromOperation = operationIndex;
+                break;
               }
             }
             update(wfi); // Update the workflow instance again, since its new operation instance has completed
+            runFromOperation = -1;
           }
         }
 
@@ -263,7 +412,36 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     threadMap.put(wfi.getId(), t);
     t.start();
   }
+  
+  /**
+   * Returns the workflow identified by <code>name</code> or <code>null</code>
+   * if no such workflow was found.
+   * 
+   * @param name the workflow definition name
+   * @return the workflow
+   */
+  protected WorkflowDefinition getWorkflowDefinitionByName(String name) {
+    String filter = getWorkflowDefinitionFilter(name);
+    try {
+      return (WorkflowDefinition)componentContext.getBundleContext().getServiceReferences(WorkflowDefinition.class.getName(), filter)[0];
+    } catch (InvalidSyntaxException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
+  /**
+   * Constructs a filter for finding registered workflow definitions by name
+   * @param name The name of the workflow definition
+   * @return The filter string
+   */
+  protected String getWorkflowDefinitionFilter(String name) {
+    StringBuilder sb = new StringBuilder("(");
+    sb.append(WORKFLOW_DEFINITION_PROPERTY);
+    sb.append("=");
+    sb.append(name);
+    sb.append(")");
+    return sb.toString();
+  }
   /**
    * {@inheritDoc}
    * 

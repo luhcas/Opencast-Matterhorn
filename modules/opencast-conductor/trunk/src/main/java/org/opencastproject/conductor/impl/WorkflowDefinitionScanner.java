@@ -15,9 +15,9 @@
  */
 package org.opencastproject.conductor.impl;
 
-import org.opencastproject.conductor.api.ConductorService;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowService;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.fileinstall.ArtifactInstaller;
@@ -35,9 +35,9 @@ import java.io.InputStream;
 public class WorkflowDefinitionScanner implements ArtifactInstaller {
   private static final Logger logger = LoggerFactory.getLogger(WorkflowDefinitionScanner.class);
   
-  protected ConductorService conductorService;
-  public void setConductorService(ConductorService conductorService) {
-    this.conductorService = conductorService;
+  protected WorkflowService workflowService;
+  public void setWorkflowService(WorkflowService workflowService) {
+    this.workflowService = workflowService;
   }
 
   /**
@@ -50,7 +50,7 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
     try {
       stream = new FileInputStream(artifact);
       WorkflowDefinition def = WorkflowBuilder.getInstance().parseWorkflowDefinition(stream);
-      conductorService.addWorkflowDefinition(def);
+      workflowService.registerWorkflowDefinition(def);
     } finally {
       IOUtils.closeQuietly(stream);
     }
@@ -66,7 +66,7 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
     try {
       stream = new FileInputStream(artifact);
       WorkflowDefinition def = WorkflowBuilder.getInstance().parseWorkflowDefinition(stream);
-      conductorService.removeWorkflowDefinition(def.getTitle());
+      workflowService.unregisterWorkflowDefinition(def.getTitle());
     } finally {
       IOUtils.closeQuietly(stream);
     }

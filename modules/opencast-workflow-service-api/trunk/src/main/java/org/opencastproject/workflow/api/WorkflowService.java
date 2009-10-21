@@ -131,5 +131,27 @@ public interface WorkflowService {
    *          the workflow instance
    */
   void update(WorkflowInstance workflowInstance);
+  
+  /**
+   * Gets the list of available workflow definitions.  In order to be "available", a workflow definition must be
+   * registered and must have registered workflow operation handlers for each of the workflow definition's operations.
+   * 
+   * @return The list of currently available workflow definitions
+   */
+  WorkflowDefinitionList listAvailableWorkflowDefinitions();
+
+  /**
+   * Registers a new {@link WorkflowDefinition}
+   * 
+   * @param definition The definition to register
+   */
+  void registerWorkflowDefinition(WorkflowDefinition definition);
+
+  /**
+   * Removes the {@link WorkflowDefinition} specified by this title from the list of available {@link WorkflowDefinition}s.
+   * 
+   * @param title The title of the {@link WorkflowDefinition} to unregister
+   */
+  void unregisterWorkflowDefinition(String title);
 
 }

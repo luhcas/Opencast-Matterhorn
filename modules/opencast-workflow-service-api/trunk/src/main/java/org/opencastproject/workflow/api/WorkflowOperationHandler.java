@@ -19,7 +19,6 @@ package org.opencastproject.workflow.api;
  * Handler for workflow operations.
  */
 public interface WorkflowOperationHandler {
-  String[] getOperationsToHandle();
   WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException;  
 
 }

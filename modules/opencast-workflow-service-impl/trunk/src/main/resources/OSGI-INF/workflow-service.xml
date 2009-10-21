@@ -6,4 +6,5 @@
     <provide interface="org.opencastproject.workflow.api.WorkflowService" />
     <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
+  <reference name="WORKFLOW_DEFINITIONS" interface="org.opencastproject.workflow.api.WorkflowDefinition" cardinality="0..n" policy="dynamic" />
 </component>

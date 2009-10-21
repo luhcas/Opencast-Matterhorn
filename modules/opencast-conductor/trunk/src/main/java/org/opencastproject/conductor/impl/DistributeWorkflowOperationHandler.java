@@ -15,7 +15,6 @@
  */
 package org.opencastproject.conductor.impl;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
@@ -25,14 +24,11 @@ import org.opencastproject.workflow.api.WorkflowOperationResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
 /**
  * The workflow definition for handling "distribute" operations
  */
 public class DistributeWorkflowOperationHandler implements WorkflowOperationHandler {
   private static final Logger logger = LoggerFactory.getLogger(DistributeWorkflowOperationHandler.class);
-  protected String[] operationsToHandle = new String[] {"distribute"};
 
   public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.info("run() distribution workflow operation");
@@ -45,16 +41,7 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
     if(workflowInstance.getProperties() == null || workflowInstance.getProperties().isEmpty()) {
       logger.info("This workflow contains no properties, so we can't distribute any media");
     }
-    final MediaPackage mp =  workflowInstance.getSourceMediaPackage();
     // TODO Add any distributed media to the media package
     return WorkflowOperationResultBuilder.build(workflowInstance.getSourceMediaPackage(), workflowInstance.getProperties(), false);
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getOperationsToHandle()
-   */
-  public String[] getOperationsToHandle() {
-    return operationsToHandle;
   }
 }

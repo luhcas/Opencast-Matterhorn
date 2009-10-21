@@ -17,7 +17,10 @@ package org.opencastproject.workflow.api;
 
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -37,21 +40,111 @@ public class WorkflowDefinitionListImpl implements WorkflowDefinitionList {
   public WorkflowDefinitionListImpl() {}
   
   @XmlElement(name="workflow-definition")
-  protected List<WorkflowDefinition> ops;
+  protected List<WorkflowDefinition> ops = new ArrayList<WorkflowDefinition>();
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowOperationDefinitionList#getOperation()
    */
   public List<WorkflowDefinition> getWorkflowDefinition() {
-    if (ops == null) {
-      ops = new ArrayList<WorkflowDefinition>();
-    }
     return ops;
   }
   
   static class Adapter extends XmlAdapter<WorkflowDefinitionListImpl, WorkflowDefinitionList> {
     public WorkflowDefinitionListImpl marshal(WorkflowDefinitionList op) throws Exception {return (WorkflowDefinitionListImpl)op;}
     public WorkflowDefinitionList unmarshal(WorkflowDefinitionListImpl op) throws Exception {return op;}
+  }
+
+  public void add(int index, WorkflowDefinition element) {
+    ops.add(index, element);
+  }
+
+  public boolean add(WorkflowDefinition e) {
+    return ops.add(e);
+  }
+
+  public boolean addAll(Collection<? extends WorkflowDefinition> c) {
+    return ops.addAll(c);
+  }
+
+  public boolean addAll(int index, Collection<? extends WorkflowDefinition> c) {
+    return ops.addAll(index, c);
+  }
+
+  public void clear() {
+    ops.clear();
+  }
+
+  public boolean contains(Object o) {
+    return ops.contains(o);
+  }
+
+  public boolean containsAll(Collection<?> c) {
+    return ops.containsAll(c);
+  }
+
+  public WorkflowDefinition get(int index) {
+    return ops.get(index);
+  }
+
+  public int indexOf(Object o) {
+    return ops.indexOf(o);
+  }
+
+  public boolean isEmpty() {
+    return ops.isEmpty();
+  }
+
+  public Iterator<WorkflowDefinition> iterator() {
+    return ops.iterator();
+  }
+
+  public int lastIndexOf(Object o) {
+    return ops.lastIndexOf(o);
+  }
+
+  public ListIterator<WorkflowDefinition> listIterator() {
+    return ops.listIterator();
+  }
+
+  public ListIterator<WorkflowDefinition> listIterator(int index) {
+    return ops.listIterator(index);
+  }
+
+  public WorkflowDefinition remove(int index) {
+    return ops.remove(index);
+  }
+
+  public boolean remove(Object o) {
+    return ops.remove(o);
+  }
+
+  public boolean removeAll(Collection<?> c) {
+    return ops.removeAll(c);
+  }
+
+  public boolean retainAll(Collection<?> c) {
+    return ops.retainAll(c);
+  }
+
+  public WorkflowDefinition set(int index, WorkflowDefinition element) {
+    return ops.set(index, element);
+  }
+
+  public int size() {
+    return ops.size();
+  }
+
+  public List<WorkflowDefinition> subList(int fromIndex, int toIndex) {
+    return ops.subList(fromIndex, toIndex);
+  }
+
+  public Object[] toArray() {
+    return ops.toArray();
+  }
+
+  public <T> T[] toArray(T[] a) {
+    return ops.toArray(a);
   }
 
 }

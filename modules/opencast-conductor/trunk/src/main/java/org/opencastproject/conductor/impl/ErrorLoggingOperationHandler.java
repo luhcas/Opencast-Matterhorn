@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ErrorLoggingOperationHandler implements WorkflowOperationHandler {
   private static final Logger logger = LoggerFactory.getLogger(ErrorLoggingOperationHandler.class);
-  protected String[] operationsToHandle = new String[] {"log"};
 
   /**
    * {@inheritDoc}
@@ -40,12 +39,4 @@ public class ErrorLoggingOperationHandler implements WorkflowOperationHandler {
     return WorkflowOperationResultBuilder.build(workflowInstance.getSourceMediaPackage(), workflowInstance.getProperties(), false);
   }
   
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getOperationsToHandle()
-   */
-  public String[] getOperationsToHandle() {
-    return operationsToHandle;
-  }
-
 }

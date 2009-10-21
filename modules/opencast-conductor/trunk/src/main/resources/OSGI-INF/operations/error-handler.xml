@@ -2,6 +2,7 @@
 <component name="org.opencastproject.conductor.impl.ErrorLoggingOperationHandler" immediate="true">
   <implementation class="org.opencastproject.conductor.impl.ErrorLoggingOperationHandler" />
   <property name="service.description" value="Error Logging Workflow Operation Handler" />
+  <property name="workflow.operation" value="log" />
   <service>
     <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
   </service>

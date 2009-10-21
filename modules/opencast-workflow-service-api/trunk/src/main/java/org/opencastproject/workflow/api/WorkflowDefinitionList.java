@@ -24,6 +24,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *
  */
 @XmlJavaTypeAdapter(WorkflowDefinitionListImpl.Adapter.class)
-public interface WorkflowDefinitionList {
+public interface WorkflowDefinitionList extends List<WorkflowDefinition> {
   List<WorkflowDefinition> getWorkflowDefinition();
 }

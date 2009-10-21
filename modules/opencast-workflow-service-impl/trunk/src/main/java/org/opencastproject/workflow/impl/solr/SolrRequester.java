@@ -132,7 +132,7 @@ public class SolrRequester {
   }
 
   public WorkflowSet getWorkflowsInState(String state, int offset, int limit) throws SolrServerException {
-    String q = SolrFields.OC_STATE + ":*";
+    String q = SolrFields.OC_STATE + ":" + state.toLowerCase();
     SolrQuery query = new SolrQuery(q);
     query.addSortField(SolrFields.OC_MODIFIED, ORDER.desc);
     query.setStart(offset);

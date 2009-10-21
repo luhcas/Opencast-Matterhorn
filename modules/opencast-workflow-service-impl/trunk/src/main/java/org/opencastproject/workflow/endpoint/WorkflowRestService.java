@@ -19,6 +19,7 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
+import org.opencastproject.workflow.api.WorkflowDefinitionList;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowInstanceListImpl;
@@ -57,6 +58,13 @@ public class WorkflowRestService {
     this.service = null;
   }
 
+  @GET
+  @Path("definitions")
+  @Produces(MediaType.TEXT_XML)
+  public WorkflowDefinitionList getWorkflowDefinitions() {
+    return service.listAvailableWorkflowDefinitions();
+  }
+
   // FIXME Implement paging
   
   @GET
@@ -64,7 +72,7 @@ public class WorkflowRestService {
   @Produces(MediaType.TEXT_XML)
   public WorkflowInstanceListImpl fetchAllJaxbWorkflowInstances(@PathParam("state") String state) throws Exception {
     WorkflowInstanceListImpl list = new WorkflowInstanceListImpl();
-    for(WorkflowInstance instance : service.getWorkflowsInState(State.valueOf(state), 0, 1000).getItems()) {
+    for(WorkflowInstance instance : service.getWorkflowsInState(State.valueOf(state.toUpperCase()), 0, 1000).getItems()) {
       list.getWorkflowInstance().add((WorkflowInstanceImpl)instance);
     }
     return list;

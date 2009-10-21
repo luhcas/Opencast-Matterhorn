@@ -153,7 +153,7 @@ public class SolrIndexManager {
     SolrUpdateableInputDocument solrEpisodeDocument = new SolrUpdateableInputDocument();
 
     // Use the latest version of the media package available
-    List<WorkflowOperationInstance> operations = workflow.getWorkflowOperationInstanceList().getOperationInstance();
+    List<WorkflowOperationInstance> operations = workflow.getWorkflowOperationInstanceList();
     MediaPackage mediaPackage;
     if(operations.size() == 0) {
       mediaPackage = workflow.getSourceMediaPackage();
@@ -176,7 +176,7 @@ public class SolrIndexManager {
 
     // Set common fields
     solrEpisodeDocument.setField(SolrFields.WORKFLOW_ID, workflow.getId());
-    solrEpisodeDocument.setField(SolrFields.OC_STATE, workflow.getState().name());
+    solrEpisodeDocument.setField(SolrFields.OC_STATE, workflow.getState().name().toLowerCase());
 
     // TODO: Store properties SolrFields.OC_PROPERTIES
     

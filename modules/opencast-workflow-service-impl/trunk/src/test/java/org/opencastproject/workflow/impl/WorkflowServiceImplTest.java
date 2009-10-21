@@ -22,6 +22,7 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -43,14 +44,14 @@ public class WorkflowServiceImplTest {
   private WorkflowServiceImpl service = null;
   private WorkflowDefinition definition1 = null;
   private MediaPackage mediapackage1 = null;
-  private List<WorkflowOperationHandler> operationHandlers = new ArrayList<WorkflowOperationHandler>();
+  private WorkflowOperationHandler operationHandler = null;
   
   @Before
   public void setup() throws Exception {
     service = new WorkflowServiceImpl(solrRoot) {
       @Override
-      protected List<WorkflowOperationHandler> getOperationHandlers() {
-        return operationHandlers;
+      protected WorkflowOperationHandler selectOperationHandler(WorkflowOperationDefinition operation) {
+        return operationHandler;
       }
     };
     service.activate(null);
@@ -64,13 +65,13 @@ public class WorkflowServiceImplTest {
   @After
   public void teardown() throws Exception {
     service = null;
-    operationHandlers = null;
+    operationHandler = null;
     FileUtils.deleteDirectory(new File(solrRoot));
   }
   
   @Test
   public void testGetWorkflowOperationById() throws Exception {
-    operationHandlers.add(new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false));
+    operationHandler = new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false);
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
     // verify that we can retrieve the workflow instance from the service by its ID
     WorkflowInstance instanceFromDb = service.getWorkflowInstance(instance.getId());
@@ -88,7 +89,7 @@ public class WorkflowServiceImplTest {
 
   @Test
   public void testGetWorkflowOperationByMediaPackageId() {
-    operationHandlers.add(new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false));
+    operationHandler = new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false);
     service.start(definition1, mediapackage1, null);
     // TODO verify that we can retrieve the workflow instance from the service by its source mediapackage ID
 //    Assert.assertEquals(1,

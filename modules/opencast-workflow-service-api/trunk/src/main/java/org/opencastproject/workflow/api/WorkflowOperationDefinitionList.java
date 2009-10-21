@@ -24,6 +24,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *
  */
 @XmlJavaTypeAdapter(WorkflowOperationDefinitionListImpl.Adapter.class)
-public interface WorkflowOperationDefinitionList {
+public interface WorkflowOperationDefinitionList extends List<WorkflowOperationDefinition> {
   List<WorkflowOperationDefinition> getOperation();
 }
