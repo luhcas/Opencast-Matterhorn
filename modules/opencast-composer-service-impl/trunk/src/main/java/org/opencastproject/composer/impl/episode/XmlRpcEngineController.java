@@ -329,6 +329,8 @@ public class XmlRpcEngineController implements Runnable {
             throw new EncoderException(engine, "Episode engine returned an illegal state value");
           Map<String, Object> response = (Map<String, Object>) result;
           Map<String, Object> status = (Map<String, Object>) response.get("currentStatus");
+          if (status == null)
+            throw new EncoderException(engine, "Episode enginge does not return a status");
           newState = XmlRpcJobState.parseResult(status);
 
           File track = job.getSourceFile();

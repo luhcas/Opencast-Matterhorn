@@ -33,6 +33,8 @@ public class XmlRpcJob {
     Created, Queued, Running, Stopped, Finished, Failed;
 
     static XmlRpcJobState parseResult(Map<String, Object> status) {
+      if (!status.containsKey("state"))
+        throw new IllegalArgumentException("Episode engine did not return a state value");
       int state = ((Integer) status.get("state")).intValue();
       switch (state) {
       case 0:
