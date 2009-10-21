@@ -15,8 +15,8 @@
  */
 package org.opencastproject.conductor.impl;
 
-import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowService;
 
 import org.apache.commons.io.IOUtils;

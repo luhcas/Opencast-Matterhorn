@@ -19,7 +19,6 @@ package org.opencastproject.workflow.impl.solr;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.dublincore.DublinCore;
 import org.opencastproject.media.mediapackage.dublincore.utils.DCMIPeriod;
@@ -35,17 +34,8 @@ import org.apache.solr.client.solrj.request.UpdateRequest.ACTION;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Date;
 import java.util.List;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  * Utility class used to manage the workflow database.
@@ -170,8 +160,10 @@ public class SolrIndexManager {
       Catalog dcCatalogs[] = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR,
               MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
       solrEpisodeDocument.setField(SolrFields.OC_MEDIA_PACKAGE_ID, mediaPackage.getIdentifier().toString());
-      DublinCoreCatalog dublinCore = (DublinCoreCatalog) dcCatalogs[0];
-      addStandardDublincCoreFields(solrEpisodeDocument, dublinCore);
+      if(dcCatalogs.length > 0) {
+        DublinCoreCatalog dublinCore = (DublinCoreCatalog) dcCatalogs[0];
+        addStandardDublincCoreFields(solrEpisodeDocument, dublinCore);
+      }
     }
 
     // Set common fields
