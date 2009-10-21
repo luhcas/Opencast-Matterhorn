@@ -48,6 +48,7 @@
 		<maxFieldLength>10000</maxFieldLength>
 		<writeLockTimeout>1000</writeLockTimeout>
 		<commitLockTimeout>10000</commitLockTimeout>
+		<lockType>single</lockType>
 	</indexDefaults>
 
 	<mainIndex>
@@ -64,6 +65,7 @@
 			safely access a lucene index, and should be used with care.
 		-->
 		<unlockOnStartup>false</unlockOnStartup>
+        <lockType>single</lockType>
 	</mainIndex>
 
 	<!-- the default high-performance update handler -->
@@ -315,6 +317,18 @@
 		class="org.apache.solr.handler.admin.ThreadDumpHandler" />
 	<requestHandler name="/admin/properties"
 		class="org.apache.solr.handler.admin.PropertiesRequestHandler" />
+    <requestHandler name="/admin/file" 
+        class="org.apache.solr.handler.admin.ShowFileRequestHandler" >
+       <lst name="defaults">
+         <str name="echoParams">explicit</str>
+       </lst>
+       <lst name="invariants">
+         <str name="hidden">scripts.conf</str> 
+         <str name="hidden">stopwords.txt</str> 
+         <str name="hidden">protwords.txt</str> 
+         <str name="hidden">synonyms.txt</str> 
+       </lst>
+     </requestHandler>
 
 	<!-- Echo the request contents back to the client -->
 	<requestHandler name="/debug/dump" class="org.apache.solr.handler.DumpRequestHandler">
@@ -323,7 +337,7 @@
 			<str name="echoHandler">true</str>
 		</lst>
 	</requestHandler>
-
+	 
 	<!--
 		queryResponseWriter plugins... query responses will be written using
 		the writer specified by the 'wt' request parameter matching the name
@@ -356,7 +370,6 @@
 	<!-- config for the admin interface -->
 	<admin>
 		<defaultQuery>solr</defaultQuery>
-		<gettableFiles>solrconfig.xml schema.xml admin-extra.html</gettableFiles>
 		<!--
 			pingQuery should be "URLish" ... &amp; separated key=val pairs ...
 			but there shouldn't be any URL escaping of the values

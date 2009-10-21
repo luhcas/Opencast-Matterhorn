@@ -29,6 +29,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.core.SolrCore;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
 
 /**
  * A Solr-based {@link SearchService} implementation.
@@ -110,6 +112,7 @@ public class SearchServiceImpl implements SearchService {
         FileUtils.forceMkdir(solrData);
       }
 
+      SolrCore.log.getParent().setLevel(Level.WARNING);
       solrConnection = new SolrConnection(solrRoot, PathSupport.concat(solrRoot, "data"));
       solrRequester = new SolrRequester(solrConnection);
       solrIndexManager = new SolrIndexManager(solrConnection);

@@ -47,9 +47,6 @@ public class SolrRequester {
   /** Logging facility */
   private static Logger log_ = LoggerFactory.getLogger(SolrRequester.class);
 
-  /** The regular filter expression */
-  private static final String queryCleanerRegex = "[^0-9a-zA-ZöäüßÖÄÜ/\" +-.,]";
-
   /** The connection to the solr database */
   private SolrConnection solrConnection = null;
 
@@ -71,7 +68,7 @@ public class SolrRequester {
    * @see org.opencastproject.search.impl.solr.Test#getEpisodesAndSeriesByText(java.lang.String, int, int)
    */
   public SearchResult getEpisodesAndSeriesByText(String text, int offset, int limit) throws SolrServerException {
-    String uq = cleanQuery(text);
+    String uq = SolrUtils.clean(text);
     StringBuffer sb = boost(uq);
     SolrQuery query = new SolrQuery(sb.toString());
     query.setStart(offset);
@@ -86,7 +83,7 @@ public class SolrRequester {
    * @see org.opencastproject.search.impl.solr.Test#getEpisodesBySeries(java.lang.String)
    */
   public SearchResult getEpisodesBySeries(String seriesId) throws SolrServerException {
-    String q = SolrFields.DC_IS_PART_OF + ":" + cleanQuery(seriesId);
+    String q = SolrFields.DC_IS_PART_OF + ":" + SolrUtils.clean(seriesId);
     SolrQuery query = new SolrQuery(q);
     query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
     query.setFields("* score");
@@ -126,7 +123,7 @@ public class SolrRequester {
    * @see org.opencastproject.search.impl.solr.Test#getSeriesByText(java.lang.String, int, int)
    */
   public SearchResult getSeriesByText(String text, int offset, int limit) throws SolrServerException {
-    StringBuffer sb = boost(cleanQuery(text));
+    StringBuffer sb = boost(SolrUtils.clean(text));
     SolrQuery query = new SolrQuery(sb.toString());
     query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series);
     query.setStart(offset);
@@ -141,7 +138,7 @@ public class SolrRequester {
    * @see org.opencastproject.search.impl.solr.Test#getEpisodesAndSeriesById(java.lang.String)
    */
   public SearchResult getEpisodeAndSeriesById(String seriesId) throws SolrServerException {
-    seriesId = cleanQuery(seriesId);
+    seriesId = SolrUtils.clean(seriesId);
     String q = SolrFields.ID + ":" + seriesId + " OR " + SolrFields.DC_IS_PART_OF + ":" + seriesId;
     SolrQuery query = new SolrQuery(q);
     query.setSortField(SolrFields.OC_MEDIATYPE, SolrQuery.ORDER.asc);
@@ -203,7 +200,7 @@ public class SolrRequester {
    * @see org.opencastproject.search.impl.solr.Test#getEpisodesByText(java.lang.String, int, int)
    */
   public SearchResult getEpisodesByText(String text, int offset, int limit) throws SolrServerException {
-    StringBuffer sb = boost(cleanQuery(text));
+    StringBuffer sb = boost(SolrUtils.clean(text));
     SolrQuery query = new SolrQuery(sb.toString());
     query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
     query.setStart(offset);
@@ -352,7 +349,7 @@ public class SolrRequester {
    * @return The boosted query
    */
   public StringBuffer boost(String query) {
-    String uq = cleanQuery(query);
+    String uq = SolrUtils.clean(query);
     StringBuffer sb = new StringBuffer();
 
     sb.append("(");
@@ -407,17 +404,6 @@ public class SolrRequester {
     sb.append(")");
 
     return sb;
-  }
-
-  /**
-   * Clean up the user query input string to avoid invalid input parameters.
-   * 
-   * @param q
-   *          The input String.
-   * @return The cleaned string.
-   */
-  protected String cleanQuery(String q) {
-    return q.replaceAll(queryCleanerRegex, " ").trim();
   }
 
   /**

@@ -191,6 +191,22 @@ public class SolrIndexManager {
    */
   private SolrUpdateableInputDocument createEpisodeInputDocument(MediaPackage mediaPackage) {
     SolrUpdateableInputDocument solrEpisodeDocument = new SolrUpdateableInputDocument();
+    String mediaPackageId = mediaPackage.getIdentifier().toString();
+
+    // Populate document with existing data
+    try {
+      StringBuffer query = new StringBuffer("q=");
+      query = query.append(SolrFields.ID).append(":").append(SolrUtils.clean(mediaPackageId));
+      QueryResponse solrResponse = solrConnection.request(query.toString());
+      if (solrResponse.getResults().size() > 0) {
+        SolrDocument existingsolrDocument = solrResponse.getResults().get(0);
+        for (String fieldName : existingsolrDocument.getFieldNames()) {
+          solrEpisodeDocument.addField(fieldName, existingsolrDocument.getFieldValue(fieldName));
+        }
+      }
+    } catch (Exception e) {
+      log_.error("Error trying to load series " + mediaPackageId, e);
+    }
 
     // Add dublin core
     if (!mediaPackage.hasCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE)) {
@@ -204,7 +220,7 @@ public class SolrIndexManager {
     DublinCoreCatalog dublinCore = (DublinCoreCatalog) dcCatalogs[0];
 
     // Set common fields
-    solrEpisodeDocument.setField(SolrFields.ID, mediaPackage.getIdentifier());
+    solrEpisodeDocument.setField(SolrFields.ID, mediaPackageId);
     solrEpisodeDocument.setField(SolrFields.OC_MEDIATYPE, SearchResultItemType.AudioVisual);
     addStandardDublincCoreFields(solrEpisodeDocument, dublinCore);
 
@@ -215,8 +231,8 @@ public class SolrIndexManager {
       StreamResult streamResult = new StreamResult(out);
       TransformerFactory tf = TransformerFactory.newInstance();
       Transformer serializer = tf.newTransformer();
-      serializer.setOutputProperty(OutputKeys.ENCODING,"ISO-8859-1");
-      serializer.transform(domSource, streamResult); 
+      serializer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
+      serializer.transform(domSource, streamResult);
       solrEpisodeDocument.setField(SolrFields.OC_MEDIAPACKAGE, out);
     } catch (MediaPackageException e) {
       throw new IllegalStateException("Error serializing media package to search index", e);
@@ -225,7 +241,7 @@ public class SolrIndexManager {
     } catch (TransformerException e) {
       throw new IllegalStateException("Error serializing media package to search index", e);
     }
-    
+
     // Add cover
     Cover cover = mediaPackage.getCover();
     if (cover != null) {
@@ -265,15 +281,17 @@ public class SolrIndexManager {
 
     // Populate document with existing data
     try {
-      QueryResponse solrResponse = solrConnection.request(SolrFields.ID + ":" + seriesId);
+      StringBuffer query = new StringBuffer("q=");
+      query = query.append(SolrFields.ID).append(":").append(SolrUtils.clean(seriesId));
+      QueryResponse solrResponse = solrConnection.request(query.toString());
       if (solrResponse.getResults().size() > 0) {
         SolrDocument existingsolrDocument = solrResponse.getResults().get(0);
         for (String fieldName : existingsolrDocument.getFieldNames()) {
           solrSeriesDocument.addField(fieldName, existingsolrDocument.getFieldValue(fieldName));
         }
       }
-    } catch (Exception e1) {
-      log_.error("Error trying to load series " + seriesId);
+    } catch (Exception e) {
+      log_.error("Error trying to load series " + seriesId, e);
     }
 
     // Set common fields
