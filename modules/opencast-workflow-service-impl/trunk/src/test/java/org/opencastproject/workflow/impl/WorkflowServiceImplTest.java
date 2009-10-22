@@ -30,24 +30,34 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 
 public class WorkflowServiceImplTest {
 
   /** The solr root directory */
-  private String solrRoot = "target" + File.separator + "workflows";
+  private static final String solrRoot = "target" + File.separator + "workflow-test-db";
 
-  private WorkflowServiceImpl service = null;
-  private WorkflowDefinition definition1 = null;
-  private MediaPackage mediapackage1 = null;
-  private WorkflowOperationHandler operationHandler = null;
+  private static WorkflowServiceImpl service = null;
+  private static WorkflowDefinition definition1 = null;
+  private static MediaPackage mediapackage1 = null;
+  private static MediaPackage mediapackage2 = null;
+  private static WorkflowOperationHandler operationHandler = null;
   
-  @Before
-  public void setup() throws Exception {
+  @BeforeClass
+  public static void setup() {
+    // always start with a fresh solr root directory
+    try {
+      FileUtils.deleteDirectory(new File(solrRoot));
+    } catch (IOException e) {
+      Assert.fail(e.getMessage());
+    }
+
+    // instantiate a service implementation, overriding the methods that depend on the osgi runtime
     service = new WorkflowServiceImpl(solrRoot) {
       @Override
       protected WorkflowOperationHandler selectOperationHandler(WorkflowOperationDefinition operation) {
@@ -58,21 +68,31 @@ public class WorkflowServiceImplTest {
         return definition1.getTitle().equals(name) ? definition1 : null;
       }
     };
+    
+    // activate the service and build some objects for it to work with
     service.activate(null);
-    definition1 = WorkflowBuilder.getInstance().parseWorkflowDefinition(getClass().getResourceAsStream("/workflow-definition-1.xml"));
-    MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
-    builder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
-    mediapackage1 = builder.loadFromManifest(
-            getClass().getResourceAsStream("/mediapackage-1.xml"));
+    try {
+      definition1 = WorkflowBuilder.getInstance().parseWorkflowDefinition(
+              WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-1.xml"));
+      MediaPackageBuilder mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
+      mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
+      mediapackage1 = mediaPackageBuilder.loadFromManifest(
+              WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-1.xml"));
+      mediapackage2 = mediaPackageBuilder.loadFromManifest(
+              WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-2.xml"));
+    } catch (Exception e) {
+      Assert.fail(e.getMessage());
+    }
   }
 
-  @After
-  public void teardown() throws Exception {
+  @AfterClass
+  public static void teardown() {
+    // TODO For some reason, deactivating solr throws exceptions
+    // service.deactivate();
     service = null;
     operationHandler = null;
-    FileUtils.deleteDirectory(new File(solrRoot));
   }
-  
+    
   @Test
   public void testGetWorkflowOperationById() {
     operationHandler = new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false);
@@ -85,16 +105,23 @@ public class WorkflowServiceImplTest {
     Assert.assertNotNull(mediapackageFromDb);
     Assert.assertEquals(mediapackage1.getIdentifier().toString(),
             mediapackageFromDb.getIdentifier().toString());
+    // cleanup for the next test
+    service.removeFromDatabase(instance.getId());
   }
 
-//  @Test
-//  public void testGetWorkflowOperationByMediaPackageId() {
-//    operationHandler = new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false);
-//    service.start(definition1, mediapackage1, null);
-    // TODO verify that we can retrieve the workflow instance from the service by its source mediapackage ID
-//    Assert.assertEquals(1,
-//            service.getWorkflowsByMediaPackage(mediapackage1.getIdentifier().toString()).getItems().length);
-//  }
+  // FIXME The removeFromDatabase() method is not working.  Combined with our inability to cleanly shut down solr,
+  // we now have no way of clearing the search index between test runs.  So we'll need to use a mediapackage with a
+  // different ID for each test.
+
+  @Test
+  public void testGetWorkflowOperationByMediaPackageId() {
+    operationHandler = new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false);
+    WorkflowInstance instance = service.start(definition1, mediapackage2, null);
+    Assert.assertEquals(1,
+            service.getWorkflowsByMediaPackage(mediapackage2.getIdentifier().toString()).getItems().length);
+    // cleanup for the next test instance
+    service.removeFromDatabase(instance.getId());
+  }
 
   class TestWorkflowOperationHandler implements WorkflowOperationHandler {
     String[] operationsToHandle;

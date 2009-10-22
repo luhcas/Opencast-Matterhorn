@@ -130,7 +130,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     this.componentContext = componentContext;
     setupSolr(solrRoot);
   }
-
+  
   /**
    * Deactivate this service.
    */
