@@ -72,7 +72,8 @@
               OSGI-INF/workflow-definition-scanner.xml,
               OSGI-INF/operations/compose.xml,
               OSGI-INF/operations/distribute.xml,
-              OSGI-INF/operations/error-handler.xml
+              OSGI-INF/operations/error-handler.xml,
+              OSGI-INF/operations/review.xml
             </Service-Component>
           </instructions>
         </configuration>
