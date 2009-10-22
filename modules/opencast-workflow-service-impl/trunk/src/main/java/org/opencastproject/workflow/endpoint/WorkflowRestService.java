@@ -82,7 +82,7 @@ public class WorkflowRestService {
   @Path("instance/{id}")
   @Produces(MediaType.TEXT_XML)
   public WorkflowInstanceImpl getJaxbWorkflowInstance(@PathParam("id") String id) throws Exception {
-    return (WorkflowInstanceImpl)service.getWorkflowInstance(id);
+    return (WorkflowInstanceImpl)service.getWorkflowById(id);
   }
 
   @POST

@@ -169,9 +169,52 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public boolean isRunnable(WorkflowDefinition workflowDefinition) {
     List<String> availableOperations = listAvailableOperationNames();
-    for(WorkflowOperationDefinition op : workflowDefinition.getOperations()) {
-      if( ! availableOperations.contains(op.getName())) return false;
-    }
+    List<WorkflowDefinition> checkedWorkflows = new ArrayList<WorkflowDefinition>();
+    boolean runnable = isRunnable(workflowDefinition, availableOperations, checkedWorkflows);
+    int wfCount = checkedWorkflows.size() - 1;
+    if (runnable)
+      log_.info("Workflow " + workflowDefinition + ", containing " + wfCount + " derived workflows is runnable");    
+    else
+      log_.warn("Workflow " + workflowDefinition + ", containing " + wfCount + " derived workflows is not runnable");    
+    return runnable;
+  }
+
+  /**
+   * Tests the workflow definition for its runnability. This method is a helper for {@link #isRunnable(WorkflowDefinition)}
+   * that is suited for recursive calling.
+   * 
+   * @param workflowDefinition the definition to test
+   * @param availableOperations
+   * list of currently available operation handlers
+   * @param checkedWorkflows
+   * list of checked workflows, used to avoid circular checking
+   * @return <code>true</code> if all bits and pieces used for executing <code>workflowDefinition</code> are in place
+   */
+  private boolean isRunnable(WorkflowDefinition workflowDefinition, List<String> availableOperations, List<WorkflowDefinition> checkedWorkflows) {
+    if (checkedWorkflows.contains(workflowDefinition))
+      return true;
+
+    // Test availability of operation handler and catch workflows
+    for(WorkflowOperationDefinition op : workflowDefinition.getOperations()) { 
+      if(! availableOperations.contains(op.getName())) {
+        log_.info(workflowDefinition + " is not runnable due to missing operation " + op);
+        return false;
+      }
+      String catchWorkflow = op.getExceptionHandlingWorkflow(); 
+      if (catchWorkflow != null) {
+        WorkflowDefinition catchWorkflowDefinition = getWorkflowDefinitionByName(catchWorkflow);
+        if (catchWorkflowDefinition == null) {
+          log_.info(workflowDefinition + " is not runnable due to missing catch workflow " + catchWorkflow + " on operation " + op);
+          return false;
+        }
+        if (!isRunnable(catchWorkflowDefinition, availableOperations, checkedWorkflows))
+          return false;
+      }
+    }    
+
+    // Add the workflow to the list of checked workflows
+    if (!checkedWorkflows.contains(workflowDefinition))
+      checkedWorkflows.add(workflowDefinition);
     return true;
   }
 
@@ -220,9 +263,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowInstance(java.lang.String)
+   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowById(java.lang.String)
    */
-  public WorkflowInstance getWorkflowInstance(String id) {
+  public WorkflowInstance getWorkflowById(String id) {
     try {
       WorkflowSet set = solrRequester.getWorkflowById(id);
       if(set.getItems().length == 0) return null;
@@ -426,7 +469,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @param name the workflow definition name
    * @return the workflow
    */
-  protected WorkflowDefinition getWorkflowDefinitionByName(String name) {
+  public WorkflowDefinition getWorkflowDefinitionByName(String name) {
     String filter = getWorkflowDefinitionFilter(name);
     try {
       return (WorkflowDefinition)componentContext.getBundleContext().getServiceReferences(WorkflowDefinition.class.getName(), filter)[0];
@@ -454,7 +497,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#stop(java.lang.String)
    */
   public void stop(String workflowInstanceId) {
-    WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
+    WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowById(workflowInstanceId);
     Thread t = threadMap.get(workflowInstanceId);
     if (t != null) {
       t.interrupt();
@@ -469,7 +512,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#suspend(java.lang.String)
    */
   public void suspend(String workflowInstanceId) {
-    WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
+    WorkflowInstanceImpl instance = (WorkflowInstanceImpl)getWorkflowById(workflowInstanceId);
     Thread t = threadMap.get(workflowInstanceId);
     if (t != null) {
       t.interrupt();
@@ -484,7 +527,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#resume(java.lang.String)
    */
   public void resume(String workflowInstanceId) {
-    WorkflowInstanceImpl workflowInstance = (WorkflowInstanceImpl)getWorkflowInstance(workflowInstanceId);
+    WorkflowInstanceImpl workflowInstance = (WorkflowInstanceImpl)getWorkflowById(workflowInstanceId);
     run(workflowInstance);
     workflowInstance.setState(State.RUNNING.name());
     update(workflowInstance);

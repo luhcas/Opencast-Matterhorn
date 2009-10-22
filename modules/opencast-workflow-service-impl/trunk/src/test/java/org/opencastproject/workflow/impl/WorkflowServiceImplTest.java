@@ -64,7 +64,7 @@ public class WorkflowServiceImplTest {
         return operationHandler;
       }
       @Override
-      protected WorkflowDefinition getWorkflowDefinitionByName(String name) {
+      public WorkflowDefinition getWorkflowDefinitionByName(String name) {
         return definition1.getTitle().equals(name) ? definition1 : null;
       }
     };
@@ -98,7 +98,7 @@ public class WorkflowServiceImplTest {
     operationHandler = new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false);
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
     // verify that we can retrieve the workflow instance from the service by its ID
-    WorkflowInstance instanceFromDb = service.getWorkflowInstance(instance.getId());
+    WorkflowInstance instanceFromDb = service.getWorkflowById(instance.getId());
 
     Assert.assertNotNull(instanceFromDb);
     MediaPackage mediapackageFromDb = instanceFromDb.getSourceMediaPackage();

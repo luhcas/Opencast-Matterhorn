@@ -26,9 +26,19 @@ import java.util.Map;
 public interface WorkflowService {
 
   /**
+   * Returns the {@link WorkflowDefinition} identified by <code>name</code> or <code>null</code> if no such definition
+   * was found.
+   * 
+   * @param name
+   *          the workflow definition name
+   * @return the workflow
+   */
+  WorkflowDefinition getWorkflowDefinitionByName(String name);
+
+  /**
    * Gets a {@link WorkflowInstace} by its ID.
    */
-  WorkflowInstance getWorkflowInstance(String workflowId);
+  WorkflowInstance getWorkflowById(String workflowId);
 
   /**
    * Gets {@link WorkflowInstace}s associated with a media package ID.
@@ -131,9 +141,9 @@ public interface WorkflowService {
    *          the workflow instance
    */
   void update(WorkflowInstance workflowInstance);
-  
+
   /**
-   * Gets the list of available workflow definitions.  In order to be "available", a workflow definition must be
+   * Gets the list of available workflow definitions. In order to be "available", a workflow definition must be
    * registered and must have registered workflow operation handlers for each of the workflow definition's operations.
    * 
    * @return The list of currently available workflow definitions
@@ -141,11 +151,12 @@ public interface WorkflowService {
   WorkflowDefinitionList listAvailableWorkflowDefinitions();
 
   /**
-   * Whether a workflow definition may be run at this moment.  Every {@link WorkflowOperationDefinition} returned by
+   * Whether a workflow definition may be run at this moment. Every {@link WorkflowOperationDefinition} returned by
    * {@link WorkflowDefinition#getOperations()} must be registered as a {@link WorkflowOperationHandler} for this
    * {@link WorkflowDefinition} to be runnable.
    * 
-   * @param workflowDefinition The workflow definition to inspect for runnability
+   * @param workflowDefinition
+   *          The workflow definition to inspect for runnability
    * @return Whether this workflow may be run
    */
   boolean isRunnable(WorkflowDefinition workflowDefinition);
@@ -153,14 +164,17 @@ public interface WorkflowService {
   /**
    * Registers a new {@link WorkflowDefinition}
    * 
-   * @param definition The definition to register
+   * @param definition
+   *          The definition to register
    */
   void registerWorkflowDefinition(WorkflowDefinition definition);
 
   /**
-   * Removes the {@link WorkflowDefinition} specified by this title from the list of available {@link WorkflowDefinition}s.
+   * Removes the {@link WorkflowDefinition} specified by this title from the list of available
+   * {@link WorkflowDefinition}s.
    * 
-   * @param title The title of the {@link WorkflowDefinition} to unregister
+   * @param title
+   *          The title of the {@link WorkflowDefinition} to unregister
    */
   void unregisterWorkflowDefinition(String title);
 
