@@ -19,7 +19,6 @@ import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.opencastproject.media.mediapackage.MediaPackage;
 
-import org.apache.commons.io.FileUtils;
 import org.gstreamer.Bus;
 import org.gstreamer.Gst;
 import org.gstreamer.GstObject;
@@ -30,7 +29,6 @@ import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Properties;
@@ -41,11 +39,8 @@ import java.util.Properties;
 public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
-  public static String tmpPath = System.getProperty("java.io.tmpdir") + File.separator + "opencast";
-
   public CaptureAgentImpl() {
-    this.tmpPath = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "tmp";
-    createTmpDirectory();
+
   }
 
   @SuppressWarnings("unchecked")
@@ -124,20 +119,5 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public String startCapture(MediaPackage mediaPackage, HashMap<String, String> properties) {
     logger.info("public String startCapture(MediaPackage mediaPackage, HashMap properties)");
     return "start capture 4";
-  }
-
-  /**
-   * Create the tmp folder to store de record.
-   */
-  private void createTmpDirectory() {
-    File f = new File(this.tmpPath);
-    if (!f.exists()) {
-      try {
-        logger.error("Make directory " + this.tmpPath);
-        FileUtils.forceMkdir(f);
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
   }
 }
