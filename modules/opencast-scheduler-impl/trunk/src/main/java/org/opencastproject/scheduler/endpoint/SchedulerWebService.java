@@ -22,9 +22,6 @@ import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.jws.WebService;
 
-import org.opencastproject.scheduler.api.SchedulerEvent;
-import org.opencastproject.scheduler.api.SchedulerFilter;
-
 /**
  *
  */

@@ -16,7 +16,6 @@
 package org.opencastproject.scheduler.impl;
 
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.LinkedList;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;

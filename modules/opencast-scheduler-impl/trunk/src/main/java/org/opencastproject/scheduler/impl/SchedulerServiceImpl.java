@@ -27,8 +27,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Dictionary;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * FIXME -- Add javadocs

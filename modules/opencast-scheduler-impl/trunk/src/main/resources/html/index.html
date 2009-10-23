@@ -1,0 +1,20 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <div>This is the documentation for the REST endpoint for the ingest service.</div>
+    <hr /><br />
+    <div>Thin Client: A simple POST form ingests a new media package. Input types must conform to Opencast metadata.</div>
+    <table>
+    <form id="meta" name="meta" action="addMediaPackage" method="POST" enctype="multipart/form-data" accept-charset="UTF-8" >
+ 	    <tr><td>submiter:</td><td><input type="text" name="publisher" id="publisher" /></td></tr>
+	    <tr><td>title:</td><td><input type="text" name="title" id="title" /></td></tr>
+	    <tr><td>presenter:</td><td><input type="text" name="contributor" id="contributor" /></td></tr>
+	    <tr><td>description:</td><td><input type="text" name="description" id="description" /></td></tr>
+	    <tr><td>language:</td><td><input type="text" name="language" id="language" />
+    	<tr><td>file:</td><td><input type="file" name="mediafile" id="mediafile" /></td></tr>
+	    <tr><td><input type="submit" id="submit" value="Submit"/>
+    </form>
+    </table>
+  </body>
+</html>

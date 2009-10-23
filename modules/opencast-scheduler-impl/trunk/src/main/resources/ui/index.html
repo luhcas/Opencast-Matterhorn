@@ -3,56 +3,123 @@
 		<title>Scheduler UI</title>
 		<!-- style -->
 		<link rel="stylesheet" type="text/css" href="css/scheduler.css" />
-		
+    <link href="css/popuphelp.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.7.2.custom.css" />
 		<!-- scripts -->
 		<script src="js/jquery-1.3.2.min.js" type="text/javascript"></script>
 		<script src="js/jquery-ui-1.7.2.custom.min.js" type="text/javascript"></script>
+    <script src="js/popuphelp.js" type="text/javascript"></script>
+    <script src="js/scheduler.helptexts.json" type="text/javascript"></script>
 		<script type="text/javascript">
-			$(function() {
-				$("#tabs").tabs();
-			});
+      function initPage(){
+        $(".required > th").prepend('<font color="red">*</font>');
+        $(".additionalMeta").toggle();
+      }
+      
+      function toggleAdditionalMetadata(){
+        $(".additionalMeta").toggle();
+        var switchIcon = $("#additionalMetaSwitchIcon");
+        if(switchIcon.hasClass("ui-icon-triangle-1-e")){
+          switchIcon.removeClass("ui-icon-triangle-1-e");
+          switchIcon.addClass("ui-icon-triangle-1-s");
+        }else{
+          switchIcon.removeClass("ui-icon-triangle-1-s");
+          switchIcon.addClass("ui-icon-triangle-1-e");
+        }
+      }
+      
+      $(document).ready(initPage);
 		</script>
 	</head>
 	<body>
 		<div>
 			<div id="tabs">
 				<ul>
-					<li><a href="#tabs-1">Scheduler</a></li>
-					<li><a href="#tabs-2"></a></li>
-					<li><a href="#tabs-3"></a></li>
+					<li><a href="#tabs-2">Dashboard</a></li>
+					<li><a href="#tabs-1">Schedule a Capture</a></li>
+					<li><a href="#tabs-3">Ingest</a></li>
 				</ul>
 				<div id="tabs-1">
 				<form>
 					<table>
-						<tr>
-							<td>Title</td>
+            <tr>
+              <th>Submitted By:</th>
+              <td>Admin</td>
+						<tr class="required">
+							<th>Title:</th>
 							<td><input type="text" size="60" name="title" id="title" /></td>
+              <td><img src="img/help.png" id="help_title" onclick="displayHelp(this, event);"></td>
 						</tr>
 						<tr>
-							<td>Creator</td>
+							<th>Presenter(s):</th>
 							<td><input type="text" size="60" name="creator" id="creator" /></td>
+              <td><img src="img/help.png" id="help_presenter" onclick="displayHelp(this, event);"></td>
 						</tr>
-						<tr>
-							<td>Date</td>
+            <tr>
+							<th></th>
+							<td><a href="javascript:toggleAdditionalMetadata();"><span id="additionalMetaSwitchIcon"style="position: absolute; margin-left: -1em;" class="ui-icon ui-icon-triangle-1-e"></span>Additional metadata</a></td>
+              <td></td>
+            </tr>
+            <tr class="additionalMeta">
+              <th>License:</th>
+              <td><select name="license" id="license"><option>test</option></select></td>
+              <td><img src="img/help.png" id="help_license" onclick="displayHelp(this, event);"></td>
+            </tr>
+            <tr class="additionalMeta">
+              <th>Series:</th>
+              <td><input type="text" name="series" id="series" size="60" value="" /></td>
+              <td><img src="img/help.png" id="help_series" onclick="displayHelp(this, event);"></td>
+            </tr>
+            <tr class="additionalMeta">
+              <th>Subject:</th>
+              <td><input type="text" name="subject" id="subject" size="60" value="" /></td>
+              <td><img src="img/help.png" id="help_subject" onclick="displayHelp(this, event);"></td>
+            </tr>
+            <tr class="additionalMeta">
+              <th>Language:</th>
+              <td><input type="text" name="language" id="language" size="60" value="" /></td>
+              <td><img src="img/help.png" id="help_language" onclick="displayHelp(this, event);"></td>
+            </tr>
+						<tr class="additionalMeta">
+							<th>Description:</th>
+							<td><textarea name="description" cols="52"></textarea></td>
+              <td><img src="img/help.png" id="help_description" onclick="displayHelp(this, event);"></td>
+						</tr>
+            <tr class="required">
+              <th>Distribution Channel(s):</th>
+              <td class="distroChannel">
+                <div><input type="checkbox" name="" value="1" />iTunesU</div>
+                <div><input type="checkbox" name="" value="1" />Matterhorn Media Channel</div>
+                <div><input type="checkbox" name="" value="1" />YouTube</div>
+                <div><input type="checkbox" name="" value="1" />Sakai</div>
+              </td>
+              <td><img src="img/help.png" id="help_distribution" onclick="displayHelp(this, event);"></td>
+            </tr>
+						<tr class="required">
+							<th>Recording Times:</th>
 							<td>
 								Start:<input type="text" size="24" name="startTime" id="startTiem" />
 								End:<input type="text" size="24" name="endTime" id="endTime" />
 							</td>
+              <td><img src="img/help.png" id="help_recording" onclick="displayHelp(this, event);"></td>
 						</tr>
+            <tr class="required">
+              <th>Capture Agent/Location:</th>
+              <td><input type="text" name="agent" size="60" /></td>
+              <td><img src="img/help.png" id="help_agent" onclick="displayHelp(this, event);"></td>
+            </tr>
+            <tr class="required">
+              <th>input(s):</th>
+              <td>
+                <input type="radio" name="inputs" value="1" />Audio Only
+                <input type="radio" name="inputs" value="3" />Audio,Video
+                <input type="radio" name="inputs" value="5" />Audio,Screen
+                <input type="radio" name="inputs" value="7" />Audio,Video,Screen
+              </td>
+              <td><img src="img/help.png" id="help_input" onclick="displayHelp(this, event);"></td>
+            </tr>
 						<tr>
-							<td>Abstract</td>
-							<td><textarea cols="52"></textarea></td>
-						</tr>
-						<tr>
-							<td>Contributor</td>
-							<td><input type="text" size="60" name="contributor" id="contributor" /></td>
-						</tr>
-						<tr>
-							<td></td>
-							<td><a href="#">Additional metadata</a></td>
-						</tr>
-						<tr>
-							<td></td>
+							<th></th>
 							<td><input type="button" value="submit" /><input type="button" value="reset" /></td>
 						</tr>
 					</table>
@@ -63,5 +130,15 @@
 			<div id="tabs-3">
 			</div>
 		</div>
+    
+    <!-- template for the popup help box -->
+    <div id="helpBox" class="helpbox" style="display:none;">
+          <img src="img/lightbulb.png">
+          <img src="img/close.png" class="closeButton" onclick="resetHelp();">
+          <div id="helpTitle" style="display:inline;font-weight:bold; margin-left:10px;"></div>
+          <p>
+            <div id="helpText" style="padding-left:7px; padding-right:7px; white-space:normal;"></div>
+          </p>
+   </div>
 	</body>
 </html>

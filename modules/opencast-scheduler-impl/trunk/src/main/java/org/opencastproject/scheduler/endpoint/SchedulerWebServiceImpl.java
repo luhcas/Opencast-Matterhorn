@@ -16,7 +16,6 @@
 package org.opencastproject.scheduler.endpoint;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
-import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
 
 import org.slf4j.Logger;
