@@ -22,7 +22,6 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -38,6 +37,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 public class WorkflowServiceImplTest {
 
@@ -63,13 +64,11 @@ public class WorkflowServiceImplTest {
 
     // instantiate a service implementation and its DAO, overriding the methods that depend on the osgi runtime
     service = new WorkflowServiceImpl(storageRoot) {
-      @Override
-      protected WorkflowOperationHandler selectOperationHandler(WorkflowOperationDefinition operation) {
-        return operationHandler;
-      }
-      @Override
-      public WorkflowDefinition getWorkflowDefinitionByName(String name) {
-        return definition1.getTitle().equals(name) ? definition1 : null;
+      protected Set<HandlerRegistration> getRegisteredHandlers() {
+        Set<HandlerRegistration> set = new HashSet<HandlerRegistration>();
+        set.add(new HandlerRegistration("op1", operationHandler));
+        set.add(new HandlerRegistration("op2", operationHandler));
+        return set;
       }
     };
     service.setDao(new WorkflowServiceImplDaoDerbyImpl());

@@ -79,7 +79,7 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
   public void deactivate() {
     try {
       // This throws by-design, so ignore the exception
-      DriverManager.getConnection(jdbcUrl + ";shutdown=true");
+      DriverManager.getConnection("jdbc:derby:;shutdown=true");
     } catch (SQLException e) {
     }
   }

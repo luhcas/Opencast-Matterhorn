@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.workflow.api.WorkflowService" immediate="true" activate="activate">
+<component name="org.opencastproject.workflow.api.WorkflowService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.workflow.impl.WorkflowServiceImpl" />
   <property name="service.description" value="Workflow Service" />
   <service>
     <provide interface="org.opencastproject.workflow.api.WorkflowService" />
     <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
-  <reference name="WORKFLOW_DEFINITIONS" interface="org.opencastproject.workflow.api.WorkflowDefinition" cardinality="0..n" policy="dynamic" />
 </component>

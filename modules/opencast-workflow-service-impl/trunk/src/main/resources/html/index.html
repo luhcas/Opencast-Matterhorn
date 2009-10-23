@@ -7,10 +7,21 @@
     </h2>
     
     <h4>
+      Workflow Definitions
+    </h4>
+    <div>
+      <b>GET definitions</b> returns all available workflow definitions
+    </div>
+    <h4>
       Workflow Instances
     </h4>
     <div>
-      <b>GET instances/{state}</b> returns all instances in a given state (RUNNING, PAUSED, or STOPPED)
+      <b>GET instances/{state}</b> returns all instances in a given state (
+      <a href="instances/running">running</a>,
+      <a href="instances/paused">paused</a>,
+      <a href="instances/stopped">stopped</a>,
+      <a href="instances/succeeded">succeeded</a>,
+      <a href="instances/failed">failed</a>)
     </div>
     <div>
       <b>GET instance/{id}</b> returns a workflow instance

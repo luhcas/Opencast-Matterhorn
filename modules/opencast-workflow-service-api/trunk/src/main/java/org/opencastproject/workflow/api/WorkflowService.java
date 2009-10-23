@@ -153,7 +153,7 @@ public interface WorkflowService {
    * Gets the list of available workflow definitions. In order to be "available", a workflow definition must be
    * registered and must have registered workflow operation handlers for each of the workflow definition's operations.
    * 
-   * @return The list of currently available workflow definitions
+   * @return The list of currently available workflow definitions, sorted by title
    */
   WorkflowDefinitionList listAvailableWorkflowDefinitions();
 

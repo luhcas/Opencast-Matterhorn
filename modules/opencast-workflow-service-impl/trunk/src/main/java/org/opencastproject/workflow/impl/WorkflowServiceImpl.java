@@ -34,7 +34,6 @@ import org.opencastproject.workflow.api.WorkflowInstance.State;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
@@ -43,12 +42,16 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -70,20 +73,72 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   protected static final String WORKFLOW_OPERATION_PROPERTY = "workflow.operation";
 
-  /** The service registration property we use to identify registered {@link WorkflowDefinition}s. */
-  protected static final String WORKFLOW_DEFINITION_PROPERTY = "workflow.definition.title";
+  /** TODO: Remove references to the component context once felix scr 1.2 becomes available */
+  protected ComponentContext componentContext = null;
 
-  /** The collection of workflow definition registrations */
-  protected Map<String, ServiceRegistration> workflowDefinitionRegistrations = new HashMap<String, ServiceRegistration>();
+  /** The collection of workflow definitions */
+  protected Map<String, WorkflowDefinition> workflowDefinitions = new HashMap<String, WorkflowDefinition>();
 
+  /**
+   * A tuple of a workflow operation handler and the name of the operation it handles
+   */
+  class HandlerRegistration {
+    HandlerRegistration(String operationName, WorkflowOperationHandler handler) {
+      this.operationName = operationName;
+      this.handler = handler;
+    }
+    WorkflowOperationHandler handler;
+    String operationName;
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + getOuterType().hashCode();
+      result = prime * result + ((handler == null) ? 0 : handler.hashCode());
+      result = prime * result + ((operationName == null) ? 0 : operationName.hashCode());
+      return result;
+    }
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (!(obj instanceof HandlerRegistration)) {
+        return false;
+      }
+      HandlerRegistration other = (HandlerRegistration) obj;
+      if (!getOuterType().equals(other.getOuterType())) {
+        return false;
+      }
+      if (handler == null) {
+        if (other.handler != null) {
+          return false;
+        }
+      } else if (!handler.equals(other.handler)) {
+        return false;
+      }
+      if (operationName == null) {
+        if (other.operationName != null) {
+          return false;
+        }
+      } else if (!operationName.equals(other.operationName)) {
+        return false;
+      }
+      return true;
+    }
+    private WorkflowServiceImpl getOuterType() {
+      return WorkflowServiceImpl.this;
+    }
+  }
+  
   /** The data access object responsible for storing and retrieving workflow instances */
   protected WorkflowServiceImplDao dao = new WorkflowServiceImplDaoDerbyImpl();
 
   /** A collection of the running workflow threads */
   protected Map<String, Thread> threadMap = new ConcurrentHashMap<String, Thread>();
-
-  /** The OSGi component context, which we use to do service lookups */
-  protected ComponentContext componentContext;
 
   /** The directory to use for persistence (contents will vary depending on the DAO implementation) */
   protected String storageDirectory = null;
@@ -116,9 +171,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * Activate this service implementation via the OSGI service component runtime
-   * 
-   * @param componentContext
-   *          The component context that's instantiating this service.
    */
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
@@ -131,7 +183,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   public void deactivate() {
     dao.deactivate();
   }
-
+  
   /**
    * {@inheritDoc}
    * 
@@ -149,9 +201,14 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public WorkflowDefinitionList listAvailableWorkflowDefinitions() {
     WorkflowDefinitionList list = new WorkflowDefinitionListImpl();
-    for (Object registeredDefinition : componentContext.locateServices("WORKFLOW_DEFINITIONS")) {
-      list.add((WorkflowDefinition) registeredDefinition);
+    for (Entry<String, WorkflowDefinition> entry : workflowDefinitions.entrySet()) {
+      list.add((WorkflowDefinition) entry.getValue());
     }
+    Collections.sort(list, new Comparator<WorkflowDefinition>() {
+      public int compare(WorkflowDefinition o1, WorkflowDefinition o2) {
+        return o1.getTitle().compareTo(o2.getTitle());
+      }
+    });
     return list;
   }
 
@@ -215,22 +272,38 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   }
 
   /**
+   * Gets the currently registered workflow operation handlers.
+   * 
+   * @return All currently registered handlers
+   */
+  protected Set<HandlerRegistration> getRegisteredHandlers() {
+    Set<HandlerRegistration> set = new HashSet<HandlerRegistration>();
+    ServiceReference[] refs;
+    try {
+      refs = componentContext.getBundleContext().getServiceReferences(
+              WorkflowOperationHandler.class.getName(), null);
+    } catch (InvalidSyntaxException e) {
+      throw new RuntimeException(e);
+    }
+    for (ServiceReference ref : refs) {
+      WorkflowOperationHandler handler = (WorkflowOperationHandler)componentContext.getBundleContext().getService(ref);
+      set.add(new HandlerRegistration((String)ref.getProperty(WORKFLOW_OPERATION_PROPERTY), handler));
+    }
+    return set;
+  }
+
+  /**
    * Lists the names of each workflow operation. Operation names are availalbe for use if there is a registered
    * {@link WorkflowOperationHandler} with an equal {@link WorkflowServiceImpl#WORKFLOW_OPERATION_PROPERTY} property.
    * 
    * @return The {@link List} of available workflow operation names
    */
   protected List<String> listAvailableOperationNames() {
-    try {
-      List<String> list = new ArrayList<String>();
-      for (ServiceReference ref : componentContext.getBundleContext().getAllServiceReferences(
-              WorkflowOperationHandler.class.getName(), null)) {
-        list.add((String) ref.getProperty(WORKFLOW_OPERATION_PROPERTY));
-      }
-      return list;
-    } catch (InvalidSyntaxException e) {
-      throw new RuntimeException(e);
+    List<String> list = new ArrayList<String>();
+    for(HandlerRegistration reg : getRegisteredHandlers()) {
+      list.add(reg.operationName);
     }
+    return list;
   }
 
   /**
@@ -239,11 +312,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#registerWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
    */
   public void registerWorkflowDefinition(WorkflowDefinition workflow) {
-    Hashtable<String, String> props = new Hashtable<String, String>();
-    props.put(WORKFLOW_DEFINITION_PROPERTY, workflow.getTitle());
-    ServiceRegistration reg = componentContext.getBundleContext().registerService(WorkflowDefinition.class.getName(),
-            workflow, props);
-    workflowDefinitionRegistrations.put(workflow.getTitle(), reg);
+    workflowDefinitions.put(workflow.getTitle(), workflow);
   }
 
   /**
@@ -252,12 +321,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#unregisterWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
    */
   public void unregisterWorkflowDefinition(String workflowTitle) {
-    ServiceRegistration reg = workflowDefinitionRegistrations.get(workflowTitle);
-    if (reg == null) {
-      throw new IllegalArgumentException("No workflow registered with title " + workflowTitle);
-    }
-    workflowDefinitionRegistrations.remove(workflowTitle);
-    reg.unregister();
+    workflowDefinitions.remove(workflowTitle);
   }
 
   /**
@@ -332,22 +396,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   protected WorkflowOperationHandler selectOperationHandler(WorkflowOperationDefinition operation) {
     List<WorkflowOperationHandler> handlerList = new ArrayList<WorkflowOperationHandler>();
-    ServiceReference[] serviceRefs = null;
-    try {
-      serviceRefs = componentContext.getBundleContext().getAllServiceReferences(
-              WorkflowOperationHandler.class.getName(), null);
-    } catch (InvalidSyntaxException e) {
-      throw new RuntimeException(e);
-    }
-    if (serviceRefs == null || serviceRefs.length == 0) {
-      log_.info("No Workflow Operation Handlers registered");
-      return null;
-    } else {
-      for (ServiceReference serviceRef : serviceRefs) {
-        String operationProperty = (String) serviceRef.getProperty(WORKFLOW_OPERATION_PROPERTY);
-        if (operationProperty != null && operationProperty.equals(operation.getName())) {
-          handlerList.add((WorkflowOperationHandler) componentContext.getBundleContext().getService(serviceRef));
-        }
+    for (HandlerRegistration handlerReg : getRegisteredHandlers()) {
+      if (handlerReg.operationName != null && handlerReg.operationName.equals(operation.getName())) {
+        handlerList.add((WorkflowOperationHandler) handlerReg.handler);
       }
     }
 
@@ -464,29 +515,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @return the workflow
    */
   public WorkflowDefinition getWorkflowDefinitionByName(String name) {
-    String filter = getWorkflowDefinitionFilter(name);
-    try {
-      return (WorkflowDefinition) componentContext.getBundleContext().getServiceReferences(
-              WorkflowDefinition.class.getName(), filter)[0];
-    } catch (InvalidSyntaxException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Constructs a filter for finding registered workflow definitions by name
-   * 
-   * @param name
-   *          The name of the workflow definition
-   * @return The filter string
-   */
-  protected String getWorkflowDefinitionFilter(String name) {
-    StringBuilder sb = new StringBuilder("(");
-    sb.append(WORKFLOW_DEFINITION_PROPERTY);
-    sb.append("=");
-    sb.append(name);
-    sb.append(")");
-    return sb.toString();
+    return workflowDefinitions.get(name);
   }
 
   /**
