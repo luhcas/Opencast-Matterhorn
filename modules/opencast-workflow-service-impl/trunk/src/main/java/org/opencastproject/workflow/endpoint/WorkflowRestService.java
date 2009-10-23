@@ -18,6 +18,7 @@ package org.opencastproject.workflow.endpoint;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
+import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowDefinitionList;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -61,8 +62,15 @@ public class WorkflowRestService {
   @GET
   @Path("definitions")
   @Produces(MediaType.TEXT_XML)
-  public WorkflowDefinitionList getWorkflowDefinitions() {
-    return service.listAvailableWorkflowDefinitions();
+  public String getWorkflowDefinitions() {
+    // FIXME: For some reason, we can't return the object here.
+    // "[JAXRSUtils] WARN - WebApplicationException has been caught : no cause is available"
+    WorkflowDefinitionList list = service.listAvailableWorkflowDefinitions();
+    try {
+      return WorkflowBuilder.getInstance().toXml(list);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   // FIXME Implement paging

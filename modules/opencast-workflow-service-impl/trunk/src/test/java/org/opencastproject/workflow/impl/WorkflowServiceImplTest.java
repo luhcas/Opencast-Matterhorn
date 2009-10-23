@@ -26,6 +26,8 @@ import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowSet;
+import org.opencastproject.workflow.api.WorkflowInstance.State;
 
 import junit.framework.Assert;
 
@@ -40,25 +42,27 @@ import java.io.IOException;
 public class WorkflowServiceImplTest {
 
   /** The solr root directory */
-  private static final String solrRoot = "target" + File.separator + "workflow-test-db";
+  private static final String storageRoot = "target" + File.separator + "workflow-test-db";
 
   private static WorkflowServiceImpl service = null;
   private static WorkflowDefinition definition1 = null;
   private static MediaPackage mediapackage1 = null;
-  private static MediaPackage mediapackage2 = null;
   private static WorkflowOperationHandler operationHandler = null;
   
   @BeforeClass
   public static void setup() {
     // always start with a fresh solr root directory
     try {
-      FileUtils.deleteDirectory(new File(solrRoot));
+      FileUtils.deleteDirectory(new File(storageRoot));
     } catch (IOException e) {
       Assert.fail(e.getMessage());
     }
 
-    // instantiate a service implementation, overriding the methods that depend on the osgi runtime
-    service = new WorkflowServiceImpl(solrRoot) {
+    // create an operation handler for our workflows
+    operationHandler = new TestWorkflowOperationHandler();
+
+    // instantiate a service implementation and its DAO, overriding the methods that depend on the osgi runtime
+    service = new WorkflowServiceImpl(storageRoot) {
       @Override
       protected WorkflowOperationHandler selectOperationHandler(WorkflowOperationDefinition operation) {
         return operationHandler;
@@ -68,9 +72,9 @@ public class WorkflowServiceImplTest {
         return definition1.getTitle().equals(name) ? definition1 : null;
       }
     };
-    
-    // activate the service and build some objects for it to work with
+    service.setDao(new WorkflowServiceImplDaoDerbyImpl());
     service.activate(null);
+
     try {
       definition1 = WorkflowBuilder.getInstance().parseWorkflowDefinition(
               WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-1.xml"));
@@ -78,8 +82,6 @@ public class WorkflowServiceImplTest {
       mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
       mediapackage1 = mediaPackageBuilder.loadFromManifest(
               WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-1.xml"));
-      mediapackage2 = mediaPackageBuilder.loadFromManifest(
-              WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-2.xml"));
     } catch (Exception e) {
       Assert.fail(e.getMessage());
     }
@@ -87,53 +89,67 @@ public class WorkflowServiceImplTest {
 
   @AfterClass
   public static void teardown() {
-    // TODO For some reason, deactivating solr throws exceptions
-    // service.deactivate();
+    System.out.println("All tests finished... tearing down...");
+    service.deactivate();
     service = null;
     operationHandler = null;
   }
     
   @Test
   public void testGetWorkflowOperationById() {
-    operationHandler = new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false);
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
+
+    // Even the sample workflows take time to complete.  Let the workflow finish before verifying state in the DB
+    while( ! instance.getState().equals(State.SUCCEEDED)) {
+      System.out.println("Waiting for workflow to complete...");
+      try { Thread.sleep(1000); } catch(InterruptedException e) {}
+    }
+    
     // verify that we can retrieve the workflow instance from the service by its ID
     WorkflowInstance instanceFromDb = service.getWorkflowById(instance.getId());
-
     Assert.assertNotNull(instanceFromDb);
     MediaPackage mediapackageFromDb = instanceFromDb.getSourceMediaPackage();
     Assert.assertNotNull(mediapackageFromDb);
     Assert.assertEquals(mediapackage1.getIdentifier().toString(),
             mediapackageFromDb.getIdentifier().toString());
-    // cleanup for the next test
-    service.removeFromDatabase(instance.getId());
-  }
+    Assert.assertEquals(1, service.countWorkflowInstances());
 
-  // FIXME The removeFromDatabase() method is not working.  Combined with our inability to cleanly shut down solr,
-  // we now have no way of clearing the search index between test runs.  So we'll need to use a mediapackage with a
-  // different ID for each test.
+    // cleanup the database
+    service.removeFromDatabase(instance.getId());
+    
+    // And ensure that it's really gone
+    Assert.assertNull(service.getWorkflowById(instance.getId()));
+    Assert.assertEquals(0, service.countWorkflowInstances());
+  }
 
   @Test
   public void testGetWorkflowOperationByMediaPackageId() {
-    operationHandler = new TestWorkflowOperationHandler(new String[] {"op1", "op2"}, false);
-    WorkflowInstance instance = service.start(definition1, mediapackage2, null);
-    Assert.assertEquals(1,
-            service.getWorkflowsByMediaPackage(mediapackage2.getIdentifier().toString()).getItems().length);
-    // cleanup for the next test instance
+    // Ensure that the database doesn't have a workflow instance with this media package
+    Assert.assertEquals(0, service.countWorkflowInstances());
+    Assert.assertEquals(0, service.getWorkflowsByMediaPackage(mediapackage1.getIdentifier().toString()).size());
+
+    WorkflowInstance instance = service.start(definition1, mediapackage1, null);
+
+    // Even the sample workflows take time to complete.  Let the workflow finish before verifying state in the DB
+    while( ! instance.getState().equals(State.SUCCEEDED)) {
+      System.out.println("Waiting for workflow to complete...");
+      try { Thread.sleep(1000); } catch(InterruptedException e) {}
+    }
+
+    WorkflowSet workflowsInDb = service.getWorkflowsByMediaPackage(mediapackage1.getIdentifier().toString());
+    Assert.assertEquals(1, workflowsInDb.getItems().length);
+
+    // cleanup the database
     service.removeFromDatabase(instance.getId());
+    
+    // And ensure that it's really gone
+    Assert.assertNull(service.getWorkflowById(instance.getId()));
+    Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
-  class TestWorkflowOperationHandler implements WorkflowOperationHandler {
-    String[] operationsToHandle;
-    boolean wait;
-    TestWorkflowOperationHandler(String[] operationsToHandle, boolean wait) {
-      this.operationsToHandle = operationsToHandle;
-      this.wait = wait;
-    }
-    public String[] getOperationsToHandle() {return operationsToHandle;}
+  static class TestWorkflowOperationHandler implements WorkflowOperationHandler {
     public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediapackage1, null, wait);
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediapackage1, null, false);
     }
-    
   }
 }

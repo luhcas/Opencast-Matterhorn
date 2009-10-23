@@ -99,8 +99,7 @@ public class SolrIndexManager {
   }
 
   /**
-   * Posts the media package to solr. Depending on what is referenced in the media package, the method might create one
-   * or two entries: one for the episode and one for the series that the episode belongs to.
+   * Posts the workflow instance to solr.
    * 
    * @param workflow
    *          the workflow instance
@@ -113,12 +112,9 @@ public class SolrIndexManager {
     
     SolrUpdateableInputDocument episodeDocument = createInputDocument(workflow);
     
-    // If neither an episode nor a series was contained, there is no point in trying to update
-    if (episodeDocument == null)
+    if (episodeDocument == null) {
       return false;
-
-    // Add the episode metadata
-    if (episodeDocument != null) {
+    } else {
       solrRequest.add(episodeDocument);
     }
 

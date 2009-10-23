@@ -126,6 +126,20 @@ public class WorkflowBuilder {
     return writer.toString();
   }
 
+  public String toXml(WorkflowDefinition workflowDefinition) throws Exception {
+    Marshaller marshaller = jaxbContext.createMarshaller();
+    Writer writer = new StringWriter();
+    marshaller.marshal(workflowDefinition, writer);
+    return writer.toString();
+  }
+
+  public String toXml(WorkflowDefinitionList list) throws Exception {
+    Marshaller marshaller = jaxbContext.createMarshaller();
+    Writer writer = new StringWriter();
+    marshaller.marshal(list, writer);
+    return writer.toString();
+  }
+
   public WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage, Map<String, String> properties, boolean wait) {
     try {
       MediapackageType mp = MediapackageType.fromXml(mediaPackage.toXml());

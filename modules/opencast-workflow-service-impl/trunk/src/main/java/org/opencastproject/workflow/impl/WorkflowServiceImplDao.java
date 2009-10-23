@@ -13,27 +13,42 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.workflow.api;
+package org.opencastproject.workflow.impl;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.workflow.api.WorkflowDatabaseException;
+import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
 
-import java.util.Map;
+import java.io.File;
 
 /**
- * Manages {@link WorkflowDefinition}s and {@link WorkflowInstance}s.
+ * Provides persistence services to the workflow service implementation.
  */
-public interface WorkflowService {
-
+public interface WorkflowServiceImplDao {
   /**
-   * Returns the {@link WorkflowDefinition} identified by <code>name</code> or <code>null</code> if no such definition
-   * was found.
-   * 
-   * @param name
-   *          the workflow definition name
-   * @return the workflow
+   * Activate this DAO using the given filestorage directory.  It is the DAO implementation's responsibility to create
+   * this directory if necessary.
    */
-  WorkflowDefinition getWorkflowDefinitionByName(String name);
+  void activate(File storageDirectory);
+  
+  /**
+   * Deactivate this DAO
+   */
+  void deactivate();
+  
+  /**
+   * Update the workflow instance, or add it to persistence if it is not already stored.
+   * @param instance The workflow instance to store
+   */
+  void update(WorkflowInstance instance);
+  
+  /**
+   * Remove the workflow instance with this id.
+   * @param id The workflow instance id
+   */
+  void remove(String id);
+
 
   /**
    * Gets a {@link WorkflowInstace} by its ID.
@@ -103,86 +118,10 @@ public interface WorkflowService {
   WorkflowSet getWorkflowsByText(String text, int offset, int limit) throws WorkflowDatabaseException;
 
   /**
-   * Creates a new workflow instance and starts the workflow.
-   * 
-   * @param workflowDefinitionId
-   * @param mediaPackage
-   * @param properties
-   * @return The new workflow instance
-   */
-  WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
-          Map<String, String> properties);
-
-  /**
    * Gets the total number of workflows that have been created to date.
    * 
    * @return The number of workflow instances, regardless of their state
    */
   long countWorkflowInstances();
-  
-  /**
-   * Stops a running workflow instance.
-   * 
-   * @param workflowInstanceId
-   */
-  void stop(String workflowInstanceId);
-
-  /**
-   * Temporarily suspends a started workflow instance.
-   * 
-   * @param workflowInstanceId
-   */
-  void suspend(String workflowInstanceId);
-
-  /**
-   * Resumes a suspended workflow instance.
-   * 
-   * @param workflowInstanceId
-   */
-  void resume(String workflowInstanceId);
-
-  /**
-   * Updates the given workflow instance with regard to the media package, the properties and the operations involved.
-   * 
-   * @param workflowInstance
-   *          the workflow instance
-   */
-  void update(WorkflowInstance workflowInstance);
-
-  /**
-   * Gets the list of available workflow definitions. In order to be "available", a workflow definition must be
-   * registered and must have registered workflow operation handlers for each of the workflow definition's operations.
-   * 
-   * @return The list of currently available workflow definitions
-   */
-  WorkflowDefinitionList listAvailableWorkflowDefinitions();
-
-  /**
-   * Whether a workflow definition may be run at this moment. Every {@link WorkflowOperationDefinition} returned by
-   * {@link WorkflowDefinition#getOperations()} must be registered as a {@link WorkflowOperationHandler} for this
-   * {@link WorkflowDefinition} to be runnable.
-   * 
-   * @param workflowDefinition
-   *          The workflow definition to inspect for runnability
-   * @return Whether this workflow may be run
-   */
-  boolean isRunnable(WorkflowDefinition workflowDefinition);
-
-  /**
-   * Registers a new {@link WorkflowDefinition}
-   * 
-   * @param definition
-   *          The definition to register
-   */
-  void registerWorkflowDefinition(WorkflowDefinition definition);
-
-  /**
-   * Removes the {@link WorkflowDefinition} specified by this title from the list of available
-   * {@link WorkflowDefinition}s.
-   * 
-   * @param title
-   *          The title of the {@link WorkflowDefinition} to unregister
-   */
-  void unregisterWorkflowDefinition(String title);
 
 }

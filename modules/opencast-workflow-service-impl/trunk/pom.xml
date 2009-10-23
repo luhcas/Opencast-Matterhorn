@@ -124,6 +124,11 @@
       <version>20040917</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>10.5.3.0_1</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -160,6 +165,7 @@
               org.tartarus.*,
               org.apache.solr.*,
               org.apache.lucene.*,
+              org.apache.derby.*
             </Private-Package>
             <Embed-Dependency>
               lucene-analyzers;inline=true,
@@ -174,7 +180,8 @@
               solr-lucene-queries;inline=true,
               solr-lucene-snowball;inline=true,
               solr-lucene-spellchecker;inline=true,
-              stax-utils;inline=true
+              stax-utils;inline=true,
+              derby;inline=true
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/workflow-service.xml,

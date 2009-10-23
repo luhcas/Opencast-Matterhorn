@@ -85,7 +85,8 @@ public class WorkflowSetImpl implements WorkflowSet {
    * @see org.opencastproject.WorkflowSet.impl.SearchResult#getItems()
    */
   public WorkflowInstance[] getItems() {
-    return resultSet.toArray(new WorkflowInstance[resultSet.size()]);
+    return resultSet == null || resultSet.size() == 0 ? new WorkflowInstance[0] :
+      resultSet.toArray(new WorkflowInstance[resultSet.size()]);
   }
 
   /**

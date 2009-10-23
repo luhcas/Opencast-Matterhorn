@@ -20,6 +20,7 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -224,6 +225,35 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   
   public void setWorkflowOperationDefinitionList(WorkflowOperationDefinitionList workflowOperationDefinitionList) {
     this.workflowOperationDefinitionList = workflowOperationDefinitionList;
+  }
+
+  public String toString() {
+    return new ToStringBuilder(this).append(this.id).append(this.title).append(this.description).toString();
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (!(obj instanceof WorkflowInstanceImpl))
+      return false;
+    WorkflowInstanceImpl other = (WorkflowInstanceImpl) obj;
+    if (id == null) {
+      if (other.id != null)
+        return false;
+    } else if (!id.equals(other.id))
+      return false;
+    return true;
   }
 
 }
