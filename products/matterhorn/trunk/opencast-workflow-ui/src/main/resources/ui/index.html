@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <link href="infusion-1.1.1/css/fss-reset.css" rel="stylesheet" type="text/css" />
+    <link href="infusion-1.1.1/css/fss-layout.css" rel="stylesheet" type="text/css" />
+    <link href="css/workflowControler.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" src="js/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="js/workflowControler.js"></script>
+    <script type="text/javascript" src="js/workflowUI.js"></script>
+    <script type="text/javascript" src="js/workflowUI.events.js"></script>
+
+  </head>
+  <body onload="workflowUI.init();"><div id="workflowControler">
+
+    <table id="evil-layout" cellpadding="0px;" cellspacing="0" border="0">
+        <tr id="upperRow">
+    
+            <!-- upper left area -->
+            <td id="upperLeft" class="contentcell"><div class="contentbox heading-background">
+                <center><h3>Workflows</h3></center>
+            </div></td>
+            
+            <!-- upper right area -->
+            <td id="upperRight" class="contentcell"><div class="contentbox heading-background">
+
+                <!-- auto update check box -->
+                <div id="autoUpdate-container">
+                    <input type="checkbox" id="autoUpdate" checked="true">
+                    <span class="align-vertical">update automatically</span>
+                </div>
+
+                <!-- table captions -->
+                <span class="tableCaption" style="left:2%;"><b>Workflow</b></span>
+                <span class="tableCaption" style="left:34%;"><b>current Operation</b></span>
+                <span class="tableCaption" style="left:66%;"><b>Media package</b></span>
+            </div></td>
+            
+        </tr>
+        <tr id="lowerRow">
+            
+            <!-- lower left area -->
+            <td id="lowerLeft" class="contentcell"><div class="contentbox sidebar-background">
+
+                <!-- state select buttons -->
+                <ul class="selectButton-list">
+                    <li class="selectButton selectButton-active" onclick="workflowUIevent.stateSelected(workflowControler.STATE.ALL, this);">
+                        <div class="icon icon-all">&nbsp;</div>
+                        All
+                    </li>
+                    <li class="selectButton" onclick="workflowUIevent.stateSelected(workflowControler.STATE.RUNNING, this);">
+                        <div class="icon icon-running">&nbsp;</div>
+                        Running
+                    </li>
+                    <li class="selectButton" onclick="workflowUIevent.stateSelected(workflowControler.STATE.PAUSED, this);">
+                        <div class="icon icon-pending">&nbsp;</div>
+                        Pending
+                    </li>
+                    <li class="selectButton" onclick="workflowUIevent.stateSelected(workflowControler.STATE.FAILED, this);">
+                        <div class="icon icon-failed">&nbsp;</div>
+                        Failed
+                    </li>
+                    <li class="selectButton" onclick="workflowUIevent.stateSelected(workflowControler.STATE.SUCCEEDED, this);">
+                        <div class="icon icon-finished">&nbsp;</div>
+                        Finished
+                    </li>
+                </ul>
+
+
+            </div></td>
+
+            <!-- lower right area -->
+            <td id="lowerRight" class="contentcell"><div class="contentbox workflowList">
+
+                <div class="workflowListItem-container">
+                    <table width="98%" class="workflowListItem-header">
+                        <tr>
+                            <td width="30%">
+                                <b class="workflowListItem-header-Title">WorkflowInstance #1</b>
+                            </td>
+                            <td width="30%">
+                                Transcode and distribute
+                            </td>
+                            <td  width="30%">
+                                Traditional pirate songs and rituals
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="workflowListItem-content">
+                        <div class="hline"></div>
+						<select>
+                            <option>Review</option>
+                            <option>Transcode and Distribute</option>
+                        </select>
+                        <span class="icon icon-play align-vertical"></span>
+                        &nbsp;
+                        &nbsp;
+                        <span class="icon icon-pause align-vertical"></span>
+                        <span class="icon icon-stop align-vertical"></span>
+						<div class="hline"></div>
+                        <table class="workflowlistItem-info-container">
+                            <tr>
+                                <td class="contentcell half-width" valign="top"><div class="contentbox">
+                                    <p><b>MediaPackage</b></p>
+                                    <table>
+                                        <tr>
+                                            <td valign="top">
+                                                Title:
+                                            </td>
+                                            <td valign="top">
+                                                Traditional pirate songs and rituals
+                                            </td>
+                                        </tr>
+                                         <tr>
+                                            <td valign="top">
+                                                Recorded:
+                                            </td>
+                                            <td valign="top">
+                                                2007-12-05 13:40:00
+                                                &nbsp;&nbsp;
+                                                Duration: 01:15:25
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td valign="top">
+                                                Creator:
+                                            </td>
+                                            <td valign="top">
+                                                Long-John Silva
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div></td>
+                                <td width="5px">
+                                    &nbsp;
+                                </td>
+                                <td class="contentcell half-width" valign="top"><div class="contentbox">
+                                        <b>Workflow Log</b>
+                                        <table class="operationsLog">
+                                            <tr class="operationsLog-header">
+                                                <td width="60%"><b class="colHeading">Operation</b></td>
+                                                <td><b class="colHeading">started<b></td>
+                                                <td><b class="colHeading">ended<b></td>
+                                                <td></td>
+                                            </tr>
+                                            <tr class="evenRow">
+                                                <td>
+                                                    Transcode media
+                                                </td>
+                                                <td>
+                                                    13:21:23
+                                                </td>
+                                                <td>
+                                                    13:24:00
+                                                </td>
+                                                <td>
+                                                    <div class="icon icon-finished"></div>
+                                                </td>
+                                            </tr>
+                                            <tr class="oddRow">
+                                                <td>
+                                                    Distribute to Sakai
+                                                </td>
+                                                <td>
+                                                    13:24:05
+                                                </td>
+                                                <td>
+                                                    13:25:02
+                                                </td>
+                                                <td>
+                                                    <div class="icon icon-finished"></div>
+                                                </td>
+                                            </tr>
+                                            <tr class="evenRow">
+                                                <td>
+                                                    Distribute to iTunes
+                                                </td>
+                                                <td>
+                                                    13:25:03
+                                                </td>
+                                                <td>
+                                                    13:30:10
+                                                </td>
+                                                <td>
+                                                    <div class="icon icon-failed"></div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                </div></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+            </div></td>
+
+        </tr>
+    </table>
+
+  </div></body>
+</html>
