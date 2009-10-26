@@ -14,7 +14,7 @@ uploadManager.init = function() {
         file_upload_limit : 0,
         file_queue_limit : 0,
         file_post_name : "mediafile",
-        debug: true,
+        debug: false,
 
         button_placeholder_id : "uploader",
         button_width: 60,
@@ -35,7 +35,7 @@ uploadManager.startUpload = function() {
     uploadManager.collectMetadata();
     // give metadata to uploader
     var list = "";
-    var url = "http://localhost:8080/ingest/rest/addMediaPackage";
+    var url = "../rest/addMediaPackage";
 
     for (key in uploadManager.metadata) {
         list += "[" + key + "]:" + uploadManager.metadata[key] + "\n";
@@ -52,8 +52,7 @@ uploadManager.cancelUpload = function() {
 }
 
 uploadManager.collectMetadata = function() {
-    uploadManager.metadata = { submitter   : UI.$("publisher").value,
-                               title       : UI.$("title").value,
+    uploadManager.metadata = { title       : UI.$("title").value,
                                presenter   : UI.$("contributor").value,
                                description : UI.$("description").value,
                                language    : UI.$("language").value

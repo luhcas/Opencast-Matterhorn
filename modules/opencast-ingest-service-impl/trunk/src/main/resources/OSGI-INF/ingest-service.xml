@@ -6,8 +6,6 @@
     <provide interface="org.opencastproject.ingest.api.IngestService" />
     <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
-  <reference name="REPO" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository" 
+  <reference name="IR" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository" 
   cardinality="1..1" policy="static" bind="setWorkingFileRepository" />
-  <reference name="INSPECT" interface="org.opencastproject.inspection.api.MediaInspectionService" 
-  cardinality="1..1" policy="static" bind="setMediaInspection" />
 </component>

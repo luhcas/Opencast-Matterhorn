@@ -28,7 +28,7 @@ uploadEvents.btnCancelUpload = function() {
 
 uploadEvents.btnAnotherUpload = function() {
     uploadUI.log("EVENT: " + "'Upload another file' button clicked");
-    UI.load("uploadform", "stage");
+    UI.load("version3", "stage");
 }
 
 
@@ -66,5 +66,5 @@ uploadEvents.uploadComplete = function(file) {
 
 uploadEvents.uploadError = function(file, code, message) {
     uploadUI.hideProgressOverlay();
-    uploadUI.warn(code + " " + message);
+    //uploadUI.warn(code + " " + message);
 }

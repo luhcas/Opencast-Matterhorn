@@ -1,0 +1,273 @@
+<style type="text/css">
+    .inputField {
+        width:350px;
+    }
+    #filename {
+        border:1px solid gray;
+        color:gray;
+        margin-left:8px;
+        width:73%;
+        display:inline-block;
+        margin-left:0px;
+        padding-left:3px;
+        vertical-align:top;
+        height:19px;
+        overflow:hidden;
+    }
+
+    .uploader {
+        display:inline-block;
+        width:1px;
+    }
+
+    .browseButton {
+        margin:0px;
+        width: 60px;
+        height: 20px;
+    }
+
+    .swfupload {
+        position: absolute;
+        z-index: 10;
+    }
+    .formBox-container {
+        width:600px;
+        max-width:600px;
+    }
+    .formBox {
+        width:100%;
+        border:1px solid silver;
+        padding:10px;
+    }
+    .formBox-head {
+        width:610px;
+        border:1px solid silver;
+        background:silver;
+        padding-left:10px;
+        margin-top:8px;
+    }
+    .labelCell {
+        text-align:right;
+        width:30%;
+    }
+    .formField {
+        width:90%;
+        vertical-align:middle;
+    }
+    .fieldTable {
+        width:100%;
+        margin-bottom:0px;
+    }
+    .required {
+        color:red;
+    }
+    .folder-head {}
+    .folder-content {
+        display:none;
+    }
+    .icon {
+        display:inline-block;
+        width:16px;
+        height:16px;
+        vertical-align:middle;
+    }
+    .icon-arrow-right {
+        background-image: url(img/arrow-right.png);
+    }
+    .icon-arrow-down {
+        background-image: url(img/arrow-down.png);
+    }
+    .icon-help {
+        background-image: url(img/help.png);
+    }
+    .halfWidth {
+        width:50%;
+        display:inline-block;
+        float:left;
+    }
+    .shortLabel {
+        width:30%;
+        display:inline-block;
+        float:left;
+    }
+    .checkbox {
+        vertical-align:middle;
+    }
+</style>
+
+<script type="text/javascript">
+
+    $('.folder-head').click(function(){
+        $(this).children('.fold-icon').toggleClass('icon-arrow-right');
+        $(this).children('.fold-icon').toggleClass('icon-arrow-down');
+        $(this).next().toggle('fast');
+        return false;
+    });
+
+    uploadManager.init();           // instantiate the swfUpload, init data
+
+</script>
+
+<!-- basic information -->
+<div class="formBox-container">
+<div class="formBox">
+    <form name="basicFrom" id="basicFrom">
+    <table class="fieldTable" border="0">
+        <tr>
+            <td class="labelCell" valign="top">
+                <span class="required">*</span>Title:
+            </td>
+            <td class="fieldCell" valign="top">
+                <input type="text" id="title" name="title" class="formField" onchange="uploadEvents.fieldChanged(this, this.value);">
+                <span class="icon icon-help" id="help_title" onclick="displayHelp(this, event);"></span>
+            </td>
+        </tr><tr>
+            <td class="labelCell" valign="top">
+                Presenter:
+            </td>
+            <td class="fieldCell" valign="top">
+                <input type="text" class="formField" id="contributor" name="contributor" onchange="uploadEvents.fieldChanged(this, this.value);">
+                <span class="icon icon-help" id="help_presenter" onclick="displayHelp(this, event);"></span>
+                <br>
+                <a href="javascript:alert('add additional presenters');">
+                    Add Additional Presenters
+                </a>
+            </td>
+        </tr><tr>
+            <td class="labelCell" valign="top">
+                Sponsoring Department:
+            </td>
+            <td class="fieldCell" valign="top">
+                <input type="text" class="formField" id="department" name="department" onchange="uploadEvents.fieldChanged(this, this.value);">
+                <span class="icon icon-help" id="help_department" onclick="displayHelp(this, event);"></span>
+            </td>
+        </tr>
+    </table>
+    </form>
+</div>
+</div>
+
+<!-- Additional Content Descriptors -->
+<div class="formBox-container">
+<div class="formBox-head folder-head">
+    <span class="fold-icon icon icon-arrow-right"></span>
+    <b style="vertical-align:middle;">Additional Content Descriptors<b/>
+</div>
+<div class="formBox folder-content">
+    <form name="additionalFrom" id="additionalFrom">
+    <table class="fieldTable" border="0">
+        <tr>
+            <td class="labelCell" valign="top">
+                Series:
+            </td>
+            <td class="fieldCell" valign="top">
+                <input type="text" class="formField" id="series" name="series" onchange="uploadEvents.fieldChanged(this, this.value);">
+                <span class="icon icon-help" id="help_series" onclick="displayHelp(this, event);"></span>
+            </td>
+        </tr><tr>
+            <td class="labelCell" valign="top">
+                Subject:
+            </td>
+            <td class="fieldCell" valign="top">
+                <input type="text" class="formField" id="subject" name="subject" onchange="uploadEvents.fieldChanged(this, this.value);">
+                <span class="icon icon-help" id="help_subject" onclick="displayHelp(this, event);"></span>
+            </td>
+        </tr><tr>
+            <td class="labelCell" valign="top">
+                Language:
+            </td>
+            <td class="fieldCell" valign="top">
+                <input type="text"  id="language" name="language" class="formField" onchange="uploadEvents.fieldChanged(this, this.value);">
+                <span class="icon icon-help" id="help_language" onclick="displayHelp(this, event);"></span>
+            </td>
+        </tr><tr>
+            <td class="labelCell" valign="top">
+                Description:
+            </td>
+            <td class="fieldCell" valign="top">
+                <textarea type="text" class="formField"  id="description" name="description" onchange="uploadEvents.fieldChanged(this, this.value);"></textarea>
+                <span class="icon icon-help"  id="help_description" onclick="displayHelp(this, event);" style="vertical-align:top;"></span>
+            </td>
+        </tr>
+    </table>
+    </form>
+</div>
+</div>
+
+<!--Distribution -->
+<div class="formBox-container">
+<div class="formBox-head"><b>Distribution<b/></div>
+<div class="formBox">
+    <form name="distributionFrom" id="distributionFrom">
+    <table class="fieldTable" border="0">
+        <tr>
+            <td class="labelCell" valign="top">
+                <span class="required">*</span>Distribution channel(s):
+            </td>
+            <td class="fieldCell" valign="top">
+                <div class="shortLabel">
+                    <input type="checkbox" id="distITunes" name="distITunes" value="itunes" class="checkbox">
+                    iTunesU
+                </div>
+                <div class="halfWidth">
+                    <input type="checkbox" id="distMatterhronMM" name="distMatterhornMM" value="materhornmm" class="checkbox">
+                    Matterhorn media module
+                </div>
+                <br>
+                <div class="shortLabel" style="clear:left;">
+                    <input type="checkbox" id="distYouTube" name="distYouTube" value="youtube" class="checkbox">
+                    YouTube
+                </div>
+                <div class="halfWidth">
+                    <input type="checkbox" id="distSakai" name="distSakai" value="sakai" class="checkbox">
+                    Sakai
+                </div>
+            </td>
+        </tr><tr>
+            <td class="labelCell" valign="top">
+                License:
+            </td>
+            <td class="formField" valign="top">
+                <select class="formField" onchange="uploadEvents.fieldChanged(this, this.value);">
+                    <option>CC</option>
+                </select>
+                <span class="icon icon-help" id="help_license" onclick="displayHelp(this, event);"></span>
+            </td>
+        </tr>
+    </table>
+    </from>
+</div>
+</div>
+
+<!--File upload -->
+<div class="formBox-container">
+<div class="formBox-head"><b>File Upload<b/></div>
+<div class="formBox">
+    <table class="fieldTable" border="0">
+        <tr>
+            <td class="labelCell" valign="top">
+                <span class="required">*</span>Media file:
+            </td>
+            <td class="fieldCell" valign="top">
+                <span id="filename" class="filename">No file selected</span>
+                <div id="uploader"></div>
+                <button type="button" id="browseButton" class="browseButton">Browse</button>
+                <span class="icon icon-help"  id="help_file" onclick="displayHelp(this, event);"></span>
+            </td>
+        </tr>
+    </table>
+</div>
+</div>
+
+<div style="width:600px;max-width:600%;margin-top:20px;text-align:center;">
+    <span>
+        <button type="button"  onclick="uploadEvents.btnSubmit();">
+            Submit
+        </button>
+        <button type="button" onclick="uploadEvents.btnClear();">
+            Clear Form
+        </button>
+        <br>&nbsp;<br>
+        <span class="required">*</span>Required
+    </span>
+</div>
