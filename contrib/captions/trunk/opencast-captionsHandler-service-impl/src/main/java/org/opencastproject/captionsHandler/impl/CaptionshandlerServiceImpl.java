@@ -17,25 +17,151 @@ package org.opencastproject.captionsHandler.impl;
 
 import org.opencastproject.captionsHandler.api.CaptionshandlerEntity;
 import org.opencastproject.captionsHandler.api.CaptionshandlerService;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.search.api.SearchResult;
+import org.opencastproject.search.api.SearchResultItem;
+import org.opencastproject.search.api.SearchService;
+import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
+import org.opencastproject.workflow.api.WorkflowOperationDefinitionListImpl;
+import org.opencastproject.workflow.api.WorkflowService;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * FIXME -- Add javadocs
+ * The captions handler service <br/>
+ * Search will provide means of searching for media packages without timed text catalogs <br/>
+ * The consumer will present a list of those media packages <br/>
+ * The consumer sends back timed text, which will be stored in the working file repository and added to the media package <br/>
+ * A new workflow (or the existing one with additional operations) will be kicked off (for redistribution including captions)
  */
 public class CaptionshandlerServiceImpl implements CaptionshandlerService, ManagedService {
+
+  public static final String CAPTIONS_ELEMENT = "captions";
+  public static final String CAPTIONS_TYPE_TIMETEXT = "TimeText";
+  public static final String CAPTIONS_TYPE_DESCAUDIO = "DescriptiveAudio";
+
   private static final Logger logger = LoggerFactory.getLogger(CaptionshandlerServiceImpl.class);
+
+  private Workspace workspace;
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
+  public void unsetWorkspace(Workspace workspace) {
+    this.workspace = null;
+  }
+
+  private SearchService searchService;
+  public void setSearchService(SearchService searchService) {
+    this.searchService = searchService;
+  }
+  public void unsetSearchService(SearchService searchService) {
+    this.searchService = null;
+  }
+
+  private WorkflowService workflowService;
+  public void setWorkflowService(WorkflowService workflowService) {
+    this.workflowService = workflowService;
+  }
+  public void unsetWorkflowService(WorkflowService workflowService) {
+    this.workflowService = null;
+  }
+
+  public CaptionshandlerServiceImpl() {
+    loadStuff();
+  }
+
+  @SuppressWarnings("unchecked")
+  public void updated(Dictionary props) throws ConfigurationException {
+    // Update any configuration properties here
+  }
+
+  /**
+   * Get the list of all captionable media packages,
+   * currently this will simply retrieve media packages by date,
+   * this will probably be overridden for local implementations
+   * 
+   * @param start the start item (for paging), <=0 for first item
+   * @param max the maximum items to return (for paging), <=0 for up to 50 items
+   * @param sort the sort order string (e.g. 'title asc')
+   * @return the list of MediaPackage or empty if none
+   */
+  public List<MediaPackage> getCaptionableMedia(int start, int max, String sort) {
+    List<MediaPackage> l = new ArrayList<MediaPackage>();
+    if (start < 0) {
+      start = 0;
+    }
+    if (max < 0 || max > 50) {
+      max = 50;
+    }
+    SearchResult result = searchService.getEpisodesByDate(max, start);
+    SearchResultItem[] items = result.getItems();
+    for (SearchResultItem searchResultItem : items) {
+      MediaPackage mp = searchResultItem.getMediaPackage();
+      l.add(mp);
+    }
+    return l;
+  }
+
+  /**
+   * Update a media package with some captions data
+   * 
+   * @param mediaId the media package id
+   * @param captionType the type of caption data (could be {@value #CAPTIONS_TYPE_TIMETEXT} or {@value #CAPTIONS_TYPE_DESCAUDIO} for example)
+   * @param data the captions data to store with the media package
+   * @return the updated media package
+   */
+  public MediaPackage updateCaptions(String mediaId, String captionType, InputStream data) {
+    if (mediaId == null || "".equals(mediaId)) {
+      throw new IllegalArgumentException("mediaId must be set");
+    }
+    if (captionType == null || "".equals(captionType)) {
+      throw new IllegalArgumentException("captionType must be set");
+    }
+    if (data == null) {
+      throw new IllegalArgumentException("data must be set");
+    }
+    // TODO is this the right way to get the media package from the id?
+    // find the media package given the id
+    SearchResult result = searchService.getEpisodeById(mediaId);
+    SearchResultItem[] items = result.getItems();
+    MediaPackage mp;
+    if (items.length > 0) {
+      mp = items[0].getMediaPackage();
+    } else {
+      throw new IllegalArgumentException("No media found with the given id: " + mediaId);
+    }
+    String mediaPackageElementID = CAPTIONS_ELEMENT+"-"+captionType;
+    workspace.put(mediaId, mediaPackageElementID, data);
+    // TODO do I need to get it again to find out the URL of the stuff I added?
+    // start off a workflow to indicate the captions just changed
+    WorkflowDefinitionImpl workflowDefinition = new WorkflowDefinitionImpl();
+    workflowDefinition.setTitle("Captions Added");
+    workflowDefinition.setDescription("Captions added workflow for media: " + mediaId);
+    // TODO what is this and what do I do with it?
+    workflowDefinition.setOperations(new WorkflowOperationDefinitionListImpl());
+    workflowService.start(workflowDefinition, mp, null);
+    return mp;
+  }
+
   
+  
+  
+  // DEFAULT STUFF
+
   Map<String, CaptionshandlerEntity> map;
   
-  public CaptionshandlerServiceImpl() {
+  public void loadStuff() {
     map = new HashMap<String, CaptionshandlerEntity>();
     CaptionshandlerEntityImpl entity = new CaptionshandlerEntityImpl();
     entity.setId("1");
@@ -44,11 +170,6 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     map.put("1", entity);
   }
   
-  @SuppressWarnings("unchecked")
-  public void updated(Dictionary props) throws ConfigurationException {
-    // Update any configuration properties here
-  }
-
   /**
    * {@inheritDoc}
    * @see org.opencastproject.captionsHandler.api.CaptionshandlerService#getEntity(java.lang.String)

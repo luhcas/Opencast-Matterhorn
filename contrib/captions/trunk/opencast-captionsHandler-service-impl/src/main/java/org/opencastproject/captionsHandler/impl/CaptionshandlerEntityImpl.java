@@ -18,7 +18,7 @@ package org.opencastproject.captionsHandler.impl;
 import org.opencastproject.captionsHandler.api.CaptionshandlerEntity;
 
 /**
- * FIXME -- Add javadocs
+ * This is the entity for the captions handler service
  */
 public class CaptionshandlerEntityImpl implements CaptionshandlerEntity {
   private String id;

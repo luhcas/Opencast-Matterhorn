@@ -13,25 +13,12 @@
  *  permissions and limitations under the License.
  *
  */
+
 package org.opencastproject.captionsHandler.api;
 
-/**
- * FIXME -- Add javadocs
- */
 public interface CaptionshandlerEntity {
-  /**
-   * FIXME -- Add javadocs
-   */
   String getId();
-
-  /**
-   * FIXME -- Add javadocs
-   */
   String getTitle();
-
-  /**
-   * FIXME -- Add javadocs
-   */
   String getDescription();
 }
 

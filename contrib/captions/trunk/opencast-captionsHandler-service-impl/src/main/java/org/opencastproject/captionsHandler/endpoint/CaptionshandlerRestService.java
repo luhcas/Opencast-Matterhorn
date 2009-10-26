@@ -34,24 +34,23 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 
 /**
- * FIXME -- Add javadocs
+ * This is the REST endpoint for the captions handler service
  */
 @Path("/")
 public class CaptionshandlerRestService {
   private static final Logger logger = LoggerFactory.getLogger(CaptionshandlerRestService.class);
+
   private CaptionshandlerService service;
   public void setService(CaptionshandlerService service) {
     this.service = service;
   }
-
   public void unsetService(CaptionshandlerService service) {
     this.service = null;
   }
-  
+
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("search")
@@ -79,9 +78,9 @@ public class CaptionshandlerRestService {
       IOUtils.closeQuietly(in);
     }
     // replace values as a test of receiving the values
-    json = json.replace("{page}", page.toString());
-    json = json.replace("{perPage}", perPage.toString());
-    json = json.replace("{count}", "3");
+    json = json.replace("\"page\": 0", "\"page\": "+page.toString());
+    json = json.replace("\"perPage\": 10", "\"perPage\": "+perPage.toString());
+    //json = json.replace("\"count\": 3", "\"count\": "+"3");
     return json;
   }
 

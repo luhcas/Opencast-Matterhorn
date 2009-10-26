@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * FIXME -- Add javadocs
+ * This defines the entities for the SOAP/REST services
  */
 
 @XmlType(name="captionsHandler-entity", namespace="http://captionsHandler.opencastproject.org/")
