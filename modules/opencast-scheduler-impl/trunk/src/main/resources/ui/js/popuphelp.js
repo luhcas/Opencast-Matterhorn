@@ -33,5 +33,3 @@ function resetHelp() {
   helpBox.style.top = -10 - helpBox.offsetHeight;
   helpBox.style.display = "none";
 }
-
-
