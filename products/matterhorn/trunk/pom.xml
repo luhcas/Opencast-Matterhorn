@@ -38,7 +38,7 @@
         <module>opencast-authentication-api</module>
         <module>opencast-capture-service-api</module> 
         <module>opencast-capture-service-impl</module> 
-        <module>opencast-composer-service-api</module>
+    	<module>opencast-composer-service-api</module>
         <module>opencast-composer-service-impl</module>
         <module>opencast-conductor-api</module>
         <module>opencast-conductor</module>
@@ -61,13 +61,15 @@
         <module>opencast-search-service-impl</module>
         <module>opencast-stream</module>
         <module>opencast-util</module>
-        <module>opencast-workflow-service-api</module>
+	<module>opencast-workflow-service-api</module>
         <module>opencast-workflow-service-impl</module>
         <module>opencast-workflow-ui</module>
         <module>opencast-working-file-repository-service-api</module>
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
+	<module>opencast-scheduler-api</module>
+	<module>opencast-scheduler-impl</module>
      </modules>
     </profile>
     <profile>
