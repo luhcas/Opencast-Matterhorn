@@ -100,11 +100,14 @@ public class WorkingFileRepositoryRestEndpoint {
   @GET
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   @Path("{mediaPackageID}/{mediaPackageElementID}")
-  public InputStream get(
+  public Response get(
       @PathParam("mediaPackageID") String mediaPackageID,
       @PathParam("mediaPackageElementID") String mediaPackageElementID) {
     checkService();
-    return repo.get(mediaPackageID, mediaPackageElementID);
+    URL url = repo.getURL(mediaPackageID, mediaPackageElementID);
+    String fileName = url.getFile().substring(url.getPath().lastIndexOf('/') + 1);
+    return Response.ok().header("Content-disposition", "attachment; filename=" + fileName)
+      .entity(repo.get(mediaPackageID, mediaPackageElementID)).build();
   }
 
   @GET
