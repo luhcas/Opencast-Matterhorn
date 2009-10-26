@@ -182,6 +182,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <configLocation>checkstyle.xml</configLocation>
+          <logViolationsToConsole>true</logViolationsToConsole>
           <headerLocation>header.txt</headerLocation>
           <excludes>**/package-info.java</excludes>
         </configuration>
