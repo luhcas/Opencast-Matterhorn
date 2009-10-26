@@ -25,12 +25,23 @@ import java.net.URL;
  */
 public interface WorkingFileRepository {
   /**
-   * Store the data stream under the given media package and element IDs.
+   * Store the data stream under the given media package and element IDs. Name of the
+   * file is equal to element ID.
    * @param mediaPackageID
    * @param mediaPackageElementID
    * @param in
    */
   void put(String mediaPackageID, String mediaPackageElementID, InputStream in);
+  
+  /**
+   * Store the data stream under the given media package and element IDs with filename as
+   * name of the file.
+   * @param mediaPackageID
+   * @param mediaPackageElementID
+   * @param filename
+   * @param in
+   */
+  void put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in);
   
   /**
    * Stream the file stored under the given media package and element IDs.

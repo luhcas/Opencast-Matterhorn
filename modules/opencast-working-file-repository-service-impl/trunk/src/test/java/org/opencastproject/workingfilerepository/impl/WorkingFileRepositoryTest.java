@@ -12,8 +12,8 @@ import java.io.InputStream;
 
 public class WorkingFileRepositoryTest {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryTest.class);
-  private String mediaPackageID = "media-package-1";
-  private String mediaPackageElementID = "element-1";
+  private String mediaPackageID = "working-file-test-media-package-1";
+  private String mediaPackageElementID = "working-file-test-element-1";
   private WorkingFileRepositoryImpl repo = new WorkingFileRepositoryImpl();
   
   @Before

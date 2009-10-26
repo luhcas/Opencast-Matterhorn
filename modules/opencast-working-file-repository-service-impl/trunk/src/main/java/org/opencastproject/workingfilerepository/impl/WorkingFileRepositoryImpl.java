@@ -42,12 +42,12 @@ import java.util.Dictionary;
 public class WorkingFileRepositoryImpl implements WorkingFileRepository, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryImpl.class);
   private String rootDirectory = null;
-  
+
   public WorkingFileRepositoryImpl() {
     rootDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo";
     createRootDirectory();
   }
-  
+
   public void delete(String mediaPackageID, String mediaPackageElementID) {
     checkId(mediaPackageID);
     checkId(mediaPackageElementID);
@@ -56,8 +56,17 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     if(f.canWrite()) {
       f.delete();
     } else {
-      throw new SecurityException("Can not delete file at mediaPackage/mediaElement: " +
-          mediaPackageID + "/" + mediaPackageElementID);
+      throw new SecurityException("Can not delete file in mediaPackage/mediaElement: " +
+              mediaPackageID + "/" + mediaPackageElementID);
+    }
+    File d = getDirectory(mediaPackageID, mediaPackageElementID);
+    logger.info("Attempting to delete directory " + d.getAbsolutePath());
+    if(d.canWrite()){
+      d.delete();
+    }
+    else{
+      throw new SecurityException("Can not delete directory at mediaPackage/mediaElement " +
+              mediaPackageID + "/" + mediaPackageElementID);
     }
   }
 
@@ -72,23 +81,34 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       throw new RuntimeException(e);
     }
   }
-  
+
   public URL getURL(String mediaPackageID, String mediaPackageElementID) throws MalformedURLException {
-    return getFile(mediaPackageID, mediaPackageElementID).toURI().toURL();
+    return getFile(mediaPackageID, mediaPackageElementID).toURL();
   }
 
-  public void put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
+  public void put(String mediaPackageID, String mediaPackageElementID, InputStream in){
+    put(mediaPackageID, mediaPackageElementID, mediaPackageElementID, in);
+  }
+
+  public void put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
     checkId(mediaPackageID);
     checkId(mediaPackageElementID);
-    File f = getFile(mediaPackageID, mediaPackageElementID);
+    File f = new File(rootDirectory + File.separator + mediaPackageID + File.separator + 
+            mediaPackageElementID + File.separator + filename);
     logger.info("Attempting to write a file to " + f.getAbsolutePath());
     try {
       if( ! f.exists()) {
         logger.info("Attempting to create a new file at " + f.getAbsolutePath());
-        File mediaPackageDirectory = new File(rootDirectory + File.separator + mediaPackageID);
-        if( ! mediaPackageDirectory.exists()) {
-          logger.info("Attempting to create a new directory at " + mediaPackageDirectory.getAbsolutePath());
-          FileUtils.forceMkdir(mediaPackageDirectory);
+        File mediaPackageElementDirectory = getDirectory(mediaPackageID, mediaPackageElementID);
+        if( ! mediaPackageElementDirectory.exists()) {
+          logger.info("Attempting to create a new directory at " + mediaPackageElementDirectory.getAbsolutePath());
+          FileUtils.forceMkdir(mediaPackageElementDirectory);
+        }
+        else{
+//          logger.error("Integrity error: directory " + mediaPackageID + "/" + mediaPackageElementID + 
+//                  " already exists, but does not contain " + filename);
+//          throw new RuntimeException("Element with ID: " + mediaPackageElementID + "already exists and does" + 
+//                  "not contain filename");
         }
         f.createNewFile();
       } else {
@@ -106,8 +126,20 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       throw new IllegalArgumentException("Invalid media package / element ID");
     }
   }
-  
+
   private File getFile(String mediaPackageID, String mediaPackageElementID) {
+    File directory = getDirectory(mediaPackageID, mediaPackageElementID);
+    String[] files = directory.list();
+    if(files.length != 1){
+      logger.error("Integrity error: Element directory " + mediaPackageID + "/" + mediaPackageElementID + 
+              "is empty or contains more than one element");
+      throw new RuntimeException("Directory " + mediaPackageID + "/" + mediaPackageElementID +
+              "does not contain exactly one element");
+    }
+    return new File(directory, files[0]);
+  }
+
+  private File getDirectory(String mediaPackageID, String mediaPackageElementID){
     return new File(rootDirectory + File.separator + mediaPackageID + File.separator + mediaPackageElementID);
   }
 
@@ -129,5 +161,4 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       }
     }
   }
-
 }
