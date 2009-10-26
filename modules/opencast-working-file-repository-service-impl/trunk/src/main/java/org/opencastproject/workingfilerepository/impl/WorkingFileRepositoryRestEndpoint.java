@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
@@ -78,8 +79,8 @@ public class WorkingFileRepositoryRestEndpoint {
       for(FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
         FileItemStream item = iter.next();
         if(item.isFormField()) continue;
-        repo.put(mediaPackageID, mediaPackageElementID, item.openStream());
-        return Response.ok("File stored for media package " + mediaPackageID + ", element " + mediaPackageElementID).build();
+        URL url = repo.put(mediaPackageID, mediaPackageElementID, item.getName(), item.openStream());
+        return Response.ok("File stored at " + url.toString()).build();
       }
     }
     return Response.serverError().status(400).build();
@@ -105,7 +106,18 @@ public class WorkingFileRepositoryRestEndpoint {
     checkService();
     return repo.get(mediaPackageID, mediaPackageElementID);
   }
-  
+
+  @GET
+  @Produces(MediaType.APPLICATION_OCTET_STREAM)
+  @Path("{mediaPackageID}/{mediaPackageElementID}/{fileName}")
+  public InputStream get(
+      @PathParam("mediaPackageID") String mediaPackageID,
+      @PathParam("mediaPackageElementID") String mediaPackageElementID,
+      @PathParam("fileName") String fileName) {
+    checkService();
+    return repo.get(mediaPackageID, mediaPackageElementID);
+  }
+
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
