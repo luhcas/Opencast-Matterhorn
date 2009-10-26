@@ -1,2 +1,153 @@
-FIXME: Please add runtime documentation for this service endpoint.
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Captions Handler Service REST Documentation</title>
+	<style type="text/css">
+	/* styles for the page */
+	fieldset {
+	   margin-top: 0.5em;
+	   width: 90%;
+	}
+	table {
+	   width: 100%;
+	}
+	.method_set_header {
+		padding-left: 0.5em;
+		padding-right: 0.5em;
+		font-size: 1.4em;
+		font-weight: bold;
+	}
+	.method_header {
+	   background-color: #FFC;
+	}
+	.method_header TH {
+        text-align: left;
+        padding: 0.3em;
+	}
+	.method TD {
+	   padding-left: 0.3em;
+	   padding-top: 0.1em;
+	   vertical-align: top;
+	}
+	.method_odd {
+	   background-color: #FFF;
+	}
+    .method_even {
+       background-color: #DDD;
+    }
+	</style>
+</head>
+<body>
+<h1>Captions Handler Service REST Documentation</h1>
 
+<fieldset>
+	<legend class="method_set_header">Read methods</legend>
+	<table cellpadding="0px" cellspacing="0px">
+		<thead>
+			<tr class="method_header">
+				<th width="20%">NAME</th>
+				<th>VALUE and NOTES</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr class="method_odd method">
+				<td>Method / Path:</td>
+				<td><tt>GET /search</tt></td>
+			</tr>
+			<tr class="method_even method">
+				<td>Description:</td>
+				<td>Searches for and retrieves a list of all media which needs to be captioned</td>
+			</tr>
+			<tr class="method_odd method">
+				<td>Optional parameters:</td>
+				<td>
+	                <tt>count=0</tt>: number of results to return per page (0 indicates all or maximum allowed)
+	                <br />
+	                <tt>startPage=0</tt>: the page of results to display (0 is first page)
+                    <br />
+                    <tt>sort=title asc</tt>: the sort order to return items in
+				</td>
+			</tr>
+			<tr class="method_even method">
+				<td>Response formats:</td>
+				<td><a href="http://json.org/">json</a> (<a href="../sample/search.json">sample</a>)</td>
+			</tr>
+			<tr class="method_odd method">
+				<td>Status codes</td>
+				<td>
+					200: OK, valid request, results returned
+					<br />
+					400: Bad Request, invalid arguments in request, error message
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</fieldset>
+
+<fieldset>
+	<legend class="method_set_header">Write methods</legend>
+    <table cellpadding="0px" cellspacing="0px">
+        <thead>
+            <tr class="method_header">
+                <th width="20%">NAME</th>
+                <th>VALUE and NOTES</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="method_odd method">
+                <td>Method / Path:</td>
+                <td><tt>PUT /add/{id}/{type}</tt></td>
+            </tr>
+            <tr class="method_even method">
+                <td>Description:</td>
+                <td>Updates a media item with captions data <br/>
+                    <tt>id</tt>: the media ID from the search result <br/>
+                    <tt>type</tt>: the media type from the search result
+                </td>
+            </tr>
+            <tr class="method_odd method">
+                <td>Optional parameters:</td>
+                <td>
+                    <em>NONE</em>
+                </td>
+            </tr>
+            <tr class="method_even method">
+                <td>Response formats:</td>
+                <td>
+                    <em>EMPTY</em>
+                </td>
+            </tr>
+            <tr class="method_odd method">
+                <td>Status codes</td>
+                <td>
+                    200: OK, data was added, result info in headers
+                    <br />
+                    400: Bad Request, data was not added, error message
+                </td>
+            </tr>
+            <tr class="method_even method">
+                <td>Notes:</td>
+                <td>Send the captions data in the body of the request</td>
+            </tr>
+        </tbody>
+    </table>
+</fieldset>
+
+<fieldset>
+	<legend class="method_set_header">General Notes</legend>
+	<ul>
+        <li>All paths above are relative to the REST endpoint base (something like http://your.server/captionsHandler/rest)</li>
+		<li>If the service is down or not working it will return a status 503, 
+		this means the the underlying service is not working and is either restarting or has failed</li>
+		<li>A status code 500 means a general failure has occurred which is not recoverable 
+		and was not anticipated. In other words, there is a bug! You should file an error report with
+		your server logs from the time when the error occurred: 
+		<a href="https://issues.opencastproject.org">Opencast Issue Tracker</a></li>
+	</ul>
+</fieldset>
+
+<h4>Service of <a href="http://www.opencastproject.org/" title="Opencast Project">Opencast</a> <a href="http://www.opencastproject.org/project/matterhorn" title="Opencast Matterhorn">Matterhorn</a></h4>
+</body>
+</html>

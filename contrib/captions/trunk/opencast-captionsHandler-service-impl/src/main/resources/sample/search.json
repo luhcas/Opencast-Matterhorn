@@ -1,7 +1,7 @@
 {
-    "page": {page},
-    "perPage": {perPage},
-    "count": {count},
+    "page": 0,
+    "perPage": 10,
+    "count": 3,
     "total": 3,
     "results": [
         {

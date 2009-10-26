@@ -8,6 +8,7 @@
   <service>
     <provide interface="org.opencastproject.captionsHandler.endpoint.CaptionshandlerRestService" />
   </service>
+  <!-- dynamic and 0..1 to allow the endpoint to work without the service, continue to serve up 503 and docs -->
   <reference name="service-impl" interface="org.opencastproject.captionsHandler.api.CaptionshandlerService"
     cardinality="0..1" policy="dynamic" bind="setService" unbind="unsetService" />
 </component>

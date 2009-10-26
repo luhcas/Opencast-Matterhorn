@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.captionsHandler.api.CaptionshandlerService" immediate="true">
-  <implementation class="org.opencastproject.captionsHandler.impl.CaptionshandlerServiceImpl" />
-  <property name="service.description" value="Captionshandler Service" />
-  <service>
-    <provide interface="org.opencastproject.captionsHandler.api.CaptionshandlerService" />
-    <provide interface="org.osgi.service.cm.ManagedService" />
-  </service>
-</component>
+<components xmlns="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <component name="org.opencastproject.captionsHandler.api.CaptionshandlerService"
+        immediate="true">
+        <implementation class="org.opencastproject.captionsHandler.impl.CaptionshandlerServiceImpl" />
+        <property name="service.description"
+            value="Captions Handler Service - handles captionable lookup and attachment of caption data" />
+        <!-- service I use -->
+        <reference interface="org.opencastproject.workspace.api.Workspace"
+            cardinality="1..1" policy="static" bind="setWorkspace" unbind="unsetWorkspace" />
+        <reference interface="org.opencastproject.search.api.SearchService"
+            cardinality="1..1" policy="static" bind="setSearchService" unbind="unsetSearchService" />
+        <reference interface="org.opencastproject.workflow.api.WorkflowService"
+            cardinality="1..1" policy="static" bind="setWorkflowService" unbind="unsetWorkflowService" />
+        <!-- services I provide -->
+        <service>
+            <provide interface="org.opencastproject.captionsHandler.api.CaptionshandlerService" />
+            <provide interface="org.osgi.service.cm.ManagedService" /><!-- for dynamic settings -->
+        </service>
+    </component>
+</components>
