@@ -96,6 +96,28 @@
     	<groupId>commons-fileupload</groupId>
     	<artifactId>commons-fileupload</artifactId>
     	<version>1.2.1</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.opencastproject</groupId>
+    	<artifactId>opencast-inspection-service-api</artifactId>
+    	<version>0.1-SNAPSHOT</version>
+    	<type>bundle</type>
+    </dependency>
+    <dependency>
+    	<groupId>commons-lang</groupId>
+    	<artifactId>commons-lang</artifactId>
+    	<version>2.4</version>
+    </dependency>
+    <dependency>
+    	<groupId>commons-collections</groupId>
+    	<artifactId>commons-collections</artifactId>
+    	<version>3.2.1</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.opencastproject</groupId>
+    	<artifactId>opencast-inspection-service-impl</artifactId>
+    	<version>0.1-SNAPSHOT</version>
+    	<type>bundle</type>
     </dependency>    
   </dependencies>
   <build>

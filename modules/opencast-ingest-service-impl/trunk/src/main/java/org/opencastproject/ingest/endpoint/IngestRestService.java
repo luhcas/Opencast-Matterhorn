@@ -58,7 +58,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 /**
- * Creates and augments Matterhorn MediaPackages using the api. Stores media into the Working File Repository.
+ * Creates and augments Matterhorn MediaPackages using the api. 
+ * Stores media into the Working File Repository.
  */
 @Path("/")
 public class IngestRestService {
@@ -197,8 +198,8 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
-  @Path("addMediaPackage")
-  public Response addMediaPackage(@Context HttpServletRequest request) {
+  @Path("ingestMediaPackage")
+  public Response ingestMediaPackage(@Context HttpServletRequest request) {
     try {
       MediaPackage mp = service.createMediaPackage();
       DublinCoreCatalog dcc = DublinCoreCatalogImpl.newInstance();
@@ -221,13 +222,27 @@ public class IngestRestService {
     } catch (Exception e) {
       return Response.serverError().status(400).build();
     }
-
   }
+  
+  @POST
+  @Path("addMediaPackage")
+  @Consumes("application/zip")
+  public Response addMediaPackage(InputStream mp)
+  {
+    try {
+      service.addMediaPackage(mp);
+    } catch (Exception e) {
+      return Response.serverError().status(400).build();
+    }
+    return Response.ok().build();
+  }
+  
+  
 
   @POST
   @Produces(MediaType.TEXT_HTML)
   @Path("ingest")
-  public Response ingestMediaPackage(@FormParam("mediaPackage") MediapackageType mpt) {
+  public Response ingest(@FormParam("mediaPackage") MediapackageType mpt) {
     try {
       MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
       service.ingest(mp);

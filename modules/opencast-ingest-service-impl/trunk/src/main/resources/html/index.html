@@ -2,11 +2,11 @@
   <head>
   </head>
   <body>
-    <div>This is the documentation for the REST endpoint for the ingest service.</div>
-    <hr /><br />
-    <div>Thin Client: A simple POST form ingests a new media package. Input types must conform to Opencast metadata.</div>
+    <div>This is the documentation for the REST endpoint for the ingest service. There are two ways how media can be ingested:</div>
+    <br /><hr />
+    <div>Thin Client: A simple POST form ingests a new media package. Input types of form fields must conform to Opencast metadata.</div>
     <table>
-    <form id="meta" name="meta" action="addMediaPackage" method="POST" enctype="multipart/form-data" accept-charset="UTF-8" >
+    <form id="meta" name="meta" action="ingest" method="POST" enctype="multipart/form-data" accept-charset="UTF-8" >
  	    <tr><td>submiter:</td><td><input type="text" name="publisher" id="publisher" /></td></tr>
 	    <tr><td>title:</td><td><input type="text" name="title" id="title" /></td></tr>
 	    <tr><td>presenter:</td><td><input type="text" name="contributor" id="contributor" /></td></tr>
@@ -16,5 +16,15 @@
 	    <tr><td><input type="submit" id="submit" value="Submit"/>
     </form>
     </table>
+	<br /><hr />
+    <div>Thick Client: Client must collect all the media, catalogs and attachments, create a MediaPackage as a manifest.xml and submit everything as a zipped file.</div>
+	COMMING SOON - THE BELOW FORM DOES NOT WORK FOR NOW
+	<table>
+    <form id="meta" name="meta" action="addMediaPackage" method="POST" enctype="multipart/form-data" accept-charset="UTF-8" >
+ 	    <tr><td>Compressed media package:</td><td><input type="file" name="mediafile" id="mediafile" /></td></tr>
+	    <tr><td><input type="submit" id="submit" value="Submit"/>
+    </form>
+    </table>
+    <div>* This form is sent by your browsers. Browsers usually limit the maximum size of sent files at 2 GB.</div>
   </body>
 </html>
