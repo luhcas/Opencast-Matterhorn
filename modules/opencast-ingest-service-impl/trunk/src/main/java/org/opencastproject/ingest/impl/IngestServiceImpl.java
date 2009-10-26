@@ -340,12 +340,6 @@ public class IngestServiceImpl implements IngestService, ManagedService {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.ingest.api.IngestService#setWorkingFileRepository(
-   * org.opencastproject.workingfilerepository.api.WorkingFileRepository)
-   */
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }

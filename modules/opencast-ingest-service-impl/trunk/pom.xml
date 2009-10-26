@@ -125,7 +125,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.ingest.* </Export-Package>
+            <Export-Package> org.opencastproject.ingest.impl, org.opencastproject.ingest.endpoint </Export-Package>
             <Import-Package>org.opencastproject.util, *</Import-Package>
             <Service-Component>
               OSGI-INF/ingest-service.xml,
