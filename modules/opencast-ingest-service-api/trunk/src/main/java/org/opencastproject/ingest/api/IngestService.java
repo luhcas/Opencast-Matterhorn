@@ -15,14 +15,12 @@
  */
 package org.opencastproject.ingest.api;
 
-import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.handle.HandleException;
 import org.opencastproject.util.ConfigurationException;
-import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -174,20 +172,4 @@ public interface IngestService {
    *          The specific Matterhorn MediaPackage
    */
   void discardMediaPackage(MediaPackage mediaPackage);
-
-  /**
-   * Injects the working file repository to be used by the ingest service
-   * 
-   * @param repo
-   *          The repository to be used
-   */
-  void setWorkingFileRepository(WorkingFileRepository repo);
-  
-  /**
-   * Injects the media inspection service to be used by the ingest service
-   * 
-   * @param inspection
-   *          The inspection service to be used
-   */
-  void setMediaInspection(MediaInspectionService inspection);
 }

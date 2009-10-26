@@ -18,6 +18,11 @@
       <version>0.1-SNAPSHOT</version>
     </dependency>   
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-workspace-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>   
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
@@ -69,39 +74,35 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-    	<groupId>org.opencastproject</groupId>
-    	<artifactId>opencast-working-file-repository-service-impl</artifactId>
-    	<version>0.1-SNAPSHOT</version>
-    	<type>bundle</type>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>2.5.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-inspection-service-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
     	<groupId>org.opencastproject</groupId>
-    	<artifactId>opencast-working-file-repository-service-api</artifactId>
+    	<artifactId>opencast-workspace-api</artifactId>
     	<version>0.1-SNAPSHOT</version>
-    	<type>bundle</type>
     </dependency>
     <dependency>
     	<groupId>org.opencastproject</groupId>
     	<artifactId>opencast-media</artifactId>
     	<version>0.1-SNAPSHOT</version>
-    	<type>bundle</type>
     </dependency>
     <dependency>
     	<groupId>org.opencastproject</groupId>
     	<artifactId>opencast-util</artifactId>
     	<version>0.1-SNAPSHOT</version>
-    	<type>bundle</type>
     </dependency>
     <dependency>
     	<groupId>commons-fileupload</groupId>
     	<artifactId>commons-fileupload</artifactId>
     	<version>1.2.1</version>
-    </dependency>
-    <dependency>
-    	<groupId>org.opencastproject</groupId>
-    	<artifactId>opencast-inspection-service-api</artifactId>
-    	<version>0.1-SNAPSHOT</version>
-    	<type>bundle</type>
     </dependency>
     <dependency>
     	<groupId>commons-lang</groupId>
@@ -113,12 +114,6 @@
     	<artifactId>commons-collections</artifactId>
     	<version>3.2.1</version>
     </dependency>
-    <dependency>
-    	<groupId>org.opencastproject</groupId>
-    	<artifactId>opencast-inspection-service-impl</artifactId>
-    	<version>0.1-SNAPSHOT</version>
-    	<type>bundle</type>
-    </dependency>    
   </dependencies>
   <build>
     <plugins>

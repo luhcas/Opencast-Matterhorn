@@ -30,7 +30,7 @@ import org.opencastproject.media.mediapackage.handle.Handle;
 import org.opencastproject.media.mediapackage.handle.HandleBuilder;
 import org.opencastproject.media.mediapackage.handle.HandleBuilderFactory;
 import org.opencastproject.media.mediapackage.handle.HandleException;
-import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
 import org.osgi.service.cm.ConfigurationException;
@@ -62,7 +62,7 @@ public class IngestServiceImpl implements IngestService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(IngestServiceImpl.class);
   private MediaPackageBuilder builder = null;
   private HandleBuilder handleBuilder = null;
-  private WorkingFileRepository repo;
+  private Workspace workspace;
   //private MediaInspectionService inspection;
   private String tempFolder;
   private String fs;
@@ -131,7 +131,7 @@ public class IngestServiceImpl implements IngestService, ManagedService {
         }
         String filename = element.getURL().getFile();
         filename = filename.substring(filename.lastIndexOf("/"));
-        repo.put(mp.getIdentifier().getLocalName(), 
+        workspace.put(mp.getIdentifier().getLocalName(), 
                 element.getIdentifier(), 
                 filename, 
                 element.getURL().openStream());
@@ -280,22 +280,22 @@ public class IngestServiceImpl implements IngestService, ManagedService {
       URL url = element.getURL();
       String elementId = element.getIdentifier();
       // element = inspection.inspect(url);
-      repo.put(mediaPackageId, elementId, getInputStreamFromURL(url));
-      URL newURL = repo.getURL(mediaPackageId, elementId);
+      workspace.put(mediaPackageId, elementId, getInputStreamFromURL(url));
+      URL newURL = workspace.getURL(mediaPackageId, elementId);
       element.setURL(newURL);
     }
     for (MediaPackageElement element : mp.getAttachments()) {
       URL url = element.getURL();
       String elementId = element.getIdentifier();
-      repo.put(mediaPackageId, elementId, getInputStreamFromURL(url));
-      URL newURL = repo.getURL(mediaPackageId, elementId);
+      workspace.put(mediaPackageId, elementId, getInputStreamFromURL(url));
+      URL newURL = workspace.getURL(mediaPackageId, elementId);
       element.setURL(newURL);
     }
     for (MediaPackageElement element : mp.getCatalogs()) {
       URL url = element.getURL();
       String elementId = element.getIdentifier();
-      repo.put(mediaPackageId, elementId, getInputStreamFromURL(url));
-      URL newURL = repo.getURL(mediaPackageId, elementId);
+      workspace.put(mediaPackageId, elementId, getInputStreamFromURL(url));
+      URL newURL = workspace.getURL(mediaPackageId, elementId);
       element.setURL(newURL);
     }
 
@@ -330,13 +330,13 @@ public class IngestServiceImpl implements IngestService, ManagedService {
   public void discardMediaPackage(MediaPackage mp) {
     String mediaPackageId = mp.getIdentifier().getLocalName();
     for (MediaPackageElement element : mp.getAttachments()) {
-      repo.delete(mediaPackageId, element.getIdentifier());
+      workspace.delete(mediaPackageId, element.getIdentifier());
     }
     for (MediaPackageElement element : mp.getCatalogs()) {
-      repo.delete(mediaPackageId, element.getIdentifier());
+      workspace.delete(mediaPackageId, element.getIdentifier());
     }
     for (MediaPackageElement element : mp.getTracks()) {
-      repo.delete(mediaPackageId, element.getIdentifier());
+      workspace.delete(mediaPackageId, element.getIdentifier());
     }
   }
 
@@ -346,8 +346,8 @@ public class IngestServiceImpl implements IngestService, ManagedService {
    * @see org.opencastproject.ingest.api.IngestService#setWorkingFileRepository(
    * org.opencastproject.workingfilerepository.api.WorkingFileRepository)
    */
-  public void setWorkingFileRepository(WorkingFileRepository repo) {
-    this.repo = repo;
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
   }
 
   public void setMediaInspection(MediaInspectionService inspection) {
@@ -386,8 +386,8 @@ public class IngestServiceImpl implements IngestService, ManagedService {
   private MediaPackage addContentToPackage(MediaPackage mp, String elementId, InputStream file,
           MediaPackageElement.Type type, MediaPackageElementFlavor flavor) 
   throws MediaPackageException, UnsupportedElementException, MalformedURLException {
-    repo.put(mp.getIdentifier().getLocalName(), elementId, file);
-    URL url = repo.getURL(mp.getIdentifier().getLocalName(), elementId);
+    workspace.put(mp.getIdentifier().getLocalName(), elementId, file);
+    URL url = workspace.getURL(mp.getIdentifier().getLocalName(), elementId);
     return addContentToPackage(mp, elementId, url, type, flavor);
   }
 

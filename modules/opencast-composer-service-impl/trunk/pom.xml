@@ -76,13 +76,11 @@
     	<groupId>org.opencastproject</groupId>
     	<artifactId>opencast-inspection-service-api</artifactId>
     	<version>0.1-SNAPSHOT</version>
-    	<type>bundle</type>
     </dependency>
     <dependency>
     	<groupId>org.opencastproject</groupId>
     	<artifactId>opencast-workspace-api</artifactId>
     	<version>0.1-SNAPSHOT</version>
-    	<type>bundle</type>
     </dependency>
   </dependencies>
   <build>

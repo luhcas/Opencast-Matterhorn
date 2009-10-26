@@ -82,15 +82,26 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     }
   }
 
-  public URL getURL(String mediaPackageID, String mediaPackageElementID) throws MalformedURLException {
-    return getFile(mediaPackageID, mediaPackageElementID).toURL();
+  public URL getURL(String mediaPackageID, String mediaPackageElementID) {
+    // FIXME Either make this configurable, try to determine it from the system, or refer to another service
+    // FIXME URL encode the IDs
+    File f = getFile(mediaPackageID, mediaPackageElementID);
+    try {
+      if(f.getName().equals(mediaPackageElementID)) {
+        return new URL("http://localhost:8080/files/" + mediaPackageID + "/" + mediaPackageElementID);
+      } else {
+        return new URL("http://localhost:8080/files/" + mediaPackageID + "/" + mediaPackageElementID + "/" + f.getName());
+      }
+    } catch (MalformedURLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  public void put(String mediaPackageID, String mediaPackageElementID, InputStream in){
-    put(mediaPackageID, mediaPackageElementID, mediaPackageElementID, in);
+  public URL put(String mediaPackageID, String mediaPackageElementID, InputStream in){
+    return put(mediaPackageID, mediaPackageElementID, mediaPackageElementID, in);
   }
 
-  public void put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
+  public URL put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
     checkId(mediaPackageID);
     checkId(mediaPackageElementID);
     File f = new File(rootDirectory + File.separator + mediaPackageID + File.separator + 
@@ -115,6 +126,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
         logger.info("Attempting to overwrite the file at " + f.getAbsolutePath());
       }
       IOUtils.copy(in, new FileOutputStream(f));
+      return getURL(mediaPackageID, mediaPackageElementID);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

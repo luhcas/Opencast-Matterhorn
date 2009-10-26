@@ -17,7 +17,6 @@ package org.opencastproject.ingest.impl;
 
 import static org.junit.Assert.fail;
 
-import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.media.mediapackage.Cover;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
@@ -26,17 +25,17 @@ import org.opencastproject.media.mediapackage.Mpeg7Catalog;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.handle.HandleException;
 import org.opencastproject.util.ConfigurationException;
-import org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryImpl;
+import org.opencastproject.workspace.api.Workspace;
 
+import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.net.URL;
 
 public class IngestServiceImplTest {
-	private IngestService service = null;
+	private IngestServiceImpl service = null;
 	private MediaPackage mediaPackage = null;
 	private URL urlTrack;
 	private URL urlCatalog;
@@ -45,8 +44,10 @@ public class IngestServiceImplTest {
 
 	@Before
 	public void setup() {
+	  Workspace workspace = EasyMock.createNiceMock(Workspace.class);
+	  EasyMock.replay(workspace);
 		service = new IngestServiceImpl();
-		service.setWorkingFileRepository(new WorkingFileRepositoryImpl());
+		service.setWorkspace(workspace);
 		//service.setMediaInspection(new MediaInspectionServiceImpl());
 		urlTrack = IngestServiceImplTest.class.getResource("/av.mov");
 		urlCatalog = IngestServiceImplTest.class.getResource("/mpeg-7.xml");
@@ -91,16 +92,8 @@ public class IngestServiceImplTest {
 
 	// TODO: Check problem with local url paths
 	@Test
-	public void testThickClient() {
-		try {
-			mediaPackage = service.addMediaPackage(urlPackage.openStream());
-		} catch (IOException e) {
-			fail("Unable to load media package");
-		} catch (MediaPackageException e) {
-			fail("Unable to consume a media package");
-		} catch (Exception e) {
-			fail("Unable to consume a media package");
-		}
+	public void testThickClient() throws Exception {
+	mediaPackage = service.addMediaPackage(urlPackage.openStream());
 		// TODO: listen to event of ingest finish check in file repo if files
 		// are really there.
 	}

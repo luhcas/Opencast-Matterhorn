@@ -80,8 +80,14 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     return repo.get(mediaPackageID, mediaPackageElementID);
   }
 
-  public void put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
+  public URL put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
     repo.put(mediaPackageID, mediaPackageElementID, in);
+    return getURL(mediaPackageID, mediaPackageElementID);
+  }
+
+  public URL put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in) {
+    repo.put(mediaPackageID, mediaPackageElementID, fileName, in);
+    return getURL(mediaPackageID, mediaPackageElementID);
   }
 
   public void setRepository(WorkingFileRepository repo) {
@@ -109,5 +115,13 @@ public class WorkspaceImpl implements Workspace, ManagedService {
         throw new RuntimeException(e);
       }
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workspace.api.Workspace#getURL(java.lang.String, java.lang.String)
+   */
+  public URL getURL(String mediaPackageID, String mediaPackageElementID) {
+    return repo.getURL(mediaPackageID, mediaPackageElementID);
   }
 }

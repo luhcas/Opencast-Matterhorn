@@ -16,7 +16,6 @@
 package org.opencastproject.workingfilerepository.api;
 
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -31,7 +30,7 @@ public interface WorkingFileRepository {
    * @param mediaPackageElementID
    * @param in
    */
-  void put(String mediaPackageID, String mediaPackageElementID, InputStream in);
+  URL put(String mediaPackageID, String mediaPackageElementID, InputStream in);
   
   /**
    * Store the data stream under the given media package and element IDs with filename as
@@ -40,8 +39,9 @@ public interface WorkingFileRepository {
    * @param mediaPackageElementID
    * @param filename
    * @param in
+   * @return The URL to access this file
    */
-  void put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in);
+  URL put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in);
   
   /**
    * Stream the file stored under the given media package and element IDs.
@@ -56,9 +56,8 @@ public interface WorkingFileRepository {
    * @param mediaPackageID
    * @param mediaPackageElementID
    * @return
-   * @throws MalformedURLException 
    */
-  URL getURL(String mediaPackageID, String mediaPackageElementID) throws MalformedURLException;
+  URL getURL(String mediaPackageID, String mediaPackageElementID);
   
   /**
    * Delete the file stored at the given media package and element IDs.
