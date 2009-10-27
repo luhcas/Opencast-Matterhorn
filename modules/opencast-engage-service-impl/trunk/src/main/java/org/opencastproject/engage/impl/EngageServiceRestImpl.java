@@ -15,12 +15,6 @@
  */
 package org.opencastproject.engage.impl;
 
-import org.opencastproject.engage.api.EngageService;
-
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -31,11 +25,17 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.io.IOUtils;
+import org.opencastproject.engage.api.EngageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * FIXME -- Add javadocs
+ * The REST endpoint 
  */
 @Path("/")
 public class EngageServiceRestImpl implements EngageService {
@@ -54,6 +54,9 @@ public class EngageServiceRestImpl implements EngageService {
 
   protected final String docs;
   
+  /**
+   * Creates an engage service 
+   */
   public EngageServiceRestImpl() {
     String docsFromClassloader = null;
     InputStream in = null;
@@ -90,11 +93,49 @@ public class EngageServiceRestImpl implements EngageService {
     return service.deliverPlayer(filename, mediaHost);
   }
   
+  public String deliverPlayer(String mediaPackageId) {
+    return service.deliverPlayer(mediaPackageId);
+  }
+  
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("available")
   public String listRecordings() {
     return service.listRecordings();
+  }
+  
+  
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("search")
+  public String search(@Context HttpServletRequest request) {
+    return "Suche";
+  }
+  
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("search/episodes")
+  public String episodesByDate(
+          @QueryParam("start") int start, 
+          @Context HttpServletRequest request) 
+  {
+    return service.getEpisodesByDate(start, 10); 
+  }
+  
+  public String getEpisodesByDate(int limit, int offset)
+  {
+    return null;
+  }
+  
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("watch/{name}/{localName}")
+  public String watch(
+          @PathParam("name") String name, 
+          @PathParam("localName") String localName, 
+          @Context HttpServletRequest request) {
+    
+    return deliverPlayer(name+"/"+localName);
   }
   
 }

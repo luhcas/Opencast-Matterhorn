@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.engage.api.EngageService" immediate="true">
+<component name="org.opencastproject.engage.api.EngageService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.engage.impl.EngageServiceImpl" />
   <property name="service.description" value="Engage Service" />
   <service>
     <provide interface="org.opencastproject.engage.api.EngageService" />
     <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
+  <reference name="service-impl" interface="org.opencastproject.search.api.SearchService" cardinality="1..1" policy="static" bind="setSearchService" />
 </component>
