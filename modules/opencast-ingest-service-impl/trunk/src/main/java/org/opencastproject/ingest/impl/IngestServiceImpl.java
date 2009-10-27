@@ -63,7 +63,7 @@ public class IngestServiceImpl implements IngestService, ManagedService {
   private MediaPackageBuilder builder = null;
   private HandleBuilder handleBuilder = null;
   private Workspace workspace;
-  //private MediaInspectionService inspection;
+  // private MediaInspectionService inspection;
   private String tempFolder;
   private String fs;
 
@@ -100,7 +100,7 @@ public class IngestServiceImpl implements IngestService, ManagedService {
         FileOutputStream fout = new FileOutputStream(tempPath + File.separator + fileName);
         byte[] buffer = new byte[1024];
         int trueCount;
-        while((trueCount = zipStream.read(buffer))!=-1) {
+        while ((trueCount = zipStream.read(buffer)) != -1) {
           fout.write(buffer, 0, trueCount);
         }
         zipStream.closeEntry();
@@ -108,10 +108,10 @@ public class IngestServiceImpl implements IngestService, ManagedService {
       }
       zipStream.close();
     } catch (FileNotFoundException e) {
-      logger.error("Error while decompressing media package! Files could not be written. "+e.getMessage());
+      logger.error("Error while decompressing media package! Files could not be written. " + e.getMessage());
       throw (e);
     } catch (IOException e) {
-      logger.error("Error while decompressing media package! "+e.getMessage());
+      logger.error("Error while decompressing media package! " + e.getMessage());
       throw (e);
     }
     // check media package and write data to file repo
@@ -119,22 +119,20 @@ public class IngestServiceImpl implements IngestService, ManagedService {
     MediaPackage mp;
     try {
       builder.setSerializer(new DefaultMediaPackageSerializerImpl(new File(tempPath)));
-      mp = builder.loadFromManifest(manifest.toURL().openStream());
-      mp.renameTo(handleBuilder.createNew(manifest.toURL()));
+      mp = builder.loadFromManifest(manifest.toURI().toURL().openStream());
+      mp.renameTo(handleBuilder.createNew(manifest.toURI().toURL()));
       builder.createNew();
       for (MediaPackageElement element : mp.elements()) {
         element.setIdentifier(UUID.randomUUID().toString());
         if (element.getElementType() == Type.Track) {
           // TODO: inspection and extension of missing metadata
-          //AbstractMediaPackageElement el = (AbstractMediaPackageElement)element;
-          //Track t = inspection.inspect(element.getURL());
+          // AbstractMediaPackageElement el = (AbstractMediaPackageElement)element;
+          // Track t = inspection.inspect(element.getURL());
         }
         String filename = element.getURL().getFile();
         filename = filename.substring(filename.lastIndexOf("/"));
-        workspace.put(mp.getIdentifier().getLocalName(), 
-                element.getIdentifier(), 
-                filename, 
-                element.getURL().openStream());
+        workspace.put(mp.getIdentifier().getLocalName(), element.getIdentifier(), filename, element.getURL()
+                .openStream());
       }
       removeDirectory(tempFolder);
     } catch (Exception e) {
@@ -314,10 +312,20 @@ public class IngestServiceImpl implements IngestService, ManagedService {
 
   private EventAdmin eventAdmin;
 
+  /**
+   * Sets {@code EventAdmin} reference.
+   * 
+   * @param eventAdmin
+   */
   protected void setEventAdmin(EventAdmin eventAdmin) {
     this.eventAdmin = eventAdmin;
   }
 
+  /**
+   * Sets {@link EventAdmin} reference to <code>null</code> when {@link EventAdmin} is no longer available.
+   * 
+   * @param eventAdmin
+   */
   protected void unsetEventAdmin(EventAdmin eventAdmin) {
     this.eventAdmin = null;
   }
@@ -345,7 +353,7 @@ public class IngestServiceImpl implements IngestService, ManagedService {
   }
 
   public void setMediaInspection(MediaInspectionService inspection) {
-    //this.inspection = inspection;
+    // this.inspection = inspection;
   }
 
   private InputStream getInputStreamFromURL(URL url) throws IOException {
@@ -360,10 +368,8 @@ public class IngestServiceImpl implements IngestService, ManagedService {
     }
   }
 
-  private MediaPackage addContentToPackage(
-          MediaPackage mp, String elementId, URL url, MediaPackageElement.Type type,
-          MediaPackageElementFlavor flavor) 
-  throws MediaPackageException, UnsupportedElementException {
+  private MediaPackage addContentToPackage(MediaPackage mp, String elementId, URL url, MediaPackageElement.Type type,
+          MediaPackageElementFlavor flavor) throws MediaPackageException, UnsupportedElementException {
     try {
       MediaPackageElement mpe = mp.add(url, type, flavor);
       mpe.setIdentifier(elementId);
@@ -378,8 +384,8 @@ public class IngestServiceImpl implements IngestService, ManagedService {
   }
 
   private MediaPackage addContentToPackage(MediaPackage mp, String elementId, InputStream file,
-          MediaPackageElement.Type type, MediaPackageElementFlavor flavor) 
-  throws MediaPackageException, UnsupportedElementException, MalformedURLException {
+          MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws MediaPackageException,
+          UnsupportedElementException, MalformedURLException {
     workspace.put(mp.getIdentifier().getLocalName(), elementId, file);
     URL url = workspace.getURL(mp.getIdentifier().getLocalName(), elementId);
     return addContentToPackage(mp, elementId, url, type, flavor);
@@ -395,6 +401,7 @@ public class IngestServiceImpl implements IngestService, ManagedService {
       }
     }
   }
+
   private void removeDirectory(String dir) {
     File f = new File(dir);
     if (f.exists()) {
