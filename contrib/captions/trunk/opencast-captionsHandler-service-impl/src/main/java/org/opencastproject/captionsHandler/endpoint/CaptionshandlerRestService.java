@@ -35,6 +35,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 /**
  * This is the REST endpoint for the captions handler service
@@ -51,10 +52,26 @@ public class CaptionshandlerRestService {
     this.service = null;
   }
 
+  /**
+   * Checks if the service or services are available,
+   * if not it handles it by returning a 503 with a message
+   * @param services an array of services to check
+   */
+  protected void checkNotNull(Object... services) {
+    if (services != null) {
+      for (Object object : services) {
+        if (object == null) {
+          throw new javax.ws.rs.WebApplicationException(Status.SERVICE_UNAVAILABLE);
+        }
+      }
+    }
+  }
+
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("search")
   public String getSearchResults(@QueryParam("count") Integer perPage, @QueryParam("startPage") Integer page, @QueryParam("sort") String sort) {
+    checkNotNull(service);
     if (page == null || page < 1) {
       page = 1;
     }
@@ -88,6 +105,7 @@ public class CaptionshandlerRestService {
   @PUT
   @Path("/add/{id}/{type}")
   public Response addCaption(@PathParam("id") String mediaId, @PathParam("type") String captionType, @Context HttpServletRequest request, InputStream stream) {
+    checkNotNull(service);
     InputStream is = null;
     try {
       is = request.getInputStream();
@@ -105,6 +123,13 @@ public class CaptionshandlerRestService {
       .header("_captionType", captionType)
       .header("_captionURL", url)
       .build();
+  }
+
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("/")
+  public String getDefault() {
+    return getDocumentation();
   }
   
   @GET
