@@ -4,7 +4,7 @@
   <!-- ===== Set general properties for this script ======== -->
 
   <property file="thirdparty.properties"/>
-  <property name="thirdparty.repository" value="http://releases.opencastproject.org/3rd%20Party" />
+  <property name="thirdparty.repository" value="http://downloads.opencastproject.org/3rd%20Party" />
     
   <!-- ===== Set properties for libpng ====================== -->
 
