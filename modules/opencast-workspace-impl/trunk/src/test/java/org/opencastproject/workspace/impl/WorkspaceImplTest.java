@@ -24,7 +24,7 @@ import java.io.File;
 public class WorkspaceImplTest {
   @Test
   public void testGetRemoteFile() {
-    WorkspaceImpl workspace = new WorkspaceImpl();
+    WorkspaceImpl workspace = new WorkspaceImpl("target/junit-workspace-rootdir");
     File f = workspace.get(getClass().getClassLoader().getResource("opencast_header.gif"));
     Assert.assertTrue(f.exists());
   }

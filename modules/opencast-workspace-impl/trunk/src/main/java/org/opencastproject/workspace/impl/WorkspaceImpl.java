@@ -44,10 +44,14 @@ public class WorkspaceImpl implements Workspace, ManagedService {
   private String rootDirectory = null;
 
   public WorkspaceImpl() {
-    rootDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workspace";
+    this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workspace");
+  }
+  public WorkspaceImpl(String rootDirectory) {
+    this.rootDirectory = rootDirectory;
     createRootDirectory();
   }
 
+    
   public File get(URL url) {
     String urlString = url.toString();
     String urlHash = DigestUtils.md5Hex(urlString);
