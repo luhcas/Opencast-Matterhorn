@@ -44,9 +44,14 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   private String rootDirectory = null;
 
   public WorkingFileRepositoryImpl() {
-    rootDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo";
+    this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo");
+  }
+
+  public WorkingFileRepositoryImpl(String rootDirectory) {
+    this.rootDirectory = rootDirectory;
     createRootDirectory();
   }
+
 
   public void delete(String mediaPackageID, String mediaPackageElementID) {
     checkId(mediaPackageID);
