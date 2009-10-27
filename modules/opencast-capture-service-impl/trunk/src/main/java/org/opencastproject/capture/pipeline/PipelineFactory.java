@@ -72,8 +72,8 @@ public class PipelineFactory {
           String deviceString = v4linfo.toString();
           if (deviceString.contains("Epiphan VGA2USB"))
             devName = DeviceName.VGA2USB;
-          else if (deviceString.contains("Hauppauge WinTV PVR-350"))
-            devName = DeviceName.PVR350;
+          else if (deviceString.contains("Hauppauge"))
+            devName = DeviceName.HAUP;
           else {
             logger.error("Device not recognized: " + devicePath);
             continue;
@@ -129,6 +129,7 @@ public class PipelineFactory {
       Element videoscale = ElementFactory.make("videoscale", null);
       Element videorate = ElementFactory.make("videorate", null);
       Element filter = ElementFactory.make("capsfilter", null);
+      Element ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
       Element mpeg2enc = ElementFactory.make("ffenc_mpeg2video", null);
       Element mpegtsmux = ElementFactory.make("mpegtsmux", null);
       Element filesink = ElementFactory.make("filesink", null);
@@ -137,7 +138,7 @@ public class PipelineFactory {
       filter.setCaps(Caps.fromString("video/x-raw-yuv, width=1024," + "height=768,framerate=30/1"));
       filesink.set("location", captureDevice.getOutputPath());
 
-      pipeline.addMany(v4lsrc, queue, videoscale, videorate, filter, mpeg2enc, mpegtsmux, filesink);
+      pipeline.addMany(v4lsrc, queue, videoscale, videorate, filter, ffmpegcolorspace, mpeg2enc, mpegtsmux, filesink);
 
       if (!v4lsrc.link(queue))
         error = formatPipelineError(captureDevice, v4lsrc, queue);
@@ -147,22 +148,24 @@ public class PipelineFactory {
         error = formatPipelineError(captureDevice, videoscale, videorate);
       else if (!videorate.link(filter))
         error = formatPipelineError(captureDevice, videorate, filter);
-      else if (!filter.link(mpeg2enc))
-        error = formatPipelineError(captureDevice, filter, mpeg2enc);
+      else if (!filter.link(ffmpegcolorspace))
+        error = formatPipelineError(captureDevice, filter, ffmpegcolorspace);
+      else if (!ffmpegcolorspace.link(mpeg2enc))
+        error = formatPipelineError(captureDevice, ffmpegcolorspace, mpeg2enc);
       else if (!mpeg2enc.link(mpegtsmux))
         error = formatPipelineError(captureDevice, mpeg2enc, mpegtsmux);
       else if (!mpegtsmux.link(filesink))
         error = formatPipelineError(captureDevice, mpegtsmux, filesink);
 
       if (error != null) {
-        pipeline.removeMany(v4lsrc, queue, videoscale, videorate, filter, mpeg2enc, mpegtsmux, filesink);
+        pipeline.removeMany(v4lsrc, queue, videoscale, videorate, filter, ffmpegcolorspace, mpeg2enc, mpegtsmux, filesink);
         logger.error(error);
         return false;
       }
     }
 
     /* Setup pipeline to capture from Hauppauge WinTV PVR-350 device */
-    else if (captureDevice.getName() == DeviceName.PVR350) {
+    else if (captureDevice.getName() == DeviceName.HAUP) {
 
       Element filesrc = ElementFactory.make("filesrc", null);
       Element queue = ElementFactory.make("queue", null);

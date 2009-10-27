@@ -20,7 +20,7 @@ package org.opencastproject.capture.pipeline;
  */
 public enum DeviceName {
   VGA2USB, /* the Epiphan VGA2USB frame grabber */
-  PVR350, /* Hauppauge WinTV PVR-350 video recorder */
+  HAUP, /* Hauppauge devices */
   ALSASRC
   /* Linux sound capture */
 }
