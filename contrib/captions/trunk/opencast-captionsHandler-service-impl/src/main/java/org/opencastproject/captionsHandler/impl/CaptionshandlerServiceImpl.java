@@ -18,12 +18,20 @@ package org.opencastproject.captionsHandler.impl;
 import org.opencastproject.captionsHandler.api.CaptionshandlerEntity;
 import org.opencastproject.captionsHandler.api.CaptionshandlerService;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
+import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
+import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationDefinitionListImpl;
 import org.opencastproject.workflow.api.WorkflowService;
+import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.cm.ConfigurationException;
@@ -32,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -46,10 +55,6 @@ import java.util.Map;
  * A new workflow (or the existing one with additional operations) will be kicked off (for redistribution including captions)
  */
 public class CaptionshandlerServiceImpl implements CaptionshandlerService, ManagedService {
-
-  public static final String CAPTIONS_ELEMENT = "captions";
-  public static final String CAPTIONS_TYPE_TIMETEXT = "TimeText";
-  public static final String CAPTIONS_TYPE_DESCAUDIO = "DescriptiveAudio";
 
   private static final Logger logger = LoggerFactory.getLogger(CaptionshandlerServiceImpl.class);
 
@@ -104,11 +109,21 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     if (max < 0 || max > 50) {
       max = 50;
     }
-    SearchResult result = searchService.getEpisodesByDate(max, start);
-    SearchResultItem[] items = result.getItems();
-    for (SearchResultItem searchResultItem : items) {
-      MediaPackage mp = searchResultItem.getMediaPackage();
+    // TODO make this actually get the captionable items
+    WorkflowSet wfs = workflowService.getWorkflowsByDate(start, max);
+    WorkflowInstance[] workflows = wfs.getItems();
+    for (WorkflowInstance workflow : workflows) {
+      MediaPackage mp = workflow.getSourceMediaPackage();
       l.add(mp);
+    }
+    if (l.isEmpty()) {
+      // TODO make this actually get the captionable items
+      SearchResult result = searchService.getEpisodesByDate(max, start);
+      SearchResultItem[] items = result.getItems();
+      for (SearchResultItem searchResultItem : items) {
+        MediaPackage mp = searchResultItem.getMediaPackage();
+        l.add(mp);
+      }
     }
     return l;
   }
@@ -133,6 +148,38 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     }
     // TODO is this the right way to get the media package from the id?
     // find the media package given the id
+    WorkflowSet wfs = workflowService.getWorkflowsByMediaPackage(mediaId);
+    WorkflowInstance[] workflows = wfs.getItems();
+    MediaPackage mp = null;
+    if (workflows.length > 0) {
+      mp = workflows[0].getSourceMediaPackage();
+      // get the MP and update it
+      String mediaPackageElementID = CAPTIONS_ELEMENT+captionType;
+      URL url = workspace.put(mediaId, mediaPackageElementID, data);
+
+      for (int i = 0; i < workflows.length; i++) {
+        WorkflowInstance workflow = workflows[i];
+        if (WorkflowInstance.State.SUCCEEDED.equals(workflow.getState())) {
+          MediaPackage mediaPackage = workflow.getSourceMediaPackage();
+          addCaptionToMediaPackage(mediaPackage, url);
+          WorkflowDefinitionImpl workflowDefinition = new WorkflowDefinitionImpl();
+          workflowDefinition.setTitle("Captions Added");
+          workflowDefinition.setDescription("Captions added workflow for media: " + mediaId);
+          // TODO what is this and what do I do with it?
+          workflowDefinition.setOperations(new WorkflowOperationDefinitionListImpl());
+          workflowService.start(workflowDefinition, mp, null);
+        } else if (WorkflowInstance.State.PAUSED.equals(workflow.getState())) {
+          MediaPackage mediaPackage = workflow.getSourceMediaPackage();
+          addCaptionToMediaPackage(mediaPackage, url);
+          workflowService.resume(workflow.getId());
+        } else {
+          
+        }
+      }
+    } else {
+      throw new IllegalArgumentException("No media found with the given id: " + mediaId);
+    }
+/*
     SearchResult result = searchService.getEpisodeById(mediaId);
     SearchResultItem[] items = result.getItems();
     MediaPackage mp;
@@ -151,10 +198,23 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     // TODO what is this and what do I do with it?
     workflowDefinition.setOperations(new WorkflowOperationDefinitionListImpl());
     workflowService.start(workflowDefinition, mp, null);
+*/
     return mp;
   }
 
-  
+  private void addCaptionToMediaPackage(MediaPackage mediaPackage, URL url) {
+    MediaPackageElementBuilder mpeb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+    try {
+      MediaPackageElement element = mpeb.elementFromURL(url, MediaPackageElement.Type.Attachment, MediaPackageElements.INDEFINITE_TRACK);
+      mediaPackage.add(element);
+    } catch (MediaPackageException e) {
+      e.printStackTrace();
+      throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier()+"):" + e);
+    } catch (UnsupportedElementException e) {
+      e.printStackTrace();
+      throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier()+"):" + e);
+    }
+  }
   
   
   // DEFAULT STUFF

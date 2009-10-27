@@ -12,6 +12,28 @@
     <version>0.1-SNAPSHOT</version>
   </parent>
   <dependencies>
+    <!-- matterhorn -->
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-media</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-workspace-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-workflow-service-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-search-service-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+
     <!-- internal -->
     <dependency>
       <groupId>commons-io</groupId>
