@@ -33,36 +33,39 @@ import java.io.File;
 import java.net.URL;
 
 public class DistributionServiceImplTest {
-  private DistributionServiceImpl service;
-  private MediaPackage mp;
+  
+  private DistributionServiceImpl service = null;
+  private MediaPackage mp = null;
+  private File distributionRoot = null;
 
   @Before
   public void setup() throws Exception {
+    File mediaPackageRoot = new File("./target/test-classes");
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
-    builder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("./target/test-classes")));
+    builder.setSerializer(new DefaultMediaPackageSerializerImpl(mediaPackageRoot));
     mp = builder.loadFromManifest(this.getClass().getResourceAsStream("/mediapackage.xml"));
-    service = new DistributionServiceImpl();
+    
+    distributionRoot = new File("./target/static");
+    service = new DistributionServiceImpl(distributionRoot);
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     service.setWorkspace(workspace);
-    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File("target/test-classes/media.mov"));
-    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File("target/test-classes/dublincore.xml"));
-    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File("target/test-classes/mpeg7.xml"));
-    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File("target/test-classes/attachment.txt"));
+
+    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "media.mov"));
+    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "dublincore.xml"));
+    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "mpeg7.xml"));
+    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "attachment.txt"));
     EasyMock.replay(workspace);
   }
 
   @After
   public void teardown() throws Exception {
-    File distDirectory = new File(System.getProperty("java.io.tmpdir") + File.separator + "opencast" +
-            File.separator + "static" + File.separator + mp.getIdentifier().getLocalName());
-    FileUtils.deleteDirectory(distDirectory);
+    FileUtils.deleteDirectory(distributionRoot);
   }
   
   @Test
   public void testDistribution() throws Exception {
     service.distribute(mp);
-    String staticDir = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "static";
-    File mpDir = new File(staticDir, mp.getIdentifier().getLocalName());
+    File mpDir = new File(distributionRoot, mp.getIdentifier().getLocalName());
     Assert.assertTrue(mpDir.exists());
     File mediaDir = new File(mpDir, "media");
     Assert.assertTrue(mediaDir.exists());

@@ -32,18 +32,36 @@ import java.io.File;
 import java.util.Dictionary;
 
 /**
- * Distributes media to the local media delivery directory.  TODO: Add metadata to the search service.
+ * Distributes media to the local media delivery directory. TODO: Add metadata to the search service.
  */
 public class DistributionServiceImpl implements DistributionService, ManagedService {
+  
   private static final Logger logger = LoggerFactory.getLogger(DistributionServiceImpl.class);
-
-  protected Workspace workspace;
-  protected String distributionDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" +
-    File.separator + "static";
+  public static final String DEFAULT_DISTRIBUTION_DIR = "opencast" + File.separator + "static"; 
+  protected Workspace workspace = null;
+  protected File distributionDirectory = null;
 
   /**
-   * Creates directories for the media package and subdirectories for media, metadata, and attachments.
-   * {@inheritDoc}
+   * Creates a local distribution service publishing to the default directory {@link #DEFAULT_DISTRIBUTION_DIR}
+   * located in <code>java.io.tmmpdir</code>.
+   */
+  public DistributionServiceImpl() {
+    this(new File(System.getProperty("java.io.tmpdir") + File.separator + DEFAULT_DISTRIBUTION_DIR));
+  }
+
+  /**
+   * Creates a local distribution service that will move files to the given directory.
+   * 
+   * @param distributionRoot
+   *          the distribution directory
+   */
+  public DistributionServiceImpl(File distributionRoot) {
+    this.distributionDirectory = distributionRoot;
+  }
+
+  /**
+   * Creates directories for the media package and subdirectories for media, metadata, and attachments. {@inheritDoc}
+   * 
    * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage)
    */
   public void distribute(MediaPackage mediaPackage) {
@@ -57,15 +75,15 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
       FileUtils.forceMkdir(mediaDirectory);
       FileUtils.forceMkdir(metadataDirectory);
       FileUtils.forceMkdir(attachmentsDirectory);
-      for(Track track : mediaPackage.getTracks()) {
+      for (Track track : mediaPackage.getTracks()) {
         File trackFile = workspace.get(track.getURL());
         FileUtils.copyFile(trackFile, new File(mediaDirectory, trackFile.getName()));
       }
-      for(Catalog catalog : mediaPackage.getCatalogs()) {
+      for (Catalog catalog : mediaPackage.getCatalogs()) {
         File catalogFile = workspace.get(catalog.getURL());
         FileUtils.copyFile(catalogFile, new File(metadataDirectory, catalogFile.getName()));
       }
-      for(Attachment attachment : mediaPackage.getAttachments()) {
+      for (Attachment attachment : mediaPackage.getAttachments()) {
         File attachmentFile = workspace.get(attachment.getURL());
         FileUtils.copyFile(attachmentFile, new File(attachmentsDirectory, attachmentFile.getName()));
       }
@@ -77,12 +95,15 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
   @SuppressWarnings("unchecked")
   public void updated(Dictionary properties) throws ConfigurationException {
   }
+
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
+
 }
