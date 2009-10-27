@@ -47,7 +47,7 @@ public class SearchServiceImplTest {
   private SearchServiceImpl service = null;
 
   /** The solr root directory */
-  private String solrRoot = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "searchindex";
+  private String solrRoot = "target" + File.separator + "opencast" + File.separator + "searchindex";
     
   @Before
   public void setup() {
