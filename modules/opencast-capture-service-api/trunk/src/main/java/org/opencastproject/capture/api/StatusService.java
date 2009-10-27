@@ -15,18 +15,21 @@
  */
 package org.opencastproject.capture.api;
 
-
 /**
- * FIXME -- Add javadocs
+ * OSGi service for querying the capture device's current state (MH-58)
  */
 public interface StatusService {
   /**
    * Gets the machine's current encoding status
+   * 
+   * @return the capture machine's current state
    */
   public State getState();
 
   /**
    * Sets the machine's current encoding status
+   * 
+   * @param state the state to change the machine into
    */
   public void setState(State state);
 }
