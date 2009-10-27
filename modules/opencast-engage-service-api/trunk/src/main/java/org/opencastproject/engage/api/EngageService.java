@@ -23,14 +23,30 @@ public interface EngageService {
   /** 
    * Returns an HTML page with a player that plays filename.
    * @param filename
+   * @deprecated
    * @return HTML page
    */
-  public String deliverPlayer(String filename, String mediaHost);
+  String deliverPlayer(String filename, String mediaHost);
   
   /**
    * Returns an HTML page that lists all available mediafiles.
+   * @deprecated
    * @return HTML page
    */
-  public String listRecordings();
+   String listRecordings();
+  
+  /** 
+   * Returns an HTML page with list of all available media packages in the search index.
+   * @param videoUrl
+   * @return HTML page
+   */
+  String getEpisodesByDate(int limit, int offset);
+  
+  /** 
+   * Returns an HTML page with a player that plays the mediaPackageId.
+   * @param episodeId
+   * @return HTML page
+   */
+  String deliverPlayer(String episodeId);
+  
 }
-
