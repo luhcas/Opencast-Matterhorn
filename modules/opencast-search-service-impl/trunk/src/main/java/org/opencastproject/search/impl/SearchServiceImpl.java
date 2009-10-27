@@ -125,7 +125,7 @@ public class SearchServiceImpl implements SearchService {
     InputStream in = SearchServiceImpl.class.getResourceAsStream(classpath);
     try {
       File file = new File(dir, FilenameUtils.getName(classpath));
-      log_.info("copying inputstream " + in + " to file to " + file);
+      log_.debug("copying inputstream " + in + " to file to " + file);
       IOUtils.copy(in, new FileOutputStream(file));
     } catch (IOException e) {
       throw new RuntimeException("Error copying solr classpath resource to the filesystem", e);
