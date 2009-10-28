@@ -15,20 +15,35 @@
  */
 package org.opencastproject.scheduler.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Date;
+
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 public class SchedulerServiceImplTest {
   private SchedulerService service = null;
+  private static final String storageRoot = "target" + File.separator + "scheduler-test-db";
+  
   @Before
   public void setup() {
-    service = new SchedulerServiceImpl();
+    // Clean up database
+    try { 
+      FileUtils.deleteDirectory(new File(storageRoot));
+    } catch (IOException e) {
+      Assert.fail(e.getMessage());
+    }    
+    service = new SchedulerServiceImpl(new File(storageRoot));
   }
 
   @After
@@ -38,14 +53,17 @@ public class SchedulerServiceImplTest {
   
   @Test
   public void testEventManagement() {
-    Assert.assertEquals("nothing", "nothing");
     SchedulerEvent event = new SchedulerEventImpl();
-    event.setID("rrolf1001"); event.setTitle("new recording"); event.setLocation("42/201");
-    SchedulerEvent event2 = service.addEvent(event);
-    Assert.assertEquals(service.getEvent(event2.getID()).getLocation(), event.getLocation());
+    event.setID("rrolf1001"); 
+    event.setTitle("new recording"); 
+    event.setStartdate(new Date (System.currentTimeMillis())); 
+    event.setEnddate(new Date (System.currentTimeMillis()+50000));
+    event.setLocation("42/201");
+    SchedulerEvent eventUpdated = service.addEvent(event);
+    Assert.assertEquals(service.getEvent(eventUpdated.getID()).getLocation(), event.getLocation());
     Assert.assertNotNull(service.getEvents(null));
-    service.removeEvent(event2.getID());
-    Assert.assertNull(service.getEvent(event2.getID()));
+    service.removeEvent(eventUpdated.getID());
+    Assert.assertNull(service.getEvent(eventUpdated.getID()));
     // TODO Need to improve this, when this is no longer a service stub
   }
 }

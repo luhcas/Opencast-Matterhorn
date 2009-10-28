@@ -11,6 +11,19 @@
     <artifactId>base</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
+   <repositories>
+    <repository>
+      <id>modularity-releases</id>
+      <name>Modularity Releases Repository</name>
+      <url>http://m2.modularity.net.au/releases</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
@@ -64,10 +77,20 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.apache.derby</groupId>
+      <artifactId>derby</artifactId>
+      <version>10.5.3.0_1</version>
+    </dependency>    
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>net.fortuna.ical4j</groupId>
+      <artifactId>ical4j</artifactId>
+      <version>1.0-rc1</version>
+    </dependency>    
   </dependencies>
   <build>
     <plugins>
@@ -80,7 +103,17 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.scheduler.* </Export-Package>
-            <Import-Package>org.opencastproject.util, *</Import-Package>
+		<Import-Package>
+			org.opencastproject.util, 
+			*;resolution:=optional
+		</Import-Package>
+            <Private-Package>
+              org.apache.derby.*
+              net.fortuna.ical4j.*
+            </Private-Package>
+            <Embed-Dependency>
+              derby;inline=true
+            </Embed-Dependency>
             <Service-Component>
               OSGI-INF/scheduler-service.xml,
               OSGI-INF/scheduler-service-rest.xml,

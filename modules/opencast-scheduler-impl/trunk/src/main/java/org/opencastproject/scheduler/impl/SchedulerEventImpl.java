@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.LinkedList;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO: Comment me!
@@ -26,6 +28,7 @@ import org.opencastproject.scheduler.api.SchedulerEvent;
  */
 public class SchedulerEventImpl implements SchedulerEvent {
 
+  private static final Logger logger = LoggerFactory.getLogger(SchedulerEventImpl.class);
   LinkedList <String> attendees;
   LinkedList <String> resources;
   String id;
@@ -222,6 +225,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setEnddate(java.util.Date)
    */
   public void setEnddate(Date end) {
+    logger.info("Event "+id+" set enddate "+start.getTime());
     this.end = end;
   }
 
@@ -264,6 +268,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setStartdate(java.util.Date)
    */
   public void setStartdate(Date start) {
+    logger.info("Event "+id+" set startdate "+start.getTime()); 
     this.start = start;
 
   }
@@ -275,6 +280,18 @@ public class SchedulerEventImpl implements SchedulerEvent {
   public void setTitle(String title) {
     this.title = title;
 
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.scheduler.api.SchedulerEvent#valid()
+   */  
+  public boolean valid () {
+    if (title == null) return false;
+    if (start == null) return false;
+    if (end == null) return false;
+    if (end.before(start)) return false;
+    return true;
   }
 
 }

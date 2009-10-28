@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 @XmlRootElement(name="scheduler-event", namespace="http://scheduler.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SchedulerEventJaxbImpl {
-  private static final Logger logger = LoggerFactory.getLogger(SchedulerFilterJaxbImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(SchedulerEventJaxbImpl.class);
   
   @XmlID
   String id;
@@ -52,9 +52,9 @@ public class SchedulerEventJaxbImpl {
   @XmlElement(name="abstract")
   String abstr;
   @XmlElement(name="startdate")
-  Date start;
+  long start;
   @XmlElement(name="enddate")
-  Date end;
+  long end;
   @XmlElement(name="contributor")
   String contributor;
   @XmlElement(name="series-id")
@@ -76,8 +76,8 @@ public class SchedulerEventJaxbImpl {
     title = event.getTitle();
     creator = event.getCreator();
     abstr = event.getAbstract();
-    start = event.getStartdate();
-    end = event.getEnddate();
+    start = event.getStartdate().getTime();
+    end = event.getEnddate().getTime();
     contributor = event.getContributor();
     seriesID = event.getSeriesID();
     channelID = event.getChannelID();
@@ -101,8 +101,8 @@ public class SchedulerEventJaxbImpl {
     event.setTitle(title);
     event.setCreator(creator);
     event.setAbstract(abstr);
-    event.setStartdate(start);
-    event.setEnddate(end);
+    event.setStartdate(new Date(start));
+    event.setEnddate(new Date(end));
     event.setContributor(contributor);
     event.setSeriesID(seriesID);
     event.setChannelID(channelID);
@@ -112,4 +112,3 @@ public class SchedulerEventJaxbImpl {
     return event;
   }
 }
-

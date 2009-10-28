@@ -17,6 +17,8 @@ package org.opencastproject.scheduler.endpoint;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
+import org.opencastproject.scheduler.impl.SchedulerEventImpl;
+import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -111,6 +114,26 @@ public class SchedulerRestService {
   @Path("docs")
   public String getDocumentation() {
     return docs;
+  }
+  
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("info")
+  public String info() {
+    logger.info("getting status info for scheduling service");
+    SchedulerEventImpl event = new SchedulerEventImpl();
+    event.setTitle("test-info");
+    long time1 = System.currentTimeMillis();
+    long time2 = time1+1111111;
+    Date date1 = new Date(time1);
+    Date date2 = new Date(time2);
+    logger.info("Info times "+time1+" = "+date1.getTime()+", "+time2+" = "+ date2.getTime());
+    event.setStartdate(date1);
+    event.setEnddate(date2);
+    SchedulerEvent event2 = service.addEvent(event);
+    String answer = "Database available: "+ ((SchedulerServiceImpl) service).dbCheck() +", "+
+    "demo-data inserted, ID="+event2.getID();
+    return answer;
   }
 
   protected final String docs;
