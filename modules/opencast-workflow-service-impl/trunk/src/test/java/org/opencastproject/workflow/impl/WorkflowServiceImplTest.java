@@ -15,10 +15,13 @@
  */
 package org.opencastproject.workflow.impl;
 
+import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
+import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -136,6 +139,35 @@ public class WorkflowServiceImplTest {
     }
 
     WorkflowSet workflowsInDb = service.getWorkflowsByMediaPackage(mediapackage1.getIdentifier().toString());
+    Assert.assertEquals(1, workflowsInDb.getItems().length);
+
+    // cleanup the database
+    service.removeFromDatabase(instance.getId());
+    
+    // And ensure that it's really gone
+    Assert.assertNull(service.getWorkflowById(instance.getId()));
+    Assert.assertEquals(0, service.countWorkflowInstances());
+  }
+
+  @Test
+  public void testGetWorkflowOperationByEpisodeId() {
+    Catalog[] dcCatalogs = mediapackage1.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
+    if(dcCatalogs.length == 0) Assert.fail("Unable to find a dublin core catalog in the test media package");
+    String episodeId = ((DublinCoreCatalog)dcCatalogs[0]).getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER, DublinCoreCatalog.LANGUAGE_UNDEFINED);
+
+    // Ensure that the database doesn't have a workflow instance with this episode
+    Assert.assertEquals(0, service.countWorkflowInstances());
+    Assert.assertEquals(0, service.getWorkflowsByEpisode(episodeId).size());
+
+    WorkflowInstance instance = service.start(definition1, mediapackage1, null);
+
+    // Even the sample workflows take time to complete.  Let the workflow finish before verifying state in the DB
+    while( ! instance.getState().equals(State.SUCCEEDED)) {
+      System.out.println("Waiting for workflow to complete...");
+      try { Thread.sleep(1000); } catch(InterruptedException e) {}
+    }
+
+    WorkflowSet workflowsInDb = service.getWorkflowsByEpisode(episodeId);
     Assert.assertEquals(1, workflowsInDb.getItems().length);
 
     // cleanup the database

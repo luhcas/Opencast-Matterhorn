@@ -25,6 +25,7 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowInstanceListImpl;
 import org.opencastproject.workflow.api.WorkflowService;
+import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
 
 import org.apache.commons.io.IOUtils;
@@ -41,6 +42,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -141,6 +143,47 @@ public class WorkflowRestService {
     return Response.ok("resumed " + workflowInstanceId).build();
   }
 
+  @GET
+  @Path("allinstances")
+  @Produces(MediaType.APPLICATION_JSON)
+  public String getWorkflowsAsJson(@QueryParam("offset") int offset, @QueryParam("limit") int limit) {
+    WorkflowSet set = service.getWorkflowsByDate(offset, limit);
+    StringBuilder sb = new StringBuilder("{\"workflows\" : [\n");
+    for(int i=0; i < set.getItems().length; i++) {
+      WorkflowInstance workflow = set.getItems()[i];
+      sb.append(" { \"workflow_id\" : \"");
+      sb.append(workflow.getId());
+      sb.append("\",\n");
+      sb.append("   \"workflow_title\" : \"");
+      sb.append(workflow.getTitle());
+      sb.append("\",\n");
+      sb.append("   \"workflow_state\" : \"");
+      sb.append(workflow.getState().name().toLowerCase());
+      sb.append("\"\n");
+      sb.append(" }");
+      if(i < set.getItems().length - 1) sb.append(",");
+      sb.append("\n");
+    }
+    sb.append("]}");
+    return sb.toString();
+  }
+
+//  {
+//    "workflows" : [
+//        {
+//            "workflow_id" : "cb7e055b-2c9f-4924-970b-8f0f74d82def",
+//            "workflow_title" : "Transcode and Distribute",
+//            "workflow_state" : "succeeded" 
+//        },
+//        {
+//            "workflow_id" : "cb7e055b-2c9f-4924-970b-8f0f74d82def",
+//            "workflow_title" : "Transcode and Distribute",
+//            "workflow_state" : "succeeded" 
+//        } 
+//    ] 
+//}
+
+  
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")

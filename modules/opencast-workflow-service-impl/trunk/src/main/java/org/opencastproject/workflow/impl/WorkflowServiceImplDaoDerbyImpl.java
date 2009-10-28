@@ -15,7 +15,10 @@
  */
 package org.opencastproject.workflow.impl;
 
+import org.opencastproject.media.mediapackage.Catalog;
+import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -65,7 +68,7 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
       Connection conn = DriverManager.getConnection(jdbcUrl + ";create=true", props);
       Statement s = conn.createStatement();
       s.execute("create table oc_workflow(workflow_id varchar(40), mp_id varchar(40), workflow_state varchar(40), "
-              + "workflow_xml long varchar, date_created timestamp)");
+              + "episode_id varchar(40), series_id varchar(40), workflow_xml long varchar, date_created timestamp)");
     } catch (SQLException e) {
       logger.error(e.getMessage());
     }
@@ -223,8 +226,7 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsByEpisode(java.lang.String)
    */
   public WorkflowSet getWorkflowsByEpisode(String episodeId) throws WorkflowDatabaseException {
-    // TODO Auto-generated method stub
-    return null;
+    return getWorkflowSet("select workflow_xml from oc_workflow where episode_id=?", new String[] {episodeId}, 0, 0);
   }
 
   /**
@@ -242,8 +244,7 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsBySeries(java.lang.String)
    */
   public WorkflowSet getWorkflowsBySeries(String seriesId) throws WorkflowDatabaseException {
-    // TODO Auto-generated method stub
-    return null;
+    return getWorkflowSet("select workflow_xml from oc_workflow where series_id=?", new String[] { seriesId }, 0, 0);
   }
 
   /**
@@ -304,6 +305,8 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
     try {
       conn = borrowConnection();
       String xml = WorkflowBuilder.getInstance().toXml(instance);
+      String episodeId = findEpisodeId(instance.getSourceMediaPackage());
+      String seriesId = findSeriesId(instance.getSourceMediaPackage());
       if (exists(instance.getId(), conn)) {
         // Update the workflow (TODO: Update the rest of the fields)
         s = conn.prepareStatement("update oc_workflow set workflow_xml=?, workflow_state=? where workflow_id=?");
@@ -317,12 +320,14 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
         String mediaPackageId = null;
         if (mp != null)
           mediaPackageId = mp.getIdentifier().toString();
-        s = conn.prepareStatement("insert into oc_workflow values(?, ?, ?, ?, ?)");
+        s = conn.prepareStatement("insert into oc_workflow values(?, ?, ?, ?, ?, ?, ?)");
         s.setString(1, instance.getId());
         s.setString(2, mediaPackageId);
         s.setString(3, instance.getState().name().toLowerCase());
-        s.setString(4, xml);
-        s.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+        s.setString(4, episodeId);
+        s.setString(5, seriesId);
+        s.setString(6, xml);
+        s.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
         s.execute();
       }
     } catch (Exception e) {
@@ -336,6 +341,35 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
         }
       returnConnection(conn);
     }
+  }
+
+  /**
+   * Finds the series ID for a media package.
+   * 
+   * @param sourceMediaPackage The media package to inspect
+   * @return The series ID, as identified in the dublin core catalog, if it exists
+   */
+  private String findSeriesId(MediaPackage sourceMediaPackage) {
+    Catalog[] dcCatalogs = sourceMediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_SERIES);
+    if(dcCatalogs.length == 0) return null;
+    String seriesId = ((DublinCoreCatalog)dcCatalogs[0]).getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER,
+            DublinCoreCatalog.LANGUAGE_UNDEFINED);
+    logger.debug("Found series ID=" + seriesId + " in media package " + sourceMediaPackage.getIdentifier());
+    return seriesId;
+  }
+
+  /**
+   * Finds the episode ID for a media package.
+   * 
+   * @param sourceMediaPackage The media package to inspect
+   * @return The episode ID, as identified in the dublin core catalog, if it exists
+   */
+  private String findEpisodeId(MediaPackage sourceMediaPackage) {
+    Catalog[] dcCatalogs = sourceMediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
+    if(dcCatalogs.length == 0) return null;
+    String episodeId = ((DublinCoreCatalog)dcCatalogs[0]).getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER, DublinCoreCatalog.LANGUAGE_UNDEFINED);
+    logger.debug("Found episode ID=" + episodeId + " in media package " + sourceMediaPackage.getIdentifier());
+    return episodeId;
   }
 
   /**
