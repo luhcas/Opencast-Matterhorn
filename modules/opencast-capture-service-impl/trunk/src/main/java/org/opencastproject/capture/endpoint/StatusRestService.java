@@ -32,7 +32,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 /**
- * FIXME -- Add javadocs
+ * The REST endpoint for the status service on the capture device
  */
 @Path("/")
 public class StatusRestService {

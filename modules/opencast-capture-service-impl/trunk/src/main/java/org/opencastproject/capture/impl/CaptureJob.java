@@ -13,18 +13,16 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.endpoint;
+package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.api.State;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
-import javax.jws.WebMethod;
-import javax.jws.WebService;
+public class CaptureJob implements Job {
 
-/**
- *  The JAXB endpoint definition for the status service
- */
-@WebService()
-public interface StatusWebService {
-  @WebMethod()
-  public State getStatus();
+  public void execute(JobExecutionContext arg0) throws JobExecutionException {
+    //TODO:  Waiting on capture impl code to be able to actually start the capture
+  }
+
 }

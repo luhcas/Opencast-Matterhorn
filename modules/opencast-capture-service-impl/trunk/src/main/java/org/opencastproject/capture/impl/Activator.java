@@ -15,15 +15,17 @@
  */
 package org.opencastproject.capture.impl;
 
+import java.io.File;
+
 import org.apache.commons.io.FileUtils;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import java.io.File;
-
 public class Activator implements BundleActivator {
 
   private BundleContext context;
+  private SchedulerImpl sched;
+
   /**
    * {@inheritDoc}
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
@@ -32,6 +34,10 @@ public class Activator implements BundleActivator {
     createTmpDirectory();
     ConfigurationManager.getInstance();
     this.context = context;
+    //TODO:  Get default URI from properties file?
+    //TODO:  Get the default polling time from properties file?
+    sched = new SchedulerImpl();
+    sched.init(getClass().getClassLoader().getResource("Matterhorn-Example.ics"), 5);
   }
 
   /**

@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Dictionary;
 
 /**
- * FIXME -- Add javadocs
+ * @see org.opencastproject.capture.api.StatusService
  */
 public class StatusServiceImpl implements StatusService, ManagedService {
 
@@ -34,13 +34,15 @@ public class StatusServiceImpl implements StatusService, ManagedService {
   private static State cur_status = null;
 
   public StatusServiceImpl() {
-    cur_status = State.IDLE;
+    if (cur_status == null) {
+      cur_status = State.IDLE;
+    }
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.status.api.StatusService#getState()
+   * @see org.opencastproject.capture.api.StatusService#getState()
    */
   public State getState() {
     return cur_status;
@@ -61,7 +63,7 @@ public class StatusServiceImpl implements StatusService, ManagedService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.status.api.StatusService#setState()
+   * @see org.opencastproject.capture.api.StatusService#setState()
    */
   public void setState(State state) {
     cur_status = state;

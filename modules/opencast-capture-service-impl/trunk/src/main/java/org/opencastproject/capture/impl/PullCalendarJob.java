@@ -13,18 +13,21 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.endpoint;
+package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.api.State;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
-import javax.jws.WebMethod;
-import javax.jws.WebService;
+public class PullCalendarJob implements Job {
 
-/**
- *  The JAXB endpoint definition for the status service
- */
-@WebService()
-public interface StatusWebService {
-  @WebMethod()
-  public State getStatus();
+  /**
+   * Pulls the calendar data and updates the calendar for the capture scheduling service
+   * {@inheritDoc}
+   * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+   */
+  public void execute(JobExecutionContext ctx) throws JobExecutionException {
+    SchedulerImpl sched = (SchedulerImpl) ctx.getMergedJobDataMap().get(SchedulerImpl.SCHEDULER);
+    sched.updateCalendar();
+  }
 }
