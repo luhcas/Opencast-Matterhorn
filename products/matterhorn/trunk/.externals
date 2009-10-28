@@ -27,6 +27,7 @@
 ../../../modules/opencast-engage-service-impl/trunk opencast-engage-service-impl
 ../../../modules/opencast-workflow-service-api/trunk	opencast-workflow-service-api
 ../../../modules/opencast-workflow-service-impl/trunk opencast-workflow-service-impl
+../../../modules/opencast-workflow-ui/trunk	opencast-workflow-ui
 ../../../modules/opencast-http/trunk	opencast-http
 ../../../modules/opencast-stream/trunk	opencast-stream
 ../../../modules/opencast-distribution-service-api/trunk	opencast-distribution-service-api
