@@ -66,17 +66,15 @@ public class ConfigurationManager {
    * if manager field is null.
    */
   private ConfigurationManager() {
-    localConfig = new File(System.getProperty("java.io.tmpdir") + 
-            File.separator + "opencast" + File.separator + "capture.cfg");
+    localConfig = new File("target" + File.separator + "capture.cfg");
     properties = new Properties();
     
     /* attempt to load properties into memory and retrieve centralised config */
     try {
       properties.load(new FileInputStream(localConfig));
-      /* TODO: capture.config.url should be changed to an interface */
-      url = new URL(properties.getProperty("capture.config.url"));
+      url = new URL(properties.getProperty(CaptureParameters.URL));
     } catch (MalformedURLException e) {
-      logger.warn("Problem reading capture.config.url");
+      logger.warn("Problem reading " + CaptureParameters.URL);
     } catch (FileNotFoundException e) {
       logger.error("Local configuration file not found.");
     } catch (IOException e) {
@@ -88,8 +86,7 @@ public class ConfigurationManager {
     
     /* if reload property specified, query server for update at that interval */
     String reload;
-    /* TODO: capture.config.reload should be changed to an interface */
-    if ((reload = getItem("capture.config.reload")) != null) {
+    if ((reload = getItem(CaptureParameters.RELOAD)) != null) {
       timer = new Timer();
       long delay = Long.parseLong(reload);
       timer.schedule(new UpdateConfig(), delay, delay);
@@ -194,6 +191,7 @@ public class ConfigurationManager {
   class UpdateConfig extends TimerTask {
     public void run() {
       retrieveConfigFromServer();
+      writeConfigFileToDisk();
     }
   }
 }
