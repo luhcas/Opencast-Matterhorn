@@ -189,4 +189,10 @@ public interface SchedulerEvent {
    * @param attendees The new list of attendees
    */
   public void setAttendees (String [] attendees);
+
+  /**
+   * Checks if the event contains all necessary information (title, start- and end-time) 
+   * @return true if the event is valid
+   */
+  public boolean valid();
 }
