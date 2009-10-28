@@ -31,7 +31,7 @@ public class WorkspaceImplTest {
 
   @Test
   public void testLocalFileUrls() throws Exception {
-    WorkspaceImpl workspace = new WorkspaceImpl();
+    WorkspaceImpl workspace = new WorkspaceImpl("target/junit-workspace-rootdir");
     File source1 = new File("target/test-classes/opencast_header.gif");
     File source2 = new File("target/test-classes/opencast_header2.gif");
     File fromWorkspace1 = workspace.get(source1.toURI().toURL());
