@@ -26,6 +26,71 @@
     <div>
       <b>GET instance/{id}</b> returns a workflow instance
     </div>
+
+
+    <div>
+      <b>GET /workflow/rest/allinstances</b> returns all workflow instances, along with a subset of dublin core metadata, as a json array
+      <pre>
+{"workflows" : [
+ { "workflow_id" : "de9609eb-2251-42f8-a190-756347380182",
+   "workflow_title" : "Transcode and Distribute",
+   "workflow_current_operation" : "distribute",
+   "workflow_state" : "succeeded",
+   "mediapackage_title" : "Land and Vegetation: Key players on the Climate Scene"
+ },
+ { "workflow_id" : "cb7e055b-2c9f-4924-970b-8f0f74d82def",
+   "workflow_title" : "Transcode and Distribute",
+   "workflow_current_operation" : "distribute",
+   "workflow_state" : "succeeded",
+   "mediapackage_title" : "Land and Vegetation: Key players on the Climate Scene"
+ }
+]}
+      </pre>
+    </div>
+
+
+
+    <div>
+      <b>GET /workflow/rest/instanceinfo/{id}</b> returns a workflow instance, along with all available dublin core metadata, as json object
+      <pre>
+ { "workflow_id" : "de9609eb-2251-42f8-a190-756347380182",
+   "workflow_title" : "Transcode and Distribute",
+   "workflow_current_operation" : "distribute",
+   "workflow_state" : "succeeded",
+   "mediapackage_creator" : "null",
+   "mediapackage_format" : "video/x-dv",
+   "mediapackage_contributor" : "null",
+   "mediapackage_coverage" : "null",
+   "mediapackage_promoted" : "true",
+   "mediapackage_type" : "null",
+   "mediapackage_extent" : "null",
+   "mediapackage_ispartof" : "null",
+   "mediapackage_license" : "null",
+   "mediapackage_available" : "null",
+   "mediapackage_advertised" : "null",
+   "mediapackage_created" : "null",
+   "mediapackage_source" : "null",
+   "mediapackage_abstract" : "null",
+   "mediapackage_temporal" : "null",
+   "mediapackage_relation" : "null",
+   "mediapackage_description" : "Introduction lecture from the Institute for Atmospheric and Climate Science.",
+   "mediapackage_subject" : "climate, land, vegetation",
+   "mediapackage_isreferencedby" : "null",
+   "mediapackage_language" : "null",
+   "mediapackage_rightsholder" : "null",
+   "mediapackage_publisher" : "ETH Zurich, Switzerland",
+   "mediapackage_accessrights" : "null",
+   "mediapackage_spatial" : "null",
+   "mediapackage_isreplacedby" : "null",
+   "mediapackage_date" : "null",
+   "mediapackage_identifier" : "10.0000/5819",
+   "mediapackage_replaces" : "null",
+   "mediapackage_rights" : "null",
+   "mediapackage_title" : "Land and Vegetation: Key players on the Climate Scene"
+ }
+      </pre>
+    </div>
+
     <div>
       <b>POST start</b> starts a workflow instance, based on the specified xml workflow definition (form element='definition'),
       the media package xml (form element='mediapackage'), and key-value properties (from element='properties')
