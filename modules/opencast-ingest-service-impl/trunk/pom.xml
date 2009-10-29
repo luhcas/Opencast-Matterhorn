@@ -130,7 +130,6 @@
             <Service-Component>
               OSGI-INF/ingest-service.xml,
               OSGI-INF/ingest-service-rest.xml,
-              OSGI-INF/ingest-service-soap.xml,
               OSGI-INF/ingest-service-ui.xml
             </Service-Component>
           </instructions>

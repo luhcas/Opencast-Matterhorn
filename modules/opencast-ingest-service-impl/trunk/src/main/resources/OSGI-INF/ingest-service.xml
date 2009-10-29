@@ -4,7 +4,12 @@
   <property name="service.description" value="Ingest Service" />
   <service>
     <provide interface="org.opencastproject.ingest.api.IngestService" />
+    <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
   <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
     cardinality="1..1" policy="static" bind="setWorkspace" />
+  <reference name="inspect" interface="org.opencastproject.inspection.api.MediaInspectionService"
+    cardinality="0..1" policy="dynamic" bind="setMediaInspection" unbind="unsetMediaInspection" />
+  <reference name="eventadmin" interface="org.osgi.service.event.EventAdmin"
+    cardinality="0..1" policy="dynamic" bind="setEventAdmin" unbind="unsetEventAdmin" />
 </component>
