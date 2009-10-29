@@ -19,10 +19,26 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+/**
+ * The class responsible for starting a capture.
+ */
 public class CaptureJob implements Job {
 
+  /**
+   * Starts the capture itself.
+   * {@inheritDoc}
+   * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+   */
   public void execute(JobExecutionContext arg0) throws JobExecutionException {
     //TODO:  Waiting on capture impl code to be able to actually start the capture
+    /*
+     * General idea:
+     *  Get all required properties via
+     *   ctx.getMergedJobDataMap().get($PROPERTY)
+     *  Turn these properties into hashmap as defined by MH-1265
+     *  Send this to capture's start method
+     *   via HTTP post?  Native call?  Unclear just yet...
+     */
   }
 
 }

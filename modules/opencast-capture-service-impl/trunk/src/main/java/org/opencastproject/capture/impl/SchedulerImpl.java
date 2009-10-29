@@ -87,7 +87,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
     try {
       //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
       POLLING_PROPS = new Properties();
-      POLLING_PROPS.load(getClass().getClassLoader().getResourceAsStream("polling.properties"));
+      POLLING_PROPS.load(getClass().getClassLoader().getResourceAsStream("config/polling.properties"));
       SchedulerFactory sched_fact = new StdSchedulerFactory(POLLING_PROPS);
 
       //Create and start the scheduler
@@ -106,7 +106,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
 
       //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
       CAPTURE_PROPS = new Properties();
-      CAPTURE_PROPS.load(getClass().getClassLoader().getResourceAsStream("calendaring.properties"));
+      CAPTURE_PROPS.load(getClass().getClassLoader().getResourceAsStream("config/scheduler.properties"));
       sched_fact = new StdSchedulerFactory(CAPTURE_PROPS);
       //Create and start the capture scheduler
       captureScheduler = sched_fact.getScheduler();
@@ -146,8 +146,12 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
 
     try {
       //Fetch the calendar data and build a iCal4j representation of it
-      calendar = parseCalendar(calendarURL);
-      setCaptureSchedule(calendar);
+      if (calendarURL != null) {
+        calendar = parseCalendar(calendarURL);
+        setCaptureSchedule(calendar);
+      } else {
+        log.error("Calendar URL is invalid!");
+      }
     } catch (MalformedURLException e) {
       log.error("updateCalendar:  Invalid URL specified", e);
     }

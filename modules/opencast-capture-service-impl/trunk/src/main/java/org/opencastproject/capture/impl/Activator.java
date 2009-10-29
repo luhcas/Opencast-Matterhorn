@@ -16,23 +16,29 @@
 package org.opencastproject.capture.impl;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.opencastproject.capture.api.Scheduler;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Activator implements BundleActivator {
 
+  /** Logging Facility */
+  private static final Logger log = LoggerFactory.getLogger(Activator.class);
+  private static final String DEFAULT_OPENCAST_DIR = "/opencast";
   private BundleContext context;
-  private SchedulerImpl sched;
+  private Scheduler sched;
 
   /**
    * {@inheritDoc}
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
   public void start(BundleContext context) throws Exception {
-    createTmpDirectory();
-    ConfigurationManager.getInstance();
+    createCoreDirectories(ConfigurationManager.getInstance());
     this.context = context;
     //TODO:  Get default URI from properties file?
     //TODO:  Get the default polling time from properties file?
@@ -47,21 +53,32 @@ public class Activator implements BundleActivator {
   public void stop(BundleContext context) throws Exception {
     this.context = null;
   }
-  
+
   /**
-   * Create the tmp folder to store the recording.
+   * Creates the core Opencast directories  
    */
-  private void createTmpDirectory() {
-    String tmpPath = System.getProperty("java.io.tmpdir") + File.separator + 
-                      "opencast" + File.separator + "capture";
-    File f = new File(tmpPath);
-    if (!f.exists()) {
-      try {
-        FileUtils.forceMkdir(f);
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
+  private void createCoreDirectories(ConfigurationManager config) {
+    //TODO: check to see if a root dir exists in the config file in the bundle
+    File root = new File( DEFAULT_OPENCAST_DIR );
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL, root, config);
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CACHE_URL, root, config);
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_URL, root, config);
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_VOLATILE_URL, root, config);
   }
 
+  /**
+   * Creates a file or directory
+   * @param key    The key to set in the configuration manager.  Key is set equal to name
+   * @param root   The directory under which to create the file/directory referred to by the key
+   * @param config The configuration manager to store the key-value pair
+   */
+  private void createFileObj(String key, File root, ConfigurationManager config) {
+    File target = new File (root, config.getItem(key));
+    try {
+      FileUtils.forceMkdir(target);
+      config.setItem(key, target.toString());
+    } catch (IOException e) {
+      log.error("Unable to create directory " + target.toString(), e);
+    }
+  }
 }

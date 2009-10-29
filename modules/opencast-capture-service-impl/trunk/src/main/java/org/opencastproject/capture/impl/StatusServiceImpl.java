@@ -31,8 +31,11 @@ import java.util.Dictionary;
 public class StatusServiceImpl implements StatusService, ManagedService {
 
   private static final Logger logger = LoggerFactory.getLogger(StatusServiceImpl.class);
-  private static State cur_status = null;
+  private State cur_status = null;
 
+  /**
+   * Creates an instance of the status service, and sets its initial state to State.IDLE
+   */
   public StatusServiceImpl() {
     if (cur_status == null) {
       cur_status = State.IDLE;

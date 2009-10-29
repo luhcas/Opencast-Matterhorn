@@ -35,5 +35,18 @@ public interface CaptureParameters {
   
   /** The time to wait between updating the local copy of the configuration */
   public static final String RELOAD = "capture.config.reload";
+
+  /** The URL of the config directory under the root directory */
+  public static final String CAPTURE_FILESYSTEM_CONFIG_URL = "capture.filesystem.config.url";
+
+  /** The URL of the capture directory under the root directory */
+  public static final String CAPTURE_FILESYSTEM_CAPTURE_URL = "capture.filesystem.capture.url";
+
+  /** The URL of the caching directory under the root directory */
+  public static final String CAPTURE_FILESYSTEM_CACHE_URL = "capture.filesystem.cache.url";
+
+  /** The URL of the volatile directory under the root directory */
+  public static final String CAPTURE_FILESYSTEM_VOLATILE_URL = "capture.filesystem.volatile.url";
+
   
 }

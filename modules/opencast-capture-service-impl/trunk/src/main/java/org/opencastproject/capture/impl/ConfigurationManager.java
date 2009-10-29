@@ -15,13 +15,7 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,6 +27,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class for retrieving, storing and accessing both local and centralised 
@@ -55,7 +52,7 @@ public class ConfigurationManager {
   private URL url; 
   
   /** the local copy of the configuration */
-  private File localConfig;
+  private URL localConfig;
   
   /** Timer that will every at a specified interval to retrieve the centralised
    * configuration file from a server */
@@ -66,12 +63,13 @@ public class ConfigurationManager {
    * if manager field is null.
    */
   private ConfigurationManager() {
-    localConfig = new File("target" + File.separator + "capture.cfg");
+    //TODO: do not rely on config file in resource bundle
+    localConfig = getClass().getClassLoader().getResource("config/capture.cfg");
     properties = new Properties();
     
     /* attempt to load properties into memory and retrieve centralised config */
     try {
-      properties.load(new FileInputStream(localConfig));
+      properties.load(localConfig.openStream());
       url = new URL(properties.getProperty(CaptureParameters.URL));
     } catch (MalformedURLException e) {
       logger.warn("Problem reading " + CaptureParameters.URL);
@@ -147,7 +145,7 @@ public class ConfigurationManager {
     if (properties == null)
       return;
     try {
-      properties.store(new FileOutputStream(localConfig), "capture config");
+      properties.store(localConfig.openConnection().getOutputStream(), "capture config");
     } catch (Exception e) {
       logger.warn("Could not write config file to disk: " + e.toString());
     }
