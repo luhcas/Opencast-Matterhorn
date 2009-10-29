@@ -17,6 +17,7 @@ package org.opencastproject.workflow.impl;
 
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
+import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -36,6 +37,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -64,11 +67,10 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
     }
     try {
       Properties props = new Properties();
-      logger.info(jdbcUrl + ";create=true");
       Connection conn = DriverManager.getConnection(jdbcUrl + ";create=true", props);
       Statement s = conn.createStatement();
       s.execute("create table oc_workflow(workflow_id varchar(40), mp_id varchar(40), workflow_state varchar(40), "
-              + "episode_id varchar(40), series_id varchar(40), workflow_xml long varchar, date_created timestamp)");
+              + "episode_id varchar(40), series_id varchar(40), workflow_text long varchar, workflow_xml long varchar, date_created timestamp)");
     } catch (SQLException e) {
       logger.error(e.getMessage());
     }
@@ -80,10 +82,12 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#deactivate()
    */
   public void deactivate() {
+    logger.info("Shutting down derby.  Ignore the upcoming exception.");
     try {
       // This throws by-design, so ignore the exception
       DriverManager.getConnection("jdbc:derby:;shutdown=true");
     } catch (SQLException e) {
+      logger.info("Derby shut down.  Did you see the exception?  Nice, wasn't it?");
     }
   }
 
@@ -166,11 +170,11 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
    */
   protected WorkflowSet getWorkflowSet(String query, String[] params, int offset, int limit) {
     query = query + " order by date_created desc";
-    // if(offset > 0 && limit > 0) {
-    // query = query + " offset " + (offset*limit);
-    // }
-    // query = query + " fetch first " + limit + " rows only";
-
+     if(offset > 0 && limit > 0) {
+       query = query + " offset " + (offset*limit) + " rows fetch first "+ limit + " rows only";
+     } else if(limit > 0) {
+       query = query + " fetch first " + limit + " rows only";
+     }
     Connection conn = null;
     PreparedStatement s = null;
     ResultSet r = null;
@@ -195,7 +199,6 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
         String xml = r.getString(1);
         set.addItem(WorkflowBuilder.getInstance().parseWorkflowInstance(xml));
       }
-      logger.info("query " + query + " returned " + count + " workflow instances");
       return set;
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -253,8 +256,8 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsByText(java.lang.String, int, int)
    */
   public WorkflowSet getWorkflowsByText(String text, int offset, int limit) throws WorkflowDatabaseException {
-    // TODO Auto-generated method stub
-    return null;
+    text = text.toLowerCase();
+    return getWorkflowSet("select workflow_xml from oc_workflow where workflow_text like ?", new String[] { "%" + text + "%" }, offset, limit);
   }
 
   /**
@@ -305,10 +308,8 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
     try {
       conn = borrowConnection();
       String xml = WorkflowBuilder.getInstance().toXml(instance);
-      String episodeId = findEpisodeId(instance.getSourceMediaPackage());
-      String seriesId = findSeriesId(instance.getSourceMediaPackage());
       if (exists(instance.getId(), conn)) {
-        // Update the workflow (TODO: Update the rest of the fields)
+        // Update the workflow (TODO: Update the rest of the fields?  Will the dublin core fields change in the middle of a workflow?)
         s = conn.prepareStatement("update oc_workflow set workflow_xml=?, workflow_state=? where workflow_id=?");
         s.setString(1, xml);
         s.setString(2, instance.getState().name().toLowerCase());
@@ -318,16 +319,24 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
         // Add it
         MediaPackage mp = instance.getSourceMediaPackage();
         String mediaPackageId = null;
-        if (mp != null)
+        String episodeId = null;
+        String seriesId = null;
+        String text = null;
+        if (mp != null) {
           mediaPackageId = mp.getIdentifier().toString();
-        s = conn.prepareStatement("insert into oc_workflow values(?, ?, ?, ?, ?, ?, ?)");
+          episodeId = findEpisodeId(instance.getSourceMediaPackage());
+          seriesId = findSeriesId(instance.getSourceMediaPackage());
+          text = getDublinCoreText(instance.getSourceMediaPackage());
+        }
+        s = conn.prepareStatement("insert into oc_workflow values(?, ?, ?, ?, ?, ?, ?, ?)");
         s.setString(1, instance.getId());
         s.setString(2, mediaPackageId);
         s.setString(3, instance.getState().name().toLowerCase());
         s.setString(4, episodeId);
         s.setString(5, seriesId);
-        s.setString(6, xml);
-        s.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+        s.setString(6, text);
+        s.setString(7, xml);
+        s.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
         s.execute();
       }
     } catch (Exception e) {
@@ -341,6 +350,27 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
         }
       returnConnection(conn);
     }
+  }
+
+  /**
+   * Gets a string representation of the dublin core metadata, which is useful for a quasi- full text search
+   * 
+   * @param mediaPackage The mediapackage to use in generating the text representation
+   * @return The text representation
+   */
+  private String getDublinCoreText(MediaPackage mediaPackage) {
+    Catalog[] dcCatalogs = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
+    if(dcCatalogs.length == 0) return null;
+    StringBuilder sb = new StringBuilder();
+    DublinCoreCatalog dc = (DublinCoreCatalog)dcCatalogs[0];
+    List<EName> props = new ArrayList<EName>(dc.getProperties());
+    for(int i=0; i<props.size(); i++) {
+      String value = dc.getFirst(props.get(i));
+      if(value == null) continue;
+      sb.append(value);
+      if(i < props.size()-1) sb.append("|");
+    }
+    return sb.toString();
   }
 
   /**

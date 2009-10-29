@@ -16,7 +16,7 @@
       Workflow Instances
     </h4>
     <div>
-      <b>GET instances/{state}</b> returns all instances in a given state (
+      <b>GET instances/{state}?startPage=2&count=1</b> returns paged sets of workflow instances in a given state
       <a href="instances/running">running</a>,
       <a href="instances/paused">paused</a>,
       <a href="instances/stopped">stopped</a>,
@@ -24,10 +24,11 @@
       <a href="instances/failed">failed</a>)
     </div>
     <div>
+      <b>GET instances?q=climate&startPage=2&count=1</b> returns paged sets of workflow instances matching a search parameter
+    </div>
+    <div>
       <b>GET instance/{id}</b> returns a workflow instance
     </div>
-
-
     <div>
       <b>GET /workflow/rest/allinstances</b> returns all workflow instances, along with a subset of dublin core metadata, as a json array
       <pre>

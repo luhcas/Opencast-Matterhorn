@@ -81,14 +81,29 @@ public class WorkflowRestService {
     }
   }
 
-  // FIXME Implement paging
-  
   @GET
   @Path("instances/{state}")
   @Produces(MediaType.TEXT_XML)
-  public WorkflowInstanceListImpl fetchAllJaxbWorkflowInstances(@PathParam("state") String state) throws Exception {
+  public WorkflowInstanceListImpl getWorkflowsInState(
+          @PathParam("state") String state,
+          @QueryParam("startPage") int offset,
+          @QueryParam("count") int limit) throws Exception {
     WorkflowInstanceListImpl list = new WorkflowInstanceListImpl();
-    for(WorkflowInstance instance : service.getWorkflowsInState(State.valueOf(state.toUpperCase()), 0, 1000).getItems()) {
+    for(WorkflowInstance instance : service.getWorkflowsInState(State.valueOf(state.toUpperCase()), offset, limit).getItems()) {
+      list.getWorkflowInstance().add((WorkflowInstanceImpl)instance);
+    }
+    return list;
+  }
+
+  @GET
+  @Path("instances")
+  @Produces(MediaType.TEXT_XML)
+  public WorkflowInstanceListImpl getWorkflowsByText(
+          @QueryParam("q") String text,
+          @QueryParam("startPage") int offset,
+          @QueryParam("count") int limit) throws Exception {
+    WorkflowInstanceListImpl list = new WorkflowInstanceListImpl();
+    for(WorkflowInstance instance : service.getWorkflowsByText(text, offset, limit).getItems()) {
       list.getWorkflowInstance().add((WorkflowInstanceImpl)instance);
     }
     return list;
@@ -97,7 +112,7 @@ public class WorkflowRestService {
   @GET
   @Path("instance/{id}")
   @Produces(MediaType.TEXT_XML)
-  public WorkflowInstanceImpl getJaxbWorkflowInstance(@PathParam("id") String id) throws Exception {
+  public WorkflowInstanceImpl getWorkflowById(@PathParam("id") String id) throws Exception {
     return (WorkflowInstanceImpl)service.getWorkflowById(id);
   }
 

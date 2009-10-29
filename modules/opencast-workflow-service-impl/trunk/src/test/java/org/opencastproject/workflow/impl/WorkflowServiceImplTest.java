@@ -40,7 +40,9 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class WorkflowServiceImplTest {
@@ -51,6 +53,7 @@ public class WorkflowServiceImplTest {
   private static WorkflowServiceImpl service = null;
   private static WorkflowDefinition definition1 = null;
   private static MediaPackage mediapackage1 = null;
+  private static MediaPackage mediapackage2 = null;
   private static WorkflowOperationHandler operationHandler = null;
   
   @BeforeClass
@@ -84,6 +87,8 @@ public class WorkflowServiceImplTest {
       mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
       mediapackage1 = mediaPackageBuilder.loadFromManifest(
               WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-1.xml"));
+      mediapackage2 = mediaPackageBuilder.loadFromManifest(
+              WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-2.xml"));
     } catch (Exception e) {
       Assert.fail(e.getMessage());
     }
@@ -178,6 +183,75 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
+  @Test
+  public void testGetWorkflowOperationByText() {
+    // Ensure that the database doesn't have any workflow instances
+    Assert.assertEquals(0, service.countWorkflowInstances());
+    Assert.assertEquals(0, service.getWorkflowsByText("Climate", 0, 100).size());
+
+    WorkflowInstance instance = service.start(definition1, mediapackage1, null);
+
+    // Even the sample workflows take time to complete.  Let the workflow finish before verifying state in the DB
+    while( ! instance.getState().equals(State.SUCCEEDED)) {
+      System.out.println("Waiting for workflow to complete...");
+      try { Thread.sleep(1000); } catch(InterruptedException e) {}
+    }
+
+    WorkflowSet workflowsInDb = service.getWorkflowsByText("Climate", 0, 100);
+    Assert.assertEquals(1, workflowsInDb.getItems().length);
+
+    // cleanup the database
+    service.removeFromDatabase(instance.getId());
+    
+    // And ensure that it's really gone
+    Assert.assertNull(service.getWorkflowById(instance.getId()));
+    Assert.assertEquals(0, service.countWorkflowInstances());
+  }
+
+  @Test
+  public void testPagedGetWorkflowOperationByText() {
+    // Ensure that the database doesn't have any workflow instances
+    Assert.assertEquals(0, service.countWorkflowInstances());
+    Assert.assertEquals(0, service.getWorkflowsByText("Climate", 0, 100).size());
+
+    List<WorkflowInstance> instances = new ArrayList<WorkflowInstance>();
+    instances.add(service.start(definition1, mediapackage1, null));
+    instances.add(service.start(definition1, mediapackage1, null));
+    instances.add(service.start(definition1, mediapackage2, null));
+    instances.add(service.start(definition1, mediapackage2, null));
+    instances.add(service.start(definition1, mediapackage1, null));
+
+    // Even the sample workflows take time to complete.  Let the workflow finish before verifying state in the DB
+    for(WorkflowInstance instance : instances) {
+      while( ! instance.getState().equals(State.SUCCEEDED)) {
+        System.out.println("Waiting for workflow to complete...");
+        try { Thread.sleep(1000); } catch(InterruptedException e) {}
+      }
+    }
+
+    // We should get the first two workflows
+    WorkflowSet firstTwoWorkflows = service.getWorkflowsByText("Climate", 0, 2);
+    Assert.assertEquals(2, firstTwoWorkflows.getItems().length);
+
+    // We should get the last workflow
+    WorkflowSet lastWorkflow = service.getWorkflowsByText("Climate", 1, 2);
+    Assert.assertEquals(1, lastWorkflow.getItems().length);
+
+    // We should get the first linguistics (mediapackage2) workflow
+    WorkflowSet firstLinguisticsWorkflow = service.getWorkflowsByText("Linguistics", 0, 1);
+    Assert.assertEquals(1, firstLinguisticsWorkflow.getItems().length);
+
+    // We should get the second linguistics (mediapackage2) workflow
+    WorkflowSet secondLinguisticsWorkflow = service.getWorkflowsByText("Linguistics", 1, 1);
+    Assert.assertEquals(1, secondLinguisticsWorkflow.getItems().length);
+
+    // cleanup the database
+    for(WorkflowInstance instance : instances) {
+      service.removeFromDatabase(instance.getId());
+    }
+    Assert.assertEquals(0, service.countWorkflowInstances());
+  }
+  
   static class TestWorkflowOperationHandler implements WorkflowOperationHandler {
     public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediapackage1, null, false);
