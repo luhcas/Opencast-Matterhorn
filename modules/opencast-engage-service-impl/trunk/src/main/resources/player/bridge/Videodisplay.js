@@ -63,7 +63,12 @@ function VideodisplayReady() {
 		b_Videodisplay_root.seek(argNumber);
 	};
 	
-	Videodisplay.setLanguage = function(argInt) {
-		b_Videodisplay_root.setLanguage(argInt);
+	Videodisplay.setLanguage = function(argString) {
+		b_Videodisplay_root.setLanguage(argString);
 	};
+	
+	Videodisplay.closedCaptions = function(argBool) {
+		b_Videodisplay_root.setClosedCaptions(argBool);
+	};
+	
 }
