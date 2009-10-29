@@ -69,8 +69,13 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
       Properties props = new Properties();
       Connection conn = DriverManager.getConnection(jdbcUrl + ";create=true", props);
       Statement s = conn.createStatement();
-      s.execute("create table oc_workflow(workflow_id varchar(40), mp_id varchar(40), workflow_state varchar(40), "
-              + "episode_id varchar(40), series_id varchar(40), workflow_text long varchar, workflow_xml long varchar, date_created timestamp)");
+      s.execute("create table oc_workflow(workflow_id varchar(40) PRIMARY KEY, mp_id varchar(40), workflow_state varchar(40), "
+              + "episode_id varchar(40), series_id varchar(40), workflow_text long varchar, workflow_xml long varchar, "
+              + "date_created timestamp)");
+      s.execute("create index oc_workflow_mp_id on oc_workflow (mp_id)");
+      s.execute("create index oc_workflow_workflow_state on oc_workflow (workflow_state)");
+      s.execute("create index oc_workflow_episode_id on oc_workflow (episode_id)");
+      s.execute("create index oc_workflow_series_id on oc_workflow (series_id)");
     } catch (SQLException e) {
       logger.error(e.getMessage());
     }
