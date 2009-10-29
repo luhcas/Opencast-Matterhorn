@@ -32,7 +32,6 @@ import org.opencastproject.media.mediapackage.handle.HandleBuilder;
 import org.opencastproject.media.mediapackage.handle.HandleBuilderFactory;
 import org.opencastproject.media.mediapackage.handle.HandleException;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
-import org.opencastproject.media.mediapackage.track.TrackImpl;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
@@ -127,7 +126,7 @@ public class IngestServiceImpl implements IngestService, ManagedService {
       for (MediaPackageElement element : mp.elements()) {
         element.setIdentifier(UUID.randomUUID().toString());
         String elId = element.getIdentifier();
-        inspect(element);
+        element = inspect(element);
         String filename = element.getURL().getFile();
         filename = filename.substring(filename.lastIndexOf("/"));
         URL newUrl = addContentToRepo(mp, elId, filename, element.getURL().openStream());
@@ -328,6 +327,9 @@ public class IngestServiceImpl implements IngestService, ManagedService {
           UnsupportedElementException {
     try {
       MediaPackageElement mpe = mp.add(url, type, flavor);
+      mp.remove(mpe);
+      mpe = inspect(mpe);
+      mp.add(mpe);
       mpe.setIdentifier(elementId);
     } catch (MediaPackageException mpe) {
       logger.error("Failed to access media package for ingest");
@@ -366,26 +368,7 @@ public class IngestServiceImpl implements IngestService, ManagedService {
     if (inspection == null)
       return element;
     if (element.getElementType() == Type.Track) {
-      TrackImpl newTrack = (TrackImpl) element;
-      Track inspectionTrack = inspection.inspect(element.getURL());
-      if (newTrack.getChecksum() == null)
-        newTrack.setChecksum(inspectionTrack.getChecksum());
-      if (newTrack.getDuration() == -1L)
-        newTrack.setDuration(inspectionTrack.getDuration());
-      // TODO
-      // Stream[] inspectionStreams = inspectionTrack.getStreams();
-      // Stream[] newStreams = newTrack.getStreams();
-      // for (int i = 0; i < inspectionStreams.length; i++) {
-      // Stream is = inspectionStreams[i];
-      // //if(newStreams.length < i)
-      // newTrack.addStream((AbstractStreamImpl)is);
-      // if(is.getClass() == AudioStream.class) {
-      // AudioStreamImpl audio = (AudioStreamImpl)is;
-      // //audio.
-      //          
-      // }
-      // }
-      return newTrack;
+      return inspection.enrich((Track) element, false);
     }
     return element;
   }

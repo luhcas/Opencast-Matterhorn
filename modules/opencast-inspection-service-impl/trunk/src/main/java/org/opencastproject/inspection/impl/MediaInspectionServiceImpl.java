@@ -20,6 +20,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.Stream;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.media.mediapackage.track.AudioStreamImpl;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URL;
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 
 /**
@@ -44,8 +46,9 @@ import java.util.List;
  */
 public class MediaInspectionServiceImpl implements MediaInspectionService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImpl.class);
-  
+
   Workspace workspace;
+
   public void setWorkspace(Workspace workspace) {
     logger.debug("setting " + workspace);
     this.workspace = workspace;
@@ -57,10 +60,10 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
   public Track inspect(URL url) {
     logger.debug("inspect(" + url + ") called, using workspace " + workspace);
-    
+
     // Get the file from the URL
     File file = workspace.get(url);
-    
+
     MediaContainerMetadata metadata = null;
     try {
       MediaAnalyzerFactory analyzerFactory = MediaAnalyzerFactory.newInstance();
@@ -69,22 +72,23 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     } catch (Throwable t) {
       throw new IllegalStateException("Unable to create media analyzer", t);
     }
-    
-    if(metadata == null) {
+
+    if (metadata == null) {
       logger.warn("Unable to acquire media metadata for " + url);
       return null;
     } else {
       MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
       TrackImpl track;
       try {
-        MediaPackageElement element = elementBuilder.elementFromURL(url, Type.Track, MediaPackageElements.INDEFINITE_TRACK);
+        MediaPackageElement element = elementBuilder.elementFromURL(url, Type.Track,
+                MediaPackageElements.INDEFINITE_TRACK);
         track = (TrackImpl) element;
         track.setDuration(metadata.getDuration());
         track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
         List<AudioStreamMetadata> audioList = metadata.getAudioStreamMetadata();
-        if(audioList != null && ! audioList.isEmpty()) {
-          for(int i=0; i<audioList.size(); i++ ) {
-            AudioStreamImpl audio = new AudioStreamImpl("audio-" + (i+1));
+        if (audioList != null && !audioList.isEmpty()) {
+          for (int i = 0; i < audioList.size(); i++) {
+            AudioStreamImpl audio = new AudioStreamImpl("audio-" + (i + 1));
             AudioStreamMetadata a = audioList.get(i);
             audio.setBitRate(a.getBitRate());
             audio.setChannels(a.getChannels());
@@ -96,9 +100,9 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
           }
         }
         List<VideoStreamMetadata> videoList = metadata.getVideoStreamMetadata();
-        if(videoList != null && ! videoList.isEmpty()) {
-          for(int i=0; i<audioList.size(); i++ ) {
-            VideoStreamImpl video = new VideoStreamImpl("video-" + (i+1));
+        if (videoList != null && !videoList.isEmpty()) {
+          for (int i = 0; i < audioList.size(); i++) {
+            VideoStreamImpl video = new VideoStreamImpl("video-" + (i + 1));
             VideoStreamMetadata v = videoList.get(i);
             video.setBitRate(v.getBitRate());
             video.setFormat(v.getFormat());
@@ -117,7 +121,101 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       return track;
     }
   }
-  
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(Track, Boolean)
+   */
+  public Track enrich(Track originalTrack, Boolean override) {
+    URL originalTrackUrl = originalTrack.getURL();
+    logger.debug("enrych(" + originalTrackUrl + ") called");
+
+    // Get the file from the URL
+    File file = workspace.get(originalTrackUrl);
+
+    MediaContainerMetadata metadata = null;
+    try {
+      MediaAnalyzerFactory analyzerFactory = MediaAnalyzerFactory.newInstance();
+      MediaAnalyzer mediaAnalyzer = analyzerFactory.newMediaAnalyzer();
+      metadata = mediaAnalyzer.analyze(file);
+    } catch (Throwable t) {
+      throw new IllegalStateException("Unable to create media analyzer", t);
+    }
+
+    if (metadata == null) {
+      logger.warn("Unable to acquire media metadata for " + originalTrackUrl);
+      return null;
+    } else {
+      MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+      TrackImpl track;
+      try {
+        MediaPackageElement element = elementBuilder.elementFromURL(originalTrackUrl, Type.Track,
+                MediaPackageElements.INDEFINITE_TRACK);
+        // init the new track with old
+        track = (TrackImpl) element;
+        track.setChecksum(originalTrack.getChecksum());
+        track.setDuration(originalTrack.getDuration());
+        track.setElementDescription(originalTrack.getElementDescription());
+        track.setFlavor(originalTrack.getFlavor());
+        track.setIdentifier(originalTrack.getIdentifier());
+        track.setMimeType(originalTrack.getMimeType());
+        track.setReference(originalTrack.getReference());
+        track.setSize(originalTrack.getSize());
+        track.setURL(originalTrackUrl);
+        // enrich the new track with basic info
+        if (track.getDuration() == -1L || override)
+          track.setDuration(metadata.getDuration());
+        if (track.getChecksum() == null || override)
+          track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+
+        // find all streams
+        Dictionary<String, Stream> streamsId2Stream = new Hashtable<String, Stream>();
+        for (Stream stream : originalTrack.getStreams()) {
+          streamsId2Stream.put(stream.getIdentifier(), stream);
+        }
+
+        // audio list
+        List<AudioStreamMetadata> audioList = metadata.getAudioStreamMetadata();
+        if (audioList != null && !audioList.isEmpty()) {
+          for (int i = 0; i < audioList.size(); i++) {
+            AudioStreamImpl audio = new AudioStreamImpl("audio-" + (i + 1));
+            AudioStreamMetadata a = audioList.get(i);
+            audio.setBitRate(a.getBitRate());
+            audio.setChannels(a.getChannels());
+            audio.setFormat(a.getFormat());
+            audio.setFormatVersion(a.getFormatVersion());
+            audio.setResolution(a.getResolution());
+            audio.setSamplingRate(a.getSamplingRate());
+            // TODO: retain the original audio metadata
+            track.addStream(audio);
+          }
+        }
+        // video list
+        List<VideoStreamMetadata> videoList = metadata.getVideoStreamMetadata();
+        if (videoList != null && !videoList.isEmpty()) {
+          for (int i = 0; i < audioList.size(); i++) {
+            VideoStreamImpl video = new VideoStreamImpl("video-" + (i + 1));
+            VideoStreamMetadata v = videoList.get(i);
+            video.setBitRate(v.getBitRate());
+            video.setFormat(v.getFormat());
+            video.setFormatVersion(v.getFormatVersion());
+            video.setFrameHeight(v.getFrameHeight());
+            video.setFrameRate(v.getFrameRate());
+            video.setFrameWidth(v.getFrameWidth());
+            video.setScanOrder(v.getScanOrder());
+            video.setScanType(v.getScanType());
+            // TODO: retain the original video metadata
+            track.addStream(video);
+          }
+        }
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+      return track;
+    }
+  }
+
   @SuppressWarnings("unchecked")
   public void updated(Dictionary properties) throws ConfigurationException {
     logger.info("Updating configuration on " + this.getClass().getName());

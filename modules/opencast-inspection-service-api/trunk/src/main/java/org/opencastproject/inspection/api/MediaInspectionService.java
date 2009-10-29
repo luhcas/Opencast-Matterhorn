@@ -23,5 +23,17 @@ import java.net.URL;
  * Anayzes media to determine its technical metadata.
  */
 public interface MediaInspectionService {
-   Track inspect(URL url);
+  Track inspect(URL url);
+
+  /**
+   * Equip an existing track with automatically generated metadata
+   * 
+   * @param originalTrack
+   *          The original track that will be inspected
+   * @param override
+   *          In case of conflict between existing and automatically obtained metadata this switch selects preference.
+   *          False..The original metadata will be kept, True..The new metadata will be used.
+   * @return
+   */
+  Track enrich(Track originalTrack, Boolean override);
 }
