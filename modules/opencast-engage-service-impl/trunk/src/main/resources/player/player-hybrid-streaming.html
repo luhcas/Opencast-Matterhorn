@@ -1,0 +1,161 @@
+<html>
+    <head>
+	    <title>Streaming Hybrid Player</title>
+
+	    <script type="text/javascript" src="bridge/lib/FABridge.js"></script>
+	    <script type="text/javascript" src="bridge/Videodisplay.js"></script>
+        <link rel="stylesheet" href="jquery/ui/css/base/ui.all.css" type="text/css">
+        <link rel="stylesheet" href="css/oc.player.css" type="text/css">
+        <script type="text/javascript" src="jquery/jquery-1.3.2.js"></script>
+        <script type="text/javascript" src="jquery/ui/ui.core.js"></script>
+        <script type="text/javascript" src="jquery/ui/ui.slider.js"></script> 
+	
+	    <script language="javascript" type="text/javascript">
+	        var playing = "playing";
+	        var pausing = "pausing";
+
+	        var currentPlayPauseState = pausing;
+
+			function doPlay () {
+			    Videodisplay.play();
+			}
+			    
+			function doPause () {
+			    Videodisplay.pause();
+			}
+
+			function doTogglePlayPause () {
+			
+			     //Checking if btn_play_pause is "play"
+			     if (currentPlayPauseState == pausing)
+			     {
+			         //Changing the volume to 1.0 and the value of the button of btn_volume to "unmute"
+			         setPlayPauseState(playing);
+			         doPlay();               
+			         return
+			     }
+			     else
+			     {
+			         //Changing the volume to 0.0 and the value of the button of btn_volume to "mute"
+			         setPlayPauseState(pausing);
+			         doPause();            
+			         return
+			     }
+			 }
+
+			 function setPlayPauseState(state) {
+
+				 if(state == playing)
+				 {
+					 document.getElementById("btn_play_pause").value = "Play";
+					 currentPlayPauseState = pausing;
+				 }
+				 else
+	             {
+                     document.getElementById("btn_play_pause").value = "Pause";
+                     currentPlayPauseState = playing;
+                 }
+			 } 
+	            
+	        function doStop () {
+	            Videodisplay.stop();
+	        }
+	
+	        function doSeek (time) {
+	        	$('#slider').slider('value', time);
+	            Videodisplay.seek (time);
+	        }
+	
+	        function setPlayhead (newPosition) {
+	            $('#slider').slider('value', newPosition);
+	        }
+	
+	        function doSetVolume (value) {
+	            Videodisplay.setVolume(value);
+	         }
+	
+	        
+	        function doToggleVolume () {
+	            var mute = "Mute";
+	            var umute = "Unmute";
+	
+	        	//Checking if btn_volume is "mute"
+	        	if (document.getElementById("btn_volume").value == mute)
+	        	{
+	        		//Changing the volume to 1.0 and the value of the button of btn_volume to "unmute"
+					document.getElementById("btn_volume").value = "Unmute";
+					doSetVolume(0.0);               	
+					return
+	        	}
+	        	else
+	        	{
+		        	//Changing the volume to 0.0 and the value of the button of btn_volume to "mute"
+		            document.getElementById("btn_volume").value = "Mute";
+		            doSetVolume(1.0);                
+		            return
+	        	}
+	        }
+	        
+	        function setTime (text) {
+	            document.getElementById("time").innerHTML = text;
+	        }
+	
+	        function setDuration (time) {
+	            $('#slider').slider('option', 'max', time);
+	        }
+	
+	        function setProgress (value) {
+	        	$('.matterhorn-progress-bar').css("width", value + "%");
+	        }
+	    </script>
+    
+        <!-- js code for scrubber -->
+        <script type="text/javascript">
+
+            $(document).ready(function() {
+                $("#slider").slider();
+                $('#slider').slider('option', 'animate', false);
+                $('#slider').slider('option', 'min', 0);
+                $('#slider').bind('slide', function(event, ui) {
+                    Videodisplay.seek (ui.value);
+                });
+            });
+
+        </script>
+    </head>
+
+    <body>
+        <div style="margin:10px;margin-bottom:0px">
+            <h1>Streaming Hybrid Player</h1>
+            <object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="288" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
+                <param name ="movie" value="Videodisplay.swf" />
+                <param name="quality"value="high"/>
+                <param name="allowScriptAccess" value="always" />
+                <param name="bgcolor" value="#000000"/>
+                <param name="allowFullScreen" value="true"/>
+                <param name="flashvars" VALUE="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv&autoplay=false">
+                <embed 
+                    width="360" 
+                    height="288" 
+                    bgcolor="#000000"
+                    allowfullscreen="true" 
+                    type="application/x-shockwave-flash" 
+                    pluginspage="http://www.macromedia.com/go/getflashplayer" 
+                    flashvars="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv&autoplay=false" 
+                    quality="high" 
+                    allowScriptAccess="always"
+                    src="Videodisplay.swf"/>
+            </object>
+        </div>
+        <div id="slider" class="ui-slider" style="width:360px; display:inline-block; margin-left:10px; margin-right:10px;margin-top:10px;" >
+            <div class="matterhorn-progress-bar"></div>
+        </div>
+
+        <div style="margin-left:10px; margin-right:10px; margin-top:5px;">
+            <div id="time" style="display:inline-block; margin-left:0px;">00:00:00 of 00:00:00</div>
+            <input id="btn_play_pause" type="button" onclick="doTogglePlayPause();" value="Play"/>
+            <input type="button" onclick="doStop();" value="Stop"/>
+            <input id="btn_volume" type="button" onclick="doToggleVolume();" value="Mute"/>
+        </div>
+    </body>
+</html>

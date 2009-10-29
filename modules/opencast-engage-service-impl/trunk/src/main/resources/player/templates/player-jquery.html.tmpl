@@ -13,6 +13,9 @@
 
 
 <script language="javascript" type="text/javascript">
+        var playing = "playing";
+        var pausing = "pausing";
+            
         function doPlay () {
             Videodisplay.play();
         }
@@ -20,6 +23,33 @@
         function doPause () {
             Videodisplay.pause();
         }
+        
+            function doTogglePlayPause () {
+                 if (currentPlayPauseState == pausing)
+                 {
+                     setPlayPauseState(playing);
+                     doPlay();               
+                 }
+                 else
+                 {
+                     setPlayPauseState(pausing);
+                     doPause();            
+                 }
+             }
+
+             function setPlayPauseState(state) {
+
+                 if(state == playing)
+                 {
+                     document.getElementById("btn_play_pause").value = "Play";
+                     currentPlayPauseState = pausing;
+                 }
+                 else
+                 {
+                     document.getElementById("btn_play_pause").value = "Pause";
+                     currentPlayPauseState = playing;
+                 }
+             } 
         
         function doStop () {
             Videodisplay.stop();
@@ -36,7 +66,23 @@
         function doSetVolume (value) {
            Videodisplay.setVolume(value);
         }
+
         
+        function doToggleVolume () {
+            var mute = "Mute";
+
+            if (document.getElementById("btn_volume").value == mute) {
+                document.getElementById("btn_volume").value = "Unmute";
+                doSetVolume(0);                   
+            }
+            else
+            {
+                document.getElementById("btn_volume").value = "Mute";
+                doSetVolume(1.0);                
+            }
+
+         }
+           
         function setTime (text) {
             document.getElementById("time").innerHTML = text;
 
@@ -49,7 +95,6 @@
         function setProgress (value) 
         {
             $('.matterhorn-progress-bar').css("width", value + "%");
-            document.getElementById("progress").innerHTML = "loaded: " + parseInt(value) + " %";
         }
 
     </script>
@@ -95,15 +140,12 @@
 <div class="matterhorn-progress-bar"></div>
 </div>
 
-<div style="margin-left: 10px; margin-right: 10px; margin-top: 5px;">
-<input type="button" onclick="doPlay();" value="Play" /> <input
-    type="button" onclick="doPause();" value="Pause" /> <input
-    type="button" onclick="doStop();" value="Stop" />
-<div id="time" style="display: inline-block; margin-left: 90px;">00:00:00
-| 00:00:00</div>
-
-<div id="progress" style="display: inline-block; margin-left: 10px;">loaded: 0 %</div>
-</div>
+        <div style="margin-left:10px; margin-right:10px; margin-top:5px;">
+            <div id="time" style="display:inline-block; margin-left:0px;">00:00:00 of 00:00:00</div>
+            <input id="btn_play_pause" type="button" onclick="doTogglePlayPause();" value="Play"/>
+            <input type="button" onclick="doStop();" value="Stop"/>
+            <input id="btn_volume" type="button" onclick="doToggleVolume();" value="Mute"/>
+        </div>
 
 </body>
 </html>
