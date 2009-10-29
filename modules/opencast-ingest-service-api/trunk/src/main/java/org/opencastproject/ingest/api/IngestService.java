@@ -33,150 +33,171 @@ import java.net.URL;
  */
 public interface IngestService {
 
-  /**
-   * Add an existing MediaPackage to the repository
-   * 
-   * @param ZippedMediaPackage
-   *          A zipped file containing manifest, tracks, catalogs and attachments
-   * @return MediaPackageManifest The manifest of a specific Matterhorn MediaPackage element
-   * @throws MediaPackageException
-   * @throws FileNotFoundException
-   * @throws IOException
-   * @throws Exception
-   */
-  MediaPackage addZippedMediaPackage(InputStream ZippedMediaPackage) 
-          throws MediaPackageException, FileNotFoundException, IOException, Exception;
+	/**
+	 * Add an existing compressed MediaPackage to the repository.
+	 * 
+	 * @param ZippedMediaPackage
+	 *            A zipped file containing manifest, tracks, catalogs and
+	 *            attachments
+	 * @return MediaPackageManifest The manifest of a specific Matterhorn
+	 *         MediaPackage element
+	 * @throws MediaPackageException
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws Exception
+	 */
+	MediaPackage addZippedMediaPackage(InputStream ZippedMediaPackage)
+			throws MediaPackageException, FileNotFoundException, IOException,
+			Exception;
+
+	/**
+	 * Create a new MediaPackage in the repository.
+	 * 
+	 * @return The created MediaPackage
+	 * @throws MediaPackageException
+	 * @throws HandleException
+	 * @throws ConfigurationException
+	 */
+	MediaPackage createMediaPackage() throws MediaPackageException,
+			ConfigurationException, HandleException;
+
+	/**
+	 * Add a media track to an existing MediaPackage in the repository
+	 * 
+	 * @param url
+	 *            The URL of the file to add
+	 * @param flavor
+	 *            The flavor of the media that is being added
+	 * @param mediaPackage
+	 *            The specific Matterhorn MediaPackage to which Media is being
+	 *            added
+	 * @return MediaPackageManifest The manifest of a specific Matterhorn
+	 *         MediaPackage element
+	 * @throws UnsupportedElementException
+	 * @throws MediaPackageException
+	 * @throws IOException
+	 */
+	MediaPackage addTrack(URL url, MediaPackageElementFlavor flavor,
+			MediaPackage mediaPackage) throws MediaPackageException,
+			UnsupportedElementException, IOException;
+
+	/**
+	 * Add a media track to an existing MediaPackage in the repository
+	 * 
+	 * @param mediaFile
+	 *            The media file to add
+	 * @param flavor
+	 *            The flavor of the media that is being added
+	 * @param mediaPackage
+	 *            The specific Matterhorn MediaPackage to which Media is being
+	 *            added
+	 * @return MediaPackage The updated Matterhorn MediaPackage element
+	 * @throws UnsupportedElementException
+	 * @throws MediaPackageException
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	MediaPackage addTrack(InputStream mediaFile,
+			MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+			throws MediaPackageException, UnsupportedElementException,
+			MalformedURLException, IOException;
+
+	/**
+	 * Add a [metadata catalog] to an existing MediaPackage in the repository
+	 * 
+	 * @param url
+	 *            The URL of the file to add
+	 * @param flavor
+	 *            The flavor of the media that is being added
+	 * @param mediaPackage
+	 *            The specific Matterhorn MediaPackage to which Media is being
+	 *            added
+	 * @return MediaPackage The updated Matterhorn MediaPackage element
+	 * @throws UnsupportedElementException
+	 * @throws MediaPackageException
+	 * @throws IOException
+	 */
+	MediaPackage addCatalog(URL url, MediaPackageElementFlavor flavor,
+			MediaPackage mediaPackage) throws MediaPackageException,
+			UnsupportedElementException, IOException;
+
+	/**
+	 * Add a [metadata catalog] to an existing MediaPackage in the repository
+	 * 
+	 * @param catalog
+	 *            The catalog file to add
+	 * @param flavor
+	 *            The flavor of the media that is being added
+	 * @param mediaPackage
+	 *            The specific Matterhorn MediaPackage to which Media is being
+	 *            added
+	 * @return MediaPackage The updated Matterhorn MediaPackage element
+	 * @throws UnsupportedElementException
+	 * @throws MediaPackageException
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	MediaPackage addCatalog(InputStream catalog,
+			MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+			throws MediaPackageException, UnsupportedElementException,
+			MalformedURLException, IOException;
+
+	/**
+	 * Add an attachment to an existing MediaPackage in the repository
+	 * 
+	 * @param url
+	 *            The URL of the file to add
+	 * @param flavor
+	 *            The flavor of the media that is being added
+	 * @param mediaPackage
+	 *            The specific Matterhorn MediaPackage to which Media is being
+	 *            added
+	 * @return MediaPackage The updated Matterhorn MediaPackage element
+	 * @throws UnsupportedElementException
+	 * @throws MediaPackageException
+	 * @throws IOException
+	 */
+	MediaPackage addAttachment(URL url, MediaPackageElementFlavor flavor,
+			MediaPackage mediaPackage) throws MediaPackageException,
+			UnsupportedElementException, IOException;
+
+	/**
+	 * Add an attachment to an existing MediaPackage in the repository
+	 * 
+	 * @param file
+	 *            The file to add
+	 * @param flavor
+	 *            The flavor of the media that is being added
+	 * @param mediaPackage
+	 *            The specific Matterhorn MediaPackage to which Media is being
+	 *            added
+	 * @return MediaPackage The updated Matterhorn MediaPackage element
+	 * @throws UnsupportedElementException
+	 * @throws MediaPackageException
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	MediaPackage addAttachment(InputStream file,
+			MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+			throws MediaPackageException, UnsupportedElementException,
+			MalformedURLException, IOException;
 
   /**
-   * Create a new MediaPackage in the repository.
-   * 
-   * @return The created MediaPackage
-   * @throws MediaPackageException
-   * @throws HandleException
-   * @throws ConfigurationException
-   */
-  MediaPackage createMediaPackage() throws MediaPackageException, ConfigurationException, HandleException;
-
-  /**
-   * Add a media track to an existing MediaPackage in the repository
-   * 
-   * @param url
-   *          The URL of the file to add
-   * @param flavor
-   *          The flavor of the media that is being added
-   * @param mediaPackage
-   *          The specific Matterhorn MediaPackage to which Media is being added
-   * @return MediaPackageManifest The manifest of a specific Matterhorn MediaPackage element
-   * @throws UnsupportedElementException
-   * @throws MediaPackageException
-   * @throws IOException 
-   */
-  MediaPackage addTrack(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, IOException;
-
-  /**
-   * Add a media track to an existing MediaPackage in the repository
-   * 
-   * @param mediaFile
-   *          The media file to add
-   * @param flavor
-   *          The flavor of the media that is being added
-   * @param mediaPackage
-   *          The specific Matterhorn MediaPackage to which Media is being added
-   * @return MediaPackage The updated Matterhorn MediaPackage element
-   * @throws UnsupportedElementException
-   * @throws MediaPackageException
-   * @throws MalformedURLException
-   * @throws IOException 
-   */
-  MediaPackage addTrack(InputStream mediaFile, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, MalformedURLException, IOException;
-
-  /**
-   * Add a [metadata catalog] to an existing MediaPackage in the repository
-   * 
-   * @param url
-   *          The URL of the file to add
-   * @param flavor
-   *          The flavor of the media that is being added
-   * @param mediaPackage
-   *          The specific Matterhorn MediaPackage to which Media is being added
-   * @return MediaPackage The updated Matterhorn MediaPackage element
-   * @throws UnsupportedElementException
-   * @throws MediaPackageException
-   * @throws IOException 
-   */
-  MediaPackage addCatalog(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, IOException;
-
-  /**
-   * Add a [metadata catalog] to an existing MediaPackage in the repository
-   * 
-   * @param catalog
-   *          The catalog file to add
-   * @param flavor
-   *          The flavor of the media that is being added
-   * @param mediaPackage
-   *          The specific Matterhorn MediaPackage to which Media is being added
-   * @return MediaPackage The updated Matterhorn MediaPackage element
-   * @throws UnsupportedElementException
-   * @throws MediaPackageException
-   * @throws MalformedURLException
-   * @throws IOException 
-   */
-  MediaPackage addCatalog(InputStream catalog, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, MalformedURLException, IOException;
-
-  /**
-   * Add an attachment to an existing MediaPackage in the repository
-   * 
-   * @param url
-   *          The URL of the file to add
-   * @param flavor
-   *          The flavor of the media that is being added
-   * @param mediaPackage
-   *          The specific Matterhorn MediaPackage to which Media is being added
-   * @return MediaPackage The updated Matterhorn MediaPackage element
-   * @throws UnsupportedElementException
-   * @throws MediaPackageException
-   * @throws IOException 
-   */
-  MediaPackage addAttachment(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, IOException;
-
-  /**
-   * Add an attachment to an existing MediaPackage in the repository
-   * 
-   * @param file
-   *          The file to add
-   * @param flavor
-   *          The flavor of the media that is being added
-   * @param mediaPackage
-   *          The specific Matterhorn MediaPackage to which Media is being added
-   * @return MediaPackage The updated Matterhorn MediaPackage element
-   * @throws UnsupportedElementException
-   * @throws MediaPackageException
-   * @throws MalformedURLException
-   * @throws IOException 
-   */
-  MediaPackage addAttachment(InputStream file, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, MalformedURLException, IOException;
-
-  /**
-   * Copy all files linked to an existing MediaPackage to the repository.
+   * Broadcasts an event, that media package is ingested.
    * 
    * @param mediaPackage
    *          The specific Matterhorn MediaPackage being ingested
    * @return MediaPackage A Matterhorn MediaPackage (via EventAdmin)
    */
-  void ingest(MediaPackage mediaPackage);
+	void ingest(MediaPackage mediaPackage);
 
-  /**
-   * Delete an existing MediaPackage and any linked files from the temporary ingest filestore.
-   * 
-   * @param mediaPackage
-   *          The specific Matterhorn MediaPackage
-   */
-  void discardMediaPackage(MediaPackage mediaPackage);
+	/**
+	 * Delete an existing MediaPackage and any linked files from the temporary
+	 * ingest filestore.
+	 * 
+	 * @param mediaPackage
+	 *            The specific Matterhorn MediaPackage
+	 */
+	void discardMediaPackage(MediaPackage mediaPackage);
 
 }
