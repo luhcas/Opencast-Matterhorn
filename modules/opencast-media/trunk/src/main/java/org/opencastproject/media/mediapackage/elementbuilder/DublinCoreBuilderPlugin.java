@@ -154,12 +154,12 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
       // checksum
       String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
       String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
-      if (checksumValue != null && checksumType != null)
+      if (checksumValue != null && !checksumValue.equals("") && checksumType != null)
         checksum = Checksum.create(checksumType.trim(), checksumValue.trim());
 
       // mimetype
       String mimeTypeValue = (String) xpath.evaluate("mimetype/text()", elementNode, XPathConstants.STRING);
-      if (mimeTypeValue != null)
+      if (mimeTypeValue != null && !mimeTypeValue.equals(""))
         mimeType = MimeTypes.parseMimeType(mimeTypeValue);
 
       // create the catalog
