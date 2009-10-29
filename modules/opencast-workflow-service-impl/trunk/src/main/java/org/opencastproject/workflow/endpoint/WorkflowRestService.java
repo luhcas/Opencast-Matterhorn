@@ -15,8 +15,12 @@
  */
 package org.opencastproject.workflow.endpoint;
 
+import org.opencastproject.media.mediapackage.Catalog;
+import org.opencastproject.media.mediapackage.DublinCoreCatalog;
+import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
@@ -34,6 +38,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.FormParam;
@@ -151,16 +157,7 @@ public class WorkflowRestService {
     StringBuilder sb = new StringBuilder("{\"workflows\" : [\n");
     for(int i=0; i < set.getItems().length; i++) {
       WorkflowInstance workflow = set.getItems()[i];
-      sb.append(" { \"workflow_id\" : \"");
-      sb.append(workflow.getId());
-      sb.append("\",\n");
-      sb.append("   \"workflow_title\" : \"");
-      sb.append(workflow.getTitle());
-      sb.append("\",\n");
-      sb.append("   \"workflow_state\" : \"");
-      sb.append(workflow.getState().name().toLowerCase());
-      sb.append("\"\n");
-      sb.append(" }");
+      appendWorkflow(sb, workflow, false);
       if(i < set.getItems().length - 1) sb.append(",");
       sb.append("\n");
     }
@@ -168,22 +165,66 @@ public class WorkflowRestService {
     return sb.toString();
   }
 
-//  {
-//    "workflows" : [
-//        {
-//            "workflow_id" : "cb7e055b-2c9f-4924-970b-8f0f74d82def",
-//            "workflow_title" : "Transcode and Distribute",
-//            "workflow_state" : "succeeded" 
-//        },
-//        {
-//            "workflow_id" : "cb7e055b-2c9f-4924-970b-8f0f74d82def",
-//            "workflow_title" : "Transcode and Distribute",
-//            "workflow_state" : "succeeded" 
-//        } 
-//    ] 
-//}
+  @GET
+  @Path("instanceinfo/{workflowId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public String getWorkflowAsJson(@PathParam("workflowId") String workflowId) {
+    WorkflowInstance workflow = service.getWorkflowById(workflowId);
+    StringBuilder sb = new StringBuilder();
+    appendWorkflow(sb, workflow, true);
+    return sb.toString();
+  }
 
-  
+  protected void appendWorkflow(StringBuilder sb, WorkflowInstance workflow, boolean includeDublinCoreFields) {
+    String mediaPackageTitle = getDublinCoreProperty(getDublinCore(workflow.getSourceMediaPackage()),
+            DublinCoreCatalog.PROPERTY_TITLE);
+
+    sb.append(" { \"workflow_id\" : \"");
+    sb.append(workflow.getId());
+    sb.append("\",\n");
+
+    sb.append("   \"workflow_title\" : \"");
+    sb.append(workflow.getTitle());
+    sb.append("\",\n");
+    
+    sb.append("   \"workflow_current_operation\" : \"");
+    sb.append(workflow.getCurrentOperation().getName());
+    sb.append("\",\n");
+
+    
+    sb.append("   \"workflow_state\" : \"");
+    sb.append(workflow.getState().name().toLowerCase());
+    sb.append("\"");
+
+    if(includeDublinCoreFields) {
+      DublinCoreCatalog dc = getDublinCore(workflow.getSourceMediaPackage());
+      List<EName> props = new ArrayList<EName>(dc.getProperties());
+      for(int i=0; i<props.size(); i++) {
+        sb.append(",\n");
+        sb.append("   \"mediapackage_" + props.get(i).getLocalName().toLowerCase() + "\" : \"");
+        sb.append(dc.getFirst(props.get(i)));
+        sb.append("\"");
+      }
+    } else {
+      sb.append(",\n   \"mediapackage_title\" : \"");
+      sb.append(mediaPackageTitle);
+      sb.append("\"");
+    }
+
+    sb.append("\n }");
+  }
+
+  private DublinCoreCatalog getDublinCore(MediaPackage mediaPackage) {
+    Catalog[] dcCatalogs = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
+    if(dcCatalogs.length == 0) return null;
+    return (DublinCoreCatalog)dcCatalogs[0];
+  }
+
+  private String getDublinCoreProperty(DublinCoreCatalog catalog, EName property) {
+    if(catalog == null) return null;
+    return catalog.getFirst(property, DublinCoreCatalog.LANGUAGE_ANY);
+  }
+
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
