@@ -65,10 +65,12 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    Connection conn = null;
+    Statement s = null;
     try {
       Properties props = new Properties();
-      Connection conn = DriverManager.getConnection(jdbcUrl + ";create=true", props);
-      Statement s = conn.createStatement();
+      conn = DriverManager.getConnection(jdbcUrl + ";create=true", props);
+      s = conn.createStatement();
       s.execute("create table oc_workflow(workflow_id varchar(40) PRIMARY KEY, mp_id varchar(40), workflow_state varchar(40), "
               + "episode_id varchar(40), series_id varchar(40), workflow_text long varchar, workflow_xml long varchar, "
               + "date_created timestamp)");
@@ -78,6 +80,14 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
       s.execute("create index oc_workflow_series_id on oc_workflow (series_id)");
     } catch (SQLException e) {
       logger.error(e.getMessage());
+    } finally {
+      if (s != null)
+        try {
+          s.close();
+        } catch (SQLException e) {
+          throw new RuntimeException(e);
+        }
+      returnConnection(conn);
     }
   }
 
@@ -87,13 +97,11 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#deactivate()
    */
   public void deactivate() {
-    logger.info("Shutting down derby.  Ignore the upcoming exception.");
+    logger.info("Shutting down derby DB.");
     try {
       // This throws by-design, so ignore the exception
       DriverManager.getConnection("jdbc:derby:;shutdown=true");
-    } catch (SQLException e) {
-      logger.info("Derby shut down.  Did you see the exception?  Nice, wasn't it?");
-    }
+    } catch (SQLException e) {}
   }
 
   /**
