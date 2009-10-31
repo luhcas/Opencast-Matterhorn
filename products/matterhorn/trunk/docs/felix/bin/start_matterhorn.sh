@@ -2,6 +2,18 @@
 # Configure these variables to match your environment
 ##
 
+if [ -n "${FELIX_HOME:-x}" ]; then
+  FELIX=$FELIX_HOME
+else
+  FELIX="/Applications/Matterhorn"
+fi
+
+if [ -n "${M2_REPO:-x}" ]; then
+  M2_REPO=$M2_REPO
+else
+  M2_REPO="/Users/johndoe/.m2/repository"
+fi
+
 FELIX="/Applications/Matterhorn"
 M2_REPO="/Users/johndoe/.m2/repository"
 DEBUG_PORT="8000"
