@@ -92,6 +92,8 @@ public interface WorkflowService {
   /**
    * Returns the {@link WorkflowInstance}s that deal with episodes matching the specified search terms.
    * 
+   * @param text
+   *          the search term
    * @param offset
    *          starting position of the result set
    * @param limit
@@ -101,6 +103,24 @@ public interface WorkflowService {
    *           if the lookup fails
    */
   WorkflowSet getWorkflowsByText(String text, int offset, int limit) throws WorkflowDatabaseException;
+
+  /**
+   * Returns the {@link WorkflowInstance}s that deal with episodes matching the specified search terms and are in the
+   * specified state.
+   * 
+   * @param state
+   *          the workflow state
+   * @param text
+   *          the search term
+   * @param offset
+   *          starting position of the result set
+   * @param limit
+   *          the maximum size of the result set
+   * @return the resultset
+   * @throws WorkflowDatabaseException
+   *           if the lookup fails
+   */
+  WorkflowSet getWorkflowsByTextAndState(State state, String text, int offset, int limit) throws WorkflowDatabaseException;
 
   /**
    * Creates a new workflow instance and starts the workflow.

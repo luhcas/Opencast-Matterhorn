@@ -254,4 +254,13 @@ public class WorkflowServiceImplDaoSolrImpl implements WorkflowServiceImplDao {
     return 0;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsByTextAndState(org.opencastproject.workflow.api.WorkflowInstance.State, java.lang.String, int, int)
+   */
+  public WorkflowSet getWorkflowsByTextAndState(State state, String text, int offset, int limit) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
 }

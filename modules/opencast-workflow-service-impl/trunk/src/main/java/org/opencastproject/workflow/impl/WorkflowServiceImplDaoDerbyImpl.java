@@ -275,13 +275,23 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
 
   /**
    * {@inheritDoc}
+   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsByTextAndState(org.opencastproject.workflow.api.WorkflowInstance.State, java.lang.String, int, int)
+   */
+  public WorkflowSet getWorkflowsByTextAndState(State state, String text, int offset, int limit) {
+    text = text.toLowerCase();
+    return getWorkflowSet("select workflow_xml from oc_workflow where workflow_state=? and workflow_text like ?",
+            new String[] {state.name().toLowerCase(), "%" + text + "%" }, offset, limit);
+  }
+
+  /**
+   * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsInState(org.opencastproject.workflow.api.WorkflowInstance.State,
    *      int, int)
    */
   public WorkflowSet getWorkflowsInState(State state, int offset, int limit) {
     return getWorkflowSet("select workflow_xml from oc_workflow where workflow_state=?", new String[] { state.name()
-            .toLowerCase() }, 0, 0);
+            .toLowerCase() }, offset, limit);
   }
 
   /**

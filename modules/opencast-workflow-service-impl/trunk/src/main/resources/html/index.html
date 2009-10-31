@@ -1,153 +1,410 @@
-<html>
-  <head>
-  </head>
-  <body>
-    <h2>
-      Workflow Service REST endpoint
-    </h2>
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Workflow Service REST Documentation</title>
+  <style type="text/css">
+  /* styles for the page */
+  fieldset {
+     margin-top: 0.5em;
+     width: 90%;
+  }
+  table {
+     width: 100%;
+  }
+  .method_set_header {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    font-size: 1.4em;
+    font-weight: bold;
+  }
+  .method_header {
+     background-color: #FFC;
+  }
+  .method_header TH {
+        text-align: left;
+        padding: 0.3em;
+  }
+  .method TD {
+     padding-left: 0.3em;
+     padding-top: 0.1em;
+     vertical-align: top;
+  }
+  .method_odd {
+     background-color: #FFF;
+  }
+    .method_even {
+       background-color: #DDD;
+    }
+  </style>
+</head>
+<body>
+<h1>Workflow Service REST Documentation</h1>
+
+<fieldset>
+  <legend class="method_set_header">Read methods</legend>
+  <table cellpadding="0px" cellspacing="0px">
+    <thead>
+      <tr class="method_header">
+        <th width="20%">NAME</th>
+        <th>VALUE and NOTES</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="method_odd method">
+        <td>Method / Path:</td>
+        <td><tt>GET /definitions.{xml|json}</tt></td>
+      </tr>
+      <tr class="method_even method">
+        <td>Description:</td>
+        <td>Returns all available workflow definitions</td>
+      </tr>
+      <tr class="method_odd method">
+        <td>Optional parameters:</td>
+        <td>
+          <tt>None</tt>
+        </td>
+      </tr>
+      <tr class="method_even method">
+        <td>Response formats:</td>
+        <td>
+          <a href="http://www.w3.org/XML/">xml</a> (<a href="definitions.xml">definitions.xml</a>)<br/>
+          <a href="http://json.org/">json</a> (<a href="definitions.json">definitions.json</a>)
+        </td>
+      </tr>
+      <tr class="method_odd method">
+        <td>Status codes</td>
+        <td>
+          200: OK, valid request, results returned
+          <br />
+          400: Bad Request, invalid arguments in request, error message
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table cellpadding="0px" cellspacing="0px">
+    <thead>
+      <tr class="method_header">
+        <th width="20%">NAME</th>
+        <th>VALUE and NOTES</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="method_odd method">
+        <td>Method / Path:</td>
+        <td><tt>GET /instances.{xml|json}</tt></td>
+      </tr>
+      <tr class="method_even method">
+        <td>Description:</td>
+        <td>Returns paged sets of workflow instances, sorted in reverse chronological order</td>
+      </tr>
+      <tr class="method_odd method">
+        <td>Optional parameters:</td>
+        <td>
+          <tt>state=succeeded</tt>: display only workflow instances in this state (default is all.  options include
+          running, paused, stopped, succeeded, failed)<br />
+          <br />
+          <tt>q=climate</tt>: the text to search for within the workflow's media package's dublin core metadata catalog
+          <br />
+          <tt>count=0</tt>: number of results to return per page (default is 20. max is 100)
+          <br />
+          <tt>startPage=1</tt>: the page of results to display (1 is first page)
+        </td>
+      </tr>
+      <tr class="method_even method">
+        <td>Response formats:</td>
+        <td>
+          <a href="http://www.w3.org/XML/">xml</a> (<a href="instances.xml">instances.xml</a>)<br/>
+          <a href="http://json.org/">json</a> (<a href="instances.json">instances.json</a>)
+        </td>
+      </tr>
+      <tr class="method_odd method">
+        <td>Status codes</td>
+        <td>
+          200: OK, valid request, results returned
+          <br />
+          400: Bad Request, invalid arguments in request, error message
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table cellpadding="0px" cellspacing="0px">
+    <thead>
+      <tr class="method_header">
+        <th width="20%">NAME</th>
+        <th>VALUE and NOTES</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="method_odd method">
+        <td>Method / Path:</td>
+        <td><tt>GET /instance/{id}.{xml|json}</tt></td>
+      </tr>
+      <tr class="method_even method">
+        <td>Description:</td>
+        <td>Returns a workflow instance</td>
+      </tr>
+      <tr class="method_odd method">
+        <td>Optional parameters:</td>
+        <td>
+          <tt>None</tt>
+        </td>
+      </tr>
+      <tr class="method_even method">
+        <td>Response formats:</td>
+        <td>
+          <a href="http://www.w3.org/XML/">xml</a> (<a href="instance/id.xml">instance/id.xml</a>)<br/>
+          <a href="http://json.org/">json</a> (<a href="instance/id.json">instance/id.json</a>)
+        </td>
+      </tr>
+      <tr class="method_odd method">
+        <td>Status codes</td>
+        <td>
+          200: OK, valid request, results returned
+          <br />
+          400: Bad Request, invalid arguments in request, error message
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</fieldset>
+
+<fieldset>
+  <legend class="method_set_header">Write methods</legend>
+    <table cellpadding="0px" cellspacing="0px">
+        <thead>
+            <tr class="method_header">
+                <th width="20%">NAME</th>
+                <th>VALUE and NOTES</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="method_odd method">
+                <td>Method / Path:</td>
+                <td><tt>POST /start</tt></td>
+            </tr>
+            <tr class="method_even method">
+                <td>Description:</td>
+                <td>starts a workflow instance, based on the specified xml workflow definition, the media package xml,
+                and key-value properties<br/>
+                    <tt>definition</tt>: the workflow definition <br/>
+                    <tt>mediapackage</tt>: the mediapackage upon which this workflow instance is to operate <br/>
+                    <tt>properties</tt>: key-value properties to include with this workflow operation
+                </td>
+            </tr>
+            <tr class="method_odd method">
+                <td>Optional parameters:</td>
+                <td>
+                    <em>NONE</em>
+                </td>
+            </tr>
+            <tr class="method_even method">
+                <td>Response formats:</td>
+                <td>An <a href="http://www.w3.org/XML/">xml</a> representation of the newly started workflow instance</td>
+            </tr>
+            <tr class="method_odd method">
+                <td>Status codes</td>
+                <td>
+                    200: OK, data was added, result info in headers
+                    <br />
+                    400: Bad Request, data was not added, error message
+                </td>
+            </tr>
+            <tr class="method_even method">
+                <td>Example:</td>
+                <td>
+                  <form action="start" method="POST">
+                    Workflow Definition XML<br/>
+                    <textarea rows="20" cols="80" id="definition" name="definition">
+                      <workflow-definition>
+                        <title>Transcode and Distribute</title>
+                        <description>
+                          A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
+                          along with their associated metadata, to the distribution channels.
+                        </description>
+                        <operations>
+                          <operation
+                            name="compose"
+                            fail-on-error="true"
+                            exception-handler-workflow="Default Error Handler"
+                            description="Encode media"/>
+                          <operation
+                            name="distribute"
+                            fail-on-error="true"
+                            exception-handler-workflow="Default Error Handler"
+                            description="Distribute media to distribution channels"/>
+                        </operations>
+                      </workflow-definition>
+                    </textarea><br/>
+                    Media Package XML<br/>
+                    <textarea rows="20" cols="80" id="mediapackage" name="mediapackage">
+                      <mediapackage id="10.0000/1" start="2007-12-05T13:40:00" duration="1004400000">
+                        <metadata>
+                          <catalog id="catalog-1" type="metadata/dublincore">
+                            <mimetype>text/xml</mimetype>
+                            <url>http://localhost:8080/workflow/samples/dc-1.xml</url>
+                            <checksum type="md5">20e466615251074e127a1627fd0dae3e</checksum>
+                          </catalog>
+                        </metadata>
+                      </mediapackage>
+                    </textarea><br/>
+                    Key/Value Properties<br/>
+                    <textarea rows="20" cols="80" id="properties" name="properties">this=that</textarea><br/>
+                    <input type="submit" value="Start workflow"/>
+                  </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
     
-    <h4>
-      Workflow Definitions
-    </h4>
-    <div>
-      <b>GET definitions</b> returns all available workflow definitions
-    </div>
-    <h4>
-      Workflow Instances
-    </h4>
-    <div>
-      <b>GET instances/{state}?startPage=2&count=1</b> returns paged sets of workflow instances in a given state
-      <a href="instances/running">running</a>,
-      <a href="instances/paused">paused</a>,
-      <a href="instances/stopped">stopped</a>,
-      <a href="instances/succeeded">succeeded</a>,
-      <a href="instances/failed">failed</a>)
-    </div>
-    <div>
-      <b>GET instances?q=climate&startPage=2&count=1</b> returns paged sets of workflow instances matching a search parameter
-    </div>
-    <div>
-      <b>GET instance/{id}</b> returns a workflow instance
-    </div>
-    <div>
-      <b>GET /workflow/rest/allinstances</b> returns all workflow instances, along with a subset of dublin core metadata, as a json array
-      <pre>
-{"workflows" : [
- { "workflow_id" : "de9609eb-2251-42f8-a190-756347380182",
-   "workflow_title" : "Transcode and Distribute",
-   "workflow_current_operation" : "distribute",
-   "workflow_state" : "succeeded",
-   "mediapackage_title" : "Land and Vegetation: Key players on the Climate Scene"
- },
- { "workflow_id" : "cb7e055b-2c9f-4924-970b-8f0f74d82def",
-   "workflow_title" : "Transcode and Distribute",
-   "workflow_current_operation" : "distribute",
-   "workflow_state" : "succeeded",
-   "mediapackage_title" : "Land and Vegetation: Key players on the Climate Scene"
- }
-]}
-      </pre>
-    </div>
+    <table cellpadding="0px" cellspacing="0px">
+        <thead>
+            <tr class="method_header">
+                <th width="20%">NAME</th>
+                <th>VALUE and NOTES</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="method_odd method">
+                <td>Method / Path:</td>
+                <td><tt>GET /stop/{id}</tt></td>
+            </tr>
+            <tr class="method_even method">
+                <td>Description:</td>
+                <td>stops a workflow instance</td>
+            </tr>
+            <tr class="method_odd method">
+                <td>Optional parameters:</td>
+                <td>
+                    <em>NONE</em>
+                </td>
+            </tr>
+            <tr class="method_even method">
+                <td>Response formats:</td>
+                <td>
+                  <em>none</em>
+                </td>
+            </tr>
+            <tr class="method_odd method">
+                <td>Status codes</td>
+                <td>
+                    200: OK, data was added, result info in headers
+                    <br />
+                    400: Bad Request, data was not added, error message
+                </td>
+            </tr>
+            <tr class="method_even method">
+                <td>Notes:</td>
+                <td>stops a running workflow instance (TODO: Change this to post... using GET only to make testing easier)</td>
+            </tr>
+        </tbody>
+    </table>
 
+    <table cellpadding="0px" cellspacing="0px">
+        <thead>
+            <tr class="method_header">
+                <th width="20%">NAME</th>
+                <th>VALUE and NOTES</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="method_odd method">
+                <td>Method / Path:</td>
+                <td><tt>GET /suspend/{id}</tt></td>
+            </tr>
+            <tr class="method_even method">
+                <td>Description:</td>
+                <td>pauses a workflow instance</td>
+            </tr>
+            <tr class="method_odd method">
+                <td>Optional parameters:</td>
+                <td>
+                    <em>NONE</em>
+                </td>
+            </tr>
+            <tr class="method_even method">
+                <td>Response formats:</td>
+                <td>
+                  <em>none</em>
+                </td>
+            </tr>
+            <tr class="method_odd method">
+                <td>Status codes</td>
+                <td>
+                    200: OK, data was added, result info in headers
+                    <br />
+                    400: Bad Request, data was not added, error message
+                </td>
+            </tr>
+            <tr class="method_even method">
+                <td>Notes:</td>
+                <td>pauses a running workflow instance (TODO: Change this to post... using GET only to make testing easier)</td>
+            </tr>
+        </tbody>
+    </table>
 
+    <table cellpadding="0px" cellspacing="0px">
+        <thead>
+            <tr class="method_header">
+                <th width="20%">NAME</th>
+                <th>VALUE and NOTES</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="method_odd method">
+                <td>Method / Path:</td>
+                <td><tt>GET /resume/{id}</tt></td>
+            </tr>
+            <tr class="method_even method">
+                <td>Description:</td>
+                <td>resumes a suspended workflow instance</td>
+            </tr>
+            <tr class="method_odd method">
+                <td>Optional parameters:</td>
+                <td>
+                    <em>NONE</em>
+                </td>
+            </tr>
+            <tr class="method_even method">
+                <td>Response formats:</td>
+                <td>
+                  <em>none</em>
+                </td>
+            </tr>
+            <tr class="method_odd method">
+                <td>Status codes</td>
+                <td>
+                    200: OK, data was added, result info in headers
+                    <br />
+                    400: Bad Request, data was not added, error message
+                </td>
+            </tr>
+            <tr class="method_even method">
+                <td>Notes:</td>
+                <td>resumes a suspended workflow instance (TODO: Change this to post... using GET only to make testing easier)</td>
+            </tr>
+        </tbody>
+    </table>
 
-    <div>
-      <b>GET /workflow/rest/instanceinfo/{id}</b> returns a workflow instance, along with all available dublin core metadata, as json object
-      <pre>
- { "workflow_id" : "de9609eb-2251-42f8-a190-756347380182",
-   "workflow_title" : "Transcode and Distribute",
-   "workflow_current_operation" : "distribute",
-   "workflow_state" : "succeeded",
-   "mediapackage_creator" : "null",
-   "mediapackage_format" : "video/x-dv",
-   "mediapackage_contributor" : "null",
-   "mediapackage_coverage" : "null",
-   "mediapackage_promoted" : "true",
-   "mediapackage_type" : "null",
-   "mediapackage_extent" : "null",
-   "mediapackage_ispartof" : "null",
-   "mediapackage_license" : "null",
-   "mediapackage_available" : "null",
-   "mediapackage_advertised" : "null",
-   "mediapackage_created" : "null",
-   "mediapackage_source" : "null",
-   "mediapackage_abstract" : "null",
-   "mediapackage_temporal" : "null",
-   "mediapackage_relation" : "null",
-   "mediapackage_description" : "Introduction lecture from the Institute for Atmospheric and Climate Science.",
-   "mediapackage_subject" : "climate, land, vegetation",
-   "mediapackage_isreferencedby" : "null",
-   "mediapackage_language" : "null",
-   "mediapackage_rightsholder" : "null",
-   "mediapackage_publisher" : "ETH Zurich, Switzerland",
-   "mediapackage_accessrights" : "null",
-   "mediapackage_spatial" : "null",
-   "mediapackage_isreplacedby" : "null",
-   "mediapackage_date" : "null",
-   "mediapackage_identifier" : "10.0000/5819",
-   "mediapackage_replaces" : "null",
-   "mediapackage_rights" : "null",
-   "mediapackage_title" : "Land and Vegetation: Key players on the Climate Scene"
- }
-      </pre>
-    </div>
+</fieldset>
 
-    <div>
-      <b>POST start</b> starts a workflow instance, based on the specified xml workflow definition (form element='definition'),
-      the media package xml (form element='mediapackage'), and key-value properties (from element='properties')
-      <form action="start" method="POST">
-        Workflow Definition XML<br/>
-        <textarea rows="20" cols="80" id="definition" name="definition">
-          <workflow-definition>
-            <title>Transcode and Distribute</title>
-            <description>
-              A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
-              along with their associated metadata, to the distribution channels.
-            </description>
-            <operations>
-              <operation
-                name="compose"
-                fail-on-error="true"
-                exception-handler-workflow="Default Error Handler"
-                description="Encode media"/>
-          
-              <operation
-                name="distribute"
-                fail-on-error="true"
-                exception-handler-workflow="Default Error Handler"
-                description="Distribute media to distribution channels"/>
-            </operations>
-          </workflow-definition>
-        </textarea><br/>
-        Media Package XML<br/>
-        <textarea rows="20" cols="80" id="mediapackage" name="mediapackage">
-          <mediapackage id="10.0000/1" start="2007-12-05T13:40:00" duration="1004400000">
-            <metadata>
-              <catalog id="catalog-1" type="metadata/dublincore">
-                <mimetype>text/xml</mimetype>
-                <url>http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/dublincore.xml</url>
-                <checksum type="md5">20e466615251074e127a1627fd0dae3e</checksum>
-              </catalog>
-            </metadata>
-          </mediapackage>
-        </textarea><br/>
-        Key/Value Properties<br/>
-        <textarea rows="20" cols="80" id="properties" name="properties">this=that</textarea><br/>
-        <input type="submit" value="Start workflow"/>
-      </form>
-    </div>
-    <div>
-      <b>GET stop/{id}</b> stops a running workflow instance (TODO: Change this to post... using GET only to make testing easier)
-    </div>
-    <div>
-      <b>GET suspend/{id}</b> suspends a workflow instance (TODO: Change this to post... using GET only to make testing easier)
-    </div>
-    <div>
-      <b>GET resume/{id}</b> resume a suspended workflow instance (TODO: Change this to post... using GET only to make testing easier)
-    </div>
-    
-    <div>
-      $Rev$
-    </div>
-  </body>
+<fieldset>
+  <legend class="method_set_header">General Notes</legend>
+  <ul>
+        <li>All paths above are relative to the REST endpoint base (something like http://localhost:8080/workflow/rest)</li>
+    <li>If the service is down or not working it will return a status 503, 
+    this means the the underlying service is not working and is either restarting or has failed</li>
+    <li>A status code 500 means a general failure has occurred which is not recoverable 
+    and was not anticipated. In other words, there is a bug! You should file an error report with
+    your server logs from the time when the error occurred: 
+    <a href="https://issues.opencastproject.org">Opencast Issue Tracker</a></li>
+  </ul>
+</fieldset>
+
+<h4>Service of <a href="http://www.opencastproject.org/" title="Opencast Project">Opencast</a>
+<a href="http://www.opencastproject.org/project/matterhorn" title="Opencast Matterhorn">Matterhorn</a> $Rev$</h4>
+</body>
 </html>

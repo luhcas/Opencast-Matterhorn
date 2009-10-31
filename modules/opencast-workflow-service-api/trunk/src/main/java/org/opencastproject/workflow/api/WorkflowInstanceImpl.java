@@ -35,6 +35,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 @XmlType(name="workflow-instance", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="workflow-instance", namespace="http://workflow.opencastproject.org/")
@@ -256,4 +257,11 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     return true;
   }
 
+  /**
+   * Allows JAXB handling of {@link WorkflowInstance} interfaces.
+   */
+  static class Adapter extends XmlAdapter<WorkflowInstanceImpl, WorkflowInstance> {
+    public WorkflowInstanceImpl marshal(WorkflowInstance instance) throws Exception {return (WorkflowInstanceImpl) instance;}
+    public WorkflowInstance unmarshal(WorkflowInstanceImpl instance) throws Exception {return instance;}
+  }
 }

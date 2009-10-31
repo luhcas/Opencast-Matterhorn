@@ -23,11 +23,14 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowDefinitionList;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowInstanceListImpl;
+import org.opencastproject.workflow.api.WorkflowOperationDefinition;
+import org.opencastproject.workflow.api.WorkflowOperationDefinitionList;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
@@ -57,6 +60,9 @@ import javax.ws.rs.core.Response;
  */
 @Path("/")
 public class WorkflowRestService {
+  private static final int DEFAULT_LIMIT = 20;
+  private static final int MAX_LIMIT = 100;
+  
   private static final Logger logger = LoggerFactory.getLogger(WorkflowRestService.class);
   private WorkflowService service;
   public void setService(WorkflowService service) {
@@ -68,52 +74,112 @@ public class WorkflowRestService {
   }
 
   @GET
-  @Path("definitions")
-  @Produces(MediaType.TEXT_XML)
-  public String getWorkflowDefinitions() {
-    // FIXME: For some reason, we can't return the object here.
-    // "[JAXRSUtils] WARN - WebApplicationException has been caught : no cause is available"
+  @Path("definitions.{output:.*}")
+  public Response getWorkflowDefinitions(@PathParam("output") String output) throws Exception {
     WorkflowDefinitionList list = service.listAvailableWorkflowDefinitions();
-    try {
-      return WorkflowBuilder.getInstance().toXml(list);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    if("json".equals(output)) {
+      StringBuilder sb = new StringBuilder("{\"workflow_definitions\" : [\n");
+      for(int i=0; i < list.size(); i++) {
+        WorkflowDefinition definition = list.get(i);
+        appendWorkflowDefinition(sb, definition);
+        if(i < list.size() - 1) sb.append(",");
+        sb.append("\n");
+      }
+      sb.append("]}");
+      return Response.ok(sb.toString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+    } else {
+      return Response.ok(WorkflowBuilder.getInstance().toXml(list)).header("Content-Type", MediaType.TEXT_XML).build();
     }
   }
 
-  @GET
-  @Path("instances/{state}")
-  @Produces(MediaType.TEXT_XML)
-  public WorkflowInstanceListImpl getWorkflowsInState(
-          @PathParam("state") String state,
-          @QueryParam("startPage") int offset,
-          @QueryParam("count") int limit) throws Exception {
-    WorkflowInstanceListImpl list = new WorkflowInstanceListImpl();
-    for(WorkflowInstance instance : service.getWorkflowsInState(State.valueOf(state.toUpperCase()), offset, limit).getItems()) {
-      list.getWorkflowInstance().add((WorkflowInstanceImpl)instance);
+  /**
+   * @param sb
+   * @param definition
+   */
+  protected void appendWorkflowDefinition(StringBuilder sb, WorkflowDefinition definition) {
+    sb.append(" { \"title\" : \"");
+    sb.append(definition.getTitle());
+    sb.append("\",\n");
+
+    sb.append("   \"description\" : \"");
+    sb.append(definition.getDescription());
+    sb.append("\",\n");
+    
+    sb.append("   \"operations\" : [\n");
+
+    WorkflowOperationDefinitionList operations = definition.getOperations();
+    for(int i=0; i < operations.size(); i++) {
+      WorkflowOperationDefinition op = operations.get(i);
+      sb.append("    {\"name\" : \"");
+      sb.append(op.getName());
+      sb.append("\", \"description\" : \"");
+      sb.append(op.getDescription());
+      sb.append("\", \"fail_on_error\" : ");
+      sb.append(op.isFailWorkflowOnException());
+      sb.append("}");
+      if(i < operations.size() - 1) sb.append(",");
+      sb.append("\n");
     }
-    return list;
+    
+    sb.append("   ]\n");
+    sb.append(" }");
   }
 
   @GET
-  @Path("instances")
-  @Produces(MediaType.TEXT_XML)
-  public WorkflowInstanceListImpl getWorkflowsByText(
+  @Path("instances.{output:.*}")
+  public Response getWorkflows(
+          @QueryParam("state") String state,
           @QueryParam("q") String text,
           @QueryParam("startPage") int offset,
-          @QueryParam("count") int limit) throws Exception {
-    WorkflowInstanceListImpl list = new WorkflowInstanceListImpl();
-    for(WorkflowInstance instance : service.getWorkflowsByText(text, offset, limit).getItems()) {
-      list.getWorkflowInstance().add((WorkflowInstanceImpl)instance);
+          @QueryParam("count") int limit,
+          @PathParam("output") String output) throws Exception {
+    if(limit == 0 || limit > MAX_LIMIT) limit = DEFAULT_LIMIT;
+    if(offset >0) offset--; // The service is zero based
+    WorkflowSet set = null;
+    if(text == null && state == null) {
+      set = service.getWorkflowsByDate(offset, limit);
+    } else if(text == null) {
+      set = service.getWorkflowsInState(State.valueOf(state.toUpperCase()), offset, limit);
+    } else if(state == null) {
+      set = service.getWorkflowsByText(text, offset, limit);
+    } else {
+      set = service.getWorkflowsByTextAndState(State.valueOf(state.toUpperCase()), text, offset, limit);
     }
-    return list;
+    
+    if("json".equals(output)) {
+      StringBuilder sb = new StringBuilder("{\"workflows\" : [\n");
+      for(int i=0; i < set.getItems().length; i++) {
+        WorkflowInstance workflow = set.getItems()[i];
+        appendWorkflow(sb, workflow, false);
+        if(i < set.getItems().length - 1) sb.append(",");
+        sb.append("\n");
+      }
+      sb.append("]}");
+      return Response.ok(sb.toString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+    } else {
+      WorkflowInstanceListImpl list = new WorkflowInstanceListImpl();
+      for(WorkflowInstance instance : set.getItems()) {
+        list.getWorkflowInstance().add((WorkflowInstanceImpl)instance);
+      }
+      return Response.ok(WorkflowBuilder.getInstance().toXml(list))
+        .header("Content-Type", MediaType.TEXT_XML).build();
+    }
   }
 
   @GET
-  @Path("instance/{id}")
-  @Produces(MediaType.TEXT_XML)
-  public WorkflowInstanceImpl getWorkflowById(@PathParam("id") String id) throws Exception {
-    return (WorkflowInstanceImpl)service.getWorkflowById(id);
+  @Path("instance/{id}.{output:.*}")
+  public Response getWorkflow(
+          @PathParam("id") String id,
+          @PathParam("output") String output) throws Exception {
+    WorkflowInstance instance = service.getWorkflowById(id);
+    if("json".equals(output)) {
+      StringBuilder sb = new StringBuilder();
+      appendWorkflow(sb, instance, true);
+      return Response.ok(sb.toString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+    } else {
+      return Response.ok(WorkflowBuilder.getInstance().toXml(instance))
+        .header("Content-Type", MediaType.TEXT_XML).build();
+    }
   }
 
   @POST
@@ -164,32 +230,6 @@ public class WorkflowRestService {
     return Response.ok("resumed " + workflowInstanceId).build();
   }
 
-  @GET
-  @Path("allinstances")
-  @Produces(MediaType.APPLICATION_JSON)
-  public String getWorkflowsAsJson(@QueryParam("offset") int offset, @QueryParam("limit") int limit) {
-    WorkflowSet set = service.getWorkflowsByDate(offset, limit);
-    StringBuilder sb = new StringBuilder("{\"workflows\" : [\n");
-    for(int i=0; i < set.getItems().length; i++) {
-      WorkflowInstance workflow = set.getItems()[i];
-      appendWorkflow(sb, workflow, false);
-      if(i < set.getItems().length - 1) sb.append(",");
-      sb.append("\n");
-    }
-    sb.append("]}");
-    return sb.toString();
-  }
-
-  @GET
-  @Path("instanceinfo/{workflowId}")
-  @Produces(MediaType.APPLICATION_JSON)
-  public String getWorkflowAsJson(@PathParam("workflowId") String workflowId) {
-    WorkflowInstance workflow = service.getWorkflowById(workflowId);
-    StringBuilder sb = new StringBuilder();
-    appendWorkflow(sb, workflow, true);
-    return sb.toString();
-  }
-
   protected void appendWorkflow(StringBuilder sb, WorkflowInstance workflow, boolean includeDublinCoreFields) {
     String mediaPackageTitle = getDublinCoreProperty(getDublinCore(workflow.getSourceMediaPackage()),
             DublinCoreCatalog.PROPERTY_TITLE);
@@ -216,9 +256,15 @@ public class WorkflowRestService {
       List<EName> props = new ArrayList<EName>(dc.getProperties());
       for(int i=0; i<props.size(); i++) {
         sb.append(",\n");
-        sb.append("   \"mediapackage_" + props.get(i).getLocalName().toLowerCase() + "\" : \"");
-        sb.append(dc.getFirst(props.get(i)));
-        sb.append("\"");
+        sb.append("   \"mediapackage_" + props.get(i).getLocalName().toLowerCase() + "\" : ");
+        String value = dc.getFirst(props.get(i));
+        if(value == null) {
+          sb.append("null");
+        } else {
+          sb.append("\"");
+          sb.append(value);
+          sb.append("\"");
+        }
       }
     } else {
       sb.append(",\n   \"mediapackage_title\" : \"");
@@ -229,13 +275,13 @@ public class WorkflowRestService {
     sb.append("\n }");
   }
 
-  private DublinCoreCatalog getDublinCore(MediaPackage mediaPackage) {
+  protected DublinCoreCatalog getDublinCore(MediaPackage mediaPackage) {
     Catalog[] dcCatalogs = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
     if(dcCatalogs.length == 0) return null;
     return (DublinCoreCatalog)dcCatalogs[0];
   }
 
-  private String getDublinCoreProperty(DublinCoreCatalog catalog, EName property) {
+  protected String getDublinCoreProperty(DublinCoreCatalog catalog, EName property) {
     if(catalog == null) return null;
     return catalog.getFirst(property, DublinCoreCatalog.LANGUAGE_ANY);
   }

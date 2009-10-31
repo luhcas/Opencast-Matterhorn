@@ -124,4 +124,22 @@ public interface WorkflowServiceImplDao {
    */
   long countWorkflowInstances();
 
+  /**
+   * Returns the {@link WorkflowInstance}s that deal with episodes matching the specified search terms and are in the
+   * specified state.
+   * 
+   * @param state
+   *          the workflow state
+   * @param text
+   *          the search term
+   * @param offset
+   *          starting position of the result set
+   * @param limit
+   *          the maximum size of the result set
+   * @return the resultset
+   * @throws WorkflowDatabaseException
+   *           if the lookup fails
+   */
+  WorkflowSet getWorkflowsByTextAndState(State state, String text, int offset, int limit);
+
 }

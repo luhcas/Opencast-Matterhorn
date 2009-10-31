@@ -19,9 +19,12 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 
 import java.util.Map;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * An single instance of a running, paused, or stopped workflow.
  */
+@XmlJavaTypeAdapter(WorkflowInstanceImpl.Adapter.class)
 public interface WorkflowInstance {
   public enum State { INSTANTIATED, RUNNING, STOPPED, PAUSED, SUCCEEDED, FAILED, FAILING }
 

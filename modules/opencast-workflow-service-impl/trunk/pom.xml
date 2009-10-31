@@ -152,6 +152,7 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package>
               org.opencastproject.workflow.api,
+              org.opencastproject.util,
               *;resolution:=optional
             </Import-Package>
             <Export-Package>
@@ -185,7 +186,8 @@
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/workflow-service.xml,
-              OSGI-INF/workflow-service-rest.xml
+              OSGI-INF/workflow-service-rest.xml,
+              OSGI-INF/workflow-samples.xml
             </Service-Component>
           </instructions>
         </configuration>

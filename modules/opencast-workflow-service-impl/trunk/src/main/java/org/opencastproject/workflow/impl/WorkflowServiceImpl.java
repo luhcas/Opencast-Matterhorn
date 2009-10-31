@@ -617,4 +617,13 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     return dao.countWorkflowInstances();
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsByTextAndState(org.opencastproject.workflow.api.WorkflowInstance.State, java.lang.String, int, int)
+   */
+  public WorkflowSet getWorkflowsByTextAndState(State state, String text, int offset, int limit)
+          throws WorkflowDatabaseException {
+    return dao.getWorkflowsByTextAndState(state, text, offset, limit);
+  }
+
 }
