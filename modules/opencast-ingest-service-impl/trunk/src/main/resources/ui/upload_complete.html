@@ -1,76 +1,64 @@
-<script type="text/javascript">
+<div class="fl-container-600">
 
-    // FIXME: fields should be populated with the data returned by the ingest service
-    UI.$("field_submitter").innerHTML = uploadManager.metadata.submitter;
-    UI.$("field_title").innerHTML = uploadManager.metadata.title;
-    UI.$("field_presenter").innerHTML = uploadManager.metadata.presenter;
-    UI.$("field_description").innerHTML = uploadManager.metadata.description;
-    UI.$("field_language").innerHTML = uploadManager.metadata.language;
-
-</script>
-
-<p>
-    <div class="notificationHeader">
+    <center><div class="notification-header">
         A recording with the following information has been uploaded:
-    </div>
-</p>
+    </div></center>
 
-<table class="metadataTable" border="1">
-      <tr>
-          <td align="right" valign="top" style="max-width:150px;min-width:150px;width:150px;">
-              Submitter:
-          </td>
-          <td id="field_submitter">
-              
-          </td>
-      </tr>
-      <tr>
-          <td align="right" valign="top">
-              Title:
-          </td>
-          <td id="field_title">
+    <table id="data-title" class="data-row" border="0"><tr>
+        <td class="data-label" align="right" valign="top">
+           Title:
+        </td>
+        <td class="data-value" valign="top"></td>
+    </tr></table>
 
-          </td>
-      </tr>
-      <tr>
-          <td align="right" valign="top">
-              Presenter(s):
-          </td>
-          <td id="field_presenter">
+    <table id="data-presenter"class="data-row" border="0"><tr>
+        <td class="data-label" align="right" valign="top">
+           Presenter:
+        </td>
+        <td class="data-value"valign="top"></td>
+    </tr></table>
 
-          </td>
-      </tr>
-      <tr>
-          <td align="right" valign="top">
-              Description:
-          </td>
-          <td id="field_description">
+    <table id="data-department"class="data-row" border="0"><tr>
+        <td class="data-label" align="right" valign="top">
+           Sponsoring Department:
+        </td>
+        <td class="data-value" valign="top"></td>
+    </tr></table>
 
-          </td>
-      </tr>
-      <tr>
-          <td align="right" valign="top">
-              Language:
-          </td>
-          <td id="field_language">
+    <table id="data-series"class="data-row" border="0"><tr>
+        <td class="data-label" align="right" valign="top">
+           Series:
+        </td>
+        <td class="data-value" valign="top"></td>
+    </tr></table>
 
-          </td>
-      </tr>
-      <tr>
-          <td align="right" valign="top">
-              Distribution channel(s):
-          </td>
-          <td id="field_dist">
+    <table id="data-subject"class="data-row" border="0"><tr>
+        <td class="data-label" align="right" valign="top">
+            Subject:
+        </td>
+        <td class="data-value" valign="top"></td>
+    </tr></table>
 
-          </td>
-      </tr>
-      <tr>
-          <td colspan="2">
-              <center>
-                  <a href="javascript:uploadEvents.btnAnotherUpload();">
-                  Upload another media file
-              </button>
-              </center>
-          </td>
-      </tr>
-</table>
+    <table id="data-language"class="data-row" border="0"><tr>
+        <td class="data-label" align="right" valign="top">
+            Language:
+        </td>
+        <td class="data-value" valign="top"></td>
+    </tr></table>
+
+    <table id="data-description"class="data-row" border="0"><tr>
+        <td class="data-label" align="right" valign="top">
+           Description:
+        </td>
+        <td class="data-value" valign="top"></td>
+    </tr></table>
+    
+    <table id="data-license"class="data-row" border="0"><tr>
+        <td class="data-label" align="right" valign="top">
+           License:
+        </td>
+        <td class="data-value" valign="top"></td>
+    </tr></table>
+
+    <center><a href="javascript:location.reload()">Upload another media file >></a></center>
+</div>

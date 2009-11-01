@@ -2,13 +2,14 @@ var uploadManager = uploadManager || { };
 
 uploadManager.uploader = null;
 uploadManager.selectedFile = null;
-uploadManager.metadata = null;
+uploadManager.metadata = {};
+uploadManager.missingFields = new Array();
 
 uploadManager.init = function() {
     uploadManager.uploader = new SWFUpload(
     {
         flash_url : "swfupload/swfupload.swf",
-        upload_url: "http://localhost:8080/ingest/rest/addMediaPackage",
+        upload_url: "../rest/addMediaPackage",
         file_types : "*.*",
         file_types_description : "All Files",
         file_upload_limit : 0,
@@ -52,49 +53,80 @@ uploadManager.cancelUpload = function() {
 }
 
 uploadManager.collectMetadata = function() {
-    uploadManager.metadata = { title       : UI.$("title").value,
-                               presenter   : UI.$("contributor").value,
-                               description : UI.$("description").value,
-                               language    : UI.$("language").value
+    uploadManager.metadata = { title       : document.getElementById("title").value,
+                               presenter   : document.getElementById("contributor").value,
+                               description : document.getElementById("description").value,
+                               language    : document.getElementById("language").value,
+                               series      : document.getElementById('series').value,
+                               department  : document.getElementById('department').value,
+                               subject     : document.getElementById('subject').value
                              };
                              /*
-                               distSakai   : UI.$("distSakai").checked,
-                               distYouTube : UI.$("distYouTube").checked,
-                               distitunes  : UI.$("distITunes").checked
+                               distSakai   : document.getElementById("distSakai").checked,
+                               distYouTube : document.getElementById("distYouTube").checked,
+                               distitunes  : document.getElementById("distITunes").checked
                              };*/
 }
 
 /* Checks if the data in the form is ready for upload
  *
  */
-uploadManager.checkUpload = function() {
+uploadManager.checkUpload = function(highlight) {
+    uploadManager.missingFields = new Array();
+    var label;
+
     // check if title is provided
-    if (UI.$("title").value == "") {
-        uploadEvents.titleMissing();
-        return false;
+    if (document.getElementById("title").value == "") {
+        uploadManager.missingFields.push('title');
     }
 
     // check if media file is selected
-    else if (uploadManager.selectedFile == null) {
-        uploadEvents.fileMissing();
-        return false;
+    if (uploadManager.selectedFile == null) {
+        uploadManager.missingFields.push('file');
     }
 
-    // everything is fine
-    return true;
+    // check if distribution channel is selected
+    if (! (document.getElementById('distITunesU').checked ||
+           document.getElementById('distMHMM').checked ||
+           document.getElementById('distYouTube').checked ||
+           document.getElementById('distSakai').checked)
+       ) {
+        uploadManager.missingFields.push('dist');
+       }
+
+    $('#missingFields-container li').css('display', 'none');
+    for (i=0; i < uploadManager.missingFields.length; i++) {
+        $('#notification-' + uploadManager.missingFields[i]).css('display', 'block');
+    }
+
+    if (highlight) {
+        for (i=0; i < uploadManager.missingFields.length; i++) {
+            uploadUI.setLabelColor(uploadManager.missingFields[i], 'red');
+        }
+    }
+
+    // is everything fine ?
+    if (uploadManager.missingFields.length == 0) {
+        uploadUI.hideMissingFields();
+        return true;
+    } else {
+        return false;
+    }
 }
+
+
 
 /* Changes UI elements but it's related to data, so it goes here
  * resets internal data for the uploader
  */
 uploadManager.resetUploader = function() {
-    UI.$("title").value = "";
-    UI.$("presenter").value = "";
-    UI.$("description").value = "";
-    UI.$("language").value = "";
-    UI.$("distSakai").checked = false;
-    UI.$("distYouTube").checked = false;
-    UI.$("distITunes").checked = false;
+    document.getElementById("title").value = "";
+    document.getElementById("contributor").value = "";
+    document.getElementById("description").value = "";
+    document.getElementById("language").value = "";
+    document.getElementById("distSakai").checked = false;
+    document.getElementById("distYouTube").checked = false;
+    document.getElementById("distITunes").checked = false;
     uploadUI.resetFilename();
     uploadManager.selectedFile = null;
 }

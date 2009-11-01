@@ -5,14 +5,18 @@ var uploadEvents = uploadEvents || { };
 /* fired when the value of a form field is changed
  *
  */
-uploadEvents.fieldChanged = function(field, value) {
-   uploadUI.log("EVENT: " + "Value of filed " + field.id + " changed to: " + value);
+uploadEvents.fieldChanged = function(field) {
+   uploadUI.log("EVENT: " + "Value of filed " + field.id + " changed to: " + field.value);
+   uploadUI.setLabelColor(field.id, 'black');
+   uploadManager.checkUpload( ($('#missingFields-container').css('display') == 'block') );
 }
 
 uploadEvents.btnSubmit = function() {
     uploadUI.log("EVENT: " + "Submit button clicked");
-    if (uploadManager.checkUpload()) {
+    if (uploadManager.checkUpload(true)) {
         uploadManager.startUpload();
+    } else {
+        uploadUI.displayMissingFields();
     }
 }
 
@@ -28,18 +32,7 @@ uploadEvents.btnCancelUpload = function() {
 
 uploadEvents.btnAnotherUpload = function() {
     uploadUI.log("EVENT: " + "'Upload another file' button clicked");
-    UI.load("version3", "stage");
-}
-
-
-// ~~~~~~~~~~~~~~~~~~~~~~~ misc events ~~~~~~~~~~~~~~~~~~~~~~~
-
-uploadEvents.titleMissing = function() {
-    uploadUI.warn("Please enter a title for the recording.");
-}
-
-uploadEvents.fileMissing = function() {
-    uploadUI.warn("Please select a media file to upload.");
+    $('#stage').load('upload.html', {}, function() {$(document).ready();});
 }
 
 
@@ -48,6 +41,8 @@ uploadEvents.fileMissing = function() {
 uploadEvents.fileSelected = function(file) {
     uploadManager.selectedFile = file;
     uploadUI.setFilename(file.name);
+    var field = { id : 'file' };
+    uploadEvents.fieldChanged(field);
 }
 
 uploadEvents.uploadStarted = function(file) {
@@ -60,8 +55,8 @@ uploadEvents.uploadProgress = function(file, completed, total) {
 
 uploadEvents.uploadComplete = function(file) {
     uploadManager.uploader.destroy();
-    UI.load("upload_complete", "stage");
     uploadUI.hideProgressOverlay();
+    uploadUI.showUploadComplete();
 }
 
 uploadEvents.uploadError = function(file, code, message) {
