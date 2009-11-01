@@ -1,4 +1,32 @@
 
+var popupHelp = popupHelp || {};
+
+popupHelp.displayHelp = function( element, event ) {
+    var id = element.prev().attr('id');
+    var title,text;
+    if (popupHelp.helpTexts[id]) {
+        title = popupHelp.helpTexts[id][0];
+        text = popupHelp.helpTexts[id][1];
+    } else {
+        title = 'Sorry';
+        text = "No help defined for field " + id;
+    }
+    $('#helpTitle').text(title);
+    $('#helpText').text(text);
+    var help = $('#helpBox');
+    help.css({
+        left:event.pageX,
+        top:event.pageY
+    });
+    help.fadeIn('fast');
+}
+
+popupHelp.resetHelp = function() {
+    $('#helpBox').fadeOut('fast');
+}
+
+
+/*
 function displayHelp( element, evt ) {
     resetHelp();
     // put title and text into help box
@@ -24,7 +52,6 @@ function displayHelp( element, evt ) {
         helpBox.style.top = evt.pageY;
     }
     helpBox.style.display="block";
-
 }
 
 function resetHelp() {
@@ -32,6 +59,6 @@ function resetHelp() {
     helpBox.style.left = -10 - helpBox.offsetWidth;
     helpBox.style.top = -10 - helpBox.offsetHeight;
     helpBox.style.display = "none";
-}
+}*/
 
 

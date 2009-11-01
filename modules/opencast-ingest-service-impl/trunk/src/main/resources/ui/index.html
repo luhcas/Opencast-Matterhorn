@@ -16,23 +16,30 @@
     <link href="css/fss-reset.css" rel="stylesheet" type="text/css" />
     <link href="css/fss-layout.css" rel="stylesheet" type="text/css" />
     <link href="css/ingest-ui.css" rel="stylesheet" type="text/css" />
+    <link href="css/popuphelp.css" rel="stylesheet" type="text/css" />
     <style type="text/css">
         
     </style>
 
     <script type="text/javascript">
         $(document).ready(function() {
-            /*$('#stage').load('upload_complete.html');
-            return;
-            */
+           
             $('.folder-control').click(function() {
                $(this).next().toggle('fast');
                $(this).children('.folder-icon').toggleClass('icon-arrow-right');
                $(this).children('.folder-icon').toggleClass('icon-arrow-down');
             });
 
-            $('.icon-help').click(function() {
-                alert('display Help');
+            $('.icon-help').click(function(event) {
+                popupHelp.displayHelp($(this), event);
+                return false;
+            });
+
+            $('body').click( function() {
+                if ($('#helpbox').css('display') != "none") {
+                    popupHelp.resetHelp();
+                }
+                return true;
             });
 
             uploadManager.init();           // instantiate the swfUpload, init data
@@ -55,13 +62,13 @@
                   <div class="fl-widget-content warnbox-content">
                       <ul>
                           <li id="notification-title" class="missing-fields-item">
-                              <a href="" class="fl-icon inline-icon icon-bullet" title=""></a>Please <a href="javascript:document.basicData.title.focus();">enter a title</a> for the recording.
+                              <span class="fl-icon inline-icon icon-bullet"></span>Please <a href="javascript:document.basicData.title.focus();">enter a title</a> for the recording.
                           </li>
                           <li id="notification-dist" class="missing-fields-item">
-                              <a href="" class="fl-icon inline-icon icon-bullet" title=""></a>Please choose at least one <a href="javascript:document.getElementById('distITunesU').focus();">distribution channel</a>.
+                              <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose at least one <a href="javascript:document.getElementById('distITunesU').focus();">distribution channel</a>.
                           </li>
                           <li id="notification-file" class="missing-fields-item">
-                              <a href="" class="fl-icon inline-icon icon-bullet" title=""></a>Please select a media file to upload.
+                              <span class="fl-icon inline-icon icon-bullet" title=""></span>Please select a media file to upload.
                           </li>
                       </ul>
                   </div>
@@ -77,22 +84,22 @@
                     <li class="fl-fix">
                         <span class="fl-label form-label" id="label-title"><span style="color:red;">*</span>Title:</span>
                         <input type="text" name="title" id="title" class="form-field" onchange="uploadEvents.fieldChanged(this);">
-                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                        <span class="fl-icon inline-icon icon-help"  id="help_title"></span>
                     </li>
                     <li class="fl-fix">
                         <span class="fl-label form-label" id="label-contributor">Presenter:</span>
                         <input type="text" name="contributor" id="contributor" class="form-field">
-                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                        <span class="fl-icon inline-icon icon-help" title=""></span>
                     </li>
                     <li class="fl-fix">
                         <span class="fl-label form-label">&nbsp;</span>
-                        <a href="" class="fl-icon inline-icon icon-add" title=""></a>
+                        <span class="fl-icon inline-icon icon-add" title=""></span>
                         <nobr><a href="javascript:alert('add presenter');">Add additional presenter</a></nobr>
                     </li>
                     <li class="fl-fix">
                         <span class="fl-label form-label">Sponsoring department:</span>
                         <input type="text" name="department" id="department" class="form-field">
-                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>   
+                        <span class="fl-icon inline-icon icon-help" title=""></span>
                     </li>
                 </ul>
                 </form>
@@ -113,23 +120,22 @@
                     <li class="fl-fix">
                         <span class="fl-label form-label">Series:</span>
                         <input type="text" name="series" id="series" class="form-field">
-                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                        <span class="fl-icon inline-icon icon-help"></span>
                     </li>
                     <li class="fl-fix">
                         <span class="fl-label form-label"">Subject:</span>
                         <input type="text" name="subject" id="subject" class="form-field">
-                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                        <span class="fl-icon inline-icon icon-help" title=""></span>
                     </li>
                     <li class="fl-fix">
                         <span class="fl-label form-label">Language:</span>
                         <input type="text" name="language" id="language" class="form-field">
-                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                        <span class="fl-icon inline-icon icon-help" title=""></span>
                     </li>
                     <li class="fl-fix">
                         <span class="fl-label form-label"">Description:</span>
-                        <textarea class="form-field" name="description" id="description" rows="5">
-                        </textarea>
-                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                        <textarea class="form-field" name="description" id="description" rows="5"></textarea>
+                        <span class="fl-icon inline-icon icon-help" title=""></span>
                     </li>
                 </ul>
                 </from>
@@ -163,9 +169,8 @@
                     <li class="fl-fix">
                         <span class="fl-label form-label">License:</span>
                         <select class="form-field" name="license" id="license">
-                            <option>Some license</option>
                         </select>
-                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                        <span class="fl-icon inline-icon icon-help" title=""></span>
                     </li>
                 </ul>
                 </form>
@@ -189,7 +194,8 @@
                                 <div id="uploader"></div>
                                 <button type="button" id="browse-button" class="browse-button">Browse</button>
                             </div>
-                            <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                            <span id="file"></span>
+                            <span class="fl-icon inline-icon icon-help" title=""></span>
                         </span>
                     </li>
                 </ul>
@@ -238,7 +244,7 @@
       <!-- template for the popup help box -->
       <div id="helpBox" class="helpbox" style="display:none;">
               <img src="img/lightbulb.png">
-              <img src="img/close.png" class="closeButton" onclick="resetHelp();">
+              <!-- <img src="img/close.png" class="closeButton" onclick="popupHelp.resetHelp();"> -->
               <div id="helpTitle" style="display:inline;font-weight:bold; margin-left:10px;"></div>
               <p>
                 <div id="helpText" style="padding-left:7px; padding-right:7px; white-space:normal;"></div>

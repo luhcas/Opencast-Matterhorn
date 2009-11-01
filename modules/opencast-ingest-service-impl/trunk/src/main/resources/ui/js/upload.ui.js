@@ -29,7 +29,7 @@ uploadUI.showProgressOverlay = function() {
 }
 
 uploadUI.setProgressBar = function(percentage) {
-    percentage = percentage + "%";
+    percentage = percentage.toFixed(0) + "%";
     document.getElementById("progressIndicator").style.width = percentage;
     document.getElementById("progressLabel").innerHTML = percentage;
 }
@@ -71,8 +71,10 @@ uploadUI.showUploadComplete = function() {
     $('#stage').load('upload_complete.html',
         function() {
             for (key in uploadManager.metadata) {
-                $('#data-' + key).find('.data-value').append(uploadManager.metadata[key]);
-                $('#data-' + key).css('display','block');
+                if (uploadManager.metadata[key] != '') {
+                    $('#data-' + key).find('.data-value').append(uploadManager.metadata[key]);
+                    $('#data-' + key).css('display','block');
+                }
             }
         }
     );

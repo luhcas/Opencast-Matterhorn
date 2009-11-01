@@ -1,4 +1,7 @@
-helpTexts = {
+
+popupHelp = popupHelp || {};
+
+popupHelp.helpTexts = {
 
     "submitter" : [
         "Submitter",
