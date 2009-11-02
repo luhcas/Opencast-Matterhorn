@@ -40,6 +40,7 @@
 		<groupId>net.luniks.linux.jv4linfo</groupId>
 		<artifactId>jv4linfo</artifactId>
 		<version>0.2.1</version>
+		<classifier>jdk5</classifier>
 	</dependency> 
 	<dependency>
 	  <groupId>org.gstreamer</groupId>
