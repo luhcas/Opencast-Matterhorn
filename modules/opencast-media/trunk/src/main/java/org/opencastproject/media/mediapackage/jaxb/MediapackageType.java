@@ -30,6 +30,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -219,8 +220,16 @@ public class MediapackageType {
     return sw.toString();
   }
 
+  static JAXBContext jaxbContext = null;
+  
+  static {
+    try {
+      jaxbContext = JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb", MediapackageType.class.getClassLoader());
+    } catch (JAXBException e) {
+      throw new RuntimeException("Unable to initialize JAXB context for the mediapackage.jaxb package");
+    }
+  }
   public static MediapackageType fromXml(Document mediaPackageXml) throws Exception {
-    JAXBContext jaxbContext = JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(mediaPackageXml, MediapackageType.class).getValue();
   }
