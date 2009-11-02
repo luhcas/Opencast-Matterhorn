@@ -212,14 +212,6 @@ public class MediapackageType {
     this.duration = value;
   }
 
-  public String toXml() throws Exception {
-    StringWriter sw = new StringWriter();
-    JAXBContext jaxbContext = JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
-    Marshaller marshaller = jaxbContext.createMarshaller();
-    marshaller.marshal(this, sw);
-    return sw.toString();
-  }
-
   static JAXBContext jaxbContext = null;
   
   static {
@@ -229,6 +221,14 @@ public class MediapackageType {
       throw new RuntimeException("Unable to initialize JAXB context for the mediapackage.jaxb package");
     }
   }
+
+  public String toXml() throws Exception {
+    StringWriter sw = new StringWriter();
+    Marshaller marshaller = jaxbContext.createMarshaller();
+    marshaller.marshal(this, sw);
+    return sw.toString();
+  }
+
   public static MediapackageType fromXml(Document mediaPackageXml) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(mediaPackageXml, MediapackageType.class).getValue();
