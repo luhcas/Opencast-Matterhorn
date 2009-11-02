@@ -277,8 +277,17 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setOrderBy(java.lang.String)
    */
-  public boolean setOrderBy(String order) {
+  public boolean setOrderBy(String order) throws IllegalArgumentException {
+    if (! (order.equalsIgnoreCase("title") || order.equalsIgnoreCase("creator") || order.equalsIgnoreCase("series") || 
+        order.equalsIgnoreCase("time-asc") || order.equalsIgnoreCase("time-desc") || order.equalsIgnoreCase("contributor") || 
+        order.equalsIgnoreCase("channel") || order.equalsIgnoreCase("location") || order.equalsIgnoreCase("device"))) 
+          throw new IllegalArgumentException("No valid value for order: "+order);
     orderBy = order;
+    if (order.equals("series")) orderBy = "seriesid";
+    if (order.equals("device")) orderBy = "deviceid";
+    if (order.equals("channel")) orderBy = "channelid";
+    if (order.equals("time-asc")) orderBy = "startdate ASC";
+    if (order.equals("time-desc")) orderBy = "startdate DESC";
     return true;
   }
 

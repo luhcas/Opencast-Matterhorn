@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -62,7 +63,7 @@ public class SchedulerRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("addEvent")
-  public SchedulerEventJaxbImpl addEvent (@QueryParam("event") SchedulerEventJaxbImpl e) {
+  public SchedulerEventJaxbImpl addEvent (@FormParam("event") SchedulerEventJaxbImpl e) {
     return new SchedulerEventJaxbImpl( service.addEvent(e.getEvent()));
     
   }
@@ -77,7 +78,7 @@ public class SchedulerRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("updateEvent")
-  public Response updateEvent (@QueryParam("event") SchedulerEventJaxbImpl e) {
+  public Response updateEvent (@FormParam("event") SchedulerEventJaxbImpl e) {
     service.updateEvent(e.getEvent());
     return Response.ok(service.updateEvent(e.getEvent())).build();
   }
@@ -85,13 +86,18 @@ public class SchedulerRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("getEvents")
-  public SchedulerEventJaxbImpl [] getEvents (@QueryParam("filter") SchedulerFilterJaxbImpl filter) {
+  public SchedulerEventJaxbImpl [] getEvents (@FormParam("filter") SchedulerFilterJaxbImpl filter) {
     SchedulerEvent [] events = service.getEvents(filter.getFilter());
     SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
     for (int i = 0; i < events.length; i++) jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
     return jaxbEvents;
   }
   
+  /**
+   * Lists all events in the database, without any filter
+   * TODO only a stub for debugging, because there is no UI to schow these at the moment
+   * @return XML with all events 
+   */
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("getEvents")
@@ -103,7 +109,7 @@ public class SchedulerRestService {
   }  
   
   @GET
-  @Produces(MediaType.TEXT_XML)
+  @Produces(MediaType.TEXT_PLAIN)
   @Path("getCalendarForCaptureAgent")
   public String getCalendarForCaptureAgent (@QueryParam("captureAgentID") String captureAgentID) {
     return service.getCalendarForCaptureAgent(captureAgentID);
@@ -116,18 +122,30 @@ public class SchedulerRestService {
     return docs;
   }
   
+  
+  /**
+   * TODO only for debugging. Checks if tables are present and creates a new event starting now.
+   * @return Status information 
+   */
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("info")
   public String info() {
-    logger.info("getting status info for scheduling service");
+    logger.debug("getting status info for scheduling service");
     SchedulerEventImpl event = new SchedulerEventImpl();
     event.setTitle("test-info");
+    event.setDevice("rec19");
+    event.addAttendee("rec19");
+    event.addAttendee("Ruediger Rolf");
+    event.addResource("vga");
+    event.addResource("audio");
+    event.setChannelID("1");
+    event.setCreator("Adam Hochman");
     long time1 = System.currentTimeMillis();
     long time2 = time1+1111111;
     Date date1 = new Date(time1);
     Date date2 = new Date(time2);
-    logger.info("Info times "+time1+" = "+date1.getTime()+", "+time2+" = "+ date2.getTime());
+    logger.debug("Info times "+time1+" = "+date1.getTime()+", "+time2+" = "+ date2.getTime());
     event.setStartdate(date1);
     event.setEnddate(date2);
     SchedulerEvent event2 = service.addEvent(event);

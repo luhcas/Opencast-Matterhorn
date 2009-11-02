@@ -68,17 +68,42 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
   public SchedulerEvent addEvent(SchedulerEvent e) {
     if (e == null || ! e.valid()) return null;
     e.setID(createNewEventID(e));
-    logger.info("adding event "+e.getID()+" at "+e.getStartdate());
+    logger.debug("adding event "+e.toString());
     try {
       dbUpdate("INSERT INTO event ( eventid , title , abstract , creator , contributor , startdate , enddate , location , deviceid , seriesid , channelid ) " +
-"VALUES ('"+e.getID()+"', '"+e.getTitle()+"', '"+e.getAbstract()+"', '"+e.getCreator()+"', '"+e.getContributor()+"', "+e.getStartdate().getTime()+", "+e.getEnddate().getTime()+", '"+e.getLocation()+"', '"+e.getDevice()+"', '"+e.getSeriesID()+"', '"+e.getChannelID()+"')");
+              "VALUES ('"+e.getID()+"', '"+e.getTitle()+"', '"+e.getAbstract()+"', '"+e.getCreator()+"', '"+e.getContributor()+"', "+e.getStartdate().getTime()+", "+e.getEnddate().getTime()+", '"+e.getLocation()+"', '"+e.getDevice()+"', '"+e.getSeriesID()+"', '"+e.getChannelID()+"')");
+      
+      saveAttendees(e.getID(), e.getAttendees());
+      saveResources(e.getID(), e.getResources());
     } catch (SQLException e1) {
       logger.error("Could not insert event. "+ e1.getMessage());
       return null;
     }
     SchedulerEvent newEvent = getEvent(e.getID());
-    logger.info("added event "+newEvent.getID()+" at "+newEvent.getStartdate());
+    logger.debug("added event "+newEvent.toString());
     return newEvent; // read from DB to make sure it is inserted an returned correct 
+  }
+ 
+  /**
+   * Saves the attendee list to the database
+   * @param eventID the eventID for which the attendees will be saved  
+   * @param attendees The array with the attendees
+   * @throws SQLException
+   */
+  void saveAttendees (String eventID, String [] attendees) throws SQLException {
+    for (int i = 0; i < attendees.length; i++)
+      dbUpdate("INSERT INTO attendees (eventid, attendee) VALUES ('"+eventID+"', '"+attendees[i]+"')");
+  }
+  
+  /**
+   * Saves the resources list to the database
+   * @param eventID the eventID for which the resources will be saved  
+   * @param resources The Array with the resources
+   * @throws SQLException
+   */
+  void saveResources (String eventID, String [] resources) throws SQLException {
+    for (int i = 0; i < resources.length; i++)
+      dbUpdate("INSERT INTO resources (eventid, resource) VALUES ('"+eventID+"', '"+resources[i]+"')");
   }
   
   /**
@@ -121,7 +146,24 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    */
   public String getCalendarForCaptureAgent(String captureAgentID) {
     // TODO real URL
-    return "https://wiki.opencastproject.org/confluence/download/attachments/7110717/MatterhornExample2.ics";
+    SchedulerFilter filter = getFilterForCaptureAgent (captureAgentID); 
+    CreateiCal cal = new CreateiCal();
+    SchedulerEvent[] events = getEvents(filter);
+    for (int i = 0; i < events.length; i++) cal.addEvent(events[i]);
+    return cal.getCalendar().toString();
+    //return "https://wiki.opencastproject.org/confluence/download/attachments/7110717/MatterhornExample2.ics";
+  }
+
+  /**
+   * resolves the appropriate Filter for the Capture Agent 
+   * @param captureAgentID The ID as provided by the capture agent 
+   * @return the Filter for this capture Agent.
+   */
+  private SchedulerFilter getFilterForCaptureAgent(String captureAgentID) {
+    SchedulerFilter filter = new SchedulerFilterImpl();
+    filter.setDeviceFilter(captureAgentID);
+    filter.setOrderBy("time-asc");
+    return filter;
   }
 
   /**
@@ -141,6 +183,11 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     return e;
   }
   
+  /**
+   * constructs a new SchedulerEvent from what's in the current result set
+   * @param rs the result set with the event that should be constructed
+   * @return an new SchedulerEvent
+   */
   SchedulerEvent buildEvent (ResultSet rs) {
     SchedulerEvent e = new SchedulerEventImpl();
     try {      
@@ -155,6 +202,8 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       e.setDevice(rs.getString("deviceid"));
       e.setSeriesID(rs.getString("seriesid"));
       e.setChannelID(rs.getString("channelid"));
+      e.setAttendees(getAttendees(e.getID()));
+      e.setResources(getResources(e.getID()));
     } catch (SQLException e1) {
       logger.error("\tCould not read SchedulerEvent from database. "+e1.getMessage());
       return null;
@@ -162,6 +211,42 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     return e;    
   }
 
+  /**
+   * Reads the attendees for an event from the database
+   * @param eventID the event for which the attendees should be loaded.
+   * @return the list of attendees 
+   * @throws SQLException
+   */
+  String [] getAttendees (String eventID) throws SQLException {
+    ResultSet rs = dbQuery("SELECT attendee FROM attendees WHERE eventid ='"+eventID+"'");
+    return resultsToArray(rs);
+  }
+
+  /**
+   * Reads the resources for an event from the database
+   * @param eventID the event for which the attendees should be loaded.
+   * @return the list of resources 
+   * @throws SQLException
+   */
+  String [] getResources (String eventID) throws SQLException {
+    ResultSet rs = dbQuery("SELECT resource FROM resources WHERE eventid ='"+eventID+"'");
+    return resultsToArray(rs);
+  }
+  
+  /**
+   * A little helper function to create an array from the first (only column) in a result set 
+   * @param rs The results
+   * @return An array representation of the ResultSet
+   * @throws SQLException
+   */
+  String [] resultsToArray (ResultSet rs) throws SQLException {
+    LinkedList<String> list = new LinkedList<String>();
+    while (rs.next()) {
+      list.add(rs.getString(1));
+    }
+    return list.toArray(new String[0]);
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerService#getEvents(org.opencastproject.scheduler.api.SchedulerFilter)
@@ -205,7 +290,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       }
       if (filter.getDeviceFilter() != null) {
         if (where.length() > 0) where += " AND ";
-        where += " deviceid LIKE '%"+filter.getDeviceFilter()+"%' "; 
+        where += " deviceid = '"+filter.getDeviceFilter()+"' "; 
       }
       if (filter.getSeriesIDFilter() != null) {
         if (where.length() > 0) where += " AND ";
@@ -241,6 +326,8 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
   public boolean removeEvent(String eventID) {
     try {
       dbUpdate("DELETE FROM event WHERE eventid = '"+eventID+"' ");
+      dbUpdate("DELETE FROM resources WHERE eventid = '"+eventID+"' ");
+      dbUpdate("DELETE FROM attendees WHERE eventid = '"+eventID+"' ");
     } catch (SQLException e) {
       logger.error("Could not delete event "+eventID+": "+e.getMessage());
     }
@@ -265,13 +352,37 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
                     " WHERE eventid = '"+e.getID()+"'"; 
     try {
       dbUpdate(query);
+      updateAttendees(e.getID(), e.getAttendees());
+      updateResources(e.getID(), e.getResources());
     } catch (SQLException e1) {
       logger.error("could not update event "+ e.getID()+": "+e1.getMessage());
       return false;
     }
     return dbIDExists(e.getID());
   }
-
+   
+  /**
+   * To update the attendee list it will be deleted and saved again. No better idea how to do this at the moment
+   * @param eventID The eventID for which the list should be updated
+   * @param attendees The list of attendees that should be updated 
+   * @throws SQLException
+   */
+  void updateAttendees (String eventID, String [] attendees) throws SQLException {
+    dbUpdate("DELETE FROM attendees WHERE eventid = '"+eventID+"' ");
+    saveAttendees(eventID, attendees);
+  }
+  
+  /**
+   * To update the resources list it will be deleted and saved again. No better idea how to do this at the moment
+   * @param eventID The eventID for which the list should be updated
+   * @param resources The list of resources that should be updated 
+   * @throws SQLException
+   */
+  void updateResources (String eventID, String [] resources) throws SQLException {
+    dbUpdate("DELETE FROM resources WHERE eventid = '"+eventID+"' ");
+    saveResources(eventID, resources);
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
@@ -299,13 +410,14 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    */
   
   ResultSet dbQuery (String query) throws SQLException{
-    logger.info("SQL Query: "+query);
+    logger.debug("SQL Query: "+query);
     if (con == null) connectToDatabase(null); // Just a fallback if service activation fails
     ResultSet rs = null;
     try {
       java.sql.Statement s = con.createStatement();
       if (s == null) return null;
       rs = s.executeQuery(query);
+      // Statement can not be closed, because ResultSet will then although be closed.
     } catch (SQLException e) {
       logger.error("SQL error on query "+ query + ": " +e.getMessage());
       throw e;
@@ -319,17 +431,18 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    * @return return A generated key, is one was generated
    */
   int dbUpdate (String query) throws SQLException {
-    logger.info("SQL Update: "+query);
+    logger.debug("SQL Update: "+query);
     if (con == null) connectToDatabase(null); // Just a fallback if service activation fails
     int key = 0;
     try {
       java.sql.Statement s = con.createStatement();
       if (s == null) return 0;
       key = s.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+      s.close();
     } catch (SQLException e) {
       logger.error("SQL error on query "+ query + ": " +e.getMessage());
       throw e;
-    }
+    } 
     return key;
   }
   
@@ -339,12 +452,13 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    * @return return A generated key, is one was generated
    */
   boolean dbExecute (String query) throws SQLException {
-    logger.info("SQL Execute: "+query);
+    logger.debug("SQL Execute: "+query);
     if (con == null) connectToDatabase(null); // Just a fallback if service activation fails 
     try {
       Statement s = con.createStatement();
       if (s == null) return false;
       s.execute(query);
+      s.close();
     } catch (SQLException e) {
       logger.error("SQL error on query "+ query + ": " +e.getMessage());
       throw e;
@@ -358,7 +472,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    */
   public boolean dbCheck () {
     String tables = "";
-    logger.info("checking if scheduler-db is available." );
+    logger.debug("checking if scheduler-db is available." );
     try {
       if (con == null) connectToDatabase(null); 
       DatabaseMetaData meta = con.getMetaData();
@@ -421,5 +535,15 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       logger.error(e.getMessage());
     }
   }  
+  
+  void closeDatabaseConnection ()  {
+    try {
+      con.close();
+      con = null;
+      // This throws by-design, so ignore the exception
+      DriverManager.getConnection("jdbc:derby:;shutdown=true");
+    } catch (SQLException e) {
+    }
+  }
   
 }

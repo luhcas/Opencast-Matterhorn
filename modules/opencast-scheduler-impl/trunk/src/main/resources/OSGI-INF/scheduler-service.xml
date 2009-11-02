@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="org.opencastproject.scheduler.api.SchedulerService"
-	immediate="true">
+	immediate="true" deactivate="closeDatabaseConnection">
 	<implementation
 		class="org.opencastproject.scheduler.impl.SchedulerServiceImpl" />
 	<property name="service.description" value="Scheduler Service" />

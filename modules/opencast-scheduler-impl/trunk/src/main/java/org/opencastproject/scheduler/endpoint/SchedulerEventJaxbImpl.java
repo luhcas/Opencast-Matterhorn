@@ -70,7 +70,7 @@ public class SchedulerEventJaxbImpl {
   
   public SchedulerEventJaxbImpl() {}
   public SchedulerEventJaxbImpl(SchedulerEvent event) {
-    logger.info("Creating a " + SchedulerEventJaxbImpl.class.getName() + " from " + event);
+    logger.debug("Creating a " + SchedulerEventJaxbImpl.class.getName() + " from " + event);
     id = event.getID();
     deviceID = event.getDevice();
     title = event.getTitle();

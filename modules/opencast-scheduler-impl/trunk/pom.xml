@@ -103,16 +103,17 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.scheduler.* </Export-Package>
-		<Import-Package>
-			org.opencastproject.util, 
-			*;resolution:=optional
-		</Import-Package>
+			<Import-Package>
+				org.opencastproject.util, 
+				*;resolution:=optional
+			</Import-Package>
             <Private-Package>
               org.apache.derby.*
               net.fortuna.ical4j.*
             </Private-Package>
             <Embed-Dependency>
-              derby;inline=true
+              derby;inline=true,
+              ical4j;inline=true
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/scheduler-service.xml,

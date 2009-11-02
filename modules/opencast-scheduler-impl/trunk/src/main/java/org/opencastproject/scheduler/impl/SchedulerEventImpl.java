@@ -53,7 +53,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#addAttendee(java.lang.String)
    */
   public void addAttendee(String attendee) {
-    attendees.add(attendee);
+    if (! attendees.contains(attendee)) attendees.add(attendee); // only save unique attendees
   }
 
   /**
@@ -61,8 +61,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#addResource(java.lang.String)
    */
   public void addResource(String resource) {
-    resources.add(resource);
-
+    if (! resources.contains(resource)) resources.add(resource); // only save unique resources
   }
 
   /**
@@ -216,6 +215,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setDevice(java.lang.String)
    */
   public void setDevice(String device) {
+    if (! attendees.contains(device)) addAttendee(device);
     this.deviceID = device;
 
   }
@@ -224,8 +224,9 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setEnddate(java.util.Date)
    */
-  public void setEnddate(Date end) {
-    logger.info("Event "+id+" set enddate "+start.getTime());
+  public void setEnddate(Date end) throws IllegalArgumentException {
+    logger.debug("Event "+id+" set enddate "+start.getTime());
+    if (start != null && end != null && end.before(start)) throw new IllegalArgumentException ("End "+ end + " before start-date "+start);
     this.end = end;
   }
 
@@ -267,10 +268,10 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setStartdate(java.util.Date)
    */
-  public void setStartdate(Date start) {
-    logger.info("Event "+id+" set startdate "+start.getTime()); 
+  public void setStartdate(Date start) throws IllegalArgumentException{
+    logger.debug("Event "+id+" set startdate "+start.getTime()); 
+    if (end != null && start != null && end.before(start)) throw new IllegalArgumentException("Start "+start+" before End-date "+end);
     this.start = start;
-
   }
 
   /**
@@ -293,5 +294,17 @@ public class SchedulerEventImpl implements SchedulerEvent {
     if (end.before(start)) return false;
     return true;
   }
+  
+  public String toString () {
+    String text = "ID: "+getID()+", start: "+getStartdate().toString()+", end: "+getEnddate().toString()+", creator: "+getCreator()+", title: "+getTitle()+
+          ", abstract: "+getAbstract()+", device: "+getDevice()+", location: "+getLocation()+", series: "+getSeriesID()+
+          ", channel: "+getChannelID()+", attendees: ";
+    String [] att = getAttendees();
+    if (att != null) for (int i=0; i<att.length; i++) text+= att[i]+", ";
+    String [] res = getResources();
+    text += "resources: ";
+    if (res != null) for (int i=0; i<res.length; i++) text+= res[i]+", ";
+    return text;
+    }
 
 }
