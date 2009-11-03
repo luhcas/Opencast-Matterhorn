@@ -142,14 +142,14 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
   /**
    * Update a media package with some captions data
    * 
-   * @param mediaId the media package id
+   * @param workflowId the workflow instance id
    * @param captionType the type of caption data (could be {@value #CAPTIONS_TYPE_TIMETEXT} or {@value #CAPTIONS_TYPE_DESCAUDIO} for example)
    * @param data the captions data to store with the media package
    * @return the updated media package
    */
-  public MediaPackage updateCaptions(String mediaId, String captionType, InputStream data) {
-    if (mediaId == null || "".equals(mediaId)) {
-      throw new IllegalArgumentException("mediaId must be set");
+  public MediaPackage updateCaptions(String workflowId, String captionType, InputStream data) {
+    if (workflowId == null || "".equals(workflowId)) {
+      throw new IllegalArgumentException("workflowId must be set");
     }
     if (captionType == null || "".equals(captionType)) {
       throw new IllegalArgumentException("captionType must be set");
@@ -157,60 +157,35 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     if (data == null) {
       throw new IllegalArgumentException("data must be set");
     }
-    // TODO is this the right way to get the media package from the id?
-    // find the media package given the id
-    WorkflowSet wfs = workflowService.getWorkflowsByMediaPackage(mediaId);
-    WorkflowInstance[] workflows = wfs.getItems();
-    MediaPackage mp = null;
-    if (workflows.length > 0) {
-      mp = workflows[0].getSourceMediaPackage();
+    // find the media package given a workflow
+    WorkflowInstance workflow = workflowService.getWorkflowById(workflowId);
+    MediaPackage mp;
+    if (workflow != null) {
+      mp = workflow.getSourceMediaPackage(); // TODO change to current media package
       // get the MP and update it
       String mediaPackageElementID = CAPTIONS_ELEMENT+captionType;
-      URL url = workspace.put(mediaId, mediaPackageElementID, data);
+      URL url = workspace.put(workflowId, mediaPackageElementID, data);
 
-      for (int i = 0; i < workflows.length; i++) {
-        WorkflowInstance workflow = workflows[i];
-        if (WorkflowInstance.State.SUCCEEDED.equals(workflow.getState())) {
-          // for now this is not really doing anything
-          MediaPackage mediaPackage = workflow.getSourceMediaPackage();
-          addCaptionToMediaPackage(mediaPackage, url, mediaPackageElementID, captionType);
-          WorkflowDefinitionImpl workflowDefinition = new WorkflowDefinitionImpl();
-          workflowDefinition.setTitle("Captions Added");
-          workflowDefinition.setDescription("Captions added workflow for media: " + mediaId);
-          // TODO what is this and what do I do with it?
-          workflowDefinition.setOperations(new WorkflowOperationDefinitionListImpl());
-          workflowService.start(workflowDefinition, mp, null);
-        } else if (WorkflowInstance.State.PAUSED.equals(workflow.getState())) {
-          MediaPackage mediaPackage = workflow.getSourceMediaPackage();
-          addCaptionToMediaPackage(mediaPackage, url, mediaPackageElementID, captionType);
-          workflowService.resume(workflow.getId());
-        } else {
-          
-        }
+      if (WorkflowInstance.State.SUCCEEDED.equals(workflow.getState())) {
+        // TODO for now this is not really doing anything
+        MediaPackage mediaPackage = workflow.getSourceMediaPackage();
+        addCaptionToMediaPackage(mediaPackage, url, mediaPackageElementID, captionType);
+        WorkflowDefinitionImpl workflowDefinition = new WorkflowDefinitionImpl();
+        workflowDefinition.setTitle("Captions Added");
+        workflowDefinition.setDescription("Captions added workflow for media: " + workflowId);
+        // TODO what is this and what do I do with it?
+        workflowDefinition.setOperations(new WorkflowOperationDefinitionListImpl());
+        workflowService.start(workflowDefinition, mp, null);
+      } else if (WorkflowInstance.State.PAUSED.equals(workflow.getState())) {
+        MediaPackage mediaPackage = workflow.getSourceMediaPackage();
+        addCaptionToMediaPackage(mediaPackage, url, mediaPackageElementID, captionType);
+        workflowService.resume(workflow.getId());
+      } else {
+        logger.warn("Workflow (" + workflowId + ") is in invalid state for captioning: " + workflow.getState());
       }
     } else {
-      throw new IllegalArgumentException("No media found with the given id: " + mediaId);
+      throw new IllegalArgumentException("No workflow found with the given id: " + workflowId);
     }
-/*
-    SearchResult result = searchService.getEpisodeById(mediaId);
-    SearchResultItem[] items = result.getItems();
-    MediaPackage mp;
-    if (items.length > 0) {
-      mp = items[0].getMediaPackage();
-    } else {
-      throw new IllegalArgumentException("No media found with the given id: " + mediaId);
-    }
-    String mediaPackageElementID = CAPTIONS_ELEMENT+"-"+captionType;
-    workspace.put(mediaId, mediaPackageElementID, data);
-    // TODO do I need to get it again to find out the URL of the stuff I added?
-    // start off a workflow to indicate the captions just changed
-    WorkflowDefinitionImpl workflowDefinition = new WorkflowDefinitionImpl();
-    workflowDefinition.setTitle("Captions Added");
-    workflowDefinition.setDescription("Captions added workflow for media: " + mediaId);
-    // TODO what is this and what do I do with it?
-    workflowDefinition.setOperations(new WorkflowOperationDefinitionListImpl());
-    workflowService.start(workflowDefinition, mp, null);
-*/
     return mp;
   }
 
@@ -232,7 +207,18 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier()+"):" + e);
     }
   }
-  
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
+   */
+  public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(
+            workflowInstance.getSourceMediaPackage(),
+            workflowInstance.getProperties(), 
+            true);
+  }
+
   
   // DEFAULT STUFF
 
@@ -265,17 +251,6 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     String id = entity.getId();
     logger.info("setting id=" + id + " to " + entity);
     map.put(id, entity);
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
-   */
-  public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(
-            workflowInstance.getSourceMediaPackage(),
-            workflowInstance.getProperties(), 
-            true);
   }
 
 }
