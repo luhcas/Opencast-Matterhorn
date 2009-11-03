@@ -18,8 +18,6 @@ package org.opencastproject.media.mediapackage.dublincore.utils;
 
 import org.opencastproject.media.mediapackage.dublincore.DublinCore;
 import org.opencastproject.media.mediapackage.dublincore.DublinCoreValue;
-import org.opencastproject.util.Assert;
-import org.opencastproject.util.MapBuilder;
 
 import org.joda.time.Duration;
 import org.joda.time.format.ISODateTimeFormat;
@@ -27,6 +25,7 @@ import org.joda.time.format.ISOPeriodFormat;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -34,19 +33,23 @@ import java.util.regex.Pattern;
 
 /**
  * Utility class to facilitate the work with DCMI encoding schemes.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class EncodingSchemeUtils {
 
-  private static final Map<Precision, String> formats = new MapBuilder<Precision, String>().put(Precision.Year, "yyyy")
-          .put(Precision.Month, "yyyy-MM").put(Precision.Day, "yyyy-MM-dd").put(Precision.Minute,
-                  "yyyy-MM-dd'T'HH:mm'Z'").put(Precision.Second, "yyyy-MM-dd'T'HH:mm:ss'Z'").put(Precision.Fraction,
-                  "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").toMap();
+  private static final Map<Precision, String> formats = new HashMap<Precision, String>();
+
+  static {
+    formats.put(Precision.Year, "yyyy");
+    formats.put(Precision.Month, "yyyy-MM");
+    formats.put(Precision.Day, "yyyy-MM-dd");
+    formats.put(Precision.Minute, "yyyy-MM-dd'T'HH:mm'Z'");
+    formats.put(Precision.Second, "yyyy-MM-dd'T'HH:mm:ss'Z'");
+    formats.put(Precision.Fraction, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+  }
 
   /**
    * Encode a date with the given precision into a Dublin Core string value, using the recommended W3C-DTF scheme and
-   * the UTC timezone.
+   * the UTC timezone. The language of the returned value is set to undefined.
    * <p/>
    * See <a href="http://www.w3.org/TR/NOTE-datetime">http://www.w3.org/TR/NOTE-datetime</a> for more information about
    * W3C-DTF.
@@ -57,8 +60,10 @@ public class EncodingSchemeUtils {
    *          the precision to use
    */
   public static DublinCoreValue encodeDate(Date date, Precision precision) {
-    Assert.notNull(date, "The date must not be null");
-    Assert.notNull(precision, "The precision must not be null");
+    if (date == null)
+      throw new IllegalArgumentException("The date must not be null");
+    if (precision == null)
+      throw new IllegalArgumentException("The precision must not be null");
 
     SimpleDateFormat f = new SimpleDateFormat(formats.get(precision));
     f.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -78,8 +83,10 @@ public class EncodingSchemeUtils {
    *          the precision
    */
   public static DublinCoreValue encodePeriod(DCMIPeriod period, Precision precision) {
-    Assert.notNull(period, "The period must not be null");
-    Assert.notNull(precision, "The precision must not be null");
+    if (period == null)
+      throw new IllegalArgumentException("The period must not be null");
+    if (precision == null)
+      throw new IllegalArgumentException("The precision must not be null");
 
     SimpleDateFormat f = new SimpleDateFormat(formats.get(precision));
     f.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -102,7 +109,9 @@ public class EncodingSchemeUtils {
   /**
    * Encode a duration measured in milliseconds into a Dublin Core string using the
    * {@linkplain ch.ethz.replay.core.api.common.metadata.dublincore.DublinCore#ENC_SCHEME_ISO8601 ISO8601} encoding
-   * scheme.
+   * scheme <code>PTnHnMnS</code>.
+   * <p/>
+   * See <a href="http://en.wikipedia.org/wiki/ISO_8601#Durations"> ISO8601 Durations</a> for details.
    * 
    * @param duration
    *          the duration in milliseconds
@@ -116,19 +125,31 @@ public class EncodingSchemeUtils {
    * Decode a string encoded in the ISO8601 encoding scheme.
    * <p/>
    * Also supports the REPLAY legacy format <code>hh:mm:ss</code>.
+   * <p/>
+   * See <a href="http://en.wikipedia.org/wiki/ISO_8601#Durations"> ISO8601 Durations</a> for details.
    * 
    * @param value
    *          the ISO encoded string
    * @return the duration in milliseconds or null, if the value cannot be parsed
-   * @throws IllegalArgumentException
-   *           if the duration cannot be encoded
    */
   public static Long decodeDuration(String value) {
     try {
       return ISOPeriodFormat.standard().parsePeriod(value).toStandardDuration().getMillis();
     } catch (IllegalArgumentException ignore) {
-      throw new IllegalArgumentException("Cannot decode duration: " + value);
     }
+    // also support the legacy format hh:mm:ss
+    String[] parts = value.split(":");
+    try {
+      if (parts.length == 1)
+        return Long.parseLong(parts[0]) * 1000;
+      if (parts.length == 2)
+        return Long.parseLong(parts[0]) * 1000 * 60 + Long.parseLong(parts[1]) * 1000;
+      if (parts.length == 3)
+        return Long.parseLong(parts[0]) * 1000 * 60 * 60 + Long.parseLong(parts[1]) * 1000 * 60
+                + Long.parseLong(parts[2]) * 1000;
+    } catch (NumberFormatException ignore) {
+    }
+    return null;
   }
 
   /**
@@ -152,6 +173,13 @@ public class EncodingSchemeUtils {
     return l;
   }
 
+  public static Long decodeMandatoryDuration(String value) {
+    Long l = decodeDuration(value);
+    if (l == null)
+      throw new IllegalArgumentException("Cannot decode duration: " + value);
+    return l;
+  }
+
   /**
    * Tries to decode the given value as a W3C-DTF encoded date. If decoding fails, null is returned.
    * 
@@ -163,6 +191,19 @@ public class EncodingSchemeUtils {
         return parseW3CDTF(value.getValue());
       } catch (IllegalArgumentException ignore) {
       }
+    }
+    return null;
+  }
+
+  /**
+   * Tries to decode the given value as a W3C-DTF encoded date. If decoding fails, null is returned.
+   * 
+   * @return the date or null if decoding fails
+   */
+  public static Date decodeDate(String value) {
+    try {
+      return parseW3CDTF(value);
+    } catch (IllegalArgumentException ignore) {
     }
     return null;
   }
@@ -182,6 +223,21 @@ public class EncodingSchemeUtils {
     return date;
   }
 
+  /**
+   * Like {@link #decodeDate(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
+   * {@link IllegalArgumentException} if the value cannot be decoded.
+   * 
+   * @return the date
+   * @throws IllegalArgumentException
+   *           if the value cannot be decoded
+   */
+  public static Date decodeMandatoryDate(String value) {
+    Date date = decodeDate(value);
+    if (date == null)
+      throw new IllegalArgumentException("Cannot decode to Date: " + value);
+    return date;
+  }
+
   private static final Pattern DCMI_PERIOD = Pattern.compile("(start|end|name)\\s*=\\s*(.*?)(?:;|\\s*$)");
   private static final Pattern DCMI_PERIOD_SCHEME = Pattern.compile("scheme\\s*=\\s*(.*?)(?:;|\\s*$)");
 
@@ -192,8 +248,18 @@ public class EncodingSchemeUtils {
    * @return the period or null if decoding fails
    */
   public static DCMIPeriod decodePeriod(DublinCoreValue value) {
+    return decodePeriod(value.getValue());
+  }
+
+  /**
+   * Tries to decode a string in the DCMI period format, using W3C-DTF for the encoding of the individual dates. If
+   * parsing fails at any point, null will be returned.
+   * 
+   * @return the period or null if decoding fails
+   */
+  public static DCMIPeriod decodePeriod(String value) {
     // Parse value
-    Matcher schemeMatcher = DCMI_PERIOD_SCHEME.matcher(value.getValue());
+    Matcher schemeMatcher = DCMI_PERIOD_SCHEME.matcher(value);
     boolean mayBeW3CDTFEncoded = true;
     if (schemeMatcher.find()) {
       String schemeString = schemeMatcher.group(1);
@@ -208,7 +274,7 @@ public class EncodingSchemeUtils {
         Date end = null;
         String name = null;
         // Parse
-        Matcher m = DCMI_PERIOD.matcher(value.getValue());
+        Matcher m = DCMI_PERIOD.matcher(value);
         while (m.find()) {
           String field = m.group(1);
           String fieldValue = m.group(2);
@@ -226,6 +292,8 @@ public class EncodingSchemeUtils {
             name = fieldValue;
           }
         }
+        if (start == null && end == null)
+          return null;
         return new DCMIPeriod(start, end, name);
       }
     } catch (IllegalArgumentException ignore) {
@@ -243,6 +311,18 @@ public class EncodingSchemeUtils {
    *           if the value cannot be decoded
    */
   public static DCMIPeriod decodeMandatoryPeriod(DublinCoreValue value) {
+    return decodeMandatoryPeriod(value.getValue());
+  }
+
+  /**
+   * Like {@link #decodePeriod(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
+   * {@link IllegalArgumentException} if the value cannot be decoded.
+   * 
+   * @return the period
+   * @throws IllegalArgumentException
+   *           if the value cannot be decoded
+   */
+  public static DCMIPeriod decodeMandatoryPeriod(String value) {
     DCMIPeriod period = decodePeriod(value);
     if (period == null)
       throw new IllegalArgumentException("Cannot decode to DCMIPeriod: " + value);
@@ -251,21 +331,25 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Tries to decode the value to a temporal object. For now, supported types are {@link java.util.Date} and
-   * {@link DCMIPeriod}
+   * Tries to decode the value to a temporal object. For now, supported types are {@link java.util.Date},
+   * {@link DCMIPeriod} and Long for a duration.
    * 
    * @param value
    *          the value to decode
    * @return a temporal object of the said types or null if decoding fails
    */
-  public static Object decodeTemporal(DublinCoreValue value) {
+  public static Temporal<?> decodeTemporal(DublinCoreValue value) {
     // First try Date
-    Object temporal = decodeDate(value);
-    if (temporal == null) {
-      // ... then try DCMIPeriod
-      temporal = decodePeriod(value);
-    }
-    return temporal;
+    Date instant = decodeDate(value);
+    if (instant != null)
+      return new InstantTemporal(instant);
+    DCMIPeriod period = decodePeriod(value);
+    if (period != null)
+      return new PeriodTemporal(period);
+    Long duration = decodeDuration(value);
+    if (duration != null)
+      return new DurationTemporal(duration);
+    return null;
   }
 
   /**
@@ -276,8 +360,8 @@ public class EncodingSchemeUtils {
    * @throws IllegalArgumentException
    *           if the value cannot be decoded
    */
-  public static Object decodeMandatoryTemporal(DublinCoreValue value) {
-    Object temporal = decodeTemporal(value);
+  public static Temporal<?> decodeMandatoryTemporal(DublinCoreValue value) {
+    Temporal<?> temporal = decodeTemporal(value);
     if (value == null)
       throw new IllegalArgumentException("Cannot decode to either Date or DCMIPeriod: " + value);
 
@@ -291,5 +375,4 @@ public class EncodingSchemeUtils {
   private static final Date parseW3CDTF(String value) {
     return ISODateTimeFormat.dateTimeParser().parseDateTime(value).toDate();
   }
-
 }

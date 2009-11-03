@@ -17,9 +17,28 @@
 package org.opencastproject.media.mediapackage.dublincore.utils;
 
 /**
- * The date output precision.
+ * A temporal is either an instant, a duration or a period.
  */
-public enum Precision {
+public abstract class Temporal<T> {
 
-  Year, Month, Day, Minute, Second, Fraction
+  enum Type {
+    Instant, Duration, Period
+  }
+
+  private T temporal;
+  private Type type;
+
+  public Temporal(T temporal, Type type) {
+    this.temporal = temporal;
+    this.type = type;
+  }
+
+  public T getTemporal() {
+    return temporal;
+  }
+
+  public Type getType() {
+    return type;
+  }
+
 }

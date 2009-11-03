@@ -17,9 +17,12 @@
 package org.opencastproject.media.mediapackage.dublincore.utils;
 
 /**
- * The date output precision.
+ * A period as {@link DCMIPeriod}.
  */
-public enum Precision {
+public class PeriodTemporal extends Temporal<DCMIPeriod> {
 
-  Year, Month, Day, Minute, Second, Fraction
+  public PeriodTemporal(DCMIPeriod temporal) {
+    super(temporal, Type.Period);
+  }
+
 }

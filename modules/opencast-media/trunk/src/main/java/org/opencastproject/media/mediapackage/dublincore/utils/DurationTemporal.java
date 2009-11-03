@@ -17,9 +17,14 @@
 package org.opencastproject.media.mediapackage.dublincore.utils;
 
 /**
- * The date output precision.
+ * A duration measured in milliseconds.
+ * 
+ * @author Christoph E. Driessen <ced@neopoly.de>
  */
-public enum Precision {
+public class DurationTemporal extends Temporal<Long> {
 
-  Year, Month, Day, Minute, Second, Fraction
+  public DurationTemporal(Long temporal) {
+    super(temporal, Type.Duration);
+  }
+
 }

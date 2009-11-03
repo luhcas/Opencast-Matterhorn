@@ -16,10 +16,15 @@
 
 package org.opencastproject.media.mediapackage.dublincore.utils;
 
-/**
- * The date output precision.
- */
-public enum Precision {
+import java.util.Date;
 
-  Year, Month, Day, Minute, Second, Fraction
+/**
+ * An instant in time as a {@link java.util.Date}.
+ */
+public class InstantTemporal extends Temporal<Date> {
+
+  public InstantTemporal(Date temporal) {
+    super(temporal, Type.Instant);
+  }
+  
 }

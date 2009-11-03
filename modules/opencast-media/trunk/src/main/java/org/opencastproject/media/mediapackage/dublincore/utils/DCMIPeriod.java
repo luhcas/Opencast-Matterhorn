@@ -16,17 +16,13 @@
 
 package org.opencastproject.media.mediapackage.dublincore.utils;
 
-import org.opencastproject.util.Assert;
-
 import java.util.Date;
 
 /**
  * A time interval, representing a DCMI period. They may be open.
  * <p/>
- * For further information on DCMI periods please refer to <a href="http://dublincore.org/documents/dcmi-period/"
- * >http://dublincore.org/documents/dcmi-period/</a>.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
+ * For further information on DCMI periods please refer to <a
+ * href="http://dublincore.org/documents/dcmi-period/">http://dublincore.org/documents/dcmi-period/</a>.
  */
 public class DCMIPeriod {
 
@@ -38,9 +34,10 @@ public class DCMIPeriod {
    * Create a new period. To create an open interval you may set one of the boundaries null.
    */
   public DCMIPeriod(Date start, Date end) {
-    Assert.not(start == null && end == null, "A period must be bounded at least at one end");
-    Assert.not(start != null && end != null && end.before(start), "The end date is before the start date");
-
+    if (start == null && end == null)
+      throw new IllegalStateException("A period must be bounded at least at one end");
+    if (start != null && end != null && end.before(start))
+      throw new IllegalStateException("The end date is before the start date");
     this.start = start;
     this.end = end;
   }
@@ -120,4 +117,5 @@ public class DCMIPeriod {
     return "DCMIPeriod{" + "start=" + (start != null ? start : "]") + ", end=" + (end != null ? end : "[")
             + (name != null ? ", name='" + name + '\'' : "") + '}';
   }
+  
 }

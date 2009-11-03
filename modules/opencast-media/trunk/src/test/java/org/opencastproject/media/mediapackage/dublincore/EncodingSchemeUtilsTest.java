@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.decodeDate;
 import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.decodeDuration;
 import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.decodePeriod;
@@ -30,6 +29,9 @@ import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSc
 import static org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils.encodePeriod;
 
 import org.opencastproject.media.mediapackage.dublincore.utils.DCMIPeriod;
+import org.opencastproject.media.mediapackage.dublincore.utils.DurationTemporal;
+import org.opencastproject.media.mediapackage.dublincore.utils.InstantTemporal;
+import org.opencastproject.media.mediapackage.dublincore.utils.PeriodTemporal;
 import org.opencastproject.media.mediapackage.dublincore.utils.Precision;
 
 import org.junit.Test;
@@ -41,8 +43,6 @@ import java.util.TimeZone;
 
 /**
  * Test cases for {@link org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils} .
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class EncodingSchemeUtilsTest {
 
@@ -132,10 +132,14 @@ public class EncodingSchemeUtilsTest {
 
   @Test
   public void testDecodeTemporal() {
-    assertTrue(decodeTemporal(new DublinCoreValue("start=2008-10-01; end=2009-01-01;")) instanceof DCMIPeriod);
-    assertTrue(decodeTemporal(new DublinCoreValue("2008-10-01")) instanceof Date);
-    assertTrue(decodeTemporal(new DublinCoreValue("2008-10-01T10:30:05Z")) instanceof Date);
-    assertTrue(decodeTemporal(new DublinCoreValue("start=2008-10-01T10:20Z; end=2009-01-01; scheme=W3C-DTF")) instanceof DCMIPeriod);
+    assertTrue(decodeTemporal(new DublinCoreValue("start=2008-10-01; end=2009-01-01;")) instanceof PeriodTemporal);
+    assertTrue(decodeTemporal(new DublinCoreValue("2008-10-01")) instanceof InstantTemporal);
+    assertTrue(decodeTemporal(new DublinCoreValue("2008-10-01T10:30:05Z")) instanceof InstantTemporal);
+    assertTrue(decodeTemporal(new DublinCoreValue("start=2008-10-01T10:20Z; end=2009-01-01; scheme=W3C-DTF")) instanceof PeriodTemporal);
+    assertTrue(decodeTemporal(new DublinCoreValue("PT10H5M")) instanceof DurationTemporal);
+    assertEquals(10L * 60 * 60 * 1000 + 5 * 60 * 1000, decodeTemporal(new DublinCoreValue("PT10H5M")).getTemporal());
+    assertEquals(10L * 60 * 60 * 1000 + 5 * 60 * 1000 + 28 * 1000, decodeTemporal(new DublinCoreValue("PT10H5M28S"))
+            .getTemporal());
   }
 
   @Test
@@ -146,24 +150,11 @@ public class EncodingSchemeUtilsTest {
     assertEquals(d2, decodeDuration(encodeDuration(d2).getValue()));
     Long d3 = 234L;
     assertEquals(d3, decodeDuration(encodeDuration(d3).getValue()));
+    assertEquals(new Long(1 * 1000 * 60 * 60 + 10 * 1000 * 60 + 5 * 1000), decodeDuration("01:10:05"));
 
     assertEquals(DublinCore.ENC_SCHEME_ISO8601, encodeDuration(d3).getEncodingScheme());
 
-    // Try to decode 01:10:05
-    try {
-      assertEquals(new Long(1 * 1000 * 60 * 60 + 10 * 1000 * 60 + 5 * 1000), decodeDuration("01:10:05"));
-      fail("Decoding of duration in ms passed although it should have failed");
-    } catch (IllegalArgumentException e) {
-      // this is expected
-    }
-
-    try {
-      assertNull(decodeDuration(new DublinCoreValue("asdsad")));
-      fail("Decoding of nonsense passed although it should have failed");
-    } catch (IllegalArgumentException e) {
-      // this is expected
-    }
-
+    assertNull(decodeDuration(new DublinCoreValue("asdsad")));
     assertNull(decodeDuration(new DublinCoreValue(encodeDuration(d1).getValue(), DublinCore.LANGUAGE_UNDEFINED,
             DublinCore.ENC_SCHEME_BOX)));
   }
