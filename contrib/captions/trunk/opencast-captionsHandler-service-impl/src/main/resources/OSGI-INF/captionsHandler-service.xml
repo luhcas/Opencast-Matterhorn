@@ -5,6 +5,7 @@
         <implementation class="org.opencastproject.captionsHandler.impl.CaptionshandlerServiceImpl" />
         <property name="service.description"
             value="Captions Handler Service - handles captionable lookup and attachment of caption data" />
+        <property name="workflow.operation" value="captions" /><!-- must match constant in service impl -->
         <!-- service I use -->
         <reference interface="org.opencastproject.workspace.api.Workspace"
             cardinality="1..1" policy="static" bind="setWorkspace" unbind="unsetWorkspace" />
@@ -16,6 +17,7 @@
         <service>
             <provide interface="org.opencastproject.captionsHandler.api.CaptionshandlerService" />
             <provide interface="org.osgi.service.cm.ManagedService" /><!-- for dynamic settings -->
+            <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
         </service>
     </component>
 </components>

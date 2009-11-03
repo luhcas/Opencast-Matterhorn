@@ -21,17 +21,23 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
 import org.opencastproject.search.api.SearchService;
+import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationDefinitionListImpl;
+import org.opencastproject.workflow.api.WorkflowOperationException;
+import org.opencastproject.workflow.api.WorkflowOperationHandler;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
+import org.opencastproject.workflow.api.WorkflowInstance.State;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.cm.ConfigurationException;
@@ -54,7 +60,9 @@ import java.util.Map;
  * The consumer sends back timed text, which will be stored in the working file repository and added to the media package <br/>
  * A new workflow (or the existing one with additional operations) will be kicked off (for redistribution including captions)
  */
-public class CaptionshandlerServiceImpl implements CaptionshandlerService, ManagedService {
+public class CaptionshandlerServiceImpl implements CaptionshandlerService, ManagedService, WorkflowOperationHandler {
+
+  private static final String CAPTIONS_OPERATION_NAME = "captions";
 
   private static final Logger logger = LoggerFactory.getLogger(CaptionshandlerServiceImpl.class);
 
@@ -110,11 +118,14 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       max = 50;
     }
     // TODO make this actually get the captionable items
-    WorkflowSet wfs = workflowService.getWorkflowsByDate(start, max);
+    WorkflowSet wfs = workflowService.getWorkflowsInState(State.PAUSED, start, max); // .getWorkflowsByDate(start, max);
     WorkflowInstance[] workflows = wfs.getItems();
     for (WorkflowInstance workflow : workflows) {
-      MediaPackage mp = workflow.getSourceMediaPackage();
-      l.add(mp);
+      WorkflowOperationInstance operation = workflow.getCurrentOperation();
+      if ( CAPTIONS_OPERATION_NAME.equals(operation.getName()) ) {
+        MediaPackage mp = workflow.getSourceMediaPackage(); // TODO use current media package
+        l.add(mp);
+      }
     }
     if (l.isEmpty()) {
       // TODO make this actually get the captionable items
@@ -160,8 +171,9 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       for (int i = 0; i < workflows.length; i++) {
         WorkflowInstance workflow = workflows[i];
         if (WorkflowInstance.State.SUCCEEDED.equals(workflow.getState())) {
+          // for now this is not really doing anything
           MediaPackage mediaPackage = workflow.getSourceMediaPackage();
-          addCaptionToMediaPackage(mediaPackage, url);
+          addCaptionToMediaPackage(mediaPackage, url, mediaPackageElementID, captionType);
           WorkflowDefinitionImpl workflowDefinition = new WorkflowDefinitionImpl();
           workflowDefinition.setTitle("Captions Added");
           workflowDefinition.setDescription("Captions added workflow for media: " + mediaId);
@@ -170,7 +182,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
           workflowService.start(workflowDefinition, mp, null);
         } else if (WorkflowInstance.State.PAUSED.equals(workflow.getState())) {
           MediaPackage mediaPackage = workflow.getSourceMediaPackage();
-          addCaptionToMediaPackage(mediaPackage, url);
+          addCaptionToMediaPackage(mediaPackage, url, mediaPackageElementID, captionType);
           workflowService.resume(workflow.getId());
         } else {
           
@@ -202,16 +214,21 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     return mp;
   }
 
-  private void addCaptionToMediaPackage(MediaPackage mediaPackage, URL url) {
+  private void addCaptionToMediaPackage(MediaPackage mediaPackage, URL url, String elementId, String type) {
+    if (mediaPackage == null || url == null || elementId == null || type == null) {
+      throw new IllegalArgumentException("All values must not be null: " + mediaPackage + " : " + url + " : " + elementId + " : " + type);
+    }
     MediaPackageElementBuilder mpeb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+    MediaPackageElementFlavor captionsFlavor = new MediaPackageElementFlavor(CAPTIONS_OPERATION_NAME, type.toLowerCase());
     try {
-      MediaPackageElement element = mpeb.elementFromURL(url, MediaPackageElement.Type.Attachment, MediaPackageElements.INDEFINITE_TRACK);
+      MediaPackageElement element = mpeb.elementFromURL(url, MediaPackageElement.Type.Catalog, captionsFlavor);
+      element.setIdentifier(elementId);
       mediaPackage.add(element);
     } catch (MediaPackageException e) {
-      e.printStackTrace();
+      logger.error(e.toString(), e);
       throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier()+"):" + e);
     } catch (UnsupportedElementException e) {
-      e.printStackTrace();
+      logger.error(e.toString(), e);
       throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier()+"):" + e);
     }
   }
@@ -248,6 +265,17 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     String id = entity.getId();
     logger.info("setting id=" + id + " to " + entity);
     map.put(id, entity);
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
+   */
+  public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(
+            workflowInstance.getSourceMediaPackage(),
+            workflowInstance.getProperties(), 
+            true);
   }
 
 }

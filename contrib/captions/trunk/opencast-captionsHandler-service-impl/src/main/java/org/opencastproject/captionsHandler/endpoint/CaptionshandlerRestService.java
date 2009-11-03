@@ -82,7 +82,7 @@ public class CaptionshandlerRestService {
       sort = "title asc";
     }
     // TODO make this do something real, right now it just loads a sample file
-    // http://repo2.maven.org/maven2/org/json/json/20090211/json-20090211.jar
+    // http://repo2.maven.org/maven2/org/json/json/20090211/json-20090211.jar OR http://repo1.maven.org/maven2/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar
     String json;
     InputStream in = null;
     try {
