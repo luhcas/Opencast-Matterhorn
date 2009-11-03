@@ -6,4 +6,6 @@
   <service>
     <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
   </service>
+  <reference cardinality="1..1" interface="org.opencastproject.composer.api.ComposerService"
+  name="ComposerService" policy="static" bind="setComposerService"/>
 </component>

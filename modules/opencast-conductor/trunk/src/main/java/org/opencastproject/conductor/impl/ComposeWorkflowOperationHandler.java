@@ -15,6 +15,13 @@
  */
 package org.opencastproject.conductor.impl;
 
+import org.opencastproject.composer.api.ComposerService;
+import org.opencastproject.composer.api.EncoderException;
+import org.opencastproject.composer.api.EncodingProfile;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -24,23 +31,92 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 /**
  * The workflow definition for handling "compose" operations
  */
 public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler {
   private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowOperationHandler.class);
 
+  private ComposerService composerService;
+
+  protected void setComposerService(ComposerService composerService) {
+    this.composerService = composerService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
+   */
   public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.info("run() compose workflow operation");
-    if(workflowInstance.getProperties() != null && workflowInstance.getProperties().keySet().contains("flash")) {
-      logger.info("Composing flash media for media package " + workflowInstance.getSourceMediaPackage().getIdentifier());
+
+    MediaPackage resultingMediaPackage;
+
+    // FIXME change when encode is called (think how to pass properties)
+    if (workflowInstance.getProperty("encode") != null) {
+      try {
+        resultingMediaPackage = encode(workflowInstance.getSourceMediaPackage(), workflowInstance.getProperties());
+      } catch (EncoderException e) {
+        throw new WorkflowOperationException(e);
+      } catch (MediaPackageException e) {
+        throw new WorkflowOperationException(e);
+      } catch (UnsupportedElementException e) {
+        throw new WorkflowOperationException(e);
+      }
     } else {
-      logger.info("Skipping flash media composition for media package " + workflowInstance.getSourceMediaPackage().getIdentifier());
+      logger.info("No property for encoding, skipping...");
+      resultingMediaPackage = workflowInstance.getSourceMediaPackage();
     }
-    if(workflowInstance.getProperties() == null || workflowInstance.getProperties().isEmpty()) {
-      logger.info("This workflow contains no properties, so we can't compose any media");
-    }
+
+    logger.info("run() compose operation completed");
+
     // TODO Add new media track(s) to the media package
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getSourceMediaPackage(), workflowInstance.getProperties(), false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage,
+            workflowInstance.getProperties(), false);
+  }
+
+  /**
+   * Encode tracks from MediaPackage using profiles stored in properties and updates current
+   * MediaPackage.
+   * @param mediaPackage 
+   * @param properties
+   * @return
+   * @throws EncoderException
+   * @throws MediaPackageException
+   * @throws UnsupportedElementException
+   */
+  private MediaPackage encode(MediaPackage mediaPackage, Map<String, String> properties) throws EncoderException,
+          MediaPackageException, UnsupportedElementException {
+
+    Track[] trackList = mediaPackage.getTracks();
+    for (Track track : trackList) {
+
+      // encode track
+      String trackID = track.getIdentifier();
+
+      // TODO profile retrieval, matching for media type (Audio, Visual, AudioVisual, EnhancedAudio, Image,
+      // ImageSequence, Cover)
+      // String[] profiles = ((String)properties.get("encode")).split(" ");
+      EncodingProfile[] profileList = composerService.listProfiles();
+
+      // for(String profileID : profiles){
+      // logger.info("Encoding track " + trackID + " with " + profileID + "profile");
+      // Track composedTrack = composerService.encode(mediaPackage, trackID, profileID);
+      // // store new tracks to mediaPackage
+      // mediaPackage.add(composedTrack);
+      // }
+      for (EncodingProfile profile : profileList) {
+        if (properties.containsKey(profile.getName())) {
+          logger.info("Encoding track " + trackID + " with " + profile.getName() + "profile");
+          Track composedTrack = composerService.encode(mediaPackage, trackID, profile.getName());
+          // store new tracks to mediaPackage
+          mediaPackage.add(composedTrack);
+        }
+      }
+    }
+
+    return mediaPackage;
   }
 }
