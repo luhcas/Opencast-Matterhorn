@@ -14,8 +14,6 @@ else
   M2_REPO="/Users/johndoe/.m2/repository"
 fi
 
-FELIX="/Applications/Matterhorn"
-M2_REPO="/Users/johndoe/.m2/repository"
 DEBUG_PORT="8000"
 DEBUG_SUSPEND="n"
 
