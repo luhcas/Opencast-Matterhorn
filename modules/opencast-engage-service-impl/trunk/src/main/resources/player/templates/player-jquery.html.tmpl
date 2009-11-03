@@ -41,7 +41,7 @@
 
                  if(state == playing)
                  {
-                     document.getElementById("btn_play_pause").value = "Play";
+                     document.getElementById("btn_play_pause").value = "&nbsp;Play&nbsp;";
                      currentPlayPauseState = pausing;
                  }
                  else
@@ -83,10 +83,13 @@
 
          }
            
-        function setTime (text) {
-            document.getElementById("time").innerHTML = text;
-
-                   }
+       function setCurrentTime (text) {
+            document.getElementById("time-current").innerHTML = text;
+        }
+        
+        function setTotalTime (text) {
+            document.getElementById("time-total").innerHTML = text;
+        }
 
         function setDuration (time) {
             $('#slider').slider('option', 'max', time);
@@ -141,7 +144,11 @@
 </div>
 
         <div style="margin-left:10px; margin-right:10px; margin-top:5px;">
-            <div id="time" style="display:inline-block; margin-left:0px;">00:00:00 of 00:00:00</div>
+            <span style="margin-left:0px;">
+            Time:
+                <span id="time-current" role="timer">00:00:00</span> of
+                <span id="time-total" role="timer">00:00:00</span>
+            </span>
             <input id="btn_play_pause" type="button" onclick="doTogglePlayPause();" value="Play"/>
             <input type="button" onclick="doStop();" value="Stop"/>
             <input id="btn_volume" type="button" onclick="doToggleVolume();" value="Mute"/>
