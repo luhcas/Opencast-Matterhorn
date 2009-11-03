@@ -15,6 +15,7 @@
  */
 package org.opencastproject.conductor.impl;
 
+import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -30,17 +31,39 @@ import org.slf4j.LoggerFactory;
 public class DistributeWorkflowOperationHandler implements WorkflowOperationHandler {
   private static final Logger logger = LoggerFactory.getLogger(DistributeWorkflowOperationHandler.class);
 
+  private DistributionService distributionService;
+
+  protected void setDistributionService(DistributionService distributionService) {
+    this.distributionService = distributionService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
+   */
   public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.info("run() distribution workflow operation");
-    if(workflowInstance.getProperties() != null && workflowInstance.getProperties().keySet().contains("itunes")) {
-      logger.info("Distributing media to itunes for media package " + workflowInstance.getSourceMediaPackage().getIdentifier());
+    // if(workflowInstance.getProperties() != null && workflowInstance.getProperties().keySet().contains("itunes")) {
+    // logger.info("Distributing media to itunes for media package " +
+    // workflowInstance.getSourceMediaPackage().getIdentifier());
+    // }
+    // if(workflowInstance.getProperties() != null && workflowInstance.getProperties().keySet().contains("youtube")) {
+    // logger.info("Distributing media to youTube for media package " +
+    // workflowInstance.getSourceMediaPackage().getIdentifier());
+    // }
+    // if(workflowInstance.getProperties() == null || workflowInstance.getProperties().isEmpty()) {
+    // logger.info("This workflow contains no properties, so we can't distribute any media");
+    // }
+    
+    // TODO: Determine which distribution channels should be called
+
+    try {
+      distributionService.distribute(workflowInstance.getSourceMediaPackage());
+    } catch (RuntimeException e) {
+      throw new WorkflowOperationException(e);
     }
-    if(workflowInstance.getProperties() != null && workflowInstance.getProperties().keySet().contains("youtube")) {
-      logger.info("Distributing media to youTube for media package " + workflowInstance.getSourceMediaPackage().getIdentifier());
-    }
-    if(workflowInstance.getProperties() == null || workflowInstance.getProperties().isEmpty()) {
-      logger.info("This workflow contains no properties, so we can't distribute any media");
-    }
+
     // TODO Add any distributed media to the media package
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getSourceMediaPackage(),
             workflowInstance.getProperties(), false);

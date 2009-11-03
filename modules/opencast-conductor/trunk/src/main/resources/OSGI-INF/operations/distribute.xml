@@ -6,4 +6,6 @@
   <service>
     <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
   </service>
+  <reference cardinality="1..1" interface="org.opencastproject.distribution.api.DistributionService"
+  name="DistributionService" policy="static" bind="setDistributionService"/>
 </component>
