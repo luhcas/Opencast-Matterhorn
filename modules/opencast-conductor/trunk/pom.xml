@@ -27,6 +27,22 @@
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-composer-service-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-search-service-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.opencastproject</groupId>
+    	<artifactId>opencast-distribution-service-api</artifactId>
+    	<version>0.1-SNAPSHOT</version>
+    	<type>bundle</type>
+    </dependency>
+    <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
     </dependency>
@@ -73,7 +89,8 @@
               OSGI-INF/operations/compose.xml,
               OSGI-INF/operations/distribute.xml,
               OSGI-INF/operations/error-handler.xml,
-              OSGI-INF/operations/review.xml
+              OSGI-INF/operations/review.xml,
+              OSGI-INF/operations/publish.xml
             </Service-Component>
           </instructions>
         </configuration>

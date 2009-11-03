@@ -24,12 +24,15 @@ import org.opencastproject.workflow.api.WorkflowService;
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 
 /**
  * This is the default implementation of the conductor service.
@@ -41,6 +44,16 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
 
   public void setWorkflowService(WorkflowService workflowService) {
     this.workflowService = workflowService;
+  }
+  
+  private EventAdmin eventAdmin;
+  
+  protected void setEventAdmin(EventAdmin eventAdmin){
+    this.eventAdmin = eventAdmin;
+  }
+  
+  protected void unsetEventAdmin(EventAdmin eventAdmin){
+    this.eventAdmin = null;
   }
 
   public void activate(ComponentContext componentContext) {
@@ -60,13 +73,19 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
       InputStream errorHandler = ConductorServiceImpl.class.getClassLoader().getResourceAsStream(
               "/workflows/default-error-handler.xml");
       workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(errorHandler));
+      
+      InputStream composeDistPublish = ConductorServiceImpl.class.getClassLoader().getResourceAsStream("workflows/compose-distribute-publish.xml");
+      workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(composeDistPublish));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritDoc} If Event contains 'mediaPackage' property with serialized Mediapackage, new MediaPackage is build and
+   * then Review workflow is started. After successful start of workflow ACK message is sent back anouncing that
+   * processing completed successfully. If there is an error during MediaPackage building or starting Review workflow,
+   * ACK message will contain exception property with linked exception.
    * 
    * @see org.osgi.service.event.EventHandler#handleEvent(org.osgi.service.event.Event)
    */
@@ -81,16 +100,28 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
       try {
         MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(
                 IOUtils.toInputStream((String) property));
+        // MediaPackage mp = (MediaPackage) property;
         logger.info("Received media package " + mp.getIdentifier().getLocalName());
         // execute 'review' workflow
         workflowService.start(workflowService.getWorkflowDefinitionByName("Review"), mp, new HashMap<String, String>());
+
+        if (eventAdmin != null) {
+          eventAdmin.postEvent(new Event("org/opencastproject/conductor/ACK", null));
+        } else {
+          logger.warn("EventAdmin not available: ACK message was not sent");
+        }
       } catch (Exception e) {
         // invalid media package manifest or problem with workflow service
-        throw new RuntimeException(e);
+        logger.error("Exception occured: " + e.getMessage());
+        Dictionary<String, Throwable> exception = new Hashtable<String, Throwable>();
+        exception.put("exception", e);
+        if (eventAdmin != null) {
+          eventAdmin.postEvent(new Event("org/opencastproject/conductor/ACK", exception));
+        } else {
+          logger.warn("EventAdmin not available: ACK message was not sent");
+        }
       }
-
     }
-
   }
 
   // /**
