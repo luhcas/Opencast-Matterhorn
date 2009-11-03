@@ -31,6 +31,7 @@ import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.service.event.EventAdmin;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -39,6 +40,7 @@ import java.net.URL;
 public class IngestServiceImplTest {
   private IngestServiceImpl service = null;
   private Workspace workspace = null;
+  private EventAdmin eventAdmin;
   private MediaPackage mediaPackage = null;
   private URL urlTrack;
   private URL urlTrack1;
@@ -61,6 +63,8 @@ public class IngestServiceImplTest {
     urlPackage = IngestServiceImplTest.class.getResource("/data.zip");
     // set up service and mock workspace
     service = new IngestServiceImpl();
+    eventAdmin = EasyMock.createNiceMock(EventAdmin.class);
+    service.setEventAdmin(eventAdmin);
     workspace = EasyMock.createNiceMock(Workspace.class);
     try {
       EasyMock.expect(workspace.getURL((String) EasyMock.anyObject(), (String) EasyMock.anyObject())).andReturn(
@@ -113,6 +117,10 @@ public class IngestServiceImplTest {
       fail("Unable to create a handle for the media package.");
     } catch (IOException e) {
       fail("Unable to put files into repo.");
+    } catch (IllegalStateException e) {
+      fail("EventAmdin not available.");
+    } catch (Exception e) {
+      fail("Error during MediaPackage serialization.");
     }
   }
 
@@ -124,8 +132,10 @@ public class IngestServiceImplTest {
       fail("Unable to load media package");
     } catch (MediaPackageException e) {
       fail("Unable to consume a media package");
+    } catch (IllegalStateException e) {
+      fail("EventAdmin not available");
     } catch (Exception e) {
-      fail("Unable to consume a media package");
+      fail("Unable to consume or serialize a media package");
     }
   }
 

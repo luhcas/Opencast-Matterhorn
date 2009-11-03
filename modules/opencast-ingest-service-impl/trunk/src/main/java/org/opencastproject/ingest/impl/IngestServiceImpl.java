@@ -39,6 +39,7 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,7 @@ import java.util.zip.ZipInputStream;
 /**
  * Creates and augments Matterhorn MediaPackages. Stores media into the Working File Repository.
  */
-public class IngestServiceImpl implements IngestService, ManagedService {
+public class IngestServiceImpl implements IngestService, ManagedService, EventHandler {
   private static final Logger logger = LoggerFactory.getLogger(IngestServiceImpl.class);
   private MediaPackageBuilder builder = null;
   private HandleBuilder handleBuilder = null;
@@ -241,45 +242,81 @@ public class IngestServiceImpl implements IngestService, ManagedService {
   /**
    * {@inheritDoc}
    * 
-   * @throws Exception
    * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String,
    *      org.opencastproject.notification.api.NotificationService)
    */
-  public void ingest(MediaPackage mp) {
+  public void ingest(MediaPackage mp) throws IllegalStateException, Exception{
+    
     // broadcast event
     if (eventAdmin != null) {
       logger.info("Broadcasting event...");
       Dictionary<String, String> properties = new Hashtable<String, String>();
+      
       // converting media package to String presentation
-      MediapackageType mpt;
-      try {
-        mpt = MediapackageType.fromXml(mp.toXml());
-        properties.put("mediaPackage", mpt.toXml());
-      } catch (Exception e) {
-        logger.error("Ingest service: Broadcasting event failed - Media package serialization failure");
-      }
+      MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
+      properties.put("mediaPackage", mpt.toXml());
       Event event = new Event("org/opencastproject/ingest/INGEST_DONE", properties);
-      eventAdmin.postEvent(event);
 
+      // waiting 3000 ms for confirmation from Conductor service
+      synchronized (this) {
+        try {
+          eventAdmin.postEvent(event);
+          logger.info("Waiting for answer...");
+          this.wait(3000);
+        } catch (InterruptedException e) {
+          logger.warn("Waiting for answer interupted: " + e.getMessage());
+        }
+      }
+
+      // processing of confirmation
+      if (errorFlag) {
+        logger.error("Received exception from Conductor service: " + error.getLocalizedMessage());
+        errorFlag = false;
+        throw new Exception("Exception durring media package processing in Conductor service: ", error);
+      } else if (ackFlag) {
+        logger.info("Received ACK message: Conductor processed event succesfully");
+        ackFlag = false;
+      } else {
+        logger.warn("Timeout occured while waiting for ACK message from Conductor service");
+      }
     } else {
       // no EventAdmin available
       logger.error("Ingest service: Broadcasting event failed - Event admin not available");
-      // Test will fail
-      // throw new NullPointerException();
+      throw new IllegalStateException("EventAdmin not available");
+    }
+  }
+  
+  // ----------------------------------------------
+  // -------- processing of Conductor ACK ---------
+  // ----------------------------------------------
+
+  private boolean errorFlag = false;
+  private boolean ackFlag = false;
+  private Throwable error = null;
+
+  /**
+   * {@inheritDoc} If event contains exception property, exception has occured during processing sent media package in
+   * Conductor service.
+   * 
+   * @see org.osgi.service.event.EventHandler#handleEvent(org.osgi.service.event.Event)
+   */
+  public void handleEvent(Event event) {
+
+    ackFlag = true;
+
+    if (event.getProperty("exception") != null) {
+      errorFlag = true;
+      error = (Throwable) event.getProperty("exception");
     }
 
-    // final MediaPackage mp = mediaPackage;
-    // Thread t = new Thread(new Runnable() {
-    // public void run() {
-    // try {
-    // doIngest(mp);
-    // } catch (IOException e) {
-    // logger.error("IngestService: Ingest failed!");
-    // }
-    // }
-    // });
-    // t.start();
+    synchronized (this) {
+      this.notifyAll();
+    }
   }
+
+  // -----------------------------------------------
+  // --------------------- end ---------------------
+  // -----------------------------------------------
 
   private EventAdmin eventAdmin;
 

@@ -163,13 +163,17 @@ public interface IngestService {
           throws MediaPackageException, UnsupportedElementException, MalformedURLException, IOException;
 
   /**
-   * Broadcasts an event, that media package is ingested.
+   * Broadcasts an event, that media package is ingested. After broadcast ACK message
+   * is expected from ConductorService. If message contains exception, it will be thrown. 
    * 
    * @param mediaPackage
    *          The specific Matterhorn MediaPackage being ingested
-   * @return MediaPackage A Matterhorn MediaPackage (via EventAdmin)
+   * @throws IllegalStateException when EventAdmin is not available
+   * @throws Exception
+   *          Exception that occured during MediaPackage serialization or happened in ConductorService
+   *          durring MediaPackage processing
    */
-  void ingest(MediaPackage mediaPackage);
+  void ingest(MediaPackage mediaPackage) throws IllegalStateException, Exception;
 
   /**
    * Delete an existing MediaPackage and any linked files from the temporary ingest filestore.
