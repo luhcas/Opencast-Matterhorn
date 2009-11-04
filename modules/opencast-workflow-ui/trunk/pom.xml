@@ -30,6 +30,28 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/ui</outputDirectory>
+              <resources>          
+                <resource>
+                  <directory>../static-resources</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>              
+            </configuration>            
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <version>1.4.3</version>
@@ -37,7 +59,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-			<Import-Package>org.opencastproject.util, *</Import-Package>
+      			<Import-Package>org.opencastproject.util, *</Import-Package>
             <Service-Component>
               OSGI-INF/workflow-ui.xml
             </Service-Component>
