@@ -23,18 +23,21 @@ package org.opencastproject.capture.impl;
 public interface CaptureParameters {
 
   /** Duration to specify for the capture client */
-  public static final String DURATION = "capture.duration";
+  public static final String CAPTURE_DURATION = "capture.duration";
   
   public static final String ATTACHMENT = "capture.attachment";
   
   /** Where the data should be sent to for ingestion */
-  public static final String INGEST = "admin.ingest.endpoint";
+  public static final String INGEST_URL = "admin.ingest.endpoint";
   
   /** Location of the centralised configuration file */
-  public static final String URL = "capture.config.url";
+  public static final String CAPTURE_CONFIG_URL = "capture.config.url";
   
   /** The time to wait between updating the local copy of the configuration */
-  public static final String RELOAD = "capture.config.reload";
+  public static final String CAPTURE_CONFIG_POLLING_INTERVAL = "capture.config.polling.interval";
+
+  /** The URL to store the cached config file in */
+  public static final String CAPTURE_CONFIG_CACHE_URL = "capture.config.cache.url";
 
   /** The URL of the config directory under the root directory */
   public static final String CAPTURE_FILESYSTEM_CONFIG_URL = "capture.filesystem.config.url";
@@ -48,5 +51,12 @@ public interface CaptureParameters {
   /** The URL of the volatile directory under the root directory */
   public static final String CAPTURE_FILESYSTEM_VOLATILE_URL = "capture.filesystem.volatile.url";
 
+  /** The remote URL where the capture schedule should be retrieved */
+  public static final String CAPTURE_SCHEDULE_URL = "capture.schedule.url";
   
+  /** The time between attempts to fetch updated calendar data */
+  public static final String CAPTURE_SCHEDULE_POLLING_INTERVAL = "capture.schedule.polling.interval";
+
+  /** The local URL of the cached copy of the capture schedule */
+  public static final String CAPTURE_SCHEDULE_CACHE_URL = "capture.schedule.cache.url";
 }

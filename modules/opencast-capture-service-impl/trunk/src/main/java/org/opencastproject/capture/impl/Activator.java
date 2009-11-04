@@ -29,7 +29,6 @@ public class Activator implements BundleActivator {
 
   /** Logging Facility */
   private static final Logger log = LoggerFactory.getLogger(Activator.class);
-  private static final String DEFAULT_OPENCAST_DIR = "/opencast";
   private BundleContext context;
   private Scheduler sched;
 
@@ -40,10 +39,8 @@ public class Activator implements BundleActivator {
   public void start(BundleContext context) throws Exception {
     createCoreDirectories(ConfigurationManager.getInstance());
     this.context = context;
-    //TODO:  Get default URI from properties file?
-    //TODO:  Get the default polling time from properties file?
     sched = new SchedulerImpl();
-    sched.init(getClass().getClassLoader().getResource("Matterhorn-Example.ics"), 5);
+    sched.init();
   }
 
   /**
@@ -58,27 +55,28 @@ public class Activator implements BundleActivator {
    * Creates the core Opencast directories  
    */
   private void createCoreDirectories(ConfigurationManager config) {
-    //TODO: check to see if a root dir exists in the config file in the bundle
-    File root = new File( DEFAULT_OPENCAST_DIR );
-    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL, root, config);
-    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CACHE_URL, root, config);
-    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_URL, root, config);
-    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_VOLATILE_URL, root, config);
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL, config);
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CACHE_URL, config);
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_URL, config);
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_VOLATILE_URL, config);
   }
 
   /**
    * Creates a file or directory
    * @param key    The key to set in the configuration manager.  Key is set equal to name
-   * @param root   The directory under which to create the file/directory referred to by the key
    * @param config The configuration manager to store the key-value pair
    */
-  private void createFileObj(String key, File root, ConfigurationManager config) {
-    File target = new File (root, config.getItem(key));
+  private void createFileObj(String key, ConfigurationManager config) {
     try {
-      FileUtils.forceMkdir(target);
-      config.setItem(key, target.toString());
-    } catch (IOException e) {
-      log.error("Unable to create directory " + target.toString(), e);
+      File target = new File (config.getItem(key));
+      try {
+        FileUtils.forceMkdir(target);
+        config.setItem(key, target.toString());
+      } catch (IOException e) {
+        log.error("Unable to create directory " + target.toString(), e);
+      }
+    } catch (NullPointerException e) {
+      log.error("No value found for key " + key);
     }
   }
 }

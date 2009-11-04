@@ -18,11 +18,15 @@ package org.opencastproject.capture.impl;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The class responsible for starting a capture.
  */
 public class CaptureJob implements Job {
+  
+  private static final Logger log = LoggerFactory.getLogger(CaptureJob.class);
 
   /**
    * Starts the capture itself.
@@ -30,6 +34,7 @@ public class CaptureJob implements Job {
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext arg0) throws JobExecutionException {
+    log.warn("Capture job fired, nothing implemented!");
     //TODO:  Waiting on capture impl code to be able to actually start the capture
     /*
      * General idea:

@@ -19,7 +19,10 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-public class PullCalendarJob implements Job {
+/**
+ * The class responsible for polling the remote scheduling source for new capture schedules.
+ */
+public class PollCalendarJob implements Job {
 
   /**
    * Pulls the calendar data and updates the calendar for the capture scheduling service

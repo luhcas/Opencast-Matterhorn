@@ -25,10 +25,10 @@ public interface Scheduler {
 
   /**
    * Sets up the calendar service and the internal polling system
-   * @param url            The URL to pull the calendaring data from
-   * @param pollingTime    The time between polls, in seconds
+   * Note that if this method encounters an error it will return, and no schedulers will be running
+   * In effect, the capture device will fall back to manual mode and no scheduled captures will take place
    */
-  public void init(URL url, int pollingTime);
+  public void init();
   
   /**
    * Sets the schedule data URL form which to gather scheduling data
@@ -44,6 +44,7 @@ public interface Scheduler {
 
   /**
    * Polls the current schedule data URL for new scheduling data
+   * If the new schedule data contains an error or is unreachable the previous recording schedule is used instead
    */
   public void updateCalendar();
 
@@ -65,6 +66,12 @@ public interface Scheduler {
   public void enablePolling();
 
   /**
+   * Checks to see if the system is polling for new calendar data
+   * @return True if the system is set to poll for new data, false otherwise
+   */
+  public boolean isPolling();
+
+  /**
    * Disables polling for new calendar data
    */
   public void disablePolling();
@@ -73,6 +80,12 @@ public interface Scheduler {
    * Starts the scheduling system.  Calling this enables scheduled captures.
    */
   public void enableScheduler();
+
+  /**
+   * Checks to see if the system is set to capture from its calendar data
+   * @return True if the system is set to capture from a schedule, false otherwise
+   */
+  public boolean isEnabled();
 
   /**
    * Stops the scheduling system.  Calling this disables scheduled captures.

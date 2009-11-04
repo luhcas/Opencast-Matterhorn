@@ -15,7 +15,9 @@
  */
 package org.opencastproject.capture.impl;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -52,7 +54,7 @@ public class ConfigurationManager {
   private URL url; 
   
   /** the local copy of the configuration */
-  private URL localConfig;
+  private File localConfig;
   
   /** Timer that will every at a specified interval to retrieve the centralised
    * configuration file from a server */
@@ -63,30 +65,56 @@ public class ConfigurationManager {
    * if manager field is null.
    */
   private ConfigurationManager() {
-    //TODO: do not rely on config file in resource bundle
-    localConfig = getClass().getClassLoader().getResource("config/capture.cfg");
+    //TODO: Do not rely on config file in resource bundle
+    URL bundleConfig = getClass().getClassLoader().getResource("config/capture.cfg");
     properties = new Properties();
     
     /* attempt to load properties into memory and retrieve centralised config */
     try {
-      properties.load(localConfig.openStream());
-      url = new URL(properties.getProperty(CaptureParameters.URL));
+      properties.load(bundleConfig.openStream());
     } catch (MalformedURLException e) {
-      logger.warn("Problem reading " + CaptureParameters.URL);
+      logger.warn("Malformed URL, cannot load bundle config file", e);
     } catch (FileNotFoundException e) {
-      logger.error("Local configuration file not found.");
+      logger.error("Bundle configuration file not found.", e);
     } catch (IOException e) {
-      logger.error("Unable to load local config file: " + e.toString());
+      logger.error("Unable to load bundle config file", e);
+    }
+
+    try {
+      url = new URL(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_URL));
+    } catch (MalformedURLException e) {
+      logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_CONFIG_URL + ", disabling polling");
+    }
+
+    try {
+      localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
+    } catch (NullPointerException e) {
+      logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_CONFIG_CACHE_URL + ", disabling caching");
+    }
+
+    if (url == null && localConfig == null) {
+      logger.error("No configuration data was found, this is very bad!");
     }
     
     retrieveConfigFromServer();
     writeConfigFileToDisk();
     
     /* if reload property specified, query server for update at that interval */
-    String reload;
-    if ((reload = getItem(CaptureParameters.RELOAD)) != null) {
+    String reload = getItem(CaptureParameters.CAPTURE_CONFIG_POLLING_INTERVAL);
+    if (url != null && reload != null) {
       timer = new Timer();
-      long delay = Long.parseLong(reload);
+      long delay = 0;
+      try {
+        delay = Long.parseLong(reload);
+        if (delay < 1) {
+          logger.info("Polling time has been set to less than 1 second, polling disabled");
+          return;
+        }
+      } catch (NumberFormatException e) {
+        logger.warn("Invalid polling time for parameter " + CaptureParameters.CAPTURE_CONFIG_POLLING_INTERVAL);
+        //If the polling time value is invalid, don't poll
+        return;
+      }
       timer.schedule(new UpdateConfig(), delay, delay);
     }
   }
@@ -109,6 +137,8 @@ public class ConfigurationManager {
     if (properties == null) {
       logger.warn("No properties are loaded into memory.");
       return null;
+    } else if (key == null) {
+      return null;
     }
     else
       return properties.getProperty(key);
@@ -120,8 +150,12 @@ public class ConfigurationManager {
    * @param value the corresponding value
    */
   public void setItem(String key, String value) {
-    if (properties == null)
+    if (properties == null) {
       properties = new Properties();
+    }
+    if (key == null) {
+      return;
+    }
     /* this will overright the previous value is there is a conflict */
     properties.setProperty(key, value);
   }
@@ -130,11 +164,15 @@ public class ConfigurationManager {
    * Read a remote properties file and load it into memory.
    */
   private void retrieveConfigFromServer() {
+    if (url == null) {
+      return;
+    }
+
     try {
       URLConnection urlc = url.openConnection();
       properties.load(urlc.getInputStream());
     } catch (Exception e) {
-      logger.warn("Could not get config file from server: " + e.toString());
+      logger.warn("Could not get config file from server", e);
     }
   }
   
@@ -142,12 +180,17 @@ public class ConfigurationManager {
    * Stores a local copy of the properties on disk.
    */
   private void writeConfigFileToDisk() {
-    if (properties == null)
+    if (properties == null || localConfig == null) {
       return;
+    }
+
     try {
-      properties.store(localConfig.openConnection().getOutputStream(), "capture config");
+      if (!localConfig.isFile()) {
+        localConfig.createNewFile();
+      }
+      properties.store(new FileWriter(localConfig), "capture config");
     } catch (Exception e) {
-      logger.warn("Could not write config file to disk: " + e.toString());
+      logger.warn("Could not write config file to disk!");
     }
   }
   

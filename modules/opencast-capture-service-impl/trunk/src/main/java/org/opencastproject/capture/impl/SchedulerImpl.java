@@ -15,8 +15,9 @@
  */
 package org.opencastproject.capture.impl;
 
-import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
@@ -51,10 +52,10 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
   public static final String SCHEDULER = "scheduler";
 
   /** The properties of the scheduler for the calendar polling system */
-  private static Properties POLLING_PROPS = null;
+  private static Properties pollingProperties = null;
 
   /** The properties of the scheduler for the capture system */
-  private static Properties CAPTURE_PROPS = null;
+  private static Properties captureProperties = null;
 
   /** Log facility */
   private static final Logger log = LoggerFactory.getLogger(SchedulerImpl.class);
@@ -62,59 +63,90 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
   /** The scheduler to start the captures */
   private Scheduler captureScheduler = null;
 
-  /** The stored URI for the calendar source */
-  private URL calendarURL = null;
-  
+  /** The scheduler which does the actual polling */
+  private Scheduler pollScheduler = null;
+
+  /** The stored URL for the remote calendar source */
+  private URL remoteCalendarURL = null;
+
+  /** The URL of the cached copy of the recording schedule */
+  private URL localCalendarCacheURL = null;
+
   /** The time in milliseconds between attempts to fetch the calendar data */
   private int pollTime = 0;
 
   /** A stored copy of the Calendar at the URI */
   private Calendar calendar = null;
 
-  /** The scheduler which does the actual polling */
-  private Scheduler pollScheduler = null;
+  /** The configuration for this service */
+  private ConfigurationManager config = null;
 
   /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.status.api.CalendarService#init()
    */
-  public void init(URL url, int pollingTime) {
+  public void init() {
     log.debug("init()");
-    calendarURL = url;
-    pollTime = pollingTime;
+    config = ConfigurationManager.getInstance();
+    SchedulerFactory sched_fact = null;
+
+    try {
+      localCalendarCacheURL = new File(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL)).toURI().toURL();
+    } catch (NullPointerException e) {
+      log.error("init:  Invalid location specified for " + CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL + " unable to cache scheduling data");
+    } catch (MalformedURLException e) {
+      log.error("init:  Invalid location specified for " + CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL + " unable to cache scheduling data");
+    }
+
+    try {
+      remoteCalendarURL = new URL(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL));
+      pollTime = Integer.parseInt(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL));
+      if (pollTime > 1) {
+        //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
+        pollingProperties = new Properties();
+        pollingProperties.load(getClass().getClassLoader().getResourceAsStream("config/polling.properties"));
+        sched_fact = new StdSchedulerFactory(pollingProperties);
+  
+        //Create and start the scheduler
+        pollScheduler = sched_fact.getScheduler();
+        pollScheduler.start();
+  
+        //Setup the polling
+        JobDetail job = new JobDetail("calendarUpdate", Scheduler.DEFAULT_GROUP, PollCalendarJob.class);
+        //Create a new trigger                    Name       Group name               Start       End   # of times to repeat               Repeat interval
+        SimpleTrigger trigger = new SimpleTrigger("polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime * 1000L);
+  
+        trigger.getJobDataMap().put(SCHEDULER, this);
+  
+        //Schedule the update
+        pollScheduler.scheduleJob(job, trigger);
+      } else {
+        log.info(CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL + " has been set to less than 1, calendar updates disabled");
+      }
+    } catch (MalformedURLException e) {
+      log.error("init:  Invalid location specified for " + CaptureParameters.CAPTURE_SCHEDULE_URL + " unable to retrieve new scheduling data");
+    } catch (NumberFormatException e) {
+      log.error("init:  Invalid polling interval for " + CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL + " unable to retrieve new scheduling data");
+    } catch (IOException e) {
+      log.error("init:  Unable to load bundled Quartz properties file for calendar polling");
+    } catch (SchedulerException e) {
+      log.error("init:  Unable to start polling scheduler", e);
+    }
 
     try {
       //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
-      POLLING_PROPS = new Properties();
-      POLLING_PROPS.load(getClass().getClassLoader().getResourceAsStream("config/polling.properties"));
-      SchedulerFactory sched_fact = new StdSchedulerFactory(POLLING_PROPS);
-
-      //Create and start the scheduler
-      pollScheduler = sched_fact.getScheduler();
-      pollScheduler.start();
-
-      //Setup the polling
-      JobDetail job = new JobDetail("calendarUpdate", Scheduler.DEFAULT_GROUP, PullCalendarJob.class);
-      //Create a new trigger                    Name       Group name               Start       End   # of times to repeat               Repeat interval
-      SimpleTrigger trigger = new SimpleTrigger("polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime * 1000L);
-
-      trigger.getJobDataMap().put(SCHEDULER, this);
-
-      //Schedule the update
-      pollScheduler.scheduleJob(job, trigger);
-
-      //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
-      CAPTURE_PROPS = new Properties();
-      CAPTURE_PROPS.load(getClass().getClassLoader().getResourceAsStream("config/scheduler.properties"));
-      sched_fact = new StdSchedulerFactory(CAPTURE_PROPS);
+      captureProperties = new Properties();
+      captureProperties.load(getClass().getClassLoader().getResourceAsStream("config/scheduler.properties"));
+      sched_fact = new StdSchedulerFactory(captureProperties);
       //Create and start the capture scheduler
       captureScheduler = sched_fact.getScheduler();
+      updateCalendar();
       captureScheduler.start();
     } catch (SchedulerException e) {
-      log.error("init:  Unable to start scheduler(s)", e);
+      log.error("init:  Unable to start capture scheduler", e);
     } catch (IOException e) {
-      log.error("init:  Unable to load Quartz properties file", e);
+      log.error("init:  Unable to load Quartz properties file for capture scheduling");
     }
   }
 
@@ -123,17 +155,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
    * @see java.lang.Object#finalize()
    */
   public void finalize() {
-    try {
-      if (pollScheduler != null) {
-          pollScheduler.shutdown();
-      }
-      if (captureScheduler != null) {
-        captureScheduler.shutdown();
-      }
-    } catch (SchedulerException e) {
-      log.warn("Finalize for " + this.getClass().getName() + " did not execute cleanly...", e);
-    }
-
+    shutdown();
   }
 
   /**
@@ -144,64 +166,137 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
   public void updateCalendar() {
     log.debug("updateCalendar()");
 
-    try {
-      //Fetch the calendar data and build a iCal4j representation of it
-      if (calendarURL != null) {
-        calendar = parseCalendar(calendarURL);
-        setCaptureSchedule(calendar);
-      } else {
-        log.error("Calendar URL is invalid!");
-      }
-    } catch (MalformedURLException e) {
-      log.error("updateCalendar:  Invalid URL specified", e);
+    //Fetch the calendar data and build a iCal4j representation of it
+    if (remoteCalendarURL != null) {
+      calendar = parseCalendar(remoteCalendarURL);
+    } else if (calendar == null && localCalendarCacheURL != null) {
+      calendar = parseCalendar(localCalendarCacheURL);
+    } else if (calendar == null && localCalendarCacheURL == null) {
+      log.error("updateCalendar: Unable to update calendar from either local or remote sources.");
+    } else {
+      log.info("updateCalendar: Calendar already exists, and " + CaptureParameters.CAPTURE_SCHEDULE_URL + " is invalid, skipping update");
+      return;
+    }
+
+    //Now set the calendar data
+    if (calendar != null) {
+      setCaptureSchedule(calendar);
+    } else {
+      log.warn("updateCalendar:  parseCalendar returned null, skipping update of capture schedule");
     }
   }
 
   /**
    * Reads in a calendar from either an HTTP or local source and turns it into a cron4j Calendar object
    * @param url The URL to read the calendar data from
-   * @return A calendar object, or null in the case of an error
-   * @throws MalformedURLException 
+   * @return A calendar object, or null in the case of an error or to indicate that no update should be performed
    */
-  public Calendar parseCalendar(URL url) throws MalformedURLException {
+  public Calendar parseCalendar(URL url) {
     log.debug("parseCalendar()");
+
+    String calendarString = null;
     try {
-      //Urgh, read in the data.  These ugly lines handle both HTTP and local file
-      DataInputStream in = new DataInputStream(new BufferedInputStream(url.openConnection().getInputStream()));
-      int c = 0;
-      StringBuilder sb = new StringBuilder();
-      while ((c = in.read()) != -1) {
-        sb.append((char) c);
+      calendarString = readCalendar(url);
+    } catch (Exception e) {
+      log.warn("parseCalendar: Exception, keeping current scheduling data", e.toString());
+      //If the calendar is null, which only happens when the machine has *just* been powered on.
+      //This case handles not having a network connection by just reading from the cached copy of the calendar 
+      if (calendar == null) {
+        try {
+          calendarString = readCalendar(localCalendarCacheURL);
+        } catch (IOException e1) {
+          log.error("Unable to read from cached schedule");
+          return null;
+        }
+      } else {
+        log.info("updateCalendar: Calendar already exists, and " + CaptureParameters.CAPTURE_SCHEDULE_URL + " is invalid, skipping update");
+        return null;
       }
-      //Great, now build the calendar instance
-      CalendarBuilder cb = new CalendarBuilder();
-      return cb.build(new StringReader(sb.toString()));
-    } catch (ParserException e) {
-      log.error("readCalendarData: Parsing error", e);
-      return null;
-    } catch (IOException e) {
-      log.error("readCalendarData: I/O error", e);
+    }
+
+    if (calendarString == null) {
+      log.warn("parseCalendar: Invalid calendar data, skipping parse attempt");
       return null;
     }
+
+    Calendar cal = null;
+    try {
+      //Great, now build the calendar instance
+      CalendarBuilder cb = new CalendarBuilder();
+      cal = cb.build(new StringReader(calendarString));
+    } catch (ParserException e) {
+      log.error("parseCalendar: Parsing error for " + url);
+      return null;
+    } catch (IOException e) {
+      log.error("parseCalendar: I/O error for " + url);
+      return null;
+    } catch (NullPointerException e) {
+      log.error("parseCalendar:  NullPointerException for " + url);
+      return null;
+    }
+
+    try {
+      //If the new data is valid calendar data, write it to the cache
+      if (cal != null) {
+        FileWriter out = new FileWriter(localCalendarCacheURL.getFile());
+        out.write(calendarString);
+        out.close();
+      }
+    } catch (IOException e) {
+      log.error("parseCalendar: Unable to cache calendar data!");
+    }
+
+    return cal;
   }
-  
+
+  /**
+   * Convenience method to read in a file from either a remote or local source
+   * @param url The URL to read the source data from
+   * @return A String containing the source data
+   * @throws IOException
+   */
+  private String readCalendar(URL url) throws IOException, NullPointerException {
+    StringBuilder sb = new StringBuilder();
+    //Urgh, read in the data.  These ugly lines handle both HTTP and local file
+    DataInputStream in = new DataInputStream(url.openStream());
+    int c = 0;
+    while ((c = in.read()) != -1) {
+      sb.append((char) c);
+    }
+    return sb.toString();
+  }
+
   /**
    * Returns a string of the name for every scheduled job
    * @return An array of Strings containing the name of every scheduled job
-   * @throws SchedulerException 
    */
-  public String[] getCaptureSchedule() throws SchedulerException {
-    return captureScheduler.getJobNames(Scheduler.DEFAULT_GROUP);
+  public String[] getCaptureSchedule() {
+    if (captureScheduler != null) {
+      try {
+        return captureScheduler.getJobNames(Scheduler.DEFAULT_GROUP);
+      } catch (SchedulerException e) {
+        log.error("getCaptureSchedule: Scheduler exception!" + e.toString());
+      }
+    }
+    return null;
   }
 
+  /**
+   * Prints out the current schedules for both schedules
+   * @throws SchedulerException
+   */
   private void checkSchedules() throws SchedulerException {
-    log.info("Currently scheduled jobs for capture schedule:");
-    for (String name : captureScheduler.getJobNames(Scheduler.DEFAULT_GROUP)) {
-      log.info(name);  
+    if (captureScheduler != null) {
+      log.info("Currently scheduled jobs for capture schedule:");
+      for (String name : captureScheduler.getJobNames(Scheduler.DEFAULT_GROUP)) {
+        log.info(name);  
+      }
     }
-    log.info("Currently scheduled jobs for poll schedule:");
-    for (String name : pollScheduler.getJobNames(Scheduler.DEFAULT_GROUP)) {
-      log.info(name);
+    if (pollScheduler != null) {
+      log.info("Currently scheduled jobs for poll schedule:");
+      for (String name : pollScheduler.getJobNames(Scheduler.DEFAULT_GROUP)) {
+        log.info(name);
+      }
     }
   }
 
@@ -210,13 +305,12 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
    * 
    * @see org.opencastproject.status.api.ScheduleService#setCaptureSchedule()
    */
-  public void setCaptureSchedule(Calendar newCal) {
+  public synchronized void setCaptureSchedule(Calendar newCal) {
     log.debug("setCaptureSchedule()");
     try {
-      checkSchedules();
       //Clear the existing jobs and reschedule everything
       captureScheduler.shutdown();
-      SchedulerFactory sched_fact = new StdSchedulerFactory(CAPTURE_PROPS);
+      SchedulerFactory sched_fact = new StdSchedulerFactory(captureProperties);
       captureScheduler = sched_fact.getScheduler();
 
       ComponentList list = newCal.getComponents(Component.VEVENT);
@@ -233,8 +327,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
         //TODO:  Figure out what to do with this attachment
         String attachment = getAttachment(event);
         
-        CronExpression cronString = getCronString(event, start);
-
+        CronExpression cronString = getCronString(event);
+        log.error("GDL:" + cronString.toString());
         CronTrigger trig = new CronTrigger();
         trig.setCronExpression(cronString);
         trig.setName(cronString.toString());
@@ -248,9 +342,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
     } catch (NullPointerException e) {
       log.error("Invalid calendar data, one of the start or end times is incorrect", e);
     } catch (SchedulerException e) {
-      log.error("Invalid scheduling data", e);
+      log.error("setCaptureSchedule: Invalid scheduling data", e);
     } catch (ParseException e) {
-      log.error("Parsing error", e);
+      log.error("setCaptureSchedule: Parsing error", e);
     }
   }
 
@@ -269,14 +363,13 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
   /**
    * Parses an event to build a cron-like time string
    * @param event The Event which we need the time string for
-   * @param start The start time
    * @return A cron-like scheduling string
    * @throws ParseException
    */
-  private CronExpression getCronString(VEvent event, Date start) throws ParseException {
+  private CronExpression getCronString(VEvent event) throws ParseException {
     /*
      * Initial implementation called for recurring events.  Keeping this code for later (ie, once the specs are set in stone)
-      if (event.getProperty(Property.RRULE) != null) {
+    if (event.getProperty(Property.RRULE) != null) {
       Recur rrule = new Recur(event.getProperty(Property.RRULE).getValue());
 
       WeekDayList weekdays = rrule.getDayList();
@@ -306,16 +399,23 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
 
       String frequency = rrule.getFrequency();
       int interval = rrule.getInterval();
+    */
 
+      Date start = event.getStartDate().getDate();
 
+      //Note:  Skipped above code because we no longer need to deal with recurring events.  Keeping it for now since they might come back.
+      //Note:  "?" means no particular setting.  Equivalent to "ignore me", rather than "I don't know what to put here"
       //TODO:  Remove the deprecated calls here.
-      return new CronExpression(start.getSeconds() + " " + start.getMinutes() + " " + start.getHours() + " " + start.getDate() + " " + start.getMonth() + " * ");
-    }
+      StringBuilder sb = new StringBuilder();
+      sb.append(start.getSeconds() + " ");
+      sb.append(start.getMinutes() + " ");
+      sb.append(start.getHours() + " ");
+      sb.append(start.getDate() + " ");
+      sb.append(start.getMonth() + 1 + " "); //Note:  iCal4j numbers months from 0-11, Quartz uses 1-12.  Sigh.
+      sb.append("? ");
+      return new CronExpression(sb.toString());
+    /*}
     return null;*/
-
-    //Note:  Skipped above code because we no longer need to deal with recurring events.  Keeping it for now since they might come back.
-    //Note:  "?" means no particular setting.  Equivalent to "ignore me", rather than "I don't know what to put here"
-    return new CronExpression(start.getSeconds() + " " + start.getMinutes() + " " + start.getHours() + " " + start.getDate() + " " + start.getMonth() + " ? ");
   }
 
   /**
@@ -325,9 +425,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
    */
   public void disableScheduler() {
     try {
-      captureScheduler.pauseAll();
+      if (captureScheduler != null) {
+        captureScheduler.pauseAll();
+      }
     } catch (SchedulerException e) {
-      log.error("Unable to disable capture scheduler", e);
+      log.error("disableScheduler: Unable to disable capture scheduler", e);
     }
   }
 
@@ -338,9 +440,13 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
    */
   public void enableScheduler() {
     try {
-      captureScheduler.start();
+      if (captureScheduler != null) {
+        captureScheduler.start();
+      } else {
+        log.error("Unable to start capture scheduler, the scheduler is null!");
+      }
     } catch (SchedulerException e) {
-      log.error("Unable to enable capture scheduler", e);
+      log.error("enableScheduler: Unable to enable capture scheduler", e);
     }
   }
 
@@ -351,9 +457,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
    */
   public void disablePolling() {
     try {
-      pollScheduler.pauseAll();
+      if (pollScheduler != null) {
+        pollScheduler.pauseAll();
+      }
     } catch (SchedulerException e) {
-      log.error("Unable to disable polling scheduler", e);
+      log.error("disablePolling: Unable to disable polling scheduler", e);
     }    
   }
 
@@ -364,9 +472,13 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
    */
   public void enablePolling() {
     try {
-      pollScheduler.pauseAll();
+      if (pollScheduler != null) {
+        pollScheduler.pauseAll();
+      } else {
+        log.error("Unable to start polling, the scheduler is null!");
+      }
     } catch (SchedulerException e) {
-      log.error("Unable to disable polling scheduler", e);
+      log.error("enablePolling: Unable to disable polling scheduler", e);
     }
   }
 
@@ -384,7 +496,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
    */
   public void setPollingTime(int pollingTime) {
     if (pollingTime <= 0) {
-      log.warn("Unable to set polling time to less than 1 second...");
+      log.warn("setPollingTime: Unable to set polling time to less than 1 second...");
       return;
     }
     pollTime = pollingTime;
@@ -395,7 +507,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
    * @see org.opencastproject.capture.api.Scheduler#getScheduleEndpoint()
    */
   public URL getScheduleEndpoint() {
-    return calendarURL;
+    return remoteCalendarURL;
   }
 
   /**
@@ -404,9 +516,61 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
    */
   public void setScheduleEndpoint(URL url) {
     if (url == null) {
-      log.error("setScheduleEndpoint():  Invalid URL specified");
+      log.warn("setScheduleEndpoint: Invalid URL specified");
       return;
     }
-    calendarURL = url;
+    remoteCalendarURL = url;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.Scheduler#isEnabled()
+   */
+  public boolean isEnabled() {
+    if (captureScheduler != null) {
+      try {
+        return captureScheduler.isStarted();
+      } catch (SchedulerException e) {
+        log.warn("isEnabled:  Scheduler exception", e);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.Scheduler#isPolling()
+   */
+  public boolean isPolling() {
+    if (pollScheduler != null) {
+      try {
+        return pollScheduler.isStarted();
+      } catch (SchedulerException e) {
+        log.warn("isPolling:  Scheduler exception", e);
+        return false;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Shuts this whole class down, and waits until the schedulers have all terminated.
+   */
+  public void shutdown() {
+    try {
+      if (pollScheduler != null) {
+          pollScheduler.shutdown(true);
+      }
+    } catch (SchedulerException e) {
+      log.warn("Finalize for pollScheduler did not execute cleanly...", e);
+    }
+    try {
+      if (captureScheduler != null) {
+        captureScheduler.shutdown(true);
+      }
+    } catch (SchedulerException e) {
+      log.warn("Finalize for captureScheduler did not execute cleanly...", e);
+    }
   }
 }
