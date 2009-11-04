@@ -15,11 +15,8 @@
  */
 package org.opencastproject.captionsHandler.endpoint;
 
-import org.opencastproject.captionsHandler.api.CaptionshandlerEntity;
+import org.opencastproject.captionsHandler.api.CaptionsMediaItem;
 import org.opencastproject.captionsHandler.api.CaptionshandlerService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -31,7 +28,6 @@ import javax.jws.WebService;
  */
 @WebService()
 public class CaptionshandlerWebServiceImpl implements CaptionshandlerWebService {
-  private static final Logger logger = LoggerFactory.getLogger(CaptionshandlerWebServiceImpl.class);
   
   private CaptionshandlerService service;
   public void setService(CaptionshandlerService service) {
@@ -44,14 +40,8 @@ public class CaptionshandlerWebServiceImpl implements CaptionshandlerWebService 
   
   @WebMethod()
   @WebResult(name="captionsHandler-entity")
-  public CaptionshandlerEntityJaxbImpl getCaptionshandlerEntity(@WebParam(name="id") String id) {
-    CaptionshandlerEntity entity = service.getCaptionshandlerEntity(id);
-    return new CaptionshandlerEntityJaxbImpl(entity);
-  }
-
-  @WebMethod()
-  public void storeCaptionshandlerEntity(@WebParam(name="captionsHandler-entity") CaptionshandlerEntityJaxbImpl jaxbEntity) {
-    logger.info("Storing " + jaxbEntity);
-    service.saveCaptionshandlerEntity(jaxbEntity.getEntity());
+  public CaptionsEntityJaxb getCaptionshandlerEntity(@WebParam(name="id") String id) {
+    CaptionsMediaItem entity = service.getCaptionsMediaItem(id);
+    return new CaptionsEntityJaxb(entity);
   }
 }

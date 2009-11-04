@@ -15,7 +15,7 @@
  */
 package org.opencastproject.captionsHandler.impl;
 
-import org.opencastproject.captionsHandler.api.CaptionshandlerEntity;
+import org.opencastproject.captionsHandler.api.CaptionsMediaItem;
 import org.opencastproject.captionsHandler.api.CaptionshandlerService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
@@ -24,9 +24,6 @@ import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.search.api.SearchResult;
-import org.opencastproject.search.api.SearchResultItem;
-import org.opencastproject.search.api.SearchService;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -49,9 +46,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The captions handler service <br/>
@@ -74,14 +69,6 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     this.workspace = null;
   }
 
-  private SearchService searchService;
-  public void setSearchService(SearchService searchService) {
-    this.searchService = searchService;
-  }
-  public void unsetSearchService(SearchService searchService) {
-    this.searchService = null;
-  }
-
   private WorkflowService workflowService;
   public void setWorkflowService(WorkflowService workflowService) {
     this.workflowService = workflowService;
@@ -91,7 +78,6 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
   }
 
   public CaptionshandlerServiceImpl() {
-    loadStuff();
   }
 
   @SuppressWarnings("unchecked")
@@ -101,7 +87,6 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
 
   /**
    * Get the list of all captionable media packages,
-   * currently this will simply retrieve media packages by date,
    * this will probably be overridden for local implementations
    * 
    * @param start the start item (for paging), <=0 for first item
@@ -109,8 +94,8 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
    * @param sort the sort order string (e.g. 'title asc')
    * @return the list of MediaPackage or empty if none
    */
-  public List<MediaPackage> getCaptionableMedia(int start, int max, String sort) {
-    List<MediaPackage> l = new ArrayList<MediaPackage>();
+  public List<CaptionsMediaItem> getCaptionableMedia(int start, int max, String sort) {
+    List<CaptionsMediaItem> l = new ArrayList<CaptionsMediaItem>();
     if (start < 0) {
       start = 0;
     }
@@ -124,16 +109,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       WorkflowOperationInstance operation = workflow.getCurrentOperation();
       if ( CAPTIONS_OPERATION_NAME.equals(operation.getName()) ) {
         MediaPackage mp = workflow.getSourceMediaPackage(); // TODO use current media package
-        l.add(mp);
-      }
-    }
-    if (l.isEmpty()) {
-      // TODO make this actually get the captionable items
-      SearchResult result = searchService.getEpisodesByDate(max, start);
-      SearchResultItem[] items = result.getItems();
-      for (SearchResultItem searchResultItem : items) {
-        MediaPackage mp = searchResultItem.getMediaPackage();
-        l.add(mp);
+        l.add( new CaptionsMediaItem(workflow.getId(), mp) );
       }
     }
     return l;
@@ -147,7 +123,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
    * @param data the captions data to store with the media package
    * @return the updated media package
    */
-  public MediaPackage updateCaptions(String workflowId, String captionType, InputStream data) {
+  public CaptionsMediaItem updateCaptions(String workflowId, String captionType, InputStream data) {
     if (workflowId == null || "".equals(workflowId)) {
       throw new IllegalArgumentException("workflowId must be set");
     }
@@ -159,9 +135,9 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     }
     // find the media package given a workflow
     WorkflowInstance workflow = workflowService.getWorkflowById(workflowId);
-    MediaPackage mp;
+    CaptionsMediaItem cmi;
     if (workflow != null) {
-      mp = workflow.getSourceMediaPackage(); // TODO change to current media package
+      MediaPackage mp = workflow.getSourceMediaPackage(); // TODO change to current media package
       // get the MP and update it
       String mediaPackageElementID = CAPTIONS_ELEMENT+captionType;
       URL url = workspace.put(workflowId, mediaPackageElementID, data);
@@ -183,10 +159,31 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       } else {
         logger.warn("Workflow (" + workflowId + ") is in invalid state for captioning: " + workflow.getState());
       }
+      cmi = new CaptionsMediaItem(workflowId, mp);
     } else {
       throw new IllegalArgumentException("No workflow found with the given id: " + workflowId);
     }
-    return mp;
+    return cmi;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.captionsHandler.api.CaptionshandlerService#getCaptionsMediaItem(java.lang.String)
+   */
+  public CaptionsMediaItem getCaptionsMediaItem(String workflowId) {
+    if (workflowId == null || "".equals(workflowId)) {
+      throw new IllegalArgumentException("workflowId must be set");
+    }
+    // find the media package given a workflow
+    WorkflowInstance workflow = workflowService.getWorkflowById(workflowId);
+    CaptionsMediaItem cmi;
+    if (workflow != null) {
+      MediaPackage mp = workflow.getSourceMediaPackage(); // TODO change to current media package
+      cmi = new CaptionsMediaItem(workflowId, mp);
+    } else {
+      cmi = null;
+    }
+    return cmi;
   }
 
   private void addCaptionToMediaPackage(MediaPackage mediaPackage, URL url, String elementId, String type) {
@@ -199,6 +196,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       MediaPackageElement element = mpeb.elementFromURL(url, MediaPackageElement.Type.Catalog, captionsFlavor);
       element.setIdentifier(elementId);
       mediaPackage.add(element);
+      logger.info("Updated the ");
     } catch (MediaPackageException e) {
       logger.error(e.toString(), e);
       throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier()+"):" + e);
@@ -217,40 +215,6 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
             workflowInstance.getSourceMediaPackage(),
             workflowInstance.getProperties(), 
             true);
-  }
-
-  
-  // DEFAULT STUFF
-
-  Map<String, CaptionshandlerEntity> map;
-  
-  public void loadStuff() {
-    map = new HashMap<String, CaptionshandlerEntity>();
-    CaptionshandlerEntityImpl entity = new CaptionshandlerEntityImpl();
-    entity.setId("1");
-    entity.setTitle("Test Title");
-    entity.setDescription("Test Description");
-    map.put("1", entity);
-  }
-  
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.captionsHandler.api.CaptionshandlerService#getEntity(java.lang.String)
-   */
-  public CaptionshandlerEntity getCaptionshandlerEntity(String id) {
-    CaptionshandlerEntity entity = map.get(id);
-    logger.info("returning " + entity + " for id=" + id);
-    return entity;
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.captionsHandler.api.CaptionshandlerService#setObject(java.lang.String, org.opencastproject.captionsHandler.api.CaptionshandlerEntity)
-   */
-  public void saveCaptionshandlerEntity(CaptionshandlerEntity entity) {
-    String id = entity.getId();
-    logger.info("setting id=" + id + " to " + entity);
-    map.put(id, entity);
   }
 
 }

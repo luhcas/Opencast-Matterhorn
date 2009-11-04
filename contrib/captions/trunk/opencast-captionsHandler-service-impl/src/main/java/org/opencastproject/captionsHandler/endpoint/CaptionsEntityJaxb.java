@@ -15,8 +15,8 @@
  */
 package org.opencastproject.captionsHandler.endpoint;
 
-import org.opencastproject.captionsHandler.api.CaptionshandlerEntity;
-import org.opencastproject.captionsHandler.impl.CaptionshandlerEntityImpl;
+import org.opencastproject.captionsHandler.api.CaptionsMediaItem;
+import org.opencastproject.media.mediapackage.MediaPackage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,26 +34,24 @@ import javax.xml.bind.annotation.XmlType;
  * This defines the entities for the SOAP/REST services
  */
 
-@XmlType(name="captionsHandler-entity", namespace="http://captionsHandler.opencastproject.org/")
-@XmlRootElement(name="captionsHandler-entity", namespace="http://captionsHandler.opencastproject.org/")
+@XmlType(name="captions-entity", namespace="http://captions.opencastproject.org/")
+@XmlRootElement(name="captions-entity", namespace="http://captions.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CaptionshandlerEntityJaxbImpl {
-  private static final Logger logger = LoggerFactory.getLogger(CaptionshandlerEntityJaxbImpl.class);
+@SuppressWarnings("unused")
+public class CaptionsEntityJaxb {
+  private static final Logger logger = LoggerFactory.getLogger(CaptionsEntityJaxb.class);
 
-  public CaptionshandlerEntityJaxbImpl() {}
-  public CaptionshandlerEntityJaxbImpl(CaptionshandlerEntity entity) {
-    logger.info("Creating a " + CaptionshandlerEntityJaxbImpl.class.getName() + " from " + entity);
-    this.id = entity.getId();
-    this.title = entity.getTitle();
-    this.description = entity.getDescription();
+  public CaptionsEntityJaxb(CaptionsMediaItem entity) {
+    logger.info("Creating a " + CaptionsEntityJaxb.class.getName() + " from " + entity);
+    this.mp = entity.getMediaPackage();
+    this.workflowId = entity.getWorkflowId();
+    this.mediaPackageId = entity.getMediaPackage().getIdentifier().getFullName();
+    this.id = this.workflowId;
   }
 
   @XmlTransient
-  public CaptionshandlerEntity getEntity() {
-    CaptionshandlerEntityImpl entity = new CaptionshandlerEntityImpl();
-    entity.setId(id);
-    entity.setTitle(title);
-    entity.setDescription(description);
+  public CaptionsMediaItem getEntity() {
+    CaptionsMediaItem entity = new CaptionsMediaItem(id, mp);
     return entity;
   }
 
@@ -61,11 +59,13 @@ public class CaptionshandlerEntityJaxbImpl {
   @XmlAttribute()
   private String id;
 
-  @XmlElement(name="title")
-  private String title;
+  @XmlElement(name="mediaPackageId")
+  private String mediaPackageId;
 
-  @XmlElement(name="description")
-  private String description;
+  @XmlElement(name="workflowId")
+  private String workflowId;
+
+  private MediaPackage mp;
 
   public String getId() {
     return id;
@@ -73,22 +73,6 @@ public class CaptionshandlerEntityJaxbImpl {
   
   public void setId(String id) {
     this.id = id;
-  }
-
-  public String getTitle() {
-    return title;
-  }
-  
-  public void setTitle(String title) {
-    this.title = title;
-  }
-  
-  public String getDescription() {
-    return description;
-  }
-  
-  public void setDescription(String description) {
-    this.description = description;
   }
 
 }

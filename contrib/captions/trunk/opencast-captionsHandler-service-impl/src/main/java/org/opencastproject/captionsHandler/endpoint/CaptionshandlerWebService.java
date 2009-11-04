@@ -26,10 +26,6 @@ import javax.jws.WebService;
 @WebService()
 public interface CaptionshandlerWebService {
   @WebMethod()
-  @WebResult(name="captionsHandler-entity")
-  public CaptionshandlerEntityJaxbImpl getCaptionshandlerEntity(@WebParam(name="id")String id);
-
-  @WebMethod()
-  public void storeCaptionshandlerEntity(@WebParam(name="captionsHandler-entity") CaptionshandlerEntityJaxbImpl jaxbEntity);
-
+  @WebResult(name="captions-entity")
+  public CaptionsEntityJaxb getCaptionshandlerEntity(@WebParam(name="id")String id);
 }

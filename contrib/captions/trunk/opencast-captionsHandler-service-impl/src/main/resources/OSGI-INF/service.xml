@@ -9,8 +9,6 @@
         <!-- service I use -->
         <reference interface="org.opencastproject.workspace.api.Workspace"
             cardinality="1..1" policy="static" bind="setWorkspace" unbind="unsetWorkspace" />
-        <reference interface="org.opencastproject.search.api.SearchService"
-            cardinality="1..1" policy="static" bind="setSearchService" unbind="unsetSearchService" />
         <reference interface="org.opencastproject.workflow.api.WorkflowService"
             cardinality="1..1" policy="static" bind="setWorkflowService" unbind="unsetWorkflowService" />
         <!-- services I provide -->
