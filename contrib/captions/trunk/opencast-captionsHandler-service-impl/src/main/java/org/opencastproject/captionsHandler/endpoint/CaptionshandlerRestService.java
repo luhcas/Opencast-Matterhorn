@@ -111,6 +111,12 @@ public class CaptionshandlerRestService {
       is = request.getInputStream();
     } catch (Exception e) {
       logger.error("failed to load request body file: " + e, e);
+      return Response.serverError()
+        .header("_dataFound", is != null)
+        .header("_streamFound", stream != null)
+        .header("_mediaId", mediaId)
+        .header("_captionType", captionType)
+        .build();
     } finally {
       IOUtils.closeQuietly(is);
     }
