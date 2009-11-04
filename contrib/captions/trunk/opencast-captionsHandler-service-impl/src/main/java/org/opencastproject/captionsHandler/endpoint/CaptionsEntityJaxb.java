@@ -16,6 +16,7 @@
 package org.opencastproject.captionsHandler.endpoint;
 
 import org.opencastproject.captionsHandler.api.CaptionsMediaItem;
+import org.opencastproject.captionsHandler.impl.CaptionsMediaItemImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public class CaptionsEntityJaxb {
 
   @XmlTransient
   public CaptionsMediaItem getEntity() {
-    CaptionsMediaItem entity = new CaptionsMediaItem(id, mp);
+    CaptionsMediaItem entity = new CaptionsMediaItemImpl(id, mp);
     return entity;
   }
 

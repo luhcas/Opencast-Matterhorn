@@ -57,8 +57,6 @@ import java.util.List;
  */
 public class CaptionshandlerServiceImpl implements CaptionshandlerService, ManagedService, WorkflowOperationHandler {
 
-  private static final String CAPTIONS_OPERATION_NAME = "captions";
-
   private static final Logger logger = LoggerFactory.getLogger(CaptionshandlerServiceImpl.class);
 
   private Workspace workspace;
@@ -109,7 +107,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       WorkflowOperationInstance operation = workflow.getCurrentOperation();
       if ( CAPTIONS_OPERATION_NAME.equals(operation.getName()) ) {
         MediaPackage mp = workflow.getSourceMediaPackage(); // TODO use current media package
-        l.add( new CaptionsMediaItem(workflow.getId(), mp) );
+        l.add( new CaptionsMediaItemImpl(workflow.getId(), mp) );
       }
     }
     return l;
@@ -159,7 +157,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       } else {
         logger.warn("Workflow (" + workflowId + ") is in invalid state for captioning: " + workflow.getState());
       }
-      cmi = new CaptionsMediaItem(workflowId, mp);
+      cmi = new CaptionsMediaItemImpl(workflowId, mp);
     } else {
       throw new IllegalArgumentException("No workflow found with the given id: " + workflowId);
     }
@@ -179,7 +177,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     CaptionsMediaItem cmi;
     if (workflow != null) {
       MediaPackage mp = workflow.getSourceMediaPackage(); // TODO change to current media package
-      cmi = new CaptionsMediaItem(workflowId, mp);
+      cmi = new CaptionsMediaItemImpl(workflowId, mp);
     } else {
       cmi = null;
     }
@@ -191,7 +189,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       throw new IllegalArgumentException("All values must not be null: " + mediaPackage + " : " + url + " : " + elementId + " : " + type);
     }
     MediaPackageElementBuilder mpeb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-    MediaPackageElementFlavor captionsFlavor = new MediaPackageElementFlavor(CAPTIONS_OPERATION_NAME, type.toLowerCase());
+    MediaPackageElementFlavor captionsFlavor = CaptionsMediaItemImpl.makeCaptionsFlavor(type);
     try {
       MediaPackageElement element = mpeb.elementFromURL(url, MediaPackageElement.Type.Catalog, captionsFlavor);
       element.setIdentifier(elementId);

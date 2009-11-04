@@ -24,6 +24,7 @@ import java.util.List;
  */
 public interface CaptionshandlerService {
 
+  public static final String CAPTIONS_OPERATION_NAME = "captions";
   public static final String CAPTIONS_ELEMENT = "captions-";
   public static final String CAPTIONS_TYPE_TIMETEXT = "TimeText";
   public static final String CAPTIONS_TYPE_DESCAUDIO = "DescriptiveAudio";

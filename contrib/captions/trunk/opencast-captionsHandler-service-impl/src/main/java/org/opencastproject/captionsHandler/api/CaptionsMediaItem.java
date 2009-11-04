@@ -17,28 +17,16 @@
 package org.opencastproject.captionsHandler.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
+import java.net.URL;
 
-public class CaptionsMediaItem {
-  String workflowId;
-  MediaPackage mediaPackage;
-  public CaptionsMediaItem(String workflowId, MediaPackage mediaPackage) {
-    if (workflowId == null) {
-      throw new IllegalArgumentException("workflowId must not be null");
-    }
-    if (mediaPackage == null) {
-      throw new IllegalArgumentException("mediaPackage must not be null");
-    }
-    this.workflowId = workflowId;
-    this.mediaPackage = mediaPackage;
-  }
-  public String getWorkflowId() {
-    return workflowId;
-  }
-  public MediaPackage getMediaPackage() {
-    return mediaPackage;
-  }
-  public String getMediaPackageId() {
-    return mediaPackage.getIdentifier().getFullName();
-  }
+public interface CaptionsMediaItem {
+  public String getWorkflowId();
+  public MediaPackage getMediaPackage();
+  public String getMediaPackageId();
+  /**
+   * @param captionType the caption type string from {@link CaptionshandlerService#CAPTIONS_TYPE_TIMETEXT}
+   * @return the url OR null if none found
+   */
+  public URL getCaptionsURL(String captionType);
 }
 
