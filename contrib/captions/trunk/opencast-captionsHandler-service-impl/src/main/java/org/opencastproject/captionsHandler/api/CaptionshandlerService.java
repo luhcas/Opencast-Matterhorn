@@ -36,9 +36,9 @@ public interface CaptionshandlerService {
    * @param start the start item (for paging), <=0 for first item
    * @param max the maximum items to return (for paging), <=0 for up to 50 items
    * @param sort the sort order string (e.g. 'title asc')
-   * @return the list of CaptionsMediaItem OR empty if none
+   * @return the results with a list of CaptionsMediaItem OR empty if none
    */
-  public List<CaptionsMediaItem> getCaptionableMedia(int start, int max, String sort);
+  public CaptionsResults getCaptionableMedia(int start, int max, String sort);
 
   /**
    * Update a media package with some captions data based on the workflow id
@@ -56,6 +56,22 @@ public interface CaptionshandlerService {
    * @return the item OR null if none found for this workflow
    */
   public CaptionsMediaItem getCaptionsMediaItem(String workflowId);
+
+  /**
+   * This will hold the results of a request for captionable media
+   */
+  public static class CaptionsResults {
+    public int start;
+    public int max;
+    public int total;
+    public List<CaptionsMediaItem> results;
+    public CaptionsResults(List<CaptionsMediaItem> results, int start, int max, int total) {
+      this.results = results;
+      this.start = start;
+      this.max = max;
+      this.total = total;
+    }
+  }
 
 }
 

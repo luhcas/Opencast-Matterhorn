@@ -90,9 +90,9 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
    * @param start the start item (for paging), <=0 for first item
    * @param max the maximum items to return (for paging), <=0 for up to 50 items
    * @param sort the sort order string (e.g. 'title asc')
-   * @return the list of MediaPackage or empty if none
+   * @return the results OR empty if none
    */
-  public List<CaptionsMediaItem> getCaptionableMedia(int start, int max, String sort) {
+  public CaptionsResults getCaptionableMedia(int start, int max, String sort) {
     List<CaptionsMediaItem> l = new ArrayList<CaptionsMediaItem>();
     if (start < 0) {
       start = 0;
@@ -100,8 +100,9 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     if (max < 0 || max > 50) {
       max = 50;
     }
-    // TODO make this actually get the captionable items
+    // TODO make this actually get the captionable items using get workflows with state and something else
     WorkflowSet wfs = workflowService.getWorkflowsInState(State.PAUSED, start, max); // .getWorkflowsByDate(start, max);
+    int total = (int) wfs.size();
     WorkflowInstance[] workflows = wfs.getItems();
     for (WorkflowInstance workflow : workflows) {
       WorkflowOperationInstance operation = workflow.getCurrentOperation();
@@ -110,7 +111,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
         l.add( new CaptionsMediaItemImpl(workflow.getId(), mp) );
       }
     }
-    return l;
+    return new CaptionsResults(l, start, max, total);
   }
 
   /**

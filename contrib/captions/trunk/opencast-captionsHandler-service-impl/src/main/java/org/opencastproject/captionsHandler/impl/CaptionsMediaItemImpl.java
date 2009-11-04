@@ -46,6 +46,14 @@ public class CaptionsMediaItemImpl implements CaptionsMediaItem {
   public String getMediaPackageId() {
     return mediaPackage.getIdentifier().getFullName();
   }
+  public URL getMediaURL() {
+    // TODO How do I get the URL of the media item?
+    return null;
+  }
+  public URL getTitle() {
+    // TODO How do I get the title of the item?
+    return null;
+  }
   public URL getCaptionsURL(String captionType) {
     URL url = null;
     Attachment[] attachments = mediaPackage.getAttachments(makeCaptionsFlavor(captionType));

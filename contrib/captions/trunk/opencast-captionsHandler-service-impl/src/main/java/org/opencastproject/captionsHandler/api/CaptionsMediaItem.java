@@ -23,6 +23,8 @@ public interface CaptionsMediaItem {
   public String getWorkflowId();
   public MediaPackage getMediaPackage();
   public String getMediaPackageId();
+  public URL getTitle();
+  public URL getMediaURL();
   /**
    * @param captionType the caption type string from {@link CaptionshandlerService#CAPTIONS_TYPE_TIMETEXT}
    * @return the url OR null if none found
