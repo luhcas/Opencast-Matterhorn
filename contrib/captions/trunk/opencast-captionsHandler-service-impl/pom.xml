@@ -100,12 +100,12 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.captionsHandler.* </Export-Package>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Export-Package>org.opencastproject.captionsHandler.*</Export-Package>
             <Service-Component>
-              OSGI-INF/captionsHandler-service.xml,
-              OSGI-INF/captionsHandler-service-rest.xml,
-              OSGI-INF/captionsHandler-service-soap.xml
+              OSGI-INF/service.xml,
+              OSGI-INF/service-rest.xml,
+              OSGI-INF/service-soap.xml
             </Service-Component>
           </instructions>
         </configuration>

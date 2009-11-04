@@ -19,8 +19,12 @@ package org.opencastproject.captionsHandler.impl;
 import org.opencastproject.captionsHandler.api.CaptionsMediaItem;
 import org.opencastproject.captionsHandler.api.CaptionshandlerService;
 import org.opencastproject.media.mediapackage.Attachment;
+import org.opencastproject.media.mediapackage.Catalog;
+import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
+import org.opencastproject.media.mediapackage.Track;
 
 import java.net.URL;
 
@@ -47,12 +51,24 @@ public class CaptionsMediaItemImpl implements CaptionsMediaItem {
     return mediaPackage.getIdentifier().getFullName();
   }
   public URL getMediaURL() {
-    // TODO How do I get the URL of the media item?
-    return null;
+    // TODO make this handle the tracks better
+    URL url = null;
+    Track[] tracks = mediaPackage.getTracks();
+    if (tracks != null && tracks.length > 0) {
+      Track track = tracks[0];
+      url = track.getURL();
+    }
+    return url;
   }
-  public URL getTitle() {
-    // TODO How do I get the title of the item?
-    return null;
+  public String getTitle() {
+    // get the title of the media package
+    String title = null;
+    Catalog[] dcCatalogs = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
+    if (dcCatalogs != null && dcCatalogs.length > 0) {
+      DublinCoreCatalog dc = (DublinCoreCatalog) dcCatalogs[0];
+      title = dc.getFirst(DublinCoreCatalog.PROPERTY_TITLE);
+    }
+    return title;
   }
   public URL getCaptionsURL(String captionType) {
     URL url = null;
