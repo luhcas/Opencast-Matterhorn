@@ -17,30 +17,27 @@
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-media</artifactId>
       <version>0.1-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-workspace-api</artifactId>
       <version>0.1-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-workflow-service-api</artifactId>
       <version>0.1-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
 
     <!-- internal -->
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
+      <scope>provided</scope>
     </dependency>
-    <!-- 
-    <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20090211</version>
-    </dependency>
-     -->
     <!-- JSON encoding - http://code.google.com/p/json-simple/ -->
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
@@ -52,40 +49,43 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.xmlschema</artifactId>
-      <version>1.4.3_1</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.jaxws-api-2.1</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_core</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_compendium</artifactId>
+      <scope>provided</scope>
     </dependency>
     <!-- logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <!-- test -->
     <dependency>
@@ -110,6 +110,8 @@
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Export-Package>org.opencastproject.captionsHandler.*</Export-Package>
+            <Embed-Dependency>*;scope=compile|runtime;inline=false</Embed-Dependency>
+            <Embed-Transitive>true</Embed-Transitive>
             <Service-Component>
               OSGI-INF/service.xml,
               OSGI-INF/service-rest.xml,

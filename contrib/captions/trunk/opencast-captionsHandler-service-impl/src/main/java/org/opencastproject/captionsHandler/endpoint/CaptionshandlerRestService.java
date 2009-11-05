@@ -15,7 +15,9 @@
  */
 package org.opencastproject.captionsHandler.endpoint;
 
+import org.opencastproject.captionsHandler.api.CaptionsMediaItem;
 import org.opencastproject.captionsHandler.api.CaptionshandlerService;
+import org.opencastproject.captionsHandler.api.CaptionshandlerService.CaptionsResults;
 
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONValue;
@@ -25,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -98,7 +101,7 @@ public class CaptionshandlerRestService {
       item.put("id", "ABC123456");
       item.put("timestamp", new Date().getTime());
       item.put("title", "Sample item title");
-      item.put("mediaURL", "http://localhost:8080/rest/samplevideo");
+      item.put("mediaURL", "http://localhost:8080/rest/samplevideo.mov");
       item.put("captionable", true);
       item.put("DFXPURL", null);
       item.put("describable", false);
@@ -108,6 +111,24 @@ public class CaptionshandlerRestService {
     } else {
       // real stuff
       // http://repo2.maven.org/maven2/org/json/json/20090211/json-20090211.jar OR http://repo1.maven.org/maven2/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar
+      int start = (page - 1) * perPage;
+      CaptionsResults cr = service.getCaptionableMedia(start, perPage, sort);
+      for (CaptionsMediaItem cmi : cr.results) {
+        LinkedHashMap<String, Object> item = new LinkedHashMap<String, Object>();
+        item.put("id", cmi.getWorkflowId());
+        item.put("timestamp", new Date().getTime()); // TODO MP created date?
+        item.put("title", cmi.getTitle());
+        item.put("mediaURL", cmi.getMediaURL() != null ? cmi.getMediaURL().toExternalForm() : null);
+        item.put("captionable", true);
+        URL ttURL = cmi.getCaptionsURL(CaptionshandlerService.CAPTIONS_TYPE_TIMETEXT);
+        URL daURL = cmi.getCaptionsURL(CaptionshandlerService.CAPTIONS_TYPE_DESCAUDIO);
+        item.put("DFXPURL", ttURL != null ? ttURL.toString() : null);
+        item.put("describable", false);
+        item.put("DAURL", daURL != null ? daURL.toString() : null);
+        results.add(item);
+      }
+      perPage = cr.max;
+      total = cr.total;
     }
     LinkedHashMap<String, Object> data = new LinkedHashMap<String, Object>();
     data.put("page", page);
@@ -150,24 +171,24 @@ public class CaptionshandlerRestService {
   }
 
   @GET
-  @Path("/samplevideo")
+  @Path("/samplevideo.mov")
+  @Produces("video/quicktime")
   public StreamingOutput getSampleVideo() {
-    InputStream in = null;
-    try {
-      in = getClass().getResourceAsStream("/sample/sample.mov");
-      if (in == null) {
-        throw new NullPointerException("No sample video could be found");
-      }
-    } catch (Exception e) {
-      logger.error("failed to load sample file: " + e, e);
-      throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-    final InputStream inStream = in;
     return new StreamingOutput() {
       public void write(OutputStream out) throws IOException, WebApplicationException {
-        IOUtils.copy(inStream, out);
+        InputStream in = null;
+        try {
+          in = getClass().getResourceAsStream("/sample/sample.mov");
+          if (in == null) {
+            throw new NullPointerException("No sample video could be found");
+          }
+          IOUtils.copy(in, out);
+        } catch (Exception e) {
+          logger.error("failed to load sample file: " + e, e);
+          throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+        } finally {
+          IOUtils.closeQuietly(in);
+        }
       }
     };
   }
