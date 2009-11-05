@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	    <title>Progressive Download Hybrid Player</title>
+	    <script type="text/javascript" src="bridge/lib/FABridge.js"></script>
+	    <script type="text/javascript" src="bridge/Videodisplay.js"></script>
+        <link rel="stylesheet" href="jquery/ui/css/base/ui.all.css" type="text/css">
+        <link rel="stylesheet" href="css/oc.player.css" type="text/css">
+        <script type="text/javascript" src="jquery/jquery-1.3.2.js"></script>
+        <script type="text/javascript" src="jquery/ui/ui.core.js"></script>
+        <script type="text/javascript" src="jquery/ui/ui.slider.js"></script>
+        <script type="text/javascript" src="player-hybrid-download.js"></script>
+    </head>
+
+    <body>
+        <h1>Progressive Download Hybrid Player</h1>
+
+        <div id="controls" style="margin-left:10px; margin-right:10px; margin-top:5px;">
+
+            <div id="slider" class="ui-slider" style="width:360px; margin-left:10px; margin-right:10px;margin-bottom:10px;" >
+                <div class="matterhorn-progress-bar"></div>
+            </div>
+
+            <span style="margin-left:0px;font-size:0.9em">
+                <span id="time-current" role="timer">00:00:00</span> of
+                <span id="time-total" role="timer">00:00:00</span>
+            </span>
+
+            <input id="btn_skip_backward"   type="image" src="./icons/skip-backward---green.png"    onclick="doSkipBackward();"             value="Skip backward"   alt="Skip backward">
+            <input id="btn_rewind"          type="image" src="./icons/rewind---green.png"           onclick="doRewind();"                   value="Rewind"          alt="Rewind">
+            <input id="btn_play_pause"      type="image" src="./icons/play---green.png"             onclick="doTogglePlayPause();" 									value="Play"            alt="Play">
+            <input id="btn_fast_forward"    type="image" src="./icons/fast-forward---green.png"     onclick="doFastForward();"              value="Fast forward"    alt="Fast forward">
+            <input id="btn_skip_forward"    type="image" src="./icons/skip-forward---green.png"     onclick="doSkipForward();"              value="Skip forward"    alt="Skip forward">
+            <input id="btn_volume"          type="image" src="./icons/volume---high.png"            onclick="doToggleVolume();"             value="Mute"            alt="Mute">
+
+            <span id='volume_slider' class='ui-slider' style="width:70px;display:inline-block;margin-left:10px; margin-right:10px">
+                <div class='ui-slider-handle'></div>
+            </span>
+
+            <input id="btn_cc"              type="image" src="./icons/cc_off.png"                       onclick="doToogleClosedCaptions();"             value="cc off" alt="Closed Caption">
+        </div>
+
+        <div id="video-display-container" style="margin:10px;margin-bottom:0px;">
+            <object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="288" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
+                <param name ="movie" value="Videodisplay.swf" >
+                <param name="quality"value="high">
+                <param name="allowScriptAccess" value="always" >
+                <param name="bgcolor" value="#000000">
+                <param name="allowFullScreen" value="true">
+                <param name="flashvars" VALUE="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml">
+                <embed
+                    width="360"
+                    height="288"
+                    bgcolor="#000000"
+                    allowfullscreen="true"
+                    type="application/x-shockwave-flash"
+                    pluginspage="http://www.macromedia.com/go/getflashplayer"
+                    flashvars="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml"
+                    quality="high"
+                    allowScriptAccess="always"
+                    src="Videodisplay.swf">
+            </object>
+        </div>
+    </body>
+</html>

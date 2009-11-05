@@ -18,10 +18,16 @@ package org.opencast.engage.brick.videodisplay.control.event
 	import flash.events.Event;
 	public class VideoControlEvent extends Event
 	{
-		public static var EVENT_NAME : String = 'VideoControlEvent';
-		public static var PLAY : String = "play";
-		public static var PAUSE : String = "pause";
-		public static var STOP : String = "stop";
+		public static var EVENT_NAME : String 	= 'VideoControlEvent';
+		public static var PLAY : String 		= "play";
+		public static var PAUSE : String 		= "pause";
+		public static var STOP : String 		= "stop";
+		public static var SKIPBACKWARD : String = "skipBackward";
+		public static var REWIND : String 		= "rewind";
+		public static var FASTFORWARD : String 	= "fastForward";
+		public static var SKIPFORWARD : String 	= "skipForward";
+		
+		
 		private var _videoControlType : String;
 		public function VideoControlEvent(videoControlType : String , bubbles : Boolean = false , cancelable : Boolean = false )
 		{

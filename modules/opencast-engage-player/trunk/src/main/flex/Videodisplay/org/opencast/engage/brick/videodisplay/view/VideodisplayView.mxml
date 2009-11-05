@@ -82,9 +82,9 @@
 			
 			private var autoplay:Boolean = false;
 			
-     	 	private const TIMER_INTERVAL_BYTES_LOADED:int = 200;
+  		private const TIMER_INTERVAL_BYTES_LOADED:int = 200;
 
-      		private var bytesLodedTimer:Timer;        
+  		private var bytesLodedTimer:Timer;        
 			
 			/**  */
 			protected function initPlayer():void
@@ -126,7 +126,7 @@
 				wrapper.scaleMode = ScaleMode.LETTERBOX;
 				wrapper.addEventListener(DimensionChangeEvent.DIMENSION_CHANGE, dimChange);	
 				wrapper.addEventListener(PlayheadChangeEvent.PLAYHEAD_CHANGE, playHeadChange);
-				wrapper.addEventListener(DurationChangeEvent.DURATION_CHANGE, durationChange);
+				wrapper.addEventListener(DurationChangeEvent.DURATION_CHANGE, durationChange);			
 				
 			}
 			
@@ -146,8 +146,8 @@
 				model.currentDuration = event.newDuration;
 				currentDurationString = t.getTC(model.currentDuration);
 				
-		    	ExternalInterface.call('setTime', lastNewPositionString +" of "+ currentDurationString);
 		    	ExternalInterface.call('setDuration', event.newDuration);
+		    	ExternalInterface.call('setTotalTime', currentDurationString);
 			}
 			
 			/**  */
@@ -163,15 +163,15 @@
 			/**  */
 			private function progress(event:TimerEvent):void
 			{
-				var loadable:ILoadable = media.getTrait(MediaTraitType.LOADABLE) as ILoadable;
-		        if (loadable)
-		        {
-		          var context:NetLoadedContext = NetLoadedContext(loadable.loadedContext);
-		          try {
-		          	ExternalInterface.call('setProgress', context.stream.bytesLoaded / context.stream.bytesTotal * 100);
-		          } catch (e:TypeError) {}
-		        }
-		      }
+	        var loadable:ILoadable = media.getTrait(MediaTraitType.LOADABLE) as ILoadable;
+	          if (loadable)
+	          {
+	            var context:NetLoadedContext = NetLoadedContext(loadable.loadedContext);
+	            try {
+	            	ExternalInterface.call('setProgress', context.stream.bytesLoaded / context.stream.bytesTotal * 100);
+	            } catch (e:TypeError) {}
+	          }
+	        }
 
 			
 			private var lastNewPositionString:String = "00:00:00";
@@ -186,7 +186,7 @@
 				
 				if(newPositionString != lastNewPositionString)
 				{
-					ExternalInterface.call('setTime', newPositionString +" of "+ currentDurationString);
+					ExternalInterface.call('setCurrentTime', newPositionString);
 					lastNewPositionString = newPositionString;
 				}
 				
@@ -194,9 +194,9 @@
 				  ExternalInterface.call('setPlayhead', event.newPosition);
 				
 				if( captionURL != null )
-		      	{
-		      		Swiz.dispatchEvent( new DisplayCaptionEvent( event.newPosition ) );
-		      	}
+      	{
+      		Swiz.dispatchEvent( new DisplayCaptionEvent( event.newPosition ) );
+      	}
 				
 			}
 			
@@ -224,11 +224,11 @@
 				if (event.newState == LoadState.LOADED)
 				{
 					if(!autoplay)
-				  	{
-				    	model.player.volume = 0.0;
-				    	wrapper.visible = false;
-				    	wrapper.addEventListener(PlayheadChangeEvent.PLAYHEAD_CHANGE, autoPlayOff);
-				  	}
+			  	{
+			    	model.player.volume = 0.0;
+			    	wrapper.visible = false;
+			    	wrapper.addEventListener(PlayheadChangeEvent.PLAYHEAD_CHANGE, autoPlayOff);
+			  	}
 				}
 			}
 			

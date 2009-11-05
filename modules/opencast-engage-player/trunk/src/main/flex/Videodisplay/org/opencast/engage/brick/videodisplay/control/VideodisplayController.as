@@ -16,11 +16,13 @@
 package org.opencast.engage.brick.videodisplay.control
 {
 	import flash.external.ExternalInterface;
+	
 	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.IResponder;
 	import mx.rpc.http.HTTPService;
+	
 	import org.opencast.engage.brick.videodisplay.business.VideodisplayDelegate;
 	import org.opencast.engage.brick.videodisplay.control.event.ClosedCaptionsEvent;
 	import org.opencast.engage.brick.videodisplay.control.event.DisplayCaptionEvent;
@@ -45,6 +47,9 @@ package org.opencast.engage.brick.videodisplay.control
 		/**  */
 		[Autowire]
 		public var delegate : VideodisplayDelegate;
+		
+		private var lastPlayPauseState:String = "";
+		
 		/** Constructor */
 		public function VideodisplayController()
 		{
@@ -63,22 +68,55 @@ package org.opencast.engage.brick.videodisplay.control
 		* */
 		public function videoControl( event : VideoControlEvent ) : void
 		{
+		  	var currentPlayPauseState:String;
+		  
 			switch(event.videoControlType)
 			{
-				case VideoControlEvent.PLAY : if( !model.player.playing)
-				model.player.play();
-				model.currentPlayerState = PlayerState.PLAYING;
-				break;
-				case VideoControlEvent.PAUSE : if(model.player.playing)
-				model.player.pause();
-				model.currentPlayerState = PlayerState.PAUSING;
-				break;
-				case VideoControlEvent.STOP : if(model.player.playing)
-				model.player.pause();
-				model.player.seek(0);
-				model.currentPlayerState = PlayerState.PAUSING;
-				break;
+				case VideoControlEvent.PLAY:			if( !model.player.playing)
+						    								model.player.play();
+						  								model.currentPlayerState = PlayerState.PLAYING;
+													   	ExternalInterface.call('setVolume', model.player.volume);
+													  	currentPlayPauseState = PlayerState.PAUSING;
+														break;
+												
+				case VideoControlEvent.PAUSE: 			if(model.player.playing)
+		  				  									model.player.pause();
+									  					model.currentPlayerState = PlayerState.PAUSING;
+									  					currentPlayPauseState = PlayerState.PLAYING;
+														break;
+												
+				case VideoControlEvent.STOP: 			if(model.player.playing)
+												    		model.player.pause();
+													  	model.player.seek(0);
+													  	model.currentPlayerState = PlayerState.PAUSING;
+						  								currentPlayPauseState = PlayerState.PLAYING;
+														break;
+												
+				case VideoControlEvent.SKIPBACKWARD: 	model.player.seek( model.skipBackwardTime );
+										    			break;
+														
+				case VideoControlEvent.REWIND: 			model.player.seek( model.currentPlayhead - model.rewindTime );
+										    		
+														break;
+								
+				case VideoControlEvent.FASTFORWARD: 	model.player.seek( model.currentPlayhead + model.fastForwardTime );
+										    		
+														break;
+								
+				case VideoControlEvent.SKIPFORWARD: 	model.player.seek( model.currentDuration - 1);
+														model.player.pause();
+										    			break;
 			}
+			
+	      	try 
+	      	{
+	      		if(currentPlayPauseState != lastPlayPauseState)
+	        	{
+	        		ExternalInterface.call('setPlayPauseState', currentPlayPauseState);
+	          		lastPlayPauseState = currentPlayPauseState;
+	        	}
+	      	}	 
+	      	catch (e:TypeError) {}
 		}
 
 		/** setVolume 
@@ -127,7 +165,9 @@ package org.opencast.engage.brick.videodisplay.control
 					if(tmpCaption.begin < time && time < tmpCaption.end)
 					{
 						lastPos += i;
+						
 						subtitle = tmpCaption.text;
+						
 						break;
 					}
 				}
@@ -142,7 +182,8 @@ package org.opencast.engage.brick.videodisplay.control
 						model.currentSubtitle = subtitle;
 						model.oldSubtitle = subtitle;
 					}
-				}else
+				}
+				else
 				{
 					model.currentSubtitle = '';
 					model.oldSubtitle = 'default';
@@ -164,7 +205,17 @@ package org.opencast.engage.brick.videodisplay.control
 			* 
 			* */
 			var divisor : int = 26;
-			model.fontSizeCaptions = Application.application.width / divisor;
+			
+			if( Application.application.width / divisor < 28 )
+			{
+				model.fontSizeCaptions = Application.application.width / divisor;
+			}
+			else
+			{
+				model.fontSizeCaptions = 28;
+			}
+			
+			
 		}
 
 		/** setCurrentCaptions 
@@ -192,7 +243,7 @@ package org.opencast.engage.brick.videodisplay.control
 
 		/** closedCaptions 
 		* 
-		* When the learner change the subtitltes from the ComboBox
+		* When the learner toggle the cc button
 		*  
 		* */
 		public function closedCaptions( event : ClosedCaptionsEvent ) : void

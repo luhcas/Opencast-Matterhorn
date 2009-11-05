@@ -49,6 +49,7 @@
         function setProgress (value) 
         {
         	$('.matterhorn-progress-bar').css("width", value + "%");
+        	document.getElementById("progress").innerHTML = parseInt(value) + "%";
         }
 
     </script>
@@ -82,11 +83,11 @@
 	<param name="bgcolor" value="#000000" />
 	<param name="allowFullScreen" value="true" />
 	<param name="flashvars"
-		VALUE="bridgeName=b_Videodisplay&video_url=http://vs1.rz.uos.de/public/virtmm/test/Pechakucha-zoo_hd.mp4&autoplay=false&captions=http://vm069.rz.uos.de:8080/examples/car.dfxp.xml">
+		VALUE="bridgeName=b_Videodisplay&video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/femaf09_2009_4_17_10_18.flv&autoplay=false&captions=http://vm069.rz.uos.de:8080/examples/car.dfxp.xml">
 	<embed width="360" height="288" bgcolor="#000000"
 		allowfullscreen="true" type="application/x-shockwave-flash"
 		pluginspage="http://www.macromedia.com/go/getflashplayer"
-		flashvars="bridgeName=b_Videodisplay&video_url=http://vs1.rz.uos.de/public/virtmm/test/Pechakucha-zoo_hd.mp4&autoplay=false&captions=http://vm069.rz.uos.de:8080/examples/car.dfxp.xml"
+		flashvars="bridgeName=b_Videodisplay&video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/femaf09_2009_4_17_10_18.flv&autoplay=false&captions=http://vm069.rz.uos.de:8080/examples/car.dfxp.xml"
 		quality="high" allowScriptAccess="always" src="Videodisplay.swf" /></object></div>
 
 <div id="slider" class="ui-slider"
@@ -100,6 +101,8 @@
 	type="button" onclick="doStop();" value="Stop" />
 <div id="time" style="display: inline-block; margin-left: 90px;">00:00:00
 | 00:00:00</div>
+
+<div id="progress" style="display: inline-block; margin-left: 10px;">        0 %    </div>
 </div>
 
 </body>

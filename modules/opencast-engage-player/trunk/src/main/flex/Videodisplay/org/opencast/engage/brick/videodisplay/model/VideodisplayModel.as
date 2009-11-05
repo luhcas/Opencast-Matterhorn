@@ -16,8 +16,9 @@
 package org.opencast.engage.brick.videodisplay.model
 {
 	import com.adobe.strobe.players.MediaPlayerWrapper;
+	
 	import mx.collections.ArrayCollection;
-	import mx.core.Application;
+	
 	import org.opencast.engage.brick.videodisplay.vo.LanguageVO;
 	[Bindable]
 	public class VideodisplayModel
@@ -26,30 +27,46 @@ package org.opencast.engage.brick.videodisplay.model
 		public var currentDuration : Number;
 		public var currentPlayhead : Number;
 		public var currentPlayerState : String;
+		
 		// Current Caption Set
 		public var currentCaptionSet : Array;
+
 		// The old Subtitle
 		public var oldSubtitle : String = '';
+
 		// The current Subtitle
 		public var currentSubtitle : String = '';
+
 		// Font Size of the Captions
 		public var fontSizeCaptions : int = 16;
+
 		// Height of the captions
 		public var captionsHeight : int = 50;
+
 		// An Array with the different captions
 		public var captionSets : ArrayCollection = new ArrayCollection();
+
 		// An Array width the language from the dfxp file
 		public var languageComboBox : Array = new Array();
+
 		// Close Caption Boolean
-		public var ccBoolean : Boolean = true;
+		public var ccBoolean : Boolean = false;
+
 		// Array of LanguageVO
 		public var languages : ArrayCollection = new ArrayCollection( [new LanguageVO('de' , "German") , new LanguageVO('en' , "English") , new LanguageVO('es' , "Spain")] );
-		// The width of the Videodisplay
-		public var videodisplayWidth : int = Application.application.width;
-		// ------- Constructor -------
-		public function VideodisplayModel()
-		{
-			//implement as singelton
-		}
+
+		// Skip Backward Time
+		public var skipBackwardTime:Number = 0;
+		
+		// Forward Time
+		public var skipForwardTime:Number = 10;
+		
+		// Rewind Time
+		public var rewindTime:Number = 10;
+		
+		// Skip Fast Forward Time
+		public var fastForwardTime:Number = 10;
+		
+		public var cctest:Boolean = false;
 	}
 }

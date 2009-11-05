@@ -32,6 +32,7 @@ package com.adobe.strobe.caption
 	{
 		public function TextElement(text : String = null)
 		{
+			
 			super();
 			this.text = text;
 		}

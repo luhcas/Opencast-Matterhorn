@@ -19,11 +19,12 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 	backgroundAlpha="1.0"
 	currentState="{model.currentPlayerState}"
-	rollOver="showPauseButton();"
-	rollOut="hidePlayButton();"
+	
 	xmlns:view="org.opencast.engage.brick.videodisplay.view.*">
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.Application;
 			import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
 		  	import org.opencast.engage.brick.videodisplay.state.PlayerState;
 		  	import org.opencast.engage.brick.videodisplay.control.event.VideoControlEvent;
@@ -34,17 +35,70 @@
 			[Bindable]
 			public var model:VideodisplayModel;
 			
-			private function showPauseButton():void
+			/**
+			 * showButton
+			 * 
+			 * Show the Button in the middle of the video
+			 * 
+			 * */
+			private function showButton():void
 			{
-				if (this.currentState == PlayerState.PLAYING)
-					pauseButton_up.visible = true;	
+				if (this.currentState == PlayerState.PLAYING )
+				{
+					pauseButton_up.visible = true;
+				}
+				else
+				{
+					playButton_up.visible = true;
+				}
 			}
+			
+			/**
+			 * hideButton
+			 * 
+			 * Hide the Button in the middle of the video
+			 * 
+			 * */
+			private function hideButton():void
+			{
+				if (this.currentState == PlayerState.PLAYING )
+				{
+					pauseButton_up.visible = false;
+				}
+				else
+				{
+					playButton_up.visible = false;
+				}
 				
-			private function hidePlayButton():void
-			{
-				if(this.currentState == PlayerState.PLAYING)
-	      			pauseButton_up.visible = false;  
 			}
+			
+			/**  
+			 * toggleFullScreen
+			 * 
+			 * Toggle between normal screen and full screen mode
+			 * 
+			 **/
+			private function toggleFullScreen():void 
+			{
+          		try 
+          		{
+          			switch (Application.application.stage.displayState) 
+              		{
+                  		case 	StageDisplayState.FULL_SCREEN:
+                      			/* If already in full screen mode, switch to normal mode. */
+                      			Application.application.stage.displayState = StageDisplayState.NORMAL;
+                      			break;
+                  		default:
+                      			/* If not in full screen mode, switch to full screen mode. */
+                      			Application.application.stage.displayState = StageDisplayState.FULL_SCREEN;
+                      			break;
+              		}
+          		} 
+          		catch (err:SecurityError) 
+          		{
+              		// ignore
+          		}
+      		}
 		]]>
 	</mx:Script>
 	<mx:states>
@@ -65,33 +119,31 @@
 				value="false"/>
 		</mx:State>
 	</mx:states>
+	
 	<mx:transitions>
 		<mx:Transition id="fadeOut"
 			fromState="{PlayerState.PLAYING}"
 			toState="{PlayerState.PAUSING}">
-			<mx:Parallel target="{curtain}">
-				<mx:Fade alphaFrom="0"
-					alphaTo="1.0"
-					duration="500"/>
-			</mx:Parallel>
+			<mx:Parallel target="{curtain}"/>
 		</mx:Transition>
 		<mx:Transition id="fadeIn"
 			fromState="{PlayerState.PAUSING}"
 			toState="{PlayerState.PLAYING}">
-			<mx:Parallel target="{curtain}">
-				<mx:Fade alphaFrom="1.0"
-					alphaTo="0.0"
-					duration="500"/>
-			</mx:Parallel>
+			<mx:Parallel target="{curtain}"/>
 		</mx:Transition>
 	</mx:transitions>
+	
 	<mx:Canvas id="curtain"
 		backgroundColor="#000000"
-		backgroundAlpha="0.5"
-		width="100%"
-		height="100%"
-		x="0"
-		y="0"/>
+		backgroundAlpha="0.0"
+		width="50"
+		height="50"
+		horizontalCenter="0"
+		verticalCenter="0"
+		rollOver="{ showButton(); }"
+		rollOut="{ hideButton(); }"
+		/>
+		
 	<mx:Button id="playButton_up"
 		click="Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));"
 		width="{this.width/3.5}"
@@ -100,7 +152,11 @@
 		visible="false"
 		verticalCenter="0"
 		horizontalCenter="0"
-		buttonMode="true"/>
+		buttonMode="true"
+		rollOver="{ showButton(); }"
+		rollOut="{ hideButton(); }"
+		/>
+		
 	<mx:Button id="pauseButton_up"
 		click="Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));"
 		width="{this.width/3.5}"
@@ -109,5 +165,31 @@
 		visible="false"
 		verticalCenter="0"
 		horizontalCenter="0"
-		buttonMode="true"/>
+		buttonMode="true"
+		rollOver="{ showButton(); }"
+		rollOut="{ hideButton(); }"
+		/>
+		
+	<mx:VBox 
+		width="100%"
+		height="100%"
+		left="5" right="5" top="5" bottom="5"
+		horizontalAlign="right"
+		verticalAlign="bottom"
+		>
+		
+		<mx:Button
+	    	id="btn_fullscreen"
+	        styleName="Fullscreen"
+	       	click="{ toggleFullScreen() }" 
+	       	/>
+	        
+    </mx:VBox>
+        
+    <view:CaptionsView 
+    	id="captionsView"
+			width="100%"
+			height="100%"
+			/>
+    		   
 </mx:Canvas>
