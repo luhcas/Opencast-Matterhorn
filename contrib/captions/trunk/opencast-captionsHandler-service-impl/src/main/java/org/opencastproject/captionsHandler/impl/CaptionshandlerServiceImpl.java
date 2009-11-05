@@ -107,7 +107,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     for (WorkflowInstance workflow : workflows) {
       WorkflowOperationInstance operation = workflow.getCurrentOperation();
       if ( CAPTIONS_OPERATION_NAME.equals(operation.getName()) ) {
-        MediaPackage mp = workflow.getSourceMediaPackage(); // TODO use current media package
+        MediaPackage mp = workflow.getCurrentMediaPackage();
         l.add( new CaptionsMediaItemImpl(workflow.getId(), mp) );
       }
     }
@@ -136,15 +136,14 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     WorkflowInstance workflow = workflowService.getWorkflowById(workflowId);
     CaptionsMediaItem cmi;
     if (workflow != null) {
-      MediaPackage mp = workflow.getSourceMediaPackage(); // TODO change to current media package
+      MediaPackage mp = workflow.getCurrentMediaPackage(); // TODO change to current media package
       // get the MP and update it
       String mediaPackageElementID = CAPTIONS_ELEMENT+captionType;
-      URL url = workspace.put(workflowId, mediaPackageElementID, data);
+      URL url = workspace.put(mp.getIdentifier().getFullName(), mediaPackageElementID, data);
 
       if (WorkflowInstance.State.SUCCEEDED.equals(workflow.getState())) {
         // TODO for now this is not really doing anything
-        MediaPackage mediaPackage = workflow.getSourceMediaPackage();
-        addCaptionToMediaPackage(mediaPackage, url, mediaPackageElementID, captionType);
+        addCaptionToMediaPackage(mp, url, mediaPackageElementID, captionType);
         WorkflowDefinitionImpl workflowDefinition = new WorkflowDefinitionImpl();
         workflowDefinition.setTitle("Captions Added");
         workflowDefinition.setDescription("Captions added workflow for media: " + workflowId);
@@ -154,6 +153,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       } else if (WorkflowInstance.State.PAUSED.equals(workflow.getState())) {
         MediaPackage mediaPackage = workflow.getSourceMediaPackage();
         addCaptionToMediaPackage(mediaPackage, url, mediaPackageElementID, captionType);
+        workflowService.update(workflow);
         workflowService.resume(workflow.getId());
       } else {
         logger.warn("Workflow (" + workflowId + ") is in invalid state for captioning: " + workflow.getState());
@@ -195,7 +195,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       MediaPackageElement element = mpeb.elementFromURL(url, MediaPackageElement.Type.Catalog, captionsFlavor);
       element.setIdentifier(elementId);
       mediaPackage.add(element);
-      logger.info("Updated the ");
+      logger.info("Updated the media package ("+mediaPackage.getIdentifier().getFullName()+") caption ("+elementId+"): " + url);
     } catch (MediaPackageException e) {
       logger.error(e.toString(), e);
       throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier()+"):" + e);

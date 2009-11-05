@@ -70,7 +70,8 @@ public class CaptionshandlerRestService {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("search")
-  public String getSearchResults(@QueryParam("count") Integer perPage, @QueryParam("startPage") Integer page, @QueryParam("sort") String sort) {
+  public String getSearchResults(@QueryParam("count") Integer perPage, @QueryParam("startPage") Integer page, 
+          @QueryParam("sort") String sort, @QueryParam("testing") boolean testing) {
     checkNotNull(service);
     if (page == null || page < 1) {
       page = 1;
@@ -81,23 +82,28 @@ public class CaptionshandlerRestService {
     if (sort == null || "".equals(page)) {
       sort = "title asc";
     }
-    // TODO make this do something real, right now it just loads a sample file
-    // http://repo2.maven.org/maven2/org/json/json/20090211/json-20090211.jar OR http://repo1.maven.org/maven2/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar
     String json;
-    InputStream in = null;
-    try {
-      in = getClass().getResourceAsStream("/sample/search.json");
-      json = IOUtils.toString(in);
-    } catch (Exception e) {
-      logger.error("failed to load sample file: " + e, e);
-      json = "ERROR: failed to load sample file: " + e;
-    } finally {
-      IOUtils.closeQuietly(in);
+    if (testing) {
+      InputStream in = null;
+      try {
+        in = getClass().getResourceAsStream("/sample/search.json");
+        json = IOUtils.toString(in);
+      } catch (Exception e) {
+        logger.error("failed to load sample file: " + e, e);
+        json = "ERROR: failed to load sample file: " + e;
+      } finally {
+        IOUtils.closeQuietly(in);
+      }
+      // replace values as a test of receiving the values
+      json = json.replace("\"page\": 0", "\"page\": "+page.toString());
+      json = json.replace("\"perPage\": 10", "\"perPage\": "+perPage.toString());
+      //json = json.replace("\"count\": 3", "\"count\": "+"3");
+    } else {
+      // real stuff
+      // TODO make this do something real, right now it just loads a sample file
+      // http://repo2.maven.org/maven2/org/json/json/20090211/json-20090211.jar OR http://repo1.maven.org/maven2/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar
+      json = null;
     }
-    // replace values as a test of receiving the values
-    json = json.replace("\"page\": 0", "\"page\": "+page.toString());
-    json = json.replace("\"perPage\": 10", "\"perPage\": "+perPage.toString());
-    //json = json.replace("\"count\": 3", "\"count\": "+"3");
     return json;
   }
 
