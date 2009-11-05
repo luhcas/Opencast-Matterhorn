@@ -31,6 +31,8 @@ import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowInstanceListImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationDefinitionList;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstanceList;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
@@ -44,6 +46,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -134,6 +138,7 @@ public class WorkflowRestService {
     sb.append(" }");
   }
 
+  
   @GET
   @Path("instances.{output:.*}")
   public Response getWorkflows(
@@ -159,7 +164,7 @@ public class WorkflowRestService {
       StringBuilder sb = new StringBuilder("{\"workflows\" : [\n");
       for(int i=0; i < set.getItems().length; i++) {
         WorkflowInstance workflow = set.getItems()[i];
-        appendWorkflow(sb, workflow, false);
+        appendWorkflowInstance(sb, workflow, false);
         if(i < set.getItems().length - 1) sb.append(",");
         sb.append("\n");
       }
@@ -183,7 +188,7 @@ public class WorkflowRestService {
     WorkflowInstance instance = service.getWorkflowById(id);
     if("json".equals(output)) {
       StringBuilder sb = new StringBuilder();
-      appendWorkflow(sb, instance, true);
+      appendWorkflowInstance(sb, instance, true);
       return Response.ok(sb.toString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
     } else {
       return Response.ok(WorkflowBuilder.getInstance().toXml(instance))
@@ -239,7 +244,7 @@ public class WorkflowRestService {
     return Response.ok("resumed " + workflowInstanceId).build();
   }
 
-  protected void appendWorkflow(StringBuilder sb, WorkflowInstance workflow, boolean includeDublinCoreFields) {
+  protected void appendWorkflowInstance(StringBuilder sb, WorkflowInstance workflow, boolean includeDublinCoreFields) {
     String mediaPackageTitle = getDublinCoreProperty(getDublinCore(workflow.getSourceMediaPackage()),
             DublinCoreCatalog.PROPERTY_TITLE);
 
@@ -255,10 +260,39 @@ public class WorkflowRestService {
     sb.append(workflow.getCurrentOperation().getName());
     sb.append("\",\n");
 
-    
     sb.append("   \"workflow_state\" : \"");
     sb.append(workflow.getState().name().toLowerCase());
-    sb.append("\"");
+    sb.append("\",\n");
+
+    sb.append("   \"workflow_properties\" : [\n");
+    Set<Entry<String, String>> entrySet = workflow.getProperties().entrySet();
+    int propCount = 0;
+    for(Entry<String, String> entry : entrySet) {
+      sb.append("     {\"");
+      sb.append(entry.getKey());
+      sb.append("\" : \"");
+      sb.append(entry.getValue());
+      sb.append("\"}");
+      if(++propCount < entrySet.size()) sb.append(",");
+      sb.append("\n");
+    }
+    sb.append("   ],\n");
+    
+    sb.append("   \"workflow_operations\" : [\n");
+    WorkflowOperationInstanceList operations = workflow.getWorkflowOperationInstanceList();
+    for(int i=0; i < operations.size(); i++) {
+      WorkflowOperationInstance op = operations.get(i);
+      sb.append("     {\"name\" : \"");
+      sb.append(op.getName());
+      sb.append("\", \"description\" : \"");
+      sb.append(op.getDescription());
+      sb.append("\", \"state\" : \"");
+      sb.append(op.getState().name().toLowerCase());
+      sb.append("\"}");
+      if(i < operations.size() - 1) sb.append(",");
+      sb.append("\n");
+    }
+    sb.append("]\n");
 
     if(includeDublinCoreFields) {
       DublinCoreCatalog dc = getDublinCore(workflow.getSourceMediaPackage());
