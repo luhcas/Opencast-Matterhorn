@@ -113,6 +113,12 @@ public interface WorkflowInstance {
   MediaPackage getSourceMediaPackage();
 
   /**
+   * The {@link MediaPackage} from the latest {@link WorkflowOperationResult}, or the source mediapackage if no
+   * operations have successfully executed.
+   */
+  MediaPackage getCurrentMediaPackage();
+
+  /**
    * The properties associated with this workflow instance. Properties can be used to affect how
    * {@link WorkflowDefinition#getOperations()} are eventually run.
    */

@@ -264,4 +264,16 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     public WorkflowInstanceImpl marshal(WorkflowInstance instance) throws Exception {return (WorkflowInstanceImpl) instance;}
     public WorkflowInstance unmarshal(WorkflowInstanceImpl instance) throws Exception {return instance;}
   }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#getCurrentMediaPackage()
+   */
+  public MediaPackage getCurrentMediaPackage() {
+    if(workflowOperationInstanceList == null || workflowOperationInstanceList.size() == 0) return getSourceMediaPackage();
+    WorkflowOperationInstance op = workflowOperationInstanceList.get(workflowOperationInstanceList.size()-1);
+    WorkflowOperationResult result = op.getResult();
+    if(result == null || result.getResultingMediaPackage() == null) return getSourceMediaPackage();
+    return result.getResultingMediaPackage();
+  }
 }
