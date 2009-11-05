@@ -114,7 +114,16 @@ public class WorkflowRestService {
       sb.append(op.getName());
       sb.append("\", \"description\" : \"");
       sb.append(op.getDescription());
-      sb.append("\", \"fail_on_error\" : ");
+      sb.append("\", \"exception_handler_workflow\" : ");
+      String exceptionWorkflow = op.getExceptionHandlingWorkflow();
+      if(exceptionWorkflow == null) {
+        sb.append("null");
+      } else {
+        sb.append("\"");
+        sb.append(exceptionWorkflow);
+        sb.append("\"");
+      }
+      sb.append(", \"fail_on_error\" : ");
       sb.append(op.isFailWorkflowOnException());
       sb.append("}");
       if(i < operations.size() - 1) sb.append(",");
