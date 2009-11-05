@@ -18,11 +18,16 @@ package org.opencastproject.captionsHandler.endpoint;
 import org.opencastproject.captionsHandler.api.CaptionshandlerService;
 
 import org.apache.commons.io.IOUtils;
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -32,9 +37,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.Response.Status;
 
 /**
@@ -82,28 +89,33 @@ public class CaptionshandlerRestService {
     if (sort == null || "".equals(page)) {
       sort = "title asc";
     }
+    int total = 0;
     String json;
+    ArrayList<LinkedHashMap<String, Object>> results = new ArrayList<LinkedHashMap<String,Object>>();
     if (testing) {
-      InputStream in = null;
-      try {
-        in = getClass().getResourceAsStream("/sample/search.json");
-        json = IOUtils.toString(in);
-      } catch (Exception e) {
-        logger.error("failed to load sample file: " + e, e);
-        json = "ERROR: failed to load sample file: " + e;
-      } finally {
-        IOUtils.closeQuietly(in);
-      }
-      // replace values as a test of receiving the values
-      json = json.replace("\"page\": 0", "\"page\": "+page.toString());
-      json = json.replace("\"perPage\": 10", "\"perPage\": "+perPage.toString());
-      //json = json.replace("\"count\": 3", "\"count\": "+"3");
+      // testing generates the sample feed which uses the sample video item
+      LinkedHashMap<String, Object> item = new LinkedHashMap<String, Object>();
+      item.put("id", "ABC123456");
+      item.put("timestamp", new Date().getTime());
+      item.put("title", "Sample item title");
+      item.put("mediaURL", "http://localhost:8080/rest/samplevideo");
+      item.put("captionable", true);
+      item.put("DFXPURL", null);
+      item.put("describable", false);
+      item.put("DAURL", null);
+      results.add(item);
+      total = 1;
     } else {
       // real stuff
-      // TODO make this do something real, right now it just loads a sample file
       // http://repo2.maven.org/maven2/org/json/json/20090211/json-20090211.jar OR http://repo1.maven.org/maven2/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar
-      json = null;
     }
+    LinkedHashMap<String, Object> data = new LinkedHashMap<String, Object>();
+    data.put("page", page);
+    data.put("perPage", perPage);
+    data.put("count", results.size());
+    data.put("total", total);
+    data.put("results", results);
+    json = JSONValue.toJSONString(data);
     return json;
   }
 
@@ -135,6 +147,29 @@ public class CaptionshandlerRestService {
       .header("_captionType", captionType)
       .header("_captionURL", url)
       .build();
+  }
+
+  @GET
+  @Path("/samplevideo")
+  public StreamingOutput getSampleVideo() {
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/sample/sample.mov");
+      if (in == null) {
+        throw new NullPointerException("No sample video could be found");
+      }
+    } catch (Exception e) {
+      logger.error("failed to load sample file: " + e, e);
+      throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+    final InputStream inStream = in;
+    return new StreamingOutput() {
+      public void write(OutputStream out) throws IOException, WebApplicationException {
+        IOUtils.copy(inStream, out);
+      }
+    };
   }
 
   @GET

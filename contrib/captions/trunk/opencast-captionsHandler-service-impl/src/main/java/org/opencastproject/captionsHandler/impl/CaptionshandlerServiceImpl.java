@@ -139,7 +139,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       MediaPackage mp = workflow.getCurrentMediaPackage(); // TODO change to current media package
       // get the MP and update it
       String mediaPackageElementID = CAPTIONS_ELEMENT+captionType;
-      URL url = workspace.put(mp.getIdentifier().getFullName(), mediaPackageElementID, data);
+      URL url = workspace.put(mp.getIdentifier().toString(), mediaPackageElementID, data);
 
       if (WorkflowInstance.State.SUCCEEDED.equals(workflow.getState())) {
         // TODO for now this is not really doing anything
