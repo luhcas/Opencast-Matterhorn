@@ -74,7 +74,8 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
               "/workflows/default-error-handler.xml");
       workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(errorHandler));
       
-      InputStream composeDistPublish = ConductorServiceImpl.class.getClassLoader().getResourceAsStream("workflows/compose-distribute-publish.xml");
+      InputStream composeDistPublish = ConductorServiceImpl.class.getClassLoader().getResourceAsStream(
+              "/workflows/compose-distribute-publish.xml");
       workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(composeDistPublish));
     } catch (Exception e) {
       throw new RuntimeException(e);
