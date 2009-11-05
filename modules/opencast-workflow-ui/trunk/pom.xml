@@ -12,7 +12,7 @@
     <version>0.1-SNAPSHOT</version>
   </parent>
   <dependencies>
-    <dependency> 
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_core</artifactId>
     </dependency>
@@ -20,11 +20,11 @@
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_compendium</artifactId>
     </dependency>
-	<dependency>
-    	<groupId>org.opencastproject</groupId>
-    	<artifactId>opencast-util</artifactId>
-    	<version>0.1-SNAPSHOT</version>
-    	<type>bundle</type>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-util</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <type>bundle</type>
     </dependency>
   </dependencies>
   <build>
@@ -35,19 +35,19 @@
         <executions>
           <execution>
             <id>copy-resources</id>
-            <phase>validate</phase>
+            <phase>verify</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
               <outputDirectory>${basedir}/target/classes/ui</outputDirectory>
-              <resources>          
+              <resources>
                 <resource>
                   <directory>../static-resources</directory>
                   <filtering>false</filtering>
                 </resource>
-              </resources>              
-            </configuration>            
+              </resources>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -59,7 +59,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-      			<Import-Package>org.opencastproject.util, *</Import-Package>
+            <Import-Package>org.opencastproject.util, *</Import-Package>
             <Service-Component>
               OSGI-INF/workflow-ui.xml
             </Service-Component>
