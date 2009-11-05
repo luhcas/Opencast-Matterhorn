@@ -55,5 +55,9 @@ helpTexts = {
         "Recording Inputs",
         "Select the inputs that this recording will capture."
     ],
-
+    
+    "contributor" : [
+        "Sponsoring Department",
+        "Enter the sponsoring deparment."
+    ]
 };

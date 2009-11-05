@@ -35,8 +35,8 @@ import org.slf4j.LoggerFactory;
  * TODO: Comment me!
  *
  */
-@XmlType(name="scheduler-event", namespace="http://scheduler.opencastproject.org/")
-@XmlRootElement(name="scheduler-event", namespace="http://scheduler.opencastproject.org/")
+@XmlType(name="scheduler-event", namespace="http://scheduler.opencastproject.org")
+@XmlRootElement(name="scheduler-event", namespace="http://scheduler.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SchedulerEventJaxbImpl {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerEventJaxbImpl.class);
@@ -110,5 +110,15 @@ public class SchedulerEventJaxbImpl {
     event.setResources(resources.toArray(new String [0]));
     event.setAttendees(attendees.toArray(new String [0]));
     return event;
+  }
+  
+  /**
+   * valueOf function is called by JAXB to bind values. This function calls the ScheduleEvent factory.
+   *
+   *  @param    xml string representation of an event.
+   *  @return   instantiated event SchdeulerEventJaxbImpl.
+   */
+  public static SchedulerEventJaxbImpl valueOf(String xmlString) throws Exception {
+    return (SchedulerEventJaxbImpl) SchedulerBuilder.getInstance().parseSchedulerEventJaxbImpl(xmlString);
   }
 }

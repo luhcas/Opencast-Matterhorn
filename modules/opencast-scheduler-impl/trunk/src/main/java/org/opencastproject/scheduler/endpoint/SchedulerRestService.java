@@ -64,8 +64,9 @@ public class SchedulerRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("addEvent")
   public SchedulerEventJaxbImpl addEvent (@FormParam("event") SchedulerEventJaxbImpl e) {
-    return new SchedulerEventJaxbImpl( service.addEvent(e.getEvent()));
-    
+    SchedulerEvent i = e.getEvent();
+    SchedulerEvent j = service.addEvent(i);
+    return new SchedulerEventJaxbImpl(j);
   }
   
   @GET

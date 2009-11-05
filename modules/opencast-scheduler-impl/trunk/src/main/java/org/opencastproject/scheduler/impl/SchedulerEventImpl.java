@@ -36,8 +36,8 @@ public class SchedulerEventImpl implements SchedulerEvent {
   String title;
   String creator;
   String abstr;
-  Date start;
-  Date end;
+  Date start = new Date();
+  Date end = new Date();
   String contributor;
   String seriesID;
   String channelID;
