@@ -103,7 +103,7 @@
            function setCurrentTime (text) {
                 document.getElementById("time-current").innerHTML = text;
             }
-            
+           
 	        function setTotalTime (text) {
 	        	document.getElementById("time-total").innerHTML = text;
 	        }
@@ -111,9 +111,92 @@
 	        function setProgress (value) {
 	        	$('.matterhorn-progress-bar').css("width", value + "%");
 	        }
-	        
+			
+			function showTimeInformation (text) {
+			    document.getElementById("time-information").innerHTML = text;
+			}
+
 	    </script>
+
+<script language="javascript" type="text/javascript">
+
+
+		function countdown (i) {
+		  if (i == undefined) {
+		    // Startwert
+		    i = 10;
+		  }
+		  alert(i);
+		  if (i > 0) {
+		    i--;
+		    var timeout = window.setTimeout("countdown(" + i + ")", 1000);
+		  }
+		}
+
+
+
+        function getNamedKey (k)
+        { 
+            if (typeof KeyEvent == "undefined") 
+            {
+                return ''; 
+            } 
+            else
+            {
+                for ( key in KeyEvent )
+                {
+                    if (KeyEvent[key] == k)
+                        return key.substr("DOM_VK_".length)
+                }
+            }
+        }
+        
+        function keyPressed (evt)
+        {
+            var e = evt || window.event; 
+            var objForm = document.forms[0];
+            var ch = '';
+
+            var keyCode;
+            
+            if (e.keyCode > 0)
+            {
+            	keyCode = e.keyCode;
+            }
+            else
+            {
+                if (document.getElementById)
+                {
+                    if (e.keyCode == 0)
+                        keyCode = e.charCode;
+                    else
+                        keyCode = e.keyCode;
+                }
+                else
+                {
+                    objForm.whichP.value = objForm.keyCodeP.value = objForm.charCodeP = 'not supported';
+                }
+            }
+
+            Videodisplay.passCharCode(keyCode);
+            return true;
+        }
+
+        function init ()
+        {
+            if (document.captureEvents)
+                document.captureEvents(Event.KEYPRESS);
+
+            document.onkeypress = keyPressed;
+
+            document.onmouseup = doScrubberStopDrag;
+            
+
+        }
     
+        window.onload = init; 
+
+</script>    
         <!-- js code for scrubber -->
         <script type="text/javascript">
 
@@ -162,9 +245,12 @@
 				<span id="time-current" role="timer">00:00:00</span> of
 				<span id="time-total" role="timer">00:00:00</span>
             </span>
-            <input id="btn_play_pause" type="button" onclick="doTogglePlayPause();" value="&nbsp;Play&nbsp;"/>
+            <input id="btn_play_pause" type="button" onclick="doTogglePlayPause();" value="Play"/>
             <input type="button" onclick="doStop();" value="Stop"/>
             <input id="btn_volume" type="button" onclick="doToggleVolume();" value="Mute"/>
         </div>
+        
+        <span id="time-information" style="margin-left:0px;">
+        </span>
     </body>
 </html>

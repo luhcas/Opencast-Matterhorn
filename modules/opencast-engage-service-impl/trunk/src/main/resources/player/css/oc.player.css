@@ -14,6 +14,11 @@
   background-color: rgb(255, 0, 0);
 }
 
+#controls {
+    position:absolute;
+    top:366px;
+}
+
 .matterhorn-slide
 {
   border:1px solid #AAAAAA;

@@ -43,6 +43,22 @@ function VideodisplayReady() {
 		b_Videodisplay_root.pause();
 	};
 	
+	Videodisplay.skipBackward = function() {
+		b_Videodisplay_root.skipBackward();
+	};
+	
+	Videodisplay.rewind = function() {
+		b_Videodisplay_root.rewind();
+	};
+	
+	Videodisplay.fastForward = function() {
+		b_Videodisplay_root.fastForward();
+	};
+	
+	Videodisplay.skipForward = function() {
+		b_Videodisplay_root.skipForward();
+	};
+	
 	Videodisplay.passCharCode = function(argInt){
 		b_Videodisplay_root.passCharCode(argInt);
 	};
