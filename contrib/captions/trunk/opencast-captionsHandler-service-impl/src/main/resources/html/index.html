@@ -1,42 +1,73 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>Captions Handler Service REST Documentation</title>
+			<title>Captions Handler Service REST Documentation</title>
 	<style type="text/css">
 	/* styles for the page */
 	fieldset {
-	   margin-top: 0.5em;
-	   width: 90%;
+		margin-bottom: 2em;
+		margin-top: 0.5em;
+		padding-bottom: 1em;
+		width: 90%;
 	}
+	
 	table {
-	   width: 100%;
+		width: 100%;
 	}
+
+    DIV.table_spacer {
+        height: 2em;
+    }
+
+	DIV.footer {
+		padding-top: 1em;
+		font-weight: bold;
+	}
+	
 	.method_set_header {
 		padding-left: 0.5em;
 		padding-right: 0.5em;
 		font-size: 1.4em;
 		font-weight: bold;
 	}
-	.method_header {
-	   background-color: #FFC;
-	}
+	
 	.method_header TH {
-        text-align: left;
-        padding: 0.3em;
+		background: #CCFF00 none repeat scroll 0 0;
+		border-bottom: 3px solid #333;
+		color: #669;
+		font-size: 1.2em;
+		font-weight: bold;
+		padding: 0.6em 0.3em;
+		text-align: left;
+		vertical-align: middle;;
 	}
-	.method TD {
-	   padding-left: 0.3em;
-	   padding-top: 0.1em;
-	   vertical-align: top;
-	}
-	.method_odd {
-	   background-color: #FFF;
-	}
-    .method_even {
-       background-color: #DDD;
+    
+    TH.method_header_left {
+       text-align: right;
+       padding: 0.6em 1em;
     }
+	
+	TR.method TH {
+		border-bottom: 1px solid #CCC;
+		color: #663;
+		font-size: 84%;
+		font-family: sans-serif;
+		font-weight: normal;
+		padding: 0.5em 1.0em;
+		text-align: right;
+		vertical-align: middle;
+	}
+	
+	TR.method TD {
+		border-bottom: 1px solid #CCC;
+		font-size: 136%;
+		padding-bottom: 0.2em;
+		padding-left: 0.3em;
+		padding-top: 0.2em;
+		vertical-align: middle;
+	}
 	</style>
 </head>
 <body>
@@ -44,30 +75,30 @@
 
 <fieldset>
 	<legend class="method_set_header">Read methods</legend>
-	<table cellpadding="0px" cellspacing="0px">
+	<table cellpadding="0px" cellspacing="0px" summary="Read method for this REST endpoint, Name of the attribute followed by the value">
 		<thead>
 			<tr class="method_header">
-				<th width="20%">NAME</th>
-				<th>VALUE and NOTES</th>
+				<th width="20%" scope="col" class="method_header_left">NAME</th>
+				<th scope="col">VALUE and NOTES</th>
 			</tr>
 		</thead>
 		<tbody>
-			<tr class="method_odd method">
-				<td>Method / Path:</td>
+			<tr class="method">
+				<th scope="row">Method / Path:</th>
 				<td><tt>GET /search</tt></td>
 			</tr>
-			<tr class="method_even method">
-				<td>Description:</td>
+			<tr class="method">
+				<th scope="row">Description:</th>
 				<td>Searches for and retrieves a list of all media which needs to be captioned</td>
 			</tr>
-            <tr class="method_odd method">
-                <td>Required (path) parameters::</td>
+            <tr class="method">
+                <th scope="row">Required (path) parameters:</th>
                 <td>
                     <em>NONE</em>
                 </td>
             </tr>
-			<tr class="method_even method">
-				<td>Optional (query) parameters:</td>
+			<tr class="method">
+				<th scope="row">Optional (query) parameters:</th>
 				<td>
 	                <tt>count=0</tt>: number of results to return per page (0 indicates all or maximum allowed)
 	                <br />
@@ -76,12 +107,12 @@
                     <tt>sort=title asc</tt>: the sort order to return items in
 				</td>
 			</tr>
-			<tr class="method_odd method">
-				<td>Response formats:</td>
+			<tr class="method">
+				<th scope="row">Response formats:</th>
 				<td><a href="http://json.org/">json</a> (<a href="../sample/search.json">sample</a>)</td>
 			</tr>
-			<tr class="method_even method">
-				<td>Status codes</td>
+			<tr class="method">
+				<th scope="row">Status codes:</th>
 				<td>
 					200: OK, valid request, results returned
 					<br />
@@ -90,55 +121,101 @@
 			</tr>
 		</tbody>
 	</table>
+
+    <div class="table_spacer"></div>
+
+    <table cellpadding="0px" cellspacing="0px" summary="Read method for this REST endpoint, Name of the attribute followed by the value">
+        <thead>
+            <tr class="method_header">
+                <th width="20%" scope="col" class="method_header_left">NAME</th>
+                <th scope="col">VALUE and NOTES</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="method">
+                <th scope="row">Method / Path:</th>
+                <td><tt>GET /{id}</tt></td>
+            </tr>
+            <tr class="method">
+                <th scope="row">Description:</th>
+                <td>Retrieve a single captionable item</td>
+            </tr>
+            <tr class="method">
+                <th scope="row">Required (path) parameters:</th>
+                <td>
+                    <tt>id</tt>: the media ID from the search result <br/>
+                </td>
+            </tr>
+            <tr class="method">
+                <th scope="row">Optional (query) parameters:</th>
+                <td>
+                    <em>NONE</em>
+                </td>
+            </tr>
+            <tr class="method">
+                <th scope="row">Response formats:</th>
+                <td><a href="http://json.org/">json</a></td>
+            </tr>
+            <tr class="method">
+                <th scope="row">Status codes:</th>
+                <td>
+                    200: OK, valid request, results returned
+                    <br />
+                    404: Not Found, item does not exist, error message
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
 </fieldset>
 
 <fieldset>
 	<legend class="method_set_header">Write methods</legend>
-    <table cellpadding="0px" cellspacing="0px">
+    <table cellpadding="0px" cellspacing="0px" summary="Write method for this REST endpoint, Name of the attribute followed by the value">
         <thead>
             <tr class="method_header">
-                <th width="20%">NAME</th>
-                <th>VALUE and NOTES</th>
+                <th width="20%" scope="col" class="method_header_left">NAME</th>
+                <th scope="col">VALUE and NOTES</th>
             </tr>
         </thead>
         <tbody>
-            <tr class="method_odd method">
-                <td>Method / Path:</td>
-                <td><tt>PUT /add/{id}/{type}</tt></td>
+            <tr class="method">
+                <th scope="row">Method / Path:</th>
+                <td><tt>PUT /{id}/{type}</tt></td>
             </tr>
-            <tr class="method_even method">
-                <td>Description:</td>
+            <tr class="method">
+                <th scope="row">Description:</th>
                 <td>Updates a media item with captions data</td>
             </tr>
-            <tr class="method_odd method">
-                <td>Required (path) parameters::</td>
+            <tr class="method">
+                <th scope="row">Required (path) parameters:</th>
                 <td>
                     <tt>id</tt>: the media ID from the search result <br/>
                     <tt>type</tt>: the media type from the search result
                 </td>
             </tr>
-            <tr class="method_even method">
-                <td>Optional parameters:</td>
+            <tr class="method">
+                <th scope="row">Optional parameters:</th>
                 <td>
                     <em>NONE</em>
                 </td>
             </tr>
-            <tr class="method_odd method">
-                <td>Response formats:</td>
+            <tr class="method">
+                <th scope="row">Response formats:</th>
                 <td>
                     <em>EMPTY</em>
                 </td>
             </tr>
-            <tr class="method_even method">
-                <td>Status codes</td>
+            <tr class="method">
+                <th scope="row">Status codes:</th>
                 <td>
                     204: OK, data was added, result info in headers
                     <br />
                     400: Bad Request, data was not added, error message
                 </td>
             </tr>
-            <tr class="method_odd method">
-                <td>Notes:</td>
+            <tr class="method">
+                <th scope="row">Notes:</th>
                 <td>Send the captions data in the body of the request</td>
             </tr>
         </tbody>
@@ -159,6 +236,9 @@
 	</ul>
 </fieldset>
 
-<h4>Service of <a href="http://www.opencastproject.org/" title="Opencast Project">Opencast</a> <a href="http://www.opencastproject.org/project/matterhorn" title="Opencast Matterhorn">Matterhorn</a></h4>
+<div class="footer">
+    Service of <a href="http://www.opencastproject.org/" title="Opencast Project">Opencast</a> 
+    <a href="http://www.opencastproject.org/project/matterhorn" title="Opencast Matterhorn">Matterhorn</a>
+</div>
 </body>
 </html>

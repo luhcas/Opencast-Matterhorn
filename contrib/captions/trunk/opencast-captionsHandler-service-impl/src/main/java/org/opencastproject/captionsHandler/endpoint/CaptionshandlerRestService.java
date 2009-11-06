@@ -114,17 +114,7 @@ public class CaptionshandlerRestService {
       int start = (page - 1) * perPage;
       CaptionsResults cr = service.getCaptionableMedia(start, perPage, sort);
       for (CaptionsMediaItem cmi : cr.results) {
-        LinkedHashMap<String, Object> item = new LinkedHashMap<String, Object>();
-        item.put("id", cmi.getWorkflowId());
-        item.put("timestamp", new Date().getTime()); // TODO MP created date?
-        item.put("title", cmi.getTitle());
-        item.put("mediaURL", cmi.getMediaURL() != null ? cmi.getMediaURL().toExternalForm() : null);
-        item.put("captionable", true);
-        URL ttURL = cmi.getCaptionsURL(CaptionshandlerService.CAPTIONS_TYPE_TIMETEXT);
-        URL daURL = cmi.getCaptionsURL(CaptionshandlerService.CAPTIONS_TYPE_DESCAUDIO);
-        item.put("DFXPURL", ttURL != null ? ttURL.toString() : null);
-        item.put("describable", false);
-        item.put("DAURL", daURL != null ? daURL.toString() : null);
+        LinkedHashMap<String, Object> item = cmiToMap(cmi);
         results.add(item);
       }
       perPage = cr.max;
@@ -140,10 +130,39 @@ public class CaptionshandlerRestService {
     return json;
   }
 
+  @GET
+  @Path("/{id}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public String getCaptionsItem(@PathParam("id") String workflowId) {
+    checkNotNull(service);
+    CaptionsMediaItem cmi = service.getCaptionsMediaItem(workflowId);
+    if (cmi == null) {
+      throw new WebApplicationException(Response.Status.NOT_FOUND);
+    }
+    LinkedHashMap<String, Object> data = cmiToMap(cmi);
+    String json = JSONValue.toJSONString(data);
+    return json;
+  }
+
+  private LinkedHashMap<String, Object> cmiToMap(CaptionsMediaItem cmi) {
+    LinkedHashMap<String, Object> item = new LinkedHashMap<String, Object>();
+    item.put("id", cmi.getWorkflowId());
+    item.put("timestamp", new Date().getTime()); // TODO MP created date?
+    item.put("title", cmi.getTitle());
+    item.put("mediaURL", cmi.getMediaURL() != null ? cmi.getMediaURL().toExternalForm() : null);
+    item.put("captionable", true);
+    URL ttURL = cmi.getCaptionsURL(CaptionshandlerService.CAPTIONS_TYPE_TIMETEXT);
+    URL daURL = cmi.getCaptionsURL(CaptionshandlerService.CAPTIONS_TYPE_DESCAUDIO);
+    item.put("DFXPURL", ttURL != null ? ttURL.toString() : null);
+    item.put("describable", false);
+    item.put("DAURL", daURL != null ? daURL.toString() : null);
+    return item;
+  }
+
   @POST
   @PUT
-  @Path("/add/{id}/{type}")
-  public Response addCaption(@PathParam("id") String mediaId, @PathParam("type") String captionType, @Context HttpServletRequest request, InputStream stream) {
+  @Path("/{id}/{type}")
+  public Response addCaption(@PathParam("id") String workflowId, @PathParam("type") String captionType, @Context HttpServletRequest request, InputStream stream) {
     checkNotNull(service);
     InputStream is = null;
     try {
@@ -153,18 +172,18 @@ public class CaptionshandlerRestService {
       return Response.serverError()
         .header("_dataFound", is != null)
         .header("_streamFound", stream != null)
-        .header("_mediaId", mediaId)
+        .header("_mediaId", workflowId)
         .header("_captionType", captionType)
         .build();
     } finally {
       IOUtils.closeQuietly(is);
     }
     // TODO make this do something real, it is just echoing out what it received in the header
-    String url = "http://sample.url/"+mediaId+"/"+captionType;
+    String url = "http://sample.url/"+workflowId+"/"+captionType;
     return Response.status(Response.Status.NO_CONTENT)
       .header("_dataFound", is != null)
       .header("_streamFound", stream != null)
-      .header("_mediaId", mediaId)
+      .header("_mediaId", workflowId)
       .header("_captionType", captionType)
       .header("_captionURL", url)
       .build();
