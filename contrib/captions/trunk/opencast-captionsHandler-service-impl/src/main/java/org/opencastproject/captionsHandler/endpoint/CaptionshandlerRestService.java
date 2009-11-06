@@ -161,7 +161,7 @@ public class CaptionshandlerRestService {
     }
     // TODO make this do something real, it is just echoing out what it received in the header
     String url = "http://sample.url/"+mediaId+"/"+captionType;
-    return Response.ok()
+    return Response.status(Response.Status.NO_CONTENT)
       .header("_dataFound", is != null)
       .header("_streamFound", stream != null)
       .header("_mediaId", mediaId)

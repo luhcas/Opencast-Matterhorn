@@ -60,8 +60,14 @@
 				<td>Description:</td>
 				<td>Searches for and retrieves a list of all media which needs to be captioned</td>
 			</tr>
-			<tr class="method_odd method">
-				<td>Optional parameters:</td>
+            <tr class="method_odd method">
+                <td>Required (path) parameters::</td>
+                <td>
+                    <em>NONE</em>
+                </td>
+            </tr>
+			<tr class="method_even method">
+				<td>Optional (query) parameters:</td>
 				<td>
 	                <tt>count=0</tt>: number of results to return per page (0 indicates all or maximum allowed)
 	                <br />
@@ -70,11 +76,11 @@
                     <tt>sort=title asc</tt>: the sort order to return items in
 				</td>
 			</tr>
-			<tr class="method_even method">
+			<tr class="method_odd method">
 				<td>Response formats:</td>
 				<td><a href="http://json.org/">json</a> (<a href="../sample/search.json">sample</a>)</td>
 			</tr>
-			<tr class="method_odd method">
+			<tr class="method_even method">
 				<td>Status codes</td>
 				<td>
 					200: OK, valid request, results returned
@@ -102,32 +108,36 @@
             </tr>
             <tr class="method_even method">
                 <td>Description:</td>
-                <td>Updates a media item with captions data <br/>
+                <td>Updates a media item with captions data</td>
+            </tr>
+            <tr class="method_odd method">
+                <td>Required (path) parameters::</td>
+                <td>
                     <tt>id</tt>: the media ID from the search result <br/>
                     <tt>type</tt>: the media type from the search result
                 </td>
             </tr>
-            <tr class="method_odd method">
+            <tr class="method_even method">
                 <td>Optional parameters:</td>
                 <td>
                     <em>NONE</em>
                 </td>
             </tr>
-            <tr class="method_even method">
+            <tr class="method_odd method">
                 <td>Response formats:</td>
                 <td>
                     <em>EMPTY</em>
                 </td>
             </tr>
-            <tr class="method_odd method">
+            <tr class="method_even method">
                 <td>Status codes</td>
                 <td>
-                    200: OK, data was added, result info in headers
+                    204: OK, data was added, result info in headers
                     <br />
                     400: Bad Request, data was not added, error message
                 </td>
             </tr>
-            <tr class="method_even method">
+            <tr class="method_odd method">
                 <td>Notes:</td>
                 <td>Send the captions data in the body of the request</td>
             </tr>
