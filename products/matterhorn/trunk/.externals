@@ -36,4 +36,5 @@
 ../../../modules/opencast-scheduler-impl/trunk	opencast-scheduler-impl
 ../../../modules/opencast-search-service-api/trunk	opencast-search-service-api
 ../../../modules/opencast-search-service-impl/trunk      opencast-search-service-impl
+../../../modules/opencast-test-harness/trunk	opencast-test-harness
 
