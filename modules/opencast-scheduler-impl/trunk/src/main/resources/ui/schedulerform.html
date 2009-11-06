@@ -1,242 +1,187 @@
-<style type="text/css">
-    .inputField {
-        width:350px;
-    }
-
-    .browseButton {
-        margin:0px;
-        width: 60px;
-        height: 20px;
-    }
-    
-    .formBox-container {
-        width:600px;
-        max-width:600px;
-    }
-    .formBox {
-        width:100%;
-        border:1px solid silver;
-        padding:10px;
-    }
-    .formBox-head {
-        width:610px;
-        border:1px solid silver;
-        background:silver;
-        padding-left:10px;
-        margin-top:8px;
-    }
-    .labelCell {
-        text-align:right;
-        width:30%;
-    }
-    .formField {
-        width:90%;
-        vertical-align:middle;
-    }
-    .fieldTable {
-        width:100%;
-        margin-bottom:0px;
-    }
-    
-    .folder-head {
-        cursor: pointer;
-    }
-    .folder-content {
-        display:none;
-    }
-    .icon {
-        display:inline-block;
-        width:16px;
-        height:16px;
-        vertical-align:middle;
-    }
-    .icon-arrow-right {
-        background-image: url(img/arrow-right.png);
-    }
-    .icon-arrow-down {
-        background-image: url(img/arrow-down.png);
-    }
-    .icon-help {
-        background-image: url(img/help.png);
-        cursor: help;
-    }
-
-    .shortLabel {
-        width:30%;
-        display:inline-block;
-        float:left;
-    }
-    .checkbox {
-        vertical-align:middle;
-    }
-</style>
-
 <script type="text/javascript">
-$('.folder-head').click(function(){
-    $(this).children('.fold-icon').toggleClass('icon-arrow-right');
-    $(this).children('.fold-icon').toggleClass('icon-arrow-down');
-    $(this).next().toggle('fast');
-    return false;
-});
-
-eventFields = {"title":       new EventField('title', true),
-               "creator":     new EventField('creator'),
-               "contributor": new EventField('contributor'),
-               "series-id":   new EventField('series'),
-               "subject":     new EventField('subject'),
-               "language":    new EventField('language'),
-               "abstract":    new EventField('description'),
-               "channel-id":  new EventFieldGroup(new Array('distITunesU', 'distMatterhornMM', 'distYouTube', 'distSakai'), true),
-               "license":     new EventField('license'),
-               "startdate":   new EventField('startTime', true),
-               "enddate":     new EventField('duration', true, durationFieldHandler),
-               "resources":   new EventFieldGroup(new Array('audio','audioVideo','audioScreen', 'audioVideoScreen'), true),
-               "attendees":   new EventField('location', true),
-               "device-id":   new EventField('location', true)};
-               
-function durationFieldHandler(){
-  if(this.formElement.val() == "" && this.required){
-    throw "Must specify a valid duration.";
+  $('.folder-head').click(function(){
+                          $(this).children('.fl-icon').toggleClass('icon-arrow-right');
+                          $(this).children('.fl-icon').toggleClass('icon-arrow-down');
+                          $(this).next().toggle('fast');
+                          return false;
+                          });
+  
+  eventFields = {"title":       new EventField('title', true),
+    "creator":     new EventField('creator'),
+    "contributor": new EventField('contributor'),
+    "series-id":   new EventField('series'),
+    "subject":     new EventField('subject'),
+    "language":    new EventField('language'),
+    "abstract":    new EventField('description'),
+    "channel-id":  new EventFieldGroup(new Array('distITunesU', 'distMatterhornMM', 'distYouTube', 'distSakai'), true),
+    "license":     new EventField('license'),
+    "startdate":   new EventField('startTime', true),
+    "enddate":     new EventField('duration', true, durationFieldHandler),
+    "resources":   new EventFieldGroup(new Array('audio','audioVideo','audioScreen', 'audioVideoScreen'), true),
+    "attendees":   new EventField('location', true),
+    "device-id":   new EventField('location', true)};
+  
+  function durationFieldHandler(){
+    if(this.formElement.val() == "" && this.required){
+      throw "Must specify a valid duration.";
+    }
+    //to do: add duration to starttime, and return the end time.
+    return this.formElement.val();
   }
-  //to do: add duration to starttime, and return the end time.
-  return this.formElement.val();
-}
 </script>
 
-<div class="formBox-container">
-<div class="formBox">
-<form>
-<table>
-	<tr class="required">
-		<th>Title:</th>
-		<td><input type="text" class="inputField" name="title" id="title" /></td>
-		<td><span class="icon icon-help"  id="help_title"
-			onclick="displayHelp(this, event);" /></td>
-	</tr>
-	<tr>
-		<th>Presenter(s):</th>
-		<td><input type="text" class="inputField" name="creator" id="creator" /></td>
-		<td><span class="icon icon-help"  id="help_presenter"
-			onclick="displayHelp(this, event);" /></td>
-	</tr>
-	<tr>
-		<th>Sponsoring Department:</th>
-		<td><input type="text" class="inputField" name="contributor" id="contributor" /></td>
-		<td><span class="icon icon-help"  id="help_contributor"
-            onclick="displayHelp(this, event);" /></td>
-	</tr>
-</table>
-</form>
-</div>
-</div>
-
-<div class="formBox-container">
-<div class="formBox-head folder-head">
-    <span class="fold-icon icon icon-arrow-right"></span>
-    <b style="verticle-align: middle;">Additional Content Descriptors</b>
-</div>
-<div class="formBox folder-content">
-<form>
-<table>
-	<tr class="additionalMeta">
-		<th>Series:</th>
-		<td><input type="text" class="inputField" name="series" id="series" /></td>
-		<td><span class="icon icon-help"  id="help_series"
-			onclick="displayHelp(this, event);" /></td>
-	</tr>
-	<tr class="additionalMeta">
-		<th>Subject:</th>
-		<td><input type="text" class="inputField" name="subject" id="subject" /></td>
-		<td><span class="icon icon-help"  id="help_subject"
-			onclick="displayHelp(this, event);" /></td>
-	</tr>
-	<tr class="additionalMeta">
-		<th>Language:</th>
-		<td><input type="text" class="inputField" name="language" id="language" /></td>
-		<td><span class="icon icon-help"  id="help_language"
-			onclick="displayHelp(this, event);" /></td>
-	</tr>
-	<tr class="additionalMeta">
-		<th>Description:</th>
-		<td><textarea name="description" id="description" cols="52"></textarea></td>
-		<td><span class="icon icon-help"  id="help_description"
-			onclick="displayHelp(this, event);" /></td>
-	</tr>
-</table>
-</form>
-</div>
+<div class="fl-container-600">
+  <div class="fl-widget">
+    <div class="fl-widget-content form-box-container">
+      <form>
+        <ul class="fl-controls-right">
+          <li class="required">
+            <label class="fl-label" for="title">Title:</label>
+            <input type="text" class="inputField" name="title" id="title" />
+            <span class="icon icon-help"  id="help_title" onclick="displayHelp(this, event);" />
+          </li>
+          <li>
+            <label class="fl-label" for="creator">Presenter(s):</label>
+            <input type="text" class="fl-textfield" name="creator" id="creator" />
+            <span class="icon icon-help"  id="help_presenter" onclick="displayHelp(this, event);" />
+          </li>
+          <li>
+            <label class="fl-label" for="contributor">Sponsoring Department:</label>
+            <input type="text" class="inputField" name="contributor" id="contributor" />
+            <span class="icon icon-help"  id="help_contributor" onclick="displayHelp(this, event);" />
+          </li>
+        </ul>
+      </form>
+    </div>
+  </div>
 </div>
 
-<div class="formBox-container">
-<div class="formBox-head"><b>Distribution</b></div>
-<div class="formBox">
-<form>
-<table>
-	<tr class="required">
-		<th>Distribution Channel(s):</th>
-		<td class="distroChannel">
-			<div><input type="checkbox" id="distITunesU" value="1" />iTunesU</div>
-			<div><input type="checkbox" id="distMatterhornMM" value="2" />Matterhorn Media Channel</div>
-			<div><input type="checkbox" id="distYouTube" value="3" />YouTube</div>
-			<div><input type="checkbox" id="distSakai" value="4" />Sakai</div>
-		</td>
-		<td><span class="icon icon-help" id="help_distribution"
-			onclick="displayHelp(this, event);" /></td>
-	</tr>
-	<tr class="">
-        <th>License:</th>
-        <td>
+<div class="fl-container-600">
+  <div class="fl-widget">
+    <div class="fl-widget-titlebar folder-head">
+      <span class="fl-icon icon-arrow-right folder-icon">Additional Content</span>
+      <b style="verticle-align: middle;">Additional Content Descriptors</b>
+    </div>
+    <div class="fl-widget-content folder-content">
+      <form>
+        <ul class="fl-controls-right">
+          <li class="additionalMeta">
+            <label class="fl-label" for="series">Series:</label>
+            <input type="text" class="inputField" name="series" id="series" />
+            <span class="icon icon-help"  id="help_series" onclick="displayHelp(this, event);" />
+          </li>
+          <li class="additionalMeta">
+            <label class="fl-label" for="subject">Subject:</label>
+            <input type="text" class="inputField" name="subject" id="subject" />
+            <span class="icon icon-help"  id="help_subject" onclick="displayHelp(this, event);" />
+          </li>
+          <li class="additionalMeta">
+            <label class="fl-label" for="language">Language:</label>
+            <input type="text" class="inputField" name="language" id="language" />
+            <span class="icon icon-help"  id="help_language" onclick="displayHelp(this, event);" />
+          </li>
+          <li class="additionalMeta">
+            <label class="fl-label" for="description">Description:</label>
+            <textarea name="description" id="description" cols="52"></textarea>
+            <span class="icon icon-help"  id="help_description" onclick="displayHelp(this, event);" />
+          </li>
+        </ul>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="fl-container-600">
+  <div class="fl-widget">
+    <div class="fl-widget-titlebar form-box-title"><b>Distribution</b></div>
+    <div class="fl-widget-content form-box-container">
+      <form>
+        <ul class="fl-controls-right">
+          <li class="required">
+            <span class="fl-label form-box-label">Distribution Channel(s):</span>
+            <div style="float: left;">
+              <ul class="form-box-group">
+                <li class="column1">
+                  <input type="checkbox" id="distITunesU" value="1" />
+                  <label for="distITunesU">iTunesU</label>
+                </li>
+                <li class="column1">
+                  <input type="checkbox" id="distMatterhornMM" value="2" />
+                  <label for="distMatterhornMM">Matterhorn Media Channel</label>
+                </li>
+                <li class="column2 reset">
+                  <input type="checkbox" id="distYouTube" value="3" />
+                  <label for="distYouTube">YouTube</label>
+                </li>
+                <li class="column2">
+                  <input type="checkbox" id="distSakai" value="4" />
+                  <label for="distSakai">Sakai</label>
+                </li>
+              </ul>
+            </div>
+            <a class="fl-icon icon-help" id="help_distribution" onclick="displayHelp(this, event);" />
+          </li>
+          <li style="clear:both">
+            <span class="fl-label">License:</span>
             <select name="license" id="license">
-            <option>test</option>
+              <option>test</option>
             </select>
-        </td>
-        <td><span class="icon icon-help" id="help_license" onclick="displayHelp(this, event);" /></td>
-    </tr>
-</table>
-</form>
-</div>
-</div>
-
-<div class="formBox-container">
-<div class="formBox-head"><b>Capture</b></div>
-<div class="formBox">
-<form>
-<table>
-	<tr class="required">
-		<th>Recording Times:</th>
-		<td>Start:<input type="text" size="10" name="startTime"
-			id="startTime" /> Duration:<input type="text" size="10" name="duration"
-			id="duration" /></td>
-		<td><span class="icon icon-help"  id="help_recording"
-			onclick="displayHelp(this, event);" /></td>
-	</tr>
-	<tr class="required">
-		<th>Location:</th>
-		<td><input type="text" id="location" name="location" size="60" /></td>
-		<td><span class="icon icon-help"  id="help_agent"
-			onclick="displayHelp(this, event);" /></td>
-	</tr>
-	<tr class="required">
-		<th>Input(s):</th>
-		<td><input type="radio" id="audio" name="inputs" value="1" checked="checked" />Audio Only <input
-			type="radio" id="audioVideo" name="inputs" value="3" />Audio,Video <input
-			type="radio" id="audioScreen" name="inputs" value="5" />Audio,Screen <input
-			type="radio" id="audioVideoScreen" name="inputs" value="7" />Audio,Video,Screen</td>
-		<td><span class="icon icon-help"  id="help_input"
-			onclick="displayHelp(this, event);" /></td>
-	</tr>
-</table>
-</form>
-</div>
+            <span class="icon icon-help" id="help_license" onclick="displayHelp(this, event);" />
+          </li>
+        </ul>
+      </form>
+    </div>
+  </div>
 </div>
 
+<div class="fl-container-600">
+  <div class="fl-widget">
+    <div class="fl-widget-titlebar form-box-title"><b>Capture</b></div>
+    <div class="fl-widget-content form-box-container">
+      <form>
+        <ul class="fl-controls-right">
+          <li class="required">
+            <label class="fl-label">Recording Times:</label>
+            <td>
+              Start:<input type="text" size="10" name="startTime" id="startTime" />
+              Duration:<input type="text" size="10" name="duration"id="duration" />
+            </td>
+            <td><span class="icon icon-help"  id="help_recording"
+              onclick="displayHelp(this, event);" /></td>
+          </li>
+          <li class="required">
+            <label class="fl-label">Location:</label>
+            <td><input type="text" id="location" name="location" size="60" /></td>
+            <td><span class="icon icon-help"  id="help_agent"
+              onclick="displayHelp(this, event);" /></td>
+          </li>
+          <li class="required">
+            <label class="fl-label">Input(s):</label>
+            <div>
+              <input type="radio" id="audio" name="inputs" value="1" checked="checked" />
+              <label for="audio">Audio Only</label>
+              <input type="radio" id="audioVideo" name="inputs" value="3" />
+              <label for="audioVideo">Audio,Video</label>
+              <input type="radio" id="audioScreen" name="inputs" value="5" />
+              <label for="audioScreen">Audio,Screen</label>
+              <input type="radio" id="audioVideoScreen" name="inputs" value="7" />
+              <label for="audioVideoScreen">Audio,Video,Screen</label>
+            </div>
+            <span class="icon icon-help"  id="help_input" onclick="displayHelp(this, event);" />
+          </li>
+        </ul>
+      </form>
+    </div>
+  </div>
+</div>
+
 <form>
-<table>
+  <table>
     <tr>
-        <td>
-            <input type="button" value="submit" onclick="doSubmit()" />
-            <input type="button" value="reset" />
-        </td>
+      <td>
+        <input type="button" value="submit" onclick="doSubmit()" />
+        <input type="button" value="reset" />
+      </td>
     </tr>
-</table>
+  </table>
 </form>
