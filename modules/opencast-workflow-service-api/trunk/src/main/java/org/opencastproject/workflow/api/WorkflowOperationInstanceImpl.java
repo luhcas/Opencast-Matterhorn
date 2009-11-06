@@ -18,6 +18,7 @@ package org.opencastproject.workflow.api;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -66,7 +67,9 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
     this.name = def.getName();
     this.state = State.RUNNING.name();
     this.description = def.getDescription();
-    this.configurations = def.getConfigurations();
+    Set<WorkflowConfiguration> defConfigs = def.getConfigurations();
+    this.configurations = defConfigs == null ?
+            new HashSet<WorkflowConfiguration>() : new HashSet<WorkflowConfiguration>(defConfigs);      
   }
   
   public String getName() {

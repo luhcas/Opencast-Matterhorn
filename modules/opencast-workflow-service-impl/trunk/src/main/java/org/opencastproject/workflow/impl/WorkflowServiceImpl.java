@@ -438,6 +438,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
             }
             // Add an operation instance with the resulting media package to the workflow instance
             WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(operationDefinition);
+            // Merge in the workflow instance's configurations, which override any operation-specific config
+            for(WorkflowConfiguration config : wfi.getConfigurations()) {
+              opInstance.setConfiguration(config.getKey(), config.getValue());
+            }
             wfi.getWorkflowOperationInstanceList().add(opInstance);
             update(wfi); // Update the workflow instance, since it has a new operation instance
             try {
