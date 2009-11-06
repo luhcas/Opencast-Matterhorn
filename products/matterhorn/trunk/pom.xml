@@ -37,8 +37,8 @@
         <module>opencast-runtime-tools</module>
         <module>opencast-authentication-api</module>
         <module>opencast-capture-service-api</module> 
-        <module>opencast-capture-service-impl</module> 
-    	<module>opencast-composer-service-api</module>
+        <module>opencast-capture-service-impl</module>
+        <module>opencast-composer-service-api</module>
         <module>opencast-composer-service-impl</module>
         <module>opencast-conductor-api</module>
         <module>opencast-conductor</module>
@@ -68,8 +68,8 @@
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
-	<module>opencast-scheduler-api</module>
-	<module>opencast-scheduler-impl</module>
+        <module>opencast-scheduler-api</module>
+        <module>opencast-scheduler-impl</module>
      </modules>
     </profile>
     <profile>
@@ -112,6 +112,12 @@
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>itest</id>
+      <modules>
+        <module>opencast-test-harness</module>
       </modules>
     </profile>
   </profiles>
