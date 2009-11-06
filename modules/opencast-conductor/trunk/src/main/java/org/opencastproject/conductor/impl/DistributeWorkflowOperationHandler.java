@@ -59,13 +59,12 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
     // TODO: Determine which distribution channels should be called
 
     try {
-      distributionService.distribute(workflowInstance.getSourceMediaPackage());
+      distributionService.distribute(workflowInstance.getCurrentMediaPackage());
     } catch (RuntimeException e) {
       throw new WorkflowOperationException(e);
     }
 
     // TODO Add any distributed media to the media package
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getSourceMediaPackage(),
-            workflowInstance.getProperties(), false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), null, false);
   }
 }

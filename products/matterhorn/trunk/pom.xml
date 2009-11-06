@@ -120,6 +120,16 @@
         <module>opencast-test-harness</module>
       </modules>
     </profile>
+    <profile>
+      <id>wf</id>
+      <modules>
+        <module>opencast-conductor</module>
+        <module>opencast-conductor-api</module>
+        <module>opencast-workflow-ui</module>
+        <module>opencast-workflow-service-api</module>
+        <module>opencast-workflow-service-impl</module>
+      </modules>
+    </profile>
   </profiles>
 
   <mailingLists>

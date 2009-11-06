@@ -142,7 +142,7 @@ public class SolrIndexManager {
     List<WorkflowOperationInstance> operations = workflow.getWorkflowOperationInstanceList();
     MediaPackage mediaPackage;
     if(operations.size() == 0) {
-      mediaPackage = workflow.getSourceMediaPackage();
+      mediaPackage = workflow.getCurrentMediaPackage();
     } else {
       WorkflowOperationResult result = operations.get(operations.size()-1).getResult();
       if(result == null || result.getResultingMediaPackage() == null) {

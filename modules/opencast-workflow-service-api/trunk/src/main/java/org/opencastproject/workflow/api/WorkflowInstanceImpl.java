@@ -24,8 +24,9 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -64,8 +65,9 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @XmlElement(name="description")
   private String description;
 
-  @XmlElementWrapper(name="properties")
-  private HashMap<String, String> properties;
+  @XmlElement(name="configuration")
+  @XmlElementWrapper(name="configurations")
+  protected Set<WorkflowConfiguration> configurations;
 
   @XmlElement(name="mediapackage")
   private MediapackageType sourceMediaPackageType;
@@ -113,13 +115,6 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   public void setSourceMediaPackageType(MediapackageType sourceMediaPackageType) {
     this.sourceMediaPackageType = sourceMediaPackageType;
   }
-  
-  public HashMap<String, String> getProperties() {
-    return properties;
-  }
-  public void setProperties(HashMap<String, String> properties) {
-    this.properties = properties;
-  }
 
   /**
    * {@inheritDoc}
@@ -143,30 +138,6 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     List<WorkflowOperationInstance> list = workflowOperationInstanceList.getOperationInstance();
     if(list.isEmpty()) return null;
     return list.get(list.size()-1);
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#getProperty(java.lang.String)
-   */
-  public String getProperty(String name) {
-    return properties.get(name);
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#removeProperty(java.lang.String)
-   */
-  public void removeProperty(String name) {
-    properties.remove(name);
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#setProperty(java.lang.String, java.lang.String)
-   */
-  public void setProperty(String name, String value) {
-    properties.put(name, value);
   }
 
   /**
@@ -275,5 +246,56 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     WorkflowOperationResult result = op.getResult();
     if(result == null || result.getResultingMediaPackage() == null) return getSourceMediaPackage();
     return result.getResultingMediaPackage();
+  }
+
+  public Set<WorkflowConfiguration> getConfigurations() {
+    return configurations;
+  }
+
+  public void setConfigurations(Set<WorkflowConfiguration> configurations) {
+    this.configurations = configurations;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#getConfiguration(java.lang.String)
+   */
+  public String getConfiguration(String key) {
+    if(key == null || configurations == null) return null;
+    for(WorkflowConfiguration config : configurations) {
+      if(config.getKey().equals(key)) return config.getValue();
+    }
+    return null;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#removeConfiguration(java.lang.String)
+   */
+  public void removeConfiguration(String key) {
+    if(key == null || configurations == null) return;
+    for(Iterator<WorkflowConfiguration> configIter = configurations.iterator(); configIter.hasNext();) {
+      WorkflowConfiguration config = configIter.next();
+      if(config.getKey().equals(key)) {
+        configIter.remove();
+        return;
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#setConfiguration(java.lang.String, java.lang.String)
+   */
+  public void setConfiguration(String key, String value) {
+    if(key == null || configurations == null) return;
+    for(WorkflowConfiguration config : configurations) {
+      if(config.getKey().equals(key)) {
+        ((WorkflowConfigurationImpl)config).setValue(value);
+        return;
+      }
+    }
+    // No configurations were found, so add a new one
+    configurations.add(new WorkflowConfigurationImpl(key, value));
   }
 }

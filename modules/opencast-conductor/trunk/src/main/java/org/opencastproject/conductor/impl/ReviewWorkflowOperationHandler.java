@@ -40,8 +40,7 @@ public class ReviewWorkflowOperationHandler implements WorkflowOperationHandler 
 
     logger.info("run() review workflow operation");
 
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getSourceMediaPackage(),
-            workflowInstance.getProperties(), true);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), null, true);
   }
 
 }

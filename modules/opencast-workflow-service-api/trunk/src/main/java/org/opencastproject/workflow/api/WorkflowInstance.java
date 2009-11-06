@@ -17,7 +17,7 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
-import java.util.Map;
+import java.util.Set;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -119,36 +119,37 @@ public interface WorkflowInstance {
   MediaPackage getCurrentMediaPackage();
 
   /**
-   * The properties associated with this workflow instance. Properties can be used to affect how
+   * The configurations associated with this workflow instance. Configurations can be used to affect how
    * {@link WorkflowDefinition#getOperations()} are eventually run.
    */
-  Map<String, String> getProperties();
+  Set<WorkflowConfiguration> getConfigurations();
 
   /**
    * Returns the value of property <code>name</code> or <code>null</code> if no such property has been set.
    * 
-   * @param name
-   *          the property name
-   * @return the property value
+   * @param key
+   *          the configuration key
+   * @return the configuration value
    */
-  public String getProperty(String name);
+  public String getConfiguration(String key);
 
   /**
-   * Sets the property with name <code>name</code> to value <code>value</code>.
+   * Sets the configuration with name <code>key</code> to value <code>value</code>, or adds it if it doesn't already
+   * exist.
    * 
-   * @param name
-   *          the property name
+   * @param key
+   *          the configuration key
    * @param value
-   *          the property value
+   *          the configuration value
    */
-  public void setProperty(String name, String value);
+  public void setConfiguration(String key, String value);
 
   /**
-   * Removes the property with name <code>name</code> from the list of defined properties.
+   * Removes the <code>key</code> configuration.
    * 
-   * @param name
-   *          the property name
+   * @param key
+   *          the configuration key
    */
-  public void removeProperty(String name);
+  public void removeConfiguration(String key);
 
 }

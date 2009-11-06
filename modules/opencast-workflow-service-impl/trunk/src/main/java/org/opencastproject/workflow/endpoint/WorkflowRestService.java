@@ -23,6 +23,7 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowDefinitionList;
@@ -44,10 +45,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -264,20 +265,8 @@ public class WorkflowRestService {
     sb.append(workflow.getState().name().toLowerCase());
     sb.append("\",\n");
 
-    sb.append("   \"workflow_properties\" : [\n");
-    Set<Entry<String, String>> entrySet = workflow.getProperties().entrySet();
-    int propCount = 0;
-    for(Entry<String, String> entry : entrySet) {
-      sb.append("     {\"");
-      sb.append(entry.getKey());
-      sb.append("\" : \"");
-      sb.append(entry.getValue());
-      sb.append("\"}");
-      if(++propCount < entrySet.size()) sb.append(",");
-      sb.append("\n");
-    }
-    sb.append("   ],\n");
-    
+    Set<WorkflowConfiguration> configs = workflow.getConfigurations();
+    appendConfigs(sb, configs, true);
     sb.append("   \"workflow_operations\" : [\n");
     WorkflowOperationInstanceList operations = workflow.getWorkflowOperationInstanceList();
     for(int i=0; i < operations.size(); i++) {
@@ -316,6 +305,24 @@ public class WorkflowRestService {
     }
 
     sb.append("\n }");
+  }
+
+  protected void appendConfigs(StringBuilder sb, Set<WorkflowConfiguration> configs, boolean moreElements) {
+    if(configs != null) {
+      sb.append("   \"configuration\" : [\n");
+      for(Iterator<WorkflowConfiguration> iter = configs.iterator(); iter.hasNext();) {
+        WorkflowConfiguration config = iter.next();
+        sb.append("     {\"");
+        sb.append(config.getKey());
+        sb.append("\" : \"");
+        sb.append(config.getValue());
+        sb.append("\"}");
+        if(iter.hasNext()) sb.append(",");
+        sb.append("\n");
+      }
+      sb.append("   ]");
+    }
+    if(moreElements) sb.append(",\n");
   }
 
   protected DublinCoreCatalog getDublinCore(MediaPackage mediaPackage) {

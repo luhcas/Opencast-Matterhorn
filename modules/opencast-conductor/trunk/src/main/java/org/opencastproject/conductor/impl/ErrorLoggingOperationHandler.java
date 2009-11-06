@@ -36,8 +36,7 @@ public class ErrorLoggingOperationHandler implements WorkflowOperationHandler {
    */
   public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.warn("Workflow instance failed: " + workflowInstance);
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getSourceMediaPackage(),
-            workflowInstance.getProperties(), false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), null, false);
   }
   
 }

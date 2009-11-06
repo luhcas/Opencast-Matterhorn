@@ -17,6 +17,8 @@ package org.opencastproject.workflow.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
+import org.opencastproject.workflow.api.WorkflowConfiguration;
+import org.opencastproject.workflow.api.WorkflowConfigurationImpl;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionList;
@@ -368,6 +370,13 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
           Map<String, String> properties) {
+    Set<WorkflowConfiguration> configurations = new HashSet<WorkflowConfiguration>();
+    if (properties != null) {
+      for(Entry<String, String> entry : properties.entrySet()) {
+        configurations.add(new WorkflowConfigurationImpl(entry.getKey(), entry.getValue()));
+      }
+    }
+    
     String id = UUID.randomUUID().toString();
     log_.info("Starting a new workflow instance with ID=" + id);
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition);
@@ -377,10 +386,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    HashMap<String, String> map = new HashMap<String, String>();
-    if (properties != null)
-      map.putAll(properties);
-    workflowInstance.setProperties(map);
+    workflowInstance.setConfigurations(configurations);
     workflowInstance.setState(WorkflowInstance.State.RUNNING.name());
     dao.update(workflowInstance);
     run(workflowInstance);

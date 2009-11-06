@@ -340,7 +340,7 @@ public class WorkflowServiceImplDaoDerbyImpl implements WorkflowServiceImplDao {
         s.execute();
       } else {
         // Add it
-        MediaPackage mp = instance.getSourceMediaPackage();
+        MediaPackage mp = instance.getCurrentMediaPackage();
         String mediaPackageId = null;
         String episodeId = null;
         String seriesId = null;

@@ -49,14 +49,13 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
 
     try {
       // adding media package to the search index
-      searchService.add(workflowInstance.getSourceMediaPackage());
+      searchService.add(workflowInstance.getCurrentMediaPackage());
     } catch (SearchException e) {
       throw new WorkflowOperationException(e);
     }
 
     logger.info("run() publish operation completed");
 
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getSourceMediaPackage(),
-            workflowInstance.getProperties(), false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), null, false);
   }
 }

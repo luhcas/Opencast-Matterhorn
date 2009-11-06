@@ -26,12 +26,11 @@ import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * The workflow definition for handling "compose" operations
@@ -55,9 +54,9 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     MediaPackage resultingMediaPackage;
 
     // FIXME change when encode is called (think how to pass properties)
-    if (workflowInstance.getProperty("encode") != null) {
+    if (workflowInstance.getConfiguration("encode") != null) {
       try {
-        resultingMediaPackage = encode(workflowInstance.getSourceMediaPackage(), workflowInstance.getProperties());
+        resultingMediaPackage = encode(workflowInstance.getCurrentMediaPackage(), workflowInstance.getCurrentOperation());
       } catch (EncoderException e) {
         throw new WorkflowOperationException(e);
       } catch (MediaPackageException e) {
@@ -67,14 +66,13 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
       }
     } else {
       logger.info("No property for encoding, skipping...");
-      resultingMediaPackage = workflowInstance.getSourceMediaPackage();
+      resultingMediaPackage = workflowInstance.getCurrentMediaPackage();
     }
 
     logger.info("run() compose operation completed");
 
     // TODO Add new media track(s) to the media package
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage,
-            workflowInstance.getProperties(), false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, null, false);
   }
 
   /**
@@ -87,7 +85,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
    * @throws MediaPackageException
    * @throws UnsupportedElementException
    */
-  private MediaPackage encode(MediaPackage mediaPackage, Map<String, String> properties) throws EncoderException,
+  private MediaPackage encode(MediaPackage mediaPackage, WorkflowOperationInstance operation) throws EncoderException,
           MediaPackageException, UnsupportedElementException {
 
     Track[] trackList = mediaPackage.getTracks();
@@ -108,7 +106,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
       // mediaPackage.add(composedTrack);
       // }
       for (EncodingProfile profile : profileList) {
-        if (properties.containsKey(profile.getName())) {
+        if (operation.getConfiguration(profile.getName()) != null) {
           logger.info("Encoding track " + trackID + " with " + profile.getName() + "profile");
           Track composedTrack = composerService.encode(mediaPackage, trackID, profile.getName());
           // store new tracks to mediaPackage

@@ -230,12 +230,20 @@
                             name="compose"
                             fail-on-error="true"
                             exception-handler-workflow="Default Error Handler"
-                            description="Encode media"/>
+                            description="Encode media">
+                            <configurations>
+                              <configuration key="track-id">track-1</configuration>
+                            </configurations>
+                          </operation>
                           <operation
                             name="distribute"
                             fail-on-error="true"
                             exception-handler-workflow="Default Error Handler"
-                            description="Distribute media to distribution channels"/>
+                            description="Distribute media to distribution channels">
+                            <configurations>
+                              <configuration key="track-id">track-2</configuration>
+                            </configurations>
+                          </operation>
                         </operations>
                       </workflow-definition>
                     </textarea><br/>
@@ -252,7 +260,12 @@
                       </mediapackage>
                     </textarea><br/>
                     Key/Value Properties<br/>
-                    <textarea rows="20" cols="80" id="properties" name="properties">this=that</textarea><br/>
+                    <textarea rows="20" cols="80" id="properties" name="properties">
+flash=true
+quicktime=false
+youTube=true
+itunes=false
+                    </textarea><br/>
                     <input type="submit" value="Start workflow"/>
                   </form>
                 </td>
