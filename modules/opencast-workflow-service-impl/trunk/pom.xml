@@ -129,6 +129,11 @@
       <version>10.5.3.0_1</version>
     </dependency>
     <dependency>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -166,7 +171,9 @@
               org.tartarus.*,
               org.apache.solr.*,
               org.apache.lucene.*,
-              org.apache.derby.*
+              org.apache.derby.*,
+              org.json.simple,
+              org.json.simple.parser
             </Private-Package>
             <Embed-Dependency>
               lucene-analyzers;inline=true,
@@ -182,7 +189,8 @@
               solr-lucene-snowball;inline=true,
               solr-lucene-spellchecker;inline=true,
               stax-utils;inline=true,
-              derby;inline=true
+              derby;inline=true,
+              json_simple;inline=true
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/workflow-service.xml,
