@@ -70,6 +70,7 @@ public class ComposerRestService {
   public TrackType encode(
           @FormParam("mediapackage") MediapackageType mediaPackageType,
           @FormParam("sourceTrackId") String sourceTrackId,
+          @FormParam("targetTrackId") String targetTrackId,
           @FormParam("profileId") String profileId) throws Exception {
     // Ensure that the POST parameters are present
     if(mediaPackageType == null || sourceTrackId == null || profileId == null) {
@@ -82,7 +83,7 @@ public class ComposerRestService {
         loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));
     
     // Encode the specified track
-    Track track = composerService.encode(mediaPackage, sourceTrackId, profileId);
+    Track track = composerService.encode(mediaPackage, sourceTrackId, targetTrackId, profileId);
     
     // Return the JAXB version of the track
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();

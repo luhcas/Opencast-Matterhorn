@@ -83,7 +83,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         MediaPackageElement element = elementBuilder.elementFromURL(url, Type.Track,
                 MediaPackageElements.INDEFINITE_TRACK);
         track = (TrackImpl) element;
-        track.setDuration(metadata.getDuration());
+        if(metadata.getDuration() != null) track.setDuration(metadata.getDuration());
         track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
         List<AudioStreamMetadata> audioList = metadata.getAudioStreamMetadata();
         if (audioList != null && !audioList.isEmpty()) {
@@ -116,6 +116,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
           }
         }
       } catch (Exception e) {
+        e.printStackTrace();
         throw new RuntimeException(e);
       } // FIXME: how should we determine flavor?
       return track;

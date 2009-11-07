@@ -25,13 +25,15 @@ import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 
@@ -96,7 +98,7 @@ public class ComposerServiceImpl implements ComposerService {
    * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.media.mediapackage.MediaPackage,
    *      java.lang.String, java.lang.String)
    */
-  public Track encode(MediaPackage mediaPackage, String sourceTrackId, String profileId) throws EncoderException {
+  public Track encode(MediaPackage mediaPackage, String sourceTrackId, String targetTrackId, String profileId) throws EncoderException {
     StringBuilder message = new StringBuilder();
     message.append("encoding job started on:\nMedia package=");
     message.append(mediaPackage.getIdentifier());
@@ -118,16 +120,25 @@ public class ComposerServiceImpl implements ComposerService {
     // Do the work
     File encodingOutput = engine.encode(workspaceVersion, profile);
 
-    // Generate the url to pick up the encoded track
+    // Put the file in the workspace
     URL returnURL = null;
+    InputStream in = null;
     try {
-      returnURL = encodingOutput.toURI().toURL();
-    } catch (MalformedURLException e) {
-      log_.error("Java seems to be unable to generate urls from files");
+      in = new FileInputStream(encodingOutput);
+      returnURL = workspace.put(mediaPackage.getIdentifier().getLocalName(), targetTrackId, encodingOutput.getName(), in);
+      log_.info("Copied the encoded file to the workspace at " + returnURL);
+//      encodingOutput.delete();
+//      log_.info("Deleted the local copy of the encoded file at " + encodingOutput.getAbsolutePath());
+    } catch (Exception e) {
+      log_.error("unable to put the encoded file into the workspace");
+      e.printStackTrace();
+    } finally {
+      IOUtils.closeQuietly(in);
     }
 
     // Have the encoded track inspected and return the result
     Track inspectedTrack = inspectionService.inspect(returnURL);
+    inspectedTrack.setIdentifier(targetTrackId);
     return inspectedTrack;
   }
 

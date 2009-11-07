@@ -23,7 +23,7 @@ import org.opencastproject.media.mediapackage.Track;
  */
 public interface ComposerService {
 
-  public Track encode(MediaPackage mediaPackage, String sourceTrackId, String profileId) throws EncoderException;
+  public Track encode(MediaPackage mediaPackage, String sourceTrackId, String targetTrackId, String profileId) throws EncoderException;
 
   EncodingProfile[] listProfiles();
   

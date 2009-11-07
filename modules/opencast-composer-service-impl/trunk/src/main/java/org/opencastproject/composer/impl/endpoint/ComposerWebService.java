@@ -40,6 +40,7 @@ public interface ComposerWebService {
   TrackType encode(
     @WebParam(name="mediapackage") MediapackageType mediaPackage,
     @WebParam(name="sourceTrackId") String sourceTrackId,
+    @WebParam(name="targetTrackId") String targetTrackId,
     @WebParam(name="profileId") String profileId) throws Exception;
 
   /**

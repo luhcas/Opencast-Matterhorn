@@ -244,7 +244,16 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     if(workflowOperationInstanceList == null || workflowOperationInstanceList.size() == 0) return getSourceMediaPackage();
     WorkflowOperationInstance op = workflowOperationInstanceList.get(workflowOperationInstanceList.size()-1);
     WorkflowOperationResult result = op.getResult();
-    if(result == null || result.getResultingMediaPackage() == null) return getSourceMediaPackage();
+    if(result == null || result.getResultingMediaPackage() == null) {
+      // this could be the currently running operation.  if so, try to get the previous operation's result
+      if(op.getState().equals(State.RUNNING) && workflowOperationInstanceList.size() >= 2) {
+        WorkflowOperationInstance previous = workflowOperationInstanceList.get(workflowOperationInstanceList.size()-2);
+        WorkflowOperationResult previousResult =  previous.getResult();
+        if(previousResult != null) return previousResult.getResultingMediaPackage();
+      } else {
+        return getSourceMediaPackage();
+      }
+    }
     return result.getResultingMediaPackage();
   }
 

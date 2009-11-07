@@ -15,6 +15,7 @@
  */
 package org.opencastproject.conductor.impl;
 
+import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -47,15 +48,17 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
 
     logger.info("run() publish workflow operation");
 
+    MediaPackage mp = workflowInstance.getCurrentMediaPackage();
+
     try {
       // adding media package to the search index
-      searchService.add(workflowInstance.getCurrentMediaPackage());
+      searchService.add(mp);
     } catch (SearchException e) {
       throw new WorkflowOperationException(e);
     }
 
     logger.info("run() publish operation completed");
 
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), null, false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, null, false);
   }
 }

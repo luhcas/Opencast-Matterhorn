@@ -54,6 +54,7 @@ public class ComposerWebServiceImpl implements ComposerWebService {
   public TrackType encode(
           @WebParam(name="mediapackage") MediapackageType mediaPackageType,
           @WebParam(name="sourceTrackId") String sourceTrackId,
+          @WebParam(name="targetTrackId") String targetTrackId,
           @WebParam(name="profileId") String profileId) throws Exception {
     if(mediaPackageType == null || sourceTrackId == null || profileId == null) {
       throw new IllegalArgumentException("mediapackage, sourceTrackId, and profileId must not be null");
@@ -64,7 +65,7 @@ public class ComposerWebServiceImpl implements ComposerWebService {
         loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));
     
     // Encode the specified track
-    Track track = composerService.encode(mediaPackage, sourceTrackId, profileId);
+    Track track = composerService.encode(mediaPackage, sourceTrackId, targetTrackId, profileId);
     
     // Return the JAXB version of the track
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();

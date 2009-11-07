@@ -97,7 +97,6 @@ public class WorkflowRestService {
   }
 
   /**
-   * @param sb
    * @param definition
    */
   @SuppressWarnings("unchecked")

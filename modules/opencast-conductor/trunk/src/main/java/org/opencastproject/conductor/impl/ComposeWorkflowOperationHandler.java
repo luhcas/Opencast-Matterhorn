@@ -87,34 +87,26 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
    */
   private MediaPackage encode(MediaPackage mediaPackage, WorkflowOperationInstance operation) throws EncoderException,
           MediaPackageException, UnsupportedElementException {
-
-    Track[] trackList = mediaPackage.getTracks();
-    for (Track track : trackList) {
-
-      // encode track
-      String trackID = track.getIdentifier();
-
-      // TODO profile retrieval, matching for media type (Audio, Visual, AudioVisual, EnhancedAudio, Image,
-      // ImageSequence, Cover)
-      // String[] profiles = ((String)properties.get("encode")).split(" ");
-      EncodingProfile[] profileList = composerService.listProfiles();
-
-      // for(String profileID : profiles){
-      // logger.info("Encoding track " + trackID + " with " + profileID + "profile");
-      // Track composedTrack = composerService.encode(mediaPackage, trackID, profileID);
-      // // store new tracks to mediaPackage
-      // mediaPackage.add(composedTrack);
-      // }
-      for (EncodingProfile profile : profileList) {
-        if (operation.getConfiguration(profile.getName()) != null) {
-          logger.info("Encoding track " + trackID + " with " + profile.getName() + "profile");
-          Track composedTrack = composerService.encode(mediaPackage, trackID, profile.getName());
-          // store new tracks to mediaPackage
-          mediaPackage.add(composedTrack);
-        }
+    String sourceTrackId = operation.getConfiguration("source-track-id");
+    String targetTrackId = operation.getConfiguration("target-track-id");
+    // TODO profile retrieval, matching for media type (Audio, Visual, AudioVisual, EnhancedAudio, Image,
+    // ImageSequence, Cover)
+    // String[] profiles = ((String)properties.get("encode")).split(" ");
+    EncodingProfile[] profileList = composerService.listProfiles();
+    // for(String profileID : profiles){
+    // logger.info("Encoding track " + trackID + " with " + profileID + "profile");
+    // Track composedTrack = composerService.encode(mediaPackage, trackID, profileID);
+    // // store new tracks to mediaPackage
+    // mediaPackage.add(composedTrack);
+    // }
+    for (EncodingProfile profile : profileList) {
+      if (operation.getConfiguration(profile.getIdentifier()) != null) {
+        logger.info("Encoding track " + sourceTrackId + " using profile " + profile.getIdentifier());
+        Track composedTrack = composerService.encode(mediaPackage, sourceTrackId, targetTrackId, profile.getIdentifier());
+        // store new tracks to mediaPackage
+        mediaPackage.add(composedTrack);
       }
     }
-
     return mediaPackage;
   }
 }
