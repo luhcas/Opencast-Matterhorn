@@ -42,13 +42,16 @@ import java.util.Dictionary;
 public class WorkingFileRepositoryImpl implements WorkingFileRepository, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryImpl.class);
   private String rootDirectory = null;
+  private String serverUrl = null;
 
   public WorkingFileRepositoryImpl() {
-    this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo");
+    this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo",
+            "http://localhost:8080");
   }
 
-  public WorkingFileRepositoryImpl(String rootDirectory) {
+  public WorkingFileRepositoryImpl(String rootDirectory, String serverUrl) {
     this.rootDirectory = rootDirectory;
+    this.serverUrl = serverUrl;
     createRootDirectory();
   }
 
@@ -93,9 +96,9 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     File f = getFile(mediaPackageID, mediaPackageElementID);
     try {
       if(f.getName().equals(mediaPackageElementID)) {
-        return new URL("http://localhost:8080/files/" + mediaPackageID + "/" + mediaPackageElementID);
+        return new URL(serverUrl + "/files/" + mediaPackageID + "/" + mediaPackageElementID);
       } else {
-        return new URL("http://localhost:8080/files/" + mediaPackageID + "/" + mediaPackageElementID + "/" + f.getName());
+        return new URL(serverUrl + "/files/" + mediaPackageID + "/" + mediaPackageElementID + "/" + f.getName());
       }
     } catch (MalformedURLException e) {
       throw new RuntimeException(e);
@@ -119,8 +122,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
         if( ! mediaPackageElementDirectory.exists()) {
           logger.info("Attempting to create a new directory at " + mediaPackageElementDirectory.getAbsolutePath());
           FileUtils.forceMkdir(mediaPackageElementDirectory);
-        }
-        else{
+        } else{
 //          logger.error("Integrity error: directory " + mediaPackageID + "/" + mediaPackageElementID + 
 //                  " already exists, but does not contain " + filename);
 //          throw new RuntimeException("Element with ID: " + mediaPackageElementID + "already exists and does" + 
@@ -162,9 +164,17 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
 
   @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {
-    if(props.get("root") != null) {
-      rootDirectory = (String)props.get("root");
+    logger.info("updating properties on " + this);
+    String newRootDirectory = (String)props.get("root");
+    if(newRootDirectory != null) {
+      logger.info("setting root directory to " + newRootDirectory);
+      rootDirectory = newRootDirectory;
       createRootDirectory();
+    }
+    String newServerUrl = (String)props.get("serverUrl");
+    if(newServerUrl != null) {
+      logger.info("setting serverUrl to " + newServerUrl);
+      serverUrl = newServerUrl;
     }
   }
 

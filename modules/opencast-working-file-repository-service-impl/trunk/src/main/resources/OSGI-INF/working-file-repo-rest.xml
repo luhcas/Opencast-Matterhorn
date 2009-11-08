@@ -9,5 +9,5 @@
     <provide interface="org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryRestEndpoint" />
   </service>
   <reference name="REPO" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository"
-    cardinality="0..1" policy="dynamic" bind="setRepository" unbind="unsetRepository" />
+    cardinality="1..1" policy="static"  bind="setRepository" />
 </component>

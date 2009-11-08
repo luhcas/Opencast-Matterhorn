@@ -42,15 +42,12 @@ import javax.ws.rs.core.Response;
 @Path("/")
 public class WorkingFileRepositoryRestEndpoint {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryRestEndpoint.class);
-  WorkingFileRepository repo;
+  protected WorkingFileRepository repo;
+  protected final String docs;
+
   public void setRepository(WorkingFileRepository repo) {
     this.repo = repo;
   }
-  public void unsetRepository(WorkingFileRepository repo) {
-    this.repo = null;
-  }
-
-  protected final String docs;
   
   public WorkingFileRepositoryRestEndpoint() {
     String docsFromClassloader = null;
