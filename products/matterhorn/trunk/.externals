@@ -1,6 +1,8 @@
 ../../../modules/opencast-build-tools/trunk opencast-build-tools
 ../../../modules/opencast-runtime-info-ui/trunk	opencast-runtime-info-ui
 ../../../modules/opencast-notification-service-api/trunk	opencast-notification-service-api
+../../../modules/opencast-capture-admin-service-api/trunk	opencast-capture-service-api
+../../../modules/opencast-capture-admin-service-impl/trunk	opencast-capture-service-impl
 ../../../modules/opencast-capture-service-api/trunk	opencast-capture-service-api
 ../../../modules/opencast-capture-service-impl/trunk	opencast-capture-service-impl
 ../../../modules/opencast-composer-service-api/trunk	opencast-composer-service-api
