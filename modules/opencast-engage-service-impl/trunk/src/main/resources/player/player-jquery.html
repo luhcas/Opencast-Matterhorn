@@ -3,11 +3,12 @@
     <title>Accessible Opencast Streaming JQuery Scrubber</title>
     <script type="text/javascript" src="bridge/lib/FABridge.js"></script>
     <script type="text/javascript" src="bridge/Videodisplay.js"></script>
-
+    
         <link rel="stylesheet" href="jquery/ui/css/base/ui.all.css" type="text/css">
+         <link rel="stylesheet" href="css/oc.player.css" type="text/css">
         <script type="text/javascript" src="jquery/jquery-1.3.2.js"></script>
         <script type="text/javascript" src="jquery/ui/ui.core.js"></script>
-        <script type="text/javascript" src="jquery/ui/ui.slider.js"></script>
+        <script type="text/javascript" src="jquery/ui/ui.slider.oc-custom.js"></script> 
 
 
     <script language="javascript" type="text/javascript">
@@ -24,6 +25,7 @@
         }
 
         function doSeek (time) {
+        	$('#slider').slider('value', time);
             Videodisplay.seek (time);
         }
 
@@ -37,11 +39,16 @@
         
         function setTime (text) {
             document.getElementById("time").innerHTML = text;
-        }
+
+                   }
 
         function setDuration (time) {
             $('#slider').slider('option', 'max', time);
-        	
+        }
+
+        function setProgress (value) 
+        {
+        	$('.matterhorn-progress-bar').css("width", value + "%");
         }
 
     </script>
@@ -51,7 +58,7 @@
 
             $(document).ready(function(){
                 $("#slider").slider();
-                $('#slider').slider('option', 'animate', true);
+                $('#slider').slider('option', 'animate', false);
                 $('#slider').slider('option', 'min', 0);
                 $('#slider').bind('slide', function(event, ui) {
 
@@ -86,14 +93,24 @@
             </object>
         </div>
         
-        <div id="slider" class="ui-slider" style="width:360px; display:inline-block; margin-left:10px; margin-right:10px;margin-top:10px;"></div>
-        
+        <div id="slider" class="ui-slider" style="width:360px; display:inline-block; margin-left:10px; margin-right:10px;margin-top:10px;" >
+            <div class="matterhorn-progress-bar"></div>
+            
+	            <div class="matterhorn-slide" onclick="doSeek(0);"></div>
+	            <div class="matterhorn-slide2" onclick="doSeek(500);"></div>
+	            <div class="matterhorn-slide3" onclick="doSeek(720);"></div>
+	            <div class="matterhorn-slide4" onclick="doSeek(1000);"></div>
+                <div class="matterhorn-slide5" onclick="doSeek(1800);"></div>
+                <div class="matterhorn-slide6" onclick="doSeek(2200);"></div>
+                <div class="matterhorn-slide7" onclick="doSeek(3000);"></div>
+        </div>
+
         <div style="margin-left:10px; margin-right:10px; margin-top:5px;">
             <input type="button" onclick="doPlay();" value="Play"/>
             <input type="button" onclick="doPause();" value="Pause"/>
             <input type="button" onclick="doStop();" value="Stop"/>
             <div id="time" style="display:inline-block; margin-left:90px;">00:00:00 | 00:00:00</div>
-            
         </div>
+
         </body>
 </html>

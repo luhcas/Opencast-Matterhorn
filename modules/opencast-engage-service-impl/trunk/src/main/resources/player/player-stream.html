@@ -1,17 +1,18 @@
 <html>
 <head>
-    <title>Accessible Opencast Streaming</title>
-    <script type="text/javascript" src="bridge/lib/FABridge.js"></script>
-    <script type="text/javascript" src="bridge/Videodisplay.js"></script>
-    <script type="text/javascript" src="bridge/Scrubber.js"></script>
+<title>Accessible Opencast Streaming</title>
+<script type="text/javascript" src="bridge/lib/FABridge.js"></script>
+<script type="text/javascript" src="bridge/Videodisplay.js"></script>
+<script type="text/javascript" src="bridge/Scrubber.js"></script>
 
-        <link rel="stylesheet" href="jquery/ui/css/base/ui.all.css" type="text/css">
-        <script type="text/javascript" src="jquery/jquery-1.3.2.js"></script>
-        <script type="text/javascript" src="jquery/ui/ui.core.js"></script>
-        <script type="text/javascript" src="jquery/ui/ui.slider.js"></script>
+<link rel="stylesheet" href="jquery/ui/css/base/ui.all.css"
+	type="text/css">
+<script type="text/javascript" src="jquery/jquery-1.3.2.js"></script>
+<script type="text/javascript" src="jquery/ui/ui.core.js"></script>
+<script type="text/javascript" src="jquery/ui/ui.slider.js"></script>
 
 
-    <script language="javascript" type="text/javascript">
+<script language="javascript" type="text/javascript">
         function doPlay () {
                     Videodisplay.play();
         }
@@ -48,8 +49,8 @@
             Scrubber.scrubberStopDrag();
         }
     </script>
-    
-   <script language="javascript" type="text/javascript">
+
+<script language="javascript" type="text/javascript">
     
         function getNamedKey (k)
         { 
@@ -117,8 +118,8 @@
         window.onload = init; 
       */
     </script>
-        <!-- js code for slider -->
-        <script type="text/javascript">
+<!-- js code for slider -->
+<script type="text/javascript">
 
             volumeSteps = 0.05;
 
@@ -182,87 +183,81 @@
         </script>
 </head>
 
-    <body>
-        <div style="margin:10px;margin-bottom:0px">
-            <h1>Streaming Videoplayer</h1>
-            <object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="288" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
-                <param name ="movie" value="Videodisplay.swf" />
-                <param name="quality"value="high"/>
-                <param name="allowScriptAccess" value="always" />
-                <param name="bgcolor" value="#000000"/>
-                <param name="allowFullScreen" value="true"/>
-                <param name="flashvars" VALUE="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv&autoplay=false&captions=http://vm069.rz.uos.de:8080/examples/car.dfxp.xml">
-                <embed 
-                    width="360" 
-                    height="288" 
-                    bgcolor="#000000"
-                    allowfullscreen="true" 
-                    tabindex="1"
-                    type="application/x-shockwave-flash" 
-                    pluginspage="http://www.macromedia.com/go/getflashplayer" 
-                    flashvars="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv&autoplay=false&captions=http://vm069.rz.uos.de:8080/examples/car.dfxp.xml" 
-                    quality="high" 
-                    allowScriptAccess="always"
-                    src="Videodisplay.swf"/>
-            </object>
-        </div>
-        
-        <div style="margin:5px;margin-top:0px">
-        <object id="oc_Scrubber" tabindex="1" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="40" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
-                <param name ="movie" value="Scrubber.swf" />
-                <param name="quality"value="high"/>
-                <param name="allowScriptAccess" value="always" />
-                <param name="bgcolor" value="#ffffff"/>
-                <param name="allowFullScreen" value="true"/>
-                <param name="flashvars" VALUE="bridgeName=b_Scrubber">
-                <embed 
-                    width="370" 
-                    height="40" 
-                    allowfullscreen="true" 
-                    tabindex="2"
-                    type="application/x-shockwave-flash" 
-                    pluginspage="http://www.macromedia.com/go/getflashplayer" 
-                    flashvars="bridgeName=b_Scrubber" 
-                    quality="high" 
-                    allowScriptAccess="always"
-                    src="Scrubber.swf"/>
-        </object>
-        </div>
-        
-        
-        <div style="margin:10px">
-            <input type="button" onclick="doPlay();" value="Play"/>
-            <input type="button" onclick="doPause();" value="Pause"/>
-            <input type="button" onclick="doStop();" value="Stop"/>
-        </div>
-        
-        <div id="time" style="margin:10px">00:00:00 | 00:00:00</div>
-        
-        <table>
-            <tr>
-                <td colspan="2"><b>Feature List</b></td>
-            </tr>
-            <tr>
-                <td align="right">1.</td>
-                <td>Zoom video using the zoom function of the browser</td>
-            </tr>
-            <tr>
-                <td align="right">2.</td>
-                <td>Play/Pause video using keyboard: <b>spacebar</b> or <b>enter</b></td>
-            </tr>
-            <tr>
-                <td align="right">3.</td>
-                <td>Default auto-play off: To enable it set flashvar <i>autoplay=true</i></td>
-            </tr>
-            <tr>
-                <td align="right">4.</td>
-                <td>Set volume:
-                    <button onclick="decreaseVolume();" onmousedown="startDecreaseVolume();" onmouseup="stopDecreaseVolume();">-</button>
-                    <div id="slider" class="ui-slider" style="width:15em; display:inline-block; margin-left:0.5em; margin-right:0.5em;"></div>
-                    <button onclick="increaseVolume();" onmousedown="startIncreaseVolume();" onmouseup="stopIncreaseVolume();">+</button>
-                    <div id="volumeDisplay" style="display:inline"></div>
-                </td>
-            </tr>
-        </table>
-    </body>
+<body>
+<div style="margin: 10px; margin-bottom: 0px">
+<h1>Streaming Videoplayer</h1>
+<object id="oc_Videodisplay"
+	codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"
+	width="360" height="288"
+	classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
+	<param name="movie" value="Videodisplay.swf" />
+	<param name="quality" value="high" />
+	<param name="allowScriptAccess" value="always" />
+	<param name="bgcolor" value="#000000" />
+	<param name="allowFullScreen" value="true" />
+	<param name="flashvars"
+		VALUE="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv&autoplay=false&captions=http://vm069.rz.uos.de:8080/examples/car.dfxp.xml">
+	<embed width="360" height="288" bgcolor="#000000"
+		allowfullscreen="true" tabindex="1"
+		type="application/x-shockwave-flash"
+		pluginspage="http://www.macromedia.com/go/getflashplayer"
+		flashvars="bridgeName=b_Videodisplay&video_url=rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv&autoplay=false&captions=http://vm069.rz.uos.de:8080/examples/car.dfxp.xml"
+		quality="high" allowScriptAccess="always" src="Videodisplay.swf" /></object></div>
+
+<div style="margin: 5px; margin-top: 0px"><object id="oc_Scrubber"
+	tabindex="1"
+	codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"
+	width="360" height="40"
+	classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
+	<param name="movie" value="Scrubber.swf" />
+	<param name="quality" value="high" />
+	<param name="allowScriptAccess" value="always" />
+	<param name="bgcolor" value="#ffffff" />
+	<param name="allowFullScreen" value="true" />
+	<param name="flashvars" VALUE="bridgeName=b_Scrubber">
+	<embed width="370" height="40" allowfullscreen="true" tabindex="2"
+		type="application/x-shockwave-flash"
+		pluginspage="http://www.macromedia.com/go/getflashplayer"
+		flashvars="bridgeName=b_Scrubber" quality="high"
+		allowScriptAccess="always" src="Scrubber.swf" /></object></div>
+
+
+<div style="margin: 10px"><input type="button" onclick="doPlay();"
+	value="Play" /> <input type="button" onclick="doPause();"
+	value="Pause" /> <input type="button" onclick="doStop();" value="Stop" /></div>
+
+<div id="time" style="margin: 10px">00:00:00 | 00:00:00</div>
+
+<table>
+	<tr>
+		<td colspan="2"><b>Feature List</b></td>
+	</tr>
+	<tr>
+		<td align="right">1.</td>
+		<td>Zoom video using the zoom function of the browser</td>
+	</tr>
+	<tr>
+		<td align="right">2.</td>
+		<td>Play/Pause video using keyboard: <b>spacebar</b> or <b>enter</b></td>
+	</tr>
+	<tr>
+		<td align="right">3.</td>
+		<td>Default auto-play off: To enable it set flashvar <i>autoplay=true</i></td>
+	</tr>
+	<tr>
+		<td align="right">4.</td>
+		<td>Set volume:
+		<button onclick="decreaseVolume();"
+			onmousedown="startDecreaseVolume();"
+			onmouseup="stopDecreaseVolume();">-</button>
+		<div id="slider" class="ui-slider"
+			style="width: 15em; display: inline-block; margin-left: 0.5em; margin-right: 0.5em;"></div>
+		<button onclick="increaseVolume();"
+			onmousedown="startIncreaseVolume();"
+			onmouseup="stopIncreaseVolume();">+</button>
+		<div id="volumeDisplay" style="display: inline"></div>
+		</td>
+	</tr>
+</table>
+</body>
 </html>

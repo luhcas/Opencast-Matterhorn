@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Accessible Opencast Video with Captions</title>
+<title>How much of the media I have already seen </title>
 <script type="text/javascript" src="bridge/lib/FABridge.js"></script>
 <script type="text/javascript" src="bridge/Videodisplay.js"></script>
 
@@ -28,13 +28,8 @@
         function doSeek (time) {
             Videodisplay.seek (time);
         }
-        
-        function doClosedCaptions (cc) {
-            Videodisplay.closedCaptions (cc);
-        }
-        
-        
-		function setPlayhead (newPosition) {
+
+        function setPlayhead (newPosition) {
             $('#slider').slider('value', newPosition);
 
             $('.matterhorn-progress-bar').css("width", newPosition/5 + "px");
@@ -43,15 +38,11 @@
         function doSetVolume (value) {
            Videodisplay.setVolume(value);
         }
-
-        function doSetLanguage (value) {
-
-            Videodisplay.setLanguage (value);
-        }
         
         function setTime (text) {
-            document.getElementById("time").innerHTML = text;
-		}
+            document.getElementById("time").innerHTML = "Time: "+ text;
+
+                   }
 
         function setDuration (time) {
             $('#slider').slider('option', 'max', time);
@@ -61,29 +52,7 @@
             document.getElementById("progress").innerHTML = value + "%";
         }
 
-        function setCaptions (text) {
-            document.getElementById("captions").innerHTML = text;
-        }
-
-        function setLangugageComboBox (languageComboBox) 
-		{
-			for(var i=0; i<languageComboBox.length; i++)
-			{
-				var option = document.createElement('option');
-				option.text = languageComboBox[i];
-				var cb_item = document.getElementById("cb_lang");
-				try
-		  		{
-		  			cb_item.add(option,null); // standards compliant
-		  		}
-				catch(ex)
-		  		{
-		  			cb_item.add(option); // IE only
-		  		}
-			}
-		}       
-     
-</script>
+    </script>
 
 <!-- js code for scrubber -->
 <script type="text/javascript">
@@ -103,7 +72,7 @@
 
 <body>
 <div style="margin: 10px; margin-bottom: 0px">
-    <h1>Videoplayer with Captions</h1>
+    <h1>How much of the media I have already seen </h1>
     
     <object id="oc_Videodisplay"
         codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"
@@ -115,11 +84,11 @@
         <param name="bgcolor" value="#000000" />
         <param name="allowFullScreen" value="true" />
         <param name="flashvars"
-            VALUE="bridgeName=b_Videodisplay&video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&autoplay=false&captions=dfxp/car.dfxp.xml">
+            VALUE="bridgeName=b_Videodisplay&video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&autoplay=false">
         <embed width="360" height="288" bgcolor="#000000"
             allowfullscreen="true" type="application/x-shockwave-flash"
             pluginspage="http://www.macromedia.com/go/getflashplayer"
-            flashvars="bridgeName=b_Videodisplay&video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&autoplay=false&captions=dfxp/car.dfxp.xml"
+            flashvars="bridgeName=b_Videodisplay&video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&autoplay=false"
             quality="high" allowScriptAccess="always" src="Videodisplay.swf" />
 
     
@@ -127,34 +96,18 @@
     
 </div>
 <div 
-    id="captions" style="height:30; width:360; text-align: center; margin-left:10px;">
-</div>
-<div 
     id="slider" class="ui-slider"
     style="width: 360px; display: inline-block; margin-left: 10px; margin-right: 10px; margin-top: 10px;">
-    
 </div>
 
 <div 
     style="margin-left: 10px; margin-right: 10px; margin-top: 5px;">
-    <input type="button" onclick="doPlay();" value="Play" /> 
-    <input type="button" onclick="doPause();" value="Pause" /> 
-    <input type="button" onclick="doStop();" value="Stop" />
-    <input type="button" onclick="doClosedCaptions(true);" value="cc" />
-   
+    <input type="button" onclick="doPlay();" value="Play" /> <input
+    type="button" onclick="doPause();" value="Pause" /> <input
+    type="button" onclick="doStop();" value="Stop" />
     <div 
-        id="time" style="display: inline-block; margin-left: 60px;">00:00:00 | 00:00:00
+        id="time" style="display: inline-block; margin-left: 90px;">Time: 00:00:00 of 00:00:00
     </div>
-</div>
-
-<div 
-    id="language" style="margin-left: 10px; margin-right: 10px; margin-top: 5px;">
-	<select 
-		id="cb_lang" 
-		style="width:150px;"
-		onChange="doSetLanguage(cb_lang.options[selectedIndex].value);"
-		>
-	</select>
 </div>
 
 
