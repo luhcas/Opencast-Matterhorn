@@ -29,7 +29,7 @@ import org.osgi.util.tracker.ServiceTracker;
 @RunWith(JUnit4TestRunner.class)
 public abstract class AbstractIntegrationTest {
   @Inject
-  private BundleContext bundleContext;
+  protected BundleContext bundleContext;
 
   @Configuration
   public static Option[] configuration() {
@@ -111,8 +111,6 @@ public abstract class AbstractIntegrationTest {
             CoreOptions.mavenBundle().groupId("org.opencastproject").artifactId("opencast-authentication-api").update(false),
             CoreOptions.mavenBundle().groupId("org.opencastproject").artifactId("opencast-composer-service-api").update(false),
             CoreOptions.mavenBundle().groupId("org.opencastproject").artifactId("opencast-composer-service-impl").update(false),
-            CoreOptions.mavenBundle().groupId("org.opencastproject").artifactId("opencast-delivery-service-api").update(false),
-            CoreOptions.mavenBundle().groupId("org.opencastproject").artifactId("opencast-delivery-service-impl").update(false),
             CoreOptions.mavenBundle().groupId("org.opencastproject").artifactId("opencast-distribution-service-api").update(false),
             CoreOptions.mavenBundle().groupId("org.opencastproject").artifactId("opencast-distribution-service-local-impl").update(false),
             CoreOptions.mavenBundle().groupId("org.opencastproject").artifactId("opencast-engage-service-api").update(false),
