@@ -211,9 +211,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
    */
   public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(
-            workflowInstance.getSourceMediaPackage(),
-            workflowInstance.getProperties(), 
-            true);
+            workflowInstance.getSourceMediaPackage(), null, true);
   }
 
 }
