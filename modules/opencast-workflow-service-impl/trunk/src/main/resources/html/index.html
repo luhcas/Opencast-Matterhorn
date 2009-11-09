@@ -69,8 +69,8 @@
       <tr class="method_even method">
         <td>Response formats:</td>
         <td>
-          <a href="http://www.w3.org/XML/">xml</a> (<a href="definitions.xml">definitions.xml</a>)<br/>
-          <a href="http://json.org/">json</a> (<a href="definitions.json">definitions.json</a>)
+          <a href="http://www.w3.org/XML/">xml</a> (<a href="@SERVER_URL@/definitions.xml">@SERVER_URL@/definitions.xml</a>)<br/>
+          <a href="http://json.org/">json</a> (<a href="@SERVER_URL@/definitions.json">@SERVER_URL@/definitions.json</a>)
         </td>
       </tr>
       <tr class="method_odd method">
@@ -116,8 +116,8 @@
       <tr class="method_even method">
         <td>Response formats:</td>
         <td>
-          <a href="http://www.w3.org/XML/">xml</a> (<a href="instances.xml">instances.xml</a>)<br/>
-          <a href="http://json.org/">json</a> (<a href="instances.json">instances.json</a>)
+          <a href="http://www.w3.org/XML/">xml</a> (<a href="@SERVER_URL@/instances.xml">@SERVER_URL@/instances.xml</a>)<br/>
+          <a href="http://json.org/">json</a> (<a href="@SERVER_URL@/instances.json">@SERVER_URL@/instances.json</a>)
         </td>
       </tr>
       <tr class="method_odd method">
@@ -156,8 +156,8 @@
       <tr class="method_even method">
         <td>Response formats:</td>
         <td>
-          <a href="http://www.w3.org/XML/">xml</a> (<a href="instance/id.xml">instance/id.xml</a>)<br/>
-          <a href="http://json.org/">json</a> (<a href="instance/id.json">instance/id.json</a>)
+          <a href="http://www.w3.org/XML/">xml</a> (/instance/{id}.xml)<br/>
+          <a href="http://json.org/">json</a> (/instance/{id}.json)
         </td>
       </tr>
       <tr class="method_odd method">
@@ -259,7 +259,7 @@
                         <media>
                           <track id="track-1" type="track/presentation">
                             <mimetype>video/quicktime</mimetype>
-                            <url>http://localhost:8080/workflow/samples/media.mov</url>
+                            <url>@SAMPLES_URL@/media.mov</url>
                             <checksum type="md5">43b7d843b02c4a429b2f547a4f230d31</checksum>
                             <duration>1004400000</duration>
                             <video>
@@ -275,7 +275,7 @@
                         <metadata>
                           <catalog id="catalog-1" type="metadata/dublincore">
                             <mimetype>text/xml</mimetype>
-                            <url>http://localhost:8080/workflow/samples/dc-1.xml</url>
+                            <url>@SAMPLES_URL@/dc-1.xml</url>
                             <checksum type="md5">20e466615251074e127a1627fd0dae3e</checksum>
                           </catalog>
                         </metadata>

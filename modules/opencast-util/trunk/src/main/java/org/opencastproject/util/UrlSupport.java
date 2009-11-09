@@ -28,7 +28,8 @@ import java.util.TreeSet;
  */
 
 public class UrlSupport {
-
+  public static final String DEFAULT_BASE_URL = "http://localhost:8080";
+  
   /**
    * This class should not be instanciated, since it only provides static
    * utility methods.

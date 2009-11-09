@@ -22,6 +22,7 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
+import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -40,6 +41,7 @@ import org.opencastproject.workflow.api.WorkflowInstance.State;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,8 +69,11 @@ import javax.ws.rs.core.Response;
 public class WorkflowRestService {
   private static final int DEFAULT_LIMIT = 20;
   private static final int MAX_LIMIT = 100;
-  
   private static final Logger logger = LoggerFactory.getLogger(WorkflowRestService.class);
+
+  protected String docs = null;
+  protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
+
   private WorkflowService service;
   public void setService(WorkflowService service) {
     this.service = service;
@@ -78,6 +83,35 @@ public class WorkflowRestService {
     this.service = null;
   }
 
+  public void activate(ComponentContext cc) {
+    // Get the configured server URL
+    if(cc == null) serverUrl = UrlSupport.DEFAULT_BASE_URL;
+    String ccServerUrl = cc.getBundleContext().getProperty("serverUrl");
+    logger.info("configured server url is " + ccServerUrl);
+    if(ccServerUrl == null) {
+      serverUrl = UrlSupport.DEFAULT_BASE_URL;
+    } else {
+      serverUrl = ccServerUrl;
+    }
+
+    // Pre-load the documentation
+    String docsFromClassloader = null;
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/html/index.html");
+      docsFromClassloader = IOUtils.toString(in);
+      docsFromClassloader = docsFromClassloader.replaceAll("@SERVER_URL@", serverUrl + "/workflow/rest");
+      docsFromClassloader = docsFromClassloader.replaceAll("@SAMPLES_URL@", serverUrl + "/workflow/samples");
+    } catch (IOException e) {
+      logger.error("failed to read documentation", e);
+      docsFromClassloader = "unable to load documentation for " + WorkflowRestService.class.getName();
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+    docs = docsFromClassloader;
+
+  }
+  
   @SuppressWarnings("unchecked")
   @GET
   @Path("definitions.{output:.*}")
@@ -286,24 +320,7 @@ public class WorkflowRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
+    if(docs == null) return "documentation not available";
     return docs;
-  }
-
-  protected final String docs;
-  
-  public WorkflowRestService() {
-    // Pre-load the documentation
-    String docsFromClassloader = null;
-    InputStream in = null;
-    try {
-      in = getClass().getResourceAsStream("/html/index.html");
-      docsFromClassloader = IOUtils.toString(in);
-    } catch (IOException e) {
-      logger.error("failed to read documentation", e);
-      docsFromClassloader = "unable to load documentation for " + WorkflowRestService.class.getName();
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-    docs = docsFromClassloader;
   }
 }
