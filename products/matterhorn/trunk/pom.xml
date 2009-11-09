@@ -42,8 +42,6 @@
         <module>opencast-composer-service-impl</module>
         <module>opencast-conductor-api</module>
         <module>opencast-conductor</module>
-        <module>opencast-delivery-service-api</module>
-        <module>opencast-delivery-service-impl</module>
         <module>opencast-distribution-service-api</module>
         <module>opencast-distribution-service-local-impl</module>
         <module>opencast-engage-player</module>
@@ -87,8 +85,6 @@
         <module>opencast-composer-service-impl</module>
         <module>opencast-conductor-api</module>
         <module>opencast-conductor</module>
-        <module>opencast-delivery-service-api</module>
-        <module>opencast-delivery-service-impl</module>
         <module>opencast-distribution-service-api</module>
         <module>opencast-distribution-service-local-impl</module>
         <module>opencast-engage-service-api</module> 
