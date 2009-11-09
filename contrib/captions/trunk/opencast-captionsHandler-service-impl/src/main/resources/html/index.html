@@ -6,33 +6,36 @@
 			<title>Captions Handler Service REST Documentation</title>
 	<style type="text/css">
 	/* styles for the page */
-	fieldset {
+	FIELDSET {
 		margin-bottom: 2em;
 		margin-top: 0.5em;
 		padding-bottom: 1em;
 		width: 90%;
 	}
-	
-	table {
+	TABLE.method {
 		width: 100%;
 	}
-
+    TABLE.testing {
+        width: 96%;
+        border: 2px solid #CCC;
+    }
+    UL {
+        margin: 0.2em;
+        padding-left: 1em;
+    }
     DIV.table_spacer {
         height: 2em;
     }
-
 	DIV.footer {
 		padding-top: 1em;
 		font-weight: bold;
 	}
-	
 	.method_set_header {
 		padding-left: 0.5em;
 		padding-right: 0.5em;
 		font-size: 1.4em;
 		font-weight: bold;
 	}
-	
 	.method_header TH {
 		background: #CCFF00 none repeat scroll 0 0;
 		border-bottom: 3px solid #333;
@@ -43,12 +46,10 @@
 		text-align: left;
 		vertical-align: middle;;
 	}
-    
     TH.method_header_left {
        text-align: right;
        padding: 0.6em 1em;
     }
-	
 	TR.method TH {
 		border-bottom: 1px solid #CCC;
 		color: #663;
@@ -59,7 +60,6 @@
 		text-align: right;
 		vertical-align: middle;
 	}
-	
 	TR.method TD {
 		border-bottom: 1px solid #CCC;
 		font-size: 136%;
@@ -68,6 +68,16 @@
 		padding-top: 0.2em;
 		vertical-align: middle;
 	}
+    DIV.hidden_form {
+        display: none;
+    }
+    TD.form_label {
+        width: 10%;
+        font-size: 0.9em !important;
+    }
+    TD.form_submit {
+        border: none !important;
+    }
 	</style>
 </head>
 <body>
@@ -75,7 +85,7 @@
 
 <fieldset>
 	<legend class="method_set_header">Read methods</legend>
-	<table cellpadding="0px" cellspacing="0px" summary="Read method for teh GET /search REST endpoint, Name of the attribute followed by the value">
+	<table class="method" cellpadding="0px" cellspacing="0px" summary="Read method for teh GET /search REST endpoint, Name of the attribute followed by the value">
 		<thead>
 			<tr class="method_header">
 				<th width="20%" scope="col" class="method_header_left">NAME</th>
@@ -89,7 +99,7 @@
 			</tr>
 			<tr class="method">
 				<th scope="row">Description:</th>
-				<td>Searches for and retrieves a list of all media which needs to be captioned</td>
+				<td>Searches for and retrieves a list of media which needs to be captioned</td>
 			</tr>
             <tr class="method">
                 <th scope="row">Required (path) parameters:</th>
@@ -104,7 +114,7 @@
 	                <br />
 	                <tt>startPage=0</tt>: the page of results to display (0 is first page)
                     <br />
-                    <tt>sort=title asc</tt>: the sort order to return items in
+                    <tt>sort=title asc</tt>: the sort order to return items in, valid fields are date, title
 				</td>
 			</tr>
 			<tr class="method">
@@ -119,12 +129,64 @@
 					400: Bad Request, invalid arguments in request, error message
 				</td>
 			</tr>
+            <tr class="method">
+                <th scope="row">Notes:</th>
+                <td>
+                    <ul>
+                        <li>The search is only a search for captionable items and not for all items in general</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr class="method">
+                <th scope="row">Testing:</th>
+                <td>
+                    <a href="#" class="form_link">Testing form</a>
+                    <div class="hidden_form">
+                        <form action="/captionsHandler/rest/search" method="get">
+                            <table class="testing" cellpadding="0" cellspacing="0">
+	                            <tr class="form_field">
+	                                <td class="form_label">
+	                                   <label for="search_count">count:</label>
+	                                </td>
+	                                <td>
+	                                   <input id="search_count" name="count" type="text" value="0" />
+	                                </td>
+	                            </tr>
+	                            <tr class="form_field">
+	                                <td class="form_label">
+	                                   <label for="search_startPage">startPage:</label>
+	                                </td>
+	                                <td>
+	                                   <input id="search_startPage" name="startPage" type="text" value="0" />
+	                                </td>
+	                            </tr>
+	                            <tr class="form_field">
+	                                <td class="form_label">
+	                                   <label for="search_sort">sort:</label>
+	                                </td>
+	                                <td>
+	                                   <input id="search_sort" name="sort" type="text" value="title asc" />
+	                                </td>
+	                            </tr>
+	                            <tr>
+	                                <td colspan="2">
+	                                    <div class="form_submit">
+										   <input type="submit" value="SUBMIT" />
+										   <input type="button" value="CANCEL" />
+									    </div>
+								    </td>
+	                            </tr>
+                            </table>
+                        </form>
+                    </div>
+                </td>
+            </tr>
 		</tbody>
 	</table>
 
     <div class="table_spacer"></div>
 
-    <table cellpadding="0px" cellspacing="0px" summary="Read method for the GET /{id} REST endpoint, Name of the attribute followed by the value">
+    <table class="method" cellpadding="0px" cellspacing="0px" summary="Read method for the GET /{id} REST endpoint, Name of the attribute followed by the value">
         <thead>
             <tr class="method_header">
                 <th width="20%" scope="col" class="method_header_left">NAME</th>
@@ -171,7 +233,7 @@
 
 <fieldset>
 	<legend class="method_set_header">Write methods</legend>
-    <table cellpadding="0px" cellspacing="0px" summary="Write method for the PUT /{id}/{type} REST endpoint, Name of the attribute followed by the value">
+    <table class="method" cellpadding="0px" cellspacing="0px" summary="Write method for the PUT /{id}/{type} REST endpoint, Name of the attribute followed by the value">
         <thead>
             <tr class="method_header">
                 <th width="20%" scope="col" class="method_header_left">NAME</th>
@@ -240,5 +302,28 @@
     Service of <a href="http://www.opencastproject.org/" title="Opencast Project">Opencast</a> 
     <a href="http://www.opencastproject.org/project/matterhorn" title="Opencast Matterhorn">Matterhorn</a>
 </div>
+
+<!-- JAVASCRIPT below here -->
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script type="text/javascript">
+(function($) {
+    $("a.form_link").click(
+        function() {
+            var $this = $(this);
+            var $form = $this.parent().find("div.hidden_form");
+            $form.toggle(400);
+            $this.parent().find("div.form_submit input").click(
+            	function() {
+            		$form.hide(200);
+            		$this.show();
+            	}
+            );
+            $this.hide();
+            return false;
+        }
+    );
+}(jQuery));
+</script>
+
 </body>
 </html>
