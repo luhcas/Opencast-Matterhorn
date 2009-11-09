@@ -15,9 +15,10 @@
 */
 package org.opencast.engage.brick.videodisplay.control
 {
+	import bridge.ExternalFunction;
+	
 	import flash.external.ExternalInterface;
 	
-	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.IResponder;
@@ -69,15 +70,14 @@ package org.opencast.engage.brick.videodisplay.control
 		public function videoControl( event : VideoControlEvent ) : void
 		{
 		  	var currentPlayPauseState:String;
-		  
+														
 			switch(event.videoControlType)
 			{
 				case VideoControlEvent.PLAY:			if( !model.player.playing)
 						    								model.player.play();
 						  								model.currentPlayerState = PlayerState.PLAYING;
-													   	ExternalInterface.call('setVolume', model.player.volume);
-													  	currentPlayPauseState = PlayerState.PAUSING;
-														break;
+													   	currentPlayPauseState = PlayerState.PAUSING;
+													   	break;
 												
 				case VideoControlEvent.PAUSE: 			if(model.player.playing)
 		  				  									model.player.pause();
@@ -100,7 +100,7 @@ package org.opencast.engage.brick.videodisplay.control
 														break;
 								
 				case VideoControlEvent.FASTFORWARD: 	model.player.seek( model.currentPlayhead + model.fastForwardTime );
-										    		
+										    			
 														break;
 								
 				case VideoControlEvent.SKIPFORWARD: 	model.player.seek( model.currentDuration - 1);
@@ -112,7 +112,7 @@ package org.opencast.engage.brick.videodisplay.control
 	      	{
 	      		if(currentPlayPauseState != lastPlayPauseState)
 	        	{
-	        		ExternalInterface.call('setPlayPauseState', currentPlayPauseState);
+	        		ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
 	          		lastPlayPauseState = currentPlayPauseState;
 	        	}
 	      	}	 
@@ -171,6 +171,8 @@ package org.opencast.engage.brick.videodisplay.control
 						break;
 					}
 				}
+				
+				
 
 				// When the learner will see the captions	
 				if( model.ccBoolean == true )
@@ -178,16 +180,18 @@ package org.opencast.engage.brick.videodisplay.control
 					// When the capions are differently, than send the new captiopns
 					if(model.oldSubtitle != subtitle)
 					{
-						ExternalInterface.call('setCaptions' , subtitle);
+						model.currentSubtitle = '';
+						//ExternalInterface.call('setCaptions' , subtitle);
 						model.currentSubtitle = subtitle;
 						model.oldSubtitle = subtitle;
+						
 					}
 				}
 				else
 				{
 					model.currentSubtitle = '';
 					model.oldSubtitle = 'default';
-					ExternalInterface.call('setCaptions' , '');
+					ExternalInterface.call(ExternalFunction.SETCAPTIONS , '');
 				}
 			}
 		}
@@ -214,8 +218,6 @@ package org.opencast.engage.brick.videodisplay.control
 			{
 				model.fontSizeCaptions = 28;
 			}
-			
-			
 		}
 
 		/** setCurrentCaptions 

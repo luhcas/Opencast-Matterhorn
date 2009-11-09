@@ -24,6 +24,8 @@
 	resize="{ resizeVideodisplay() }">
 	<mx:Script>
 		<![CDATA[
+			import bridge.ExternalFunction;
+			import org.openvideoplayer.events.VolumeChangeEvent;
 			import org.opencast.engage.brick.videodisplay.control.event.ResizeVideodisplayEvent;
 			import mx.controls.Alert;
 			import org.openvideoplayer.utils.URL;
@@ -82,9 +84,9 @@
 			
 			private var autoplay:Boolean = false;
 			
-  		private const TIMER_INTERVAL_BYTES_LOADED:int = 200;
+  			private const TIMER_INTERVAL_BYTES_LOADED:int = 200;
 
-  		private var bytesLodedTimer:Timer;        
+  			private var bytesLodedTimer:Timer;        
 			
 			/**  */
 			protected function initPlayer():void
@@ -126,8 +128,8 @@
 				wrapper.scaleMode = ScaleMode.LETTERBOX;
 				wrapper.addEventListener(DimensionChangeEvent.DIMENSION_CHANGE, dimChange);	
 				wrapper.addEventListener(PlayheadChangeEvent.PLAYHEAD_CHANGE, playHeadChange);
-				wrapper.addEventListener(DurationChangeEvent.DURATION_CHANGE, durationChange);			
-				
+				wrapper.addEventListener(DurationChangeEvent.DURATION_CHANGE, durationChange);		
+				wrapper.addEventListener(VolumeChangeEvent.VOLUME_CHANGE, volumeChange );
 			}
 			
 			/**  */
@@ -146,31 +148,30 @@
 				model.currentDuration = event.newDuration;
 				currentDurationString = t.getTC(model.currentDuration);
 				
-		    	ExternalInterface.call('setDuration', event.newDuration);
-		    	ExternalInterface.call('setTotalTime', currentDurationString);
+		    	ExternalInterface.call(ExternalFunction.SETDURATION, event.newDuration);
+		    	ExternalInterface.call(ExternalFunction.SETTOTALTIME, currentDurationString);
 			}
 			
 			/**  */
 			private function dimChange(event:DimensionChangeEvent):void
 			{	
 				// 	debugDimensions.text = event.newWidth +" "+event.newHeight;
-			
 				//	ExternalInterface.call('setLog', "WidthxHeight: "+event.newWidth +"x"+event.newHeight);
-				
-				
 			}
 			
 			/**  */
 			private function progress(event:TimerEvent):void
 			{
-	        var loadable:ILoadable = media.getTrait(MediaTraitType.LOADABLE) as ILoadable;
-	          if (loadable)
-	          {
-	            var context:NetLoadedContext = NetLoadedContext(loadable.loadedContext);
-	            try {
-	            	ExternalInterface.call('setProgress', context.stream.bytesLoaded / context.stream.bytesTotal * 100);
-	            } catch (e:TypeError) {}
-	          }
+	        	var loadable:ILoadable = media.getTrait(MediaTraitType.LOADABLE) as ILoadable;
+	          	if (loadable)
+	          	{
+	            	var context:NetLoadedContext = NetLoadedContext(loadable.loadedContext);
+	            	try 
+	            	{
+	            		ExternalInterface.call(ExternalFunction.SETPROGRESS, context.stream.bytesLoaded / context.stream.bytesTotal * 100);
+	            	} 
+	            	catch (e:TypeError) {}
+	          	}
 	        }
 
 			
@@ -186,17 +187,17 @@
 				
 				if(newPositionString != lastNewPositionString)
 				{
-					ExternalInterface.call('setCurrentTime', newPositionString);
+					ExternalInterface.call(ExternalFunction.SETCURRENTTIME, newPositionString);
 					lastNewPositionString = newPositionString;
 				}
 				
 				if(!model.player.seeking)
-				  ExternalInterface.call('setPlayhead', event.newPosition);
+				  ExternalInterface.call(ExternalFunction.SETPLAYHEAD, event.newPosition);
 				
 				if( captionURL != null )
-      	{
-      		Swiz.dispatchEvent( new DisplayCaptionEvent( event.newPosition ) );
-      	}
+      			{
+      				Swiz.dispatchEvent( new DisplayCaptionEvent( event.newPosition ) );
+      			}
 				
 			}
 			
@@ -242,6 +243,18 @@
 			{
 				Swiz.dispatchEvent( new ResizeVideodisplayEvent() );
 			}
+			
+			/**
+			 * volumeChange
+			 * 
+			 * When the volume is change in the video
+			 * 
+			 * */
+			private function volumeChange(event:VolumeChangeEvent):void
+			{
+				ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume);
+			}
+			
 		]]>
 	</mx:Script>
 	<players:MediaPlayerWrapper id="wrapper"

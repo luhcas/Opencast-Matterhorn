@@ -23,6 +23,7 @@
 	creationComplete="{ onCreationComplete() }">
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
 			import mx.events.ValidationResultEvent;
 			import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
 		  	import org.opencast.engage.brick.videodisplay.state.PlayerState;
@@ -70,6 +71,7 @@
 			fontSize="{ model.fontSizeCaptions }"
 			htmlText="{ model.currentSubtitle }"
 			styleName="captions"
+			focusOut="{ txt_captions.setFocus() }"
 			/>
 			
 	</mx:VBox>

@@ -12,6 +12,9 @@
         <script type="text/javascript" src="jquery/ui/ui.core.js"></script>
         <script type="text/javascript" src="jquery/ui/ui.slider.js"></script>
         <script type="text/javascript" src="player-hybrid-download.js"></script>
+        <script type="text/javascript" src="player-hybrid-fromvideodisplay.js"></script>
+        <script type="text/javascript" src="player-hybrid-tovideodisplay.js"></script>
+       
     </head>
 
     <body>
@@ -28,18 +31,18 @@
                 <span id="time-total" role="timer">00:00:00</span>
             </span>
 
-            <input id="btn_skip_backward"   type="image" src="./icons/skip-backward---green.png"    onclick="doSkipBackward();"             value="Skip backward"   alt="Skip backward">
-            <input id="btn_rewind"          type="image" src="./icons/rewind---green.png"           onclick="doRewind();"                   value="Rewind"          alt="Rewind">
-            <input id="btn_play_pause"      type="image" src="./icons/play---green.png"             onclick="doTogglePlayPause();" 									value="Play"            alt="Play">
-            <input id="btn_fast_forward"    type="image" src="./icons/fast-forward---green.png"     onclick="doFastForward();"              value="Fast forward"    alt="Fast forward">
-            <input id="btn_skip_forward"    type="image" src="./icons/skip-forward---green.png"     onclick="doSkipForward();"              value="Skip forward"    alt="Skip forward">
-            <input id="btn_volume"          type="image" src="./icons/volume---high.png"            onclick="doToggleVolume();"             value="Mute"            alt="Mute">
+            <input id="btn_skip_backward"   type="image" src="./icons/skip-backward---green.png"    onclick="Opencast.ToVideodisplay.doSkipBackward();"             value="Skip backward"   alt="Skip backward"	title="skip backward" >
+            <input id="btn_rewind"          type="image" src="./icons/rewind---green.png"           onclick="Opencast.ToVideodisplay.doRewind();"                   value="Rewind"          alt="Rewind"								title="rewind" >
+            <input id="btn_play_pause"      type="image" src="./icons/play---green.png"             onclick="Opencast.ToVideodisplay.doTogglePlayPause();" 									value="Play"            alt="Play" 									title="play" >
+            <input id="btn_fast_forward"    type="image" src="./icons/fast-forward---green.png"     onclick="Opencast.ToVideodisplay.doFastForward();"              value="Fast forward"    alt="Fast forward"		title="fast forward" >
+            <input id="btn_skip_forward"    type="image" src="./icons/skip-forward---green.png"     onclick="Opencast.ToVideodisplay.doSkipForward();"              value="Skip forward"    alt="Skip forward"		title="skip forward" >
+            <input id="btn_volume"          type="image" src="./icons/volume---high.png"            onclick="Opencast.ToVideodisplay.doToggleVolume();"             value="Mute"            alt="Mute"										title="Unmute" >
 
             <span id='volume_slider' class='ui-slider' style="width:70px;display:inline-block;margin-left:10px; margin-right:10px">
                 <div class='ui-slider-handle'></div>
             </span>
 
-            <input id="btn_cc"              type="image" src="./icons/cc_off.png"                       onclick="doToogleClosedCaptions();"             value="cc off" alt="Closed Caption">
+            <input id="btn_cc"              type="image" src="./icons/cc_off.png"                   onclick="Opencast.ToVideodisplay.doToogleClosedCaptions();"    value="cc off" alt="Closed Caption on" 									title="closed captions on" >
         </div>
 
         <div id="video-display-container" style="margin:10px;margin-bottom:0px;">

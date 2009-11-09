@@ -22,15 +22,18 @@
 package com.adobe.strobe.players
 {
 	import flash.events.Event;
+	
+	import mx.controls.Alert;
 	import mx.core.UIComponent;
+	
 	import org.openvideoplayer.display.MediaPlayerSprite;
 	import org.openvideoplayer.display.ScaleMode;
-	import org.openvideoplayer.events. * ;
+	import org.openvideoplayer.events.*;
 	import org.openvideoplayer.media.MediaElement;
 	import org.openvideoplayer.media.MediaPlayer;
 	import org.openvideoplayer.media.MediaPlayerState;
-	import org.openvideoplayer.traits. * ;
-	import org.openvideoplayer.video. * ;
+	import org.openvideoplayer.traits.*;
+	import org.openvideoplayer.video.*; ;
 	public class MediaPlayerWrapper extends UIComponent
 	{
 		public function set element(value : MediaElement) : void
@@ -511,6 +514,7 @@ package com.adobe.strobe.players
 			dispatchEvent(new VolumeChangeEvent(0 , mediaPlayer.volume));
 			dispatchEvent(new PanChangeEvent(0 , mediaPlayer.pan));
 			dispatchEvent(new MutedChangeEvent(mediaPlayer.muted));
+			Alert.show( mediaPlayer.volume.toString());
 		}
 
 		private function get mediaPlayer() : MediaPlayer
