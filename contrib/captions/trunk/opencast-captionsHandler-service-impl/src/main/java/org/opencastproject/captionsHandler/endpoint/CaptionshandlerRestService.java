@@ -21,6 +21,7 @@ import org.opencastproject.captionsHandler.api.CaptionshandlerService.CaptionsRe
 
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONValue;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +62,10 @@ public class CaptionshandlerRestService {
   public void unsetService(CaptionshandlerService service) {
     this.service = null;
   }
+
+  protected void activate(ComponentContext context) {
+    logger.info("ACTIVATE: service="+service);
+  } 
 
   /**
    * Checks if the service or services are available,
@@ -167,26 +172,30 @@ public class CaptionshandlerRestService {
     InputStream is = null;
     try {
       is = request.getInputStream();
+      if (is == null) {
+        logger.error("failed to load request body file (body is null)");
+        throw new IllegalArgumentException("request body cannot be null (no file was sent)");
+      }
+      CaptionsMediaItem cmi = service.updateCaptions(workflowId, captionType, is);
+      return Response.status(Response.Status.NO_CONTENT)
+        .header("_mpId", cmi.getMediaPackageId())
+        .header("_mediaURL", cmi.getMediaURL())
+        .header("_mediaId", workflowId)
+        .header("_captionType", captionType)
+        .header("_captionURL", cmi.getCaptionsURL(captionType))
+        .build();
     } catch (Exception e) {
-      logger.error("failed to load request body file: " + e, e);
+      logger.error("Failure while adding caption ("+captionType+") to workflow ("+workflowId+"): " + e, e);
       return Response.serverError()
         .header("_dataFound", is != null)
         .header("_streamFound", stream != null)
         .header("_mediaId", workflowId)
         .header("_captionType", captionType)
+        .header("_error", e.toString())
         .build();
     } finally {
       IOUtils.closeQuietly(is);
     }
-    // TODO make this do something real, it is just echoing out what it received in the header
-    String url = "http://sample.url/"+workflowId+"/"+captionType;
-    return Response.status(Response.Status.NO_CONTENT)
-      .header("_dataFound", is != null)
-      .header("_streamFound", stream != null)
-      .header("_mediaId", workflowId)
-      .header("_captionType", captionType)
-      .header("_captionURL", url)
-      .build();
   }
 
   @GET

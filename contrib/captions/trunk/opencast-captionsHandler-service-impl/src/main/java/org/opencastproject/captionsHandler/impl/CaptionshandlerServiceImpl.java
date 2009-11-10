@@ -39,6 +39,7 @@ import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,8 +76,9 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
     this.workflowService = null;
   }
 
-  public CaptionshandlerServiceImpl() {
-  }
+  protected void activate(ComponentContext context) {
+    logger.info("ACTIVATE"); // Called when all service dependencies are in place
+  } 
 
   @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {
