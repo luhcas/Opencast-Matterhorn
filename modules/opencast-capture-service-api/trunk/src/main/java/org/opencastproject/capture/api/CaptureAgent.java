@@ -17,7 +17,7 @@ package org.opencastproject.capture.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
-import java.util.HashMap;
+import java.util.Properties;
 
 /**
  * OSGi service for starting capture (MH-730)
@@ -40,7 +40,7 @@ public interface CaptureAgent {
    * 
    * @param configuration HashMap<String, String> for properties.
    */
-  String startCapture(HashMap<String, String> configuration);
+  String startCapture(Properties configuration);
 
   /**
    * Starting a simple capture.
@@ -48,6 +48,12 @@ public interface CaptureAgent {
    * @param mediaPackage 
    * @param configuration HashMap<String, String> for properties.
    */
-  String startCapture(MediaPackage mediaPackage, HashMap<String, String> configuration);
+  String startCapture(MediaPackage mediaPackage, Properties configuration);
+  
+  /**
+   * Stops the capture
+   * @return A string indicating the success or fail of the action
+   */
+  String stopCapture();
 }
 
