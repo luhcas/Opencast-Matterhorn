@@ -111,7 +111,13 @@ public class CoverImpl extends AttachmentImpl implements Cover {
    */
   @Override
   public String toString() {
-    return "Cover (" + getMimeType() + ")";
+    StringBuffer buf = new StringBuffer("cover");
+    if (getMimeType() != null) {
+      buf.append(" (");
+      buf.append(getMimeType());
+      buf.append(")");
+    }
+    return buf.toString();
   }
 
 }
