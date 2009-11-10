@@ -72,7 +72,8 @@ public class SolrRequester {
     StringBuffer sb = boost(uq);
     SolrQuery query = new SolrQuery(sb.toString());
     query.setStart(offset);
-    query.setRows(limit);
+    if (limit > 0)
+      query.setRows(limit);
     query.setFields("* score");
     return createSearchResult(query);
   }
@@ -100,7 +101,8 @@ public class SolrRequester {
     SolrQuery query = new SolrQuery(q);
     query.setStart(offset);
     query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
-    query.setRows(limit);
+    if (limit > 0)
+      query.setRows(limit);
     query.setFields("* score");
     return createSearchResult(query);
   }
@@ -127,7 +129,8 @@ public class SolrRequester {
     SolrQuery query = new SolrQuery(sb.toString());
     query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series);
     query.setStart(offset);
-    query.setRows(limit);
+    if (limit > 0)
+      query.setRows(limit);
     query.setFields("* score");
     return createSearchResult(query);
   }
@@ -161,7 +164,8 @@ public class SolrRequester {
     String q = "*:*";
     SolrQuery query = new SolrQuery(q);
     query.setStart(offset);
-    query.setRows(limit);
+    if (limit > 0)
+      query.setRows(limit);
     query.setFields("* score");
     return createSearchResult(query);
   }
@@ -189,7 +193,8 @@ public class SolrRequester {
     SolrQuery query = new SolrQuery(q);
     query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
     query.setStart(offset);
-    query.setRows(limit);
+    if (limit > 0)
+      query.setRows(limit);
     query.setFields("* score");
     return createSearchResult(query);
   }
@@ -204,7 +209,8 @@ public class SolrRequester {
     SolrQuery query = new SolrQuery(sb.toString());
     query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
     query.setStart(offset);
-    query.setRows(limit);
+    if (limit > 0)
+      query.setRows(limit);
     query.setFields("* score");
     return createSearchResult(query);
   }

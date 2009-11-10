@@ -26,16 +26,11 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class implementing <code>LookupRequester</code> to provide connection to solr indexing facility.
  */
 public class SolrRequester {
-
-  /** Logging facility */
-  private static Logger log_ = LoggerFactory.getLogger(SolrRequester.class);
 
   /** The regular filter expression */
   private static final String queryCleanerRegex = "[^0-9a-zA-ZöäüßÖÄÜ/\" +-.,]";
@@ -92,7 +87,8 @@ public class SolrRequester {
     String q = "*:*";
     SolrQuery query = new SolrQuery(q);
     query.setStart(offset);
-    query.setRows(limit);
+    if (limit > 0)
+      query.setRows(limit);
     query.setFields("* score");
     return createResultset(query);
   }
@@ -109,7 +105,8 @@ public class SolrRequester {
     SolrQuery query = new SolrQuery(q);
     query.addSortField(SolrFields.OC_MODIFIED, ORDER.desc);
     query.setStart(offset);
-    query.setRows(limit);
+    if (limit > 0)
+      query.setRows(limit);
     query.setFields("* score");
     return createResultset(query);
   }
@@ -118,7 +115,8 @@ public class SolrRequester {
     StringBuffer sb = boost(cleanQuery(text));
     SolrQuery query = new SolrQuery(sb.toString());
     query.setStart(offset);
-    query.setRows(limit);
+    if (limit > 0)
+      query.setRows(limit);
     query.setFields("* score");
     return createResultset(query);
   }
@@ -128,7 +126,8 @@ public class SolrRequester {
     SolrQuery query = new SolrQuery(q);
     query.addSortField(SolrFields.OC_MODIFIED, ORDER.desc);
     query.setStart(offset);
-    query.setRows(limit);
+    if (limit > 0)
+      query.setRows(limit);
     query.setFields("* score");
     return createResultset(query);
   }
