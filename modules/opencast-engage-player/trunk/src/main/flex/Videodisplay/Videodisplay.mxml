@@ -23,22 +23,22 @@
 	backgroundColor="#000000"
 	preinitialize="{ onPreinitialize(); }"
 	addedToStage="onAddedToStage()"
-	xmlns:view="org.opencast.engage.brick.videodisplay.view.*"
+	xmlns:view="org.opencast.engage.videodisplay.view.*"
 	xmlns:ns1="bridge.*">
 	<mx:Style source="style/standard_videodisplay.css"/>
 	<mx:Script>
 		
 		<![CDATA[
-			import org.opencast.engage.brick.videodisplay.control.util.TimeCode;
-			import org.opencast.engage.brick.videodisplay.control.event.ClosedCaptionsEvent;
-			import org.opencast.engage.brick.videodisplay.control.event.SetCurrentCaptionsEvent;
+			import org.opencast.engage.videodisplay.control.util.TimeCode;
+			import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
+			import org.opencast.engage.videodisplay.control.event.SetCurrentCaptionsEvent;
 			import mx.collections.ArrayCollection;
-			import org.opencast.engage.brick.videodisplay.vo.CaptionSetVO;
+			import org.opencast.engage.videodisplay.vo.CaptionSetVO;
 			import mx.controls.Alert;
-			import org.opencast.engage.brick.videodisplay.control.event.SetVolumeEvent;
-			import org.opencast.engage.brick.videodisplay.control.event.VideoControlEvent;
-			import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
-			import org.opencast.engage.brick.videodisplay.business.VideodisplayBean;
+			import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
+			import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
+			import org.opencast.engage.videodisplay.model.VideodisplayModel;
+			import org.opencast.engage.videodisplay.business.VideodisplayBean;
 			import org.swizframework.Swiz;
 			
 			[Autowire]

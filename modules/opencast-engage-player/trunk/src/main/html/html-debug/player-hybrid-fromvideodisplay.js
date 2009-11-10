@@ -37,6 +37,25 @@ Opencast.FromVideodisplay = (function () {
         document.getElementById("captions").innerHTML = text;
     }
     
+    var playing = "playing";
+    var pausing = "pausing";
+    
+	function setPlayPauseState(state) {
+  		if (state == playing) {
+    		document.getElementById("btn_play_pause").value = "Play";
+		    document.getElementById("btn_play_pause").alt = "Play";
+		     document.getElementById("btn_play_pause").title = "play";
+		    document.getElementById("btn_play_pause").src = "./icons/play---green.png";
+		    Opencast.ToVideodisplay.doSetCurrentPlayPauseState(pausing);
+  		} else {
+		    document.getElementById("btn_play_pause").value = "Pause";
+		    document.getElementById("btn_play_pause").alt = "Pause";
+		    document.getElementById("btn_play_pause").title = "pause";
+		    document.getElementById("btn_play_pause").src = "./icons/pause---green.png";
+		    Opencast.ToVideodisplay.doSetCurrentPlayPauseState(playing);
+  		}
+	}
+    
      return {
        	setPlayhead : setPlayhead,
        	setVomume : setVolume,
@@ -44,7 +63,8 @@ Opencast.FromVideodisplay = (function () {
        	setTotalTime: setTotalTime,
        	setDuration: setDuration,
         setProgress : setProgress,
-        setCaptions : setCaptions
+        setCaptions : setCaptions,
+        setPlayPauseState : setPlayPauseState
      };
 }());
 	

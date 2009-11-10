@@ -7,7 +7,6 @@
  * ------------------------------------------------------------------------ */
 var Opencast = Opencast || {};
 
-
 $(document).ready(function () {
     $("#slider").slider();
     $('#slider').slider('option', 'animate', false);

@@ -32,37 +32,26 @@ Opencast.ToVideodisplay = (function () {
     function doStop() {
         Videodisplay.stop();
     }
-    
+   
     var playing = "playing";
     var pausing = "pausing";
     var currentPlayPauseState = pausing;
-
-   	function setPlayPauseState(state) {
-  		if (state == playing) {
-    		document.getElementById("btn_play_pause").value = "Play";
-		    document.getElementById("btn_play_pause").alt = "Play";
-		     document.getElementById("btn_play_pause").title = "play";
-		    document.getElementById("btn_play_pause").src = "./icons/play---green.png";
-		    currentPlayPauseState = pausing;
-  		} else {
-		    document.getElementById("btn_play_pause").value = "Pause";
-		    document.getElementById("btn_play_pause").alt = "Pause";
-		    document.getElementById("btn_play_pause").title = "pause";
-		    document.getElementById("btn_play_pause").src = "./icons/pause---green.png";
-		    currentPlayPauseState = playing;
-  		}
+ 
+	function doSetCurrentPlayPauseState(state)
+	{
+		currentPlayPauseState = state;
 	}
 
 	function doTogglePlayPause() {
         // Checking if btn_play_pause is "play"
         if (currentPlayPauseState == pausing) {
             // Changing the volume to 1.0 and the value of the button of btn_volume to "unmute"
-            setPlayPauseState(playing);
+            Opencast.FromVideodisplay.setPlayPauseState(playing);
             doPlay();
             return;
         } else {
             // Changing the volume to 0.0 and the value of the button of btn_volume to "mute"
-            setPlayPauseState(pausing);
+            Opencast.FromVideodisplay.setPlayPauseState(pausing);
             doPause();
             return;
         }
@@ -130,6 +119,7 @@ Opencast.ToVideodisplay = (function () {
         Videodisplay.setLanguage(value);
     }
     
+    
     function setLangugageComboBox(languageComboBox) {
         for (var i = 0; i < languageComboBox.length; i = i + 1) {
             var option = document.createElement('option');
@@ -150,8 +140,8 @@ Opencast.ToVideodisplay = (function () {
         doPlay: doPlay,
         doPause: doPause,
         doStop: doStop,
+        doSetCurrentPlayPauseState : doSetCurrentPlayPauseState,
         doTogglePlayPause : doTogglePlayPause,
-        setPlayPauseState : setPlayPauseState,
         doFastForward: doFastForward,
         doSkipForward : doSkipForward,
         doToggleVolume: doToggleVolume,
