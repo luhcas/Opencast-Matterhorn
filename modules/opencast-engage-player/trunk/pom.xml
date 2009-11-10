@@ -3,10 +3,10 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>EngageApp</groupId>
-	<artifactId>opencast-engage-player</artifactId>
+	<artifactId>opencast-engage-player-videodisplay</artifactId>
 	<version>0.1-SNAPSHOT</version>
 	<packaging>swf</packaging>
-	<name>opencast-engage-player</name>
+	<name>opencast-engage-player-videodisplay</name>
 
 	<properties>
 		<sourceFile>Videodisplay.mxml</sourceFile>
@@ -62,11 +62,39 @@
                           </execution> -->
                 </executions>
 			</plugin>
+			<plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-resources-plugin</artifactId>
+        <version>2.4.1</version>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>install</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/hybrid-player</outputDirectory>
+              <resources>          
+                <resource>
+                  <directory>src/main/html/html-debug</directory>
+                  <filtering>true</filtering>
+                </resource>
+                <resource>
+                  <directory>src/main/resources</directory>
+                  <filtering>true</filtering>
+                </resource>
+                <resource>
+                  <directory>src/main/flex/Videodisplay</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>              
+            </configuration>            
+          </execution>
+        </executions>
+      </plugin>
 		</plugins>
 	</build>
-
-
-	
 
 	<dependencies>
 	<!--	
@@ -107,6 +135,5 @@
 			<type>swc</type>
 		</dependency>
 	</dependencies>
-
 
 </project>
