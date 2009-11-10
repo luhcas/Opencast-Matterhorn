@@ -21,7 +21,7 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.Properties;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -59,14 +59,21 @@ public class CaptureWebServiceImpl implements CaptureWebService {
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public String startCapture(@WebParam(name = "configuration") HashMap configuration) {
+  public String startCapture(@WebParam(name = "configuration") Properties configuration) {
     return service.startCapture(configuration);
   }
 
   @WebMethod()
   @WebResult(name = "recorder-info")
   public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage,
-          @WebParam(name = "configuration") HashMap configuration) {
+          @WebParam(name = "configuration") Properties configuration) {
     return service.startCapture(mediaPackage, configuration);
   }
+  
+  @WebMethod()
+  @WebResult(name = "recorder-info")
+  public String stopCapture() {
+    return service.stopCapture();
+  }
+
 }

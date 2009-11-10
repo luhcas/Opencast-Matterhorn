@@ -31,6 +31,11 @@
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-inspection-service-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
 	  <groupId>net.luniks.linux.jv4linfo</groupId>
 		<artifactId>libjv4linfo</artifactId>
 		<version>0.2.1</version>

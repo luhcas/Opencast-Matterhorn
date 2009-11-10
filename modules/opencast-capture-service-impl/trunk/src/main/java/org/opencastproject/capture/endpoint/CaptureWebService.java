@@ -17,7 +17,7 @@ package org.opencastproject.capture.endpoint;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
-import java.util.HashMap;
+import java.util.Properties;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -39,10 +39,15 @@ public interface CaptureWebService {
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public String startCapture(@WebParam(name = "configuration") HashMap<String, String> configuration);
+  public String startCapture(@WebParam(name = "configuration") Properties configuration);
 
   @WebMethod()
   @WebResult(name = "recorder-info")
   public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage,
-          @WebParam(name = "configuration") HashMap<String, String> configuration);
+          @WebParam(name = "configuration") Properties configuration);
+  
+  @WebMethod()
+  @WebResult(name = "recorder-info")
+  public String stopCapture();
+
 }

@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.Properties;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -65,11 +65,11 @@ public class CaptureRestService {
   @POST
   @Produces(MediaType.TEXT_PLAIN)
   @Path("startCapture")
-  public Response startCapture(@FormParam("configuration") HashMap<String, String> configuration) {
+  public Response startCapture(@FormParam("configuration") Properties configuration) {
     String out;
     try {
       out = service.startCapture(configuration);
-      return Response.ok("Start Capute OK. OUT: " + out).build();
+      return Response.ok("Start Capture OK. OUT: " + out).build();
     } catch (Exception e) {
       return Response.serverError().status(400).build();
     }
@@ -81,12 +81,25 @@ public class CaptureRestService {
   public String getDocumentation() {
     return docs;
   }
+  
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  @Path("stopCapture")
+  public Response stopCapture() {
+    String out;
+    try {
+      out = service.stopCapture();
+      return Response.ok("Stop Capture OK. OUT: " + out).build();
+    } catch (Exception e) {
+      return Response.serverError().status(400).build();
+    }
+  }
 
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("test")
   public String getTest() {
-    return "Huevo de pascua!!!!";
+    return "Easter Egg!!!!";
   }
 
   protected final String docs;
