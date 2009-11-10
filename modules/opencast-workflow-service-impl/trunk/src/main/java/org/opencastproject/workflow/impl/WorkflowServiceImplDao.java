@@ -20,22 +20,10 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
 
-import java.io.File;
-
 /**
  * Provides persistence services to the workflow service implementation.
  */
 public interface WorkflowServiceImplDao {
-  /**
-   * Activate this DAO using the given filestorage directory.  It is the DAO implementation's responsibility to create
-   * this directory if necessary.
-   */
-  void activate(File storageDirectory);
-  
-  /**
-   * Deactivate this DAO
-   */
-  void deactivate();
   
   /**
    * Update the workflow instance, or add it to persistence if it is not already stored.

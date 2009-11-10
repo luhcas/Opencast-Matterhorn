@@ -42,7 +42,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -137,31 +136,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   }
   
   /** The data access object responsible for storing and retrieving workflow instances */
-  protected WorkflowServiceImplDao dao = new WorkflowServiceImplDaoDerbyImpl();
-
+  protected WorkflowServiceImplDao dao;
+  
   /** A collection of the running workflow threads */
   protected Map<String, Thread> threadMap = new ConcurrentHashMap<String, Thread>();
-
-  /** The directory to use for persistence (contents will vary depending on the DAO implementation) */
-  protected String storageDirectory = null;
-
-  /**
-   * Creates a workflow service that puts its data into the given directory. If the directory doesn't exist, the dao
-   * will create it.
-   * 
-   * @param storageDirectory
-   *          the storage directory to use for persistence, if necessary
-   */
-  public WorkflowServiceImpl(String storageDirectory) {
-    this.storageDirectory = storageDirectory;
-  }
-
-  /**
-   * Creates a new workflow service instance.
-   */
-  public WorkflowServiceImpl() {
-    this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workflows");
-  }
 
   /**
    * Sets the DAO implementation to use in this service.
@@ -176,14 +154,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
-    dao.activate(new File(storageDirectory));
   }
 
   /**
    * Deactivate this service.
    */
   public void deactivate() {
-    dao.deactivate();
   }
   
   /**

@@ -34,6 +34,7 @@ import org.opencastproject.workflow.api.WorkflowInstance.State;
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -55,6 +56,7 @@ public class WorkflowServiceImplTest {
   private static MediaPackage mediapackage1 = null;
   private static MediaPackage mediapackage2 = null;
   private static WorkflowOperationHandler operationHandler = null;
+  private static JdbcConnectionPool cp = null;
   
   @BeforeClass
   public static void setup() {
@@ -69,7 +71,7 @@ public class WorkflowServiceImplTest {
     operationHandler = new TestWorkflowOperationHandler();
 
     // instantiate a service implementation and its DAO, overriding the methods that depend on the osgi runtime
-    service = new WorkflowServiceImpl(storageRoot) {
+    service = new WorkflowServiceImpl() {
       protected Set<HandlerRegistration> getRegisteredHandlers() {
         Set<HandlerRegistration> set = new HashSet<HandlerRegistration>();
         set.add(new HandlerRegistration("op1", operationHandler));
@@ -77,7 +79,10 @@ public class WorkflowServiceImplTest {
         return set;
       }
     };
-    service.setDao(new WorkflowServiceImplDaoDerbyImpl());
+    cp = JdbcConnectionPool.create("jdbc:h2:target/testdb", "sa", "sa");
+    WorkflowServiceImplDaoDatasourceImpl dao = new WorkflowServiceImplDaoDatasourceImpl(cp);
+    dao.activate(null);
+    service.setDao(dao);
     service.activate(null);
 
     try {

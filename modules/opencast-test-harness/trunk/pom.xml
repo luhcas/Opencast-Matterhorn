@@ -39,6 +39,24 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- REST and SOAP endpoint testing -->
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-workflow-service-impl</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <version>4.0</version>
+    </dependency>
+
     <!-- Testing infrastructure -->
     <dependency>
       <groupId>org.ops4j.pax.exam</groupId>
@@ -54,12 +72,15 @@
       <groupId>org.ops4j.pax.exam</groupId>
       <artifactId>pax-exam-junit</artifactId>
       <version>1.2.0</version>
+      <scope>test</scope>
     </dependency>        
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.5</version>
+      <scope>test</scope>
     </dependency>
+
   </dependencies>
   <build>
     <defaultGoal>test</defaultGoal>
