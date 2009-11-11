@@ -3,6 +3,13 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        
+        <link rel="stylesheet" type="text/css" href="fluid/fss/css/fss-reset.css" />
+        <link rel="stylesheet" type="text/css" href="fluid/framework/fss/css/fss-layout.css" />
+        <link rel="stylesheet" type="text/css" href="fluid/framework/fss/css/fss-text.css" />
+        <link rel="stylesheet" type="text/css" href="fluid/framework/fss/css/fss-theme-mist.css" />
+        
+        
 	    <title>Progressive Download Hybrid Player</title>
 	    <script type="text/javascript" src="bridge/lib/FABridge.js"></script>
 	    <script type="text/javascript" src="bridge/Videodisplay.js"></script>
@@ -18,11 +25,13 @@
     </head>
 
     <body>
+    <div id="title-bar" style="margin-left:10px; margin-right:10px; margin-top:5px;">
         <h1>Progressive Download Hybrid Player</h1>
-
+    </div>
         <div id="controls" style="margin-left:10px; margin-right:10px; margin-top:5px;">
 
-            <div id="slider" class="ui-slider" style="width:360px; margin-left:10px; margin-right:10px;margin-bottom:10px;" >
+            <div id="slider" class="ui-slider" style="width:360px; margin-right:10px;margin-bottom:10px;" >
+                <div class="matterhorn-progress-bar-background"></div>
                 <div class="matterhorn-progress-bar"></div>
             </div>
 
@@ -36,13 +45,13 @@
             <input id="btn_play_pause"      type="image" src="./icons/play---green.png"             onclick="Opencast.ToVideodisplay.doTogglePlayPause();" 									value="Play"            alt="Play" 									title="play" >
             <input id="btn_fast_forward"    type="image" src="./icons/fast-forward---green.png"     onclick="Opencast.ToVideodisplay.doFastForward();"              value="Fast forward"    alt="Fast forward"		title="fast forward" >
             <input id="btn_skip_forward"    type="image" src="./icons/skip-forward---green.png"     onclick="Opencast.ToVideodisplay.doSkipForward();"              value="Skip forward"    alt="Skip forward"		title="skip forward" >
-            <input id="btn_volume"          type="image" src="./icons/volume---high.png"            onclick="Opencast.ToVideodisplay.doToggleVolume();"             value="Mute"            alt="Mute"										title="Unmute" >
+            <input id="btn_volume"          type="image" src="./icons/volume---high.png"            onclick="Opencast.ToVideodisplay.doToggleVolume();"             value="Mute"            alt="Mute"								  title="Mute" >
 
-            <span id='volume_slider' class='ui-slider' style="width:70px;display:inline-block;margin-left:10px; margin-right:10px">
+            <div id='volume_slider' class='ui-slider' style="width:70px;display:inline-block;margin-left:10px; margin-right:10px">
                 <div class='ui-slider-handle'></div>
-            </span>
+            </div>
 
-            <input id="btn_cc"              type="image" src="./icons/cc_off.png"                   onclick="Opencast.ToVideodisplay.doToogleClosedCaptions();"    value="cc off" alt="Closed Caption on" 									title="closed captions on" >
+            <input id="btn_cc"              type="image" src="./icons/cc_off.png"                   onclick="Opencast.ToVideodisplay.doToogleClosedCaptions();"    value="Closed Caption on" alt="Closed Caption on" 									title="closed caption on" >
         </div>
 
         <div id="video-display-container" style="margin:10px;margin-bottom:0px;">
@@ -52,7 +61,7 @@
                 <param name="allowScriptAccess" value="always" >
                 <param name="bgcolor" value="#000000">
                 <param name="allowFullScreen" value="true">
-                <param name="flashvars" VALUE="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml">
+                <param name="flashvars" VALUE="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/femaf09_2009_4_17_10_18.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml">
                 <embed
                     width="360"
                     height="288"
@@ -60,7 +69,7 @@
                     allowfullscreen="true"
                     type="application/x-shockwave-flash"
                     pluginspage="http://www.macromedia.com/go/getflashplayer"
-                    flashvars="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml"
+                    flashvars="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/femaf09_2009_4_17_10_18.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml"
                     quality="high"
                     allowScriptAccess="always"
                     src="Videodisplay.swf">

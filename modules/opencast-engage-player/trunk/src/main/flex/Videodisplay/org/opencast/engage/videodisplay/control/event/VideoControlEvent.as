@@ -18,15 +18,24 @@ package org.opencast.engage.videodisplay.control.event
 	import flash.events.Event;
 	public class VideoControlEvent extends Event
 	{
-		public static var EVENT_NAME : String 	= 'VideoControlEvent';
-		public static var PLAY : String 		= "play";
-		public static var PAUSE : String 		= "pause";
-		public static var STOP : String 		= "stop";
-		public static var SKIPBACKWARD : String = "skipBackward";
-		public static var REWIND : String 		= "rewind";
-		public static var FASTFORWARD : String 	= "fastForward";
-		public static var SKIPFORWARD : String 	= "skipForward";
-		
+		public static var EVENT_NAME : String 		= 'VideoControlEvent';
+		public static var PLAY : String 			= "play";
+		public static var PAUSE : String 			= "pause";
+		public static var STOP : String 			= "stop";
+		public static var SKIPBACKWARD : String 	= "skipBackward";
+		public static var REWIND : String 			= "rewind";
+		public static var FASTFORWARD : String 		= "fastForward";
+		public static var SKIPFORWARD : String 		= "skipForward";
+		public static var MUTE : String 			= "mute";
+		public static var UNMUTE : String 			= "unmute";
+		public static var VOLUMEUP : String			= "volumeUp";
+		public static var VOLUMEDOWN : String		= "volumeDown";
+		public static var VOLUMELOWEST : String		= "volumeLowest";
+		public static var VOLUMELOW : String		= "volumeLow";
+		public static var VOLUMEMIDDLE : String		= "volumeMiddle";
+		public static var VOLUMEHIGH : String		= "volumeHigh";
+		public static var VOLUMEHIGHEST : String	= "volumeHighest";
+		public static var CLOSEDCAPTIONS : String	= "closeCaptions";
 		
 		private var _videoControlType : String;
 		public function VideoControlEvent(videoControlType : String , bubbles : Boolean = false , cancelable : Boolean = false )

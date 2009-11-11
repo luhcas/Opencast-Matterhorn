@@ -1,22 +1,46 @@
 .matterhorn-progress-bar
 {
-  border:1px solid #D3D3D3;
+  border:0px solid #D3D3D3;
   color:#555555;
   font-weight:normal;
   outline-color:-moz-use-text-color;
   outline-style:none;
-  outline-width:medium;
+  outline-width:none;
   
   display: inline; 
   position: absolute; 
-  height: 0.7em; 
+  height: 0.8em; 
   word-spacing: 1px;
-  background-color: rgb(255, 0, 0);
+  background-color: rgb(255, 255, 255);
+ -moz-border-radius: 0.2em;
+ -webkit-border-radius: 0.2em;
+  background-color: #7B7EAE;
 }
+
+.matterhorn-progress-bar-background
+{
+  background-image: url('../fluid/images/progress-bar-animation.gif');
+  border:0px solid #D3D3D3;
+  color:#555555;
+  font-weight:normal;
+  outline-color:-moz-use-text-color;
+  outline-style:none;
+  outline-width:none;
+  display: inline; 
+  position: absolute; 
+  height: 0.8em;
+  width: 100%;
+  word-spacing: 1px;
+  background-color: rgb(255, 255, 255);
+ -moz-border-radius: 0.2em;
+ -webkit-border-radius: 0.2em;
+  background-color: rgb(200, 200, 200);
+}
+
 
 #controls {
     position:absolute;
-    top:366px;
+    top:350px;
 }
 
 .matterhorn-slide

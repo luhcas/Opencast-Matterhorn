@@ -13,7 +13,7 @@ Opencast.FromVideodisplay = (function () {
     }
 
     function setVolume(newVolume) {
-        // $('#volume_slider').slider('value', newVolume);
+        $('#volume_slider').slider('value', newVolume);
     }
 
     function setCurrentTime(text) {
@@ -29,7 +29,7 @@ Opencast.FromVideodisplay = (function () {
     }
 
     function setProgress(value) {
-        $('.matterhorn-progress-bar').css("width", value + "%");
+        $('.matterhorn-progress-bar').css("width", (value + "%"));
     }
     
     function setCaptions(text) {

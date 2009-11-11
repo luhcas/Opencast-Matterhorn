@@ -68,68 +68,79 @@ Opencast.ToVideodisplay = (function () {
     }
 
     function doToggleVolume() {
-        var mute = "Mute",
-            umute = "Unmute",
-            button = document.getElementById("btn_volume");
+        var mute = "Mute";
         // Checking if btn_volume is "mute"
-        if (button.value === mute) {
+        if (document.getElementById("btn_volume").value === mute) {
             //Changing the volume to 1.0 and the value of the button of btn_volume to "unmute"
-            button.value = "mute";
-            button.title = "mute";
-            button.alt = "mute";
-            button.src = "./icons/volume---mute.png";
+            document.getElementById("btn_volume").value = "Unmute";
+            document.getElementById("btn_volume").alt = "Unmute";
+            document.getElementById("btn_volume").title = "Unmute";
+            document.getElementById("btn_volume").src = "./icons/volume---mute.png";
             doSetVolume(0.0);
         } else {
             // Changing the volume to 0.0 and the value of the button of btn_volume to "mute"
-            button.value = "unmute";
-            button.alt = "unmute";
-            button.title = "unmute";
-            button.src = "./icons/volume---high.png";
-            doSetVolume(1.0);
+            document.getElementById("btn_volume").value = "Mute";
+            document.getElementById("btn_volume").alt = "Mute";
+            document.getElementById("btn_volume").title = "Mute";
+            document.getElementById("btn_volume").src = "./icons/volume---high.png";
+            doSetVolume(Opencast.volume);
         }
     }
-
+    
     function doClosedCaptions(cc) {
         Videodisplay.closedCaptions(cc);
     }
 
-    function doToogleClosedCaptions() {
-        var on = "cc on",
-            off = "cc off",
-            button = document.getElementById("btn_cc");
+	function doToogleClosedCaptions() {
+        var on = "Closed Caption on";
         // Checking if btn_cc is "CC off"
-        if (button.value === off) {
-            button.value = "close captions off";
-            button.alt = "close captions off";
-            button.title = "close captions off";
-            button.src = "./icons/cc_on.png";
+        if (document.getElementById("btn_cc").value === on) {
+            document.getElementById("btn_cc").value = "Closed Caption off";
+            document.getElementById("btn_cc").alt = "Closed Caption off";
+            document.getElementById("btn_cc").title = "Closed Caption off";
+            document.getElementById("btn_cc").src = "./icons/cc_on.png";
             doClosedCaptions(true);
+            return;
         } else {
-            button.value = "close captions on";
-            button.alt = "close captions on";
-            button.title = "close captions on";
-            button.src = "./icons/cc_off.png";
+            document.getElementById("btn_cc").value = "Closed Caption on";
+            document.getElementById("btn_cc").alt = "Closed Caption on";
+            document.getElementById("btn_cc").title = "Closed Caption on";
+            document.getElementById("btn_cc").src = "./icons/cc_off.png";
             doClosedCaptions(false);
+            return;
         }
     }
 
-    function doSetLanguage(value) {
-        Videodisplay.setLanguage(value);
-    }
-
-
-    function setLangugageComboBox(languageComboBox) {
-        for (var i = 0; i < languageComboBox.length; i = i + 1) {
-            var option = document.createElement('option');
-            option.text = languageComboBox[i];
-            var cb_item = document.getElementById("cb_lang");
-            try {
-                cb_item.add(option, null); // standards compliant
-            } catch (ex) {
-                cb_item.add(option); // IE only
+    var isCtrl = false;
+    var isAlt = false;
+    
+    $(document).keyup(function (e) { 
+        if (e.which === 17) 
+        {
+            isCtrl = false; 
+        }
+        if (e.which === 18) 
+        {
+            isAlt = false; 
+        }
+    }).keydown(function (e) { 
+        if (e.which === 17)
+        {
+            isCtrl = true;
+        }
+        if (e.which === 18)
+        {
+            isAlt = true;
+        }
+        if (isCtrl === true && isAlt === true) {
+          
+            if (e.which === 80 || e.which === 112 || e.which === 83 || e.which === 115 || e.which === 77 || e.which === 109 || e.which === 85 || e.which === 117  || e.which === 68 || e.which === 100 || e.which === 49 || e.which === 50 || e.which === 51 || e.which === 52 || e.which === 53 || e.which === 67 || e.which === 99)
+            {
+                Videodisplay.passCharCode(e.which);
             }
+            return false;
         }
-    }
+    }); 
 
     return {
         doSeek: doSeek,
@@ -145,8 +156,6 @@ Opencast.ToVideodisplay = (function () {
         doToggleVolume: doToggleVolume,
         doSetVolume: doSetVolume,
         doClosedCaptions: doClosedCaptions,
-        doToogleClosedCaptions : doToogleClosedCaptions,
-        doSetLanguage: doSetLanguage,
-        setLangugageComboBox : setLangugageComboBox
+        doToogleClosedCaptions : doToogleClosedCaptions
     };
 }());

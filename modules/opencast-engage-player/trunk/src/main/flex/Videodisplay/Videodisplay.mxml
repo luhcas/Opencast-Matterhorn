@@ -71,7 +71,7 @@
 			private function onAddedToStage():void
 			{
 			  	_timeCode = new TimeCode();
-				stage.addEventListener(KeyboardEvent.KEY_UP, reportKeyDown);
+				stage.addEventListener(KeyboardEvent.KEY_UP, reportKeyUp);
 			}
 			
 			/**
@@ -155,7 +155,7 @@
 			 * seek
 			 * 
 			 * 
-			 * 
+			 * Wehn the learner seek the video
 			 * */
 			public function seek(time:Number):void
 		    {
@@ -204,30 +204,91 @@
 				return model.player.volume;
 			}
       
-      		/**
+			/**
 			 * reportKeyDown
 			 * 
 			 * 
 			 */ 
-			private function reportKeyDown(event:KeyboardEvent):void
+			private function reportKeyUp(event:KeyboardEvent):void
 			{
-				passCharCode(event.charCode);
+				if( event.altKey == true && event.ctrlKey == true )
+				{
+					passCharCode( event.keyCode);
+				}
 			}
 			
 			/**
 			 * passCharCode
 			 * 
-			 * 
+			 * When the learner press any key for the mediaplayer
 			 */ 
 			public function passCharCode(charCode:int):void
 			{	
-				if(charCode == 13 || charCode == 32) // Return oder Leertaste
+				
+				// Play or pause the video
+				if(charCode == 80 || charCode == 112) // P or p
 				{
 					if(model.player.playing)
 						Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));	
 					else
 						Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));	
 				}
+				
+				// Mute the video
+				else if(charCode == 77 || charCode == 109) // M or m
+				{
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.MUTE));	
+				}
+				
+				// Volume up
+				else if(charCode == 85 || charCode == 117) // U or u
+				{
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMEUP));	
+				}
+				
+				// Volume down
+				else if(charCode == 68 || charCode == 100) // D or d
+				{
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMEDOWN));	
+				}
+				
+				// Volume 1 lowest
+				else if(charCode == 49 ) // 1
+				{
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMELOWEST));	
+				}
+				
+				// Volume 2 low
+				else if(charCode == 50 ) // 2
+				{
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMELOW));	
+				}
+				
+				// Volume 3 middle
+				else if(charCode == 51 ) // 3
+				{
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMEMIDDLE));	
+				}
+				
+				// Volume 4 high
+				else if(charCode == 52 ) // 4
+				{
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMEHIGH));	
+				}
+				
+				// Volume 5 highest
+				else if(charCode == 53 ) // 5
+				{
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMEHIGHEST));	
+				}
+				
+				// Closed Caption
+				else if(charCode == 67 || charCode == 99) // C or c
+				{
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.CLOSEDCAPTIONS));	
+				}
+				
+				/* when we need the timer
 				else if(charCode == 116 || charCode == 84) // t oder T
 				{
           			try 
@@ -240,14 +301,16 @@
 		          	} 
           			catch (e:TypeError) {}
 				} 
-				else if(charCode == 110 || charCode == 88) // n oder N
-		        {
-		          // Next Slide
-		        } 
-				else if(charCode == 112 || charCode == 80) // p oder P
+				*/
+				/* when we need the stop function
+				// stop the video 
+				else if(charCode == 83 || charCode == 115) // S or s
 				{
-					// Previous Slide
-				}        
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.STOP));	
+				}
+				*/
+				
+				
 			}
 			
 			/**
