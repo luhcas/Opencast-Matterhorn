@@ -7,14 +7,13 @@
  * ------------------------------------------------------------------------ */
 
 Opencast.FromVideodisplay = (function () {
-	
-	
-	function setPlayhead(newPosition) {
+
+    function setPlayhead(newPosition) {
         $('#slider').slider('value', newPosition);
     }
 
     function setVolume(newVolume) {
-        // $('#volume_slider').slider('value', newVolume);
+        $('#volume_slider').slider('value', newVolume);
     }
 
     function setCurrentTime(text) {
@@ -30,24 +29,40 @@ Opencast.FromVideodisplay = (function () {
     }
 
     function setProgress(value) {
-        $('.matterhorn-progress-bar').css("width", value + "%");
+        $('.matterhorn-progress-bar').css("width", (value + "%"));
     }
     
-     function setCaptions(text) {
+    function setCaptions(text) {
         document.getElementById("captions").innerHTML = text;
     }
     
-     return {
-       	setPlayhead : setPlayhead,
-       	setVomume : setVolume,
-       	setCurrentTime : setCurrentTime,
-       	setTotalTime: setTotalTime,
-       	setDuration: setDuration,
+    var playing = "playing";
+    var pausing = "pausing";
+    
+    function setPlayPauseState(state) {
+        if (state === playing) {
+            document.getElementById("btn_play_pause").value = "Play";
+            document.getElementById("btn_play_pause").alt = "Play";
+            document.getElementById("btn_play_pause").title = "play";
+            document.getElementById("btn_play_pause").src = "./icons/play---green.png";
+            Opencast.ToVideodisplay.doSetCurrentPlayPauseState(pausing);
+        } else {
+            document.getElementById("btn_play_pause").value = "Pause";
+            document.getElementById("btn_play_pause").alt = "Pause";
+            document.getElementById("btn_play_pause").title = "pause";
+            document.getElementById("btn_play_pause").src = "./icons/pause---green.png";
+            Opencast.ToVideodisplay.doSetCurrentPlayPauseState(playing);
+        }
+    }
+    
+    return {
+        setPlayhead : setPlayhead,
+        setVomume : setVolume,
+        setCurrentTime : setCurrentTime,
+        setTotalTime: setTotalTime,
+        setDuration: setDuration,
         setProgress : setProgress,
-        setCaptions : setCaptions
-     };
+        setCaptions : setCaptions,
+        setPlayPauseState : setPlayPauseState
+    };
 }());
-	
-	
-	
-	

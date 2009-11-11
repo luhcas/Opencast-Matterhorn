@@ -7,6 +7,16 @@
  * ------------------------------------------------------------------------ */
 var Opencast = Opencast || {};
 
+function doUnmute() {
+    if (document.getElementById("btn_volume").value === "Unmute") {
+        document.getElementById("btn_volume").value = "Mute";
+        document.getElementById("btn_volume").alt = "Mute";
+        document.getElementById("btn_volume").title = "Mute";
+        document.getElementById("btn_volume").src = "./icons/volume---high.png";
+    } 
+}
+
+Opencast.volume = 1.0;
 
 $(document).ready(function () {
     $("#slider").slider();
@@ -24,5 +34,8 @@ $(document).ready(function () {
     $('#volume_slider').slider('value', 100);
     $('#volume_slider').bind('slide', function (event, ui) {
         Opencast.ToVideodisplay.doSetVolume(ui.value / 100);
+        Opencast.volume = ui.value / 100;
+        doUnmute();
     });
 });
+
