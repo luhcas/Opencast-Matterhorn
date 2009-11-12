@@ -55,14 +55,19 @@ Opencast.FromVideodisplay = (function () {
         }
     }
     
+    function setDoToggleVolume() {
+        Opencast.ToVideodisplay.doToggleVolume();
+    }
+    
     return {
         setPlayhead : setPlayhead,
-        setVomume : setVolume,
+        setVolume : setVolume,
         setCurrentTime : setCurrentTime,
         setTotalTime: setTotalTime,
         setDuration: setDuration,
         setProgress : setProgress,
         setCaptions : setCaptions,
-        setPlayPauseState : setPlayPauseState
+        setPlayPauseState : setPlayPauseState,
+        setDoToggleVolume : setDoToggleVolume
     };
 }());

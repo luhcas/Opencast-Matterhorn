@@ -288,6 +288,17 @@
 					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.CLOSEDCAPTIONS));	
 				}
 				
+				// rewind
+				else if(charCode == 82 || charCode == 114) // R or r
+				{
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.REWIND));	
+				}
+				
+				// Fast forward
+				else if(charCode == 70 || charCode == 102) // F or f
+				{
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.FASTFORWARD));	
+				}				
 				/* when we need the timer
 				else if(charCode == 116 || charCode == 84) // t oder T
 				{

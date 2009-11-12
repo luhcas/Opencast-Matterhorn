@@ -51,6 +51,18 @@ package org.opencast.engage.videodisplay.control
 		
 		private var lastPlayPauseState:String = "";
 		
+		private var volume:Number = 1;
+		
+		private var skipVolume:Number = 0.1;
+		private var volumeLowest:Number = 0.2;
+		private var volumeLow:Number = 0.4;
+		private var volumeMiddle:Number = 0.6;
+		private var volumeHigh:Number = 0.8;
+		private var volumeHighest:Number = 1;
+		private var percent:int = 100;
+		
+		
+		
 		/** Constructor */
 		public function VideodisplayController()
 		{
@@ -95,17 +107,56 @@ package org.opencast.engage.videodisplay.control
 				case VideoControlEvent.SKIPBACKWARD: 	model.player.seek( model.skipBackwardTime );
 										    			break;
 														
-				case VideoControlEvent.REWIND: 			model.player.seek( model.currentPlayhead - model.rewindTime );
-										    		
-														break;
+				case VideoControlEvent.REWIND: 			model.player.pause();
+														model.player.seek( model.currentPlayhead - model.rewindTime );
+														model.player.play();
+										    			break;
 								
 				case VideoControlEvent.FASTFORWARD: 	model.player.seek( model.currentPlayhead + model.fastForwardTime );
-										    			
-														break;
+										    			break;
 								
 				case VideoControlEvent.SKIPFORWARD: 	model.player.seek( model.currentDuration - 1);
 														model.player.pause();
 										    			break;
+										    			
+				case VideoControlEvent.MUTE: 			ExternalInterface.call(ExternalFunction.MUTE, '');
+														break;
+														
+				case VideoControlEvent.VOLUMEUP:		if( model.player.volume != 1 )
+														{
+															model.player.volume = model.player.volume + skipVolume;
+														}
+														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
+														break;
+														
+				case VideoControlEvent.VOLUMEDOWN:		if( model.player.volume != 0 )
+														{
+															model.player.volume = model.player.volume - skipVolume;
+														}
+														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
+														break;
+														
+				case VideoControlEvent.VOLUMELOWEST:	model.player.volume = volumeLowest;
+														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
+														break;
+														
+				case VideoControlEvent.VOLUMELOW:		model.player.volume = volumeLow;
+														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
+														break;
+														
+				case VideoControlEvent.VOLUMEMIDDLE: 	model.player.volume = volumeMiddle;
+														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
+														break;
+														
+				case VideoControlEvent.VOLUMEHIGH: 		model.player.volume = volumeHigh;
+														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
+														break;
+								
+				case VideoControlEvent.VOLUMEHIGHEST: 	model.player.volume = volumeHighest;
+														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
+														break;
+														
+				
 			}
 			
 	      	try 

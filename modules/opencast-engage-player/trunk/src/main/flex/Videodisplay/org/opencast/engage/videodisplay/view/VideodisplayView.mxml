@@ -252,7 +252,7 @@
 			 * */
 			private function volumeChange(event:VolumeChangeEvent):void
 			{
-				ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume);
+				ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * 100);
 			}
 			
 		]]>

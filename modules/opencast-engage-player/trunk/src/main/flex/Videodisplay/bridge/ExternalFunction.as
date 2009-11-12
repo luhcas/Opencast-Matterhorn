@@ -17,5 +17,7 @@ package bridge
  		public static const SETPLAYPAUSESTATE:String	= 'Opencast.FromVideodisplay.setPlayPauseState';
  		
  		public static const SETCAPTIONS:String			= 'Opencast.FromVideodisplay.setCaptions';
+ 		
+ 		public static const MUTE:String					= 'Opencast.FromVideodisplay.setDoToggleVolume';
  	}
 }
