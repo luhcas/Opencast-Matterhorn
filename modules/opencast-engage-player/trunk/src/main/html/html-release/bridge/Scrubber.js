@@ -1,58 +1,66 @@
 /**
- * Application "Videodisplay.mxml"
+ * WARNING! THIS IS A GENERATED FILE, AND WILL BE RE-GENERATED EACH TIME THE
+ * AJAXBRIDGE IS RUN.
+ *
+ * You should keep your javascript code inside this file as light as possible, 
+ * and rather keep the body of your Ajax application in separate *.js files. 
+ *
+ * Do make a backup of your changes, before re-generating this file (AjaxBridge 
+ * will display a warning message to you).
+ *
+ * Please refer to the built-in documentation inside the AjaxBridge application 
+ * for help on using this file.
+ */
+ 
+ 
+/**
+ * Application "Scrubber.mxml"
  */
 
 /**
- * The "Videodisplay" javascript namespace. All the functions/variables you
- * have selected under the "Videodisplay.mxml" in the tree will be
+ * The "Scrubber" javascript namespace. All the functions/variables you
+ * have selected under the "Scrubber.mxml" in the tree will be
  * available as static members of this namespace object.
  */
-Videodisplay = {};
+Scrubber = {};
 
 
 /**
  * Listen for the instantiation of the Flex application over the bridge
  */
-FABridge.addInitializationCallback("b_Videodisplay", VideodisplayReady);
+FABridge.addInitializationCallback("b_Scrubber", ScrubberReady);
 
 
 /**
- * Hook here all the code that must run as soon as the "Videodisplay" class
+ * Hook here all the code that must run as soon as the "Scrubber" class
  * finishes its instantiation over the bridge.
  *
- * However, using the "VideodisplayReady()" is the safest way, as it will 
+ * For basic tasks, such as running a Flex method on the click of a javascript
+ * button, chances are that both Ajax and Flex may well have loaded before the 
+ * user actually clicks the button.
+ *
+ * However, using the "ScrubberReady()" is the safest way, as it will 
  * let Ajax know that involved Flex classes are available for use.
  */
-function VideodisplayReady() {
+function ScrubberReady() {
 
 	// Initialize the "root" object. This represents the actual 
-	// "Videodisplay.mxml" flex application.
-	b_Videodisplay_root = FABridge["b_Videodisplay"].root();
+	// "Scrubber.mxml" flex application.
+	b_Scrubber_root = FABridge["b_Scrubber"].root();
 	
-	// Global functions in the "Videodisplay.mxml" application
 
-	Videodisplay.play = function() {
-		b_Videodisplay_root.play();
-	};
-
-	Videodisplay.stop = function() {
-		b_Videodisplay_root.stop();
-	};
-
-	Videodisplay.pause = function() {
-		b_Videodisplay_root.pause();
+	// Global variables in the "Scrubber.mxml" application (converted 
+	// to getters and setters)
+	
+	Scrubber.setPlayhead = function(argNumber) {
+		b_Scrubber_root.setPlayhead(argNumber);
 	};
 	
-	Videodisplay.passCharCode = function(argInt){
-		b_Videodisplay_root.passCharCode(argInt);
+	Scrubber.setDuration = function(argNumber) {
+		b_Scrubber_root.setDuration(argNumber);
 	};
 	
-	Videodisplay.passCharCode = function(argInt){
-		b_Videodisplay_root.passCharCode(argInt);
+	Scrubber.scrubberStopDrag = function() {
+		b_Scrubber_root.scrubberStopDrag();
 	};
-	
-	Videodisplay.setVolume = function(argNumber) {
-		b_Videodisplay_root.setVolume(argNumber);
-	};
-
 }

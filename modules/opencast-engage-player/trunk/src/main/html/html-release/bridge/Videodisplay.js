@@ -43,6 +43,22 @@ function VideodisplayReady() {
 		b_Videodisplay_root.pause();
 	};
 	
+	Videodisplay.skipBackward = function() {
+		b_Videodisplay_root.skipBackward();
+	};
+	
+	Videodisplay.rewind = function() {
+		b_Videodisplay_root.rewind();
+	};
+	
+	Videodisplay.fastForward = function() {
+		b_Videodisplay_root.fastForward();
+	};
+	
+	Videodisplay.skipForward = function() {
+		b_Videodisplay_root.skipForward();
+	};
+	
 	Videodisplay.passCharCode = function(argInt){
 		b_Videodisplay_root.passCharCode(argInt);
 	};
@@ -55,4 +71,20 @@ function VideodisplayReady() {
 		b_Videodisplay_root.setVolume(argNumber);
 	};
 
+	Videodisplay.getVolume = function(){
+		return b_Videodisplay_root.getVolume();
+	};
+	
+	Videodisplay.seek = function(argNumber) {
+		b_Videodisplay_root.seek(argNumber);
+	};
+	
+	Videodisplay.setLanguage = function(argString) {
+		b_Videodisplay_root.setLanguage(argString);
+	};
+	
+	Videodisplay.closedCaptions = function(argBool) {
+		b_Videodisplay_root.setClosedCaptions(argBool);
+	};
+	
 }
