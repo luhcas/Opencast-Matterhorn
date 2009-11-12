@@ -48,11 +48,8 @@ package org.opencast.engage.videodisplay.control
 		/**  */
 		[Autowire]
 		public var delegate : VideodisplayDelegate;
-		
 		private var lastPlayPauseState:String = "";
-		
 		private var volume:Number = 1;
-		
 		private var skipVolume:Number = 0.1;
 		private var volumeLowest:Number = 0.2;
 		private var volumeLow:Number = 0.4;
@@ -60,8 +57,6 @@ package org.opencast.engage.videodisplay.control
 		private var volumeHigh:Number = 0.8;
 		private var volumeHighest:Number = 1;
 		private var percent:int = 100;
-		
-		
 		
 		/** Constructor */
 		public function VideodisplayController()
@@ -89,12 +84,14 @@ package org.opencast.engage.videodisplay.control
 						    								model.player.play();
 						  								model.currentPlayerState = PlayerState.PLAYING;
 													   	currentPlayPauseState = PlayerState.PAUSING;
+													   	ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
 													   	break;
 												
 				case VideoControlEvent.PAUSE: 			if(model.player.playing)
 		  				  									model.player.pause();
 									  					model.currentPlayerState = PlayerState.PAUSING;
 									  					currentPlayPauseState = PlayerState.PLAYING;
+									  					ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
 														break;
 												
 				case VideoControlEvent.STOP: 			if(model.player.playing)
@@ -116,10 +113,16 @@ package org.opencast.engage.videodisplay.control
 										    			break;
 								
 				case VideoControlEvent.SKIPFORWARD: 	model.player.seek( model.currentDuration - 1);
-														model.player.pause();
+														if(model.player.playing)
+		  				  									model.player.pause();
+									  					model.currentPlayerState = PlayerState.PAUSING;
+									  					currentPlayPauseState = PlayerState.PLAYING;
+									  					ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
 										    			break;
 										    			
 				case VideoControlEvent.MUTE: 			ExternalInterface.call(ExternalFunction.MUTE, '');
+														model.player.volume = 0;
+														
 														break;
 														
 				case VideoControlEvent.VOLUMEUP:		if( model.player.volume != 1 )
@@ -156,18 +159,10 @@ package org.opencast.engage.videodisplay.control
 														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
 														break;
 														
-				
+				case VideoControlEvent.CLOSEDCAPTIONS: 	Swiz.dispatchEvent( new ClosedCaptionsEvent(true) );
+														ExternalInterface.call(ExternalFunction.SETCAPTIONSBUTOON, model.ccBoolean);
+														break;
 			}
-			
-	      	try 
-	      	{
-	      		if(currentPlayPauseState != lastPlayPauseState)
-	        	{
-	        		ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
-	          		lastPlayPauseState = currentPlayPauseState;
-	        	}
-	      	}	 
-	      	catch (e:TypeError) {}
 		}
 
 		/** setVolume 
