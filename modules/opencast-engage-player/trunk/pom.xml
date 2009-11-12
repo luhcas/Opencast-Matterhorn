@@ -47,6 +47,7 @@
 					<accessible>true</accessible>
 					<headlessServer>true</headlessServer>
 					<showWarnings>false</showWarnings>
+					<output>target/hybrid-player/Videodisplay.swf</output>
 				</configuration>
 				<executions> 
                   <!--    <execution> 
@@ -85,8 +86,11 @@
                   <filtering>true</filtering>
                 </resource>
                 <resource>
-                  <directory>src/main/flex/Videodisplay</directory>
+                  <directory>src/main/flex/Videodisplay/</directory>
                   <filtering>true</filtering>
+                 	<includes>
+         			 <include>style/</include>
+       				</includes>
                 </resource>
               </resources>              
             </configuration>            
