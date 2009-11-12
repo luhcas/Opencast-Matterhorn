@@ -3,10 +3,10 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>EngageApp</groupId>
-	<artifactId>opencast-engage-player-videodisplay</artifactId>
+	<artifactId>opencast-engage-player</artifactId>
 	<version>0.1-SNAPSHOT</version>
 	<packaging>swf</packaging>
-	<name>opencast-engage-player-videodisplay</name>
+	<name>opencast-engage-player</name>
 
 	<properties>
 		<sourceFile>Videodisplay.mxml</sourceFile>
