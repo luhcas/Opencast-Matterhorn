@@ -76,7 +76,8 @@ Opencast.ToVideodisplay = (function () {
             document.getElementById("btn_volume").alt = "Unmute";
             document.getElementById("btn_volume").title = "Unmute";
             document.getElementById("btn_volume").src = "./icons/volume---mute.png";
-            doSetVolume(0.0);
+            Opencast.volume = $('#volume_slider').slider('option', 'value') / 100;
+            doSetVolume(0);
         } else {
             // Changing the volume to 0.0 and the value of the button of btn_volume to "mute"
             document.getElementById("btn_volume").value = "Mute";
@@ -111,23 +112,36 @@ Opencast.ToVideodisplay = (function () {
         }
     }
 
-    function doSetLanguage(value) {
-        Videodisplay.setLanguage(value);
-    }
-
-
-    function setLangugageComboBox(languageComboBox) {
-        for (var i = 0; i < languageComboBox.length; i = i + 1) {
-            var option = document.createElement('option');
-            option.text = languageComboBox[i];
-            var cb_item = document.getElementById("cb_lang");
-            try {
-                cb_item.add(option, null); // standards compliant
-            } catch (ex) {
-                cb_item.add(option); // IE only
-            }
+    var isCtrl = false;
+    var isAlt = false;
+    
+    $(document).keyup(function (e) { 
+        if (e.which === 17) 
+        {
+            isCtrl = false; 
         }
-    }
+        if (e.which === 18) 
+        {
+            isAlt = false; 
+        }
+    }).keydown(function (e) { 
+        if (e.which === 17)
+        {
+            isCtrl = true;
+        }
+        if (e.which === 18)
+        {
+            isAlt = true;
+        }
+        if (isCtrl === true && isAlt === true) {
+          
+            if (e.which === 80 || e.which === 112 || e.which === 83 || e.which === 115 || e.which === 77 || e.which === 109 || e.which === 85 || e.which === 117  || e.which === 68 || e.which === 100 || e.which === 49 || e.which === 50 || e.which === 51 || e.which === 52 || e.which === 53 || e.which === 67 || e.which === 99 || e.which === 82 || e.which === 114 || e.which === 70 || e.which === 102)
+            {
+                Videodisplay.passCharCode(e.which);
+            }
+            return false;
+        }
+    }); 
 
     return {
         doSeek: doSeek,
@@ -143,8 +157,6 @@ Opencast.ToVideodisplay = (function () {
         doToggleVolume: doToggleVolume,
         doSetVolume: doSetVolume,
         doClosedCaptions: doClosedCaptions,
-        doToogleClosedCaptions : doToogleClosedCaptions,
-        doSetLanguage: doSetLanguage,
-        setLangugageComboBox : setLangugageComboBox
+        doToogleClosedCaptions : doToogleClosedCaptions
     };
 }());

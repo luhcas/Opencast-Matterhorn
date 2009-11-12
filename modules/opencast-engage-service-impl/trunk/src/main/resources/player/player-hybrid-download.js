@@ -22,9 +22,16 @@ $(document).ready(function () {
     $("#slider").slider();
     $('#slider').slider('option', 'animate', false);
     $('#slider').slider('option', 'min', 0);
+    $('#slider').bind('slidechange', function (event, ui) {
+        if (ui.value === 0)
+        {
+            Opencast.ToVideodisplay.doTogglePlayPause();
+        }
+    });
     $('#slider').bind('slide', function (event, ui) {
         Videodisplay.seek(ui.value);
     });
+    
     $('#volume_slider').slider();
     $('#volume_slider').slider('option', 'min', 0);
     $('#volume_slider').slider('option', 'max', 100);
@@ -35,7 +42,12 @@ $(document).ready(function () {
     $('#volume_slider').bind('slide', function (event, ui) {
         Opencast.ToVideodisplay.doSetVolume(ui.value / 100);
         Opencast.volume = ui.value / 100;
-        doUnmute();
     });
+    $('#volume_slider').bind('slidechange', function (event, ui) {
+        if (ui.value !== 0) 
+        {
+            doUnmute();
+        }
+    });  
 });
 

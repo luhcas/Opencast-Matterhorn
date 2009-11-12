@@ -28,52 +28,60 @@
     <div id="title-bar" style="margin-left:10px; margin-right:10px; margin-top:5px;">
         <h1>Progressive Download Hybrid Player</h1>
     </div>
-        <div id="controls" style="margin-left:10px; margin-right:10px; margin-top:5px;">
+    <div id="controls" style="margin-left:10px; margin-right:10px; margin-top:5px;">
 
-            <div id="slider" class="ui-slider" style="width:360px; margin-right:10px;margin-bottom:10px;" >
-                <div class="matterhorn-progress-bar-background"></div>
-                <div class="matterhorn-progress-bar"></div>
-            </div>
-
-            <span style="margin-left:0px;font-size:0.9em">
-                <span id="time-current" role="timer">00:00:00</span> of
-                <span id="time-total" role="timer">00:00:00</span>
-            </span>
-
-            <input id="btn_skip_backward"   type="image" src="./icons/skip-backward---green.png"    onclick="Opencast.ToVideodisplay.doSkipBackward();"             value="Skip backward"   alt="Skip backward"	title="skip backward" >
-            <input id="btn_rewind"          type="image" src="./icons/rewind---green.png"           onclick="Opencast.ToVideodisplay.doRewind();"                   value="Rewind"          alt="Rewind"								title="rewind" >
-            <input id="btn_play_pause"      type="image" src="./icons/play---green.png"             onclick="Opencast.ToVideodisplay.doTogglePlayPause();" 									value="Play"            alt="Play" 									title="play" >
-            <input id="btn_fast_forward"    type="image" src="./icons/fast-forward---green.png"     onclick="Opencast.ToVideodisplay.doFastForward();"              value="Fast forward"    alt="Fast forward"		title="fast forward" >
-            <input id="btn_skip_forward"    type="image" src="./icons/skip-forward---green.png"     onclick="Opencast.ToVideodisplay.doSkipForward();"              value="Skip forward"    alt="Skip forward"		title="skip forward" >
-            <input id="btn_volume"          type="image" src="./icons/volume---high.png"            onclick="Opencast.ToVideodisplay.doToggleVolume();"             value="Mute"            alt="Mute"								  title="Mute" >
-
-            <div id='volume_slider' class='ui-slider' style="width:70px;display:inline-block;margin-left:10px; margin-right:10px">
-                <div class='ui-slider-handle'></div>
-            </div>
-
-            <input id="btn_cc"              type="image" src="./icons/cc_off.png"                   onclick="Opencast.ToVideodisplay.doToogleClosedCaptions();"    value="Closed Caption on" alt="Closed Caption on" 									title="closed caption on" >
+        <div id="slider" class="ui-slider" style="width:360px; margin-right:10px;margin-bottom:10px;" >
+            <div class="matterhorn-progress-bar-background"></div>
+            <div class="matterhorn-progress-bar"></div>
         </div>
 
-        <div id="video-display-container" style="margin:10px;margin-bottom:0px;">
-            <object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="288" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
-                <param name ="movie" value="Videodisplay.swf" >
-                <param name="quality"value="high">
-                <param name="allowScriptAccess" value="always" >
-                <param name="bgcolor" value="#000000">
-                <param name="allowFullScreen" value="true">
-                <param name="flashvars" VALUE="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/femaf09_2009_4_17_10_18.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml">
-                <embed
-                    width="360"
-                    height="288"
-                    bgcolor="#000000"
-                    allowfullscreen="true"
-                    type="application/x-shockwave-flash"
-                    pluginspage="http://www.macromedia.com/go/getflashplayer"
-                    flashvars="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/femaf09_2009_4_17_10_18.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml"
-                    quality="high"
-                    allowScriptAccess="always"
-                    src="Videodisplay.swf">
-            </object>
+        <span style="margin-left:0px;font-size:0.9em">
+            <span id="time-current" role="timer">00:00:00</span> of
+            <span id="time-total" role="timer">00:00:00</span>
+        </span>
+
+        <input id="btn_skip_backward"   type="image" src="./icons/skip-backward---green.png"    onclick="Opencast.ToVideodisplay.doSkipBackward();"             value="Skip backward"   alt="Skip backward"	title="Skip Backward" >
+        <input id="btn_rewind"          type="image" src="./icons/rewind---green.png"           onclick="Opencast.ToVideodisplay.doRewind();"                   value="Rewind"          alt="Rewind"								title="Rewind" >
+        <input id="btn_play_pause"      type="image" src="./icons/play---green.png"             onclick="Opencast.ToVideodisplay.doTogglePlayPause();" 									value="Play"            alt="Play" 									title="Play" >
+        <input id="btn_fast_forward"    type="image" src="./icons/fast-forward---green.png"     onclick="Opencast.ToVideodisplay.doFastForward();"              value="Fast forward"    alt="Fast forward"		title="Fast Forward" >
+        <input id="btn_skip_forward"    type="image" src="./icons/skip-forward---green.png"     onclick="Opencast.ToVideodisplay.doSkipForward();"              value="Skip forward"    alt="Skip forward"		title="Skip Forward" >
+        <input id="btn_volume"          type="image" src="./icons/volume---high.png"            onclick="Opencast.ToVideodisplay.doToggleVolume();"             value="Mute"            alt="Mute"								  title="Mute" >
+
+        <div id='volume_slider' class='ui-slider' style="width:70px;display:inline-block;margin-left:10px; margin-right:10px">
         </div>
-    </body>
+
+        <input id="btn_cc"              type="image" src="./icons/cc_off.png"                   onclick="Opencast.ToVideodisplay.doToogleClosedCaptions();"    value="Closed Caption on" alt="Closed Caption on" 									title="closed caption on" >
+    	<div style="margin-left:10px; margin-right:10px; margin-top:10px;">
+    		<p>Keyboard Shortcuts:</p>
+    		Control + Alt + P   = Pause/Play toggle<br>
+    		Control + Alt + M   = Mute<br>
+    		Control + Alt + U   = Volume Up<br>
+    		Control + Alt + D   = Volume Down<br>
+    		Control + Alt 1 - 5 = Change the volume. 1 being the lowest volume and 5 being the loudest.<br>
+    		Control + Alt + C   = Captions toggle.<br>
+    	</div>
+    </div>
+    
+    <div id="video-display-container" style="margin:10px;margin-bottom:0px;">
+        <object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="288" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
+            <param name ="movie" value="Videodisplay.swf" >
+            <param name="quality"value="high">
+            <param name="allowScriptAccess" value="always" >
+            <param name="bgcolor" value="#000000">
+            <param name="allowFullScreen" value="true">
+            <param name="flashvars" VALUE="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/femaf09_2009_4_17_10_18.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml">
+            <embed
+                width="360"
+                height="288"
+                bgcolor="#000000"
+                allowfullscreen="true"
+                type="application/x-shockwave-flash"
+                pluginspage="http://www.macromedia.com/go/getflashplayer"
+                flashvars="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/femaf09_2009_4_17_10_18.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml"
+                quality="high"
+                allowScriptAccess="always"
+                src="Videodisplay.swf">
+        </object>
+    </div>
+   	</body>
 </html>

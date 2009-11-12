@@ -32,10 +32,23 @@ Button.Pause
   selectedDisabledSkin: Embed(source='skin_opencast.swf', symbol='btn_pause_up');
 }
 
+Button.Fullscreen
+{
+  font-size: 0; 
+  
+  upSkin: Embed(source='skin_opencast.swf', symbol='btn_fullscreen_up');
+  overSkin: Embed(source='skin_opencast.swf', symbol='btn_fullscreen_up');
+  downSkin: Embed(source='skin_opencast.swf', symbol='btn_fullscreen_down');
+  disabledSkin: Embed(source='skin_opencast.swf', symbol='btn_fullscreen_up');
+  selectedUpSkin: Embed(source='skin_opencast.swf', symbol='btn_fullscreen_up'); 
+  selectedOverSkin: Embed(source='skin_opencast.swf', symbol='btn_fullscreen_up');
+  selectedDownSkin: Embed(source='skin_opencast.swf', symbol='btn_fullscreen_up');
+  selectedDisabledSkin: Embed(source='skin_opencast.swf', symbol='btn_fullscreen_up');
+}
+
 .captions
 {
-	font-size: 16;
 	color: #ffffff;
-	background-alpha: 0;
+	backgroundColor: #125458;
 	text-align: center;
 }
