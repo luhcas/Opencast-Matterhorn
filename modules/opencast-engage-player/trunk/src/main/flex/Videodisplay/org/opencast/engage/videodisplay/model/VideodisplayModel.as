@@ -68,5 +68,10 @@ package org.opencast.engage.videodisplay.model
 		public var fastForwardTime:Number = 10;
 		
 		public var cctest:Boolean = false;
+		
+		public function VideodisplayModel()
+        {
+        	
+        }
 	}
 }

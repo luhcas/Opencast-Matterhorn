@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<actionScriptProperties 
+        mainApplicationPath="Videodisplay.mxml" 
+        version="3"
+        >
+
+    <compiler 
+            additionalCompilerArguments="-locale en_US" 
+            copyDependentFiles="true" 
+            enableModuleDebug="true" 
+            generateAccessible="true" 
+            htmlExpressInstall="true" 
+            htmlGenerate="false" 
+            htmlHistoryManagement="true" 
+            htmlPlayerVersion="10.0.0" 
+            htmlPlayerVersionCheck="true" 
+            outputFolderPath="bin-debug" 
+            sourceFolderPath="src/main/flex/Videodisplay" 
+            strict="true" 
+            useApolloConfig="false" 
+            verifyDigests="true" 
+            warn="false"
+            >
+
+        <compilerSourcePath>
+            <compilerSourcePathEntry 
+                    kind="1" 
+                    linkType="1" 
+                    path="src/main/flex/Videodisplay"
+                    />
+            <compilerSourcePathEntry 
+                    kind="1" 
+                    linkType="1" 
+                    path="src/main/resources"
+                    />
+        </compilerSourcePath>
+
+        <libraryPath
+                defaultLinkType="1">
+
+			<!-- artifact: com.adobe.flex.framework:rpc:3.3.0.4852 -->
+            <libraryPathEntry 
+                    kind="3" 
+                    linkType="1" 
+                    path="/Users/markusketterl/.m2/repository/com/adobe/flex/framework/rpc/3.3.0.4852/rpc-3.3.0.4852.swc" 
+                    useDefaultLinkType="false"
+                    />
+
+			<!-- artifact: com.adobe.flex.framework:applicationupdater_ui:3.3.0.4852 -->
+            <libraryPathEntry 
+                    kind="3" 
+                    linkType="1" 
+                    path="/Users/markusketterl/.m2/repository/com/adobe/flex/framework/applicationupdater_ui/3.3.0.4852/applicationupdater_ui-3.3.0.4852.swc" 
+                    useDefaultLinkType="false"
+                    />
+
+			<!-- artifact: com.adobe.flex.framework:applicationupdater:3.3.0.4852 -->
+            <libraryPathEntry 
+                    kind="3" 
+                    linkType="1" 
+                    path="/Users/markusketterl/.m2/repository/com/adobe/flex/framework/applicationupdater/3.3.0.4852/applicationupdater-3.3.0.4852.swc" 
+                    useDefaultLinkType="false"
+                    />
+
+			<!-- artifact: com.adobe.flex.framework:utilities:3.3.0.4852 -->
+            <libraryPathEntry 
+                    kind="3" 
+                    linkType="1" 
+                    path="/Users/markusketterl/.m2/repository/com/adobe/flex/framework/utilities/3.3.0.4852/utilities-3.3.0.4852.swc" 
+                    useDefaultLinkType="false"
+                    />
+
+			<!-- artifact: com.adobe.swiz:swiz:0.6.2 -->
+            <libraryPathEntry 
+                    kind="3" 
+                    linkType="1" 
+                    path="/Users/markusketterl/.m2/repository/com/adobe/swiz/swiz/0.6.2/swiz-0.6.2.swc" 
+                    useDefaultLinkType="false"
+                    />
+
+			<!-- artifact: com.adobe.flex.framework:framework:3.3.0.4852 -->
+            <libraryPathEntry 
+                    kind="3" 
+                    linkType="1" 
+                    path="/Users/markusketterl/.m2/repository/com/adobe/flex/framework/framework/3.3.0.4852/framework-3.3.0.4852-en_US.rb.swc" 
+                    useDefaultLinkType="false"
+                    />
+
+			<!-- artifact: com.adobe.osmf:MediaFramework:0.6 -->
+            <libraryPathEntry 
+                    kind="3" 
+                    linkType="1" 
+                    path="/Users/markusketterl/.m2/repository/com/adobe/osmf/MediaFramework/0.6/MediaFramework-0.6.swc" 
+                    useDefaultLinkType="false"
+                    />
+
+			<!-- artifact: com.adobe.flex.framework:rpc:3.3.0.4852 -->
+            <libraryPathEntry 
+                    kind="3" 
+                    linkType="1" 
+                    path="/Users/markusketterl/.m2/repository/com/adobe/flex/framework/rpc/3.3.0.4852/rpc-3.3.0.4852-en_US.rb.swc" 
+                    useDefaultLinkType="false"
+                    />
+
+			<!-- artifact: com.adobe.flex.framework:flex:3.3.0.4852 -->
+            <libraryPathEntry 
+                    kind="3" 
+                    linkType="1" 
+                    path="/Users/markusketterl/.m2/repository/com/adobe/flex/framework/flex/3.3.0.4852/flex-3.3.0.4852.swc" 
+                    useDefaultLinkType="false"
+                    />
+
+			<!-- artifact: com.adobe.flex.framework:framework:3.3.0.4852 -->
+            <libraryPathEntry 
+                    kind="3" 
+                    linkType="1" 
+                    path="/Users/markusketterl/.m2/repository/com/adobe/flex/framework/framework/3.3.0.4852/framework-3.3.0.4852.swc" 
+                    useDefaultLinkType="false"
+                    />
+
+
+	      <libraryPathEntry kind="4" path="">
+	        <excludedEntries>
+	          <libraryPathEntry kind="1" linkType="1" path="${PROJECT_FRAMEWORKS}/locale/{locale}"/>
+	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/flex.swc" useDefaultLinkType="false"/>
+	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/qtp.swc" useDefaultLinkType="false"/>
+	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/rpc.swc" useDefaultLinkType="false"/>
+	          <libraryPathEntry kind="3" linkType="4" path="${PROJECT_FRAMEWORKS}/libs/framework.swc" useDefaultLinkType="true">
+	            <crossDomainRsls>
+	              <crossDomainRslEntry autoExtract="true" policyFileUrl="" rslUrl="framework_3.1.0.2710.swz"/>
+	              <crossDomainRslEntry autoExtract="true" policyFileUrl="" rslUrl="framework_3.1.0.2710.swf"/>
+	            </crossDomainRsls>
+	          </libraryPathEntry>
+	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/datavisualization.swc" useDefaultLinkType="false"/>
+	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/automation.swc" useDefaultLinkType="false"/>
+	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/automation_dmv.swc" useDefaultLinkType="false"/>
+	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/automation_flashflexkit.swc" useDefaultLinkType="false"/>
+	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/utilities.swc" useDefaultLinkType="false"/>
+	          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/automation_agent.swc" useDefaultLinkType="false"/>
+	        </excludedEntries>
+	      </libraryPathEntry>
+        </libraryPath>
+
+        <sourceAttachmentPath/>
+
+    </compiler>
+
+    <applications>
+        <application 
+                path="Videodisplay.mxml"
+                />
+    </applications>
+
+    <modules/>
+    
+    <buildCSSFiles/>
+
+</actionScriptProperties>
