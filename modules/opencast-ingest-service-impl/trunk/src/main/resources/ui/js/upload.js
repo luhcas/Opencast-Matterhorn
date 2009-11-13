@@ -120,13 +120,9 @@ uploadManager.checkUpload = function(highlight) {
  * resets internal data for the uploader
  */
 uploadManager.resetUploader = function() {
-    document.getElementById("title").value = "";
-    document.getElementById("contributor").value = "";
-    document.getElementById("description").value = "";
-    document.getElementById("language").value = "";
-    document.getElementById("distSakai").checked = false;
-    document.getElementById("distYouTube").checked = false;
-    document.getElementById("distITunes").checked = false;
+    document.basicData.reset.click();           // somehow document.basicData.reset() 'is not a function', twilight zone...
+    document.additionalData.reset();
+    document.distributionData.reset();
     uploadUI.resetFilename();
     uploadManager.selectedFile = null;
 }
