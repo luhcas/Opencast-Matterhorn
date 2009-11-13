@@ -14,7 +14,7 @@
  *
  */
 
-package org.opencastproject.media.mediapackage.handle;
+package org.opencastproject.media.mediapackage.identifier;
 
 import org.opencastproject.util.ConfigurationException;
 
@@ -29,7 +29,7 @@ import org.opencastproject.util.ConfigurationException;
 public class HandleBuilderFactory {
 
   /** Class name for the default handle builder */
-  private static final String BUILDER_CLASS = "org.opencastproject.media.mediapackage.handle.HandleBuilderImpl";
+  private static final String BUILDER_CLASS = "org.opencastproject.media.mediapackage.identifier.HandleBuilderImpl";
 
   /** Name of the system property */
   public static final String PROPERTY_NAME = "opencast.handlebuilder";

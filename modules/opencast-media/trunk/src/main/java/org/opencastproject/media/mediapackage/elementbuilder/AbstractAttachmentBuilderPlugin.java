@@ -19,9 +19,9 @@ package org.opencastproject.media.mediapackage.elementbuilder;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.MediaPackageSerializer;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.attachment.AttachmentImpl;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
@@ -41,9 +41,6 @@ import javax.xml.xpath.XPathExpressionException;
 /**
  * This implementation of the {@link MediaPackageElementBuilderPlugin} recognizes attachments and provides utility
  * methods for creating media package element representations for them.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: AbstractAttachmentBuilderPlugin.java 2905 2009-07-15 16:16:05Z ced $
  */
 public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBuilderPlugin {
 
@@ -139,7 +136,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
    *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
   public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
-          throws MediaPackageException {
+          throws UnsupportedElementException {
 
     String id = null;
     String attachmentFlavor = null;
@@ -222,11 +219,11 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
 
       return specializeAttachment(attachment);
     } catch (XPathExpressionException e) {
-      throw new MediaPackageException("Error while reading attachment from manifest: " + e.getMessage());
+      throw new UnsupportedElementException("Error while reading attachment from manifest: " + e.getMessage());
     } catch (NoSuchAlgorithmException e) {
-      throw new MediaPackageException("Unsupported digest algorithm: " + e.getMessage());
+      throw new UnsupportedElementException("Unsupported digest algorithm: " + e.getMessage());
     } catch (IOException e) {
-      throw new MediaPackageException("Error while reading attachment file " + url + ": " + e.getMessage());
+      throw new UnsupportedElementException("Error while reading attachment file " + url + ": " + e.getMessage());
     }
   }
 
@@ -236,10 +233,10 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
    * @param url
    *          the element location
    * @return an attachment object
-   * @throws MediaPackageException
+   * @throws UnsupportedElementException
    *           if the attachment cannto be read
    */
-  public MediaPackageElement elementFromURL(URL url) throws MediaPackageException {
+  public MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException {
     log_.trace("Creating attachment from " + url);
     return specializeAttachment(AttachmentImpl.fromURL(url));
   }
@@ -250,7 +247,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   public MediaPackageElement elementFromURL(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
-          throws MediaPackageException {
+          throws UnsupportedElementException {
     return elementFromURL(url);
   }
 
@@ -261,10 +258,10 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
    * @param attachment
    *          the general attachment representation
    * @return a specialized attachment
-   * @throws MediaPackageException
-   *           if the media package fails to be specialized
+   * @throws UnsupportedElementException
+   *           if the attachment fails to be specialized
    */
-  protected Attachment specializeAttachment(Attachment attachment) throws MediaPackageException {
+  protected Attachment specializeAttachment(Attachment attachment) throws UnsupportedElementException {
     return attachment;
   }
 

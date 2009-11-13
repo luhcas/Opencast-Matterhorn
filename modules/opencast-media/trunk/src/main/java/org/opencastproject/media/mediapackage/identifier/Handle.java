@@ -14,18 +14,16 @@
  *
  */
 
-package org.opencastproject.media.mediapackage.handle;
+package org.opencastproject.media.mediapackage.identifier;
 
-import java.io.Serializable;
+
 import java.net.URL;
 
 /**
- * This interface identifies a CNRI handle.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: Handle.java 238 2009-07-29 09:53:32Z jholtzman $
+ * This interface identifies a CNRI handle. Handles are a special type of <code>digital object identifier</code> that
+ * allow for permanent localization of digital resources.
  */
-public interface Handle extends Serializable {
+public interface Handle extends Id {
 
   /** The handle protocol identifier */
   String PROTOCOL = "hdl";

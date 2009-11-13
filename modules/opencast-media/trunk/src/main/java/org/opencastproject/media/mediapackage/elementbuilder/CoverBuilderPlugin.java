@@ -18,7 +18,7 @@ package org.opencastproject.media.mediapackage.elementbuilder;
 
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Cover;
-import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.attachment.CoverImpl;
 
 /**
@@ -26,10 +26,6 @@ import org.opencastproject.media.mediapackage.attachment.CoverImpl;
  * Format (pdf) and creates media package element representations for them.
  * <p>
  * The test depends solely on the mimetype.
- * </p>
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: PdfElementBuilderPlugin.java 1089 2008-09-10 10:55:20Z wunden $
  */
 public class CoverBuilderPlugin extends AbstractAttachmentBuilderPlugin implements MediaPackageElementBuilderPlugin {
 
@@ -44,11 +40,11 @@ public class CoverBuilderPlugin extends AbstractAttachmentBuilderPlugin implemen
    * @see org.opencastproject.media.mediapackage.elementbuilder.AbstractAttachmentBuilderPlugin#specializeAttachment(org.opencastproject.media.mediapackage.Attachment)
    */
   @Override
-  protected Attachment specializeAttachment(Attachment attachment) throws MediaPackageException {
+  protected Attachment specializeAttachment(Attachment attachment) throws UnsupportedElementException {
     try {
       return CoverImpl.fromAttachment(attachment);
     } catch (Exception e) {
-      throw new MediaPackageException("Failed to specialize cover " + attachment + ": " + e.getMessage());
+      throw new UnsupportedElementException("Failed to specialize cover " + attachment + ": " + e.getMessage());
     }
   }
 

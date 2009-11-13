@@ -16,7 +16,7 @@
 
 package org.opencastproject.media.mediapackage;
 
-import org.opencastproject.media.mediapackage.handle.Handle;
+import org.opencastproject.media.mediapackage.identifier.Id;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,7 +53,7 @@ public interface MediaPackageBuilder {
    * @throws MediaPackageException
    *           if creation of the new media package fails
    */
-  MediaPackage createNew(Handle identifier) throws MediaPackageException;
+  MediaPackage createNew(Id identifier) throws MediaPackageException;
 
   /**
    * Loads a media package from the manifest.

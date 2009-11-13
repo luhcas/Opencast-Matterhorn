@@ -34,6 +34,7 @@ public interface MediaPackageReference {
   public static final String TYPE_ATTACHMENT = "attachment";
   public static final String TYPE_SERIES = "series";
   public static final String SELF = "self";
+  public static final String ANY = "*";
 
   /**
    * Returns the reference type.

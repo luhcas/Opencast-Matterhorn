@@ -19,7 +19,7 @@ package org.opencastproject.media.mediapackage.elementbuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.track.TrackImpl;
 
 import org.slf4j.Logger;
@@ -33,14 +33,8 @@ import javax.xml.xpath.XPathExpressionException;
 /**
  * This implementation of the {@link MediaPackageElementBuilderPlugin} recognises presentation tracks and provides the
  * functionality of reading it on behalf of the media package.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: PresentationTrackBuilderPlugin.java 2905 2009-07-15 16:16:05Z ced $
  */
 public class PresentationTrackBuilderPlugin extends AbstractTrackBuilderPlugin {
-
-  /** Prefix for presentation track filenames */
-  private String FILENAME_PREFIX = "presentation";
 
   /** the logging facility provided by log4j */
   private final static Logger log_ = LoggerFactory.getLogger(PresentationTrackBuilderPlugin.class.getName());
@@ -84,7 +78,7 @@ public class PresentationTrackBuilderPlugin extends AbstractTrackBuilderPlugin {
   /**
    * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURL(java.net.URL)
    */
-  public MediaPackageElement elementFromURL(URL url) throws MediaPackageException {
+  public MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException {
     log_.trace("Creating presentation track from " + url);
     TrackImpl track = TrackImpl.fromURL(url);
     track.setFlavor(MediaPackageElements.PRESENTATION_TRACK);

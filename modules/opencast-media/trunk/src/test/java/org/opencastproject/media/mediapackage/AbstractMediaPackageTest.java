@@ -16,9 +16,9 @@
 
 package org.opencastproject.media.mediapackage;
 
-import org.opencastproject.media.mediapackage.handle.Handle;
-import org.opencastproject.media.mediapackage.handle.HandleBuilder;
-import org.opencastproject.media.mediapackage.handle.HandleBuilderFactory;
+import org.opencastproject.media.mediapackage.identifier.Handle;
+import org.opencastproject.media.mediapackage.identifier.HandleBuilder;
+import org.opencastproject.media.mediapackage.identifier.HandleBuilderFactory;
 import org.opencastproject.util.FileSupport;
 
 import org.junit.After;
@@ -29,11 +29,7 @@ import java.io.FileInputStream;
 
 /**
  * Base class for media package tests.
- * 
- * @author Tobias Wunden
- * @version $Id
  */
-
 public abstract class AbstractMediaPackageTest {
 
   /** tmp directory */

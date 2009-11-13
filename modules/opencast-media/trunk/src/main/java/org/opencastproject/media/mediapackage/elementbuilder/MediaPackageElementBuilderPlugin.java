@@ -18,8 +18,8 @@ package org.opencastproject.media.mediapackage.elementbuilder;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageSerializer;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
 
 import org.w3c.dom.Node;
 
@@ -32,9 +32,6 @@ import java.net.URL;
  * <p/>
  * <strong>Implementation note:</strong> Builder plugins may be stateful. They are intended to be used as throw-away
  * objects.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageElementBuilderPlugin.java 2905 2009-07-15 16:16:05Z ced $
  */
 public interface MediaPackageElementBuilderPlugin {
 
@@ -99,7 +96,7 @@ public interface MediaPackageElementBuilderPlugin {
    * given element definition.
    * </p>
    * <p>
-   * The element must then be constructed and returned in the call to {@link #elementFromManifest(Node, File, boolean)}.
+   * The element must then be constructed and returned in the call to {@link #elementFromManifest(Node, boolean)}.
    * </p>
    * 
    * @param elementNode
@@ -132,10 +129,10 @@ public interface MediaPackageElementBuilderPlugin {
    * @param url
    *          the element location
    * @return the new media package element
-   * @throws MediaPackageException
+   * @throws UnsupportedElementException
    *           if creating the media package element fails
    */
-  MediaPackageElement elementFromURL(URL url) throws MediaPackageException;
+  MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException;
 
   /**
    * Creates a media package element from the DOM element.
@@ -145,10 +142,10 @@ public interface MediaPackageElementBuilderPlugin {
    * @param serializer
    *          the media package serializer
    * @return the media package element
-   * @throws MediaPackageException
+   * @throws UnsupportedElementException
    */
   MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
-          throws MediaPackageException;
+          throws UnsupportedElementException;
 
   /**
    * Creates a new media package element of the specified type.

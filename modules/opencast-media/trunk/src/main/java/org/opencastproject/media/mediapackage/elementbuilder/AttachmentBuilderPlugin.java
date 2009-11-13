@@ -26,8 +26,11 @@ import org.w3c.dom.Node;
 import java.net.URL;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: AttachmentBuilderPlugin.java 2905 2009-07-15 16:16:05Z ced $
+ * This implementation of the {@link MediaPackageElementBuilderPlugin} recognizes arbitrary attachments and creates
+ * media package element representations for them.
+ * <p>
+ * A media package element is considered an attachment by this plugin if it is of type
+ * {@link MediaPackageElement.Type#Attachment} and does not have any specializing flavor.
  */
 public class AttachmentBuilderPlugin extends AbstractAttachmentBuilderPlugin implements MediaPackageElementBuilder {
 

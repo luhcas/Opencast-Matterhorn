@@ -17,7 +17,7 @@
 package org.opencastproject.media.mediapackage;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
-import org.opencastproject.media.mediapackage.handle.Handle;
+import org.opencastproject.media.mediapackage.identifier.Id;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * @param handle
    *          the media package identifier
    */
-  MediaPackageImpl(Handle handle) {
+  MediaPackageImpl(Id handle) {
     this.manifest = new ManifestImpl(handle);
   }
 
@@ -93,7 +93,7 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#getIdentifier()
    */
-  public Handle getIdentifier() {
+  public Id getIdentifier() {
     return manifest.getIdentifier();
   }
 
@@ -147,6 +147,23 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getElementsByFlavor(org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
+   */
+  public MediaPackageElement[] getElementsByFlavor(MediaPackageElementFlavor flavor) {
+    if (flavor == null)
+      throw new IllegalArgumentException("Flavor cannot be null");
+
+    List<MediaPackageElement> elements = new ArrayList<MediaPackageElement>();
+    for (MediaPackageElement element : manifest.getEntries()) {
+      if (flavor.equals(element.getFlavor()))
+        elements.add(element);
+    }
+    return elements.toArray(new MediaPackageElement[elements.size()]);
+  }
+
+  /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#contains(org.opencastproject.media.mediapackage.MediaPackageElement)
    */
   public boolean contains(MediaPackageElement element) {
@@ -171,39 +188,40 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#add(org.opencastproject.media.mediapackage.Catalog)
    */
-  public void add(Catalog catalog) throws MediaPackageException, UnsupportedElementException {
+  public void add(Catalog catalog) throws UnsupportedElementException {
     try {
       integrateCatalog(catalog);
       manifest.add(catalog);
       fireElementAdded(catalog);
     } catch (IOException e) {
-      throw new MediaPackageException("Error integrating " + catalog + " into media package: " + e.getMessage());
+      throw new UnsupportedElementException("Error integrating " + catalog + " into media package: " + e.getMessage());
     }
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#add(org.opencastproject.media.mediapackage.Track)
    */
-  public void add(Track track) throws MediaPackageException, UnsupportedElementException {
+  public void add(Track track) throws UnsupportedElementException {
     try {
       integrateTrack(track);
       manifest.add(track);
       fireElementAdded(track);
     } catch (IOException e) {
-      throw new MediaPackageException("Error integrating " + track + " into media package: " + e.getMessage());
+      throw new UnsupportedElementException("Error integrating " + track + " into media package: " + e.getMessage());
     }
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#add(org.opencastproject.media.mediapackage.Attachment)
    */
-  public void add(Attachment attachment) throws MediaPackageException, UnsupportedElementException {
+  public void add(Attachment attachment) throws UnsupportedElementException {
     try {
       integrateAttachment(attachment);
       manifest.add(attachment);
       fireElementAdded(attachment);
     } catch (IOException e) {
-      throw new MediaPackageException("Error integrating " + attachment + " into media package: " + e.getMessage());
+      throw new UnsupportedElementException("Error integrating " + attachment + " into media package: "
+              + e.getMessage());
     }
   }
 
@@ -507,7 +525,7 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#add(java.io.File, boolean)
    */
-  public MediaPackageElement add(URL url) throws MediaPackageException, UnsupportedElementException {
+  public MediaPackageElement add(URL url) throws UnsupportedElementException {
     if (url == null)
       throw new IllegalArgumentException("Argument 'url' may not be null");
 
@@ -524,8 +542,8 @@ public final class MediaPackageImpl implements MediaPackage {
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement add(URL url, Type type, MediaPackageElementFlavor flavor) throws MediaPackageException,
-          UnsupportedElementException {
+  public MediaPackageElement add(URL url, Type type, MediaPackageElementFlavor flavor)
+          throws UnsupportedElementException {
     if (url == null)
       throw new IllegalArgumentException("Argument 'url' may not be null");
     if (type == null)
@@ -546,7 +564,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @see org.opencastproject.media.mediapackage.MediaPackage#add(org.opencastproject.media.mediapackage.MediaPackageElement)
    */
-  public void add(MediaPackageElement element) throws MediaPackageException, UnsupportedElementException {
+  public void add(MediaPackageElement element) throws UnsupportedElementException {
     try {
       if (element.getElementType().equals(MediaPackageElement.Type.Track) && element instanceof Track) {
         integrateTrack((Track) element);
@@ -560,8 +578,50 @@ public final class MediaPackageImpl implements MediaPackage {
       manifest.add(element);
       fireElementAdded(element);
     } catch (IOException e) {
-      throw new MediaPackageException("Error integrating " + element + " into media package: " + e.getMessage());
+      throw new UnsupportedElementException("Error integrating " + element + " into media package: " + e.getMessage());
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @throws UnsupportedElementException
+   * @throws MediaPackageException
+   * @see org.opencastproject.media.mediapackage.MediaPackage#addDerived(org.opencastproject.media.mediapackage.MediaPackageElement,
+   *      org.opencastproject.media.mediapackage.MediaPackageElement)
+   */
+  public void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement)
+          throws UnsupportedElementException {
+    if (derivedElement == null)
+      throw new IllegalArgumentException("The derived element is null");
+    if (sourceElement == null)
+      throw new IllegalArgumentException("The source element is null");
+    if (!manifest.contains(sourceElement))
+      throw new IllegalStateException("The sourceElement needs to be part of the media package");
+
+    derivedElement.referTo(sourceElement);
+    add(derivedElement);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getDerived(org.opencastproject.media.mediapackage.MediaPackageElement,
+   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
+   */
+  public MediaPackageElement[] getDerived(MediaPackageElement sourceElement, MediaPackageElementFlavor derivateFlavor) {
+    if (sourceElement == null)
+      throw new IllegalArgumentException("Source element cannot be null");
+    if (derivateFlavor == null)
+      throw new IllegalArgumentException("Derivate flavor cannot be null");
+
+    MediaPackageReference reference = new MediaPackageReferenceImpl(sourceElement);
+    List<MediaPackageElement> elements = new ArrayList<MediaPackageElement>();
+    for (MediaPackageElement element : manifest.getEntries()) {
+      if (derivateFlavor.equals(element.getFlavor()) && reference.equals(element.getReference()))
+        elements.add(element);
+    }
+    return elements.toArray(new MediaPackageElement[elements.size()]);
   }
 
   /**
@@ -601,9 +661,9 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#renameTo(org.opencastproject.media.mediapackage.handle.Handle)
+   * @see org.opencastproject.media.mediapackage.MediaPackage#renameTo(org.opencastproject.org.opencastproject.media.mediapackage.identifier.Id)
    */
-  public void renameTo(Handle identifier) {
+  public void renameTo(Id identifier) {
     manifest.setIdentifier(identifier);
   }
 

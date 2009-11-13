@@ -18,10 +18,10 @@ package org.opencastproject.media.mediapackage.elementbuilder;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.MediaPackageSerializer;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.track.AudioStreamImpl;
 import org.opencastproject.media.mediapackage.track.TrackImpl;
 import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
@@ -41,10 +41,6 @@ import javax.xml.xpath.XPathExpressionException;
 
 /**
  * Abstract base class for the various track builders.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @author Christoph E. Driessen <ced@neopoly.de>
- * @version $Id: AbstractTrackBuilderPlugin.java 2914 2009-07-22 14:58:07Z ced $
  */
 public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderPlugin {
 
@@ -83,7 +79,7 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
    *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
   public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
-          throws MediaPackageException {
+          throws UnsupportedElementException {
 
     String id = null;
     MimeType mimeType = null;
@@ -156,10 +152,10 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
         String strDuration = (String) xpath.evaluate("duration/text()", elementNode, XPathConstants.STRING);
         long duration = Long.parseLong(strDuration.trim());
         if (duration <= 0)
-          throw new MediaPackageException("Invalid duration for track " + url + " found in manifest: " + duration);
+          throw new UnsupportedElementException("Invalid duration for track " + url + " found in manifest: " + duration);
         track.setDuration(duration);
       } catch (NumberFormatException e) {
-        throw new MediaPackageException("Duration of track " + url + " is malformatted");
+        throw new UnsupportedElementException("Duration of track " + url + " is malformatted");
       }
 
       // audio settings
@@ -169,10 +165,10 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
           AudioStreamImpl as = AudioStreamImpl.fromManifest(createStreamID(track), audioSettingsNode, xpath);
           track.addStream(as);
         } catch (IllegalStateException e) {
-          throw new MediaPackageException("Illegal state encountered while reading audio settings from " + url + ": "
+          throw new UnsupportedElementException("Illegal state encountered while reading audio settings from " + url + ": "
                   + e.getMessage());
         } catch (XPathException e) {
-          throw new MediaPackageException("Error while parsing audio settings from " + url + ": " + e.getMessage());
+          throw new UnsupportedElementException("Error while parsing audio settings from " + url + ": " + e.getMessage());
         }
       }
 
@@ -183,20 +179,20 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
           VideoStreamImpl vs = VideoStreamImpl.fromManifest(createStreamID(track), videoSettingsNode, xpath);
           track.addStream(vs);
         } catch (IllegalStateException e) {
-          throw new MediaPackageException("Illegal state encountered while reading video settings from " + url + ": "
+          throw new UnsupportedElementException("Illegal state encountered while reading video settings from " + url + ": "
                   + e.getMessage());
         } catch (XPathException e) {
-          throw new MediaPackageException("Error while parsing video settings from " + url + ": " + e.getMessage());
+          throw new UnsupportedElementException("Error while parsing video settings from " + url + ": " + e.getMessage());
         }
       }
 
       return track;
     } catch (XPathExpressionException e) {
-      throw new MediaPackageException("Error while reading track information from manifest: " + e.getMessage());
+      throw new UnsupportedElementException("Error while reading track information from manifest: " + e.getMessage());
     } catch (NoSuchAlgorithmException e) {
-      throw new MediaPackageException("Unsupported digest algorithm: " + e.getMessage());
+      throw new UnsupportedElementException("Unsupported digest algorithm: " + e.getMessage());
     } catch (IOException e) {
-      throw new MediaPackageException("Error while reading presenter track " + url + ": " + e.getMessage());
+      throw new UnsupportedElementException("Error while reading presenter track " + url + ": " + e.getMessage());
     }
   }
 

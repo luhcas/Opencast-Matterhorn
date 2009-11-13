@@ -84,8 +84,6 @@ public class MediaPackageReferenceTest extends AbstractMediaPackageTest {
       catalogZ.referTo(new MediaPackageReferenceImpl("track", "track-1"));
       catalogZ.setIdentifier("catalog-z");
 
-    } catch (MediaPackageException e) {
-      fail("Adding of catalog failed: " + e.getMessage());
     } catch (UnsupportedElementException e) {
       fail("Adding of catalog failed: " + e.getMessage());
     } catch (MalformedURLException e) {

@@ -14,15 +14,12 @@
  *
  */
 
-package org.opencastproject.media.mediapackage.handle;
+package org.opencastproject.media.mediapackage.identifier;
 
 import java.net.URL;
 
 /**
  * Implementation of a CNRI handle.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: HandleImpl.java 238 2009-07-29 09:53:32Z jholtzman $
  */
 public final class HandleImpl implements Handle {
 
@@ -88,14 +85,14 @@ public final class HandleImpl implements Handle {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.handle.Handle#getLocalName()
+   * @see org.opencastproject.org.opencastproject.media.mediapackage.identifier.Id#getLocalName()
    */
   public String getLocalName() {
     return localName;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.handle.Handle#getNamingAuthority()
+   * @see org.opencastproject.org.opencastproject.media.mediapackage.identifier.Id#getNamingAuthority()
    */
   public String getNamingAuthority() {
     return namingAuthority;
@@ -110,7 +107,7 @@ public final class HandleImpl implements Handle {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.handle.Handle#resolve()
+   * @see org.opencastproject.org.opencastproject.media.mediapackage.identifier.Id#resolve()
    */
   public URL resolve() throws HandleException {
     if (target == null) {
@@ -122,13 +119,18 @@ public final class HandleImpl implements Handle {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.handle.Handle#update(java.net.URL)
+   * @see org.opencastproject.org.opencastproject.media.mediapackage.identifier.Id#update(java.net.URL)
    */
   public void update(URL target) throws HandleException {
     builder.update(this, target);
     this.target = target;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof Handle) {
@@ -138,11 +140,21 @@ public final class HandleImpl implements Handle {
     return false;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#hashCode()
+   */
   @Override
   public int hashCode() {
     return id.hashCode();
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#toString()
+   */
   @Override
   public String toString() {
     return id;
@@ -162,6 +174,19 @@ public final class HandleImpl implements Handle {
     StringBuffer buf = new StringBuffer(namingAuthority);
     buf.append("/");
     buf.append(localName);
+    return buf.toString();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.identifier.Id#compact()
+   */
+  public String compact() {
+    StringBuffer buf = new StringBuffer();
+    buf.append(namingAuthority);
+    buf.append("-");
+    buf.append(localName.replaceAll("/", "-").replaceAll("\\\\", "-"));
     return buf.toString();
   }
 

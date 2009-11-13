@@ -20,10 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import org.opencastproject.media.mediapackage.handle.Handle;
-import org.opencastproject.media.mediapackage.handle.HandleBuilder;
-import org.opencastproject.media.mediapackage.handle.HandleBuilderImpl;
-import org.opencastproject.media.mediapackage.handle.HandleException;
+import org.opencastproject.media.mediapackage.identifier.Handle;
+import org.opencastproject.media.mediapackage.identifier.HandleBuilder;
+import org.opencastproject.media.mediapackage.identifier.HandleBuilderImpl;
+import org.opencastproject.media.mediapackage.identifier.HandleException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -85,7 +85,7 @@ public class HandleTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.handle.HandleImpl#getLocalName()}.
+   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleImpl#getLocalName()}.
    */
   @Test
   public void testGetLocalName() {
@@ -93,7 +93,7 @@ public class HandleTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.handle.HandleImpl#getNamingAuthority()} .
+   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleImpl#getNamingAuthority()} .
    */
   @Test
   public void testGetNamingAuthority() {
@@ -101,7 +101,7 @@ public class HandleTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.handle.HandleImpl#toString()}.
+   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleImpl#toString()}.
    */
   @Test
   public void testToString() {
@@ -113,7 +113,7 @@ public class HandleTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.handle.HandleImpl#resolve()}.
+   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleImpl#resolve()}.
    */
   @Test
   public void testGetValue() {
@@ -128,7 +128,7 @@ public class HandleTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.handle.HandleImpl#update(java.net.URL)} .
+   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleImpl#update(java.net.URL)} .
    */
   @Test
   public void testUpdate() {
@@ -143,6 +143,20 @@ public class HandleTest {
       fail("Error updating handle: " + e.getMessage());
     } catch (MalformedURLException e) {
       fail("Error creating new handle url: " + e.getMessage());
+    }
+  }
+  
+  /**
+   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleImpl#compact()} .
+   */
+  @Test
+  public void testCompact() {
+    try {
+      String hdlValue = "10.0001/abcde/test";
+      Handle handle = handleBuilder.fromValue(hdlValue);
+      assertEquals("10.0001-abcde-test", handle.compact());
+    } catch (HandleException e) {
+      fail("Error creating handle: " + e.getMessage());
     }
   }
 

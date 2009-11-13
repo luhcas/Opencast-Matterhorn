@@ -20,9 +20,9 @@ import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.MediaPackageSerializer;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
@@ -47,9 +47,6 @@ import javax.xml.xpath.XPathExpressionException;
  * <p>
  * The test currently depends on the filename and mimetype only.
  * </p>
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: DublinCoreBuilderPlugin.java 2905 2009-07-15 16:16:05Z ced $
  */
 public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implements MediaPackageElementBuilderPlugin {
 
@@ -125,7 +122,7 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
    *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
   public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
-          throws MediaPackageException {
+          throws UnsupportedElementException {
 
     String id = null;
     URL url = null;
@@ -187,32 +184,32 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
 
       return dc;
     } catch (XPathExpressionException e) {
-      throw new MediaPackageException("Error while reading catalog information from manifest: " + e.getMessage());
+      throw new UnsupportedElementException("Error while reading catalog information from manifest: " + e.getMessage());
     } catch (NoSuchAlgorithmException e) {
-      throw new MediaPackageException("Unsupported digest algorithm: " + e.getMessage());
+      throw new UnsupportedElementException("Unsupported digest algorithm: " + e.getMessage());
     } catch (ParserConfigurationException e) {
-      throw new MediaPackageException("Unable to create parser for dublin core catalog " + url + ": " + e.getMessage());
+      throw new UnsupportedElementException("Unable to create parser for dublin core catalog " + url + ": " + e.getMessage());
     } catch (IOException e) {
-      throw new MediaPackageException("Error while reading dublin core file " + url + ": " + e.getMessage());
+      throw new UnsupportedElementException("Error while reading dublin core file " + url + ": " + e.getMessage());
     } catch (SAXException e) {
-      throw new MediaPackageException("Error while parsing dublin core catalog " + url + ": " + e.getMessage());
+      throw new UnsupportedElementException("Error while parsing dublin core catalog " + url + ": " + e.getMessage());
     }
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURL(java.net.URL)
    */
-  public MediaPackageElement elementFromURL(URL url) throws MediaPackageException {
+  public MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException {
     try {
       log_.trace("Creating dublin core metadata container from " + url);
       return DublinCoreCatalogImpl.fromURL(url);
     } catch (IOException e) {
-      throw new MediaPackageException("Error reading dublin core from " + url + " : " + e.getMessage());
+      throw new UnsupportedElementException("Error reading dublin core from " + url + " : " + e.getMessage());
     } catch (ParserConfigurationException e) {
-      throw new MediaPackageException("Parser configuration exception while reading dublin core catalog from " + url
+      throw new UnsupportedElementException("Parser configuration exception while reading dublin core catalog from " + url
               + " : " + e.getMessage());
     } catch (SAXException e) {
-      throw new MediaPackageException("Error parsing dublin core catalog " + url + " : " + e.getMessage());
+      throw new UnsupportedElementException("Error parsing dublin core catalog " + url + " : " + e.getMessage());
     }
   }
 

@@ -67,6 +67,14 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
   String getElementDescription();
 
   /**
+   * Sets the element description of this media package element.
+   * 
+   * @param description
+   *          the new element description
+   */
+  void setElementDescription(String description);
+
+  /**
    * Returns the media package if the element has been added, <code>null</code> otherwise.
    * 
    * @return the media package
@@ -103,6 +111,14 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
   Checksum getChecksum();
 
   /**
+   * Sets the new checksum on this media package element.
+   * 
+   * @param checksum
+   *          the checksum
+   */
+  void setChecksum(Checksum checksum);
+
+  /**
    * Returns the element's mimetype as found in the ISO Mime Type Registrations.
    * <p/>
    * For example, in case of motion jpeg slides, this method will return the mime type for <code>video/mj2</code>.
@@ -112,6 +128,14 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
   MimeType getMimeType();
 
   /**
+   * Sets the mime type on this media package element.
+   * 
+   * @param mimeType
+   *          the new mime type
+   */
+  void setMimeType(MimeType mimeType);
+
+  /**
    * Returns the element's type as defined for the specific media package element.
    * <p/>
    * For example, in case of a video track, the type could be <code>video/x-presentation</code>.
@@ -119,6 +143,14 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
    * @return the element flavor
    */
   MediaPackageElementFlavor getFlavor();
+
+  /**
+   * Sets the flavor on this media package element.
+   * 
+   * @param flavor
+   *          the new flavor
+   */
+  void setFlavor(MediaPackageElementFlavor flavor);
 
   /**
    * Returns the number of bytes that are occupied by this media package element.

@@ -44,7 +44,7 @@ public interface MediaPackageElementBuilder {
    * @throws MediaPackageException
    *           if creating the media package element fails
    */
-  MediaPackageElement elementFromURL(URL url) throws MediaPackageException;
+  MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException;
 
   /**
    * Creates a media package element from the given file that was previously accepted, while <code>type</code> and
@@ -66,7 +66,7 @@ public interface MediaPackageElementBuilder {
    *           if creating the media package element fails
    */
   MediaPackageElement elementFromURL(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
-          throws MediaPackageException;
+          throws UnsupportedElementException;
 
   /**
    * Creates a media package element from the DOM element.
@@ -80,7 +80,7 @@ public interface MediaPackageElementBuilder {
    *           if reading the file from manifest fails
    */
   MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
-          throws MediaPackageException;
+          throws UnsupportedElementException;
 
   /**
    * Creates a new media package elment of the specified type.

@@ -75,4 +75,37 @@ public class MediaPackageTest extends AbstractMediaPackageTest {
     }
   }
 
+  @Test
+  public void testDerivates() {
+    try {
+
+      // Create a media package and add an element
+      MediaPackage mediaPackage = mediaPackageBuilder.createNew();
+      MediaPackageElement dcCatalog = mediaPackage.add(dcFile.toURI().toURL());
+      
+      // Add the "derived" catalog
+      MediaPackageElementFlavor derivedFlavor = new MediaPackageElementFlavor("dublincore", "specialedition");
+      MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+      MediaPackageElement derivedElement = elementBuilder.elementFromURL(dcFile.toURI().toURL());
+      derivedElement.setFlavor(derivedFlavor);
+      mediaPackage.addDerived(derivedElement, dcCatalog);
+      
+      // Test the whole thing
+      assertEquals(1, mediaPackage.getElementsByFlavor(derivedFlavor).length);
+      assertEquals(2, mediaPackage.getCatalogs().length);
+      assertEquals(1, mediaPackage.getCatalogs(derivedFlavor).length);
+      assertEquals(1, mediaPackage.getDerived(dcCatalog, derivedFlavor).length);
+      assertEquals(derivedElement, mediaPackage.getDerived(dcCatalog, derivedFlavor)[0]);
+
+    } catch (MediaPackageException e) {
+      fail("Media package excpetion while reading media package from manifest: " + e.getMessage());
+    } catch (ConfigurationException e) {
+      fail("Configuration exception while reading media package from manifest: " + e.getMessage());
+    } catch (MalformedURLException e) {
+      fail("Exception while creating url: " + e.getMessage());
+    } catch (UnsupportedElementException e) {
+      fail("Error while creating media package: " + e.getMessage());
+    }
+  }
+
 }

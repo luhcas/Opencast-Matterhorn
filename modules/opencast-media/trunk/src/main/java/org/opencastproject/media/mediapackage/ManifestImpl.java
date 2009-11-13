@@ -16,9 +16,11 @@
 
 package org.opencastproject.media.mediapackage;
 
-import org.opencastproject.media.mediapackage.handle.Handle;
-import org.opencastproject.media.mediapackage.handle.HandleBuilderFactory;
-import org.opencastproject.media.mediapackage.handle.HandleException;
+import org.opencastproject.media.mediapackage.identifier.HandleBuilderFactory;
+import org.opencastproject.media.mediapackage.identifier.HandleException;
+import org.opencastproject.media.mediapackage.identifier.Id;
+import org.opencastproject.media.mediapackage.identifier.IdBuilder;
+import org.opencastproject.media.mediapackage.identifier.SerialIdBuilder;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.DateTimeSupport;
 
@@ -52,8 +54,14 @@ import javax.xml.xpath.XPathFactory;
  */
 final class ManifestImpl {
 
+  /** the logging facility provided by log4j */
+  private final static Logger log_ = LoggerFactory.getLogger(ManifestImpl.class.getName());
+  
+  /** id builder, for internal use only */
+  private static final IdBuilder idBuilder = new SerialIdBuilder();
+
   /** The media package's identifier */
-  private Handle identifier = null;
+  private Id identifier = null;
 
   /** The start date and time */
   private long startTime = 0L;
@@ -76,14 +84,11 @@ final class ManifestImpl {
   /** Numer of unclassified elements */
   private int others = 0;
 
-  /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(ManifestImpl.class.getName());
-
   /**
    * Creates a new manifest implementation used to be filled up using the manifest SAX parser.
    */
   ManifestImpl() {
-    this(null);
+    this(idBuilder.createNew());
   }
 
   /**
@@ -93,19 +98,16 @@ final class ManifestImpl {
    *          the media package identifier
    * @throws IOException
    *           if the specified file does not exist or cannot be created
-   * @throws UnknownFileTypeException
-   *           if the manifest is of an unknown file type
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
+
    */
-  ManifestImpl(Handle identifier) {
+  ManifestImpl(Id identifier) {
     this.identifier = identifier;
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.ManifestImpl#getIdentifier()
    */
-  Handle getIdentifier() {
+  Id getIdentifier() {
     return identifier;
   }
 
@@ -115,7 +117,7 @@ final class ManifestImpl {
    * @param identifier
    *          the identifier
    */
-  void setIdentifier(Handle identifier) {
+  void setIdentifier(Id identifier) {
     this.identifier = identifier;
   }
 
@@ -152,7 +154,7 @@ final class ManifestImpl {
    * @throws MediaPackageException
    *           if adding the element fails
    */
-  void add(MediaPackageElement element) throws MediaPackageException {
+  void add(MediaPackageElement element) throws UnsupportedElementException {
     if (element == null)
       throw new IllegalArgumentException("Media package element must not be null");
     String id = null;
@@ -196,7 +198,7 @@ final class ManifestImpl {
       if (element instanceof AbstractMediaPackageElement)
         ((AbstractMediaPackageElement) element).setIdentifier(id);
       else
-        throw new IllegalStateException("Found unkown element without id");
+        throw new UnsupportedElementException(element, "Found unkown element without id");
     }
   }
 
@@ -864,18 +866,8 @@ final class ManifestImpl {
    * @param identifier
    *          the media package identifier
    * @return the new manifest
-   * @throws UnknownFileTypeException
-   *           if the manifest file type is unknown (very unlikely)
-   * @throws IOException
-   *           if creating the manifest file fails
-   * @throws TransformerException
-   *           if saving the xml file fails
-   * @throws ParserConfigurationException
-   *           if creating the xml parser fails
-   * @throws NoSuchAlgorithmException
-   *           if the md5 checksum cannot be computed
    */
-  static ManifestImpl newInstance(Handle identifier) {
+  static ManifestImpl newInstance(Id identifier) {
     ManifestImpl m = new ManifestImpl(identifier);
     return m;
   }
@@ -894,8 +886,6 @@ final class ManifestImpl {
    *           if the media package is in an inconsistent state
    * @throws IOException
    *           if reading the manifest file fails
-   * @throws UnknownFileTypeException
-   *           if the manifest file is of an unknown file type
    * @throws ParserConfigurationException
    *           if the manifest parser cannot be created
    * @throws SAXException

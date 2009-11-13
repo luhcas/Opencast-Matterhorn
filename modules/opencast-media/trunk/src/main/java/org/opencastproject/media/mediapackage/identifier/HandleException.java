@@ -14,7 +14,7 @@
  *
  */
 
-package org.opencastproject.media.mediapackage.handle;
+package org.opencastproject.media.mediapackage.identifier;
 
 /**
  * General exception that is raised when problems occur while retreiving or dealing with handles.

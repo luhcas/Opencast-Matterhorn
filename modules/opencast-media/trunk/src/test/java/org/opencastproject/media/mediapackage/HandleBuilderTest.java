@@ -21,12 +21,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.opencastproject.media.mediapackage.handle.Handle;
-import org.opencastproject.media.mediapackage.handle.HandleBuilder;
-import org.opencastproject.media.mediapackage.handle.HandleBuilderFactory;
-import org.opencastproject.media.mediapackage.handle.HandleException;
-import org.opencastproject.util.IdBuilderFactory;
-import org.opencastproject.util.SerialIdBuilder;
+import org.opencastproject.media.mediapackage.identifier.Handle;
+import org.opencastproject.media.mediapackage.identifier.HandleBuilder;
+import org.opencastproject.media.mediapackage.identifier.HandleBuilderFactory;
+import org.opencastproject.media.mediapackage.identifier.HandleException;
+import org.opencastproject.media.mediapackage.identifier.IdBuilderFactory;
+import org.opencastproject.media.mediapackage.identifier.SerialIdBuilder;
 
 import org.junit.After;
 import org.junit.Before;
@@ -83,7 +83,7 @@ public class HandleBuilderTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.handle.HandleBuilderImpl#createNew()} .
+   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleBuilderImpl#createNew()} .
    */
   @Test
   public void testCreateNew() {
@@ -101,7 +101,7 @@ public class HandleBuilderTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.handle.HandleBuilderImpl#createNew(java.net.URL)} .
+   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleBuilderImpl#createNew(java.net.URL)} .
    */
   @Test
   public void testCreateNewURL() {
@@ -120,7 +120,7 @@ public class HandleBuilderTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.handle.HandleBuilderImpl#fromValue(java.lang.String)}
+   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleBuilderImpl#fromValue(java.lang.String)}
    * .
    */
   @Test
@@ -140,7 +140,7 @@ public class HandleBuilderTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.handle.HandleBuilderImpl#fromValue(java.lang.String)}
+   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleBuilderImpl#fromValue(java.lang.String)}
    * .
    */
   @Test
@@ -161,7 +161,7 @@ public class HandleBuilderTest {
 
   /**
    * Test method for
-   * {@link org.opencastproject.media.mediapackage.handle.HandleBuilderImpl#update(Handle, java.net.URL)} .
+   * {@link org.opencastproject.media.mediapackage.identifier.HandleBuilderImpl#update(Id, java.net.URL)} .
    */
   @Test
   public void testUpdate() {

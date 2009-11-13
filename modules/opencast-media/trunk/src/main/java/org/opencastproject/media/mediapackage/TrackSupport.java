@@ -23,14 +23,13 @@ import java.util.List;
 /**
  * Utility class for handling {@link org.opencastproject.media.mediapackage.Track}s and
  * {@link org.opencastproject.media.mediapackage.Stream}s.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class TrackSupport {
 
   private TrackSupport() {
   }
 
+  @SuppressWarnings("unchecked")
   public static <T extends Stream> T[] byType(Stream[] streams, Class<T> streamType) {
     List<Stream> f = new ArrayList<Stream>();
     for (Stream s : streams) {

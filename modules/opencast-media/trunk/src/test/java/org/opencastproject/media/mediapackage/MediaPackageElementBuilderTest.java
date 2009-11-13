@@ -61,7 +61,7 @@ public class MediaPackageElementBuilderTest {
       MediaPackageElement element = mediaPackageElementBuilder.elementFromURL(catalogFile);
       assertEquals(Catalog.TYPE, element.getElementType());
       assertEquals(MediaPackageElements.DUBLINCORE_CATALOG, element.getFlavor());
-    } catch (MediaPackageException e) {
+    } catch (UnsupportedElementException e) {
       fail(e.getMessage());
     } catch (MalformedURLException e) {
       fail(e.getMessage());
@@ -87,7 +87,7 @@ public class MediaPackageElementBuilderTest {
       mediaPackageElementBuilder.elementFromURL(catalogFile, MediaPackageElement.Type.Catalog, null);
       mediaPackageElementBuilder.elementFromURL(catalogFile, null, MediaPackageElements.DUBLINCORE_CATALOG);
       mediaPackageElementBuilder.elementFromURL(catalogFile, null, null);
-    } catch (MediaPackageException e) {
+    } catch (UnsupportedElementException e) {
       fail(e.getMessage());
     } catch (MalformedURLException e) {
       fail(e.getMessage());
@@ -100,7 +100,7 @@ public class MediaPackageElementBuilderTest {
       mediaPackageElementBuilder.elementFromURL(catalogFile, MediaPackageElement.Type.Track,
               MediaPackageElements.DUBLINCORE_CATALOG);
       fail("Specified type was wrong but didn't matter");
-    } catch (MediaPackageException e) {
+    } catch (UnsupportedElementException e) {
       // Expected
     }
 
@@ -109,7 +109,7 @@ public class MediaPackageElementBuilderTest {
       mediaPackageElementBuilder.elementFromURL(catalogFile, MediaPackageElement.Type.Catalog,
               MediaPackageElements.PRESENTER_TRACK);
       fail("Specified flavor was wrong but didn't matter");
-    } catch (MediaPackageException e) {
+    } catch (UnsupportedElementException e) {
       // Expected
     }
 

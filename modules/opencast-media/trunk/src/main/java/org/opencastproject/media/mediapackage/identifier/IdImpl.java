@@ -14,32 +14,33 @@
  *
  */
 
-package org.opencastproject.media.mediapackage.handle;
-
-import java.io.File;
+package org.opencastproject.media.mediapackage.identifier;
 
 /**
- * Utility class used to deal with handle identifiers.
- * 
- * @author Tobias Wunden
- * @version $Id
+ * Simple and straightforward implementation of the {@link Id} interface.
  */
+public class IdImpl implements Id {
 
-public class HandleSupport {
+  /** The identifier */
+  protected String id = null;
 
   /**
-   * Converts the handle into a valid path name by replacing forward slashes with dots.
+   * Creates a new serial identifier as created by {@link SerialBuilder}.
    * 
-   * @param handle
-   *          the handle identifier
-   * @return the pathname
+   * @param id
+   *          the identifier
    */
-  public static String toPath(Handle handle) {
-    StringBuffer buf = new StringBuffer(handle.getNamingAuthority());
-    buf.append("/");
-    buf.append(File.separatorChar);
-    buf.append(handle.getLocalName().replace('/', File.separatorChar));
-    return buf.toString();
+  public IdImpl(String id) {
+    this.id = id;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.identifier.Id#compact()
+   */
+  public String compact() {
+    return id.replaceAll("/", "-").replaceAll("\\\\", "-");
   }
 
 }

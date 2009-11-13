@@ -94,7 +94,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromURL(java.net.URL)
    */
-  public MediaPackageElement elementFromURL(URL url) throws MediaPackageException {
+  public MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException {
     return elementFromURL(url, null, null);
   }
 
@@ -104,7 +104,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   public MediaPackageElement elementFromURL(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
-          throws MediaPackageException {
+          throws UnsupportedElementException {
 
     // Feed the file to the element builder plugins
     List<MediaPackageElementBuilderPlugin> candidates = new ArrayList<MediaPackageElementBuilderPlugin>();
@@ -119,7 +119,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
 
     // Check the plugins
     if (candidates.size() == 0) {
-      throw new MediaPackageException("No suitable element builder plugin found for " + url);
+      throw new UnsupportedElementException("No suitable element builder plugin found for " + url);
     } else if (candidates.size() > 1) {
       StringBuffer buf = new StringBuffer();
       for (MediaPackageElementBuilderPlugin plugin : candidates) {
@@ -144,7 +144,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
    *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
   public MediaPackageElement elementFromManifest(Node node, MediaPackageSerializer serializer)
-          throws MediaPackageException {
+          throws UnsupportedElementException {
     List<MediaPackageElementBuilderPlugin> candidates = new ArrayList<MediaPackageElementBuilderPlugin>();
     for (Class<? extends MediaPackageElementBuilderPlugin> pluginClass : plugins) {
       MediaPackageElementBuilderPlugin plugin = createPlugin(pluginClass);
@@ -155,7 +155,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
 
     // Check the plugins
     if (candidates.size() == 0) {
-      throw new MediaPackageException("No suitable element builder plugin found for node " + node.getNodeName());
+      throw new UnsupportedElementException("No suitable element builder plugin found for node " + node.getNodeName());
     } else if (candidates.size() > 1) {
       StringBuffer buf = new StringBuffer();
       for (MediaPackageElementBuilderPlugin plugin : candidates) {

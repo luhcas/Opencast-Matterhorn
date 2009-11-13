@@ -16,8 +16,8 @@
 
 package org.opencastproject.media.mediapackage;
 
-import org.opencastproject.media.mediapackage.handle.Handle;
-import org.opencastproject.media.mediapackage.handle.HandleException;
+import org.opencastproject.media.mediapackage.identifier.HandleException;
+import org.opencastproject.media.mediapackage.identifier.Id;
 import org.opencastproject.util.ConfigurationException;
 
 import org.xml.sax.SAXException;
@@ -75,9 +75,9 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackagBuilder#createNew(org.opencastproject.media.mediapackage.handle.Handle)
+   * @see org.opencastproject.media.mediapackage.MediaPackagBuilder#createNew(org.opencastproject.org.opencastproject.media.mediapackage.identifier.Id)
    */
-  public MediaPackage createNew(Handle identifier) throws MediaPackageException {
+  public MediaPackage createNew(Id identifier) throws MediaPackageException {
     return new MediaPackageImpl(identifier);
   }
 

@@ -488,8 +488,6 @@ public abstract class XMLCatalogImpl extends AbstractMediaPackageElement impleme
    *          the document type definition (dtd)
    * @throws TransformerException
    *           if serialization fails
-   * @throws FileNotFoundException
-   *           if the catalog file cannot be found
    */
   protected void saveToXml(Node document, String docType, OutputStream out) throws TransformerException, IOException {
     StreamResult streamResult = new StreamResult(out);

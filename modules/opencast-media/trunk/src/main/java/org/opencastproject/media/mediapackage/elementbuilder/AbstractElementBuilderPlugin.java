@@ -36,9 +36,6 @@ import javax.xml.xpath.XPathFactory;
 /**
  * This general inplementation of a media package element builder supports specialized implementations by providing
  * tests on the filename an mime type of the file in question.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: AbstractElementBuilderPlugin.java 1726 2008-12-18 12:46:00Z ced $
  */
 public abstract class AbstractElementBuilderPlugin implements MediaPackageElementBuilderPlugin {
 

@@ -14,7 +14,7 @@
  *
  */
 
-package org.opencastproject.media.mediapackage.handle;
+package org.opencastproject.media.mediapackage.identifier;
 
 import org.opencastproject.util.UrlSupport;
 
@@ -96,7 +96,7 @@ public class HandleBuilderImpl implements HandleBuilder {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.handle.HandleBuilder#createNew()
+   * @see org.opencastproject.media.mediapackage.identifier.HandleBuilder#createNew()
    */
   public Handle createNew() throws HandleException {
     if (defaultURL == null)
@@ -105,7 +105,7 @@ public class HandleBuilderImpl implements HandleBuilder {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.handle.HandleBuilder#createNew(java.net.URL)
+   * @see org.opencastproject.media.mediapackage.identifier.HandleBuilder#createNew(java.net.URL)
    */
   public Handle createNew(URL url) throws HandleException {
     if (url == null)
@@ -122,7 +122,7 @@ public class HandleBuilderImpl implements HandleBuilder {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.handle.HandleBuilder#fromValue(java.lang.String)
+   * @see org.opencastproject.media.mediapackage.identifier.HandleBuilder#fromValue(java.lang.String)
    */
   public Handle fromValue(String value) throws HandleException {
     if (value == null)
@@ -137,7 +137,7 @@ public class HandleBuilderImpl implements HandleBuilder {
   /**
    * This implementation throws an {@link IllegalArgumentException}, since it cannot resolve handles.
    * 
-   * @see org.opencastproject.media.mediapackage.handle.HandleBuilder#resolve(org.opencastproject.media.mediapackage.handle.Handle)
+   * @see org.opencastproject.media.mediapackage.identifier.HandleBuilder#resolve(org.opencastproject.media.mediapackage.identifier.Handle)
    */
   public URL resolve(Handle handle) throws HandleException {
     if (handle == null)
@@ -149,7 +149,7 @@ public class HandleBuilderImpl implements HandleBuilder {
   /**
    * This implementation always returns <code>true</code> without actually updating anything.
    * 
-   * @see org.opencastproject.media.mediapackage.handle.HandleBuilder#update(org.opencastproject.media.mediapackage.handle.Handle,
+   * @see org.opencastproject.media.mediapackage.identifier.HandleBuilder#update(org.opencastproject.media.mediapackage.identifier.Handle,
    *      java.net.URL)
    */
   public boolean update(Handle handle, URL url) throws HandleException {
@@ -163,7 +163,7 @@ public class HandleBuilderImpl implements HandleBuilder {
   /**
    * This implementation always returns <code>true</code> without actually deleting anything.
    * 
-   * @see org.opencastproject.media.mediapackage.handle.HandleBuilder#delete(org.opencastproject.media.mediapackage.handle.Handle)
+   * @see org.opencastproject.media.mediapackage.identifier.HandleBuilder#delete(org.opencastproject.media.mediapackage.identifier.Handle)
    */
   public boolean delete(Handle handle) throws HandleException {
     if (handle == null)

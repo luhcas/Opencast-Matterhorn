@@ -14,15 +14,14 @@
  *
  */
 
-package org.opencastproject.media.mediapackage.handle;
+package org.opencastproject.media.mediapackage.identifier;
+
 
 import java.net.URL;
 
 /**
- * Interface that describes
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: HandleBuilder.java 238 2009-07-29 09:53:32Z jholtzman $
+ * Interface for a facility that is able to create CNRI handles as described in more detail on the <a
+ * href="http://www.handle.net/">handle system page</a>.
  */
 public interface HandleBuilder {
 

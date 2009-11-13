@@ -16,7 +16,7 @@
 
 package org.opencastproject.media.mediapackage;
 
-import org.opencastproject.media.mediapackage.handle.Handle;
+import org.opencastproject.media.mediapackage.identifier.Id;
 
 import org.w3c.dom.Document;
 
@@ -56,7 +56,7 @@ public interface MediaPackage {
    * 
    * @return the identifier
    */
-  Handle getIdentifier();
+  Id getIdentifier();
 
   /**
    * Returns the media package start time.
@@ -105,6 +105,13 @@ public interface MediaPackage {
    * @return the element
    */
   MediaPackageElement getElementById(String id);
+  
+  /**
+   * Returns all elements of this media package with the given flavor.
+   * 
+   * @return the media package elements
+   */
+  MediaPackageElement[] getElementsByFlavor(MediaPackageElementFlavor flavor);
 
   /**
    * Returns the track identified by <code>trackId</code> or <code>null</code> if that track doesn't exists.
@@ -348,12 +355,10 @@ public interface MediaPackage {
    * 
    * @param url
    *          the element location
-   * @throws MediaPackageException
-   *           if the element cannot be accessed
    * @throws UnsupportedElementException
    *           if the element is of an unsupported format
    */
-  MediaPackageElement add(URL file) throws MediaPackageException, UnsupportedElementException;
+  MediaPackageElement add(URL file) throws UnsupportedElementException;
 
   /**
    * Adds an arbitrary {@link URL} to this media package, utilizing a {@link MediaPackageBuilder} to create a suitable
@@ -366,25 +371,21 @@ public interface MediaPackage {
    *          the element type
    * @param flavor
    *          the element flavor
-   * @throws MediaPackageException
-   *           if the element cannot be accessed
    * @throws UnsupportedElementException
    *           if the element is of an unsupported format
    */
   MediaPackageElement add(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
-          throws MediaPackageException, UnsupportedElementException;
+          throws UnsupportedElementException;
 
   /**
    * Adds an arbitrary {@link MediaPackageElement} to this media package.
    * 
    * @param element
    *          the element
-   * @throws MediaPackageException
-   *           if the element cannot be accessed
    * @throws UnsupportedElementException
    *           if the element is of an unsupported format
    */
-  void add(MediaPackageElement element) throws MediaPackageException, UnsupportedElementException;
+  void add(MediaPackageElement element) throws UnsupportedElementException;
 
   /**
    * Adds a track to this media package, actually <em>moving</em> the underlying file in the filesystem. Use this method
@@ -394,12 +395,10 @@ public interface MediaPackage {
    * 
    * @param track
    *          the track
-   * @throws MediaPackageException
-   *           if the track cannot be accessed
    * @throws UnsupportedElementException
    *           if the track is of an unsupported format
    */
-  void add(Track track) throws MediaPackageException, UnsupportedElementException;
+  void add(Track track) throws UnsupportedElementException;
 
   /**
    * Removes the track from the media package.
@@ -416,12 +415,10 @@ public interface MediaPackage {
    * 
    * @param catalog
    *          the catalog
-   * @throws MediaPackageException
-   *           if the catalog cannot be accessed
    * @throws UnsupportedElementException
    *           if the catalog is of an unsupported format
    */
-  void add(Catalog catalog) throws MediaPackageException, UnsupportedElementException;
+  void add(Catalog catalog) throws UnsupportedElementException;
 
   /**
    * Removes the catalog from the media package.
@@ -438,12 +435,10 @@ public interface MediaPackage {
    * 
    * @param attachment
    *          the attachment
-   * @throws MediaPackageException
-   *           if the attachment cannot be accessed
    * @throws UnsupportedElementException
    *           if the attachment is of an unsupported format
    */
-  void add(Attachment attachment) throws MediaPackageException, UnsupportedElementException;
+  void add(Attachment attachment) throws UnsupportedElementException;
 
   /**
    * Removes an arbitrary media package element.
@@ -464,6 +459,37 @@ public interface MediaPackage {
    *           if the attachment cannot be removed
    */
   void remove(Attachment attachment) throws MediaPackageException;
+
+  /**
+   * Adds an element to this media package that represents a derived version of <code>sourceElement</code>. Examples of
+   * a derived element could be an encoded version of a track or a converted version of a time text captions file.
+   * <p>
+   * This method will add <code>derviedElement</code> to the media package and add a reference to the original element
+   * <code>sourceElement</code>. Make sure that <code>derivedElement</code> features the right flavor, so that you are
+   * later able to look up derived work using {@link #getDerived(MediaPackageElement, MediaPackageElementFlavor)}.
+   * 
+   * @param derivedElement
+   *          the derived element
+   * @param sourceElement
+   *          the source element
+   * @throws UnsupportedElementException
+   *           if for some reason <code>derivedElement</code> cannot be added to the media package
+   */
+  void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement)
+          throws UnsupportedElementException;
+
+  /**
+   * Returns those media package elements that are derivates of <code>sourceElement</code> and feature the flavor
+   * <code>derivateFlavor</code>. Using this method, you could easily look up e. g. flash-encoded versions of the
+   * presenter track or converted versions of a time text captions file.
+   * 
+   * @param sourceElement
+   *          the original track, catalog or attachment
+   * @param derivateFlavor
+   *          the derivate flavor you are looking for
+   * @return the derivates
+   */
+  MediaPackageElement[] getDerived(MediaPackageElement sourceElement, MediaPackageElementFlavor derivateFlavor);
 
   /**
    * Returns the media package's cover or <code>null</code> if no cover is defined.
@@ -562,6 +588,6 @@ public interface MediaPackage {
    *          the identifier
    * @return <code>true</code> if the media package could be renamed
    */
-  void renameTo(Handle identifier);
+  void renameTo(Id identifier);
 
 }

@@ -19,8 +19,8 @@ package org.opencastproject.media.mediapackage.elementbuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.track.TrackImpl;
 
 import org.slf4j.Logger;
@@ -34,9 +34,6 @@ import javax.xml.xpath.XPathExpressionException;
 /**
  * This implementation of the {@link MediaPackageElementBuilderPlugin} recognizes video tracks and provides the
  * functionality of reading it on behalf of the media package.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
- * @version $Id: IndefiniteTrackBuilderPlugin.java 2905 2009-07-15 16:16:05Z ced $
  */
 public class IndefiniteTrackBuilderPlugin extends AbstractTrackBuilderPlugin {
 
@@ -83,7 +80,7 @@ public class IndefiniteTrackBuilderPlugin extends AbstractTrackBuilderPlugin {
   /**
    * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURL(java.net.URL)
    */
-  public MediaPackageElement elementFromURL(URL url) throws MediaPackageException {
+  public MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException {
     log_.trace("Creating video track from " + url);
     Track track = TrackImpl.fromURL(url);
     return track;
