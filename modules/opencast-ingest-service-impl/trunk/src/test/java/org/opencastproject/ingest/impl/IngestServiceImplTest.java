@@ -23,7 +23,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Mpeg7Catalog;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.handle.HandleException;
+import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.workspace.api.Workspace;
 

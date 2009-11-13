@@ -19,7 +19,7 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.handle.HandleException;
+import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.util.ConfigurationException;
 
 import java.io.FileNotFoundException;

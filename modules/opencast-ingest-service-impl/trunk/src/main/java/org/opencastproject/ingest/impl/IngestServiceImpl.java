@@ -27,10 +27,9 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
-import org.opencastproject.media.mediapackage.handle.Handle;
-import org.opencastproject.media.mediapackage.handle.HandleBuilder;
-import org.opencastproject.media.mediapackage.handle.HandleBuilderFactory;
-import org.opencastproject.media.mediapackage.handle.HandleException;
+import org.opencastproject.media.mediapackage.identifier.HandleBuilder;
+import org.opencastproject.media.mediapackage.identifier.HandleBuilderFactory;
+import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -121,7 +120,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
     MediaPackage mp;
     try {
       builder.setSerializer(new DefaultMediaPackageSerializerImpl(new File(tempPath)));
-      mp = builder.loadFromManifest(manifest.toURL().openStream());
+      mp = builder.loadFromManifest(manifest.toURI().toURL().openStream());
       mp.renameTo(handleBuilder.createNew());
       builder.createNew();
       for (MediaPackageElement element : mp.elements()) {
@@ -151,9 +150,8 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   public MediaPackage createMediaPackage() throws MediaPackageException,
           org.opencastproject.util.ConfigurationException, HandleException {
     MediaPackage mediaPackage;
-    Handle h = handleBuilder.createNew();
     try {
-      mediaPackage = builder.createNew(h);
+      mediaPackage = builder.createNew();
     } catch (MediaPackageException e) {
       logger.error("INGEST:Failed to create media package " + e.getLocalizedMessage());
       throw e;
@@ -326,7 +324,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
    * @see org.opencastproject.ingest.api.IngestService#discardMediaPackage(java.lang.String)
    */
   public void discardMediaPackage(MediaPackage mp) {
-    String mediaPackageId = mp.getIdentifier().getLocalName();
+    String mediaPackageId = mp.getIdentifier().compact();
     for (MediaPackageElement element : mp.getAttachments()) {
       workspace.delete(mediaPackageId, element.getIdentifier());
     }
@@ -340,22 +338,22 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
 
   private URL addContentToRepo(MediaPackage mp, String elementId, URL url) throws IOException, MediaPackageException,
           UnsupportedElementException {
-    workspace.put(mp.getIdentifier().getLocalName(), elementId, url.openStream());
-    return workspace.getURL(mp.getIdentifier().getLocalName(), elementId);
+    workspace.put(mp.getIdentifier().compact(), elementId, url.openStream());
+    return workspace.getURL(mp.getIdentifier().compact(), elementId);
     // return addContentToMediaPackage(mp, elementId, newUrl, type, flavor);
   }
 
   private URL addContentToRepo(MediaPackage mp, String elementId, InputStream file) throws MediaPackageException,
           UnsupportedElementException, IOException {
-    workspace.put(mp.getIdentifier().getLocalName(), elementId, file);
-    return workspace.getURL(mp.getIdentifier().getLocalName(), elementId);
+    workspace.put(mp.getIdentifier().compact(), elementId, file);
+    return workspace.getURL(mp.getIdentifier().compact(), elementId);
     // return addContentToMediaPackage(mp, elementId, url, type, flavor);
   }
 
   private URL addContentToRepo(MediaPackage mp, String elementId, String filename, InputStream file)
           throws MediaPackageException, UnsupportedElementException, IOException {
-    workspace.put(mp.getIdentifier().getLocalName(), elementId, filename, file);
-    return workspace.getURL(mp.getIdentifier().getLocalName(), elementId);
+    workspace.put(mp.getIdentifier().compact(), elementId, filename, file);
+    return workspace.getURL(mp.getIdentifier().compact(), elementId);
     // return addContentToMediaPackage(mp, elementId, url, type, flavor);
   }
 

@@ -65,10 +65,11 @@ public class DistributionServiceImplTest {
   @Test
   public void testDistribution() throws Exception {
     service.distribute(mp);
-    File mpDir = new File(distributionRoot, mp.getIdentifier().getLocalName());
+    File mpDir = new File(distributionRoot, mp.getIdentifier().compact());
     Assert.assertTrue(mpDir.exists());
     File mediaDir = new File(mpDir, "media");
     Assert.assertTrue(mediaDir.exists());
     Assert.assertTrue(new File(mediaDir, "media.mov").exists());
   }
+
 }

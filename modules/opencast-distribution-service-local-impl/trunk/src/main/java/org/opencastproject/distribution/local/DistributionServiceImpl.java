@@ -65,7 +65,7 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
    * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage)
    */
   public void distribute(MediaPackage mediaPackage) {
-    File mediaPackageDirectory = new File(distributionDirectory, mediaPackage.getIdentifier().getLocalName());
+    File mediaPackageDirectory = new File(distributionDirectory, mediaPackage.getIdentifier().compact());
     File mediaDirectory = new File(mediaPackageDirectory, "media");
     File metadataDirectory = new File(mediaPackageDirectory, "metadata");
     File attachmentsDirectory = new File(mediaPackageDirectory, "attachments");

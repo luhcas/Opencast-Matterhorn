@@ -102,7 +102,7 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
         MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(
                 IOUtils.toInputStream((String) property));
         // MediaPackage mp = (MediaPackage) property;
-        logger.info("Received media package " + mp.getIdentifier().getLocalName());
+        logger.info("Received media package " + mp.getIdentifier());
         // execute 'review' workflow
         workflowService.start(workflowService.getWorkflowDefinitionByName("Review"), mp, new HashMap<String, String>());
 
