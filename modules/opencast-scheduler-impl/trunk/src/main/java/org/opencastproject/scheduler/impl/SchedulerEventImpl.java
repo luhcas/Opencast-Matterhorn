@@ -36,8 +36,8 @@ public class SchedulerEventImpl implements SchedulerEvent {
   String title;
   String creator;
   String abstr;
-  Date start = new Date();
-  Date end = new Date();
+  Date start = new Date(0);
+  Date end = new Date(0);
   String contributor;
   String seriesID;
   String channelID;
@@ -226,7 +226,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    */
   public void setEnddate(Date end) throws IllegalArgumentException {
     logger.debug("Event "+id+" set enddate "+start.getTime());
-    if (start != null && end != null && end.before(start)) throw new IllegalArgumentException ("End "+ end + " before start-date "+start);
+    if (start.getTime() > 0 && end.getTime() > 0 && end.before(start)) throw new IllegalArgumentException ("End "+ end + " before start-date "+start);
     this.end = end;
   }
 
@@ -270,7 +270,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    */
   public void setStartdate(Date start) throws IllegalArgumentException{
     logger.debug("Event "+id+" set startdate "+start.getTime()); 
-    if (end != null && start != null && end.before(start)) throw new IllegalArgumentException("Start "+start+" before End-date "+end);
+    if (end.getTime() > 0 && start.getTime() > 0 && end.before(start)) throw new IllegalArgumentException("Start "+start+" before end-date "+end);
     this.start = start;
   }
 
@@ -289,8 +289,8 @@ public class SchedulerEventImpl implements SchedulerEvent {
    */  
   public boolean valid () {
     if (title == null) return false;
-    if (start == null) return false;
-    if (end == null) return false;
+    if (start.getTime() == 0) return false;
+    if (end.getTime() == 0) return false;
     if (end.before(start)) return false;
     return true;
   }
