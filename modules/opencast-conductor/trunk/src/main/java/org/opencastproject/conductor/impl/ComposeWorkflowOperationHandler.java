@@ -19,6 +19,7 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
@@ -89,6 +90,13 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
           MediaPackageException, UnsupportedElementException {
     String sourceTrackId = operation.getConfiguration("source-track-id");
     String targetTrackId = operation.getConfiguration("target-track-id");
+    
+    Track sourceTrack = mediaPackage.getTrack(sourceTrackId);
+    if (sourceTrack == null) {
+      logger.info("Source track '" + sourceTrackId + "' was not found in media package and will not be encoded");
+      return mediaPackage;
+    }
+    
     // TODO profile retrieval, matching for media type (Audio, Visual, AudioVisual, EnhancedAudio, Image,
     // ImageSequence, Cover)
     // String[] profiles = ((String)properties.get("encode")).split(" ");
@@ -104,7 +112,10 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
         logger.info("Encoding track " + sourceTrackId + " using profile " + profile.getIdentifier());
         Track composedTrack = composerService.encode(mediaPackage, sourceTrackId, targetTrackId, profile.getIdentifier());
         // store new tracks to mediaPackage
-        mediaPackage.add(composedTrack);
+        if (profile.getFlavor() != null)
+          composedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(profile.getFlavor()));
+        mediaPackage.addDerived(composedTrack, sourceTrack);
+        break;
       }
     }
     return mediaPackage;

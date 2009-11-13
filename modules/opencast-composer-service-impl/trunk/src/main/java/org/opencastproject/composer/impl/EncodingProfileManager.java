@@ -17,6 +17,7 @@ package org.opencastproject.composer.impl;
 
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfile.MediaType;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.util.ConfigurationException;
 
 import org.slf4j.Logger;
@@ -50,6 +51,7 @@ public class EncodingProfileManager {
   private static final String PROP_OUTPUT = ".output";
   private static final String PROP_SUFFIX = ".suffix";
   private static final String PROP_MIMETYPE = ".mimetype";
+  private static final String PROP_FLAVOR = ".flavor";
 
   /** The profiles map */
   private Map<String, EncodingProfile> profiles = null;
@@ -198,6 +200,11 @@ public class EncodingProfileManager {
     if (mimeTypeObj == null || "".equals(mimeTypeObj.toString().trim()))
       throw new ConfigurationException("Mime type of profile '" + profile + "' is missing");
     df.mimeType = mimeTypeObj.toString();
+
+    // flavor
+    Object flavorObj = getDefaultProperty(profile, PROP_FLAVOR, properties, defaultProperties);
+    if (flavorObj != null && !"".equals(flavorObj.toString().trim()))
+      df.flavor = MediaPackageElementFlavor.parseFlavor(flavorObj.toString()).toString();
 
     // Applicable to the following track categories
     Object applicableObj = getDefaultProperty(profile, PROP_APPLICABLE, properties, defaultProperties);

@@ -91,6 +91,14 @@ public interface EncodingProfile {
   String getMimeType();
 
   /**
+   * Returns the {@link org.opencastproject.media.mediapackage.MediaPackageElementFlavor} of the encoding result or
+   * <code>null</code> if no flavor was specified.
+   * 
+   * @return the element flavor
+   */
+  String getFlavor();
+
+  /**
    * Returns a list of track classes this media format is applicable to.
    * 
    * @return the applicable formats

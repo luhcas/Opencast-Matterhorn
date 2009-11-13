@@ -34,37 +34,41 @@ import javax.xml.bind.annotation.XmlType;
  * Default implementation for encoding profiles.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="encoding-profile")
-@XmlRootElement(name="encoding-profile", namespace="http://composer.opencastproject.org/")
+@XmlType(name = "encoding-profile")
+@XmlRootElement(name = "encoding-profile", namespace = "http://composer.opencastproject.org/")
 public class EncodingProfileImpl implements EncodingProfile {
 
   /** The profile identifier, e. g. flash.http */
-  @XmlAttribute(name="id")
+  @XmlAttribute(name = "id")
   @XmlID
   protected String identifier = null;
 
   /** Format description */
-  @XmlElement(name="name")
+  @XmlElement(name = "name")
   protected String name = null;
 
   /** Format type */
-  @XmlElement(name="mediatype")
+  @XmlElement(name = "mediatype")
   protected MediaType outputType = null;
 
   /** Suffix */
-  @XmlElement(name="suffix")
+  @XmlElement(name = "suffix")
   protected String suffix = null;
 
   /** Mime type */
-  @XmlElement(name="mimetype")
+  @XmlElement(name = "mimetype")
   protected String mimeType = null;
 
+  /** Flavor */
+  @XmlElement(name = "flavor")
+  protected String flavor = null;
+
   /** The track types that this profile may be applied to */
-  @XmlElement(name="mediatype")
+  @XmlElement(name = "mediatype")
   protected MediaType[] applicableTypes = null;
 
   /** Installation-specific properties */
-  @XmlElement(name="extension")
+  @XmlElement(name = "extension")
   protected HashMap<String, String> extension = null;
 
   /**
@@ -79,11 +83,14 @@ public class EncodingProfileImpl implements EncodingProfile {
     this.identifier = identifier;
     this.name = name;
   }
+
   // Needed by JAXB
-  public EncodingProfileImpl() {}
+  public EncodingProfileImpl() {
+  }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.EncodingProfile#getIdentifier()
    */
   public String getIdentifier() {
@@ -92,6 +99,7 @@ public class EncodingProfileImpl implements EncodingProfile {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.EncodingProfile#getName()
    */
   public String getName() {
@@ -101,14 +109,16 @@ public class EncodingProfileImpl implements EncodingProfile {
   /**
    * Sets the output type.
    * 
-   * @param type  the output type
+   * @param type
+   *          the output type
    */
   void setType(MediaType type) {
     this.outputType = type;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.EncodingProfile#getType()
    */
   public MediaType getType() {
@@ -118,14 +128,16 @@ public class EncodingProfileImpl implements EncodingProfile {
   /**
    * Sets the suffix for encoded file names.
    * 
-   * @param suffix the file suffix
+   * @param suffix
+   *          the file suffix
    */
   void setSuffix(String suffix) {
     this.suffix = suffix;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.EncodingProfile#getSuffix()
    */
   public String getSuffix() {
@@ -134,6 +146,7 @@ public class EncodingProfileImpl implements EncodingProfile {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.EncodingProfile#getMimeType()
    */
   public String getMimeType() {
@@ -141,25 +154,47 @@ public class EncodingProfileImpl implements EncodingProfile {
   }
 
   /**
-   * Sets the types that are applicable for that profile. For example, an audio only-track
-   * hardly be applicable to a jpeg-slide extraction.
+   * {@inheritDoc}
    * 
-   * @param types applicable track types
+   * @see org.opencastproject.composer.api.EncodingProfile#getFlavor()
+   */
+  public String getFlavor() {
+    return flavor;
+  }
+
+  /**
+   * Sets the element flavor of the encoding result.
+   * 
+   * @param flavor
+   *          the flavor
+   */
+  void setFlavor(String flavor) {
+    this.flavor = flavor;
+  }
+
+  /**
+   * Sets the types that are applicable for that profile. For example, an audio only-track hardly be applicable to a
+   * jpeg-slide extraction.
+   * 
+   * @param types
+   *          applicable track types
    */
   void setApplicableTo(MediaType[] types) {
     this.applicableTypes = types;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.EncodingProfile#getApplicableMediaTypes()
    */
   public MediaType[] getApplicableMediaTypes() {
     return applicableTypes;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.EncodingProfile#isApplicableTo(org.opencastproject.composer.api.EncodingProfile.MediaType)
    */
   public boolean isApplicableTo(MediaType type) {
@@ -173,17 +208,18 @@ public class EncodingProfileImpl implements EncodingProfile {
   }
 
   /**
-   * Sets the extension properties for that profile. These properties may be intepreted
-   * by the encoder engine.
+   * Sets the extension properties for that profile. These properties may be intepreted by the encoder engine.
    * 
-   * @param extension the extension properties
+   * @param extension
+   *          the extension properties
    */
   void setExtension(Map<String, String> extension) {
     this.extension = new HashMap<String, String>(extension);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.EncodingProfile#getExtension(java.lang.String)
    */
   public String getExtension(String key) {
@@ -194,6 +230,7 @@ public class EncodingProfileImpl implements EncodingProfile {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.EncodingProfile#getExtensions()
    */
   public Map<String, String> getExtensions() {
@@ -204,6 +241,7 @@ public class EncodingProfileImpl implements EncodingProfile {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.EncodingProfile#hasExtensions()
    */
   public boolean hasExtensions() {
@@ -244,6 +282,7 @@ public class EncodingProfileImpl implements EncodingProfile {
 
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -253,6 +292,7 @@ public class EncodingProfileImpl implements EncodingProfile {
 
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -266,36 +306,46 @@ public class EncodingProfileImpl implements EncodingProfile {
 
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#toString()
    */
   @Override
   public String toString() {
     return identifier;
   }
+
   public MediaType getOutputType() {
     return outputType;
   }
+
   public void setOutputType(MediaType outputType) {
     this.outputType = outputType;
   }
+
   public MediaType[] getApplicableTypes() {
     return applicableTypes;
   }
+
   public void setApplicableTypes(MediaType[] applicableTypes) {
     this.applicableTypes = applicableTypes;
   }
+
   public HashMap<String, String> getExtension() {
     return extension;
   }
+
   public void setExtension(HashMap<String, String> extension) {
     this.extension = extension;
   }
+
   public void setIdentifier(String identifier) {
     this.identifier = identifier;
   }
+
   public void setName(String name) {
     this.name = name;
   }
+
   public void setMimeType(String mimeType) {
     this.mimeType = mimeType;
   }
