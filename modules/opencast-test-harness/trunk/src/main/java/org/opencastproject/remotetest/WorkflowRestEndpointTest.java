@@ -13,14 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.integrationtest;
-
-import org.opencastproject.integrationtest.AbstractIntegrationTest;
-import org.opencastproject.util.UrlSupport;
-import org.opencastproject.workflow.api.WorkflowBuilder;
-import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowService;
-import org.opencastproject.workflow.endpoint.WorkflowRestService;
+package org.opencastproject.remotetest;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -35,36 +28,35 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Tests the workflow service in a running osgi container
- *
- */
-@Ignore
-public class WorkflowRestEndpointTest extends AbstractIntegrationTest {
-  protected String baseUrl = null;
-  
-  @Before
-  public void setup() throws Exception {
-    String configuredUrl = super.bundleContext.getProperty("serverUrl");
-    baseUrl = configuredUrl == null ? UrlSupport.DEFAULT_BASE_URL : configuredUrl;
-    
-    // Ensure the dependent services have started
-    retrieveService(WorkflowService.class);
-    retrieveService(WorkflowRestService.class);
-//    retrieveService(ConductorService.class);
-  }
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
-  @Test
-  public void testWorkflowRestEndpoint() throws Exception {
+/**
+ * Tests the functionality of a remote workflow service rest endpoint
+ */
+public class WorkflowRestEndpointTest {
+  protected String baseUrl;
+  
+  public WorkflowRestEndpointTest(String baseUrl) {
+    this.baseUrl = baseUrl;
+    try {
+      testStartAndRetrieveWorkflowInstance();
+      System.out.println(this + " passed");
+    } catch(Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  public void testStartAndRetrieveWorkflowInstance() throws Exception {
     HttpClient client = new DefaultHttpClient();
     
     // Start a workflow instance via the rest endpoint
@@ -73,8 +65,8 @@ public class WorkflowRestEndpointTest extends AbstractIntegrationTest {
 
     formParams.add(new BasicNameValuePair("definition", getSampleWorkflowDefinition()));
     formParams.add(new BasicNameValuePair("mediapackage", getSampleMediaPackage()));
-    UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formParams, "UTF-8");
-    postStart.setEntity(entity);
+    formParams.add(new BasicNameValuePair("properties", "this=that"));
+    postStart.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
     // Grab the new workflow instance from the response
     String postResponse = client.execute(postStart, new ResponseHandler<String>() {
@@ -83,30 +75,34 @@ public class WorkflowRestEndpointTest extends AbstractIntegrationTest {
         return EntityUtils.toString(entity);
       }
     });
-    System.out.println("Started workflow instance " + postResponse);
-    WorkflowInstance instanceFromPost = WorkflowBuilder.getInstance().parseWorkflowInstance(postResponse);
+    
+    String id = getWorkflowInstanceId(postResponse);
+    System.out.println("Started workflow instance " + id);
 
     // Ensure we can retrieve the workflow instance from the rest endpoint
-    HttpGet getWorkflowMethod = new HttpGet(baseUrl + "/workflow/rest/instance/" + instanceFromPost.getId() + ".xml");
+    HttpGet getWorkflowMethod = new HttpGet(baseUrl + "/workflow/rest/instance/" + id + ".xml");
     String getResponse = client.execute(getWorkflowMethod, new ResponseHandler<String>() {
       public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
         return EntityUtils.toString(response.getEntity());}
       });
-    WorkflowInstance instanceFromGet = WorkflowBuilder.getInstance().parseWorkflowInstance(getResponse);
-    Assert.assertEquals(instanceFromPost.getId(), instanceFromGet.getId());
-    System.out.println("Retrieved workflow " + getResponse);
+    System.out.println("Retrieved workflow instance " + getWorkflowInstanceId(getResponse));
   }
 
-  protected String getSampleMediaPackage() {
-    try {
-      String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("/mediapackage-1.xml"));
-      return template.replaceAll("@SAMPLES_URL@", baseUrl + "/workflow/samples");
-    } catch (IOException e) {Assert.fail(); return null;}
+  protected String getWorkflowInstanceId(String xml) throws Exception {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setNamespaceAware(true);
+    DocumentBuilder builder = factory.newDocumentBuilder();
+    Document doc = builder.parse(IOUtils.toInputStream(xml));
+    return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("id");
   }
 
-  protected String getSampleWorkflowDefinition() {
-    try {
-      return IOUtils.toString(getClass().getClassLoader().getResourceAsStream("/workflow-definition-1.xml"));
-    } catch (IOException e) {Assert.fail(); return null;}
+  protected String getSampleMediaPackage() throws Exception {
+    String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("mediapackage-1.xml"));
+    return template.replaceAll("@SAMPLES_URL@", baseUrl + "/workflow/samples");
   }
+
+  protected String getSampleWorkflowDefinition() throws Exception {
+    return IOUtils.toString(getClass().getClassLoader().getResourceAsStream("workflow-definition-1.xml"));
+  }
+
 }
