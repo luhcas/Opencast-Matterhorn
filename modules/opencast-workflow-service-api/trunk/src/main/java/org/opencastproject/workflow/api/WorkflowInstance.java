@@ -119,11 +119,20 @@ public interface WorkflowInstance {
   MediaPackage getCurrentMediaPackage();
 
   /**
-   * The configurations associated with this workflow instance. Configurations can be used to affect how
+   * The global configurations associated with this workflow instance. Configurations can be used to affect how
    * {@link WorkflowDefinition#getOperations()} are eventually run.
    */
+  // FIXME change name to getGlobalConfigurations
   Set<WorkflowConfiguration> getConfigurations();
 
+  /**
+   * The local configurations associated with the operations in this workflow instance. 
+   * @param operation
+   *          operation name for witch configurations will be retrieved
+   * @return configurations for specified operation
+   */
+  Set<WorkflowConfiguration> getLocalConfigurations(String operation);
+  
   /**
    * Returns the value of property <code>name</code> or <code>null</code> if no such property has been set.
    * 

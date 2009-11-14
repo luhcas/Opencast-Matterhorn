@@ -24,6 +24,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -65,10 +66,14 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @XmlElement(name="description")
   private String description;
 
-  @XmlElement(name="configuration")
-  @XmlElementWrapper(name="configurations")
-  protected Set<WorkflowConfiguration> configurations;
+  //@XmlElement(name="configuration")
+  //@XmlElementWrapper(name="configurations")
+  //protected Set<WorkflowConfiguration> configurations;
 
+  @XmlElement(name="scope")
+  @XmlElementWrapper(name="configurations")
+  protected Set<WorkflowOperationConfigurations> configurations;
+  
   @XmlElement(name="mediapackage")
   private MediapackageType sourceMediaPackageType;
   
@@ -257,22 +262,53 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     return result.getResultingMediaPackage();
   }
 
+  /**
+   * {@inheritDoc} Global configurations are stored under the scope 'global'.
+   * @see org.opencastproject.workflow.api.WorkflowInstance#getConfigurations()
+   */
   public Set<WorkflowConfiguration> getConfigurations() {
-    return configurations;
+    for(WorkflowOperationConfigurations confs : configurations){
+      if(confs.getName().equals("global")){
+        return confs.getConfigurations();
+      }
+    }
+    return new HashSet<WorkflowConfiguration>();
   }
 
-  public void setConfigurations(Set<WorkflowConfiguration> configurations) {
+  public void setConfigurations(Set<WorkflowOperationConfigurations> configurations) {
     this.configurations = configurations;
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#getConfiguration(java.lang.String)
+   * @see org.opencastproject.workflow.api.WorkflowInstance#getLocalConfigurations(java.lang.String)
    */
+  public Set<WorkflowConfiguration> getLocalConfigurations(String operation){
+    for(WorkflowOperationConfigurations confs : configurations){
+      if(confs.getName().equals(operation)){
+        return confs.getConfigurations();
+      }
+    }
+    return new HashSet<WorkflowConfiguration>();
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#getConfiguration(java.lang.String)
+   */ 
   public String getConfiguration(String key) {
     if(key == null || configurations == null) return null;
-    for(WorkflowConfiguration config : configurations) {
-      if(config.getKey().equals(key)) return config.getValue();
+    String[] result = scopeDeterminer(key);
+    String scope = result[0];
+    String newKey = result[1];
+    for(WorkflowOperationConfigurations confs : configurations){
+      if(confs.getName().equals(scope)){
+        // there is configuration in specified scope (or global if scope was not specified)
+        for(WorkflowConfiguration config : confs.getConfigurations()) {
+          if(config.getKey().equals(newKey)) return config.getValue();
+        }
+        return null;
+      }
     }
     return null;
   }
@@ -283,11 +319,19 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   public void removeConfiguration(String key) {
     if(key == null || configurations == null) return;
-    for(Iterator<WorkflowConfiguration> configIter = configurations.iterator(); configIter.hasNext();) {
-      WorkflowConfiguration config = configIter.next();
-      if(config.getKey().equals(key)) {
-        configIter.remove();
-        return;
+    String[] result = scopeDeterminer(key);
+    String scope = result[0];
+    String newKey = result[1];
+    for(WorkflowOperationConfigurations confs : configurations){
+      if(confs.getName().equals(scope)){
+        for(Iterator<WorkflowConfiguration> configIter = confs.getConfigurations().iterator(); configIter.hasNext();) {
+          WorkflowConfiguration config = configIter.next();
+          // remove configuration in specified scope
+          if(config.getKey().equals(newKey)) {
+            configIter.remove();
+            return;
+          }
+        }
       }
     }
   }
@@ -298,13 +342,36 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   public void setConfiguration(String key, String value) {
     if(key == null || configurations == null) return;
-    for(WorkflowConfiguration config : configurations) {
-      if(config.getKey().equals(key)) {
-        ((WorkflowConfigurationImpl)config).setValue(value);
+    String[] result = scopeDeterminer(key);
+    String scope = result[0];
+    String newKey = result[1];
+    for(WorkflowOperationConfigurations confs : configurations){
+      if(confs.getName().equals(scope)){
+        for(WorkflowConfiguration config : confs.getConfigurations()) {
+          if(config.getKey().equals(newKey)) {
+            ((WorkflowConfigurationImpl)config).setValue(value);
+            return;
+          }
+        }
+        // No configurations were found, so add a new one
+        confs.getConfigurations().add(new WorkflowConfigurationImpl(newKey, value));
         return;
       }
     }
-    // No configurations were found, so add a new one
-    configurations.add(new WorkflowConfigurationImpl(key, value));
+    //configurations.add(new WorkflowConfigurationImpl(key, value));
+  }
+  
+  /**
+   * The helper method which determines in which scope does configuration belong based to the prefix of key.
+   * @param key
+   *        
+   * @return scope and new key
+   */
+  protected String[] scopeDeterminer(String key){
+    if(key.contains("/")){
+      return key.split("/", 2);
+    } else {
+      return new String[]{"global", key};
+    }
   }
 }

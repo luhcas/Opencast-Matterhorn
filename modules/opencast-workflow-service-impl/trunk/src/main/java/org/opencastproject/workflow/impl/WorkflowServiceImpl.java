@@ -25,6 +25,8 @@ import org.opencastproject.workflow.api.WorkflowDefinitionList;
 import org.opencastproject.workflow.api.WorkflowDefinitionListImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
+import org.opencastproject.workflow.api.WorkflowOperationConfigurations;
+import org.opencastproject.workflow.api.WorkflowOperationConfigurationsImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationDefinitionListImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -346,11 +348,16 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
           Map<String, String> properties) {
-    Set<WorkflowConfiguration> configurations = new HashSet<WorkflowConfiguration>();
-    if (properties != null) {
-      for(Entry<String, String> entry : properties.entrySet()) {
-        configurations.add(new WorkflowConfigurationImpl(entry.getKey(), entry.getValue()));
-      }
+    //Set<WorkflowConfiguration> configurations = new HashSet<WorkflowConfiguration>();
+    //if (properties != null) {
+    //  for(Entry<String, String> entry : properties.entrySet()) {
+    //    configurations.add(new WorkflowConfigurationImpl(entry.getKey(), entry.getValue()));
+    //  }
+    //}
+    
+    Set<WorkflowOperationConfigurations> configurations = new HashSet<WorkflowOperationConfigurations>();
+    if(properties != null){
+      configurations = proccessProperties(properties);
     }
     
     String id = UUID.randomUUID().toString();
@@ -367,6 +374,37 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     dao.update(workflowInstance);
     run(workflowInstance);
     return workflowInstance;
+  }
+  
+  /**
+   * Divides properties based to prefix to local (specific for workflow operation) or global
+   * 
+   * @param properties
+   * @return
+   */
+  protected Set<WorkflowOperationConfigurations> proccessProperties(Map<String, String> properties){
+    
+    HashMap<String, Set<WorkflowConfiguration>> configurations = new HashMap<String, Set<WorkflowConfiguration>>();
+    configurations.put("global", new HashSet<WorkflowConfiguration>());
+    
+    for(Entry<String, String> entry : properties.entrySet()){
+      if(entry.getKey().contains("/")){
+        String[] key = entry.getKey().split("/", 2);
+        if(!configurations.containsKey(key[0])){
+          configurations.put(key[0], new HashSet<WorkflowConfiguration>());
+        }
+        configurations.get(key[0]).add(new WorkflowConfigurationImpl(key[1], entry.getValue()));
+      } else {
+        configurations.get("global").add(new WorkflowConfigurationImpl(entry.getKey(), entry.getValue()));
+      }
+    }
+    
+    Set<WorkflowOperationConfigurations> confs = new HashSet<WorkflowOperationConfigurations>();
+    for (String key : configurations.keySet()){
+      confs.add(new WorkflowOperationConfigurationsImpl(key, configurations.get(key)));
+    }
+    
+    return confs;
   }
 
   /**
@@ -414,6 +452,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
             }
             // Add an operation instance with the resulting media package to the workflow instance
             WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(operationDefinition);
+            // Merge in local configurations
+            for(WorkflowConfiguration config : wfi.getLocalConfigurations(opInstance.getName())){
+              opInstance.setConfiguration(config.getKey(), config.getValue());
+            }
+            
             // Merge in the workflow instance's configurations, which override any operation-specific config
             for(WorkflowConfiguration config : wfi.getConfigurations()) {
               opInstance.setConfiguration(config.getKey(), config.getValue());

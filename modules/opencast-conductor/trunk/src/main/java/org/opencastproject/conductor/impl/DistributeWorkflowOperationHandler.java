@@ -58,10 +58,15 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
     
     // TODO: Determine which distribution channels should be called
 
-    try {
-      distributionService.distribute(workflowInstance.getCurrentMediaPackage());
-    } catch (RuntimeException e) {
-      throw new WorkflowOperationException(e);
+    if (workflowInstance.getConfiguration("local") != null) {
+      try {
+        logger.info("Distributing to the local repository");
+        distributionService.distribute(workflowInstance.getCurrentMediaPackage());
+      } catch (RuntimeException e) {
+        throw new WorkflowOperationException(e);
+      }
+    } else {
+      logger.info("Distribution to local repository skipped");
     }
 
     // TODO Add any distributed media to the media package

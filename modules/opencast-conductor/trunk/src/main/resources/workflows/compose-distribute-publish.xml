@@ -1,5 +1,5 @@
 <workflow-definition>
-  <title>Transcode and Distribute</title>
+  <title>Transcode, Distribute and Publish</title>
   <description>
     A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
     along with their associated metadata, to the distribution channels.

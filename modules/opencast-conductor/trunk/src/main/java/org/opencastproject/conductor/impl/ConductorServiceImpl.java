@@ -19,6 +19,7 @@ import org.opencastproject.conductor.api.ConductorService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowService;
 
 import org.apache.commons.io.IOUtils;
@@ -33,6 +34,7 @@ import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.UUID;
 
 /**
  * This is the default implementation of the conductor service.
@@ -101,10 +103,28 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
       try {
         MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(
                 IOUtils.toInputStream((String) property));
-        // MediaPackage mp = (MediaPackage) property;
+
         logger.info("Received media package " + mp.getIdentifier());
+        
+        // execute 'Transcode, Distribute and Publish workflow'
+        WorkflowDefinition def = workflowService.getWorkflowDefinitionByName("Transcode, Distribute and Publish");
+        HashMap<String, String> properties = new HashMap<String, String>();
+        if (mp.getTracks().length == 0) {
+          // no track to encode, skipping encoding
+          properties.put("encode", "false");
+        } else {
+          // encoding first track to flash
+          properties.put("encode", "true");
+          properties.put("compose/flash.http", "true");
+          properties.put("compose/source-track-id", mp.getTracks()[0].getIdentifier());
+          properties.put("compose/target-track-id", UUID.randomUUID().toString());
+        }
+        properties.put("local", "true");
+
+        workflowService.start(def, mp, properties);
+
         // execute 'review' workflow
-        workflowService.start(workflowService.getWorkflowDefinitionByName("Review"), mp, new HashMap<String, String>());
+        // workflowService.start(workflowService.getWorkflowDefinitionByName("Review"), mp, new HashMap<String, String>());
 
         if (eventAdmin != null) {
           eventAdmin.postEvent(new Event("org/opencastproject/conductor/ACK", null));
@@ -112,6 +132,7 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
           logger.warn("EventAdmin not available: ACK message was not sent");
         }
       } catch (Exception e) {
+        e.printStackTrace();
         // invalid media package manifest or problem with workflow service
         logger.error("Exception occured: " + e.getMessage());
         Dictionary<String, Throwable> exception = new Hashtable<String, Throwable>();
