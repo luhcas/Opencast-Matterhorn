@@ -16,12 +16,8 @@
 package org.opencastproject.remotetest;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -31,7 +27,6 @@ import org.apache.http.util.EntityUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,22 +64,14 @@ public class WorkflowRestEndpointTest {
     postStart.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
     // Grab the new workflow instance from the response
-    String postResponse = client.execute(postStart, new ResponseHandler<String>() {
-      public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-        HttpEntity entity = response.getEntity();
-        return EntityUtils.toString(entity);
-      }
-    });
+    String postResponse = EntityUtils.toString(client.execute(postStart).getEntity());
     
     String id = getWorkflowInstanceId(postResponse);
     System.out.println("Started workflow instance " + id);
 
     // Ensure we can retrieve the workflow instance from the rest endpoint
     HttpGet getWorkflowMethod = new HttpGet(baseUrl + "/workflow/rest/instance/" + id + ".xml");
-    String getResponse = client.execute(getWorkflowMethod, new ResponseHandler<String>() {
-      public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-        return EntityUtils.toString(response.getEntity());}
-      });
+    String getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
     System.out.println("Retrieved workflow instance " + getWorkflowInstanceId(getResponse));
   }
 
