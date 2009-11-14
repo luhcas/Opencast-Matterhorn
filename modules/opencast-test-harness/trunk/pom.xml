@@ -17,45 +17,10 @@
       <artifactId>commons-logging</artifactId>
       <version>1.1.1</version>
     </dependency>
-
-    <!-- APIs to test -->
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-workflow-service-api</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-conductor-api</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-ingest-service-api</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-inspection-service-api</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-search-service-api</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- REST and SOAP endpoint testing -->
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-workflow-service-impl</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>test</scope>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
@@ -67,31 +32,6 @@
       <artifactId>httpcore</artifactId>
       <version>4.0</version>
     </dependency>
-
-    <!-- Testing infrastructure -->
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam</artifactId>
-      <version>1.2.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-container-default</artifactId>
-      <version>1.2.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-junit</artifactId>
-      <version>1.2.0</version>
-      <scope>test</scope>
-    </dependency>        
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.5</version>
-      <scope>test</scope>
-    </dependency>
-
   </dependencies>
   <build>
     <defaultGoal>test</defaultGoal>
@@ -118,12 +58,13 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Private-Package> org.opencastproject.*, org.apache.org.apache.commons.io.*, org.apache.http.* </Private-Package>
+            <Private-Package> org.opencastproject.*, org.apache.org.apache.commons.io.*, org.apache.http.*, org.json.simple.* </Private-Package>
             <Embed-Dependency>
               commons-io;inline=true,
               commons-logging;inline=true,
               httpcore;inline=true,
-              httpclient;inline=true
+              httpclient;inline=true,
+              json-simple;inline=true
             </Embed-Dependency>
             <_include>src/main/resources/META-INF/MANIFEST.MF</_include>
           </instructions>

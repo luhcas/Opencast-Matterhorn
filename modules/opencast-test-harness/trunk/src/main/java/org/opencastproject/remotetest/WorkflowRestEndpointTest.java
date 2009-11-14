@@ -24,6 +24,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -40,20 +42,22 @@ import javax.xml.xpath.XPathFactory;
  */
 public class WorkflowRestEndpointTest {
   protected String baseUrl;
+  HttpClient client;
   
   public WorkflowRestEndpointTest(String baseUrl) {
     this.baseUrl = baseUrl;
+    client = new DefaultHttpClient();
     try {
-      testStartAndRetrieveWorkflowInstance();
+      startAndRetrieveWorkflowInstance();
       System.out.println(this + " passed");
     } catch(Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      client.getConnectionManager().shutdown();
     }
   }
   
-  public void testStartAndRetrieveWorkflowInstance() throws Exception {
-    HttpClient client = new DefaultHttpClient();
-    
+  public void startAndRetrieveWorkflowInstance() throws Exception {
     // Start a workflow instance via the rest endpoint
     HttpPost postStart = new HttpPost(baseUrl + "/workflow/rest/start");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
@@ -65,7 +69,6 @@ public class WorkflowRestEndpointTest {
 
     // Grab the new workflow instance from the response
     String postResponse = EntityUtils.toString(client.execute(postStart).getEntity());
-    
     String id = getWorkflowInstanceId(postResponse);
     System.out.println("Started workflow instance " + id);
 
@@ -73,6 +76,12 @@ public class WorkflowRestEndpointTest {
     HttpGet getWorkflowMethod = new HttpGet(baseUrl + "/workflow/rest/instance/" + id + ".xml");
     String getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
     System.out.println("Retrieved workflow instance " + getWorkflowInstanceId(getResponse));
+    
+    // Make sure we can retrieve it via json, too
+    HttpGet getWorkflowJson = new HttpGet(baseUrl + "/workflow/rest/instance/" + id + ".json");
+    String jsonResponse = EntityUtils.toString(client.execute(getWorkflowJson).getEntity());
+    JSONObject json = (JSONObject) JSONValue.parse(jsonResponse);
+    System.out.println("Retrieved json response for workflow " + json.get("workflow_id"));
   }
 
   protected String getWorkflowInstanceId(String xml) throws Exception {
