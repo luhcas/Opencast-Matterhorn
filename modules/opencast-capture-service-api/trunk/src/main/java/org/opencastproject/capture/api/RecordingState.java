@@ -15,22 +15,13 @@
  */
 package org.opencastproject.capture.api;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
 /**
- * A representation of the capture client's current state (MH-730)
- *
+ * A representation of a recording's current state (MH-1475)
  */
-@XmlType(name = "status-entity", namespace = "http://status.opencastproject.org/")
-@XmlRootElement(name = "status-entity", namespace = "http://status.opencastproject.org/")
-@XmlEnum(String.class)
-@XmlAccessorType(XmlAccessType.FIELD)
-public enum State {
-  IDLE(),
-  CAPTURING(),
-  UPLOADING();
+public interface RecordingState {
+  public static final String UNKNOWN = "unknown";
+  public static final String CAPTURING = "capturing";
+  public static final String CAPTURE_FINISHED = "capture_finished";
+  public static final String UPLOADING = "uploading";
+  public static final String UPLOAD_FINISHED = "upload_finished";
 }

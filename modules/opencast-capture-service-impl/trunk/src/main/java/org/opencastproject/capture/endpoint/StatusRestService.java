@@ -15,14 +15,6 @@
  */
 package org.opencastproject.capture.endpoint;
 
-import org.opencastproject.capture.api.State;
-import org.opencastproject.capture.api.StatusService;
-import org.opencastproject.capture.impl.StatusServiceImpl;
-
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -30,6 +22,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import org.apache.commons.io.IOUtils;
+import org.opencastproject.capture.api.StatusService;
+import org.opencastproject.capture.impl.StatusServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The REST endpoint for the status service on the capture device
@@ -46,9 +44,9 @@ public class StatusRestService {
   }
 
   @GET
-  @Produces(MediaType.TEXT_XML)
+  @Produces(MediaType.TEXT_PLAIN)
   @Path("GetState")
-  public State getState() {
+  public String getState() {
     return this.service.getState();
   }
 

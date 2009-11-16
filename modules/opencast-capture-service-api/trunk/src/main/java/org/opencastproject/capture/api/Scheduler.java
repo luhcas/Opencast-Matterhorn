@@ -25,10 +25,10 @@ public interface Scheduler {
 
   /**
    * Sets up the calendar service and the internal polling system
-   * Note that if this method encounters an error it will return, and no schedulers will be running
-   * In effect, the capture device will fall back to manual mode and no scheduled captures will take place
+   * Note that if this method encounters an error it will throw a RuntimeException
+   * @throws RuntimeException
    */
-  public void init();
+  public void init() throws RuntimeException;
   
   /**
    * Sets the schedule data URL form which to gather scheduling data

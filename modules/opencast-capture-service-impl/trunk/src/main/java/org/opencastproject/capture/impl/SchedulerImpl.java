@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 
 public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler {
 
+  /** A constant which defines the key to retrieve a pointer to this object in the Quartz job classes */
   public static final String SCHEDULER = "scheduler";
 
   /** The properties of the scheduler for the calendar polling system */
@@ -129,9 +130,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
     } catch (NumberFormatException e) {
       log.error("init:  Invalid polling interval for " + CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL + " unable to retrieve new scheduling data");
     } catch (IOException e) {
-      log.error("init:  Unable to load bundled Quartz properties file for calendar polling");
+      throw new RuntimeException("IOException, unable to load bundled Quartz properties file for calendar polling", e);
     } catch (SchedulerException e) {
-      log.error("init:  Unable to start polling scheduler", e);
+      throw new RuntimeException("Internal error in polling scheduler, unable to start", e);
     }
 
     try {
@@ -144,9 +145,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
       updateCalendar();
       captureScheduler.start();
     } catch (SchedulerException e) {
-      log.error("init:  Unable to start capture scheduler", e);
+      throw new RuntimeException("Internal error in capture scheduler, unable to start", e);
     } catch (IOException e) {
-      log.error("init:  Unable to load Quartz properties file for capture scheduling");
+      throw new RuntimeException("IOException, unable to load Quartz properties file for capture scheduling");
     }
   }
 
@@ -172,7 +173,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
     } else if (calendar == null && localCalendarCacheURL != null) {
       calendar = parseCalendar(localCalendarCacheURL);
     } else if (calendar == null && localCalendarCacheURL == null) {
-      log.error("updateCalendar: Unable to update calendar from either local or remote sources.");
+      log.warn("updateCalendar: Unable to update calendar from either local or remote sources.");
     } else {
       log.info("updateCalendar: Calendar already exists, and " + CaptureParameters.CAPTURE_SCHEDULE_URL + " is invalid, skipping update");
       return;
@@ -209,7 +210,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
           return null;
         }
       } else {
-        log.info("updateCalendar: Calendar already exists, and " + CaptureParameters.CAPTURE_SCHEDULE_URL + " is invalid, skipping update");
+        log.info("parseCalendar: Calendar already exists, and " + CaptureParameters.CAPTURE_SCHEDULE_URL + " is invalid, skipping update");
         return null;
       }
     }
@@ -235,15 +236,24 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
       return null;
     }
 
+    //TODO:  Handle file corruption issues for this block
+    FileWriter out = null;
     try {
       //If the new data is valid calendar data, write it to the cache
       if (cal != null) {
-        FileWriter out = new FileWriter(localCalendarCacheURL.getFile());
+        out = new FileWriter(localCalendarCacheURL.getFile());
         out.write(calendarString);
-        out.close();
       }
     } catch (IOException e) {
       log.error("parseCalendar: Unable to cache calendar data!");
+    } finally {
+      try {
+        if (out != null) {
+          out.close();
+        }
+      } catch (IOException e) {
+        //TODO:  What goes here?  The JVM should clean this up shortly...
+      }
     }
 
     return cal;
@@ -257,6 +267,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
    */
   private String readCalendar(URL url) throws IOException, NullPointerException {
     StringBuilder sb = new StringBuilder();
+    //TODO:  Handle reading UTF16, and every other format under the sun
     //Urgh, read in the data.  These ugly lines handle both HTTP and local file
     DataInputStream in = new DataInputStream(url.openStream());
     int c = 0;
@@ -268,6 +279,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
 
   /**
    * Returns a string of the name for every scheduled job
+   * Job titles are their DTSTART fields, so they look like 20091105T142500
    * @return An array of Strings containing the name of every scheduled job
    */
   public String[] getCaptureSchedule() {
@@ -318,17 +330,27 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
         VEvent event = (VEvent) item;
         Date start = event.getStartDate().getDate();
         Date end = event.getEndDate().getDate();
+        //Note that we're assuming this is accurate...
         Duration duration = event.getDuration();
         if (duration == null) {
-          //Note that in the example metadata I was given the duration field did not exist...
-          duration = new Duration(start, end);
+          if (start != null && end != null) {
+            //Note that in the example metadata I was given the duration field did not exist...
+            duration = new Duration(start, end);
+          } else {
+            log.warn("Event " + event.getName() + " has an invalid start and/or end time, skipping");
+            continue;
+          }
+        }
+
+        if (duration != null && duration.getDuration().isNegative()) {
+          log.warn("Event " + event.getName() + " has a negative duration, skipping");
+          continue;
         }
 
         //TODO:  Figure out what to do with this attachment
-        String attachment = getAttachment(event);
+        String attachment = getAttachmentAsString(event);
         
         CronExpression cronString = getCronString(event);
-        log.error("GDL:" + cronString.toString());
         CronTrigger trig = new CronTrigger();
         trig.setCronExpression(cronString);
         trig.setName(cronString.toString());
@@ -354,7 +376,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
    * @return A String representation of the attachment
    * @throws ParseException
    */
-  private String getAttachment(VEvent event) throws ParseException {
+  private String getAttachmentAsString(VEvent event) throws ParseException {
     byte[] bytes = Base64.decodeBase64(event.getProperty(Property.ATTACH).getValue());
     String attach = new String(bytes);
     return attach;
