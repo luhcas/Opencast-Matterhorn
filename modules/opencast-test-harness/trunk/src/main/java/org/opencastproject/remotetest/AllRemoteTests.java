@@ -15,18 +15,33 @@
  */
 package org.opencastproject.remotetest;
 
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.RunWith;
+import org.junit.runner.notification.Failure;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
 /**
  * Runs all of the remote tests
  */
+@RunWith(Suite.class)
+@SuiteClasses({WorkflowRestEndpointTest.class, WorkingFileRepoRestEndpointTest.class})
 public class AllRemoteTests {
-  protected static String baseUrl = "http://localhost:8080";
+  public static String BASE_URL = "http://localhost:8080";
 
   public static void main(String[] args) {
     if(args.length > 0) {
-      System.out.println("testing URL " + args[0]);
-      baseUrl = args[0];
+      BASE_URL = args[0];
     }
-    new WorkflowRestEndpointTest(baseUrl);
-    // add the rest of the tests here
+    System.out.println("Beginning matterhorn test suite on " + BASE_URL);
+    long start = System.currentTimeMillis();
+    Result result = JUnitCore.runClasses(AllRemoteTests.class);
+    System.out.println("Finished test suite in " + (System.currentTimeMillis()-start) + "ms");
+    if(result.getFailureCount() > 0) {
+      for(Failure failure : result.getFailures()) {
+        System.out.println(failure.getTrace());
+      }
+    }
   }
 }

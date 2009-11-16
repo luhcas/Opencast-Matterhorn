@@ -15,6 +15,10 @@
  */
 package org.opencastproject.remotetest;
 
+import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
+
+import junit.framework.Assert;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -26,6 +30,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -41,25 +48,22 @@ import javax.xml.xpath.XPathFactory;
  * Tests the functionality of a remote workflow service rest endpoint
  */
 public class WorkflowRestEndpointTest {
-  protected String baseUrl;
   HttpClient client;
-  
-  public WorkflowRestEndpointTest(String baseUrl) {
-    this.baseUrl = baseUrl;
+
+  @Before
+  public void setup() throws Exception {
     client = new DefaultHttpClient();
-    try {
-      startAndRetrieveWorkflowInstance();
-      System.out.println(this + " passed");
-    } catch(Exception e) {
-      throw new RuntimeException(e);
-    } finally {
-      client.getConnectionManager().shutdown();
-    }
   }
-  
-  public void startAndRetrieveWorkflowInstance() throws Exception {
+
+  @After
+  public void teardown() throws Exception {
+    client.getConnectionManager().shutdown();
+  }
+    
+  @Test
+  public void testStartAndRetrieveWorkflowInstance() throws Exception {
     // Start a workflow instance via the rest endpoint
-    HttpPost postStart = new HttpPost(baseUrl + "/workflow/rest/start");
+    HttpPost postStart = new HttpPost(BASE_URL + "/workflow/rest/start");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
     formParams.add(new BasicNameValuePair("definition", getSampleWorkflowDefinition()));
@@ -70,18 +74,17 @@ public class WorkflowRestEndpointTest {
     // Grab the new workflow instance from the response
     String postResponse = EntityUtils.toString(client.execute(postStart).getEntity());
     String id = getWorkflowInstanceId(postResponse);
-    System.out.println("Started workflow instance " + id);
 
     // Ensure we can retrieve the workflow instance from the rest endpoint
-    HttpGet getWorkflowMethod = new HttpGet(baseUrl + "/workflow/rest/instance/" + id + ".xml");
+    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".xml");
     String getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
-    System.out.println("Retrieved workflow instance " + getWorkflowInstanceId(getResponse));
+    Assert.assertEquals(id, getWorkflowInstanceId(getResponse));
     
     // Make sure we can retrieve it via json, too
-    HttpGet getWorkflowJson = new HttpGet(baseUrl + "/workflow/rest/instance/" + id + ".json");
+    HttpGet getWorkflowJson = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".json");
     String jsonResponse = EntityUtils.toString(client.execute(getWorkflowJson).getEntity());
     JSONObject json = (JSONObject) JSONValue.parse(jsonResponse);
-    System.out.println("Retrieved json response for workflow " + json.get("workflow_id"));
+    Assert.assertEquals(id, json.get("workflow_id"));
   }
 
   protected String getWorkflowInstanceId(String xml) throws Exception {
@@ -94,11 +97,10 @@ public class WorkflowRestEndpointTest {
 
   protected String getSampleMediaPackage() throws Exception {
     String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("mediapackage-1.xml"));
-    return template.replaceAll("@SAMPLES_URL@", baseUrl + "/workflow/samples");
+    return template.replaceAll("@SAMPLES_URL@", BASE_URL + "/workflow/samples");
   }
 
   protected String getSampleWorkflowDefinition() throws Exception {
     return IOUtils.toString(getClass().getClassLoader().getResourceAsStream("workflow-definition-1.xml"));
   }
-
 }

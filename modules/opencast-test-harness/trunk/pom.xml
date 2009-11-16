@@ -8,6 +8,11 @@
   <version>0.1-SNAPSHOT</version>
   <dependencies>
     <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.5</version>
+    </dependency>
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>1.4</version>
@@ -31,6 +36,16 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore</artifactId>
       <version>4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+      <version>4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.james</groupId>
+      <artifactId>apache-mime4j</artifactId>
+      <version>0.6</version>
     </dependency>
   </dependencies>
   <build>
@@ -58,13 +73,16 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Private-Package> org.opencastproject.*, org.apache.org.apache.commons.io.*, org.apache.http.*, org.json.simple.* </Private-Package>
+            <Private-Package> org.junit.*, org.opencastproject.*, org.apache.org.apache.commons.io.*, org.apache.http.*, org.json.simple.* </Private-Package>
             <Embed-Dependency>
               commons-io;inline=true,
               commons-logging;inline=true,
               httpcore;inline=true,
               httpclient;inline=true,
-              json-simple;inline=true
+              httpmime;inline=true,
+              apache-mime4j;inline=true,
+              json-simple;inline=true,
+              junit;inline=true
             </Embed-Dependency>
             <_include>src/main/resources/META-INF/MANIFEST.MF</_include>
           </instructions>
