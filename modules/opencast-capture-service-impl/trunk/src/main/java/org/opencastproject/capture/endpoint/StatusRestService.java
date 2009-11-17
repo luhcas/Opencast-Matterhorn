@@ -24,6 +24,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
+import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
 import org.opencastproject.capture.api.StatusService;
 import org.opencastproject.capture.impl.StatusServiceImpl;
 import org.slf4j.Logger;
@@ -43,15 +44,15 @@ public class StatusRestService {
     this.service = service;
   }
 
+  public void unsetService(CaptureAgentStatusService service) {
+    this.service = null;
+  }
+
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("GetState")
   public String getState() {
     return this.service.getState();
-  }
-
-  public void setState() {
-
   }
 
   @GET
