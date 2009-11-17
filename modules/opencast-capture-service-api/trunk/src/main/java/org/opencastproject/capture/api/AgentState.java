@@ -22,4 +22,5 @@ public interface AgentState {
   public static final String IDLE = "idle";
   public static final String CAPTURING = "capturing";
   public static final String UPLOADING = "uploading";
+  public static final String UNKNOWN = "unknown";
 }
