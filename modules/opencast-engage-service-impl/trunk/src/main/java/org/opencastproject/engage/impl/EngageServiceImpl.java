@@ -132,7 +132,7 @@ public class EngageServiceImpl implements EngageService, ManagedService {
   }
 
   /**
-   * Returns a String with the content of the reuqested resource.
+   * Returns a String with the content of the requested resource.
    * 
    * @param templateName
    * @return String
