@@ -36,6 +36,7 @@
         <module>opencast-maven-plugin</module>
         <module>opencast-runtime-tools</module>
         <module>opencast-authentication-api</module>
+        <module>opencast-capture-service-api</module> 
         <module>opencast-capture-admin-service-api</module>
         <module>opencast-capture-admin-service-impl</module>
         <module>opencast-composer-service-api</module>
