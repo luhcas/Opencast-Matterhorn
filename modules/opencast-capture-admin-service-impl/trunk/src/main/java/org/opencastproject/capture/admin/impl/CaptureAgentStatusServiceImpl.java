@@ -19,7 +19,11 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
+import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.capture.api.AgentState;
+import org.opencastproject.capture.api.RecordingState;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
@@ -31,15 +35,15 @@ import org.slf4j.LoggerFactory;
 public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentStatusServiceImpl.class);
 
-  private static HashMap<String, String> agents;
-  private static HashMap<String, String> recordings;
+  private HashMap<String, Agent> agents;
+  private HashMap<String, Recording> recordings;
 
   public CaptureAgentStatusServiceImpl() {
     if (agents == null) {
-      agents = new HashMap<String, String>();
+      agents = new HashMap<String, Agent>();
     }
     if (recordings == null) {
-      recordings = new HashMap<String, String>();
+      recordings = new HashMap<String, Recording>();
     }
   }
 
@@ -47,8 +51,15 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
    * {@inheritDoc}
    * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#getAgentState(java.lang.String)
    */
-  public String getAgentState(String agentName) {
-    return agents.get(agentName);
+  public Agent getAgentState(String agentName) {
+    Agent req = agents.get(agentName);
+    //If that agent doesn't exist, return an unknown agent, else return the known agent
+    if (req == null) {
+      Agent a = new Agent(agentName, AgentState.UNKNOWN);
+      return a;
+    } else {
+      return req;
+    }
   }
 
   /**
@@ -56,7 +67,14 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
    * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#setAgentState(java.lang.String, java.lang.String)
    */
   public void setAgentState(String agentName, String state) {
-    agents.put(agentName, state);
+    Agent req = agents.get(agentName);
+    //if the agent is known set the state
+    if (req != null) {
+      req.setState(state);
+    } else {
+      Agent a = new Agent(agentName, state);
+      agents.put(agentName, a);
+    }
   }
 
   /**
@@ -71,7 +89,7 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
    * {@inheritDoc}
    * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#getKnownAgents()
    */
-  public Map<String, String> getKnownAgents() {
+  public Map<String, Agent> getKnownAgents() {
     return agents;
   }
 
@@ -79,8 +97,15 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
    * {@inheritDoc}
    * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#getRecordingState(java.lang.String)
    */
-  public String getRecordingState(String id) {
-    return recordings.get(id);
+  public Recording getRecordingState(String id) {
+    Recording req = recordings.get(id);
+    //If that agent doesn't exist, return an unknown agent, else return the known agent
+    if (req == null) {
+      Recording r = new Recording(id, RecordingState.UNKNOWN);
+      return r;
+    } else {
+      return req;
+    }
   }
 
   /**
@@ -88,7 +113,13 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
    * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#setRecordingState(java.lang.String, java.lang.String)
    */
   public void setRecordingState(String id, String state) {
-    recordings.put(id, state);
+    Recording req = recordings.get(id);
+    if (req != null) {
+      req.setState(state);
+    } else {
+      Recording r = new Recording(id, state);
+      recordings.put(id, r);
+    }
   }
 
   /**
@@ -101,11 +132,12 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#getAllRecordingStates()
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#getKnownRecordings()
    */
-  public Map<String,String> getAllRecordingStates() {
+  public Map<String,Recording> getKnownRecordings() {
     return recordings;
   }
+
 
   @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {

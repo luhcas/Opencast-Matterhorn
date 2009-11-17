@@ -25,9 +25,9 @@ public interface CaptureAgentStatusService {
   /**
    * Returns the last known state of a given agent
    * @param agentName The name of the agent
-   * @return The last known state of that agent, or null if that agent does not exist.
+   * @return The agent with a value for both its last checkin time and its last known state
    */
-  public String getAgentState(String agentName);
+  public Agent getAgentState(String agentName);
 
   /**
    * Sets a given agent's state.  Note that this will create the agent if it does not already exist.
@@ -46,14 +46,14 @@ public interface CaptureAgentStatusService {
    * Returns the list of known agents
    * @return A map of agent-state pairs
    */
-  public Map<String, String> getKnownAgents();
+  public Map<String, Agent> getKnownAgents();
 
   /**
    * Gets the state of a recording, if it exists
    * @param id The id of the recording
    * @return The state of the recording, or null if it does not exist
    */
-  public String getRecordingState(String id);
+  public Recording getRecordingState(String id);
 
   /**
    * Updates the state of a recording with the given state, if it exists
@@ -72,5 +72,5 @@ public interface CaptureAgentStatusService {
    * Gets the state of all recordings in the system
    * @return A map of recording-state pairs
    */
-  public Map<String,String> getAllRecordingStates();
+  public Map<String,Recording> getKnownRecordings();
 }

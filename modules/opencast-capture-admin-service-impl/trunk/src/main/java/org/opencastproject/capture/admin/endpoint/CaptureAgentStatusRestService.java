@@ -17,7 +17,11 @@ package org.opencastproject.capture.admin.endpoint;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -28,7 +32,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
+import org.opencastproject.capture.admin.api.Agent;
+import org.opencastproject.capture.admin.api.AgentStateUpdate;
 import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
+import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.capture.admin.api.RecordingStateUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,10 +56,10 @@ public class CaptureAgentStatusRestService {
   }
 
   @GET
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.TEXT_XML)
   @Path("GetAgentState")
-  public String getAgentState(@QueryParam("agentName") String agentName) {
-    return service.getAgentState(agentName);
+  public AgentStateUpdate getAgentState(@QueryParam("agentName") String agentName) {
+    return new AgentStateUpdate(service.getAgentState(agentName));
   }
 
   @POST
@@ -69,15 +77,21 @@ public class CaptureAgentStatusRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("GetKnownAgents")
-  public Map<String, String> getKnownAgents() {
-    return service.getKnownAgents();
+  public List<AgentStateUpdate> getKnownAgents() {
+    LinkedList<AgentStateUpdate> update = new LinkedList<AgentStateUpdate>();
+    Map<String, Agent> data = service.getKnownAgents();
+    //Run through and build a map of updates (rather than states)
+    for (Entry<String, Agent> e : data.entrySet()) {
+      update.add(new AgentStateUpdate(e.getValue()));
+    }
+    return update;
   }
 
   @GET
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.TEXT_XML)
   @Path("GetRecordingState")
-  public String getRecordingState(@QueryParam("id") String id) {
-    return service.getRecordingState(id);
+  public RecordingStateUpdate getRecordingState(@QueryParam("id") String id) {
+    return new RecordingStateUpdate(service.getRecordingState(id));
   }
 
   @POST
@@ -94,9 +108,15 @@ public class CaptureAgentStatusRestService {
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("GetAllRecordingStates")
-  public Map<String, String> getAllRecordingStates() {
-    return service.getAllRecordingStates();
+  @Path("GetKnownRecordings")
+  public Map<String, RecordingStateUpdate> getAllRecordings() {
+    HashMap<String, RecordingStateUpdate> update = new HashMap<String, RecordingStateUpdate>();
+    Map<String, Recording> data = service.getKnownRecordings();
+    //Run through and build a map of updates (rather than states)
+    for (Entry<String, Recording> e : data.entrySet()) {
+      update.put(e.getKey(), new RecordingStateUpdate(e.getValue()));
+    }
+    return update;
   }
   
   @GET
