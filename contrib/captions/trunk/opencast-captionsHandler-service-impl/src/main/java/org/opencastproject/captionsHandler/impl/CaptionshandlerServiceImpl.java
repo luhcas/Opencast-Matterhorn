@@ -22,7 +22,6 @@ import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
@@ -197,10 +196,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       MediaPackageElement element = mpeb.elementFromURL(url, MediaPackageElement.Type.Catalog, captionsFlavor);
       element.setIdentifier(elementId);
       mediaPackage.add(element);
-      logger.info("Updated the media package ("+mediaPackage.getIdentifier().getFullName()+") caption ("+elementId+"): " + url);
-    } catch (MediaPackageException e) {
-      logger.error(e.toString(), e);
-      throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier()+"):" + e);
+      logger.info("Updated the media package ("+mediaPackage.getIdentifier().toString()+") caption ("+elementId+"): " + url);
     } catch (UnsupportedElementException e) {
       logger.error(e.toString(), e);
       throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier()+"):" + e);
