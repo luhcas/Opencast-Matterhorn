@@ -8,7 +8,8 @@
 
 Opencast.ToVideodisplay = (function () {
 
-    var playing = "playing",
+    var pressKey = false,
+        playing = "playing",
         pausing = "pausing",
         currentPlayPauseState = pausing;
 
@@ -41,8 +42,19 @@ Opencast.ToVideodisplay = (function () {
     {
         currentPlayPauseState = state;
     }
+    
+    function getCurrentPlayPauseState()
+    {
+        return currentPlayPauseState;
+    }
+    
+    function getPressKey()
+    {
+        return pressKey;
+    }
 
     function doTogglePlayPause() {
+    
         // Checking if btn_play_pause is "play"
         if (currentPlayPauseState === pausing) {
             // Changing the volume to 1.0 and the value of the button of btn_volume to "unmute"
@@ -124,6 +136,7 @@ Opencast.ToVideodisplay = (function () {
         {
             isAlt = false; 
         }
+        pressKey = false;
     }).keydown(function (e) { 
         if (e.which === 17)
         {
@@ -135,9 +148,11 @@ Opencast.ToVideodisplay = (function () {
         }
         if (isCtrl === true && isAlt === true) {
           
+            pressKey = true;
             if (e.which === 80 || e.which === 112 || e.which === 83 || e.which === 115 || e.which === 77 || e.which === 109 || e.which === 85 || e.which === 117  || e.which === 68 || e.which === 100 || e.which === 49 || e.which === 50 || e.which === 51 || e.which === 52 || e.which === 53 || e.which === 67 || e.which === 99 || e.which === 82 || e.which === 114 || e.which === 70 || e.which === 102)
             {
                 Videodisplay.passCharCode(e.which);
+                
             }
             return false;
         }
@@ -147,6 +162,8 @@ Opencast.ToVideodisplay = (function () {
         doSeek: doSeek,
         doSkipBackward : doSkipBackward,
         doRewind : doRewind,
+        getCurrentPlayPauseState : getCurrentPlayPauseState,
+        getPressKey : getPressKey,
         doPlay: doPlay,
         doPause: doPause,
         doStop: doStop,
