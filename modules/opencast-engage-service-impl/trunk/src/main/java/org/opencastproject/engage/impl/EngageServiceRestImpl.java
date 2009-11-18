@@ -17,8 +17,6 @@ package org.opencastproject.engage.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -39,8 +37,11 @@ import org.slf4j.LoggerFactory;
  */
 @Path("/")
 public class EngageServiceRestImpl implements EngageService {
+  
   private static final Logger logger = LoggerFactory.getLogger(EngageServiceImpl.class);
+  
   private EngageService service;
+  
   public void setService(EngageService service) {
     this.service = service;
   }
@@ -71,44 +72,27 @@ public class EngageServiceRestImpl implements EngageService {
     }
     docs = docsFromClassloader;
   }
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("play/{filename}")
-  public String deliverPlayerGET(@PathParam("filename") String filename, @Context HttpServletRequest request) {
-    @SuppressWarnings("unused")
-    String mediaHost = "mediahost";
-    
-      try {
-        InetAddress addr = InetAddress.getLocalHost();
-        mediaHost = addr.getHostAddress();
-      } catch (UnknownHostException e) {
-        e.printStackTrace();
-      }
-    // FIXME find out the hostname of the machine the service is running on
-    return deliverPlayer(filename, "vm081.rz.uos.de:8080");
-  }
-  
-  public String deliverPlayer(String filename, String mediaHost) {
-    return service.deliverPlayer(filename, mediaHost);
-  }
-  
+
   public String deliverPlayer(String mediaPackageId) {
     return service.deliverPlayer(mediaPackageId);
   }
   
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("available")
-  public String listRecordings() {
-    return service.listRecordings();
+  public String deliverBrowsePage() {
+    return service.deliverBrowsePage();
   }
-  
   
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("search")
   public String search(@Context HttpServletRequest request) {
-    return "Suche";
+    return "Search";
+  }
+  
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("/")
+  public String browse(@Context HttpServletRequest request) {
+    return deliverBrowsePage();
   }
   
   @GET
