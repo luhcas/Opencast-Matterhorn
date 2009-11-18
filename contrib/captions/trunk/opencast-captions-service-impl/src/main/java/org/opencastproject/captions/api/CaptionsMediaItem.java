@@ -13,19 +13,22 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.captionsHandler.endpoint;
 
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebResult;
-import javax.jws.WebService;
+package org.opencastproject.captions.api;
 
-/**
- * This is the SOAP endpoint for the captions handler service
- */
-@WebService()
-public interface CaptionshandlerWebService {
-  @WebMethod()
-  @WebResult(name="captions-entity")
-  public CaptionsEntityJaxb getCaptionshandlerEntity(@WebParam(name="id")String id);
+import org.opencastproject.media.mediapackage.MediaPackage;
+import java.net.URL;
+
+public interface CaptionsMediaItem {
+  public String getWorkflowId();
+  public MediaPackage getMediaPackage();
+  public String getMediaPackageId();
+  public String getTitle();
+  public URL getMediaURL();
+  /**
+   * @param captionType the caption type string from {@link CaptionshandlerService#CAPTIONS_TYPE_TIMETEXT}
+   * @return the url OR null if none found
+   */
+  public URL getCaptionsURL(String captionType);
 }
+

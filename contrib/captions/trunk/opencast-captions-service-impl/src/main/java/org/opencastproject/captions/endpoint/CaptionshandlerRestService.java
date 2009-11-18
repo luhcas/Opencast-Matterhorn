@@ -13,11 +13,11 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.captionsHandler.endpoint;
+package org.opencastproject.captions.endpoint;
 
-import org.opencastproject.captionsHandler.api.CaptionsMediaItem;
-import org.opencastproject.captionsHandler.api.CaptionshandlerService;
-import org.opencastproject.captionsHandler.api.CaptionshandlerService.CaptionsResults;
+import org.opencastproject.captions.api.CaptionsMediaItem;
+import org.opencastproject.captions.api.CaptionshandlerService;
+import org.opencastproject.captions.api.CaptionshandlerService.CaptionsResults;
 
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONValue;

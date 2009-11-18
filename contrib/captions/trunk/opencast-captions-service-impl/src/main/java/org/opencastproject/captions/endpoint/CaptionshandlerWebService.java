@@ -13,33 +13,19 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.captionsHandler.impl;
+package org.opencastproject.captions.endpoint;
 
-import org.opencastproject.captionsHandler.api.CaptionshandlerService;
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
+import javax.jws.WebResult;
+import javax.jws.WebService;
 
-import junit.framework.Assert;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
-public class CaptionshandlerServiceImplTest {
-  private CaptionshandlerService service = null;
-
-  @Before
-  public void setup() {
-    service = new CaptionshandlerServiceImpl();
-  }
-
-  @After
-  public void teardown() {
-    service = null;
-  }
-  
-  @Test
-  @Ignore
-  public void testGetEntity() {
-    // TODO add some test here
-  }
+/**
+ * This is the SOAP endpoint for the captions handler service
+ */
+@WebService()
+public interface CaptionshandlerWebService {
+  @WebMethod()
+  @WebResult(name="captions-entity")
+  public CaptionsEntityJaxb getCaptionshandlerEntity(@WebParam(name="id")String id);
 }

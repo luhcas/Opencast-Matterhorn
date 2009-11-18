@@ -13,10 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.captionsHandler.endpoint;
+package org.opencastproject.captions.endpoint;
 
-import org.opencastproject.captionsHandler.api.CaptionsMediaItem;
-import org.opencastproject.captionsHandler.api.CaptionshandlerService;
+import org.opencastproject.captions.api.CaptionsMediaItem;
+import org.opencastproject.captions.api.CaptionshandlerService;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;

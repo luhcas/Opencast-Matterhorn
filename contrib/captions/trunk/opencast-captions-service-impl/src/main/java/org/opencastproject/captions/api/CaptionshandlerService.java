@@ -14,7 +14,7 @@
  *
  */
 
-package org.opencastproject.captionsHandler.api;
+package org.opencastproject.captions.api;
 
 import java.io.InputStream;
 import java.util.List;

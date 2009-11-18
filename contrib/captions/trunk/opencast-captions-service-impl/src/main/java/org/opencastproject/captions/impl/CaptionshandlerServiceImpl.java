@@ -13,10 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.captionsHandler.impl;
+package org.opencastproject.captions.impl;
 
-import org.opencastproject.captionsHandler.api.CaptionsMediaItem;
-import org.opencastproject.captionsHandler.api.CaptionshandlerService;
+import org.opencastproject.captions.api.CaptionsMediaItem;
+import org.opencastproject.captions.api.CaptionshandlerService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
@@ -168,7 +168,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.captionsHandler.api.CaptionshandlerService#getCaptionsMediaItem(java.lang.String)
+   * @see org.opencastproject.captions.api.CaptionshandlerService#getCaptionsMediaItem(java.lang.String)
    */
   public CaptionsMediaItem getCaptionsMediaItem(String workflowId) {
     if (workflowId == null || "".equals(workflowId)) {

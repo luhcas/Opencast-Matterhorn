@@ -13,22 +13,33 @@
  *  permissions and limitations under the License.
  *
  */
+package org.opencastproject.captions.impl;
 
-package org.opencastproject.captionsHandler.api;
+import org.opencastproject.captions.api.CaptionshandlerService;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import java.net.URL;
+import junit.framework.Assert;
 
-public interface CaptionsMediaItem {
-  public String getWorkflowId();
-  public MediaPackage getMediaPackage();
-  public String getMediaPackageId();
-  public String getTitle();
-  public URL getMediaURL();
-  /**
-   * @param captionType the caption type string from {@link CaptionshandlerService#CAPTIONS_TYPE_TIMETEXT}
-   * @return the url OR null if none found
-   */
-  public URL getCaptionsURL(String captionType);
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+public class CaptionshandlerServiceImplTest {
+  private CaptionshandlerService service = null;
+
+  @Before
+  public void setup() {
+    service = new CaptionshandlerServiceImpl();
+  }
+
+  @After
+  public void teardown() {
+    service = null;
+  }
+  
+  @Test
+  @Ignore
+  public void testGetEntity() {
+    // TODO add some test here
+  }
 }
-

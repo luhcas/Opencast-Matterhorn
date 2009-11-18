@@ -14,10 +14,10 @@
  *
  */
 
-package org.opencastproject.captionsHandler.impl;
+package org.opencastproject.captions.impl;
 
-import org.opencastproject.captionsHandler.api.CaptionsMediaItem;
-import org.opencastproject.captionsHandler.api.CaptionshandlerService;
+import org.opencastproject.captions.api.CaptionsMediaItem;
+import org.opencastproject.captions.api.CaptionshandlerService;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
