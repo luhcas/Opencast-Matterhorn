@@ -46,26 +46,6 @@ public class ConfigurationManagerTest {
   @Test
   public void testMerge() {
     
-    Dictionary<String, String> table1 = new Hashtable<String, String>();
-    Dictionary<String, String> table2 = new Hashtable<String, String>();
-    Dictionary<String, String> combined;
-    
-    table1.put("a", "1");
-    table2.put("b", "2");
-    combined = configManager.merge(table1, table2);
-    Assert.assertEquals(2, combined.size());
-    
-    table2.put("c", "3");
-    combined = configManager.merge(table1, table2);
-    Assert.assertEquals(3, combined.size());
-    Assert.assertEquals("3", combined.get("c"));
-    
-    table1.put("b", "2");
-    table2.put("b", "4");
-    combined = configManager.merge(table1, table2);
-    Assert.assertEquals(3, combined.size());
-    Assert.assertEquals("2", combined.get("b"));
-    
   }
   
   @Test

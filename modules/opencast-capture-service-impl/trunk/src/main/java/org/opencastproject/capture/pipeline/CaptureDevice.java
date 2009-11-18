@@ -15,6 +15,8 @@
  */
 package org.opencastproject.capture.pipeline;
 
+import java.util.Properties;
+
 /**
  * Simple representation of the location, name, capture type and output file of a capture device.
  */
@@ -28,6 +30,9 @@ public class CaptureDevice {
 
   /** Name of the file to save the stream to */
   private String outputPath;
+  
+  /** A list of properties set for this device */
+  public Properties properties;
 
   /**
    * Create a representation of a capture device for the PipelineFactory
@@ -43,6 +48,8 @@ public class CaptureDevice {
     this.location = loc;
     this.name = name;
     this.outputPath = output;
+    
+    properties = new Properties();
 
   }
 

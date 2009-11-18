@@ -59,4 +59,9 @@ public interface CaptureParameters {
 
   /** The local URL of the cached copy of the capture schedule */
   public static final String CAPTURE_SCHEDULE_CACHE_URL = "capture.schedule.cache.url";
+  
+  /** A comma delimited list of the friendly names for capturing devices */
+  public static final String CAPTURE_DEVICE_NAMES = "capture.device.names";
+  
+  public static final String CAPTURE_DEVICE_PREFIX = "capture.device";
 }

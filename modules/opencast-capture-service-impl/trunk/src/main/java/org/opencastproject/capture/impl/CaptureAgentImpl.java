@@ -72,12 +72,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     
     logger.info("[startCapture]Setting up default values for MediaPackage and properties...");
     
-    // Creates default set of properties
-    Properties props = new Properties();
-    props.setProperty("/dev/video0", tmpDir.getAbsolutePath() + File.separator +"professor.mpg");
-    props.setProperty("/dev/video2", tmpDir.getAbsolutePath() + File.separator + "screen.mpg");
-    props.setProperty("hw:0", tmpDir.getAbsolutePath() + File.separator + "microphone.mp2");
-
     // Creates default MediaPackage
     MediaPackage pack;
     try {
@@ -90,7 +84,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return "Media Package exception";
     }
     
-    return startCapture(pack, props);
+    return startCapture(pack, null);
     
   }
 
@@ -103,13 +97,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     logger.info("[startCapture]Setting up default values for the capture properties...");
     
-    // Creates default set of properties
-    Properties props = new Properties();
-    props.setProperty("/dev/video0", tmpDir.getAbsolutePath() + File.separator +"professor.mpg");
-    props.setProperty("/dev/video2", tmpDir.getAbsolutePath() + File.separator + "screen.mpg");
-    props.setProperty("hw:0", tmpDir.getAbsolutePath() + File.separator + "microphone.mp2");
-
-    return startCapture(mediaPackage, props);
+    return startCapture(mediaPackage, null);
   }
 
   /**
@@ -155,7 +143,12 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     
     logger.info("Initializing devices for capture...");
     
+    ConfigurationManager.getInstance().merge(properties);
+    
     pipe = PipelineFactory.create(properties);
+    
+    if (pipe == null)
+      return "Capture could not start.";
     
     Bus bus = pipe.getBus();
     bus.connect(new Bus.EOS() {
@@ -200,7 +193,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * @see org.opencastproject.capture.api.CaptureAgent#stopCapture()
    */
   public String stopCapture() {
-    
+    if (pipe == null)
+      return "Pipeline is null.";
     String result = "Capture OK";
     File stopFlag = new File(tmpDir.getAbsolutePath() + File.separator + "capture.stopped");
     
@@ -313,7 +307,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    System.out.println("Fin de temporización");
+    System.out.println("Fin de temporizaciï¿½n");
     
     System.out.println("Enviamos evento fin de stream");
     pipe.sendEvent(new EOSEvent());

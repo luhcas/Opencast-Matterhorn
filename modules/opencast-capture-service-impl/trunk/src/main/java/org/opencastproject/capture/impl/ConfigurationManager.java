@@ -17,15 +17,12 @@ package org.opencastproject.capture.impl;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -85,13 +82,20 @@ public class ConfigurationManager {
     } catch (MalformedURLException e) {
       logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_CONFIG_URL + ", disabling polling");
     }
+    
+    /* check for a local configuration file (outside of the bundle) before reading from server */
+    try {
+      localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL));
+    } catch (NullPointerException e) {
+      logger.warn("No config file on filesystem outside of bundle found.");
+    }
 
     try {
       localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
     } catch (NullPointerException e) {
       logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_CONFIG_CACHE_URL + ", disabling caching");
     }
-
+    
     if (url == null && localConfig == null) {
       logger.error("No configuration data was found, this is very bad!");
     }
@@ -156,7 +160,7 @@ public class ConfigurationManager {
     if (key == null) {
       return;
     }
-    /* this will overright the previous value is there is a conflict */
+    /* this will overwrite the previous value is there is a conflict */
     properties.setProperty(key, value);
   }
   
@@ -188,7 +192,7 @@ public class ConfigurationManager {
       if (!localConfig.isFile()) {
         localConfig.createNewFile();
       }
-      properties.store(new FileWriter(localConfig), "capture config");
+      properties.store(new FileOutputStream(localConfig), "capture config");
     } catch (Exception e) {
       logger.warn("Could not write config file to disk!");
     }
@@ -205,24 +209,16 @@ public class ConfigurationManager {
   }
   
   /**
-   * Produces a Dictionary that combines the key/value pairs from both
-   * parameters. If there are conflicts the primary value will remain.
-   * @param primary the dictionary that should not change
-   * @param secondary the dictionary that will change if there are conflicts
-   * @return a combination of the mappings using stated collision resolution
+   * Merges the given Properties with the ConfigurationManager's properties. If
+   * there are conflicts, the given properties will take precedence.
+   * @param primary the properties that should not change
    */
-  @SuppressWarnings("unchecked")
-  public Dictionary<String, String> merge(Dictionary<String, String> primary, 
-          Dictionary<String, String> secondary) {
-    Hashtable<String, String> merged = 
-      new Hashtable<String, String>((Map<String, String>)primary);
-    
-    for (Enumeration<String> i = secondary.keys(); i.hasMoreElements();) {
-      String next = i.nextElement();
-      if (merged.get(next) == null)
-        merged.put(next, secondary.get(next));
+  public void merge(Properties primary) {
+    if (primary == null)
+      return;
+    for (Object key : primary.keySet()) {
+      properties.setProperty((String) key, (String) primary.get(key));
     }
-    return merged;
   }
   
   /**

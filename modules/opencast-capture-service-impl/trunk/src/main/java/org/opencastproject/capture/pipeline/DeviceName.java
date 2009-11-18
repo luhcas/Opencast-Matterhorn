@@ -19,8 +19,8 @@ package org.opencastproject.capture.pipeline;
  * The devices that are currently supported and tested with this code
  */
 public enum DeviceName {
-  VGA2USB, /* the Epiphan VGA2USB frame grabber */
-  HAUP, /* Hauppauge devices */
-  ALSASRC
-  /* Linux sound capture */
+  EPIPHAN_VGA2USB,     /* the Epiphan VGA2USB frame grabber */
+  HAUPPAUGE_WINTV,     /* Hauppauge devices                 */
+  BLUECHERRY_PROVIDEO, /* Bluecherry ProVideo-143           */
+  ALSASRC              /* Linux sound capture               */
 }

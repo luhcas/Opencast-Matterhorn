@@ -33,6 +33,7 @@ import org.w3c.dom.Document;
 import java.io.File;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
+import java.util.Properties;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -72,23 +73,39 @@ public class CaptureAgentImplTest {
   @Test
   public void testCapture() {
     
-    logger.info("Starting capture");
-    service.startCapture();
-    
-    logger.info("Starting timing...");
     try {
-      Thread.sleep(msecs);
-    } catch (InterruptedException e) {
-      logger.error("Unexpected exception while sleeping: "+e.getMessage());
-      Assert.fail("Unexpected exception while sleeping: "+e.getMessage());
+      /* setup some default hard-coded properties */
+      Properties props = new Properties();
+      props.setProperty(CaptureParameters.CAPTURE_DEVICE_NAMES, "SCREEN,PRESENTER,AUDIO");
+      props.setProperty("capture.device.SCREEN.src", "/dev/video1");
+      props.setProperty("capture.device.SCREEN.outputfile", outFiles[1].getAbsolutePath());
+      props.setProperty("capture.device.PRESENTER.src", "/dev/video0");
+      props.setProperty("capture.device.PRESENTER.outputfile", outFiles[0].getAbsolutePath());
+      props.setProperty("capture.device.AUDIO.src", "hw:0");
+      props.setProperty("capture.device.AUDIO.outputfile", outFiles[2].getAbsolutePath());
+      
+      logger.info("Starting capture");
+      
+      service.startCapture(props);
+      
+      logger.info("Starting timing...");
+      try {
+        Thread.sleep(msecs);
+      } catch (InterruptedException e) {
+        logger.error("Unexpected exception while sleeping: "+e.getMessage());
+        Assert.fail("Unexpected exception while sleeping: "+e.getMessage());
+      }
+  
+      logger.info("End of timing. Stopping...");
+      
+      String result = service.stopCapture();
+  
+      // Checks correct return value
+      Assert.assertTrue(result.equals("Capture OK"));
+      
+    } catch (UnsatisfiedLinkError e) {
+      logger.error("Could not properly test capture agent: " + e.getMessage());
     }
-
-    logger.info("End of timing. Stopping...");
-    
-    String result = service.stopCapture();
-
-    // Checks correct return value
-    Assert.assertTrue(result.equals("Capture OK"));
     
     // Checks for the existence of the expected files
     //for (File item : outFiles)
