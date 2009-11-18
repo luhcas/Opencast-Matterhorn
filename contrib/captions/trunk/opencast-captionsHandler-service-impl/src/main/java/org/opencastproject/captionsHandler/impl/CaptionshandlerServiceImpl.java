@@ -140,7 +140,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       MediaPackage mp = workflow.getCurrentMediaPackage(); // TODO change to current media package
       // get the MP and update it
       String mediaPackageElementID = CAPTIONS_ELEMENT+captionType;
-      URL url = workspace.put(mp.getIdentifier().toString(), mediaPackageElementID, data);
+      URL url = workspace.put(mp.getIdentifier().compact(), mediaPackageElementID, data);
 
       if (WorkflowInstance.State.SUCCEEDED.equals(workflow.getState())) {
         // TODO for now this is not really doing anything
@@ -196,10 +196,10 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
       MediaPackageElement element = mpeb.elementFromURL(url, MediaPackageElement.Type.Catalog, captionsFlavor);
       element.setIdentifier(elementId);
       mediaPackage.add(element);
-      logger.info("Updated the media package ("+mediaPackage.getIdentifier().toString()+") caption ("+elementId+"): " + url);
+      logger.info("Updated the media package ("+mediaPackage.getIdentifier().compact()+") caption ("+elementId+"): " + url);
     } catch (UnsupportedElementException e) {
       logger.error(e.toString(), e);
-      throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier()+"):" + e);
+      throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier().compact()+"):" + e);
     }
   }
 

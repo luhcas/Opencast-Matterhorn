@@ -48,7 +48,7 @@ public class CaptionsMediaItemImpl implements CaptionsMediaItem {
     return mediaPackage;
   }
   public String getMediaPackageId() {
-    return mediaPackage.getIdentifier().toString();
+    return mediaPackage.getIdentifier().compact();
   }
   public URL getMediaURL() {
     // TODO make this handle the tracks better
