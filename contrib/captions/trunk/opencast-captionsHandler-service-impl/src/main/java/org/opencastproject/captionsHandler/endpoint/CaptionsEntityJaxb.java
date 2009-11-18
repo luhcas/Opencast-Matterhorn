@@ -46,7 +46,7 @@ public class CaptionsEntityJaxb {
     logger.info("Creating a " + CaptionsEntityJaxb.class.getName() + " from " + entity);
     this.mp = entity.getMediaPackage();
     this.workflowId = entity.getWorkflowId();
-    this.mediaPackageId = entity.getMediaPackage().getIdentifier().toString();
+    this.mediaPackageId = entity.getMediaPackage().getIdentifier().compact();
     this.id = this.workflowId;
   }
 
