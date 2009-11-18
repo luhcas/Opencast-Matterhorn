@@ -1,5 +1,5 @@
 /**
- * Captionshandler service implementation classes
+ * Captions service implementation classes
  */
 @javax.xml.bind.annotation.XmlSchema(elementFormDefault=XmlNsForm.QUALIFIED)
 package org.opencastproject.captions.impl;

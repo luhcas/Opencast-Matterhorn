@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * The API for the captions handler service
  */
-public interface CaptionshandlerService {
+public interface CaptionsService {
 
   public static final String CAPTIONS_OPERATION_NAME = "captions";
   public static final String CAPTIONS_ELEMENT = "captions-";

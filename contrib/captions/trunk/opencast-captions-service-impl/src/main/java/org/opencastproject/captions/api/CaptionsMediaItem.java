@@ -26,7 +26,7 @@ public interface CaptionsMediaItem {
   public String getTitle();
   public URL getMediaURL();
   /**
-   * @param captionType the caption type string from {@link CaptionshandlerService#CAPTIONS_TYPE_TIMETEXT}
+   * @param captionType the caption type string from {@link CaptionsService#CAPTIONS_TYPE_TIMETEXT}
    * @return the url OR null if none found
    */
   public URL getCaptionsURL(String captionType);

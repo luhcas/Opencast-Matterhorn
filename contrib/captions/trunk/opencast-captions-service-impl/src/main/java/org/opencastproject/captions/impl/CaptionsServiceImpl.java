@@ -16,7 +16,7 @@
 package org.opencastproject.captions.impl;
 
 import org.opencastproject.captions.api.CaptionsMediaItem;
-import org.opencastproject.captions.api.CaptionshandlerService;
+import org.opencastproject.captions.api.CaptionsService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
@@ -55,9 +55,9 @@ import java.util.List;
  * The consumer sends back timed text, which will be stored in the working file repository and added to the media package <br/>
  * A new workflow (or the existing one with additional operations) will be kicked off (for redistribution including captions)
  */
-public class CaptionshandlerServiceImpl implements CaptionshandlerService, ManagedService, WorkflowOperationHandler {
+public class CaptionsServiceImpl implements CaptionsService, ManagedService, WorkflowOperationHandler {
 
-  private static final Logger logger = LoggerFactory.getLogger(CaptionshandlerServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(CaptionsServiceImpl.class);
 
   private Workspace workspace;
   public void setWorkspace(Workspace workspace) {
@@ -168,7 +168,7 @@ public class CaptionshandlerServiceImpl implements CaptionshandlerService, Manag
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.captions.api.CaptionshandlerService#getCaptionsMediaItem(java.lang.String)
+   * @see org.opencastproject.captions.api.CaptionsService#getCaptionsMediaItem(java.lang.String)
    */
   public CaptionsMediaItem getCaptionsMediaItem(String workflowId) {
     if (workflowId == null || "".equals(workflowId)) {

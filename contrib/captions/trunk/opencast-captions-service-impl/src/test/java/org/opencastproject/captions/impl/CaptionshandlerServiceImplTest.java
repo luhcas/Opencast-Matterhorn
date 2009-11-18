@@ -15,7 +15,7 @@
  */
 package org.opencastproject.captions.impl;
 
-import org.opencastproject.captions.api.CaptionshandlerService;
+import org.opencastproject.captions.api.CaptionsService;
 
 import junit.framework.Assert;
 
@@ -25,11 +25,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class CaptionshandlerServiceImplTest {
-  private CaptionshandlerService service = null;
+  private CaptionsService service = null;
 
   @Before
   public void setup() {
-    service = new CaptionshandlerServiceImpl();
+    service = new CaptionsServiceImpl();
   }
 
   @After

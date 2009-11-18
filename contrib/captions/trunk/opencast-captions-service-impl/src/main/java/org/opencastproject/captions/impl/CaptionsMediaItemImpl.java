@@ -17,7 +17,7 @@
 package org.opencastproject.captions.impl;
 
 import org.opencastproject.captions.api.CaptionsMediaItem;
-import org.opencastproject.captions.api.CaptionshandlerService;
+import org.opencastproject.captions.api.CaptionsService;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
@@ -83,7 +83,7 @@ public class CaptionsMediaItemImpl implements CaptionsMediaItem {
     if (type == null || "".equals(type)) {
       throw new IllegalArgumentException("type must be set");
     }
-    return new MediaPackageElementFlavor(CaptionshandlerService.CAPTIONS_OPERATION_NAME, type.toLowerCase());
+    return new MediaPackageElementFlavor(CaptionsService.CAPTIONS_OPERATION_NAME, type.toLowerCase());
   }
 
 }

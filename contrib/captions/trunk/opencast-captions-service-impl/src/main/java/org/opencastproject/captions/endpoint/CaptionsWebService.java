@@ -15,33 +15,17 @@
  */
 package org.opencastproject.captions.endpoint;
 
-import org.opencastproject.captions.api.CaptionsMediaItem;
-import org.opencastproject.captions.api.CaptionshandlerService;
-
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.jws.WebService;
 
 /**
- * @see CaptionshandlerWebService
+ * This is the SOAP endpoint for the captions handler service
  */
 @WebService()
-public class CaptionshandlerWebServiceImpl implements CaptionshandlerWebService {
-  
-  private CaptionshandlerService service;
-  public void setService(CaptionshandlerService service) {
-    this.service = service;
-  }
-
-  public void unsetService(CaptionshandlerService service) {
-    this.service = null;
-  }
-  
+public interface CaptionsWebService {
   @WebMethod()
-  @WebResult(name="captionsHandler-entity")
-  public CaptionsEntityJaxb getCaptionshandlerEntity(@WebParam(name="id") String id) {
-    CaptionsMediaItem entity = service.getCaptionsMediaItem(id);
-    return new CaptionsEntityJaxb(entity);
-  }
+  @WebResult(name="captions-entity")
+  public CaptionsEntityJaxb getCaptionshandlerEntity(@WebParam(name="id")String id);
 }

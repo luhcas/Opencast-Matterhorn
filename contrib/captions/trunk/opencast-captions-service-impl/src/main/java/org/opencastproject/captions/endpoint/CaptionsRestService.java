@@ -16,8 +16,8 @@
 package org.opencastproject.captions.endpoint;
 
 import org.opencastproject.captions.api.CaptionsMediaItem;
-import org.opencastproject.captions.api.CaptionshandlerService;
-import org.opencastproject.captions.api.CaptionshandlerService.CaptionsResults;
+import org.opencastproject.captions.api.CaptionsService;
+import org.opencastproject.captions.api.CaptionsService.CaptionsResults;
 
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONValue;
@@ -52,14 +52,14 @@ import javax.ws.rs.core.Response.Status;
  * This is the REST endpoint for the captions handler service
  */
 @Path("/")
-public class CaptionshandlerRestService {
-  private static final Logger logger = LoggerFactory.getLogger(CaptionshandlerRestService.class);
+public class CaptionsRestService {
+  private static final Logger logger = LoggerFactory.getLogger(CaptionsRestService.class);
 
-  private CaptionshandlerService service;
-  public void setService(CaptionshandlerService service) {
+  private CaptionsService service;
+  public void setService(CaptionsService service) {
     this.service = service;
   }
-  public void unsetService(CaptionshandlerService service) {
+  public void unsetService(CaptionsService service) {
     this.service = null;
   }
 
@@ -156,8 +156,8 @@ public class CaptionshandlerRestService {
     item.put("title", cmi.getTitle());
     item.put("mediaURL", cmi.getMediaURL() != null ? cmi.getMediaURL().toExternalForm() : null);
     item.put("captionable", true);
-    URL ttURL = cmi.getCaptionsURL(CaptionshandlerService.CAPTIONS_TYPE_TIMETEXT);
-    URL daURL = cmi.getCaptionsURL(CaptionshandlerService.CAPTIONS_TYPE_DESCAUDIO);
+    URL ttURL = cmi.getCaptionsURL(CaptionsService.CAPTIONS_TYPE_TIMETEXT);
+    URL daURL = cmi.getCaptionsURL(CaptionsService.CAPTIONS_TYPE_DESCAUDIO);
     item.put("DFXPURL", ttURL != null ? ttURL.toString() : null);
     item.put("describable", false);
     item.put("DAURL", daURL != null ? daURL.toString() : null);
@@ -237,7 +237,7 @@ public class CaptionshandlerRestService {
 
   protected final String docs;
   
-  public CaptionshandlerRestService() {
+  public CaptionsRestService() {
     String docsFromClassloader = null;
     InputStream in = null;
     try {
@@ -245,7 +245,7 @@ public class CaptionshandlerRestService {
       docsFromClassloader = IOUtils.toString(in);
     } catch (IOException e) {
       logger.error("failed to read documentation", e);
-      docsFromClassloader = "unable to load documentation for " + CaptionshandlerRestService.class.getName();
+      docsFromClassloader = "unable to load documentation for " + CaptionsRestService.class.getName();
     } finally {
       IOUtils.closeQuietly(in);
     }
