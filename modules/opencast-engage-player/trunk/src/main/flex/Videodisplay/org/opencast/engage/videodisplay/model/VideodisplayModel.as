@@ -69,6 +69,9 @@ package org.opencast.engage.videodisplay.model
 		
 		public var cctest:Boolean = false;
 		
+		// Volume of the Player
+		public var playerVolume:Number = 1.0;
+		
 		public function VideodisplayModel()
         {
         	

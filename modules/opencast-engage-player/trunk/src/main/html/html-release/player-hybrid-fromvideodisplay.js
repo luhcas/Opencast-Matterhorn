@@ -1,4 +1,4 @@
-/*global $, Videodisplay*/
+/*global $, Videodisplay, Opencast*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
 
@@ -18,6 +18,7 @@ Opencast.FromVideodisplay = (function () {
 
     function setCurrentTime(text) {
         document.getElementById("time-current").innerHTML = text;
+        //$("time-current").text(text);
     }
 
     function setTotalTime(text) {
@@ -33,7 +34,7 @@ Opencast.FromVideodisplay = (function () {
     }
     
     function setCaptions(text) {
-        document.getElementById("captions").innerHTML = text;
+    	  document.getElementById("captions").innerHTML = text;
     }
     
     function setCaptionsButton(bool) {
@@ -62,13 +63,33 @@ Opencast.FromVideodisplay = (function () {
             document.getElementById("btn_play_pause").value = "Play";
             document.getElementById("btn_play_pause").alt = "Play";
             document.getElementById("btn_play_pause").title = "play";
-            document.getElementById("btn_play_pause").src = "./icons/play---green.png";
+          
+            if (Opencast.ToVideodisplay.getPressKey() === true)
+            {
+                document.getElementById("btn_play_pause").className = "btn_play_out";
+            }
+            else
+            {
+                document.getElementById("btn_play_pause").className = "btn_play_over";
+            }
+            
             Opencast.ToVideodisplay.doSetCurrentPlayPauseState(pausing);
-        } else {
+        } 
+        else {
             document.getElementById("btn_play_pause").value = "Pause";
             document.getElementById("btn_play_pause").alt = "Pause";
             document.getElementById("btn_play_pause").title = "pause";
-            document.getElementById("btn_play_pause").src = "./icons/pause---green.png";
+           
+            if (Opencast.ToVideodisplay.getPressKey() === true)
+            {
+                document.getElementById("btn_play_pause").className = "btn_pause_out";
+             
+            }
+            else
+            {
+                document.getElementById("btn_play_pause").className = "btn_pause_over";
+            }
+            
             Opencast.ToVideodisplay.doSetCurrentPlayPauseState(playing);
         }
     }

@@ -19,6 +19,7 @@ package org.opencast.engage.videodisplay.control
 	
 	import flash.external.ExternalInterface;
 	
+	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.IResponder;
@@ -77,6 +78,7 @@ package org.opencast.engage.videodisplay.control
 		public function videoControl( event : VideoControlEvent ) : void
 		{
 		  	var currentPlayPauseState:String;
+						
 														
 			switch(event.videoControlType)
 			{
@@ -120,9 +122,17 @@ package org.opencast.engage.videodisplay.control
 									  					ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
 										    			break;
 										    			
-				case VideoControlEvent.MUTE: 			ExternalInterface.call(ExternalFunction.MUTE, '');
-														model.player.volume = 0;
-														
+				case VideoControlEvent.MUTE: 			if( model.player.volume != 0 )
+				                                        {
+				                                        	ExternalInterface.call(ExternalFunction.MUTE, '');
+				                                        	model.playerVolume = model.player.volume;
+				                                        	model.player.volume = 0;
+				                                        }
+				                                        else
+				                                        {
+				                                        	ExternalInterface.call(ExternalFunction.SETVOLUME, model.playerVolume * percent);
+				                                        	model.player.volume = model.playerVolume;
+				                                        }
 														break;
 														
 				case VideoControlEvent.VOLUMEUP:		if( model.player.volume != 1 )
@@ -227,7 +237,7 @@ package org.opencast.engage.videodisplay.control
 					if(model.oldSubtitle != subtitle)
 					{
 						model.currentSubtitle = '';
-						//ExternalInterface.call('setCaptions' , subtitle);
+						ExternalInterface.call(ExternalFunction.SETCAPTIONS , subtitle);
 						model.currentSubtitle = subtitle;
 						model.oldSubtitle = subtitle;
 						
