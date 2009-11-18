@@ -26,14 +26,14 @@ public interface EngageService {
    * @deprecated
    * @return HTML page
    */
-  String deliverPlayer(String filename, String mediaHost);
+  //String deliverPlayer(String filename, String mediaHost);
   
   /**
    * Returns an HTML page that lists all available mediafiles.
    * @deprecated
    * @return HTML page
    */
-   String listRecordings();
+   //String listRecordings();
   
   /** 
    * Returns an HTML page with list of all available media packages in the search index.
@@ -48,5 +48,11 @@ public interface EngageService {
    * @return HTML page
    */
   String deliverPlayer(String episodeId);
+  
+  /** 
+   * Returns an HTML page with the latest available episodes
+   * @return HTML page
+   */
+  String deliverBrowsePage();
   
 }
