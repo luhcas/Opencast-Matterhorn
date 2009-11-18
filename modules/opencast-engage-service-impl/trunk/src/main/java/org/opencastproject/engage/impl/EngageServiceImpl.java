@@ -82,7 +82,6 @@ public class EngageServiceImpl implements EngageService, ManagedService {
     map.put("videoURL", "http://" + mediaHost + "/files/engage/" + filename);
     return doReplacements(template, map);
   }
-
   /**
    * Returns an HTML page that lists all available mediafiles.
    * 

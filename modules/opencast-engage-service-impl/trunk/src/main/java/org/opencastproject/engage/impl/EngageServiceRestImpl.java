@@ -71,7 +71,6 @@ public class EngageServiceRestImpl implements EngageService {
     }
     docs = docsFromClassloader;
   }
-
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("play/{filename}")

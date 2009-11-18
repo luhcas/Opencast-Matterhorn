@@ -32,7 +32,6 @@ public class Activator implements BundleActivator {
   public void start(BundleContext context) throws Exception {
     Activator.bc = context;
   }
-
   /**
    * {@inheritDoc}
    * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
