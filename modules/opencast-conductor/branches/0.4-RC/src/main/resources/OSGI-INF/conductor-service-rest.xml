@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.conductor.endpoint.ConductorRestService" immediate="true">
+  <implementation class="org.opencastproject.conductor.endpoint.ConductorRestService" />
+  <property name="service.description" value="Conductor REST Endpoint" />
+  <property name="service.exported.interfaces" value="org.opencastproject.conductor.endpoint.ConductorRestService" />
+  <property name="service.exported.configs" value="org.apache.cxf.rs" />
+  <property name="org.apache.cxf.rs.httpservice.context" value="/conductor/rest" />
+  <service>
+    <provide interface="org.opencastproject.conductor.endpoint.ConductorRestService" />
+  </service>
+</component>
