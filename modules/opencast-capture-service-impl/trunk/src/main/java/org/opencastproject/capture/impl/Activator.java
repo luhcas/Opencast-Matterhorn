@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.Scheduler;
 import org.opencastproject.capture.api.StatusService;
 import org.osgi.framework.BundleActivator;
@@ -33,6 +34,7 @@ public class Activator implements BundleActivator {
   private BundleContext context;
   private Scheduler sched;
   private StatusService service;
+  private CaptureAgent agent;
 
   /**
    * {@inheritDoc}
@@ -44,6 +46,7 @@ public class Activator implements BundleActivator {
     service = new StatusServiceImpl();
     sched = new SchedulerImpl();
     sched.init();
+    agent = new CaptureAgentImpl();
   }
 
   /**

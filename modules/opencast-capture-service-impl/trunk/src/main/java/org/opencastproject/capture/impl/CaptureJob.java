@@ -15,6 +15,14 @@
  */
 package org.opencastproject.capture.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -26,24 +34,33 @@ import org.slf4j.LoggerFactory;
  */
 public class CaptureJob implements Job {
   
-  private static final Logger log = LoggerFactory.getLogger(CaptureJob.class);
+  private static final Logger logger = LoggerFactory.getLogger(CaptureJob.class);
 
   /**
    * Starts the capture itself.
    * {@inheritDoc}
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
-  public void execute(JobExecutionContext arg0) throws JobExecutionException {
-    log.warn("Capture job fired, nothing implemented!");
-    //TODO:  Waiting on capture impl code to be able to actually start the capture
-    /*
-     * General idea:
-     *  Get all required properties via
-     *   ctx.getMergedJobDataMap().get($PROPERTY)
-     *  Turn these properties into hashmap as defined by MH-1265
-     *  Send this to capture's start method
-     *   via HTTP post?  Native call?  Unclear just yet...
-     */
+  public void execute(JobExecutionContext ctx) throws JobExecutionException {
+    logger.warn("Capture job fired but nothing will be sent because I don't know what needs sending!");
+
+    ConfigurationManager config = ConfigurationManager.getInstance();
+
+    //Figure out where we're sending the data
+    //TODO:  Should this be hardcoded, or grabbed from some config?
+    HttpPost remoteServer = new HttpPost("http://localhost:8080/capture/rest/StartCapture");
+    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+
+    //TODO:  Fill in the data the capture start function needs
+    
+    //Send the data
+    try {
+      remoteServer.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
+      HttpClient client = new DefaultHttpClient();
+      client.execute(remoteServer);
+    } catch (Exception e) {
+      logger.error("Unable to start capture!", e);
+    }
   }
 
 }

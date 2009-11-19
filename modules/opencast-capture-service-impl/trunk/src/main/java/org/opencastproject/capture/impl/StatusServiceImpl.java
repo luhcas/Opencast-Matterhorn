@@ -51,7 +51,13 @@ public class StatusServiceImpl implements StatusService, ManagedService {
       cur_status = AgentState.IDLE;
     }
     config = ConfigurationManager.getInstance();
+    createPollingTask();
+  }
 
+  /**
+   * Creates the Quartz task which pushes the agent's status to the status server
+   */
+  private void createPollingTask() {
     try {
       long pollTime = Long.parseLong(config.getItem(CaptureParameters.AGENT_STATUS_POLLING_INTERVAL)) * 1000L;
       Properties pollingProperties = new Properties();

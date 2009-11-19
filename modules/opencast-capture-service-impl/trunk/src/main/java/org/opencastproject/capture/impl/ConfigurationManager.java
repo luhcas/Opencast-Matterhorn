@@ -63,7 +63,7 @@ public class ConfigurationManager {
    */
   private ConfigurationManager() {
     //TODO: Do not rely on config file in resource bundle
-    URL bundleConfig = getClass().getClassLoader().getResource("config/capture.cfg");
+    URL bundleConfig = getClass().getClassLoader().getResource("config/capture.properties");
     properties = new Properties();
     
     /* attempt to load properties into memory and retrieve centralised config */

@@ -15,28 +15,36 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.capture.pipeline.PipelineFactory;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.util.Compressor;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.gstreamer.Bus;
 import org.gstreamer.Gst;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
 import org.gstreamer.event.EOSEvent;
+import org.opencastproject.capture.api.CaptureAgent;
+import org.opencastproject.capture.api.RecordingState;
+import org.opencastproject.capture.pipeline.PipelineFactory;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.util.Compressor;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Properties;
 
 
 // TODO: Eliminate dependency with MediaInspector in pom.xml, if it is not finally used
@@ -171,6 +179,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     //Gst.main();
     //Gst.deinit();
 
+    //TODO:  Get valid id for this recording
+    logRecordingState("?", RecordingState.CAPTURING);
     return "Capture started";
   }
 
@@ -197,6 +207,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return "Pipeline is null.";
     String result = "Capture OK";
     File stopFlag = new File(tmpDir.getAbsolutePath() + File.separator + "capture.stopped");
+
+    //TODO:  Get valid id for this recording
+    logRecordingState("?", RecordingState.CAPTURE_FINISHED);
     
     try {
       // "READY" is the idle state for pipelines
@@ -262,6 +275,30 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
           filesToZip[i++] = item;
     
     return new Compressor().zip(filesToZip, tmpDir.getAbsolutePath()+File.separator+zipName);
+  }
+
+  public void logRecordingState(String id, String state) {
+    ConfigurationManager config = ConfigurationManager.getInstance();
+    //Figure out where we're sending the data
+    String url = config.getItem(CaptureParameters.RECORDING_STATUS_ENDPOINT_URL);
+    if (url == null) {
+      logger.warn("URL for " + CaptureParameters.RECORDING_STATUS_ENDPOINT_URL + " is invalid, unable to push recording status to remote server");
+      return;
+    }
+    HttpPost remoteServer = new HttpPost(url);
+    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+
+    formParams.add(new BasicNameValuePair("id", id));
+    formParams.add(new BasicNameValuePair("state", state));
+
+    //Send the data
+    try {
+      remoteServer.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
+      HttpClient client = new DefaultHttpClient();
+      client.execute(remoteServer);
+    } catch (Exception e) {
+      logger.error("Unable to push agent status to remote server", e);
+    }
   }
   
   /**

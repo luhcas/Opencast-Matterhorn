@@ -178,7 +178,10 @@
             <Service-Component>
               OSGI-INF/status-service.xml,
               OSGI-INF/status-service-rest.xml,
-              OSGI-INF/status-service-soap.xml
+              OSGI-INF/status-service-soap.xml,
+              OSGI-INF/capture-service.xml,
+              OSGI-INF/capture-service-rest.xml,
+              OSGI-INF/capture-service-soap.xml
             </Service-Component>
           </instructions>
         </configuration>
