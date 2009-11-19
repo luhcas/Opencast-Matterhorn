@@ -18,9 +18,9 @@ package org.opencastproject.distribution.api;
 import org.opencastproject.media.mediapackage.MediaPackage;
 
 /**
- * Distributes {@link MediaPackage}s to distriution channels.
+ * Distributes elements from {@link MediaPackage}s to distribution channels.
  */
 public interface DistributionService {
-  void distribute(MediaPackage mediaPackage);
+  MediaPackage distribute(MediaPackage mediaPackage, String... elementIds);
 }
 

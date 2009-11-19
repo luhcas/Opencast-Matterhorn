@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Dictionary;
 
 /**
@@ -64,7 +65,8 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
    * 
    * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage)
    */
-  public void distribute(MediaPackage mediaPackage) {
+  public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) {
+    Arrays.sort(elementIds);
     File mediaPackageDirectory = new File(distributionDirectory, mediaPackage.getIdentifier().compact());
     File mediaDirectory = new File(mediaPackageDirectory, "media");
     File metadataDirectory = new File(mediaPackageDirectory, "metadata");
@@ -76,21 +78,28 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
       FileUtils.forceMkdir(metadataDirectory);
       FileUtils.forceMkdir(attachmentsDirectory);
       for (Track track : mediaPackage.getTracks()) {
-        File trackFile = workspace.get(track.getURL());
-        FileUtils.copyFile(trackFile, new File(mediaDirectory, trackFile.getName()));
+        if(Arrays.binarySearch(elementIds, track.getIdentifier()) >= 0) {
+          File trackFile = workspace.get(track.getURL());
+          FileUtils.copyFile(trackFile, new File(mediaDirectory, trackFile.getName()));
+        }
       }
       for (Catalog catalog : mediaPackage.getCatalogs()) {
-        File catalogFile = workspace.get(catalog.getURL());
-        FileUtils.copyFile(catalogFile, new File(metadataDirectory, catalogFile.getName()));
+        if(Arrays.binarySearch(elementIds, catalog.getIdentifier()) >= 0) {
+          File catalogFile = workspace.get(catalog.getURL());
+          FileUtils.copyFile(catalogFile, new File(metadataDirectory, catalogFile.getName()));
+        }
       }
       for (Attachment attachment : mediaPackage.getAttachments()) {
-        File attachmentFile = workspace.get(attachment.getURL());
-        FileUtils.copyFile(attachmentFile, new File(attachmentsDirectory, attachmentFile.getName()));
+        if(Arrays.binarySearch(elementIds, attachment.getIdentifier()) >= 0) {
+          File attachmentFile = workspace.get(attachment.getURL());
+          FileUtils.copyFile(attachmentFile, new File(attachmentsDirectory, attachmentFile.getName()));
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException(e);
     }
+    return mediaPackage; // TODO: Should the URLs for the distributed files be added to the media package?
   }
 
   /**

@@ -64,12 +64,19 @@ public class DistributionServiceImplTest {
   
   @Test
   public void testDistribution() throws Exception {
-    service.distribute(mp);
+    service.distribute(mp, new String[] {"track-1", "catalog-1"}); // "catalog-2" and "notes" are not to be distributed
     File mpDir = new File(distributionRoot, mp.getIdentifier().compact());
     Assert.assertTrue(mpDir.exists());
     File mediaDir = new File(mpDir, "media");
+    File metadataDir = new File(mpDir, "metadata");
+    File attachmentsDir = new File(mpDir, "attachments");
     Assert.assertTrue(mediaDir.exists());
+    Assert.assertTrue(metadataDir.exists());
+    Assert.assertTrue(attachmentsDir.exists());
     Assert.assertTrue(new File(mediaDir, "media.mov").exists());
+    Assert.assertTrue(new File(metadataDir, "dublincore.xml").exists());
+    Assert.assertTrue( ! new File(metadataDir, "mpeg7.xml").exists());
+    Assert.assertTrue( ! new File(attachmentsDir, "attachment.txt").exists());
   }
 
 }
