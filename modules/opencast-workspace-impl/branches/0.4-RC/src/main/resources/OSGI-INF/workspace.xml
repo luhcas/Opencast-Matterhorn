@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.workspace.api.Workspace" immediate="true">
+  <implementation class="org.opencastproject.workspace.impl.WorkspaceImpl" />
+  <property name="service.description" value="Workspace" />
+  <service>
+    <provide interface="org.opencastproject.workspace.api.Workspace" />
+    <provide interface="org.osgi.service.cm.ManagedService" />
+  </service>
+  <reference name="REPO" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository"
+    cardinality="0..1" policy="dynamic" bind="setRepository" unbind="unsetRepository" />
+</component>
