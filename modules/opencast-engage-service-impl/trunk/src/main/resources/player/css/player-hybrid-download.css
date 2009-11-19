@@ -1,8 +1,8 @@
 /* CSS file */
 
-#title-bar
+.oc-title-bar
 {
-	width:              360px;
+	width:              380px;
 	height:             20px;
 	margin-left:        10px;
 	margin-top:         5px;
@@ -16,16 +16,22 @@
 	font-size:          1em;
 }
 
+.oc-controls 
+{
+    position:absolute;
+    top:350px;
+}	
+
 #oc-videocontrols-holder
 {
-    width:              360px;
+    width:              380px;
     heigth:             20px;
     margin-left:        10px;
     background: transparent url(../background/title.png) repeat-x center top;
     border:             ridge 1px #999999;
 }
                         
-.timeline
+.oc-timeline
 {
     color:              #444444; 
     font-family:        verdana;
@@ -34,14 +40,15 @@
     margin-left:5px;
     margin-top:6px;
 }
-.buttons
+.oc-buttons
 {
     float:left;
-    margin-left: 5px;
+    margin-left: 10px;
     margin-top:4px;
+    text-align:center;
 }
 
-.volume
+.oc-volume
 {
     float:right;
     margin-left: 5px;
@@ -49,14 +56,15 @@
     margin-right: 5px;
 }
 
+
 #slider
 {
-	width:              360px;
+	width:              380px;
 	margin-left:        10px;
 	margin-bottom:      10px;
 }
 
-#volume_slider
+.oc-volume-slider
 {
 	display:            inline-block;
 	width:              70px;
@@ -64,14 +72,19 @@
     margin-right:       10px;
 }
 
+.oc-btn-cc
+{
+	
+}
+
 #info
 {
     margin-left:        10px; 
     margin-right:       10px; 
-    margin-top:         90px;
+    margin-top:         70px;
 }
 
-#captions
+.oc-captions
 {
  	position:absolute; 
  	left:-10000px; top:auto; 
@@ -80,7 +93,7 @@
  	overflow:hidden;
 }	
 
-#video-display-container
+#oc-video-display-container
 {
     margin:             10px;
     margin-bottom:      0px;
