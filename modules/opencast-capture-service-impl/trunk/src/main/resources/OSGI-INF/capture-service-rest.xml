@@ -4,7 +4,7 @@
   <property name="service.description" value="Capture REST Endpoint" />
   <property name="service.exported.interfaces" value="org.opencastproject.capture.endpoint.CaptureRestService" />
   <property name="service.exported.configs" value="org.apache.cxf.rs" />
-  <property name="org.apache.cxf.rs.httpservice.context" value="/capture/rest" />
+  <property name="org.apache.cxf.rs.httpservice.context" value="/status/rest" />
   <service>
     <provide interface="org.opencastproject.capture.endpoint.CaptureRestService" />
   </service>

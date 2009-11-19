@@ -30,10 +30,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import java.io.File;
-import java.io.StringWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Properties;
+
+import java.io.File;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -46,13 +49,17 @@ public class CaptureAgentImplTest {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);
 
   private static final String captureDir = CaptureAgentImpl.tmpPath;
+  //private static final String ingestURL = "http://nightly.opencastproject.org/ingest/rest/addZippedMediaPackage";
+  private static final String ingestURL = "http://rubenrua.uvigo.es:8080";
   
   private CaptureAgentImpl service = null;
   private final File[] outFiles = {new File(captureDir+File.separator+"professor.mpg"),
                                    new File(captureDir+File.separator+"screen.mpg"),
                                    new File(captureDir+File.separator+"microphone.mp2"),
                                    new File(captureDir+File.separator+"capture.stopped")};
+  private final File manifest = new File(captureDir+File.separator+"manifest.xml");
   private final long msecs = 10000;
+  
 
   @Before
   public void setup() {
@@ -63,6 +70,9 @@ public class CaptureAgentImplTest {
       if (checkFile.exists())
         checkFile.delete();
     }
+    
+    if (manifest.exists())
+      manifest.delete();
   }
 
   @After
@@ -72,7 +82,7 @@ public class CaptureAgentImplTest {
 
   @Test
   public void testCapture() {
-    
+     
     try {
       /* setup some default hard-coded properties */
       Properties props = new Properties();
@@ -103,40 +113,32 @@ public class CaptureAgentImplTest {
       // Checks correct return value
       Assert.assertTrue(result.equals("Capture OK"));
       
+      System.out.println("After AssertTrue()");
+
     } catch (UnsatisfiedLinkError e) {
       logger.error("Could not properly test capture agent: " + e.getMessage());
     }
     
     // Checks for the existence of the expected files
-    //for (File item : outFiles)
-    //  Assert.assertTrue(item.exists());
+    for (File item : outFiles)
+      Assert.assertTrue(item.exists());
+
+    System.out.println("Existence checked");
     
     // Generates the manifest
-    try {
+    /*    try {
       MediaPackage pkg = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-      
-      
-      for(File item : outFiles) {
-        if (item.exists() && !(item.getName().equals("capture.stopped"))) {
-          System.out.println(item.getName()); 
+        
+      // Inserts the files in the MediaPackage
+      for(java.io.File item : outFiles) {
+        if (item.exists()) 
+        if (item.getName().substring(item.getName().lastIndexOf('.')).equals(".xml"))
+          pkg.add(item.toURL());
+        else
           pkg.add(TrackImpl.fromURL(item.toURL()));
-        }
       }
-      
-      Document doc = pkg.toXml();
-      
-      Transformer transformer = TransformerFactory.newInstance().newTransformer();
-      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
-      //initialize StreamResult with File object to save to file
-      StreamResult result2 = new StreamResult(new StringWriter());
-      DOMSource source = new DOMSource(doc);
-      transformer.transform(source, result2);
-
-      String xmlString = result2.getWriter().toString();
-      System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"+xmlString+"\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-
-      
+            
     } catch (ConfigurationException e) {
       logger.error("MediaPackage configuration exception: "+e.getMessage());
       Assert.fail("MediaPackage configuration exception: "+e.getMessage());
@@ -149,17 +151,28 @@ public class CaptureAgentImplTest {
     } catch (UnsupportedElementException e) {
       logger.error("Unsupported Element Exception: "+e.getMessage());
       Assert.fail("Unsupported Element Exception: "+e.getMessage());
-    } catch (TransformerException e) {
-      logger.error("Transformer Exception: "+e.getMessage());
-      Assert.fail("Transformer Exception: "+e.getMessage());
+    } catch (IOException e) {
+      logger.error("I/O Exception: "+e.getMessage());
+      Assert.fail("I/O Exception: "+e.getMessage());
     }
-    
-    // Checks for the existence of the .zip file
-    // TODO
-    
-    // Checks files inside the .zip file are those expected
-    // TODO
+*/
+      // Zips files
+      File zip = new File(captureDir+File.separator+"output.zip");
+      service.zipFiles(zip.getAbsolutePath());
+      
+      System.out.println("Files zipped");
 
+      // Checks for the existence of the .zip file
+      Assert.assertTrue(zip.exists());
+      
+      // Checks that files inside the .zip file are those expected
+      // TODO  Necessary?      
+      
+      System.out.println("Let's injest");
+
+      // Ingests the file
+      System.out.println("Ingest result:\n==============\n"+service.doIngest(ingestURL, zip));
+    
   }
 
 }
