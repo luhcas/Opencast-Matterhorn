@@ -1,7 +1,13 @@
-#stage{
+.wu-tab-content {
+    border-left:1px solid black;
+    border-right:1px solid black;
+    border-bottom:1px solid black;
+    padding: 12px;
+}
+/*#stage{
     margin-left:20px;
     margin-top:20px;
-}
+}*/
 .formbox-header {
     background: silver;
     margin-bottom: 0px;

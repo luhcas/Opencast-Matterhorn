@@ -2,256 +2,263 @@
 <html>
 
     <head>
-    <title>Media Ingest</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
-    <script type="text/javascript" src="js/jquery-1.3.2.js"></script>
-    <script type="text/javascript" src="swfupload/swfupload.js"></script>
-    <script type="text/javascript" src="js/upload.js"></script>
-    <script type="text/javascript" src="js/upload.ui.js"></script>
-    <script type="text/javascript" src="js/events.js"></script>
-    <script type="text/javascript" src="js/popuphelp.js"></script>
-    <script type="text/javascript" src="js/upload.helptexts.json"></script>
+        <title>Media Ingest</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <link href="css/fss-reset.css" rel="stylesheet" type="text/css" />
-    <link href="css/fss-layout.css" rel="stylesheet" type="text/css" />
-    <link href="css/ingest-ui.css" rel="stylesheet" type="text/css" />
-    <link href="css/popuphelp.css" rel="stylesheet" type="text/css" />
-    <style type="text/css">
-        
-    </style>
+        <script type="text/javascript" src="js/jquery-1.3.2.js"></script>
+        <script type="text/javascript" src="swfupload/swfupload.js"></script>
+        <script type="text/javascript" src="js/upload.js"></script>
+        <script type="text/javascript" src="js/upload.ui.js"></script>
+        <script type="text/javascript" src="js/events.js"></script>
+        <script type="text/javascript" src="js/popuphelp.js"></script>
+        <script type="text/javascript" src="js/upload.helptexts.json"></script>
 
-    <script type="text/javascript">
-        $(document).ready(function() {
+        <link href="css/fss-reset.css" rel="stylesheet" type="text/css" />
+        <link href="css/fss-layout.css" rel="stylesheet" type="text/css" />
+        <link href="css/fss-theme-coal.css" rel="stylesheet" type="text/css" />
+        <link href="css/ingest-ui.css" rel="stylesheet" type="text/css" />
+        <link href="css/popuphelp.css" rel="stylesheet" type="text/css" />
+        <style type="text/css">
+
+        </style>
+
+        <script type="text/javascript">
+            $(document).ready(function() {
            
-            $('.folder-control').click(function() {
-               $(this).next().toggle('fast');
-               $(this).children('.folder-icon').toggleClass('icon-arrow-right');
-               $(this).children('.folder-icon').toggleClass('icon-arrow-down');
-            });
+                $('.folder-control').click(function() {
+                    $(this).next().toggle('fast');
+                    $(this).children('.folder-icon').toggleClass('icon-arrow-right');
+                    $(this).children('.folder-icon').toggleClass('icon-arrow-down');
+                });
 
-            $('.icon-help').click(function(event) {
-                popupHelp.displayHelp($(this), event);
-                return false;
-            });
+                $('.icon-help').click(function(event) {
+                    popupHelp.displayHelp($(this), event);
+                    return false;
+                });
 
-            $('body').click( function() {
-                if ($('#helpbox').css('display') != "none") {
-                    popupHelp.resetHelp();
-                }
-                return true;
-            });
+                $('body').click( function() {
+                    if ($('#helpbox').css('display') != "none") {
+                        popupHelp.resetHelp();
+                    }
+                    return true;
+                });
 
-            uploadManager.init();           // instantiate the swfUpload, init data
+                uploadManager.init();           // instantiate the swfUpload, init data
             
-        });
-    </script>
+            });
+        </script>
 
     </head>
 
-  <body>
+    <body>
 
-      <div id="stage">
+        <!-- fl-centered doesn't work in winXP-IE8 -->
+        <div class="fl-container-850 fl-centered fl-theme-coal">
+            <ul class="fl-tabs fl-tabs-left">
+                <li class="fl-activeTab"><a href="recordings_upcoming.html">Recordings</a></li>
+                <li class=""><a href="../../admin/ui/agents_status.html">Capture Agents</a></li>
+            </ul>
+            <div id="stage" class="fl-tab-content wu-tab-content fl-fix fl-centered">
 
-          <!-- missing fields notification -->
-          <div class="fl-container-600" id="missingFields-container" style="display:none;">
-              <div class="fl-widget">
-                  <div class="fl-widget-titlebar warnbox-title">
-                      <b class="formbox-header-text" style="color:white;">Missing Inputs</b>
-                  </div>
-                  <div class="fl-widget-content warnbox-content">
-                      <ul>
-                          <li id="notification-title" class="missing-fields-item">
-                              <span class="fl-icon inline-icon icon-bullet"></span>Please <a href="javascript:document.basicData.title.focus();">enter a title</a> for the recording.
-                          </li>
-                          <li id="notification-dist" class="missing-fields-item">
-                              <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose at least one <a href="javascript:document.getElementById('distITunesU').focus();">distribution channel</a>.
-                          </li>
-                          <li id="notification-file" class="missing-fields-item">
-                              <span class="fl-icon inline-icon icon-bullet" title=""></span>Please select a media file to upload.
-                          </li>
-                      </ul>
-                  </div>
-              </div>
-          </div>
-
-    <!-- Basic information -->
-    <div class="fl-container-600">
-        <div class="fl-widget">
-            <div class="fl-widget-content formbox-content fl-fix">
-                <form name="basicData">
-                <ul class="fl-controls-right wu-reset">
-                    <li class="fl-fix">
-                        <span class="fl-label form-label" id="label-title"><span style="color:red;">*</span>Title:</span>
-                        <input type="text" name="title" id="title" class="form-field" onchange="uploadEvents.fieldChanged(this);">
-                        <span class="fl-icon inline-icon icon-help"  id="help_title"></span>
-                    </li>
-                    <li class="fl-fix">
-                        <span class="fl-label form-label" id="label-contributor">Presenter:</span>
-                        <input type="text" name="contributor" id="contributor" class="form-field">
-                        <span class="fl-icon inline-icon icon-help" title=""></span>
-                    </li>
-                    <!-- <li class="fl-fix">
-                        <span class="fl-label form-label">&nbsp;</span>
-                        <span class="fl-icon inline-icon icon-add" title=""></span>
-                        <nobr><a href="javascript:alert('add presenter');">Add additional presenter</a></nobr>
-                    </li> -->
-                    <li class="fl-fix">
-                        <span class="fl-label form-label">Sponsoring department:</span>
-                        <input type="text" name="department" id="department" class="form-field">
-                        <span class="fl-icon inline-icon icon-help" title=""></span>
-                    </li>
-                </ul>
-                    <input type="reset" name="reset" value="clear" class="form-clear">
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Additional Content Description -->
-    <div class="fl-container-600">
-        <div class="fl-widget">
-            <div class="fl-widget-titlebar formbox-header folder-control">
-                <a href="#_bottom" class="fl-icon inline-icon folder-icon icon-arrow-right" title="Hide/unhide additional information">Fold/Unfold additional information</a>
-                <b>Additional Description</b>
-            </div>
-            <div class="fl-widget-content formbox-content fl-fix" style="display:none;">
-                <form id="additionalData" name="additionalData">
-                <ul class="fl-controls-right wu-reset">
-                    <li class="fl-fix">
-                        <span class="fl-label form-label">Series:</span>
-                        <input type="text" name="series" id="series" class="form-field">
-                        <span class="fl-icon inline-icon icon-help"></span>
-                    </li>
-                    <li class="fl-fix">
-                        <span class="fl-label form-label"">Subject:</span>
-                        <input type="text" name="subject" id="subject" class="form-field">
-                        <span class="fl-icon inline-icon icon-help" title=""></span>
-                    </li>
-                    <li class="fl-fix">
-                        <span class="fl-label form-label">Language:</span>
-                        <input type="text" name="language" id="language" class="form-field">
-                        <span class="fl-icon inline-icon icon-help" title=""></span>
-                    </li>
-                    <li class="fl-fix">
-                        <span class="fl-label form-label"">Description:</span>
-                        <textarea class="form-field" name="description" id="description" rows="5"></textarea>
-                        <span class="fl-icon inline-icon icon-help" title=""></span>
-                    </li>
-                </ul>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Distribution -->
-    <div class="fl-container-600">
-        <div class="fl-widget">
-            <div class="fl-widget-titlebar formbox-header">
-                <b class="formbox-header-text">Distribution</b>
-            </div>
-            <div class="fl-widget-content formbox-content fl-fix">
-                <form name="distributionData">
-                <ul class="fl-controls-right wu-reset">
-                    <li class="fl-fix">
-                        <span class="fl-label form-label"  id="label-dist"><span style="color:red;">*</span>Distribution channel(s):</span>
-                        <div style="width:20%;float:left;">
-                            <input type="checkbox" name="distITunesU" id="distITunesU" onchange="uploadEvents.fieldChanged(this);">ITunesU
+                <!-- missing fields notification -->
+                <div class="fl-container-600" id="missingFields-container" style="display:none;">
+                    <div class="fl-widget">
+                        <div class="fl-widget-titlebar warnbox-title">
+                            <b class="formbox-header-text" style="color:white;">Missing Inputs</b>
                         </div>
-                        <input type="checkbox" name="distMHMM" id="distMHMM" onchange="uploadEvents.fieldChanged(this);"><span>Matterhorn media module</span>
-                    </li>
-                    <li class="fl-fix">
-                        <span class="fl-label form-label">&nbsp;</span>
-                        <div style="width:20%;float:left;">
-                            <input type="checkbox" name="distYouTube" id="distYouTube" onchange="uploadEvents.fieldChanged(this);">YouTube
+                        <div class="fl-widget-content warnbox-content">
+                            <ul>
+                                <li id="notification-title" class="missing-fields-item">
+                                    <span class="fl-icon inline-icon icon-bullet"></span>Please <a href="javascript:document.basicData.title.focus();">enter a title</a> for the recording.
+                                </li>
+                                <li id="notification-dist" class="missing-fields-item">
+                                    <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose at least one <a href="javascript:document.getElementById('distITunesU').focus();">distribution channel</a>.
+                                </li>
+                                <li id="notification-file" class="missing-fields-item">
+                                    <span class="fl-icon inline-icon icon-bullet" title=""></span>Please select a media file to upload.
+                                </li>
+                            </ul>
                         </div>
-                        <input type="checkbox" name="distSakai" id="distSakai" onchange="uploadEvents.fieldChanged(this);"><span>Sakai</span>
-                    </li>
-                    <li class="fl-fix">
-                        <span class="fl-label form-label">License:</span>
-                        <select class="form-field" name="license" id="license">
-                        </select>
-                        <span class="fl-icon inline-icon icon-help" title=""></span>
-                    </li>
-                </ul>
-                </form>
+                    </div>
+                </div>
+
+                <!-- Basic information -->
+                <div class="fl-container-600">
+                    <div class="fl-widget">
+                        <div class="fl-widget-content formbox-content fl-fix">
+                            <form name="basicData">
+                                <ul class="fl-controls-right wu-reset">
+                                    <li class="fl-fix">
+                                        <span class="fl-label form-label" id="label-title"><span style="color:red;">*</span>Title:</span>
+                                        <input type="text" name="title" id="title" class="form-field" onchange="uploadEvents.fieldChanged(this);">
+                                        <span class="fl-icon inline-icon icon-help"  id="help_title"></span>
+                                    </li>
+                                    <li class="fl-fix">
+                                        <span class="fl-label form-label" id="label-contributor">Presenter:</span>
+                                        <input type="text" name="contributor" id="contributor" class="form-field">
+                                        <span class="fl-icon inline-icon icon-help" title=""></span>
+                                    </li>
+                                    <!-- <li class="fl-fix">
+                                        <span class="fl-label form-label">&nbsp;</span>
+                                        <span class="fl-icon inline-icon icon-add" title=""></span>
+                                        <nobr><a href="javascript:alert('add presenter');">Add additional presenter</a></nobr>
+                                    </li> -->
+                                    <li class="fl-fix">
+                                        <span class="fl-label form-label">Sponsoring department:</span>
+                                        <input type="text" name="department" id="department" class="form-field">
+                                        <span class="fl-icon inline-icon icon-help" title=""></span>
+                                    </li>
+                                </ul>
+                                <input type="reset" name="reset" value="clear" class="form-clear">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Content Description -->
+                <div class="fl-container-600">
+                    <div class="fl-widget">
+                        <div class="fl-widget-titlebar formbox-header folder-control">
+                            <a href="#_bottom" class="fl-icon inline-icon folder-icon icon-arrow-right" title="Hide/unhide additional information">Fold/Unfold additional information</a>
+                            <b>Additional Description</b>
+                        </div>
+                        <div class="fl-widget-content formbox-content fl-fix" style="display:none;">
+                            <form id="additionalData" name="additionalData">
+                                <ul class="fl-controls-right wu-reset">
+                                    <li class="fl-fix">
+                                        <span class="fl-label form-label">Series:</span>
+                                        <input type="text" name="series" id="series" class="form-field">
+                                        <span class="fl-icon inline-icon icon-help"></span>
+                                    </li>
+                                    <li class="fl-fix">
+                                        <span class="fl-label form-label"">Subject:</span>
+                                        <input type="text" name="subject" id="subject" class="form-field">
+                                        <span class="fl-icon inline-icon icon-help" title=""></span>
+                                    </li>
+                                    <li class="fl-fix">
+                                        <span class="fl-label form-label">Language:</span>
+                                        <input type="text" name="language" id="language" class="form-field">
+                                        <span class="fl-icon inline-icon icon-help" title=""></span>
+                                    </li>
+                                    <li class="fl-fix">
+                                        <span class="fl-label form-label"">Description:</span>
+                                        <textarea class="form-field" name="description" id="description" rows="5"></textarea>
+                                        <span class="fl-icon inline-icon icon-help" title=""></span>
+                                    </li>
+                                </ul>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distribution -->
+                <div class="fl-container-600">
+                    <div class="fl-widget">
+                        <div class="fl-widget-titlebar formbox-header">
+                            <b class="formbox-header-text">Distribution</b>
+                        </div>
+                        <div class="fl-widget-content formbox-content fl-fix">
+                            <form name="distributionData">
+                                <ul class="fl-controls-right wu-reset">
+                                    <li class="fl-fix">
+                                        <span class="fl-label form-label"  id="label-dist"><span style="color:red;">*</span>Distribution channel(s):</span>
+                                        <div style="width:20%;float:left;">
+                                            <input type="checkbox" name="distITunesU" id="distITunesU" onchange="uploadEvents.fieldChanged(this);">ITunesU
+                                        </div>
+                                        <input type="checkbox" name="distMHMM" id="distMHMM" onchange="uploadEvents.fieldChanged(this);"><span>Matterhorn media module</span>
+                                    </li>
+                                    <li class="fl-fix">
+                                        <span class="fl-label form-label">&nbsp;</span>
+                                        <div style="width:20%;float:left;">
+                                            <input type="checkbox" name="distYouTube" id="distYouTube" onchange="uploadEvents.fieldChanged(this);">YouTube
+                                        </div>
+                                        <input type="checkbox" name="distSakai" id="distSakai" onchange="uploadEvents.fieldChanged(this);"><span>Sakai</span>
+                                    </li>
+                                    <li class="fl-fix">
+                                        <span class="fl-label form-label">License:</span>
+                                        <select class="form-field" name="license" id="license">
+                                        </select>
+                                        <span class="fl-icon inline-icon icon-help" title=""></span>
+                                    </li>
+                                </ul>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- file upload -->
+                <div class="fl-container-600">
+                    <div class="fl-widget">
+                        <div class="fl-widget-titlebar formbox-header">
+                            <b class="formbox-header-text">File Upload</b>
+                        </div>
+                        <div class="fl-widget-content formbox-content fl-fix">
+                            <ul class="fl-controls-right wu-reset">
+                                <li class="fl-fix">
+                                    <span class="fl-label form-label" id="label-file"><span style="color:red;">*</span>Media file:</span>
+                                    <span>
+                                        <div id="filename" class="filename" id="filename">No file selected</div>
+                                        <div class="fl-fix browse-button" style="position:relative;overflow:hidden;">
+                                            <div id="uploader"></div>
+                                            <button type="button" id="browse-button" class="browse-button">Browse</button>
+                                        </div>
+                                        <span id="file"></span>
+                                        <span class="fl-icon inline-icon icon-help" title=""></span>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fl-container-600">
+                    <div class="fl-widget">
+                        <div class="fl-widget-content fl-fix">
+                            <ul class="fl-controls-right wu-reset">
+                                <li class="fl-fix">
+                                    <span class="fl-label form-label"">&nbsp;</span>
+                                    <span>
+                                        <button onclick="uploadEvents.btnSubmit();">Submit</button>
+                                        <button onclick="uploadEvents.btnClear();">Clear Form</button>
+                                    </span>
+                                </li>
+                                <li class="fl-fix">
+                                    <span class="fl-label form-label"">&nbsp;</span>
+                                    <span>
+                                        <span style="color:red;">*</span>
+                                        required
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>    <!-- /stage -->
+
+            <!-- Upload progress overlay -->
+            <div id="grayOut"></div>
+            <div id="uploadProgressOverlay" class="uploadProgressOverlay fl-centered">
+                <center><b>Upload in Progress</b></center>
+                <div class="progressbarContainer">
+                    <div id="ProgressBar" class="progressbar">
+                        <div id="progressIndicator" class="progressIndicator"></div>
+                        <div id="progressLabel" class="progressLabel">0%</div>
+                    </div>
+                </div>
+                <center><button type="button" onclick="uploadEvents.btnCancelUpload();">Cancel</button></center>
             </div>
-        </div>
-    </div>
 
-    <!-- file upload -->
-    <div class="fl-container-600">
-        <div class="fl-widget">
-            <div class="fl-widget-titlebar formbox-header">
-                <b class="formbox-header-text">File Upload</b>
-            </div>
-            <div class="fl-widget-content formbox-content fl-fix">
-                <ul class="fl-controls-right wu-reset">
-                    <li class="fl-fix">
-                        <span class="fl-label form-label" id="label-file"><span style="color:red;">*</span>Media file:</span>
-                        <span>
-                            <div id="filename" class="filename" id="filename">No file selected</div>
-                            <div class="fl-fix browse-button" style="position:relative;overflow:hidden;">
-                                <div id="uploader"></div>
-                                <button type="button" id="browse-button" class="browse-button">Browse</button>
-                            </div>
-                            <span id="file"></span>
-                            <span class="fl-icon inline-icon icon-help" title=""></span>
-                        </span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <div class="fl-container-600">
-        <div class="fl-widget">
-            <div class="fl-widget-content fl-fix">
-                <ul class="fl-controls-right wu-reset">
-                    <li class="fl-fix">
-                        <span class="fl-label form-label"">&nbsp;</span>
-                        <span>
-                            <button onclick="uploadEvents.btnSubmit();">Submit</button>
-                            <button onclick="uploadEvents.btnClear();">Clear Form</button>
-                        </span>
-                    </li>
-                    <li class="fl-fix">
-                        <span class="fl-label form-label"">&nbsp;</span>
-                        <span>
-                            <span style="color:red;">*</span>
-                            required
-                        </span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-      </div>    <!-- /stage -->
-
-    <!-- Upload progress overlay -->
-    <div id="grayOut"></div>
-        <div id="uploadProgressOverlay" class="uploadProgressOverlay fl-centered">
-          <center><b>Upload in Progress</b></center>
-          <div class="progressbarContainer">
-              <div id="ProgressBar" class="progressbar">
-                  <div id="progressIndicator" class="progressIndicator"></div>
-                  <div id="progressLabel" class="progressLabel">0%</div>
-              </div>
-          </div>
-          <center><button type="button" onclick="uploadEvents.btnCancelUpload();">Cancel</button></center>
-        </div>
-
-      <!-- template for the popup help box -->
-      <div id="helpBox" class="helpbox" style="display:none;">
-              <img src="img/lightbulb.png">
-              <!-- <img src="img/close.png" class="closeButton" onclick="popupHelp.resetHelp();"> -->
-              <div id="helpTitle" style="display:inline;font-weight:bold; margin-left:10px;"></div>
-              <p>
+            <!-- template for the popup help box -->
+            <div id="helpBox" class="helpbox" style="display:none;">
+                <img src="img/lightbulb.png">
+                <!-- <img src="img/close.png" class="closeButton" onclick="popupHelp.resetHelp();"> -->
+                <div id="helpTitle" style="display:inline;font-weight:bold; margin-left:10px;"></div>
+                <p>
                 <div id="helpText" style="padding-left:7px; padding-right:7px; white-space:normal;"></div>
-              </p>
-      </div>
-
-  </body>
+                </p>
+            </div>
+        </div>
+    </body>
 
 </html>
