@@ -74,7 +74,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
   private URL localCalendarCacheURL = null;
 
   /** The time in milliseconds between attempts to fetch the calendar data */
-  private int pollTime = 0;
+  private long pollTime = 0;
 
   /** A stored copy of the Calendar at the URI */
   private Calendar calendar = null;
@@ -102,7 +102,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
 
     try {
       remoteCalendarURL = new URL(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL));
-      pollTime = Integer.parseInt(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL));
+      //Times are in seconds in the config file, so multiply by 1000
+      pollTime = Long.parseLong(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL)) * 1000L;
       if (pollTime > 1) {
         //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
         pollingProperties = new Properties();
@@ -116,7 +117,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
         //Setup the polling
         JobDetail job = new JobDetail("calendarUpdate", Scheduler.DEFAULT_GROUP, PollCalendarJob.class);
         //Create a new trigger                    Name       Group name               Start       End   # of times to repeat               Repeat interval
-        SimpleTrigger trigger = new SimpleTrigger("polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime * 1000L);
+        SimpleTrigger trigger = new SimpleTrigger("polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime);
   
         trigger.getJobDataMap().put(SCHEDULER, this);
   
@@ -508,7 +509,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.Scheduler#getPollingTime()
    */
-  public int getPollingTime() {
+  public long getPollingTime() {
     return pollTime;
   }
 

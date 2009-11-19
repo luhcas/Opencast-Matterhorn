@@ -58,7 +58,7 @@ public interface Scheduler {
    * Gets the time between refreshes of the scheduling data
    * @return The time between refreshes of the scheduling data
    */
-  public int getPollingTime();
+  public long getPollingTime();
 
   /**
    * Enables polling for new calendar data

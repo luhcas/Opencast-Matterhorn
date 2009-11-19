@@ -109,7 +109,8 @@ public class ConfigurationManager {
       timer = new Timer();
       long delay = 0;
       try {
-        delay = Long.parseLong(reload);
+        //Times in the config file are in seconds, so multiply by 1000
+        delay = Long.parseLong(reload) * 1000L;
         if (delay < 1) {
           logger.info("Polling time has been set to less than 1 second, polling disabled");
           return;

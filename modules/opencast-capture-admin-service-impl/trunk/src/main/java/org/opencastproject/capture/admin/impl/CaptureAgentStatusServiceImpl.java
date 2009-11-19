@@ -39,12 +39,8 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
   private HashMap<String, Recording> recordings;
 
   public CaptureAgentStatusServiceImpl() {
-    if (agents == null) {
-      agents = new HashMap<String, Agent>();
-    }
-    if (recordings == null) {
-      recordings = new HashMap<String, Recording>();
-    }
+    agents = new HashMap<String, Agent>();
+    recordings = new HashMap<String, Recording>();
   }
 
   /**

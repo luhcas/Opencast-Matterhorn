@@ -123,6 +123,21 @@
       <artifactId>ical4j</artifactId>
       <version>1.0-rc1</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <version>4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+      <version>4.0</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -144,13 +159,17 @@
               org.gstreamer,
               net.java.dev.jna,
               net.fortuna.ical4j.*,
+              org.apache.http.*
             </Private-Package>
             <Embed-Dependency>
               jv4linfo;inline=true,
               gstreamer-java;inline=true,
               jna;inline=true,
               quartz;inline=true,
-              ical4j;inline=true
+              ical4j;inline=true,
+	      httpcore;inline=true,
+              httpclient;inline=true,
+              httpmime;inline=true
             </Embed-Dependency>
             <Export-Package>
               org.opencastproject.capture.impl.*,

@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.opencastproject.capture.api.Scheduler;
+import org.opencastproject.capture.api.StatusService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ public class Activator implements BundleActivator {
   private static final Logger log = LoggerFactory.getLogger(Activator.class);
   private BundleContext context;
   private Scheduler sched;
+  private StatusService service;
 
   /**
    * {@inheritDoc}
@@ -39,6 +41,7 @@ public class Activator implements BundleActivator {
   public void start(BundleContext context) throws Exception {
     createCoreDirectories(ConfigurationManager.getInstance());
     this.context = context;
+    service = new StatusServiceImpl();
     sched = new SchedulerImpl();
     sched.init();
   }

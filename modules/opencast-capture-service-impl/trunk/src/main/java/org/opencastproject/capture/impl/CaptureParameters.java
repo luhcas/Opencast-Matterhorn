@@ -59,6 +59,21 @@ public interface CaptureParameters {
 
   /** The local URL of the cached copy of the capture schedule */
   public static final String CAPTURE_SCHEDULE_CACHE_URL = "capture.schedule.cache.url";
+
+  /** The name of the agent */ 
+  public static final String AGENT_NAME = "capture.agent.name";
+  
+  /** The URL of the remote status service */
+  public static final String AGENT_STATUS_ENDPOINT_URL = "capture.agent.status.endpoint.url";
+
+  /** The time between attempts to push the agent's status to the status service */
+  public static final String AGENT_STATUS_POLLING_INTERVAL = "capture.agent.status.polling.interval";
+
+  /** The URL of the remote recording status service */
+  public static final String RECORDING_STATUS_ENDPOINT_URL = "capture.recording.status.endpoint.url";
+
+  /** The time between attemps to push the current recording's status to the status service */
+  public static final String RECORDING_STATUS_POLLING_INTERVAL = "capture.recording.status.polling.interval";
   
   /** A comma delimited list of the friendly names for capturing devices */
   public static final String CAPTURE_DEVICE_NAMES = "capture.device.names";
