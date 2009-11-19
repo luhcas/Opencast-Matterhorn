@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.ingest.IngestWebService" immediate="true">
+  <implementation class="org.opencastproject.ingest.endpoint.IngestWebServiceImpl" />
+  <property name="service.description" value="Ingest SOAP Endpoint" />
+  <property name="service.exported.interfaces" value="org.opencastproject.ingest.endpoint.IngestWebService" />
+  <property name="service.exported.configs" value="org.apache.cxf.ws" />
+  <property name="org.apache.cxf.dosgi.databinding" value="jaxb"/>
+  <property name="org.apache.cxf.dosgi.frontend" value="jaxws"/>
+  <property name="org.apache.cxf.ws.httpservice.context" value="/ingest/soap" />
+  <service>
+    <provide interface="org.opencastproject.ingest.endpoint.IngestWebService" />
+  </service>
+  <reference name="service-impl" interface="org.opencastproject.ingest.api.IngestService"
+    cardinality="1..1" policy="static" bind="setService" />
+</component>
