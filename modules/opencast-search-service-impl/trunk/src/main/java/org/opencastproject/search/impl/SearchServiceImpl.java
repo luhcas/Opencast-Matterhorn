@@ -107,9 +107,16 @@ public class SearchServiceImpl implements SearchService {
       copyClasspathResourceToFile("/solr/conf/synonyms.txt", solrConfigDir);
 
       // Test for the existence of a data directory
-      File solrData = new File(solrRoot, "data");
-      if (!solrData.exists()) {
-        FileUtils.forceMkdir(solrData);
+      File solrDataDir = new File(solrRoot, "data");
+      if (!solrDataDir.exists()) {
+        FileUtils.forceMkdir(solrDataDir);
+      }
+
+      // Test for the existence of the index. Note that an empty index directory will prevent solr from
+      // completing normal setup.
+      File solrIndexDir = new File(solrDataDir, "index");
+      if (solrIndexDir.exists() && solrIndexDir.list().length == 0) {
+        FileUtils.deleteDirectory(solrIndexDir);
       }
 
       SolrCore.log.getParent().setLevel(Level.WARNING);
