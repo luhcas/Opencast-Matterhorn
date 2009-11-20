@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.distribution.local.endpoint.DistributionRestService" immediate="true">
+<component name="org.opencastproject.distribution.local.endpoint.DistributionRestService" immediate="true" activate="activate">
   <implementation class="org.opencastproject.distribution.local.endpoint.DistributionRestService" />
   <property name="service.description" value="Distribution (Local) REST Endpoint" />
   <property name="service.exported.interfaces" value="org.opencastproject.distribution.local.endpoint.DistributionRestService" />

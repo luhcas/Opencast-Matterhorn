@@ -47,6 +47,11 @@
       <artifactId>apache-mime4j</artifactId>
       <version>0.6</version>
     </dependency>
+    <dependency>
+      <groupId>net.jcip</groupId>
+      <artifactId>jcip-annotations</artifactId>
+      <version>1.0</version>
+    </dependency> 
   </dependencies>
   <build>
     <defaultGoal>test</defaultGoal>
@@ -73,7 +78,14 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Private-Package> org.junit.*, org.opencastproject.*, org.apache.org.apache.commons.io.*, org.apache.http.*, org.json.simple.* </Private-Package>
+            <Private-Package>
+              org.junit.*,
+              org.opencastproject.*,
+              org.apache.org.apache.commons.io.*,
+              org.apache.http.*,
+              net.jcip.annotations.*,
+              org.json.simple.*
+            </Private-Package>
             <Embed-Dependency>
               commons-io;inline=true,
               commons-logging;inline=true,
@@ -81,6 +93,7 @@
               httpclient;inline=true,
               httpmime;inline=true,
               apache-mime4j;inline=true,
+              jcip-annotations;inline=true,
               json-simple;inline=true,
               junit;inline=true
             </Embed-Dependency>

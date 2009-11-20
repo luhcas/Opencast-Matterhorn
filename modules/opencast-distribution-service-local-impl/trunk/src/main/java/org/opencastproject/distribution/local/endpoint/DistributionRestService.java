@@ -19,8 +19,10 @@ import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
+import org.opencastproject.util.UrlSupport;
 
 import org.apache.commons.io.IOUtils;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,13 +30,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -45,6 +45,8 @@ import javax.ws.rs.core.Response.Status;
 @Path("/")
 public class DistributionRestService {
   private static final Logger logger = LoggerFactory.getLogger(DistributionRestService.class);
+  protected String docs = null;
+  protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
   private DistributionService service;
   public void setService(DistributionService service) {
     this.service = service;
@@ -55,8 +57,9 @@ public class DistributionRestService {
   }
 
   @POST
-  @Consumes(MediaType.TEXT_XML)
-  public Response distribute(@FormParam("mediapackage") MediapackageType mediaPackage, @QueryParam("elementId") List<String> elementIds) throws Exception {
+  @Path("")
+  @Produces(MediaType.TEXT_XML)
+  public Response distribute(@FormParam("mediapackage") MediapackageType mediaPackage, @FormParam("elementId") List<String> elementIds) throws Exception {
     MediaPackage result = null;
     String[] elements = elementIds == null ? new String[0] : elementIds.toArray(new String[elementIds.size()]);
     try {
@@ -77,14 +80,25 @@ public class DistributionRestService {
     return docs;
   }
 
-  protected final String docs;
-  
-  public DistributionRestService() {
+  public void activate(ComponentContext cc) {
+    // Get the configured server URL
+    if(cc == null) serverUrl = UrlSupport.DEFAULT_BASE_URL;
+    String ccServerUrl = cc.getBundleContext().getProperty("serverUrl");
+    logger.info("configured server url is " + ccServerUrl);
+    if(ccServerUrl == null) {
+      serverUrl = UrlSupport.DEFAULT_BASE_URL;
+    } else {
+      serverUrl = ccServerUrl;
+    }
+
+    // Pre-load the documentation
     String docsFromClassloader = null;
     InputStream in = null;
     try {
       in = getClass().getResourceAsStream("/html/index.html");
       docsFromClassloader = IOUtils.toString(in);
+      docsFromClassloader = docsFromClassloader.replaceAll("@SERVER_URL@", serverUrl + "/workflow/rest");
+      docsFromClassloader = docsFromClassloader.replaceAll("@SAMPLES_URL@", serverUrl + "/workflow/samples");
     } catch (IOException e) {
       logger.error("failed to read documentation", e);
       docsFromClassloader = "unable to load documentation for " + DistributionRestService.class.getName();
