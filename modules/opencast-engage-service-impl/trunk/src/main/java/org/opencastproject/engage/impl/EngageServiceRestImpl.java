@@ -90,7 +90,7 @@ public class EngageServiceRestImpl implements EngageService {
   
   @GET
   @Produces(MediaType.TEXT_HTML)
-  @Path("/")
+  @Path("/browse")
   public String browse(@Context HttpServletRequest request) {
     return deliverBrowsePage();
   }
