@@ -38,4 +38,5 @@
 ../../../modules/opencast-search-service-impl/trunk      opencast-search-service-impl
 ../../../modules/opencast-test-harness/trunk	opencast-test-harness
 ../../../modules/opencast-db/trunk	opencast-db
+../../../modules/opencast-admin-ui/trunk/ opencast-admin-ui
 
