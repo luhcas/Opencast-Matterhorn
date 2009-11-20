@@ -148,9 +148,9 @@
 				model.currentDuration = event.newDuration;
 				currentDurationString = t.getTC(model.currentDuration);
 				
-		    	ExternalInterface.call(ExternalFunction.SETDURATION, event.newDuration);
+				ExternalInterface.call(ExternalFunction.SETDURATION, event.newDuration);
 		    	ExternalInterface.call(ExternalFunction.SETTOTALTIME, currentDurationString);
-			}
+		    }
 			
 			/**  */
 			private function dimChange(event:DimensionChangeEvent):void
@@ -198,7 +198,12 @@
       			{
       				Swiz.dispatchEvent( new DisplayCaptionEvent( event.newPosition ) );
       			}
-				
+      			
+      			// end of the video
+      			if( currentDurationString == newPositionString  )
+      			{
+      				Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.STOP));
+      			}
 			}
 			
 			/**  */

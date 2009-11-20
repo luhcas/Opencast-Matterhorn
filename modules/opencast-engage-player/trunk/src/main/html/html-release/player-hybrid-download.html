@@ -26,54 +26,53 @@
     </head>
 
     <body>
-    <div id="title-bar">
+    <div id="title-bar" class="oc-title-bar">
         <p>Progressive Download Hybrid Player</p>
     </div>
     
-    <div id="controls">
+    <div id="controls" class="oc-controls" >
         
-        <div id="captions"></div>
+        <div id="captions" class="oc-captions"></div>
         
-        <div id="slider" class="ui-slider">
+        <div id="slider" class="ui-slider ">
+            <a href="#"></a>
             <div class="matterhorn-progress-bar-background"></div>
             <div class="matterhorn-progress-bar"></div>
         </div>
-        
+      
         <div id="oc-videocontrols-holder" >
         
-            
-	        <div class="timeline" >
+            <div class="oc-timeline" >
 	            <span id="time-current" role="timer">00:00:00</span> of
 	            <span id="time-total" role="timer">00:00:00</span>
 	        </div>
 	        
-	        <div class="buttons" >
+	        <div class="oc-buttons" >
 	        
-	           <button id="btn_skip_backward"  class="btn_skip_backward"  onmouseover="this.className='btn_skip_backward_over'"   onmouseout="this.className='btn_skip_backward_out'"  type="submit"  onclick="Opencast.ToVideodisplay.doSkipBackward();"     name="Skip Backward"  value="Skip Backward"   alt="Skip Backward"  title="Skip Backward" ></button>
+	            <button id="btn_skip_backward"  class="btn_skip_backward"  onmouseover="this.className='btn_skip_backward_over'"   onmouseout="this.className='btn_skip_backward_out'"  type="submit"  onclick="Opencast.ToVideodisplay.doSkipBackward();"     name="Skip Backward"  value="Skip Backward"   alt="Skip Backward"  title="Skip Backward" ></button>
                 <button id="btn_rewind"         class="btn_rewind"         onmouseover="this.className='btn_rewind_over'"          onmouseout="this.className='btn_rewind_out'"         type="submit"  onclick="Opencast.ToVideodisplay.doRewind();"           name="Rewind"         value="Rewind"          alt="Rewind"         title="Rewind"        ></button>
-                <button id="btn_play_pause"     class="btn_play"           onmouseover="mouseOver();"                              onmouseout="mouseOut();"             type="submit"  onclick="Opencast.ToVideodisplay.doTogglePlayPause();"  name="Play"           value="Play"            alt="Play"           title="Play"          ></button>
+                <button id="btn_play_pause"     class="btn_play"           onmouseover="Opencast.global.mouseOver();"              onmouseout="Opencast.global.mouseOut();"                             type="submit"  onclick="Opencast.ToVideodisplay.doTogglePlayPause();"  name="Play"           value="Play"            alt="Play"           title="Play"          ></button>
                 <button id="btn_fast_forward"   class="btn_fast_forward"   onmouseover="this.className='btn_fastForward_over'"     onmouseout="this.className='btn_fastForward_out'"    type="submit"  onclick="Opencast.ToVideodisplay.doFastForward();"      name="Fast Forward"   value="Fast Forward"    alt="Fast Forward"		 title="Fast Forward"  ></button>
                 <button id="btn_skip_forward"   class="btn_skip_forward"   onmouseover="this.className='btn_skip_forward_over'"    onmouseout="this.className='btn_skip_forward_out'"   type="submit"  onclick="Opencast.ToVideodisplay.doSkipForward();"      name="Skip Forward"   value="Skip Forward"    alt="Skip Forward"   title="Skip Forward"  ></button>
             
             </div>
             
-            <div class="volume">
+            <div class="oc-volume">
             
-                <input id="btn_volume"  class="btn_volume"        type="image" src="./icons/volume---high.png"            onclick="Opencast.ToVideodisplay.doToggleVolume();"             value="Mute"            alt="Mute"                                title="Mute" >
-                <div id='volume_slider' class='ui-slider'></div>
-                <input id="btn_cc"              type="image" src="./icons/cc_off.png"                   onclick="Opencast.ToVideodisplay.doToogleClosedCaptions();"    value="Closed Caption on" alt="Closed Caption on"                                    title="closed caption on" >
+                <input id="btn_volume"    class="oc-btn_volume"        				type="image" src="./icons/volume---high.png"  onclick="Opencast.ToVideodisplay.doToggleVolume();"          value="Mute"               alt="Mute"               title="Mute" ></input>
+                <div   id='volume_slider' class='ui-slider oc-volume-slider'></div>
+                <input id="btn_cc"        class="oc-btn-cc"         				type="image" src="./icons/cc_off.png"         onclick="Opencast.ToVideodisplay.doToogleClosedCaptions();"  value="Closed Caption On"  alt="Closed Caption On"  title="Closed Caption On" ></input>
              
             </div>
             
             <br style="clear:both;">
-            
         
         </div>
     	
     </div>
     
-    <div id="video-display-container">
-        <object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="360" height="288" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
+    <div id="oc-video-display-container">
+        <object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="380" height="304" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
             <param name ="movie" value="Videodisplay.swf" >
             <param name="quality"value="high">
             <param name="allowScriptAccess" value="always" >
@@ -81,8 +80,8 @@
             <param name="allowFullScreen" value="true">
             <param name="flashvars" VALUE="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml">
             <embed
-                width="360"
-                height="288"
+                width="380"
+                height="304"
                 bgcolor="#000000"
                 allowfullscreen="true"
                 type="application/x-shockwave-flash"
@@ -95,9 +94,10 @@
     </div>
     
     <div id="info">
+    		<p>Flash 10 is required</p>
             <p>Keyboard Shortcuts:</p>
             Control + Alt + P   = Pause/Play toggle<br>
-            Control + Alt + M   = Mute<br>
+            Control + Alt + M   = Mute/Unmute toggle<br>
             Control + Alt + U   = Volume Up<br>
             Control + Alt + D   = Volume Down<br>
             Control + Alt 1 - 5 = Change the volume. 1 being the lowest volume and 5 being the loudest<br>

@@ -79,7 +79,6 @@ package org.opencast.engage.videodisplay.control
 		{
 		  	var currentPlayPauseState:String;
 						
-														
 			switch(event.videoControlType)
 			{
 				case VideoControlEvent.PLAY:			if( !model.player.playing)
@@ -97,10 +96,11 @@ package org.opencast.engage.videodisplay.control
 														break;
 												
 				case VideoControlEvent.STOP: 			if(model.player.playing)
-												    		model.player.pause();
+															model.player.pause();
 													  	model.player.seek(0);
 													  	model.currentPlayerState = PlayerState.PAUSING;
 						  								currentPlayPauseState = PlayerState.PLAYING;
+						  								ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
 														break;
 												
 				case VideoControlEvent.SKIPBACKWARD: 	model.player.seek( model.skipBackwardTime );

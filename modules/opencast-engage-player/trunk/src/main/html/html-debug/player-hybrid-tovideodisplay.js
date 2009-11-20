@@ -2,59 +2,103 @@
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
 
-/* ------------------------------------------------------------------------
- * the global opencast namespace ToVideodisplay
- * ------------------------------------------------------------------------ */
-
+/**
+    @namespace the global Opencast namespace ToVideodisplay
+*/
 Opencast.ToVideodisplay = (function () {
 
     var pressKey = false,
-        playing = "playing",
-        pausing = "pausing",
+        playing  = "playing",
+        pausing  = "pausing",
+        mute     = "Mute",
+        unmute   = "Unmute",
+        ccon     = "Closed Caption On",
+        ccoff    = "Closed Caption Off",
         currentPlayPauseState = pausing;
 
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Do seek in the video.
+        @param number time
+    */
     function doSeek(time) {
         $('#slider').slider('value', time);
         Videodisplay.seek(time);
     }
 
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Do skip backward in the video.
+    */
     function doSkipBackward() {
         Videodisplay.skipBackward();
     }
 
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Do rewind in the video.
+    */
     function doRewind() {
         Videodisplay.rewind();
     }
 
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Do play the video.
+    */
     function doPlay() {
         Videodisplay.play();
     }
 
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Do pause the video.
+    */
     function doPause() {
         Videodisplay.pause();
     }
-
+    
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Do stop the video.
+    */
     function doStop() {
         Videodisplay.stop();
     }
-
+    
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Set the current play pause state.
+        @param string state
+    */
     function doSetCurrentPlayPauseState(state)
     {
         currentPlayPauseState = state;
     }
     
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Get the current play pause state.
+    */
     function getCurrentPlayPauseState()
     {
         return currentPlayPauseState;
     }
     
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Get the pressed key.
+    */
     function getPressKey()
     {
         return pressKey;
     }
 
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Toggle between play and pause the video.
+    */
     function doTogglePlayPause() {
-    
         // Checking if btn_play_pause is "play"
         if (currentPlayPauseState === pausing) {
             // Changing the volume to 1.0 and the value of the button of btn_volume to "unmute"
@@ -66,64 +110,94 @@ Opencast.ToVideodisplay = (function () {
             doPause();
         }
     }
-
+    
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Toggle between play and pause the video.
+    */
     function doFastForward() {
         Videodisplay.fastForward();
     }
 
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Do skip forward in the vido.
+    */
     function doSkipForward() {
         Videodisplay.skipForward();
     }
-
+    
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Change the volume of the video.
+    */
     function doSetVolume(value) {
         Videodisplay.setVolume(value);
     }
 
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Toggle between mute an unmute.
+    */
     function doToggleVolume() {
-        var mute = "Mute";
         // Checking if btn_volume is "mute"
-        if (document.getElementById("btn_volume").value === mute) {
-            //Changing the volume to 1.0 and the value of the button of btn_volume to "unmute"
-            document.getElementById("btn_volume").value = "Unmute";
-            document.getElementById("btn_volume").alt = "Unmute";
-            document.getElementById("btn_volume").title = "Unmute";
-            document.getElementById("btn_volume").src = "./icons/volume---mute.png";
+        if ($("#btn_volume").attr("value") === mute) {
+            $("#btn_volume").attr({ 
+                value: unmute,
+                alt: unmute,
+                title: unmute,
+                src: "./icons/volume---mute.png"
+            });
             Opencast.volume = $('#volume_slider').slider('option', 'value') / 100;
             doSetVolume(0);
         } else {
-            // Changing the volume to 0.0 and the value of the button of btn_volume to "mute"
-            document.getElementById("btn_volume").value = "Mute";
-            document.getElementById("btn_volume").alt = "Mute";
-            document.getElementById("btn_volume").title = "Mute";
-            document.getElementById("btn_volume").src = "./icons/volume---high.png";
+            $("#btn_volume").attr({ 
+                value: mute,
+                alt: mute,
+                title: mute,
+                src: "./icons/volume---high.png"
+            });
             doSetVolume(Opencast.volume);
         }
     }
-    
+    /**
+       @memberOf Opencast.ToVideodisplay
+       @description Set the closed caption.
+       @param boolean cc
+    */
     function doClosedCaptions(cc) {
         Videodisplay.closedCaptions(cc);
     }
-
-	function doToogleClosedCaptions() {
-        var on = "Closed Caption on";
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Toggle between closed caption on and off.
+    */
+    function doToogleClosedCaptions() {
         // Checking if btn_cc is "CC off"
-        if (document.getElementById("btn_cc").value === on) {
-            document.getElementById("btn_cc").value = "Closed Caption off";
-            document.getElementById("btn_cc").alt = "Closed Caption off";
-            document.getElementById("btn_cc").title = "Closed Caption off";
-            document.getElementById("btn_cc").src = "./icons/cc_on.png";
+        if ($("#btn_cc").attr("value") === ccon) {
+            $("#btn_cc").attr({ 
+                value: ccoff,
+                alt: ccoff,
+                title: ccoff,
+                src: "./icons/cc_on.png"
+            });
             doClosedCaptions(true);
             return;
         } else {
-            document.getElementById("btn_cc").value = "Closed Caption on";
-            document.getElementById("btn_cc").alt = "Closed Caption on";
-            document.getElementById("btn_cc").title = "Closed Caption on";
-            document.getElementById("btn_cc").src = "./icons/cc_off.png";
+            $("#btn_cc").attr({ 
+                value: ccon,
+                alt: ccon,
+                title: ccon,
+                src: "./icons/cc_off.png"
+            });
             doClosedCaptions(false);
             return;
         }
     }
 
+    /**
+       @description Keylistener.
+    */
     var isCtrl = false;
     var isAlt = false;
     
