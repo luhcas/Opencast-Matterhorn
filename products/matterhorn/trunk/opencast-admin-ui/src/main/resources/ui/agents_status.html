@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>Capture Agents Status</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <!-- styles -->
+        <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css" />
+        <link href="infusion-1.1.2/fss/css/fss-layout.css" rel="stylesheet" type="text/css" />
+        <link href="infusion-1.1.2/fss/css/fss-text.css" rel="stylesheet" type="text/css" />
+        <link href="infusion-1.1.2/fss/css/fss-theme-coal.css" rel="stylesheet" type="text/css" />
+        <link href="css/admin.css" rel="stylesheet" type="text/css" />
+
+        <!-- scripts -->
+        <script type="text/javascript" src="infusion-1.1.2/InfusionAll.js"></script>
+        <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
+        <script type="text/javascript" src="js/jquery.xslt.js"></script>
+        <script type="text/javascript">
+
+            $(document).ready( function() {
+               //AdminUI.init();
+
+               $('#stage').xslt("../../capture-admin/rest/GetKnownAgents", "xsl/agents_status.xsl");
+
+               // this seems to be not as easy as thought
+               //$('#stage').tablesorter();
+               
+            });
+
+        </script>
+    </head>
+    <body>
+        <!-- fl-centered doesn't work in winXP-IE8 -->
+        <div class="fl-container-850 fl-centered fl-theme-coal">
+            <ul class="fl-tabs fl-tabs-left">
+                <li class=""><a href="recordings_upcoming.html">Recordings</a></li>
+                <li class="fl-activeTab"><a href='agents_status.html'>Capture Agents</a></li>
+            </ul>
+            <div id="stage" class="fl-tab-content wu-tab-content fl-fix">
+                
+            </div>
+        </div>
+    </body>
+</html>

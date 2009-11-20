@@ -69,6 +69,7 @@
         <module>opencast-workspace-impl</module>
         <module>opencast-scheduler-api</module>
         <module>opencast-scheduler-impl</module>
+	<module>opencast-admin-ui</module>
         <module>opencast-db</module>
         <module>opencast-test-harness</module>
      </modules>
