@@ -16,6 +16,7 @@
 package org.opencastproject.distribution.local.endpoint;
 
 import org.opencastproject.distribution.api.DistributionService;
+import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -32,6 +34,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -53,15 +56,18 @@ public class DistributionRestService {
 
   @POST
   @Consumes(MediaType.TEXT_XML)
-  public Response storeAnEntity(@FormParam("mediapackage") MediapackageType mediaPackage) {
+  public Response distribute(@FormParam("mediapackage") MediapackageType mediaPackage, @QueryParam("elementId") List<String> elementIds) throws Exception {
+    MediaPackage result = null;
+    String[] elements = elementIds == null ? new String[0] : elementIds.toArray(new String[elementIds.size()]);
     try {
-      service.distribute(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(
-              IOUtils.toInputStream(mediaPackage.toXml())));
+      result = service.distribute(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(
+              IOUtils.toInputStream(mediaPackage.toXml())), elements);
     } catch (Exception e) {
       e.printStackTrace();
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
-    return Response.ok(mediaPackage).build();
+    MediapackageType jaxbResult = MediapackageType.fromXml(result.toXml());
+    return Response.ok(jaxbResult).build();
   }
   
   @GET

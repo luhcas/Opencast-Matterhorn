@@ -109,6 +109,16 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
    */
   @SuppressWarnings("unchecked")
   public void updated(Dictionary properties) throws ConfigurationException {
+    String updatedRootDir = (String)properties.get("distributionDirectory");
+    if(updatedRootDir != null) {
+      File f = new File(updatedRootDir);
+      if(f.exists()) {
+        this.distributionDirectory = f;
+        logger.info("Set distribution directory to " + updatedRootDir);
+      } else {
+        logger.warn("Can not set distribution directory to " + updatedRootDir + ".  Directory does not exist");
+      }
+    }
   }
 
   public void setWorkspace(Workspace workspace) {

@@ -21,6 +21,14 @@ import org.opencastproject.media.mediapackage.MediaPackage;
  * Distributes elements from {@link MediaPackage}s to distribution channels.
  */
 public interface DistributionService {
+  /**
+   * Distribute the elementIds from a media package.
+   * 
+   * @param mediaPackage The media package to distribute
+   * @param elementIds The elements in the media package to include in this distribution
+   * @return The augmented media package, typically including all of the source media package's elements along with new
+   * elements pointing to the distributed media. 
+   */
   MediaPackage distribute(MediaPackage mediaPackage, String... elementIds);
 }
 
