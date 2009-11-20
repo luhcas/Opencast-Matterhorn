@@ -48,7 +48,7 @@ public class AgentStatusJob implements Job {
     //Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATUS_ENDPOINT_URL);
     if (url == null) {
-      logger.warn("URL for " + CaptureParameters.AGENT_STATUS_ENDPOINT_URL + " is invalid, unable to push status to remote server");
+      logger.warn("URL for " + CaptureParameters.AGENT_STATUS_ENDPOINT_URL + " is invalid, unable to push state to remote server");
       return;
     }
     HttpPost remoteServer = new HttpPost(url);

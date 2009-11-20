@@ -149,7 +149,6 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator>org.opencastproject.capture.impl.Activator </Bundle-Activator>
             <Import-Package>
               org.opencastproject.capture.api.*,
               *;resolution:=optional
@@ -173,6 +172,7 @@
             </Embed-Dependency>
             <Export-Package>
               org.opencastproject.capture.impl.*,
+              org.opencastproject.capture.pipeline.*,
               org.opencastproject.capture.endpoint
             </Export-Package>
             <Service-Component>

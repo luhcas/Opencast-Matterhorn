@@ -30,6 +30,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
 import org.opencastproject.capture.admin.api.Agent;
@@ -64,14 +65,16 @@ public class CaptureAgentStatusRestService {
 
   @POST
   @Path("SetAgentState")
-  public void setAgentState(@FormParam("agentName") String agentName, @FormParam("state") String state) {
+  public Response setAgentState(@FormParam("agentName") String agentName, @FormParam("state") String state) {
     service.setAgentState(agentName, state);
+    return Response.ok(agentName + " set to " + state).build();
   }
 
   @POST
   @Path("RemoveAgent")
-  public void removeAgent(@FormParam("agentName") String agentName) {
+  public Response removeAgent(@FormParam("agentName") String agentName) {
     service.removeAgent(agentName);
+    return Response.ok(agentName + " removed").build();
   }
 
   @GET
@@ -96,14 +99,16 @@ public class CaptureAgentStatusRestService {
 
   @POST
   @Path("SetRecordingState")
-  public void setRecordingState(@FormParam("id") String id, @FormParam("state") String state) {
+  public Response setRecordingState(@FormParam("id") String id, @FormParam("state") String state) {
     service.setRecordingState(id, state);
+    return Response.ok(id + " set to " + state).build();
   }
 
   @POST
   @Path("RemoveRecording")
-  public void removeRecording(@FormParam("id") String id) {
+  public Response removeRecording(@FormParam("id") String id) {
     service.removeRecording(id);
+    return Response.ok(id + " removed").build();
   }
 
   @GET

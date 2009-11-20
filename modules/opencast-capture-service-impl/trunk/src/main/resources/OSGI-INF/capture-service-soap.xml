@@ -6,7 +6,7 @@
   <property name="service.exported.configs" value="org.apache.cxf.ws" />
   <property name="org.apache.cxf.dosgi.databinding" value="jaxb"/>
   <property name="org.apache.cxf.dosgi.frontend" value="jaxws"/>
-  <property name="org.apache.cxf.ws.httpservice.context" value="/status/soap" />
+  <property name="org.apache.cxf.ws.httpservice.context" value="/capture/soap" />
   <service>
     <provide interface="org.opencastproject.capture.endpoint.CaptureWebService" />
   </service>

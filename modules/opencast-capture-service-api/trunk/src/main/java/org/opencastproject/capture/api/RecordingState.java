@@ -24,4 +24,5 @@ public interface RecordingState {
   public static final String CAPTURE_FINISHED = "capture_finished";
   public static final String UPLOADING = "uploading";
   public static final String UPLOAD_FINISHED = "upload_finished";
+  public static final String UPLOAD_ERROR = "upload_error";
 }

@@ -24,6 +24,7 @@ import org.opencastproject.capture.api.AgentState;
 import org.opencastproject.capture.api.StatusService;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -40,17 +41,18 @@ public class StatusServiceImpl implements StatusService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(StatusServiceImpl.class);
   public static final String SERVICE = "StatusServiceImpl";
   private String cur_status = null;
-  private ConfigurationManager config = null;
+  private ConfigurationManager config = ConfigurationManager.getInstance();
 
   /**
    * Creates an instance of the status service, and sets its initial state to AgentState.IDLE
    */
-  public StatusServiceImpl() {
+  public StatusServiceImpl() {}
+
+  public void activate(ComponentContext cc) {
     logger.info("Starting StatusServiceImpl");
     if (cur_status == null) {
       cur_status = AgentState.IDLE;
     }
-    config = ConfigurationManager.getInstance();
     createPollingTask();
   }
 

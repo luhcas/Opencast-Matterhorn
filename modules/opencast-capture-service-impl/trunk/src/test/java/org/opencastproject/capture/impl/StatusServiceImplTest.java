@@ -29,6 +29,7 @@ public class StatusServiceImplTest {
   @Before
   public void setup() {
     service = new StatusServiceImpl();
+    service.activate(null);
     Assert.assertNotNull(service);
   }
 

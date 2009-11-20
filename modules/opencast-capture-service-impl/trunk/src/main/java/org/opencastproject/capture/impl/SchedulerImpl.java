@@ -85,7 +85,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.status.api.CalendarService#init()
+   * @see org.opencastproject.capture.api.StatusService#init()
    */
   public void init() {
     log.debug("init()");
@@ -163,7 +163,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.status.api.CalendarService#updateCalendar()
+   * @see org.opencastproject.capture.api.StatusService#updateCalendar()
    */
   public void updateCalendar() {
     log.debug("updateCalendar()");
@@ -316,7 +316,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.status.api.ScheduleService#setCaptureSchedule()
+   * @see org.opencastproject.capture.api.ScheduleService#setCaptureSchedule()
    */
   public synchronized void setCaptureSchedule(Calendar newCal) {
     log.debug("setCaptureSchedule()");
@@ -444,7 +444,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.status.api.ScheduleService#disableScheduler()
+   * @see org.opencastproject.capture.api.ScheduleService#disableScheduler()
    */
   public void disableScheduler() {
     try {
@@ -459,7 +459,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.status.api.ScheduleService#enableScheduler()
+   * @see org.opencastproject.capture.api.ScheduleService#enableScheduler()
    */
   public void enableScheduler() {
     try {
@@ -476,7 +476,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.status.api.CalendarService#disablePolling()
+   * @see org.opencastproject.capture.api.StatusService#disablePolling()
    */
   public void disablePolling() {
     try {
@@ -491,7 +491,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.status.api.CalendarService#enablePolling()
+   * @see org.opencastproject.capture.api.StatusService#enablePolling()
    */
   public void enablePolling() {
     try {

@@ -27,6 +27,7 @@ import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,6 +122,37 @@ public class ConfigurationManager {
         return;
       }
       timer.schedule(new UpdateConfig(), delay, delay);
+    }
+
+    createCoreDirectories();
+  }
+
+  /**
+   * Creates the core Opencast directories  
+   */
+  private void createCoreDirectories() {
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL, this);
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CACHE_URL, this);
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_URL, this);
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_VOLATILE_URL, this);
+  }
+
+  /**
+   * Creates a file or directory
+   * @param key    The key to set in the configuration manager.  Key is set equal to name
+   * @param config The configuration manager to store the key-value pair
+   */
+  private void createFileObj(String key, ConfigurationManager config) {
+    try {
+      File target = new File (config.getItem(key));
+      try {
+        FileUtils.forceMkdir(target);
+        config.setItem(key, target.toString());
+      } catch (IOException e) {
+        logger.error("Unable to create directory " + target.toString(), e);
+      }
+    } catch (NullPointerException e) {
+      logger.error("No value found for key " + key);
     }
   }
   
