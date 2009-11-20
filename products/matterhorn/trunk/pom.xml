@@ -35,6 +35,7 @@
         <module>opencast-build-tools</module>
         <module>opencast-maven-plugin</module>
         <module>opencast-runtime-tools</module>
+        <!--module>opencast-admin-ui</module -->
         <module>opencast-authentication-api</module>
         <module>opencast-capture-service-api</module> 
         <module>opencast-capture-admin-service-api</module>
@@ -69,7 +70,6 @@
         <module>opencast-workspace-impl</module>
         <module>opencast-scheduler-api</module>
         <module>opencast-scheduler-impl</module>
-	<module>opencast-admin-ui</module>
         <module>opencast-db</module>
         <module>opencast-test-harness</module>
      </modules>
@@ -82,6 +82,7 @@
         <module>opencast-build-tools</module>
         <module>opencast-maven-plugin</module>
         <module>opencast-runtime-tools</module>
+        <!--module>opencast-admin-ui</module -->
         <module>opencast-authentication-api</module>
         <module>opencast-capture-service-api</module> 
         <module>opencast-capture-service-impl</module> 
@@ -122,6 +123,7 @@
         <module>opencast-build-tools</module>
         <module>opencast-maven-plugin</module>
         <module>opencast-runtime-tools</module>
+        <!--module>opencast-admin-ui</module -->
         <module>opencast-authentication-api</module>
         <module>opencast-capture-service-api</module>
         <!--module>opencast-capture-service-impl</module -->
