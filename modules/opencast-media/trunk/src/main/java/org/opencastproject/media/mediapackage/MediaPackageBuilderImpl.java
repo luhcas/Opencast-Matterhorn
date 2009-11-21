@@ -93,21 +93,21 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
     try {
       manifest = ManifestImpl.fromStream(is, serializer, false);
     } catch (IOException e) {
-      throw new MediaPackageException("I/O error while accessing manifest: " + e.getMessage());
+      throw new MediaPackageException("I/O error while accessing manifest", e);
     } catch (ParserConfigurationException e) {
-      throw new MediaPackageException("Media package manifest cannot be parsed: " + e.getMessage());
+      throw new MediaPackageException("Media package manifest cannot be parsed", e);
     } catch (TransformerException e) {
-      throw new MediaPackageException("Error while updating media package manifest: " + e.getMessage());
+      throw new MediaPackageException("Error while updating media package manifest", e);
     } catch (SAXException e) {
-      throw new MediaPackageException("Error while parsing media package manifest: " + e.getMessage());
+      throw new MediaPackageException("Error while parsing media package manifest", e);
     } catch (XPathExpressionException e) {
-      throw new MediaPackageException("Media package manifest cannot be parsed: " + e.getMessage());
+      throw new MediaPackageException("Media package manifest cannot be parsed", e);
     } catch (ConfigurationException e) {
-      throw new MediaPackageException("Configuration error while accessing manifest: " + e.getMessage());
+      throw new MediaPackageException("Configuration error while accessing manifest", e);
     } catch (HandleException e) {
-      throw new MediaPackageException("Handle system error while accessing manifest: " + e.getMessage());
+      throw new MediaPackageException("Handle system error while accessing manifest", e);
     } catch (ParseException e) {
-      throw new MediaPackageException("Error while parsing invalid media package start date: " + e.getMessage());
+      throw new MediaPackageException("Error while parsing invalid media package start date", e);
     }
 
     return new MediaPackageImpl(manifest);

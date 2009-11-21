@@ -30,7 +30,7 @@ import org.opencastproject.util.ConfigurationException;
 public class IdBuilderFactory {
 
   /** Class name for the default id builder */
-  private static final String BUILDER_CLASS = "org.opencastproject.media.mediapackage.UUIDIdBuilderImpl";
+  private static final String BUILDER_CLASS = "org.opencastproject.media.mediapackage.identifier.UUIDIdBuilderImpl";
 
   /** Name of the system property */
   public static final String PROPERTY_NAME = "opencast.idbuilder";

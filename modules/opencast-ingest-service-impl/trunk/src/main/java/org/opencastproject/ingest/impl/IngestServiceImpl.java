@@ -249,7 +249,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
     if (eventAdmin != null) {
       logger.info("Broadcasting event...");
       Dictionary<String, String> properties = new Hashtable<String, String>();
-      
+
       // converting media package to String presentation
       MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
       properties.put("mediaPackage", mpt.toXml());
@@ -338,23 +338,19 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
 
   private URL addContentToRepo(MediaPackage mp, String elementId, URL url) throws IOException, MediaPackageException,
           UnsupportedElementException {
-    workspace.put(mp.getIdentifier().compact(), elementId, url.openStream());
-    return workspace.getURL(mp.getIdentifier().compact(), elementId);
+    return workspace.put(mp.getIdentifier().compact(), elementId, url.openStream());
     // return addContentToMediaPackage(mp, elementId, newUrl, type, flavor);
   }
 
   private URL addContentToRepo(MediaPackage mp, String elementId, InputStream file) throws MediaPackageException,
           UnsupportedElementException, IOException {
-    workspace.put(mp.getIdentifier().compact(), elementId, file);
-    return workspace.getURL(mp.getIdentifier().compact(), elementId);
+    return workspace.put(mp.getIdentifier().compact(), elementId, file);
     // return addContentToMediaPackage(mp, elementId, url, type, flavor);
   }
 
   private URL addContentToRepo(MediaPackage mp, String elementId, String filename, InputStream file)
           throws MediaPackageException, UnsupportedElementException, IOException {
-    workspace.put(mp.getIdentifier().compact(), elementId, filename, file);
-    return workspace.getURL(mp.getIdentifier().compact(), elementId);
-    // return addContentToMediaPackage(mp, elementId, url, type, flavor);
+    return workspace.put(mp.getIdentifier().compact(), elementId, filename, file);
   }
 
   private MediaPackage addContentToMediaPackage(MediaPackage mp, String elementId, URL url,

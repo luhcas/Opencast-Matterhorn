@@ -51,4 +51,7 @@ public interface MediaPackageElements {
   /** Track without any known semantics */
   MediaPackageElementFlavor INDEFINITE_TRACK = new MediaPackageElementFlavor("track", "indefinite");
 
+  /** Track without any known semantics */
+  MediaPackageElementFlavor ENGAGE_TRACK = new MediaPackageElementFlavor("engage", "download");
+
 }

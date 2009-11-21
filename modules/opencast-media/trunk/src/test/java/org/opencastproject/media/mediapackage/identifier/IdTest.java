@@ -13,38 +13,21 @@
  *  permissions and limitations under the License.
  *
  */
-
 package org.opencastproject.media.mediapackage.identifier;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
+
 /**
- * Simple and straightforward implementation of the {@link Id} interface.
+ * Tests non-handle Identifiers
+ *
  */
-public class IdImpl implements Id {
+public class IdTest {
 
-  /** The identifier */
-  protected String id = null;
-
-  /**
-   * Creates a new serial identifier as created by {@link SerialBuilder}.
-   * 
-   * @param id
-   *          the identifier
-   */
-  public IdImpl(String id) {
-    this.id = id;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.media.mediapackage.identifier.Id#compact()
-   */
-  public String compact() {
-    return id.replaceAll("/", "-").replaceAll("\\\\", "-");
-  }
-
-  @Override
-  public String toString() {
-    return compact();
+  @Test
+  public void testIds() throws Exception {
+    IdImpl id = new IdImpl("c4f91f2f-bfac-43db-b3b3-8de233dad462");
+    Assert.assertEquals("c4f91f2f-bfac-43db-b3b3-8de233dad462", id.toString());
   }
 }

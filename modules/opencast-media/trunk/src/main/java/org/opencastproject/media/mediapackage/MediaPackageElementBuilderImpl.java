@@ -19,6 +19,7 @@ package org.opencastproject.media.mediapackage;
 import org.opencastproject.media.mediapackage.elementbuilder.AttachmentBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.CoverBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.DublinCoreBuilderPlugin;
+import org.opencastproject.media.mediapackage.elementbuilder.EngageDownloadTrackBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.IndefiniteTrackBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.MPEG7BuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin;
@@ -78,6 +79,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
       plugins.add(CoverBuilderPlugin.class);
       plugins.add(DublinCoreBuilderPlugin.class);
       plugins.add(IndefiniteTrackBuilderPlugin.class);
+      plugins.add(EngageDownloadTrackBuilderPlugin.class);
       plugins.add(MPEG7BuilderPlugin.class);
       plugins.add(PresentationTrackBuilderPlugin.class);
       plugins.add(PresenterTrackBuilderPlugin.class);

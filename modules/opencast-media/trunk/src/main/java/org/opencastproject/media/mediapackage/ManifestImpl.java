@@ -20,7 +20,8 @@ import org.opencastproject.media.mediapackage.identifier.HandleBuilderFactory;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.media.mediapackage.identifier.Id;
 import org.opencastproject.media.mediapackage.identifier.IdBuilder;
-import org.opencastproject.media.mediapackage.identifier.SerialIdBuilder;
+import org.opencastproject.media.mediapackage.identifier.IdBuilderFactory;
+import org.opencastproject.media.mediapackage.identifier.UUIDIdBuilderImpl;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.DateTimeSupport;
 
@@ -58,7 +59,7 @@ final class ManifestImpl {
   private final static Logger log_ = LoggerFactory.getLogger(ManifestImpl.class.getName());
   
   /** id builder, for internal use only */
-  private static final IdBuilder idBuilder = new SerialIdBuilder();
+  private static final IdBuilder idBuilder = new UUIDIdBuilderImpl();
 
   /** The media package's identifier */
   private Id identifier = null;
@@ -914,12 +915,18 @@ final class ManifestImpl {
     if (elementBuilder == null)
       throw new IllegalStateException("Unable to create a media package element builder");
 
-    // Handle
+    // Handle or ID (we currently have a mix, so we need to support both)
     String id = xPath.evaluate("/mediapackage/@id", doc);
+    
     if (id != null && !"".equals(id)) {
-      manifest.identifier = HandleBuilderFactory.newInstance().newHandleBuilder().fromValue(id);
+      try {
+        manifest.identifier = IdBuilderFactory.newInstance().newIdBuilder().fromString(id);
+      } catch(Exception e) {
+        // The default ID builder didn't work?  Try the handle builder.
+        manifest.identifier = HandleBuilderFactory.newInstance().newHandleBuilder().fromValue(id);
+      }
     } else {
-      manifest.identifier = HandleBuilderFactory.newInstance().newHandleBuilder().createNew();
+      manifest.identifier = IdBuilderFactory.newInstance().newIdBuilder().createNew();
       log_.info("Created handle " + manifest.identifier + " for manifest");
     }
 
