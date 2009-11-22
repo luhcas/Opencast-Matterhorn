@@ -9,7 +9,8 @@ uploadManager.init = function() {
     uploadManager.uploader = new SWFUpload(
     {
         flash_url : "swfupload/swfupload.swf",
-        upload_url: "../rest/addMediaPackage",
+        upload_url: "../../rest/addMediaPackage",
+        preserve_relative_urls : true,
         file_types : "*.*",
         file_types_description : "All Files",
         file_upload_limit : 0,
@@ -34,21 +35,17 @@ uploadManager.init = function() {
 
 uploadManager.startUpload = function() {
     uploadManager.collectMetadata();
-    // give metadata to uploader
-    var list = "";
-    var url = "../rest/addMediaPackage";
-
+    /*var list = "";    
     for (key in uploadManager.metadata) {
         list += "[" + key + "]:" + uploadManager.metadata[key] + "\n";
         uploadManager.uploader.addFileParam(uploadManager.selectedFile.id, key, uploadManager.metadata[key]);
     }
-    //alert(url);
-    uploadManager.uploader.setUploadURL(url);
+    alert("Metadata:\n" + list);*/
     uploadManager.uploader.startUpload(uploadManager.selectedFile.id);
 }
 
 uploadManager.cancelUpload = function() {
-    // tell swfUpload to stop upload
+    uploadManager.uploader.cancelUpload(uploadManager.selectedFile, false);
     uploadEvents.uploadError(uploadManager.selectedFile, 000, "Upload aborted by user.");
 }
 
