@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.captions.endpoint.CaptionsRestService" immediate="true">
+<component name="org.opencastproject.captions.CaptionsRestService" immediate="true">
   <implementation class="org.opencastproject.captions.endpoint.CaptionsRestService" />
   <property name="service.description" value="Captions REST Endpoint" />
   <property name="service.exported.interfaces" value="org.opencastproject.captions.endpoint.CaptionsRestService" />

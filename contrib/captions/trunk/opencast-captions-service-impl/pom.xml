@@ -109,7 +109,8 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Export-Package>org.opencastproject.captions.*</Export-Package>
+            <Export-Package>org.opencastproject.captions.api.*,org.opencastproject.captions.endpoint.*</Export-Package>
+            <Private-Package>org.opencastproject.captions.impl.*</Private-Package>
             <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Service-Component>

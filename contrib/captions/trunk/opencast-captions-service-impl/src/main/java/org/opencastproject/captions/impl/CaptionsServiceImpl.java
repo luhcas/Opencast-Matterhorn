@@ -74,10 +74,16 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
   public void unsetWorkflowService(WorkflowService workflowService) {
     this.workflowService = null;
   }
-
   protected void activate(ComponentContext context) {
     logger.info("ACTIVATE"); // Called when all service dependencies are in place
-  } 
+  }
+  protected void deactivate(ComponentContext ctxt) {
+    logger.info("SHUTDOWN"); // Called on shutdown
+  }
+
+  public CaptionsServiceImpl() {
+    logger.info("CONSTRUCT");
+  }
 
   @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {
