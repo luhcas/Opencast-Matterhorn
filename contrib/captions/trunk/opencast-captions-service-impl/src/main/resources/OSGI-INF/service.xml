@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <components xmlns="http://www.osgi.org/xmlns/scr/v1.1.0">
-    <component name="org.opencastproject.captionsHandler.api.CaptionshandlerService"
+    <component name="org.opencastproject.captions.api.CaptionsService"
         immediate="true">
-        <implementation class="org.opencastproject.captionsHandler.impl.CaptionshandlerServiceImpl" />
+        <implementation class="org.opencastproject.captions.impl.CaptionsServiceImpl" />
         <property name="service.description"
             value="Captions Handler Service - handles captionable lookup and attachment of caption data" />
         <property name="workflow.operation" value="captions" /><!-- must match constant in service impl -->
@@ -13,7 +13,7 @@
             cardinality="1..1" policy="static" bind="setWorkflowService" unbind="unsetWorkflowService" />
         <!-- services I provide -->
         <service>
-            <provide interface="org.opencastproject.captionsHandler.api.CaptionshandlerService" />
+            <provide interface="org.opencastproject.captions.api.CaptionsService" />
             <provide interface="org.osgi.service.cm.ManagedService" /><!-- for dynamic settings -->
             <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
         </service>

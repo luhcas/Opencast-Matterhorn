@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.captionsHandler.CaptionshandlerWebService" immediate="true">
-  <implementation class="org.opencastproject.captionsHandler.endpoint.CaptionshandlerWebServiceImpl" />
-  <property name="service.description" value="Captionshandler SOAP Endpoint" />
-  <property name="service.exported.interfaces" value="org.opencastproject.captionsHandler.endpoint.CaptionshandlerWebService" />
+<component name="org.opencastproject.captions.CaptionsWebService" immediate="true">
+  <implementation class="org.opencastproject.captions.endpoint.CaptionsWebServiceImpl" />
+  <property name="service.description" value="Captions SOAP Endpoint" />
+  <property name="service.exported.interfaces" value="org.opencastproject.captions.endpoint.CaptionsWebService" />
   <property name="service.exported.configs" value="org.apache.cxf.ws" />
   <property name="org.apache.cxf.dosgi.databinding" value="jaxb"/>
   <property name="org.apache.cxf.dosgi.frontend" value="jaxws"/>
-  <property name="org.apache.cxf.ws.httpservice.context" value="/captionsHandler/soap" />
+  <property name="org.apache.cxf.ws.httpservice.context" value="/captions/soap" />
   <service>
-    <provide interface="org.opencastproject.captionsHandler.endpoint.CaptionshandlerWebService" />
+    <provide interface="org.opencastproject.captions.endpoint.CaptionsWebService" />
   </service>
-  <reference name="service-impl" interface="org.opencastproject.captionsHandler.api.CaptionshandlerService"
+  <reference name="service-impl" interface="org.opencastproject.captions.api.CaptionsService"
     cardinality="0..1" policy="dynamic" bind="setService" unbind="unsetService" />
 </component>
