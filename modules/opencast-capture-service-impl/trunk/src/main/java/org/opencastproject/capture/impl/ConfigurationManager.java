@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Dictionary;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -236,9 +235,8 @@ public class ConfigurationManager {
    * configuration manager
    * @return the key/value pair mapping
    */
-  @SuppressWarnings("unchecked")
-  public Dictionary<String, String> getAllProperties() {
-    return (Dictionary<String, String>) properties.clone();
+  public Properties getAllProperties() {
+    return (Properties) properties.clone();
   }
   
   /**

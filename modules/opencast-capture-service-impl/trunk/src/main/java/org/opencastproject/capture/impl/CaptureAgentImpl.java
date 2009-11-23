@@ -172,10 +172,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     logger.info("Initializing devices for capture...");
 
+    ConfigurationManager config = ConfigurationManager.getInstance();
+    config.merge(properties);
     
-    ConfigurationManager.getInstance().merge(properties);
-    
-    pipe = PipelineFactory.create(properties);
+    pipe = PipelineFactory.create(config.getAllProperties());
 
     
     if (pipe == null)

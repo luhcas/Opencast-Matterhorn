@@ -21,8 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.Properties;
 
 /**
  * Test the functionality of the ConfigurationManager
@@ -50,7 +49,7 @@ public class ConfigurationManagerTest {
   
   @Test
   public void testGetAllProperties() {
-    Dictionary<String, String> properties;
+    Properties properties;
     
     configManager.setItem("a", "1");
     configManager.setItem("b", "2");

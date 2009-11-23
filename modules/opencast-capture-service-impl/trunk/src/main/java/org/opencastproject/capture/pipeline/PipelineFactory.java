@@ -16,7 +16,6 @@
 package org.opencastproject.capture.pipeline;
 
 import org.opencastproject.capture.impl.CaptureParameters;
-import org.opencastproject.capture.impl.ConfigurationManager;
 
 import net.luniks.linux.jv4linfo.JV4LInfo;
 import net.luniks.linux.jv4linfo.JV4LInfoException;
@@ -56,13 +55,11 @@ public class PipelineFactory {
   public static Pipeline create(Properties props) {
     ArrayList<CaptureDevice> devices = new ArrayList<CaptureDevice>();
     
-    ConfigurationManager config = ConfigurationManager.getInstance();
-    
     /*
      * Identify which candidate video devices are described in the properties and create CaptureDevice objects out of
      * them.
      */
-    String deviceNames = config.getItem(CaptureParameters.CAPTURE_DEVICE_NAMES);
+    String deviceNames = props.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
     if (deviceNames == null) {
       logger.error("No capture devices specified in " + CaptureParameters.CAPTURE_DEVICE_NAMES);
       return null;
@@ -80,8 +77,8 @@ public class PipelineFactory {
       
       String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + "." + name + ".src";
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + "." + name + ".outputfile";
-      String srcLoc = config.getItem(srcProperty);
-      String outputLoc = config.getItem(outputProperty);
+      String srcLoc = props.getProperty(srcProperty);
+      String outputLoc = props.getProperty(outputProperty);
       
       /* Attempt to determine what the device is using the JV4LInfo library */
       try {
@@ -110,8 +107,8 @@ public class PipelineFactory {
       CaptureDevice capdev = new CaptureDevice(srcLoc, devName, outputLoc);
       String pluginProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + "." + name + ".plugin";
       String bitrateProperty = pluginProperty + ".properties.bitrate";
-      String plugin = config.getItem(pluginProperty);
-      String bitrate = config.getItem(bitrateProperty);
+      String plugin = props.getProperty(pluginProperty);
+      String bitrate = props.getProperty(bitrateProperty);
       
       if (plugin != null)
         capdev.properties.setProperty("plugin", plugin);
