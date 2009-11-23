@@ -110,7 +110,7 @@
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Export-Package>org.opencastproject.captionsHandler.*</Export-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=false</Embed-Dependency>
+            <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Service-Component>
               OSGI-INF/service.xml,
