@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-captionsHandler-service-impl</artifactId>
+  <artifactId>opencast-captions-service-impl</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-captionsHandler-service-impl</name>
+  <name>opencast-captions-service-impl</name>
   <version>0.1-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -109,7 +109,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Export-Package>org.opencastproject.captionsHandler.*</Export-Package>
+            <Export-Package>org.opencastproject.captions.*</Export-Package>
             <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Service-Component>
