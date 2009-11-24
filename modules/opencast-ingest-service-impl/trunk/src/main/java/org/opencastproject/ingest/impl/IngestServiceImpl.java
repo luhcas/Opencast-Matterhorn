@@ -29,10 +29,8 @@ import org.opencastproject.media.mediapackage.identifier.HandleBuilder;
 import org.opencastproject.media.mediapackage.identifier.HandleBuilderFactory;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
+import org.opencastproject.util.ZipUtil;
 import org.opencastproject.workspace.api.Workspace;
-
-import de.schlichtherle.io.File;
-import de.schlichtherle.io.FileOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.osgi.service.cm.ConfigurationException;
@@ -43,6 +41,9 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -91,8 +92,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
     // locally unpack the mediaPackage
     String tempPath = tempFolder + UUID.randomUUID().toString();
     // save inputStream to file
-    createDirectory(tempPath);
-    File tempDir = new File(tempPath);
+    File tempDir = createDirectory(tempPath);
     File f = new File(tempPath + fs + UUID.randomUUID().toString() + ".zip");
     OutputStream out = new FileOutputStream(f);
     int len;
@@ -102,15 +102,30 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
     out.close();
     mediaPackage.close();
     // unpack
-    f.copyAllTo(tempDir);
-
+    ZipUtil.unzip(f, tempDir);
     f.delete();
 
     // check media package and write data to file repo
-    File manifest = new File(tempPath + File.separator + "manifest.xml");
+    File manifest = null;
+    File topLevelManifest = new File(tempPath, "manifest.xml");
+    if(topLevelManifest.exists()) {
+      manifest = topLevelManifest;
+    } else {
+      // try to find the manifest in the first subdirectory, since the zip may have been constructed this way
+      File[] subDirs = tempDir.listFiles(new FileFilter() {public boolean accept(File pathname) {return pathname.isDirectory();}});
+      if(subDirs.length == 1) {
+        File subDirManifest = new File(subDirs[0], "manifest.xml");
+        if(subDirManifest.exists()) {
+          manifest = subDirManifest;
+        } else {
+          throw new RuntimeException("no manifest found in the root of this zip file or in the first directory");
+        }
+      }
+    }
+    
     MediaPackage mp;
     try {
-      builder.setSerializer(new DefaultMediaPackageSerializerImpl(new File(tempPath)));
+      builder.setSerializer(new DefaultMediaPackageSerializerImpl(manifest.getParentFile()));
       mp = builder.loadFromManifest(manifest.toURI().toURL().openStream());
       mp.renameTo(handleBuilder.createNew());
       builder.createNew();
