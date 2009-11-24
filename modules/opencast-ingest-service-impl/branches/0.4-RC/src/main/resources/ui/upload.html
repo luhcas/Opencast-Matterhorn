@@ -1,0 +1,173 @@
+          <!-- missing fields notification -->
+          <div class="fl-container-600" id="missingFields-container" style="display:none;">
+              <div class="fl-widget">
+                  <div class="fl-widget-titlebar warnbox-title">
+                      <b class="formbox-header-text" style="color:white;">Missing Inputs</b>
+                  </div>
+                  <div class="fl-widget-content warnbox-content">
+                      <ul>
+                          <li id="notification-title" class="missing-fields-item">
+                              <a href="" class="fl-icon inline-icon icon-bullet" title=""></a>Please <a href="javascript:document.basicData.title.focus();">enter a title</a> for the recording.
+                          </li>
+                          <li id="notification-dist" class="missing-fields-item">
+                              <a href="" class="fl-icon inline-icon icon-bullet" title=""></a>Please choose at least one <a href="javascript:document.getElementById('distITunesU').focus();">distribution channel</a>.
+                          </li>
+                          <li id="notification-file" class="missing-fields-item">
+                              <a href="" class="fl-icon inline-icon icon-bullet" title=""></a>Please select a media file to upload.
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+          </div>
+
+    <!-- Basic information -->
+    <div class="fl-container-600">
+        <div class="fl-widget">
+            <div class="fl-widget-content formbox-content fl-fix">
+                <form id="basicData" name="basicData">
+                <ul class="fl-controls-right wu-reset">
+                    <li class="fl-fix">
+                        <span class="fl-label form-label" id="label-title"><span style="color:red;">*</span>Title:</span>
+                        <input type="text" name="title" id="title" class="form-field" onchange="uploadEvents.fieldChanged(this);">
+                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                    </li>
+                    <li class="fl-fix">
+                        <span class="fl-label form-label" id="label-contributor">Presenter:</span>
+                        <input type="text" name="contributor" id="contributor" class="form-field">
+                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                    </li>
+                    <li class="fl-fix">
+                        <span class="fl-label form-label">&nbsp;</span>
+                        <a href="" class="fl-icon inline-icon icon-add" title=""></a>
+                        <nobr><a href="javascript:alert('add presenter');">Add additional presenter</a></nobr>
+                    </li>
+                    <li class="fl-fix">
+                        <span class="fl-label form-label">Sponsoring department:</span>
+                        <input type="text" name="department" id="department" class="form-field">
+                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                    </li>
+                </ul>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Content Description -->
+    <div class="fl-container-600">
+        <div class="fl-widget">
+            <div class="fl-widget-titlebar formbox-header folder-control">
+                <a href="#_bottom" class="fl-icon inline-icon folder-icon icon-arrow-right" title="Hide/unhide additional information">Fold/Unfold additional information</a>
+                <b>Additional Description</b>
+            </div>
+            <div class="fl-widget-content formbox-content fl-fix" style="display:none;">
+                <form id="additionalData" name="additionalData">
+                <ul class="fl-controls-right wu-reset">
+                    <li class="fl-fix">
+                        <span class="fl-label form-label">Series:</span>
+                        <input type="text" name="series" id="series" class="form-field">
+                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                    </li>
+                    <li class="fl-fix">
+                        <span class="fl-label form-label"">Subject:</span>
+                        <input type="text" name="subject" id="subject" class="form-field">
+                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                    </li>
+                    <li class="fl-fix">
+                        <span class="fl-label form-label">Language:</span>
+                        <input type="text" name="language" id="language" class="form-field">
+                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                    </li>
+                    <li class="fl-fix">
+                        <span class="fl-label form-label"">Description:</span>
+                        <textarea class="form-field" name="description" id="description" rows="5">
+                        </textarea>
+                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                    </li>
+                </ul>
+                </from>
+            </div>
+        </div>
+    </div>
+
+    <!-- Distribution -->
+    <div class="fl-container-600">
+        <div class="fl-widget">
+            <div class="fl-widget-titlebar formbox-header">
+                <b class="formbox-header-text">Distribution</b>
+            </div>
+            <div class="fl-widget-content formbox-content fl-fix">
+                <form id="distribution" name="distributionData">
+                <ul class="fl-controls-right wu-reset">
+                    <li class="fl-fix">
+                        <span class="fl-label form-label"  id="label-dist"><span style="color:red;">*</span>Distribution channel(s):</span>
+                        <div style="width:20%;float:left;">
+                            <input type="checkbox" name="distITunesU" id="distITunesU" onchange="uploadEvents.fieldChanged(this);">ITunesU
+                        </div>
+                        <input type="checkbox" name="distMHMM" id="distMHMM" onchange="uploadEvents.fieldChanged(this);"><span>Matterhorn media module</span>
+                    </li>
+                    <li class="fl-fix">
+                        <span class="fl-label form-label">&nbsp;</span>
+                        <div style="width:20%;float:left;">
+                            <input type="checkbox" name="distYouTube" id="distYouTube" onchange="uploadEvents.fieldChanged(this);">YouTube
+                        </div>
+                        <input type="checkbox" name="distSakai" id="distSakai" onchange="uploadEvents.fieldChanged(this);"><span>Sakai</span>
+                    </li>
+                    <li class="fl-fix">
+                        <span class="fl-label form-label">License:</span>
+                        <select class="form-field" name="license" id="license">
+                            <option>Some license</option>
+                        </select>
+                        <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                    </li>
+                </ul>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- file upload -->
+    <div class="fl-container-600">
+        <div class="fl-widget">
+            <div class="fl-widget-titlebar formbox-header">
+                <b class="formbox-header-text">File Upload</b>
+            </div>
+            <div class="fl-widget-content formbox-content fl-fix">
+                <ul class="fl-controls-right wu-reset">
+                    <li class="fl-fix">
+                        <span class="fl-label form-label" id="label-file"><span style="color:red;">*</span>Media file:</span>
+                        <span>
+                            <div id="filename" class="filename" id="filename">No file selected</div>
+                            <div class="fl-fix browse-button" style="position:relative;overflow:hidden;">
+                                <div id="uploader"></div>
+                                <button type="button" id="browse-button" class="browse-button">Browse</button>
+                            </div>
+                            <a href="" class="fl-icon inline-icon icon-help" title=""></a>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="fl-container-600">
+        <div class="fl-widget">
+            <div class="fl-widget-content fl-fix">
+                <ul class="fl-controls-right wu-reset">
+                    <li class="fl-fix">
+                        <span class="fl-label form-label"">&nbsp;</span>
+                        <span>
+                            <button onclick="uploadEvents.btnSubmit();">Submit</button>
+                            <button onclick="uploadEvents.btnClear();">Clear Form</button>
+                            <button onclick="uploadManager.checkUpload();">do</button>
+                        </span>
+                    </li>
+                    <li class="fl-fix">
+                        <span class="fl-label form-label"">&nbsp;</span>
+                        <span>
+                            <span style="color:red;">*</span>
+                            required
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
