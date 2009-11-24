@@ -240,7 +240,7 @@
           <configLocation>checkstyle.xml</configLocation>
           <logViolationsToConsole>true</logViolationsToConsole>
           <headerLocation>header.txt</headerLocation>
-          <excludes>**/package-info.java</excludes>
+          <excludes>**/package-info.java, de/schlichtherle/**/*</excludes>
         </configuration>
       </plugin>
     </plugins>
@@ -344,7 +344,7 @@
           </execution>
         </executions>
       </plugin>
-      
+
       <!-- Make the matterhorn plugin available to all subprojects -->
       <plugin>
         <groupId>org.opencastproject</groupId>

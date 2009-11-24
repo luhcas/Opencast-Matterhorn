@@ -88,21 +88,22 @@ public class IngestRestService {
     }
   }
 
-  @POST
-  @Produces(MediaType.TEXT_HTML)
-  @Path("discardMediaPackage")
-  public Response discardMediaPackage(MediapackageType mpt) {
-    try {
-      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-      service.discardMediaPackage(mp);
-      return Response.ok("Media package discarded.").build();
-    } catch (Exception e) {
-      return Response.serverError().status(400).build();
-    }
-  }
+  // @POST
+  // @Produces(MediaType.TEXT_HTML)
+  // @Path("discardMediaPackage")
+  // public Response discardMediaPackage(MediapackageType mpt) {
+  // try {
+  // MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
+  // service.discardMediaPackage(mp);
+  // return Response.ok("Media package discarded.").build();
+  // } catch (Exception e) {
+  // return Response.serverError().status(400).build();
+  // }
+  // }
 
   @POST
   @Produces(MediaType.TEXT_XML)
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addTrack")
   public Response addMediaPackageTrack(@FormParam("url") String url, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") MediapackageType mpt) {
@@ -111,6 +112,7 @@ public class IngestRestService {
       URL u = new URL(url);
       mp = service.addTrack(u, MediaPackageElementFlavor.parseFlavor(flavor), mp);
       mpt = MediapackageType.fromXml(mp.toXml());
+
       return Response.ok(mpt).build();
     } catch (Exception e) {
       return Response.serverError().status(400).build();
@@ -119,6 +121,7 @@ public class IngestRestService {
 
   @POST
   @Produces(MediaType.TEXT_XML)
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addTrack")
   public Response addMediaPackageTrack(@FormParam("file") InputStream file, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") MediapackageType mpt) {
@@ -134,6 +137,7 @@ public class IngestRestService {
 
   @POST
   @Produces(MediaType.TEXT_XML)
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addCatalog")
   public Response addMediaPackageCatalog(@FormParam("url") String url, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") MediapackageType mpt) {
@@ -150,6 +154,7 @@ public class IngestRestService {
 
   @POST
   @Produces(MediaType.TEXT_XML)
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addCatalog")
   public Response addMediaPackageCatalog(@FormParam("file") InputStream file, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") MediapackageType mpt) {
@@ -165,6 +170,7 @@ public class IngestRestService {
 
   @POST
   @Produces(MediaType.TEXT_XML)
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addAttachment")
   public Response addMediaPackageAttachment(@FormParam("url") String url, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") MediapackageType mpt) {
@@ -181,6 +187,7 @@ public class IngestRestService {
 
   @POST
   @Produces(MediaType.TEXT_XML)
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addAttachment")
   public Response addMediaPackageAttachment(@FormParam("file") InputStream file, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") MediapackageType mpt) {
@@ -212,8 +219,8 @@ public class IngestRestService {
             service.addTrack(item.openStream(), MediaPackageElements.INDEFINITE_TRACK, mp);
           }
         }
-        service.addCatalog(IOUtils.toInputStream(getStringFromDocument(dcc.toXml())),
-                MediaPackageElements.DUBLINCORE_CATALOG, mp);
+        String xml = getStringFromDocument(dcc.toXml());
+        service.addCatalog(IOUtils.toInputStream(xml), MediaPackageElements.DUBLINCORE_CATALOG, mp);
         MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
         service.ingest(mp);
         return Response.ok(mpt).build();
@@ -231,6 +238,7 @@ public class IngestRestService {
     try {
       service.addZippedMediaPackage(mp);
     } catch (Exception e) {
+      e.printStackTrace();
       return Response.serverError().status(400).build();
     }
     return Response.ok().build();

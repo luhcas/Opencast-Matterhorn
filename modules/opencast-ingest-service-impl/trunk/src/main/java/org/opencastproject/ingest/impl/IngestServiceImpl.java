@@ -24,14 +24,15 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.media.mediapackage.identifier.HandleBuilder;
 import org.opencastproject.media.mediapackage.identifier.HandleBuilderFactory;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.workspace.api.Workspace;
+
+import de.schlichtherle.io.File;
+import de.schlichtherle.io.FileOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.osgi.service.cm.ConfigurationException;
@@ -42,23 +43,20 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.UUID;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Creates and augments Matterhorn MediaPackages. Stores media into the Working File Repository.
  */
 public class IngestServiceImpl implements IngestService, ManagedService, EventHandler {
+  // TODO CONFIGURATION (tempPath, BUFFER)
+
   private static final Logger logger = LoggerFactory.getLogger(IngestServiceImpl.class);
   private MediaPackageBuilder builder = null;
   private HandleBuilder handleBuilder = null;
@@ -73,7 +71,10 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
     builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     handleBuilder = HandleBuilderFactory.newInstance().newHandleBuilder();
     fs = File.separator;
-    tempFolder = System.getProperty("java.io.tmpdir") + "opencast" + fs + "ingest-temp" + fs;
+    tempFolder = System.getProperty("java.io.tmpdir");
+    if (!tempFolder.endsWith(fs))
+      tempFolder += fs;
+    tempFolder += "opencast" + fs + "ingest-temp" + fs;
   }
 
   @SuppressWarnings("unchecked")
@@ -87,34 +88,24 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
    * @see org.opencastproject.ingest.api.IngestService#addZippedMediaPackage(java.io.InputStream)
    */
   public MediaPackage addZippedMediaPackage(InputStream mediaPackage) throws Exception {
-    // locally unzip the mediaPackage
+    // locally unpack the mediaPackage
     String tempPath = tempFolder + UUID.randomUUID().toString();
-    ZipInputStream zipStream = new ZipInputStream(mediaPackage);
-    ZipEntry entry = null;
-    try {
-      ArrayList<String> allFiles = new ArrayList<String>();
-      createDirectory(tempPath);
-      while ((entry = zipStream.getNextEntry()) != null) {
-        String fileName = entry.getName();
-        logger.info("Unzipping " + fileName);
-        allFiles.add(fileName);
-        FileOutputStream fout = new FileOutputStream(tempPath + File.separator + fileName);
-        byte[] buffer = new byte[1024];
-        int trueCount;
-        while ((trueCount = zipStream.read(buffer)) != -1) {
-          fout.write(buffer, 0, trueCount);
-        }
-        zipStream.closeEntry();
-        fout.close();
-      }
-      zipStream.close();
-    } catch (FileNotFoundException e) {
-      logger.error("Error while decompressing media package! Files could not be written. " + e.getMessage());
-      throw (e);
-    } catch (IOException e) {
-      logger.error("Error while decompressing media package! " + e.getMessage());
-      throw (e);
-    }
+    // save inputStream to file
+    createDirectory(tempPath);
+    File tempDir = new File(tempPath);
+    File f = new File(tempPath + fs + UUID.randomUUID().toString() + ".zip");
+    OutputStream out = new FileOutputStream(f);
+    int len;
+    byte[] buffer = new byte[1024];
+    while ((len = mediaPackage.read(buffer)) > 0)
+      out.write(buffer, 0, len);
+    out.close();
+    mediaPackage.close();
+    // unpack
+    f.copyAllTo(tempDir);
+
+    f.delete();
+
     // check media package and write data to file repo
     File manifest = new File(tempPath + File.separator + "manifest.xml");
     MediaPackage mp;
@@ -132,11 +123,11 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
         URL newUrl = addContentToRepo(mp, elId, filename, element.getURL().openStream());
         element.setURL(newUrl);
       }
-      removeDirectory(tempFolder);
     } catch (Exception e) {
       logger.error("Ingest service: Failed to ingest media package!");
       throw (e);
     }
+    removeDirectory(tempFolder);
     // broadcast event
     ingest(mp);
     return mp;
@@ -243,8 +234,8 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
    * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String,
    *      org.opencastproject.notification.api.NotificationService)
    */
-  public void ingest(MediaPackage mp) throws IllegalStateException, Exception{
-    
+  public void ingest(MediaPackage mp) throws IllegalStateException, Exception {
+
     // broadcast event
     if (eventAdmin != null) {
       logger.info("Broadcasting event...");
@@ -283,7 +274,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
       throw new IllegalStateException("EventAdmin not available");
     }
   }
-  
+
   // ----------------------------------------------
   // -------- processing of Conductor ACK ---------
   // ----------------------------------------------
@@ -373,7 +364,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
 
   }
 
-  private void createDirectory(String dir) {
+  private File createDirectory(String dir) {
     File f = new File(dir);
     if (!f.exists()) {
       try {
@@ -382,6 +373,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
         throw new RuntimeException(e);
       }
     }
+    return f;
   }
 
   private void removeDirectory(String dir) {
@@ -396,11 +388,17 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   }
 
   private MediaPackageElement inspect(MediaPackageElement element) {
-    if (inspection == null)
-      return element;
-    if (element.getElementType() == Type.Track) {
-      return inspection.enrich((Track) element, false);
-    }
+    // if (inspection == null)
+    // return element;
+    // if (element.getElementType() == Type.Track) {
+    // return inspection.enrich((Track) element, false);
+    // }
+    // if (element.getElementType() == Type.Catalog) {
+    // return (Catalog) inspection.enrich((AbstractMediaPackageElement) element, false);
+    // }
+    // if (element.getElementType() == Type.Attachment) {
+    // return inspection.enrich((Attachment) element, false);
+    // }
     return element;
   }
 

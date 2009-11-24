@@ -114,6 +114,17 @@
     	<artifactId>commons-collections</artifactId>
     	<version>3.2.1</version>
     </dependency>
+    <dependency>
+      <groupId>bouncycastle</groupId>
+      <artifactId>bcprov-jdk15</artifactId>
+      <version>140</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.ant</groupId>
+      <artifactId>ant</artifactId>
+      <version>1.7.1</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -126,7 +137,9 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.ingest.impl, org.opencastproject.ingest.endpoint </Export-Package>
-            <Import-Package>org.opencastproject.util, *</Import-Package>
+            <Private-Package> META-INF.services, de.schlichtherle.*, org.apache.tools.*</Private-Package>
+            <Import-Package> !com.sun.*, *;resolution:=optional </Import-Package>
+            <Embed-Dependency>ant;inline=true</Embed-Dependency>            
             <Service-Component>
               OSGI-INF/ingest-service.xml,
               OSGI-INF/ingest-service-rest.xml,
