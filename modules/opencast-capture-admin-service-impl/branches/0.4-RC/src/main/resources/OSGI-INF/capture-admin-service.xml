@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.capture.admin.api.CaptureAgentStatusService" immediate="true">
-  <implementation class="org.opencastproject.capture.admin.impl.CaptureAgentStatusServiceImpl" />
-  <property name="service.description" value="Capture-Admin Service" />
-  <service>
-    <provide interface="org.opencastproject.capture.admin.api.CaptureAgentStatusService" />
-    <provide interface="org.osgi.service.cm.ManagedService" />
-  </service>
-</component>
