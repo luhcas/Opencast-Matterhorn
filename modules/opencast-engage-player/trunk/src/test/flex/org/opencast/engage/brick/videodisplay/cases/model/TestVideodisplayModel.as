@@ -10,6 +10,7 @@ package org.opencast.engage.brick.videodisplay.cases.model
     
     public class TestVideodisplayModel
     {
+    	
         private var videoDisplayModel:VideodisplayModel;
         private var languageVO:LanguageVO;
 
@@ -35,6 +36,8 @@ package org.opencast.engage.brick.videodisplay.cases.model
                                 this.videoDisplayModel.player = player, true );                   
                           
         }
+        
+        
         
         [Test]
         public function testModelAttributes_currentDuration():void
@@ -133,6 +136,16 @@ package org.opencast.engage.brick.videodisplay.cases.model
                                 this.videoDisplayModel.languages = languages, true );                     
         }
        
+       
+       
+       /* [Test]
+        public function testModelAttributes_languages():void
+        {
+            var test:int = 5;
+            var test1:int = 5;
+            Assert.assertEquals("simple test for flexmojos ", 
+                               test1 == test1, true );                     
+        }*/
 
     }
 }

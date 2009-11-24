@@ -1,5 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>EngageApp</groupId>
@@ -35,82 +36,80 @@
 
 	<build>
 		<sourceDirectory>src/main/flex/Videodisplay</sourceDirectory>
-	<!--	<testSourceDirectory>src/test/flex</testSourceDirectory>-->
+		<!--<testSourceDirectory>src/test/flex</testSourceDirectory>-->
 		<plugins>
 			<plugin>
 				<groupId>org.sonatype.flexmojos</groupId>
 				<artifactId>flexmojos-maven-plugin</artifactId>
-				<version>3.0.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.adobe.flex</groupId>
+						<artifactId>compiler</artifactId>
+						<version>3.4.0.9271</version>
+						<type>pom</type>
+					</dependency>
+				</dependencies>
+				<version>3.4.2</version>
 				<extensions>true</extensions>
 				<configuration>
 					<targetPlayer>10.0.0</targetPlayer>
 					<accessible>true</accessible>
 					<headlessServer>true</headlessServer>
 					<showWarnings>false</showWarnings>
-					<output>target/hybrid-player/Videodisplay.swf</output>
+					<output>${project.build.directory}/hybrid-player/Videodisplay.swf</output>
 				</configuration>
-				<executions> 
-                  <!--    <execution> 
-							<phase>install</phase> 
-                                <goals> 
-                                  <goal>asdoc</goal>
-                                </goals>
-                                <configuration> 
-                     			<mainTitle>Opencast-Matterhorn Videodisplay</mainTitle>
-                  				<windowTitle>Opencast-Matterhorn Videodisplay</windowTitle>
-                  				<output>docs/Opencast-Matterhorn Videodisplay</output>
-                  				</configuration> 
-                          </execution> -->
-                </executions>
 			</plugin>
 			<plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-resources-plugin</artifactId>
-        <version>2.4.1</version>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>install</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/target/hybrid-player</outputDirectory>
-              <resources>          
-                <resource>
-                  <directory>src/main/html/html-release</directory>
-                  <filtering>true</filtering>
-                </resource>
-                <resource>
-                  <directory>src/main/resources</directory>
-                  <filtering>true</filtering>
-                </resource>
-                <resource>
-                  <directory>src/main/flex/Videodisplay/</directory>
-                  <filtering>true</filtering>
-                 	<includes>
-         			 <include>style/</include>
-       				</includes>
-                </resource>
-              </resources>              
-            </configuration>            
-          </execution>
-        </executions>
-      </plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.4.1</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/target/hybrid-player</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/main/html/html-release</directory>
+									<filtering>true</filtering>
+								</resource>
+								<resource>
+									<directory>src/main/resources</directory>
+									<filtering>true</filtering>
+								</resource>
+								<resource>
+									<directory>src/main/flex/Videodisplay/</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>style/</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
-	<!--	
-			<dependency> <groupId>org.sonatype.flexmojos</groupId>
-			<artifactId>flexmojos-unittest-support</artifactId>
-			<version>3.3.0</version> <type>swc</type> <scope>test</scope>
-			</dependency>
-		-->
+
+		<dependency>
+			<groupId>com.adobe.flexunit</groupId>
+			<artifactId>flexunit</artifactId>
+			<version>4.0-beta-2</version>
+			<type>swc</type>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>com.adobe.flex.framework</groupId>
 			<artifactId>flex-framework</artifactId>
-			<version>3.3.0.4852</version>
+			<version>3.4.0.9271</version>
 			<type>pom</type>
 			<exclusions>
 				<exclusion>
@@ -119,23 +118,24 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
 		<dependency>
 			<groupId>com.adobe.flex.framework</groupId>
 			<artifactId>playerglobal</artifactId>
-			<version>3.3.0.4852</version>
+			<version>3.4.0.9271</version>
 			<classifier>10</classifier>
 			<type>swc</type>
 		</dependency>
 		<dependency>
-			<groupId>com.adobe.osmf</groupId> 
-			<artifactId>MediaFramework</artifactId> 
-			<version>0.6</version> 
+			<groupId>com.adobe.osmf</groupId>
+			<artifactId>MediaFramework</artifactId>
+			<version>0.6</version>
 			<type>swc</type>
 		</dependency>
 		<dependency>
-			<groupId>com.adobe.swiz</groupId> 
-			<artifactId>swiz</artifactId> 
-			<version>0.6.2</version> 
+			<groupId>com.adobe.swiz</groupId>
+			<artifactId>swiz</artifactId>
+			<version>0.6.2</version>
 			<type>swc</type>
 		</dependency>
 	</dependencies>
