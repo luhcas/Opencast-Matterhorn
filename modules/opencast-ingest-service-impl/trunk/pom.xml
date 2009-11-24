@@ -120,11 +120,6 @@
       <version>140</version>
       <scope>compile</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.ant</groupId>
-      <artifactId>ant</artifactId>
-      <version>1.7.1</version>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -139,7 +134,6 @@
             <Export-Package> org.opencastproject.ingest.impl, org.opencastproject.ingest.endpoint </Export-Package>
             <Private-Package> META-INF.services, de.schlichtherle.*, org.apache.tools.*</Private-Package>
             <Import-Package> !com.sun.*, *;resolution:=optional </Import-Package>
-            <Embed-Dependency>ant;inline=true</Embed-Dependency>            
             <Service-Component>
               OSGI-INF/ingest-service.xml,
               OSGI-INF/ingest-service-rest.xml,

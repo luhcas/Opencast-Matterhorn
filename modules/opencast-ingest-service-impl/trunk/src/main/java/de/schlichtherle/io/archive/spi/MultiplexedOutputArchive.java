@@ -25,7 +25,6 @@ import de.schlichtherle.io.ChainableIOException;
 import de.schlichtherle.io.File;
 import de.schlichtherle.io.InputIOException;
 import de.schlichtherle.io.OutputArchiveMetaData;
-import de.schlichtherle.io.archive.tar.TarEntry;
 import de.schlichtherle.io.archive.zip.ZipEntry;
 import de.schlichtherle.io.util.Temps;
 import de.schlichtherle.util.JointEnumeration;
@@ -218,8 +217,8 @@ public class MultiplexedOutputArchive implements OutputArchive {
     private void setSize(final ArchiveEntry entry, final long size) {
         if (entry instanceof ZipEntry) {
             ((ZipEntry) entry).setSize(size);
-        } else if (entry instanceof TarEntry) {
-            ((TarEntry) entry).setSize(size);
+//        } else if (entry instanceof TarEntry) {
+//            ((TarEntry) entry).setSize(size);
         } else {
             assert false : "Unknown archive entry type: File.length() may return 0 while the temp file hasn't yet been saved to the output archive.";
         }
