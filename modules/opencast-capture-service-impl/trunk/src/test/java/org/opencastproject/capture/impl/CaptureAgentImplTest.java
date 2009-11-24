@@ -25,21 +25,30 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.util.Properties;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 public class CaptureAgentImplTest {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);
 
   private static final String captureDir = CaptureAgentImpl.tmpPath;
-  //private static final String ingestURL = "http://nightly.opencastproject.org/ingest/rest/addZippedMediaPackage";
-  private static final String ingestURL = "http://rubenrua.uvigo.es:8080";
   
   private CaptureAgentImpl service = null;
   private final File[] outFiles = {new File(captureDir+File.separator+"professor.mpg"),
                                    new File(captureDir+File.separator+"screen.mpg"),
                                    new File(captureDir+File.separator+"microphone.mp2"),
                                    new File(captureDir+File.separator+"capture.stopped")};
-  private final File manifest = new File(captureDir+File.separator+"manifest.xml");
   private final long msecs = 10000;
-  
+  private final File manifest = new File(captureDir+File.separator+"manifest.xml");
 
   @Before
   public void setup() {
@@ -50,7 +59,7 @@ public class CaptureAgentImplTest {
       if (checkFile.exists())
         checkFile.delete();
     }
-    
+
     if (manifest.exists())
       manifest.delete();
   }
@@ -62,9 +71,9 @@ public class CaptureAgentImplTest {
 
   @Test
   public void testCapture() {
-     
+    /*
     try {
-      /* setup some default hard-coded properties */
+
       Properties props = new Properties();
       props.setProperty(CaptureParameters.CAPTURE_DEVICE_NAMES, "SCREEN,PRESENTER,AUDIO");
       props.setProperty("capture.device.SCREEN.src", "/dev/video1");
@@ -93,8 +102,6 @@ public class CaptureAgentImplTest {
       // Checks correct return value
       Assert.assertTrue(result.equals("Capture OK"));
       
-      System.out.println("After AssertTrue()");
-
     } catch (UnsatisfiedLinkError e) {
       logger.error("Could not properly test capture agent: {}.", e.getMessage());
     }
@@ -136,7 +143,7 @@ public class CaptureAgentImplTest {
       logger.error("I/O Exception: "+e.getMessage());
       Assert.fail("I/O Exception: "+e.getMessage());
     }
-*/
+*/ /*
       // Zips files
       File zip = new File(captureDir+File.separator+"output.zip");
       service.zipFiles(zip.getAbsolutePath());
@@ -146,14 +153,18 @@ public class CaptureAgentImplTest {
       // Checks for the existence of the .zip file
       Assert.assertTrue(zip.exists());
       
-      // Checks that files inside the .zip file are those expected
-      // TODO  Necessary?      
-      
-      logger.info("Let's injest.");
+      Transformer transformer = TransformerFactory.newInstance().newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
       // Ingests the file
       logger.info("Ingest result:\n==============\n{}", service.doIngest(ingestURL, zip));
     
+    // Checks for the existence of the .zip file
+    // TODO
+    
+    // Checks files inside the .zip file are those expected
+    // TODO
+*/
   }
 
 }

@@ -18,10 +18,10 @@ package org.opencastproject.capture.impl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.xml.transform.OutputKeys;
@@ -52,7 +52,6 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.track.TrackImpl;
 import org.opencastproject.util.Compressor;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -167,8 +166,6 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
       logger.error("Media Package exception: {}.", e.getMessage());
       return "Media Package exception";
     }
-
-    props = properties;
 
     return startCapture(pack, properties);
   }
@@ -302,39 +299,6 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
 
     //TODO:  Either remove this code or bring it back.  We need to comment/log it (per MH-1597) if it's going to stay
 
-    // Check all the output files are correctly generated
-    //String[] fileNames = props.values().toArray(new String[props.size()]);
-    //long duration = -1;
-
-    // For the moment checks all files have the same duration and it's longer than 1 sec.
-    /*
-    try {
-      for (String fileName : fileNames) {
-        File aFile = new File(fileName);
-        if (aFile.exists()) {
-          long tempDuration = inspector.inspect(aFile.toURL()).getDuration();
-
-          // If duration == -1 we need to initialize it
-          if (duration == -1)
-            if (tempDuration > 1000)
-              duration = tempDuration;
-            else {
-              result = "Invalid media file: " + fileName;
-              break;
-            }
-
-          if (tempDuration != duration) {
-            result = "Unexpected duration (" + tempDuration +") in file " + fileName;
-            result += "\n(Should be " + duration + ")";
-            break;
-          }
-        } else
-          result = "File " + fileName + "not found";
-      }
-    } catch (MalformedURLException e) {
-      result = "Malformed URL Exception";
-    }
-     */
     return result;
   }
 
@@ -422,22 +386,44 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
    * @throws IOException 
    * @throws TransformerException 
    */
-  private void doManifest() throws MediaPackageException, UnsupportedElementException, IOException, TransformerException {
+  private boolean doManifest() throws MediaPackageException, UnsupportedElementException, IOException, TransformerException {
     logger.debug("Generating manifest.");
 
     // Generates the manifest
     try {
       MediaPackage pkg = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
 
-      Enumeration<Object> keys = props.keys();
       // Inserts the tracks in the MediaPackage
-      while (keys.hasMoreElements()) {
-        File item = new File(props.getProperty((String)keys.nextElement()));
-        if (item.exists())
+      // TODO Specify the flavour
+      String deviceNames = config.getItem(CaptureParameters.CAPTURE_DEVICE_NAMES);
+      if (deviceNames == null) {
+        logger.error("No capture devices specified in " + CaptureParameters.CAPTURE_DEVICE_NAMES);
+        return false;
+      }
+      
+      String[] friendlyNames = deviceNames.split(",");
+      
+      for (String name : friendlyNames) {
+        name = name.trim();
+       
+        // Disregard the empty string
+        if (name.equals(""))
+          continue;
+        
+        String fileName = config.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + "." + name + ".outputfile");
+        
+        if (fileName == null)
+          continue;
+     
+        File outputFile = new File(fileName);
+
+        if (outputFile.exists())
             // Adds a track
-            pkg.add(TrackImpl.fromURL(item.toURI().toURL()));
+            pkg.add(new URL(outputFile.getName()));
       }
 
+      // TODO insert a catalog with some capture metadata
+      
       // Gets the manifest.xml as a Document object
       Document doc = pkg.toXml();
 
@@ -466,6 +452,8 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
       throw e;
     }
 
+    return true;
+    
   }
 
     /**
@@ -501,13 +489,14 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
 
       setAgentState(AgentState.UPLOADING);
       setRecordingState(RecordingState.UPLOADING);
+      
       try {
         // Set the file as the body of the request
         postMethod.setEntity(new FileEntity(fileDesc, URLConnection.getFileNameMap().getContentTypeFor(fileDesc.getName())));
 
         // Send the file
         HttpResponse response = client.execute(postMethod);
-
+        
         retValue = response.getStatusLine().getReasonPhrase();
 
         setRecordingState(RecordingState.UPLOAD_FINISHED);
