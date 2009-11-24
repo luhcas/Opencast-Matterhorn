@@ -1,0 +1,56 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <h2>
+      Search Service REST endpoint
+    </h2>
+    
+    <div>
+      <b>GET episode</b> returns episodes that match these query parameters:
+      <div>
+        <b>id</b> The episode ID
+        <b>seriesId</b> All episodes in the series with this ID
+        <b>q</b> Any episode that matches this free-text query. For example: <a href="./episode?q=vegetation">./episode?q=vegetation</a>
+        <b>limit</b> The maximum number of items to return per page
+        <b>offset</b> The page number
+      </div>
+    </div>
+    <div>
+      <b>GET series</b> returns series that match these query parameters:
+      <div>
+        <b>id</b> The series ID.  This takes the additional boolean "episodes" parameter.  If true, the result set will
+        include this series episodes.
+        <b>q</b> Any series that matches this free-text query.  This takes the additional boolean "episodes" parameter.
+        If true, the result set will include this series episodes.
+        <b>limit</b> The maximum number of items to return per page
+        <b>offset</b> The page number
+      </div>
+    </div>
+    <div>
+      <b>POST add</b> Adds a mediapackage to the search index.
+      <form action="add" method="POST">
+        Media Package XML<br/>
+        <textarea rows="20" cols="80" id="mediapackage" name="mediapackage">
+<mediapackage id="00000/1" start="2007-12-05T13:40:00" duration="1004400000">
+  <metadata>
+    <catalog id="catalog-1" type="metadata/dublincore">
+      <mimetype>text/xml</mimetype>
+      <url>http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/dublincore.xml</url>
+      <checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</checksum>
+    </catalog>
+    <catalog id="catalog-3" type="metadata/mpeg-7" ref="track:track-1">
+      <mimetype>text/xml</mimetype>
+      <url>http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/mpeg7.xml</url>
+      <checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</checksum>
+    </catalog>
+  </metadata>
+</mediapackage></textarea><br/>
+        <input type="submit" value="Add to search index"/>
+      </form>
+    </div>
+    <div>
+      $Rev$
+    </div>
+  </body>
+</html>
