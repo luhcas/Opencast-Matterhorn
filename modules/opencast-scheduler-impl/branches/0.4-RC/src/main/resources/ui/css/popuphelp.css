@@ -1,0 +1,16 @@
+.helpbox {
+    position:absolute;
+    border: 1px solid black;
+    background: #CCFFFF;
+    padding: 5px;
+    padding-top:7px;
+    max-width:30em;
+    min-width:5em;
+}
+
+.closeButton {
+    position:absolute;
+    right:3px;
+    top:3px;
+}
+

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.scheduler.SchedulerWebService"
+	immediate="true">
+	<implementation
+		class="org.opencastproject.scheduler.endpoint.SchedulerWebServiceImpl" />
+	<property name="service.description" value="Scheduler SOAP Endpoint" />
+	<property name="service.exported.interfaces"
+		value="org.opencastproject.scheduler.endpoint.SchedulerWebService" />
+	<property name="service.exported.configs" value="org.apache.cxf.ws" />
+	<property name="org.apache.cxf.dosgi.databinding" value="jaxb" />
+	<property name="org.apache.cxf.dosgi.frontend" value="jaxws" />
+	<property name="org.apache.cxf.ws.httpservice.context" value="/scheduler/soap" />
+	<service>
+		<provide interface="org.opencastproject.scheduler.endpoint.SchedulerWebService" />
+	</service>
+	<reference name="service-impl"
+		interface="org.opencastproject.scheduler.api.SchedulerService"
+		cardinality="0..1" policy="dynamic" bind="setService" unbind="unsetService" />
+</component>
