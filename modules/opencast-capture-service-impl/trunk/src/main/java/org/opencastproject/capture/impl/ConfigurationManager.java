@@ -71,20 +71,21 @@ public class ConfigurationManager {
     try {
       properties.load(bundleConfig.openStream());
     } catch (MalformedURLException e) {
-      logger.warn("Malformed URL, cannot load bundle config file", e);
+      logger.warn("Malformed URL, cannot load bundle config file: {}.", e.getMessage());
     } catch (FileNotFoundException e) {
-      logger.error("Bundle configuration file not found.", e);
+      logger.error("Bundle configuration file not found: {}.", e.getMessage());
     } catch (IOException e) {
-      logger.error("Unable to load bundle config file", e);
+      logger.error("Unable to load bundle config file: {}.", e.getMessage());
     }
 
     // Attempt to parse the location of the configuration server
     try {
       url = new URL(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_URL));
     } catch (MalformedURLException e) {
-      logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_CONFIG_URL + ", disabling polling");
+      logger.warn("Malformed URL for {}, disabling polling.", CaptureParameters.CAPTURE_CONFIG_URL);
     }
-    
+
+    //TODO:  Redo this bit.  We should be able to read config data from 1) a remote source 2) a cached local copy of the config data
     // Checking the filesystem for configuration file
     try {
       localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_FILESYSTEM_URL));
@@ -98,13 +99,14 @@ public class ConfigurationManager {
       try {
         localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
       } catch (NullPointerException e) {
-        logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_CONFIG_CACHE_URL + ", disabling caching");
+        logger.warn("Malformed URL for {}, disabling caching", CaptureParameters.CAPTURE_CONFIG_CACHE_URL);
       }
     }
     
     // If this is the case capture there will be no capture devices specified
     if (url == null && localConfig == null) {
       logger.error("No configuration data was found, this is very bad!");
+      //TODO:  return here?
     }
     else {
       // Load the users configuration into the configuration, overwriting any conflicts
@@ -127,11 +129,11 @@ public class ConfigurationManager {
         // Times in the config file are in seconds, so multiply by 1000
         delay = Long.parseLong(reload) * 1000L;
         if (delay < 1) {
-          logger.info("Polling time has been set to less than 1 second, polling disabled");
+          logger.info("Polling time has been set to less than 1 second, polling disabled.");
           return;
         }
       } catch (NumberFormatException e) {
-        logger.warn("Invalid polling time for parameter " + CaptureParameters.CAPTURE_CONFIG_POLLING_INTERVAL);
+        logger.warn("Invalid polling time for parameter {}.", CaptureParameters.CAPTURE_CONFIG_POLLING_INTERVAL);
         // If the polling time value is invalid, don't poll
         return;
       }
@@ -157,16 +159,18 @@ public class ConfigurationManager {
    * @param config The configuration manager to store the key-value pair
    */
   private void createFileObj(String key, ConfigurationManager config) {
+    File target = null;
     try {
-      File target = new File (config.getItem(key));
-      try {
-        FileUtils.forceMkdir(target);
-        config.setItem(key, target.toString());
-      } catch (IOException e) {
-        logger.error("Unable to create directory " + target.toString(), e);
+      target = new File (config.getItem(key));
+      FileUtils.forceMkdir(target);
+      config.setItem(key, target.toString());
+      if (!target.exists()) {
+        throw new RuntimeException("Unable to create directory " + target + ".");
       }
+    } catch (IOException e) {
+      logger.error("Unable to create directory: {}, because {} happened.", target, e.getMessage());
     } catch (NullPointerException e) {
-      logger.error("No value found for key " + key);
+      logger.error("No value found for key {}.", key);
     }
   }
   
@@ -223,7 +227,7 @@ public class ConfigurationManager {
       URLConnection urlc = url.openConnection();
       properties.load(urlc.getInputStream());
     } catch (Exception e) {
-      logger.warn("Could not get config file from server", e);
+      logger.warn("Could not get config file from server: {}.", e);
     }
   }
   
@@ -241,7 +245,7 @@ public class ConfigurationManager {
       }
       properties.store(new FileOutputStream(localConfig), "capture config");
     } catch (Exception e) {
-      logger.warn("Could not write config file to disk!");
+      logger.warn("Could not write config file to disk: {}.", e.getMessage());
     }
   }
   
@@ -290,6 +294,8 @@ public class ConfigurationManager {
    * get a new version of the capture configuration from a centralised server.
    */
   class UpdateConfig extends TimerTask {
+
+    @Override
     public void run() {
       retrieveConfigFromServer();
       writeConfigFileToDisk();

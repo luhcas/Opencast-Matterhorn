@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * TODO:  Write me!  Comment me!
  * @see Capture-adminWebService
  */
 @WebService()
@@ -29,6 +30,7 @@ public class CaptureAgentStatusWebServiceImpl implements CaptureAgentStatusWebSe
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentStatusWebServiceImpl.class);
   
   private CaptureAgentStatusService service;
+
   public void setService(CaptureAgentStatusService service) {
     this.service = service;
   }

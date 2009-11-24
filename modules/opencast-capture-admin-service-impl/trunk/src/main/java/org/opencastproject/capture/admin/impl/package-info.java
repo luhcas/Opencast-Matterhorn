@@ -1,7 +1,5 @@
 /**
- * Capture-admin service implementation classes
+ * Capture-admin service implementation classes.
+ * These provide a centralized place where we can store Agents, Recordings, their statuses and their capabilities.
  */
-@javax.xml.bind.annotation.XmlSchema(elementFormDefault=XmlNsForm.QUALIFIED)
 package org.opencastproject.capture.admin.impl;
-
-import javax.xml.bind.annotation.XmlNsForm;

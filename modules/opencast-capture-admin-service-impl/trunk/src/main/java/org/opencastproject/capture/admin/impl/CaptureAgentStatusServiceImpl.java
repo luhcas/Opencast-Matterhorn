@@ -39,6 +39,7 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
   private HashMap<String, Recording> recordings;
 
   public CaptureAgentStatusServiceImpl() {
+    logger.info("CaptureAgentStatusServiceImpl starting.");
     agents = new HashMap<String, Agent>();
     recordings = new HashMap<String, Recording>();
   }
@@ -51,9 +52,11 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
     Agent req = agents.get(agentName);
     //If that agent doesn't exist, return an unknown agent, else return the known agent
     if (req == null) {
+      logger.debug("Agent {} does not exist in the system.", agentName);
       Agent a = new Agent(agentName, AgentState.UNKNOWN);
       return a;
     } else {
+      logger.debug("Agent {} found, returning state.", agentName);
       return req;
     }
   }
@@ -66,8 +69,10 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
     Agent req = agents.get(agentName);
     //if the agent is known set the state
     if (req != null) {
+      logger.debug("Setting Agent {} to state {}.", agentName, state);
       req.setState(state);
     } else {
+      logger.debug("Creating Agent {} with state {}.", agentName, state);
       Agent a = new Agent(agentName, state);
       agents.put(agentName, a);
     }
@@ -78,6 +83,7 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
    * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#removeAgent(java.lang.String)
    */
   public void removeAgent(String agentName) {
+    logger.debug("Removing Agent {}.", agentName);
     agents.remove(agentName);
   }
 
@@ -91,15 +97,26 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
 
   /**
    * {@inheritDoc}
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#getAgentCapabilities()
+   */
+  public Map<String, String> getAgentCapabilities() {
+    //TODO:  Fill this in for MH-1336
+    return null;
+  }
+
+  /**
+   * {@inheritDoc}
    * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#getRecordingState(java.lang.String)
    */
   public Recording getRecordingState(String id) {
     Recording req = recordings.get(id);
     //If that agent doesn't exist, return an unknown agent, else return the known agent
     if (req == null) {
+      logger.debug("Recording {} does not exist in the system.", id);
       Recording r = new Recording(id, RecordingState.UNKNOWN);
       return r;
     } else {
+      logger.debug("Recording {} found, returning state.", id);
       return req;
     }
   }
@@ -111,8 +128,10 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
   public void setRecordingState(String id, String state) {
     Recording req = recordings.get(id);
     if (req != null) {
+      logger.debug("Setting Recording {} to state {}.", id, state);
       req.setState(state);
     } else {
+      logger.debug("Creating Recording {} with state {}.", id, state);
       Recording r = new Recording(id, state);
       recordings.put(id, r);
     }
@@ -123,6 +142,7 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
    * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#removeRecording(java.lang.String)
    */
   public void removeRecording(String id) {
+    logger.debug("Removing Recording {}.", id);
     recordings.remove(id);
   }
   

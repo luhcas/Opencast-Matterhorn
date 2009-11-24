@@ -19,7 +19,7 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 
 import org.opencastproject.capture.api.StatusService;
-import org.opencastproject.capture.impl.StatusServiceImpl;
+import org.opencastproject.capture.impl.CaptureAgentImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class StatusWebServiceImpl implements StatusWebService {
   private StatusService service;
 
   public StatusWebServiceImpl() {
-    service = new StatusServiceImpl();
+    service = new CaptureAgentImpl();
   }
 
   public void setService(StatusService service) {
@@ -46,6 +46,6 @@ public class StatusWebServiceImpl implements StatusWebService {
 
   @WebMethod()
   public String getStatus() {
-    return service.getState();
+    return service.getAgentState();
   }
 }

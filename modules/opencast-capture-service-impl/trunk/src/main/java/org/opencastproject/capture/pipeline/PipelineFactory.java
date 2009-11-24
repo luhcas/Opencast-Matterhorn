@@ -61,7 +61,7 @@ public class PipelineFactory {
      */
     String deviceNames = props.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
     if (deviceNames == null) {
-      logger.error("No capture devices specified in " + CaptureParameters.CAPTURE_DEVICE_NAMES);
+      logger.error("No capture devices specified in {}.", CaptureParameters.CAPTURE_DEVICE_NAMES);
       return null;
     }
     
@@ -94,12 +94,12 @@ public class PipelineFactory {
           else if (deviceString.contains("BT878"))
             devName = DeviceName.BLUECHERRY_PROVIDEO;
           else {
-            logger.error("Device not recognized: " + srcLoc + ", ignoring...");
+            logger.error("Device not recognized: {}, ignoring.", srcLoc);
             continue;
           }
         }
       } catch (JV4LInfoException e) {
-        logger.error("Could not access device: " + srcLoc);
+        logger.error("Could not access device: {}.", srcLoc);
         continue;
       }
       
@@ -116,12 +116,12 @@ public class PipelineFactory {
         capdev.properties.setProperty("bitrate", bitrate);
   
       if (!devices.add(capdev))
-        logger.error("Unable to add device: " + capdev);
+        logger.error("Unable to add device: {}.", capdev);
     }
 
-    logger.info("Successfully initialised " + devices.size() + " devices.");
+    logger.info("Successfully initialised {} devices.", devices.size());
     for (int i = 0; i < devices.size(); i++)
-      logger.info("Device #" + i + ": " + devices.get(i));
+      logger.info("Device #{}: {}.", i, devices.get(i));
 
     // setup gstreamer pipeline using capture devices 
     Gst.init(); // cannot using gst library without first initialising it
@@ -129,7 +129,7 @@ public class PipelineFactory {
     Pipeline pipeline = new Pipeline();
     for (int i = 0; i < devices.size(); i++) {
       if (!addPipeline(devices.get(i), pipeline))
-        logger.error("Failed to create pipeline for " + devices.get(i));
+        logger.error("Failed to create pipeline for {}.", devices.get(i));
     }
 
     return pipeline;

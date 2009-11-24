@@ -15,12 +15,8 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.track.TrackImpl;
-import org.opencastproject.util.ConfigurationException;
+import java.io.File;
+import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -28,22 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.Properties;
-
-import java.io.File;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 public class CaptureAgentImplTest {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);
@@ -94,16 +74,16 @@ public class CaptureAgentImplTest {
       props.setProperty("capture.device.AUDIO.src", "hw:0");
       props.setProperty("capture.device.AUDIO.outputfile", outFiles[2].getAbsolutePath());
       
-      logger.info("Starting capture");
+      logger.info("Starting capture.");
       
       service.startCapture(props);
       
-      logger.info("Starting timing...");
+      logger.info("Starting timing.");
       try {
         Thread.sleep(msecs);
       } catch (InterruptedException e) {
-        logger.error("Unexpected exception while sleeping: "+e.getMessage());
-        Assert.fail("Unexpected exception while sleeping: "+e.getMessage());
+        logger.error("Unexpected exception while sleeping: {}.", e.getMessage());
+        Assert.fail("Unexpected exception while sleeping: " + e.getMessage());
       }
   
       logger.info("End of timing. Stopping...");
@@ -116,15 +96,16 @@ public class CaptureAgentImplTest {
       System.out.println("After AssertTrue()");
 
     } catch (UnsatisfiedLinkError e) {
-      logger.error("Could not properly test capture agent: " + e.getMessage());
+      logger.error("Could not properly test capture agent: {}.", e.getMessage());
     }
     
     // Checks for the existence of the expected files
     for (File item : outFiles)
       Assert.assertTrue(item.exists());
 
-    System.out.println("Existence checked");
-    
+    logger.info("Existence checked.");
+
+    //TODO:  Bring this back, or kill it.  If it comes back, let greg_logan know so he can fix the logging style here.
     // Generates the manifest
     /*    try {
       MediaPackage pkg = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
@@ -160,7 +141,7 @@ public class CaptureAgentImplTest {
       File zip = new File(captureDir+File.separator+"output.zip");
       service.zipFiles(zip.getAbsolutePath());
       
-      System.out.println("Files zipped");
+      logger.info("Files zipped.");
 
       // Checks for the existence of the .zip file
       Assert.assertTrue(zip.exists());
@@ -168,10 +149,10 @@ public class CaptureAgentImplTest {
       // Checks that files inside the .zip file are those expected
       // TODO  Necessary?      
       
-      System.out.println("Let's injest");
+      logger.info("Let's injest.");
 
       // Ingests the file
-      System.out.println("Ingest result:\n==============\n"+service.doIngest(ingestURL, zip));
+      logger.info("Ingest result:\n==============\n{}", service.doIngest(ingestURL, zip));
     
   }
 

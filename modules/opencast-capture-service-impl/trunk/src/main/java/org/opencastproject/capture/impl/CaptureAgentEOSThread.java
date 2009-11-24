@@ -18,11 +18,21 @@ package org.opencastproject.capture.impl;
 import org.gstreamer.Pipeline;
 import org.gstreamer.event.EOSEvent;
 
+/**
+ * 
+ * TODO: Comment me!
+ *
+ */
 public class CaptureAgentEOSThread implements Runnable {
 
   private long timeout;
   private Pipeline pipeline;
 
+  /**
+   * TODO:  Comment me!
+   * {@inheritDoc}
+   * @see java.lang.Runnable#run()
+   */
   public void run() {
     try {
       Thread.sleep(timeout);
@@ -33,6 +43,11 @@ public class CaptureAgentEOSThread implements Runnable {
     pipeline.sendEvent(new EOSEvent());
   }
 
+  /**
+   * TODO:  Comment me!
+   * @param milli
+   * @param p
+   */
   public CaptureAgentEOSThread(long milli, Pipeline p) {
     timeout = milli;
     pipeline = p;

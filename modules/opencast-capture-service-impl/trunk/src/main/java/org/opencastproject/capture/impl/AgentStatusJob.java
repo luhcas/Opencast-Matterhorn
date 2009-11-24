@@ -26,6 +26,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.opencastproject.capture.api.StatusService;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -36,7 +37,10 @@ import org.slf4j.LoggerFactory;
  * This class is responsible for pushing the agent's status to the remote status service
  */
 public class AgentStatusJob implements Job {
+
   private static final Logger logger = LoggerFactory.getLogger(AgentStatusJob.class);
+
+  ConfigurationManager config = ConfigurationManager.getInstance();
 
   /**
    * Pushes the agent's status to the remote status service
@@ -44,18 +48,24 @@ public class AgentStatusJob implements Job {
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    ConfigurationManager config = ConfigurationManager.getInstance();
+
+    //Get a pointer to the agent
+    StatusService agent = (StatusService) ctx.getMergedJobDataMap().get(CaptureAgentImpl.SERVICE);
+
+    sendAgentState(agent, config);
+    sendRecordingState(agent, config);
+  }
+
+  private void sendAgentState(StatusService agent, ConfigurationManager config) {
+
     //Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATUS_ENDPOINT_URL);
     if (url == null) {
-      logger.warn("URL for " + CaptureParameters.AGENT_STATUS_ENDPOINT_URL + " is invalid, unable to push state to remote server");
+      logger.warn("URL for {} is invalid, unable to push state to remote server.", CaptureParameters.AGENT_STATUS_ENDPOINT_URL);
       return;
     }
-    HttpPost remoteServer = new HttpPost(url);
-    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
-    //Build the list of data that gets sent
-    StatusServiceImpl status = (StatusServiceImpl) ctx.getMergedJobDataMap().get(StatusServiceImpl.SERVICE);
+    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
     String agentName = config.getItem(CaptureParameters.AGENT_NAME);
     if (agentName == null) {
@@ -65,19 +75,41 @@ public class AgentStatusJob implements Job {
         logger.error("Unable to resolve localhost.  This is very bad...", e);
         return;
       }
-      logger.warn("Invalid name set for " + CaptureParameters.AGENT_NAME + " falling back to " + agentName);
+      logger.warn("Invalid name set for {} falling back to {}.", CaptureParameters.AGENT_NAME, agentName);
     }
     formParams.add(new BasicNameValuePair("agentName", agentName));
-    formParams.add(new BasicNameValuePair("state", status.getState()));
+    formParams.add(new BasicNameValuePair("state", agent.getAgentState()));
 
-    //Send the data
+    send(formParams, url);
+  }
+
+  private void sendRecordingState(StatusService agent, ConfigurationManager config) {
+
+    //Figure out where we're sending the data
+    String url = config.getItem(CaptureParameters.RECORDING_STATUS_ENDPOINT_URL);
+    if (url == null) {
+      logger.warn("URL for {} is invalid, unable to push recording state to remote server.", CaptureParameters.RECORDING_STATUS_ENDPOINT_URL);
+      return;
+    }
+
+    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+
+    //TODO:  Get the id value from somewhere
+    formParams.add(new BasicNameValuePair("id", "?"));
+    formParams.add(new BasicNameValuePair("state", agent.getRecordingState()));
+
+    send(formParams, url);
+  }
+
+  private void send(List<NameValuePair> formParams, String url) {
+    HttpPost remoteServer = new HttpPost(url);
+
     try {
       remoteServer.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
       HttpClient client = new DefaultHttpClient();
       client.execute(remoteServer);
     } catch (Exception e) {
-      logger.error("Unable to push agent status to remote server", e);
+      logger.error("Unable to push update to remote server: {}.", e.getMessage());
     }
   }
-
 }

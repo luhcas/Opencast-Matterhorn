@@ -22,6 +22,7 @@ public interface RecordingState {
   public static final String UNKNOWN = "unknown";
   public static final String CAPTURING = "capturing";
   public static final String CAPTURE_FINISHED = "capture_finished";
+  public static final String CAPTURE_ERROR = "capture_error";
   public static final String UPLOADING = "uploading";
   public static final String UPLOAD_FINISHED = "upload_finished";
   public static final String UPLOAD_ERROR = "upload_error";

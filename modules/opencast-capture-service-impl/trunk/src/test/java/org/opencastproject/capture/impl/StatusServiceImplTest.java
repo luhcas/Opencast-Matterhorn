@@ -24,11 +24,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class StatusServiceImplTest {
-  private StatusServiceImpl service = null;
+  private CaptureAgentImpl service = null;
 
   @Before
   public void setup() {
-    service = new StatusServiceImpl();
+    service = new CaptureAgentImpl();
     service.activate(null);
     Assert.assertNotNull(service);
   }
@@ -40,30 +40,30 @@ public class StatusServiceImplTest {
 
   @Test
   public void testStartup() {
-    Assert.assertEquals(AgentState.IDLE, service.getState());
+    Assert.assertEquals(AgentState.IDLE, service.getAgentState());
   }
 
   @Test
   public void testStart() {
-    service.start();
-    Assert.assertEquals(AgentState.CAPTURING, service.getState());
+    service.startCapture();
+    Assert.assertEquals(AgentState.CAPTURING, service.getAgentState());
   }
 
   @Test
   public void testStop() {
-    service.start();
-    Assert.assertEquals(AgentState.CAPTURING, service.getState());
-    service.stop();
-    Assert.assertEquals(AgentState.UPLOADING, service.getState());
+    service.startCapture();
+    Assert.assertEquals(AgentState.CAPTURING, service.getAgentState());
+    service.stopCapture();
+    Assert.assertEquals(AgentState.UPLOADING, service.getAgentState());
   }
 
   @Test
   public void testHalt() {
-    service.start();
-    Assert.assertEquals(AgentState.CAPTURING, service.getState());
-    service.stop();
-    Assert.assertEquals(AgentState.UPLOADING, service.getState());
-    service.stop();
-    Assert.assertEquals(AgentState.IDLE, service.getState());
+    service.startCapture();
+    Assert.assertEquals(AgentState.CAPTURING, service.getAgentState());
+    service.stopCapture();
+    Assert.assertEquals(AgentState.UPLOADING, service.getAgentState());
+    service.stopCapture();
+    Assert.assertEquals(AgentState.IDLE, service.getAgentState());
   }
 }

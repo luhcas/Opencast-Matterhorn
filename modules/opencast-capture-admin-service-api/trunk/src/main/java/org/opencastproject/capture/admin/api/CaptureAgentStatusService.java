@@ -44,9 +44,15 @@ public interface CaptureAgentStatusService {
 
   /**
    * Returns the list of known agents
-   * @return A map of agent-state pairs
+   * @return A map of name-agent pairs
    */
   public Map<String, Agent> getKnownAgents();
+
+  /**
+   * Returns the list of known agent capabilities
+   * @return A map of name-agent capability pairs 
+   */
+  public Map<String, String> getAgentCapabilities();
 
   /**
    * Gets the state of a recording, if it exists

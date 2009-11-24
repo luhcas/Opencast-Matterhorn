@@ -51,7 +51,11 @@ public class CaptureJob implements Job {
     HttpPost remoteServer = new HttpPost("http://localhost:8080/capture/rest/StartCapture");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
-    //TODO:  Fill in the data the capture start function needs
+    //TODO:  Fill in the data the capture start function needs  (see MH-1184)
+    //TODO:  Make this into a properties object for the REST endpoint
+    //CaptureParameters.CAPTURE_DEVICE_NAMES = CSV of friendly device name
+    //CaptureParameters.CAPTURE_DEVICE_PREFIX+".FRIENDLYNAME.src"="/dev/video0"
+    //CaptureParameters.CAPTURE_DEVICE_PREFIX+".FRIENDLYNAME.outputfile"="presenter.mpg"
     
     //Send the data
     try {
@@ -59,7 +63,7 @@ public class CaptureJob implements Job {
       HttpClient client = new DefaultHttpClient();
       client.execute(remoteServer);
     } catch (Exception e) {
-      logger.error("Unable to start capture!", e);
+      logger.error("Unable to start capture: {}.", e.getMessage());
     }
   }
 
