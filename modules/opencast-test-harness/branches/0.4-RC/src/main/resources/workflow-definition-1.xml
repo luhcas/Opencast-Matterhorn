@@ -1,4 +1,0 @@
-<workflow-definition>
-  <title>Just publish the media and metadata, please</title>
-  <operations><operation name="publish"/></operations>
-</workflow-definition>
