@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+<title>Accessible Opencast Streaming</title>
+
+<script language="javascript" type="text/javascript">
+        function doPlay () {
+        }
+            
+        function doPause () {
+        }
+        
+        function doStop () {
+        }
+
+    </script>
+</head>
+<body>
+
+<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
+	id="sna08Test" width="760" height="290"
+	codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
+	<param name="movie" value="Scrubber.swf" />
+	<param name="flashvars" value="bridgeName=b_sna08" />
+	<param name="quality" value="high" />
+	<param name="allowScriptAccess" value="always" />
+	<embed src="Scrubber.swf" quality="high" width="760" height="335"
+		name="sna08Test" align="middle" play="true" loop="false"
+		quality="high" allowScriptAccess="always"
+		type="application/x-shockwave-flash"
+		pluginspage="http://www.adobe.com/go/getflashplayer"
+		flashvars="bridgeName=b_sna08">
+	</embed> </object>
+
+
+<input type="button" onclick="doPlay();" value="Play" />
+<input type="button" onclick="doPause();" value="Pause" />
+<input type="button" onclick="doStop();" value="Stop" />
+
+</body>
+</html>
