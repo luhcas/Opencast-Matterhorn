@@ -1,0 +1,75 @@
+<script type="text/javascript">
+
+    document.getElementById("field_submitter").innerHTML = metaData.submitter;
+    document.getElementById("field_title").innerHTML = metaData.title;
+    document.getElementById("field_presenter").innerHTML = metaData.presenter;
+    document.getElementById("field_description").innerHTML = metaData.description;
+    document.getElementById("field_language").innerHTML = metaData.language;
+
+</script>
+
+<p>
+    <div class="notificationHeader">
+        A recording with the following information has been uploaded:
+    </div>
+</p>
+
+<table class="metadataTable" border="1">
+      <tr>
+          <td align="right" valign="top" style="max-width:150px;min-width:150px;width:150px;">
+              Submitter:
+          </td>
+          <td id="field_submitter">
+              
+          </td>
+      </tr>
+      <tr>
+          <td align="right" valign="top">
+              Title:
+          </td>
+          <td id="field_title">
+
+          </td>
+      </tr>
+      <tr>
+          <td align="right" valign="top">
+              Presenter(s):
+          </td>
+          <td id="field_presenter">
+
+          </td>
+      </tr>
+      <tr>
+          <td align="right" valign="top">
+              Description:
+          </td>
+          <td id="field_description">
+
+          </td>
+      </tr>
+      <tr>
+          <td align="right" valign="top">
+              Language:
+          </td>
+          <td id="field_language">
+
+          </td>
+      </tr>
+      <tr>
+          <td align="right" valign="top">
+              Distribution channel(s):
+          </td>
+          <td id="field_dist">
+
+          </td>
+      </tr>
+      <tr>
+          <td colspan="2">
+              <center>
+              <button type="button" onclick="loadUi('uploadform', 'stage')">
+                  Upload another media file
+              </button>
+              </center>
+          </td>
+      </tr>
+</table>
