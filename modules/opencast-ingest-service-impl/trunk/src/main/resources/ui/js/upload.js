@@ -1,10 +1,26 @@
+/**
+ * @fileOverview Collection of functions to deal with swfUpload
+ * @name Upload Manager
+ */
+
+/**
+ @namespace Holds all functions to deal with swfUpload
+*/
 var uploadManager = uploadManager || { };
 
+/** Instace of swfUpload */
 uploadManager.uploader = null;
+
+/** File currently selected for upload */
 uploadManager.selectedFile = null;
+
+/** List of metadata that is uploaded along with the file */
 uploadManager.metadata = {};
+
+/** List of fields in to forms mandatory fields that the user still must fill */
 uploadManager.missingFields = new Array();
 
+/** Instanciate swfUpload and init this namespace */
 uploadManager.init = function() {
     uploadManager.uploader = new SWFUpload(
     {
@@ -33,6 +49,7 @@ uploadManager.init = function() {
    selectedFile = null;
 }
 
+/** Colloects the metadata from the form and starts the file upload */
 uploadManager.startUpload = function() {
     uploadManager.collectMetadata();
     /*var list = "";    
@@ -44,11 +61,14 @@ uploadManager.startUpload = function() {
     uploadManager.uploader.startUpload(uploadManager.selectedFile.id);
 }
 
+/** Cancels the current upload and generates an upload error event */
 uploadManager.cancelUpload = function() {
     uploadManager.uploader.cancelUpload(uploadManager.selectedFile, false);
     uploadEvents.uploadError(uploadManager.selectedFile, 000, "Upload aborted by user.");
 }
 
+/** Collect metadata from the forms
+ *  TODO use form.serialize() the serialize the forms */
 uploadManager.collectMetadata = function() {
     uploadManager.metadata = { title       : document.getElementById("title").value,
                                presenter   : document.getElementById("contributor").value,
@@ -65,9 +85,7 @@ uploadManager.collectMetadata = function() {
                              };*/
 }
 
-/* Checks if the data in the form is ready for upload
- *
- */
+/** Checks if the data in the form is ready for upload */
 uploadManager.checkUpload = function(highlight) {
     uploadManager.missingFields = new Array();
     var label;
@@ -113,9 +131,7 @@ uploadManager.checkUpload = function(highlight) {
 
 
 
-/* Changes UI elements but it's related to data, so it goes here
- * resets internal data for the uploader
- */
+/** Resets all forms, deselects selected file */
 uploadManager.resetUploader = function() {
     document.basicData.reset.click();           // somehow document.basicData.reset() 'is not a function', twilight zone...
     document.additionalData.reset();
@@ -126,14 +142,14 @@ uploadManager.resetUploader = function() {
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~ upload mockup ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// start uploadMockup
+/** Starts a simulated upload */
 uploadManager.startUploadMockup = function() {
     uploadUI.currentProgress = 0;
     uploadEvents.uploadStarted(uploadManager.selectedFile);
     uploadManager.uploadMockup = window.setInterval("uploadManager.fireProgressEvent();", 300);
 }
 
-// fire uploadProgress event for uploadMockup
+/** fires the uploadProgress event to simulate upload progress */
 uploadManager.fireProgressEvent = function() {
     uploadUI.currentProgress += 5;
     if (uploadUI.currentProgress > 100) {

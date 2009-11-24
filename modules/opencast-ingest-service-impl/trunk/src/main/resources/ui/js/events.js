@@ -1,16 +1,23 @@
+/**
+ * @fileOverview Event hub for the Ingest UI
+ * @name Ingest UI
+ */
+
+/**
+ @namespace Holds all event handlers for the Ingest UI
+*/
 var uploadEvents = uploadEvents || { };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~ ui elements ~~~~~~~~~~~~~~~~~~~~~~~
 
-/* fired when the value of a form field is changed
- *
- */
+/** fired when the value of a form field is changed */
 uploadEvents.fieldChanged = function(field) {
    uploadUI.log("EVENT: " + "Value of filed " + field.id + " changed to: " + field.value);
    uploadUI.setLabelColor(field.id, 'black');
    uploadManager.checkUpload( ($('#missingFields-container').css('display') == 'block') );
 }
 
+/** fired when submit button is clicked */
 uploadEvents.btnSubmit = function() {
     uploadUI.log("EVENT: " + "Submit button clicked");
     if (uploadManager.checkUpload(true)) {
@@ -20,24 +27,28 @@ uploadEvents.btnSubmit = function() {
     }
 }
 
+/** fired when clear button is clicked */
 uploadEvents.btnClear = function() {
     uploadUI.log("EVENT: " + "Clear button clicked");
     uploadManager.resetUploader();
 }
 
+/** fired if cancel button in upload progress overlay is clicked */
 uploadEvents.btnCancelUpload = function() {
     uploadUI.log("EVENT: " + "Submit button clicked");
     uploadManager.cancelUpload();
 }
 
+/*
 uploadEvents.btnAnotherUpload = function() {
     uploadUI.log("EVENT: " + "'Upload another file' button clicked");
     $('#stage').load('upload.html', {}, function() {$(document).ready();});
 }
-
+*/
 
 // ~~~~~~~~~~~~~~~~~~~~~~~ swfUpload events ~~~~~~~~~~~~~~~~~~~~~~~
 
+/** fired when user has selected a file in the file dialog */
 uploadEvents.fileSelected = function(file) {
     uploadManager.selectedFile = file;
     uploadUI.setFilename(file.name);
@@ -45,21 +56,24 @@ uploadEvents.fileSelected = function(file) {
     uploadEvents.fieldChanged(field);
 }
 
+/** fired when swfUpload has started the upload */
 uploadEvents.uploadStarted = function(file) {
     uploadUI.showProgressOverlay();
 }
 
+/** fired periodically when upload is in progress */
 uploadEvents.uploadProgress = function(file, completed, total) {
     uploadUI.setProgressBar(completed / total * 100);
 }
 
+/** fired when file was successfully uploaded */
 uploadEvents.uploadComplete = function(file) {
     uploadManager.uploader.destroy();
     uploadUI.hideProgressOverlay();
     uploadUI.showUploadComplete();
 }
 
+/** fired when an error occured during upload */
 uploadEvents.uploadError = function(file, code, message) {
     uploadUI.hideProgressOverlay();
-    //uploadUI.warn(code + " " + message);
 }
