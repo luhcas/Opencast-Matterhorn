@@ -13,7 +13,7 @@
     <xsl:output method="html"/>
 
     <xsl:template match="/">
-        <table class="fl-theme-coal" width="100%">
+        <table class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
             <thead>
                 <tr>
                     <th width="33%">Agent Name</th>
