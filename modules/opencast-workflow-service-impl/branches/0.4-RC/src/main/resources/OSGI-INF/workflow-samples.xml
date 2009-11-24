@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="workflowsamples" immediate="true" activate="activate">
+  <implementation class="org.opencastproject.util.StaticResource" />
+  <property name="service.description" value="Workflow Controler" />
+  <property name="alias" value="/workflow/samples" />
+  <property name="classpath" value="/samples" />
+  <property name="welcome.file" value="index.html" />
+  <service>
+    <provide interface="org.opencastproject.util.StaticResource" />
+  </service>
+  <reference name="http-service" interface="org.osgi.service.http.HttpService"
+    cardinality="1..1" policy="static" bind="setHttpService" />
+</component>
+
