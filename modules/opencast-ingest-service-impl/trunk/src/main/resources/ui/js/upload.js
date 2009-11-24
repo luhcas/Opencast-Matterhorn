@@ -76,6 +76,7 @@ uploadManager.collectMetadata = function() {
                                language    : document.getElementById("language").value,
                                series      : document.getElementById('series').value,
                                department  : document.getElementById('department').value,
+                               content     : document.getElementById('mediacontent').value,
                                subject     : document.getElementById('subject').value
                              };
                              /*
@@ -101,9 +102,9 @@ uploadManager.checkUpload = function(highlight) {
     }
 
     // check if distribution channel is selected
-    if (! (document.getElementById('distITunesU').checked ||
+    if (! (/*document.getElementById('distITunesU').checked ||*/
            document.getElementById('distMHMM').checked ||
-           document.getElementById('distYouTube').checked ||
+           /*document.getElementById('distYouTube').checked ||*/
            document.getElementById('distSakai').checked)
        ) {
         uploadManager.missingFields.push('dist');

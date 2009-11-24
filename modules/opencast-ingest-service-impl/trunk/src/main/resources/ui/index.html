@@ -53,7 +53,7 @@
     <body>
 
         <!-- fl-centered doesn't work in winXP-IE8 -->
-        <div class="fl-container-850 fl-centered fl-theme-coal">
+        <div class="fl-container-flex fl-centered fl-theme-coal">
             <ul class="fl-tabs fl-tabs-left">
                 <li class="fl-activeTab"><a href="../../admin/ui/recordings_upcoming.html">Recordings</a></li>
                 <li class=""><a href="../../admin/ui/agents_status.html">Capture Agents</a></li>
@@ -61,7 +61,7 @@
             <div id="stage" class="fl-tab-content wu-tab-content fl-fix fl-centered">
 
                 <!-- missing fields notification -->
-                <div class="fl-container-600" id="missingFields-container" style="display:none;">
+                <div class="fl-container-600 fl-centered" id="missingFields-container" style="display:none;">
                     <div class="fl-widget">
                         <div class="fl-widget-titlebar warnbox-title">
                             <b class="formbox-header-text" style="color:white;">Missing Inputs</b>
@@ -83,7 +83,7 @@
                 </div>
 
                 <!-- Basic information -->
-                <div class="fl-container-600">
+                <div class="fl-container-600 fl-centered">
                     <div class="fl-widget">
                         <div class="fl-widget-content formbox-content fl-fix">
                             <form name="basicData">
@@ -116,7 +116,7 @@
                 </div>
 
                 <!-- Additional Content Description -->
-                <div class="fl-container-600">
+                <div class="fl-container-600 fl-centered">
                     <div class="fl-widget">
                         <div class="fl-widget-titlebar formbox-header folder-control">
                             <a href="#_bottom" class="fl-icon inline-icon folder-icon icon-arrow-right" title="Hide/unhide additional information">Fold/Unfold additional information</a>
@@ -152,7 +152,7 @@
                 </div>
 
                 <!-- Distribution -->
-                <div class="fl-container-600">
+                <div class="fl-container-600 fl-centered">
                     <div class="fl-widget">
                         <div class="fl-widget-titlebar formbox-header">
                             <b class="formbox-header-text">Distribution</b>
@@ -163,21 +163,22 @@
                                     <li class="fl-fix">
                                         <span class="fl-label form-label"  id="label-dist"><span style="color:red;">*</span>Distribution channel(s):</span>
                                         <div style="width:20%;float:left;">
-                                            <input type="checkbox" name="distITunesU" id="distITunesU" onchange="uploadEvents.fieldChanged(this);">ITunesU
+                                            <input type="checkbox" name="distSakai" id="distSakai" onchange="uploadEvents.fieldChanged(this);">Sakai
                                         </div>
                                         <input type="checkbox" name="distMHMM" id="distMHMM" onchange="uploadEvents.fieldChanged(this);"><span>Matterhorn media module</span>
                                     </li>
-                                    <li class="fl-fix">
+                                    <!-- <li class="fl-fix">
                                         <span class="fl-label form-label">&nbsp;</span>
                                         <div style="width:20%;float:left;">
                                             <input type="checkbox" name="distYouTube" id="distYouTube" onchange="uploadEvents.fieldChanged(this);">YouTube
                                         </div>
-                                        <input type="checkbox" name="distSakai" id="distSakai" onchange="uploadEvents.fieldChanged(this);"><span>Sakai</span>
-                                    </li>
+                                        <input type="checkbox" name="distITunesU" id="distITunesU" onchange="uploadEvents.fieldChanged(this);"><span>ITunesU</span>
+                                    </li> -->
                                     <li class="fl-fix">
                                         <span class="fl-label form-label">License:</span>
-                                        <select class="form-field" name="license" id="license">
-                                        </select>
+                                        <!-- <select class="form-field" name="license" id="license">
+                                        </select> -->
+					                    <input type="text" name="license" id="license" class="form-field">
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
                                     </li>
                                 </ul>
@@ -187,7 +188,7 @@
                 </div>
 
                 <!-- file upload -->
-                <div class="fl-container-600">
+                <div class="fl-container-600 fl-centered">
                     <div class="fl-widget">
                         <div class="fl-widget-titlebar formbox-header">
                             <b class="formbox-header-text">File Upload</b>
@@ -206,12 +207,19 @@
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
                                     </span>
                                 </li>
+                                <!--
+                                <li class="fl-fix">
+                                    <span class="fl-label form-label"  id="label-dist"><span style="color:red;">*</span>Distribution channel(s):</span>
+                                    <input type="radio" name="mediacontent" id="mediacontent" onchange="uploadEvents.fieldChanged(this);">Sakai
+                                    <input type="radio" name="mediacontent" id="distMHMM" onchange="uploadEvents.fieldChanged(this);"><span>Matterhorn media module</span>
+                                </li>
+                                -->
                             </ul>
                         </div>
                     </div>
                 </div>
 
-                <div class="fl-container-600">
+                <div class="fl-container-600 fl-centered">
                     <div class="fl-widget">
                         <div class="fl-widget-content fl-fix">
                             <ul class="fl-controls-right wu-reset">
@@ -234,6 +242,10 @@
                     </div>
                 </div>
 
+                <center>
+                    <a href="../../admin/ui/recordings_upcoming.html">Back to Recordings</a>
+                </center>
+		
             </div>    <!-- /stage -->
 
             <!-- Upload progress overlay -->
