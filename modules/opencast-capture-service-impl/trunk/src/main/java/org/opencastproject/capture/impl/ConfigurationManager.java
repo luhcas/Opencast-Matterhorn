@@ -89,9 +89,11 @@ public class ConfigurationManager {
     // Checking the filesystem for configuration file
     try {
       localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_FILESYSTEM_URL));
+      properties.load(new FileInputStream(localConfig));
     } catch (NullPointerException e) {
       logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL);
-      localConfig = null;
+    } catch (IOException e) {
+      logger.warn("Could not load local configuration: " + e.getMessage());
     }
 
     // In the event that our configuration file does not exist, try to load it from the cache
@@ -107,14 +109,6 @@ public class ConfigurationManager {
     if (url == null && localConfig == null) {
       logger.error("No configuration data was found, this is very bad!");
       //TODO:  return here?
-    }
-    else {
-      // Load the users configuration into the configuration, overwriting any conflicts
-      try {
-        properties.load(new FileInputStream(localConfig));
-      } catch (Exception e) {
-        logger.error("Could not load local configuration." );
-      }
     }
     
     retrieveConfigFromServer();
@@ -280,9 +274,9 @@ public class ConfigurationManager {
     }
     // do not overwrite the ConfigurationManager, but merge the properties
     else {
-      Properties merged = (Properties) p.clone();
-      for (Object key : properties.keySet()) {
-        merged.setProperty((String) key, (String) properties.get(key));
+      Properties merged = getAllProperties();
+      for (Object key : p.keySet()) {
+        merged.setProperty((String) key, (String) p.get(key));
       }
       return merged;
     }
