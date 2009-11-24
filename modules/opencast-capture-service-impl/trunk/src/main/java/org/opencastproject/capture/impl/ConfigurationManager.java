@@ -87,7 +87,7 @@ public class ConfigurationManager {
     
     // Checking the filesystem for configuration file
     try {
-      localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL));
+      localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_FILESYSTEM_URL));
     } catch (NullPointerException e) {
       logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL);
       localConfig = null;
@@ -111,7 +111,7 @@ public class ConfigurationManager {
       try {
         properties.load(new FileInputStream(localConfig));
       } catch (Exception e) {
-        logger.error("Could not load local configuration.");
+        logger.error("Could not load local configuration." );
       }
     }
     
@@ -255,16 +255,34 @@ public class ConfigurationManager {
   }
   
   /**
-   * Merges the given Properties with the ConfigurationManager's properties. If
-   * there are conflicts, the given properties will take precedence.
-   * @param primary the properties that should not change
+   * Merges the given Properties with the ConfigurationManager's properties. Will
+   * not overwrite the ConfigurationManager if specified.
+   * 
+   * @param properties Properties object to be merged with ConfigurationManager
+   * @param overwrite true if this should overwrite the ConfigurationManager's properties, false if not
+   * @return the merged properties
    */
-  public void merge(Properties primary) {
-    if (primary == null)
-      return;
-    for (Object key : primary.keySet()) {
-      properties.setProperty((String) key, (String) primary.get(key));
+  public Properties merge(Properties p, boolean overwrite) {
+    // if no properties specified, just return current configuration
+    if (p == null) {
+      return getAllProperties();
     }
+    // overwrite the current properties in the ConfigurationManager
+    if (overwrite) {
+      for (Object key : p.keySet()) {
+        properties.setProperty((String) key, (String) p.get(key));
+      }
+      return getAllProperties();
+    }
+    // do not overwrite the ConfigurationManager, but merge the properties
+    else {
+      Properties merged = (Properties) p.clone();
+      for (Object key : properties.keySet()) {
+        merged.setProperty((String) key, (String) properties.get(key));
+      }
+      return merged;
+    }
+
   }
   
   /**

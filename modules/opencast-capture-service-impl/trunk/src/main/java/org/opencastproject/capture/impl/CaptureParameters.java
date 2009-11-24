@@ -38,6 +38,9 @@ public interface CaptureParameters {
 
   /** The URL to store the cached config file in */
   public static final String CAPTURE_CONFIG_CACHE_URL = "capture.config.cache.url";
+  
+  /** The URL to store the main config file */
+  public static final String CAPTURE_CONFIG_FILESYSTEM_URL = "capture.config.filesystem.url";
 
   /** The URL of the config directory under the root directory */
   public static final String CAPTURE_FILESYSTEM_CONFIG_URL = "capture.filesystem.config.url";
