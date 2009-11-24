@@ -75,5 +75,24 @@ public interface CaptureParameters {
   /** A comma delimited list of the friendly names for capturing devices */
   public static final String CAPTURE_DEVICE_NAMES = "capture.device.names";
   
-  public static final String CAPTURE_DEVICE_PREFIX = "capture.device";
+  /* Specification for configuration files are discussed in MH-1184. Properties for capture devices
+   * are specified by CAPTURE_DEVICE_PREFIX + "$DEVICENAME" + CAPTURE_DEVICE_* where DEVICENAME is one of
+   * the devices specified in CAPTURE_DEVICE_NAMES. For instance, the source of a capture device for
+   * a device named SCREEN is CAPTURE_DEVICE_PREFIX + SCREEN + CAPTURE_DEVICE_SOURCE
+   */
+  
+  /** String prefix used when specify capture device properties */
+  public static final String CAPTURE_DEVICE_PREFIX = "capture.device.";
+  
+  /** Property specifying the source location of the device e.g., /dev/video0 */
+  public static final String CAPTURE_DEVICE_SOURCE = ".src";
+  
+  /** Property specifying the name of the file to output */
+  public static final String CAPTURE_DEVICE_DEST = ".outputfile";
+  
+  /** Property specifying a codec for the device */
+  public static final String CAPTURE_DEVICE_CODEC = ".codec";
+  
+  /** Property appended to CAPTURE_DEVICE_CODEC to specify that codec's bitrate */
+  public static final String CAPTURE_DEVICE_BITRATE = ".properties.bitrate";
 }

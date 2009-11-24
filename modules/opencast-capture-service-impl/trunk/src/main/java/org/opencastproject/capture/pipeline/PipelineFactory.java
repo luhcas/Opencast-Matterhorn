@@ -71,16 +71,16 @@ public class PipelineFactory {
       name = name.trim();
       DeviceName devName;
      
-      /* disregard the empty string */
+      // disregard the empty string 
       if (name == "")
         continue;
       
-      String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + "." + name + ".src";
-      String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + "." + name + ".outputfile";
+      String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
+      String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
       String srcLoc = props.getProperty(srcProperty);
       String outputLoc = props.getProperty(outputProperty);
       
-      /* Attempt to determine what the device is using the JV4LInfo library */
+      // Attempt to determine what the device is using the JV4LInfo library 
       try {
         if (srcLoc.contains("hw:"))
           devName = DeviceName.ALSASRC;
@@ -103,15 +103,15 @@ public class PipelineFactory {
         continue;
       }
       
-      /* devices will store the CaptureDevice list arbitrary order */
+      // devices will store the CaptureDevice list arbitrary order
       CaptureDevice capdev = new CaptureDevice(srcLoc, devName, outputLoc);
-      String pluginProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + "." + name + ".plugin";
-      String bitrateProperty = pluginProperty + ".properties.bitrate";
-      String plugin = props.getProperty(pluginProperty);
+      String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_CODEC;
+      String bitrateProperty = codecProperty + CaptureParameters.CAPTURE_DEVICE_BITRATE;
+      String codec = props.getProperty(codecProperty);
       String bitrate = props.getProperty(bitrateProperty);
       
-      if (plugin != null)
-        capdev.properties.setProperty("plugin", plugin);
+      if (codec != null)
+        capdev.properties.setProperty("codec", codec);
       if (bitrate != null)
         capdev.properties.setProperty("bitrate", bitrate);
   
@@ -123,8 +123,8 @@ public class PipelineFactory {
     for (int i = 0; i < devices.size(); i++)
       logger.info("Device #" + i + ": " + devices.get(i));
 
-    /* setup gstreamer pipeline using capture devices */
-    Gst.init(); /* cannot using gst library without first initialising it */
+    // setup gstreamer pipeline using capture devices 
+    Gst.init(); // cannot using gst library without first initialising it
 
     Pipeline pipeline = new Pipeline();
     for (int i = 0; i < devices.size(); i++) {
@@ -183,16 +183,16 @@ public class PipelineFactory {
    */
   private static boolean getHauppaugePipeline(CaptureDevice captureDevice, Pipeline pipeline) {
     String error = null;
-    String plugin =  captureDevice.properties.getProperty("plugin");
+    String codec =  captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
     Element dec, enc;
     Element filesrc = ElementFactory.make("filesrc", null);
     Element queue = ElementFactory.make("queue", null);
     Element mpegpsdemux = ElementFactory.make("mpegpsdemux", null);
     final Element mpegvideoparse = ElementFactory.make("mpegvideoparse", null);
-    if (plugin != null) {
+    if (codec != null) {
       dec = ElementFactory.make("mpeg2dec", null);
-      enc = ElementFactory.make(plugin, null);
+      enc = ElementFactory.make(codec, null);
     }
     else {
       dec = ElementFactory.make("capsfilter", null);
@@ -253,9 +253,9 @@ public class PipelineFactory {
    */
   private static boolean getVGA2USBPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
     String error = null;
-    String plugin = captureDevice.properties.getProperty("plugin");
+    String codec = captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
-    /* Create elements, add them to pipeline, then link them */
+    // Create elements, add them to pipeline, then link them 
     Element enc;
     Element v4lsrc = ElementFactory.make("v4lsrc", null);
     Element queue = ElementFactory.make("queue", null);
@@ -263,8 +263,8 @@ public class PipelineFactory {
     Element videorate = ElementFactory.make("videorate", null);
     Element filter = ElementFactory.make("capsfilter", null);
     Element ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
-    if (plugin != null)
-      enc = ElementFactory.make(plugin, null);
+    if (codec != null)
+      enc = ElementFactory.make(codec, null);
     else
       enc = ElementFactory.make("ffenc_mpeg2video", null);
     Element mpegtsmux = ElementFactory.make("mpegtsmux", null);
@@ -315,15 +315,15 @@ public class PipelineFactory {
    */
   private static boolean getAlsasrcPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
     String error = null;
-    String plugin = captureDevice.properties.getProperty("plugin");
+    String codec = captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
     Element enc, mux;
     
     Element alsasrc = ElementFactory.make("alsasrc", null);
     Element queue = ElementFactory.make("queue", null);
-    if (plugin != null) {
-      enc = ElementFactory.make(plugin, null);
-      if (plugin.equalsIgnoreCase("faac"))
+    if (codec != null) {
+      enc = ElementFactory.make(codec, null);
+      if (codec.equalsIgnoreCase("faac"))
         mux = ElementFactory.make("mp4mux", null);
       else
         mux = ElementFactory.make("capsfilter", null);
@@ -371,13 +371,13 @@ public class PipelineFactory {
    */
   private static boolean getBluecherryPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
     String error = null;
-    String plugin = captureDevice.properties.getProperty("plugin");
+    String codec = captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
     Element enc;
     Element v4l2src = ElementFactory.make("v4l2src", null);
     Element queue = ElementFactory.make("queue", null);
-    if (plugin != null)
-      enc = ElementFactory.make(plugin, null);
+    if (codec != null)
+      enc = ElementFactory.make(codec, null);
     else
       enc = ElementFactory.make("ffenc_mpeg2video", null);
     Element mpegtsmux = ElementFactory.make("mpegtsmux", null);

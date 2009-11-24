@@ -16,6 +16,7 @@
 package org.opencastproject.capture.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -62,11 +63,11 @@ public class ConfigurationManager {
    * if manager field is null.
    */
   private ConfigurationManager() {
-    //TODO: Do not rely on config file in resource bundle
-    URL bundleConfig = getClass().getClassLoader().getResource("config/capture.properties");
     properties = new Properties();
     
-    /* attempt to load properties into memory and retrieve centralised config */
+    // TODO: Do not rely on config file in resource bundle
+    // Load the configuration packed with the bundle
+    URL bundleConfig = getClass().getClassLoader().getResource("config/capture.properties");
     try {
       properties.load(bundleConfig.openStream());
     } catch (MalformedURLException e) {
@@ -77,39 +78,53 @@ public class ConfigurationManager {
       logger.error("Unable to load bundle config file", e);
     }
 
+    // Attempt to parse the location of the configuration server
     try {
       url = new URL(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_URL));
     } catch (MalformedURLException e) {
       logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_CONFIG_URL + ", disabling polling");
     }
     
-    /* check for a local configuration file (outside of the bundle) before reading from server */
+    // Checking the filesystem for configuration file
     try {
       localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL));
     } catch (NullPointerException e) {
-      logger.warn("No config file on filesystem outside of bundle found.");
+      logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL);
+      localConfig = null;
     }
 
-    try {
-      localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
-    } catch (NullPointerException e) {
-      logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_CONFIG_CACHE_URL + ", disabling caching");
+    // In the event that our configuration file does not exist, try to load it from the cache
+    if (localConfig == null) {
+      try {
+        localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
+      } catch (NullPointerException e) {
+        logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_CONFIG_CACHE_URL + ", disabling caching");
+      }
     }
     
+    // If this is the case capture there will be no capture devices specified
     if (url == null && localConfig == null) {
       logger.error("No configuration data was found, this is very bad!");
+    }
+    else {
+      // Load the users configuration into the configuration, overwriting any conflicts
+      try {
+        properties.load(new FileInputStream(localConfig));
+      } catch (Exception e) {
+        logger.error("Could not load local configuration.");
+      }
     }
     
     retrieveConfigFromServer();
     writeConfigFileToDisk();
     
-    /* if reload property specified, query server for update at that interval */
+    // if reload property specified, query server for update at that interval
     String reload = getItem(CaptureParameters.CAPTURE_CONFIG_POLLING_INTERVAL);
     if (url != null && reload != null) {
       timer = new Timer();
       long delay = 0;
       try {
-        //Times in the config file are in seconds, so multiply by 1000
+        // Times in the config file are in seconds, so multiply by 1000
         delay = Long.parseLong(reload) * 1000L;
         if (delay < 1) {
           logger.info("Polling time has been set to less than 1 second, polling disabled");
@@ -117,7 +132,7 @@ public class ConfigurationManager {
         }
       } catch (NumberFormatException e) {
         logger.warn("Invalid polling time for parameter " + CaptureParameters.CAPTURE_CONFIG_POLLING_INTERVAL);
-        //If the polling time value is invalid, don't poll
+        // If the polling time value is invalid, don't poll
         return;
       }
       timer.schedule(new UpdateConfig(), delay, delay);
@@ -192,7 +207,7 @@ public class ConfigurationManager {
     if (key == null) {
       return;
     }
-    /* this will overwrite the previous value is there is a conflict */
+    // this will overwrite the previous value is there is a conflict
     properties.setProperty(key, value);
   }
   
