@@ -1,8 +1,10 @@
-<div class="fl-container-600">
+<div class="fl-container-600 fl-centered">
 
     <center><div class="notification-header">
         A recording with the following information has been uploaded:
     </div></center>
+
+    <!-- all this tables here look ugly, this needs a make-over -->
 
     <table id="data-title" class="data-row" border="0"><tr>
         <td class="data-label" align="right" valign="top">
@@ -60,5 +62,16 @@
         <td class="data-value" valign="top"></td>
     </tr></table>
 
-    <center><a href="javascript:location.reload()">Upload another media file >></a>&nbsp;&nbsp;<a href="../../admin/ui/recordings_upcoming.html">Back to Recordings</a></center>
+    <table id="data-mediacontent" class="data-row" border="0"><tr>
+        <td class="data-label" align="right" valign="top">
+           Media content:
+        </td>
+        <td class="data-value" valign="top"></td>
+    </tr></table>
+
+    <p><center>
+        <a href="../../admin/ui/recordings_upcoming.html"><< Back to Recordings</a>
+        &nbsp;&nbsp;
+        <a href="javascript:location.reload()">Upload another media file >></a>
+    </center></p>
 </div>

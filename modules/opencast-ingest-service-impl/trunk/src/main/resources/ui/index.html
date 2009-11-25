@@ -77,6 +77,9 @@
                                 <li id="notification-file" class="missing-fields-item">
                                     <span class="fl-icon inline-icon icon-bullet" title=""></span>Please select a media file to upload.
                                 </li>
+                                <li id="notification-mediacontent" class="missing-fields-item">
+                                    <span class="fl-icon inline-icon icon-bullet"></span>Please choose the <a href="javascript:document.getElementById('mediacontent').focus();">type of content</a> the media file holds.
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -107,7 +110,7 @@
                                         <span class="fl-label form-label">Sponsoring department:</span>
                                         <input type="text" name="department" id="department" class="form-field">
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
-                                    </li>
+                                    </li>                                   
                                 </ul>
                                 <input type="reset" name="reset" value="clear" class="form-clear">
                             </form>
@@ -162,9 +165,9 @@
                                 <ul class="fl-controls-right wu-reset">
                                     <li class="fl-fix">
                                         <span class="fl-label form-label"  id="label-dist"><span style="color:red;">*</span>Distribution channel(s):</span>
-                                        <div style="width:20%;float:left;">
+                                        <!--<div style="width:20%;float:left;">
                                             <input type="checkbox" name="distSakai" id="distSakai" onchange="uploadEvents.fieldChanged(this);">Sakai
-                                        </div>
+                                        </div>-->
                                         <input type="checkbox" name="distMHMM" id="distMHMM" onchange="uploadEvents.fieldChanged(this);"><span>Matterhorn media module</span>
                                     </li>
                                     <!-- <li class="fl-fix">
@@ -207,13 +210,18 @@
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
                                     </span>
                                 </li>
-                                <!--
                                 <li class="fl-fix">
-                                    <span class="fl-label form-label"  id="label-dist"><span style="color:red;">*</span>Distribution channel(s):</span>
-                                    <input type="radio" name="mediacontent" id="mediacontent" onchange="uploadEvents.fieldChanged(this);">Sakai
-                                    <input type="radio" name="mediacontent" id="distMHMM" onchange="uploadEvents.fieldChanged(this);"><span>Matterhorn media module</span>
+                                    <span class="fl-label form-label"  id="label-dist" style="padding-top:3px;"><span style="color:red;">*</span>Media file content:</span>
+                                    <select type="radio" name="mediacontent" id="mediacontent" onchange="uploadEvents.fieldChanged(this);">
+                                        <option value="none">Choose one:</option>                                    
+                                        <option value="audio">Audio</option>
+                                        <option value="video/presenter">Presenter (Video)</option>
+                                        <option value="video/audience">Audience (Video)</option>
+                                        <option value="video/slides">Presentation slides (video)</option>
+                                        <option value="video/other">Other document (video)</option>
+                                        <option value="other">other</option>
+                                    </select>
                                 </li>
-                                -->
                             </ul>
                         </div>
                     </div>
@@ -221,13 +229,13 @@
 
                 <div class="fl-container-600 fl-centered">
                     <div class="fl-widget">
-                        <div class="fl-widget-content fl-fix">
+                        <div class="fl-widget-content formbox-content fl-fix">
                             <ul class="fl-controls-right wu-reset">
                                 <li class="fl-fix">
                                     <span class="fl-label form-label"">&nbsp;</span>
                                     <span>
                                         <button onclick="uploadEvents.btnSubmit();">Submit</button>
-                                        <button onclick="uploadEvents.btnClear();">Clear Form</button>
+                                        <button onclick="window.back()">Cancel</button>
                                     </span>
                                 </li>
                                 <li class="fl-fix">
@@ -241,10 +249,6 @@
                         </div>
                     </div>
                 </div>
-
-                <center>
-                    <a href="../../admin/ui/recordings_upcoming.html">Back to Recordings</a>
-                </center>
 		
             </div>    <!-- /stage -->
 

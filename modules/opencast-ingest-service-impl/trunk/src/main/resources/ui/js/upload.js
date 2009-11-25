@@ -52,12 +52,12 @@ uploadManager.init = function() {
 /** Colloects the metadata from the form and starts the file upload */
 uploadManager.startUpload = function() {
     uploadManager.collectMetadata();
-    /*var list = "";    
+    var list = "";    
     for (key in uploadManager.metadata) {
         list += "[" + key + "]:" + uploadManager.metadata[key] + "\n";
         uploadManager.uploader.addFileParam(uploadManager.selectedFile.id, key, uploadManager.metadata[key]);
     }
-    alert("Metadata:\n" + list);*/
+    alert("Metadata:\n" + list);
     uploadManager.uploader.startUpload(uploadManager.selectedFile.id);
 }
 
@@ -110,6 +110,12 @@ uploadManager.checkUpload = function(highlight) {
         uploadManager.missingFields.push('dist');
        }
 
+    // check if media file content was selected
+    if (document.getElementById('mediacontent').value == 'none') {
+        uploadManager.missingFields.push('mediacontent');
+    }
+
+    // display missing field notification
     $('#missingFields-container li').css('display', 'none');
     for (i=0; i < uploadManager.missingFields.length; i++) {
         $('#notification-' + uploadManager.missingFields[i]).css('display', 'block');
@@ -129,8 +135,6 @@ uploadManager.checkUpload = function(highlight) {
         return false;
     }
 }
-
-
 
 /** Resets all forms, deselects selected file */
 uploadManager.resetUploader = function() {

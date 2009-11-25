@@ -209,7 +209,7 @@ input.fl-icon {padding-left:16px;}
 /*
  * Widgets: modelled after the mycamtools widget model
  */
-.fl-widget {padding:5px; margin-bottom:10px;}
+.fl-widget {padding:0px; margin-bottom:10px;}
 .fl-widget .button {margin:0 5px;}
 .fl-grabbable .fl-widget-titlebar {background-position:center top; background-repeat:no-repeat; cursor:move;}
 .fl-widget .fl-widget-titlebar {}
