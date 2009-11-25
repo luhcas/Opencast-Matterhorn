@@ -56,7 +56,8 @@ public class ZipUtilTest {
   public void testZip() throws Exception {
     File zip = ZipUtil.zip(new File[] {src1, src2}, destDir + File.separator + "testingZip.zip");
     Assert.assertTrue(zip.exists());
-    Assert.assertTrue(zip.getTotalSpace() > 0);
+    // java 5 incompatible
+    //Assert.assertTrue(zip.getTotalSpace() > 0);
   }
   
   @Test

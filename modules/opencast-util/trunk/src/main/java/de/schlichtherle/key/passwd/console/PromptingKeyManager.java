@@ -19,7 +19,8 @@ package de.schlichtherle.key.passwd.console;
 import de.schlichtherle.key.*;
 
 import java.awt.*;
-import java.io.Console;
+// java 5 incompatible
+//import java.io.Console;
 
 /**
  * A simple key manager which enables users to enter passwords as keys using
@@ -79,7 +80,9 @@ public class PromptingKeyManager extends de.schlichtherle.key.PromptingKeyManage
     //
 
     protected boolean isPromptingImpl() {
-        return super.isPromptingImpl() && System.console() != null;
+      // java 5 incompatible
+//        return super.isPromptingImpl() && System.console() != null;
+      return false;
     }
 
     /**
@@ -88,8 +91,10 @@ public class PromptingKeyManager extends de.schlichtherle.key.PromptingKeyManage
      */
     protected void ensurePromptingImpl()
     throws KeyPromptingDisabledException {
-        if (System.console() == null)
-            throw new KeyPromptingDisabledException();
-        super.ensurePromptingImpl();
+      // java 5 incompatible
+//        if (System.console() == null)
+//            throw new KeyPromptingDisabledException();
+//        super.ensurePromptingImpl();
+      throw new KeyPromptingDisabledException();
     }
 }

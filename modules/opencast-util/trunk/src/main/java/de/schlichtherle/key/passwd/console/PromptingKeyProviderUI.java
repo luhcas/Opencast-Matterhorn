@@ -42,7 +42,7 @@ public class PromptingKeyProviderUI
      * If <code>null</code>, the prompt methods are never called, so it's
      * safe to assume that it's not <code>null</code> in these methods.
      */
-    protected static final Console con = System.console();
+    //protected static final Console con = System.console();
 
     /**
      * Used to lock out prompting by multiple threads.
@@ -59,11 +59,12 @@ public class PromptingKeyProviderUI
     private static String lastResourceID = "";
 
     public final void promptCreateKey(final PromptingKeyProvider provider) {
-        synchronized (lock) {
+/*
+      synchronized (lock) {
             final String resourceID = provider.getResourceID();
             if (!resourceID.equals(lastResourceID))
-                printf(resources.getString("createKey.banner"),
-                        provider.getResourceID());
+//                printf(resources.getString("createKey.banner"),
+//                        provider.getResourceID());
             lastResourceID = resourceID;
 
             while (true) {
@@ -78,12 +79,12 @@ public class PromptingKeyProviderUI
                     return;
 
                 if (!Arrays.equals(newPasswd1, newPasswd2)) {
-                    printf(resources.getString("createKey.passwd.noMatch"));
+//                    printf(resources.getString("createKey.passwd.noMatch"));
                     continue;
                 }
 
                 if (newPasswd1.length < MIN_PASSWD_LEN) {
-                    printf(resources.getString("createKey.passwd.tooShort"));
+//                    printf(resources.getString("createKey.passwd.tooShort"));
                     continue;
                 }
 
@@ -93,6 +94,7 @@ public class PromptingKeyProviderUI
 
             promptExtraData(provider);
         }
+*/
     }
 
     protected void promptExtraData(PromptingKeyProvider provider)
@@ -112,7 +114,8 @@ public class PromptingKeyProviderUI
     }
 
     private boolean promptOpenKey(final PromptingKeyProvider provider, final boolean invalid) {
-        if (invalid)
+/*
+      if (invalid)
             printf(resources.getString("openKey.invalid"));
 
         final String resourceID = provider.getResourceID();
@@ -139,6 +142,8 @@ public class PromptingKeyProviderUI
             else if (changeKey.equals(resources.getString("yes")))
                 return true;
         }
+*/
+      return false;
     }
 
     //
@@ -146,25 +151,25 @@ public class PromptingKeyProviderUI
     // as a substitute for the varargs calls.
     //
 
-    protected final Console printf(String format) {
-        return con.printf(format, null);
-    }
-
-    protected final Console printf(String format, Object arg) {
-        return con.printf(format, new Object[] { arg });
-    }
-
-    protected final String readLine(String format) {
-        return con.readLine(format, null);
-    }
-
-    protected final String readLine(String format, Object arg) {
-        return con.readLine(format, new Object[] { arg });
-    }
-
-    protected final char[] readPassword(String format) {
-        return con.readPassword(format, null);
-    }
+//    protected final Console printf(String format) {
+//        return con.printf(format, null);
+//    }
+//
+//    protected final Console printf(String format, Object arg) {
+//        return con.printf(format, new Object[] { arg });
+//    }
+//
+//    protected final String readLine(String format) {
+//        return con.readLine(format, null);
+//    }
+//
+//    protected final String readLine(String format, Object arg) {
+//        return con.readLine(format, new Object[] { arg });
+//    }
+//
+//    protected final char[] readPassword(String format) {
+//        return con.readPassword(format, null);
+//    }
 
     //
     // Miscellaneous.

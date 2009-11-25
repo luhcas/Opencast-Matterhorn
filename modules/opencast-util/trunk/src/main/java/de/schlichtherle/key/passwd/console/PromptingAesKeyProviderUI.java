@@ -36,10 +36,11 @@ public class PromptingAesKeyProviderUI extends PromptingKeyProviderUI {
         // otherwise we would not have been called.
         final PromptingAesKeyProvider aesKeyProvider = ((PromptingAesKeyProvider) provider);
 
-        printf(resources.getString("keyStrength.banner"));
-        printf(resources.getString("keyStrength.medium"));
-        printf(resources.getString("keyStrength.high"));
-        printf(resources.getString("keyStrength.ultra"));
+        // java 5 incompatible
+//        printf(resources.getString("keyStrength.banner"));
+//        printf(resources.getString("keyStrength.medium"));
+//        printf(resources.getString("keyStrength.high"));
+//        printf(resources.getString("keyStrength.ultra"));
 
         prompting: while (true) {
             String keyStrength = readLine(
