@@ -24,7 +24,8 @@ DEBUG_SUSPEND="n"
 MAVEN_ARG="-DM2_REPO=$M2_REPO"
 FELIX_FILEINSTALL_OPTS="-Dfelix.fileinstall.dir=$FELIX/load"
 PAX_CONFMAN_OPTS="-Dbundles.configuration.location=$FELIX/conf"
-CXF_OPTS="-Djava.util.logging.config.file=$FELIX/conf/cxf.properties"
+PAX_LOGGING_OPTS="-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN"
+UTIL_LOGGING_OPTS="-Djava.util.logging.config.file=$FELIX/conf/services/java.util.logging.properties"
 
 # Clear the felix cache directory
 FELIX_CACHE="$FELIX/felix-cache"
@@ -40,4 +41,4 @@ XML_OPTS=""
 
 # Finally start felix
 cd $FELIX
-java $DEBUG_OPTS $XML_OPTS $MAVEN_ARG $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $CXF_OPTS -jar $FELIX/bin/felix.jar $FELIX_CACHE
+java $DEBUG_OPTS $XML_OPTS $MAVEN_ARG $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $PAX_LOGGING_OPTS $UTIL_LOGGING_OPTS $CXF_OPTS -jar $FELIX/bin/felix.jar $FELIX_CACHE
