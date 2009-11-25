@@ -26,7 +26,6 @@ import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Default implementation of the composer service api.
@@ -77,12 +77,9 @@ public class ComposerServiceImpl implements ComposerService {
   }
 
   /**
-   * Bundle activator that will make sure the encoding profiles are loaded.
-   * 
-   * @param context
-   *          component context
+   * Activator that will make sure the encoding profiles are loaded.
    */
-  public void activate(ComponentContext context) {
+  protected void activate(Map<String, String> map) {
     try {
       profileManager = new EncodingProfileManager();
     } catch (ConfigurationException e) {
