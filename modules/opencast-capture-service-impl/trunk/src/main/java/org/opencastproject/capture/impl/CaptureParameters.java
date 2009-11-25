@@ -76,6 +76,12 @@ public interface CaptureParameters {
   /** The URL of the remote recording status service */
   public static final String RECORDING_STATUS_ENDPOINT_URL = "capture.recording.status.endpoint.url";
 
+  /** The ID of a capture */
+  public static final String RECORDING_ID = "capture.recording.id";
+
+  /** A directory which contains a capture */
+  public static final String RECORDING_ROOT_URL = "capture.recording.root.url";
+
   /** A comma delimited list of the friendly names for capturing devices */
   public static final String CAPTURE_DEVICE_NAMES = "capture.device.names";
   

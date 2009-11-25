@@ -40,7 +40,7 @@ import javax.xml.transform.stream.StreamResult;
 public class CaptureAgentImplTest {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);
 
-  private static final String captureDir = CaptureAgentImpl.tmpPath;
+  /*private static final String captureDir = CaptureAgentImpl.tmpPath;
   
   private CaptureAgentImpl service = null;
   private final File[] outFiles = {new File(captureDir+File.separator+"professor.mpg"),
@@ -48,11 +48,11 @@ public class CaptureAgentImplTest {
                                    new File(captureDir+File.separator+"microphone.mp2"),
                                    new File(captureDir+File.separator+"capture.stopped")};
   private final long msecs = 10000;
-  private final File manifest = new File(captureDir+File.separator+"manifest.xml");
+  private final File manifest = new File(captureDir+File.separator+"manifest.xml");*/
 
   @Before
   public void setup() {
-    service = new CaptureAgentImpl();
+/*    service = new CaptureAgentImpl();
 
     // Checks output files don't exist
     for (File checkFile : outFiles) {
@@ -61,12 +61,12 @@ public class CaptureAgentImplTest {
     }
 
     if (manifest.exists())
-      manifest.delete();
+      manifest.delete();*/
   }
 
   @After
   public void teardown() {
-    service = null;
+//    service = null;
   }
 
   @Test

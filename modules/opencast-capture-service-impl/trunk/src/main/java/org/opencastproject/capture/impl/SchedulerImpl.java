@@ -268,6 +268,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    */
   private void writeFile(URL file, String contents) {
     //TODO:  Handle file corruption issues for this block
+    //TODO:  Handle UTF16, etc
     FileWriter out = null;
     try {
         out = new FileWriter(file.getFile());
@@ -380,14 +381,32 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
         JobDetail job = new JobDetail(start.toString(), Scheduler.DEFAULT_GROUP, CaptureJob.class);
 
-        //TODO:  Write attachment to output directory of capture
-        //TODO:  One attachment should contain which capture parameters.  These must be put into the JobDetail object below
         PropertyList attachments = event.getProperties(Property.ATTACH);
         ListIterator<Property> iter = (ListIterator<Property>) attachments.listIterator();
+
         boolean hasProperties = false;
+        Properties props = new Properties();
+        props.put(CaptureParameters.RECORDING_ID, start.toString());
+
+        //Create the directory we'll be capturing into
+        File captureDir = new File(config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),
+                                    props.getProperty(CaptureParameters.RECORDING_ID));
+        if (!captureDir.exists()) {
+          try {
+            FileUtils.forceMkdir(captureDir);
+          } catch (IOException e) {
+            log.error("IOException creating required directory {}.", captureDir.toString());
+          }
+          //Should have been created.  Let's make sure of that.
+          if (!captureDir.exists()) {
+            log.error("Could not create required directory {}.", captureDir.toString());
+          }
+        }
+
+        //For each attachment
         while (iter.hasNext()) {
           Property p = iter.next();
-          //TODO:  Make this not hardcoded?
+          //TODO:  Make this not hardcoded?  Make this not depend on Apple's idea of rfc 2445?
           String filename = p.getParameter("X-APPLE-FILENAME").getValue();
           String contents = getAttachmentAsString(p);
 
@@ -396,33 +415,35 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           //TODO:  Should this string be hardcoded?
           if (filename != "capture.properties") {
             try {
-              File captureDir = new File(config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), start.toString());
-              FileUtils.forceMkdir(captureDir);
               URL u = new File(captureDir, filename).toURI().toURL();
               writeFile(u, contents);
             } catch (MalformedURLException e) {
               log.warn("Unable to write capture.properties file for {}!", start.toString());
-            } catch (IOException e) {
-              log.warn("IOException trying to create capture directory: {}.", e.getMessage());
             } catch (NullPointerException e) {
               log.warn("Unable to write capture.properties file for {}: {}", 0, e.getMessage());
             }
           } else {
             //Create a properties object and put it into the job's data map for access later
             //TODO:  Watch for large memory usage here.  Each object is created when the calendar is loaded and then must live until the job fires (4+ months?)
-            Properties props = new Properties();
+            //TODO:  What happens if there are multiple capture.properties?
             try {
               props.load(new StringReader(contents));
-              job.getJobDataMap().put(CaptureJob.CAPTURE_PROPS, props);
+
+              //Put capture variables into the properties object
+              props.put(CaptureParameters.RECORDING_ROOT_URL, captureDir.toString());
+              props.put(CaptureParameters.RECORDING_ID, start.toString());
+
               hasProperties = true;
             } catch (IOException e) {
               log.warn("Unable to read from capture.properties file, using defaults for this capture.");
             }
           }
         }
-
+        //Put the properties into the job
+        job.getJobDataMap().put(CaptureJob.CAPTURE_PROPS, props);
+        
         if (!hasProperties) {
-          log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", cronString.toString());
+          log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", start.toString());
         }
         
         captureScheduler.scheduleJob(job, trig);

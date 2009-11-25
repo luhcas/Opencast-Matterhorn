@@ -86,20 +86,8 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
   private String agent_state = AgentState.UNKNOWN;
   /** The recording's current state.  Used for logging */
   private String recording_state = RecordingState.UNKNOWN;
-
-  //TODO:  Document this, and read it from the config manager
-  public static final String tmpPath = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "captures";
-  //TODO:  Document this
-  private final File tmpDir = new File(tmpPath);
-  //TODO:  Document this
-  private final File manifest = new File(tmpDir.getAbsolutePath()+File.separator+"manifest.xml");
-
-  /**
-   * Builds an instance of the Capture agent.
-   */
-  public CaptureAgentImpl() {
-    createTmpDirectory();
-  }
+  /** A pointer to the current capture directory.  Note that this should be null except for when we are actually capturing */
+  private File current_capture_dir = null;
 
   /**
    * Called when the bundle is activated.
@@ -179,24 +167,42 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
    */
   public String startCapture(MediaPackage mediaPackage, Properties properties) {
 
-    // Deletes possibly existing file "capture.stopped"
-    File stopped = new File(tmpDir.getAbsolutePath() + File.separator + "capture.stopped");
-
-    if (stopped.exists()) {
-      if (!stopped.delete()) {
-        logger.error("\"capture.stopped\" could not be deleted.");
-        return "\"capture.stopped\" could not be deleted.";
-      }
+    if (current_capture_dir != null || !agent_state.equals(AgentState.IDLE)) {
+      logger.warn("Unable to start capture, a different capture is still in progress in {}.", current_capture_dir.getAbsolutePath());
+      return "Unable to start capture, a different capture is still in progress in " + current_capture_dir.getAbsolutePath() + ".";
     }
 
     logger.info("Initializing devices for capture.");
 
     // merges properties without overwriting the system's configuration
     Properties merged = config.merge(properties, false);
+
+    //Figure out where captureDir lives
+    if (merged.contains(CaptureParameters.RECORDING_ROOT_URL)) {
+      current_capture_dir = new File(merged.getProperty(CaptureParameters.RECORDING_ROOT_URL));
+    } else {
+      current_capture_dir = new File(config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),
+                               merged.getProperty(CaptureParameters.RECORDING_ID));
+      merged.put(CaptureParameters.RECORDING_ROOT_URL, current_capture_dir.toString());
+    }
+
+    //Setup the root capture dir, also make sure that it exists.
+    if (!current_capture_dir.exists()) {
+      try {
+        FileUtils.forceMkdir(current_capture_dir);
+      } catch (IOException e) {
+        logger.error("IOException creating required directory {}.", current_capture_dir.toString());
+        return "IOException creating required directory " + current_capture_dir.toString();
+      }
+      //Should have been created.  Let's make sure of that.
+      if (!current_capture_dir.exists()) {
+        logger.error("Unable to start capture, could not create required directory {}.", current_capture_dir.toString());
+        return "Unable to start capture, could not create required directory " + current_capture_dir.toString();
+      }
+    }
     
     pipe = PipelineFactory.create(merged);
 
-    
     if (pipe == null) {
       logger.error("Capture could not start, pipeline was null!");
       return "Capture could not start, pipline was null!";
@@ -230,23 +236,6 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
   }
 
   /**
-   * Create the tmp folder to store the record.
-   */
-  private void createTmpDirectory() {
-    if (!tmpDir.exists()) {
-      try {
-        logger.info("Making directory {}.", CaptureAgentImpl.tmpPath);
-        FileUtils.forceMkdir(tmpDir);
-        if (!tmpDir.exists()) {
-          throw new RuntimeException("Unable to create directory " + CaptureAgentImpl.tmpPath + ".");
-        }
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
-  /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.CaptureAgent#stopCapture()
    */
@@ -256,7 +245,7 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
       return "Pipeline is null.";
     }
     String result = "Capture OK";
-    File stopFlag = new File(tmpDir.getAbsolutePath(), "capture.stopped");
+    File stopFlag = new File(current_capture_dir, "capture.stopped");
     
     try {
       // "READY" is the idle state for pipelines
@@ -300,6 +289,142 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
     //TODO:  Either remove this code or bring it back.  We need to comment/log it (per MH-1597) if it's going to stay
 
     return result;
+  }
+
+  /**
+   * Generates the manifest.xml file from the files specified in the properties
+   * @return A String indicating the success or fail of the operation
+   * @throws MediaPackageException 
+   * @throws UnsupportedElementException 
+   * @throws IOException 
+   * @throws TransformerException 
+   */
+  private boolean doManifest() throws MediaPackageException, UnsupportedElementException, IOException, TransformerException {
+    logger.debug("Generating manifest.");
+
+    // Generates the manifest
+    try {
+      MediaPackage pkg = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
+
+      // Inserts the tracks in the MediaPackage
+      // TODO Specify the flavour
+      String deviceNames = config.getItem(CaptureParameters.CAPTURE_DEVICE_NAMES);
+      if (deviceNames == null) {
+        logger.error("No capture devices specified in " + CaptureParameters.CAPTURE_DEVICE_NAMES);
+        return false;
+      }
+      
+      String[] friendlyNames = deviceNames.split(",");
+      
+      for (String name : friendlyNames) {
+        name = name.trim();
+       
+        // Disregard the empty string
+        if (name.equals(""))
+          continue;
+        
+        String fileName = config.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + "." + name + ".outputfile");
+        
+        if (fileName == null)
+          continue;
+     
+        File outputFile = new File(fileName);
+
+        if (outputFile.exists())
+            // Adds a track
+            pkg.add(new URL(outputFile.getName()));
+      }
+
+      // TODO insert a catalog with some capture metadata
+      
+      // Gets the manifest.xml as a Document object
+      Document doc = pkg.toXml();
+
+      // Defines a transformer to convert the object in a xml file
+      Transformer transformer = TransformerFactory.newInstance().newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+      // Initializes StreamResult with File object to save to file
+      StreamResult stResult = new StreamResult(new FileOutputStream(new File(current_capture_dir, "manifest.xml")));
+      DOMSource source = new DOMSource(doc);
+      transformer.transform(source, stResult);
+
+      // Closes the stream to make sure all the content is written to the file
+      stResult.getOutputStream().close();
+    } catch (MediaPackageException e) {
+      logger.error("MediaPackage Exception: {}.", e.getMessage());
+      throw e;
+    } catch (UnsupportedElementException e) {
+      logger.error("Unsupported Element Exception: {}.", e.getMessage());
+      throw e;
+    } catch (TransformerException e) {
+      logger.error("Transformer Exception: {}.", e.getMessage());
+      throw e;
+    } catch (IOException e) {
+      logger.error("I/O Exception: {}.", e.getMessage());
+      throw e;
+    }
+
+    return true;
+
+  }
+
+  /**
+   * Compresses the files contained in the output directory
+   * @param zipName - The name of the zip file created
+   * @return A File reference to the file zip created
+   */
+  public File zipFiles(String zipName) {
+    String[] totalFiles = current_capture_dir.list();
+    String[] filesToZip = new String[totalFiles.length - 1];
+    int i = 0;
+
+    for (String item : totalFiles)
+      if (!(item.equals("capture.stopped") ||
+              item.substring(item.lastIndexOf('.')).trim().equals("zip")))
+        filesToZip[i++] = new File(current_capture_dir, item).getAbsolutePath();
+
+    return new Compressor().zip(filesToZip, zipName);
+  }
+  
+  /**
+   * Sends a file to the REST ingestion service
+   * @param url : The service URL
+   * @param fileDesc : The descriptor for the media package
+   */
+  public String doIngest(String url, File fileDesc) {
+
+    logger.info("Beginning ingest of recording.");
+
+    HttpClient client = new DefaultHttpClient();
+    HttpPost postMethod = new HttpPost(url);
+    String retValue = null;
+
+    setAgentState(AgentState.UPLOADING);
+    setRecordingState(RecordingState.UPLOADING);
+    
+    try {
+      // Set the file as the body of the request
+      postMethod.setEntity(new FileEntity(fileDesc, URLConnection.getFileNameMap().getContentTypeFor(fileDesc.getName())));
+
+      // Send the file
+      HttpResponse response = client.execute(postMethod);
+      
+      retValue = response.getStatusLine().getReasonPhrase();
+
+      setRecordingState(RecordingState.UPLOAD_FINISHED);
+    } catch (ClientProtocolException e) {
+      logger.error("Failed to submit the data: {}.", e.getMessage());
+      setRecordingState(RecordingState.UPLOAD_ERROR);
+    } catch (IOException e) {
+      logger.error("I/O Exception: {}.", e.getMessage());
+      setRecordingState(RecordingState.UPLOAD_ERROR);
+    } finally {
+      client.getConnectionManager().shutdown();
+      setAgentState(AgentState.IDLE);
+    }
+
+    return retValue;
   }
 
   /**
@@ -377,144 +502,7 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
     return recording_state;
   }
 
-
-  /**
-   * Generates the manifest.xml file from the files specified in the properties
-   * @return A String indicating the success or fail of the operation
-   * @throws MediaPackageException 
-   * @throws UnsupportedElementException 
-   * @throws IOException 
-   * @throws TransformerException 
-   */
-  private boolean doManifest() throws MediaPackageException, UnsupportedElementException, IOException, TransformerException {
-    logger.debug("Generating manifest.");
-
-    // Generates the manifest
-    try {
-      MediaPackage pkg = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-
-      // Inserts the tracks in the MediaPackage
-      // TODO Specify the flavour
-      String deviceNames = config.getItem(CaptureParameters.CAPTURE_DEVICE_NAMES);
-      if (deviceNames == null) {
-        logger.error("No capture devices specified in " + CaptureParameters.CAPTURE_DEVICE_NAMES);
-        return false;
-      }
-      
-      String[] friendlyNames = deviceNames.split(",");
-      
-      for (String name : friendlyNames) {
-        name = name.trim();
-       
-        // Disregard the empty string
-        if (name.equals(""))
-          continue;
-        
-        String fileName = config.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + "." + name + ".outputfile");
-        
-        if (fileName == null)
-          continue;
-     
-        File outputFile = new File(fileName);
-
-        if (outputFile.exists())
-            // Adds a track
-            pkg.add(new URL(outputFile.getName()));
-      }
-
-      // TODO insert a catalog with some capture metadata
-      
-      // Gets the manifest.xml as a Document object
-      Document doc = pkg.toXml();
-
-      // Defines a transformer to convert the object in a xml file
-      Transformer transformer = TransformerFactory.newInstance().newTransformer();
-      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
-      // Initializes StreamResult with File object to save to file
-      StreamResult stResult = new StreamResult(new FileOutputStream(manifest));
-      DOMSource source = new DOMSource(doc);
-      transformer.transform(source, stResult);
-
-      // Closes the stream to make sure all the content is written to the file
-      stResult.getOutputStream().close();
-    } catch (MediaPackageException e) {
-      logger.error("MediaPackage Exception: {}.", e.getMessage());
-      throw e;
-    } catch (UnsupportedElementException e) {
-      logger.error("Unsupported Element Exception: {}.", e.getMessage());
-      throw e;
-    } catch (TransformerException e) {
-      logger.error("Transformer Exception: {}.", e.getMessage());
-      throw e;
-    } catch (IOException e) {
-      logger.error("I/O Exception: {}.", e.getMessage());
-      throw e;
-    }
-
-    return true;
-    
+  public void updated(Dictionary props) throws ConfigurationException {
+    // Update any configuration properties here
   }
-
-    /**
-     * Compresses the files contained in the output directory
-     * @param zipName - The name of the zip file created
-     * @return A File reference to the file zip created
-     */
-    public File zipFiles(String zipName) {
-      String[] totalFiles = tmpDir.list();
-      String[] filesToZip = new String[totalFiles.length - 1];
-      int i = 0;
-
-      for (String item : totalFiles)
-        if (!(item.equals("capture.stopped") ||
-                item.substring(item.lastIndexOf('.')).trim().equals("zip")))
-          filesToZip[i++] = tmpDir.getAbsolutePath()+File.separatorChar+item;
-
-      return new Compressor().zip(filesToZip, zipName);
-    }
-    
-    /**
-     * Sends a file to the REST ingestion service
-     * @param url : The service URL
-     * @param fileDesc : The descriptor for the media package
-     */
-    public String doIngest(String url, File fileDesc) {
-
-      logger.info("Beginning ingest of recording.");
-
-      HttpClient client = new DefaultHttpClient();
-      HttpPost postMethod = new HttpPost(url);
-      String retValue = null;
-
-      setAgentState(AgentState.UPLOADING);
-      setRecordingState(RecordingState.UPLOADING);
-      
-      try {
-        // Set the file as the body of the request
-        postMethod.setEntity(new FileEntity(fileDesc, URLConnection.getFileNameMap().getContentTypeFor(fileDesc.getName())));
-
-        // Send the file
-        HttpResponse response = client.execute(postMethod);
-        
-        retValue = response.getStatusLine().getReasonPhrase();
-
-        setRecordingState(RecordingState.UPLOAD_FINISHED);
-      } catch (ClientProtocolException e) {
-        logger.error("Failed to submit the data: {}.", e.getMessage());
-        setRecordingState(RecordingState.UPLOAD_ERROR);
-      } catch (IOException e) {
-        logger.error("I/O Exception: {}.", e.getMessage());
-        setRecordingState(RecordingState.UPLOAD_ERROR);
-      } finally {
-        client.getConnectionManager().shutdown();
-        setAgentState(AgentState.IDLE);
-      }
-
-      return retValue;
-    }
-
-    public void updated(Dictionary props) throws ConfigurationException {
-      // Update any configuration properties here
-    }
-  }
+}
