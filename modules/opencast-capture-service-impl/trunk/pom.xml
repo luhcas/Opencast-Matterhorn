@@ -166,7 +166,7 @@
               jna;inline=true,
               quartz;inline=true,
               ical4j;inline=true,
-	      httpcore;inline=true,
+	     	  httpcore;inline=true,
               httpclient;inline=true,
               httpmime;inline=true
             </Embed-Dependency>
@@ -181,7 +181,8 @@
               OSGI-INF/status-service-soap.xml,
               OSGI-INF/capture-service.xml,
               OSGI-INF/capture-service-rest.xml,
-              OSGI-INF/capture-service-soap.xml
+              OSGI-INF/capture-service-soap.xml,
+              OSGI-INF/scheduler-service.xml
             </Service-Component>
           </instructions>
         </configuration>

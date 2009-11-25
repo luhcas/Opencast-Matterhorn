@@ -154,8 +154,6 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
     return recordings;
   }
 
-
-  @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {
     // Update any configuration properties here
   }

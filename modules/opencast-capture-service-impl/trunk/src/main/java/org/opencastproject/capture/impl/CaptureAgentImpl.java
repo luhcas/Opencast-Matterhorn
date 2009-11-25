@@ -514,7 +514,6 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
       return retValue;
     }
 
-    @SuppressWarnings("unchecked")
     public void updated(Dictionary props) throws ConfigurationException {
       // Update any configuration properties here
     }

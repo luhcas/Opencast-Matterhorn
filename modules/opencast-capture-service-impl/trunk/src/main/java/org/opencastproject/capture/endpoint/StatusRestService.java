@@ -26,7 +26,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.io.IOUtils;
 import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
 import org.opencastproject.capture.api.StatusService;
-import org.opencastproject.capture.impl.CaptureAgentImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,6 @@ public class StatusRestService {
   protected final String docs;
 
   public StatusRestService() {
-    service = new CaptureAgentImpl();
     String docsFromClassloader = null;
     InputStream in = null;
     try {

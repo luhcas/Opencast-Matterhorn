@@ -23,6 +23,7 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Dictionary;
 import java.util.ListIterator;
 import java.util.Properties;
 
@@ -38,6 +39,10 @@ import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Duration;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
 import org.quartz.CronExpression;
 import org.quartz.CronTrigger;
 import org.quartz.JobDetail;
@@ -49,7 +54,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler {
+public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler, ManagedService {
 
   /** A constant which defines the key to retrieve a pointer to this object in the Quartz job classes */
   public static final String SCHEDULER = "scheduler";
@@ -83,6 +88,18 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
 
   /** The configuration for this service */
   private ConfigurationManager config = null;
+
+  /**
+   * Called when the bundle is activated.
+   * @param cc The component context
+   */
+  public void activate(ComponentContext cc) {
+    init();
+  }
+
+  public void deactivate() {
+    shutdown();
+  }
 
   /**
    * {@inheritDoc}
@@ -237,16 +254,26 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
       return null;
     }
 
+    if (cal != null) {
+      writeFile(localCalendarCacheURL, calendarString);
+    }
+
+    return cal;
+  }
+
+  /**
+   * Writes the contents variable to the URL passed in
+   * @param file The URL of the local file you wish to write to
+   * @param contents The contents of the file you wish to create
+   */
+  private void writeFile(URL file, String contents) {
     //TODO:  Handle file corruption issues for this block
     FileWriter out = null;
     try {
-      //If the new data is valid calendar data, write it to the cache
-      if (cal != null) {
-        out = new FileWriter(localCalendarCacheURL.getFile());
-        out.write(calendarString);
-      }
+        out = new FileWriter(file.getFile());
+        out.write(contents);
     } catch (IOException e) {
-      log.error("Unable to cache calendar data: {}.", e.getMessage());
+      log.error("Unable to write to {}: {}.", file, e.getMessage());
     } finally {
       try {
         if (out != null) {
@@ -256,8 +283,6 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
         //TODO:  What goes here?  The JVM should clean this up shortly...
       }
     }
-
-    return cal;
   }
 
   /**
@@ -348,14 +373,6 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
           continue;
         }
 
-        //TODO:  Write attachment to output directory of capture
-        //TODO:  One attachment should contain which capture parameters.  These must be put into the JobDetail object below
-        PropertyList attachments = event.getProperties(Property.ATTACH);
-        ListIterator<Property> iter = (ListIterator<Property>) attachments.listIterator();
-        while (iter.hasNext()) {
-          getAttachmentAsString(iter.next());
-        }
-        
         CronExpression cronString = getCronString(event);
         CronTrigger trig = new CronTrigger();
         trig.setCronExpression(cronString);
@@ -363,6 +380,51 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
 
         JobDetail job = new JobDetail(start.toString(), Scheduler.DEFAULT_GROUP, CaptureJob.class);
 
+        //TODO:  Write attachment to output directory of capture
+        //TODO:  One attachment should contain which capture parameters.  These must be put into the JobDetail object below
+        PropertyList attachments = event.getProperties(Property.ATTACH);
+        ListIterator<Property> iter = (ListIterator<Property>) attachments.listIterator();
+        boolean hasProperties = false;
+        while (iter.hasNext()) {
+          Property p = iter.next();
+          //TODO:  Make this not hardcoded?
+          String filename = p.getParameter("X-APPLE-FILENAME").getValue();
+          String contents = getAttachmentAsString(p);
+
+          //If the file is not the properties file for the capture, store it
+          //Otherwise put it into the job's detail package
+          //TODO:  Should this string be hardcoded?
+          if (filename != "capture.properties") {
+            try {
+              File captureDir = new File(config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), start.toString());
+              FileUtils.forceMkdir(captureDir);
+              URL u = new File(captureDir, filename).toURI().toURL();
+              writeFile(u, contents);
+            } catch (MalformedURLException e) {
+              log.warn("Unable to write capture.properties file for {}!", start.toString());
+            } catch (IOException e) {
+              log.warn("IOException trying to create capture directory: {}.", e.getMessage());
+            } catch (NullPointerException e) {
+              log.warn("Unable to write capture.properties file for {}: {}", 0, e.getMessage());
+            }
+          } else {
+            //Create a properties object and put it into the job's data map for access later
+            //TODO:  Watch for large memory usage here.  Each object is created when the calendar is loaded and then must live until the job fires (4+ months?)
+            Properties props = new Properties();
+            try {
+              props.load(new StringReader(contents));
+              job.getJobDataMap().put(CaptureJob.CAPTURE_PROPS, props);
+              hasProperties = true;
+            } catch (IOException e) {
+              log.warn("Unable to read from capture.properties file, using defaults for this capture.");
+            }
+          }
+        }
+
+        if (!hasProperties) {
+          log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", cronString.toString());
+        }
+        
         captureScheduler.scheduleJob(job, trig);
       }
 
@@ -600,5 +662,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler 
     } catch (SchedulerException e) {
       log.warn("Finalize for captureScheduler did not execute cleanly: {}.", e.getMessage());
     }
+  }
+
+  public void updated(Dictionary properties) throws ConfigurationException {
+    // TODO Auto-generated method stub
   }
 }

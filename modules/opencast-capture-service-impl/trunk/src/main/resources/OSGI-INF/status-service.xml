@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="org.opencastproject.capture.api.StatusService" immediate="true">
-  <implementation class="org.opencastproject.capture.impl.StatusServiceImpl" />
+  <implementation class="org.opencastproject.capture.impl.CaptureAgentImpl" />
   <property name="service.description" value="Status Service" />
   <service>
     <provide interface="org.opencastproject.capture.api.StatusService" />

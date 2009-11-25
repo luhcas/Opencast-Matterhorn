@@ -25,8 +25,6 @@ public interface CaptureParameters {
   /** Duration to specify for the capture client */
   public static final String CAPTURE_DURATION = "capture.duration";
   
-  public static final String ATTACHMENT = "capture.attachment";
-  
   /** Where the data should be sent to for ingestion */
   public static final String INGEST_URL = "admin.ingest.endpoint";
   
@@ -54,6 +52,9 @@ public interface CaptureParameters {
   /** The URL of the volatile directory under the root directory */
   public static final String CAPTURE_FILESYSTEM_VOLATILE_URL = "capture.filesystem.volatile.url";
 
+  /** The root URL where the captures should be stored prior to ingest */
+  public static final String CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL = "capture.filesystem.cache.capture.url";
+  
   /** The remote URL where the capture schedule should be retrieved */
   public static final String CAPTURE_SCHEDULE_URL = "capture.schedule.url";
   

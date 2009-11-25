@@ -15,14 +15,9 @@
  */
 package org.opencastproject.capture.endpoint;
 
-import org.opencastproject.capture.api.CaptureAgent;
-
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.Properties;
 
 import javax.ws.rs.FormParam;
@@ -32,6 +27,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.apache.commons.io.IOUtils;
+import org.opencastproject.capture.api.CaptureAgent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * FIXME -- Add javadocs
@@ -65,7 +65,14 @@ public class CaptureRestService {
   @POST
   @Produces(MediaType.TEXT_PLAIN)
   @Path("startCapture")
-  public Response startCapture(@FormParam("configuration") Properties configuration) {
+  public Response startCapture(@FormParam("config") String config) {
+    Properties configuration = new Properties();
+    try {
+      configuration.load(new StringReader(config));
+    } catch (IOException e1) {
+      logger.error("Unable to parse configuration string into valid capture config.  Continuing with default settings.");
+    }
+
     String out;
     try {
       out = service.startCapture(configuration);
@@ -93,13 +100,6 @@ public class CaptureRestService {
     } catch (Exception e) {
       return Response.serverError().status(400).build();
     }
-  }
-
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("test")
-  public String getTest() {
-    return "Easter Egg!!!!";
   }
 
   protected final String docs;

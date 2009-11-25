@@ -15,14 +15,18 @@
  */
 package org.opencastproject.capture.impl;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -36,26 +40,32 @@ public class CaptureJob implements Job {
   
   private static final Logger logger = LoggerFactory.getLogger(CaptureJob.class);
 
+  /** Constant used to define the key for the properties object which is pulled out of the execution context */
+  public static final String CAPTURE_PROPS = "capture_props";
+  
   /**
    * Starts the capture itself.
    * {@inheritDoc}
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    logger.warn("Capture job fired but nothing will be sent because I don't know what needs sending!");
-
-    ConfigurationManager config = ConfigurationManager.getInstance();
 
     //Figure out where we're sending the data
     //TODO:  Should this be hardcoded, or grabbed from some config?
-    HttpPost remoteServer = new HttpPost("http://localhost:8080/capture/rest/StartCapture");
+    HttpPost remoteServer = new HttpPost("http://localhost:8080/capture/rest/startCapture");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
-    //TODO:  Fill in the data the capture start function needs  (see MH-1184)
-    //TODO:  Make this into a properties object for the REST endpoint
-    //CaptureParameters.CAPTURE_DEVICE_NAMES = CSV of friendly device name
-    //CaptureParameters.CAPTURE_DEVICE_PREFIX+".FRIENDLYNAME.src"="/dev/video0"
-    //CaptureParameters.CAPTURE_DEVICE_PREFIX+".FRIENDLYNAME.outputfile"="presenter.mpg"
+    Properties p = (Properties) ctx.getMergedJobDataMap().get(CAPTURE_PROPS);
+
+    StringWriter props = new StringWriter();
+    try {
+      p.store(props, "");
+    } catch (IOException e) {
+      logger.error("Unable to store properties for trasport to REST endpoint: {}.", e.getMessage());
+    }
+
+    //Note that config must be the same as the name in the endpoint!
+    formParams.add(new BasicNameValuePair("config", props.toString()));
     
     //Send the data
     try {
