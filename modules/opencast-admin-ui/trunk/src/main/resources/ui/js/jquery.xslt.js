@@ -36,7 +36,7 @@
     }
     var str = /^\s*</;
     if (document.recalc) { // IE 5+
-        $.fn.xslt = function(xml, xslt) {
+        $.fn.xslt = function(xml, xslt, callback) {
             var target = $(this);
                 
             var change = function() {
@@ -44,6 +44,7 @@
                 if (xm.readyState == c && xs.readyState == c) {
                         window.setTimeout(function() {
                             target.html(xm.transformNode(xs.XMLDocument));
+                            callback();
                         }, 50);
                 }
             };
@@ -70,7 +71,7 @@
            support = true;
        }
        if (support) {
-            $.fn.xslt = function(xml, xslt) {
+            $.fn.xslt = function(xml, xslt, callback) {
                 var target = $(this);
                 var transformed = false;
 
@@ -80,22 +81,28 @@
                 var xs = {
                     readyState: 4
                 };
+                
+                var xsDoc = null;
+                var xmDoc = null;
 
                 var change = function() {
-                    if (xm.readyState == 4 && xs.readyState == 4  && !transformed) {
+                    if(xm.readyState == 4){ xmDoc = xm.responseXML; }
+                    if(xs.readyState == 4){ xsDoc = xs.responseXML; }
+                    if (xmDoc && xsDoc && !transformed) {
                         var processor = new XSLTProcessor();
                         if ($.isFunction(processor.transformDocument)) {
                             // obsolete Mozilla interface
                             resultDoc = document.implementation.createDocument("", "", null);
-                            processor.transformDocument(xm.responseXML, xs.responseXML, resultDoc, null);
+                            processor.transformDocument(xmDoc, xsDoc, resultDoc, null);
                             target.html(new XMLSerializer().serializeToString(resultDoc));
                         }
                         else {
-                            processor.importStylesheet(xs.responseXML);
-                            resultDoc = processor.transformToFragment(xm.responseXML, document);
+                            processor.importStylesheet(xsDoc);
+                            resultDoc = processor.transformToFragment(xmDoc, document);
                             target.empty().append(resultDoc);
                         }
                         transformed = true;
+                        callback();
                     }
                 };
 
