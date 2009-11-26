@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.impl;
+package org.opencastproject.capture.impl.jobs;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

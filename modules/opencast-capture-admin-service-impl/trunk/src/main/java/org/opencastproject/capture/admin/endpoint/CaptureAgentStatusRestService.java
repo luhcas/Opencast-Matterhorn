@@ -17,7 +17,6 @@ package org.opencastproject.capture.admin.endpoint;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -114,12 +113,12 @@ public class CaptureAgentStatusRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("GetKnownRecordings")
-  public Map<String, RecordingStateUpdate> getAllRecordings() {
-    HashMap<String, RecordingStateUpdate> update = new HashMap<String, RecordingStateUpdate>();
+  public List<RecordingStateUpdate> getAllRecordings() {
+    LinkedList<RecordingStateUpdate> update = new LinkedList<RecordingStateUpdate>();
     Map<String, Recording> data = service.getKnownRecordings();
     //Run through and build a map of updates (rather than states)
     for (Entry<String, Recording> e : data.entrySet()) {
-      update.put(e.getKey(), new RecordingStateUpdate(e.getValue()));
+      update.add(new RecordingStateUpdate(e.getValue()));
     }
     return update;
   }

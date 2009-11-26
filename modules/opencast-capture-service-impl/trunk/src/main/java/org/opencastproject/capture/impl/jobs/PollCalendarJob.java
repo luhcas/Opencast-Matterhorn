@@ -13,8 +13,9 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.impl;
+package org.opencastproject.capture.impl.jobs;
 
+import org.opencastproject.capture.impl.SchedulerImpl;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;

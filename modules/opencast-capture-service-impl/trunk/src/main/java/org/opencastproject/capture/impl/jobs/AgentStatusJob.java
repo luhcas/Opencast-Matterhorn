@@ -13,12 +13,13 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.impl;
+package org.opencastproject.capture.impl.jobs;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -27,6 +28,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.opencastproject.capture.api.StatusService;
+import org.opencastproject.capture.impl.CaptureParameters;
+import org.opencastproject.capture.impl.ConfigurationManager;
+import org.opencastproject.capture.impl.StateSingleton;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -40,7 +44,8 @@ public class AgentStatusJob implements Job {
 
   private static final Logger logger = LoggerFactory.getLogger(AgentStatusJob.class);
 
-  ConfigurationManager config = ConfigurationManager.getInstance();
+  private ConfigurationManager config = ConfigurationManager.getInstance();
+  private StatusService status = StateSingleton.getInstance();
 
   /**
    * Pushes the agent's status to the remote status service
@@ -48,15 +53,14 @@ public class AgentStatusJob implements Job {
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-
-    //Get a pointer to the agent
-    StatusService agent = (StatusService) ctx.getMergedJobDataMap().get(CaptureAgentImpl.SERVICE);
-
-    sendAgentState(agent, config);
-    sendRecordingState(agent, config);
+    sendAgentState();
+    sendRecordingState();
   }
 
-  private void sendAgentState(StatusService agent, ConfigurationManager config) {
+  /**
+   * Sends an agent state update to the capture-admin status service
+   */
+  private void sendAgentState() {
 
     //Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATUS_ENDPOINT_URL);
@@ -78,12 +82,15 @@ public class AgentStatusJob implements Job {
       logger.warn("Invalid name set for {} falling back to {}.", CaptureParameters.AGENT_NAME, agentName);
     }
     formParams.add(new BasicNameValuePair("agentName", agentName));
-    formParams.add(new BasicNameValuePair("state", agent.getAgentState()));
+    formParams.add(new BasicNameValuePair("state", status.getAgentState()));
 
     send(formParams, url);
   }
 
-  private void sendRecordingState(StatusService agent, ConfigurationManager config) {
+  /**
+   * Sends an update for each of the recordings currently being tracked in the system
+   */
+  private void sendRecordingState() {
 
     //Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.RECORDING_STATUS_ENDPOINT_URL);
@@ -92,15 +99,23 @@ public class AgentStatusJob implements Job {
       return;
     }
 
-    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+    //For each recording being tracked by the system send an update
+    Set<String> recordings = status.getRecordings();
+    for (String id : recordings) {
+      List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
-    //TODO:  Get the id value from somewhere
-    formParams.add(new BasicNameValuePair("id", "?"));
-    formParams.add(new BasicNameValuePair("state", agent.getRecordingState()));
+      formParams.add(new BasicNameValuePair("id", id));
+      formParams.add(new BasicNameValuePair("state", status.getRecordingState(id)));
 
-    send(formParams, url);
+      send(formParams, url);
+    }
   }
 
+  /**
+   * Utility method to POST data to a URL.  This method encodes the data in UTF-8 as post data, rather than multipart MIME
+   * @param formParams The data to send
+   * @param url The URL to send the data to
+   */
   private void send(List<NameValuePair> formParams, String url) {
     HttpPost remoteServer = new HttpPost(url);
 

@@ -40,6 +40,8 @@ import net.fortuna.ical4j.model.property.Duration;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.opencastproject.capture.impl.jobs.CaptureJob;
+import org.opencastproject.capture.impl.jobs.PollCalendarJob;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;

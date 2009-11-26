@@ -15,23 +15,33 @@
  */
 package org.opencastproject.capture.api;
 
+import java.util.Set;
+
 /**
  * OSGi service for querying the capture device's current state (MH-58)
  */
 public interface StatusService {
 
   /**
-   * Gets the machine's current encoding status
-   * 
-   * @return The capture machine's current state
+   * Gets the state of the agent
+   * @return The state of the agent (should be defined in AgentState)
+   * @see org.opencastproject.capture.api.AgentState
    */
   public String getAgentState();
 
   /**
-   * Gets the machine's current encoding status
-   * 
-   * @return The capture machine's current state
+   * Returns the set of recording IDs that are active within this capture agent.
+   * @return The set of recording IDs
    */
-  public String getRecordingState();
+  public Set<String> getRecordings();
+
+  /**
+   * Gets the state of a recording
+   * 
+   * @param recordingID The ID of the recording in question
+   * @return A state (should be defined in RecordingState)
+   * @see org.opencastproject.capture.api.RecordingState
+   */
+  public String getRecordingState(String recordingID);
 }
 

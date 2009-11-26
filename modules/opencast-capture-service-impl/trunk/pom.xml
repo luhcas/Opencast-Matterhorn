@@ -172,13 +172,15 @@
             </Embed-Dependency>
             <Export-Package>
               org.opencastproject.capture.impl.*,
+              org.opencastproject.capture.jobs.*,
               org.opencastproject.capture.pipeline.*,
               org.opencastproject.capture.endpoint
             </Export-Package>
-            <Service-Component>
-              OSGI-INF/status-service.xml,
+            <!--               OSGI-INF/status-service.xml,
               OSGI-INF/status-service-rest.xml,
               OSGI-INF/status-service-soap.xml,
+             -->
+            <Service-Component>
               OSGI-INF/capture-service.xml,
               OSGI-INF/capture-service-rest.xml,
               OSGI-INF/capture-service-soap.xml,
