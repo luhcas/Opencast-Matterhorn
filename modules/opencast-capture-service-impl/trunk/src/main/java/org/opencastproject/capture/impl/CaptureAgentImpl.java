@@ -181,8 +181,13 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
     if (merged.contains(CaptureParameters.RECORDING_ROOT_URL)) {
       current_capture_dir = new File(merged.getProperty(CaptureParameters.RECORDING_ROOT_URL));
     } else {
-      current_capture_dir = new File(config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),
-                               merged.getProperty(CaptureParameters.RECORDING_ID));
+      //If there is a recording ID use it, otherwise it's unscheduled so just grab a timestamp
+      if (merged.contains(CaptureParameters.RECORDING_ID)) {
+        current_capture_dir = new File(config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),
+                                       merged.getProperty(CaptureParameters.RECORDING_ID));
+      } else {
+        current_capture_dir = new File(config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), "Unscheduled-" + System.currentTimeMillis());
+      }
       merged.put(CaptureParameters.RECORDING_ROOT_URL, current_capture_dir.toString());
     }
 

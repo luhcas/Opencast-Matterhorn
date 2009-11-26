@@ -15,8 +15,8 @@
  */
 package org.opencastproject.capture.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -57,15 +57,15 @@ public class CaptureJob implements Job {
 
     Properties p = (Properties) ctx.getMergedJobDataMap().get(CAPTURE_PROPS);
 
-    StringWriter props = new StringWriter();
+    ByteArrayOutputStream contents = new ByteArrayOutputStream();
     try {
-      p.store(props, "");
+      p.store(contents, "");
     } catch (IOException e) {
       logger.error("Unable to store properties for trasport to REST endpoint: {}.", e.getMessage());
     }
 
     //Note that config must be the same as the name in the endpoint!
-    formParams.add(new BasicNameValuePair("config", props.toString()));
+    formParams.add(new BasicNameValuePair("config", contents.toString()));
     
     //Send the data
     try {
