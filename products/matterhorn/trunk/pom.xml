@@ -724,7 +724,23 @@
     </dependencies>
   </dependencyManagement>
 
+  <!-- These should be the right locations for opencast maven 2 distribution,
+    make sure you have <scm> defined for your sub project -->
+  <distributionManagement>
+    <snapshotRepository>
+      <id>opencast-maven2-snapshot</id>
+      <name>OC Snapshot repo</name>
+      <url>http://repository.opencastproject.org/nexus/content/repositories/snapshots</url>
+      <uniqueVersion>false</uniqueVersion>
+    </snapshotRepository>
+    <repository>
+      <id>opencast-maven2-release</id>
+      <name>OC Release repo</name>
+      <url>http://repository.opencastproject.org/nexus/content/repositories/release</url>
+    </repository>
+  </distributionManagement>
 
+  <!-- defines the  -->
   <pluginRepositories>
     <pluginRepository>
       <id>opencast</id>
