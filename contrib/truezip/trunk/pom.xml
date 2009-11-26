@@ -49,14 +49,21 @@
   </dependencies>
 
   <scm>
-    <connection>http://source.opencastproject.org/svn/contrib</connection>
-    <developerConnection>https://source.opencastproject.org/svn/contrib</developerConnection>
+    <connection>http://source.opencastproject.org/svn/contrib/truezip/trunk</connection>
+    <developerConnection>https://source.opencastproject.org/svn/contrib/truezip/trunk</developerConnection>
   </scm>
 
   <distributionManagement>
+    <snapshotRepository>
+      <id>opencast-maven2-snapshot</id>
+      <name>OC Snapshot repo</name>
+      <url>http://repository.opencastproject.org/nexus/content/repositories/snapshots</url>
+      <uniqueVersion>false</uniqueVersion>
+    </snapshotRepository>
     <repository>
-      <id>Opencast-Maven2</id>
-      <url>http://repository.opencastproject.org/nexus/content/repositories/snapshots/</url>
+      <id>opencast-maven2-release</id>
+      <name>OC Release repo</name>
+      <url>http://repository.opencastproject.org/nexus/content/repositories/release</url>
     </repository>
   </distributionManagement>
 
