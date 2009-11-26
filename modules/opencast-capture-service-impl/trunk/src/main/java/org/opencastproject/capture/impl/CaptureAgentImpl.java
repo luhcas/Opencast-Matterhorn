@@ -18,7 +18,6 @@ package org.opencastproject.capture.impl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
 import java.util.Dictionary;
@@ -42,6 +41,7 @@ import org.gstreamer.Bus;
 import org.gstreamer.Gst;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
+import org.gstreamer.State;
 import org.gstreamer.event.EOSEvent;
 import org.opencastproject.capture.api.AgentState;
 import org.opencastproject.capture.api.CaptureAgent;
@@ -77,13 +77,13 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
 
   private Pipeline pipe = null;
   //TODO:  Document this, what does it contain?
-  private Properties props = null;
+  private Properties merged = null;
   private ConfigurationManager config = ConfigurationManager.getInstance();
 
   /** Used by the AgentStatusJob class to pull a pointer to the CaptureAgentImpl so it can poll for status updates */
   public static final String SERVICE = "status_service";
   /** The agent's current state.  Used for logging */
-  private String agent_state = AgentState.UNKNOWN;
+  private String agent_state = AgentState.IDLE;
   /** The recording's current state.  Used for logging */
   private String recording_state = RecordingState.UNKNOWN;
   /** A pointer to the current capture directory.  Note that this should be null except for when we are actually capturing */
@@ -175,7 +175,7 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
     logger.info("Initializing devices for capture.");
 
     // merges properties without overwriting the system's configuration
-    Properties merged = config.merge(properties, false);
+    merged = config.merge(properties, false);
 
     //Figure out where captureDir lives
     if (merged.contains(CaptureParameters.RECORDING_ROOT_URL)) {
@@ -216,7 +216,7 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
     Bus bus = pipe.getBus();
     bus.connect(new Bus.EOS() {
       public void endOfStream(GstObject arg0) {
-        stopCapture();
+        logger.debug("Pipeline received EOS.");
       }
     });
     bus.connect(new Bus.ERROR() {
@@ -230,7 +230,7 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
     pipe.play();
 
     // It **SEEMS** the state changes are immediate (for the test i've done so far)
-    //while (pipe.getState() != State.PLAYING);
+    while (pipe.getState() != State.PLAYING);
     logger.info("{} started.", pipe.getName());
     //Gst.main();
     //Gst.deinit();
@@ -256,7 +256,7 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
       // "READY" is the idle state for pipelines
       pipe.sendEvent(new EOSEvent());
       //while (pipe.getState() != State.NULL);
-      //pipe.setState(State.NULL);
+      pipe.setState(State.NULL);
 
       Gst.deinit();
 
@@ -281,6 +281,7 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
       setRecordingState(RecordingState.CAPTURE_ERROR);
     } catch (IOException e) {
       logger.error("I/O Exception: {}.", e.getMessage());
+      e.printStackTrace();
       result = "I/O Exception: " + e.getMessage();
       setRecordingState(RecordingState.CAPTURE_ERROR);
     } catch (TransformerException e) {
@@ -313,14 +314,14 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
 
       // Inserts the tracks in the MediaPackage
       // TODO Specify the flavour
-      String deviceNames = config.getItem(CaptureParameters.CAPTURE_DEVICE_NAMES);
+      String deviceNames = merged.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
       if (deviceNames == null) {
         logger.error("No capture devices specified in " + CaptureParameters.CAPTURE_DEVICE_NAMES);
         return false;
       }
       
       String[] friendlyNames = deviceNames.split(",");
-      
+      String outputDirectory = merged.getProperty(CaptureParameters.RECORDING_ROOT_URL);
       for (String name : friendlyNames) {
         name = name.trim();
        
@@ -328,16 +329,14 @@ public class CaptureAgentImpl implements CaptureAgent, StatusService, ManagedSer
         if (name.equals(""))
           continue;
         
-        String fileName = config.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + "." + name + ".outputfile");
+        String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
+        File outputFile = new File(outputDirectory, merged.getProperty(outputProperty));
+      
+        // add the file to the MediaPackage
+        if (outputFile.exists()) {
+          pkg.add(outputFile.toURI().toURL()); 
+        }
         
-        if (fileName == null)
-          continue;
-     
-        File outputFile = new File(fileName);
-
-        if (outputFile.exists())
-            // Adds a track
-            pkg.add(new URL(outputFile.getName()));
       }
 
       // TODO insert a catalog with some capture metadata

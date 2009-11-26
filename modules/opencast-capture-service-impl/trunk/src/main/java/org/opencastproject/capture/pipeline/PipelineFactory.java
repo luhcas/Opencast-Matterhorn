@@ -31,6 +31,7 @@ import org.gstreamer.Pipeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -66,6 +67,7 @@ public class PipelineFactory {
     }
     
     String[] friendlyNames = deviceNames.split(",");
+    String outputDirectory = props.getProperty(CaptureParameters.RECORDING_ROOT_URL);
     
     for (String name : friendlyNames) {
       name = name.trim();
@@ -78,7 +80,7 @@ public class PipelineFactory {
       String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
       String srcLoc = props.getProperty(srcProperty);
-      String outputLoc = props.getProperty(outputProperty);
+      String outputLoc = new File(outputDirectory, props.getProperty(outputProperty)).getAbsolutePath();
       
       // Attempt to determine what the device is using the JV4LInfo library 
       try {
@@ -271,7 +273,7 @@ public class PipelineFactory {
     Element filesink = ElementFactory.make("filesink", null);
 
     v4lsrc.set("device", captureDevice.getLocation());
-    filter.setCaps(Caps.fromString("video/x-raw-yuv, width=1024," + "height=768,framerate=30/1"));
+    filter.setCaps(Caps.fromString("video/x-raw-yuv,width=1024,height=768,framerate=30/1"));
     filesink.set("location", captureDevice.getOutputPath());
     if (bitrate != null)
       enc.set("bitrate", bitrate);
