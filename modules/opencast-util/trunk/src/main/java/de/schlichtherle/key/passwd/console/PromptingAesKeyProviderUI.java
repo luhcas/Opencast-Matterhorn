@@ -37,10 +37,11 @@ public class PromptingAesKeyProviderUI extends PromptingKeyProviderUI {
         final PromptingAesKeyProvider aesKeyProvider = ((PromptingAesKeyProvider) provider);
 
         // java 5 incompatible
-//        printf(resources.getString("keyStrength.banner"));
-//        printf(resources.getString("keyStrength.medium"));
-//        printf(resources.getString("keyStrength.high"));
-//        printf(resources.getString("keyStrength.ultra"));
+/*
+        printf(resources.getString("keyStrength.banner"));
+        printf(resources.getString("keyStrength.medium"));
+        printf(resources.getString("keyStrength.high"));
+        printf(resources.getString("keyStrength.ultra"));
 
         prompting: while (true) {
             String keyStrength = readLine(
@@ -68,5 +69,6 @@ public class PromptingAesKeyProviderUI extends PromptingKeyProviderUI {
             } catch (NumberFormatException syntaxError) {
             }
         }
+*/
     }
 }
