@@ -151,7 +151,8 @@ public class Activator extends ContextLoaderListener implements BundleActivator 
     try {
       contextLoader = createContextLoader();
       applicationContext = (ConfigurableWebApplicationContext) contextLoader.initWebApplicationContext(servletContext);
-      logger.debug("Root context path: {}", applicationContext.getServletContext().getContextPath());
+      // this is servlet 2.5 only and oddly we seem to be using a mix of 2.4 and 2.5, commenting this out until all 2.4 references are gone -AZ
+      //logger.debug("Root context path: {}", applicationContext.getServletContext().getContextPath());
       ConfigurableBeanFactory factory = applicationContext.getBeanFactory();
       factory.registerSingleton("default.context", applicationContext);
       parentFactory = (DefaultListableBeanFactory) factory.getParentBeanFactory();
