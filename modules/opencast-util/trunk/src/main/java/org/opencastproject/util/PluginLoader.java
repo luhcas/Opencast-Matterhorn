@@ -140,7 +140,7 @@ public class PluginLoader {
    */
   public static Class<?>[] findPlugins(String pkg, String ext, String impl[],
       ClassLoader cl) throws IllegalArgumentException {
-    logger.info("Looking for plugins in package " + pkg);
+    logger.debug("Looking for plugins in package " + pkg);
 
     if (pkg == null)
       throw new IllegalArgumentException("Package name must not be null!");
@@ -148,7 +148,7 @@ public class PluginLoader {
     // search classpath for possible locations of the package
     String packagePath = pkg.replace('.', '/').concat("/");
 
-    logger.info("package path = " + packagePath);
+    logger.debug("package path = " + packagePath);
 
     Enumeration<URL> e;
     try {
