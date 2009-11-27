@@ -16,6 +16,7 @@
 package org.opencastproject.inspection.impl;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
@@ -83,7 +84,8 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         MediaPackageElement element = elementBuilder.elementFromURL(url, Type.Track,
                 MediaPackageElements.INDEFINITE_TRACK);
         track = (TrackImpl) element;
-        if(metadata.getDuration() != null) track.setDuration(metadata.getDuration());
+        if (metadata.getDuration() != null)
+          track.setDuration(metadata.getDuration());
         track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
         List<AudioStreamMetadata> audioList = metadata.getAudioStreamMetadata();
         if (audioList != null && !audioList.isEmpty()) {
@@ -169,7 +171,6 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
           track.setDuration(metadata.getDuration());
         if (track.getChecksum() == null || override)
           track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
-
         // find all streams
         Dictionary<String, Stream> streamsId2Stream = new Hashtable<String, Stream>();
         for (Stream stream : originalTrack.getStreams()) {
@@ -215,6 +216,22 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       }
       return track;
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(AbstractMediaPackageElement, Boolean)
+   */
+  public AbstractMediaPackageElement enrich(AbstractMediaPackageElement element, Boolean override) {
+    File file = workspace.get(element.getURL());
+    if (element.getChecksum() == null || override)
+      try {
+        element.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    return element;
   }
 
   @SuppressWarnings("unchecked")

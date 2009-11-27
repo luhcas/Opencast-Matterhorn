@@ -45,8 +45,7 @@ public class IngestServiceImplTest {
 
   @Before
   public void setup() {
-    // urlTrack = IngestServiceImplTest.class.getResource("/av.mov");
-    urlTrack = IngestServiceImplTest.class.getResource("/test.avi");
+    urlTrack = IngestServiceImplTest.class.getResource("/av.mov");
     urlTrack1 = IngestServiceImplTest.class.getResource("/vonly.mov");
     urlTrack2 = IngestServiceImplTest.class.getResource("/aonly.mov");
     urlCatalog = IngestServiceImplTest.class.getResource("/mpeg-7.xml");
@@ -95,7 +94,7 @@ public class IngestServiceImplTest {
 
   }
 
-  // @Test
+  @Test
   public void testThinClient() throws Exception {
     mediaPackage = service.createMediaPackage();
     service.addTrack(urlTrack, MediaPackageElements.INDEFINITE_TRACK, mediaPackage);
@@ -106,7 +105,7 @@ public class IngestServiceImplTest {
 
   @Test
   public void testThickClient() throws Exception {
-    // mediaPackage = service.addZippedMediaPackage(urlPackage.openStream());
+    mediaPackage = service.addZippedMediaPackage(urlPackage.openStream());
   }
 
 }

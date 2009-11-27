@@ -17,13 +17,17 @@ package org.opencastproject.ingest.impl;
 
 import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
+import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.identifier.HandleBuilder;
 import org.opencastproject.media.mediapackage.identifier.HandleBuilderFactory;
@@ -104,25 +108,28 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
     // unpack
     ZipUtil.unzip(f, tempDir);
     f.delete();
-
     // check media package and write data to file repo
     File manifest = null;
     File topLevelManifest = new File(tempPath, "manifest.xml");
-    if(topLevelManifest.exists()) {
+    if (topLevelManifest.exists()) {
       manifest = topLevelManifest;
     } else {
       // try to find the manifest in the first subdirectory, since the zip may have been constructed this way
-      File[] subDirs = tempDir.listFiles(new FileFilter() {public boolean accept(File pathname) {return pathname.isDirectory();}});
-      if(subDirs.length == 1) {
+      File[] subDirs = tempDir.listFiles(new FileFilter() {
+        public boolean accept(File pathname) {
+          return pathname.isDirectory();
+        }
+      });
+      if (subDirs.length == 1) {
         File subDirManifest = new File(subDirs[0], "manifest.xml");
-        if(subDirManifest.exists()) {
+        if (subDirManifest.exists()) {
           manifest = subDirManifest;
         } else {
           throw new RuntimeException("no manifest found in the root of this zip file or in the first directory");
         }
       }
     }
-    
+
     MediaPackage mp;
     try {
       builder.setSerializer(new DefaultMediaPackageSerializerImpl(manifest.getParentFile()));
@@ -403,17 +410,17 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   }
 
   private MediaPackageElement inspect(MediaPackageElement element) {
-    // if (inspection == null)
-    // return element;
-    // if (element.getElementType() == Type.Track) {
-    // return inspection.enrich((Track) element, false);
-    // }
-    // if (element.getElementType() == Type.Catalog) {
-    // return (Catalog) inspection.enrich((AbstractMediaPackageElement) element, false);
-    // }
-    // if (element.getElementType() == Type.Attachment) {
-    // return inspection.enrich((Attachment) element, false);
-    // }
+    if (inspection == null)
+      return element;
+    if (element.getElementType() == Type.Track) {
+      return inspection.enrich((Track) element, false);
+    }
+    if (element.getElementType() == Type.Catalog) {
+      return (Catalog) inspection.enrich((AbstractMediaPackageElement) element, false);
+    }
+    if (element.getElementType() == Type.Attachment) {
+      return inspection.enrich((AbstractMediaPackageElement) element, false);
+    }
     return element;
   }
 

@@ -15,6 +15,7 @@
  */
 package org.opencastproject.inspection.api;
 
+import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.media.mediapackage.Track;
 
 import java.net.URL;
@@ -36,4 +37,16 @@ public interface MediaInspectionService {
    * @return
    */
   Track enrich(Track originalTrack, Boolean override);
+
+  /**
+   * Equip an existing media package element with automatically generated metadata
+   * 
+   * @param original
+   *          The original media package element that will be inspected
+   * @param override
+   *          In case of conflict between existing and automatically obtained metadata this switch selects preference.
+   *          False..The original metadata will be kept, True..The new metadata will be used.
+   * @return
+   */
+  AbstractMediaPackageElement enrich(AbstractMediaPackageElement element, Boolean override);
 }
