@@ -250,10 +250,12 @@ public class SolrIndexManager {
 
     // Add mpeg-7
     // TODO: Merge mpeg-7 catalogs prior to adding them to solr
+    /*
     Catalog[] mpeg7Catalogs = mediaPackage.getCatalogs(Mpeg7Catalog.FLAVOR);
     for (Catalog mpeg7Catalog : mpeg7Catalogs) {
       addMpeg7Metadata(solrEpisodeDocument, (Mpeg7Catalog) mpeg7Catalog);
     }
+    */
 
     return solrEpisodeDocument;
   }
