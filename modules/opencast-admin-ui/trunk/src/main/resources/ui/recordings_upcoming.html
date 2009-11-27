@@ -19,8 +19,31 @@
 
             $(document).ready( function() {
                AdminUI.init();
+               $('#recordings-table-container').xslt("../../scheduler/rest/getUpcommingEvents", "xsl/recordings_upcoming.xsl", function() {
+                   // run through the timestamps and make them string representations
+                   $('#recordings-table-container').find('.td-TimeDate').each( function() {
+                       var start, end;
+                       start = timestampToDate($(this).children('.date-start').text());
+                       end   = timestampToDate($(this).children('.date-end').text());
+                       $(this).children('.date-start').text( start.getFullYear() + '/' + makeTwoDigits(start.getMonth()) + '/' + makeTwoDigits(start.getDate()) + ' ' + makeTwoDigits(start.getHours()) + ':' + makeTwoDigits(start.getMinutes()) );
+                       $(this).children('.date-end').text( makeTwoDigits(end.getHours()) + ':' + makeTwoDigits(end.getMinutes()) );
+                   })
+               });
             });
 
+            function timestampToDate(timestamp) {
+                var date = new Date();
+                date.setTime(timestamp);
+                return date;
+            }
+
+            function makeTwoDigits(number) {
+                if (number < 10) {
+                    return '0' + number;
+                } else {
+                    return number;
+                }
+            }
         </script>
     </head>
     <body>
