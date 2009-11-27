@@ -211,7 +211,7 @@ public class MimeTypes {
         }
     }
 
-    log_.info("Discovered previously unknown mime type '" + mimeType + "'");
+    log_.debug("Discovered previously unknown mime type '" + mimeType + "'");
     MimeType m = new MimeType(t[0], t[1]);
     mimeTypes_.add(m);
     return m;
