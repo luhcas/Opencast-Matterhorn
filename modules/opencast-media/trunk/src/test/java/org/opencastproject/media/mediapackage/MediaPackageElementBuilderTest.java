@@ -72,51 +72,6 @@ public class MediaPackageElementBuilderTest {
 
   /**
    * Test method for
-   * {@link org.opencastproject.media.mediapackage.MediaPackageElementBuilderImpl#elementFromURL(File file, org.opencastproject.media.mediapackage.MediaPackageElement.Type type, MediaPackageElementFlavor flavor)}
-   * .
-   */
-  @Test
-  public void testElementFromFileWithHints() {
-
-    // Test correct hints
-
-    try {
-      catalogFile = DublinCoreTest.class.getResource("/dublincore.xml").toURI().toURL();
-      mediaPackageElementBuilder.elementFromURL(catalogFile, MediaPackageElement.Type.Catalog,
-              MediaPackageElements.DUBLINCORE_CATALOG);
-      mediaPackageElementBuilder.elementFromURL(catalogFile, MediaPackageElement.Type.Catalog, null);
-      mediaPackageElementBuilder.elementFromURL(catalogFile, null, MediaPackageElements.DUBLINCORE_CATALOG);
-      mediaPackageElementBuilder.elementFromURL(catalogFile, null, null);
-    } catch (UnsupportedElementException e) {
-      fail(e.getMessage());
-    } catch (MalformedURLException e) {
-      fail(e.getMessage());
-    } catch (URISyntaxException e) {
-      fail(e.getMessage());
-    }
-
-    // Test incorrect hints
-    try {
-      mediaPackageElementBuilder.elementFromURL(catalogFile, MediaPackageElement.Type.Track,
-              MediaPackageElements.DUBLINCORE_CATALOG);
-      fail("Specified type was wrong but didn't matter");
-    } catch (UnsupportedElementException e) {
-      // Expected
-    }
-
-    // Test incorrect flavor
-    try {
-      mediaPackageElementBuilder.elementFromURL(catalogFile, MediaPackageElement.Type.Catalog,
-              MediaPackageElements.PRESENTER_TRACK);
-      fail("Specified flavor was wrong but didn't matter");
-    } catch (UnsupportedElementException e) {
-      // Expected
-    }
-
-  }
-
-  /**
-   * Test method for
    * {@link org.opencastproject.media.mediapackage.MediaPackageElementBuilderImpl#newElement(org.opencastproject.media.mediapackage.MediaPackageElement.Type type, MediaPackageElementFlavor flavor)}
    * .
    */
