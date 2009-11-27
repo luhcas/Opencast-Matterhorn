@@ -18,7 +18,6 @@ package org.opencastproject.media.mediapackage.elementbuilder;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.track.TrackImpl;
@@ -28,8 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
 import java.net.URL;
-
-import javax.xml.xpath.XPathExpressionException;
 
 /**
  * This implementation of the {@link MediaPackageElementBuilderPlugin} recognizes video tracks and provides the
@@ -51,21 +48,15 @@ public class IndefiniteTrackBuilderPlugin extends AbstractTrackBuilderPlugin {
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   public boolean accept(MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
-    return type.equals(MediaPackageElement.Type.Track) && flavor.equals(MediaPackageElements.INDEFINITE_TRACK);
+    return type.equals(MediaPackageElement.Type.Track);
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.w3c.dom.Node)
    */
   public boolean accept(Node elementNode) {
-    try {
-      String name = elementNode.getNodeName();
-      String flavor = xpath.evaluate("@type", elementNode);
-      return name.equalsIgnoreCase(MediaPackageElement.Type.Track.toString())
-              && MediaPackageElements.INDEFINITE_TRACK.eq(flavor);
-    } catch (XPathExpressionException e) {
-      return false;
-    }
+    String name = elementNode.getNodeName();
+    return name.equalsIgnoreCase(MediaPackageElement.Type.Track.toString());
   }
 
   /**
@@ -74,7 +65,7 @@ public class IndefiniteTrackBuilderPlugin extends AbstractTrackBuilderPlugin {
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   public boolean accept(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
-    return MediaPackageElement.Type.Track.equals(type) && MediaPackageElements.INDEFINITE_TRACK.equals(flavor);
+    return MediaPackageElement.Type.Track.equals(type);
   }
 
   /**
