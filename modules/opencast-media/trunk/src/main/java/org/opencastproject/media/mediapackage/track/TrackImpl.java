@@ -131,9 +131,11 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
     Node node = super.toManifest(document, serializer);
 
     // duration
-    Node durationNode = document.createElement("duration");
-    durationNode.appendChild(document.createTextNode(Long.toString(duration)));
-    node.appendChild(durationNode);
+    if (duration >= 0) {
+      Node durationNode = document.createElement("duration");
+      durationNode.appendChild(document.createTextNode(Long.toString(duration)));
+      node.appendChild(durationNode);
+    }
 
     for (Stream s : streams)
       node.appendChild(s.toManifest(document, serializer));

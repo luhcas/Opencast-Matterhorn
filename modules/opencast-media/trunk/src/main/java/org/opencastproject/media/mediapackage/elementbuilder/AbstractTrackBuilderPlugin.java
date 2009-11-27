@@ -150,10 +150,10 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
       // duration
       try {
         String strDuration = (String) xpath.evaluate("duration/text()", elementNode, XPathConstants.STRING);
-        long duration = Long.parseLong(strDuration.trim());
-        if (duration <= 0)
-          throw new UnsupportedElementException("Invalid duration for track " + url + " found in manifest: " + duration);
-        track.setDuration(duration);
+        if (strDuration != null && !strDuration.equals("")) {
+          long duration = Long.parseLong(strDuration.trim());
+          track.setDuration(duration);
+        }
       } catch (NumberFormatException e) {
         throw new UnsupportedElementException("Duration of track " + url + " is malformatted");
       }
