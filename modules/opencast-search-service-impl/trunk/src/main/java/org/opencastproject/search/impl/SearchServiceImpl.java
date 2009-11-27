@@ -56,7 +56,7 @@ public class SearchServiceImpl implements SearchService {
 
   /** Manager for the solr search index */
   private SolrIndexManager solrIndexManager = null;
-  
+
   /** The solr root directory */
   private String solrRoot = null;
 
@@ -72,8 +72,8 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * Creates a search service that places solr into a subdirectory of 
-   * <code>java.io.tmpdir</code> called <code>opencast/searchindex</code>.
+   * Creates a search service that places solr into a subdirectory of <code>java.io.tmpdir</code> called
+   * <code>opencast/searchindex</code>.
    */
   public SearchServiceImpl() {
     this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "searchindex");
@@ -92,7 +92,7 @@ public class SearchServiceImpl implements SearchService {
 
       // Create the config directory
       if (solrConfigDir.exists()) {
-        log_.info("solr search index found at " + solrConfigDir);        
+        log_.info("solr search index found at " + solrConfigDir);
       } else {
         log_.info("solr config directory doesn't exist.  Creating " + solrConfigDir);
         FileUtils.forceMkdir(solrConfigDir);
@@ -158,13 +158,13 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * @param seriesId
-   * @return
-   * @throws SearchException
-   * @see org.opencastproject.search.impl.solr.SolrRequester#getEpisodesAndSeriesById(java.lang.String)
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#getEpisodeAndSeriesById(java.lang.String)
    */
   public SearchResult getEpisodeAndSeriesById(String seriesId) throws SearchException {
     try {
+      log_.debug("Searching index for episodes and series details of series " + seriesId);
       return solrRequester.getEpisodeAndSeriesById(seriesId);
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -172,13 +172,13 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * @param episodeId
-   * @return
-   * @throws SearchException
-   * @see org.opencastproject.search.impl.solr.SolrRequester#getEpisodeById(java.lang.String)
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#getEpisodeById(java.lang.String)
    */
   public SearchResult getEpisodeById(String episodeId) throws SearchException {
     try {
+      log_.debug("Searching index for episode " + episodeId);
       return solrRequester.getEpisodeById(episodeId);
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -186,15 +186,13 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * @param text
-   * @param offset
-   * @param limit
-   * @return
-   * @throws SearchException
-   * @see org.opencastproject.search.impl.solr.SolrRequester#getEpisodesAndSeriesByText(java.lang.String, int, int)
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesByText(java.lang.String, int, int)
    */
   public SearchResult getEpisodesAndSeriesByText(String text, int offset, int limit) throws SearchException {
     try {
+      log_.debug("Searching index for episodes and series matching '" + text + "'");
       return solrRequester.getEpisodesAndSeriesByText(text, offset, limit);
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -202,14 +200,13 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * @param limit
-   * @param offset
-   * @return
-   * @throws SearchException
-   * @see org.opencastproject.search.impl.solr.SolrRequester#getEpisodesByDate(int, int)
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#getEpisodesByDate(int, int)
    */
   public SearchResult getEpisodesByDate(int offset, int limit) throws SearchException {
     try {
+      log_.debug("Asking index for episodes by date");
       return solrRequester.getEpisodesByDate(offset, limit);
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -217,13 +214,13 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * @param seriesId
-   * @return
-   * @throws SearchException
-   * @see org.opencastproject.search.impl.solr.SolrRequester#getEpisodesBySeries(java.lang.String)
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#getEpisodesBySeries(java.lang.String)
    */
   public SearchResult getEpisodesBySeries(String seriesId) throws SearchException {
     try {
+      log_.debug("Searching index for episodes in series " + seriesId);
       return solrRequester.getEpisodesBySeries(seriesId);
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -231,12 +228,9 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * @param text
-   * @param offset
-   * @param limit
-   * @return
-   * @throws SearchException
-   * @see org.opencastproject.search.impl.solr.SolrRequester#getEpisodesByText(java.lang.String, int, int)
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#getEpisodesByText(java.lang.String, int, int)
    */
   public SearchResult getEpisodesByText(String text, int offset, int limit) throws SearchException {
     try {
@@ -247,14 +241,13 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * @param limit
-   * @param offset
-   * @return
-   * @throws SearchException
-   * @see org.opencastproject.search.impl.solr.SolrRequester#getSeriesByDate(int, int)
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#getSeriesByDate(int, int)
    */
   public SearchResult getSeriesByDate(int limit, int offset) throws SearchException {
     try {
+      log_.debug("Asking index for series by date");
       return solrRequester.getSeriesByDate(limit, offset);
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -262,15 +255,13 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * @param seriesId
-   * @param limit
-   * @param offset
-   * @return
-   * @throws SearchException
-   * @see org.opencastproject.search.impl.solr.SolrRequester#getSeriesById(java.lang.String, int, int)
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#getSeriesById(java.lang.String)
    */
   public SearchResult getSeriesById(String seriesId) throws SearchException {
     try {
+      log_.debug("Searching index for series " + seriesId);
       return solrRequester.getSeriesById(seriesId);
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -278,15 +269,13 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * @param text
-   * @param offset
-   * @param limit
-   * @return
-   * @throws SearchException
-   * @see org.opencastproject.search.impl.solr.SolrRequester#getSeriesByText(java.lang.String, int, int)
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#getSeriesByText(java.lang.String, int, int)
    */
   public SearchResult getSeriesByText(String text, int offset, int limit) throws SearchException {
     try {
+      log_.debug("Searching index for series matching '" + text + "'");
       return solrRequester.getSeriesByText(text, offset, limit);
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -300,6 +289,7 @@ public class SearchServiceImpl implements SearchService {
    */
   public void add(MediaPackage mediaPackage) throws SearchException {
     try {
+      log_.info("Adding mediapackage " + mediaPackage.getIdentifier() + " to search index");
       solrIndexManager.add(mediaPackage);
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -313,6 +303,7 @@ public class SearchServiceImpl implements SearchService {
    */
   public void delete(String mediaPackageId) throws SearchException {
     try {
+      log_.info("Removing mediapackage " + mediaPackageId + " from search index");
       solrIndexManager.delete(mediaPackageId);
     } catch (SolrServerException e) {
       throw new SearchException(e);
