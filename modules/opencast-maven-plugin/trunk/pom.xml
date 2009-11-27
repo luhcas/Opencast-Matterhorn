@@ -6,6 +6,10 @@
   <version>1.0</version>
   <packaging>maven-plugin</packaging>
   <name>maven-oc-plugin</name>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.apache.maven</groupId>
