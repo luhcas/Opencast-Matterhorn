@@ -15,6 +15,17 @@
  */
 package org.opencastproject.demo;
 
+import org.opencastproject.media.mediapackage.Catalog;
+import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilder;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.identifier.Id;
+
+import com.sun.org.apache.xml.internal.serialize.OutputFormat;
+import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -27,9 +38,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -37,7 +45,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -47,7 +58,6 @@ import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
@@ -70,64 +80,82 @@ public class DemodataLoader {
   public static void main(String[] args) {
 
     String host = DEFAULT_HOST;
-    
-    // See if a url has been passed
-    if (args.length > 0) {
-      try {
-        URL url = new URL(args[0]);
-        host = url.toExternalForm();
-      } catch (MalformedURLException e) {
-        System.err.println("The argument is not a valid url. Please use http://<hostname>:<portname>");
-        System.exit(1);
+    boolean verbose = true;
+    MediaPackageBuilder mpBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
+
+    if (args.length > 2) {
+      System.err.println("Wrong number of arguments");
+      System.err.println("Usage: demoloader [-q] <host>");
+      System.exit(1);
+    }
+
+    for (String arg : args) {
+      if ("-q".equals(arg)) {
+        verbose = false;
+      } else {
+        try {
+          URL url = new URL(args[0]);
+          host = url.toExternalForm();
+        } catch (MalformedURLException e) {
+          System.err.println("Invalid host. Please use http://<hostname>:<portname>");
+          System.exit(1);
+        }
       }
     }
 
     HttpClient client = null;
-    
+
     try {
       client = new DefaultHttpClient();
       String loadDemoDataWorkflow = loadWorkflow("/demo-workflow.xml");
-      File[] packages = unzipDemoData("/demodata.zip");
+      File[] packages = unzipDemoData("/demo-data.zip");
 
-      XPath xpath = XPathFactory.newInstance().newXPath();
-      
       for (File packageDir : packages) {
-        String mediapackageId = packageDir.getName();
+        mpBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(packageDir));
         File manifestFile = new File(packageDir, "index.xml");
-        Object result = xpath.evaluate("//catalog", new InputSource(new FileInputStream(manifestFile)), XPathConstants.NODESET);
-        NodeList nodes = (NodeList)result;
-        for (int i=0; i < nodes.getLength(); i++) {
-          Node n = nodes.item(i);
-          String elementId = n.getAttributes().getNamedItem("id").getNodeValue();
-          String url = null;
-          String filename = null;
-          NodeList childNodes = n.getChildNodes();
-          for (int j=0; j < childNodes.getLength(); j++) {
-            Node childNode = childNodes.item(j);
-            if (childNode.getNodeName().equals("url")) {
-              url = packageDir.getAbsolutePath() + File.separatorChar + childNode.getFirstChild().getNodeValue();
-              filename = url.substring(url.lastIndexOf('/') + 1);
-              break;
-            }
-          }
+        MediaPackage mediaPackage = mpBuilder.loadFromManifest(new FileInputStream(manifestFile));
+        Id mediapackageId = mediaPackage.getIdentifier();
 
+        // Upload metadata catalogs to working file repository
+        for (Catalog catalog : mediaPackage.getCatalogs()) {
+          client = new DefaultHttpClient();
           MultipartEntity postEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-          postEntity.addPart("file", new InputStreamBody(new FileInputStream(url), filename));
-          HttpPost post = new HttpPost(host + "/files/" + mediapackageId + "/" + elementId);
+          URL catalogUrl = catalog.getURL();
+          String filename = catalogUrl.getPath().substring(catalogUrl.getPath().lastIndexOf('/') + 1);
+          URL uploadedCatalogUrl = new URL(host + "/files/" + mediapackageId.compact() + "/" + catalog.getIdentifier());
+          postEntity.addPart("file", new InputStreamBody(catalog.getURL().openStream(), filename));
+          HttpPost post = new HttpPost(uploadedCatalogUrl.toExternalForm());
           post.setEntity(postEntity);
           client.execute(post);
-        }        
-        
+          catalog.setURL(uploadedCatalogUrl);
+        }
+
+        // Serialize the modified media package into a string
+        String serializedMediaPackage = null;
+        try {
+          Writer out = new StringWriter();
+          XMLSerializer serializer = new XMLSerializer(out, new OutputFormat(mediaPackage.toXml()));
+          serializer.serialize(mediaPackage.toXml());
+          serializedMediaPackage = out.toString();
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+
         // Start a workflow instance via the rest endpoint
         HttpPost postStart = new HttpPost(host + "/workflow/rest/start");
         List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-    
+
         formParams.add(new BasicNameValuePair("definition", loadDemoDataWorkflow));
-        formParams.add(new BasicNameValuePair("mediapackage", loadMediapackage(packageDir)));
+        formParams.add(new BasicNameValuePair("mediapackage", serializedMediaPackage));
         formParams.add(new BasicNameValuePair("properties", "mediapackage=" + packageDir));
         postStart.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
-    
+
+        if (verbose) {
+          System.out.println("Ingesting media package " + mediapackageId);
+        }
+
         // Grab the new workflow instance from the response
+        client = new DefaultHttpClient();
         client.execute(postStart);
       }
     } catch (Exception e) {
@@ -144,19 +172,6 @@ public class DemodataLoader {
     Document doc = builder.parse(IOUtils.toInputStream(xml));
     return ((Element) XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE))
             .getAttribute("id");
-  }
-
-  /**
-   * Loads the manifest from the given media package directory and returns it as a string.
-   * 
-   * @param packageDir
-   *          root directory of the media package
-   * @return the manifest
-   * @throws Exception
-   *           if loading the manifest fails
-   */
-  protected static String loadMediapackage(File packageDir) throws Exception {
-    return IOUtils.toString(new FileInputStream(new File(packageDir, "index.xml")));
   }
 
   /**
@@ -184,8 +199,7 @@ public class DemodataLoader {
     try {
 
       // Create the temporary directories
-      File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-      File extractDir = new File(tmpDir, "demodata");
+      File extractDir = new File(System.getProperty("java.io.tmpdir"));
       extractDir.mkdirs();
 
       // Unzip the demo data
@@ -193,10 +207,16 @@ public class DemodataLoader {
       InputStream is = DemodataLoader.class.getResourceAsStream(zipfile);
       ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is));
       ZipEntry entry = null;
+      final StringBuffer rootFolder = new StringBuffer();
       while ((entry = zis.getNextEntry()) != null) {
         if (entry.isDirectory()) {
           String directoryName = extractDir.getAbsolutePath() + File.separatorChar + entry.getName();
-          new File(directoryName).mkdirs();
+          File f = new File(directoryName);
+          if (rootFolder.length() == 0) {
+            FileUtils.deleteDirectory(f);
+            rootFolder.append(f.getName());
+          }
+          f.mkdirs();
         } else {
           int count = 0;
           byte data[] = new byte[BUFFER];
@@ -214,10 +234,14 @@ public class DemodataLoader {
 
       File dataFolder = extractDir.listFiles(new FileFilter() {
         public boolean accept(File pathname) {
-          return pathname.isDirectory() && pathname.getName().equals("demodata");
+          return pathname.isDirectory() && pathname.getName().equals(rootFolder.toString());
         }
       })[0];
-      return dataFolder.listFiles();
+      return dataFolder.listFiles(new FileFilter() {
+        public boolean accept(File pathname) {
+          return pathname.isDirectory();
+        }
+      });
     } catch (Exception e) {
       e.printStackTrace();
     }
