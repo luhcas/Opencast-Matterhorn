@@ -25,9 +25,6 @@ public interface CaptureParameters {
   /** Duration to specify for the capture client */
   public static final String CAPTURE_DURATION = "capture.duration";
   
-  /** Where the data should be sent to for ingestion */
-  public static final String INGEST_URL = "admin.ingest.endpoint";
-  
   /** Location of the centralised configuration file */
   public static final String CAPTURE_CONFIG_URL = "capture.config.url";
   
@@ -81,6 +78,12 @@ public interface CaptureParameters {
 
   /** A directory which contains a capture */
   public static final String RECORDING_ROOT_URL = "capture.recording.root.url";
+
+  /** The URL to send the capture data to during ingest */
+  public static final String INGEST_ENDPOINT_URL = "capture.ingest.endpoint.url";
+
+  /** The retry interval for attempting ingest */
+  public static final String INGEST_RETRY_INTERVAL = "capture.ingest.retry.interval";
 
   /** A comma delimited list of the friendly names for capturing devices */
   public static final String CAPTURE_DEVICE_NAMES = "capture.device.names";

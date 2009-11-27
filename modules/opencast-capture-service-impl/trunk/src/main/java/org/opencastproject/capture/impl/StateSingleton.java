@@ -117,7 +117,7 @@ public class StateSingleton implements StatusService {
     try {
       long pollTime = Long.parseLong(ConfigurationManager.getInstance().getItem(CaptureParameters.AGENT_STATUS_POLLING_INTERVAL)) * 1000L;
       Properties pollingProperties = new Properties();
-      pollingProperties.load(getClass().getClassLoader().getResourceAsStream("config/misc.properties"));
+      pollingProperties.load(getClass().getClassLoader().getResourceAsStream("config/state_update.properties"));
       StdSchedulerFactory sched_fact = new StdSchedulerFactory(pollingProperties);
   
       //Create and start the scheduler

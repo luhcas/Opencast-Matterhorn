@@ -30,6 +30,7 @@ import org.gstreamer.event.EOSEvent;
 import org.opencastproject.capture.api.AgentState;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.RecordingState;
+import org.opencastproject.capture.impl.jobs.IngestJob;
 import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
@@ -37,6 +38,7 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -261,7 +263,15 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     status_service.setRecordingState(recordingID, RecordingState.CAPTURE_FINISHED);
     setAgentState(AgentState.IDLE);
 
-    //TODO:  Schedule ingest job here
+    try {
+      IngestJob.scheduleJob(cur);
+    } catch (IOException e) {
+      logger.error("IOException while attempting to schedule ingest for recording {}.", recordingID);
+      result = "IOException while attempting to schedule ingest for recording " + recordingID + ".";
+    } catch (SchedulerException e) {
+      logger.error("SchedulerException while attempting to schedule ingest for recording {}.", recordingID);
+      result = "SchedulerException while attempting to schedule ingest for recording " + recordingID + ".";
+    }
 
     return result;
   }

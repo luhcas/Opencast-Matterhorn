@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLConnection;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.xml.transform.OutputKeys;
@@ -42,9 +43,14 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.util.Compressor;
-import org.quartz.Job;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
+import org.quartz.StatefulJob;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -52,7 +58,7 @@ import org.w3c.dom.Document;
 /**
  * Creates the manifest, then attempts to ingest the media to the remote server
  */
-public class IngestJob implements Job {
+public class IngestJob implements StatefulJob {
 
   private static final Logger logger = LoggerFactory.getLogger(IngestJob.class);
 
@@ -66,18 +72,40 @@ public class IngestJob implements Job {
   private String recordingID = null;
   /** The directory we're dealing with when trying to ingest */
   private File current_capture_dir = null;
+  
+  public static void scheduleJob(Properties props) throws IOException, SchedulerException {
+
+    long retry = Long.parseLong(props.getProperty(CaptureParameters.INGEST_RETRY_INTERVAL)) * 1000L;
+    String id = props.getProperty(CaptureParameters.RECORDING_ID);
+
+    Properties retryProperties = new Properties();
+    retryProperties.load(IngestJob.class.getClassLoader().getResourceAsStream("config/ingest.properties"));
+    StdSchedulerFactory sched_fact = new StdSchedulerFactory(retryProperties);
+
+    //Create and start the scheduler
+    Scheduler retryScheduler = sched_fact.getScheduler();
+    if (!retryScheduler.isStarted()) {
+      retryScheduler.start();
+    }
+
+    //Setup the polling
+    JobDetail job = new JobDetail(id, Scheduler.DEFAULT_GROUP, IngestJob.class);
+    job.getJobDataMap().put(CONFIGURATION, props);
+
+    //Create a new trigger                    Name         Group name               Start       End   # of times to repeat, Repeat interval
+    SimpleTrigger trigger = new SimpleTrigger(id, Scheduler.DEFAULT_GROUP, new Date(), null, 1, retry);
+    //If the trigger misfires (ie, the ingest didn't work) then retry
+    trigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT);
+
+    //Schedule the update
+    retryScheduler.scheduleJob(job, trigger);
+  }
 
   /**
    * {@inheritDoc}
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    //get the config out of the context
-    config = (Properties) ctx.getMergedJobDataMap().get(CONFIGURATION);
-    if (config == null) {
-      logger.error("Capture configuration was missing, cannot continue!");
-      return;
-    }
 
     if (config.getProperty(CaptureParameters.RECORDING_ID) == null || config.getProperty(CaptureParameters.RECORDING_ROOT_URL) == null) {
       logger.error("Invalid capture configuration, unable to process ingest!");
@@ -85,6 +113,8 @@ public class IngestJob implements Job {
     }
     recordingID = config.getProperty(CaptureParameters.RECORDING_ID);
     current_capture_dir = new File(config.getProperty(CaptureParameters.RECORDING_ROOT_URL));
+    String ingest_url = config.getProperty(CaptureParameters.INGEST_ENDPOINT_URL);
+
     logger.info("Beginning ingest procedure for {}.", recordingID);
 
     //TODO:  We currently lack multi-state support (both uploading and capturing, for example).  We need to add this at the appropriate places when it comes online.
