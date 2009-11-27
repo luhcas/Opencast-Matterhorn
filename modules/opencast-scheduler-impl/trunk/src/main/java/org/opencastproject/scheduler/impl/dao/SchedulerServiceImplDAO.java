@@ -38,28 +38,38 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
+/
  * TODO: Comment me!
  *
  */
+ //todo: almost none of the data fields in this file are validated before they are pushed to the databse.  for instance
+ //an id can only be a varchar of 255, but the id is never checked for its length.  what happens when someone tries to insert
+ //an id that is 256 chars long?  is this behaviour expected, or an error state?  this happens for *most* of the data
+ //fields in the class.
 public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   
+  //todo: wrong class passed to logger
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImpl.class);
   
+  //todo: need comments on member variables
+  //todo: why do you need a datasource and connection here
   Connection con;
   DataSource dataSource;
   Dictionary properties;
   ComponentContext componentContext;
   
+  //todo: no need to specify default ctor if it isn't doing anything
   public SchedulerServiceImplDAO() {
       
   }
 
+  //todo: need comments
   public SchedulerServiceImplDAO(Connection c) {
     super (c);
     try {
     setDatabase(c);
     } catch (SQLException e) {
+	//todo: does not use specified logging method
       logger.error("could not init database for scheduler. "+e.getMessage());
       throw new RuntimeException(e);
     }
@@ -70,20 +80,26 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @see org.opencastproject.scheduler.api.SchedulerService#addEvent(org.opencastproject.scheduler.api.SchedulerEvent)
    */
   public SchedulerEvent addEvent(SchedulerEvent e) {
+  //todo: shouldn't we log this error state at the least?
     if (e == null || ! e.valid()) return null;
+	//todo: createNewEventID() should be a method on the event since it needs to know event details to create an id
+	//todo: e.g e.setID(e.createID());
     e.setID(createNewEventID(e));
     logger.debug("adding event "+e.toString());
     try {
+	  //todo: unsafe, what if db goes down in one of these operations?  inconsistent state.  all of these should be wrapped in a transaction
       dbUpdate("INSERT INTO EVENT ( eventid , startdate , enddate ) " +
               "VALUES ('"+e.getID()+"', "+e.getStartdate().getTime()+", "+e.getEnddate().getTime()+")");
       
       saveAttendees(e.getID(), e.getAttendees());
       saveResources(e.getID(), e.getResources());
+	  //todo: this kind of casting is unsafe, why should it have to be a schedulereventimpl?  getmetadata() is in the interface...
       saveMetadata(e.getID(), ((SchedulerEventImpl)e).getMetadata());
     } catch (SQLException e1) {
       logger.error("Could not insert event. "+ e1.getMessage());
       return null;
     }
+	//todo: this is unneccessary and just slows down access, write a test if it is just for testing
     SchedulerEvent newEvent = getEvent(e.getID());
     logger.debug("added event "+newEvent.toString());
     return newEvent; // read from DB to make sure it is inserted an returned correct 
@@ -95,6 +111,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @param attendees The array with the attendees
    * @throws SQLException
    */
+   //unsafe; needs (1) transactions and (2) injection protection and (3) data field verification
   private void saveAttendees (String eventID, String [] attendees) throws SQLException {
     for (int i = 0; i < attendees.length; i++)
       dbUpdate("INSERT INTO ATTENDEES (eventid, attendee) VALUES ('"+eventID+"', '"+attendees[i]+"')");
@@ -106,6 +123,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @param resources The Array with the resources
    * @throws SQLException
    */
+   //unsafe; needs (1) transactions and (2) injection protection and (3) data field verification
   private void saveResources (String eventID, String [] resources) throws SQLException {
     for (int i = 0; i < resources.length; i++)
       dbUpdate("INSERT INTO RESOURCES (eventid, resource) VALUES ('"+eventID+"', '"+resources[i]+"')");
@@ -117,6 +135,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @param metadata The hashtable with the metadata
    * @throws SQLException
    */
+   //unsafe; needs (1) transactions and (2) injection protection and (3) data field verification
   private void saveMetadata (String eventID, Hashtable<String, String> metadata) throws SQLException {
     String [] keys = metadata.keySet().toArray(new String [0]);
     for (int i = 0; i < keys.length; i++)
@@ -128,10 +147,11 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @param e The event for which the eventID should be created
    * @return the new eventID. Dont't forget to set it to the Event!
    */
+   //todo: why not just use a guid function for each event when they are created?  does a person need to be able to actually read the id?
   private String createNewEventID (SchedulerEvent e) {
     if (e == null) e = new SchedulerEventImpl();
     if (e.getStartdate() == null) e.setStartdate(new Date(System.currentTimeMillis()));
-    if (e.getDevice() == null) e.setDevice("unknown");
+    if (e.getDevice() == null) e.setDevice("unknown");  //todo: if the device is empty is should be set to unknown?  I don't think so, this should be a null in the db field
     String eventID = e.getStartdate().toString().replace(" ", "") + "@" + e.getDevice(); // eventID = startdate@deviceID.number (usually number should not be used because recorder and device are an unique tuple  
     String baseID = eventID;
     int counter = 0;
@@ -146,6 +166,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @param eventID The eventID to check.
    * @return true is the ID is already in the database
    */
+   //todo: most dbs have a way to grab a unique key, why create this at the application level?  what is the win?
   private boolean dbIDExists (String eventID) {
     if (eventID == null) return false; //or would true be a better result?
     try {
@@ -356,7 +377,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @param eventID The eventID for which the list should be updated
    * @param resources The list of resources that should be updated 
    * @throws SQLException
-   */
+   *
   private void updateResources (String eventID, String [] resources) throws SQLException {
     dbUpdate("DELETE FROM RESOURCES WHERE eventid = '"+eventID+"' ");
     saveResources(eventID, resources);
@@ -387,9 +408,13 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @throws SQLException 
    */
   void setDatabase (Connection con) throws SQLException {
+  //todo: con.setAutoCommit(false) should be done
     this.con = con;
+	//todo: it is legal to set a null connection?  what does that mean? shouldn't this be at least logged?
     if (con == null) return;
+	//todo: see above, same questions
     if (con.isClosed()) return;
+	
     if (! dbCheck()) dbCreate();    
   }
   
@@ -420,8 +445,13 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @param query A SQL update or insert query
    * @return return A generated key, is one was generated
    */
+  //todo: this method is unsafe as it doesn't prevent against sql injection attacks
+  //todo: preparedstatements() should be used instead of regular statements with string queries
+  //todo: sql injection projection is free with prep statements: http://java.sun.com/docs/books/tutorial/jdbc/basics/prepared.html
   private int dbUpdate (String query) throws SQLException {
     logger.debug("SQL Update: "+query);
+	//todo: I find this line very hard to read, why write it so densely?
+	//todo: if we are going to borrow a connection from the context why do we have a member con variable?  shouldn't we ignore that and just pass around our borrowed one?
     if (con == null && (con = borrowConnection()) == null) throw new SQLException("No database connected"); 
     int key = 0;
     try {
@@ -441,6 +471,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @param query A SQL update or insert query
    * @return return A generated key, is one was generated
    */
+   //todo: see dbupdate() comments
   private boolean dbExecute (String query) throws SQLException {
     logger.debug("SQL Execute: "+query);
     if (con == null && (con = borrowConnection()) == null) throw new SQLException("No database connected");
@@ -460,6 +491,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * Checks is a database with all necessary tables is available
    * @return true is the database AND all needed tables are available 
    */
+   //todo: see dbupdate() comments
   public boolean dbCheck () {
     String tables = "";
     logger.debug("checking if scheduler-db is available." );
@@ -486,9 +518,11 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     return true;
   }
   
+  //todo: no docs?
   private boolean dbCreate () {
     logger.info("creating new scheduler database.");
     try {
+		//todo: what if some of these fail?  is that an error state of some kind?  should be in transaction
       dbExecute("CREATE TABLE EVENTMETADATA ( eventid varchar(255) NOT NULL, metadatakey varchar(255) NOT NULL, metadatavalue varchar(4096))");
       dbExecute("CREATE TABLE ATTENDEES ( attendee varchar(255) NOT NULL, eventid varchar(255) NOT NULL)");
       dbExecute("CREATE TABLE EVENT ( eventid varchar(255) NOT NULL, startdate bigint NOT NULL, enddate bigint NOT NULL, PRIMARY KEY (eventid))");
@@ -500,9 +534,10 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     } catch (SQLException e) {
       logger.error("Could not create new database structure. "+e.getMessage());
     }
+	//todo: if no exceptions no need to return a check of tables
     return dbCheck();
   }  
-  
+  //todo: why no docs?
   public void activate(ComponentContext componentContext) {
     
     if (componentContext == null) {
@@ -526,7 +561,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     };
     
   }
-  
+  //todo: why does this exist?
   public void deactivate ()  {
     
   }
