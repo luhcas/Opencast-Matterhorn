@@ -17,12 +17,15 @@ package org.opencastproject.scheduler.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Properties;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
+import org.opencastproject.scheduler.impl.dao.SchedulerServiceImplDAO;
 
 import junit.framework.Assert;
 
@@ -34,6 +37,26 @@ import org.junit.Test;
 public class SchedulerServiceImplTest {
   private SchedulerService service = null;
   private static final String storageRoot = "target" + File.separator + "scheduler-test-db";
+
+  private Connection connectToDatabase(File storageDirectory) {
+    if (storageDirectory == null) {
+      storageDirectory = new File(File.separator + "tmp" + File.separator +"opencast" + File.separator + "scheduler-db");
+    }
+    String jdbcUrl = "jdbc:derby:" + storageDirectory.getAbsolutePath();
+    String driver = "org.apache.derby.jdbc.EmbeddedDriver";
+    try {
+      Class.forName(driver).newInstance();      
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    Connection conn = null;
+    try {
+      Properties props = new Properties();
+      conn = DriverManager.getConnection(jdbcUrl + ";create=true", props);
+    } catch (SQLException e) {
+    }
+    return conn;
+  }    
   
   @Before
   public void setup() {
@@ -43,7 +66,7 @@ public class SchedulerServiceImplTest {
     } catch (IOException e) {
       Assert.fail(e.getMessage());
     }    
-    service = new SchedulerServiceImpl(new File(storageRoot));
+    service = new SchedulerServiceImplDAO(connectToDatabase(new File(storageRoot)));
   }
 
   @After

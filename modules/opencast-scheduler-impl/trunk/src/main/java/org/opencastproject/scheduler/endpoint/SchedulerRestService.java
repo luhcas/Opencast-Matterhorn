@@ -18,7 +18,6 @@ package org.opencastproject.scheduler.endpoint;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.scheduler.impl.SchedulerEventImpl;
-import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -66,6 +65,7 @@ public class SchedulerRestService {
   public SchedulerEventJaxbImpl addEvent (@FormParam("event") SchedulerEventJaxbImpl e) {
     SchedulerEvent i = e.getEvent();
     SchedulerEvent j = service.addEvent(i);
+    logger.info("Adding event "+j.getID()+" to scheduler");
     return new SchedulerEventJaxbImpl(j);
   }
   
@@ -109,6 +109,21 @@ public class SchedulerRestService {
     return jaxbEvents;
   }  
   
+  /**
+   * Lists all events in the database, without any filter
+   * TODO only a stub for debugging, because there is no UI to schow these at the moment
+   * @return XML with all events 
+   */
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("getUpcommingEvents")
+  public SchedulerEventJaxbImpl [] getUpcommingEvents () {
+    SchedulerEvent [] events = service.getUpcommingEvents();
+    SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
+    for (int i = 0; i < events.length; i++) jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
+    return jaxbEvents;
+  }   
+  
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("getCalendarForCaptureAgent")
@@ -142,16 +157,15 @@ public class SchedulerRestService {
     event.addResource("audio");
     event.setChannelID("1");
     event.setCreator("Adam Hochman");
-    long time1 = System.currentTimeMillis();
-    long time2 = time1+1111111;
+    long time1 = System.currentTimeMillis()+11111111;
+    long time2 = time1 + 11111111 + 1111111;
     Date date1 = new Date(time1);
     Date date2 = new Date(time2);
     logger.debug("Info times "+time1+" = "+date1.getTime()+", "+time2+" = "+ date2.getTime());
     event.setStartdate(date1);
     event.setEnddate(date2);
     SchedulerEvent event2 = service.addEvent(event);
-    String answer = "Database available: "+ ((SchedulerServiceImpl) service).dbCheck() +", "+
-    "demo-data inserted, ID="+event2.getID();
+    String answer = "demo-data inserted, ID="+event2.getID();
     return answer;
   }
 

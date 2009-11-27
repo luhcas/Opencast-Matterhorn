@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="org.opencastproject.scheduler.endpoint.SchedulerRestService"
-	immediate="true">
+	immediate="true" activate="activate" deactivate="deactivate">
 	<implementation
 		class="org.opencastproject.scheduler.endpoint.SchedulerRestService" />
 	<property name="service.description" value="Scheduler REST Endpoint" />
@@ -13,5 +13,5 @@
 	</service>
 	<reference name="service-impl"
 		interface="org.opencastproject.scheduler.api.SchedulerService"
-		cardinality="0..1" policy="dynamic" bind="setService" unbind="unsetService" />
+		cardinality="0..1" policy="dynamic" bind="setService" unbind="unsetService" /> 			
 </component>

@@ -16,15 +16,18 @@
 package org.opencastproject.scheduler.endpoint;
 
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.LinkedList;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.impl.SchedulerEventImpl;
@@ -35,60 +38,42 @@ import org.slf4j.LoggerFactory;
  * TODO: Comment me!
  *
  */
-@XmlType(name="scheduler-event", namespace="http://scheduler.opencastproject.org")
-@XmlRootElement(name="scheduler-event", namespace="http://scheduler.opencastproject.org")
+@XmlType(name="SchedulerEvent", namespace="http://scheduler.opencastproject.org")
+@XmlRootElement(name="SchedulerEvent", namespace="http://scheduler.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SchedulerEventJaxbImpl {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerEventJaxbImpl.class);
   
   @XmlID
   String id;
-  @XmlElement(name="device-id")
-  String deviceID;
-  @XmlElement(name="title")
-  String title;
-  @XmlElement(name="creator")
-  String creator;
-  @XmlElement(name="abstract")
-  String abstr;
-  @XmlElement(name="startdate")
+  @XmlJavaTypeAdapter(value=HashtableAdapter.class)
+  Hashtable<String, String> metadata;
   long start;
   @XmlElement(name="enddate")
   long end;
-  @XmlElement(name="contributor")
-  String contributor;
-  @XmlElement(name="series-id")
-  String seriesID;
-  @XmlElement(name="channel-id")
-  String channelID;
-  @XmlElement(name="location")
-  String location;
-  @XmlElement(name="attendees")
+  @XmlElementWrapper(name="attendees")
+  @XmlElement(name="attendee")
   LinkedList <String> attendees;
-  @XmlElement(name="resources")
+  @XmlElementWrapper(name="resources")
+  @XmlElement(name="resource")
   LinkedList <String> resources;  
   
-  public SchedulerEventJaxbImpl() {}
+  public SchedulerEventJaxbImpl() {
+    metadata = new Hashtable<String, String>();
+  }
   public SchedulerEventJaxbImpl(SchedulerEvent event) {
-    logger.debug("Creating a " + SchedulerEventJaxbImpl.class.getName() + " from " + event);
+    logger.info("Creating a " + SchedulerEventJaxbImpl.class.getName() + " from " + event);
     id = event.getID();
-    deviceID = event.getDevice();
-    title = event.getTitle();
-    creator = event.getCreator();
-    abstr = event.getAbstract();
+    metadata = event.getMetadata();
     start = event.getStartdate().getTime();
     end = event.getEnddate().getTime();
-    contributor = event.getContributor();
-    seriesID = event.getSeriesID();
-    channelID = event.getChannelID();
-    location = event.getLocation();
     
     String [] att = event.getAttendees();
-    attendees = new LinkedList ();
+    attendees = new LinkedList <String>();
     for (int i = 0; i < att.length; i++) attendees.add(att[i]);
     
     String [] res = event.getResources();
-    resources = new LinkedList ();
+    resources = new LinkedList <String>();
     for (int i = 0; i < res.length; i++) resources.add(res[i]);
     
   }
@@ -97,18 +82,12 @@ public class SchedulerEventJaxbImpl {
   public SchedulerEvent getEvent() {
     SchedulerEventImpl event = new SchedulerEventImpl();
     event.setID(id);
-    event.setDevice(deviceID);
-    event.setTitle(title);
-    event.setCreator(creator);
-    event.setAbstract(abstr);
+    event.setMetadata(metadata);
     event.setStartdate(new Date(start));
     event.setEnddate(new Date(end));
-    event.setContributor(contributor);
-    event.setSeriesID(seriesID);
-    event.setChannelID(channelID);
-    event.setLocation(location);
     event.setResources(resources.toArray(new String [0]));
     event.setAttendees(attendees.toArray(new String [0]));
+    logger.info("Event created "+event.toString());
     return event;
   }
   

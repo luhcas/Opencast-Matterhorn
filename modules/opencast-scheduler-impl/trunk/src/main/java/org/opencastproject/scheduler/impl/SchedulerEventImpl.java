@@ -16,6 +16,7 @@
 package org.opencastproject.scheduler.impl;
 
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.LinkedList;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
@@ -29,23 +30,18 @@ import org.slf4j.LoggerFactory;
 public class SchedulerEventImpl implements SchedulerEvent {
 
   private static final Logger logger = LoggerFactory.getLogger(SchedulerEventImpl.class);
+  
   LinkedList <String> attendees;
   LinkedList <String> resources;
   String id;
-  String deviceID;
-  String title;
-  String creator;
-  String abstr;
   Date start = new Date(0);
   Date end = new Date(0);
-  String contributor;
-  String seriesID;
-  String channelID;
-  String location;
+  Hashtable<String, String> metadata;
   
   public SchedulerEventImpl () {
     attendees = new LinkedList<String>();
     resources = new LinkedList<String>();
+    metadata = new Hashtable<String, String>();
   }
   
   /**
@@ -53,7 +49,9 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#addAttendee(java.lang.String)
    */
   public void addAttendee(String attendee) {
-    if (! attendees.contains(attendee)) attendees.add(attendee); // only save unique attendees
+    synchronized (attendees) {
+      if (! attendees.contains(attendee)) attendees.add(attendee); // only save unique attendees  
+    }
   }
 
   /**
@@ -61,7 +59,9 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#addResource(java.lang.String)
    */
   public void addResource(String resource) {
-    if (! resources.contains(resource)) resources.add(resource); // only save unique resources
+    synchronized (resources) {
+      if (! resources.contains(resource)) resources.add(resource); // only save unique resources
+    }
   }
 
   /**
@@ -69,7 +69,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#getAbstract()
    */
   public String getAbstract() {
-    return abstr;
+    return metadata.get("abstract");
   }
 
   /**
@@ -85,7 +85,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#getChannelID()
    */
   public String getChannelID() {
-    return channelID;
+    return metadata.get("channel-id");
   }
 
   /**
@@ -93,7 +93,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#getContributor()
    */
   public String getContributor() {
-    return contributor;
+    return metadata.get("contributor");
   }
 
   /**
@@ -101,7 +101,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#getCreator()
    */
   public String getCreator() {
-    return creator;
+    return metadata.get("creator");
   }
 
   /**
@@ -109,7 +109,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#getDevice()
    */
   public String getDevice() {
-    return deviceID;
+    return metadata.get("device");
   }
 
   /**
@@ -133,7 +133,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#getLocation()
    */
   public String getLocation() {
-    return location;
+    return metadata.get("location");
   }
 
   /**
@@ -149,7 +149,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#getSeriesID()
    */
   public String getSeriesID() {
-    return seriesID;
+    return metadata.get("series-id");
   }
 
   /**
@@ -165,7 +165,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#getTitle()
    */
   public String getTitle() {
-    return title;
+    return metadata.get("title");
   }
 
   /**
@@ -173,7 +173,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setAbstract(java.lang.String)
    */
   public void setAbstract(String text) {
-    abstr=text;
+    metadata.put("abstract", text);
   }
 
   /**
@@ -190,7 +190,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setChannelID(java.lang.String)
    */
   public void setChannelID(String channelID) {
-    this.channelID = channelID;
+    metadata.put("channel-id", channelID);
   }
 
   /**
@@ -198,7 +198,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setContributor(java.lang.String)
    */
   public void setContributor(String contributor) {
-    this.contributor = contributor;
+    metadata.put("contributor", contributor);
   }
 
   /**
@@ -206,7 +206,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setCreator(java.lang.String)
    */
   public void setCreator(String creator) {
-    this.creator = creator;
+    metadata.put("creator", creator);
 
   }
 
@@ -216,7 +216,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    */
   public void setDevice(String device) {
     if (! attendees.contains(device)) addAttendee(device);
-    this.deviceID = device;
+    metadata.put("device", device);
 
   }
 
@@ -243,7 +243,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setLocation(java.lang.String)
    */
   public void setLocation(String location) {
-    this.location = location;
+    metadata.put("location", location);
   }
 
   /**
@@ -260,8 +260,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setSeriesID(java.lang.String)
    */
   public void setSeriesID(String seriesID) {
-    this.seriesID = seriesID;
-
+    metadata.put("series-id", seriesID);
   }
 
   /**
@@ -279,8 +278,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setTitle(java.lang.String)
    */
   public void setTitle(String title) {
-    this.title = title;
-
+    metadata.put("title", title);
   }
   
   /**
@@ -288,7 +286,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#valid()
    */  
   public boolean valid () {
-    if (title == null) return false;
+    if (metadata.get("title") == null) return false;
     if (start.getTime() == 0) return false;
     if (end.getTime() == 0) return false;
     if (end.before(start)) return false;
@@ -302,9 +300,56 @@ public class SchedulerEventImpl implements SchedulerEvent {
     String [] att = getAttendees();
     if (att != null) for (int i=0; i<att.length; i++) text+= att[i]+", ";
     String [] res = getResources();
-    text += "resources: ";
+    text += " resources: ";
     if (res != null) for (int i=0; i<res.length; i++) text+= res[i]+", ";
+    text += "metadata: ";      
+    if (metadata != null) {
+      String[] keys = metadata.keySet().toArray(new String[0]);
+      for (int i = 0; i < keys.length; i++) text += keys[i]+"="+metadata.get(keys[i])+", "; 
+    }
     return text;
     }
+  
+  /**
+   * set a arbitrary key value pair of metadata. If this key-value-pair is not included in the mapping later on it will be ignored.
+   * @param key the key for the metadata
+   * @param value the value for the metadata
+   */
+  public void setMetadata (String key, String value) {
+    metadata.put(key, value);
+  }
+  
+  /**
+   * Set a complet set of metadata
+   * @param meta the Hasttable with the key value pairs
+   */
+  public void setMetadata (Hashtable <String, String> meta) {
+    metadata = meta;
+  }
+  
+  /**
+   * get the a value for a specific key from the metadata
+   * @param key 
+   * @return the value for the given key
+   */
+  public String getMetadata(String key) {
+    return metadata.get(key);
+  }
+  
+  /**
+   * get the complete set of Metadata from the event
+   * @return The Hashtable with the metadata
+   */
+  public Hashtable<String, String> getMetadata () {
+    return metadata;
+  }
+  
+  /**
+   * get all keys that the metadata contains
+   * @return all keys from the metadata.
+   */
+  public String [] getMetadataKeys () {
+    return metadata.keySet().toArray(new String [0]);
+  }
 
 }

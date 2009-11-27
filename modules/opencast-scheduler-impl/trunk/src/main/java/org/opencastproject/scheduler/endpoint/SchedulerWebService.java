@@ -51,4 +51,8 @@ public interface SchedulerWebService {
   @WebMethod()
   @WebResult(name="url")
   public String getCalendarForCaptureAgent (@WebParam(name="captureAgentID")String captureAgentID);
+  
+  @WebMethod()
+  @WebResult(name="array")
+  public SchedulerEventJaxbImpl [] getUpcommingEvents ();  
 }

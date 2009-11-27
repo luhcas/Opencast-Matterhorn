@@ -62,5 +62,10 @@ public interface SchedulerService {
    */
   public String getCalendarForCaptureAgent (String captureAgentID);
   
+  /**
+   * return a list of all events that will be recorded in the future
+   * @return The List of events.
+   */
+  public SchedulerEvent [] getUpcommingEvents (); 
 }
 

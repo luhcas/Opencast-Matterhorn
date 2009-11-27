@@ -16,6 +16,7 @@
 package org.opencastproject.scheduler.api;
 
 import java.util.Date;
+import java.util.Hashtable;
 
 /**
  * TODO: Comment me!
@@ -195,4 +196,16 @@ public interface SchedulerEvent {
    * @return true if the event is valid
    */
   public boolean valid();
+  
+  /**
+   * Sets a complete set of metadata as a Hashtable where key is the metadata descriptor and value the data
+   * @param metadata The Hashtable with the metadata
+   */
+  public void setMetadata(Hashtable<String, String> metadata);
+  
+  /**
+   * Gets the metadata for the current event as a Hashtable where key is the metadata descriptor and value the data  
+   * @return The hashtable with the metadata
+   */
+  public Hashtable<String, String> getMetadata ();
 }

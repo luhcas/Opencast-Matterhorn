@@ -28,6 +28,7 @@ import javax.jws.WebService;
 
 /**
  * @see SchedulerWebService
+ * TODO SOAP endpoint needs to be tested.
  */
 @WebService()
 public class SchedulerWebServiceImpl implements SchedulerWebService {
@@ -84,6 +85,19 @@ public class SchedulerWebServiceImpl implements SchedulerWebService {
     for (int i = 0; i < events.length; i++) jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
     return jaxbEvents;
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.scheduler.endpoint.SchedulerWebService#getEvents(org.opencastproject.scheduler.api.SchedulerFilter)
+   */
+  @WebMethod()
+  @WebResult(name="array")
+  public SchedulerEventJaxbImpl [] getUpcommingEvents () {
+    SchedulerEvent [] events = service.getUpcommingEvents();
+    SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
+    for (int i = 0; i < events.length; i++) jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
+    return jaxbEvents;
+  }  
 
   /**
    * {@inheritDoc}

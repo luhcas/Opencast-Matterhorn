@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="org.opencastproject.scheduler.api.SchedulerService"
-	immediate="true" deactivate="closeDatabaseConnection">
+	immediate="true" activate="activate" deactivate="deactivate">
 	<implementation
-		class="org.opencastproject.scheduler.impl.SchedulerServiceImpl" />
+		class="org.opencastproject.scheduler.impl.dao.SchedulerServiceImplDAO" />
 	<property name="service.description" value="Scheduler Service" />
 	<service>
 		<provide interface="org.opencastproject.scheduler.api.SchedulerService" />
 		<provide interface="org.osgi.service.cm.ManagedService" />
 	</service>
+	<reference name="dataSource" 
+		interface="javax.sql.DataSource" 
+		cardinality="1..1" policy="static" bind="setDataSource" />
 </component>

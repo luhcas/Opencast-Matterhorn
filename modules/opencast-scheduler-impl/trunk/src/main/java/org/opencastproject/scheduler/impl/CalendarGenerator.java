@@ -39,12 +39,12 @@ import net.fortuna.ical4j.model.property.Uid;
  * TODO: Comment me!
  *
  */
-public class CreateiCal {
-  private static final Logger logger = LoggerFactory.getLogger(CreateiCal.class);
+public class CalendarGenerator {
+  private static final Logger logger = LoggerFactory.getLogger(CalendarGenerator.class);
   
   Calendar cal;
   
-  public CreateiCal () {
+  public CalendarGenerator () {
     cal = new Calendar();
   }
   

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="org.opencastproject.scheduler.SchedulerWebService"
-	immediate="true">
+	immediate="true" activate="activate" deactivate="deactivate">
 	<implementation
 		class="org.opencastproject.scheduler.endpoint.SchedulerWebServiceImpl" />
 	<property name="service.description" value="Scheduler SOAP Endpoint" />

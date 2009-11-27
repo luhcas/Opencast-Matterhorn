@@ -90,7 +90,7 @@
       <groupId>net.fortuna.ical4j</groupId>
       <artifactId>ical4j</artifactId>
       <version>1.0-rc1</version>
-    </dependency>    
+    </dependency>          
   </dependencies>
   <build>
     <plugins>
@@ -118,7 +118,6 @@
             <Service-Component>
               OSGI-INF/scheduler-service.xml,
               OSGI-INF/scheduler-service-rest.xml,
-              OSGI-INF/scheduler-service-soap.xml,
               OSGI-INF/scheduler-service-ui.xml
             </Service-Component>
           </instructions>
