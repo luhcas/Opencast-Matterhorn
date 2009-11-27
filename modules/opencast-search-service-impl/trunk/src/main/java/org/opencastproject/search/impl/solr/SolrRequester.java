@@ -272,7 +272,8 @@ public class SolrRequester {
       if (mediaPackageFieldValue != null) {
         try {
           MediaPackage mediaPackage = null;
-          mediaPackage = builder.loadFromManifest(new ByteArrayInputStream(mediaPackageFieldValue.toString().getBytes()));
+          mediaPackage = builder
+                  .loadFromManifest(new ByteArrayInputStream(mediaPackageFieldValue.toString().getBytes()));
           item.setMediaPackage(mediaPackage);
         } catch (MediaPackageException e) {
           log_.warn("Unable to read media package from search result", e);
@@ -293,12 +294,14 @@ public class SolrRequester {
 
       // if it is a video or audio episode
       if (item.getType().equals(SearchResultItemType.AudioVisual)) {
-        try {
-          // the video duration
-          item.setDcExtent(Long.parseLong(toString(doc.getFieldValue(SolrFields.DC_EXTENT))));
-        } catch (NumberFormatException e) {
-          item.setDcExtent(-1);
-          log_.warn("Cannot parse duration from solr response document. Setting duration to -1.");
+        if (doc.getFieldValue(SolrFields.DC_EXTENT) != null) {
+          try {
+            // the video duration
+            item.setDcExtent(Long.parseLong(toString(doc.getFieldValue(SolrFields.DC_EXTENT))));
+          } catch (NumberFormatException e) {
+            item.setDcExtent(-1);
+            log_.warn("Cannot parse duration from solr response document. Setting duration to -1.");
+          }
         }
 
         // Add the list of most important keywords
