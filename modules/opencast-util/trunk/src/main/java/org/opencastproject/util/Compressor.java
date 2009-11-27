@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implements two very simple methods to compress and uncompress zip files. Please note that NO SUPPORT FOR COMPRESSING
  * DIRECTORIES has been tested, and probably does not work.
+ * @deprecated 27 November 2009 - use ZipUtil instead
  */
 public class Compressor {
 
