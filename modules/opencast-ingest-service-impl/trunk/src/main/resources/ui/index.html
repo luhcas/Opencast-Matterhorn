@@ -2,7 +2,7 @@
 <html>
 
     <head>
-        <title>Media Ingest</title>
+        <title>Upload Recording</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
         <script type="text/javascript" src="js/jquery-1.3.2.js"></script>
@@ -10,6 +10,7 @@
         <script type="text/javascript" src="js/upload.js"></script>
         <script type="text/javascript" src="js/upload.ui.js"></script>
         <script type="text/javascript" src="js/events.js"></script>
+        <script type="text/javascript" src="js/dialogbox.js"></script>
         <script type="text/javascript" src="js/popuphelp.js"></script>
         <script type="text/javascript" src="js/upload.helptexts.json"></script>
 
@@ -53,15 +54,19 @@
     <body>
 
         <!-- fl-centered doesn't work in winXP-IE8 -->
-        <div class="fl-container-flex fl-centered fl-theme-coal">
+        <div class="fl-container-flex fl-theme-coal">
             <ul class="fl-tabs fl-tabs-left">
                 <li class="fl-activeTab"><a href="../../admin/ui/recordings_upcoming.html">Recordings</a></li>
                 <li class=""><a href="../../admin/ui/agents_status.html">Capture Agents</a></li>
             </ul>
-            <div id="stage" class="fl-tab-content wu-tab-content fl-fix fl-centered">
+            <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
+
+                <div class="fl-container-800">
+                    <center><h2>Upload Recording</h2></center>
+                </div>
 
                 <!-- missing fields notification -->
-                <div class="fl-container-600 fl-centered" id="missingFields-container" style="display:none;">
+                <div class="fl-container-800" id="missingFields-container" style="display:none;">
                     <div class="fl-widget">
                         <div class="fl-widget-titlebar warnbox-title">
                             <b class="formbox-header-text" style="color:white;">Missing Inputs</b>
@@ -86,18 +91,18 @@
                 </div>
 
                 <!-- Basic information -->
-                <div class="fl-container-600 fl-centered">
+                <div class="fl-container-800">
                     <div class="fl-widget">
                         <div class="fl-widget-content formbox-content fl-fix">
                             <form name="basicData">
-                                <ul class="fl-controls-right wu-reset">
+                                <ul class="fl-controls-right wu-reset field-list">
                                     <li class="fl-fix">
-                                        <span class="fl-label form-label" id="label-title"><span style="color:red;">*</span>Title:</span>
+                                        <span class="fl-label form-label" id="label-title"><span style="color:red;">*</span><label for="title">Title:</label></span>
                                         <input type="text" name="title" id="title" class="form-field" onchange="uploadEvents.fieldChanged(this);">
                                         <span class="fl-icon inline-icon icon-help"  id="help_title"></span>
                                     </li>
                                     <li class="fl-fix">
-                                        <span class="fl-label form-label" id="label-contributor">Presenter:</span>
+                                        <span class="fl-label form-label" id="label-contributor"><label for="contributor">Presenter:</label></span>
                                         <input type="text" name="contributor" id="contributor" class="form-field">
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
                                     </li>
@@ -107,7 +112,7 @@
                                         <nobr><a href="javascript:alert('add presenter');">Add additional presenter</a></nobr>
                                     </li> -->
                                     <li class="fl-fix">
-                                        <span class="fl-label form-label">Sponsoring department:</span>
+                                        <span class="fl-label form-label"><label for="department">Sponsoring department:</label></span>
                                         <input type="text" name="department" id="department" class="form-field">
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
                                     </li>                                   
@@ -119,7 +124,7 @@
                 </div>
 
                 <!-- Additional Content Description -->
-                <div class="fl-container-600 fl-centered">
+                <div class="fl-container-800">
                     <div class="fl-widget">
                         <div class="fl-widget-titlebar formbox-header folder-control">
                             <a href="#_bottom" class="fl-icon inline-icon folder-icon icon-arrow-right" title="Hide/unhide additional information">Fold/Unfold additional information</a>
@@ -127,24 +132,24 @@
                         </div>
                         <div class="fl-widget-content formbox-content fl-fix" style="display:none;">
                             <form id="additionalData" name="additionalData">
-                                <ul class="fl-controls-right wu-reset">
+                                <ul class="fl-controls-right wu-reset field-list">
                                     <li class="fl-fix">
-                                        <span class="fl-label form-label">Series:</span>
+                                        <span class="fl-label form-label"><label for="series">Series:</label></span>
                                         <input type="text" name="series" id="series" class="form-field">
                                         <span class="fl-icon inline-icon icon-help"></span>
                                     </li>
                                     <li class="fl-fix">
-                                        <span class="fl-label form-label"">Subject:</span>
+                                        <span class="fl-label form-label""><label for="subject">Subject:</label></span>
                                         <input type="text" name="subject" id="subject" class="form-field">
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
                                     </li>
                                     <li class="fl-fix">
-                                        <span class="fl-label form-label">Language:</span>
+                                        <span class="fl-label form-label"><label for="language">Language:</label></span>
                                         <input type="text" name="language" id="language" class="form-field">
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
                                     </li>
                                     <li class="fl-fix">
-                                        <span class="fl-label form-label"">Description:</span>
+                                        <span class="fl-label form-label""><label for="description">Description:</label></span>
                                         <textarea class="form-field" name="description" id="description" rows="5"></textarea>
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
                                     </li>
@@ -155,20 +160,21 @@
                 </div>
 
                 <!-- Distribution -->
-                <div class="fl-container-600 fl-centered">
+                <div class="fl-container-800">
                     <div class="fl-widget">
                         <div class="fl-widget-titlebar formbox-header">
                             <b class="formbox-header-text">Distribution</b>
                         </div>
                         <div class="fl-widget-content formbox-content fl-fix">
                             <form name="distributionData">
-                                <ul class="fl-controls-right wu-reset">
+                                <ul class="fl-controls-right wu-reset field-list">
                                     <li class="fl-fix">
-                                        <span class="fl-label form-label"  id="label-dist"><span style="color:red;">*</span>Distribution channel(s):</span>
+                                        <span class="fl-label form-label"  id="label-dist"><span style="color:red;">*</span><label for="distMHMM">Distribution channel(s):</label></span>
                                         <!--<div style="width:20%;float:left;">
                                             <input type="checkbox" name="distSakai" id="distSakai" onchange="uploadEvents.fieldChanged(this);">Sakai
                                         </div>-->
-                                        <input type="checkbox" name="distMHMM" id="distMHMM" onchange="uploadEvents.fieldChanged(this);"><span>Matterhorn media module</span>
+                                        <input type="checkbox" name="distMHMM" id="distMHMM" onchange="uploadEvents.fieldChanged(this);" checked="true" style="float:left;"><span style="float:left;">&nbsp;Matterhorn Media Module</span>
+                                        <span class="fl-icon inline-icon icon-help"></span>
                                     </li>
                                     <!-- <li class="fl-fix">
                                         <span class="fl-label form-label">&nbsp;</span>
@@ -178,7 +184,7 @@
                                         <input type="checkbox" name="distITunesU" id="distITunesU" onchange="uploadEvents.fieldChanged(this);"><span>ITunesU</span>
                                     </li> -->
                                     <li class="fl-fix">
-                                        <span class="fl-label form-label">License:</span>
+                                        <span class="fl-label form-label"><label for="license">License:</label></span>
                                         <!-- <select class="form-field" name="license" id="license">
                                         </select> -->
 					                    <input type="text" name="license" id="license" class="form-field">
@@ -191,13 +197,26 @@
                 </div>
 
                 <!-- file upload -->
-                <div class="fl-container-600 fl-centered">
+                <div class="fl-container-800">
                     <div class="fl-widget">
                         <div class="fl-widget-titlebar formbox-header">
                             <b class="formbox-header-text">File Upload</b>
                         </div>
                         <div class="fl-widget-content formbox-content fl-fix">
-                            <ul class="fl-controls-right wu-reset">
+                            <ul class="fl-controls-right wu-reset field-list">
+                                <li class="fl-fix">
+                                    <span class="fl-label form-label"  id="label-dist" style="padding-top:3px;float:left;"><span style="color:red;">*</span><label for="mediacontent">Media file content:</label></span>
+                                    <select type="radio" name="mediacontent" id="mediacontent" onchange="uploadEvents.fieldChanged(this);" style="float:left">
+                                        <option value="none">Choose one:</option>                                    
+                                        <option value="audio">Audio</option>
+                                        <option value="video/presenter">Presenter (Video)</option>
+                                        <option value="video/audience">Audience (Video)</option>
+                                        <option value="video/slides">Presentation slides (video)</option>
+                                        <option value="video/other">Other document (video)</option>
+                                        <option value="other">Other (video)</option>
+                                    </select>
+                                    <span class="fl-icon inline-icon icon-help"></span>
+                                </li>
                                 <li class="fl-fix">
                                     <span class="fl-label form-label" id="label-file"><span style="color:red;">*</span>Media file:</span>
                                     <span>
@@ -209,28 +228,16 @@
                                         <span id="file"></span>
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
                                     </span>
-                                </li>
-                                <li class="fl-fix">
-                                    <span class="fl-label form-label"  id="label-dist" style="padding-top:3px;"><span style="color:red;">*</span>Media file content:</span>
-                                    <select type="radio" name="mediacontent" id="mediacontent" onchange="uploadEvents.fieldChanged(this);">
-                                        <option value="none">Choose one:</option>                                    
-                                        <option value="audio">Audio</option>
-                                        <option value="video/presenter">Presenter (Video)</option>
-                                        <option value="video/audience">Audience (Video)</option>
-                                        <option value="video/slides">Presentation slides (video)</option>
-                                        <option value="video/other">Other document (video)</option>
-                                        <option value="other">other</option>
-                                    </select>
-                                </li>
+                                </li>                                
                             </ul>
                         </div>
                     </div>
                 </div>
 
-                <div class="fl-container-600 fl-centered">
+                <div class="fl-container-800">
                     <div class="fl-widget">
-                        <div class="fl-widget-content formbox-content fl-fix">
-                            <ul class="fl-controls-right wu-reset">
+                        <div class="fl-widget-content fl-fix">
+                            <ul class="fl-controls-right wu-reset field-list">
                                 <li class="fl-fix">
                                     <span class="fl-label form-label"">&nbsp;</span>
                                     <span>
@@ -274,6 +281,18 @@
                 <div id="helpText" style="padding-left:7px; padding-right:7px; white-space:normal;"></div>
                 </p>
             </div>
+
+            <!-- template for the dialog box 
+            <div id="dialogBox" class="dialogbox" style="border:1px solid silver;">
+                <div id="dialogBox-title">some Title</div>
+                <div id="dialogBox-text">You haven't completed the upload of MY RECORDING</div>
+                <div id="dialogBox-buttons">
+                    <center>
+                        <button type="button" id="dialogBox-button1">Continue editing</button>
+                        <button type="button" id="dialogBox-button2">Discard changes</button>
+                    </center>
+                </div>
+            </div>-->
         </div>
     </body>
 

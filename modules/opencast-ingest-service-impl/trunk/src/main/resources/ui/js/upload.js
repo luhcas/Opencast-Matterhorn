@@ -52,12 +52,12 @@ uploadManager.init = function() {
 /** Colloects the metadata from the form and starts the file upload */
 uploadManager.startUpload = function() {
     uploadManager.collectMetadata();
-    var list = "";    
+    /* var list = "";    
     for (key in uploadManager.metadata) {
         list += "[" + key + "]:" + uploadManager.metadata[key] + "\n";
         uploadManager.uploader.addFileParam(uploadManager.selectedFile.id, key, uploadManager.metadata[key]);
     }
-    alert("Metadata:\n" + list);
+    alert("Metadata:\n" + list);*/
     uploadManager.uploader.startUpload(uploadManager.selectedFile.id);
 }
 
