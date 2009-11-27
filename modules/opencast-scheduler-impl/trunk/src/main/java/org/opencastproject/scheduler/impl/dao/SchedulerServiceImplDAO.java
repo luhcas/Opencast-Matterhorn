@@ -38,7 +38,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/
+/*
  * TODO: Comment me!
  *
  */
@@ -69,7 +69,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     try {
     setDatabase(c);
     } catch (SQLException e) {
-	//todo: does not use specified logging method
+      //todo: does not use specified logging method
       logger.error("could not init database for scheduler. "+e.getMessage());
       throw new RuntimeException(e);
     }
@@ -82,24 +82,24 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   public SchedulerEvent addEvent(SchedulerEvent e) {
   //todo: shouldn't we log this error state at the least?
     if (e == null || ! e.valid()) return null;
-	//todo: createNewEventID() should be a method on the event since it needs to know event details to create an id
-	//todo: e.g e.setID(e.createID());
+  //todo: createNewEventID() should be a method on the event since it needs to know event details to create an id
+  //todo: e.g e.setID(e.createID());
     e.setID(createNewEventID(e));
     logger.debug("adding event "+e.toString());
     try {
-	  //todo: unsafe, what if db goes down in one of these operations?  inconsistent state.  all of these should be wrapped in a transaction
+      //todo: unsafe, what if db goes down in one of these operations?  inconsistent state.  all of these should be wrapped in a transaction
       dbUpdate("INSERT INTO EVENT ( eventid , startdate , enddate ) " +
               "VALUES ('"+e.getID()+"', "+e.getStartdate().getTime()+", "+e.getEnddate().getTime()+")");
       
       saveAttendees(e.getID(), e.getAttendees());
       saveResources(e.getID(), e.getResources());
-	  //todo: this kind of casting is unsafe, why should it have to be a schedulereventimpl?  getmetadata() is in the interface...
+      //todo: this kind of casting is unsafe, why should it have to be a schedulereventimpl?  getmetadata() is in the interface...
       saveMetadata(e.getID(), ((SchedulerEventImpl)e).getMetadata());
     } catch (SQLException e1) {
       logger.error("Could not insert event. "+ e1.getMessage());
       return null;
     }
-	//todo: this is unneccessary and just slows down access, write a test if it is just for testing
+    //todo: this is unneccessary and just slows down access, write a test if it is just for testing
     SchedulerEvent newEvent = getEvent(e.getID());
     logger.debug("added event "+newEvent.toString());
     return newEvent; // read from DB to make sure it is inserted an returned correct 
@@ -377,7 +377,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @param eventID The eventID for which the list should be updated
    * @param resources The list of resources that should be updated 
    * @throws SQLException
-   *
+   */
   private void updateResources (String eventID, String [] resources) throws SQLException {
     dbUpdate("DELETE FROM RESOURCES WHERE eventid = '"+eventID+"' ");
     saveResources(eventID, resources);
@@ -410,11 +410,11 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   void setDatabase (Connection con) throws SQLException {
   //todo: con.setAutoCommit(false) should be done
     this.con = con;
-	//todo: it is legal to set a null connection?  what does that mean? shouldn't this be at least logged?
+  //todo: it is legal to set a null connection?  what does that mean? shouldn't this be at least logged?
     if (con == null) return;
-	//todo: see above, same questions
+  //todo: see above, same questions
     if (con.isClosed()) return;
-	
+
     if (! dbCheck()) dbCreate();    
   }
   
@@ -450,8 +450,8 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   //todo: sql injection projection is free with prep statements: http://java.sun.com/docs/books/tutorial/jdbc/basics/prepared.html
   private int dbUpdate (String query) throws SQLException {
     logger.debug("SQL Update: "+query);
-	//todo: I find this line very hard to read, why write it so densely?
-	//todo: if we are going to borrow a connection from the context why do we have a member con variable?  shouldn't we ignore that and just pass around our borrowed one?
+  //todo: I find this line very hard to read, why write it so densely?
+  //todo: if we are going to borrow a connection from the context why do we have a member con variable?  shouldn't we ignore that and just pass around our borrowed one?
     if (con == null && (con = borrowConnection()) == null) throw new SQLException("No database connected"); 
     int key = 0;
     try {
@@ -522,7 +522,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   private boolean dbCreate () {
     logger.info("creating new scheduler database.");
     try {
-		//todo: what if some of these fail?  is that an error state of some kind?  should be in transaction
+      //todo: what if some of these fail?  is that an error state of some kind?  should be in transaction
       dbExecute("CREATE TABLE EVENTMETADATA ( eventid varchar(255) NOT NULL, metadatakey varchar(255) NOT NULL, metadatavalue varchar(4096))");
       dbExecute("CREATE TABLE ATTENDEES ( attendee varchar(255) NOT NULL, eventid varchar(255) NOT NULL)");
       dbExecute("CREATE TABLE EVENT ( eventid varchar(255) NOT NULL, startdate bigint NOT NULL, enddate bigint NOT NULL, PRIMARY KEY (eventid))");
@@ -534,7 +534,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     } catch (SQLException e) {
       logger.error("Could not create new database structure. "+e.getMessage());
     }
-	//todo: if no exceptions no need to return a check of tables
+    //todo: if no exceptions no need to return a check of tables
     return dbCheck();
   }  
   //todo: why no docs?
