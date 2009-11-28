@@ -18,13 +18,12 @@ package org.opencastproject.scheduler.impl;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
+import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.sql.Connection;
 import java.util.Date;
 import java.util.Dictionary;
 
@@ -34,20 +33,10 @@ import java.util.Dictionary;
 public abstract class SchedulerServiceImpl implements SchedulerService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImpl.class);
  
-  Connection con;
+  /** 
+   * Properties that are updated by ManagedService updated method
+   */
   Dictionary properties;
-  
-  public SchedulerServiceImpl() {
-      
-  }
-
-  public SchedulerServiceImpl(Connection c) {
-    con = c;
-  }
-  
-  public SchedulerServiceImpl(File storageDir) {
-    
-  }  
  
   /**
    * {@inheritDoc}
@@ -105,11 +94,19 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
   public abstract boolean updateEvent(SchedulerEvent e);
   
   
-  
+  /**
+   * This method will be called, when the bundle gets loaded from OSGI
+   * @param componentContext The ComponetnContext of the OSGI bundle
+   */
+  //todo: if this method is empty do we still need it?
   public void activate(ComponentContext componentContext) {
     
   }
   
+  /**
+   * This method will be called, when the bundle gets unloaded from OSGI 
+   */
+  //todo: if this method is empty do we still need it?
   public void deactivate ()  {
 
   }
@@ -123,5 +120,13 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
     filter.setStart(new Date(System.currentTimeMillis()));
     return getEvents(filter);
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+   */
+  public void updated(Dictionary properties) throws ConfigurationException {
+    this.properties = properties;
+  }  
   
 }

@@ -18,14 +18,16 @@ package org.opencastproject.scheduler.impl;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.UUID;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO: Comment me!
- *
+ * Implementation of the Interface Scheduler event. This class is used to store event specific data.
+ * This implementations has a slight dependency on SchedulerServiceImplDAO, because the length of the Strings is limited 
+ * due to the dependencies of the database.
  */
 public class SchedulerEventImpl implements SchedulerEvent {
 
@@ -37,6 +39,9 @@ public class SchedulerEventImpl implements SchedulerEvent {
   Date start = new Date(0);
   Date end = new Date(0);
   Hashtable<String, String> metadata;
+  
+  int maxLengthKey = 0;
+  int maxLengthValue = 0;
   
   public SchedulerEventImpl () {
     attendees = new LinkedList<String>();
@@ -59,6 +64,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#addResource(java.lang.String)
    */
   public void addResource(String resource) {
+    
     synchronized (resources) {
       if (! resources.contains(resource)) resources.add(resource); // only save unique resources
     }
@@ -173,7 +179,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setAbstract(java.lang.String)
    */
   public void setAbstract(String text) {
-    metadata.put("abstract", text);
+    put("abstract", text);
   }
 
   /**
@@ -182,7 +188,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    */
   public void setAttendees(String[] attendees) {
     this.attendees = new LinkedList<String>();
-    for (int i = 0; i < attendees.length; i++) this.attendees.add(attendees[i]);
+    for (int i = 0; i < attendees.length; i++) this.attendees.add(trimText(attendees[i], 255));
   }
 
   /**
@@ -190,7 +196,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setChannelID(java.lang.String)
    */
   public void setChannelID(String channelID) {
-    metadata.put("channel-id", channelID);
+    put("channel-id", channelID);
   }
 
   /**
@@ -198,7 +204,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setContributor(java.lang.String)
    */
   public void setContributor(String contributor) {
-    metadata.put("contributor", contributor);
+    put("contributor", contributor);
   }
 
   /**
@@ -206,7 +212,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setCreator(java.lang.String)
    */
   public void setCreator(String creator) {
-    metadata.put("creator", creator);
+    put("creator", creator);
 
   }
 
@@ -216,7 +222,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    */
   public void setDevice(String device) {
     if (! attendees.contains(device)) addAttendee(device);
-    metadata.put("device", device);
+    put("device", device);
 
   }
 
@@ -243,7 +249,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setLocation(java.lang.String)
    */
   public void setLocation(String location) {
-    metadata.put("location", location);
+    put("location", location);
   }
 
   /**
@@ -252,7 +258,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    */
   public void setResources(String[] resources) {
     this.resources = new LinkedList<String>();
-    for (int i = 0; i < resources.length ; i++) this.resources.add(resources[i]);
+    for (int i = 0; i < resources.length ; i++) this.resources.add(trimText(resources[i],2048));
   }
 
   /**
@@ -260,7 +266,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setSeriesID(java.lang.String)
    */
   public void setSeriesID(String seriesID) {
-    metadata.put("series-id", seriesID);
+    put("series-id", seriesID);
   }
 
   /**
@@ -278,7 +284,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setTitle(java.lang.String)
    */
   public void setTitle(String title) {
-    metadata.put("title", title);
+    put("title", title);
   }
   
   /**
@@ -316,7 +322,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @param value the value for the metadata
    */
   public void setMetadata (String key, String value) {
-    metadata.put(key, value);
+    put(key, value);
   }
   
   /**
@@ -350,6 +356,40 @@ public class SchedulerEventImpl implements SchedulerEvent {
    */
   public String [] getMetadataKeys () {
     return metadata.keySet().toArray(new String [0]);
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.scheduler.api.SchedulerEvent#createID()
+   */
+  public String createID() {
+    return UUID.randomUUID().toString();
+  }
+  
+  /**
+   * Trims a String that must fit into a varchar(length) column
+   * @param text the text that should be checked for its length
+   * @param length the maximum length of the string
+   * @return text text with the maximum character length specified in length
+   */ 
+  private String trimText (String text, int length) {
+    if (text.length() > length) {
+	//todo: this should be logged as a warning because it is a recoverable error
+      logger.error("Value for "+text+" to long. Only "+length+" characters allowed.");
+      return text.substring(0, length-1);
+    }
+    return text;
+  } 
+  
+  /**
+   * Store data in the local Hashtable and make sure the key and value can be stored in database
+   * This somehow has a dependency on the service current implementation, because keys can only be 255 chars and values 4096 chars   
+   * @param key Keys longer than 255 chars will be shortened
+   * @param value Values longer than 4096 chars will be shortened
+   */
+  //todo: what if key or value is null?
+  private void put (String key, String value) {
+    metadata.put(trimText(key, 255), trimText(value, 4096));
   }
 
 }
