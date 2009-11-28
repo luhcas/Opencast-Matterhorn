@@ -208,4 +208,12 @@ public interface SchedulerEvent {
    * @return The hashtable with the metadata
    */
   public Hashtable<String, String> getMetadata ();
+
+  /**
+   * Creates a new unique identifier.
+   * 
+   * @return the identifier
+   */
+  public String createID();
+  
 }
