@@ -203,7 +203,7 @@ public class EngageServiceImpl implements EngageService, ManagedService {
     {
       title = result[i].getDcTitle();
   //    mediaPackageId = result[i].getId();
-      playerTrackUrl = result[i].getMediaPackage().getTrack("track-1").getURL().toExternalForm();
+      playerTrackUrl = result[i].getMediaPackage().getTrack("track-1").getURI().toString();
     }
     
     if(title != null)

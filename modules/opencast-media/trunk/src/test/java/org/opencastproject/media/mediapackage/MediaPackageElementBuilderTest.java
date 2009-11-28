@@ -26,9 +26,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 /**
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
@@ -40,7 +39,7 @@ public class MediaPackageElementBuilderTest {
   MediaPackageElementBuilder mediaPackageElementBuilder = null;
 
   /** The test catalog */
-  private URL catalogFile = null;
+  private URI catalogFile = null;
 
   /**
    * @throws java.lang.Exception
@@ -57,13 +56,11 @@ public class MediaPackageElementBuilderTest {
   @Test
   public void testElementFromFile() {
     try {
-      catalogFile = DublinCoreTest.class.getResource("/dublincore.xml").toURI().toURL();
-      MediaPackageElement element = mediaPackageElementBuilder.elementFromURL(catalogFile);
+      catalogFile = DublinCoreTest.class.getResource("/dublincore.xml").toURI();
+      MediaPackageElement element = mediaPackageElementBuilder.elementFromURI(catalogFile);
       assertEquals(Catalog.TYPE, element.getElementType());
       assertEquals(MediaPackageElements.DUBLINCORE_CATALOG, element.getFlavor());
     } catch (UnsupportedElementException e) {
-      fail(e.getMessage());
-    } catch (MalformedURLException e) {
       fail(e.getMessage());
     } catch (URISyntaxException e) {
       fail(e.getMessage());

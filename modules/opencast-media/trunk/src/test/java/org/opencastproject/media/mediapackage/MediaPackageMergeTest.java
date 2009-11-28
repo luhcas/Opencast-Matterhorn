@@ -30,7 +30,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -166,14 +166,14 @@ public class MediaPackageMergeTest {
    */
   private void testMediaPackageConsistency(MediaPackage mediaPackage) throws MediaPackageException {
     List<String> ids = new ArrayList<String>();
-    List<URL> files = new ArrayList<URL>();
+    List<URI> files = new ArrayList<URI>();
     for (MediaPackageElement e : mediaPackage.elements()) {
       if (ids.contains(e.getIdentifier()))
         throw new MediaPackageException("Duplicate id " + e.getIdentifier() + "' found");
       ids.add(e.getIdentifier());
-      if (files.contains(e.getURL()))
-        throw new MediaPackageException("Duplicate filename " + e.getURL() + "' found");
-      files.add(e.getURL());
+      if (files.contains(e.getURI()))
+        throw new MediaPackageException("Duplicate filename " + e.getURI() + "' found");
+      files.add(e.getURI());
     }
   }
 

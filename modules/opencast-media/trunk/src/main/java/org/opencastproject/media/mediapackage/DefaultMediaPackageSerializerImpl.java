@@ -19,6 +19,8 @@ import org.opencastproject.util.PathSupport;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
@@ -86,17 +88,17 @@ public class DefaultMediaPackageSerializerImpl implements MediaPackageSerializer
    * This serializer implementation tries to cope with relative urls. Should the root url be set to any value other than
    * <code>null</code>, the serializer will try to convert element urls to relative paths if possible. .
    * 
-   * @see org.opencastproject.media.mediapackage.MediaPackageSerializer#encodeURL(java.net.URL)
+   * @see org.opencastproject.media.mediapackage.MediaPackageSerializer#encodeURI(URI)
    */
-  public String encodeURL(URL url) {
-    if (url == null)
+  public String encodeURI(URI uri) {
+    if (uri == null)
       throw new IllegalArgumentException("Argument url is null");
 
-    String path = url.toExternalForm();
+    String path = uri.toString();
 
     // Has a package root been set? If not, no relative paths!
     if (packageRoot == null)
-      return url.toExternalForm();
+      return uri.toString();
 
     // A package root has been set
     String rootPath = packageRoot.toExternalForm();
@@ -117,36 +119,36 @@ public class DefaultMediaPackageSerializerImpl implements MediaPackageSerializer
    * @see #DefaultMediaPackageSerializerImpl(URL)
    * @see org.opencastproject.media.mediapackage.MediaPackageSerializer#resolvePath(java.lang.String)
    */
-  public URL resolvePath(String path) throws MalformedURLException {
+  public URI resolvePath(String path) throws URISyntaxException {
     if (path == null)
       throw new IllegalArgumentException("Argument path is null");
 
     // If the path starts with neither a protocol nor a path separator, the packageRoot is used to
     // create the url relative to the root
-    URL url = null;
+    URI uri = null;
     boolean isRelative = false;
     try {
-      url = new URL(path);
-      isRelative = !url.getPath().startsWith("/");
+      uri = new URI(path);
+      isRelative = !uri.getPath().startsWith("/");
       if (!isRelative)
-        return url;
-    } catch (MalformedURLException e) {
+        return uri;
+    } catch (URISyntaxException e) {
       // this may happen, we're still fine
       isRelative = !path.startsWith("/");
       if (!isRelative) {
         path = "file:" + path;
-        url = new URL(path);
-        return url;
+        uri = new URI(path);
+        return uri;
       }
     }
 
     // This is a relative path
     if (isRelative && packageRoot != null) {
-      url = new URL(PathSupport.concat(packageRoot.toExternalForm(), path));
-      return url;
+      uri = new URI(PathSupport.concat(packageRoot.toExternalForm(), path));
+      return uri;
     }
-
-    throw new MalformedURLException("Path '" + path + "' cannot be resolved to a URL");
+    
+    return uri;
   }
 
 }

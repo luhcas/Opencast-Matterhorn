@@ -34,7 +34,8 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -67,11 +68,11 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(java.net.URL,
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(URI,
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public boolean accept(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
+  public boolean accept(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     try {
       // Check type and flavor
       if (type != null && flavor != null)
@@ -82,7 +83,7 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
         return false;
 
       // Still uncertain. Let's try to read the catalog
-      DublinCoreCatalogImpl.fromURL(url);
+      DublinCoreCatalogImpl.fromURI(uri);
       return true;
     } catch (IllegalArgumentException e) {
       return false;
@@ -125,7 +126,7 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
           throws UnsupportedElementException {
 
     String id = null;
-    URL url = null;
+    URI url = null;
     long size = -1;
     Checksum checksum = null;
     MimeType mimeType = null;
@@ -160,12 +161,12 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
         mimeType = MimeTypes.parseMimeType(mimeTypeValue);
 
       // create the catalog
-      DublinCoreCatalogImpl dc = DublinCoreCatalogImpl.fromURL(url);
+      DublinCoreCatalogImpl dc = DublinCoreCatalogImpl.fromURI(url);
       if (id != null && !id.equals(""))
         dc.setIdentifier(id);
 
       // Add url
-      dc.setURL(url);
+      dc.setURI(url);
 
       // Add reference
       if (reference != null && !reference.equals(""))
@@ -190,26 +191,28 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
     } catch (ParserConfigurationException e) {
       throw new UnsupportedElementException("Unable to create parser for dublin core catalog " + url + ": " + e.getMessage());
     } catch (IOException e) {
-      throw new UnsupportedElementException("Error while reading dublin core file " + url + ": " + e.getMessage());
+      throw new UnsupportedElementException("Error while reading dublin core catalog " + url + ": " + e.getMessage());
     } catch (SAXException e) {
       throw new UnsupportedElementException("Error while parsing dublin core catalog " + url + ": " + e.getMessage());
+    } catch (URISyntaxException e) {
+      throw new UnsupportedElementException("Error while reading dublin core catalog " + url + ": " + e.getMessage());
     }
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURL(java.net.URL)
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURI(URI)
    */
-  public MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException {
+  public MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException {
     try {
-      log_.trace("Creating dublin core metadata container from " + url);
-      return DublinCoreCatalogImpl.fromURL(url);
+      log_.trace("Creating dublin core metadata container from " + uri);
+      return DublinCoreCatalogImpl.fromURI(uri);
     } catch (IOException e) {
-      throw new UnsupportedElementException("Error reading dublin core from " + url + " : " + e.getMessage());
+      throw new UnsupportedElementException("Error reading dublin core from " + uri + " : " + e.getMessage());
     } catch (ParserConfigurationException e) {
-      throw new UnsupportedElementException("Parser configuration exception while reading dublin core catalog from " + url
+      throw new UnsupportedElementException("Parser configuration exception while reading dublin core catalog from " + uri
               + " : " + e.getMessage());
     } catch (SAXException e) {
-      throw new UnsupportedElementException("Error parsing dublin core catalog " + url + " : " + e.getMessage());
+      throw new UnsupportedElementException("Error parsing dublin core catalog " + uri + " : " + e.getMessage());
     }
   }
 

@@ -259,7 +259,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
         return getSourceMediaPackage();
       }
     }
-    return result.getResultingMediaPackage();
+    return (result != null) ? result.getResultingMediaPackage() : getSourceMediaPackage();
   }
 
   /**

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -154,10 +154,10 @@ public class CaptionsRestService {
     item.put("id", cmi.getWorkflowId());
     item.put("timestamp", new Date().getTime()); // TODO MP created date?
     item.put("title", cmi.getTitle());
-    item.put("mediaURL", cmi.getMediaURL() != null ? cmi.getMediaURL().toExternalForm() : null);
+    item.put("mediaURL", cmi.getMediaURI() != null ? cmi.getMediaURI().toString() : null);
     item.put("captionable", true);
-    URL ttURL = cmi.getCaptionsURL(CaptionsService.CAPTIONS_TYPE_TIMETEXT);
-    URL daURL = cmi.getCaptionsURL(CaptionsService.CAPTIONS_TYPE_DESCAUDIO);
+    URI ttURL = cmi.getCaptionsURI(CaptionsService.CAPTIONS_TYPE_TIMETEXT);
+    URI daURL = cmi.getCaptionsURI(CaptionsService.CAPTIONS_TYPE_DESCAUDIO);
     item.put("DFXPURL", ttURL != null ? ttURL.toString() : null);
     item.put("describable", false);
     item.put("DAURL", daURL != null ? daURL.toString() : null);
@@ -179,10 +179,10 @@ public class CaptionsRestService {
       CaptionsMediaItem cmi = service.updateCaptions(workflowId, captionType, is);
       return Response.status(Response.Status.NO_CONTENT)
         .header("_mpId", cmi.getMediaPackageId())
-        .header("_mediaURL", cmi.getMediaURL())
+        .header("_mediaURL", cmi.getMediaURI())
         .header("_mediaId", workflowId)
         .header("_captionType", captionType)
-        .header("_captionURL", cmi.getCaptionsURL(captionType))
+        .header("_captionURL", cmi.getCaptionsURI(captionType))
         .build();
     } catch (Exception e) {
       logger.error("Failure while adding caption ("+captionType+") to workflow ("+workflowId+"): " + e, e);

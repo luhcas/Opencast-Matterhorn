@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
-import java.net.URL;
+import java.net.URI;
 
 /**
  * This implementation of the {@link MediaPackageElementBuilderPlugin} recognizes video tracks and provides the
@@ -60,20 +60,20 @@ public class IndefiniteTrackBuilderPlugin extends AbstractTrackBuilderPlugin {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(java.net.URL,
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(URI,
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public boolean accept(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
+  public boolean accept(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     return MediaPackageElement.Type.Track.equals(type);
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURL(java.net.URL)
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURI(URI)
    */
-  public MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException {
-    log_.trace("Creating video track from " + url);
-    Track track = TrackImpl.fromURL(url);
+  public MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException {
+    log_.trace("Creating video track from " + uri);
+    Track track = TrackImpl.fromURI(uri);
     return track;
   }
 
@@ -83,8 +83,8 @@ public class IndefiniteTrackBuilderPlugin extends AbstractTrackBuilderPlugin {
   }
 
   @Override
-  protected TrackImpl trackFromManifest(String id, URL url) {
-    TrackImpl track = (TrackImpl) TrackImpl.fromURL(url);
+  protected TrackImpl trackFromManifest(String id, URI uri) {
+    TrackImpl track = (TrackImpl) TrackImpl.fromURI(uri);
     track.setIdentifier(id);
     return track;
   }

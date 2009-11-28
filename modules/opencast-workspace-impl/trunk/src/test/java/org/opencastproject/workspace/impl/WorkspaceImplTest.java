@@ -15,18 +15,28 @@
  */
 package org.opencastproject.workspace.impl;
 
+import static org.junit.Assert.fail;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 public class WorkspaceImplTest {
   @Test
   public void testGetRemoteFile() {
     WorkspaceImpl workspace = new WorkspaceImpl("target/junit-workspace-rootdir");
-    File f = workspace.get(getClass().getClassLoader().getResource("opencast_header.gif"));
-    Assert.assertTrue(f.exists());
+    URL fileURL = getClass().getClassLoader().getResource("opencast_header.gif");
+    File f = null;
+    try {
+      f = workspace.get(fileURL.toURI());
+      Assert.assertTrue(f.exists());
+    } catch (URISyntaxException e) {
+      fail(e.getMessage());
+    }
   }
 
   @Test
@@ -34,8 +44,8 @@ public class WorkspaceImplTest {
     WorkspaceImpl workspace = new WorkspaceImpl("target/junit-workspace-rootdir");
     File source1 = new File("target/test-classes/opencast_header.gif");
     File source2 = new File("target/test-classes/opencast_header2.gif");
-    File fromWorkspace1 = workspace.get(source1.toURI().toURL());
-    File fromWorkspace2 = workspace.get(source2.toURI().toURL());
+    File fromWorkspace1 = workspace.get(source1.toURI());
+    File fromWorkspace2 = workspace.get(source2.toURI());
     Assert.assertFalse(fromWorkspace1.getAbsolutePath().equals(fromWorkspace2.getAbsolutePath()));
   }
 }

@@ -146,15 +146,15 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * 
    */
   protected File download(Track track) throws IOException {
-    if (track.getURL().getProtocol().equals("file"))
-      return new File(track.getURL().getPath());
+    if (track.getURI().getScheme().equals("file"))
+      return new File(track.getURI().getPath());
 
     // The file does not seem to be inside the local filesystem.
     // Let's download it and log a warning, since this shouldn't happen.
     log_.warn("Downloading track " + track + " to temp directory");
-    File f = File.createTempFile(track.getURL().getFile(), null);
+    File f = File.createTempFile(track.getURI().toString(), null);
     FileOutputStream fos = new FileOutputStream(f);
-    InputStream is = track.getURL().openStream();
+    InputStream is = track.getURI().toURL().openStream();
     byte[] bytes = new byte[2048];
     int offset = 0;
     int len = 0;

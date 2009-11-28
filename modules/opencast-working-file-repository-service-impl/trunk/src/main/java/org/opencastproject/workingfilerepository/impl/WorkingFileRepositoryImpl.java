@@ -30,8 +30,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Dictionary;
 
 /**
@@ -90,26 +90,26 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     }
   }
 
-  public URL getURL(String mediaPackageID, String mediaPackageElementID) {
+  public URI getURI(String mediaPackageID, String mediaPackageElementID) {
     // FIXME Either make this configurable, try to determine it from the system, or refer to another service
     // FIXME URL encode the IDs
     File f = getFile(mediaPackageID, mediaPackageElementID);
     try {
       if(f.getName().equals(mediaPackageElementID)) {
-        return new URL(serverUrl + "/files/" + mediaPackageID + "/" + mediaPackageElementID);
+        return new URI(serverUrl + "/files/" + mediaPackageID + "/" + mediaPackageElementID);
       } else {
-        return new URL(serverUrl + "/files/" + mediaPackageID + "/" + mediaPackageElementID + "/" + f.getName());
+        return new URI(serverUrl + "/files/" + mediaPackageID + "/" + mediaPackageElementID + "/" + f.getName());
       }
-    } catch (MalformedURLException e) {
+    } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
   }
 
-  public URL put(String mediaPackageID, String mediaPackageElementID, InputStream in){
+  public URI put(String mediaPackageID, String mediaPackageElementID, InputStream in){
     return put(mediaPackageID, mediaPackageElementID, mediaPackageElementID, in);
   }
 
-  public URL put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
+  public URI put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
     checkId(mediaPackageID);
     checkId(mediaPackageElementID);
     File f = new File(rootDirectory + File.separator + mediaPackageID + File.separator + 
@@ -133,7 +133,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
         logger.info("Attempting to overwrite the file at " + f.getAbsolutePath());
       }
       IOUtils.copy(in, new FileOutputStream(f));
-      return getURL(mediaPackageID, mediaPackageElementID);
+      return getURI(mediaPackageID, mediaPackageElementID);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

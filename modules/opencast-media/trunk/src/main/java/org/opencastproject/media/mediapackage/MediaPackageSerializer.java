@@ -15,8 +15,8 @@
  */
 package org.opencastproject.media.mediapackage;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public interface MediaPackageSerializer {
 
@@ -25,11 +25,11 @@ public interface MediaPackageSerializer {
    * serializers are able to store package elements in directories relative to some common root folder, thereby making
    * it movable.
    * 
-   * @param url
+   * @param uri
    *          the url to encode
    * @return the encoded path
    */
-  public String encodeURL(URL url);
+  public String encodeURI(URI uri);
 
   /**
    * This method is called every time a url is being read from a media package manifest. By implementing this method,
@@ -39,9 +39,9 @@ public interface MediaPackageSerializer {
    * @param path
    *          the original path from the manifest
    * @return the resolved url
-   * @throws MalformedURLException
+   * @throws URISyntaxException
    *           if the path cannot be converted into a url
    */
-  public URL resolvePath(String path) throws MalformedURLException;
+  public URI resolvePath(String path) throws URISyntaxException;
 
 }

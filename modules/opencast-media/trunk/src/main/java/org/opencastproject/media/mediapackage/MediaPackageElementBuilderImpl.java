@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -94,18 +94,18 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromURL(java.net.URL)
+   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromURI(URI)
    */
-  public MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException {
-    return elementFromURL(url, null, null);
+  public MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException {
+    return elementFromURI(uri, null, null);
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromURL(java.io.File,
+   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromURI(URI,
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type ,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement elementFromURL(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
+  public MediaPackageElement elementFromURI(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
           throws UnsupportedElementException {
 
     // Feed the file to the element builder plugins
@@ -114,14 +114,14 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
       MediaPackageElementBuilderPlugin plugin = null;
       for (Class<? extends MediaPackageElementBuilderPlugin> pluginClass : plugins) {
         plugin = createPlugin(pluginClass);
-        if (plugin.accept(url, type, flavor))
+        if (plugin.accept(uri, type, flavor))
           candidates.add(plugin);
       }
     }
 
     // Check the plugins
     if (candidates.size() == 0) {
-      throw new UnsupportedElementException("No suitable element builder plugin found for " + url);
+      throw new UnsupportedElementException("No suitable element builder plugin found for " + uri);
     } else if (candidates.size() > 1) {
       StringBuffer buf = new StringBuffer();
       for (MediaPackageElementBuilderPlugin plugin : candidates) {
@@ -129,14 +129,14 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
           buf.append(", ");
         buf.append(plugin.toString());
       }
-      log_.debug("More than one element builder plugin with the same priority claims responsibilty for " + url + ": "
+      log_.debug("More than one element builder plugin with the same priority claims responsibilty for " + uri + ": "
               + buf.toString());
     }
 
     // Create media package element depending on mime type flavor
     Collections.sort(candidates, PriorityComparator.INSTANCE);
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
-    MediaPackageElement element = builderPlugin.elementFromURL(url);
+    MediaPackageElement element = builderPlugin.elementFromURI(uri);
     builderPlugin.cleanup();
     return element;
   }

@@ -23,7 +23,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.io.Serializable;
-import java.net.URL;
+import java.net.URI;
 
 /**
  * This class provides base functionality for media package elements.
@@ -52,7 +52,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   protected MediaPackageElementFlavor flavor = null;
 
   /** The element's location */
-  protected URL url = null;
+  protected URI uri = null;
 
   /** Size in bytes */
   protected long size = -1L;
@@ -73,11 +73,11 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    *          the type, e. g. Track, Catalog etc.
    * @param flavor
    *          the flavor
-   * @param url
+   * @param uri
    *          the elements location
    */
-  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, URL url) {
-    this(null, elementType, flavor, url, -1, null, null);
+  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, URI uri) {
+    this(null, elementType, flavor, uri, -1, null, null);
   }
 
   /**
@@ -87,7 +87,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    *          the type, e. g. Track, Catalog etc.
    * @param flavor
    *          the flavor
-   * @param url
+   * @param uri
    *          the elements location
    * @param size
    *          the element size in bytes
@@ -96,9 +96,9 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    * @param mimeType
    *          the element mime type
    */
-  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, URL url, long size,
+  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, URI uri, long size,
           Checksum checksum, MimeType mimeType) {
-    this(null, elementType, flavor, url, size, checksum, mimeType);
+    this(null, elementType, flavor, uri, size, checksum, mimeType);
   }
 
   /**
@@ -110,7 +110,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    *          the type, e. g. Track, Catalog etc.
    * @param flavor
    *          the flavor
-   * @param url
+   * @param uri
    *          the elements location
    * @param size
    *          the element size in bytes
@@ -119,7 +119,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    * @param mimeType
    *          the element mime type
    */
-  protected AbstractMediaPackageElement(String id, Type elementType, MediaPackageElementFlavor flavor, URL url,
+  protected AbstractMediaPackageElement(String id, Type elementType, MediaPackageElementFlavor flavor, URI uri,
           long size, Checksum checksum, MimeType mimeType) {
     if (elementType == null)
       throw new IllegalArgumentException("Argument 'elementType' is null");
@@ -127,7 +127,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
     this.elementType = elementType;
     this.flavor = flavor;
     this.mimeType = mimeType;
-    this.url = url;
+    this.uri = uri;
     this.checksum = checksum;
   }
 
@@ -166,7 +166,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    * @see org.opencastproject.media.mediapackage.MediaPackageElement#getElementDescription()
    */
   public String getElementDescription() {
-    return (description != null) ? description : url.toString();
+    return (description != null) ? description : uri.toString();
   }
 
   /**
@@ -197,10 +197,10 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElement#getURL()
+   * @see org.opencastproject.media.mediapackage.MediaPackageElement#getURI()
    */
-  public URL getURL() {
-    return url;
+  public URI getURI() {
+    return uri;
   }
 
   /**
@@ -208,11 +208,11 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    * <p>
    * Make sure you know what you are doing, since usually, the media package will take care of the elements locations.
    * 
-   * @param url
+   * @param uri
    *          the elements url
    */
-  public void setURL(URL url) {
-    this.url = url;
+  public void setURI(URI uri) {
+    this.uri = uri;
   }
 
   /**
@@ -349,7 +349,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
   public int compareTo(MediaPackageElement o) {
-    return url.toString().compareTo(o.getURL().toString());
+    return uri.toString().compareTo(o.getURI().toString());
   }
 
   /**
@@ -361,7 +361,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
       MediaPackageElement e = (MediaPackageElement) obj;
       if (mediaPackage != null && !mediaPackage.equals(e.getMediaPackage()))
         return false;
-      return url.equals(e.getURL());
+      return uri.equals(e.getURI());
     }
     return false;
   }
@@ -371,7 +371,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    */
   @Override
   public int hashCode() {
-    return url.hashCode();
+    return uri.hashCode();
   }
 
   /**
@@ -401,7 +401,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
 
     // Url
     Element urlNode = document.createElement("url");
-    String urlValue = (serializer != null) ? serializer.encodeURL(url) : url.toExternalForm();
+    String urlValue = (serializer != null) ? serializer.encodeURI(uri) : uri.toString();
     urlNode.appendChild(document.createTextNode(urlValue));
     node.appendChild(urlNode);
 
@@ -435,7 +435,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    */
   @Override
   public String toString() {
-    String s = (description != null) ? description : url.toString();
+    String s = (description != null) ? description : uri.toString();
     s += " (" + flavor + ", " + mimeType + ")";
     return s.toLowerCase();
   }

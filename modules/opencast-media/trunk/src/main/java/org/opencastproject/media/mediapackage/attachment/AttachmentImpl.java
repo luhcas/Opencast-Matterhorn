@@ -26,7 +26,7 @@ import org.opencastproject.util.MimeType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import java.net.URL;
+import java.net.URI;
 
 /**
  * Basic implementation of an attachment.
@@ -46,7 +46,7 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
    *          the attachment identifier
    * @param flavor
    *          the attachment type
-   * @param url
+   * @param uri
    *          the attachments location
    * @param size
    *          the attachments size
@@ -55,9 +55,9 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
    * @param mimeType
    *          the attachments mime type
    */
-  protected AttachmentImpl(String identifier, MediaPackageElementFlavor flavor, URL url, long size, Checksum checksum,
+  protected AttachmentImpl(String identifier, MediaPackageElementFlavor flavor, URI uri, long size, Checksum checksum,
           MimeType mimeType) {
-    super(identifier, Type.Attachment, flavor, url, size, checksum, mimeType);
+    super(identifier, Type.Attachment, flavor, uri, size, checksum, mimeType);
   }
 
   /**
@@ -65,7 +65,7 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
    * 
    * @param flavor
    *          the attachment type
-   * @param url
+   * @param uri
    *          the attachment location
    * @param size
    *          the attachment size
@@ -74,19 +74,19 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
    * @param mimeType
    *          the attachment mime type
    */
-  protected AttachmentImpl(MediaPackageElementFlavor flavor, URL url, long size, Checksum checksum, MimeType mimeType) {
-    super(Type.Attachment, flavor, url, size, checksum, mimeType);
+  protected AttachmentImpl(MediaPackageElementFlavor flavor, URI uri, long size, Checksum checksum, MimeType mimeType) {
+    super(Type.Attachment, flavor, uri, size, checksum, mimeType);
   }
 
   /**
    * Creates an attachment.
    * 
    * @parm identifier the attachment identifier
-   * @param url
+   * @param uri
    *          the attachments location
    */
-  protected AttachmentImpl(String identifier, URL url) {
-    this(identifier, null, url, 0, null, null);
+  protected AttachmentImpl(String identifier, URI uri) {
+    this(identifier, null, uri, 0, null, null);
   }
 
   /**
@@ -95,7 +95,7 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
    * @parm identifier the attachment identifier
    * @param flavor
    *          the attachment type
-   * @param url
+   * @param uri
    *          the attachments location
    * @param size
    *          the attachments size
@@ -104,19 +104,19 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
    * @param mimeType
    *          the attachments mime type
    */
-  protected AttachmentImpl(URL url) {
-    this(null, null, url, 0, null, null);
+  protected AttachmentImpl(URI uri) {
+    this(null, null, uri, 0, null, null);
   }
 
   /**
    * Creates a new attachment from the url.
    * 
-   * @param url
+   * @param uri
    *          the attachment location
    * @return the attachment
    */
-  public static Attachment fromURL(URL url) {
-    return new AttachmentImpl(url);
+  public static Attachment fromURI(URI uri) {
+    return new AttachmentImpl(uri);
   }
 
   /**

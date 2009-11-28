@@ -28,7 +28,7 @@ import org.opencastproject.util.MimeType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,15 +55,15 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
    * 
    * @param flavor
    *          the track flavor
-   * @param url
+   * @param uri
    *          the track location
    * @param checksum
    *          the track checksum
    * @param mimeType
    *          the track mime type
    */
-  TrackImpl(MediaPackageElementFlavor flavor, MimeType mimeType, URL url, long size, Checksum checksum) {
-    super(Type.Track, flavor, url, size, checksum, mimeType);
+  TrackImpl(MediaPackageElementFlavor flavor, MimeType mimeType, URI uri, long size, Checksum checksum) {
+    super(Type.Track, flavor, uri, size, checksum, mimeType);
   }
 
   /**
@@ -71,7 +71,7 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
    * 
    * @param flavor
    *          the track flavor
-   * @param url
+   * @param uri
    *          the track location
    * @throws IOException
    *           if the track file cannot be accessed
@@ -80,19 +80,19 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
    * @throws NoSuchAlgorithmException
    *           if the track's checksum cannot be computed
    */
-  TrackImpl(MediaPackageElementFlavor flavor, URL url) {
-    super(Type.Track, flavor, url);
+  TrackImpl(MediaPackageElementFlavor flavor, URI uri) {
+    super(Type.Track, flavor, uri);
   }
 
   /**
    * Creates a new track from the given url.
    * 
-   * @param url
+   * @param uri
    *          the track location
    * @return the track
    */
-  public static TrackImpl fromURL(URL url) {
-    return new TrackImpl(MediaPackageElements.INDEFINITE_TRACK, url);
+  public static TrackImpl fromURI(URI uri) {
+    return new TrackImpl(MediaPackageElements.INDEFINITE_TRACK, uri);
   }
 
   /**

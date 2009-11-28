@@ -24,7 +24,7 @@ import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.w3c.dom.Node;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 
 /**
  * An element builder plugin is an object that is able to recognize one ore more filetypes slated for ingest into
@@ -79,7 +79,7 @@ public interface MediaPackageElementBuilderPlugin {
    * Otherwise, <code>null</code> should be returned.
    * </p>
    * 
-   * @param url
+   * @param uri
    *          the element location
    * @param type
    *          the element type
@@ -87,7 +87,7 @@ public interface MediaPackageElementBuilderPlugin {
    *          the element flavor
    * @return <code>true</code> if the plugin can handle the element
    */
-  boolean accept(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor);
+  boolean accept(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor);
 
   /**
    * This method is called while the media package builder parses a media package manifest.
@@ -126,13 +126,13 @@ public interface MediaPackageElementBuilderPlugin {
   /**
    * Creates a media package element from the given url that was previously accepted.
    * 
-   * @param url
+   * @param uri
    *          the element location
    * @return the new media package element
    * @throws UnsupportedElementException
    *           if creating the media package element fails
    */
-  MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException;
+  MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException;
 
   /**
    * Creates a media package element from the DOM element.

@@ -40,7 +40,7 @@ import org.w3c.dom.Document;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.URL;
+import java.net.URI;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -109,7 +109,7 @@ public class IngestRestService {
           @FormParam("mediaPackage") MediapackageType mpt) {
     try {
       MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-      URL u = new URL(url);
+      URI u = new URI(url);
       mp = service.addTrack(u, MediaPackageElementFlavor.parseFlavor(flavor), mp);
       mpt = MediapackageType.fromXml(mp.toXml());
 
@@ -143,7 +143,7 @@ public class IngestRestService {
           @FormParam("mediaPackage") MediapackageType mpt) {
     try {
       MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-      URL u = new URL(url);
+      URI u = new URI(url);
       mp = service.addCatalog(u, MediaPackageElementFlavor.parseFlavor(flavor), mp);
       mpt = MediapackageType.fromXml(mp.toXml());
       return Response.ok(mpt).build();
@@ -176,7 +176,7 @@ public class IngestRestService {
           @FormParam("mediaPackage") MediapackageType mpt) {
     try {
       MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-      URL u = new URL(url);
+      URI u = new URI(url);
       mp = service.addAttachment(u, MediaPackageElementFlavor.parseFlavor(flavor), mp);
       mpt = MediapackageType.fromXml(mp.toXml());
       return Response.ok(mpt).build();

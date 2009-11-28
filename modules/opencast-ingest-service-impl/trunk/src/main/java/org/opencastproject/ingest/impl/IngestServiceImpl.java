@@ -24,11 +24,11 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.media.mediapackage.identifier.HandleBuilder;
 import org.opencastproject.media.mediapackage.identifier.HandleBuilderFactory;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
@@ -51,7 +51,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.UUID;
@@ -140,10 +140,10 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
         element.setIdentifier(UUID.randomUUID().toString());
         String elId = element.getIdentifier();
         element = inspect(element);
-        String filename = element.getURL().getFile();
+        String filename = element.getURI().toURL().getFile();
         filename = filename.substring(filename.lastIndexOf("/"));
-        URL newUrl = addContentToRepo(mp, elId, filename, element.getURL().openStream());
-        element.setURL(newUrl);
+        URI newUrl = addContentToRepo(mp, elId, filename, element.getURI().toURL().openStream());
+        element.setURI(newUrl);
       }
     } catch (Exception e) {
       logger.error("Ingest service: Failed to ingest media package!");
@@ -175,13 +175,13 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageTrack(URL, MediaPackageElementFlavor,
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageTrack(URI, MediaPackageElementFlavor,
    *      MediaPackage)
    */
-  public MediaPackage addTrack(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+  public MediaPackage addTrack(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
-    URL newUrl = addContentToRepo(mediaPackage, elementId, url);
+    URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
     return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track, flavor);
   }
 
@@ -194,20 +194,20 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   public MediaPackage addTrack(InputStream file, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
-    URL newUrl = addContentToRepo(mediaPackage, elementId, file);
+    URI newUrl = addContentToRepo(mediaPackage, elementId, file);
     return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track, flavor);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageCatalog(URL, MediaPackageElementFlavor,
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageCatalog(URI, MediaPackageElementFlavor,
    *      MediaPackage)
    */
-  public MediaPackage addCatalog(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+  public MediaPackage addCatalog(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
-    URL newUrl = addContentToRepo(mediaPackage, elementId, url);
+    URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
     return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Catalog, flavor);
   }
 
@@ -220,20 +220,20 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   public MediaPackage addCatalog(InputStream file, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
-    URL newUrl = addContentToRepo(mediaPackage, elementId, file);
+    URI newUrl = addContentToRepo(mediaPackage, elementId, file);
     return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Catalog, flavor);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageAttachment(URL, MediaPackageElementFlavor,
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageAttachment(URI, MediaPackageElementFlavor,
    *      MediaPackage)
    */
-  public MediaPackage addAttachment(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+  public MediaPackage addAttachment(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
-    URL newUrl = addContentToRepo(mediaPackage, elementId, url);
+    URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
     return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment, flavor);
   }
 
@@ -246,7 +246,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   public MediaPackage addAttachment(InputStream file, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
-    URL newUrl = addContentToRepo(mediaPackage, elementId, file);
+    URI newUrl = addContentToRepo(mediaPackage, elementId, file);
     return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment, flavor);
   }
 
@@ -349,28 +349,28 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
     }
   }
 
-  private URL addContentToRepo(MediaPackage mp, String elementId, URL url) throws IOException, MediaPackageException,
+  private URI addContentToRepo(MediaPackage mp, String elementId, URI uri) throws IOException, MediaPackageException,
           UnsupportedElementException {
-    return workspace.put(mp.getIdentifier().compact(), elementId, url.openStream());
+    return workspace.put(mp.getIdentifier().compact(), elementId, uri.toURL().openStream());
     // return addContentToMediaPackage(mp, elementId, newUrl, type, flavor);
   }
 
-  private URL addContentToRepo(MediaPackage mp, String elementId, InputStream file) throws MediaPackageException,
+  private URI addContentToRepo(MediaPackage mp, String elementId, InputStream file) throws MediaPackageException,
           UnsupportedElementException, IOException {
     return workspace.put(mp.getIdentifier().compact(), elementId, file);
     // return addContentToMediaPackage(mp, elementId, url, type, flavor);
   }
 
-  private URL addContentToRepo(MediaPackage mp, String elementId, String filename, InputStream file)
+  private URI addContentToRepo(MediaPackage mp, String elementId, String filename, InputStream file)
           throws MediaPackageException, UnsupportedElementException, IOException {
     return workspace.put(mp.getIdentifier().compact(), elementId, filename, file);
   }
 
-  private MediaPackage addContentToMediaPackage(MediaPackage mp, String elementId, URL url,
+  private MediaPackage addContentToMediaPackage(MediaPackage mp, String elementId, URI uri,
           MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws MediaPackageException,
           UnsupportedElementException {
     try {
-      MediaPackageElement mpe = mp.add(url, type, flavor);
+      MediaPackageElement mpe = mp.add(uri, type, flavor);
       mp.remove(mpe);
       mpe = inspect(mpe);
       mp.add(mpe);

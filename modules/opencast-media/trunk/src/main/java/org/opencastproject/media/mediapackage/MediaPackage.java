@@ -22,7 +22,7 @@ import org.w3c.dom.Document;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URL;
+import java.net.URI;
 
 /**
  * Interface for a media package, which is a data container moving through the system, containing metadata, tracks and
@@ -349,7 +349,7 @@ public interface MediaPackage {
   boolean hasUnclassifiedElements(MediaPackageElementFlavor flavor);
 
   /**
-   * Adds an arbitrary {@link URL} to this media package, utilizing a {@link MediaPackageBuilder} to create a suitable
+   * Adds an arbitrary {@link URI} to this media package, utilizing a {@link MediaPackageBuilder} to create a suitable
    * media package element out of the url. If the content cannot be recognized as being either a metadata catalog or
    * multimedia track, it is added as an attachment.
    * 
@@ -358,14 +358,14 @@ public interface MediaPackage {
    * @throws UnsupportedElementException
    *           if the element is of an unsupported format
    */
-  MediaPackageElement add(URL file) throws UnsupportedElementException;
+  MediaPackageElement add(URI uri) throws UnsupportedElementException;
 
   /**
-   * Adds an arbitrary {@link URL} to this media package, utilizing a {@link MediaPackageBuilder} to create a suitable
+   * Adds an arbitrary {@link URI} to this media package, utilizing a {@link MediaPackageBuilder} to create a suitable
    * media package element out of the url. If the content cannot be recognized as being either a metadata catalog or
    * multimedia track, it is added as an attachment.
    * 
-   * @param url
+   * @param uri
    *          the element location
    * @param type
    *          the element type
@@ -374,7 +374,7 @@ public interface MediaPackage {
    * @throws UnsupportedElementException
    *           if the element is of an unsupported format
    */
-  MediaPackageElement add(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
+  MediaPackageElement add(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
           throws UnsupportedElementException;
 
   /**

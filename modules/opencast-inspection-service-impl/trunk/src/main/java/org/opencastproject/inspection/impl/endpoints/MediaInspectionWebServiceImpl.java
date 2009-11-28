@@ -22,7 +22,7 @@ import org.opencastproject.media.mediapackage.jaxb.TrackType;
 
 import org.w3c.dom.Document;
 
-import java.net.URL;
+import java.net.URI;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -37,9 +37,9 @@ public class MediaInspectionWebServiceImpl implements MediaInspectionWebService 
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.inspection.impl.endpoints.MediaInspectionWebService#inspect(java.net.URL)
+   * @see org.opencastproject.inspection.impl.endpoints.MediaInspectionWebService#inspect(URI)
    */
-  public TrackType inspect(URL url) {
+  public TrackType inspect(URI url) {
     Track track = service.inspect(url);
     Document doc;
     try {

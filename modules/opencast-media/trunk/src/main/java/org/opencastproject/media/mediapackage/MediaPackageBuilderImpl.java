@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.text.ParseException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 
 /**
@@ -96,8 +95,6 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
       throw new MediaPackageException("I/O error while accessing manifest", e);
     } catch (ParserConfigurationException e) {
       throw new MediaPackageException("Media package manifest cannot be parsed", e);
-    } catch (TransformerException e) {
-      throw new MediaPackageException("Error while updating media package manifest", e);
     } catch (SAXException e) {
       throw new MediaPackageException("Error while parsing media package manifest", e);
     } catch (XPathExpressionException e) {

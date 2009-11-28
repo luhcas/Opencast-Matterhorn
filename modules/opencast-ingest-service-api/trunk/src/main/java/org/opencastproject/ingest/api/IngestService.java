@@ -26,7 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 
 /**
  * Generates {@link MediaPackage}s from media, metadata, and attachments.
@@ -60,7 +60,7 @@ public interface IngestService {
   /**
    * Add a media track to an existing MediaPackage in the repository
    * 
-   * @param url
+   * @param uri
    *          The URL of the file to add
    * @param flavor
    *          The flavor of the media that is being added
@@ -71,7 +71,7 @@ public interface IngestService {
    * @throws MediaPackageException
    * @throws IOException
    */
-  MediaPackage addTrack(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+  MediaPackage addTrack(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException;
 
   /**
@@ -95,7 +95,7 @@ public interface IngestService {
   /**
    * Add a [metadata catalog] to an existing MediaPackage in the repository
    * 
-   * @param url
+   * @param uri
    *          The URL of the file to add
    * @param flavor
    *          The flavor of the media that is being added
@@ -106,7 +106,7 @@ public interface IngestService {
    * @throws MediaPackageException
    * @throws IOException
    */
-  MediaPackage addCatalog(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+  MediaPackage addCatalog(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException;
 
   /**
@@ -130,7 +130,7 @@ public interface IngestService {
   /**
    * Add an attachment to an existing MediaPackage in the repository
    * 
-   * @param url
+   * @param uri
    *          The URL of the file to add
    * @param flavor
    *          The flavor of the media that is being added
@@ -141,7 +141,7 @@ public interface IngestService {
    * @throws MediaPackageException
    * @throws IOException
    */
-  MediaPackage addAttachment(URL url, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+  MediaPackage addAttachment(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException;
 
   /**

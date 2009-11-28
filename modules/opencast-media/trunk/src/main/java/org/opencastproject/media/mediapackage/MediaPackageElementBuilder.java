@@ -19,7 +19,7 @@ package org.opencastproject.media.mediapackage;
 import org.w3c.dom.Node;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 
 /**
  * A media package element builder provides factory methods for the creation and loading of media package elements from
@@ -38,13 +38,13 @@ public interface MediaPackageElementBuilder {
    * plugin for details.
    * </p>
    * 
-   * @param url
+   * @param uri
    *          the element location
    * @return the new media package element
    * @throws MediaPackageException
    *           if creating the media package element fails
    */
-  MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException;
+  MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException;
 
   /**
    * Creates a media package element from the given file that was previously accepted, while <code>type</code> and
@@ -55,7 +55,7 @@ public interface MediaPackageElementBuilder {
    * corresponding builder plugin for details.
    * </p>
    * 
-   * @param url
+   * @param uri
    *          the element location
    * @param type
    *          the element type
@@ -65,7 +65,7 @@ public interface MediaPackageElementBuilder {
    * @throws MediaPackageException
    *           if creating the media package element fails
    */
-  MediaPackageElement elementFromURL(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
+  MediaPackageElement elementFromURI(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
           throws UnsupportedElementException;
 
   /**

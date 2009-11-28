@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,14 +121,14 @@ public class DemodataLoader {
         for (Catalog catalog : mediaPackage.getCatalogs()) {
           client = new DefaultHttpClient();
           MultipartEntity postEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-          URL catalogUrl = catalog.getURL();
+          URI catalogUrl = catalog.getURI();
           String filename = catalogUrl.getPath().substring(catalogUrl.getPath().lastIndexOf('/') + 1);
-          URL uploadedCatalogUrl = new URL(host + "/files/" + mediapackageId.compact() + "/" + catalog.getIdentifier());
-          postEntity.addPart("file", new InputStreamBody(catalog.getURL().openStream(), filename));
-          HttpPost post = new HttpPost(uploadedCatalogUrl.toExternalForm());
+          URI uploadedCatalogUrl = new URI(host + "/files/" + mediapackageId.compact() + "/" + catalog.getIdentifier());
+          postEntity.addPart("file", new InputStreamBody(catalog.getURI().toURL().openStream(), filename));
+          HttpPost post = new HttpPost(uploadedCatalogUrl);
           post.setEntity(postEntity);
           client.execute(post);
-          catalog.setURL(uploadedCatalogUrl);
+          catalog.setURI(uploadedCatalogUrl);
         }
 
         // Serialize the modified media package into a string

@@ -31,8 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
-import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.xml.xpath.XPathConstants;
@@ -71,11 +71,11 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#accept(java.io.File,
+   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#accept(URI,
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type ,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public boolean accept(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
+  public boolean accept(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     return accept(type, flavor);
   }
 
@@ -141,7 +141,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
     String id = null;
     String attachmentFlavor = null;
     String reference = null;
-    URL url = null;
+    URI uri = null;
     long size = -1;
     Checksum checksum = null;
     MimeType mimeType = null;
@@ -157,7 +157,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       reference = (String) xpath.evaluate("@ref", elementNode, XPathConstants.STRING);
 
       // url
-      url = serializer.resolvePath(xpath.evaluate("url/text()", elementNode).trim());
+      uri = serializer.resolvePath(xpath.evaluate("url/text()", elementNode).trim());
 
       // size
       try {
@@ -178,13 +178,13 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
         mimeType = MimeTypes.parseMimeType(mimeTypeValue);
 
       // create the attachment
-      AttachmentImpl attachment = (AttachmentImpl) AttachmentImpl.fromURL(url);
+      AttachmentImpl attachment = (AttachmentImpl) AttachmentImpl.fromURI(uri);
 
       if (id != null && !id.equals(""))
         attachment.setIdentifier(id);
 
       // Add url
-      attachment.setURL(url);
+      attachment.setURI(uri);
 
       // Add reference
       if (reference != null && !reference.equals(""))
@@ -222,33 +222,33 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       throw new UnsupportedElementException("Error while reading attachment from manifest: " + e.getMessage());
     } catch (NoSuchAlgorithmException e) {
       throw new UnsupportedElementException("Unsupported digest algorithm: " + e.getMessage());
-    } catch (IOException e) {
-      throw new UnsupportedElementException("Error while reading attachment file " + url + ": " + e.getMessage());
+    } catch (URISyntaxException e) {
+      throw new UnsupportedElementException("Error while reading attachment file " + uri + ": " + e.getMessage());
     }
   }
 
   /**
    * Utility method that returns an attachment object from the given url.
    * 
-   * @param url
+   * @param uri
    *          the element location
    * @return an attachment object
    * @throws UnsupportedElementException
    *           if the attachment cannto be read
    */
-  public MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException {
-    log_.trace("Creating attachment from " + url);
-    return specializeAttachment(AttachmentImpl.fromURL(url));
+  public MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException {
+    log_.trace("Creating attachment from " + uri);
+    return specializeAttachment(AttachmentImpl.fromURI(uri));
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromURL(java.io.File,
+   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#elementFromURI(URI,
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type ,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement elementFromURL(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
+  public MediaPackageElement elementFromURI(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
           throws UnsupportedElementException {
-    return elementFromURL(url);
+    return elementFromURI(uri);
   }
 
   /**

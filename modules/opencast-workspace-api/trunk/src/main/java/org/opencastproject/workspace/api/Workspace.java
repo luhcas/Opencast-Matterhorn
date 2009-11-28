@@ -18,7 +18,7 @@ package org.opencastproject.workspace.api;
 import java.io.File;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 
 /**
  * Provides efficient access java.io.File objects from potentially remote URIs. This helper service
@@ -36,7 +36,7 @@ public interface Workspace {
    * @param uri
    * @return
    */
-  File get(URL uri);
+  File get(URI uri);
 
   /**
    * Store the data stream under the given media package and element IDs.
@@ -44,7 +44,7 @@ public interface Workspace {
    * @param mediaPackageElementID
    * @param in
    */
-  URL put(String mediaPackageID, String mediaPackageElementID, InputStream in);
+  URI put(String mediaPackageID, String mediaPackageElementID, InputStream in);
 
   /**
    * Store the data stream under the given media package and element IDs, specifying a filename.
@@ -53,7 +53,7 @@ public interface Workspace {
    * @param fileName
    * @param in
    */
-  URL put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in);
+  URI put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in);
 
   /**
    * Stream the file stored under the given media package and element IDs.
@@ -77,6 +77,6 @@ public interface Workspace {
    * @return
    * @throws MalformedURLException 
    */
-  URL getURL(String mediaPackageID, String mediaPackageElementID) throws MalformedURLException;
+  URI getURI(String mediaPackageID, String mediaPackageElementID) throws MalformedURLException;
 
 }

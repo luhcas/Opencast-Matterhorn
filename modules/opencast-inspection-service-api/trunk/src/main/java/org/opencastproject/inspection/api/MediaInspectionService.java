@@ -18,13 +18,13 @@ package org.opencastproject.inspection.api;
 import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.media.mediapackage.Track;
 
-import java.net.URL;
+import java.net.URI;
 
 /**
  * Anayzes media to determine its technical metadata.
  */
 public interface MediaInspectionService {
-  Track inspect(URL url);
+  Track inspect(URI uri);
 
   /**
    * Equip an existing track with automatically generated metadata

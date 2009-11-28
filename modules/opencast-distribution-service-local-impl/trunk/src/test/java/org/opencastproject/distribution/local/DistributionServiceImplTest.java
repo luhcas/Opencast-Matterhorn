@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.net.URL;
+import java.net.URI;
 
 public class DistributionServiceImplTest {
   
@@ -50,10 +50,10 @@ public class DistributionServiceImplTest {
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     service.setWorkspace(workspace);
 
-    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "media.mov"));
-    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "dublincore.xml"));
-    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "mpeg7.xml"));
-    EasyMock.expect(workspace.get((URL)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "attachment.txt"));
+    EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "media.mov"));
+    EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "dublincore.xml"));
+    EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "mpeg7.xml"));
+    EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "attachment.txt"));
     EasyMock.replay(workspace);
   }
 

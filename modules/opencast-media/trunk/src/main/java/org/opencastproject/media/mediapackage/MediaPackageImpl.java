@@ -25,7 +25,7 @@ import org.w3c.dom.Document;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -525,26 +525,26 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#add(java.io.File, boolean)
    */
-  public MediaPackageElement add(URL url) throws UnsupportedElementException {
+  public MediaPackageElement add(URI url) throws UnsupportedElementException {
     if (url == null)
       throw new IllegalArgumentException("Argument 'url' may not be null");
 
     if (mediaPackageElementBuilder == null) {
       mediaPackageElementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
     }
-    MediaPackageElement element = mediaPackageElementBuilder.elementFromURL(url);
+    MediaPackageElement element = mediaPackageElementBuilder.elementFromURI(url);
     add(element);
     return element;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#add(java.net.URL,
+   * @see org.opencastproject.media.mediapackage.MediaPackage#add(URI,
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement add(URL url, Type type, MediaPackageElementFlavor flavor)
+  public MediaPackageElement add(URI uri, Type type, MediaPackageElementFlavor flavor)
           throws UnsupportedElementException {
-    if (url == null)
+    if (uri == null)
       throw new IllegalArgumentException("Argument 'url' may not be null");
     if (type == null)
       throw new IllegalArgumentException("Argument 'type' may not be null");
@@ -554,7 +554,7 @@ public final class MediaPackageImpl implements MediaPackage {
     if (mediaPackageElementBuilder == null) {
       mediaPackageElementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
     }
-    MediaPackageElement element = mediaPackageElementBuilder.elementFromURL(url, type, flavor);
+    MediaPackageElement element = mediaPackageElementBuilder.elementFromURI(uri, type, flavor);
     add(element);
     return element;
   }

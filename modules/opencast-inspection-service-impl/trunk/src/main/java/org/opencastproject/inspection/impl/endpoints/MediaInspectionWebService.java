@@ -17,7 +17,7 @@ package org.opencastproject.inspection.impl.endpoints;
 
 import org.opencastproject.media.mediapackage.jaxb.TrackType;
 
-import java.net.URL;
+import java.net.URI;
 
 import javax.jws.WebService;
 
@@ -32,6 +32,6 @@ public interface MediaInspectionWebService {
    * @param url
    * @return
    */
-  TrackType inspect(URL url);
+  TrackType inspect(URI url);
   
 }

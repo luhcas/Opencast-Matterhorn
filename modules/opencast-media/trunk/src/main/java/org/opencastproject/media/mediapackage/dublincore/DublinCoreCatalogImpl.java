@@ -44,7 +44,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -107,7 +107,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    * 
    * @param id
    *          the element identifier withing the package
-   * @param url
+   * @param uri
    *          the document location
    * @param size
    *          the catalog size in bytes
@@ -116,8 +116,8 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    * @param mimeType
    *          the catalog mime type
    */
-  protected DublinCoreCatalogImpl(String id, URL url, long size, Checksum checksum) {
-    super(id, DublinCoreCatalog.FLAVOR, url, size, checksum, MimeTypes.XML);
+  protected DublinCoreCatalogImpl(String id, URI uri, long size, Checksum checksum) {
+    super(id, DublinCoreCatalog.FLAVOR, uri, size, checksum, MimeTypes.XML);
     bindings.bindPrefix(XMLConstants.DEFAULT_NS_PREFIX, OPENCASTPROJECT_DUBLIN_CORE_NS_URI);
     bindings.bindPrefix("dc", ELEMENTS_1_1_NS_URI);
     bindings.bindPrefix("dcterms", TERMS_NS_URI);
@@ -127,7 +127,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
   /**
    * Creates a new dublin core metadata container.
    * 
-   * @param url
+   * @param uri
    *          the document location
    * @param size
    *          the catalog size in bytes
@@ -136,8 +136,8 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    * @param mimeType
    *          the catalog mime type
    */
-  protected DublinCoreCatalogImpl(URL url, long size, Checksum checksum) {
-    this(null, url, size, checksum);
+  protected DublinCoreCatalogImpl(URI uri, long size, Checksum checksum) {
+    this(null, uri, size, checksum);
   }
 
   /**
@@ -186,14 +186,14 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
   public static DublinCoreCatalog fromFile(File catalog) throws IOException, ParserConfigurationException, SAXException {
     DublinCoreParser parser = new DublinCoreParser();
     DublinCoreCatalogImpl dc = parser.parse(new FileInputStream(catalog));
-    dc.setURL(catalog.toURI().toURL());
+    dc.setURI(catalog.toURI());
     return dc;
   }
 
   /**
    * Reads the metadata from the specified file and returns it encapsulated in a {@link DublinCoreCatalog} object.
    * 
-   * @param url
+   * @param uri
    *          the dublin core metadata container file
    * @return the dublin core object
    * @throws IOException
@@ -203,10 +203,10 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    * @throws SAXException
    *           if reading the catalog fails
    */
-  public static DublinCoreCatalogImpl fromURL(URL url) throws IOException, ParserConfigurationException, SAXException {
+  public static DublinCoreCatalogImpl fromURI(URI uri) throws IOException, ParserConfigurationException, SAXException {
     DublinCoreParser parser = new DublinCoreParser();
-    DublinCoreCatalogImpl dc = parser.parse(url.openStream());
-    dc.setURL(url);
+    DublinCoreCatalogImpl dc = parser.parse(uri.toURL().openStream());
+    dc.setURI(uri);
     return dc;
   }
 

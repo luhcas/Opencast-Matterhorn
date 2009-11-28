@@ -26,7 +26,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
 
-import java.net.URL;
+import java.net.URI;
 
 public class CaptionsMediaItemImpl implements CaptionsMediaItem {
   String workflowId;
@@ -50,13 +50,13 @@ public class CaptionsMediaItemImpl implements CaptionsMediaItem {
   public String getMediaPackageId() {
     return mediaPackage.getIdentifier().compact();
   }
-  public URL getMediaURL() {
+  public URI getMediaURI() {
     // TODO make this handle the tracks better
-    URL url = null;
+    URI url = null;
     Track[] tracks = mediaPackage.getTracks();
     if (tracks != null && tracks.length > 0) {
       Track track = tracks[0];
-      url = track.getURL();
+      url = track.getURI();
     }
     return url;
   }
@@ -70,11 +70,11 @@ public class CaptionsMediaItemImpl implements CaptionsMediaItem {
     }
     return title;
   }
-  public URL getCaptionsURL(String captionType) {
-    URL url = null;
+  public URI getCaptionsURI(String captionType) {
+    URI url = null;
     Attachment[] attachments = mediaPackage.getAttachments(makeCaptionsFlavor(captionType));
     if (attachments != null && attachments.length > 0) {
-      url = attachments[0].getURL();
+      url = attachments[0].getURI();
     }
     return url;
   }

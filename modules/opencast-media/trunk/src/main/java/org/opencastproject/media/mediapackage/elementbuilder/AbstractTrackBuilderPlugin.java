@@ -32,7 +32,8 @@ import org.opencastproject.util.MimeTypes;
 import org.w3c.dom.Node;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.xml.xpath.XPathConstants;
@@ -59,11 +60,11 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
    * 
    * @param id
    *          the track id
-   * @param url
+   * @param uri
    *          the track location
    * @return
    */
-  protected abstract TrackImpl trackFromManifest(String id, URL url);
+  protected abstract TrackImpl trackFromManifest(String id, URI uri);
 
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#newElement(org.opencastproject.media.mediapackage.MediaPackageElement.Type
@@ -84,7 +85,7 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
     String id = null;
     MimeType mimeType = null;
     String reference = null;
-    URL url = null;
+    URI url = null;
     long size = -1;
     Checksum checksum = null;
 
@@ -124,7 +125,7 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
         track.setIdentifier(id);
 
       // Add url
-      track.setURL(url);
+      track.setURI(url);
 
       // Add reference
       if (reference != null && !reference.equals(""))
@@ -191,7 +192,7 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
       throw new UnsupportedElementException("Error while reading track information from manifest: " + e.getMessage());
     } catch (NoSuchAlgorithmException e) {
       throw new UnsupportedElementException("Unsupported digest algorithm: " + e.getMessage());
-    } catch (IOException e) {
+    } catch (URISyntaxException e) {
       throw new UnsupportedElementException("Error while reading presenter track " + url + ": " + e.getMessage());
     }
   }

@@ -21,7 +21,7 @@ import org.opencastproject.media.mediapackage.Cover;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 
-import java.net.URL;
+import java.net.URI;
 
 /**
  * This is a specialized implementation for a media package cover.
@@ -39,7 +39,7 @@ public class CoverImpl extends AttachmentImpl implements Cover {
    * Creates a cover attachment.
    * 
    * @parm identifier the cover identifier
-   * @param url
+   * @param uri
    *          the cover location
    * @param size
    *          the cover size in bytes
@@ -48,14 +48,14 @@ public class CoverImpl extends AttachmentImpl implements Cover {
    * @param mimeType
    *          the cover mime type
    */
-  protected CoverImpl(String identifier, URL url, long size, Checksum checksum, MimeType mimeType) {
-    super(identifier, Cover.FLAVOR, url, size, checksum, mimeType);
+  protected CoverImpl(String identifier, URI uri, long size, Checksum checksum, MimeType mimeType) {
+    super(identifier, Cover.FLAVOR, uri, size, checksum, mimeType);
   }
 
   /**
    * Creates a cover attachment.
    * 
-   * @param url
+   * @param uri
    *          the covers location
    * @param size
    *          the covers size in bytes
@@ -64,18 +64,18 @@ public class CoverImpl extends AttachmentImpl implements Cover {
    * @param mimeType
    *          the covers mime type
    */
-  protected CoverImpl(URL url, long size, Checksum checksum, MimeType mimeType) {
-    super(Cover.FLAVOR, url, size, checksum, mimeType);
+  protected CoverImpl(URI uri, long size, Checksum checksum, MimeType mimeType) {
+    super(Cover.FLAVOR, uri, size, checksum, mimeType);
   }
 
   /**
    * Creates a cover attachment.
    * 
-   * @param url
+   * @param uri
    *          the covers location
    */
-  protected CoverImpl(URL url) {
-    this(null, url, -1, null, null);
+  protected CoverImpl(URI uri) {
+    this(null, uri, -1, null, null);
   }
 
   /**
@@ -85,14 +85,14 @@ public class CoverImpl extends AttachmentImpl implements Cover {
    *          the general attachment representation
    */
   public static CoverImpl fromAttachment(Attachment attachment) {
-    return new CoverImpl(attachment.getIdentifier(), attachment.getURL(), attachment.getSize(), attachment
+    return new CoverImpl(attachment.getIdentifier(), attachment.getURI(), attachment.getSize(), attachment
             .getChecksum(), attachment.getMimeType());
   }
 
   /**
    * Creates a new {@link Cover} object.
    * 
-   * @param url
+   * @param uri
    *          the cover location
    * @param size
    *          the covers size in bytes
@@ -102,8 +102,8 @@ public class CoverImpl extends AttachmentImpl implements Cover {
    *          the mime type
    * @return the cover object
    */
-  public static CoverImpl fromURL(URL url) {
-    return new CoverImpl(url);
+  public static CoverImpl fromURI(URI uri) {
+    return new CoverImpl(uri);
   }
 
   /**

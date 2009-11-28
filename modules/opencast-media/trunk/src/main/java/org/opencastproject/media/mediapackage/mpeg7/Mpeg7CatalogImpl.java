@@ -31,7 +31,7 @@ import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,7 +66,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    * 
    * @param id
    *          the element identifier withing the package
-   * @param url
+   * @param uri
    *          the document location
    * @param size
    *          the catalog size in bytes
@@ -75,15 +75,15 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    * @param mimeType
    *          the catalog mime type
    */
-  protected Mpeg7CatalogImpl(String id, URL url, long size, Checksum checksum) {
-    super(id, Mpeg7Catalog.FLAVOR, url, size, checksum, MimeTypes.XML);
+  protected Mpeg7CatalogImpl(String id, URI uri, long size, Checksum checksum) {
+    super(id, Mpeg7Catalog.FLAVOR, uri, size, checksum, MimeTypes.XML);
     multimediaContent = new HashMap<MultimediaContent.Type, MultimediaContentImpl<? extends MultimediaContentType>>();
   }
 
   /**
    * Creates a new mpeg-7 metadata container.
    * 
-   * @param url
+   * @param uri
    *          the document location
    * @param size
    *          the catalog size in bytes
@@ -92,8 +92,8 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    * @param mimeType
    *          the catalog mime type
    */
-  protected Mpeg7CatalogImpl(URL url, long size, Checksum checksum) {
-    this(null, url, size, checksum);
+  protected Mpeg7CatalogImpl(URI uri, long size, Checksum checksum) {
+    this(null, uri, size, checksum);
   }
 
   /**
@@ -116,7 +116,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
   /**
    * Reads the metadata from the specified file and returns it encapsulated in a {@link Mpeg7Catalog} object.
    * 
-   * @param url
+   * @param uri
    *          the mpeg7 metadata container file
    * @return the mpeg7 catalog
    * @throws IOException
@@ -126,10 +126,10 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    * @throws SAXException
    *           if reading the catalog fails
    */
-  public static Mpeg7Catalog fromURL(URL url) throws IOException, ParserConfigurationException, SAXException {
+  public static Mpeg7Catalog fromURI(URI uri) throws IOException, ParserConfigurationException, SAXException {
     Mpeg7Parser parser = new Mpeg7Parser();
-    Mpeg7CatalogImpl doc = (Mpeg7CatalogImpl) parser.parse(url.openStream());
-    doc.setURL(url);
+    Mpeg7CatalogImpl doc = (Mpeg7CatalogImpl) parser.parse(uri.toURL().openStream());
+    doc.setURI(uri);
     return doc;
   }
 
@@ -152,7 +152,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
           ParserConfigurationException, SAXException {
     Mpeg7Parser parser = new Mpeg7Parser();
     Mpeg7CatalogImpl doc = (Mpeg7CatalogImpl) parser.parse(new FileInputStream(file));
-    doc.setURL(file.toURI().toURL());
+    doc.setURI(file.toURI());
     return doc;
   }
 

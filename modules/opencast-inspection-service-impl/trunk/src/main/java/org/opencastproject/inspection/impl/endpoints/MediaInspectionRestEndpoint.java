@@ -27,7 +27,7 @@ import org.opencastproject.media.mediapackage.jaxb.VideoType;
 import org.opencastproject.media.mediapackage.track.AudioStreamImpl;
 import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
 
-import java.net.URL;
+import java.net.URI;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -47,7 +47,7 @@ public class MediaInspectionRestEndpoint {
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  public TrackType getTrack(@QueryParam("url") URL url) {
+  public TrackType getTrack(@QueryParam("url") URI url) {
     Track t = service.inspect(url);
     ObjectFactory of = new ObjectFactory();
     TrackType track = of.createTrackType();

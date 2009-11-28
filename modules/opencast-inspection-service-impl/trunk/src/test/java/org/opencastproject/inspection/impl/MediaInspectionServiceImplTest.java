@@ -30,7 +30,7 @@ public class MediaInspectionServiceImplTest {
     URL url = this.getClass().getResource("test-video.mp4");
     // FIXME -- the test movie should always be available
     if(url != null) {
-      service.inspect(url);
+      service.inspect(url.toURI());
     }
   }
 }

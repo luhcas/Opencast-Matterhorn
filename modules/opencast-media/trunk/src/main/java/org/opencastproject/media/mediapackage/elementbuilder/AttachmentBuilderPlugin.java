@@ -23,7 +23,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 
 import org.w3c.dom.Node;
 
-import java.net.URL;
+import java.net.URI;
 
 /**
  * This implementation of the {@link MediaPackageElementBuilderPlugin} recognizes arbitrary attachments and creates
@@ -35,12 +35,12 @@ import java.net.URL;
 public class AttachmentBuilderPlugin extends AbstractAttachmentBuilderPlugin implements MediaPackageElementBuilder {
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.AbstractAttachmentBuilderPlugin#accept(java.io.File,
+   * @see org.opencastproject.media.mediapackage.elementbuilder.AbstractAttachmentBuilderPlugin#accept(URI,
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type ,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   @Override
-  public boolean accept(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
+  public boolean accept(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     if (type != null && flavor != null) {
       if (!type.equals(MediaPackageElement.Type.Attachment))
         return false;
@@ -49,7 +49,7 @@ public class AttachmentBuilderPlugin extends AbstractAttachmentBuilderPlugin imp
     } else if (flavor != null && !flavor.equals(Attachment.FLAVOR)) {
       return false;
     }
-    return super.accept(url, type, flavor);
+    return super.accept(uri, type, flavor);
   }
 
   /**

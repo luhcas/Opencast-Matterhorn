@@ -374,7 +374,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    */ 
   private String trimText (String text, int length) {
     if (text.length() > length) {
-	//todo: this should be logged as a warning because it is a recoverable error
+    //todo: this should be logged as a warning because it is a recoverable error
       logger.error("Value for "+text+" to long. Only "+length+" characters allowed.");
       return text.substring(0, length-1);
     }

@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.URL;
+import java.net.URI;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -59,11 +59,11 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     logger.debug("unsetting " + workspace);
   }
 
-  public Track inspect(URL url) {
-    logger.debug("inspect(" + url + ") called, using workspace " + workspace);
+  public Track inspect(URI uri) {
+    logger.debug("inspect(" + uri + ") called, using workspace " + workspace);
 
     // Get the file from the URL
-    File file = workspace.get(url);
+    File file = workspace.get(uri);
 
     MediaContainerMetadata metadata = null;
     try {
@@ -75,13 +75,13 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     }
 
     if (metadata == null) {
-      logger.warn("Unable to acquire media metadata for " + url);
+      logger.warn("Unable to acquire media metadata for " + uri);
       return null;
     } else {
       MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
       TrackImpl track;
       try {
-        MediaPackageElement element = elementBuilder.elementFromURL(url, Type.Track,
+        MediaPackageElement element = elementBuilder.elementFromURI(uri, Type.Track,
                 MediaPackageElements.INDEFINITE_TRACK);
         track = (TrackImpl) element;
         if (metadata.getDuration() != null)
@@ -131,7 +131,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
    * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(Track, Boolean)
    */
   public Track enrich(Track originalTrack, Boolean override) {
-    URL originalTrackUrl = originalTrack.getURL();
+    URI originalTrackUrl = originalTrack.getURI();
     logger.debug("enrych(" + originalTrackUrl + ") called");
 
     // Get the file from the URL
@@ -153,7 +153,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
       TrackImpl track;
       try {
-        MediaPackageElement element = elementBuilder.elementFromURL(originalTrackUrl, Type.Track,
+        MediaPackageElement element = elementBuilder.elementFromURI(originalTrackUrl, Type.Track,
                 MediaPackageElements.INDEFINITE_TRACK);
         // init the new track with old
         track = (TrackImpl) element;
@@ -165,7 +165,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         track.setMimeType(originalTrack.getMimeType());
         track.setReference(originalTrack.getReference());
         track.setSize(originalTrack.getSize());
-        track.setURL(originalTrackUrl);
+        track.setURI(originalTrackUrl);
         // enrich the new track with basic info
         if (track.getDuration() == -1L || override)
           track.setDuration(metadata.getDuration());
@@ -224,7 +224,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
    * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(AbstractMediaPackageElement, Boolean)
    */
   public AbstractMediaPackageElement enrich(AbstractMediaPackageElement element, Boolean override) {
-    File file = workspace.get(element.getURL());
+    File file = workspace.get(element.getURI());
     if (element.getChecksum() == null || override)
       try {
         element.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));

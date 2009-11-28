@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
@@ -146,11 +146,11 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
       MediaPackage mp = workflow.getCurrentMediaPackage(); // TODO change to current media package
       // get the MP and update it
       String mediaPackageElementID = CAPTIONS_ELEMENT+captionType;
-      URL url = workspace.put(mp.getIdentifier().compact(), mediaPackageElementID, data);
+      URI uri = workspace.put(mp.getIdentifier().compact(), mediaPackageElementID, data);
 
       if (WorkflowInstance.State.SUCCEEDED.equals(workflow.getState())) {
         // TODO for now this is not really doing anything
-        addCaptionToMediaPackage(mp, url, mediaPackageElementID, captionType);
+        addCaptionToMediaPackage(mp, uri, mediaPackageElementID, captionType);
         WorkflowDefinitionImpl workflowDefinition = new WorkflowDefinitionImpl();
         workflowDefinition.setTitle("Captions Added");
         workflowDefinition.setDescription("Captions added workflow for media: " + workflowId);
@@ -159,7 +159,7 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
         workflowService.start(workflowDefinition, mp, null);
       } else if (WorkflowInstance.State.PAUSED.equals(workflow.getState())) {
         MediaPackage mediaPackage = workflow.getSourceMediaPackage();
-        addCaptionToMediaPackage(mediaPackage, url, mediaPackageElementID, captionType);
+        addCaptionToMediaPackage(mediaPackage, uri, mediaPackageElementID, captionType);
         workflowService.update(workflow);
         workflowService.resume(workflow.getId());
       } else {
@@ -192,17 +192,17 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
     return cmi;
   }
 
-  private void addCaptionToMediaPackage(MediaPackage mediaPackage, URL url, String elementId, String type) {
-    if (mediaPackage == null || url == null || elementId == null || type == null) {
-      throw new IllegalArgumentException("All values must not be null: " + mediaPackage + " : " + url + " : " + elementId + " : " + type);
+  private void addCaptionToMediaPackage(MediaPackage mediaPackage, URI uri, String elementId, String type) {
+    if (mediaPackage == null || uri == null || elementId == null || type == null) {
+      throw new IllegalArgumentException("All values must not be null: " + mediaPackage + " : " + uri + " : " + elementId + " : " + type);
     }
     MediaPackageElementBuilder mpeb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
     MediaPackageElementFlavor captionsFlavor = CaptionsMediaItemImpl.makeCaptionsFlavor(type);
     try {
-      MediaPackageElement element = mpeb.elementFromURL(url, MediaPackageElement.Type.Catalog, captionsFlavor);
+      MediaPackageElement element = mpeb.elementFromURI(uri, MediaPackageElement.Type.Catalog, captionsFlavor);
       element.setIdentifier(elementId);
       mediaPackage.add(element);
-      logger.info("Updated the media package ("+mediaPackage.getIdentifier().compact()+") caption ("+elementId+"): " + url);
+      logger.info("Updated the media package ("+mediaPackage.getIdentifier().compact()+") caption ("+elementId+"): " + uri);
     } catch (UnsupportedElementException e) {
       logger.error(e.toString(), e);
       throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier().compact()+"):" + e);

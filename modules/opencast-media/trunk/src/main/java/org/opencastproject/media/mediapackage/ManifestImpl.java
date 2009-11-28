@@ -34,7 +34,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -901,7 +901,7 @@ final class ManifestImpl {
    *           if the manifest contains a malformed start date
    */
   static ManifestImpl fromStream(InputStream is, MediaPackageSerializer serializer, boolean ignoreMissingElements)
-          throws MediaPackageException, IOException, ParserConfigurationException, SAXException, TransformerException,
+          throws MediaPackageException, IOException, ParserConfigurationException, SAXException,
           XPathExpressionException, ConfigurationException, HandleException, ParseException {
 
     DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -948,7 +948,7 @@ final class ManifestImpl {
       try {
         MediaPackageElement track = elementBuilder.elementFromManifest(trackNodes.item(i), serializer);
         if (track != null) {
-          URL elementUrl = track.getURL();
+          URI elementUrl = track.getURI();
           if (elementUrl != null) // TODO: Check existence
             manifest.add(track);
           else if (!ignoreMissingElements)
@@ -976,7 +976,7 @@ final class ManifestImpl {
       try {
         MediaPackageElement catalog = elementBuilder.elementFromManifest(catalogNodes.item(i), serializer);
         if (catalog != null) {
-          URL elementUrl = catalog.getURL();
+          URI elementUrl = catalog.getURI();
           if (elementUrl != null) // TODO: Check existence
             manifest.add(catalog);
           else if (!ignoreMissingElements)
@@ -1005,7 +1005,7 @@ final class ManifestImpl {
       try {
         MediaPackageElement attachment = elementBuilder.elementFromManifest(attachmentNodes.item(i), serializer);
         if (attachment != null) {
-          URL elementUrl = attachment.getURL();
+          URI elementUrl = attachment.getURI();
           if (elementUrl != null) // TODO: Check existence
             manifest.add(attachment);
           else if (!ignoreMissingElements)

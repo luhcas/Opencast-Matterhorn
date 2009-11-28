@@ -42,7 +42,7 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
 
       // Create a media package and add an element
       MediaPackage mediaPackage = mediaPackageBuilder.createNew();
-      mediaPackage.add(dcFile.toURI().toURL());
+      mediaPackage.add(dcFile.toURI());
 
       // Test relative path, using serializer
       MediaPackageSerializer serializer = null;

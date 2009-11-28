@@ -28,31 +28,31 @@ import org.junit.Test;
 import org.osgi.service.event.EventAdmin;
 
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 
 public class IngestServiceImplTest {
   private IngestServiceImpl service = null;
   private Workspace workspace = null;
   private MediaPackage mediaPackage = null;
-  private URL urlTrack;
-  private URL urlTrack1;
-  private URL urlTrack2;
-  private URL urlCatalog;
-  private URL urlCatalog1;
-  private URL urlCatalog2;
-  private URL urlAttachment;
-  private URL urlPackage;
+  private URI urlTrack;
+  private URI urlTrack1;
+  private URI urlTrack2;
+  private URI urlCatalog;
+  private URI urlCatalog1;
+  private URI urlCatalog2;
+  private URI urlAttachment;
+  private URI urlPackage;
 
   @Before
-  public void setup() {
-    urlTrack = IngestServiceImplTest.class.getResource("/av.mov");
-    urlTrack1 = IngestServiceImplTest.class.getResource("/vonly.mov");
-    urlTrack2 = IngestServiceImplTest.class.getResource("/aonly.mov");
-    urlCatalog = IngestServiceImplTest.class.getResource("/mpeg-7.xml");
-    urlCatalog1 = IngestServiceImplTest.class.getResource("/dublincore.xml");
-    urlCatalog2 = IngestServiceImplTest.class.getResource("/series-dublincore.xml");
-    urlAttachment = IngestServiceImplTest.class.getResource("/cover.png");
-    urlPackage = IngestServiceImplTest.class.getResource("/data.zip");
+  public void setup() throws Exception {
+    urlTrack = IngestServiceImplTest.class.getResource("/av.mov").toURI();
+    urlTrack1 = IngestServiceImplTest.class.getResource("/vonly.mov").toURI();
+    urlTrack2 = IngestServiceImplTest.class.getResource("/aonly.mov").toURI();
+    urlCatalog = IngestServiceImplTest.class.getResource("/mpeg-7.xml").toURI();
+    urlCatalog1 = IngestServiceImplTest.class.getResource("/dublincore.xml").toURI();
+    urlCatalog2 = IngestServiceImplTest.class.getResource("/series-dublincore.xml").toURI();
+    urlAttachment = IngestServiceImplTest.class.getResource("/cover.png").toURI();
+    urlPackage = IngestServiceImplTest.class.getResource("/data.zip").toURI();
     // set up service and mock workspace
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(
@@ -105,7 +105,7 @@ public class IngestServiceImplTest {
 
   @Test
   public void testThickClient() throws Exception {
-    mediaPackage = service.addZippedMediaPackage(urlPackage.openStream());
+    mediaPackage = service.addZippedMediaPackage(urlPackage.toURL().openStream());
   }
 
 }

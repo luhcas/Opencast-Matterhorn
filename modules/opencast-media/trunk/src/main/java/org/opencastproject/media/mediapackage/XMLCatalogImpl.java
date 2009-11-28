@@ -27,7 +27,7 @@ import org.xml.sax.Attributes;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -116,7 +116,7 @@ public abstract class XMLCatalogImpl extends AbstractMediaPackageElement impleme
    *          the element identifier withing the package
    * @param flavor
    *          the catalog flavor
-   * @param url
+   * @param uri
    *          the document location
    * @param size
    *          the catalog size in bytes
@@ -125,9 +125,9 @@ public abstract class XMLCatalogImpl extends AbstractMediaPackageElement impleme
    * @param mimeType
    *          the catalog mime type
    */
-  protected XMLCatalogImpl(String id, MediaPackageElementFlavor flavor, URL url, long size, Checksum checksum,
+  protected XMLCatalogImpl(String id, MediaPackageElementFlavor flavor, URI uri, long size, Checksum checksum,
           MimeType mimeType) {
-    super(Type.Catalog, flavor, url, size, checksum, mimeType);
+    super(Type.Catalog, flavor, uri, size, checksum, mimeType);
     bindPrefix(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
     bindPrefix(XMLConstants.XMLNS_ATTRIBUTE, XMLConstants.XMLNS_ATTRIBUTE_NS_URI);
     bindPrefix(XSI_NS_PREFIX, XSI_NS_URI);
@@ -138,7 +138,7 @@ public abstract class XMLCatalogImpl extends AbstractMediaPackageElement impleme
    * 
    * @param flavor
    *          the catalog flavor
-   * @param url
+   * @param uri
    *          the document location
    * @param size
    *          the catalog size in bytes
@@ -147,8 +147,8 @@ public abstract class XMLCatalogImpl extends AbstractMediaPackageElement impleme
    * @param mimeType
    *          the catalog mime type
    */
-  protected XMLCatalogImpl(MediaPackageElementFlavor flavor, URL url, long size, Checksum checksum, MimeType mimeType) {
-    this(null, flavor, url, size, checksum, mimeType);
+  protected XMLCatalogImpl(MediaPackageElementFlavor flavor, URI uri, long size, Checksum checksum, MimeType mimeType) {
+    this(null, flavor, uri, size, checksum, mimeType);
   }
 
   /**

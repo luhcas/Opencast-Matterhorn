@@ -79,19 +79,19 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
       FileUtils.forceMkdir(attachmentsDirectory);
       for (Track track : mediaPackage.getTracks()) {
         if(Arrays.binarySearch(elementIds, track.getIdentifier()) >= 0) {
-          File trackFile = workspace.get(track.getURL());
+          File trackFile = workspace.get(track.getURI());
           FileUtils.copyFile(trackFile, new File(mediaDirectory, trackFile.getName()));
         }
       }
       for (Catalog catalog : mediaPackage.getCatalogs()) {
         if(Arrays.binarySearch(elementIds, catalog.getIdentifier()) >= 0) {
-          File catalogFile = workspace.get(catalog.getURL());
+          File catalogFile = workspace.get(catalog.getURI());
           FileUtils.copyFile(catalogFile, new File(metadataDirectory, catalogFile.getName()));
         }
       }
       for (Attachment attachment : mediaPackage.getAttachments()) {
         if(Arrays.binarySearch(elementIds, attachment.getIdentifier()) >= 0) {
-          File attachmentFile = workspace.get(attachment.getURL());
+          File attachmentFile = workspace.get(attachment.getURI());
           FileUtils.copyFile(attachmentFile, new File(attachmentsDirectory, attachmentFile.getName()));
         }
       }

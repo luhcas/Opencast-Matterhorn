@@ -33,7 +33,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 
@@ -106,7 +106,7 @@ public class ComposerServiceImpl implements ComposerService {
     Track track = mediaPackage.getTrack(sourceTrackId);
     if (track == null)
       throw new RuntimeException("Unable to encode non-existing track " + sourceTrackId);
-    File workspaceVersion = workspace.get(track.getURL());
+    File workspaceVersion = workspace.get(track.getURI());
 
     // Create the engine
     EncoderEngine engine = EncoderEngineFactory.newInstance().newEngineByProfile(profileId);
@@ -118,7 +118,7 @@ public class ComposerServiceImpl implements ComposerService {
     File encodingOutput = engine.encode(workspaceVersion, profile);
 
     // Put the file in the workspace
-    URL returnURL = null;
+    URI returnURL = null;
     InputStream in = null;
     try {
       in = new FileInputStream(encodingOutput);

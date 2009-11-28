@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.Dictionary;
 
 /**
@@ -52,8 +52,8 @@ public class WorkspaceImpl implements Workspace, ManagedService {
   }
 
     
-  public File get(URL url) {
-    String urlString = url.toString();
+  public File get(URI uri) {
+    String urlString = uri.toString();
     String urlHash = DigestUtils.md5Hex(urlString);
     String urlExtension = FilenameUtils.getExtension(urlString);
     String fileName = rootDirectory + File.separator + urlHash;
@@ -68,7 +68,7 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     } else {
       logger.info("Copying " + urlString + " to " + f.getAbsolutePath());
       try {
-        FileUtils.copyURLToFile(url, f);
+        FileUtils.copyURLToFile(uri.toURL(), f);
         return f;
       } catch (Exception e) {
         throw new RuntimeException(e);
@@ -84,14 +84,14 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     return repo.get(mediaPackageID, mediaPackageElementID);
   }
 
-  public URL put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
+  public URI put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
     repo.put(mediaPackageID, mediaPackageElementID, in);
-    return getURL(mediaPackageID, mediaPackageElementID);
+    return getURI(mediaPackageID, mediaPackageElementID);
   }
 
-  public URL put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in) {
+  public URI put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in) {
     repo.put(mediaPackageID, mediaPackageElementID, fileName, in);
-    return getURL(mediaPackageID, mediaPackageElementID);
+    return getURI(mediaPackageID, mediaPackageElementID);
   }
 
   public void setRepository(WorkingFileRepository repo) {
@@ -123,9 +123,9 @@ public class WorkspaceImpl implements Workspace, ManagedService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workspace.api.Workspace#getURL(java.lang.String, java.lang.String)
+   * @see org.opencastproject.workspace.api.Workspace#getURI(java.lang.String, java.lang.String)
    */
-  public URL getURL(String mediaPackageID, String mediaPackageElementID) {
-    return repo.getURL(mediaPackageID, mediaPackageElementID);
+  public URI getURI(String mediaPackageID, String mediaPackageElementID) {
+    return repo.getURI(mediaPackageID, mediaPackageElementID);
   }
 }

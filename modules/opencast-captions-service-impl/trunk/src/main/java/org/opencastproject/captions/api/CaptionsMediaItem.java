@@ -17,18 +17,19 @@
 package org.opencastproject.captions.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
-import java.net.URL;
+
+import java.net.URI;
 
 public interface CaptionsMediaItem {
   public String getWorkflowId();
   public MediaPackage getMediaPackage();
   public String getMediaPackageId();
   public String getTitle();
-  public URL getMediaURL();
+  public URI getMediaURI();
   /**
    * @param captionType the caption type string from {@link CaptionsService#CAPTIONS_TYPE_TIMETEXT}
    * @return the url OR null if none found
    */
-  public URL getCaptionsURL(String captionType);
+  public URI getCaptionsURI(String captionType);
 }
 

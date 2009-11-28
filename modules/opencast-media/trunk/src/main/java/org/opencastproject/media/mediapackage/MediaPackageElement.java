@@ -19,7 +19,7 @@ package org.opencastproject.media.mediapackage;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 
-import java.net.URL;
+import java.net.URI;
 
 /**
  * All classes that will be part of a media package must implement this interface.
@@ -93,15 +93,15 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
    * 
    * @return the element location
    */
-  URL getURL();
+  URI getURI();
 
   /**
    * Sets the elements location.
    * 
-   * @param url
+   * @param uri
    *          the element location
    */
-  void setURL(URL url);
+  void setURI(URI uri);
 
   /**
    * Returns the file's checksum.

@@ -35,7 +35,8 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -88,11 +89,11 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(java.net.URL,
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(URI,
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public boolean accept(URL url, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
+  public boolean accept(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     try {
       // Check type and flavor
       if (type != null && flavor != null)
@@ -104,7 +105,7 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
 
       // Still uncertain. Let's try to read the catalog
       Mpeg7Parser parser = new Mpeg7Parser();
-      parser.parse(url.openStream());
+      parser.parse(uri.toURL().openStream());
       return true;
     } catch (IllegalArgumentException e) {
       return false;
@@ -118,19 +119,19 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURL(java.net.URL)
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURI(URI)
    */
-  public MediaPackageElement elementFromURL(URL url) throws UnsupportedElementException {
+  public MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException {
     try {
-      log_.trace("Creating mpeg-7 metadata container from " + url);
-      return Mpeg7CatalogImpl.fromURL(url);
+      log_.trace("Creating mpeg-7 metadata container from " + uri);
+      return Mpeg7CatalogImpl.fromURI(uri);
     } catch (IOException e) {
-      throw new UnsupportedElementException("Error reading mpeg-7 from " + url + " : " + e.getMessage());
+      throw new UnsupportedElementException("Error reading mpeg-7 from " + uri + " : " + e.getMessage());
     } catch (ParserConfigurationException e) {
-      throw new UnsupportedElementException("Parser configuration exception while reading mpeg-7 metadata from " + url
+      throw new UnsupportedElementException("Parser configuration exception while reading mpeg-7 metadata from " + uri
               + " : " + e.getMessage());
     } catch (SAXException e) {
-      throw new UnsupportedElementException("Error parsing mpeg-7 catalog " + url + " : " + e.getMessage());
+      throw new UnsupportedElementException("Error parsing mpeg-7 catalog " + uri + " : " + e.getMessage());
     }
   }
 
@@ -151,7 +152,7 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
 
     String id = null;
     String reference = null;
-    URL url = null;
+    URI url = null;
     long size = -1;
     Checksum checksum = null;
     MimeType mimeType = null;
@@ -186,12 +187,12 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
 
       // create the catalog
       Mpeg7Parser mpeg7Parser = new Mpeg7Parser();
-      Mpeg7CatalogImpl mpeg7 = mpeg7Parser.parse(url.openStream());
+      Mpeg7CatalogImpl mpeg7 = mpeg7Parser.parse(url.toURL().openStream());
       if (id != null && !id.equals(""))
         mpeg7.setIdentifier(id);
 
       // Add url
-      mpeg7.setURL(url);
+      mpeg7.setURI(url);
 
       // Add reference
       if (reference != null && !reference.equals(""))
@@ -217,9 +218,11 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
     } catch (ParserConfigurationException e) {
       throw new UnsupportedElementException("Unable to create parser for mpeg-7 catalog " + url + ": " + e.getMessage());
     } catch (IOException e) {
-      throw new UnsupportedElementException("Error while reading mpeg-7 file " + url + ": " + e.getMessage());
+      throw new UnsupportedElementException("Error while reading mpeg-7 catalog " + url + ": " + e.getMessage());
     } catch (SAXException e) {
       throw new UnsupportedElementException("Error while parsing mpeg-7 catalog " + url + ": " + e.getMessage());
+    } catch (URISyntaxException e) {
+      throw new UnsupportedElementException("Error while reading mpeg-7 catalog " + url + ": " + e.getMessage());
     }
   }
 

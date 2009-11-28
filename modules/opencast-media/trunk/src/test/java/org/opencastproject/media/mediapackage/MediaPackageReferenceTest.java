@@ -25,9 +25,8 @@ import org.opencastproject.util.ConfigurationException;
 
 import org.junit.Test;
 
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 /**
  * Test case for media package references.
@@ -68,25 +67,23 @@ public class MediaPackageReferenceTest extends AbstractMediaPackageTest {
   public void testMediaPackageReference() {
     try {
       // Add first catalog without any reference
-      URL catalogXTestFile = MediaPackageReferenceTest.class.getResource("/dublincore.xml").toURI().toURL();
+      URI catalogXTestFile = MediaPackageReferenceTest.class.getResource("/dublincore.xml").toURI();
       MediaPackageElement catalogX = mediaPackage.add(catalogXTestFile);
       catalogX.setIdentifier("catalog-x");
 
       // Add second catalog with media package reference
-      URL catalogYTestFile = MediaPackageReferenceTest.class.getResource("/dublincore.xml").toURI().toURL();
+      URI catalogYTestFile = MediaPackageReferenceTest.class.getResource("/dublincore.xml").toURI();
       MediaPackageElement catalogY = mediaPackage.add(catalogYTestFile);
       catalogY.referTo(new MediaPackageReferenceImpl(mediaPackage));
       catalogY.setIdentifier("catalog-y");
 
       // Add third catalog with track reference
-      URL catalogZTestFile = MediaPackageReferenceTest.class.getResource("/dublincore.xml").toURI().toURL();
+      URI catalogZTestFile = MediaPackageReferenceTest.class.getResource("/dublincore.xml").toURI();
       MediaPackageElement catalogZ = mediaPackage.add(catalogZTestFile);
       catalogZ.referTo(new MediaPackageReferenceImpl("track", "track-1"));
       catalogZ.setIdentifier("catalog-z");
 
     } catch (UnsupportedElementException e) {
-      fail("Adding of catalog failed: " + e.getMessage());
-    } catch (MalformedURLException e) {
       fail("Adding of catalog failed: " + e.getMessage());
     } catch (URISyntaxException e) {
       fail("Adding of catalog failed: " + e.getMessage());

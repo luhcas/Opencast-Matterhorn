@@ -32,10 +32,7 @@ import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -75,12 +72,8 @@ public class Mpeg7Test {
    */
   @Test
   public void testFromFile() {
-    try {
-      Mpeg7Catalog mpeg7 = parse(catalogFile.toURI().toURL());
-      testContent(mpeg7);
-    } catch (MalformedURLException e) {
-      fail(e.getMessage());
-    }
+    Mpeg7Catalog mpeg7 = parse(catalogFile.toURI());
+    testContent(mpeg7);
   }
 
   /**
@@ -90,12 +83,12 @@ public class Mpeg7Test {
   public void testNewInstance() {
     try {
       // Read the sample catalog
-      Mpeg7Catalog mpeg7Sample = parse(catalogFile.toURI().toURL());
+      Mpeg7Catalog mpeg7Sample = parse(catalogFile.toURI());
 
       // Create a new catalog and fill it with a few fields
       Mpeg7Catalog mpeg7New = Mpeg7CatalogImpl.newInstance();
       File mpeg7TempFile = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
-      mpeg7New.setURL(mpeg7TempFile.toURI().toURL());
+      mpeg7New.setURI(mpeg7TempFile.toURI());
 
       // TODO: Add sample tracks to new catalog
       // TODO: Add sample video segments to new catalog
@@ -106,20 +99,18 @@ public class Mpeg7Test {
       Transformer trans = transfac.newTransformer();
       trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
       trans.setOutputProperty(OutputKeys.METHOD, "xml");
-      FileWriter sw = new FileWriter(new File(mpeg7New.getURL().toURI()));
+      FileWriter sw = new FileWriter(new File(mpeg7New.getURI()));
       StreamResult result = new StreamResult(sw);
       DOMSource source = new DOMSource(mpeg7New.toXml());
       trans.transform(source, result);
 
       // Re-read the saved catalog and test for its content
-      Mpeg7Catalog mpeg7NewFromDisk = parse(mpeg7New.getURL());
+      Mpeg7Catalog mpeg7NewFromDisk = parse(mpeg7New.getURI());
       // TODO: Test content
       // testContent(mpeg7NewFromDisk);
 
     } catch (IOException e) {
       fail("Error creating the catalog: " + e.getMessage());
-    } catch (URISyntaxException e) {
-      fail("Error storing the catalog: " + e.getMessage());
     } catch (TransformerConfigurationException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -261,14 +252,14 @@ public class Mpeg7Test {
   /**
    * Parses the test catalog.
    * 
-   * @param url
+   * @param uri
    *          the file containing the catalog
    * @return the mpeg-7 object representation
    */
-  private Mpeg7Catalog parse(URL url) {
+  private Mpeg7Catalog parse(URI uri) {
     Mpeg7Catalog mpeg7 = null;
     try {
-      mpeg7 = Mpeg7CatalogImpl.fromURL(url);
+      mpeg7 = Mpeg7CatalogImpl.fromURI(uri);
       return mpeg7;
     } catch (IOException e) {
       fail("Error accessing the catalog: " + e.getMessage());

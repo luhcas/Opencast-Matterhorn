@@ -16,7 +16,7 @@
 package org.opencastproject.workingfilerepository.api;
 
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 
 /**
  * The Working File Repository is a file storage service that supports the lecture capture system.
@@ -30,7 +30,7 @@ public interface WorkingFileRepository {
    * @param mediaPackageElementID
    * @param in
    */
-  URL put(String mediaPackageID, String mediaPackageElementID, InputStream in);
+  URI put(String mediaPackageID, String mediaPackageElementID, InputStream in);
   
   /**
    * Store the data stream under the given media package and element IDs with filename as
@@ -41,7 +41,7 @@ public interface WorkingFileRepository {
    * @param in
    * @return The URL to access this file
    */
-  URL put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in);
+  URI put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in);
   
   /**
    * Stream the file stored under the given media package and element IDs.
@@ -57,7 +57,7 @@ public interface WorkingFileRepository {
    * @param mediaPackageElementID
    * @return
    */
-  URL getURL(String mediaPackageID, String mediaPackageElementID);
+  URI getURI(String mediaPackageID, String mediaPackageElementID);
   
   /**
    * Delete the file stored at the given media package and element IDs.
