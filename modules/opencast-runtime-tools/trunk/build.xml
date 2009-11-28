@@ -150,14 +150,15 @@
     <antcall target="jam.install"/>
 
     <!-- main packages -->
-  <!--
     <antcall target="ffmpeg.install"/>
-  -->
     <antcall target="mediainfo.install"/>
+
+    <!-- UNCOMMENT TO use media analyzer
     <antcall target="opencv.install"/>
     <antcall target="tesseract.install"/>
     <antcall target="ocropus.install"/>
     <antcall target="videosegmenter.install"/>
+    -->
   </target>
 
   <!-- ============================================================== -->
