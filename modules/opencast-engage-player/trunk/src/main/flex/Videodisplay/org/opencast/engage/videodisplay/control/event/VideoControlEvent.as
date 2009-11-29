@@ -28,14 +28,27 @@ package org.opencast.engage.videodisplay.control.event
 		public static var SKIPFORWARD : String 		= "skipForward";
 		public static var MUTE : String 			= "mute";
 		public static var UNMUTE : String 			= "unmute";
+		public static var CLOSEDCAPTIONS : String   = "closeCaptions";
+		public static var SEEKZERO : String         = "seekZero";
+		public static var SEEKONE : String          = "seekOne";
+		public static var SEEKTWO : String          = "seekTwo";
+		public static var SEEKTHREE : String        = "seekThree";
+		public static var SEEKFOUR : String         = "seekFour";
+		public static var SEEKFIVE : String         = "seekFive";
+		public static var SEEKSIX : String          = "seekSix";
+		public static var SEEKSEVEN : String        = "seekSeven";
+		public static var SEEKEIGHT : String        = "seekEight";
+		public static var SEEKNINE : String         = "seekNine";
 		public static var VOLUMEUP : String			= "volumeUp";
 		public static var VOLUMEDOWN : String		= "volumeDown";
-		public static var VOLUMELOWEST : String		= "volumeLowest";
-		public static var VOLUMELOW : String		= "volumeLow";
-		public static var VOLUMEMIDDLE : String		= "volumeMiddle";
-		public static var VOLUMEHIGH : String		= "volumeHigh";
-		public static var VOLUMEHIGHEST : String	= "volumeHighest";
-		public static var CLOSEDCAPTIONS : String	= "closeCaptions";
+		
+		// now more use? tickt mh1349
+		//public static var VOLUMELOWEST : String		= "volumeLowest";
+		//public static var VOLUMELOW : String		= "volumeLow";
+		//public static var VOLUMEMIDDLE : String		= "volumeMiddle";
+		//public static var VOLUMEHIGH : String		= "volumeHigh";
+		//public static var VOLUMEHIGHEST : String	= "volumeHighest";
+		
 		
 		private var _videoControlType : String;
 		public function VideoControlEvent(videoControlType : String , bubbles : Boolean = false , cancelable : Boolean = false )

@@ -67,6 +67,7 @@ package org.opencast.engage.videodisplay.model
 		// Skip Fast Forward Time
 		public var fastForwardTime:Number = 10;
 		
+		//
 		public var cctest:Boolean = false;
 		
 		// Volume of the Player

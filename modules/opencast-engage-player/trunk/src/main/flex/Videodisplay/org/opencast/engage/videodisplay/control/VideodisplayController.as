@@ -78,9 +78,9 @@ package org.opencast.engage.videodisplay.control
 		public function videoControl( event : VideoControlEvent ) : void
 		{
 		  	var currentPlayPauseState:String;
-						
-			switch(event.videoControlType)
-			{
+
+		  	switch(event.videoControlType)
+            {
 				case VideoControlEvent.PLAY:			if( !model.player.playing)
 						    								model.player.play();
 						  								model.currentPlayerState = PlayerState.PLAYING;
@@ -106,9 +106,17 @@ package org.opencast.engage.videodisplay.control
 				case VideoControlEvent.SKIPBACKWARD: 	model.player.seek( model.skipBackwardTime );
 										    			break;
 														
-				case VideoControlEvent.REWIND: 			model.player.pause();
-														model.player.seek( model.currentPlayhead - model.rewindTime );
-														model.player.play();
+				case VideoControlEvent.REWIND: 			if(model.player.playing)
+				                                        {
+				                                            model.player.pause();
+                                                            model.player.seek( model.currentPlayhead - model.rewindTime );
+                                                            model.player.play();
+                                                        }
+				                                        else
+				                                        {
+				                                            model.player.seek( model.currentPlayhead - model.rewindTime );
+				                                        }
+				                                            
 										    			break;
 								
 				case VideoControlEvent.FASTFORWARD: 	model.player.seek( model.currentPlayhead + model.fastForwardTime );
@@ -120,9 +128,9 @@ package org.opencast.engage.videodisplay.control
 									  					model.currentPlayerState = PlayerState.PAUSING;
 									  					currentPlayPauseState = PlayerState.PLAYING;
 									  					ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
-										    			break;
+									  					break;
 										    			
-				case VideoControlEvent.MUTE: 			if( model.player.volume != 0 )
+                case VideoControlEvent.MUTE: 			if( model.player.volume != 0 )
 				                                        {
 				                                        	ExternalInterface.call(ExternalFunction.MUTE, '');
 				                                        	model.playerVolume = model.player.volume;
@@ -133,6 +141,7 @@ package org.opencast.engage.videodisplay.control
 				                                        	ExternalInterface.call(ExternalFunction.SETVOLUME, model.playerVolume * percent);
 				                                        	model.player.volume = model.playerVolume;
 				                                        }
+
 														break;
 														
 				case VideoControlEvent.VOLUMEUP:		if( model.player.volume != 1 )
@@ -149,6 +158,41 @@ package org.opencast.engage.videodisplay.control
 														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
 														break;
 														
+				case VideoControlEvent.SEEKZERO:        model.player.seek((model.currentDuration / 10) * 0);
+                                                        break;
+                                                        
+                case VideoControlEvent.SEEKONE:         model.player.seek((model.currentDuration / 10) * 1);
+                                                        break;
+                
+                case VideoControlEvent.SEEKTWO:         model.player.seek((model.currentDuration / 10) * 2);
+                                                        break;                                                       
+
+                case VideoControlEvent.SEEKTHREE:       model.player.seek((model.currentDuration / 10) * 3);
+                                                        break;
+                
+                case VideoControlEvent.SEEKFOUR:        model.player.seek((model.currentDuration / 10) * 4);
+                                                        break;                                                        
+                                                        
+                case VideoControlEvent.SEEKFIVE:        model.player.seek((model.currentDuration / 10) * 5);
+                                                        break;                                                        
+                                                        
+                case VideoControlEvent.SEEKSIX:         model.player.seek((model.currentDuration / 10) * 6);
+                                                        break;
+                                                        
+                case VideoControlEvent.SEEKSEVEN:       model.player.seek((model.currentDuration / 10) * 7);
+                                                        break;                                                        
+                                                        
+                case VideoControlEvent.SEEKEIGHT:       model.player.seek((model.currentDuration / 10) * 8);
+                                                        break;                                                        
+                                                        
+                case VideoControlEvent.SEEKNINE:        model.player.seek((model.currentDuration / 10) * 9);
+                                                        break;                                                     
+                
+                case VideoControlEvent.CLOSEDCAPTIONS:  Swiz.dispatchEvent( new ClosedCaptionsEvent(true) );
+                                                        ExternalInterface.call(ExternalFunction.SETCAPTIONSBUTOON, model.ccBoolean);
+                                                        break;                                                                                     
+                                                        												
+												/*		
 				case VideoControlEvent.VOLUMELOWEST:	model.player.volume = volumeLowest;
 														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
 														break;
@@ -169,9 +213,11 @@ package org.opencast.engage.videodisplay.control
 														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
 														break;
 														
-				case VideoControlEvent.CLOSEDCAPTIONS: 	Swiz.dispatchEvent( new ClosedCaptionsEvent(true) );
-														ExternalInterface.call(ExternalFunction.SETCAPTIONSBUTOON, model.ccBoolean);
-														break;
+				
+														
+											*/
+											
+											
 			}
 		}
 

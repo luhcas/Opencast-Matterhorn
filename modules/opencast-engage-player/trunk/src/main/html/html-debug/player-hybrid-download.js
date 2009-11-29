@@ -34,7 +34,19 @@ $(document).ready(function () {
         {
             Opencast.global.doUnmute();
         }
-    });  
+    });
+    
+    var simpleEdit = fluid.inlineEdit("#simpleEdit", {
+        selectors : {
+            text: ".editableText",
+            editContainer: "#editorContainer",
+            edit: "#editField"
+        },
+        useTooltip : true,
+        tooltipDelay : 500
+    });
+    
+
 });
 
 Opencast.global = (function () {
@@ -53,9 +65,9 @@ Opencast.global = (function () {
             $("#btn_volume").attr({ 
                 value: mute,
                 alt: mute,
-                title: mute,
-                src: "./icons/volume---high.png"
+                title: mute
             });
+            $("#btn_volume").attr("className", "oc-btn-volume-high");
         } 
     }
     
@@ -88,13 +100,11 @@ Opencast.global = (function () {
         }
     }
     
-    
-
+   
     return {
         doUnmute : doUnmute,
         mouseOver : mouseOver,
         mouseOut : mouseOut
-
     };
 }());
 

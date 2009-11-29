@@ -224,7 +224,6 @@
 			 */ 
 			public function passCharCode(charCode:int):void
 			{	
-				
 				// Play or pause the video
 				if(charCode == 80 || charCode == 112) // P or p
 				{
@@ -233,6 +232,12 @@
 					else
 						Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));	
 				}
+				
+				// Mute the video
+                else if(charCode == 83 || charCode == 115) // S or s
+                {
+                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.STOP)); 
+                }
 				
 				// Mute the video
 				else if(charCode == 77 || charCode == 109) // M or m
@@ -252,35 +257,65 @@
 					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMEDOWN));	
 				}
 				
-				// Volume 1 lowest
+				// Seek 0
+                else if(charCode == 48 ) // 0
+                {
+                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKZERO)); 
+                }
+				
+				// Seek 1
 				else if(charCode == 49 ) // 1
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMELOWEST));	
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKONE));	
 				}
 				
-				// Volume 2 low
+				// Seek 2
 				else if(charCode == 50 ) // 2
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMELOW));	
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKTWO));	
 				}
 				
-				// Volume 3 middle
+				// Seek 3
 				else if(charCode == 51 ) // 3
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMEMIDDLE));	
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKTHREE));	
 				}
 				
-				// Volume 4 high
+				// Seek 4
 				else if(charCode == 52 ) // 4
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMEHIGH));	
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKFOUR));	
 				}
 				
-				// Volume 5 highest
+				// Seek 5
 				else if(charCode == 53 ) // 5
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMEHIGHEST));	
+					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKFIVE));	
 				}
+				
+				// Seek 6
+                else if(charCode == 54 ) // 6
+                {
+                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKSIX)); 
+                }
+                
+                // Seek 7
+                else if(charCode == 55 ) // 7
+                {
+                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKSEVEN)); 
+                }
+                
+                // Seek 8
+                else if(charCode == 56 ) // 8
+                {
+                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKEIGHT)); 
+                }
+                
+                // Seek 9
+                else if(charCode == 57 ) // 9
+                {
+                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKNINE)); 
+                }
 				
 				// Closed Caption
 				else if(charCode == 67 || charCode == 99) // C or c
@@ -299,29 +334,6 @@
 				{
 					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.FASTFORWARD));	
 				}				
-				/* when we need the timer
-				else if(charCode == 116 || charCode == 84) // t oder T
-				{
-          			try 
-		          	{
-		            	showTimeInformationTimer = new Timer(1000, 5);    
-		            	showTimeInformationTimer.addEventListener(TimerEvent.TIMER_COMPLETE, hideTimeInformation);
-		            	showTimeInformationTimer.start();
-		            	ExternalInterface.call('showTimeInformation', _timeCode.getTC(model.currentPlayhead));
-		            	Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));
-		          	} 
-          			catch (e:TypeError) {}
-				} 
-				*/
-				/* when we need the stop function
-				// stop the video 
-				else if(charCode == 83 || charCode == 115) // S or s
-				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.STOP));	
-				}
-				*/
-				
-				
 			}
 			
 			/**

@@ -18,7 +18,9 @@ package bridge
  		
  		public static const SETCAPTIONS:String			= 'Opencast.FromVideodisplay.setCaptions';
  		
- 		public static const MUTE:String					= 'Opencast.FromVideodisplay.setDoToggleVolume';
+ 		public static const MUTE:String					= 'Opencast.FromVideodisplay.setDoMute';
+ 		
+ 		public static const UNMUTE:String               = 'Opencast.FromVideodisplay.setDoUnmute';
  		
  		public static const SETCAPTIONSBUTOON:String	= 'Opencast.FromVideodisplay.setCaptionsButton';
  		

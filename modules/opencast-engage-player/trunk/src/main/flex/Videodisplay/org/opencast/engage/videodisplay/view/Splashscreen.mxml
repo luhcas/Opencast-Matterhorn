@@ -155,6 +155,7 @@
 		buttonMode="true"
 		rollOver="{ showButton(); }"
 		rollOut="{ hideButton(); }"
+		toolTip="Play"
 		/>
 		
 	<mx:Button id="pauseButton_up"
@@ -168,6 +169,7 @@
 		buttonMode="true"
 		rollOver="{ showButton(); }"
 		rollOut="{ hideButton(); }"
+		toolTip="Pause"
 		/>
 		
 	<mx:VBox 
@@ -182,6 +184,7 @@
 	    	id="btn_fullscreen"
 	        styleName="Fullscreen"
 	       	click="{ toggleFullScreen() }" 
+	       	toolTip="Fullscreen"
 	       	/>
 	        
     </mx:VBox>
