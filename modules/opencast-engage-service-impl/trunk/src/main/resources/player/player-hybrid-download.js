@@ -2,71 +2,18 @@
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
 
-/* ------------------------------------------------------------------------
- * the global opencast namespace
- * ------------------------------------------------------------------------ */
+/**
+    @namespace the global Opencast namespace
+*/
 var Opencast = Opencast || {};
 
 Opencast.volume = 1.0;
-
-
-function doUnmute() {
-    if (document.getElementById("btn_volume").value === "Unmute") {
-        
-       /*
-        $("btn_volume").attr("value","Mute");
-        $("btn_volume").attr("alt","Mute");
-        $("btn_volume").attr("title","Mute");
-        $("btn_volume").attr("src","./icons/volume---high.png");
-        */
-        
-        document.getElementById("btn_volume").value = "Mute";
-        document.getElementById("btn_volume").alt = "Mute";
-        document.getElementById("btn_volume").title = "Mute";
-        document.getElementById("btn_volume").src = "./icons/volume---high.png";
-        
-        //$("btn_volume").attr("alt","Mute";)
-        //$("btn_volume").attr("value","";)
-    } 
-}
-
-function mouseOver() {
-
-
-    if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === "playing") {
-        document.getElementById("btn_play_pause").className = "btn_pause_over";
-    }
-    else if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === "pausing") {
-        document.getElementById("btn_play_pause").className = "btn_play_over";
-    }
- 
-}
-
-function mouseOut() {
-  
-    if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === "playing") {
-        document.getElementById("btn_play_pause").className = "btn_pause_out";
-    }
-    else if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === "pausing") {
-        document.getElementById("btn_play_pause").className = "btn_play_out";
-    }
-  
-}
-
-
-
-
+Opencast.mouseOverBool = false;
 
 $(document).ready(function () {
     $("#slider").slider();
     $('#slider').slider('option', 'animate', false);
     $('#slider').slider('option', 'min', 0);
-    $('#slider').bind('slidechange', function (event, ui) {
-        if (ui.value === 0)
-        {
-            Opencast.ToVideodisplay.doTogglePlayPause();
-        }
-    });
     $('#slider').bind('slide', function (event, ui) {
         Videodisplay.seek(ui.value);
     });
@@ -85,10 +32,79 @@ $(document).ready(function () {
     $('#volume_slider').bind('slidechange', function (event, ui) {
         if (ui.value !== 0) 
         {
-            doUnmute();
+            Opencast.global.doUnmute();
         }
-    });  
+    });
+    
+    var simpleEdit = fluid.inlineEdit("#simpleEdit", {
+        selectors : {
+            text: ".editableText",
+            editContainer: "#editorContainer",
+            edit: "#editField"
+        },
+        useTooltip : true,
+        tooltipDelay : 500
+    });
+    
+
 });
 
+Opencast.global = (function () {
 
+    var playing = "playing",
+    pausing     = "pausing",
+    unmute      = "Unmute",
+    mute        = "mute";
+
+    /**
+        @memberOf Opencast.global
+        @description Do unmute the volume of the video.
+    */
+    function doUnmute() {
+        if ($("#btn_volume").attr("value") === unmute) {  
+            $("#btn_volume").attr({ 
+                value: mute,
+                alt: mute,
+                title: mute
+            });
+            $("#btn_volume").attr("className", "oc-btn-volume-high");
+        } 
+    }
+    
+    /**
+        @memberOf Opencast.global
+        @description Mouse over effect.
+    */
+    function mouseOver() {
+        if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === playing) {
+            $("#btn_play_pause").attr("className", "btn_pause_over");
+            Opencast.mouseOverBool = true;
+        }
+         else if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === pausing) {
+            $("#btn_play_pause").attr("className", "btn_play_over");
+            Opencast.mouseOverBool = true;
+        }
+    }
+    /**
+        @memberOf Opencast.global
+        @description Mouse out effect.
+    */
+    function mouseOut() {
+        if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === playing) {
+            $("#btn_play_pause").attr("className", "btn_pause_out");
+            Opencast.mouseOverBool = false;
+        }
+        else if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === pausing) {
+            $("#btn_play_pause").attr("className", "btn_play_out");
+            Opencast.mouseOverBool = false;
+        }
+    }
+    
+   
+    return {
+        doUnmute : doUnmute,
+        mouseOver : mouseOver,
+        mouseOut : mouseOut
+    };
+}());
 
