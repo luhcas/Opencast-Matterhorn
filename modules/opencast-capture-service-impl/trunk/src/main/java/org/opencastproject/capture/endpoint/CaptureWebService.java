@@ -31,23 +31,23 @@ import javax.jws.WebService;
 public interface CaptureWebService {
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public String startCapture();
+  public boolean startCapture();
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage);
+  public boolean startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage);
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public String startCapture(@WebParam(name = "configuration") Properties configuration);
+  public boolean startCapture(@WebParam(name = "configuration") Properties configuration);
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage,
+  public boolean startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage,
           @WebParam(name = "configuration") Properties configuration);
   
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public String stopCapture();
+  public boolean stopCapture();
 
 }

@@ -92,10 +92,10 @@ public class CaptureAgentImplTest {
             
             logger.info("End of timing. Stopping...");
             
-            String result = service.stopCapture();
+            boolean result = service.stopCapture();
             
             // Checks correct return value
-            Assert.assertTrue(result.equals("Capture OK"));
+            Assert.assertTrue(result);
       
         } catch (UnsatisfiedLinkError e) {
             logger.error("Could not properly test capture agent: {}.", e.getMessage());

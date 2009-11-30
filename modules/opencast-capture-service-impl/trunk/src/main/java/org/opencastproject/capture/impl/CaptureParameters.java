@@ -108,4 +108,10 @@ public interface CaptureParameters {
   
   /** Property appended to CAPTURE_DEVICE_CODEC to specify that codec's bitrate */
   public static final String CAPTURE_DEVICE_BITRATE = ".properties.bitrate";
+
+  /** Threshold used for determining when deleting archived captures needs to happen */
+  public static final String CAPTURE_CLEANER_MIN_DISK_SPACE = "capture.cleaner.mindiskspace";
+  
+  /** Maximum number of days to archive a capture after its been ingested before cleaning up */
+  public static final String CAPTURE_CLEANER_MAX_ARCHIVAL_DAYS = "capture.cleaner.maxarchivaldays";
 }

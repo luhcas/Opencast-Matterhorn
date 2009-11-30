@@ -47,32 +47,32 @@ public class CaptureWebServiceImpl implements CaptureWebService {
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public String startCapture() {
+  public boolean startCapture() {
     return service.startCapture();
   }
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage) {
+  public boolean startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage) {
     return service.startCapture(mediaPackage);
   }
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public String startCapture(@WebParam(name = "configuration") Properties configuration) {
+  public boolean startCapture(@WebParam(name = "configuration") Properties configuration) {
     return service.startCapture(configuration);
   }
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage,
+  public boolean startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage,
           @WebParam(name = "configuration") Properties configuration) {
     return service.startCapture(mediaPackage, configuration);
   }
   
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public String stopCapture() {
+  public boolean stopCapture() {
     return service.stopCapture();
   }
 

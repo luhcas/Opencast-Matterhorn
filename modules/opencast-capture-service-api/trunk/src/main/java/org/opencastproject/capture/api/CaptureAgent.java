@@ -26,21 +26,21 @@ public interface CaptureAgent {
   /**
    * Starting a simple capture.
    */
-  String startCapture();
+  boolean startCapture();
 
   /**
    * Starting a simple capture.
    * 
    * @param mediaPackage 
    */
-  String startCapture(MediaPackage mediaPackage);
+  boolean startCapture(MediaPackage mediaPackage);
 
   /**
    * Starting a simple capture.
    * 
    * @param configuration HashMap<String, String> for properties.
    */
-  String startCapture(Properties configuration);
+  boolean startCapture(Properties configuration);
 
   /**
    * Starting a simple capture.
@@ -48,12 +48,12 @@ public interface CaptureAgent {
    * @param mediaPackage 
    * @param configuration HashMap<String, String> for properties.
    */
-  String startCapture(MediaPackage mediaPackage, Properties configuration);
+  boolean startCapture(MediaPackage mediaPackage, Properties configuration);
   
   /**
    * Stops the capture
    * @return A string indicating the success or fail of the action
    */
-  String stopCapture();
+  boolean stopCapture();
 }
 

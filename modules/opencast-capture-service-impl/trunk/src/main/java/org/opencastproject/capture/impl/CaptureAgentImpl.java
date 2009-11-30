@@ -80,7 +80,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * 
    * @see org.opencastproject.recorder.api.CaptureAgent#startCapture()
    */
-  public String startCapture() {
+  public boolean startCapture() {
 
     logger.info("Starting capture using default values for MediaPackage and properties.");
 
@@ -90,10 +90,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     } catch (org.opencastproject.util.ConfigurationException e) {
       logger.error("Wrong configuration for the default media package: {}.", e.getMessage());
-      return "Wrong MediaPackage configuration";
+      return false;
     } catch (MediaPackageException e) {
       logger.error("Media Package exception: {}.", e.getMessage());
-      return "Media Package exception";
+      return false;
     }
 
     return startCapture(pack, null);
@@ -104,7 +104,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * 
    * @see org.opencastproject.recorder.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage)
    */
-  public String startCapture(MediaPackage mediaPackage) {
+  public boolean startCapture(MediaPackage mediaPackage) {
 
     logger.info("Starting capture using default values for the capture properties and a passed in media package.");
     
@@ -117,7 +117,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * 
    * @see org.opencastproject.recorder.api.CaptureAgent#startCapture(java.util.HashMap)
    */
-  public String startCapture(Properties properties) {
+  public boolean startCapture(Properties properties) {
     logger.info("Starting capture using a passed in properties and default media package.");
 
     // Creates default MediaPackage
@@ -126,10 +126,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     } catch (org.opencastproject.util.ConfigurationException e) {
       logger.error("Wrong configuration for the default media package: {}.", e.getMessage());
-      return "Wrong MediaPackage configuration";
+      return false;
     } catch (MediaPackageException e) {
       logger.error("Media Package exception: {}.", e.getMessage());
-      return "Media Package exception";
+      return false;
     }
 
     return startCapture(pack, properties);
@@ -142,11 +142,11 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    *      org.opencastproject.recorder.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage,
    *      HashMap properties)
    */
-  public String startCapture(MediaPackage mediaPackage, Properties properties) {
+  public boolean startCapture(MediaPackage mediaPackage, Properties properties) {
 
     if (current_capture_dir != null || !agent_state.equals(AgentState.IDLE)) {
       logger.warn("Unable to start capture, a different capture is still in progress in {}.", current_capture_dir.getAbsolutePath());
-      return "Unable to start capture, a different capture is still in progress in " + current_capture_dir.getAbsolutePath() + ".";
+      return false;
     } else {
       setAgentState(AgentState.CAPTURING);
     }
@@ -189,13 +189,13 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       } catch (IOException e) {
         logger.error("IOException creating required directory {}.", current_capture_dir.toString());
         status_service.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-        return "IOException creating required directory " + current_capture_dir.toString();
+        return false;
       }
       //Should have been created.  Let's make sure of that.
       if (!current_capture_dir.exists()) {
         logger.error("Unable to start capture, could not create required directory {}.", current_capture_dir.toString());
         status_service.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-        return "Unable to start capture, could not create required directory " + current_capture_dir.toString();
+        return false;
       }
     }
 
@@ -203,7 +203,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     if (pipe == null) {
       logger.error("Capture could not start, pipeline was null!");
-      return "Capture could not start, pipline was null!";
+      return false;
     }
 
     Bus bus = pipe.getBus();
@@ -238,19 +238,18 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     status_service.setRecordingState(recordingID, RecordingState.CAPTURING);
     setAgentState(AgentState.CAPTURING);
-    return "Capture started";
+    return true;
   }
 
   /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.CaptureAgent#stopCapture()
    */
-  public String stopCapture() {
+  public boolean stopCapture() {
     if (pipe == null) {
       logger.warn("Pipeline is null, unable to stop capture.");
-      return "Pipeline is null.";
+      return false;
     }
-    String result = "Capture OK";
     File stopFlag = new File(current_capture_dir, "capture.stopped");
     
     try {
@@ -264,7 +263,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       stopFlag.createNewFile();
     } catch (IOException e) {
       logger.error("IOException: Could not create \"capture.stopped\" file: {}.", e.getMessage());
-      result = "\"capture.stopped\" could not be created.";
       //TODO:  Is this capture.stopped file required for ingest to work?  Then it should die here rather than trying to build the manifest.
     }
 
@@ -289,7 +287,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     }
     */
 
-    return result;
+    return true;
   }
 
   /**
