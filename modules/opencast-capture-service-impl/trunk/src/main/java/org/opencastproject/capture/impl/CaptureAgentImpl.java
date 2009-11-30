@@ -30,7 +30,6 @@ import org.gstreamer.event.EOSEvent;
 import org.opencastproject.capture.api.AgentState;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.RecordingState;
-import org.opencastproject.capture.impl.jobs.IngestJob;
 import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
@@ -38,7 +37,6 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
-import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,17 +152,17 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     logger.info("Initializing devices for capture.");
 
     // merges properties without overwriting the system's configuration
-    Properties merged = config.merge(properties, false);
+    Properties merged = config.merge(properties, true);
 
     //Get the recording id
     String recordingID = merged.getProperty(CaptureParameters.RECORDING_ID);
 
     //Figure out where captureDir lives
-    if (merged.contains(CaptureParameters.RECORDING_ROOT_URL)) {
+    if (merged.containsKey(CaptureParameters.RECORDING_ROOT_URL)) {
       current_capture_dir = new File(merged.getProperty(CaptureParameters.RECORDING_ROOT_URL));
     } else {
       //If there is a recording ID use it, otherwise it's unscheduled so just grab a timestamp
-      if (merged.contains(CaptureParameters.RECORDING_ID)) {
+      if (merged.containsKey(CaptureParameters.RECORDING_ID)) {
         current_capture_dir = new File(config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), recordingID);
       } else {
         //Unscheduled capture, use a timestamp value instead
@@ -263,6 +261,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     status_service.setRecordingState(recordingID, RecordingState.CAPTURE_FINISHED);
     setAgentState(AgentState.IDLE);
 
+    /*
     try {
       IngestJob.scheduleJob(cur);
     } catch (IOException e) {
@@ -272,6 +271,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       logger.error("SchedulerException while attempting to schedule ingest for recording {}.", recordingID);
       result = "SchedulerException while attempting to schedule ingest for recording " + recordingID + ".";
     }
+    */
 
     return result;
   }
