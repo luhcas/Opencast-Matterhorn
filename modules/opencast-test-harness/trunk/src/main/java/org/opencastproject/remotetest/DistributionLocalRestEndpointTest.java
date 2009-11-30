@@ -24,6 +24,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -48,6 +49,20 @@ public class DistributionLocalRestEndpointTest {
   @After
   public void teardown() throws Exception {
     client.getConnectionManager().shutdown();
+  }
+
+  @Test
+  public void testDocs() throws Exception {
+    HttpGet get = new HttpGet(BASE_URL + "/distribution/local/rest/docs");
+    HttpResponse response = client.execute(get);
+    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+  }
+
+  @Test
+  public void testWadl() throws Exception {
+    HttpGet get = new HttpGet(BASE_URL + "/distribution/local/rest/?_wadl");
+    HttpResponse response = client.execute(get);
+    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
 
   @Test
