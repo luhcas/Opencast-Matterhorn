@@ -15,13 +15,12 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.api.AgentState;
-
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opencastproject.capture.api.AgentState;
 
 public class StatusServiceImplTest {
   private CaptureAgentImpl service = null;

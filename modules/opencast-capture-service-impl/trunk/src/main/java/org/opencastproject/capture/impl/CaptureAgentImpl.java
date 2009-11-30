@@ -147,19 +147,28 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     if (current_capture_dir != null || !agent_state.equals(AgentState.IDLE)) {
       logger.warn("Unable to start capture, a different capture is still in progress in {}.", current_capture_dir.getAbsolutePath());
       return "Unable to start capture, a different capture is still in progress in " + current_capture_dir.getAbsolutePath() + ".";
+    } else {
+      setAgentState(AgentState.CAPTURING);
     }
 
     logger.info("Initializing devices for capture.");
 
     // merges properties without overwriting the system's configuration
-    Properties merged = config.merge(properties, true);
+    Properties merged = config.merge(properties, false);
 
-    //Get the recording id
-    String recordingID = merged.getProperty(CaptureParameters.RECORDING_ID);
+    String recordingID = null;
 
     //Figure out where captureDir lives
     if (merged.containsKey(CaptureParameters.RECORDING_ROOT_URL)) {
       current_capture_dir = new File(merged.getProperty(CaptureParameters.RECORDING_ROOT_URL));
+      if (merged.containsKey(CaptureParameters.RECORDING_ID)) {
+        recordingID = merged.getProperty(CaptureParameters.RECORDING_ID);
+      } else {
+        //In this case they've set the root URL, but not the recording ID.  Get the id from that url instead then.
+        logger.warn("{} was set, but not {}.", CaptureParameters.RECORDING_ROOT_URL, CaptureParameters.RECORDING_ID);
+        String[] pathAry = merged.getProperty(CaptureParameters.RECORDING_ROOT_URL).split(File.separator);
+        recordingID = pathAry[pathAry.length-1];
+      }
     } else {
       //If there is a recording ID use it, otherwise it's unscheduled so just grab a timestamp
       if (merged.containsKey(CaptureParameters.RECORDING_ID)) {

@@ -366,13 +366,24 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
             //Note that in the example metadata I was given the duration field did not exist...
             duration = new Duration(start, end);
           } else {
-            log.warn("Event {} has an invalid start and/or end time, skipping.", event.getName());
+            if (start != null) {
+              log.warn("Event {} has no duration and no end time, skipping.", start.toString());
+            } else if (end != null) {
+              log.warn("Event {} has no duration and no begin time, skipping.", end.toString());
+            } else {
+              log.warn("Event has no duration, no begin and no end time, skipping.");
+            }
             continue;
           }
         }
 
         if (duration != null && duration.getDuration().isNegative()) {
           log.warn("Event {} has a negative duration, skipping.", event.getName());
+          continue;
+        }
+
+        if (start.before(new Date())) {
+          log.warn("Event {} is scheduled for a time that has already passed, skipping.", event.getName());
           continue;
         }
 
