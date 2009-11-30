@@ -22,7 +22,7 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.util.Compressor;
+import org.opencastproject.util.ZipUtil;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -216,23 +216,25 @@ public class IngestJob implements StatefulJob {
 
     return true;
   }
-
+  
   /**
    * Compresses the files contained in the output directory
    * @param zipName - The name of the zip file created
    * @return A File reference to the file zip created
    */
-  public File zipFiles(String zipName) {
-    String[] totalFiles = current_capture_dir.list();
-    String[] filesToZip = new String[totalFiles.length - 1];
+  public File zipFiles(File theZipFile) {
+    File[] totalFiles = current_capture_dir.listFiles();
+    File[] filesToZip = new File[totalFiles.length - 1];
     int i = 0;
 
-    for (String item : totalFiles)
-      if (!(item.equals("capture.stopped") ||
-              item.substring(item.lastIndexOf('.')).trim().equals("zip")))
-        filesToZip[i++] = new File(current_capture_dir, item).getAbsolutePath();
-
-    return new Compressor().zip(filesToZip, zipName);
+    for (File item : totalFiles) {
+      String fileName = item.getName().trim();
+      if (!(fileName.equals("capture.stopped") ||
+              (item.compareTo(theZipFile) == 0)))
+        filesToZip[i++] = item;
+    }
+    
+    return ZipUtil.zip(filesToZip, theZipFile.getAbsolutePath());
   }
 
   /**

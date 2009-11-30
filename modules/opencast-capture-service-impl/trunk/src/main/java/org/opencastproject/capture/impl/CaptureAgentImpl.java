@@ -199,13 +199,20 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     Bus bus = pipe.getBus();
     bus.connect(new Bus.EOS() {
+      /**
+       * {@inheritDoc}
+       * @see org.gstreamer.Bus.EOS#endOfStream(org.gstreamer.GstObject)
+       */
       public void endOfStream(GstObject arg0) {
         logger.debug("Pipeline received EOS.");
       }
     });
     bus.connect(new Bus.ERROR() {
+      /**
+       * {@inheritDoc}
+       * @see org.gstreamer.Bus.ERROR#errorMessage(org.gstreamer.GstObject, int, java.lang.String)
+       */
       public void errorMessage(GstObject arg0, int arg1, String arg2) {
-        //TODO:  What does this mean?
         logger.error(arg0.getName() + ": " + arg2);
         stopCapture();
       }
@@ -238,7 +245,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     File stopFlag = new File(current_capture_dir, "capture.stopped");
     
     try {
-      // "READY" is the idle state for pipelines
+      // Sending End Of Stream event to the Pipeline so its components stop appropriately
       pipe.sendEvent(new EOSEvent());
       //while (pipe.getState() != State.NULL);
       pipe.setState(State.NULL);
