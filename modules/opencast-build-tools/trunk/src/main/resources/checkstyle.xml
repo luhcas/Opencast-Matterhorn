@@ -10,7 +10,9 @@ checkstyle-results.xml file, making it difficult to figure out why checkstyle is
 -->
 
   <module name="NewlineAtEndOfFile" /> 
+  <module name="SuppressionCommentFilter"/>
   <module name="TreeWalker">
+    <module name="FileContentsHolder"/>
     <module name="Header">
       <property name="headerFile" value="${checkstyle.header.file}" />
     </module>
