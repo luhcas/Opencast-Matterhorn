@@ -37,18 +37,36 @@ public class Param {
   boolean required = false;
 
   /**
+   * Create a parameter for this endpoint, the thing you are adding it to indicates if required or optional
+   * 
    * @param name
    *          the parameter name (this is the parameter itself)
    * @param type
    *          [optional] the type of this parameter
-   * @param description
-   *          [optional] the description to display with this param
    * @param defaultValue
    *          [optional] the default value which is used if this param is missing
+   * @param description
+   *          [optional] the description to display with this param
+   */
+  public Param(String name, Type type, String defaultValue, String description) {
+    this(name, type, defaultValue, description, null);
+  }
+
+  /**
+   * Create a parameter for this endpoint, the thing you are adding it to indicates if required or optional
+   * 
+   * @param name
+   *          the parameter name (this is the parameter itself)
+   * @param type
+   *          [optional] the type of this parameter
+   * @param defaultValue
+   *          [optional] the default value which is used if this param is missing
+   * @param description
+   *          [optional] the description to display with this param
    * @param choices
    *          [optional] a list of valid choices for this parameter (only used for the enum type)
    */
-  public Param(String name, Type type, String description, String defaultValue, String[] choices) {
+  public Param(String name, Type type, String defaultValue, String description, String[] choices) {
     if (!DocData.isValidName(name)) {
       throw new IllegalArgumentException("name must not be null and must be alphanumeric");
     }
@@ -59,12 +77,7 @@ public class Param {
     this.type = type.name().toLowerCase();
     this.description = description;
     this.defaultValue = defaultValue;
-    if (choices != null) {
-      this.choices = new Vector<String>(choices.length);
-      for (int i = 0; i < choices.length; i++) {
-        addChoice(choices[i]);
-      }
-    }
+    setChoices(choices);
   }
 
   /**
@@ -76,6 +89,17 @@ public class Param {
       choices = new Vector<String>();
     }
     choices.add(choice);
+  }
+  
+  public void setChoices(String[] choices) {
+    if (choices != null) {
+      this.choices = new Vector<String>(choices.length);
+      for (int i = 0; i < choices.length; i++) {
+        addChoice(choices[i]);
+      }
+    } else {
+      choices = null;
+    }
   }
 
   /**

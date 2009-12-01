@@ -64,7 +64,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.util </Export-Package>
+            <Export-Package> org.opencastproject.util.* </Export-Package>
             <Private-Package> META-INF.services, de.schlichtherle.*</Private-Package>
             <Import-Package> !com.sun.*, *;resolution:=optional </Import-Package>
             <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>

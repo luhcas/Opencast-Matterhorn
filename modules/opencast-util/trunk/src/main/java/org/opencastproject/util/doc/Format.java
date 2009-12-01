@@ -30,12 +30,25 @@ public class Format {
   public static Format json() {
     return new Format(JSON, null, JSON_URL);
   }
-
   /**
    * @return the standard format object for use with XML
    */
   public static Format xml() {
     return new Format(XML, null, XML_URL);
+  }
+  /**
+   * @param desc [optional] description to display with the format
+   * @return the standard format object for use with JSON with a description
+   */
+  public static Format json(String desc) {
+    return new Format(JSON, desc, JSON_URL);
+  }
+  /**
+   * @param desc [optional] description to display with the format
+   * @return the standard format object for use with XML with a description
+   */
+  public static Format xml(String desc) {
+    return new Format(XML, desc, XML_URL);
   }
 
   String name; // unique key

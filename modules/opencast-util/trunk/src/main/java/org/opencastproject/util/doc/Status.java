@@ -19,24 +19,59 @@ package org.opencastproject.util.doc;
  * Represents one possible status result for an endpoint
  */
 public class Status {
+  /**
+   * @param desc [optional] description to add to this status
+   * @return the status
+   */
   public static Status OK(String desc) {
     return new Status(200, desc);
   }
+  /**
+   * @param desc [optional] description to add to this status
+   * @return the status
+   */
+  public static Status NO_CONTENT(String desc) {
+    return new Status(204, desc);
+  }
+  /**
+   * @param desc [optional] description to add to this status
+   * @return the status
+   */
   public static Status BAD_REQUEST(String desc) {
     return new Status(400, desc);
   }
+  /**
+   * @param desc [optional] description to add to this status
+   * @return the status
+   */
   public static Status UNAUTHORIZED(String desc) {
     return new Status(401, desc);
   }
+  /**
+   * @param desc [optional] description to add to this status
+   * @return the status
+   */
   public static Status FORBIDDEN(String desc) {
     return new Status(403, desc);
   }
+  /**
+   * @param desc [optional] description to add to this status
+   * @return the status
+   */
   public static Status NOT_FOUND(String desc) {
     return new Status(404, desc);
   }
+  /**
+   * @param desc [optional] description to add to this status
+   * @return the status
+   */
   public static Status ERROR(String desc) {
     return new Status(500, desc);
   }
+  /**
+   * @param desc [optional] description to add to this status
+   * @return the status
+   */
   public static Status SERVICE_UNAVAILABLE(String desc) {
     return new Status(503, desc);
   }
