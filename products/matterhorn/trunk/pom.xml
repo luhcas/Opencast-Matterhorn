@@ -304,12 +304,14 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <inherited>true</inherited>
+        <version>2.1.1</version>
         <executions>
           <execution>
             <id>attach-sources</id>
+            <phase>verify</phase>
             <goals>
-              <goal>jar</goal>
+              <goal>jar-no-fork</goal> 
+              <goal>test-jar-no-fork</goal> 
             </goals>
           </execution>
         </executions>
