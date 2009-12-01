@@ -68,7 +68,6 @@ public class PipelineFactory {
     
     String[] friendlyNames = deviceNames.split(",");
     String outputDirectory = props.getProperty(CaptureParameters.RECORDING_ROOT_URL);
-    String captureDirectory = props.getProperty(CaptureParameters.RECORDING_ID);
     
     for (String name : friendlyNames) {
       name = name.trim();
@@ -81,7 +80,7 @@ public class PipelineFactory {
       String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
       String srcLoc = props.getProperty(srcProperty);
-      String outputLoc = new File(new File(outputDirectory, captureDirectory), props.getProperty(outputProperty)).getAbsolutePath();
+      String outputLoc = new File(outputDirectory, props.getProperty(outputProperty)).getAbsolutePath();
       
       // Attempt to determine what the device is using the JV4LInfo library 
       try {

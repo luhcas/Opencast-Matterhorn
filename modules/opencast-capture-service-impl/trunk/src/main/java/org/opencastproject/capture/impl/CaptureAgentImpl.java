@@ -22,7 +22,6 @@ import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.gstreamer.Bus;
-import org.gstreamer.Gst;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
 import org.gstreamer.State;
@@ -258,7 +257,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       //while (pipe.getState() != State.NULL);
       pipe.setState(State.NULL);
 
-      Gst.deinit();
+     // Gst.deinit();
 
       stopFlag.createNewFile();
     } catch (IOException e) {
@@ -274,6 +273,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     String recordingID = cur.getProperty(CaptureParameters.RECORDING_ID);
     status_service.setRecordingState(recordingID, RecordingState.CAPTURE_FINISHED);
     setAgentState(AgentState.IDLE);
+    current_capture_dir = null;
 
     /*
     try {
