@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>${meta.title} REST Documentation</title>
+  <style type="text/css">
+  /* styles for the page */
+  FIELDSET {
+    margin-bottom: 2em;
+    margin-top: 0.5em;
+    padding-bottom: 1em;
+    width: 90%;
+  }
+  
+  TABLE.method {
+    width: 100%;
+  }
+  
+  TABLE.testing {
+    width: 96%;
+    border: 2px solid #CCC;
+  }
+  
+  UL {
+    margin: 0.2em;
+    padding-left: 1em;
+  }
+  
+  DIV.table_spacer {
+    height: 2em;
+  }
+  
+  DIV.footer {
+    padding-top: 1em;
+    font-weight: bold;
+  }
+  
+  .method_set_header {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    font-size: 1.4em;
+    font-weight: bold;
+  }
+  
+  .method_header TH {
+    background: #CCFF00 none repeat scroll 0 0;
+    border-bottom: 3px solid #333;
+    color: #669;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 0.6em 0.3em;
+    text-align: left;
+    vertical-align: middle;;
+  }
+  
+  TH.method_header_left {
+    text-align: right;
+    padding: 0.6em 1em;
+  }
+  
+  TR.method TH {
+    border-bottom: 1px solid #CCC;
+    color: #663;
+    font-size: 84%;
+    font-family: sans-serif;
+    font-weight: normal;
+    padding: 0.5em 1.0em;
+    text-align: right;
+    vertical-align: middle;
+  }
+  
+  TR.method TD {
+    border-bottom: 1px solid #CCC;
+    font-size: 136%;
+    padding-bottom: 0.2em;
+    padding-left: 0.3em;
+    padding-top: 0.2em;
+    vertical-align: middle;
+  }
+  
+  DIV.hidden_form {
+    display: none;
+  }
+  
+  TD.form_label {
+    width: 10%;
+    font-size: 0.9em !important;
+  }
+  
+  TD.form_submit {
+    border: none !important;
+  }
+  </style>
+</head>
+<body>
+<h1>${meta.title} REST Documentation</h1>
+<span>${meta.url}</span>
+
+<#list endpointHolders as endpointHolder>
+<fieldset id="endpoint_holder_${endpointHolder.name}">
+<legend class="method_set_header">${endpointHolder.title} methods</legend>
+<#if (endpointHolder.endpoints?size <= 0)>
+<em>NONE</em>
+<#else>
+<#list endpointHolder.endpoints as endpoint>
+<table class="method" cellpadding="0px" cellspacing="0px"
+  summary="${endpointHolder.title} function for the ${endpoint.method} ${endpoint.path} REST endpoint, Name of the attribute followed by the value">
+  <thead>
+    <tr class="method_header">
+      <th width="20%" scope="col" class="method_header_left">NAME</th>
+      <th scope="col">VALUE and NOTES</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="method">
+      <th scope="row">Method / Path:</th>
+      <td><tt>${endpoint.method} <a href="${meta.url}${endpoint.path}">${endpoint.path}</a></tt></td>
+    </tr>
+    <tr class="method">
+      <th scope="row">Description:</th>
+      <td>${endpoint.description!"<em>NONE</em>"}</td>
+    </tr>
+    <tr class="method">
+      <th scope="row">Required (path) parameters:</th>
+      <td>
+        <#if (endpoint.requiredParams?size > 0)>
+        <#list endpoint.requiredParams as param>
+        <tt>${param.name}<#if param.defaultValue??>=${param.defaultValue}</#if></tt>: ${param.description!"<em>NONE</em>"}
+        <#if param_has_next><br/></#if>
+        </#list>
+        <#else>
+        <em>NONE</em>
+        </#if>
+      </td>
+    </tr>
+    <tr class="method">
+      <th scope="row">Optional (query) parameters:</th>
+      <td>
+        <#if (endpoint.optionalParams?size > 0)>
+        <#list endpoint.optionalParams as param>
+        <tt>${param.name}<#if param.defaultValue??>=${param.defaultValue}</#if></tt>: ${param.description!"<em>NONE</em>"}
+        <#if param_has_next><br/></#if>
+        </#list>
+        <#else>
+        <em>NONE</em>
+        </#if>
+      </td>
+    </tr>
+    <#if (endpoint.formats?size <= 0)>
+    <tr class="method">
+      <th scope="row">Response formats:</th>
+      <td>
+        <#list endpoint.formats as format>
+        <#if format.url??><a href="${format.url}">${format.name}</a><#else>${format.name}</#if> <#if format.description??>(${format.description})</#if>
+        <#if format_has_next><br/></#if>
+        </#list>
+      </td>
+    </tr>
+    </#if>
+    <tr class="method">
+      <th scope="row">Status codes:</th>
+      <td>
+        <#if (endpoint.statuses?size <= 0)>
+        <em>NONE</em>
+        <#else>
+        <#list endpoint.statuses as status>
+        <tt>${status.code}: ${status.name}, ${status.description!"<em>NONE</em>"}
+        <#if status_has_next><br/></#if>
+        </#list>
+        </#if>
+      </td>
+    </tr>
+    <#if (endpoint.notes?size > 0)>
+    <tr class="method">
+      <th scope="row">Notes:</th>
+      <td>
+        <ul>
+          <#list endpoint.notes as note>
+          <li>${note}</li>
+          </#list>
+        </ul>
+      </td>
+    </tr>
+    </#if>
+    <#if endpoint.form??>
+    <tr class="method">
+      <th scope="row">Testing:</th>
+      <td>
+        <#if endpoint.form.html??><#-- just dump the html value -->
+        ${endpoint.form.html}
+        <#elseif endpoint.form.url??><#-- just create a link to the form -->
+        <a href="${endpoint.form.url}" target="_new">${endpoint.form.title!"Go to Testing form"}</a>
+        <#else>
+        <a href="#" class="form_link">${endpoint.form.title!"Testing form"} (click to reveal)</a>
+        <div class="hidden_form">
+          <form id="form_${endpoint.name}" action="${meta.url}${endpoint.path}" method="${endpoint.method}" enctype="multipart/form-data">
+            <#if (endpoint.form.ajaxSubmit)><input class="ajax_submit" type="hidden" name="ajax_submit" value="true" /></#if>
+            <span class="form_path">${endpoint.path}</span>
+            <table class="testing" cellpadding="0" cellspacing="0">
+              <#list endpoint.form.items as item>
+              <tr class="form_field<#if item.required> form_required</#if>">
+                <#if item.type == "text">
+                <td class="form_textarea" colspan="3">
+                  <div>
+                    <label for="${endpoint.name}_${item.name}">${item.name}</label>:
+                  </div>
+                  <textarea class="form_field_text" rows="${(item.attributes.rows)!'3'}" cols="${(item.attributes.cols)!'80'}">${item.defaultValue!}</textarea>
+                  <div>${item.description!}</div>
+                </td>
+                <#elseif item.type == "boolean">
+                <td class="form_label">
+                  <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
+                </td>
+                <td>
+                  <input class="form_field" id="${endpoint.name}_${item.name}" name="${item.name}" type="checkbox" value="${item.defaultValue!}" />
+                </td>
+                <td>${item.description!}</td>
+                <#elseif item.type == "file">
+                <td class="form_label">
+                  <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
+                </td>
+                <td>
+                  <input class="form_field_file" class="form_field" id="${endpoint.name}_${item.name}" name="${item.name}" type="file" />
+                </td>
+                <td>${item.description!}</td>
+                <#elseif item.type == "enum">
+                <td class="form_label">
+                  <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
+                </td>
+                <td>
+                  <select class="form_field" id="${endpoint.name}_${item.name}" name="${item.name}">
+                    <#list item.choices as choice>
+                    <option value="${choice}"<#if (choice == item.defaultValue)> selected="selected"</#if>>${choice}</option>
+                    </#list>
+                  </select>
+                </td>
+                <td>${item.description!}</td>
+                <#else>
+                <td class="form_label">
+                  <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
+                </td>
+                <td>
+                  <input class="form_field" id="${endpoint.name}_${item.name}" name="${item.name}" type="text" value="${item.defaultValue!}" size="${(item.attributes.size)!'80'}" />
+                </td>
+                <td>${item.description!}</td>
+                </#if>
+              </tr>
+              </#list>
+              <tr>
+                <td colspan="3">
+                  <div class="form_submit">
+                    <input type="submit" value="SUBMIT" />
+                    <input type="button" value="CANCEL" />
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </form>
+        </div>
+        </#if>
+      </td>
+    </tr>
+    </#if>
+  </tbody>
+</table>
+
+<#if endpoint_has_next>
+<div class="table_spacer"></div>
+</#if>
+
+</#list>
+</#if>
+</fieldset>
+</#list>
+
+
+<fieldset>
+<legend class="method_set_header">General Notes</legend>
+<#if (notes?size <= 0)>
+<em>NONE</em>
+<#else>
+<ul>
+  <#list notes as note>
+  <li>${note}</li>
+  </#list>
+</ul>
+</#if>
+</fieldset>
+
+<div class="footer">Service of 
+    <a href="http://www.opencastproject.org/" title="Opencast Project">Opencast</a>
+    <a href="http://www.opencastproject.org/project/matterhorn" title="Opencast Matterhorn">Matterhorn</a>
+</div>
+
+<!-- JAVASCRIPT below here -->
+<script type="text/javascript"
+  src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script type="text/javascript">
+(function($) {
+    $("a.form_link").click(
+        function() {
+            var $this = $(this);
+            var $form = $this.parent().find("div.hidden_form");
+            $form.toggle(400);
+            $this.parent().find("div.form_submit input").click(
+            	function() {
+            		$form.hide(200);
+            		$this.show();
+            	}
+            );
+            $this.hide();
+            return false;
+        }
+    );
+}(jQuery));
+</script>
+
+</body>
+</html>
