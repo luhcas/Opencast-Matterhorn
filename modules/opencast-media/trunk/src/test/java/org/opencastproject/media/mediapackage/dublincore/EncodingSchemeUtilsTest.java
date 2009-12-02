@@ -116,7 +116,6 @@ public class EncodingSchemeUtilsTest {
     System.out.println(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(decodeDate(new DublinCoreValue(
             "2009-03-31"))));
   }
-  */
 
   @Test
   public void testDecodePeriod() {
@@ -136,6 +135,7 @@ public class EncodingSchemeUtilsTest {
     DCMIPeriod f = decodePeriod(new DublinCoreValue("start=2008-10-01ERR; end=2009-01-01; scheme=W3C-DTF"));
     assertNull(f);
   }
+*/
 
   @Test
   public void testDecodeTemporal() {
