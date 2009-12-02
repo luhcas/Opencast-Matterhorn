@@ -73,10 +73,18 @@
   TR.method TD {
     border-bottom: 1px solid #CCC;
     font-size: 136%;
-    padding-bottom: 0.2em;
-    padding-left: 0.3em;
-    padding-top: 0.2em;
+    padding-bottom: 6px;
+    padding-left: 4px;
+    padding-top: 6px;
     vertical-align: middle;
+  }
+  
+  TR.testform TD {
+    font-size: 110%;
+  }
+
+  TR.testform A {
+    font-size: 120%;
   }
   
   DIV.hidden_form {
@@ -85,6 +93,10 @@
   
   TD.form_label {
     width: 10%;
+    font-size: 1.1em !important;
+  }
+  
+  .form_field_description {
     font-size: 0.9em !important;
   }
   
@@ -115,7 +127,7 @@
   <tbody>
     <tr class="method">
       <th scope="row">Method / Path:</th>
-      <td><tt>${endpoint.method} <a href="${meta.url}${endpoint.path}">${endpoint.path}</a></tt></td>
+      <td><tt title="${meta.url}${endpoint.path}">${endpoint.method} ${endpoint.path}</tt></td>
     </tr>
     <tr class="method">
       <th scope="row">Description:</th>
@@ -126,34 +138,39 @@
       <td>
         <#if (endpoint.requiredParams?size > 0)>
         <#list endpoint.requiredParams as param>
-        <tt>${param.name}<#if param.defaultValue??>=${param.defaultValue}</#if></tt>: ${param.description!"<em>NONE</em>"}
-        <#if param_has_next><br/></#if>
+        <tt>${param.name}<#if param.defaultValue??>=${param.defaultValueHtml}</#if></tt>: ${param.description!"<em>NONE</em>"}<#if param_has_next> <br/></#if>
         </#list>
         <#else>
         <em>NONE</em>
         </#if>
       </td>
     </tr>
+    <#if endpoint.bodyParam??>
+    <tr class="method">
+      <th scope="row">Body parameter:</th>
+      <td>
+        <#if endpoint.bodyParam.defaultValue??><tt>DEFAULT=${endpoint.bodyParam.defaultValueHtml}</tt>: </#if>${endpoint.bodyParam.description!"<em>NONE</em>"}
+      </td>
+    </tr>
+    </#if>
     <tr class="method">
       <th scope="row">Optional (query) parameters:</th>
       <td>
         <#if (endpoint.optionalParams?size > 0)>
         <#list endpoint.optionalParams as param>
-        <tt>${param.name}<#if param.defaultValue??>=${param.defaultValue}</#if></tt>: ${param.description!"<em>NONE</em>"}
-        <#if param_has_next><br/></#if>
+        <tt>${param.name}<#if param.defaultValue??>=${param.defaultValueHtml}</#if></tt>: ${param.description!"<em>NONE</em>"}<#if param_has_next> <br/></#if>
         </#list>
         <#else>
         <em>NONE</em>
         </#if>
       </td>
     </tr>
-    <#if (endpoint.formats?size <= 0)>
+    <#if (endpoint.formats?size > 0)>
     <tr class="method">
       <th scope="row">Response formats:</th>
       <td>
         <#list endpoint.formats as format>
-        <#if format.url??><a href="${format.url}">${format.name}</a><#else>${format.name}</#if> <#if format.description??>(${format.description})</#if>
-        <#if format_has_next><br/></#if>
+        <#if format.url??><a href="${format.url}">${format.name}</a><#else>${format.name}</#if> <#if format.description??>(${format.description})</#if><#if format_has_next> <br/></#if>
         </#list>
       </td>
     </tr>
@@ -165,8 +182,7 @@
         <em>NONE</em>
         <#else>
         <#list endpoint.statuses as status>
-        <tt>${status.code}: ${status.name}, ${status.description!"<em>NONE</em>"}
-        <#if status_has_next><br/></#if>
+        <tt>${status.code}: ${status.name}, ${status.description!"<em>NONE</em>"}<#if status_has_next> <br/></#if>
         </#list>
         </#if>
       </td>
@@ -184,7 +200,7 @@
     </tr>
     </#if>
     <#if endpoint.form??>
-    <tr class="method">
+    <tr class="method testform">
       <th scope="row">Testing:</th>
       <td>
         <#if endpoint.form.html??><#-- just dump the html value -->
@@ -196,17 +212,15 @@
         <div class="hidden_form">
           <form id="form_${endpoint.name}" action="${meta.url}${endpoint.path}" method="${endpoint.method}" enctype="multipart/form-data">
             <#if (endpoint.form.ajaxSubmit)><input class="ajax_submit" type="hidden" name="ajax_submit" value="true" /></#if>
-            <span class="form_path">${endpoint.path}</span>
+            <div><strong>Path:</strong> <tt class="form_path">${endpoint.path}</tt></div>
             <table class="testing" cellpadding="0" cellspacing="0">
               <#list endpoint.form.items as item>
               <tr class="form_field<#if item.required> form_required</#if>">
                 <#if item.type == "text">
                 <td class="form_textarea" colspan="3">
-                  <div>
-                    <label for="${endpoint.name}_${item.name}">${item.name}</label>:
-                  </div>
+                  <label for="${endpoint.name}_${item.name}">${item.name}</label>:<br/>
                   <textarea class="form_field_text" rows="${(item.attributes.rows)!'3'}" cols="${(item.attributes.cols)!'80'}">${item.defaultValue!}</textarea>
-                  <div>${item.description!}</div>
+                  <div class="form_field_description">${item.description!}</div>
                 </td>
                 <#elseif item.type == "boolean">
                 <td class="form_label">
@@ -215,7 +229,7 @@
                 <td>
                   <input class="form_field" id="${endpoint.name}_${item.name}" name="${item.name}" type="checkbox" value="${item.defaultValue!}" />
                 </td>
-                <td>${item.description!}</td>
+                <td class="form_field_description">${item.description!}</td>
                 <#elseif item.type == "file">
                 <td class="form_label">
                   <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
@@ -223,7 +237,7 @@
                 <td>
                   <input class="form_field_file" class="form_field" id="${endpoint.name}_${item.name}" name="${item.name}" type="file" />
                 </td>
-                <td>${item.description!}</td>
+                <td class="form_field_description">${item.description!}</td>
                 <#elseif item.type == "enum">
                 <td class="form_label">
                   <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
@@ -235,15 +249,15 @@
                     </#list>
                   </select>
                 </td>
-                <td>${item.description!}</td>
+                <td class="form_field_description">${item.description!}</td>
                 <#else>
                 <td class="form_label">
                   <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
                 </td>
                 <td>
-                  <input class="form_field" id="${endpoint.name}_${item.name}" name="${item.name}" type="text" value="${item.defaultValue!}" size="${(item.attributes.size)!'80'}" />
+                  <input class="form_field" id="${endpoint.name}_${item.name}" name="${item.name}" type="text" value="${item.defaultValue!}" size="${(item.attributes.size)!'30'}" />
                 </td>
-                <td>${item.description!}</td>
+                <td class="form_field_description">${item.description!}</td>
                 </#if>
               </tr>
               </#list>

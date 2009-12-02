@@ -134,6 +134,15 @@ public class Param {
     return defaultValue;
   }
 
+  public String getDefaultValueHtml() {
+    if (defaultValue != null) {
+      if (defaultValue.length() > 20) {
+        return "<strong title=\""+defaultValue+"\">TEXT</strong>";
+      }
+    }
+    return defaultValue;
+  }
+
   public String getType() {
     return type;
   }

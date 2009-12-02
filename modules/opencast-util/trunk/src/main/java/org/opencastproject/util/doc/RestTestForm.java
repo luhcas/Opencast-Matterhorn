@@ -115,6 +115,14 @@ public class RestTestForm {
         this.items.add(param);
       }
     }
+    if (endpoint.getBodyParam() != null) {
+      Param param = endpoint.getBodyParam();
+      param.required = true;
+      if (Param.Type.FILE.name().equalsIgnoreCase(param.type)) {
+        hasUpload = true;
+      }
+      this.items.add(param);
+    }
     if (hasUpload) {
       this.ajaxSubmit = false;
     }

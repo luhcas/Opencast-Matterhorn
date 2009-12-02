@@ -67,6 +67,7 @@ public class DocUtilTest {
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
     RestEndpoint endpoint2 = new RestEndpoint("name2",RestEndpoint.Method.POST,"/path2","description for this thing 2");
     endpoint2.addRequiredParam(new Param("rp2", Param.Type.STRING, "default-rp2", null));
+    endpoint2.addBodyParam(false, "<xml>\n  <thing>this is something</thing>\n</xml>", "description for body");
     endpoint2.addOptionalParam(new Param("rp3", Param.Type.BOOLEAN, "true", "description r p 3"));
     endpoint2.addOptionalParam(new Param("rp4", Param.Type.ENUM, "choice2", "description r p 4", 
             new String[] {"choice1", "choice2", "choice3" }));

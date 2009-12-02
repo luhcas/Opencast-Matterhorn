@@ -32,6 +32,7 @@ public class RestEndpoint {
   String method;
   String path;
   String description;
+  Param bodyParam;
   List<Param> requiredParams;
   List<Param> optionalParams;
   List<Format> formats;
@@ -67,8 +68,27 @@ public class RestEndpoint {
   }
   @Override
   public String toString() {
-    return "ENDP:"+name+":"+method+" "+path+" :req="+requiredParams+" :opt="+optionalParams
+    return "ENDP:"+name+":"+method+" "+path+" :body="+bodyParam+" :req="+requiredParams+" :opt="+optionalParams
       +" :formats="+formats+" :status="+statuses+" :notes="+notes+" :form="+form;
+  }
+  /**
+   * This is a special parameter which indicates that this value is to be sent as the body of
+   * the request, in general the type of this parameter should only be FILE or TEXT but
+   * nothing stop you from using the other types
+   * 
+   * @param isBinary if true then this should use an uploader to send, otherwise the data can be placed in a text area
+   * @param defaultValue 
+   * @param description
+   * @return the new param object in case you want to set attributes
+   * @throws IllegalArgumentException if the params are null
+   */
+  public Param addBodyParam(boolean isBinary, String defaultValue, String description) {
+    Param.Type type = isBinary ? Param.Type.FILE : Param.Type.TEXT;
+    Param param = new Param("BODY", type, defaultValue, description);
+    param.setRequired(true);
+    param.setAttribute("rows", "8");
+    this.bodyParam = param;
+    return param;
   }
   /**
    * Adds a required parameter for this endpoint
@@ -169,6 +189,9 @@ public class RestEndpoint {
   }
   public String getDescription() {
     return description;
+  }
+  public Param getBodyParam() {
+    return bodyParam;
   }
   public List<Param> getRequiredParams() {
     if (this.requiredParams == null) {

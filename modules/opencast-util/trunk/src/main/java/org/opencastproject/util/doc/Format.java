@@ -76,5 +76,16 @@ public class Format {
   public String toString() {
     return name + ":(" + url + ")";
   }
+
+  public String getName() {
+    return name;
+  }
+  public String getDescription() {
+    return description;
+  }
+  public String getUrl() {
+    return url;
+  }
+
 }
 

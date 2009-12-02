@@ -52,8 +52,8 @@ public class DocRestData extends DocData {
     this.meta.put("url", url);
     // create the endpoint holders
     this.holders = new Vector<RestEndpointHolder>(2);
-    this.holders.add( new RestEndpointHolder(RestEndpoint.Type.WRITE.name(), "Write") );
     this.holders.add( new RestEndpointHolder(RestEndpoint.Type.READ.name(), "Read") );
+    this.holders.add( new RestEndpointHolder(RestEndpoint.Type.WRITE.name(), "Write") );
   }
 
   @Override
