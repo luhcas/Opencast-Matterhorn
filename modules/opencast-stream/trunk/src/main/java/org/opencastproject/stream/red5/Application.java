@@ -16,9 +16,13 @@
 package org.opencastproject.stream.red5;
 
 import org.red5.server.adapter.ApplicationAdapter;
+import org.red5.server.api.IBandwidthConfigure;
 import org.red5.server.api.IClient;
 import org.red5.server.api.IConnection;
 import org.red5.server.api.IScope;
+import org.red5.server.api.stream.IServerStream;
+import org.red5.server.api.stream.IStreamCapableConnection;
+import org.red5.server.api.stream.support.SimpleConnectionBWConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +31,13 @@ import org.slf4j.LoggerFactory;
  */
 public class Application extends ApplicationAdapter {
   private static final Logger logger = LoggerFactory.getLogger(Application.class);
+  private IScope appScope;
+  private IServerStream serverStream;
 
+  public void init() {
+    logger.info(this + ".init()");
+  }
+  
   /** {@inheritDoc} */
   @Override
   public synchronized boolean connect(IConnection conn, IScope scope, Object[] params) {
@@ -68,5 +78,41 @@ public class Application extends ApplicationAdapter {
   public synchronized void leave(IClient client, IScope scope) {
     logger.info("red5 application: leave");
     super.leave(client, scope);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public boolean appStart(IScope app) {
+    log.info("oflaDemo appStart");
+    System.out.println("oflaDemo appStart");      
+    appScope = app;
+    return true;
+  }
+
+/** {@inheritDoc} */
+  @Override
+  public boolean appConnect(IConnection conn, Object[] params) {
+    log.info("oflaDemo appConnect");
+    // Trigger calling of "onBWDone", required for some FLV players
+    measureBandwidth(conn);
+    if (conn instanceof IStreamCapableConnection) {
+      IStreamCapableConnection streamConn = (IStreamCapableConnection) conn;
+      SimpleConnectionBWConfig bwConfig = new SimpleConnectionBWConfig();
+      bwConfig.getChannelBandwidth()[IBandwidthConfigure.OVERALL_CHANNEL] =
+        1024 * 1024;
+      bwConfig.getChannelInitialBurst()[IBandwidthConfigure.OVERALL_CHANNEL] =
+        128 * 1024;
+      streamConn.setBandwidthConfigure(bwConfig);
+    }
+    return super.appConnect(conn, params);
+  }
+  /** {@inheritDoc} */
+  @Override
+  public void appDisconnect(IConnection conn) {
+    log.info("oflaDemo appDisconnect");
+    if (appScope == conn.getScope() && serverStream != null) {
+      serverStream.close();
+    }
+    super.appDisconnect(conn);
   }
 }

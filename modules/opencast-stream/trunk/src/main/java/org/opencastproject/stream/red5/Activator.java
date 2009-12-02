@@ -103,9 +103,9 @@ public class Activator extends ContextLoaderListener implements BundleActivator 
 
         // Register servlets
         try {
-          httpService.registerServlet("/gateway", gatewayServlet, null, httpContext);
+          httpService.registerServlet(gatewayServlet, new String[] {"/stream/gateway"}, null, httpContext);
           httpService.registerServlet(rtmptServlet,
-                  new String[] {"/fcs/*", "/open/*", "/idle/*", "/send/*", "/close/*"}, null, httpContext);
+                  new String[] {"/stream/fcs/*", "/stream/open/*", "/stream/idle/*", "/stream/send/*", "/stream/close/*"}, null, httpContext);
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
@@ -157,6 +157,7 @@ public class Activator extends ContextLoaderListener implements BundleActivator 
       factory.registerSingleton("default.context", applicationContext);
       parentFactory = (DefaultListableBeanFactory) factory.getParentBeanFactory();
     } catch (Throwable t) {
+      t.printStackTrace();
       logger.error("", t);
     }
     long startupIn = System.currentTimeMillis() - time;
