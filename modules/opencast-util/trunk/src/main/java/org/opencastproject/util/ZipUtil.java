@@ -34,12 +34,21 @@ public class ZipUtil {
 
   /**
    * Compresses source files into a zip archive.  Does not support recursive addition of directories.
+   * 
    * @param sourceFiles The files to include in the root of the archive
    * @param destination The path to put the resulting zip archive file.
    * @return the resulting zip archive file
    */
   public static java.io.File zip(java.io.File[] sourceFiles, String destination) {
-    File zipFile = new File(destination);
+    if (sourceFiles == null || sourceFiles.length <= 0) {
+      throw new IllegalArgumentException("sourceFiles must include at least 1 file");
+    }
+    if (destination == null || "".equals(destination)) {
+      throw new IllegalArgumentException("destination must be set");
+    }
+    // patch from ruben.perez to ensure only exposes java.io.File: http://issues.opencastproject.org/jira/browse/MH-1698 - AZ
+    java.io.File normalFile = new java.io.File(destination);
+    File zipFile = new File(normalFile);
     for(java.io.File f : sourceFiles) {
       OutputStream out = null;
       InputStream in = null;
@@ -55,7 +64,7 @@ public class ZipUtil {
         if(out != null) {try {out.close();} catch (IOException e) {logger.error(e.getMessage());}}
       }
     }
-    return zipFile;
+    return normalFile;
   }
 
   /**
@@ -66,7 +75,13 @@ public class ZipUtil {
    * will be created.
    */
   public static void unzip(java.io.File zipFile, java.io.File destination) {
-    if(destination.exists() && destination.isFile()) {
+    if (zipFile == null) {
+      throw new IllegalArgumentException("zipFile must be set");
+    }
+    if (destination == null) {
+      throw new IllegalArgumentException("destination must be set");
+    }
+    if (destination.exists() && destination.isFile()) {
       throw new IllegalArgumentException("destination file must be a directory");
     }
     if( ! destination.exists()) destination.mkdir();
