@@ -18,6 +18,13 @@ package org.opencastproject.captions.endpoint;
 import org.opencastproject.captions.api.CaptionsMediaItem;
 import org.opencastproject.captions.api.CaptionsService;
 import org.opencastproject.captions.api.CaptionsService.CaptionsResults;
+import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Status;
 
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONValue;
@@ -46,7 +53,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.Response.Status;
 
 /**
  * This is the REST endpoint for the captions handler service
@@ -76,7 +82,7 @@ public class CaptionsRestService {
     if (services != null) {
       for (Object object : services) {
         if (object == null) {
-          throw new javax.ws.rs.WebApplicationException(Status.SERVICE_UNAVAILABLE);
+          throw new javax.ws.rs.WebApplicationException(javax.ws.rs.core.Response.Status.SERVICE_UNAVAILABLE);
         }
       }
     }
@@ -202,23 +208,14 @@ public class CaptionsRestService {
   @Path("/samplevideo.mov")
   @Produces("video/quicktime")
   public StreamingOutput getSampleVideo() {
-    return new StreamingOutput() {
-      public void write(OutputStream out) throws IOException, WebApplicationException {
-        InputStream in = null;
-        try {
-          in = getClass().getResourceAsStream("/sample/sample.mov");
-          if (in == null) {
-            throw new NullPointerException("No sample video could be found");
-          }
-          IOUtils.copy(in, out);
-        } catch (Exception e) {
-          logger.error("failed to load sample file: " + e, e);
-          throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-        } finally {
-          IOUtils.closeQuietly(in);
-        }
-      }
-    };
+    return makeStream("/sample/sample.mov");
+  }
+
+  @GET
+  @Path("/samplesearch.json")
+  @Produces("application/json")
+  public StreamingOutput getSampleJSON() {
+    return makeStream("/sample/search.json");
   }
 
   @GET
@@ -236,8 +233,15 @@ public class CaptionsRestService {
   }
 
   protected final String docs;
+  private static String[] notes = {
+    "All paths above are relative to the REST endpoint base (something like http://your.server/captions/rest)",
+    "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>",
+    "Here is a sample video for testing: <a href=\"/captions/rest/samplevideo.mov\">sample video</a>"
+  };
   
   public CaptionsRestService() {
+    /* old method
     String docsFromClassloader = null;
     InputStream in = null;
     try {
@@ -250,5 +254,75 @@ public class CaptionsRestService {
       IOUtils.closeQuietly(in);
     }
     docs = docsFromClassloader;
+    */
+    // generate using the rest doc util
+    DocRestData data = new DocRestData("captions", "Captions Handler", "/captions/rest", notes);
+    // search
+    RestEndpoint endpoint = new RestEndpoint("search", RestEndpoint.Method.GET, "/search", 
+            "Searches for and retrieves a list of media which needs to be captioned");
+    endpoint.addOptionalParam(new Param("count", Param.Type.STRING,
+            "0", "number of results to return per page (0 indicates all or maximum allowed)", null));
+    endpoint.addOptionalParam(new Param("startPage", Param.Type.STRING,
+            "0", "the page of results to display (0 is first page)", null));
+    endpoint.addOptionalParam(new Param("sort", Param.Type.ENUM,
+            "title asc", "the sort order to return items in, valid fields are date, title", 
+            new String[] {"title asc","title desc","date asc","date desc"}));
+    endpoint.addFormat( Format.json("<a href=\"/captions/rest/samplesearch.json\">sample</a>") );
+    endpoint.addStatus( Status.OK("results returned") );
+    endpoint.addStatus( Status.BAD_REQUEST("invalid arguments in request, error message") );
+    endpoint.addNote("The search is only a search for captionable items and not for all items in general");
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+    // get
+    endpoint = new RestEndpoint("get_caption", RestEndpoint.Method.GET, "/{id}",
+            "Retrieve a single captionable item");
+    endpoint.addRequiredParam(new Param("id", Param.Type.STRING,
+            null, "the media ID from the search result", null));
+    endpoint.addFormat(Format.json());
+    endpoint.addStatus(Status.OK("results returned"));
+    endpoint.addStatus(Status.NOT_FOUND("item does not exist, error message"));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+    // add
+    endpoint = new RestEndpoint("add", RestEndpoint.Method.PUT, "/{id}/{type}",
+            "Updates a media item with captions data");
+    endpoint.addBodyParam(false, null, "should be captions data (a timetext file)");
+    endpoint.addRequiredParam(new Param("id", Param.Type.STRING,
+            null, "the media ID from the search result", null));
+    endpoint.addRequiredParam(new Param("type", Param.Type.STRING,
+            null, "the media type from the search result", null));
+    endpoint.addStatus( new Status(204, "data was added, result info in headers") );
+    endpoint.addStatus(Status.BAD_REQUEST("data was not added, error message"));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+    docs = DocUtil.generate(data);
   }
+
+  /**
+   * Generate a JAXRS stream for a given path
+   * 
+   * @param path the path to the resource
+   * @return the stream object
+   * @throws RuntimeException if there is a failure
+   */
+  private static StreamingOutput makeStream(final String path) {
+    return new StreamingOutput() {
+      public void write(OutputStream out) throws IOException, WebApplicationException {
+        InputStream in = null;
+        try {
+          in = getClass().getResourceAsStream(path);
+          if (in == null) {
+            throw new NullPointerException("No file could be found at path: " + path);
+          }
+          IOUtils.copy(in, out);
+        } catch (Exception e) {
+          logger.error("failed to load sample file: " + e, e);
+          throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+        } finally {
+          IOUtils.closeQuietly(in);
+        }
+      }
+    };
+  }
+
 }

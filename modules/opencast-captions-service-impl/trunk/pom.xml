@@ -31,6 +31,13 @@
       <version>0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
+    <!-- needed for rest docs utils -->
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-util</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
 
     <!-- internal -->
     <dependency>
