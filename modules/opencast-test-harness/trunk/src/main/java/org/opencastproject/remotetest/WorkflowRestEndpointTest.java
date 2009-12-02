@@ -79,11 +79,12 @@ public class WorkflowRestEndpointTest {
     HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".xml");
     String getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
     Assert.assertEquals(id, getWorkflowInstanceId(getResponse));
-    
+
     // Make sure we can retrieve it via json, too
     HttpGet getWorkflowJson = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".json");
     String jsonResponse = EntityUtils.toString(client.execute(getWorkflowJson).getEntity());
     JSONObject json = (JSONObject) JSONValue.parse(jsonResponse);
+    if(json == null) Assert.fail("JSON response should not be null, but is " + jsonResponse);
     Assert.assertEquals(id, json.get("workflow_id"));
   }
 

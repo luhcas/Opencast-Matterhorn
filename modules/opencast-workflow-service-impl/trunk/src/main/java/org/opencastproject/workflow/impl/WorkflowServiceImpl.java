@@ -19,7 +19,6 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowConfigurationImpl;
-import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionList;
 import org.opencastproject.workflow.api.WorkflowDefinitionListImpl;
@@ -32,6 +31,7 @@ import org.opencastproject.workflow.api.WorkflowOperationDefinitionListImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
+import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
@@ -316,33 +316,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsByEpisode(java.lang.String)
-   */
-  public WorkflowSet getWorkflowsByEpisode(String episodeId) throws WorkflowDatabaseException {
-    return dao.getWorkflowsByEpisode(episodeId);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsByMediaPackage(java.lang.String)
-   */
-  public WorkflowSet getWorkflowsByMediaPackage(String mediaPackageId) {
-    return dao.getWorkflowsByMediaPackage(mediaPackageId);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsInState(org.opencastproject.workflow.api.WorkflowInstance.State)
-   */
-  public WorkflowSet getWorkflowsInState(State state, int offset, int limit) {
-    return dao.getWorkflowsInState(state, offset, limit);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
    * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition,
    *      org.opencastproject.media.mediapackage.MediaPackage)
    */
@@ -613,46 +586,22 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsByDate(int, int)
-   */
-  public WorkflowSet getWorkflowsByDate(int offset, int limit) throws WorkflowDatabaseException {
-    return dao.getWorkflowsByDate(offset, limit);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsBySeries(java.lang.String)
-   */
-  public WorkflowSet getWorkflowsBySeries(String seriesId) throws WorkflowDatabaseException {
-    return dao.getWorkflowsBySeries(seriesId);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsByText(java.lang.String, int, int)
-   */
-  public WorkflowSet getWorkflowsByText(String text, int offset, int limit) throws WorkflowDatabaseException {
-    return dao.getWorkflowsByText(text, offset, limit);
-  }
-
-  /**
-   * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowService#countWorkflowInstances()
    */
   public long countWorkflowInstances() {
     return dao.countWorkflowInstances();
   }
 
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowsByTextAndState(org.opencastproject.workflow.api.WorkflowInstance.State, java.lang.String, int, int)
-   */
-  public WorkflowSet getWorkflowsByTextAndState(State state, String text, int offset, int limit)
-          throws WorkflowDatabaseException {
-    return dao.getWorkflowsByTextAndState(state, text, offset, limit);
+  public WorkflowSet getWorkflowInstances(WorkflowQuery query) {
+    return dao.getWorkflowInstances(query);
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#newWorkflowQuery()
+   */
+  @Override
+  public WorkflowQuery newWorkflowQuery() {
+    return new WorkflowQueryImpl();
+  }
 }

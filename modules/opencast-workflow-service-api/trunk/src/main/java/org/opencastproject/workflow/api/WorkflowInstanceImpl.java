@@ -140,6 +140,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   public WorkflowOperationInstance getCurrentOperation() {
     // Since we add operation instances only once they start, we can just return the last one in the list.
+    if(workflowOperationInstanceList == null) return null;
     List<WorkflowOperationInstance> list = workflowOperationInstanceList.getOperationInstance();
     if(list.isEmpty()) return null;
     return list.get(list.size()-1);

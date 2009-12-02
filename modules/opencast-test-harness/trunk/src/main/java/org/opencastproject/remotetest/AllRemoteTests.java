@@ -40,13 +40,14 @@ public class AllRemoteTests {
       BASE_URL = args[0];
     }
     System.out.println("Beginning matterhorn test suite on " + BASE_URL);
-    long start = System.currentTimeMillis();
     Result result = JUnitCore.runClasses(AllRemoteTests.class);
-    System.out.println("Finished test suite in " + (System.currentTimeMillis()-start) + "ms");
+    System.out.println(result.getRunCount() + " tests run, " + result.getIgnoreCount() + " tests ignored, "
+            + result.getFailureCount() + " tests failed.  Total time = " + result.getRunTime() + "ms");
     if(result.getFailureCount() > 0) {
       for(Failure failure : result.getFailures()) {
         System.out.println(failure.getTrace());
       }
+      System.exit(1);
     }
   }
 }

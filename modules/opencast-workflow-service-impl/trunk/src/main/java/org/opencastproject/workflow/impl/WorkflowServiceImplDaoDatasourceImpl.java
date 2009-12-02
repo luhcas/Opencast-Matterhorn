@@ -15,16 +15,18 @@
  */
 package org.opencastproject.workflow.impl;
 
+import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
+import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.workflow.api.WorkflowBuilder;
-import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
-import org.opencastproject.workflow.api.WorkflowInstance.State;
+import org.opencastproject.workflow.impl.WorkflowQueryImpl.ElementTuple;
 
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -37,6 +39,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -68,6 +71,9 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     Statement s = null;
     try {
       s = conn.createStatement();
+      s.execute("create table if not exists oc_workflow_element(workflow_id varchar(127), mp_id varchar(127), "
+              + "mp_element_id varchar(127), mp_element_type varchar(127), mp_element_flavor varchar(127), "
+              + "PRIMARY KEY(workflow_id, mp_element_id))");
       s.execute("create table if not exists oc_workflow(workflow_id varchar(127) PRIMARY KEY, mp_id varchar(127), "
               + "workflow_state varchar(127), episode_id varchar(127), series_id varchar(127), workflow_text clob, "
               + "workflow_xml clob, date_created timestamp)");
@@ -166,7 +172,7 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
   }
 
   /**
-   * Gets a set of workflows based on the provided query
+   * Gets a set of workflows based on the provided query.  The first column in the query must be the workflow xml.
    * 
    * @param query
    *          The sql query as a prepared statement
@@ -178,13 +184,15 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
    *          The paging limit
    * @return The set of workflows matching this query
    */
-  protected WorkflowSet getWorkflowSet(String query, String[] params, int offset, int limit) {
+  protected WorkflowSet getWorkflowSet(String query, String[] params, long offset, long limit) {
     query = query + " order by date_created desc";
     if (offset > 0 && limit > 0) {
       query = query + " limit " + limit + " offset " + (offset * limit);
     } else if (limit > 0) {
       query = query + " limit " + limit;
     }
+    
+    logger.debug("Query: {}", query);
     Connection conn = null;
     PreparedStatement s = null;
     ResultSet r = null;
@@ -226,72 +234,67 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsByDate(int, int)
+   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowInstances(org.opencastproject.workflow.api.WorkflowInstanceQuery)
    */
-  public WorkflowSet getWorkflowsByDate(int offset, int limit) throws WorkflowDatabaseException {
-    return getWorkflowSet("select workflow_xml from oc_workflow", null, offset, limit);
-  }
+  @Override
+  public WorkflowSet getWorkflowInstances(WorkflowQuery query) {
+    List<String> params = new ArrayList<String>();
+    List<String> whereClauseList = new ArrayList<String>();
+    WorkflowQueryImpl queryImpl = (WorkflowQueryImpl)query;
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsByEpisode(java.lang.String)
-   */
-  public WorkflowSet getWorkflowsByEpisode(String episodeId) throws WorkflowDatabaseException {
-    return getWorkflowSet("select workflow_xml from oc_workflow where episode_id=?", new String[] { episodeId }, 0, 0);
-  }
+    // If we need to count media package elements, use a join
+    StringBuilder q;
+    ElementTuple elementTuple = queryImpl.getElementTuple();
+    if(elementTuple != null) {
+      if(elementTuple.exists) {
+        q = new StringBuilder("select wf.workflow_xml as wfi from oc_workflow as wf");
+        q.append(" join oc_workflow_element as el on wf.workflow_id = el.workflow_id where el.mp_element_type=?");
+        q.append(" and el.mp_element_flavor=?");
+      } else {
+        q = new StringBuilder("select distinct wf.workflow_xml as wfi, wf.date_created from oc_workflow as wf");
+        q.append(" join oc_workflow_element as el on wf.workflow_id = el.workflow_id where");
+        q.append(" (el.mp_element_type <> ? or el.mp_element_flavor <> ?)");
+      }
+      params.add(elementTuple.elementType);
+      params.add(elementTuple.elementFlavor);
+    } else {
+      // always include a where clause to make the append logic simpler
+      q = new StringBuilder("select wf.workflow_xml from oc_workflow as wf where 1=1");
+    }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsByMediaPackage(java.lang.String)
-   */
-  public WorkflowSet getWorkflowsByMediaPackage(String mediaPackageId) {
-    return getWorkflowSet("select workflow_xml from oc_workflow where mp_id=?", new String[] { mediaPackageId }, 0, 0);
-  }
+    // Add the rest of the where clauses
+    if(queryImpl.getEpisodeId() != null) {
+      whereClauseList.add(" and wf.episode_id=?");
+      params.add(queryImpl.getEpisodeId());
+    }
+    if(queryImpl.getMediaPackageId() != null) {
+      whereClauseList.add(" and wf.mp_id=?");
+      params.add(queryImpl.getMediaPackageId());
+    }
+    if(queryImpl.getSeriesId() != null) {
+      whereClauseList.add(" and wf.series_id=?");
+      params.add(queryImpl.getSeriesId());
+    }
+    if(queryImpl.getState() != null) {
+      whereClauseList.add(" and wf.workflow_state=?");
+      params.add(queryImpl.getState().name().toLowerCase());
+    }
+    if(queryImpl.getText() != null) {
+      whereClauseList.add(" and wf.workflow_text like ?");
+      params.add("%" + queryImpl.getText().toLowerCase() + "%");
+    }
+    
+    // build the rest of the where clause
+    for(Iterator<String> iter = whereClauseList.iterator(); iter.hasNext();) {
+      q.append(iter.next());
+    }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsBySeries(java.lang.String)
-   */
-  public WorkflowSet getWorkflowsBySeries(String seriesId) throws WorkflowDatabaseException {
-    return getWorkflowSet("select workflow_xml from oc_workflow where series_id=?", new String[] { seriesId }, 0, 0);
-  }
+    // if using a join, add the "group by" and "having" clauses
+    if(elementTuple != null) {
+      q.append(" group by wfi having count(el.mp_element_id) > 0");
+    }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsByText(java.lang.String, int, int)
-   */
-  public WorkflowSet getWorkflowsByText(String text, int offset, int limit) throws WorkflowDatabaseException {
-    text = text.toLowerCase();
-    return getWorkflowSet("select workflow_xml from oc_workflow where workflow_text like ?", new String[] { "%" + text
-            + "%" }, offset, limit);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsByTextAndState(org.opencastproject.workflow.api.WorkflowInstance.State,
-   *      java.lang.String, int, int)
-   */
-  public WorkflowSet getWorkflowsByTextAndState(State state, String text, int offset, int limit) {
-    text = text.toLowerCase();
-    return getWorkflowSet("select workflow_xml from oc_workflow where workflow_state=? and workflow_text like ?",
-            new String[] { state.name().toLowerCase(), "%" + text + "%" }, offset, limit);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowsInState(org.opencastproject.workflow.api.WorkflowInstance.State,
-   *      int, int)
-   */
-  public WorkflowSet getWorkflowsInState(State state, int offset, int limit) {
-    return getWorkflowSet("select workflow_xml from oc_workflow where workflow_state=?", new String[] { state.name()
-            .toLowerCase() }, offset, limit);
+    return getWorkflowSet(q.toString(), params.toArray(new String[params.size()]), queryImpl.getOffset(), queryImpl.getLimit());
   }
 
   /**
@@ -301,21 +304,38 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
    */
   public void remove(String id) {
     Connection conn = null;
-    PreparedStatement s = null;
+    PreparedStatement s1 = null;
+    PreparedStatement s2 = null;
     try {
       conn = borrowConnection();
-      s = conn.prepareStatement("delete from oc_workflow where workflow_id=?");
-      s.setString(1, id);
-      s.executeUpdate();
+      conn.setAutoCommit(false);
+      s1 = conn.prepareStatement("delete from oc_workflow where workflow_id=?");
+      s2 = conn.prepareStatement("delete from oc_workflow_element where workflow_id=?");
+      s1.setString(1, id);
+      s2.setString(1, id);
+      s1.executeUpdate();
+      s2.executeUpdate();
+      conn.commit();
     } catch (SQLException e) {
+      try {
+        conn.rollback();
+      } catch (SQLException e1) {
+        throw new RuntimeException(e);
+      }
       throw new RuntimeException(e);
     } finally {
-      if (s != null)
+      if (s1 != null)
         try {
-          s.close();
+          s1.close();
         } catch (SQLException e) {
           throw new RuntimeException(e);
         }
+        if (s2 != null)
+          try {
+            s2.close();
+          } catch (SQLException e) {
+            throw new RuntimeException(e);
+          }
       returnConnection(conn);
     }
   }
@@ -327,48 +347,92 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
    */
   public void update(WorkflowInstance instance) {
     Connection conn = null;
-    PreparedStatement s = null;
+    PreparedStatement updateStatment = null;
+    PreparedStatement deleteElementsStatement = null;
+    PreparedStatement addElementsStatement = null;
     try {
       conn = borrowConnection();
+      conn.setAutoCommit(false);
       String xml = WorkflowBuilder.getInstance().toXml(instance);
+      
+      // Get the field values to store
+      MediaPackage mp = instance.getCurrentMediaPackage();
+      String mediaPackageId = null;
+      String episodeId = null;
+      String seriesId = null;
+      String text = null;
+      if (mp != null) {
+        mediaPackageId = mp.getIdentifier().toString();
+        episodeId = findEpisodeId(instance.getSourceMediaPackage());
+        seriesId = findSeriesId(instance.getSourceMediaPackage());
+        text = getDublinCoreText(instance.getSourceMediaPackage());
+      }
+      
       if (exists(instance.getId(), conn)) {
         // Update the workflow (TODO: Update the rest of the fields? Will the dublin core fields change in the middle of
         // a workflow?)
-        s = conn.prepareStatement("update oc_workflow set workflow_xml=?, workflow_state=? where workflow_id=?");
-        s.setString(1, xml);
-        s.setString(2, instance.getState().name().toLowerCase());
-        s.setString(3, instance.getId());
-        s.execute();
+        updateStatment = conn.prepareStatement("update oc_workflow set workflow_xml=?, workflow_state=? where workflow_id=?");
+        updateStatment.setString(1, xml);
+        updateStatment.setString(2, instance.getState().name().toLowerCase());
+        updateStatment.setString(3, instance.getId());
+        updateStatment.execute();
       } else {
         // Add it
-        MediaPackage mp = instance.getCurrentMediaPackage();
-        String mediaPackageId = null;
-        String episodeId = null;
-        String seriesId = null;
-        String text = null;
-        if (mp != null) {
-          mediaPackageId = mp.getIdentifier().toString();
-          episodeId = findEpisodeId(instance.getSourceMediaPackage());
-          seriesId = findSeriesId(instance.getSourceMediaPackage());
-          text = getDublinCoreText(instance.getSourceMediaPackage());
-        }
-        s = conn.prepareStatement("insert into oc_workflow values(?, ?, ?, ?, ?, ?, ?, ?)");
-        s.setString(1, instance.getId());
-        s.setString(2, mediaPackageId);
-        s.setString(3, instance.getState().name().toLowerCase());
-        s.setString(4, episodeId);
-        s.setString(5, seriesId);
-        s.setString(6, text);
-        s.setString(7, xml);
-        s.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
-        s.execute();
+        updateStatment = conn.prepareStatement("insert into oc_workflow values(?, ?, ?, ?, ?, ?, ?, ?)");
+        updateStatment.setString(1, instance.getId());
+        updateStatment.setString(2, mediaPackageId);
+        updateStatment.setString(3, instance.getState().name().toLowerCase());
+        updateStatment.setString(4, episodeId);
+        updateStatment.setString(5, seriesId);
+        updateStatment.setString(6, text);
+        updateStatment.setString(7, xml);
+        updateStatment.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+        updateStatment.execute();
       }
+      // Update the elements table
+      deleteElementsStatement = conn.prepareStatement("delete from oc_workflow_element where workflow_id=?");
+      deleteElementsStatement.setString(1, instance.getId());
+      deleteElementsStatement.execute();
+      addElementsStatement = conn.prepareStatement("insert into oc_workflow_element values(?, ?, ?, ?, ?)");
+      if(mp != null) {
+        for(Attachment att : mp.getAttachments()) {
+          addElementsStatement.setString(1, instance.getId());
+          addElementsStatement.setString(2, mediaPackageId);
+          addElementsStatement.setString(3, att.getIdentifier());
+          addElementsStatement.setString(4, "attachment");
+          addElementsStatement.setString(5, att.getFlavor().toString());
+          addElementsStatement.execute();
+        }
+        for(Catalog cat : mp.getCatalogs()) {
+          addElementsStatement.setString(1, instance.getId());
+          addElementsStatement.setString(2, mediaPackageId);
+          addElementsStatement.setString(3, cat.getIdentifier());
+          addElementsStatement.setString(4, "catalog");
+          addElementsStatement.setString(5, cat.getFlavor().toString());
+          addElementsStatement.execute();
+        }
+        for(Track track : mp.getTracks()) {
+          addElementsStatement.setString(1, instance.getId());
+          addElementsStatement.setString(2, mediaPackageId);
+          addElementsStatement.setString(3, track.getIdentifier());
+          addElementsStatement.setString(4, "track");
+          addElementsStatement.setString(5, track.getFlavor().toString());
+          addElementsStatement.execute();
+        }
+      }
+      // Commit the transaction
+      conn.commit();
     } catch (Exception e) {
+      try {
+        conn.rollback();
+      } catch (SQLException e1) {
+        throw new RuntimeException(e1);
+      }
       throw new RuntimeException(e);
     } finally {
-      if (s != null)
+      if (updateStatment != null)
         try {
-          s.close();
+          updateStatment.close();
         } catch (SQLException e) {
           throw new RuntimeException(e);
         }
@@ -510,5 +574,4 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
   public void setDataSource(DataSource dataSource) {
     this.dataSource = dataSource;
   }
-
 }

@@ -59,7 +59,7 @@
         <module>opencast-runtime-info-ui</module>
         <module>opencast-search-service-api</module>
         <module>opencast-search-service-impl</module>
-        <module>opencast-stream</module>
+        <!-- <module>opencast-stream</module> -->
         <module>opencast-util</module>
         <module>opencast-workflow-service-api</module>
         <module>opencast-workflow-service-impl</module>
@@ -106,7 +106,7 @@
         <module>opencast-runtime-info-ui</module>
         <module>opencast-search-service-api</module>
         <module>opencast-search-service-impl</module>
-        <module>opencast-stream</module>
+        <!-- <module>opencast-stream</module> -->
         <module>opencast-util</module>
         <module>opencast-workflow-service-api</module>
         <module>opencast-workflow-service-impl</module>
@@ -150,7 +150,7 @@
         <module>opencast-runtime-info-ui</module>
         <module>opencast-search-service-api</module>
         <module>opencast-search-service-impl</module>
-        <module>opencast-stream</module>
+        <!-- <module>opencast-stream</module> -->
         <module>opencast-util</module>
         <module>opencast-workflow-service-api</module>
         <module>opencast-workflow-service-impl</module>

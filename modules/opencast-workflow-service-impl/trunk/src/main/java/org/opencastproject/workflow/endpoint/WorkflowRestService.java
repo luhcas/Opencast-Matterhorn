@@ -165,13 +165,15 @@ public class WorkflowRestService {
     if(offset >0) offset--; // The service is zero based
     WorkflowSet set = null;
     if(text == null && state == null) {
-      set = service.getWorkflowsByDate(offset, limit);
+      set = service.getWorkflowInstances(service.newWorkflowQuery().withOffset(offset).withLimit(limit));
     } else if(text == null) {
-      set = service.getWorkflowsInState(State.valueOf(state.toUpperCase()), offset, limit);
+      set = service.getWorkflowInstances(service.newWorkflowQuery()
+              .withState(State.valueOf(state.toUpperCase())).withOffset(offset).withLimit(limit));
     } else if(state == null) {
-      set = service.getWorkflowsByText(text, offset, limit);
+      set = service.getWorkflowInstances(service.newWorkflowQuery().withText(text).withOffset(offset).withLimit(limit));
     } else {
-      set = service.getWorkflowsByTextAndState(State.valueOf(state.toUpperCase()), text, offset, limit);
+      set = service.getWorkflowInstances(service.newWorkflowQuery().withText(text)
+              .withState(State.valueOf(state.toUpperCase())).withOffset(offset).withLimit(limit));
     }
     
     if("json".equals(output)) {
@@ -253,14 +255,17 @@ public class WorkflowRestService {
   }
 
   @SuppressWarnings("unchecked")
-  protected JSONObject getWorkflowInstanceAsJson(WorkflowInstance workflow, boolean includeDublinCoreFields) {
+  protected JSONObject getWorkflowInstanceAsJson(WorkflowInstance workflow, boolean includeDublinCoreFields) throws Exception {
     String mediaPackageTitle = getDublinCoreProperty(getDublinCore(workflow.getSourceMediaPackage()),
             DublinCoreCatalog.PROPERTY_TITLE);
 
     JSONObject jsInstance = new JSONObject();
     jsInstance.put("workflow_id", workflow.getId());
     jsInstance.put("workflow_title", workflow.getTitle());
-    jsInstance.put("workflow_current_operation", workflow.getCurrentOperation().getName());
+    WorkflowOperationInstance opInstance = workflow.getCurrentOperation();
+    if(opInstance != null) {
+      jsInstance.put("workflow_current_operation", opInstance.getName());
+    }
     jsInstance.put("workflow_state", workflow.getState().name().toLowerCase());
     Set<WorkflowConfiguration> configs = workflow.getConfigurations();
     jsInstance.put("configuration", getConfigsAsJson(configs));

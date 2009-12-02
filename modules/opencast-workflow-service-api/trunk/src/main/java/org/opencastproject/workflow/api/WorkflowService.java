@@ -16,7 +16,6 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.workflow.api.WorkflowInstance.State;
 
 import java.util.Map;
 
@@ -40,88 +39,101 @@ public interface WorkflowService {
    */
   WorkflowInstance getWorkflowById(String workflowId);
 
-  /**
-   * Gets {@link WorkflowInstace}s associated with a media package ID.
-   */
-  WorkflowSet getWorkflowsByMediaPackage(String mediaPackageId);
+//  /**
+//   * Gets {@link WorkflowInstace}s associated with a media package ID.
+//   */
+//  WorkflowSet getWorkflowsByMediaPackage(String mediaPackageId);
+//
+//  /**
+//   * List all {@link WorkflowInstance}s that are currently in the given {@link State}.
+//   * 
+//   * TODO Implement paging
+//   * 
+//   * @return The list of {@link WorkflowInstance}s in this {@link State}.
+//   */
+//  WorkflowSet getWorkflowsInState(State state, int offset, int limit);
+//
+//  /**
+//   * Returns the {@link WorkflowInstance}s ordered by date (descending).
+//   * 
+//   * @param offset
+//   *          starting position of the result set
+//   * @param limit
+//   *          the maximum size of the result set
+//   * @return the resultset
+//   * @throws WorkflowDatabaseException
+//   *           if the lookup fails
+//   */
+//  WorkflowSet getWorkflowsByDate(int offset, int limit) throws WorkflowDatabaseException;
+//
+//  /**
+//   * Returns the {@link WorkflowInstance}s deal with the specified episode.
+//   * 
+//   * @param episodeId
+//   *          the episode identifier
+//   * @return the resultset
+//   * @throws WorkflowDatabaseException
+//   *           if the lookup fails
+//   */
+//  WorkflowSet getWorkflowsByEpisode(String episodeId) throws WorkflowDatabaseException;
+//
+//  /**
+//   * Returns the {@link WorkflowInstance}s deal with the specified series.
+//   * 
+//   * @param seriesId
+//   *          the the series identifier
+//   * @return the resultset
+//   * @throws WorkflowDatabaseException
+//   *           if the lookup fails
+//   */
+//  WorkflowSet getWorkflowsBySeries(String seriesId) throws WorkflowDatabaseException;
+//
+//  /**
+//   * Returns the {@link WorkflowInstance}s that deal with episodes matching the specified search terms.
+//   * 
+//   * @param text
+//   *          the search term
+//   * @param offset
+//   *          starting position of the result set
+//   * @param limit
+//   *          the maximum size of the result set
+//   * @return the resultset
+//   * @throws WorkflowDatabaseException
+//   *           if the lookup fails
+//   */
+//  WorkflowSet getWorkflowsByText(String text, int offset, int limit) throws WorkflowDatabaseException;
+//
+//  /**
+//   * Returns the {@link WorkflowInstance}s that deal with episodes matching the specified search terms and are in the
+//   * specified state.
+//   * 
+//   * @param state
+//   *          the workflow state
+//   * @param text
+//   *          the search term
+//   * @param offset
+//   *          starting position of the result set
+//   * @param limit
+//   *          the maximum size of the result set
+//   * @return the resultset
+//   * @throws WorkflowDatabaseException
+//   *           if the lookup fails
+//   */
+//  WorkflowSet getWorkflowsByTextAndState(State state, String text, int offset, int limit) throws WorkflowDatabaseException;
 
   /**
-   * List all {@link WorkflowInstance}s that are currently in the given {@link State}.
-   * 
-   * TODO Implement paging
-   * 
-   * @return The list of {@link WorkflowInstance}s in this {@link State}.
+   * Finds workflow instances based on the specified query.
+   * @param query The query parameters
+   * @return The {@link WorkflowSet} containing the workflow instances matching the query parameters
    */
-  WorkflowSet getWorkflowsInState(State state, int offset, int limit);
-
+  WorkflowSet getWorkflowInstances(WorkflowQuery query);
+  
   /**
-   * Returns the {@link WorkflowInstance}s ordered by date (descending).
-   * 
-   * @param offset
-   *          starting position of the result set
-   * @param limit
-   *          the maximum size of the result set
-   * @return the resultset
-   * @throws WorkflowDatabaseException
-   *           if the lookup fails
+   * Constructs a new {@link WorkflowQuery}
+   * @return The {@link WorkflowQuery}
    */
-  WorkflowSet getWorkflowsByDate(int offset, int limit) throws WorkflowDatabaseException;
-
-  /**
-   * Returns the {@link WorkflowInstance}s deal with the specified episode.
-   * 
-   * @param episodeId
-   *          the episode identifier
-   * @return the resultset
-   * @throws WorkflowDatabaseException
-   *           if the lookup fails
-   */
-  WorkflowSet getWorkflowsByEpisode(String episodeId) throws WorkflowDatabaseException;
-
-  /**
-   * Returns the {@link WorkflowInstance}s deal with the specified series.
-   * 
-   * @param seriesId
-   *          the the series identifier
-   * @return the resultset
-   * @throws WorkflowDatabaseException
-   *           if the lookup fails
-   */
-  WorkflowSet getWorkflowsBySeries(String seriesId) throws WorkflowDatabaseException;
-
-  /**
-   * Returns the {@link WorkflowInstance}s that deal with episodes matching the specified search terms.
-   * 
-   * @param text
-   *          the search term
-   * @param offset
-   *          starting position of the result set
-   * @param limit
-   *          the maximum size of the result set
-   * @return the resultset
-   * @throws WorkflowDatabaseException
-   *           if the lookup fails
-   */
-  WorkflowSet getWorkflowsByText(String text, int offset, int limit) throws WorkflowDatabaseException;
-
-  /**
-   * Returns the {@link WorkflowInstance}s that deal with episodes matching the specified search terms and are in the
-   * specified state.
-   * 
-   * @param state
-   *          the workflow state
-   * @param text
-   *          the search term
-   * @param offset
-   *          starting position of the result set
-   * @param limit
-   *          the maximum size of the result set
-   * @return the resultset
-   * @throws WorkflowDatabaseException
-   *           if the lookup fails
-   */
-  WorkflowSet getWorkflowsByTextAndState(State state, String text, int offset, int limit) throws WorkflowDatabaseException;
-
+  WorkflowQuery newWorkflowQuery();
+  
   /**
    * Creates a new workflow instance and starts the workflow.
    * 
@@ -204,5 +216,4 @@ public interface WorkflowService {
    *          The title of the {@link WorkflowDefinition} to unregister
    */
   void unregisterWorkflowDefinition(String title);
-
 }
