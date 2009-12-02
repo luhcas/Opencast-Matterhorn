@@ -15,7 +15,6 @@
  */
 package org.opencastproject.util.doc;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +28,7 @@ import java.util.Vector;
  * @see DocRestData if you want to create rest endpoint docs
  */
 public class DocData {
-
-  protected static final Logger logger = LoggerFactory.getLogger(DocData.class);
+  private static final Logger logger = LoggerFactory.getLogger(DocData.class);
   protected static final String TEMPLATE_DEFAULT = "/org/opencastproject/templates/template.txt";
 
   /**
@@ -63,6 +61,7 @@ public class DocData {
         this.notes.add(notes[i]);
       }
     }
+    logger.info("Created new Doc: " + name);
   }
 
   /**

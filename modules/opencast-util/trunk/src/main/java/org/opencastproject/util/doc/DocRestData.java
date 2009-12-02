@@ -30,9 +30,6 @@ public class DocRestData extends DocData {
 
   public static final String TEMPLATE_DEFAULT = "/org/opencastproject/templates/rest/template.xhtml";
 
-  protected static RestEndpointHolder writeHolder = new RestEndpointHolder(RestEndpoint.Type.WRITE.name(), "Write");
-  protected static RestEndpointHolder readHolder = new RestEndpointHolder(RestEndpoint.Type.READ.name(), "Read");
-
   protected List<RestEndpointHolder> holders;
 
   /**
@@ -55,8 +52,8 @@ public class DocRestData extends DocData {
     this.meta.put("url", url);
     // create the endpoint holders
     this.holders = new Vector<RestEndpointHolder>(2);
-    this.holders.add(DocRestData.readHolder.duplicate());
-    this.holders.add(DocRestData.writeHolder.duplicate());
+    this.holders.add( new RestEndpointHolder(RestEndpoint.Type.WRITE.name(), "Write") );
+    this.holders.add( new RestEndpointHolder(RestEndpoint.Type.READ.name(), "Read") );
   }
 
   @Override
