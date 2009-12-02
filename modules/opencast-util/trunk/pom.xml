@@ -67,7 +67,7 @@
             <Export-Package> org.opencastproject.util.* </Export-Package>
             <Private-Package> META-INF.services, de.schlichtherle.*</Private-Package>
             <Import-Package> !com.sun.*, *;resolution:=optional </Import-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
+            <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
           </instructions>
         </configuration>
