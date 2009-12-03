@@ -31,6 +31,7 @@ import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
@@ -108,7 +109,9 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
       max = 50;
     }
     // TODO make this actually get the captionable items using get workflows with state and something else
-    WorkflowSet wfs = workflowService.getWorkflowsInState(State.PAUSED, start, max); // .getWorkflowsByDate(start, max);
+    WorkflowQuery q = workflowService.newWorkflowQuery();
+    q.withState(State.PAUSED).withLimit(max).withOffset(start);
+    WorkflowSet wfs = workflowService.getWorkflowInstances(q);
     int total = (int) wfs.size();
     WorkflowInstance[] workflows = wfs.getItems();
     for (WorkflowInstance workflow : workflows) {
