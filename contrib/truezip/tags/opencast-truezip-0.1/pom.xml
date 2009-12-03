@@ -1,0 +1,66 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.opencastproject</groupId>
+  <artifactId>opencast-truezip</artifactId>
+  <packaging>bundle</packaging>
+  <name>opencast-truezip</name>
+  <version>0.1</version>
+  <dependencies>
+    <dependency>
+      <groupId>bouncycastle</groupId>
+      <artifactId>bcprov-jdk15</artifactId>
+      <version>140</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+
+  <scm>
+    <connection>scm:svn:http://source.opencastproject.org/svn/contrib/truezip/tags/opencast-truezip-0.1</connection>
+    <developerConnection>scm:svn:https://source.opencastproject.org/svn/contrib/truezip/tags/opencast-truezip-0.1</developerConnection>
+    <url>http://source.opencastproject.org/svn/contrib/truezip/tags/opencast-truezip-0.1</url>
+  </scm>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>opencast-maven2-snapshot</id>
+      <name>OC Snapshot repo</name>
+      <url>http://repository.opencastproject.org/nexus/content/repositories/snapshots</url>
+      <uniqueVersion>false</uniqueVersion>
+    </snapshotRepository>
+    <repository>
+      <id>opencast-maven2-release</id>
+      <name>OC Release repo</name>
+      <url>http://repository.opencastproject.org/nexus/content/repositories/releases</url>
+    </repository>
+  </distributionManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>1.4.3</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-Category>opencastproject</Bundle-Category>
+            <Bundle-DocURL>http://opencastproject.org/</Bundle-DocURL>
+            <Bundle-Vendor>The Opencast Project</Bundle-Vendor>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Export-Package> de.schlichtherle.* </Export-Package>
+            <Private-Package> META-INF.services </Private-Package>
+            <Import-Package> !com.sun.*, *;resolution:=optional </Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>1.5</source>
+            <target>1.5</target>
+          </configuration>
+        </plugin>
+    </plugins>
+  </build>
+</project>
