@@ -4,7 +4,7 @@
   <artifactId>opencast-truezip</artifactId>
   <packaging>bundle</packaging>
   <name>opencast-truezip</name>
-  <version>0.1</version>
+  <version>0.2-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>bouncycastle</groupId>
