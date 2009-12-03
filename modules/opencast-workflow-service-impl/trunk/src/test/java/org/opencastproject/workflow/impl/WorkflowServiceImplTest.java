@@ -37,6 +37,7 @@ import org.apache.commons.io.FileUtils;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -46,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Ignore
 public class WorkflowServiceImplTest {
 
   /** The solr root directory */
