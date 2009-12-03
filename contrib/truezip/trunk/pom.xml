@@ -12,39 +12,11 @@
     <version>0.1-SNAPSHOT</version>
   </parent>
   <dependencies>
-      <dependency>
-        <groupId>org.osgi</groupId>
-        <artifactId>osgi_R4_core</artifactId>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.osgi</groupId>
-        <artifactId>osgi_R4_compendium</artifactId>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
-      </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>bouncycastle</groupId>
       <artifactId>bcprov-jdk15</artifactId>
       <version>140</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -77,8 +49,8 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.util </Export-Package>
-            <Private-Package> META-INF.services, de.schlichtherle.*</Private-Package>
+            <Export-Package> de.schlichtherle.* </Export-Package>
+            <Private-Package> META-INF.services </Private-Package>
             <Import-Package> !com.sun.*, *;resolution:=optional </Import-Package>
           </instructions>
         </configuration>
