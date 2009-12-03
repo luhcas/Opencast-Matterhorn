@@ -54,7 +54,7 @@
     <body>
 
         <!-- fl-centered doesn't work in winXP-IE8 -->
-        <div class="fl-container-flex fl-theme-coal">
+        <div class="fl-container-850 fl-theme-coal">
             <ul class="fl-tabs fl-tabs-left">
                 <li class="fl-activeTab"><a href="../../admin/ui/recordings_upcoming.html">Recordings</a></li>
                 <li class=""><a href="../../admin/ui/agents_status.html">Capture Agents</a></li>
@@ -126,7 +126,7 @@
                 <!-- Additional Content Description -->
                 <div class="fl-container-800">
                     <div class="fl-widget">
-                        <div class="fl-widget-titlebar formbox-header folder-control">
+                        <div class="fl-widget-titlebar formbox-header folder-control" style="cursor:pointer;">
                             <a href="#_bottom" class="fl-icon inline-icon folder-icon icon-arrow-right" title="Hide/unhide additional information">Fold/Unfold additional information</a>
                             <b>Additional Description</b>
                         </div>
@@ -173,7 +173,7 @@
                                         <!--<div style="width:20%;float:left;">
                                             <input type="checkbox" name="distSakai" id="distSakai" onchange="uploadEvents.fieldChanged(this);">Sakai
                                         </div>-->
-                                        <input type="checkbox" name="distMHMM" id="distMHMM" onchange="uploadEvents.fieldChanged(this);" checked="true" style="float:left;"><span style="float:left;">&nbsp;Matterhorn Media Module</span>
+                                        <input type="checkbox" name="distMHMM" id="distMHMM" onchange="uploadEvents.fieldChanged(this);" checked="true" style="float:left;margin:3px;"><span style="float:left;">&nbsp;Matterhorn Media Module</span>
                                         <span class="fl-icon inline-icon icon-help"></span>
                                     </li>
                                     <!-- <li class="fl-fix">
@@ -206,7 +206,7 @@
                             <ul class="fl-controls-right wu-reset field-list">
                                 <li class="fl-fix">
                                     <span class="fl-label form-label"  id="label-dist" style="padding-top:3px;float:left;"><span style="color:red;">*</span><label for="mediacontent">Media file content:</label></span>
-                                    <select type="radio" name="mediacontent" id="mediacontent" onchange="uploadEvents.fieldChanged(this);" style="float:left">
+                                    <select type="radio" name="mediacontent" id="mediacontent" onchange="uploadEvents.fieldChanged(this);" style="float:left;margin:3px;">
                                         <option value="none">Choose one:</option>                                    
                                         <option value="audio">Audio</option>
                                         <option value="video/presenter">Presenter (Video)</option>

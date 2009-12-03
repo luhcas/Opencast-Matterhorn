@@ -18,16 +18,16 @@
    outline: 0.1em solid #000;
 }
 
-.fl-theme-coal {color:#000000 !important; background-color:#ebebeb !important; border-color:#000000;}
+.fl-theme-coal {color:#000000 !important; background-color:white !important; border-color:#000000;}
 .fl-theme-coal a {color: #333333 !important; font-weight:bold;}
 .fl-theme-coal a:hover {color: #999999 !important;}
 .fl-theme-coal h1 {color:#000000; border-bottom-width:0.2em; border-bottom-style:solid;} 
 .fl-theme-coal h2 {color: #666666;}
-.fl-theme-coal th {border:0.1em solid #ffffff; background-color:#dfefff !important;}
-.fl-theme-coal td {border:none;}
+.fl-theme-coal th {border:0.1em solid #999999; background-color:#dfefff !important;}
+.fl-theme-coal td {border:0.1em solid #999999 !important;}
 .fl-theme-coal .fl-textfield,
 .fl-theme-coal .fl-textarea {background-color:#ffffff; border:1px solid #000000;}
-/*.fl-theme-coal .fl-icon {background-color:#666666}*/
+.fl-theme-coal .fl-icon {background-color:none;}
 
 /* temp selector to access inline edit input fields (should use a classname but now there is none applied) */
 .fl-theme-coal .fl-inlineEdit-edit {background-color:#ebebeb !important; border:0.1em solid #ffffff; margin:-0.1em;}
@@ -56,7 +56,7 @@
 /* New syntax */
 .fl-theme-coal .fl-tabs li.fl-tabs-active,
 .fl-theme-coal .fl-tabs li.fl-tabs-active a,
-.fl-theme-coal .fl-tabs li.fl-tabs-active a:hover {background-color: #ebebeb; border-bottom-color:#ebebeb; color:#000 !important;}
+.fl-theme-coal .fl-tabs li.fl-tabs-active a:hover {background-color: white; border-bottom-color:white; color:#000 !important;}
 .fl-theme-coal .fl-tabs-content {background-color:#ebebeb; color:#000; border:1px solid #999999; border-top:none;}
 
 /* Helper: Menu */
@@ -74,7 +74,7 @@
 
 /* Helper: Widgets */
 /* Widget core */
-/*.fl-theme-coal .fl-widget {background:#333333 url(../images/themes/coal/widget-bg.png) repeat-x top left; border:1px solid #000000;} */
+.fl-theme-coal .fl-widget {background:#333333 url(../images/themes/coal/widget-bg.png) repeat-x top left; border:1px solid #000000;}                        
 .fl-theme-coal .fl-widget ul {}
 .fl-theme-coal .fl-widget h2 {color:#ffffff;}
 .fl-theme-coal .fl-widget .fl-icon-more  {background-image:url('../images/themes/coal/icon-widget-More.png'); margin-left:0px;}

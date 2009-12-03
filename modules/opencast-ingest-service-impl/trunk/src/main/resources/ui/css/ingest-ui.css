@@ -9,10 +9,9 @@ body {
     border-bottom:1px solid black;
     padding: 12px;
 }
-/*#stage{
-    margin-left:20px;
-    margin-top:20px;
-}*/
+#stage {
+    padding-left:24px;
+}
 .formbox-header {
     background: silver;
     margin-bottom: 0px;
@@ -21,7 +20,7 @@ body {
     margin-left: 10px;
 }
 .formbox-content {
-    border: 1px solid silver;
+    border: none;
 }
 .icon-arrow-right {
      background-image: url(../img/arrow-right.png);
@@ -53,16 +52,15 @@ body {
 .form-field {
     width:450px !important;
     float:left;
+    margin:3px;
 }
-.field-list li {
-    margin-bottom: 20px;
-}
+
 .wu-reset {
     margin-left:5px;
     margin-right:5px;
 }
 .fl-controls-right li {
-    margin-bottom:3px;
+    margin-bottom:4px;
 }
 .filename {
     border:1px solid silver;
@@ -179,4 +177,8 @@ body {
 }
 .form-clear {
     display:none;
+}
+
+.expandable-title :hover {
+    cursor: pointer;
 }
