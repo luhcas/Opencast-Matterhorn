@@ -15,7 +15,12 @@
  */
 package org.opencastproject.media.mediapackage.track;
 
+import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.elementbuilder.PresenterTrackBuilderPlugin;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Before;
@@ -74,6 +79,14 @@ public class TrackTest {
     assertEquals(-1, track.getDuration());
   }
 
+  /**
+   * Test method for {@link PresenterTrackBuilderPlugin#accept(URI, org.opencastproject.media.mediapackage.MediaPackageElement.Type, org.opencastproject.media.mediapackage.MediaPackageElementFlavor)}
+   * @throws Exception
+   */
+  @Test
+  public void testPresenterTrackAccept() throws Exception {
+    assertTrue(new PresenterTrackBuilderPlugin().accept(new URI("uri"), Track.TYPE, MediaPackageElements.PRESENTER_TRACK));
+  }
   /**
    * Test method for {@link org.opencastproject.media.mediapackage.track.TrackImpl#getStreams()}.
    */

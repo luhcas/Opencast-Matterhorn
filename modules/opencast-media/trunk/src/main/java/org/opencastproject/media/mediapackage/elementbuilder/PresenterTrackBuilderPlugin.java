@@ -71,7 +71,7 @@ public class PresenterTrackBuilderPlugin extends AbstractTrackBuilderPlugin {
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   public boolean accept(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
-    return type != null && flavor == null && MediaPackageElement.Type.Track.equals(type)
+    return type != null && flavor != null && MediaPackageElement.Type.Track.equals(type)
             && MediaPackageElements.PRESENTER_TRACK.equals(flavor);
   }
 
