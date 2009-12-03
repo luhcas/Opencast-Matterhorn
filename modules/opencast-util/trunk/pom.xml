@@ -30,12 +30,11 @@
       <artifactId>commons-io</artifactId>
       <scope>provided</scope>
     </dependency>
-    <!-- not sure if this should be embedded or not -->
+    <!-- Embedding opencast version of truezip -->
     <dependency>
-      <groupId>bouncycastle</groupId>
-      <artifactId>bcprov-jdk15</artifactId>
-      <version>140</version>
-      <scope>compile</scope>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-truezip</artifactId>
+      <version>0.1</version>
     </dependency>
     <!-- logging -->
     <dependency>
@@ -55,6 +54,13 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <scm>
+    <connection>scm:svn:http://source.opencastproject.org/svn/modules/opencast-util/trunk</connection>
+    <developerConnection>scm:svn:https://source.opencastproject.org/svn/modules/opencast-util/trunk</developerConnection>
+    <url>https://source.opencastproject.org/svn/modules/opencast-util/trunk</url>
+  </scm>
+
   <build>
     <plugins>
       <plugin>
@@ -66,9 +72,9 @@
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Export-Package> org.opencastproject.util.* </Export-Package>
-            <Private-Package> META-INF.services, de.schlichtherle.*</Private-Package>
+            <Private-Package> META-INF.services </Private-Package>
             <Import-Package> !com.sun.*, *;resolution:=optional </Import-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=true;groupId=!bouncycastle</Embed-Dependency>
+            <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
           </instructions>
         </configuration>
