@@ -21,8 +21,9 @@
   </dependencies>
 
   <scm>
-    <connection>http://source.opencastproject.org/svn/contrib/truezip/trunk</connection>
-    <developerConnection>https://source.opencastproject.org/svn/contrib/truezip/trunk</developerConnection>
+    <connection>scm:svn:http://source.opencastproject.org/svn/contrib/truezip/trunk</connection>
+    <developerConnection>scm:svn:https://source.opencastproject.org/svn/contrib/truezip/trunk</developerConnection>
+    <url>http://source.opencastproject.org/svn/contrib/truezip/trunk</url>
   </scm>
 
   <distributionManagement>
