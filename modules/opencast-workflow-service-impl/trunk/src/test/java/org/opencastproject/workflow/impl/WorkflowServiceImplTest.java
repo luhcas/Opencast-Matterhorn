@@ -28,6 +28,7 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
 
@@ -37,7 +38,6 @@ import org.apache.commons.io.FileUtils;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -47,7 +47,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Ignore
 public class WorkflowServiceImplTest {
 
   /** The solr root directory */
@@ -281,10 +280,10 @@ public class WorkflowServiceImplTest {
 
   @Test
   public void testGetWorkflowInstanceByMetadataCatalog() {
+    WorkflowQuery q = service.newWorkflowQuery().withElement("catalog", "metadata/dublincore", true);
     // Ensure that the database doesn't have any workflow instances
     Assert.assertEquals(0, service.countWorkflowInstances());
-    Assert.assertEquals(0, service.getWorkflowInstances(
-            service.newWorkflowQuery().withElement("catalog", "metadata/dublincore", true)).size());
+    Assert.assertEquals(0, service.getWorkflowInstances(q).size());
 
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
 
@@ -296,9 +295,8 @@ public class WorkflowServiceImplTest {
       } catch (InterruptedException e) {
       }
     }
-
-    WorkflowSet workflowsInDb = service.getWorkflowInstances(service.newWorkflowQuery().withElement("catalog",
-            "metadata/dublincore", true));
+    // reuse our original query, which returned zero before we started a new workflow
+    WorkflowSet workflowsInDb = service.getWorkflowInstances(q);
     Assert.assertEquals(1, workflowsInDb.getItems().length);
 
     // cleanup the database
@@ -311,10 +309,11 @@ public class WorkflowServiceImplTest {
 
   @Test
   public void testGetWorkflowInstanceByMissingMetadataCatalog() {
+    WorkflowQuery q = service.newWorkflowQuery().withElement("catalog", "metadata/dublincore", false);
+    
     // Ensure that the database doesn't have any workflow instances
     Assert.assertEquals(0, service.countWorkflowInstances());
-    Assert.assertEquals(0, service.getWorkflowInstances(
-            service.newWorkflowQuery().withElement("catalog", "metadata/dublincore", false)).size());
+    Assert.assertEquals(0, service.getWorkflowInstances(q).size());
 
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
 
@@ -326,8 +325,8 @@ public class WorkflowServiceImplTest {
       } catch (InterruptedException e) {
       }
     }
-
-    WorkflowSet workflowsInDb = service.getWorkflowInstances(service.newWorkflowQuery().withElement("catalog", "something/nonexistent", false));
+    WorkflowQuery queryUnmatched = service.newWorkflowQuery().withElement("catalog", "something/nonexistent", false);
+    WorkflowSet workflowsInDb = service.getWorkflowInstances(queryUnmatched);
     Assert.assertEquals(1, workflowsInDb.getItems().length);
 
     // cleanup the database

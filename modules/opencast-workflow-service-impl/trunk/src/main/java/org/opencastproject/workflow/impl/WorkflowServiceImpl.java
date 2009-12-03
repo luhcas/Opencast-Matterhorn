@@ -502,7 +502,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         } else {
           wfi.setState(State.SUCCEEDED.name());
         }
-        update(wfi);
+        if( ! wfi.getState().equals(State.SUCCEEDED)) { // there's no need to re-update an already succeeded instance
+          update(wfi);
+        }
       }
     });
     threadMap.put(wfi.getId(), t);

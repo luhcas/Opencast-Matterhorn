@@ -130,6 +130,7 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
   protected void returnConnection(Connection conn) {
     try {
       if (conn != null)
+        conn.setAutoCommit(true);
         conn.close();
     } catch (SQLException e) {
       logger.error("Unable to close database connection:" + e.getMessage());
@@ -147,6 +148,7 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     ResultSet r = null;
     try {
       conn = borrowConnection();
+      conn.setAutoCommit(true);
       s = conn.prepareStatement("select workflow_xml from oc_workflow where workflow_id=?");
       s.setString(1, workflowId);
       r = s.executeQuery();
@@ -203,6 +205,7 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     ResultSet r = null;
     try {
       conn = borrowConnection();
+      conn.setAutoCommit(true);
       s = conn.prepareStatement(query);
       if (params != null) {
         for (int i = 0; i < params.length; i++) {
@@ -351,10 +354,29 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#update(org.opencastproject.workflow.api.WorkflowInstance)
    */
   public void update(WorkflowInstance instance) {
+    // Try a maximum of three times.
+    int currentAttempt = 0;
+    int maxAttempts = 3;
+    Exception latestException = null;
+    while(currentAttempt < maxAttempts) {
+      try {
+        up(instance);
+        return;
+      } catch (Exception e) {
+        logger.warn("Exception updating workflow instance, trying update again.");
+        latestException = e;
+        currentAttempt++;
+      }
+    }
+    throw new RuntimeException(latestException);
+  }
+
+  
+  protected void up(WorkflowInstance instance) throws Exception {
     Connection conn = null;
     PreparedStatement updateStatment = null;
     PreparedStatement deleteElementsStatement = null;
-    PreparedStatement addElementsStatement = null;
+    PreparedStatement addElementsStatement = null;    
     try {
       conn = borrowConnection();
       conn.setAutoCommit(false);
@@ -447,7 +469,7 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       returnConnection(conn);
     }
   }
-
+  
   protected String getFlavor(MediaPackageElement element) {
     MediaPackageElementFlavor flavor = element.getFlavor();
     String flavorAsString = null;
