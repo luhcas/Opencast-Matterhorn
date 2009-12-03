@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class WorkflowServiceImplTest {
 
@@ -80,7 +81,8 @@ public class WorkflowServiceImplTest {
         return set;
       }
     };
-    cp = JdbcConnectionPool.create("jdbc:h2:target/testdb;LOCK_MODE=1", "sa", "sa");
+    String randomId = UUID.randomUUID().toString();
+    cp = JdbcConnectionPool.create("jdbc:h2:target/" + randomId + ";LOCK_MODE=1", "sa", "sa");
     WorkflowServiceImplDaoDatasourceImpl dao = new WorkflowServiceImplDaoDatasourceImpl(cp);
     dao.activate(null);
     service.setDao(dao);
