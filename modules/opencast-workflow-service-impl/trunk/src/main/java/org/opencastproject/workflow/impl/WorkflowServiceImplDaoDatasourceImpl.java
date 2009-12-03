@@ -314,11 +314,11 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     try {
       conn = borrowConnection();
       conn.setAutoCommit(false);
-      s1 = conn.prepareStatement("delete from oc_workflow where workflow_id=?");
-      s2 = conn.prepareStatement("delete from oc_workflow_element where workflow_id=?");
+      s1 = conn.prepareStatement("delete from oc_workflow_element where workflow_id=?");
+      s2 = conn.prepareStatement("delete from oc_workflow where workflow_id=?");
       s1.setString(1, id);
       s2.setString(1, id);
-      s1.executeUpdate();
+      s1.executeUpdate(); // The order is important to avoid DB deadlocks
       s2.executeUpdate();
       conn.commit();
     } catch (SQLException e) {

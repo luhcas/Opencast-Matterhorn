@@ -37,7 +37,6 @@ import org.apache.commons.io.FileUtils;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -47,7 +46,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Ignore
 public class WorkflowServiceImplTest {
 
   /** The solr root directory */
@@ -81,7 +79,7 @@ public class WorkflowServiceImplTest {
         return set;
       }
     };
-    cp = JdbcConnectionPool.create("jdbc:h2:target/testdb", "sa", "sa");
+    cp = JdbcConnectionPool.create("jdbc:h2:target/testdb;LOCK_MODE=1", "sa", "sa");
     WorkflowServiceImplDaoDatasourceImpl dao = new WorkflowServiceImplDaoDatasourceImpl(cp);
     dao.activate(null);
     service.setDao(dao);
