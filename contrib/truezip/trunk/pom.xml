@@ -4,7 +4,7 @@
   <artifactId>opencast-truezip</artifactId>
   <packaging>bundle</packaging>
   <name>opencast-truezip</name>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.1-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>bouncycastle</groupId>
@@ -30,7 +30,7 @@
     <repository>
       <id>opencast-maven2-release</id>
       <name>OC Release repo</name>
-      <url>http://repository.opencastproject.org/nexus/content/repositories/release</url>
+      <url>http://repository.opencastproject.org/nexus/content/repositories/releases</url>
     </repository>
   </distributionManagement>
 
