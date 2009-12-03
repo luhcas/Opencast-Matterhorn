@@ -29,6 +29,8 @@ import org.gstreamer.event.EOSEvent;
 import org.opencastproject.capture.api.AgentState;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.RecordingState;
+import org.opencastproject.capture.api.StateService;
+import org.opencastproject.capture.impl.jobs.IngestJob;
 import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
@@ -36,11 +38,10 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
+import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-// TODO: Eliminate dependency with MediaInspector in pom.xml, if it is not finally used
 
 /**
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines
@@ -52,16 +53,14 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   private Pipeline pipe = null;
   private ConfigurationManager config = ConfigurationManager.getInstance();
 
-  /** Used by the AgentStatusJob class to pull a pointer to the CaptureAgentImpl so it can poll for status updates */
-  public static final String SERVICE = "status_service";
   /** The agent's current state.  Used for logging */
-  private String agent_state = AgentState.IDLE;
+  private String agent_state = null;
   /** A pointer to the current capture directory.  Note that this should be null except for when we are actually capturing */
   private File current_capture_dir = null;
   /** The properties object for the current capture.  NOTE THAT THIS WILL BE NULL IF THE AGENT IS NOT CURRENTLY CAPTURING. */
   private Properties current_capture_properties = null;
-  /** A pointer to the state singleton.  This is where all of the recording state information should be kept. */
-  private StateSingleton status_service = null;
+  /** A pointer to the state service.  This is where all of the recording state information should be kept. */
+  StateService state_service = null;
 
   /**
    * Called when the bundle is activated.
@@ -69,10 +68,33 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   public void activate(ComponentContext cc) {
     logger.info("Starting CaptureAgentImpl.");
-    status_service = StateSingleton.getInstance();
-    status_service.setCaptureAgent(this);
     setAgentState(AgentState.IDLE);
   }
+
+  /**
+   * Gets the state service this capture agent is pushing its state to
+   * @return The service this agent pushes its state to.
+   */
+  public StateService getStateService() {
+    return state_service;
+  }
+
+  /**
+   * Sets the state service this capture agent should push its state to.
+   * @param service The service to push the state information to
+   */
+  public void setStateService(StateService service) {
+    state_service = service;
+    setAgentState(agent_state);
+  }
+
+  /**
+   * Unsets the state service which this capture agent should push its state to.
+   */
+  public void unsetStateService() {
+    state_service = null;
+  }
+  
 
   /**
    * {@inheritDoc}
@@ -167,6 +189,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         logger.warn("{} was set, but not {}.", CaptureParameters.RECORDING_ROOT_URL, CaptureParameters.RECORDING_ID);
         String[] pathAry = merged.getProperty(CaptureParameters.RECORDING_ROOT_URL).split(File.separator);
         recordingID = pathAry[pathAry.length-1];
+        merged.put(CaptureParameters.RECORDING_ID, recordingID);
       }
     } else {
       //If there is a recording ID use it, otherwise it's unscheduled so just grab a timestamp
@@ -187,13 +210,15 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         FileUtils.forceMkdir(current_capture_dir);
       } catch (IOException e) {
         logger.error("IOException creating required directory {}.", current_capture_dir.toString());
-        status_service.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+        setAgentState(AgentState.IDLE);
+        setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
         return false;
       }
       //Should have been created.  Let's make sure of that.
       if (!current_capture_dir.exists()) {
         logger.error("Unable to start capture, could not create required directory {}.", current_capture_dir.toString());
-        status_service.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+        setAgentState(AgentState.IDLE);
+        setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
         return false;
       }
     }
@@ -202,6 +227,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     if (pipe == null) {
       logger.error("Capture could not start, pipeline was null!");
+      setAgentState(AgentState.IDLE);
       return false;
     }
 
@@ -235,7 +261,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     //Gst.main();
     //Gst.deinit();
 
-    status_service.setRecordingState(recordingID, RecordingState.CAPTURING);
+    setRecordingState(recordingID, RecordingState.CAPTURING);
     setAgentState(AgentState.CAPTURING);
     return true;
   }
@@ -247,10 +273,21 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public boolean stopCapture() {
     if (pipe == null) {
       logger.warn("Pipeline is null, unable to stop capture.");
+      setAgentState(AgentState.IDLE);
       return false;
     }
     File stopFlag = new File(current_capture_dir, "capture.stopped");
-    
+
+    //Take the properties out of the class level variable so that we can start capturing again immediately without worrying about overwriting them.
+    Properties cur = current_capture_properties;
+    current_capture_properties = null;
+
+    //Update the states of everything.
+    String recordingID = cur.getProperty(CaptureParameters.RECORDING_ID);
+    setRecordingState(recordingID, RecordingState.CAPTURE_FINISHED);
+    setAgentState(AgentState.IDLE);
+    current_capture_dir = null;
+
     try {
       // Sending End Of Stream event to the Pipeline so its components stop appropriately
       pipe.sendEvent(new EOSEvent());
@@ -261,33 +298,38 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
       stopFlag.createNewFile();
     } catch (IOException e) {
+      setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
       logger.error("IOException: Could not create \"capture.stopped\" file: {}.", e.getMessage());
       //TODO:  Is this capture.stopped file required for ingest to work?  Then it should die here rather than trying to build the manifest.
     }
 
-    //Take the properties out of the class level variable so that we can start capturing again immediately without worrying about overwriting them.
-    Properties cur = current_capture_properties;
-    current_capture_properties = null;
-
-    //Update the states of everything.
-    String recordingID = cur.getProperty(CaptureParameters.RECORDING_ID);
-    status_service.setRecordingState(recordingID, RecordingState.CAPTURE_FINISHED);
-    setAgentState(AgentState.IDLE);
-    current_capture_dir = null;
-
-    /*
     try {
-      IngestJob.scheduleJob(cur);
+      IngestJob.scheduleJob(cur, state_service);
     } catch (IOException e) {
       logger.error("IOException while attempting to schedule ingest for recording {}.", recordingID);
-      result = "IOException while attempting to schedule ingest for recording " + recordingID + ".";
+      setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
+      return false;
     } catch (SchedulerException e) {
       logger.error("SchedulerException while attempting to schedule ingest for recording {}.", recordingID);
-      result = "SchedulerException while attempting to schedule ingest for recording " + recordingID + ".";
+      setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
+      return false;
     }
-    */
 
     return true;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.CaptureAgent#stopCapture()
+   */
+  public boolean stopCapture(String recordingID) {
+    if (current_capture_properties != null) {
+      String current_id =current_capture_properties.getProperty(CaptureParameters.RECORDING_ID); 
+      if (recordingID.equals(current_id)) {
+        return stopCapture();
+      }
+    }
+    return false;
   }
 
   /**
@@ -296,17 +338,30 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * @param state The state for the agent.  Defined in AgentState.
    * @see org.opencastproject.capture.api.AgentState
    */
-  private synchronized void setAgentState(String state) {
+  private void setAgentState(String state) {
     agent_state = state;
+    if (state_service != null) {
+      state_service.setAgentState(agent_state);
+    }
   }
 
   /**
-   * Gets the machine's current state
-   * @return A state (should be defined in AgentState)
-   * @see org.opencastproject.capture.api.AgentState
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.CaptureAgent#getAgentState()
    */
   public String getAgentState() {
     return agent_state;
+  }
+
+  /**
+   * Convenience method which wraps calls to the state_service to make sure it's not going to null pointer on me.
+   * @param recordingID The ID of the recording to update
+   * @param state The state to update the recording to
+   */
+  private void setRecordingState(String recordingID, String state) {
+    if (state_service != null) {
+      state_service.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+    }
   }
 
   public void updated(Dictionary props) throws ConfigurationException {

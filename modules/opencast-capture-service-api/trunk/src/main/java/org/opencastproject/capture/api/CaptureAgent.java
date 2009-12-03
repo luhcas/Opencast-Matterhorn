@@ -55,5 +55,20 @@ public interface CaptureAgent {
    * @return A string indicating the success or fail of the action
    */
   boolean stopCapture();
+
+  /**
+   * Stops the capture
+   * This version takes in a recording ID and only stops the recording if that ID matches the current recording's ID.
+   * @param recordingID The ID of the recording you wish to stop
+   * @return A string indicating the success or fail of the action
+   */
+  boolean stopCapture(String recordingID);
+
+  /**
+   * Gets the machine's current state
+   * @return A state (should be defined in AgentState)
+   * @see org.opencastproject.capture.api.AgentState
+   */
+  String getAgentState();
 }
 

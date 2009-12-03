@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 
 public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler, ManagedService {
 
-  /** A constant which defines the key to retrieve a pointer to this object in the Quartz job classes */
+  /** A constant which defines the key to retrieve a pointer to this object in the Quartz job classes.  This is required for PollCalendarJob to know who to push updated calendar data to */
   public static final String SCHEDULER = "scheduler";
 
   /** The properties of the scheduler for the calendar polling system */
@@ -106,7 +106,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.capture.api.StatusService#init()
+   * @see org.opencastproject.capture.api.StateService#init()
    */
   public void init() {
     config = ConfigurationManager.getInstance();
@@ -184,7 +184,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.capture.api.StatusService#updateCalendar()
+   * @see org.opencastproject.capture.api.StateService#updateCalendar()
    */
   public void updateCalendar() {
 
@@ -209,11 +209,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Reads in a calendar from either an HTTP or local source and turns it into a cron4j Calendar object
+   * Reads in a calendar from either an HTTP or local source and turns it into a iCal4j Calendar object
    * @param url The URL to read the calendar data from
    * @return A calendar object, or null in the case of an error or to indicate that no update should be performed
    */
-  public Calendar parseCalendar(URL url) {
+  private Calendar parseCalendar(URL url) {
 
     String calendarString = null;
     try {
@@ -378,12 +378,12 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         }
 
         if (duration != null && duration.getDuration().isNegative()) {
-          log.warn("Event {} has a negative duration, skipping.", event.getName());
+          log.warn("Event {} has a negative duration, skipping.", start.toString());
           continue;
         }
 
         if (start.before(new Date())) {
-          log.warn("Event {} is scheduled for a time that has already passed, skipping.", event.getName());
+          log.warn("Event {} is scheduled for a time that has already passed, skipping.", start.toString());
           continue;
         }
 
@@ -421,30 +421,37 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           Property p = iter.next();
           //TODO:  Make this not hardcoded?  Make this not depend on Apple's idea of rfc 2445?
           String filename = p.getParameter("X-APPLE-FILENAME").getValue();
+          if (filename == null) {
+            log.warn("No filename given for attachment, skipping.");
+            continue;
+          }
           String contents = getAttachmentAsString(p);
 
           //If the file is not the properties file for the capture, store it
           //Otherwise put it into the job's detail package
           //TODO:  Should this string be hardcoded?
-          if (filename != "capture.properties") {
+          if (!filename.equals("capture.properties")) {
             try {
               URL u = new File(captureDir, filename).toURI().toURL();
               writeFile(u, contents);
             } catch (MalformedURLException e) {
-              log.warn("Unable to write capture.properties file for {}!", start.toString());
+              log.warn("Malformed URL exception while trying to write capture.properties file for {}!", start.toString());
             } catch (NullPointerException e) {
-              log.warn("Unable to write capture.properties file for {}: {}", 0, e.getMessage());
+              log.warn("Null Pointer exception while trying to write capture.properties file for {}: {}", start.toString(), e.getMessage());
             }
           } else {
             //Create a properties object and put it into the job's data map for access later
             //TODO:  Watch for large memory usage here.  Each object is created when the calendar is loaded and then must live until the job fires (4+ months?)
             //TODO:  What happens if there are multiple capture.properties?
             try {
-              props.load(new StringReader(contents));
+              Properties temp = new Properties();
+              temp.load(new StringReader(contents));
 
-              //Put capture variables into the properties object
-              props.put(CaptureParameters.RECORDING_ROOT_URL, captureDir.toString());
-              props.put(CaptureParameters.RECORDING_ID, start.toString());
+              for (Object key : temp.keySet()) {
+                props.setProperty((String) key, (String) temp.get(key));
+              }
+
+              props.store(new FileWriter(new File(captureDir, filename)), "");
 
               hasProperties = true;
             } catch (IOException e) {
@@ -577,7 +584,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.capture.api.StatusService#disablePolling()
+   * @see org.opencastproject.capture.api.StateService#disablePolling()
    */
   public void disablePolling() {
     try {
@@ -592,7 +599,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.capture.api.StatusService#enablePolling()
+   * @see org.opencastproject.capture.api.StateService#enablePolling()
    */
   public void enablePolling() {
     try {

@@ -25,7 +25,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
 import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
-import org.opencastproject.capture.api.StatusService;
+import org.opencastproject.capture.api.StateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +37,9 @@ public class StatusRestService {
 
   private static final Logger logger = LoggerFactory.getLogger(StatusRestService.class);
 
-  private StatusService service;
+  private StateService service;
 
-  public void setService(StatusService service) {
+  public void setService(StateService service) {
     this.service = service;
   }
 

@@ -17,13 +17,16 @@ package org.opencastproject.capture.impl;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Set;
 
-import org.opencastproject.capture.api.StatusService;
+import org.opencastproject.capture.api.AgentState;
+import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.jobs.AgentStatusJob;
-import org.osgi.service.component.ComponentContext;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -32,51 +35,24 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StateSingleton implements StatusService {
-  private static final Logger logger = LoggerFactory.getLogger(StateSingleton.class);
+public class StateServiceImpl implements StateService, ManagedService {
+  private static final Logger logger = LoggerFactory.getLogger(StateServiceImpl.class);
 
-  private static StateSingleton instance = null;
-  private CaptureAgentImpl service = null;
+  private String agentState = null;
   private Hashtable<String, String> recordings = null;
 
   /**
-   * Private constructor
+   * Constructor, sets up the class to keep track of an arbitrary number of recordings.
    */
-  private StateSingleton() {
+  public StateServiceImpl() {
     recordings = new Hashtable<String, String>();
+    agentState = AgentState.UNKNOWN;
     createPollingTask();
   }
 
   /**
-   * Called when the bundle is activated.
-   * @param cc The component context
-   */
-  public void activate(ComponentContext cc) {
-    getInstance();
-  }
-
-
-  public static synchronized StateSingleton getInstance() {
-    if (instance == null) {
-      instance = new StateSingleton();
-    }
-    return instance;
-  }
-
-  public CaptureAgentImpl getCaptureAgent() {
-    return service;
-  }
-
-  public void setCaptureAgent(CaptureAgentImpl sourceService) {
-    service = sourceService;
-  }
-
-  /**
-   * Sets the recording's current state
-   * 
-   * @param recordingID The ID of the recording.
-   * @param state The state for the recording.  Defined in RecordingState.
-   * @see org.opencastproject.capture.api.RecordingState
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.StateService#setRecordingState(java.lang.String, java.lang.String)
    */
   public void setRecordingState(String recordingID, String state) {
     recordings.put(recordingID, state);
@@ -84,7 +60,7 @@ public class StateSingleton implements StatusService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.StatusService#getRecordingState(java.lang.String)
+   * @see org.opencastproject.capture.api.StateService#getRecordingState(java.lang.String)
    */
   public String getRecordingState(String recordingID) {
     return recordings.get(recordingID);
@@ -92,7 +68,7 @@ public class StateSingleton implements StatusService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.StatusService#getRecordings()
+   * @see org.opencastproject.capture.api.StateService#getRecordings()
    */
   public Set<String> getRecordings() {
     return recordings.keySet();
@@ -100,14 +76,19 @@ public class StateSingleton implements StatusService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.StatusService#getAgentState()
+   * @see org.opencastproject.capture.api.StateService#getAgentState()
    */
   public String getAgentState() {
-    if (service != null) {
-      return service.getAgentState();
-    } else {
-      return null;
-    }
+    return agentState;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * Note that this specific implementation does nothing.  getAgentState queries directly from the CaptureAgent itself, rather than storing a string here.
+   * @see org.opencastproject.capture.api.StateService#setAgentState(java.lang.String)
+   */
+  public void setAgentState(String state) {
+    agentState = state;
   }
 
   /**
@@ -130,6 +111,9 @@ public class StateSingleton implements StatusService {
   
       //Setup the polling
       JobDetail job = new JobDetail("agentStatusUpdate", Scheduler.DEFAULT_GROUP, AgentStatusJob.class);
+
+      job.getJobDataMap().put(AgentStatusJob.STATE_SERVICE, this);
+
       //TODO:  Support changing the polling interval
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
       SimpleTrigger trigger = new SimpleTrigger("status_polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime);
@@ -143,5 +127,10 @@ public class StateSingleton implements StatusService {
     } catch (SchedulerException e) {
       logger.error("SchedulerException in StateSingleton: {}.", e.getMessage());
     }
+  }
+
+  public void updated(Dictionary properties) throws ConfigurationException {
+    // TODO Auto-generated method stub
+    
   }
 }

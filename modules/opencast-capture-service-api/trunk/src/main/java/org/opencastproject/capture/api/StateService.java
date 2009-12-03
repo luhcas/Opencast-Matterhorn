@@ -20,7 +20,14 @@ import java.util.Set;
 /**
  * OSGi service for querying the capture device's current state (MH-58)
  */
-public interface StatusService {
+public interface StateService {
+
+  /**
+   * Sets the state of the agent.  Note that this should not change the *actual* state of the agent, only update the StatusService's record of its state.
+   * @param state The state of the agent.  Should be defined in AgentState.
+   * @see org.opencastproject.capture.api.AgentState
+   */
+  public void setAgentState(String state);
 
   /**
    * Gets the state of the agent
@@ -35,6 +42,15 @@ public interface StatusService {
    */
   public Set<String> getRecordings();
 
+  /**
+   * Sets the recording's current state
+   * 
+   * @param recordingID The ID of the recording.
+   * @param state The state for the recording.  Defined in RecordingState.
+   * @see org.opencastproject.capture.api.RecordingState
+   */
+  public void setRecordingState(String recordingID, String state);
+  
   /**
    * Gets the state of a recording
    * 

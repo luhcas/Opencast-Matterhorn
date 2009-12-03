@@ -102,6 +102,19 @@ public class CaptureRestService {
     }
   }
 
+  @POST
+  @Produces(MediaType.TEXT_PLAIN)
+  @Path("stopCapture")
+  public Response stopCapture(@FormParam("recordingID") String recordingID) {
+    boolean out;
+    try {
+      out = service.stopCapture(recordingID);
+      return Response.ok("Stop Capture OK. OUT: " + out).build();
+    } catch (Exception e) {
+      return Response.serverError().status(400).build();
+    }
+  }
+
   protected final String docs;
 
   public CaptureRestService() {

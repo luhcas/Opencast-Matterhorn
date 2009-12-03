@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="org.opencastproject.capture.api.Scheduler" immediate="true">
   <implementation class="org.opencastproject.capture.impl.SchedulerImpl" />
-  <property name="service.description" value="Capture Service" />
+  <property name="service.description" value="Capture Scheduling Service" />
   <service>
     <provide interface="org.opencastproject.capture.api.Scheduler" />
     <provide interface="org.osgi.service.cm.ManagedService" />

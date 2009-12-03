@@ -27,10 +27,9 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.opencastproject.capture.api.StatusService;
+import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.CaptureParameters;
 import org.opencastproject.capture.impl.ConfigurationManager;
-import org.opencastproject.capture.impl.StateSingleton;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -44,8 +43,9 @@ public class AgentStatusJob implements Job {
 
   private static final Logger logger = LoggerFactory.getLogger(AgentStatusJob.class);
 
+  public static final String STATE_SERVICE = "state_service";
   private ConfigurationManager config = ConfigurationManager.getInstance();
-  private StatusService status = StateSingleton.getInstance();
+  private StateService status = null;
 
   /**
    * Pushes the agent's status to the remote status service
@@ -53,6 +53,7 @@ public class AgentStatusJob implements Job {
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
+    status = (StateService) ctx.getMergedJobDataMap().get(STATE_SERVICE);
     sendAgentState();
     sendRecordingState();
   }

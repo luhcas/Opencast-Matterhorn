@@ -18,7 +18,7 @@ package org.opencastproject.capture.endpoint;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 
-import org.opencastproject.capture.api.StatusService;
+import org.opencastproject.capture.api.StateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +29,13 @@ import org.slf4j.LoggerFactory;
 public class StatusWebServiceImpl implements StatusWebService {
   private static final Logger logger = LoggerFactory.getLogger(StatusWebServiceImpl.class);
 
-  private StatusService service;
+  private StateService service;
 
-  public void setService(StatusService service) {
+  public void setService(StateService service) {
     this.service = service;
   }
 
-  public void unsetService(StatusService service) {
+  public void unsetService(StateService service) {
     this.service = null;
   }
 

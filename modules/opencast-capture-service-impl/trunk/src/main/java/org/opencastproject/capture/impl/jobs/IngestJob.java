@@ -15,33 +15,6 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import org.opencastproject.capture.api.RecordingState;
-import org.opencastproject.capture.impl.CaptureParameters;
-import org.opencastproject.capture.impl.StateSingleton;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.util.ZipUtil;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.FileEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SimpleTrigger;
-import org.quartz.StatefulJob;
-import org.quartz.impl.StdSchedulerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -56,6 +29,32 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.opencastproject.capture.api.RecordingState;
+import org.opencastproject.capture.api.StateService;
+import org.opencastproject.capture.impl.CaptureParameters;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.util.ZipUtil;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
+import org.quartz.StatefulJob;
+import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+
 /**
  * Creates the manifest, then attempts to ingest the media to the remote server
  */
@@ -64,17 +63,18 @@ public class IngestJob implements StatefulJob {
   private static final Logger logger = LoggerFactory.getLogger(IngestJob.class);
 
   /** The constant used to define where the ConfigurationManager lives within the JobExecutionContext */
-  public static final String CONFIGURATION = "configuration";
+  private static final String CONFIGURATION = "configuration";
+  private static final String SERVICE = "state_service";
   /** The configuration for this capture */
   private Properties config = null;
-  /** The singleton where the states of the captures are kept */
-  private StateSingleton singleton = StateSingleton.getInstance();
+  /** The service where the states of the captures are kept */
+  private StateService service = null;
   /** The ID of the recording we're dealing with */
   private String recordingID = null;
   /** The directory we're dealing with when trying to ingest */
   private File current_capture_dir = null;
   
-  public static void scheduleJob(Properties props) throws IOException, SchedulerException {
+  public static void scheduleJob(Properties props, StateService state_service) throws IOException, SchedulerException {
 
     long retry = Long.parseLong(props.getProperty(CaptureParameters.INGEST_RETRY_INTERVAL)) * 1000L;
     String id = props.getProperty(CaptureParameters.RECORDING_ID);
@@ -92,6 +92,7 @@ public class IngestJob implements StatefulJob {
     //Setup the polling
     JobDetail job = new JobDetail(id, Scheduler.DEFAULT_GROUP, IngestJob.class);
     job.getJobDataMap().put(CONFIGURATION, props);
+    job.getJobDataMap().put(SERVICE, state_service);
 
     //Create a new trigger                    Name         Group name               Start       End   # of times to repeat, Repeat interval
     SimpleTrigger trigger = new SimpleTrigger(id, Scheduler.DEFAULT_GROUP, new Date(), null, 1, retry);
@@ -108,6 +109,9 @@ public class IngestJob implements StatefulJob {
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
 
+    config = (Properties) ctx.getMergedJobDataMap().get(CONFIGURATION);
+    service = (StateService) ctx.getMergedJobDataMap().get(SERVICE);
+
     if (config.getProperty(CaptureParameters.RECORDING_ID) == null || config.getProperty(CaptureParameters.RECORDING_ROOT_URL) == null) {
       logger.error("Invalid capture configuration, unable to process ingest!");
       return;
@@ -123,20 +127,20 @@ public class IngestJob implements StatefulJob {
     // Does the manifest
     try {
       doManifest();
-      singleton.setRecordingState(recordingID, RecordingState.CAPTURE_FINISHED);
+      service.setRecordingState(recordingID, RecordingState.CAPTURE_FINISHED);
     } catch (MediaPackageException e) {
       logger.error("MediaPackage Exception: {}.", e.getMessage());
-      singleton.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+      service.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
     } catch (UnsupportedElementException e) {
       logger.error("Unsupported Element Exception: {}.", e.getMessage());
-      singleton.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+      service.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
     } catch (IOException e) {
       logger.error("I/O Exception: {}.", e.getMessage());
       e.printStackTrace();
-      singleton.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+      service.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
     } catch (TransformerException e) {
       logger.error("Transformer Exception: {}.", e.getMessage());
-      singleton.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+      service.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
     } finally {
       //setAgentState(AgentState.IDLE);
     }
@@ -252,7 +256,7 @@ public class IngestJob implements StatefulJob {
 
     //TODO:  We currently lack multi-state support (both uploading and capturing, for example).  We need to add this at the appropriate places when it comes online.
     //setAgentState(AgentState.UPLOADING);
-    singleton.setRecordingState(recordingID, RecordingState.UPLOADING);
+    service.setRecordingState(recordingID, RecordingState.UPLOADING);
 
     try {
       // Set the file as the body of the request
@@ -263,13 +267,13 @@ public class IngestJob implements StatefulJob {
 
       retValue = response.getStatusLine().getReasonPhrase();
 
-      singleton.setRecordingState(recordingID, RecordingState.UPLOAD_FINISHED);
+      service.setRecordingState(recordingID, RecordingState.UPLOAD_FINISHED);
     } catch (ClientProtocolException e) {
       logger.error("Failed to submit the data: {}.", e.getMessage());
-      singleton.setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
+      service.setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
     } catch (IOException e) {
       logger.error("I/O Exception: {}.", e.getMessage());
-      singleton.setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
+      service.setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
     } finally {
       client.getConnectionManager().shutdown();
       //setAgentState(AgentState.IDLE);

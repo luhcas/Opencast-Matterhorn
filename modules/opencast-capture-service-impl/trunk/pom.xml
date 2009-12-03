@@ -37,7 +37,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-inspection-service-api</artifactId>
+      <artifactId>opencast-db</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -102,6 +102,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -114,9 +115,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.opensymphony.quartz</groupId>
-      <artifactId>quartz</artifactId>
-      <version>1.6.1</version>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
+      <version>1.6.6_1</version>
     </dependency>
     <dependency>
       <groupId>net.fortuna.ical4j</groupId>
@@ -164,9 +165,8 @@
               jv4linfo;inline=true,
               gstreamer-java;inline=true,
               jna;inline=true,
-              quartz;inline=true,
               ical4j;inline=true,
-	     	  httpcore;inline=true,
+              httpcore;inline=true,
               httpclient;inline=true,
               httpmime;inline=true
             </Embed-Dependency>
@@ -176,14 +176,13 @@
               org.opencastproject.capture.pipeline.*,
               org.opencastproject.capture.endpoint
             </Export-Package>
-            <!--               OSGI-INF/status-service.xml,
-              OSGI-INF/status-service-rest.xml,
-              OSGI-INF/status-service-soap.xml,
-             -->
             <Service-Component>
               OSGI-INF/capture-service.xml,
               OSGI-INF/capture-service-rest.xml,
               OSGI-INF/capture-service-soap.xml,
+              OSGI-INF/status-service.xml,
+              OSGI-INF/status-service-rest.xml,
+              OSGI-INF/status-service-soap.xml,
               OSGI-INF/scheduler-service.xml
             </Service-Component>
           </instructions>
