@@ -29,8 +29,6 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
-import org.opencastproject.media.mediapackage.identifier.HandleBuilder;
-import org.opencastproject.media.mediapackage.identifier.HandleBuilderFactory;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.util.ZipUtil;
@@ -64,7 +62,6 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
 
   private static final Logger logger = LoggerFactory.getLogger(IngestServiceImpl.class);
   private MediaPackageBuilder builder = null;
-  private HandleBuilder handleBuilder = null;
   private Workspace workspace;
   private MediaInspectionService inspection;
   private String tempFolder;
@@ -74,7 +71,6 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   public IngestServiceImpl() {
     logger.info("Ingest Service started.");
     builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
-    handleBuilder = HandleBuilderFactory.newInstance().newHandleBuilder();
     fs = File.separator;
     tempFolder = System.getProperty("java.io.tmpdir");
     if (!tempFolder.endsWith(fs))
@@ -134,11 +130,14 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
     try {
       builder.setSerializer(new DefaultMediaPackageSerializerImpl(manifest.getParentFile()));
       mp = builder.loadFromManifest(manifest.toURI().toURL().openStream());
-      mp.renameTo(handleBuilder.createNew());
-      builder.createNew();
+//      mp.renameTo(handleBuilder.createNew());
+//      builder.createNew();
       for (MediaPackageElement element : mp.elements()) {
-        element.setIdentifier(UUID.randomUUID().toString());
         String elId = element.getIdentifier();
+        if(elId == null) {
+          elId = UUID.randomUUID().toString();
+          element.setIdentifier(elId);
+        }
         element = inspect(element);
         String filename = element.getURI().toURL().getFile();
         filename = filename.substring(filename.lastIndexOf("/"));
@@ -149,7 +148,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
       logger.error("Ingest service: Failed to ingest media package!");
       throw (e);
     }
-    removeDirectory(tempFolder);
+    removeDirectory(tempPath);
     // broadcast event
     ingest(mp);
     return mp;

@@ -20,6 +20,8 @@ import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -116,7 +118,10 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
    */
   protected Connection borrowConnection() {
     try {
-      return dataSource.getConnection();
+      Connection conn = dataSource.getConnection();
+      conn.setAutoCommit(false);
+      conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+      return conn;
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
@@ -396,27 +401,30 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       addElementsStatement = conn.prepareStatement("insert into oc_workflow_element values(?, ?, ?, ?, ?)");
       if(mp != null) {
         for(Attachment att : mp.getAttachments()) {
+          String flavor = getFlavor(att);
           addElementsStatement.setString(1, instance.getId());
           addElementsStatement.setString(2, mediaPackageId);
           addElementsStatement.setString(3, att.getIdentifier());
           addElementsStatement.setString(4, "attachment");
-          addElementsStatement.setString(5, att.getFlavor().toString());
+          addElementsStatement.setString(5, flavor);
           addElementsStatement.execute();
         }
         for(Catalog cat : mp.getCatalogs()) {
+          String flavor = getFlavor(cat);
           addElementsStatement.setString(1, instance.getId());
           addElementsStatement.setString(2, mediaPackageId);
           addElementsStatement.setString(3, cat.getIdentifier());
           addElementsStatement.setString(4, "catalog");
-          addElementsStatement.setString(5, cat.getFlavor().toString());
+          addElementsStatement.setString(5, flavor);
           addElementsStatement.execute();
         }
         for(Track track : mp.getTracks()) {
+          String flavor = getFlavor(track);
           addElementsStatement.setString(1, instance.getId());
           addElementsStatement.setString(2, mediaPackageId);
           addElementsStatement.setString(3, track.getIdentifier());
           addElementsStatement.setString(4, "track");
-          addElementsStatement.setString(5, track.getFlavor().toString());
+          addElementsStatement.setString(5, flavor);
           addElementsStatement.execute();
         }
       }
@@ -440,6 +448,14 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     }
   }
 
+  protected String getFlavor(MediaPackageElement element) {
+    MediaPackageElementFlavor flavor = element.getFlavor();
+    String flavorAsString = null;
+    if(flavor != null) {
+      flavorAsString = flavor.toString();
+    }
+    return flavorAsString;
+  }
   /**
    * Gets a string representation of the dublin core metadata, which is useful for a quasi- full text search
    * 
