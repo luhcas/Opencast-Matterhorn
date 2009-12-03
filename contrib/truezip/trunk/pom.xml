@@ -15,9 +15,9 @@
   </dependencies>
 
   <scm>
-    <connection>scm:svn:http://source.opencastproject.org/svn/contrib/truezip/tags/opencast-truezip-0.1</connection>
-    <developerConnection>scm:svn:https://source.opencastproject.org/svn/contrib/truezip/tags/opencast-truezip-0.1</developerConnection>
-    <url>http://source.opencastproject.org/svn/contrib/truezip/tags/opencast-truezip-0.1</url>
+    <connection>scm:svn:http://source.opencastproject.org/svn/contrib/truezip/trunk</connection>
+    <developerConnection>scm:svn:https://source.opencastproject.org/svn/contrib/truezip/trunk</developerConnection>
+    <url>http://source.opencastproject.org/svn/contrib/truezip/tags/trunk</url>
   </scm>
 
   <distributionManagement>
