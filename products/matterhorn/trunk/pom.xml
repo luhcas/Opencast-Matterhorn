@@ -738,7 +738,7 @@
     <repository>
       <id>opencast-maven2-release</id>
       <name>OC Release repo</name>
-      <url>http://repository.opencastproject.org/nexus/content/repositories/release</url>
+      <url>http://repository.opencastproject.org/nexus/content/repositories/releases</url>
     </repository>
   </distributionManagement>
 
