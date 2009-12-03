@@ -18,12 +18,12 @@
    outline: 0.1em solid #000;
 }
 
-.fl-theme-coal {color:#000000 !important; background-color:#ebebeb !important; border-color:#000000;}
+.fl-theme-coal {color:#000000 !important; background-color:white !important; border-color:#000000;}
 .fl-theme-coal a {color: #333333 !important; font-weight:bold;}
 .fl-theme-coal a:hover {color: #999999 !important;}
 .fl-theme-coal h1 {color:#000000; border-bottom-width:0.2em; border-bottom-style:solid;} 
 .fl-theme-coal h2 {color: #666666;}
-.fl-theme-coal th {border:0.1em solid #ffffff; background-color:#dfefff !important;}
+.fl-theme-coal th {border:0.1em solid #999999; background-color:#dfefff !important;}
 .fl-theme-coal td {border:0.1em solid #999999 !important;}
 .fl-theme-coal .fl-textfield,
 .fl-theme-coal .fl-textarea {background-color:#ffffff; border:1px solid #000000;}
@@ -56,7 +56,7 @@
 /* New syntax */
 .fl-theme-coal .fl-tabs li.fl-tabs-active,
 .fl-theme-coal .fl-tabs li.fl-tabs-active a,
-.fl-theme-coal .fl-tabs li.fl-tabs-active a:hover {background-color: #ebebeb; border-bottom-color:#ebebeb; color:#000 !important;}
+.fl-theme-coal .fl-tabs li.fl-tabs-active a:hover {background-color: white; border-bottom-color:white; color:#000 !important;}
 .fl-theme-coal .fl-tabs-content {background-color:#ebebeb; color:#000; border:1px solid #999999; border-top:none;}
 
 /* Helper: Menu */
