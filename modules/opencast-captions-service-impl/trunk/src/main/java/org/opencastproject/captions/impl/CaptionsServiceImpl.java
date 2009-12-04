@@ -92,13 +92,8 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
   }
 
   /**
-   * Get the list of all captionable media packages,
-   * this will probably be overridden for local implementations
-   * 
-   * @param start the start item (for paging), <=0 for first item
-   * @param max the maximum items to return (for paging), <=0 for up to 50 items
-   * @param sort the sort order string (e.g. 'title asc')
-   * @return the results OR empty if none
+   * {@inheritDoc}
+   * @see org.opencastproject.captions.api.CaptionsService#getCaptionableMedia(int, int, java.lang.String)
    */
   public CaptionsResults getCaptionableMedia(int start, int max, String sort) {
     List<CaptionsMediaItem> l = new ArrayList<CaptionsMediaItem>();
@@ -125,12 +120,8 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
   }
 
   /**
-   * Update a media package with some captions data
-   * 
-   * @param workflowId the workflow instance id
-   * @param captionType the type of caption data (could be {@value #CAPTIONS_TYPE_TIMETEXT} or {@value #CAPTIONS_TYPE_DESCAUDIO} for example)
-   * @param data the captions data to store with the media package
-   * @return the updated media package
+   * {@inheritDoc}
+   * @see org.opencastproject.captions.api.CaptionsService#updateCaptions(java.lang.String, java.lang.String, java.io.InputStream)
    */
   public CaptionsMediaItem updateCaptions(String workflowId, String captionType, InputStream data) {
     if (workflowId == null || "".equals(workflowId)) {

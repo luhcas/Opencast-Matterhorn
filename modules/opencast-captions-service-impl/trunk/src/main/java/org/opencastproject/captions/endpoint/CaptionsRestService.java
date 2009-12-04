@@ -100,7 +100,7 @@ public class CaptionsRestService {
     if (perPage == null || perPage < 1) {
       perPage = 10;
     }
-    if (sort == null || "".equals(page)) {
+    if (sort == null || "".equals(sort)) {
       sort = "title asc";
     }
     int total = 0;

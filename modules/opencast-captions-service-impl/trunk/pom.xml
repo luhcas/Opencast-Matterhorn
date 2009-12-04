@@ -4,13 +4,35 @@
   <groupId>org.opencastproject</groupId>
   <artifactId>opencast-captions-service-impl</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-captions-service-impl</name>
   <version>0.1-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
+
+  <!-- module specific stuff for the site -->
+  <name>Opencast Captions Service</name>
+  <developers>
+    <developer>
+      <id>azeckoski</id>
+      <email>azeckoski@vt.edu</email>
+      <name>Aaron Zeckoski</name>
+      <timezone>0</timezone>
+      <roles>
+        <role>Architect</role>
+        <role>Developer</role>
+        <role>Documentation</role>
+      </roles>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:svn:http://source.opencastproject.org/svn/modules/opencast-captions-service-impl/trunk</connection>
+    <developerConnection>scm:svn:https://source.opencastproject.org/svn/modules/opencast-captions-service-impl/trunk</developerConnection>
+    <url>http://source.opencastproject.org/svn/modules/opencast-captions-service-impl/trunk</url>
+  </scm>
+  <!-- END site stuff -->
+
   <dependencies>
     <!-- matterhorn -->
     <dependency>
