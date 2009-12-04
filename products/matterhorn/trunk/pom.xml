@@ -27,8 +27,8 @@
         <module>opencast-build-tools</module>
         <module>opencast-maven-plugin</module>
         <module>opencast-runtime-tools</module>
-        <!--module>opencast-admin-ui</module -->
-        <module>opencast-authentication-api</module>
+        <!-- <module>opencast-admin-ui</module> -->
+        <!-- <module>opencast-authentication-api</module> -->
         <module>opencast-capture-service-api</module> 
         <module>opencast-capture-admin-service-api</module>
         <module>opencast-capture-admin-service-impl</module>
@@ -77,7 +77,7 @@
         <module>opencast-maven-plugin</module>
         <module>opencast-runtime-tools</module>
         <!--module>opencast-admin-ui</module -->
-        <module>opencast-authentication-api</module>
+        <!-- <module>opencast-authentication-api</module> -->
         <module>opencast-capture-service-api</module> 
         <module>opencast-capture-service-impl</module> 
         <module>opencast-composer-service-api</module>
@@ -118,7 +118,7 @@
         <module>opencast-maven-plugin</module>
         <module>opencast-runtime-tools</module>
         <!--module>opencast-admin-ui</module -->
-        <module>opencast-authentication-api</module>
+        <!-- <module>opencast-authentication-api</module> -->
         <module>opencast-capture-service-api</module>
         <!--module>opencast-capture-service-impl</module -->
         <module>opencast-capture-admin-service-api</module>
@@ -301,6 +301,11 @@
             <source>1.5</source>
             <target>1.5</target>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.6.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.felix</groupId>
