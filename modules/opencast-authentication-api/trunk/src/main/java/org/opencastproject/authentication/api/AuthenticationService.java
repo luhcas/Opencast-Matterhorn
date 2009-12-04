@@ -1,3 +1,4 @@
+
 /**
  *  Copyright 2009 The Regents of the University of California
  *  Licensed under the Educational Community License, Version 2.0
@@ -12,9 +13,15 @@
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  *
+ * @author azeckoski
+ * @version $Id: $
  */
 package org.opencastproject.authentication.api;
-
 public interface AuthenticationService {
+  /**
+   * <p>getUserId</p>
+   *
+   * @return a {@link java.lang.String} object.
+   */
   String getUserId();
 }
