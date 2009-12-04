@@ -194,8 +194,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.6</source>
+          <target>1.6</target>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
@@ -298,8 +298,8 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
           <configuration>
-            <source>1.5</source>
-            <target>1.5</target>
+            <source>1.6</source>
+            <target>1.6</target>
           </configuration>
         </plugin>
         <plugin>
@@ -516,26 +516,18 @@
       <!-- CXF -->
       <dependency>
         <groupId>org.apache.cxf</groupId>
-        <artifactId>cxf-bundle</artifactId>
-        <version>2.3.0-20090930</version>
+        <artifactId>cxf-bundle-minimal</artifactId>
+        <version>2.2.5</version>
       </dependency>
-
       <dependency>
         <groupId>org.apache.cxf.dosgi</groupId>
         <artifactId>cxf-dosgi-ri-discovery-local</artifactId>
-        <version>1.1-20090930</version>
+        <version>1.1</version>
       </dependency>
-
       <dependency>
         <groupId>org.apache.cxf.dosgi</groupId>
         <artifactId>cxf-dosgi-ri-dsw-cxf</artifactId>
-        <version>1.1-20090930</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.servicemix.cxf</groupId>
-        <artifactId>org.apache.servicemix.cxf.transport.osgi</artifactId>
-        <version>4.0.0</version>
+        <version>1.1</version>
       </dependency>
 
       <!-- Spring 2.5.6.A is needed for OSGI (as opposed to 2.5.6) http://forum.springsource.org/showthread.php?t=69049 -->

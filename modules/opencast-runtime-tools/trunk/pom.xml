@@ -71,7 +71,7 @@
     <!-- CXF -->
     <dependency>
       <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-bundle</artifactId>
+      <artifactId>cxf-bundle-minimal</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.cxf.dosgi</groupId>
@@ -80,10 +80,6 @@
     <dependency>
       <groupId>org.apache.cxf.dosgi</groupId>
       <artifactId>cxf-dosgi-ri-dsw-cxf</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.servicemix.cxf</groupId>
-      <artifactId>org.apache.servicemix.cxf.transport.osgi</artifactId>
     </dependency>
     <!-- End CXF -->
 
