@@ -48,9 +48,15 @@ public class SchedulerEventJaxbImpl {
   String id;
   @XmlJavaTypeAdapter(value=HashtableAdapter.class)
   Hashtable<String, String> metadata;
+  @XmlElement(name="startdate")
   long start;
   @XmlElement(name="enddate")
   long end;
+  /**
+   * Duration can be alternative to enddate. If duration is given enddate will be ignored.
+   */
+  @XmlElement(name="duration") 
+  long duration;
   @XmlElementWrapper(name="attendees")
   @XmlElement(name="attendee")
   LinkedList <String> attendees;
@@ -67,6 +73,7 @@ public class SchedulerEventJaxbImpl {
     metadata = event.getMetadata();
     start = event.getStartdate().getTime();
     end = event.getEnddate().getTime();
+    duration = end-start;
     
     String [] att = event.getAttendees();
     attendees = new LinkedList <String>();
@@ -84,7 +91,9 @@ public class SchedulerEventJaxbImpl {
     event.setID(id);
     event.setMetadata(metadata);
     event.setStartdate(new Date(start));
-    event.setEnddate(new Date(end));
+    if (duration > 0 )
+      event.setStartdate(new Date(start+duration));
+    else event.setEnddate(new Date(end));
     event.setResources(resources.toArray(new String [0]));
     event.setAttendees(attendees.toArray(new String [0]));
     logger.info("Event created "+event.toString());
