@@ -640,6 +640,14 @@
 
   <!-- All non-build related project data below here -->
 
+  <organization>
+    <name>Opencast Project</name>
+    <url>http://www.opencastproject.org/</url>
+  </organization>
+
+  <developers><!-- TODO? --></developers>
+  <contributors><!-- TODO? --></contributors>
+
   <mailingLists>
     <mailingList>
       <name>Matterhorn Mailing List</name>
@@ -649,6 +657,13 @@
       <archive>http://n2.nabble.com/Opencast-Matterhorn-f2233301.html</archive>
     </mailingList>
   </mailingLists>
+
+  <licenses>
+    <license>
+      <name>Educational Community License, Version 2.0</name>
+      <url>http://www.osedu.org/licenses/ECL-2.0</url>
+    </license>
+  </licenses>
 
   <scm>
     <connection>scm:svn:http://source.opencastproject.org/svn/products/matterhorn/trunk</connection>
@@ -678,8 +693,14 @@
     <site>
       <id>opencast-site</id>
       <url>file://tmp/matterhorn/site/</url>
+      <!-- <url>scp://www.mycompany.com/www/docs/project/</url> -->
     </site>
   </distributionManagement>
+
+  <ciManagement>
+    <system>Bamboo</system>
+    <url>http://build.opencastproject.org/bamboo/browse/MH-TRUNK</url>
+  </ciManagement>
 
   <!-- Site Report generation settings -->
   <reporting>
