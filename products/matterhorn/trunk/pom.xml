@@ -5,9 +5,9 @@
   <artifactId>base</artifactId>
   <packaging>pom</packaging>
   <version>0.1-SNAPSHOT</version>
-  <name>opencast</name>
+  <name>Opencast Matterhorn</name>
   <description>The Opencast Project's Matterhorn software is a media capture, processing, and distribution system</description>
-  <url>http://www.opencastproject.org</url>
+  <url>http://www.opencastproject.org/project/matterhorn</url>
   <inceptionYear>2009</inceptionYear>
   <prerequisites>
     <maven>2.0.6</maven>
@@ -16,15 +16,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
-  <scm>
-    <connection>scm:svn:http://source.opencastproject.org/svn/products/matterhorn/trunk</connection>
-    <developerConnection>scm:svn:https://source.opencastproject.org/svn/products/matterhorn/trunk</developerConnection>
-    <url>http://source.opencastproject.org/svn/products/matterhorn/trunk</url>
-  </scm>
-  <issueManagement>
-    <system>jira</system>
-    <url>https://issues.apache.org/jira</url>
-  </issueManagement>
+
   <profiles>
     <profile>
       <id>server</id>
@@ -72,9 +64,9 @@
         <module>opencast-scheduler-impl</module> -->
         <module>opencast-db</module>
         <module>opencast-test-harness</module>
-	<module>opencast-admin-ui</module>
+        <module>opencast-admin-ui</module>
         <module>opencast-captions-service-impl</module>
-     </modules>
+      </modules>
     </profile>
     <profile>
       <!-- This profile will just build the modules and when combined with 
@@ -159,9 +151,9 @@
         <module>opencast-working-file-repository-service-impl</module>
         <module>opencast-workspace-api</module>
         <module>opencast-workspace-impl</module>
-<!--        <module>opencast-scheduler-api</module>
-        <module>opencast-scheduler-impl</module>
--->        <module>opencast-db</module>
+        <!-- <module>opencast-scheduler-api</module>  -->
+        <!-- <module>opencast-scheduler-impl</module> -->
+        <module>opencast-db</module>
         <module>opencast-test-harness</module>
      </modules>
     </profile>
@@ -177,37 +169,26 @@
     </profile>
   </profiles>
 
-  <mailingLists>
-    <mailingList>
-      <name>Matterhorn Mailing List</name>
-      <subscribe>http://lists.opencastproject.org/mailman/listinfo/matterhorn</subscribe>
-      <unsubscribe>http://lists.opencastproject.org/mailman/listinfo/matterhorn</unsubscribe>
-      <post>matterhorn@opencastproject.org</post>
-      <archive>http://n2.nabble.com/Opencast-Matterhorn-f2233301.html</archive>
-    </mailingList>
-  </mailingLists>
-
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
-        <!-- Setup pax-runner -->
-        <plugin>
-            <groupId>org.ops4j</groupId>
-            <artifactId>maven-pax-plugin</artifactId>
-            <version>1.4</version>
-            <configuration>
-                <!-- including profiles for http (web), dosgi, DS, Config, Prefs spring -->
-                <!-- NOTE: cxf.dosgi profile is currently failing -AZ -->
-                <!-- NOTE: I could have included the felix.webconsole here but I probably should not -AZ -->
-                <profiles>cxf.dosgi/1.2,web,ds,config,prefs,spring.dm,spring</profiles>
-                <provision>
-                    <param>scan-pom:file:${basedir}/runner.xml</param>
-                    <param>--repositories=+http://scm.ops4j.org/repos/ops4j/projects/pax/runner-repository/</param>
-                    <param>--vmOptions=-server -Xmx512M</param>
-                </provision>
-            </configuration>
-        </plugin>
-
+      <!-- Setup pax-runner -->
+      <plugin>
+        <groupId>org.ops4j</groupId>
+        <artifactId>maven-pax-plugin</artifactId>
+        <version>1.4</version>
+        <configuration>
+          <!-- including profiles for http (web), dosgi, DS, Config, Prefs spring -->
+          <!-- NOTE: cxf.dosgi profile is currently failing -AZ -->
+          <!-- NOTE: I could have included the felix.webconsole here but I probably should not -AZ -->
+          <profiles>cxf.dosgi/1.2,web,ds,config,prefs,spring.dm,spring</profiles>
+          <provision>
+            <param>scan-pom:file:${basedir}/runner.xml</param>
+            <param>--repositories=+http://scm.ops4j.org/repos/ops4j/projects/pax/runner-repository/</param>
+            <param>--vmOptions=-server -Xmx512M</param>
+          </provision>
+        </configuration>
+      </plugin>
       <!-- Require Java 5 or higher for building -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -218,7 +199,6 @@
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
-
       <!-- Deploy OSGi bundles to a container -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -230,7 +210,8 @@
             <phase>install</phase>
             <configuration>
               <tasks if="deployTo">
-                <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="${deployTo}" failonerror="false" />
+                <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                  todir="${deployTo}" failonerror="false" />
               </tasks>
             </configuration>
             <goals>
@@ -239,7 +220,6 @@
           </execution>
         </executions>
       </plugin>
-
       <!-- Attach sources for all builds -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -250,13 +230,12 @@
             <id>attach-sources</id>
             <phase>verify</phase>
             <goals>
-              <goal>jar-no-fork</goal> 
-              <goal>test-jar-no-fork</goal> 
+              <goal>jar-no-fork</goal>
+              <goal>test-jar-no-fork</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
-
       <!-- Run tests and display test output in the console -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -265,7 +244,6 @@
           <useFile>false</useFile>
         </configuration>
       </plugin>
-
       <!-- Ensure that the source code matches the Matterhorn style rules -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -287,14 +265,12 @@
           </execution>
         </executions>
       </plugin>
-
       <!-- Make the matterhorn plugin available to all subprojects -->
       <plugin>
         <groupId>org.opencastproject</groupId>
         <artifactId>maven-oc-plugin</artifactId>
         <version>1.0</version>
       </plugin>
-
     </plugins>
 
     <pluginManagement>
@@ -328,9 +304,7 @@
           <configuration>
             <instructions>
               <Bundle-Category>opencastproject</Bundle-Category>
-              <Bundle-DocURL>
-                http://opencastproject.org/
-              </Bundle-DocURL>
+              <Bundle-DocURL>http://opencastproject.org/</Bundle-DocURL>
               <Bundle-Vendor>The Opencast Project</Bundle-Vendor>
               <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             </instructions>
@@ -455,7 +429,6 @@
         <version>2.0.0</version>
       </dependency>
 
-
       <!-- Specifications -->
       <dependency>
         <groupId>org.apache.geronimo.specs</groupId>
@@ -548,7 +521,6 @@
         <artifactId>org.apache.servicemix.cxf.transport.osgi</artifactId>
         <version>4.0.0</version>
       </dependency>
-
 
       <!-- Spring 2.5.6.A is needed for OSGI (as opposed to 2.5.6) http://forum.springsource.org/showthread.php?t=69049 -->
       <dependency>
@@ -666,6 +638,29 @@
     </dependencies>
   </dependencyManagement>
 
+  <!-- All non-build related project data below here -->
+
+  <mailingLists>
+    <mailingList>
+      <name>Matterhorn Mailing List</name>
+      <subscribe>http://lists.opencastproject.org/mailman/listinfo/matterhorn</subscribe>
+      <unsubscribe>http://lists.opencastproject.org/mailman/listinfo/matterhorn</unsubscribe>
+      <post>matterhorn@opencastproject.org</post>
+      <archive>http://n2.nabble.com/Opencast-Matterhorn-f2233301.html</archive>
+    </mailingList>
+  </mailingLists>
+
+  <scm>
+    <connection>scm:svn:http://source.opencastproject.org/svn/products/matterhorn/trunk</connection>
+    <developerConnection>scm:svn:https://source.opencastproject.org/svn/products/matterhorn/trunk</developerConnection>
+    <url>http://source.opencastproject.org/svn/products/matterhorn/trunk</url>
+  </scm>
+
+  <issueManagement>
+    <system>jira</system>
+    <url>https://issues.apache.org/jira</url>
+  </issueManagement>
+
   <!-- These should be the right locations for opencast maven 2 distribution,
     make sure you have <scm> defined for your sub project -->
   <distributionManagement>
@@ -686,6 +681,7 @@
     </site>
   </distributionManagement>
 
+  <!-- Site Report generation settings -->
   <reporting>
     <plugins>
       <plugin>
