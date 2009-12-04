@@ -38,6 +38,7 @@ import org.apache.commons.io.FileUtils;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -115,7 +116,7 @@ public class WorkflowServiceImplTest {
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
-    while (!instance.getState().equals(State.SUCCEEDED)) {
+    while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
       System.out.println("Waiting for workflow to complete...");
       try {
         Thread.sleep(1000);
@@ -149,7 +150,7 @@ public class WorkflowServiceImplTest {
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
-    while (!instance.getState().equals(State.SUCCEEDED)) {
+    while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
       System.out.println("Waiting for workflow to complete...");
       try {
         Thread.sleep(1000);
@@ -185,7 +186,7 @@ public class WorkflowServiceImplTest {
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
-    while (!instance.getState().equals(State.SUCCEEDED)) {
+    while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
       System.out.println("Waiting for workflow to complete...");
       try {
         Thread.sleep(1000);
@@ -214,7 +215,7 @@ public class WorkflowServiceImplTest {
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
-    while (!instance.getState().equals(State.SUCCEEDED)) {
+    while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
       System.out.println("Waiting for workflow to complete...");
       try {
         Thread.sleep(1000);
@@ -248,7 +249,7 @@ public class WorkflowServiceImplTest {
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
     for (WorkflowInstance instance : instances) {
-      while (!instance.getState().equals(State.SUCCEEDED)) {
+      while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
         System.out.println("Waiting for workflow to complete...");
         try {
           Thread.sleep(1000);
@@ -290,7 +291,7 @@ public class WorkflowServiceImplTest {
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
-    while (!instance.getState().equals(State.SUCCEEDED)) {
+    while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
       System.out.println("Waiting for workflow to complete...");
       try {
         Thread.sleep(1000);
@@ -320,7 +321,7 @@ public class WorkflowServiceImplTest {
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
-    while (!instance.getState().equals(State.SUCCEEDED)) {
+    while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
       System.out.println("Waiting for workflow to complete...");
       try {
         Thread.sleep(1000);
@@ -337,6 +338,37 @@ public class WorkflowServiceImplTest {
     // And ensure that it's really gone
     Assert.assertNull(service.getWorkflowById(instance.getId()));
     Assert.assertEquals(0, service.countWorkflowInstances());
+  }
+  
+  /**
+   * Starts 100 concurrent workflows to test DB deadlocking.  This takes a while, so this test is ignored by default.
+   * @throws Exception
+   */
+  @Test
+  @Ignore
+  public void testManyConcurrentWorkflows() throws Exception {
+    Assert.assertEquals(0, service.countWorkflowInstances());
+    List<WorkflowInstance> instances = new ArrayList<WorkflowInstance>();
+    for(int i=0; i<100; i++) {
+      MediaPackage mp = i % 2 == 0 ? mediapackage1 : mediapackage2;
+      instances.add(service.start(definition1, mp, null));
+    }
+
+    // Give the workflows a chance to finish before looping
+    Thread.sleep(5000);
+
+    // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
+    for (WorkflowInstance instance : instances) {
+      while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
+        System.out.println("Waiting for one of many workflows to complete...");
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
+      }
+    }
+    
+    Assert.assertEquals(100, service.countWorkflowInstances());
   }
 
   static class TestWorkflowOperationHandler implements WorkflowOperationHandler {

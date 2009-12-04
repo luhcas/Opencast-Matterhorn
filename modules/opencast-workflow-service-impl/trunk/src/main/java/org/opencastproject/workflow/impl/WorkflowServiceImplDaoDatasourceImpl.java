@@ -363,9 +363,9 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
         up(instance);
         return;
       } catch (Exception e) {
-        logger.warn("Exception updating workflow instance, trying update again.");
         latestException = e;
         currentAttempt++;
+        logger.warn("Exception updating workflow instanceon attempt #{} of {}", new Integer[] {currentAttempt, maxAttempts});
       }
     }
     throw new RuntimeException(latestException);
