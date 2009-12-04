@@ -14,6 +14,11 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-capture-admin-service-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
       <artifactId>opencast-media</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>

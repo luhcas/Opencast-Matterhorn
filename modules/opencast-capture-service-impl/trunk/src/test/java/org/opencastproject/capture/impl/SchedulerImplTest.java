@@ -32,6 +32,7 @@ public class SchedulerImplTest {
   public void setUp() {
     config = ConfigurationManager.getInstance();
     sched = new SchedulerImpl();
+    sched.activate(null);
   }
 
   @After
@@ -47,7 +48,6 @@ public class SchedulerImplTest {
     String knownGood = this.getClass().getClassLoader().getResource("calendars/Opencast.ics").toString();
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, knownGood);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
-    sched.init();
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("20091005T090000", schedule[0]);
@@ -58,7 +58,6 @@ public class SchedulerImplTest {
     String knownGood = this.getClass().getClassLoader().getResource("calendars/Opencast.ics").getFile();
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, knownGood);
-    sched.init();
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("20091005T090000", schedule[0]);
@@ -71,7 +70,6 @@ public class SchedulerImplTest {
     String knownGood = this.getClass().getClassLoader().getResource("calendars/Opencast-UTF16.ics").toString();
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, knownGood);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
-    sched.init();
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("20091005T090000", schedule[0]);
@@ -82,7 +80,6 @@ public class SchedulerImplTest {
     String knownGood = this.getClass().getClassLoader().getResource("calendars/Opencast-UTF16.ics").getFile();
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, knownGood);
-    sched.init();
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("20091005T090000", schedule[0]);
@@ -94,7 +91,6 @@ public class SchedulerImplTest {
     String cachedBlank = this.getClass().getClassLoader().getResource("calendars/Blank.ics").getFile();
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, cachedBlank);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
-    sched.init();
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -104,7 +100,6 @@ public class SchedulerImplTest {
     String cachedBlank = this.getClass().getClassLoader().getResource("calendars/Blank.ics").getFile();
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, cachedBlank);
-    sched.init();
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -113,7 +108,6 @@ public class SchedulerImplTest {
   public void testMalformedRemoteURLCalendar() {
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "blah!");
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
-    sched.init();
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -122,7 +116,6 @@ public class SchedulerImplTest {
   public void testMalformedLocalURLCalendar() {
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "blah!");
-    sched.init();
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -150,7 +143,6 @@ public class SchedulerImplTest {
     String garbage = this.getClass().getClassLoader().getResource("calendars/Garbage.ics").getFile();
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, garbage);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
-    sched.init();
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -160,7 +152,6 @@ public class SchedulerImplTest {
     String garbage = this.getClass().getClassLoader().getResource("calendars/Garbage.ics").getFile();
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, garbage);
-    sched.init();
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -169,7 +160,6 @@ public class SchedulerImplTest {
   public void testEndpoit() {
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
-    sched.init();
     URL test;
     try {
       test = new URL("http://www.example.com");

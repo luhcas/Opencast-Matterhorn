@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.opencastproject.capture.admin.api.Agent;
+import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
 import org.opencastproject.capture.admin.api.Recording;
-import org.opencastproject.capture.api.AgentState;
-import org.opencastproject.capture.api.RecordingState;
+import org.opencastproject.capture.admin.api.RecordingState;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;

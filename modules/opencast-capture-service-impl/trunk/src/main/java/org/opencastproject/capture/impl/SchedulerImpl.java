@@ -23,6 +23,7 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.ListIterator;
 import java.util.Properties;
@@ -32,7 +33,6 @@ import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
-import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VEvent;
@@ -40,7 +40,7 @@ import net.fortuna.ical4j.model.property.Duration;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
-import org.opencastproject.capture.impl.jobs.CaptureJob;
+import org.opencastproject.capture.impl.jobs.StartCaptureJob;
 import org.opencastproject.capture.impl.jobs.PollCalendarJob;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -91,24 +91,15 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /** The configuration for this service */
   private ConfigurationManager config = null;
 
-  /**
-   * Called when the bundle is activated.
-   * @param cc The component context
-   */
-  public void activate(ComponentContext cc) {
-    init();
-  }
-
   public void deactivate() {
     shutdown();
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.capture.api.StateService#init()
+   * Called when the bundle is activated and does all of the activation for the schedulers.
+   * @param cc The component context
    */
-  public void init() {
+  public void activate(ComponentContext cc) {
     config = ConfigurationManager.getInstance();
     SchedulerFactory sched_fact = null;
 
@@ -127,7 +118,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       if (pollTime > 1) {
         //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
         pollingProperties = new Properties();
-        pollingProperties.load(getClass().getClassLoader().getResourceAsStream("config/polling.properties"));
+        pollingProperties.load(getClass().getClassLoader().getResourceAsStream("config/calendar_polling_scheduler.properties"));
         sched_fact = new StdSchedulerFactory(pollingProperties);
   
         //Create and start the scheduler
@@ -159,7 +150,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     try {
       //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
       captureProperties = new Properties();
-      captureProperties.load(getClass().getClassLoader().getResourceAsStream("config/scheduler.properties"));
+      captureProperties.load(getClass().getClassLoader().getResourceAsStream("config/capture_scheduler.properties"));
       sched_fact = new StdSchedulerFactory(captureProperties);
       //Create and start the capture scheduler
       captureScheduler = sched_fact.getScheduler();
@@ -346,7 +337,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * 
    * @see org.opencastproject.capture.api.ScheduleService#setCaptureSchedule()
    */
-  public synchronized void setCaptureSchedule(Calendar newCal) {
+  private synchronized void setCaptureSchedule(Calendar newCal) {
 
     try {
       //Clear the existing jobs and reschedule everything
@@ -387,12 +378,12 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           continue;
         }
 
-        CronExpression cronString = getCronString(event);
+        CronExpression startCronExpression = getCronString(start);
         CronTrigger trig = new CronTrigger();
-        trig.setCronExpression(cronString);
-        trig.setName(cronString.toString());
+        trig.setCronExpression(startCronExpression);
+        trig.setName(startCronExpression.toString());
 
-        JobDetail job = new JobDetail(start.toString(), Scheduler.DEFAULT_GROUP, CaptureJob.class);
+        JobDetail job = new JobDetail(start.toString(), Scheduler.DEFAULT_GROUP, StartCaptureJob.class);
 
         PropertyList attachments = event.getProperties(Property.ATTACH);
         ListIterator<Property> iter = (ListIterator<Property>) attachments.listIterator();
@@ -400,6 +391,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         boolean hasProperties = false;
         Properties props = new Properties();
         props.put(CaptureParameters.RECORDING_ID, start.toString());
+        props.put(CaptureParameters.RECORDING_END, getCronString(duration.getDuration().getTime(start)).toString());
 
         //Create the directory we'll be capturing into
         File captureDir = new File(config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),
@@ -460,7 +452,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           }
         }
         //Put the properties into the job
-        job.getJobDataMap().put(CaptureJob.CAPTURE_PROPS, props);
+        job.getJobDataMap().put(StartCaptureJob.CAPTURE_PROPS, props);
         
         if (!hasProperties) {
           log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", start.toString());
@@ -492,12 +484,12 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Parses an event to build a cron-like time string
-   * @param event The Event which we need the time string for
+   * Parses an date to build a cron-like time string
+   * @param date The Date you want returned in a cronstring
    * @return A cron-like scheduling string
    * @throws ParseException
    */
-  private CronExpression getCronString(VEvent event) throws ParseException {
+  private CronExpression getCronString(Date date) throws ParseException {
     /*
      * Initial implementation called for recurring events.  Keeping this code for later (ie, once the specs are set in stone)
     if (event.getProperty(Property.RRULE) != null) {
@@ -532,17 +524,15 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       int interval = rrule.getInterval();
     */
 
-      Date start = event.getStartDate().getDate();
-
       //Note:  Skipped above code because we no longer need to deal with recurring events.  Keeping it for now since they might come back.
       //Note:  "?" means no particular setting.  Equivalent to "ignore me", rather than "I don't know what to put here"
       //TODO:  Remove the deprecated calls here.
       StringBuilder sb = new StringBuilder();
-      sb.append(start.getSeconds() + " ");
-      sb.append(start.getMinutes() + " ");
-      sb.append(start.getHours() + " ");
-      sb.append(start.getDate() + " ");
-      sb.append(start.getMonth() + 1 + " "); //Note:  iCal4j numbers months from 0-11, Quartz uses 1-12.  Sigh.
+      sb.append(date.getSeconds() + " ");
+      sb.append(date.getMinutes() + " ");
+      sb.append(date.getHours() + " ");
+      sb.append(date.getDate() + " ");
+      sb.append(date.getMonth() + 1 + " "); //Note:  Java numbers months from 0-11, Quartz uses 1-12.  Sigh.
       sb.append("? ");
       return new CronExpression(sb.toString());
     /*}
@@ -631,6 +621,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       return;
     }
     pollTime = pollingTime;
+    //TODO:  Actually do something with this changed time.  This would involve rescheduling the polling.
   }
 
   /**

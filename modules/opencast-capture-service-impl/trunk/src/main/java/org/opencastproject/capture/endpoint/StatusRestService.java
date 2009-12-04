@@ -17,6 +17,10 @@ package org.opencastproject.capture.endpoint;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -25,6 +29,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
 import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
+import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.capture.admin.api.RecordingStateUpdate;
 import org.opencastproject.capture.api.StateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +58,19 @@ public class StatusRestService {
   @Path("GetState")
   public String getState() {
     return this.service.getAgentState();
+  }
+
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("GetRecordings")
+  public List<RecordingStateUpdate> getRecordings() {
+    LinkedList<RecordingStateUpdate> update = new LinkedList<RecordingStateUpdate>();
+    Map<String, Recording> data = service.getKnownRecordings();
+    //Run through and build a map of updates (rather than states)
+    for (Entry<String, Recording> e : data.entrySet()) {
+      update.add(new RecordingStateUpdate(e.getValue()));
+    }
+    return update;
   }
 
   @GET

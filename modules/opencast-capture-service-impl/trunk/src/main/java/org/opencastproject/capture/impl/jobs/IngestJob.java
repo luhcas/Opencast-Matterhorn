@@ -35,7 +35,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.opencastproject.capture.api.RecordingState;
+import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.CaptureParameters;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -80,7 +80,7 @@ public class IngestJob implements StatefulJob {
     String id = props.getProperty(CaptureParameters.RECORDING_ID);
 
     Properties retryProperties = new Properties();
-    retryProperties.load(IngestJob.class.getClassLoader().getResourceAsStream("config/ingest.properties"));
+    retryProperties.load(IngestJob.class.getClassLoader().getResourceAsStream("config/ingest_scheduler.properties"));
     StdSchedulerFactory sched_fact = new StdSchedulerFactory(retryProperties);
 
     //Create and start the scheduler

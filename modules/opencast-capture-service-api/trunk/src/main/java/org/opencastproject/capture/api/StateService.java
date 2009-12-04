@@ -15,12 +15,21 @@
  */
 package org.opencastproject.capture.api;
 
-import java.util.Set;
+import java.util.Map;
+
+import org.opencastproject.capture.admin.api.Agent;
+import org.opencastproject.capture.admin.api.Recording;
 
 /**
  * OSGi service for querying the capture device's current state (MH-58)
  */
 public interface StateService {
+
+  /**
+   * Gets the internal Agent used to store this agent's status
+   * @return The Agent which represents this capture agent
+   */
+  public Agent getAgent();
 
   /**
    * Sets the state of the agent.  Note that this should not change the *actual* state of the agent, only update the StatusService's record of its state.
@@ -37,10 +46,10 @@ public interface StateService {
   public String getAgentState();
 
   /**
-   * Returns the set of recording IDs that are active within this capture agent.
-   * @return The set of recording IDs
+   * Gets the state of all recordings in the system
+   * @return A map of recording-state pairs
    */
-  public Set<String> getRecordings();
+  public Map<String,Recording> getKnownRecordings();
 
   /**
    * Sets the recording's current state
@@ -58,6 +67,6 @@ public interface StateService {
    * @return A state (should be defined in RecordingState)
    * @see org.opencastproject.capture.api.RecordingState
    */
-  public String getRecordingState(String recordingID);
+  public Recording getRecordingState(String recordingID);
 }
 

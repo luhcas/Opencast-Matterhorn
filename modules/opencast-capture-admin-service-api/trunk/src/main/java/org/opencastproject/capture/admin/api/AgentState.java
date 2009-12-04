@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.api;
+package org.opencastproject.capture.admin.api;
 
 /**
  * A representation of the capture client's current state (MH-730)

@@ -19,8 +19,6 @@ import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
-import org.opencastproject.capture.api.AgentState;
 
 public class StatusServiceImplTest {
   private CaptureAgentImpl service = null;
@@ -37,6 +35,8 @@ public class StatusServiceImplTest {
     service = null;
   }
 
+  //TODO:  Roll all of these tests into the capture agent tests in the testing harness
+/*
   @Test
   public void testStartup() {
     Assert.assertEquals(AgentState.IDLE, service.getAgentState());
@@ -65,4 +65,6 @@ public class StatusServiceImplTest {
     service.stopCapture();
     Assert.assertEquals(AgentState.IDLE, service.getAgentState());
   }
+   */
+
 }

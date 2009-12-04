@@ -24,13 +24,6 @@ import java.net.URL;
 public interface Scheduler {
 
   /**
-   * Sets up the calendar service and the internal polling system
-   * Note that if this method encounters an error it will throw a RuntimeException
-   * @throws RuntimeException
-   */
-  public void init() throws RuntimeException;
-  
-  /**
    * Sets the schedule data URL form which to gather scheduling data
    * @param url The URL to pull the calendaring data from
    */

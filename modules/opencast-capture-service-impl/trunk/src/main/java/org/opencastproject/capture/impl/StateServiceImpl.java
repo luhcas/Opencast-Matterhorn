@@ -19,10 +19,12 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
-import org.opencastproject.capture.api.AgentState;
+import org.opencastproject.capture.admin.api.Agent;
+import org.opencastproject.capture.admin.api.AgentState;
+import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.jobs.AgentStatusJob;
 import org.osgi.service.cm.ConfigurationException;
@@ -35,18 +37,23 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * TODO: Comment me!
+ *
+ */
 public class StateServiceImpl implements StateService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(StateServiceImpl.class);
 
-  private String agentState = null;
-  private Hashtable<String, String> recordings = null;
+  private Agent agent = null;
+  private Hashtable<String, Recording> recordings = null;
+  ConfigurationManager config = ConfigurationManager.getInstance();
 
   /**
    * Constructor, sets up the class to keep track of an arbitrary number of recordings.
    */
   public StateServiceImpl() {
-    recordings = new Hashtable<String, String>();
-    agentState = AgentState.UNKNOWN;
+    recordings = new Hashtable<String, Recording>();
+    agent = new Agent(config.getItem(CaptureParameters.AGENT_NAME), AgentState.UNKNOWN);
     createPollingTask();
   }
 
@@ -55,23 +62,31 @@ public class StateServiceImpl implements StateService, ManagedService {
    * @see org.opencastproject.capture.api.StateService#setRecordingState(java.lang.String, java.lang.String)
    */
   public void setRecordingState(String recordingID, String state) {
-    recordings.put(recordingID, state);
+    recordings.put(recordingID, new Recording(recordingID, state));
   }
 
   /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.StateService#getRecordingState(java.lang.String)
    */
-  public String getRecordingState(String recordingID) {
+  public Recording getRecordingState(String recordingID) {
     return recordings.get(recordingID);
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.StateService#getRecordings()
+   * @see org.opencastproject.capture.api.StateService#getKnownRecordings()
    */
-  public Set<String> getRecordings() {
-    return recordings.keySet();
+  public Map<String, Recording> getKnownRecordings() {
+    return recordings;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.StateService#getAgent()
+   */
+  public Agent getAgent() {
+    return agent;
   }
 
   /**
@@ -79,7 +94,7 @@ public class StateServiceImpl implements StateService, ManagedService {
    * @see org.opencastproject.capture.api.StateService#getAgentState()
    */
   public String getAgentState() {
-    return agentState;
+    return agent.getState();
   }
   
   /**
@@ -88,7 +103,7 @@ public class StateServiceImpl implements StateService, ManagedService {
    * @see org.opencastproject.capture.api.StateService#setAgentState(java.lang.String)
    */
   public void setAgentState(String state) {
-    agentState = state;
+    agent.setState(state);
   }
 
   /**
@@ -98,7 +113,7 @@ public class StateServiceImpl implements StateService, ManagedService {
     try {
       long pollTime = Long.parseLong(ConfigurationManager.getInstance().getItem(CaptureParameters.AGENT_STATUS_POLLING_INTERVAL)) * 1000L;
       Properties pollingProperties = new Properties();
-      pollingProperties.load(getClass().getClassLoader().getResourceAsStream("config/state_update.properties"));
+      pollingProperties.load(getClass().getClassLoader().getResourceAsStream("config/state_update_scheduler.properties"));
       StdSchedulerFactory sched_fact = new StdSchedulerFactory(pollingProperties);
   
       //Create and start the scheduler

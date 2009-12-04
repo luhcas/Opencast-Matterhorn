@@ -17,6 +17,8 @@ package org.opencastproject.capture.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Properties;
 
@@ -26,11 +28,12 @@ import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
 import org.gstreamer.State;
 import org.gstreamer.event.EOSEvent;
-import org.opencastproject.capture.api.AgentState;
+import org.opencastproject.capture.admin.api.AgentState;
+import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.capture.api.RecordingState;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.jobs.IngestJob;
+import org.opencastproject.capture.impl.jobs.StopCaptureJob;
 import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
@@ -38,7 +41,12 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
+import org.quartz.CronExpression;
+import org.quartz.CronTrigger;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +58,8 @@ import org.slf4j.LoggerFactory;
 public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
+  private static final long default_capture_length = 1 * 60 * 60 * 1000; //1 Hour
+
   private Pipeline pipe = null;
   private ConfigurationManager config = ConfigurationManager.getInstance();
 
@@ -60,7 +70,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   /** The properties object for the current capture.  NOTE THAT THIS WILL BE NULL IF THE AGENT IS NOT CURRENTLY CAPTURING. */
   private Properties current_capture_properties = null;
   /** A pointer to the state service.  This is where all of the recording state information should be kept. */
-  StateService state_service = null;
+  private StateService state_service = null;
+  /** The scheduler which is used to schedule stopCapture calls */
+  private Scheduler captureScheduler = null;
 
   /**
    * Called when the bundle is activated.
@@ -69,6 +81,21 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public void activate(ComponentContext cc) {
     logger.info("Starting CaptureAgentImpl.");
     setAgentState(AgentState.IDLE);
+    try {
+      //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
+      Properties captureProperties = new Properties();
+      captureProperties.load(getClass().getClassLoader().getResourceAsStream("config/capture_scheduler.properties"));
+      StdSchedulerFactory sched_fact = new StdSchedulerFactory(captureProperties);
+      //Create and start the capture scheduler
+      captureScheduler = sched_fact.getScheduler();
+      if (!captureScheduler.isStarted()) {
+        captureScheduler.start();
+      }
+    } catch (SchedulerException e) {
+      throw new RuntimeException("Internal error in capture scheduler, unable to start.", e);
+    } catch (IOException e) {
+      throw new RuntimeException("IOException, unable to load Quartz properties file for capture scheduling.");
+    }
   }
 
   /**
@@ -194,14 +221,15 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     } else {
       //If there is a recording ID use it, otherwise it's unscheduled so just grab a timestamp
       if (merged.containsKey(CaptureParameters.RECORDING_ID)) {
-        current_capture_dir = new File(config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), recordingID);
+        recordingID = merged.getProperty(CaptureParameters.RECORDING_ID);
+        current_capture_dir = new File(merged.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), recordingID);
       } else {
         //Unscheduled capture, use a timestamp value instead
         recordingID = "Unscheduled-" + System.currentTimeMillis();
         merged.setProperty(CaptureParameters.RECORDING_ID, recordingID);
-        current_capture_dir = new File(config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), recordingID);
+        current_capture_dir = new File(merged.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), recordingID);
       }
-      merged.put(CaptureParameters.RECORDING_ROOT_URL, current_capture_dir.toString());
+      merged.put(CaptureParameters.RECORDING_ROOT_URL, current_capture_dir.getAbsolutePath());
     }
 
     //Setup the root capture dir, also make sure that it exists.
@@ -253,7 +281,54 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     });
 
     current_capture_properties = merged;
-    pipe.play();
+
+    CronExpression end = null;
+    if (current_capture_properties.containsKey(CaptureParameters.RECORDING_END)) {
+      try {
+        end = new CronExpression(current_capture_properties.getProperty(CaptureParameters.RECORDING_END));
+      } catch (ParseException e) {
+        logger.error("Invalid end time for capture {}, skipping startup!", recordingID);
+        setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+        setAgentState(AgentState.IDLE);
+        return false;
+      }
+    } else {
+      try {
+        Date date = new Date(System.currentTimeMillis() + default_capture_length);
+        StringBuilder sb = new StringBuilder();
+        //TODO:  Remove the deprecated calls here.
+        sb.append(date.getSeconds() + " ");
+        sb.append(date.getMinutes() + " ");
+        sb.append(date.getHours() + " ");
+        sb.append(date.getDate() + " ");
+        sb.append(date.getMonth() + 1 + " "); //Note:  Java numbers months from 0-11, Quartz uses 1-12.  Sigh.
+        sb.append("? ");
+        end = new CronExpression(sb.toString());
+      } catch (ParseException e) {
+        logger.error("Parsing exception in default length fallback code.  This is very bad.");
+        setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+        setAgentState(AgentState.IDLE);
+        return false;
+      }
+    }
+    JobDetail job = new JobDetail("STOP-" + recordingID, Scheduler.DEFAULT_GROUP, StopCaptureJob.class);
+    job.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
+
+    CronTrigger trig = new CronTrigger();
+    trig.setName(recordingID);
+    trig.setCronExpression(end);
+
+    try {
+      captureScheduler.scheduleJob(job, trig);
+    } catch (SchedulerException e) {
+      logger.error("Unable to schedule stopCapture for {}, skipping capture: {}.", recordingID, e.toString());
+      e.printStackTrace();
+      setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+      setAgentState(AgentState.IDLE);
+      return false;
+    }
+    
+//    pipe.play();
 
     // It **SEEMS** the state changes are immediate (for the test i've done so far)
     while (pipe.getState() != State.PLAYING);
@@ -276,6 +351,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       setAgentState(AgentState.IDLE);
       return false;
     }
+
     File stopFlag = new File(current_capture_dir, "capture.stopped");
 
     //Take the properties out of the class level variable so that we can start capturing again immediately without worrying about overwriting them.
@@ -310,7 +386,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
       return false;
     } catch (SchedulerException e) {
-      logger.error("SchedulerException while attempting to schedule ingest for recording {}.", recordingID);
+      logger.error("SchedulerException while attempting to schedule ingest for recording {}: {}.", recordingID, e);
       setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
       return false;
     }
@@ -324,7 +400,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   public boolean stopCapture(String recordingID) {
     if (current_capture_properties != null) {
-      String current_id =current_capture_properties.getProperty(CaptureParameters.RECORDING_ID); 
+      String current_id = current_capture_properties.getProperty(CaptureParameters.RECORDING_ID); 
       if (recordingID.equals(current_id)) {
         return stopCapture();
       }
@@ -342,6 +418,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     agent_state = state;
     if (state_service != null) {
       state_service.setAgentState(agent_state);
+    } else {
+      logger.warn("State service for capture agent is null, unable to push updates to remote server!");
     }
   }
 
@@ -360,7 +438,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   private void setRecordingState(String recordingID, String state) {
     if (state_service != null) {
-      state_service.setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+      state_service.setRecordingState(recordingID, state);
+    } else {
+      logger.warn("State service for capture agent is null, unable to push updates to remote server!");
     }
   }
 

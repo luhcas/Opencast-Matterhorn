@@ -15,11 +15,10 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -27,6 +26,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.opencastproject.capture.admin.api.Agent;
+import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.CaptureParameters;
 import org.opencastproject.capture.impl.ConfigurationManager;
@@ -72,18 +73,10 @@ public class AgentStatusJob implements Job {
 
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
-    String agentName = config.getItem(CaptureParameters.AGENT_NAME);
-    if (agentName == null) {
-      try {
-        agentName = InetAddress.getLocalHost().getHostName();
-      } catch (UnknownHostException e) {
-        logger.error("Unable to resolve localhost.  This is very bad...", e);
-        return;
-      }
-      logger.warn("Invalid name set for {} falling back to {}.", CaptureParameters.AGENT_NAME, agentName);
-    }
-    formParams.add(new BasicNameValuePair("agentName", agentName));
-    formParams.add(new BasicNameValuePair("state", status.getAgentState()));
+    Agent a = status.getAgent();
+
+    formParams.add(new BasicNameValuePair("agentName", a.getName()));
+    formParams.add(new BasicNameValuePair("state", a.getState()));
 
     send(formParams, url);
   }
@@ -101,12 +94,12 @@ public class AgentStatusJob implements Job {
     }
 
     //For each recording being tracked by the system send an update
-    Set<String> recordings = status.getRecordings();
-    for (String id : recordings) {
+    Map<String, Recording> recordings = status.getKnownRecordings();
+    for (Entry<String, Recording> e : recordings.entrySet()) {
       List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
-      formParams.add(new BasicNameValuePair("id", id));
-      formParams.add(new BasicNameValuePair("state", status.getRecordingState(id)));
+      formParams.add(new BasicNameValuePair("id", e.getKey()));
+      formParams.add(new BasicNameValuePair("state", e.getValue().getState()));
 
       send(formParams, url);
     }

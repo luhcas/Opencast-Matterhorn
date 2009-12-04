@@ -15,11 +15,8 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -27,6 +24,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.opencastproject.capture.impl.CaptureParameters;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -34,38 +32,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The class responsible for starting a capture.
+ * The class responsible for stopping a capture.
  */
-public class CaptureJob implements Job {
+public class StopCaptureJob implements Job {
   
-  private static final Logger logger = LoggerFactory.getLogger(CaptureJob.class);
+  private static final Logger logger = LoggerFactory.getLogger(StopCaptureJob.class);
 
-  /** Constant used to define the key for the properties object which is pulled out of the execution context */
-  public static final String CAPTURE_PROPS = "capture_props";
-  
   /**
-   * Starts the capture itself.
+   * Stops the capture.
    * {@inheritDoc}
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
 
+    logger.error("Stopcapturejob firing");
     //Figure out where we're sending the data
     //TODO:  Should this be hardcoded, or grabbed from some config?
-    HttpPost remoteServer = new HttpPost("http://localhost:8080/capture/rest/startCapture");
+    HttpPost remoteServer = new HttpPost("http://localhost:8080/capture/rest/stopCapture");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
-    Properties p = (Properties) ctx.getMergedJobDataMap().get(CAPTURE_PROPS);
-
-    ByteArrayOutputStream contents = new ByteArrayOutputStream();
-    try {
-      p.store(contents, "");
-    } catch (IOException e) {
-      logger.error("Unable to store properties for trasport to REST endpoint: {}.", e.getMessage());
-    }
+    String recordingID = ctx.getMergedJobDataMap().getString(CaptureParameters.RECORDING_ID);
 
     //Note that config must be the same as the name in the endpoint!
-    formParams.add(new BasicNameValuePair("config", contents.toString()));
+    formParams.add(new BasicNameValuePair("recordingID", recordingID));
     
     //Send the data
     try {
@@ -73,7 +62,7 @@ public class CaptureJob implements Job {
       HttpClient client = new DefaultHttpClient();
       client.execute(remoteServer);
     } catch (Exception e) {
-      logger.error("Unable to start capture: {}.", e.getMessage());
+      logger.error("Unable to stop capture: {}.", e.getMessage());
     }
   }
 

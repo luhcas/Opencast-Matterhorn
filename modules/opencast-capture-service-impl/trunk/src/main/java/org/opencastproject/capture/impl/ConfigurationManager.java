@@ -217,9 +217,13 @@ public class ConfigurationManager {
       return;
     }
 
+    //TODO:  Doc that this is a merge operation rather than a straight up replcae
+    //ie, that to clear a setting from the admin service you have to set it to blank rather than just ignore it
     try {
       URLConnection urlc = url.openConnection();
-      properties.load(urlc.getInputStream());
+      Properties temp = new Properties();
+      temp.load(urlc.getInputStream());
+      merge(temp, true);
     } catch (Exception e) {
       logger.warn("Could not get config file from server: {}.", e);
     }
