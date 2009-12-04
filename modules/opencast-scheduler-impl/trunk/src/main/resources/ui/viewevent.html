@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Scheduler UI</title>
+    
+    <!-- style -->
+    <link rel="stylesheet" type="text/css" href="css/fss-reset.css" />
+    <link rel="stylesheet" type="text/css" href="css/fss-layout.css" />
+    
+    <link rel="stylesheet" type="text/css" href="css/scheduler.css" />
+    <link rel="stylesheet" type="text/css" href="css/popuphelp.css" />
+    <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.7.2.custom.css" />
+    
+    <!-- scripts -->
+    <script type="text/javascript" src="js/InfusionAll.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.7.2.custom.min.js"></script>
+    <script type="text/javascript" src="js/viewevent.js"></script>
+    <script type="text/javascript" src="js/jquery.xslt.js"></script>
+    <script type="text/javascript">
+      var workflowID = null;
+      if(document.location.search){
+        var params = document.location.search.substr(1).split('&');
+        for(var p in params){
+          eq = params[p].indexOf("=");
+          if(params[p].indexOf("workflow") != -1 && eq != -1){
+            workflowID = params[p].substr(eq+1);
+            break;
+          }
+        }
+      }
+      
+      $(document).ready(function() { 
+                        $.get("http://localhost/~msutton/test.xml", handleWorkflow);
+                        $('#stage').xslt("http://localhost/~msutton/scheduler/event.xml", "viewevent.xsl", callback);
+                        });
+      
+      function handleWorkflow(workflowDoc){
+        //TODO: better selector to get just the metadata we want.
+        console.log($("metadata:first catalog url", workflowDoc).text());
+        var dcUrl = $("metadata:first catalog url", workflowDoc).text();
+      }
+      
+      function callback(){
+        $('.folder-head').click(function(){
+                                $(this).children('.fl-icon').toggleClass('icon-arrow-right');
+                                $(this).children('.fl-icon').toggleClass('icon-arrow-down');
+                                $(this).next().toggle('fast');
+                                return false;
+                                });
+      }
+      </script>
+  </head>
+  <body>
+    <!-- fl-centered doesn't work in winXP-IE8 -->
+    <div class="fl-container-flex fl-theme-coal">
+      <ul class="fl-tabs fl-tabs-left">
+        <li class="fl-activeTab"><a href="../../admin/ui/recordings_upcoming.html">Recordings</a></li>
+        <li class=""><a href="../../admin/ui/agents_status.html">Capture Agents</a></li>
+      </ul>
+      <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
+        <div class="fl-container-800">
+          <center><h2>Schedule Recording</h2></center>
+        </div>
+        
+      </div>
+    </div>
+  </body>
+</html>

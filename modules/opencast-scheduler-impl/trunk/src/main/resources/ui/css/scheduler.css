@@ -8,11 +8,42 @@
    background-offset: 0 0;
 }
 
+.icon-help {
+  background-image: url(../img/help.png);
+  background-offset: 0 0;
+  display: inline-block;
+}
+
+.icon-add {
+  background-image: url(../img/add.png);
+  background-offset: 0 0;
+  display: inline-block;
+}
+
+.icon-sub {
+  background-image: url(../img/minus.png);
+  background-offset: 0 0;
+  display: inline-block;
+}
+
+.icon-bullet {
+  background-image: url(../img/bullet-arrow.png);
+  background-offset: 0 0;
+}
+
+.inline-icon {
+  display: inline-block;
+}
+
 /* folding widget */
 
 .folder-head {
   cursor: pointer;
   background-color: silver;
+}
+
+.formbox-header-text {
+    margin-left: 10px;
 }
 
 .folder-icon {
@@ -85,6 +116,56 @@ eg, 5 items * 1.2em line-height = 6em */
   margin-top: -2.4em;
 }
 
+.disable-label {
+  color: gray;
+}
+
+.form-field {
+  width: 320px !important;
+}
+
+.form-list{
+  margin-left: 1em;
+}
+
+.form-list li {
+  margin-bottom: 1em;
+}
+
+.form-list label {
+  font-weight: bold;
+}
+
+.form-radio-group {
+  font-size: .8em;
+}
+
+/* complete/feedback view */
+.notification-header {
+    border: 1px solid black;
+    background: lightgreen;
+    width:430px;
+    text-align:center;
+    margin-bottom:15px;
+}
+.data-row {
+    width:100%;
+    margin:0;
+    display:none;
+}
+.data-label {
+    width:150px;
+}
+.data-value {
+    
+}
+
+.warnbox-title {
+    background:#FA5858;
+}
+.warnbox-content {
+    border:1px solid #FA5858;
+}
 
 /* Fluid Skinning System Overrides */
 
