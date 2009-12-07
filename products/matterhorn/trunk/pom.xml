@@ -663,7 +663,20 @@
     <url>http://www.opencastproject.org/</url>
   </organization>
 
-  <developers><!-- TODO? --></developers>
+  <developers>
+    <developer>
+      <id>jholtzman</id>
+      <name>Josh Holtzman</name>
+      <email>jholtzman@berkeley.edu</email>
+      <organization>UC Berkeley</organization>
+      <organizationUrl>http://berkeley.edu</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>-8</timezone>
+    </developer>
+  </developers>
+
   <contributors><!-- TODO? --></contributors>
 
   <mailingLists>
