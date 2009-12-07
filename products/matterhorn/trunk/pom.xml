@@ -697,6 +697,17 @@
       </roles>
       <timezone>-6</timezone>
     </developer>
+    <developer>
+      <id>bwulff</id>
+      <name>Benjamin Wulff</name>
+      <email>bwulff@uos.de</email>
+      <organization>University of Osnabrueck</organization>
+      <organizationUrl>http://www.uos.de/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
 
   <contributors><!-- TODO? --></contributors>
