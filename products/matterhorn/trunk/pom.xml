@@ -305,6 +305,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
+          <!-- NOTE: this should match the settings for the reporting plugin below -->
           <version>2.6.1</version>
           <configuration>
             <!-- <aggregate>true</aggregate> -->
@@ -730,6 +731,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <!-- NOTE: this should match the settings for the build plugin above -->
+        <version>2.6.1</version>
+        <configuration>
+          <!-- <aggregate>true</aggregate> -->
+          <!-- <detectLinks>true</detectLinks> --><!-- http://jira.codehaus.org/browse/MJAVADOC-273 -->
+          <detectJavaApiLink>true</detectJavaApiLink>
+          <javadocVersion>1.6</javadocVersion>
+          <maxmemory>512m</maxmemory>
+          <quiet>true</quiet>
+          <testSkip>true</testSkip>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
