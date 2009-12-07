@@ -3,6 +3,10 @@ body {
     padding-right:30px;
 }
 
+li {
+  overflow: hidden;
+}
+
 .wu-tab-content {
     border-left:1px solid black;
     border-right:1px solid black;
