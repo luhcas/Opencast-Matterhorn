@@ -675,6 +675,17 @@
       </roles>
       <timezone>-8</timezone>
     </developer>
+    <developer>
+      <id>ruben.perez</id>
+      <name>Ruben Perez Vazquez</name>
+      <email>rubenperez@uvigo.es</email>
+      <organization>Universidade de Vigo</organization>
+      <organizationUrl>http://www.uvigo.es</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
 
   <contributors><!-- TODO? --></contributors>
