@@ -29,12 +29,10 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationDefinitionListImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
-import org.opencastproject.workflow.api.WorkflowInstance.State;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.cm.ConfigurationException;
@@ -105,16 +103,17 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
     }
     // TODO make this actually get the captionable items using get workflows with state and something else
     WorkflowQuery q = workflowService.newWorkflowQuery();
-    q.withState(State.PAUSED).withLimit(max).withOffset(start);
+    //q.withState(State.PAUSED).withLimit(max).withOffset(start); // MH-1743
+    q.withLimit(max).withOffset(start); // MH-1743
     WorkflowSet wfs = workflowService.getWorkflowInstances(q);
     int total = (int) wfs.size();
     WorkflowInstance[] workflows = wfs.getItems();
     for (WorkflowInstance workflow : workflows) {
-      WorkflowOperationInstance operation = workflow.getCurrentOperation();
-      if ( CAPTIONS_OPERATION_NAME.equals(operation.getName()) ) {
+      //WorkflowOperationInstance operation = workflow.getCurrentOperation(); // MH-1743
+      //if ( CAPTIONS_OPERATION_NAME.equals(operation.getName()) ) { // MH-1743
         MediaPackage mp = workflow.getCurrentMediaPackage();
         l.add( new CaptionsMediaItemImpl(workflow.getId(), mp) );
-      }
+      //} // MH-1743
     }
     return new CaptionsResults(l, start, max, total);
   }
