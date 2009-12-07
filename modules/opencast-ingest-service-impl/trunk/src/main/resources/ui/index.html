@@ -96,22 +96,22 @@
                         <div class="fl-widget-content formbox-content fl-fix">
                             <form name="basicData">
                                 <ul class="fl-controls-right wu-reset field-list">
-                                    <li class="fl-fix">
+                                    <li class="">
                                         <span class="fl-label form-label" id="label-title"><span style="color:red;">*</span><label for="title">Title:</label></span>
                                         <input type="text" name="title" id="title" class="form-field" onchange="uploadEvents.fieldChanged(this);">
                                         <span class="fl-icon inline-icon icon-help"  id="help_title"></span>
                                     </li>
-                                    <li class="fl-fix">
+                                    <li class="">
                                         <span class="fl-label form-label" id="label-contributor"><label for="contributor">Presenter:</label></span>
                                         <input type="text" name="contributor" id="contributor" class="form-field">
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
                                     </li>
-                                    <!-- <li class="fl-fix">
+                                    <!-- <li class="">
                                         <span class="fl-label form-label">&nbsp;</span>
                                         <span class="fl-icon inline-icon icon-add" title=""></span>
                                         <nobr><a href="javascript:alert('add presenter');">Add additional presenter</a></nobr>
                                     </li> -->
-                                    <li class="fl-fix">
+                                    <li class="">
                                         <span class="fl-label form-label"><label for="department">Sponsoring department:</label></span>
                                         <input type="text" name="department" id="department" class="form-field">
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
@@ -133,22 +133,22 @@
                         <div class="fl-widget-content formbox-content fl-fix" style="display:none;">
                             <form id="additionalData" name="additionalData">
                                 <ul class="fl-controls-right wu-reset field-list">
-                                    <li class="fl-fix">
+                                    <li class="">
                                         <span class="fl-label form-label"><label for="series">Series:</label></span>
                                         <input type="text" name="series" id="series" class="form-field">
                                         <span class="fl-icon inline-icon icon-help"></span>
                                     </li>
-                                    <li class="fl-fix">
+                                    <li class="">
                                         <span class="fl-label form-label""><label for="subject">Subject:</label></span>
                                         <input type="text" name="subject" id="subject" class="form-field">
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
                                     </li>
-                                    <li class="fl-fix">
+                                    <li class="">
                                         <span class="fl-label form-label"><label for="language">Language:</label></span>
                                         <input type="text" name="language" id="language" class="form-field">
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
                                     </li>
-                                    <li class="fl-fix">
+                                    <li class="">
                                         <span class="fl-label form-label""><label for="description">Description:</label></span>
                                         <textarea class="form-field" name="description" id="description" rows="5"></textarea>
                                         <span class="fl-icon inline-icon icon-help" title=""></span>
@@ -168,7 +168,7 @@
                         <div class="fl-widget-content formbox-content fl-fix">
                             <form name="distributionData">
                                 <ul class="fl-controls-right wu-reset field-list">
-                                    <li class="fl-fix">
+                                    <li class="">
                                         <span class="fl-label form-label"  id="label-dist"><span style="color:red;">*</span><label for="distMHMM">Distribution channel(s):</label></span>
                                         <!--<div style="width:20%;float:left;">
                                             <input type="checkbox" name="distSakai" id="distSakai" onchange="uploadEvents.fieldChanged(this);">Sakai
@@ -183,7 +183,7 @@
                                         </div>
                                         <input type="checkbox" name="distITunesU" id="distITunesU" onchange="uploadEvents.fieldChanged(this);"><span>ITunesU</span>
                                     </li> -->
-                                    <li class="fl-fix">
+                                    <li class="">
                                         <span class="fl-label form-label"><label for="license">License:</label></span>
                                         <!-- <select class="form-field" name="license" id="license">
                                         </select> -->
@@ -204,8 +204,8 @@
                         </div>
                         <div class="fl-widget-content formbox-content fl-fix">
                             <ul class="fl-controls-right wu-reset field-list">
-                                <li class="fl-fix">
-                                    <span class="fl-label form-label"  id="label-dist" style="padding-top:3px;float:left;"><span style="color:red;">*</span><label for="mediacontent">Media file content:</label></span>
+                                <li class="">
+                                    <span class="fl-label form-label"  id="label-mediacontent" style="padding-top:3px;float:left;"><span style="color:red;">*</span><label for="mediacontent">Media file content:</label></span>
                                     <select type="radio" name="mediacontent" id="mediacontent" onchange="uploadEvents.fieldChanged(this);" style="float:left;margin:3px;">
                                         <option value="none">Choose one:</option>                                    
                                         <option value="audio">Audio</option>
@@ -217,7 +217,7 @@
                                     </select>
                                     <span class="fl-icon inline-icon icon-help"></span>
                                 </li>
-                                <li class="fl-fix">
+                                <li class="">
                                     <span class="fl-label form-label" id="label-file"><span style="color:red;">*</span>Media file:</span>
                                     <span>
                                         <div id="filename" class="filename" id="filename">No file selected</div>
@@ -238,14 +238,14 @@
                     <div class="fl-widget">
                         <div class="fl-widget-content fl-fix">
                             <ul class="fl-controls-right wu-reset field-list">
-                                <li class="fl-fix">
+                                <li class="">
                                     <span class="fl-label form-label"">&nbsp;</span>
                                     <span>
                                         <button onclick="uploadEvents.btnSubmit();">Submit</button>
                                         <button onclick="history.back();">Cancel</button>
                                     </span>
                                 </li>
-                                <li class="fl-fix">
+                                <li class="">
                                     <span class="fl-label form-label"">&nbsp;</span>
                                     <span>
                                         <span style="color:red;">*</span>
