@@ -26,6 +26,7 @@ import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.impl.WorkflowQueryImpl.ElementTuple;
@@ -77,8 +78,8 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
               + "mp_element_id varchar(127), mp_element_type varchar(127), mp_element_flavor varchar(127), "
               + "PRIMARY KEY(workflow_id, mp_element_id))");
       s.execute("create table if not exists oc_workflow(workflow_id varchar(127) PRIMARY KEY, mp_id varchar(127), "
-              + "workflow_state varchar(127), episode_id varchar(127), series_id varchar(127), workflow_text clob, "
-              + "workflow_xml clob, date_created timestamp)");
+              + "workflow_state varchar(127), episode_id varchar(127), series_id varchar(127), current_op varchar(127), "
+              + "workflow_text clob, workflow_xml clob, date_created timestamp)");
       s.execute("create index oc_workflow_mp_id on oc_workflow (mp_id)");
       s.execute("create index oc_workflow_workflow_state on oc_workflow (workflow_state)");
       s.execute("create index oc_workflow_episode_id on oc_workflow (episode_id)");
@@ -291,6 +292,10 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       whereClauseList.add(" and wf.workflow_text like ?");
       params.add("%" + queryImpl.getText().toLowerCase() + "%");
     }
+    if(queryImpl.getCurrentOperation() != null) {
+      whereClauseList.add(" and wf.current_op = ?");
+      params.add(queryImpl.getCurrentOperation());
+    }
     
     // build the rest of the where clause
     for(Iterator<String> iter = whereClauseList.iterator(); iter.hasNext();) {
@@ -388,32 +393,37 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       String episodeId = null;
       String seriesId = null;
       String text = null;
+      String currentOperation = null;
       if (mp != null) {
         mediaPackageId = mp.getIdentifier().toString();
         episodeId = findEpisodeId(instance.getSourceMediaPackage());
         seriesId = findSeriesId(instance.getSourceMediaPackage());
         text = getDublinCoreText(instance.getSourceMediaPackage());
+        WorkflowOperationInstance op = instance.getCurrentOperation();
+        if(op != null) currentOperation = op.getName();
       }
       
       if (exists(instance.getId(), conn)) {
         // Update the workflow (TODO: Update the rest of the fields? Will the dublin core fields change in the middle of
         // a workflow?)
-        updateStatment = conn.prepareStatement("update oc_workflow set workflow_xml=?, workflow_state=? where workflow_id=?");
+        updateStatment = conn.prepareStatement("update oc_workflow set workflow_xml=?, workflow_state=?, current_op=? where workflow_id=?");
         updateStatment.setString(1, xml);
         updateStatment.setString(2, instance.getState().name().toLowerCase());
-        updateStatment.setString(3, instance.getId());
+        updateStatment.setString(3, currentOperation);
+        updateStatment.setString(4, instance.getId());
         updateStatment.execute();
       } else {
         // Add it
-        updateStatment = conn.prepareStatement("insert into oc_workflow values(?, ?, ?, ?, ?, ?, ?, ?)");
+        updateStatment = conn.prepareStatement("insert into oc_workflow values(?, ?, ?, ?, ?, ?, ?, ?, ?)");
         updateStatment.setString(1, instance.getId());
         updateStatment.setString(2, mediaPackageId);
         updateStatment.setString(3, instance.getState().name().toLowerCase());
         updateStatment.setString(4, episodeId);
         updateStatment.setString(5, seriesId);
-        updateStatment.setString(6, text);
-        updateStatment.setString(7, xml);
-        updateStatment.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+        updateStatment.setString(6, currentOperation);
+        updateStatment.setString(7, text);
+        updateStatment.setString(8, xml);
+        updateStatment.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
         updateStatment.execute();
       }
       // Update the elements table

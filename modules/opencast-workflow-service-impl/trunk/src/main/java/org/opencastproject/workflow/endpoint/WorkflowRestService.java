@@ -34,6 +34,7 @@ import org.opencastproject.workflow.api.WorkflowInstanceListImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceList;
+import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
@@ -151,30 +152,34 @@ public class WorkflowRestService {
     return json;
   }
 
-  
+// CHECKSTYLE:OFF (The number of method parameters is large because we need to handle many potential query parameters)
   @SuppressWarnings("unchecked")
   @GET
   @Path("instances.{output:.*}")
   public Response getWorkflows(
           @QueryParam("state") String state,
           @QueryParam("q") String text,
+          @QueryParam("episode") String episodeId,
+          @QueryParam("series") String seriesId,
+          @QueryParam("mp") String mediapackageId,
+          @QueryParam("op") String currentOperation,
           @QueryParam("startPage") int offset,
           @QueryParam("count") int limit,
           @PathParam("output") String output) throws Exception {
+// CHECKSTYLE:ON
     if(limit == 0 || limit > MAX_LIMIT) limit = DEFAULT_LIMIT;
     if(offset >0) offset--; // The service is zero based
-    WorkflowSet set = null;
-    if(text == null && state == null) {
-      set = service.getWorkflowInstances(service.newWorkflowQuery().withOffset(offset).withLimit(limit));
-    } else if(text == null) {
-      set = service.getWorkflowInstances(service.newWorkflowQuery()
-              .withState(State.valueOf(state.toUpperCase())).withOffset(offset).withLimit(limit));
-    } else if(state == null) {
-      set = service.getWorkflowInstances(service.newWorkflowQuery().withText(text).withOffset(offset).withLimit(limit));
-    } else {
-      set = service.getWorkflowInstances(service.newWorkflowQuery().withText(text)
-              .withState(State.valueOf(state.toUpperCase())).withOffset(offset).withLimit(limit));
-    }
+    
+    WorkflowQuery q = service.newWorkflowQuery();
+    q.withLimit(limit);
+    q.withOffset(offset);
+    if(state != null) q.withState(State.valueOf(state.toUpperCase()));
+    if(text != null) q.withText(text);
+    if(episodeId != null) q.withEpisode(episodeId);
+    if(seriesId != null) q.withSeries(seriesId);
+    if(mediapackageId != null) q.withMediaPackage(mediapackageId);
+    if(currentOperation != null) q.withCurrentOperation(currentOperation);
+    WorkflowSet set = service.getWorkflowInstances(q);
     
     if("json".equals(output)) {
       JSONArray json = new JSONArray();

@@ -29,6 +29,7 @@ public class WorkflowQueryImpl implements WorkflowQuery {
   protected String episodeId;
   protected String seriesId;
   protected String mediaPackageId;
+  protected String currentOperation;
   protected ElementTuple elementTuple;
 
   public WorkflowQueryImpl() {}
@@ -91,9 +92,16 @@ public class WorkflowQueryImpl implements WorkflowQuery {
   }
   /**
    * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowQuery#withCurrentOperation(java.lang.String)
+   */
+  public WorkflowQuery withCurrentOperation(String currentOperation) {
+    this.currentOperation = currentOperation;
+    return this;
+  }
+  /**
+   * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowQuery#withElement(java.lang.String, java.lang.String, boolean)
    */
-  @Override
   public WorkflowQuery withElement(String elementType, String elementFlavor, boolean exists) {
     this.elementTuple = new ElementTuple(elementType, elementFlavor, exists);
     return this;
@@ -125,6 +133,10 @@ public class WorkflowQueryImpl implements WorkflowQuery {
 
   public String getMediaPackageId() {
     return mediaPackageId;
+  }
+
+  public String getCurrentOperation() {
+    return currentOperation;
   }
 
   public ElementTuple getElementTuple() {

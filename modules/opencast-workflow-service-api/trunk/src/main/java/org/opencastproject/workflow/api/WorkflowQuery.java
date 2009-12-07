@@ -43,6 +43,9 @@ public interface WorkflowQuery {
   /** Limit results to workflow instances for a specific media package */
   WorkflowQuery withMediaPackage(String mediaPackageId);
 
+  /** Limit results to workflow instances that are currently handling the specified operation */
+  WorkflowQuery withCurrentOperation(String currentOperation);
+
   /**
    * Add the existence (or not) of a media package element of this type and flavor
    * @param elementType The type of element (e.g. track, catalog, attachment)
