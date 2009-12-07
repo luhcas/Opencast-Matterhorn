@@ -102,10 +102,10 @@ uploadManager.checkUpload = function(highlight) {
     }
 
     // check if distribution channel is selected
-    if (! (/*document.getElementById('distITunesU').checked ||*/
-           document.getElementById('distMHMM').checked ||
+    if (! /*(document.getElementById('distITunesU').checked ||*/
+           document.getElementById('distMHMM').checked
            /*document.getElementById('distYouTube').checked ||*/
-           document.getElementById('distSakai').checked)
+           //document.getElementById('distSakai').checked)
        ) {
         uploadManager.missingFields.push('dist');
        }
