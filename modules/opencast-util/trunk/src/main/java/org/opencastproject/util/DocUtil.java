@@ -37,6 +37,8 @@ import freemarker.template.TemplateException;
 /**
  * This provides methods for handling documentation generation
  * The is mainly for generating REST documentation but it could be used for other things as well
+ * @see DocData
+ * @see org.opencastproject.util.doc.DocRestData
  */
 public class DocUtil {
 
@@ -127,7 +129,7 @@ public class DocUtil {
    * @param data any populated DocData object
    * @return the documentation (e.g. REST html) as a string
    * @see DocData
-   * @see DocRestData
+   * @see org.opencastproject.util.doc.DocRestData
    */
   public static String generate(DocData data) {
     String template = loadTemplate(data.getDefaultTemplatePath());
@@ -143,7 +145,7 @@ public class DocUtil {
    * @param template any freemarker template which works with the DocData data structure
    * @return the documentation (e.g. REST html) as a string
    * @see DocData
-   * @see DocRestData
+   * @see org.opencastproject.util.doc.DocRestData
    */
   public static String generate(DocData data, String template) {
     if (template == null) {
