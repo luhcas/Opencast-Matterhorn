@@ -306,6 +306,15 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>2.6.1</version>
+          <configuration>
+            <!-- <aggregate>true</aggregate> -->
+            <!-- <detectLinks>true</detectLinks> --><!-- http://jira.codehaus.org/browse/MJAVADOC-273 -->
+            <detectJavaApiLink>true</detectJavaApiLink>
+            <javadocVersion>1.6</javadocVersion>
+            <maxmemory>512m</maxmemory>
+            <quiet>true</quiet>
+            <testSkip>true</testSkip>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.felix</groupId>
@@ -721,15 +730,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.6.1</version>
-        <configuration>
-          <!-- <aggregate>true</aggregate> -->
-          <detectLinks>true</detectLinks>
-          <javadocVersion>1.6</javadocVersion>
-          <maxmemory>512m</maxmemory>
-          <quiet>true</quiet>
-          <testSkip>true</testSkip>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
