@@ -707,7 +707,7 @@
         <role>developer</role>
       </roles>
       <timezone>+1</timezone>
-    </developer>
+    </developer>   
     <developer>
       <id>azeckoski</id>
       <name>Aaron Zeckoski</name>
@@ -718,6 +718,17 @@
       </roles>
       <timezone>0</timezone>
     </developer>
+    <developer>
+      <id>rrolf</id>
+      <name>Ruediger Rolf</name>
+      <email>rrolf@uni-osnabrueck.de</email>
+      <organization>University of Osnabrueck</organization>
+      <organizationUrl>http://www.uni-osnabrueck.de.de/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>     
   </developers>
 
   <contributors><!-- TODO? --></contributors>
