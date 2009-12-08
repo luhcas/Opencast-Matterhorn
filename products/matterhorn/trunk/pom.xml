@@ -708,6 +708,16 @@
       </roles>
       <timezone>+1</timezone>
     </developer>
+    <developer>
+      <id>azeckoski</id>
+      <name>Aaron Zeckoski</name>
+      <email>azeckoski@vt.edu</email>
+      <url>http://tinyurl.com/azprofile</url>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>0</timezone>
+    </developer>
   </developers>
 
   <contributors><!-- TODO? --></contributors>
