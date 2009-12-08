@@ -841,6 +841,10 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
         <version>2.2</version>
+        <configuration>
+          <failOnError>false</failOnError>
+          <timeout>30000</timeout>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -871,6 +875,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>jdepend-maven-plugin</artifactId>
+        <version>2.0-beta-2</version>
       </plugin>
 <!--      <plugin>-->
 <!--        <groupId>org.codehaus.mojo</groupId>-->
