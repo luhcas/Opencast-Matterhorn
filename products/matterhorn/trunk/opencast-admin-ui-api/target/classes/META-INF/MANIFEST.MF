@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Export-Package: org.opencastproject.adminui.api;uses:="javax.xml.bind.
+ annotation,javax.xml.bind.annotation.adapters"
+Built-By: wulff
+Tool: Bnd-0.0.255
+Bundle-Category: opencastproject
+Bundle-Name: opencast-admin-ui-api
+Created-By: Apache Maven Bundle Plugin
+Bundle-Vendor: The Opencast Project
+Build-Jdk: 1.6.0_15
+Bundle-Version: 0.1.0.SNAPSHOT
+Bnd-LastModified: 1260386361212
+Bundle-ManifestVersion: 2
+Bundle-License: http://www.osedu.org/licenses/ECL-2.0/ecl2.txt
+Bundle-Description: The Opencast Project's Matterhorn software is a me
+ dia capture, processing, and distribution system
+Import-Package: javax.xml.bind.annotation,javax.xml.bind.annotation.ad
+ apters,org.opencastproject.adminui.api
+Bundle-SymbolicName: opencast-admin-ui-api
+Bundle-DocURL: http://opencastproject.org/
+

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="4.4">
+<file name="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-api/src/main/java/org/opencastproject/adminui/api/RecordingDataViewList.java">
+</file>
+<file name="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-api/src/main/java/org/opencastproject/adminui/api/AdminuiService.java">
+</file>
+<file name="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-api/src/main/java/org/opencastproject/adminui/api/RecordingDataViewListImpl.java">
+</file>
+<file name="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-api/src/main/java/org/opencastproject/adminui/api/RecordingDataViewImpl.java">
+</file>
+<file name="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-api/src/main/java/org/opencastproject/adminui/api/RecordingDataView.java">
+</file>
+<file name="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-api/src/main/java/org/opencastproject/adminui/api/RecordingDataViewList.java">
+</file>
+<file name="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-api/src/main/java/org/opencastproject/adminui/api/AdminuiService.java">
+</file>
+<file name="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-api/src/main/java/org/opencastproject/adminui/api/RecordingDataViewListImpl.java">
+</file>
+<file name="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-api/src/main/java/org/opencastproject/adminui/api/RecordingDataViewImpl.java">
+</file>
+<file name="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-api/src/main/java/org/opencastproject/adminui/api/RecordingDataView.java">
+</file>
+</checkstyle>
