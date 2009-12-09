@@ -95,6 +95,10 @@ uploadUI.showUploadComplete = function() {
     );
 }
 
+uploadUI.displayPrompt = function(title,message,confirmbtnText,cancelbtnText,callback) {
+  
+}
+
 /** prints the log message in the swfUpload debug console if it is activeated
  *  @param {string} message message that should be printed in log */
 uploadUI.log = function(message) {

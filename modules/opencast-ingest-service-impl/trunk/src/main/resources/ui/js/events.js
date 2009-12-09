@@ -15,6 +15,7 @@ uploadEvents.fieldChanged = function(field) {
    uploadUI.log("EVENT: " + "Value of filed " + field.id + " changed to: " + field.value);
    uploadUI.setLabelColor(field.id, 'black');
    uploadManager.checkUpload( ($('#missingFields-container').css('display') == 'block') );
+   uploadManager.dataChanged = true;
 }
 
 /** fired when submit button is clicked */
@@ -59,6 +60,7 @@ uploadEvents.fileSelected = function(file) {
 /** fired when swfUpload has started the upload */
 uploadEvents.uploadStarted = function(file) {
     uploadUI.showProgressOverlay();
+    uploadManager.uploading = true;
 }
 
 /** fired periodically when upload is in progress */
@@ -71,9 +73,11 @@ uploadEvents.uploadComplete = function(file) {
     uploadManager.uploader.destroy();
     uploadUI.hideProgressOverlay();
     uploadUI.showUploadComplete();
+    uploadManager.uploading = false;
 }
 
 /** fired when an error occured during upload */
 uploadEvents.uploadError = function(file, code, message) {
     uploadUI.hideProgressOverlay();
+    uploadManager.uploading = false;
 }

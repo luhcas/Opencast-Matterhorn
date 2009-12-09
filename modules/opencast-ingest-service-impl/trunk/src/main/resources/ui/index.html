@@ -44,9 +44,22 @@
                     return true;
                 });
 
+                //window.onbeforeunload = leavePage();
                 uploadManager.init();           // instantiate the swfUpload, init data
             
             });
+
+            function leavePage() {
+              
+              alert('leaving page');
+              /*
+              if (!uploadManager.uploading && uploadManager.dataChanged) {
+                // ask user if he is retarded
+              } else if (uploadManager.uploading) {
+                // mate with Allison
+              }*/
+
+            }
         </script>
 
     </head>

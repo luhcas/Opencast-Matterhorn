@@ -24,7 +24,7 @@
 .fl-theme-coal h1 {color:#000000; border-bottom-width:0.2em; border-bottom-style:solid;} 
 .fl-theme-coal h2 {color: #666666;}
 .fl-theme-coal th {border:0.1em solid #999999; background-color:#dfefff !important;}
-.fl-theme-coal td {border:0.1em solid #999999 !important;}
+.fl-theme-coal td {border:0.1em solid white !important;}
 .fl-theme-coal .fl-textfield,
 .fl-theme-coal .fl-textarea {background-color:#ffffff; border:1px solid #000000;}
 .fl-theme-coal .fl-icon {background-color:none;}

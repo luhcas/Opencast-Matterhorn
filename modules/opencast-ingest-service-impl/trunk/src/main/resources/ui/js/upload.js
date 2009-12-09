@@ -8,6 +8,12 @@
 */
 var uploadManager = uploadManager || { };
 
+/** indicates if the user has entered data */
+uploadManager.dataChanged = false;
+
+/** indicates if there is an upload in progress */
+uploadManager.uploading = false;
+
 /** Instace of swfUpload */
 uploadManager.uploader = null;
 
@@ -32,7 +38,7 @@ uploadManager.init = function() {
         file_upload_limit : 0,
         file_queue_limit : 0,
         file_post_name : "mediafile",
-        debug: false,
+        debug: true,
 
         button_placeholder_id : "uploader",
         button_width: 60,
