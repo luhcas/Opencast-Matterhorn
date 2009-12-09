@@ -128,6 +128,7 @@ public class DocUtil {
    * 
    * @param data any populated DocData object
    * @return the documentation (e.g. REST html) as a string
+   * @throws IllegalArgumentException if the input data is invalid in some way
    * @see DocData
    * @see org.opencastproject.util.doc.DocRestData
    */
@@ -144,6 +145,7 @@ public class DocUtil {
    * @param data any populated DocData object
    * @param template any freemarker template which works with the DocData data structure
    * @return the documentation (e.g. REST html) as a string
+   * @throws IllegalArgumentException if the input data is invalid in some way
    * @see DocData
    * @see org.opencastproject.util.doc.DocRestData
    */

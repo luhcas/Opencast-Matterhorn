@@ -66,6 +66,7 @@ public class DocData {
 
   /**
    * @return the map version of the data in this doc data holder
+   * @throws IllegalArgumentException if the data cannot be turned into a valid map
    */
   public Map<String, Object> toMap() {
     LinkedHashMap<String, Object> m = new LinkedHashMap<String, Object>();

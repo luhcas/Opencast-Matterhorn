@@ -21,6 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This is the document model class which holds the data about a set of rest endpoints, build this one time and reuse it
@@ -29,6 +31,7 @@ import java.util.Vector;
 public class DocRestData extends DocData {
 
   public static final String TEMPLATE_DEFAULT = "/org/opencastproject/templates/rest/template.xhtml";
+  public static final String FORMAT_KEY = "{FORMAT}";
 
   protected List<RestEndpointHolder> holders;
 
@@ -66,6 +69,30 @@ public class DocRestData extends DocData {
     for (RestEndpointHolder holder : this.holders) {
       if (!holder.getEndpoints().isEmpty()) {
         for (RestEndpoint endpoint : holder.getEndpoints()) {
+          // validate the endpoint
+          if (! endpoint.getRequiredParams().isEmpty()) {
+            for (Param param : endpoint.getRequiredParams()) {
+              if (! endpoint.path.contains("{"+param.name+"}")) {
+                throw new IllegalArgumentException("Path ("+endpoint.path+") does not match required parameter ("+
+                        param.name+") for endpoint ("+endpoint.name+"), the path must contain all required param names");
+              }
+            }
+            Pattern pattern = Pattern.compile("\\{(.+?)\\}");
+            Matcher matcher = pattern.matcher(endpoint.path);
+            int count = 0;
+            int n = matcher.groupCount();
+            while (matcher.find()) {
+              String g = matcher.group();
+              if (! FORMAT_KEY.equals(matcher.group())) {
+                count++;
+              }
+            }
+            if ( count != endpoint.getRequiredParams().size() ) {
+              throw new IllegalArgumentException("Path ("+endpoint.path+") does not match required parameters ("+
+                      endpoint.getRequiredParams()+") for endpoint ("+endpoint.name+
+                      "), the path must contain the same number of required params as the requiredParams list");
+            }
+          }
           // handle the forms
           if (endpoint.getForm() != null) {
             RestTestForm form = endpoint.getForm();
@@ -82,7 +109,7 @@ public class DocRestData extends DocData {
           // handle the endpoint auto format paths
           if (endpoint.isAutoPathFormat()) {
             if (! endpoint.getFormats().isEmpty()) {
-              endpoint.pathFormat = ".{FORMAT}";
+              endpoint.pathFormat = "."+FORMAT_KEY;
               StringBuilder sb = new StringBuilder();
               sb.append(".{");
               for (Format format : endpoint.getFormats()) {

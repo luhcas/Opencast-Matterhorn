@@ -49,6 +49,7 @@ public class DocUtilTest {
     String title = "AZ REST DOC";
     DocRestData data;
     String document;
+    RestEndpoint endpoint;
 
     data = new DocRestData(name, title, "/azservice/rest", new String[] {"My first note"});
     document = DocUtil.generate(data);
@@ -59,13 +60,13 @@ public class DocUtilTest {
     // now for one with some real endpoint data
     data = new DocRestData(name, title, "/azservice/rest", new String[] {"My first note"});
     data.addNote("my second note");
-    RestEndpoint endpoint = new RestEndpoint("name1", RestEndpoint.Method.GET, "/path1", null);
+    endpoint = new RestEndpoint("name1", RestEndpoint.Method.GET, "/path1/{rp1}", null);
     endpoint.addRequiredParam(new Param("rp1", Param.Type.STRING, null, null, null));
     endpoint.addFormat(Format.json());
     endpoint.addStatus(Status.OK(null));
     endpoint.addStatus(new Status(500, null));
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
-    RestEndpoint endpoint2 = new RestEndpoint("name2",RestEndpoint.Method.POST,"/path2","description for this thing 2");
+    RestEndpoint endpoint2 = new RestEndpoint("name2",RestEndpoint.Method.POST,"/path2/{rp2}","description for this thing 2");
     endpoint2.addRequiredParam(new Param("rp2", Param.Type.STRING, "default-rp2", null));
     endpoint2.addBodyParam(false, "<xml>\n  <thing>this is something</thing>\n</xml>", "description for body");
     endpoint2.addOptionalParam(new Param("rp3", Param.Type.BOOLEAN, "true", "description r p 3"));
@@ -92,8 +93,8 @@ public class DocUtilTest {
     // test out the new format handling - MH-1752
     data = new DocRestData(name, title, "/azservice/rest", null);
     RestEndpoint endpointDot = new RestEndpoint("nameDot", RestEndpoint.Method.GET, "/path3/{value}.xml", null);
-    data.addEndpoint(RestEndpoint.Type.READ, endpointDot);
     endpointDot.addStatus(Status.OK(null));
+    data.addEndpoint(RestEndpoint.Type.READ, endpointDot);
     document = DocUtil.generate(data);
     assertNotNull(document);
     assertFalse(document.startsWith("ERROR::"));
@@ -114,6 +115,33 @@ public class DocUtilTest {
     assertTrue(document.contains(title));
     assertTrue(document.contains(".{FORMAT}"));
     assertTrue(document.contains(".{json|xml}"));
+
+    // test out the validation of params
+    // this is missing one of the params in the path
+    data = new DocRestData(name, title, "/azservice/rest", null);
+    endpoint = new RestEndpoint("nameDot", RestEndpoint.Method.GET, "/path/{req1}/{req2}.{FORMAT}", null);
+    endpoint.addRequiredParam( new Param("req1", Param.Type.STRING, null, null) );
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+    try {
+      document = DocUtil.generate(data);
+      fail("should have died");
+    } catch (IllegalArgumentException e) {
+      assertNotNull(e.getMessage());
+    }
+
+    // this has too many params compared to the path
+    data = new DocRestData(name, title, "/azservice/rest", null);
+    endpoint = new RestEndpoint("nameDot", RestEndpoint.Method.GET, "/path/{req1}/{req2}.{FORMAT}", null);
+    endpoint.addRequiredParam( new Param("req1", Param.Type.STRING, null, null) );
+    endpoint.addRequiredParam( new Param("req2", Param.Type.STRING, null, null) );
+    endpoint.addRequiredParam( new Param("req3", Param.Type.STRING, null, null) );
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+    try {
+      document = DocUtil.generate(data);
+      fail("should have died");
+    } catch (IllegalArgumentException e) {
+      assertNotNull(e.getMessage());
+    }
   }
 
 }
