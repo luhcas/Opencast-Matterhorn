@@ -142,6 +142,7 @@ public class DocUtilTest {
     } catch (IllegalArgumentException e) {
       assertNotNull(e.getMessage());
     }
+
   }
 
 }
