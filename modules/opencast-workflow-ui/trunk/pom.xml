@@ -59,7 +59,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Import-Package>org.opencastproject.util, *</Import-Package>
+            <Import-Package>org.opencastproject.http, *</Import-Package>
             <Service-Component>
               OSGI-INF/workflow-ui.xml
             </Service-Component>

@@ -245,8 +245,8 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
    * {@inheritDoc}
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowInstances(org.opencastproject.workflow.api.WorkflowInstanceQuery)
    */
-  @Override
   public WorkflowSet getWorkflowInstances(WorkflowQuery query) {
+    if(query == null) throw new IllegalArgumentException("WorkflowQuery must not be null");
     List<String> params = new ArrayList<String>();
     List<String> whereClauseList = new ArrayList<String>();
     WorkflowQueryImpl queryImpl = (WorkflowQueryImpl)query;

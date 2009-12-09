@@ -1,0 +1,5 @@
+This directory contains sample files for use in testing workflows:
+
+dc-1.xml
+media.mov
+mediapackage-1.xml

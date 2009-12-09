@@ -15,10 +15,13 @@
  */
 package org.opencastproject.runtimeinfo;
 
-import org.opencastproject.util.StaticResource;
+import org.opencastproject.http.StaticResource;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpContext;
@@ -29,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -42,149 +44,114 @@ import javax.servlet.http.HttpServletResponse;
 public class InfoServlet extends HttpServlet implements BundleActivator {
   private static final long serialVersionUID = 1L;
   private static final Logger logger = LoggerFactory.getLogger(InfoServlet.class);
+  private static final String WS_CONTEXT = "org.apache.cxf.ws.httpservice.context";
+  private static final String WS_CONTEXT_FILTER = "(" + WS_CONTEXT + "=*)";
+  private static final String RS_CONTEXT = "org.apache.cxf.rs.httpservice.context";
+  private static final String RS_CONTEXT_FILTER = "(" + RS_CONTEXT + "=*)";
+  
   private BundleContext bundleContext;
   /**
    * {@inheritDoc}
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
+  @SuppressWarnings("unchecked")
   public void doGet(HttpServletRequest request, HttpServletResponse response)
     throws IOException, ServletException{
-    response.setContentType("text/html");
-    PrintWriter writer = response.getWriter();
-    writeHtmlHeader(writer);
-    writeWsdlEndpoints(writer);
-    writeJaxRsEndpoints(writer);
-    writeUserInterfaces(writer);
-    writeSystemConsole(writer);
-    writeHtmlFooter(writer);
+    response.setContentType("application/json");
+    JSONObject json = new JSONObject();
+    json.put("rest", getRestAsJson());
+    json.put("soap", getSoapAsJson());
+    json.put("ui", getUserInterfacesAsJson());
+    json.writeJSONString(response.getWriter());
   }
 
-  private void writeHtmlHeader(PrintWriter writer) {
-    writer.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">");
-    writer.println("<html><head>");
-    writer.println("<title>Matterhorn Service Endpoints</title>");
-    writer.println("</head>");
-    writer.println("<body>");
+  protected String getServerUrl() {
+    String serverUrl = bundleContext.getProperty("serverUrl");
+    return serverUrl == null ? "http://localhost:8080" : serverUrl;
   }
   
-  private void writeWsdlEndpoints(PrintWriter writer) {
+  protected ServiceReference[] getSoapServiceReferences() throws InvalidSyntaxException {
+    return bundleContext.getAllServiceReferences(null, WS_CONTEXT_FILTER);
+  }
+
+  protected ServiceReference[] getRestServiceReferences() throws InvalidSyntaxException {
+    return bundleContext.getAllServiceReferences(null, RS_CONTEXT_FILTER);
+  }
+
+  protected ServiceReference[] getUserInterfaceServiceReferences() throws InvalidSyntaxException {
+    return bundleContext.getAllServiceReferences(StaticResource.class.getName(), "(&(alias=*)(classpath=*))");
+  }
+
+  @SuppressWarnings("unchecked")
+  protected JSONArray getSoapAsJson() {
+    JSONArray json = new JSONArray();
     ServiceReference[] serviceRefs = null;
     try {
-      serviceRefs = bundleContext.getAllServiceReferences(null, "(org.apache.cxf.ws.httpservice.context=*)");
+      serviceRefs = getSoapServiceReferences();
     } catch (InvalidSyntaxException e) {
       e.printStackTrace();
     }
-    if (serviceRefs == null) {
-      writer.println("<div>There are no wsdl endpoints available.</div>");
-    } else {
-      writer.println("<table border=\"1\">");
-      writer.println("<title>WSDL Service Endpoints</title>");
-      writer.println("<th>Base URL</th>");
-      writer.println("<th>Description</th>");
-      writer.println("<th>WSDL</th>");
-      for (ServiceReference wsdlRef : serviceRefs) {
-        String description = (String)wsdlRef.getProperty("service.description");
-        String servletContextPath = (String)wsdlRef.getProperty("org.apache.cxf.ws.httpservice.context");
-        writer.println("<tr>");
-        writer.println("<td>");
-        writer.println(servletContextPath);
-        writer.println("</td>");
-        writer.println("<td>");
-        writer.println(description);
-        writer.println("</td>");
-        writer.println("<td>");
-        writer.println("<a href=\"" + servletContextPath + "?wsdl\">" + servletContextPath + "</a>");
-        writer.println("</td>");
-        writer.println("</tr>");
-      }
-      writer.println("</table>");
+    if (serviceRefs == null) return json;
+    String serverUrl = getServerUrl();
+    for (ServiceReference ref : serviceRefs) {
+      String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
+      String servletContextPath = (String)ref.getProperty(WS_CONTEXT);
+      JSONObject endpoint = new JSONObject();
+      endpoint.put("description", description);
+      endpoint.put("url", serverUrl + servletContextPath);
+      endpoint.put("wsdl", serverUrl + servletContextPath + "/?wsdl");
+      json.add(endpoint);
     }
+    return json;
   }
 
-  private void writeJaxRsEndpoints(PrintWriter writer) {
+  @SuppressWarnings("unchecked")
+  protected JSONArray getRestAsJson() {
+    JSONArray json = new JSONArray();
     ServiceReference[] serviceRefs = null;
     try {
-      serviceRefs = bundleContext.getAllServiceReferences(null, "(org.apache.cxf.rs.httpservice.context=*)");
+      serviceRefs = getRestServiceReferences();
     } catch (InvalidSyntaxException e) {
       e.printStackTrace();
     }
-    if (serviceRefs == null) {
-      writer.println("<div>There are no JAX-RS endpoints available.</div>");
-    } else {
-      writer.println("<table border=\"1\">");
-      writer.println("<title>REST Service Endpoints</title>");
-      writer.println("<th>Base URL</th>");
-      writer.println("<th>Description</th>");
-      writer.println("<th>Documentation</th>");
-      writer.println("<th>WADL</th>");
-      for (ServiceReference jaxRsRef : serviceRefs) {
-        String description = (String)jaxRsRef.getProperty("service.description");
-        String servletContextPath = (String)jaxRsRef.getProperty("org.apache.cxf.rs.httpservice.context");
-        writer.println("<tr>");
-        writer.println("<td>");
-        writer.println(servletContextPath);
-        writer.println("</td>");
-        writer.println("<td>");
-        writer.println(description);
-        writer.println("</td>");
-        writer.println("<td>");
-        writer.println("<a href=\"" + servletContextPath + "/docs\">" + servletContextPath + "/docs</a>");
-        writer.println("</td>");
-        writer.println("<td>");
-        writer.println("<a href=\"" + servletContextPath + "/?_wadl&_type=xml\">" + servletContextPath + "/?_wadl&_type=xml</a>");
-        writer.println("</td>");
-        writer.println("</tr>");
-      }
-      writer.println("</table>");
+    if (serviceRefs == null) return json;
+    String serverUrl = getServerUrl();
+    for (ServiceReference jaxRsRef : serviceRefs) {
+      String description = (String)jaxRsRef.getProperty(Constants.SERVICE_DESCRIPTION);
+      String servletContextPath = (String)jaxRsRef.getProperty(RS_CONTEXT);
+      JSONObject endpoint = new JSONObject();
+      endpoint.put("description", description);
+      endpoint.put("docs", serverUrl + servletContextPath + "/docs");
+      endpoint.put("wadl", serverUrl + servletContextPath + "/?_wadl&type=xml");
+      json.add(endpoint);
     }
+    return json;
   }
   
-  private void writeUserInterfaces(PrintWriter writer) {
+  @SuppressWarnings("unchecked")
+  protected JSONArray getUserInterfacesAsJson() {
+    JSONArray json = new JSONArray();
     ServiceReference[] serviceRefs = null;
     try {
-      serviceRefs = bundleContext.getAllServiceReferences(StaticResource.class.getName(), "(&(alias=*)(classpath=*))");
+      serviceRefs = getUserInterfaceServiceReferences();
     } catch (InvalidSyntaxException e) {
       e.printStackTrace();
     }
-    if (serviceRefs == null) {
-      writer.println("<div>There are no user interfaces available.</div>");
-    } else {
-      writer.println("<table border=\"1\">");
-      writer.println("<title>User Interfaces</title>");
-      writer.println("<th>Base URL</th>");
-      writer.println("<th>Description</th>");
-      writer.println("<th>Welcome Page</th>");
-      for (ServiceReference uiRef : serviceRefs) {
-        String description = (String)uiRef.getProperty("service.description");
-        String alias = (String)uiRef.getProperty("alias");
-        String welcomeFile = (String)uiRef.getProperty("welcome.file");
-        String welcomePath = alias + "/" + welcomeFile;
-        writer.println("<tr>");
-        writer.println("<td>");
-        writer.println(alias);
-        writer.println("</td>");
-        writer.println("<td>");
-        writer.println(description);
-        writer.println("</td>");
-        writer.println("<td>");
-        writer.println("<a href=\"" + welcomePath + "\">" + welcomePath + "</a>");
-        writer.println("</td>");
-        writer.println("</tr>");
-      }
-      writer.println("</table>");
+    if (serviceRefs == null) return json;
+    String serverUrl = getServerUrl();
+    for (ServiceReference ref : serviceRefs) {
+      String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
+      String alias = (String)ref.getProperty("alias");
+      String welcomeFile = (String)ref.getProperty("welcome.file");
+      String welcomePath = "/".equals(alias) ? alias + welcomeFile : alias + "/" + welcomeFile;
+      JSONObject endpoint = new JSONObject();
+      endpoint.put("description", description);
+      endpoint.put("welcomepage", serverUrl + welcomePath);
+      json.add(endpoint);
     }
+    return json;
   }
   
-  private void writeSystemConsole(PrintWriter writer) {
-    writer.println("<p>");
-    writer.println("<a href=\"/system/console\">System Console</a>");
-    writer.println("</p>");
-  }
-
-  private void writeHtmlFooter(PrintWriter writer) {
-    writer.println("</body></html>");
-  }
-
   private ServiceTracker httpTracker;
   
   public void start(BundleContext context) throws Exception {
@@ -198,7 +165,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
         HttpService httpService = (HttpService) context.getService(reference);
         try {
           HttpContext httpContext = httpService.createDefaultHttpContext();
-          httpService.registerServlet("/", servlet, null, httpContext);
+          httpService.registerServlet("/info.json", servlet, null, httpContext);
         } catch (ServletException e) {
           e.printStackTrace();
         } catch (NamespaceException e) {
@@ -217,4 +184,3 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     }
   }
 }
-

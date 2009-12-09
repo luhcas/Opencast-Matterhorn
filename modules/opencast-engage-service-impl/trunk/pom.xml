@@ -63,7 +63,7 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Bundle-Activator> org.opencastproject.engage.impl.Activator </Bundle-Activator>
             <Private-Package> org.opencastproject.engage.impl </Private-Package>
-            <Import-Package>org.opencastproject.util, *</Import-Package>
+            <Import-Package>org.opencastproject.http, *</Import-Package>
             <Service-Component>
               OSGI-INF/engage-service.xml,
               OSGI-INF/engage-service-rest.xml,

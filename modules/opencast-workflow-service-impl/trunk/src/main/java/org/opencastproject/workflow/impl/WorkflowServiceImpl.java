@@ -600,7 +600,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowService#newWorkflowQuery()
    */
-  @Override
   public WorkflowQuery newWorkflowQuery() {
     return new WorkflowQueryImpl();
   }

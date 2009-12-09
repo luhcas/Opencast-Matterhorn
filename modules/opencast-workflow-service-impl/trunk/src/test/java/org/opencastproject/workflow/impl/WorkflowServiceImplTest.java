@@ -232,6 +232,7 @@ public class WorkflowServiceImplTest {
     Assert.assertNull(service.getWorkflowById(instance.getId()));
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
+
   @Test
   public void testGetWorkflowByText() {
     // Ensure that the database doesn't have any workflow instances
@@ -367,6 +368,37 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
   
+  @Test
+  public void testGetAllWorkflowInstances() {
+    Assert.assertEquals(0, service.countWorkflowInstances());
+    Assert.assertEquals(0, service.getWorkflowInstances(service.newWorkflowQuery()).size());
+
+    WorkflowInstance instance1 = service.start(definition1, mediapackage1, null);
+    WorkflowInstance instance2 = service.start(definition1, mediapackage2, null);
+
+    // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
+    while (! service.getWorkflowById(instance1.getId()).getState().equals(State.SUCCEEDED) ||
+            ! service.getWorkflowById(instance2.getId()).getState().equals(State.SUCCEEDED)) {
+      System.out.println("Waiting for workflows to complete...");
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+      }
+    }
+
+    WorkflowSet workflowsInDb = service.getWorkflowInstances(service.newWorkflowQuery());
+    Assert.assertEquals(2, workflowsInDb.getItems().length);
+
+    // cleanup the database
+    service.removeFromDatabase(instance1.getId());
+    service.removeFromDatabase(instance2.getId());
+
+    // And ensure that it's really gone
+    Assert.assertNull(service.getWorkflowById(instance1.getId()));
+    Assert.assertNull(service.getWorkflowById(instance2.getId()));
+    Assert.assertEquals(0, service.countWorkflowInstances());
+  }
+
   /**
    * Starts 100 concurrent workflows to test DB deadlocking.  This takes a while, so this test is ignored by default.
    * @throws Exception

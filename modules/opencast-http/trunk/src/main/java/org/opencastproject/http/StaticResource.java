@@ -1,0 +1,117 @@
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+package org.opencastproject.http;
+
+import org.apache.commons.io.IOUtils;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.HttpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * A static resource for registration with the http service.
+ */
+public class StaticResource extends HttpServlet {
+  private static final long serialVersionUID = 1L;
+  private static final Logger logger = LoggerFactory.getLogger(StaticResource.class);
+  String classpath;
+  String alias;
+  String welcomeFile;
+  HttpService httpService;
+  ComponentContext componentContext;
+
+  public void setHttpService(HttpService service) {
+    this.httpService = service;
+  }
+
+  public void activate(ComponentContext componentContext) {
+    this.componentContext = componentContext;
+    welcomeFile = (String)componentContext.getProperties().get("welcome.file");
+    boolean welcomeFileSpecified = true;
+    if(welcomeFile == null) {
+      welcomeFileSpecified = false;
+      welcomeFile = "index.html";
+    }
+    alias = (String)componentContext.getProperties().get("alias");
+    classpath = (String)componentContext.getProperties().get("classpath");
+    logger.info("registering classpath:{} at {} with welcome file {} {}",
+            new Object[] {classpath, alias, welcomeFile, welcomeFileSpecified ? "" : "(via default)"});
+    try {
+      httpService.registerServlet(alias, this, null, null);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  public void deactivate(ComponentContext context) {
+    httpService.unregister(alias);
+  }
+
+  @Override
+  public String toString() {
+    return "StaticResource [alias=" + alias + ", classpath=" + classpath + ", welcome file=" + welcomeFile + "]";
+  }
+  
+  @Override
+  public void doGet(HttpServletRequest req, HttpServletResponse resp) {
+    String pathInfo = req.getPathInfo();
+    String servletPath = req.getServletPath();
+    String path = pathInfo == null ? servletPath : servletPath + pathInfo;
+
+    logger.info("handling path {}, pathInfo={}, servletPath={}", new String[] {path, pathInfo, servletPath});
+    
+    // If the URL points to a "directory", redirect to the welcome file
+    if("/".equals(path) || alias.equals(path) || (alias + "/").equals(path)) {
+      try {
+        String redirectPath;
+        if("/".equals(alias)) {
+          redirectPath = "/" + welcomeFile;
+        } else {
+          redirectPath = alias + "/" + welcomeFile;
+        }
+        logger.info("redirecting {} to {}", new String[] {path, redirectPath});
+        resp.sendRedirect(redirectPath);
+        return;
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    
+    // Find and deliver the resource
+    try {
+      String classpathToResource = pathInfo == null ?
+              classpath.substring(1) + "/" + welcomeFile : classpath.substring(1) + pathInfo;
+      URL url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
+      logger.info("opening url {} {}", new Object[] {classpathToResource, url});
+      InputStream in = url.openStream();
+      IOUtils.copy(in, resp.getOutputStream());
+    } catch (Exception e) {
+      try {
+        resp.sendError(404, e.getMessage());
+      } catch (IOException e1) {
+        e1.printStackTrace();
+      }
+    }
+  }
+}

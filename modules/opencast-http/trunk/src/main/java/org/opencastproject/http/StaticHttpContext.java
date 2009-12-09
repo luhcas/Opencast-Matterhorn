@@ -36,13 +36,13 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Registers static content resources on the filesystem with the http service.
  */
-public class Static implements ManagedService {
-  private static final Logger logger = LoggerFactory.getLogger(Static.class);
+public class StaticHttpContext implements ManagedService {
+  private static final Logger logger = LoggerFactory.getLogger(StaticHttpContext.class);
   String defaultPath;
   protected HttpService httpService;
   StaticContext context;
 
-  public Static() {
+  public StaticHttpContext() {
     defaultPath = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "static";
     logger.info("Registering resources at " + defaultPath + " at URL /static");
     context = new StaticContext(defaultPath);
