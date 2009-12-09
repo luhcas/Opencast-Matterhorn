@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite failures="0" time="0.106" errors="0" skipped="0" tests="1" name="org.opencastproject.adminui.impl.AdminuiServiceImplTest">
+  <properties>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="sun.boot.library.path" value="/usr/lib/jvm/java-6-sun-1.6.0.15/jre/lib/amd64"/>
+    <property name="java.vm.version" value="14.1-b02"/>
+    <property name="java.vm.vendor" value="Sun Microsystems Inc."/>
+    <property name="java.vendor.url" value="http://java.sun.com/"/>
+    <property name="path.separator" value=":"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="file.encoding.pkg" value="sun.io"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="sun.os.patch.level" value="unknown"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="user.dir" value="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-impl"/>
+    <property name="java.runtime.version" value="1.6.0_15-b03"/>
+    <property name="java.awt.graphicsenv" value="sun.awt.X11GraphicsEnvironment"/>
+    <property name="basedir" value="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-impl"/>
+    <property name="java.endorsed.dirs" value="/usr/lib/jvm/java-6-sun-1.6.0.15/jre/lib/endorsed"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="surefire.real.class.path" value="/tmp/surefirebooter3643811942447601925.jar"/>
+    <property name="java.io.tmpdir" value="/tmp"/>
+    <property name="line.separator" value="
+"/>
+    <property name="java.vm.specification.vendor" value="Sun Microsystems Inc."/>
+    <property name="os.name" value="Linux"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/usr/lib/jvm/java-6-sun-1.6.0.15/jre/lib/amd64/server:/usr/lib/jvm/java-6-sun-1.6.0.15/jre/lib/amd64:/usr/lib/jvm/java-6-sun-1.6.0.15/jre/../lib/amd64:/usr/java/packages/lib/amd64:/lib:/usr/lib"/>
+    <property name="surefire.test.class.path" value="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-impl/target/test-classes:/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-impl/target/classes:/home/wulff/.m2/repository/org/opencastproject/opencast-admin-ui-api/0.1-SNAPSHOT/opencast-admin-ui-api-0.1-SNAPSHOT.jar:/home/wulff/.m2/repository/commons-io/commons-io/1.4/commons-io-1.4.jar:/home/wulff/.m2/repository/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar:/home/wulff/.m2/repository/org/apache/servicemix/specs/org.apache.servicemix.specs.jaxb-api-2.1/1.3.0/org.apache.servicemix.specs.jaxb-api-2.1-1.3.0.jar:/home/wulff/.m2/repository/org/apache/servicemix/specs/org.apache.servicemix.specs.stax-api-1.0/1.3.0/org.apache.servicemix.specs.stax-api-1.0-1.3.0.jar:/home/wulff/.m2/repository/org/apache/geronimo/specs/geronimo-activation_1.1_spec/1.0.2/geronimo-activation_1.1_spec-1.0.2.jar:/home/wulff/.m2/repository/org/apache/servicemix/bundles/org.apache.servicemix.bundles.xmlschema/1.4.3_1/org.apache.servicemix.bundles.xmlschema-1.4.3_1.jar:/home/wulff/.m2/repository/javax/ws/rs/jsr311-api/1.1.A/jsr311-api-1.1.A.jar:/home/wulff/.m2/repository/org/apache/geronimo/specs/geronimo-ws-metadata_2.0_spec/1.1.2/geronimo-ws-metadata_2.0_spec-1.1.2.jar:/home/wulff/.m2/repository/org/apache/servicemix/specs/org.apache.servicemix.specs.jaxws-api-2.1/1.3.0/org.apache.servicemix.specs.jaxws-api-2.1-1.3.0.jar:/home/wulff/.m2/repository/org/apache/servicemix/specs/org.apache.servicemix.specs.saaj-api-1.3/1.3.0/org.apache.servicemix.specs.saaj-api-1.3-1.3.0.jar:/home/wulff/.m2/repository/org/osgi/osgi_R4_core/1.0/osgi_R4_core-1.0.jar:/home/wulff/.m2/repository/org/osgi/osgi_R4_compendium/1.0/osgi_R4_compendium-1.0.jar:/home/wulff/.m2/repository/org/slf4j/slf4j-api/1.5.8/slf4j-api-1.5.8.jar:/home/wulff/.m2/repository/org/slf4j/slf4j-simple/1.5.6/slf4j-simple-1.5.6.jar:/home/wulff/.m2/repository/junit/junit/4.5/junit-4.5.jar:/home/wulff/.m2/repository/org/opencastproject/opencast-scheduler-api/0.1-SNAPSHOT/opencast-scheduler-api-0.1-SNAPSHOT.jar:/home/wulff/.m2/repository/org/opencastproject/opencast-workflow-service-api/0.1-SNAPSHOT/opencast-workflow-service-api-0.1-SNAPSHOT.jar:/home/wulff/.m2/repository/org/opencastproject/opencast-media/0.1-SNAPSHOT/opencast-media-0.1-SNAPSHOT.jar:/home/wulff/.m2/repository/org/opencastproject/opencast-util/0.1-SNAPSHOT/opencast-util-0.1-SNAPSHOT.jar:/home/wulff/.m2/repository/org/freemarker/freemarker/2.3.15/freemarker-2.3.15.jar:/home/wulff/.m2/repository/org/opencastproject/opencast-truezip/0.1/opencast-truezip-0.1.jar:/home/wulff/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar:/home/wulff/.m2/repository/commons-lang/commons-lang/2.4/commons-lang-2.4.jar:/home/wulff/.m2/repository/joda-time/joda-time/1.6/joda-time-1.6.jar:/home/wulff/.m2/repository/org/opencastproject/opencast-capture-admin-service-api/0.1-SNAPSHOT/opencast-capture-admin-service-api-0.1-SNAPSHOT.jar:/home/wulff/.m2/repository/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar:/home/wulff/code/matterhorn/matterhorn_trunk/opencast-util/target/opencast-util-0.1-SNAPSHOT.jar:"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.class.version" value="50.0"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Server Compiler"/>
+    <property name="os.version" value="2.6.31-16-generic"/>
+    <property name="user.home" value="/home/wulff"/>
+    <property name="user.timezone" value=""/>
+    <property name="java.awt.printerjob" value="sun.print.PSPrinterJob"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.specification.version" value="1.6"/>
+    <property name="user.name" value="wulff"/>
+    <property name="java.class.path" value="/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-impl/target/test-classes:/home/wulff/code/matterhorn/matterhorn_trunk/opencast-admin-ui-impl/target/classes:/home/wulff/.m2/repository/org/opencastproject/opencast-admin-ui-api/0.1-SNAPSHOT/opencast-admin-ui-api-0.1-SNAPSHOT.jar:/home/wulff/.m2/repository/commons-io/commons-io/1.4/commons-io-1.4.jar:/home/wulff/.m2/repository/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar:/home/wulff/.m2/repository/org/apache/servicemix/specs/org.apache.servicemix.specs.jaxb-api-2.1/1.3.0/org.apache.servicemix.specs.jaxb-api-2.1-1.3.0.jar:/home/wulff/.m2/repository/org/apache/servicemix/specs/org.apache.servicemix.specs.stax-api-1.0/1.3.0/org.apache.servicemix.specs.stax-api-1.0-1.3.0.jar:/home/wulff/.m2/repository/org/apache/geronimo/specs/geronimo-activation_1.1_spec/1.0.2/geronimo-activation_1.1_spec-1.0.2.jar:/home/wulff/.m2/repository/org/apache/servicemix/bundles/org.apache.servicemix.bundles.xmlschema/1.4.3_1/org.apache.servicemix.bundles.xmlschema-1.4.3_1.jar:/home/wulff/.m2/repository/javax/ws/rs/jsr311-api/1.1.A/jsr311-api-1.1.A.jar:/home/wulff/.m2/repository/org/apache/geronimo/specs/geronimo-ws-metadata_2.0_spec/1.1.2/geronimo-ws-metadata_2.0_spec-1.1.2.jar:/home/wulff/.m2/repository/org/apache/servicemix/specs/org.apache.servicemix.specs.jaxws-api-2.1/1.3.0/org.apache.servicemix.specs.jaxws-api-2.1-1.3.0.jar:/home/wulff/.m2/repository/org/apache/servicemix/specs/org.apache.servicemix.specs.saaj-api-1.3/1.3.0/org.apache.servicemix.specs.saaj-api-1.3-1.3.0.jar:/home/wulff/.m2/repository/org/osgi/osgi_R4_core/1.0/osgi_R4_core-1.0.jar:/home/wulff/.m2/repository/org/osgi/osgi_R4_compendium/1.0/osgi_R4_compendium-1.0.jar:/home/wulff/.m2/repository/org/slf4j/slf4j-api/1.5.8/slf4j-api-1.5.8.jar:/home/wulff/.m2/repository/org/slf4j/slf4j-simple/1.5.6/slf4j-simple-1.5.6.jar:/home/wulff/.m2/repository/junit/junit/4.5/junit-4.5.jar:/home/wulff/.m2/repository/org/opencastproject/opencast-scheduler-api/0.1-SNAPSHOT/opencast-scheduler-api-0.1-SNAPSHOT.jar:/home/wulff/.m2/repository/org/opencastproject/opencast-workflow-service-api/0.1-SNAPSHOT/opencast-workflow-service-api-0.1-SNAPSHOT.jar:/home/wulff/.m2/repository/org/opencastproject/opencast-media/0.1-SNAPSHOT/opencast-media-0.1-SNAPSHOT.jar:/home/wulff/.m2/repository/org/opencastproject/opencast-util/0.1-SNAPSHOT/opencast-util-0.1-SNAPSHOT.jar:/home/wulff/.m2/repository/org/freemarker/freemarker/2.3.15/freemarker-2.3.15.jar:/home/wulff/.m2/repository/org/opencastproject/opencast-truezip/0.1/opencast-truezip-0.1.jar:/home/wulff/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar:/home/wulff/.m2/repository/commons-lang/commons-lang/2.4/commons-lang-2.4.jar:/home/wulff/.m2/repository/joda-time/joda-time/1.6/joda-time-1.6.jar:/home/wulff/.m2/repository/org/opencastproject/opencast-capture-admin-service-api/0.1-SNAPSHOT/opencast-capture-admin-service-api-0.1-SNAPSHOT.jar:/home/wulff/.m2/repository/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar:/home/wulff/code/matterhorn/matterhorn_trunk/opencast-util/target/opencast-util-0.1-SNAPSHOT.jar:"/>
+    <property name="java.vm.specification.version" value="1.0"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.home" value="/usr/lib/jvm/java-6-sun-1.6.0.15/jre"/>
+    <property name="java.specification.vendor" value="Sun Microsystems Inc."/>
+    <property name="user.language" value="en"/>
+    <property name="java.vm.info" value="mixed mode"/>
+    <property name="java.version" value="1.6.0_15"/>
+    <property name="java.ext.dirs" value="/usr/lib/jvm/java-6-sun-1.6.0.15/jre/lib/ext:/usr/java/packages/lib/ext"/>
+    <property name="sun.boot.class.path" value="/usr/lib/jvm/java-6-sun-1.6.0.15/jre/lib/resources.jar:/usr/lib/jvm/java-6-sun-1.6.0.15/jre/lib/rt.jar:/usr/lib/jvm/java-6-sun-1.6.0.15/jre/lib/sunrsasign.jar:/usr/lib/jvm/java-6-sun-1.6.0.15/jre/lib/jsse.jar:/usr/lib/jvm/java-6-sun-1.6.0.15/jre/lib/jce.jar:/usr/lib/jvm/java-6-sun-1.6.0.15/jre/lib/charsets.jar:/usr/lib/jvm/java-6-sun-1.6.0.15/jre/classes"/>
+    <property name="java.vendor" value="Sun Microsystems Inc."/>
+    <property name="localRepository" value="/home/wulff/.m2/repository"/>
+    <property name="file.separator" value="/"/>
+    <property name="java.vendor.url.bug" value="http://java.sun.com/cgi-bin/bugreport.cgi"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="sun.desktop" value="gnome"/>
+    <property name="sun.cpu.isalist" value=""/>
+  </properties>
+  <testcase time="0.098" classname="org.opencastproject.adminui.impl.AdminuiServiceImplTest" name="testNothing"/>
+</testsuite>

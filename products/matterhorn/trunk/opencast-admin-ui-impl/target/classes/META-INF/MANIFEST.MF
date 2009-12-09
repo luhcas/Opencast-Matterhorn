@@ -1,0 +1,43 @@
+Manifest-Version: 1.0
+Export-Package: org.opencastproject.adminui.endpoint;uses:="javax.ws.r
+ s,javax.xml.bind.annotation,org.apache.commons.io,org.slf4j,org.openc
+ astproject.adminui.api,javax.ws.rs.core",org.opencastproject.adminui.
+ impl;uses:="org.opencastproject.capture.admin.api,javax.xml.bind.anno
+ tation,org.opencastproject.workflow.api,org.osgi.service.cm,org.openc
+ astproject.scheduler.api,org.opencastproject.adminui.api,org.opencast
+ project.media.mediapackage,org.slf4j",org.opencastproject.adminui.api
+ ;uses:="javax.xml.bind.annotation,javax.xml.bind.annotation.adapters"
+Service-Component: OSGI-INF/adminui-service.xml,OSGI-INF/adminui-servi
+ ce-rest.xml,OSGI-INF/opencast-admin-ui.xml
+Private-Package: html,org.json.simple,org.json.simple.parser,ui,ui.css
+ ,ui.css.images,ui.img,ui.infusion-1.1.2,ui.infusion-1.1.2.fss,ui.infu
+ sion-1.1.2.fss.css,ui.infusion-1.1.2.fss.images,ui.infusion-1.1.2.fss
+ .images.themes._common,ui.infusion-1.1.2.fss.images.themes.coal,ui.in
+ fusion-1.1.2.fss.images.themes.iphone,ui.infusion-1.1.2.fss.images.th
+ emes.mist,ui.infusion-1.1.2.fss.images.themes.rust,ui.infusion-1.1.2.
+ fss.images.themes.slate,ui.js,ui.xsl
+Built-By: wulff
+Bundle-Category: opencastproject
+Tool: Bnd-0.0.255
+Bundle-Name: opencast-admin-ui-impl
+Created-By: Apache Maven Bundle Plugin
+Bundle-Vendor: The Opencast Project
+Build-Jdk: 1.6.0_15
+Bundle-Version: 0.1.0.SNAPSHOT
+Bnd-LastModified: 1260386366336
+Bundle-ManifestVersion: 2
+Bundle-Description: The Opencast Project's Matterhorn software is a me
+ dia capture, processing, and distribution system
+Bundle-License: http://www.osedu.org/licenses/ECL-2.0/ecl2.txt
+Embed-Dependency: json_simple;inline=true
+Import-Package: javax.ws.rs;version="1.1",javax.ws.rs.core;version="1.
+ 1",javax.xml.bind.annotation;version="2.1",javax.xml.bind.annotation.
+ adapters;version="2.1",org.apache.commons.io;version="1.4",org.openca
+ stproject.adminui.api,org.opencastproject.adminui.endpoint,org.openca
+ stproject.adminui.impl,org.opencastproject.capture.admin.api,org.open
+ castproject.media.mediapackage,org.opencastproject.scheduler.api,org.
+ opencastproject.util,org.opencastproject.workflow.api,org.osgi.servic
+ e.cm,org.slf4j;version="1.5"
+Bundle-SymbolicName: opencast-admin-ui-impl
+Bundle-DocURL: http://opencastproject.org/
+
