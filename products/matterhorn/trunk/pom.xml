@@ -746,7 +746,18 @@
         <role>developer</role>
       </roles>
       <timezone>+1</timezone>
-    </developer>    
+    </developer> 
+    <developer>
+      <id>bostjan</id>
+      <name>Bostjan Pajntar</name>
+      <email>bostjan.pajntar@ijs.si</email>
+      <organization>Jozeph Stefan Institute</organization>
+      <organizationUrl>http://www.ijs.si</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>   
   </developers>
 
   <contributors><!-- TODO? --></contributors>
