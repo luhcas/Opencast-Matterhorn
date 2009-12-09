@@ -28,7 +28,6 @@
         <module>opencast-build-tools</module>
         <module>opencast-maven-plugin</module>
         <module>opencast-runtime-tools</module>
-        <!-- <module>opencast-admin-ui</module> -->
         <!-- <module>opencast-authentication-api</module> -->
         <module>opencast-capture-service-api</module> 
         <module>opencast-capture-admin-service-api</module>
@@ -65,98 +64,10 @@
         <module>opencast-scheduler-impl</module>
         <module>opencast-db</module>
         <module>opencast-test-harness</module>
-        <module>opencast-admin-ui</module>
         <module>opencast-captions-service-impl</module>
+        <module>opencast-admin-ui-api</module>
+        <module>opencast-admin-ui-impl</module>
       </modules>
-    </profile>
-    <profile>
-      <!-- This profile will just build the modules and when combined with 
-          pax-runner it will start up an osgi instance -->
-      <id>paxrun</id>
-      <modules>
-        <module>opencast-build-tools</module>
-        <module>opencast-maven-plugin</module>
-        <module>opencast-runtime-tools</module>
-        <!--module>opencast-admin-ui</module -->
-        <!-- <module>opencast-authentication-api</module> -->
-        <module>opencast-capture-service-api</module> 
-        <module>opencast-capture-service-impl</module> 
-        <module>opencast-composer-service-api</module>
-        <module>opencast-composer-service-impl</module>
-        <module>opencast-conductor-api</module>
-        <module>opencast-conductor</module>
-        <module>opencast-distribution-service-api</module>
-        <module>opencast-distribution-service-local-impl</module>
-        <module>opencast-engage-service-api</module> 
-        <module>opencast-engage-service-impl</module> 
-        <module>opencast-http</module>
-        <module>opencast-ingest-service-api</module>
-        <module>opencast-ingest-service-impl</module>
-        <module>opencast-inspection-service-api</module>
-        <module>opencast-inspection-service-impl</module>
-        <module>opencast-media</module>
-        <module>opencast-notification-service-api</module>
-        <module>opencast-runtime-info-ui</module>
-        <module>opencast-search-service-api</module>
-        <module>opencast-search-service-impl</module>
-        <!-- <module>opencast-stream</module> -->
-        <module>opencast-util</module>
-        <module>opencast-workflow-service-api</module>
-        <module>opencast-workflow-service-impl</module>
-        <module>opencast-workflow-ui</module>
-        <module>opencast-working-file-repository-service-api</module>
-        <module>opencast-working-file-repository-service-impl</module>
-        <module>opencast-workspace-api</module>
-        <module>opencast-workspace-impl</module>
-        <module>opencast-db</module>
-        <module>opencast-test-harness</module>
-      </modules>
-    </profile>
-    <profile>
-      <id>full</id>
-      <modules>
-        <module>opencast-build-tools</module>
-        <module>opencast-maven-plugin</module>
-        <module>opencast-runtime-tools</module>
-        <!--module>opencast-admin-ui</module -->
-        <!-- <module>opencast-authentication-api</module> -->
-        <module>opencast-capture-service-api</module>
-        <!--module>opencast-capture-service-impl</module -->
-        <module>opencast-capture-admin-service-api</module>
-        <module>opencast-capture-admin-service-impl</module>
-        <module>opencast-composer-service-api</module>
-        <module>opencast-composer-service-impl</module>
-        <module>opencast-conductor-api</module>
-        <module>opencast-conductor</module>
-        <module>opencast-distribution-service-api</module>
-        <module>opencast-distribution-service-local-impl</module>
-        <!--<module>opencast-engage-player</module>-->
-        <module>opencast-engage-service-api</module>
-        <module>opencast-engage-service-impl</module>
-        <module>opencast-http</module>
-        <module>opencast-ingest-service-api</module>
-        <module>opencast-ingest-service-impl</module>
-        <module>opencast-inspection-service-api</module>
-        <module>opencast-inspection-service-impl</module>
-        <module>opencast-media</module>
-        <module>opencast-notification-service-api</module>
-        <module>opencast-runtime-info-ui</module>
-        <module>opencast-search-service-api</module>
-        <module>opencast-search-service-impl</module>
-        <!-- <module>opencast-stream</module> -->
-        <module>opencast-util</module>
-        <module>opencast-workflow-service-api</module>
-        <module>opencast-workflow-service-impl</module>
-        <module>opencast-workflow-ui</module>
-        <module>opencast-working-file-repository-service-api</module>
-        <module>opencast-working-file-repository-service-impl</module>
-        <module>opencast-workspace-api</module>
-        <module>opencast-workspace-impl</module>
-        <module>opencast-scheduler-api</module>
-        <module>opencast-scheduler-impl</module>
-        <module>opencast-db</module>
-        <module>opencast-test-harness</module>
-     </modules>
     </profile>
     <profile>
       <id>capture</id>
