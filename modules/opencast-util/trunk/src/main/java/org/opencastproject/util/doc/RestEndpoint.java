@@ -40,6 +40,10 @@ public class RestEndpoint {
   List<String> notes;
   RestTestForm form;
 
+  boolean autoPathFormat = false;
+  String pathFormat = ""; // this is used when the automatic path format is enabled (e.g. )
+  String pathFormatHtml = ""; // this is used when the automatic path format is enabled (e.g. )
+
   /**
    * Create a new basic endpoint, you should use the add methods to fill in the rest of the information about the
    * endpoint data
@@ -177,6 +181,17 @@ public class RestEndpoint {
   public void setTestForm(RestTestForm form) {
     this.form = form;
   }
+  /**
+   * Setting this to true will cause the path to be filled in with format extensions which will
+   * work with the {FORMAT} convention (which is automatically filled in with the selected or default format key - e.g. json)
+   * <br/>
+   * This will generate a path like /your/path.{FORMAT} and will show the following on screen GET /your/path.{xml|json} if you have 2 formats in this endpoint
+   * 
+   * @param autoPathFormat true to enable, false to disable
+   */
+  public void setAutoPathFormat(boolean autoPathFormat) {
+    this.autoPathFormat = autoPathFormat;
+  }
   // GETTERS
   public String getName() {
     return name;
@@ -225,5 +240,14 @@ public class RestEndpoint {
   }
   public RestTestForm getForm() {
     return form;
+  }
+  public String getPathFormat() {
+    return pathFormat;
+  }
+  public String getPathFormatHtml() {
+    return pathFormatHtml;
+  }
+  public boolean isAutoPathFormat() {
+    return autoPathFormat;
   }
 }

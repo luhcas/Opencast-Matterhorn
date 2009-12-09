@@ -88,6 +88,32 @@ public class DocUtilTest {
     assertNotNull(document);
     assertFalse(document.startsWith("ERROR::"));
     assertTrue(document.contains(title));
+
+    // test out the new format handling - MH-1752
+    data = new DocRestData(name, title, "/azservice/rest", null);
+    RestEndpoint endpointDot = new RestEndpoint("nameDot", RestEndpoint.Method.GET, "/path3/{value}.xml", null);
+    data.addEndpoint(RestEndpoint.Type.READ, endpointDot);
+    endpointDot.addStatus(Status.OK(null));
+    document = DocUtil.generate(data);
+    assertNotNull(document);
+    assertFalse(document.startsWith("ERROR::"));
+    assertTrue(document.contains(title));
+
+    data = new DocRestData(name, title, "/azservice/rest", null);
+    RestEndpoint endpoint3 = new RestEndpoint("name1", RestEndpoint.Method.GET, "/path3/{value}", null);
+    endpoint3.setAutoPathFormat(true);
+    endpoint3.addRequiredParam(new Param("value", Param.Type.STRING, null, null, null));
+    endpoint3.addFormat(Format.json());
+    endpoint3.addFormat(Format.xml());
+    endpoint3.addStatus(Status.OK(null));
+    endpoint3.addStatus(new Status(500, null));
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint3);
+    document = DocUtil.generate(data);
+    assertNotNull(document);
+    assertFalse(document.startsWith("ERROR::"));
+    assertTrue(document.contains(title));
+    assertTrue(document.contains(".{FORMAT}"));
+    assertTrue(document.contains(".{json|xml}"));
   }
 
 }

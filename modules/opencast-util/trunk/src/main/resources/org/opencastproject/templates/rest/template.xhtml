@@ -12,37 +12,30 @@
     padding-bottom: 1em;
     width: 90%;
   }
-  
   TABLE.method {
     width: 100%;
   }
-  
   TABLE.testing {
     width: 96%;
     border: 2px solid #CCC;
   }
-  
   UL {
     margin: 0.2em;
     padding-left: 1em;
   }
-  
   DIV.table_spacer {
     height: 2em;
   }
-  
   DIV.footer {
     padding-top: 1em;
     font-weight: bold;
   }
-  
   .method_set_header {
     padding-left: 0.5em;
     padding-right: 0.5em;
     font-size: 1.4em;
     font-weight: bold;
   }
-  
   .method_header TH {
     background: #CCFF00 none repeat scroll 0 0;
     border-bottom: 3px solid #333;
@@ -53,12 +46,10 @@
     text-align: left;
     vertical-align: middle;;
   }
-  
   TH.method_header_left {
     text-align: right;
     padding: 0.6em 1em;
   }
-  
   TR.method TH {
     border-bottom: 1px solid #CCC;
     color: #663;
@@ -69,7 +60,6 @@
     text-align: right;
     vertical-align: middle;
   }
-  
   TR.method TD {
     border-bottom: 1px solid #CCC;
     font-size: 136%;
@@ -78,28 +68,22 @@
     padding-top: 6px;
     vertical-align: middle;
   }
-  
   TR.testform TD {
     font-size: 110%;
   }
-
   TR.testform A {
     font-size: 120%;
   }
-  
   DIV.hidden_form {
     display: none;
   }
-  
   TD.form_label {
     width: 10%;
     font-size: 1.1em !important;
   }
-  
   .form_field_description {
     font-size: 0.9em !important;
   }
-  
   TD.form_submit {
     border: none !important;
   }
@@ -127,7 +111,7 @@
   <tbody>
     <tr class="method">
       <th scope="row">Method / Path:</th>
-      <td><tt title="${meta.url}${endpoint.path}">${endpoint.method} ${endpoint.path}</tt></td>
+      <td><tt title="${meta.url}${endpoint.path}${endpoint.pathFormat!}">${endpoint.method} ${endpoint.path}${endpoint.pathFormatHtml!}</tt></td>
     </tr>
     <tr class="method">
       <th scope="row">Description:</th>
@@ -182,7 +166,7 @@
         <em>NONE</em>
         <#else>
         <#list endpoint.statuses as status>
-        <tt>${status.code}: ${status.name}, ${status.description!"<em>NONE</em>"}<#if status_has_next> <br/></#if>
+        <tt>${status.code}: ${status.name}</tt>, ${status.description!"<em>NONE</em>"}<#if status_has_next> <br/></#if>
         </#list>
         </#if>
       </td>

@@ -79,6 +79,25 @@ public class DocRestData extends DocData {
               endpoint.setTestForm(null);
             }
           }
+          // handle the endpoint auto format paths
+          if (endpoint.isAutoPathFormat()) {
+            if (! endpoint.getFormats().isEmpty()) {
+              endpoint.pathFormat = ".{FORMAT}";
+              StringBuilder sb = new StringBuilder();
+              sb.append(".{");
+              for (Format format : endpoint.getFormats()) {
+                if (sb.length() > 3) {
+                  sb.append("|");
+                }
+                sb.append(format.name);
+              }
+              sb.append("}");
+              endpoint.pathFormatHtml = sb.toString();
+            }
+          } else {
+            endpoint.pathFormat = "";
+            endpoint.pathFormatHtml = "";
+          }
         }
         holdersList.add(holder);
       }
@@ -114,13 +133,27 @@ public class DocRestData extends DocData {
     currentHolder.addEndPoint(endpoint);
   }
 
+  /**
+   * Validates paths:
+   * VALID: /sample , /sample/{thing} , /{my}/{path}.xml , /my/fancy_path/is/{awesome}.{FORMAT}
+   * INVALID: sample, /sample/, /sa#$%mple/path
+   * 
+   * @param path the path value to check
+   * @return true if this path is valid, false otherwise
+   */
   public static boolean isValidPath(String path) {
     boolean valid = true;
     if (isBlank(path)) {
       valid = false;
     } else {
-      if (!path.matches("^[\\w\\/{}]+$")) {
+      if (path.equals("/")) {
+        valid = true;
+      } else if (path.endsWith("/") || ! path.startsWith("/")) {
         valid = false;
+      } else {
+        if (!path.matches("^[\\w\\/{}\\.]+$")) {
+          valid = false;
+        }
       }
     }
     return valid;
