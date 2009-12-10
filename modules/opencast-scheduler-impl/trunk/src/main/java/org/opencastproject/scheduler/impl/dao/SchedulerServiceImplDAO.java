@@ -30,7 +30,6 @@ import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.impl.SchedulerEventImpl;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,11 +46,6 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * The Connection to the database
    */
   Connection con;
-  
-  /**
-   * The component context that is passed when activate is called
-   */
-  ComponentContext componentContext;
 
   
   /**
@@ -376,7 +370,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
 //                    " enddate = "+e.getEnddate().getTime()+", " +
 //                    " WHERE eventid = '"+e.getID()+"'"; 
     try {
-      PreparedStatement s = con.prepareStatement("UPDATE EVENT SET startdate = ?, enddate = ?, WHERE eventid = ?");
+      PreparedStatement s = con.prepareStatement("UPDATE EVENT SET startdate = ?, enddate = ? WHERE eventid = ?");
       s.setLong(1, e.getStartdate().getTime());
       s.setLong(2, e.getEnddate().getTime());
       s.setString(3, e.getID());
@@ -507,20 +501,6 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     }
     return dbCheck(); //Check for tables to make sure that the underlying database referes the tables in the correct way (for example derby did only know Uppercase table names)  
   }  
-  
-  /**
-   * At the moment this method just saves the component context
-   * {@inheritDoc}
-   * @see org.opencastproject.scheduler.impl.SchedulerServiceImpl#activate(org.osgi.service.component.ComponentContext)
-   */
-  public void activate(ComponentContext componentContext) {
-    logger.info("activation started.");
-    if (componentContext == null) {
-      logger.error("Could not activate because of missing ComponentContext");
-      return;
-    }
-    this.componentContext = componentContext;
-  }
   
   
   /**

@@ -27,6 +27,7 @@ import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.ResourceList;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.parameter.Cn;
+import net.fortuna.ical4j.model.property.Attach;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Description;
 import net.fortuna.ical4j.model.property.Location;
@@ -43,9 +44,12 @@ public class CalendarGenerator {
   private static final Logger logger = LoggerFactory.getLogger(CalendarGenerator.class);
   
   Calendar cal;
+  DublinCoreGenerator dcGenerator;
   
-  public CalendarGenerator () {
+  
+  public CalendarGenerator (DublinCoreGenerator dcGenerator) {
     cal = new Calendar();
+    this.dcGenerator = dcGenerator;
   }
   
   /**
@@ -97,6 +101,8 @@ public class CalendarGenerator {
         for (int i = 0; i < resources.length; i++) resList.add(resources[i]);     
         event.getProperties().add(new Resources(resList));
       }
+        event.getProperties().add(new Attach((dcGenerator.generateAsBase64(e))));
+      //event.getProperties().add(new XProperty(name));
     } catch (URISyntaxException e1) {
       logger.error("could not create Calendar entry for Event "+ e.toString()+". Reason : "+e1.getMessage());
     } 

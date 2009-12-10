@@ -18,6 +18,7 @@ package org.opencastproject.scheduler.endpoint;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.scheduler.impl.SchedulerEventImpl;
+import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -58,6 +59,13 @@ public class SchedulerRestService {
     SchedulerEvent event = service.getEvent(eventID);
     return new SchedulerEventJaxbImpl(event);
   }
+  
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("getDublinCoreMetadata")
+  public String getDublinCoreMetadata(@QueryParam("eventID") String eventID) {
+    return ((SchedulerServiceImpl)service).getDublinCoreMetadata(eventID);
+  }  
   
   @POST
   @Produces(MediaType.TEXT_XML)
@@ -188,4 +196,5 @@ public class SchedulerRestService {
     }
     docs = docsFromClassloader;
   }
+  
 }
