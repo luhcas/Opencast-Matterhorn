@@ -619,6 +619,17 @@
       <timezone>-6</timezone>
     </developer>
     <developer>
+      <id>cab938</id>
+      <name>Christopher Brooks</name>
+      <email>cab938@mail.usask.ca</email>
+      <organization>University of Saskatchewan</organization>
+      <organizationUrl>http://www.usask.ca/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>-6</timezone>
+    </developer>
+    <developer>
       <id>bwulff</id>
       <name>Benjamin Wulff</name>
       <email>bwulff@uos.de</email>
