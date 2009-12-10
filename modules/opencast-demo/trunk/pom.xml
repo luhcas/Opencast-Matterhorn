@@ -83,6 +83,7 @@
       </plugin>
     </plugins>
   </build>
+  <!-- This gets a pass for MH-1810 since it does not inherit the base POM -AZ -->
   <repositories>
     <repository>
       <id>opencast</id>

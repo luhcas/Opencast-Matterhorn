@@ -877,6 +877,11 @@
         <enabled>false</enabled>
       </releases>
     </pluginRepository>
+    <pluginRepository>
+      <id>sonatype-repository</id>
+      <name>Sonatype Public Repo</name>
+      <url>http://repository.sonatype.org/content/groups/public/</url>
+    </pluginRepository>
   </pluginRepositories>
 
   <repositories>
@@ -932,6 +937,11 @@
       <id>modularity-releases</id>
       <name>Modularity Releases Repository</name>
       <url>http://m2.modularity.net.au/releases</url>
+    </repository>
+    <repository>
+      <id>sonatype-repository</id>
+      <name>Sonatype Public Repo</name>
+      <url>http://repository.sonatype.org/content/groups/public/</url>
     </repository>
   </repositories>
 </project>

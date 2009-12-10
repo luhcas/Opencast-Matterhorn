@@ -51,7 +51,7 @@
       <groupId>net.jcip</groupId>
       <artifactId>jcip-annotations</artifactId>
       <version>1.0</version>
-    </dependency> 
+    </dependency>
   </dependencies>
   <build>
     <defaultGoal>test</defaultGoal>
@@ -127,6 +127,7 @@
     </plugins>
   </build>
 
+  <!-- This gets a pass for MH-1810 since it does not inherit the base POM -AZ -->
   <repositories>
     <repository>
       <id>opencast</id>
