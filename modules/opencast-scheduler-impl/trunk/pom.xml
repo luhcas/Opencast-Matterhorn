@@ -104,7 +104,7 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.scheduler.* </Export-Package>
 			<Import-Package>
-				org.opencastproject.util, 
+				org.opencastproject.http, 
 				*;resolution:=optional
 			</Import-Package>
             <Private-Package>

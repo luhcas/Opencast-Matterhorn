@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-admin-ui-impl</artifactId>
+  <artifactId>opencast-admin-ui</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-admin-ui-impl</name>
+  <name>opencast-admin-ui</name>
   <version>0.1-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -14,7 +14,17 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-admin-ui-api</artifactId>
+      <artifactId>opencast-scheduler-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-workflow-service-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-capture-admin-service-api</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -69,30 +79,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-scheduler-api</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-workflow-service-api</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-capture-admin-service-api</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
       <version>1.1</version>
-    </dependency>
-    <dependency>
-    	<groupId>org.opencastproject</groupId>
-    	<artifactId>opencast-util</artifactId>
-    	<version>0.1-SNAPSHOT</version>
-    	<type>bundle</type>
     </dependency>
   </dependencies>
   <build>
@@ -105,17 +94,13 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Import-Package>org.opencastproject.util, *</Import-Package>
+            <Import-Package>org.opencastproject.http, *</Import-Package>
             <Export-Package> org.opencastproject.adminui.* </Export-Package>
-            <Private-Package>
-              org.json.simple,
-              org.json.simple.parser
-            </Private-Package>
+            <Private-Package>org.json.*</Private-Package>
             <Embed-Dependency>
               json_simple;inline=true
             </Embed-Dependency>
             <Service-Component>
-              OSGI-INF/adminui-service.xml,
               OSGI-INF/adminui-service-rest.xml,
               OSGI-INF/opencast-admin-ui.xml
             </Service-Component>
@@ -125,3 +110,4 @@
     </plugins>
   </build>
 </project>
+

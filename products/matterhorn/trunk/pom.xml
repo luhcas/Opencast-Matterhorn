@@ -65,10 +65,7 @@
         <module>opencast-db</module>
         <module>opencast-test-harness</module>
         <module>opencast-captions-service-impl</module>
-<!--
-        <module>opencast-admin-ui-api</module>
-        <module>opencast-admin-ui-impl</module>
--->
+        <module>opencast-admin-ui</module>
       </modules>
     </profile>
     <profile>

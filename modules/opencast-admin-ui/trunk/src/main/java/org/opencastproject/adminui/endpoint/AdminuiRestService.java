@@ -15,15 +15,32 @@
  */
 package org.opencastproject.adminui.endpoint;
 
-import org.apache.commons.io.IOUtils;
+import org.opencastproject.adminui.api.RecordingDataView;
+import org.opencastproject.adminui.api.RecordingDataViewImpl;
+import org.opencastproject.adminui.api.RecordingDataViewList;
+import org.opencastproject.adminui.api.RecordingDataViewListImpl;
+import org.opencastproject.capture.admin.api.AgentState;
+import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
+import org.opencastproject.media.mediapackage.Catalog;
+import org.opencastproject.media.mediapackage.DublinCoreCatalog;
+import org.opencastproject.media.mediapackage.EName;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
+import org.opencastproject.scheduler.api.SchedulerEvent;
+import org.opencastproject.scheduler.api.SchedulerService;
+import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowService;
+import org.opencastproject.workflow.api.WorkflowInstance.State;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -32,8 +49,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.json.simple.JSONObject;
-import org.opencastproject.adminui.api.AdminuiService;
-import org.opencastproject.adminui.api.RecordingDataViewListImpl;
 
 /**
  * REST endpoint for the Admin UI proxy service
@@ -41,14 +56,41 @@ import org.opencastproject.adminui.api.RecordingDataViewListImpl;
 @Path("/")
 public class AdminuiRestService {
   private static final Logger logger = LoggerFactory.getLogger(AdminuiRestService.class);
-  private AdminuiService service;
-  public void setService(AdminuiService service) {
-    this.service = service;
+
+  private SchedulerService schedulerService;
+  private WorkflowService workflowService;
+  private CaptureAgentStatusService captureAdminService;
+
+  public void setSchedulerService(SchedulerService service) {
+    logger.info("binding SchedulerService");
+    schedulerService = service;
   }
 
-  public void unsetService(AdminuiService service) {
-    this.service = null;
+  public void unsetSchedulerService(SchedulerService service) {
+    logger.info("unbinding SchedulerService");
+    schedulerService = null;
   }
+
+  public void setWorkflowService(WorkflowService service) {
+    logger.info("binding WorkflowService");
+    workflowService = service;
+  }
+
+  public void unsetWorkflowService(WorkflowService service) {
+    logger.info("unbinding WorkflowService");
+    workflowService = null;
+  }
+
+  public void setCaptureAdminService(CaptureAgentStatusService service) {
+    logger.info("binding CaptureAgentStatusService");
+    captureAdminService = service;
+  }
+
+  public void unsetCaptureAdminService(CaptureAgentStatusService service) {
+    logger.info("unbinding CaptureAgentStatusService");
+    captureAdminService = null;
+  }
+
 
   /**
    * Returns a list of recordings in a certain state.
@@ -59,17 +101,87 @@ public class AdminuiRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("recordings/{state}")
   public RecordingDataViewListImpl getRecordings(@PathParam("state") String state) {
-    return (RecordingDataViewListImpl)service.getRecordings(state);     // cast to annotated Impl so JAXB can produce XML
+    RecordingDataViewListImpl out = new RecordingDataViewListImpl();
+    if ( (state.toUpperCase().equals("UPCOMING")) || (state.toUpperCase().equals("ALL")) ) {
+      out.addAll(getUpcomingRecordings());
+    }
+    if ( (state.toUpperCase().equals("PROCESSING")) || (state.toUpperCase().equals("ALL")) ) {
+      out.addAll(getRecordingsFromWorkflowService(State.RUNNING));
+    }
+    if ( (state.toUpperCase().equals("FINISHED")) || (state.toUpperCase().equals("ALL")) ) {
+      out.addAll(getRecordingsFromWorkflowService(State.SUCCEEDED));
+    }
+    return out;
+  }
+
+  /**
+   * returns a RecordingDataViewList of recordings that are currently begin processed. 
+   * If the WorkflowService is not present an empty list is returned.
+   * @return RecordingDataViewList list of upcoming recordings
+   */
+  private RecordingDataViewList getRecordingsFromWorkflowService(State state) {
+    RecordingDataViewList out = new RecordingDataViewListImpl();
+    if (workflowService != null) {
+      logger.info("getting currently processed/finished recordings from workflowService");
+      WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery().withState(state)).getItems();
+      // next line is for debuging: return all workflowInstaces
+      //WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery()).getItems();
+      for (int i = 0; i < workflows.length; i++) {
+        RecordingDataView item = new RecordingDataViewImpl();
+        DublinCoreCatalog dcCatalog = getDublinCore(workflows[i].getCurrentMediaPackage());
+        if (dcCatalog != null) {
+          item.setTitle(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_TITLE));
+          item.setPresenter(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_CREATOR));
+          item.setSeries(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_IS_PART_OF));
+          item.setStartTime(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_DATE));  // FIXME get timestamp
+          item.setCaptureAgent(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_SPATIAL)); //FIXME get capture agent from where...?
+          WorkflowOperationInstance operation = workflows[i].getCurrentOperation();
+          if (operation != null) {
+            item.setProcessingStatus(operation.getName());
+          }
+          // TODO get distribution status #openquestion is there a way to find out if a workflowOperation does distribution?
+          out.add(item);
+        } else {
+          logger.warn("MediaPackage has no Catalog");
+        }
+      }
+    } else {
+      logger.warn("WorkflowService not present, returning empty list");
+    }
+    return out;
+  }
+
+  /**
+   * copied from WorkflowRestService
+   * @param mediaPackage
+   * @return
+   */
+  protected DublinCoreCatalog getDublinCore(MediaPackage mediaPackage) {
+    Catalog[] dcCatalogs = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
+    if(dcCatalogs.length == 0) return null;
+    return (DublinCoreCatalog)dcCatalogs[0];
+  }
+
+  /**
+   * copied from WorkflowRestService
+   * @param catalog
+   * @param property
+   * @return
+   */
+  protected String getDublinCoreProperty(DublinCoreCatalog catalog, EName property) {
+    if(catalog == null) return null;
+    return catalog.getFirst(property, DublinCoreCatalog.LANGUAGE_ANY);
   }
 
   /**
    * Retruns simple statistics about "recordings" in the system
    * @return simple statistics about "recordings" in the system
    */
+  @SuppressWarnings("unchecked")
   @GET
   @Path("countRecordings")
   public Response countRecordings() {
-    HashMap<String,Integer> stats = service.getRecordingsStatistic();
+    HashMap<String,Integer> stats = getRecordingsStatistic();
     Iterator<String> i = stats.keySet().iterator();
     JSONObject out = new JSONObject();
     while (i.hasNext()) {
@@ -80,7 +192,105 @@ public class AdminuiRestService {
   }
 
   /**
-   * Retruns documentation for this endpoint
+   * returns a statistic about number and state of recordings in the system
+   * @return statistic about number and state of recordings in the system
+   */
+  public HashMap<String,Integer> getRecordingsStatistic() {
+    String logMessage = "got statistics from: ";
+    HashMap<String,Integer> out = new HashMap<String,Integer>();
+    Integer total = new Integer(0);
+
+    // get number of upcoming recordings if scheduler is present
+    if (schedulerService != null) {
+      SchedulerEvent[] events = schedulerService.getUpcommingEvents();
+      out.put("upcoming", new Integer(events.length));
+      logMessage += "scheduler-service";
+      total += events.length;
+    } else {
+      logger.warn("scheduler service not present, unable to retreive number of upcoming events");
+    }
+
+    // get statistics from capture admin if present
+    if (captureAdminService != null) {
+      Map<String,Recording> recordings = captureAdminService.getKnownRecordings();
+      Iterator<String> i = recordings.keySet().iterator();
+      int capturing = 0;
+      while (i.hasNext()) {
+        if (recordings.get(i.next()).getState().equals(AgentState.CAPTURING)) {
+          capturing++;
+        }
+      }
+      out.put("capturing", new Integer(capturing));
+      total += capturing;
+      logMessage += " capture-admin-service";
+    } else {
+      logger.warn("CaptureAdmin service not present, unable to retrieve capture statistics");
+    }
+
+    // get statistics from workflowService if present
+    if (workflowService != null) {
+      WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery()).getItems();
+      int i = 0, processing = 0, inactive = 0, finished = 0, errors = 0;
+      for (; i < workflows.length; i++) {
+        switch (workflows[i].getState()) {
+          case FAILED:
+          case FAILING:
+            errors++;
+            break;
+          case INSTANTIATED:
+          case RUNNING:
+            processing++;
+            break;
+          case PAUSED:
+          case STOPPED:
+            inactive++;
+          case SUCCEEDED:
+            finished++;
+        }
+      }
+      out.put("processing", new Integer(processing));
+      out.put("inactive", new Integer(inactive));
+      out.put("errors", new Integer(errors));
+      out.put("finished", new Integer(finished));
+      total += i;
+      logMessage += " workflow-service";
+    } else {
+      logger.warn("workflow service not present, unable to retrieve workflow statistics");
+    }
+    out.put("total", total);
+    logger.info(logMessage);
+    return out;
+  }
+
+  /**
+   * returns a RecordingDataViewList of upcoming events. If the schedulerService
+   * is not present an empty list is returned.
+   * @return RecordingDataViewList list of upcoming recordings
+   */
+  private RecordingDataViewList getUpcomingRecordings() {
+    RecordingDataViewList out = new RecordingDataViewListImpl();
+    if (schedulerService != null) {
+      logger.info("getting upcoming recordings from scheudler");
+      SchedulerEvent[] events = schedulerService.getUpcommingEvents();
+      for (int i = 0; i < events.length; i++) {
+        RecordingDataView item = new RecordingDataViewImpl();
+        item.setTitle(events[i].getTitle());
+        item.setPresenter(events[i].getCreator());
+        item.setSeries(events[i].getSeriesID());    // FIXME get title for seriesID
+        item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
+        item.setStartTime(Long.toString(events[i].getEnddate().getTime()));
+        item.setCaptureAgent(events[i].getDevice());
+        item.setProcessingStatus("scheduled");
+        item.setDistributionStatus("not distributed");
+        out.add(item);
+      }
+    } else {
+      logger.warn("scheduler not present, returning empty list");
+    }
+    return out;
+  }
+
+  /**
    * @return documentation for this endpoint
    */
   @GET
@@ -93,17 +303,6 @@ public class AdminuiRestService {
   protected final String docs;
   
   public AdminuiRestService() {
-    String docsFromClassloader = null;
-    InputStream in = null;
-    try {
-      in = getClass().getResourceAsStream("/html/index.html");
-      docsFromClassloader = IOUtils.toString(in);
-    } catch (IOException e) {
-      logger.error("failed to read documentation", e);
-      docsFromClassloader = "unable to load documentation for " + AdminuiRestService.class.getName();
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-    docs = docsFromClassloader;
+    docs = "FIXME -- add documentation";
   }
 }
