@@ -129,26 +129,23 @@ package org.opencast.engage.videodisplay.control
 									  					currentPlayPauseState = PlayerState.PLAYING;
 									  					ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
 									  					break;
+									  					
+				 case VideoControlEvent.MUTE:           ExternalInterface.call(ExternalFunction.MUTE, '');
+                                                        
+                                                        break;
 										    			
-                case VideoControlEvent.MUTE: 			if( model.player.volume != 0 )
-				                                        {
-				                                        	ExternalInterface.call(ExternalFunction.MUTE, '');
-				                                        	model.playerVolume = model.player.volume;
-				                                        	model.player.volume = 0;
-				                                        }
-				                                        else
-				                                        {
-				                                        	ExternalInterface.call(ExternalFunction.SETVOLUME, model.playerVolume * percent);
-				                                        	model.player.volume = model.playerVolume;
-				                                        }
-
-														break;
-														
-				case VideoControlEvent.VOLUMEUP:		if( model.player.volume != 1 )
+                case VideoControlEvent.VOLUMEUP:		if( model.player.volume != 1 )
 														{
 															model.player.volume = model.player.volume + skipVolume;
 														}
 														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
+														
+														if(!model.ccButtonBool)
+														{
+														    model.ccBoolean = false;
+                                                            ExternalInterface.call(ExternalFunction.SETCAPTIONSBUTTON, false);
+														}
+														
 														break;
 														
 				case VideoControlEvent.VOLUMEDOWN:		if( model.player.volume != 0 )
@@ -188,37 +185,17 @@ package org.opencast.engage.videodisplay.control
                 case VideoControlEvent.SEEKNINE:        model.player.seek((model.currentDuration / 10) * 9);
                                                         break;                                                     
                 
-                case VideoControlEvent.CLOSEDCAPTIONS:  Swiz.dispatchEvent( new ClosedCaptionsEvent(true) );
-                                                        ExternalInterface.call(ExternalFunction.SETCAPTIONSBUTOON, model.ccBoolean);
+                case VideoControlEvent.CLOSEDCAPTIONS:  if(model.ccBoolean)
+                                                        {
+                                                        	Swiz.dispatchEvent( new ClosedCaptionsEvent(false) );
+                                                        }
+                                                        else
+                                                        {
+                                                        	Swiz.dispatchEvent( new ClosedCaptionsEvent(true) );
+                                                        }
+                                                        ExternalInterface.call(ExternalFunction.SETCAPTIONSBUTTON, model.ccBoolean);
                                                         break;                                                                                     
-                                                        												
-												/*		
-				case VideoControlEvent.VOLUMELOWEST:	model.player.volume = volumeLowest;
-														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
-														break;
-														
-				case VideoControlEvent.VOLUMELOW:		model.player.volume = volumeLow;
-														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
-														break;
-														
-				case VideoControlEvent.VOLUMEMIDDLE: 	model.player.volume = volumeMiddle;
-														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
-														break;
-														
-				case VideoControlEvent.VOLUMEHIGH: 		model.player.volume = volumeHigh;
-														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
-														break;
-								
-				case VideoControlEvent.VOLUMEHIGHEST: 	model.player.volume = volumeHighest;
-														ExternalInterface.call(ExternalFunction.SETVOLUME, model.player.volume * percent);
-														break;
-														
-				
-														
-											*/
-											
-											
-			}
+            }
 		}
 
 		/** setVolume 
@@ -231,8 +208,6 @@ package org.opencast.engage.videodisplay.control
 		}
 
 		/** loadDFXP.XML 
-		* 
-		* 
 		* 
 		* @eventType event:LoadDFXPXMLEvent
 		* */
@@ -352,13 +327,19 @@ package org.opencast.engage.videodisplay.control
 		* */
 		public function closedCaptions( event : ClosedCaptionsEvent ) : void
 		{
+			model.ccBoolean = event.ccBoolean;
+			
+			
+			
+			/*
+			
 			if( model.ccBoolean == true )
 			{
 				model.ccBoolean = false;
 			}else
 			{
 				model.ccBoolean = true;
-			}
+			}*/
 		}
 	}
 }

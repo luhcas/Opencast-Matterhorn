@@ -20,11 +20,7 @@ package bridge
  		
  		public static const MUTE:String					= 'Opencast.FromVideodisplay.setDoMute';
  		
- 		public static const UNMUTE:String               = 'Opencast.FromVideodisplay.setDoUnmute';
- 		
- 		public static const SETCAPTIONSBUTOON:String	= 'Opencast.FromVideodisplay.setCaptionsButton';
- 		
- 		
+ 		public static const SETCAPTIONSBUTTON:String	= 'Opencast.FromVideodisplay.setCaptionsButton';
  		
  	}
 }

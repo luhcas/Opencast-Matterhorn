@@ -16,11 +16,58 @@
 	font-size:          1em;
 }
 
+#info
+{
+    margin-left:        10px; 
+    margin-right:       10px; 
+    margin-top:         70px;
+}
+
 .oc-controls 
 {
     position:           absolute;
     top:                370px;
-}	
+}
+
+#oc-slider
+{
+    width:              399px;
+    margin-left:        10px;
+    margin-bottom:      10px;
+    position: relative; 
+    text-align: left;
+}
+
+.oc-slider-seek-Rail 
+{
+    width:              100%;
+    height:             0.8em;
+    border:             0px solid #999999;
+    position:           relative;
+    background:         transparent;    
+    -moz-border-radius: 0.2em;
+    -webkit-border-radius: 0.2em;
+}
+
+.oc-slider-seek-Thumb:focus
+{
+    border:             0px solid #999999;
+    background-color:   #BEBEBE;
+}
+
+.oc-slider-seek-Thumb 
+{
+    margin:             0px;
+    padding:            0px;
+    top:                -.3em;
+    width:              8px; 
+    height:             16px;
+    background:         #EEEEEE;
+    border:             1px solid #999999;
+    position:           absolute;
+}
+
+	
 
 .oc-videocontrols-holder
 {
@@ -29,7 +76,6 @@
     background:         transparent url(../background/title.png) repeat-x center top;
     margin-left:        10px;
     border:             ridge 1px #999999;
-
 }
 
 .oc-videocontrols-holder td
@@ -37,145 +83,30 @@
     border:             0;
     padding-top:        0;
     padding-bottom:     0;
-    
-
 }
-
-.oc-videocontrols-holder_old
+        
+#simpleEdit .inlineEdit-invitation 
 {
-    width:              380px;
-    height:             30px;
-    margin-left:        10px;
-    margin-right:       0;
-    margin-top:         0;
-    margin-bottom:      0;
-    padding:            0;
-    background:         transparent url(../background/title.png) repeat-x center top;
-    border:             ridge 1px #999999;
+  border:               0px solid blue;
+  background:           transparent;
+  color:                blue;
+  padding:              0;
+  margin:               0;
 }
-                        
-.oc-timeline_old
+
+#editField 
 {
-    width:              33%;
-    height:             100%;
-    display:            table-cell;
-    vertical-align:     middle;
-    color:              #444444; 
-    font-family:        verdana;
-    font-size:          0.8em;
-    float:              left;
+  width:                40px;
+  border:               0;
+  color:                #999;
+  padding-top:          2px;
+  padding-bottom:       2px;
+  margin:               0;
 }
-
-.oc-volume
-{
-    width:              33%;
-    height:             100%;
-    display:            table-cell;
-    vertical-align:     middle;
-    float:              right;
-}
-
-.oc-btn-volume-high
-{
-    overflow: hidden;
-    width:              16px;
-    height:             16px;
-    border:             0;
-    margin:             0;
-    background:         transparent url(../icons/volumehigh.png) no-repeat center top;
-    text-indent:        -1000em;
-    cursor:             pointer; /* hand-shaped cursor */
-    cursor:             hand; /* for IE 5.x */
-}
-
-.oc-btn-volume-low
-{
-    overflow: hidden;
-    width:              16px;
-    height:             16px;
-    border:             0;
-    margin:             0;
-    background:         transparent url(../icons/volumelow.png) no-repeat center top;
-    text-indent:        -1000em;
-    cursor:             pointer; /* hand-shaped cursor */
-    cursor:             hand; /* for IE 5.x */
-}
-
-.oc-btn-volume-mute
-{
-    overflow: hidden;
-    width:              16px;
-    height:             16px;
-    border:             0;
-    margin:             0;
-    background:         transparent url(../icons/volumemute.png) no-repeat center top;
-    text-indent:        -1000em;
-    cursor:             pointer; /* hand-shaped cursor */
-    cursor:             hand; /* for IE 5.x */
-}
-
-#slider
-{
-	width:              399px;
-	margin-left:        10px;
-	margin-bottom:      10px;
-}
-
-.oc-volume-slider
-{
-	display:            inline-block;
-	width:              70px;
-	margin-left:        5px;
-	margin-right:       5px;
-}
-
-.oc-btn-cc-off
-{
-    overflow: hidden;
-    width:              16px;
-    height:             16px;
-    margin:             0;
-    border:             0;
-    background:         transparent url(../icons/cc_off.png) no-repeat center top;
-    text-indent:        -1000em;
-    cursor:             pointer; /* hand-shaped cursor */
-    cursor:             hand; /* for IE 5.x */
-}
-
-.oc-btn-cc-on
-{
-    overflow: hidden;
-    width:              16px;
-    height:             16px;
-    margin:             0;
-    border:             0;
-    background:         transparent url(../icons/cc_on.png) no-repeat center top;
-    text-indent:        -1000em;
-    cursor:             pointer; /* hand-shaped cursor */
-    cursor:             hand; /* for IE 5.x */
-}
-
-#info
-{
-    margin-left:        10px; 
-    margin-right:       10px; 
-    margin-top:         70px;
-}
-
-#oc-video-display-container
-{
-    margin:             10px;
-    margin-bottom:      0px;
-    margin-left:        10px;
-}
-
-.overflow-hidden {
-    overflow: hidden;
-}
-
+            
 .btn_skip_backward
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -188,7 +119,7 @@
 
 .btn_skip_backward_over
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -201,7 +132,7 @@
 
 .btn_skip_backward_out
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -214,7 +145,7 @@
 
 .btn_rewind
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -227,7 +158,7 @@
 
 .btn_rewind_over
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -240,7 +171,7 @@
 
 .btn_rewind_out
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -253,7 +184,7 @@
 
 .btn_play
 {
-  overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -266,7 +197,7 @@
 
 .btn_play_over
 {
-  overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -292,7 +223,7 @@
 
 .btn_pause
 {
-  overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -305,7 +236,7 @@
 
 .btn_pause_over
 {
-  overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -318,7 +249,7 @@
 
 .btn_pause_out
 {
-  overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -331,7 +262,7 @@
 
 .btn_fast_forward
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -344,7 +275,7 @@
 
 .btn_fastForward_over
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -357,7 +288,7 @@
 
 .btn_fastForward_out
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -370,7 +301,7 @@
 
 .btn_skip_forward
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -383,7 +314,7 @@
 
 .btn_skip_forward_over
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -396,7 +327,7 @@
 
 .btn_skip_forward_out
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -406,33 +337,120 @@
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
-
-          
-#simpleEdit .inlineEdit-invitation 
+                    
+.oc-btn-volume-high
 {
-  border:               0px solid blue;
-  background:           transparent;
-  color:                blue;
-  padding:              0;
-  margin:               0;
+    overflow:           hidden;
+    width:              16px;
+    height:             16px;
+    border:             0;
+    margin:             0;
+    background:         transparent url(../icons/volumehigh.png) no-repeat center top;
+    text-indent:        -1000em;
+    cursor:             pointer; /* hand-shaped cursor */
+    cursor:             hand; /* for IE 5.x */
 }
 
-#editField 
+.oc-btn-volume-low
 {
-  width:                40px;
-  border:               0;
-  color:                #999;
-  padding-top:          2px;
-  padding-bottom:       2px;
-  margin:               0;
+    overflow:           hidden;
+    width:              16px;
+    height:             16px;
+    border:             0;
+    margin:             0;
+    background:         transparent url(../icons/volumelow.png) no-repeat center top;
+    text-indent:        -1000em;
+    cursor:             pointer; /* hand-shaped cursor */
+    cursor:             hand; /* for IE 5.x */
 }
 
-#captions {
-    position: absolute;
-    top:420px;
-    list-style-type:none;
+.oc-btn-volume-mute
+{
+    overflow:           hidden;
+    width:              16px;
+    height:             16px;
+    border:             0;
+    margin:             0;
+    background:         transparent url(../icons/volumemute.png) no-repeat center top;
+    text-indent:        -1000em;
+    cursor:             pointer; /* hand-shaped cursor */
+    cursor:             hand; /* for IE 5.x */
 }
 
-#captions li {
-    list-style-type:none;
+.oc-slider-volume-Rail 
+{
+    width:              70px;
+    height:             8px;
+    border:             1px solid #999999;
+    position:           relative;
+    background:         #fff;
+    
+}
+
+.oc-slider-volume-Thumb:focus
+{
+    border:             0px solid #999999;
+    background-color:   #BEBEBE;
+}
+
+.oc-slider-volume-Thumb 
+{
+    margin:             0px;
+    padding:            0px;
+    top:                -.4em;
+    width:              8px; 
+    height:             16px;
+    background:         #EEEEEE;
+    border:             1px solid #999999;
+    position:           absolute;
+}
+
+.oc-btn-cc-off
+{
+    overflow:           hidden;
+    width:              16px;
+    height:             16px;
+    margin:             0;
+    border:             0;
+    background:         transparent url(../icons/cc_off.png) no-repeat center top;
+    text-indent:        -1000em;
+    cursor:             pointer; /* hand-shaped cursor */
+    cursor:             hand; /* for IE 5.x */
+}
+
+.oc-btn-cc-on
+{
+    overflow:           hidden;
+    width:              16px;
+    height:             16px;
+    margin:             0;
+    border:             0;
+    background:         transparent url(../icons/cc_on.png) no-repeat center top;
+    text-indent:        -1000em;
+    cursor:             pointer; /* hand-shaped cursor */
+    cursor:             hand; /* for IE 5.x */
+}
+
+#oc-video-display-container
+{
+    margin:             10px;
+    margin-bottom:      0px;
+    margin-left:        10px;
+}
+
+.overflow-hidden 
+{
+    overflow:           hidden;
+}
+
+#captions 
+{
+    position:           absolute;
+    top:                420px;
+    list-style-type:    none;
+}
+
+#captions li 
+{
+    list-style-type:    none;
 }

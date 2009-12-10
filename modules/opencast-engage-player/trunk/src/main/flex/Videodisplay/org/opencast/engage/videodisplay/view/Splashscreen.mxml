@@ -146,7 +146,7 @@
 		
 	<mx:Button id="playButton_up"
 		click="Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));"
-		width="{this.width/3.5}"
+		width="{this.width/5}"
 		height="{playButton_up.width}"
 		styleName="Play"
 		visible="false"
@@ -160,7 +160,7 @@
 		
 	<mx:Button id="pauseButton_up"
 		click="Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));"
-		width="{this.width/3.5}"
+		width="{this.width/5}"
 		height="{pauseButton_up.width}"
 		styleName="Pause"
 		visible="false"

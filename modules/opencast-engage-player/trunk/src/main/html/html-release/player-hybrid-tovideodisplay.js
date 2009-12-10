@@ -1,36 +1,28 @@
 /*global $, Videodisplay, Opencast*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
-
 /**
     @namespace the global Opencast namespace ToVideodisplay
 */
-Opencast.ToVideodisplay = (function () {
+Opencast.ToVideodisplay = (function () 
+{
 
-    var pressKey = false,
-        playing  = "playing",
-        pausing  = "pausing",
-        mute     = "Mute",
-        unmute   = "Unmute",
-        ccon     = "Closed Caption On",
-        ccoff    = "Closed Caption Off",
-        currentPlayPauseState = pausing;
-
-    /**
-        @memberOf Opencast.ToVideodisplay
-        @description Do seek in the video.
-        @param number time
-    */
-    function doSeek(time) {
-        $('#slider').slider('value', time);
-        Videodisplay.seek(time);
-    }
+    var pressKey              = false,
+        playing               = "playing",
+        pausing               = "pausing",
+        mute                  = "Mute",
+        unmute                = "Unmute",
+        ccon                  = "Closed Caption On",
+        ccoff                 = "Closed Caption Off",
+        currentPlayPauseState = pausing,
+        ccBool                = false;
 
     /**
         @memberOf Opencast.ToVideodisplay
         @description Do skip backward in the video.
     */
-    function doSkipBackward() {
+    function doSkipBackward() 
+    {
         Videodisplay.skipBackward();
     }
 
@@ -38,7 +30,8 @@ Opencast.ToVideodisplay = (function () {
         @memberOf Opencast.ToVideodisplay
         @description Do rewind in the video.
     */
-    function doRewind() {
+    function doRewind() 
+    {
         Videodisplay.rewind();
     }
 
@@ -46,7 +39,8 @@ Opencast.ToVideodisplay = (function () {
         @memberOf Opencast.ToVideodisplay
         @description Do play the video.
     */
-    function doPlay() {
+    function doPlay() 
+    {
         Videodisplay.play();
     }
 
@@ -54,7 +48,8 @@ Opencast.ToVideodisplay = (function () {
         @memberOf Opencast.ToVideodisplay
         @description Do pause the video.
     */
-    function doPause() {
+    function doPause() 
+    {
         Videodisplay.pause();
     }
     
@@ -62,7 +57,8 @@ Opencast.ToVideodisplay = (function () {
         @memberOf Opencast.ToVideodisplay
         @description Do stop the video.
     */
-    function doStop() {
+    function doStop() 
+    {
         Videodisplay.stop();
     }
     
@@ -87,6 +83,26 @@ Opencast.ToVideodisplay = (function () {
     
     /**
         @memberOf Opencast.ToVideodisplay
+        @description Set the bool of true or false, when the learner press the cc button.
+        @param Boolean bool
+    */
+    function setccBool(bool) 
+    {
+        ccBool = bool;
+    }
+    
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Set the bool of true or false.
+        @param Boolean bool
+    */
+    function getccBool() 
+    {
+        return ccBool;
+    }
+    
+    /**
+        @memberOf Opencast.ToVideodisplay
         @description Get the pressed key.
     */
     function getPressKey()
@@ -98,13 +114,17 @@ Opencast.ToVideodisplay = (function () {
         @memberOf Opencast.ToVideodisplay
         @description Toggle between play and pause the video.
     */
-    function doTogglePlayPause() {
+    function doTogglePlayPause() 
+    {
         // Checking if btn_play_pause is "play"
-        if (currentPlayPauseState === pausing) {
+        if (currentPlayPauseState === pausing) 
+        {
             // Changing the volume to 1.0 and the value of the button of btn_volume to "unmute"
             Opencast.FromVideodisplay.setPlayPauseState(playing);
             doPlay();
-        } else {
+        } 
+        else 
+        {
             // Changing the volume to 0.0 and the value of the button of btn_volume to "mute"
             Opencast.FromVideodisplay.setPlayPauseState(pausing);
             doPause();
@@ -113,9 +133,10 @@ Opencast.ToVideodisplay = (function () {
     
     /**
         @memberOf Opencast.ToVideodisplay
-        @description Toggle between play and pause the video.
+        @description Do fast forward the video.
     */
-    function doFastForward() {
+    function doFastForward() 
+    {
         Videodisplay.fastForward();
     }
 
@@ -123,34 +144,107 @@ Opencast.ToVideodisplay = (function () {
         @memberOf Opencast.ToVideodisplay
         @description Do skip forward in the vido.
     */
-    function doSkipForward() {
+    function doSkipForward() 
+    {
         Videodisplay.skipForward();
+    }
+    
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Set the closed caption true or false.
+        @param Boolean cc
+    */
+    function doClosedCaptions(cc) 
+    {
+        Videodisplay.closedCaptions(cc);
+    }
+
+    
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Change the css style, when the learner press the closed captions button on.
+    */
+    function setClosedCaptionsOn() 
+    {
+        doClosedCaptions(true);
+        $("#btn_cc").attr({ 
+            value: ccoff,
+            alt: ccoff,
+            title: ccoff
+        });
+        $("#btn_cc").attr("className", "oc-btn-cc-on");
+    }
+
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Change the css style, when the learner press the closed captions button off.
+    */
+    function setClosedCaptionsOff() 
+    {
+        doClosedCaptions(false);
+        $("#btn_cc").attr({ 
+            value: ccon,
+            alt: ccon,
+            title: ccon
+        });
+        $("#btn_cc").attr("className", "oc-btn-cc-off");
+    }
+
+    /**
+        @memberOf Opencast.ToVideodisplay
+        @description Toggle between closed captions on or off.
+        @param Boolean cc
+    */
+    function doToogleClosedCaptions() 
+    {
+        // Checking if btn_cc is "CC off"
+        if ($("#btn_cc").attr("value") === ccon) 
+        {
+            setccBool(true);
+            Videodisplay.setccBool(true);
+            setClosedCaptionsOn();
+        } 
+        else 
+        {
+            setccBool(false);
+            Videodisplay.setccBool(false);
+            setClosedCaptionsOff();
+        }
     }
     
     /**
         @memberOf Opencast.ToVideodisplay
         @description Change the volume of the video.
     */
-    function doSetVolume(value) {
+    function doSetVolume(value) 
+    {
         Videodisplay.setVolume(value);
     }
-
+    
     /**
         @memberOf Opencast.ToVideodisplay
         @description Toggle between mute an unmute.
     */
-    function doToggleVolume() {
+    function doToggleVolume() 
+    {
         // Checking if btn_volume is "mute"
-        if ($("#btn_volume").attr("value") === mute) {
+        if ($("#btn_volume").attr("value") === mute) 
+        {
             $("#btn_volume").attr({ 
                 value: unmute,
                 alt: unmute,
                 title: unmute
             });
             $("#btn_volume").attr("className", "oc-btn-volume-mute");
-            Opencast.volume = $('#volume_slider').slider('option', 'value') / 100;
             doSetVolume(0);
-        } else {
+            // When the Button cc is not press before
+            if (getccBool() === false)
+            {
+                setClosedCaptionsOn();
+            }
+        } 
+        else 
+        {
             $("#btn_volume").attr({ 
                 value: mute,
                 alt: mute,
@@ -158,51 +252,23 @@ Opencast.ToVideodisplay = (function () {
             });
             $("#btn_volume").attr("className", "oc-btn-volume-high");
             doSetVolume(Opencast.volume);
+            // When the Button cc is not press before
+            if (getccBool() === false)
+            {
+                setClosedCaptionsOff();
+            }
         }
-        
     }
-    /**
-       @memberOf Opencast.ToVideodisplay
-       @description Set the closed caption.
-       @param boolean cc
-    */
-    function doClosedCaptions(cc) {
-        Videodisplay.closedCaptions(cc);
-    }
+    
     /**
         @memberOf Opencast.ToVideodisplay
-        @description Toggle between closed caption on and off.
-    */
-    function doToogleClosedCaptions() {
-        // Checking if btn_cc is "CC off"
-        if ($("#btn_cc").attr("value") === ccon) {
-            $("#btn_cc").attr({ 
-                value: ccoff,
-                alt: ccoff,
-                title: ccoff
-            });
-            $("#btn_cc").attr("className", "oc-btn-cc-on");
-            doClosedCaptions(true);
-            return;
-        } else {
-            $("#btn_cc").attr({ 
-                value: ccon,
-                alt: ccon,
-                title: ccon
-            });
-            $("#btn_cc").attr("className", "oc-btn-cc-off");
-            doClosedCaptions(false);
-            return;
-        }
-    }
-
-    /**
-       @description Keylistener.
+        @description Keylistener.
     */
     var isCtrl = false;
     var isAlt = false;
     
-    $(document).keyup(function (e) { 
+    $(document).keyup(function (e) 
+    { 
         if (e.which === 17) 
         {
             isCtrl = false; 
@@ -212,7 +278,8 @@ Opencast.ToVideodisplay = (function () {
             isAlt = false; 
         }
         pressKey = false;
-    }).keydown(function (e) { 
+    }).keydown(function (e) 
+    { 
         if (e.which === 17)
         {
             isCtrl = true;
@@ -221,20 +288,29 @@ Opencast.ToVideodisplay = (function () {
         {
             isAlt = true;
         }
-        if (isCtrl === true && isAlt === true) {
-          
+        if (isCtrl === true && isAlt === true) 
+        {
             pressKey = true;
+            
+            if (e.which === 77 || e.which === 109) // press m or M
+            {
+                doToggleVolume();
+            }
+            
             if (e.which === 80 || e.which === 112 || e.which === 83 || e.which === 115 || e.which === 77 || e.which === 109 || e.which === 85 || e.which === 117  || e.which === 68 || e.which === 100 || e.which === 48 || e.which === 49 || e.which === 50 || e.which === 51 || e.which === 52 || e.which === 53 || e.which === 54  || e.which === 55 || e.which === 56 || e.which === 57 || e.which === 67 || e.which === 99 || e.which === 82 || e.which === 114 || e.which === 70 || e.which === 102 || e.which === 83 || e.which === 115)
             {
                 Videodisplay.passCharCode(e.which);
-                
+               
+            }
+            if (e.which === 85 || e.which === 68) // press arrow up or down
+            {
+                Opencast.volume = Videodisplay.getVolume();
             }
             return false;
         }
     }); 
 
     return {
-        doSeek: doSeek,
         doSkipBackward : doSkipBackward,
         doRewind : doRewind,
         getCurrentPlayPauseState : getCurrentPlayPauseState,
@@ -249,6 +325,11 @@ Opencast.ToVideodisplay = (function () {
         doToggleVolume: doToggleVolume,
         doSetVolume: doSetVolume,
         doClosedCaptions: doClosedCaptions,
-        doToogleClosedCaptions : doToogleClosedCaptions
+        doToogleClosedCaptions : doToogleClosedCaptions,
+        setClosedCaptionsOn : setClosedCaptionsOn,
+        setClosedCaptionsOff : setClosedCaptionsOff,
+        setccBool : setccBool,
+        getccBool : getccBool
+        
     };
 }());

@@ -1,6 +1,5 @@
-/*global $, Videodisplay*/
+/*global $, Videodisplay, fluid*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
-
 
 /**
     @namespace the global Opencast namespace
@@ -10,31 +9,10 @@ var Opencast = Opencast || {};
 Opencast.volume = 1.0;
 Opencast.mouseOverBool = false;
 
+
 $(document).ready(function () {
-    $("#slider").slider();
-    $('#slider').slider('option', 'animate', false);
-    $('#slider').slider('option', 'min', 0);
-    $('#slider').bind('slide', function (event, ui) {
-        Videodisplay.seek(ui.value);
-    });
-    
-    $('#volume_slider').slider();
-    $('#volume_slider').slider('option', 'min', 0);
-    $('#volume_slider').slider('option', 'max', 100);
-    $('#volume_slider').slider({
-        steps: 10
-    });
-    $('#volume_slider').slider('value', 100);
-    $('#volume_slider').bind('slide', function (event, ui) {
-        Opencast.ToVideodisplay.doSetVolume(ui.value / 100);
-        Opencast.volume = ui.value / 100;
-    });
-    $('#volume_slider').bind('slidechange', function (event, ui) {
-        if (ui.value !== 0) 
-        {
-            Opencast.global.doUnmute();
-        }
-    });
+  
+    Opencast.ariaSlider.init();
     
     var simpleEdit = fluid.inlineEdit("#simpleEdit", {
         selectors : {
@@ -45,16 +23,17 @@ $(document).ready(function () {
         useTooltip : true,
         tooltipDelay : 500
     });
-    
-
 });
 
+/**
+@namespace the global Opencast namespace global
+*/
 Opencast.global = (function () {
 
     var playing = "playing",
     pausing     = "pausing",
     unmute      = "Unmute",
-    mute        = "mute";
+    mute        = "Mute";
 
     /**
         @memberOf Opencast.global
@@ -73,7 +52,7 @@ Opencast.global = (function () {
     
     /**
         @memberOf Opencast.global
-        @description Mouse over effect.
+        @description Mouse over effect, change the css style.
     */
     function mouseOver() {
         if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === playing) {
@@ -85,9 +64,10 @@ Opencast.global = (function () {
             Opencast.mouseOverBool = true;
         }
     }
+    
     /**
         @memberOf Opencast.global
-        @description Mouse out effect.
+        @description Mouse out effect, change the css style.
     */
     function mouseOut() {
         if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === playing) {
@@ -100,11 +80,73 @@ Opencast.global = (function () {
         }
     }
     
-   
+    /**
+        @memberOf Opencast.global
+        @description When the learner edit the current time.
+    */
+    function editTime() 
+    {
+        var timeString = $("#editField").attr("value");
+        
+        timeString = timeString.replace(/[-\/]/g, ':'); 
+        timeString = timeString.replace(/[^0-9: ]/g, ''); 
+        timeString = timeString.replace(/ +/g, ' '); 
+        
+        var time = timeString.split(':');
+
+        try
+        {
+            var seekHour = parseInt(time[0], 10);
+            var seekMinutes = parseInt(time[1], 10);
+            var seekSeconds = parseInt(time[2], 10);
+          
+        }
+        catch (exception) 
+        {
+            //alert('Wrong Time enter like this: HH:MM:SS');
+        }
+        
+        if (seekHour > 99 || seekMinutes > 59 || seekSeconds > 59)
+        {
+            //alert('Wrong Time enter like this: HH:MM:SS');
+        } 
+        else 
+        {
+            var seek = (seekHour * 60 * 60) + (seekMinutes * 60) + (seekSeconds);
+            Videodisplay.seek(seek);
+        }
+    }
+    
+    /**
+        @memberOf Opencast.global
+        @description When the learner press a key.
+        @param event evt
+    */
+    function keyListener(evt) {
+        var charCode;
+        if (evt && evt.which)
+        {
+            evt = evt;
+            charCode = evt.which;
+        }
+        else
+        {
+            evt = event;
+            charCode = evt.keyCode;
+        }
+        
+        if (charCode === 13) // return
+        {
+            editTime(); 
+        }
+        
+    }
+    
     return {
         doUnmute : doUnmute,
         mouseOver : mouseOver,
-        mouseOut : mouseOut
+        mouseOut : mouseOut,
+        editTime : editTime,
+        keyListener : keyListener
     };
 }());
-

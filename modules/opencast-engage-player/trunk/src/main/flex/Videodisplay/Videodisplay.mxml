@@ -41,6 +41,7 @@
 			import org.opencast.engage.videodisplay.business.VideodisplayBean;
 			import org.swizframework.Swiz;
 			
+			
 			[Autowire]
 			[Bindable]
 			public var model:VideodisplayModel;
@@ -179,11 +180,13 @@
 		     * To see the captions
 		     * 
 		     * */
-		    public function setClosedCaptions( bool:Boolean ):void
+		    public function closedCaptions( bool:Boolean ):void
 		    {
 		    	Swiz.dispatchEvent( new ClosedCaptionsEvent(bool) );
+		    	
+		    	
 		    }
-		    
+		   
 		    /**
 			 * setVolume
 			 * 
@@ -203,8 +206,19 @@
 			{
 				return model.player.volume;
 			}
-      
+			
+			
 			/**
+             * setccBool
+             * 
+             * Set true when the cc Button is press
+             */   
+            public function setccBool(ccBool:Boolean):void
+            {
+                model.ccButtonBool = ccBool;   
+            }
+			
+		    /**
 			 * reportKeyDown
 			 * 
 			 * 
