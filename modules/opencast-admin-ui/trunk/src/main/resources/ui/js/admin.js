@@ -28,7 +28,7 @@ AdminUI.init = function() {
  * get and display recording statistics
  */
 AdminUI.displayRecordingCounts = function() {
-  $.getJSON("../rest/countRecordings",
+  $.getJSON("rest/countRecordings",
     function(data) {
       for (key in data) {
         var elm = $('#count-' + key);

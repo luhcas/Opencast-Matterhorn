@@ -25,7 +25,7 @@
 
       function updateUI() {
         AdminUI.displayRecordingCounts();
-        $('#recordings-table-container').xslt("../rest/recordings/processing", "xsl/recordings_processing.xsl", function() {
+        $('#recordings-table-container').xslt("rest/recordings/processing", "xsl/recordings_processing.xsl", function() {
           // currently empty
         });
         // make table sortable

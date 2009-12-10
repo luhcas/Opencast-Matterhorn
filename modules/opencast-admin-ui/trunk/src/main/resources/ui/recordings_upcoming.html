@@ -24,7 +24,7 @@
 
       function updateUI() {
         AdminUI.displayRecordingCounts();
-        $('#recordings-table-container').xslt("../rest/recordings/upcoming", "xsl/recordings_upcoming.xsl", function() {
+        $('#recordings-table-container').xslt("rest/recordings/upcoming", "xsl/recordings_upcoming.xsl", function() {
           // run through the timestamps and make them string representations
           $('#recordings-table-container').find('.date-start').each( function() {
             $(this).text(AdminUI.makeLocaleDateString($(this).text()));
