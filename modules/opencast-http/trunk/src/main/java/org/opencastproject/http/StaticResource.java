@@ -79,7 +79,7 @@ public class StaticResource extends HttpServlet {
     String servletPath = req.getServletPath();
     String path = pathInfo == null ? servletPath : servletPath + pathInfo;
 
-    logger.info("handling path {}, pathInfo={}, servletPath={}", new String[] {path, pathInfo, servletPath});
+    logger.debug("handling path {}, pathInfo={}, servletPath={}", new String[] {path, pathInfo, servletPath});
     
     // If the URL points to a "directory", redirect to the welcome file
     if("/".equals(path) || alias.equals(path) || (alias + "/").equals(path)) {
