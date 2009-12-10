@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import de.schlichtherle.io.ArchiveException;
 import de.schlichtherle.io.File;
 import de.schlichtherle.io.FileInputStream;
 import de.schlichtherle.io.FileOutputStream;
@@ -64,6 +65,15 @@ public class ZipUtil {
         if(out != null) {try {out.close();} catch (IOException e) {logger.error(e.getMessage());}}
       }
     }
+    
+    // Solves issue MH-1809 (java.io.File.length() doesn't return actual zip file size) 
+    try {
+      File.umount();
+    } catch (ArchiveException e) {
+      zipFile.delete();
+      throw new RuntimeException(e);
+    }
+    
     return normalFile;
   }
 

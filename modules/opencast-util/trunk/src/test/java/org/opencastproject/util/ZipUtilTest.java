@@ -29,6 +29,12 @@ public class ZipUtilTest {
   File src1;
   File src2;
   File destDir;
+  /**
+   * Added as part of the fix for MH-1809
+   * WARNING: Changes in the files to zip would change the resulting zip size.
+   * If such changes are made, change also this constant accordingly
+   */
+  private final long ZIPSIZE = 870496;
   
   @Before
   public void setup() throws Exception {
@@ -56,6 +62,8 @@ public class ZipUtilTest {
   public void testZip() throws Exception {
     File zip = ZipUtil.zip(new File[] {src1, src2}, destDir + File.separator + "testingZip.zip");
     Assert.assertTrue(zip.exists());
+    // Testing issue MH-1809
+    Assert.assertEquals(ZIPSIZE, zip.length());
     // java 5 incompatible
     //Assert.assertTrue(zip.getTotalSpace() > 0);
   }
