@@ -28,7 +28,7 @@
                             <xsl:value-of select="name" />
                         </td>
                         <td>
-                          audio, video, VGA
+                          Audio, Video, Screen
                         </td>
                         <td>
                             <span>
