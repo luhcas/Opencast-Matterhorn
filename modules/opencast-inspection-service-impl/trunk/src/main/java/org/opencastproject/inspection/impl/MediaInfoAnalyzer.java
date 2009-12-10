@@ -251,7 +251,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
         Object converted = converter.invoke(null, value);
         ReflectionSupport.setProperty(property, target, converted);
       } catch (NoSuchMethodException e) {
-        throw new RuntimeException(e);
+        //throw new RuntimeException(e);
       } catch (InvocationTargetException e) {
         throw new RuntimeException(e);
       } catch (IllegalAccessException e) {
