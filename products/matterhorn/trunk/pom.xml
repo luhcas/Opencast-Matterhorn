@@ -679,7 +679,18 @@
         <role>developer</role>
       </roles>
       <timezone>+1</timezone>
-    </developer>   
+    </developer>
+    <developer>
+      <id>greg_logan</id>
+      <name>Greg Logan</name>
+      <email>greg.logan@usask.ca</email>
+      <organization>University of Saskatchewan</organization>
+      <organizationUrl>http://www.usask.ca</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>-6</timezone>
+    </developer>
   </developers>
 
   <contributors><!-- TODO? --></contributors>
