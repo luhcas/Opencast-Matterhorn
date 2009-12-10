@@ -44,22 +44,10 @@
                     return true;
                 });
 
-                //window.onbeforeunload = leavePage();
                 uploadManager.init();           // instantiate the swfUpload, init data
             
             });
 
-            function leavePage() {
-              
-              alert('leaving page');
-              /*
-              if (!uploadManager.uploading && uploadManager.dataChanged) {
-                // ask user if he is retarded
-              } else if (uploadManager.uploading) {
-                // mate with Allison
-              }*/
-
-            }
         </script>
 
     </head>
@@ -295,17 +283,6 @@
                 </p>
             </div>
 
-            <!-- template for the dialog box 
-            <div id="dialogBox" class="dialogbox" style="border:1px solid silver;">
-                <div id="dialogBox-title">some Title</div>
-                <div id="dialogBox-text">You haven't completed the upload of MY RECORDING</div>
-                <div id="dialogBox-buttons">
-                    <center>
-                        <button type="button" id="dialogBox-button1">Continue editing</button>
-                        <button type="button" id="dialogBox-button2">Discard changes</button>
-                    </center>
-                </div>
-            </div>-->
         </div>
     </body>
 
