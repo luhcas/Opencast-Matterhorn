@@ -15,6 +15,7 @@
  */
 package org.opencastproject.http;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpService;
@@ -110,9 +111,15 @@ public class StaticResource extends HttpServlet {
       } else {
         classpathToResource = classpath.substring(1) + pathInfo;
       }
-      
+
       URL url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
       logger.debug("opening url {} {}", new Object[] {classpathToResource, url});
+      String md5 = DigestUtils.md5Hex(url.openStream());
+      if(md5.equals(req.getHeader("If-None-Match"))) {
+        resp.setStatus(304);
+        return;
+      }
+      resp.setHeader("ETag", md5);
       InputStream in = url.openStream();
       IOUtils.copy(in, resp.getOutputStream());
     } catch (Exception e) {
