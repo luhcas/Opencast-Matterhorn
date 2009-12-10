@@ -35,12 +35,12 @@
         <executions>
           <execution>
             <id>copy-resources</id>
-            <phase>verify</phase>
+            <phase>validate</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/classes/ui</outputDirectory>
+              <outputDirectory>${basedir}/target/classes/ui/</outputDirectory>
               <resources>
                 <resource>
                   <directory>../static-resources</directory>
@@ -60,6 +60,7 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package>org.opencastproject.http, *</Import-Package>
+            <Private-Package> ui.*</Private-Package>
             <Service-Component>
               OSGI-INF/workflow-ui.xml
             </Service-Component>

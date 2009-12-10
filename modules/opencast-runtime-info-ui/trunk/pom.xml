@@ -51,12 +51,12 @@
         <executions>
           <execution>
             <id>copy-resources</id>
-            <phase>verify</phase>
+            <phase>validate</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/classes/ui</outputDirectory>
+              <outputDirectory>${basedir}/target/classes/ui/</outputDirectory>
               <resources>
                 <resource>
                   <directory>../static-resources</directory>
@@ -75,7 +75,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Private-Package>org.opencastproject.runtimeinfo, org.json.*</Private-Package>
+            <Private-Package>org.opencastproject.runtimeinfo, org.json.*, ui.*</Private-Package>
             <Bundle-Activator> org.opencastproject.runtimeinfo.InfoServlet </Bundle-Activator>
             <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
             <Service-Component>

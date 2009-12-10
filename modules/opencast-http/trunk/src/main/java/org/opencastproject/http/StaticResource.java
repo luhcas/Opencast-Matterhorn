@@ -79,7 +79,7 @@ public class StaticResource extends HttpServlet {
     String servletPath = req.getServletPath();
     String path = pathInfo == null ? servletPath : servletPath + pathInfo;
 
-    logger.debug("handling path {}, pathInfo={}, servletPath={}", new String[] {path, pathInfo, servletPath});
+    logger.info("handling path {}, pathInfo={}, servletPath={}", new String[] {path, pathInfo, servletPath});
     
     // If the URL points to a "directory", redirect to the welcome file
     if("/".equals(path) || alias.equals(path) || (alias + "/").equals(path)) {
@@ -100,8 +100,17 @@ public class StaticResource extends HttpServlet {
     
     // Find and deliver the resource
     try {
-      String classpathToResource = pathInfo == null ?
-              classpath.substring(1) + "/" + welcomeFile : classpath.substring(1) + pathInfo;
+      String classpathToResource;
+      if(pathInfo == null) {
+        if( ! servletPath.equals(alias)) {
+          classpathToResource = classpath.substring(1) + servletPath;
+        } else {
+          classpathToResource = classpath.substring(1) + "/" + welcomeFile;
+        }
+      } else {
+        classpathToResource = classpath.substring(1) + pathInfo;
+      }
+      
       URL url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
       logger.debug("opening url {} {}", new Object[] {classpathToResource, url});
       InputStream in = url.openStream();
