@@ -64,6 +64,9 @@ public class SchedulerRestService {
   @Path("addEvent")
   public SchedulerEventJaxbImpl addEvent (@FormParam("event") SchedulerEventJaxbImpl e) {
     SchedulerEvent i = e.getEvent();
+    if(i == null){
+      logger.info("Event was null.");
+    }
     SchedulerEvent j = service.addEvent(i);
     logger.info("Adding event "+j.getID()+" to scheduler");
     return new SchedulerEventJaxbImpl(j);

@@ -37,6 +37,7 @@ EventManager.prototype.createDoc = createDoc;
  *  @returns {boolean} True if the form value's are valid, otherwise false;
  */
 function checkForm() {
+  //Todo: create some functions in schedulerUI to manipulate the notification box.
   var missingFields = new Array();
   for(var i in this.fields){
     //if the field is required, and does not contain valid data notify user
@@ -67,13 +68,29 @@ EventManager.prototype.checkForm = checkForm;
  *  scheduler service: addEvent
  */
 function serialize() {
+  //Todo: EventField/Group should know how to render themselves. this is a hack
   if(this.checkForm()){
     var doc = this.createDoc();
+    var metadata = doc.createElement('metadata');
     for(var i in this.fields){
-      el = doc.createElement(i);
-      el.appendChild(doc.createTextNode(this.fields[i].getValue()));
-      doc.documentElement.appendChild(el);
+      if(i == "startdate" || i == "enddate" || i == "duration" || i == "resources" || i == "attendees"){
+        el = doc.createElement(i);
+        if(i == "startdate" || i == "enddate" || i == "duration"){
+          el.appendChild(doc.createTextNode(this.fields[i].getValue().getTime()));
+        }else{
+          el.appendChild(doc.createTextNode(this.fields[i].getValue()));
+        }
+        doc.documentElement.appendChild(el);
+      }else{
+        var item = doc.createElement('item');
+        var val = doc.createElement('value');
+        val.appendChild(doc.createTextNode(this.fields[i].getValue()));
+        item.setAttribute('key', i);
+        item.appendChild(val);
+        metadata.appendChild(item);
+      }
     }
+    doc.documentElement.appendChild(metadata);
     if(typeof XMLSerializer != 'undefined'){
       return (new XMLSerializer()).serializeToString(doc);
     }else if(doc.xml){ return doc.xml; }
@@ -97,11 +114,11 @@ function populateForm(document){
     if(e != "resources" || e != "attendees" || e != "channel-id"){
       switch(e){
         case 'startdate':
-          console.log('start: ' + $("item[key='" + e + "'] > value", document).text());
+          //console.log('start: ' + $("item[key='" + e + "'] > value", document).text());
           this.fields[e].setValue(new Date(parseInt($("item[key='" + e + "'] > value", document).text())*1000));
           break;
         case 'enddate': //we have to know the start date before we can use the enddate to sort out duration. This is dumb, talk to rudiger about switching to just use duration.
-          console.log('end: ' + $("item[key='" + e + "'] > value", document).text());
+          //console.log('end: ' + $("item[key='" + e + "'] > value", document).text());
           new Date((parseInt($("item[key='" + e + "'] > value", document).text()) - this.fields['startdate'].getValue().getTime())*1000)
           break;
         default:
@@ -163,7 +180,9 @@ function EventField(id, required, getValue, setValue, checkValue){
  *  @return {string} 
  */
 function getEventFieldValue() {
-  this.value = this.formElement.val()
+  if(this.formElement){
+    this.value = this.formElement.val()
+  }
   return this.value;
 }
 //Set EventField getValue function
@@ -248,13 +267,16 @@ function EventFieldGroup(idArray, required, getValue, setValue, checkValue) {
  *  @return {string} a string of values, seperated by ','
  */
 function getEventFieldGroupValue() {
+  
   values = new Array();
   for(var el in this.groupElements){
     if(this.groupElements[el][0].checked){
       values.push(this.groupElements[el].val());
     }
   }
-  this.value = values.toString();
+  if(values.length > 0){
+    this.value = values.toString();
+  }
   return this.value;
 }
 //Set EventFieldGroup getValue function
@@ -347,8 +369,10 @@ function getStartDate(){
       date += 12 * 3600; //add 12 hours for PM;
     }
     date = date * 1000; //back to milliseconds
+    this.value = new Date(date);
   }
-  return new Date(date); //TODO: set seconds/milliseconds to 0.
+  
+  return this.value; //TODO: set seconds/milliseconds to 0.
 }
 
 /**
@@ -359,14 +383,14 @@ function setStartDate(date){
   if(this.groupElements['startDate'] && this.groupElements['startTimeHour'] && this.groupElements['startTimeMin'] && this.groupElements['startTimePeriod']){
     this.groupElements['startTimePeriod'].val('am');
     var hour = date.getHours();
-    console.log('Hours: ' + hour);
+    //console.log('Hours: ' + hour);
     if(hour === 0){
       hour = 12;
     }else if( hour >= 12 ) {
       hour = hour - 12;
       this.groupElements['startTimePeriod'].val('pm');
     }
-    console.log("Minutes: " + date.getMinutes());
+    //console.log("Minutes: " + date.getMinutes());
     this.groupElements['startTimeHour'].val(hour);
     this.groupElements['startTimeMin'].val(date.getMinutes());
     

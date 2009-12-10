@@ -76,14 +76,12 @@
                         return true;
                         }
                         );
+        
+        $('#submitButton').click(schedulerUI.submitForm);
+        $('#resetButton').click(schedulerUI.resetForm);
       }
       
       $(document).ready(initPage);
-      
-      xmlString = '<scheduler-event><event-id>19970901T130000Z-123401@host.com</event-id><metadata><item key="title"><value>Title of my recording</value></item><item key="startdate"><value>1259856000</value></item><item key="enddate"><value>1259859600</value></item><item key="creator"><value>Name of the lecturer</value></item><item key="abstract"><value>A short description of the content of the lecture</value></item><item key="contributor"><value>ID or descriptions of the instution</value></item><item key="series-id"><value>19960401-080045-4000F192713-0052@host1.com</value></item><item key="device"><value>recorder-MH1234</value></item><item key="channel-id"><value>1</value></item><item key="location"><value>MH 1234g</value></item></metadata><resources>vga, 4M</resources><resources>lecturer, 800K, 320x240</resources><resources>board, 1M, 1280x720</resources><resources>audio, 320k, 44kHz</resources><attendees>recorder-MH1234</attendees></scheduler-event>';
-        parser=new DOMParser();
-        xmlDoc=parser.parseFromString(xmlString,"text/xml");
-        console.log(xmlDoc);
       </script>
   </head>
   <body>
@@ -350,8 +348,8 @@
           <table>
             <tr>
               <td>
-                <input type="button" value="submit" onclick="doSubmit()" />
-                <input type="reset" value="reset" onclick="schedulerUI.clearForm()" />
+                <input type="button" value="submit" id="submitButton" />
+                <input type="reset" value="reset" id="resetButton" />
                 <span style="color: red; font-size: 1.4em;">*</span> Required
               </td>
             </tr>

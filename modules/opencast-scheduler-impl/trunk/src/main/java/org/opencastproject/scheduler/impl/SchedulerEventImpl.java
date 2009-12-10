@@ -292,10 +292,15 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#valid()
    */  
   public boolean valid () {
+    logger.debug("Title Valid?");
     if (metadata.get("title") == null) return false;
+    logger.debug("Start time Valid?");
     if (start.getTime() == 0) return false;
+    logger.debug("End time Valid?");
     if (end.getTime() == 0) return false;
+    logger.debug("Start before End Valid?");
     if (end.before(start)) return false;
+    logger.debug("Event is Valid!");
     return true;
   }
   
