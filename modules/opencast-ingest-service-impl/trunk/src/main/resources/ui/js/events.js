@@ -53,10 +53,14 @@ uploadEvents.btnAnotherUpload = function() {
 
 /** fired when user has selected a file in the file dialog */
 uploadEvents.fileSelected = function(file) {
-    uploadManager.selectedFile = file;
-    uploadUI.setFilename(file.name);
-    var field = { id : 'file' };
-    uploadEvents.fieldChanged(field);
+    if (file.size > 2147483648) {
+      alert('The maximum size for a file to be uploaded is 2 GB. The file you selected is bigger than 2 GB and thus cannot be uploaded.');
+    } else {
+      uploadManager.selectedFile = file;
+      uploadUI.setFilename(file.name);
+      var field = { id : 'file' };
+      uploadEvents.fieldChanged(field);
+    }
 }
 
 /** fired when swfUpload has started the upload */
