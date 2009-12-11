@@ -35,6 +35,7 @@ public class Param {
   List<String> choices;
   Map<String, String> attributes = new HashMap<String, String>();
   boolean required = false;
+  boolean path = false;
 
   /**
    * Create a parameter for this endpoint, the thing you are adding it to indicates if required or optional
@@ -161,6 +162,10 @@ public class Param {
 
   public boolean isRequired() {
     return required;
+  }
+
+  public boolean isPath() {
+    return path;
   }
 
   /**

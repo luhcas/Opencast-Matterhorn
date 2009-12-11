@@ -100,7 +100,7 @@
 <em>NONE</em>
 <#else>
 <#list endpointHolder.endpoints as endpoint>
-<table class="method" cellpadding="0px" cellspacing="0px"
+<table id="${endpoint.name}" class="method" cellpadding="0px" cellspacing="0px"
   summary="${endpointHolder.title} function for the ${endpoint.method} ${endpoint.path} REST endpoint, Name of the attribute followed by the value">
   <thead>
     <tr class="method_header">
@@ -110,7 +110,7 @@
   </thead>
   <tbody>
     <tr class="method">
-      <th scope="row">Method / Path:</th>
+      <th class="method_important" scope="row">Method / Path:</th>
       <td><tt title="${meta.url}${endpoint.path}${endpoint.pathFormat!}">${endpoint.method} ${endpoint.path}${endpoint.pathFormatHtml!}</tt></td>
     </tr>
     <tr class="method">
@@ -118,10 +118,10 @@
       <td>${endpoint.description!"<em>NONE</em>"}</td>
     </tr>
     <tr class="method">
-      <th scope="row">Required (path) parameters:</th>
+      <th class="method_important" scope="row">Path params:</th>
       <td>
-        <#if (endpoint.requiredParams?size > 0)>
-        <#list endpoint.requiredParams as param>
+        <#if (endpoint.pathParams?size > 0)>
+        <#list endpoint.pathParams as param>
         <tt>${param.name}<#if param.defaultValue??>=${param.defaultValueHtml}</#if></tt>: ${param.description!"<em>NONE</em>"}<#if param_has_next> <br/></#if>
         </#list>
         <#else>
@@ -129,16 +129,26 @@
         </#if>
       </td>
     </tr>
+    <#if (endpoint.requiredParams?size > 0)>
+    <tr class="method">
+      <th class="method_important" scope="row">Required (form) params:</th>
+      <td>
+        <#list endpoint.requiredParams as param>
+        <tt>${param.name}<#if param.defaultValue??>=${param.defaultValueHtml}</#if></tt>: ${param.description!"<em>NONE</em>"}<#if param_has_next> <br/></#if>
+        </#list>
+      </td>
+    </tr>
+    </#if>
     <#if endpoint.bodyParam??>
     <tr class="method">
-      <th scope="row">Body parameter:</th>
+      <th class="method_important" scope="row">Body (upload) param:</th>
       <td>
         <#if endpoint.bodyParam.defaultValue??><tt>DEFAULT=${endpoint.bodyParam.defaultValueHtml}</tt>: </#if>${endpoint.bodyParam.description!"<em>NONE</em>"}
       </td>
     </tr>
     </#if>
     <tr class="method">
-      <th scope="row">Optional (query) parameters:</th>
+      <th scope="row">Optional (<#if (endpoint.method == "GET")>query<#else>form</#if>) params:</th>
       <td>
         <#if (endpoint.optionalParams?size > 0)>
         <#list endpoint.optionalParams as param>
@@ -183,10 +193,11 @@
       </td>
     </tr>
     </#if>
-    <#if endpoint.form??>
     <tr class="method testform">
       <th scope="row">Testing:</th>
       <td>
+        <div><strong>Sample:</strong> <tt class="sample_url">${endpoint.path}${endpoint.queryString!}</tt></div>
+        <#if endpoint.form??>
         <#if endpoint.form.html??><#-- just dump the html value -->
         ${endpoint.form.html}
         <#elseif endpoint.form.url??><#-- just create a link to the form -->
@@ -195,15 +206,26 @@
         <a href="#" class="form_link">${endpoint.form.title!"Testing form"} (click to reveal)</a>
         <div class="hidden_form">
           <form id="form_${endpoint.name}" action="${meta.url}${endpoint.path}" method="${endpoint.method}" enctype="multipart/form-data">
-            <#if (endpoint.form.ajaxSubmit)><input class="ajax_submit" type="hidden" name="ajax_submit" value="true" /></#if>
-            <div><strong>Path:</strong> <tt class="form_path">${endpoint.path}</tt></div>
+            <#if (endpoint.form.ajaxSubmit)><input class="form_ajax_submit" type="hidden" name="form_ajax_submit" value="${endpoint.name}" /></#if>
+            <div>
+                <strong>Form action:</strong> <tt class="form_path">${endpoint.path}</tt>
+                <#if (endpoint.form.usesPathFormat)>
+                  [<label for="${endpoint.name}_FORMAT">Format</label>:
+                  <select id="${endpoint.name}_FORMAT" name="form_path_format">
+                    <option value="{FORMAT}">format</option>
+                    <#list endpoint.formats as format>
+                    <option value="${format}">${format}</option>
+                    </#list>
+                  </select>]
+                </#if>
+            </div>
             <table class="testing" cellpadding="0" cellspacing="0">
               <#list endpoint.form.items as item>
-              <tr class="form_field<#if item.required> form_required</#if>">
+              <tr class="form_field<#if item.required> form_required<#else> form_optional</#if><#if item.path> form_path_param</#if>">
                 <#if item.type == "text">
                 <td class="form_textarea" colspan="3">
                   <label for="${endpoint.name}_${item.name}">${item.name}</label>:<br/>
-                  <textarea class="form_field_text" rows="${(item.attributes.rows)!'3'}" cols="${(item.attributes.cols)!'80'}">${item.defaultValue!}</textarea>
+                  <textarea id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field_text" rows="${(item.attributes.rows)!'3'}" cols="${(item.attributes.cols)!'80'}">${item.defaultValue!}</textarea>
                   <div class="form_field_description">${item.description!}</div>
                 </td>
                 <#elseif item.type == "boolean">
@@ -211,7 +233,7 @@
                   <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
                 </td>
                 <td>
-                  <input class="form_field" id="${endpoint.name}_${item.name}" name="${item.name}" type="checkbox" value="${item.defaultValue!}" />
+                  <input id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field" type="checkbox" value="${item.defaultValue!}" />
                 </td>
                 <td class="form_field_description">${item.description!}</td>
                 <#elseif item.type == "file">
@@ -219,7 +241,7 @@
                   <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
                 </td>
                 <td>
-                  <input class="form_field_file" class="form_field" id="${endpoint.name}_${item.name}" name="${item.name}" type="file" />
+                  <input id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field_file" class="form_field" type="file" />
                 </td>
                 <td class="form_field_description">${item.description!}</td>
                 <#elseif item.type == "enum">
@@ -227,7 +249,7 @@
                   <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
                 </td>
                 <td>
-                  <select class="form_field" id="${endpoint.name}_${item.name}" name="${item.name}">
+                  <select id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field">
                     <#list item.choices as choice>
                     <option value="${choice}"<#if (choice == item.defaultValue)> selected="selected"</#if>>${choice}</option>
                     </#list>

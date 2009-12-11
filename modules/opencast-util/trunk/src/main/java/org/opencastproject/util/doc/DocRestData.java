@@ -70,28 +70,27 @@ public class DocRestData extends DocData {
       if (!holder.getEndpoints().isEmpty()) {
         for (RestEndpoint endpoint : holder.getEndpoints()) {
           // validate the endpoint
-          if (! endpoint.getRequiredParams().isEmpty()) {
-            for (Param param : endpoint.getRequiredParams()) {
+          if (! endpoint.getPathParams().isEmpty()) {
+            for (Param param : endpoint.getPathParams()) {
               if (! endpoint.path.contains("{"+param.name+"}")) {
-                throw new IllegalArgumentException("Path ("+endpoint.path+") does not match required parameter ("+
-                        param.name+") for endpoint ("+endpoint.name+"), the path must contain all required param names");
+                throw new IllegalArgumentException("Path ("+endpoint.path+") does not match path parameter ("+
+                        param.name+") for endpoint ("+endpoint.name+"), the path must contain all path param names");
               }
             }
-            Pattern pattern = Pattern.compile("\\{(.+?)\\}");
-            Matcher matcher = pattern.matcher(endpoint.path);
-            int count = 0;
-            int n = matcher.groupCount();
-            while (matcher.find()) {
-              String g = matcher.group();
-              if (! FORMAT_KEY.equals(matcher.group())) {
-                count++;
-              }
+          }
+          // validate the path in the endpoint
+          Pattern pattern = Pattern.compile("\\{(.+?)\\}");
+          Matcher matcher = pattern.matcher(endpoint.path);
+          int count = 0;
+          while (matcher.find()) {
+            if (! FORMAT_KEY.equals(matcher.group())) {
+              count++;
             }
-            if ( count != endpoint.getRequiredParams().size() ) {
-              throw new IllegalArgumentException("Path ("+endpoint.path+") does not match required parameters ("+
-                      endpoint.getRequiredParams()+") for endpoint ("+endpoint.name+
-                      "), the path must contain the same number of required params as the requiredParams list");
-            }
+          }
+          if ( count != endpoint.getPathParams().size() ) {
+            throw new IllegalArgumentException("Path ("+endpoint.path+") does not match path parameters ("+
+                    endpoint.getRequiredParams()+") for endpoint ("+endpoint.name+
+                    "), the path must contain the same number of path params as the pathParams list");
           }
           // handle the forms
           if (endpoint.getForm() != null) {

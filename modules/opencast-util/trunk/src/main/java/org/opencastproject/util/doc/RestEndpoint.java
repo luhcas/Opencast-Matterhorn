@@ -15,6 +15,8 @@
  */
 package org.opencastproject.util.doc;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -33,6 +35,7 @@ public class RestEndpoint {
   String path;
   String description;
   Param bodyParam;
+  List<Param> pathParams;
   List<Param> requiredParams;
   List<Param> optionalParams;
   List<Format> formats;
@@ -78,11 +81,13 @@ public class RestEndpoint {
   /**
    * This is a special parameter which indicates that this value is to be sent as the body of
    * the request, in general the type of this parameter should only be FILE or TEXT but
-   * nothing stop you from using the other types
+   * nothing stops you from using the other types<br/>
+   * This is always a required parameter as you should never design an endpoint that takes
+   * a file sometimes but not always
    * 
    * @param isBinary if true then this should use an uploader to send, otherwise the data can be placed in a text area
-   * @param defaultValue 
-   * @param description
+   * @param defaultValue the default value (only viable for text)
+   * @param description the optional description
    * @return the new param object in case you want to set attributes
    * @throws IllegalArgumentException if the params are null
    */
@@ -95,7 +100,37 @@ public class RestEndpoint {
     return param;
   }
   /**
-   * Adds a required parameter for this endpoint
+   * Adds a path parameter for this endpoint,
+   * this would be a parameter which is passed as part of the path
+   * (e.g. /my/path/{param}) and thus must use a name which is safe
+   * to place in a URL and does not contain a slash (/)
+   * 
+   * @param param the path param to add
+   * @throws IllegalArgumentException if the params are null
+   */
+  public void addPathParam(Param param) {
+    if (param == null) {
+      throw new IllegalArgumentException("param must not be null");
+    }
+    if (Param.Type.FILE.name().equals(param.getType()) ||
+            Param.Type.TEXT.name().equals(param.getType()) ) {
+      throw new IllegalStateException("Cannot add path param of type FILE or TEXT");
+    }
+    param.setRequired(true);
+    param.path = true;
+    if (this.pathParams == null) {
+      this.pathParams = new Vector<Param>(3);
+    }
+    this.pathParams.add(param);
+  }
+  /**
+   * Adds a required form parameter for this endpoint,
+   * this would be a parameter which is passed encoded as part of the 
+   * request body (commonly referred to as a post or form parameter)
+   * <br/>
+   * WARNING: This should generally be reserved for endpoints which 
+   * are used for processing, it is better to use path params unless
+   * the required parameter is not part of an identifier for the resource
    * 
    * @param param the required param to add
    * @throws IllegalArgumentException if the params are null
@@ -104,14 +139,20 @@ public class RestEndpoint {
     if (param == null) {
       throw new IllegalArgumentException("param must not be null");
     }
+    if ( isGetMethod() ) {
+      throw new IllegalStateException("Cannot add required params for GET endpoints");
+    }
     param.setRequired(true);
+    param.path = false;
     if (this.requiredParams == null) {
       this.requiredParams = new Vector<Param>(3);
     }
     this.requiredParams.add(param);
   }
   /**
-   * Adds an optional parameter for this endpoint
+   * Adds an optional parameter for this endpoint,
+   * this would be a parameter which is passed in the query string (for GET) or 
+   * encoded as part of the body otherwise (often referred to as a post or form parameter)
    * 
    * @param param the optional param to add
    * @throws IllegalArgumentException if the params are null
@@ -121,6 +162,7 @@ public class RestEndpoint {
       throw new IllegalArgumentException("param must not be null");
     }
     param.setRequired(false);
+    param.path = false;
     if (this.optionalParams == null) {
       this.optionalParams = new Vector<Param>(3);
     }
@@ -192,6 +234,48 @@ public class RestEndpoint {
   public void setAutoPathFormat(boolean autoPathFormat) {
     this.autoPathFormat = autoPathFormat;
   }
+  /**
+   * @return true if this endpoint method is GET, otherwise false
+   */
+  public boolean isGetMethod() {
+    boolean match = false;
+    if (Method.GET.name().equals(this.method)) {
+      match = true;
+    }
+    return match;
+  }
+  /**
+   * @return the calculated query string for a GET endpoint (e.g. ?blah=1)
+   */
+  public String getQueryString() {
+    String qs = "";
+    if (isGetMethod()) {
+      if (this.optionalParams != null && ! this.optionalParams.isEmpty()) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("?");
+        for (Param p : this.optionalParams) {
+          if (sb.length() > 2) {
+            sb.append("&");
+          }
+          sb.append(p.getName());
+          sb.append("=");
+          if (p.getDefaultValue() != null) {
+            try {
+              sb.append(URLEncoder.encode(p.getDefaultValue(),"UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+              sb.append(p.getDefaultValue());
+            }
+          } else {
+            sb.append("{");
+            sb.append(p.getName());
+            sb.append("}");
+          }
+        }
+        qs = sb.toString();
+      }
+    }
+    return qs;
+  }
   // GETTERS
   public String getName() {
     return name;
@@ -207,6 +291,12 @@ public class RestEndpoint {
   }
   public Param getBodyParam() {
     return bodyParam;
+  }
+  public List<Param> getPathParams() {
+    if (this.pathParams == null) {
+      this.pathParams = new ArrayList<Param>(0);
+    }
+    return this.pathParams;
   }
   public List<Param> getRequiredParams() {
     if (this.requiredParams == null) {
