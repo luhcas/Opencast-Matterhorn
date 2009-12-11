@@ -24,6 +24,7 @@ import org.opencastproject.search.api.SearchResultItem;
 
 import org.apache.commons.io.IOUtils;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -45,8 +46,8 @@ import javax.xml.bind.annotation.XmlType;
  * This class models an item in the search result. It represents a 'video' or 'series' object.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="search-result", namespace="http://search.opencastproject.org/")
-@XmlRootElement(name="search-result", namespace="http://search.opencastproject.org/")
+@XmlType(name = "search-result", namespace = "http://search.opencastproject.org/")
+@XmlRootElement(name = "search-result", namespace = "http://search.opencastproject.org/")
 public class SearchResultItemImpl implements SearchResultItem {
 
   /** Serial version id **/
@@ -54,7 +55,7 @@ public class SearchResultItemImpl implements SearchResultItem {
 
   /** Media identificator. **/
   @XmlID
-  @XmlAttribute(name="id")
+  @XmlAttribute(name = "id")
   private String id = "";
 
   /** The media package */
@@ -62,9 +63,9 @@ public class SearchResultItemImpl implements SearchResultItem {
   private MediaPackage mediaPackage = null;
 
   /** The jaxb version of the media package, in case this object needs to be serialized to xml */
-  @XmlElement(name="mediapackage")
+  @XmlElement(name = "mediapackage")
   private MediapackageType mediaPackageJaxb = null;
-  
+
   /** Dublin core field 'dc:extent' */
   @XmlElement
   private long dcExtent = -1;
@@ -146,7 +147,7 @@ public class SearchResultItemImpl implements SearchResultItem {
   private SearchResultItemType mediaType = null;
 
   /** Media keyword list */
-  @XmlElementWrapper(name="keywords")
+  @XmlElementWrapper(name = "keywords")
   private List<String> keywords = new ArrayList<String>();
 
   /** The cover url. **/
@@ -162,8 +163,12 @@ public class SearchResultItemImpl implements SearchResultItem {
   private double score = -1;
 
   /** Media segment list **/
-  @XmlElementWrapper(name="media-segments")
+  @XmlElementWrapper(name = "media-segments")
   private SortedSet<MediaSegmentImpl> mediaSegments = null;
+
+  @XmlElementWrapper(name = "file-locations")
+  @XmlElement(name = "location")
+  private List<URI> locations;
 
   /**
    * {@inheritDoc}
@@ -541,8 +546,32 @@ public class SearchResultItemImpl implements SearchResultItem {
     return mediaPackage;
   }
 
+  public void setLocations(List<URI> locations) {
+    this.locations = locations;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchResultItem#getLocations()
+   */
+  public URI[] getLocations() {
+    return locations.toArray(new URI[locations.size()]);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchResultItem#getLocation(int)
+   */
+  public URI getLocation(int index) {
+    if (index < 0 || index >= locations.size())
+      return null;
+    return locations.get(index);
+  }
+
   public MediapackageType getMediaPackageJaxb() {
-    if(mediaPackageJaxb == null && mediaPackage != null) {
+    if (mediaPackageJaxb == null && mediaPackage != null) {
       try {
         mediaPackageJaxb = MediapackageType.fromXml(mediaPackage.toXml());
       } catch (Exception e) {
@@ -555,8 +584,8 @@ public class SearchResultItemImpl implements SearchResultItem {
   public void setMediaPackageJaxb(MediapackageType mediaPackageJaxb) {
     this.mediaPackageJaxb = mediaPackageJaxb;
     try {
-      this.mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder()
-        .loadFromManifest(IOUtils.toInputStream(mediaPackageJaxb.toXml()));
+      this.mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(
+              IOUtils.toInputStream(mediaPackageJaxb.toXml()));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -653,7 +682,7 @@ public class SearchResultItemImpl implements SearchResultItem {
   public void addSegment(MediaSegment segment) {
     if (mediaSegments == null)
       mediaSegments = new TreeSet<MediaSegmentImpl>(MediaSegmentComparator.getInstance());
-    mediaSegments.add((MediaSegmentImpl)segment); // TODO: assuming this 
+    mediaSegments.add((MediaSegmentImpl) segment); // TODO: assuming this
   }
 
   /**

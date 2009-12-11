@@ -18,23 +18,28 @@ package org.opencastproject.search.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
+import java.net.URI;
 import java.util.Date;
 
 /**
- * An item that was found as part of a search.  Typically a {@link SearchResultItem} will be included in a {@link SearchResult}
+ * An item that was found as part of a search. Typically a {@link SearchResultItem} will be included in a
+ * {@link SearchResult}
  */
 public interface SearchResultItem {
 
   /**
-   * A search result item can either represent an episode ({@link SearchResultItemType#AudioVisual}) or a series ({@link SearchResultItemType#Series})
+   * A search result item can either represent an episode ({@link SearchResultItemType#AudioVisual}) or a series (
+   * {@link SearchResultItemType#Series})
    */
-  public enum SearchResultItemType { AudioVisual, Series };
-  
+  public enum SearchResultItemType {
+    AudioVisual, Series
+  };
+
   /**
    * @return the id
    */
   public String getId();
-  
+
   /**
    * Returns the media package that was used to create the entry in the search index.
    * 
@@ -161,6 +166,22 @@ public interface SearchResultItem {
    * @return the score
    */
   public double getScore();
+
+  /**
+   * Get the file location list.
+   * 
+   * @return URI file locations
+   */
+  public URI[] getLocations();
+
+  /**
+   * Get a certain file location.
+   * 
+   * @param index
+   *          The file index.
+   * @return URI location of file or null if there is no file with that index
+   */
+  public URI getLocation(int index);
 
   /**
    * Get the result item segment list.

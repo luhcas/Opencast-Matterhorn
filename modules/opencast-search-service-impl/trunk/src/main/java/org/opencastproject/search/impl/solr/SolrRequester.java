@@ -16,10 +16,13 @@
 
 package org.opencastproject.search.impl.solr;
 
+import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
 import org.opencastproject.search.impl.MediaSegmentImpl;
@@ -36,7 +39,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -275,6 +281,23 @@ public class SolrRequester {
           mediaPackage = builder
                   .loadFromManifest(new ByteArrayInputStream(mediaPackageFieldValue.toString().getBytes()));
           item.setMediaPackage(mediaPackage);
+
+          // setting file locations
+          List<URI> locations = new LinkedList<URI>();
+          for (Track track : mediaPackage.getTracks()) {
+            // FIXME different way of removing original track from search results
+            String trackLocation = track.getURI().toString();
+            if (trackLocation.lastIndexOf(".") > trackLocation.length() - 7)
+              locations.add(track.getURI());
+          }
+          for (Attachment attachment : mediaPackage.getAttachments()) {
+            locations.add(attachment.getURI());
+          }
+          for (MediaPackageElement element : mediaPackage.getUnclassifiedElements()) {
+            locations.add(element.getURI());
+          }
+          item.setLocations(locations);
+
         } catch (MediaPackageException e) {
           log_.warn("Unable to read media package from search result", e);
         }
