@@ -276,7 +276,7 @@ public class CaptionsRestService {
     // get
     endpoint = new RestEndpoint("get_caption", RestEndpoint.Method.GET, "/{id}",
             "Retrieve a single captionable item");
-    endpoint.addRequiredParam(new Param("id", Param.Type.STRING,
+    endpoint.addPathParam(new Param("id", Param.Type.STRING,
             null, "the media ID from the search result", null));
     endpoint.addFormat(Format.json());
     endpoint.addStatus(Status.OK("results returned"));
@@ -286,11 +286,11 @@ public class CaptionsRestService {
     // add
     endpoint = new RestEndpoint("add", RestEndpoint.Method.PUT, "/{id}/{type}",
             "Updates a media item with captions data");
-    endpoint.addBodyParam(false, null, "should be captions data (a timetext file)");
-    endpoint.addRequiredParam(new Param("id", Param.Type.STRING,
+    endpoint.addPathParam(new Param("id", Param.Type.STRING,
             null, "the media ID from the search result", null));
-    endpoint.addRequiredParam(new Param("type", Param.Type.STRING,
+    endpoint.addPathParam(new Param("type", Param.Type.STRING,
             null, "the media type from the search result", null));
+    endpoint.addBodyParam(false, null, "should be captions data (a timetext file)");
     endpoint.addStatus( new Status(204, "data was added, result info in headers") );
     endpoint.addStatus(Status.BAD_REQUEST("data was not added, error message"));
     endpoint.setTestForm(RestTestForm.auto());
