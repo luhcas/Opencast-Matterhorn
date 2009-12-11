@@ -43,72 +43,72 @@ public class WorkflowInstanceListImpl implements List<WorkflowInstanceImpl> {
     return instance;
   }
   public void add(int index, WorkflowInstanceImpl element) {
-    instance.add(index, element);
+    getWorkflowInstance().add(index, element);
   }
   public boolean add(WorkflowInstanceImpl e) {
-    return instance.add(e);
+    return getWorkflowInstance().add(e);
   }
   public boolean addAll(Collection<? extends WorkflowInstanceImpl> c) {
-    return instance.addAll(c);
+    return getWorkflowInstance().addAll(c);
   }
   public boolean addAll(int index, Collection<? extends WorkflowInstanceImpl> c) {
-    return instance.addAll(index, c);
+    return getWorkflowInstance().addAll(index, c);
   }
   public void clear() {
-    instance.clear();
+    getWorkflowInstance().clear();
   }
   public boolean contains(Object o) {
-    return instance.contains(o);
+    return getWorkflowInstance().contains(o);
   }
   public boolean containsAll(Collection<?> c) {
-    return instance.containsAll(c);
+    return getWorkflowInstance().containsAll(c);
   }
   public WorkflowInstanceImpl get(int index) {
-    return instance.get(index);
+    return getWorkflowInstance().get(index);
   }
   public int indexOf(Object o) {
-    return instance.indexOf(o);
+    return getWorkflowInstance().indexOf(o);
   }
   public boolean isEmpty() {
-    return instance.isEmpty();
+    return getWorkflowInstance().isEmpty();
   }
   public Iterator<WorkflowInstanceImpl> iterator() {
-    return instance.iterator();
+    return getWorkflowInstance().iterator();
   }
   public int lastIndexOf(Object o) {
-    return instance.lastIndexOf(o);
+    return getWorkflowInstance().lastIndexOf(o);
   }
   public ListIterator<WorkflowInstanceImpl> listIterator() {
-    return instance.listIterator();
+    return getWorkflowInstance().listIterator();
   }
   public ListIterator<WorkflowInstanceImpl> listIterator(int index) {
-    return instance.listIterator(index);
+    return getWorkflowInstance().listIterator(index);
   }
   public WorkflowInstanceImpl remove(int index) {
-    return instance.remove(index);
+    return getWorkflowInstance().remove(index);
   }
   public boolean remove(Object o) {
-    return instance.remove(o);
+    return getWorkflowInstance().remove(o);
   }
   public boolean removeAll(Collection<?> c) {
-    return instance.removeAll(c);
+    return getWorkflowInstance().removeAll(c);
   }
   public boolean retainAll(Collection<?> c) {
-    return instance.retainAll(c);
+    return getWorkflowInstance().retainAll(c);
   }
   public WorkflowInstanceImpl set(int index, WorkflowInstanceImpl element) {
-    return instance.set(index, element);
+    return getWorkflowInstance().set(index, element);
   }
   public int size() {
-    return instance.size();
+    return getWorkflowInstance().size();
   }
   public List<WorkflowInstanceImpl> subList(int fromIndex, int toIndex) {
-    return instance.subList(fromIndex, toIndex);
+    return getWorkflowInstance().subList(fromIndex, toIndex);
   }
   public Object[] toArray() {
-    return instance.toArray();
+    return getWorkflowInstance().toArray();
   }
   public <T> T[] toArray(T[] a) {
-    return instance.toArray(a);
+    return getWorkflowInstance().toArray(a);
   }
 }

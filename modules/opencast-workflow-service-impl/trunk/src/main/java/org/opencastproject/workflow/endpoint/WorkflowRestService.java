@@ -30,7 +30,6 @@ import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowDefinitionList;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
-import org.opencastproject.workflow.api.WorkflowInstanceListImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceList;
@@ -163,16 +162,16 @@ public class WorkflowRestService {
           @QueryParam("series") String seriesId,
           @QueryParam("mp") String mediapackageId,
           @QueryParam("op") String currentOperation,
-          @QueryParam("startPage") int offset,
-          @QueryParam("count") int limit,
+          @QueryParam("startPage") int startPage,
+          @QueryParam("count") int count,
           @PathParam("output") String output) throws Exception {
 // CHECKSTYLE:ON
-    if(limit == 0 || limit > MAX_LIMIT) limit = DEFAULT_LIMIT;
-    if(offset >0) offset--; // The service is zero based
+    if(count < 1 || count > MAX_LIMIT) count = DEFAULT_LIMIT;
+    if(startPage == 0) startPage = 1;
     
     WorkflowQuery q = service.newWorkflowQuery();
-    q.withLimit(limit);
-    q.withOffset(offset);
+    q.withCount(count);
+    q.withStartPage(startPage);
     if(state != null) q.withState(State.valueOf(state.toUpperCase()));
     if(text != null) q.withText(text);
     if(episodeId != null) q.withEpisode(episodeId);
@@ -188,12 +187,7 @@ public class WorkflowRestService {
       }
       return Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
     } else {
-      WorkflowInstanceListImpl list = new WorkflowInstanceListImpl();
-      for(WorkflowInstance instance : set.getItems()) {
-        list.getWorkflowInstance().add((WorkflowInstanceImpl)instance);
-      }
-      return Response.ok(WorkflowBuilder.getInstance().toXml(list))
-        .header("Content-Type", MediaType.TEXT_XML).build();
+      return Response.ok(WorkflowBuilder.getInstance().toXml(set)).header("Content-Type", MediaType.TEXT_XML).build();
     }
   }
 

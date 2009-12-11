@@ -88,26 +88,6 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
     this.description = description;
   }
 
-//  /**
-//   * {@inheritDoc}
-//   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getResult()
-//   */
-//  public MediaPackage getResult() {
-//    try {
-//      return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));
-//    } catch (Exception e) {
-//      throw new RuntimeException(e);
-//    }
-//  }
-  
-//  public void setResult(MediaPackage mediaPackage) {
-//    try {
-//      this.mediaPackageType = MediapackageType.fromXml(mediaPackage.toXml());
-//    } catch (Exception e) {
-//      throw new RuntimeException(e);
-//    }
-//  }
-
   static class Adapter extends XmlAdapter<WorkflowOperationInstanceImpl, WorkflowOperationInstance> {
     public WorkflowOperationInstanceImpl marshal(WorkflowOperationInstance op) throws Exception {return (WorkflowOperationInstanceImpl)op;}
     public WorkflowOperationInstance unmarshal(WorkflowOperationInstanceImpl op) throws Exception {return op;}

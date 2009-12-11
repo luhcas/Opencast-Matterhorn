@@ -238,7 +238,7 @@ public class WorkflowServiceImplTest {
     // Ensure that the database doesn't have any workflow instances
     Assert.assertEquals(0, service.countWorkflowInstances());
     Assert.assertEquals(0, service.getWorkflowInstances(
-            service.newWorkflowQuery().withText("Climate").withLimit(100).withOffset(0)).size());
+            service.newWorkflowQuery().withText("Climate").withCount(100).withStartPage(0)).size());
 
     WorkflowInstance instance = service.start(definition1, mediapackage1, null);
 
@@ -251,7 +251,7 @@ public class WorkflowServiceImplTest {
       }
     }
 
-    WorkflowSet workflowsInDb = service.getWorkflowInstances(service.newWorkflowQuery().withText("Climate").withLimit(100).withOffset(0));
+    WorkflowSet workflowsInDb = service.getWorkflowInstances(service.newWorkflowQuery().withText("Climate").withCount(100).withStartPage(0));
     Assert.assertEquals(1, workflowsInDb.getItems().length);
 
     // cleanup the database
@@ -266,7 +266,7 @@ public class WorkflowServiceImplTest {
   public void testPagedGetWorkflowByText() {
     // Ensure that the database doesn't have any workflow instances
     Assert.assertEquals(0, service.countWorkflowInstances());
-    Assert.assertEquals(0, service.getWorkflowInstances(service.newWorkflowQuery().withText("Climate").withLimit(100).withOffset(0)).size());
+    Assert.assertEquals(0, service.getWorkflowInstances(service.newWorkflowQuery().withText("Climate").withCount(100).withStartPage(0)).size());
 
     List<WorkflowInstance> instances = new ArrayList<WorkflowInstance>();
     instances.add(service.start(definition1, mediapackage1, null));
@@ -287,20 +287,24 @@ public class WorkflowServiceImplTest {
     }
 
     // We should get the first two workflows
-    WorkflowSet firstTwoWorkflows = service.getWorkflowInstances(service.newWorkflowQuery().withText("Climate").withLimit(2).withOffset(0));
+    WorkflowSet firstTwoWorkflows = service.getWorkflowInstances(service.newWorkflowQuery().withText("Climate").withCount(2).withStartPage(0));
     Assert.assertEquals(2, firstTwoWorkflows.getItems().length);
+    Assert.assertEquals(3, firstTwoWorkflows.getTotalCount()); // The total, non-paged number of results should be three
 
     // We should get the last workflow
-    WorkflowSet lastWorkflow = service.getWorkflowInstances(service.newWorkflowQuery().withText("Climate").withLimit(1).withOffset(2));
+    WorkflowSet lastWorkflow = service.getWorkflowInstances(service.newWorkflowQuery().withText("Climate").withCount(1).withStartPage(2));
     Assert.assertEquals(1, lastWorkflow.getItems().length);
+    Assert.assertEquals(3, lastWorkflow.getTotalCount()); // The total, non-paged number of results should be three
 
     // We should get the first linguistics (mediapackage2) workflow
-    WorkflowSet firstLinguisticsWorkflow = service.getWorkflowInstances(service.newWorkflowQuery().withText("Linguistics").withLimit(1).withOffset(0));
+    WorkflowSet firstLinguisticsWorkflow = service.getWorkflowInstances(service.newWorkflowQuery().withText("Linguistics").withCount(1).withStartPage(0));
     Assert.assertEquals(1, firstLinguisticsWorkflow.getItems().length);
+    Assert.assertEquals(2, firstLinguisticsWorkflow.getTotalCount()); // The total, non-paged number of results should be two
 
     // We should get the second linguistics (mediapackage2) workflow
-    WorkflowSet secondLinguisticsWorkflow = service.getWorkflowInstances(service.newWorkflowQuery().withText("Linguistics").withLimit(1).withOffset(1));
+    WorkflowSet secondLinguisticsWorkflow = service.getWorkflowInstances(service.newWorkflowQuery().withText("Linguistics").withCount(1).withStartPage(1));
     Assert.assertEquals(1, secondLinguisticsWorkflow.getItems().length);
+    Assert.assertEquals(2, secondLinguisticsWorkflow.getTotalCount()); // The total, non-paged number of results should be two
 
     // cleanup the database
     for (WorkflowInstance instance : instances) {

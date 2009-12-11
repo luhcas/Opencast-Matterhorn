@@ -29,6 +29,7 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
+import org.opencastproject.workflow.api.WorkflowSetImpl;
 import org.opencastproject.workflow.impl.WorkflowQueryImpl.ElementTuple;
 
 import org.osgi.service.component.ComponentContext;
@@ -70,6 +71,7 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#activate()
    */
   public void activate(ComponentContext cc) {
+    logger.info("activate()");
     Connection conn = borrowConnection();
     Statement s = null;
     try {
@@ -80,10 +82,10 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       s.execute("create table if not exists oc_workflow(workflow_id varchar(127) PRIMARY KEY, mp_id varchar(127), "
               + "workflow_state varchar(127), episode_id varchar(127), series_id varchar(127), current_op varchar(127), "
               + "workflow_text clob, workflow_xml clob, date_created timestamp)");
-      s.execute("create index oc_workflow_mp_id on oc_workflow (mp_id)");
-      s.execute("create index oc_workflow_workflow_state on oc_workflow (workflow_state)");
-      s.execute("create index oc_workflow_episode_id on oc_workflow (episode_id)");
-      s.execute("create index oc_workflow_series_id on oc_workflow (series_id)");
+      s.execute("create index if not exists oc_workflow_mp_id on oc_workflow (mp_id)");
+      s.execute("create index if not exists oc_workflow_workflow_state on oc_workflow (workflow_state)");
+      s.execute("create index if not exists oc_workflow_episode_id on oc_workflow (episode_id)");
+      s.execute("create index if not exists oc_workflow_series_id on oc_workflow (series_id)");
     } catch (SQLException e) {
       logger.error(e.getMessage());
     } finally {
@@ -104,11 +106,7 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#deactivate()
    */
   public void deactivate() {
-    // logger.info("Shutting down derby DB.");
-    // try {
-    // // This throws by-design, so ignore the exception
-    // DriverManager.getConnection("jdbc:derby:;shutdown=true");
-    // } catch (SQLException e) {}
+    logger.info("deactivate()");
   }
 
   /**
@@ -186,43 +184,37 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
    *          The sql query as a prepared statement
    * @param params
    *          The parameters to pass along with the query
-   * @param offset
+   * @param startPage
    *          The paging offset
-   * @param limit
+   * @param count
    *          The paging limit
    * @return The set of workflows matching this query
    */
-  protected WorkflowSet getWorkflowSet(String query, String[] params, long offset, long limit) {
-    query = query + " order by date_created desc";
-    if (offset > 0 && limit > 0) {
-      query = query + " limit " + limit + " offset " + (offset * limit);
-    } else if (limit > 0) {
-      query = query + " limit " + limit;
-    }
-    
-    logger.debug("Query: {}", query);
+  protected WorkflowSet getWorkflowSet(String query, String countQuery, String[] params, long startPage, long count) {
+    String limitedQuery = getLimitedQuery(query, startPage, count);
+    logger.debug("Query: {} -- Limited query: {}", new String[] {query, limitedQuery});
     Connection conn = null;
     PreparedStatement s = null;
     ResultSet r = null;
     try {
       conn = borrowConnection();
-      conn.setAutoCommit(true);
-      s = conn.prepareStatement(query);
+      conn.setAutoCommit(true);      
+      long start = System.currentTimeMillis(); // we should include the total count query as part of the execution time
+      long totalCount = count(countQuery, params, conn);
+      s = conn.prepareStatement(limitedQuery);
       if (params != null) {
         for (int i = 0; i < params.length; i++) {
           s.setString(i + 1, params[i]);
         }
       }
-      long start = System.currentTimeMillis();
       r = s.executeQuery();
       long searchTime = System.currentTimeMillis() - start;
-      int count = 0;
-      WorkflowSetImpl set = new WorkflowSetImpl(query);
-      set.setLimit(limit);
-      set.setOffset(offset);
+      WorkflowSetImpl set = new WorkflowSetImpl();
+      set.setCount(Math.min(count, totalCount));
+      set.setStartPage(startPage);
       set.setSearchTime(searchTime);
+      set.setTotalCount(totalCount);
       while (r.next()) {
-        count++;
         String xml = r.getString(1);
         set.addItem(WorkflowBuilder.getInstance().parseWorkflowInstance(xml));
       }
@@ -240,7 +232,53 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       returnConnection(conn);
     }
   }
+  
+  protected String getLimitedQuery(String query, long startPage, long count) {
+    query = query + " order by date_created desc";
+    if (startPage > 1 && count > 0) {
+      query = query + " limit " + count + " offset " + ((startPage-1) * count);
+    } else if (count > 0) {
+      query = query + " limit " + count;
+    }
+    return query;
+  }
 
+  protected long count(String query, String[] params, Connection conn) {
+    logger.debug("Count query: {}", query);
+    PreparedStatement s = null;
+    ResultSet r = null;
+    try {
+      s = conn.prepareStatement(query);
+      if (params != null) {
+        for (int i = 0; i < params.length; i++) {
+          s.setString(i + 1, params[i]);
+        }
+      }
+      r = s.executeQuery();
+      if(r.next()) return r.getLong(1);
+      return 0;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      if (r != null) {
+        try {
+          r.close();
+        } catch (SQLException e) {
+          throw new RuntimeException(e);
+        }
+      }
+      if (s != null) {
+        try {
+          s.close();
+        } catch (SQLException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+  }
+
+  
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowInstances(org.opencastproject.workflow.api.WorkflowInstanceQuery)
@@ -252,23 +290,32 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     WorkflowQueryImpl queryImpl = (WorkflowQueryImpl)query;
 
     // If we need to count media package elements, use a join
-    StringBuilder q;
+    StringBuilder q, countQ;
     ElementTuple elementTuple = queryImpl.getElementTuple();
     if(elementTuple != null) {
       if(elementTuple.exists) {
         q = new StringBuilder("select wf.workflow_xml as wfi from oc_workflow as wf");
         q.append(" join oc_workflow_element as el on wf.workflow_id = el.workflow_id where el.mp_element_type=?");
         q.append(" and el.mp_element_flavor=?");
+
+        countQ = new StringBuilder("select count(wf.workflow_xml) as wfi from oc_workflow as wf");
+        countQ.append(" join oc_workflow_element as el on wf.workflow_id = el.workflow_id where el.mp_element_type=?");
+        countQ.append(" and el.mp_element_flavor=?");
       } else {
         q = new StringBuilder("select distinct wf.workflow_xml as wfi, wf.date_created from oc_workflow as wf");
         q.append(" join oc_workflow_element as el on wf.workflow_id = el.workflow_id where");
         q.append(" (el.mp_element_type <> ? or el.mp_element_flavor <> ?)");
+
+        countQ = new StringBuilder("select count(distinct wf.workflow_xml) as wfi from oc_workflow as wf");
+        countQ.append(" join oc_workflow_element as el on wf.workflow_id = el.workflow_id where");
+        countQ.append(" (el.mp_element_type <> ? or el.mp_element_flavor <> ?)");
       }
       params.add(elementTuple.elementType);
       params.add(elementTuple.elementFlavor);
     } else {
       // always include a where clause to make the append logic simpler
       q = new StringBuilder("select wf.workflow_xml from oc_workflow as wf where 1=1");
+      countQ = new StringBuilder("select count(wf.workflow_xml) from oc_workflow as wf where 1=1");
     }
 
     // Add the rest of the where clauses
@@ -299,15 +346,18 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     
     // build the rest of the where clause
     for(Iterator<String> iter = whereClauseList.iterator(); iter.hasNext();) {
-      q.append(iter.next());
+      String clause = iter.next();
+      q.append(clause);
+      countQ.append(clause);
     }
 
     // if using a join, add the "group by" and "having" clauses
     if(elementTuple != null) {
       q.append(" group by wfi having count(el.mp_element_id) > 0");
+      countQ.append(" having count(el.mp_element_id) > 0");
     }
 
-    return getWorkflowSet(q.toString(), params.toArray(new String[params.size()]), queryImpl.getOffset(), queryImpl.getLimit());
+    return getWorkflowSet(q.toString(), countQ.toString(), params.toArray(new String[params.size()]), queryImpl.getStartPage(), queryImpl.getCount());
   }
 
   /**

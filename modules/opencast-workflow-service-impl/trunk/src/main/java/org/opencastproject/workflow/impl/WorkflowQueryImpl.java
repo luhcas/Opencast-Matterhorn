@@ -22,8 +22,8 @@ import org.opencastproject.workflow.api.WorkflowInstance.State;
  * A fluent API for issuing {@link WorkflowInstance} queries.
  */
 public class WorkflowQueryImpl implements WorkflowQuery {
-  protected long limit;
-  protected long offset;
+  protected long count;
+  protected long startPage;
   protected String text;
   protected State state;
   protected String episodeId;
@@ -36,18 +36,18 @@ public class WorkflowQueryImpl implements WorkflowQuery {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowQuery#withLimit(long)
+   * @see org.opencastproject.workflow.api.WorkflowQuery#withCount(long)
    */
-  public WorkflowQuery withLimit(long limit) {
-    this.limit = limit;
+  public WorkflowQuery withCount(long count) {
+    this.count = count;
     return this;
   }
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowQuery#withOffset(long)
+   * @see org.opencastproject.workflow.api.WorkflowQuery#withStartPage(long)
    */
-  public WorkflowQuery withOffset(long offset) {
-    this.offset = offset;
+  public WorkflowQuery withStartPage(long startPage) {
+    this.startPage = startPage;
     return this;
   }
   /**
@@ -107,12 +107,12 @@ public class WorkflowQueryImpl implements WorkflowQuery {
     return this;
   }
 
-  public long getLimit() {
-    return limit;
+  public long getCount() {
+    return count;
   }
 
-  public long getOffset() {
-    return offset;
+  public long getStartPage() {
+    return startPage;
   }
 
   public String getText() {

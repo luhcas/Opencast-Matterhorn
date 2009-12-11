@@ -16,9 +16,12 @@
 
 package org.opencastproject.workflow.api;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * A single result of searching.
  */
+@XmlJavaTypeAdapter(WorkflowSetImpl.Adapter.class)
 public interface WorkflowSet {
 
   /**
@@ -26,48 +29,41 @@ public interface WorkflowSet {
    * 
    * @return Item list.
    */
-  public abstract WorkflowInstance[] getItems();
+  WorkflowInstance[] getItems();
 
   /**
-   * Get the user query.
-   * 
-   * @return The user query.
-   */
-  public abstract String getQuery();
-
-  /**
-   * Get the total number of items found.
+   * Get the total number of items returned
    * 
    * @return The number.
    */
-  public abstract long size();
+  long size();
 
   /**
-   * Get the offset.
+   * Get the start page.
    * 
-   * @return The offset.
+   * @return The start page.
    */
-  public abstract long getOffset();
+  long getStartPage();
 
   /**
-   * Get the limit.
+   * Get the count limit.
    * 
-   * @return The limit.
+   * @return The count limit.
    */
-  public abstract long getLimit();
+  long getCount();
 
   /**
    * Get the search time.
    * 
    * @return The time in ms.
    */
-  public abstract long getSearchTime();
-
+  long getSearchTime();
+  
   /**
-   * Get the page of the current result.
+   * The total number of items without paging.
    * 
-   * @return The page.
+   * @return The total number of items
    */
-  public abstract long getPage();
+  long getTotalCount();
 
 }

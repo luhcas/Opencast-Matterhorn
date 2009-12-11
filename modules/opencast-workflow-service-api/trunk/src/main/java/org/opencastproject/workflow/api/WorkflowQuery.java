@@ -23,10 +23,10 @@ import org.opencastproject.workflow.api.WorkflowInstance.State;
 public interface WorkflowQuery {
 
   /** Include a limit for the number of items to return in the result */
-  WorkflowQuery withLimit(long limit);
+  WorkflowQuery withCount(long count);
 
   /** Include a paging offset for the items returned */
-  WorkflowQuery withOffset(long offset);
+  WorkflowQuery withStartPage(long startPage);
 
   /** Limit results to workflow instances matching a free text search */
   WorkflowQuery withText(String text);

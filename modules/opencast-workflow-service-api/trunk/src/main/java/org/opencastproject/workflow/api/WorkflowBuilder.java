@@ -140,10 +140,10 @@ public class WorkflowBuilder {
     return writer.toString();
   }
 
-  public String toXml(WorkflowInstanceListImpl workflowInstanceList) throws Exception {
+  public String toXml(WorkflowSet set) throws Exception {
     Marshaller marshaller = jaxbContext.createMarshaller();
     Writer writer = new StringWriter();
-    marshaller.marshal(workflowInstanceList, writer);
+    marshaller.marshal(set, writer);
     return writer.toString();
   }
   

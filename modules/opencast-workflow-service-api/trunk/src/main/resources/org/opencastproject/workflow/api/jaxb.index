@@ -8,4 +8,4 @@ WorkflowOperationDefinitionListImpl
 WorkflowOperationInstanceImpl
 WorkflowOperationInstanceListImpl
 WorkflowOperationResultImpl
-
+WorkflowSetImpl

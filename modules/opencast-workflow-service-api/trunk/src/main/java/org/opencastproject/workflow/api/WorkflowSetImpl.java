@@ -14,70 +14,53 @@
  *
  */
 
-package org.opencastproject.workflow.impl;
-
-import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowSet;
+package org.opencastproject.workflow.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * The search result represents a set of result items that has been compiled as a result for a search operation.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="search-result", namespace="http://search.opencastproject.org/")
+@XmlRootElement(name="workflow-instances", namespace="http://workflow.opencastproject.org/")
 public class WorkflowSetImpl implements WorkflowSet {
 
   /** Logging facility */
   static Logger log_ = LoggerFactory.getLogger(WorkflowSetImpl.class);
 
   /** A list of search items. */
-  @XmlElementWrapper(name="search-results")
-  private List<WorkflowInstance> resultSet = null;
-
-  /** The query that yielded the result set */
-  @XmlElement
-  private String query = null;
+  @XmlElement(name="workflow-instance")
+  private WorkflowInstanceListImpl resultSet = null;
 
   /** The pagination offset. */
-  @XmlAttribute
-  private long offset = 0;
+  @XmlAttribute(name="startPage")
+  private long startPage;
 
-  /** The pagination limit. Default is 10. */
-  @XmlAttribute
-  private long limit = 10;
+  /** The pagination limit. */
+  @XmlAttribute(name="count")
+  private long count;
 
   /** The search time in milliseconds */
-  @XmlAttribute
-  private long searchTime = 0;
+  @XmlAttribute(name="searchTime")
+  private long searchTime;
+
+  /** The total number of results without paging */
+  @XmlAttribute(name="totalCount")
+  public long totalCount;
+  
 
   /**
    * A no-arg constructor needed by JAXB
    */
   public WorkflowSetImpl() {}
-
-  /**
-   * Creates a new and empty search result.
-   * 
-   * @param query
-   *          the query
-   */
-  public WorkflowSetImpl(String query) {
-    if (query == null)
-      throw new IllegalArgumentException("Quey cannot be null");
-    this.query = query;
-  }
 
   /**
    * {@inheritDoc}
@@ -99,17 +82,8 @@ public class WorkflowSetImpl implements WorkflowSet {
     if (item == null)
       throw new IllegalArgumentException("Parameter item cannot be null");
     if (resultSet == null)
-      resultSet = new ArrayList<WorkflowInstance>();
-    resultSet.add((WorkflowInstance)item);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.WorkflowSet.impl.SearchResult#getQuery()
-   */
-  public String getQuery() {
-    return query;
+      resultSet = new WorkflowInstanceListImpl();
+    resultSet.add((WorkflowInstanceImpl)item);
   }
 
   /**
@@ -124,10 +98,10 @@ public class WorkflowSetImpl implements WorkflowSet {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.WorkflowSet.impl.SearchResult#getOffset()
+   * @see org.opencastproject.WorkflowSet.impl.SearchResult#getStartPage()
    */
-  public long getOffset() {
-    return offset;
+  public long getStartPage() {
+    return startPage;
   }
 
   /**
@@ -136,27 +110,27 @@ public class WorkflowSetImpl implements WorkflowSet {
    * @param offset
    *          The offset.
    */
-  public void setOffset(long offset) {
-    this.offset = offset;
+  public void setStartPage(long startPage) {
+    this.startPage = startPage;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.WorkflowSet.impl.SearchResult#getLimit()
+   * @see org.opencastproject.WorkflowSet.impl.SearchResult#getCount()
    */
-  public long getLimit() {
-    return limit;
+  public long getCount() {
+    return count;
   }
 
   /**
-   * Set the limit.
+   * Set the count.
    * 
-   * @param limit
-   *          The limit.
+   * @param count
+   *          The count.
    */
-  public void setLimit(long limit) {
-    this.limit = limit;
+  public void setCount(long count) {
+    this.count = count;
   }
 
   /**
@@ -178,15 +152,17 @@ public class WorkflowSetImpl implements WorkflowSet {
     this.searchTime = searchTime;
   }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.WorkflowSet.impl.SearchResult#getPage()
-   */
-  public long getPage() {
-    if (limit != 0)
-      return offset / limit;
-    return 0;
+  public long getTotalCount() {
+    return totalCount;
+  }
+
+  public void setTotalCount(long totalCount) {
+    this.totalCount = totalCount;
+  }
+
+  static class Adapter extends XmlAdapter<WorkflowSetImpl, WorkflowSet> {
+    public WorkflowSetImpl marshal(WorkflowSet set) throws Exception {return (WorkflowSetImpl)set;}
+    public WorkflowSet unmarshal(WorkflowSetImpl set) throws Exception {return set;}
   }
 
 }

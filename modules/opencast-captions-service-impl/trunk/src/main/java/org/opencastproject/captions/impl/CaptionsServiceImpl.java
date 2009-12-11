@@ -104,7 +104,7 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
     // TODO make this actually get the captionable items using get workflows with state and something else
     WorkflowQuery q = workflowService.newWorkflowQuery();
     //q.withState(State.PAUSED).withLimit(max).withOffset(start); // MH-1743
-    q.withLimit(max).withOffset(start); // MH-1743
+    q.withCount(max).withStartPage(start); // MH-1743
     WorkflowSet wfs = workflowService.getWorkflowInstances(q);
     int total = (int) wfs.size();
     WorkflowInstance[] workflows = wfs.getItems();
