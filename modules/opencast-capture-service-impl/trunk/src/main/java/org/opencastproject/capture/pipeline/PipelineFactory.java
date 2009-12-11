@@ -56,10 +56,7 @@ public class PipelineFactory {
   public static Pipeline create(Properties props) {
     ArrayList<CaptureDevice> devices = new ArrayList<CaptureDevice>();
     
-    /*
-     * Identify which candidate video devices are described in the properties and create CaptureDevice objects out of
-     * them.
-     */
+     // Setup pipeline for all the devices specified
     String deviceNames = props.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
     if (deviceNames == null) {
       logger.error("No capture devices specified in {}.", CaptureParameters.CAPTURE_DEVICE_NAMES);
@@ -70,13 +67,11 @@ public class PipelineFactory {
     String outputDirectory = props.getProperty(CaptureParameters.RECORDING_ROOT_URL);
     
     for (String name : friendlyNames) {
+
       name = name.trim();
       DeviceName devName;
      
-      // disregard the empty string 
-      if (name == "")
-        continue;
-      
+      // Get properties from 
       String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
       String srcLoc = props.getProperty(srcProperty);
@@ -84,8 +79,10 @@ public class PipelineFactory {
       
       // Attempt to determine what the device is using the JV4LInfo library 
       try {
+        // ALSA source
         if (srcLoc.contains("hw:"))
           devName = DeviceName.ALSASRC;
+        // V4L devices
         else {
           V4LInfo v4linfo = JV4LInfo.getV4LInfo(srcLoc);
           String deviceString = v4linfo.toString();
@@ -95,9 +92,16 @@ public class PipelineFactory {
             devName = DeviceName.HAUPPAUGE_WINTV;
           else if (deviceString.contains("BT878"))
             devName = DeviceName.BLUECHERRY_PROVIDEO;
+          // Non-V4L file. If it exists, assume it is ingestable
+          // TODO: Fix security risk. Any file on CaptureAgent filesytem could be ingested
           else {
-            logger.error("Device not recognized: {}, ignoring.", srcLoc);
-            continue;
+            if (new File(srcLoc).isFile()) {
+              devName = DeviceName.FILE;
+            }
+            else {
+              logger.error("Do not recognized device: {}.", srcLoc);
+              return null;
+            }
           }
         }
       } catch (JV4LInfoException e) {
@@ -155,6 +159,8 @@ public class PipelineFactory {
       return getBluecherryPipeline(captureDevice, pipeline);
     else if (captureDevice.getName() == DeviceName.ALSASRC)
       return getAlsasrcPipeline(captureDevice, pipeline);
+    else if(captureDevice.getName() == DeviceName.FILE)
+      return getFilePipeline(captureDevice, pipeline);
     return false;
   }
 
@@ -170,7 +176,6 @@ public class PipelineFactory {
    * @return String representation of the error
    */
   private static String formatPipelineError(CaptureDevice device, Element src, Element sink) {
-
     return device.getLocation() + ": " + "(" + src.toString() + ", " + sink.toString() + ")";
   }
   
@@ -404,6 +409,32 @@ public class PipelineFactory {
     if (error != null) {
       pipeline.removeMany(v4l2src, queue, enc, mpegtsmux, filesink);
       logger.error(error);
+      return false;
+    }
+    return true;
+  }
+  
+  /**
+   * Adds a pipeline for a media file that just copies it to a new location
+   * 
+   * @param captureDevice
+   *          capture device with source and output information
+   * @param pipeline
+   *          the Pipeline bin to add it to
+   * @return True, if successful
+   */
+  private static boolean getFilePipeline(CaptureDevice captureDevice, Pipeline pipeline) {
+    Element filesrc = ElementFactory.make("filesrc", null);
+    Element filesink = ElementFactory.make("filesink", null);
+    
+    filesrc.set("location", captureDevice.getLocation());
+    filesink.set("location", captureDevice.getOutputPath());
+    
+    pipeline.addMany(filesrc, filesink);
+    
+    if (!filesrc.link(filesink)) {
+      pipeline.removeMany(filesrc, filesink);
+      logger.error(formatPipelineError(captureDevice, filesrc, filesink));
       return false;
     }
     return true;

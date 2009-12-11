@@ -22,5 +22,6 @@ public enum DeviceName {
   EPIPHAN_VGA2USB,     /* the Epiphan VGA2USB frame grabber */
   HAUPPAUGE_WINTV,     /* Hauppauge devices                 */
   BLUECHERRY_PROVIDEO, /* Bluecherry ProVideo-143           */
-  ALSASRC              /* Linux sound capture               */
+  ALSASRC,             /* Linux sound capture               */
+  FILE                 /* A media file on the filesystem    */
 }
