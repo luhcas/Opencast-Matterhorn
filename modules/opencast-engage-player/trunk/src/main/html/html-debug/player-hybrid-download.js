@@ -12,7 +12,7 @@ Opencast.mouseOverBool = false;
 
 $(document).ready(function () {
   
-    Opencast.ariaSlider.init();
+     Opencast.ariaSlider.init();
     
     var simpleEdit = fluid.inlineEdit("#simpleEdit", {
         selectors : {

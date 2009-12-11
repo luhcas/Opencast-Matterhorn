@@ -68,7 +68,7 @@ function VideodisplayReady() {
 	};
 	
 	Videodisplay2.closedCaptions = function(argBool) {
-		b_Videodisplay2_root.closedCaptions(argBool);
+		b_Videodisplay2_root.setClosedCaptions(argBool);
 	};
 	
 }

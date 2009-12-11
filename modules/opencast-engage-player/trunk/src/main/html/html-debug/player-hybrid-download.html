@@ -30,6 +30,11 @@
         <script type="text/javascript" src="player-hybrid-fromvideodisplay.js"></script>
         <script type="text/javascript" src="player-hybrid-tovideodisplay.js"></script>
         <script type="text/javascript" src="aria/js/ariaSlider.js"></script>
+        <script type="text/javascript" src="swffix/swffix.js"></script>
+        <script type="text/javascript">
+        SWFFix.registerObject("oc_Videodisplay", "10.0.0", "swffix/expressInstall.swf");
+        </script>
+        
      </head>
 
     <body>
@@ -87,6 +92,7 @@
     
     <div id="oc-video-display-container">
       <object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="400" height="320" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
+        
         <param name ="movie" value="Videodisplay.swf" >
           <param name="quality"value="high">
           <param name="allowScriptAccess" value="always" >
@@ -104,7 +110,8 @@
             quality="high"
             allowScriptAccess="always"
             src="Videodisplay.swf">
-      </object>
+       </object>
+      
     </div>
 
     <div id="info" class="fl-offScreen-hidden">
