@@ -1,8 +1,3 @@
-.oc-player {
-  position:relative;
-}
-
-
 .matterhorn-progress-bar
 {
   border:0px solid #D3D3D3;
@@ -11,7 +6,6 @@
   outline-color:-moz-use-text-color;
   outline-style:none;
   outline-width:none;
-  
   display: inline; 
   position: absolute; 
   height: 0.8em; 
@@ -34,12 +28,13 @@
   display: inline; 
   position: absolute; 
   height: 0.8em;
-  width: 100%;
+  width: 399px;
   word-spacing: 1px;
   background-color: rgb(255, 255, 255);
  -moz-border-radius: 0.2em;
  -webkit-border-radius: 0.2em;
   background-color: rgb(200, 200, 200);
+  
 }
 
 .matterhorn-slide

@@ -5,110 +5,135 @@
 /**
     @namespace the global Opencast namespace FromVideodisplay
 */
-Opencast.FromVideodisplay = (function () {
-
+Opencast.FromVideodisplay = (function () 
+{
     var playing = "playing",
         pausing = "pausing",
         play    = "Play",
         pause   = "Pause",
         unmute  = "Unmute",
+        mute    = "Mute",
         ccon    = "Closed Caption On",
-        ccoff   = "Closed Caption Off";
+        ccoff   = "Closed Caption Off",
+        sliderVolume = 'slider_volume_Thumb',
+        sliderSeek = 'slider_seek_Thumb';
     
     /**
         @memberOf Opencast.FromVideodisplay
         @description Set the new position of the seek slider.
-        @param number newPosition 
+        @param Number newPosition 
     */
-    function setPlayhead(newPosition) {
-        $('#slider').slider('value', newPosition);
+    function setPlayhead(newPosition) 
+    {
+        Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(sliderSeek), newPosition);
+    }
+    
+    /**
+        @memberOf Opencast.FromVideodisplay
+        @description Change the css style of the mute/unmute button.
+    */
+    function setDoUnmute() 
+    {
+        if ($("#btn_volume").attr("value") === unmute) 
+        {  
+            $("#btn_volume").attr({ 
+                value: mute,
+                alt: mute,
+                title: mute
+            });
+            $("#btn_volume").attr("className", "oc-btn-volume-high");
+        }
     }
 
     /**
         @memberOf Opencast.FromVideodisplay
         @description Set the new position of the volume slider.
-        @param number newVolume 
+        @param Number newVolume 
     */
-    function setVolume(newVolume) {
-        $('#volume_slider').slider('value', newVolume);
+    function setVolume(newVolume) 
+    {
+        if (newVolume !== 0)
+        {
+            setDoUnmute();
+        }
+        Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(sliderVolume), newVolume);
     }
 
     /**
         @memberOf Opencast.FromVideodisplay
         @description Set the current time of the video.
-        @param string text 
+        @param String text 
     */
-    function setCurrentTime(text) {
+    function setCurrentTime(text) 
+    {
         $("#time-current").text(text);
+        $("#slider_seek_Rail").attr("title", "Time " + text);
     }
 
     /**
         @memberOf Opencast.FromVideodisplay
         @description Set the total time of the video.
-        @param string text 
+        @param String text 
     */
-    function setTotalTime(text) {
+    function setTotalTime(text) 
+    {
         $("#time-total").text(text);
     }
 
     /**
         @memberOf Opencast.FromVideodisplay
         @description Set the slider max time.
-        @param number time 
+        @param Number time 
     */
-    function setDuration(time) {
+    function setDuration(time) 
+    {
         $('#slider').slider('option', 'max', time);
+        Opencast.ariaSlider.getElementId(sliderSeek).setAttribute('aria-valuemax', time);
     }
     
     /**
         @memberOf Opencast.FromVideodisplay
         @description Set the with of the progress bar.
-        @param number value 
+        @param Number value 
     */
-    function setProgress(value) {
+    function setProgress(value) 
+    {
         $('.matterhorn-progress-bar').css("width", (value + "%"));
     }
 
     /**
         @memberOf Opencast.FromVideodisplay
-        @description Set the html captions.
-        @param html text 
+        @description Toggle the closed caption button between on or off and change the css style from the closed captions button.
+        @param Boolean bool 
     */
-    function setCaptions(text) {
-        $("#captions").html(text);
-    }
-    
-    /**
-        @memberOf Opencast.FromVideodisplay
-        @description Toggle the cc button between on or off.
-        @param boolean bool 
-    */
-    function setCaptionsButton(bool) {
-       
+    function setCaptionsButton(bool) 
+    {
         if (bool === true)
         {
             $("#btn_cc").attr({ 
                 value: ccoff,
                 alt: ccoff,
-                title: ccoff,
-                src: "./icons/cc_on.png"
+                title: ccoff
             });
+            $("#btn_cc").attr("className", "oc-btn-cc-on");
+            Opencast.ToVideodisplay.setccBool(true);
         }
         else
         {
             $("#btn_cc").attr({ 
                 value: ccon,
                 alt: ccon,
-                title: ccon,
-                src: "./icons/cc_off.png"
+                title: ccon
             });
+            $("#btn_cc").attr("className", "oc-btn-cc-off");
+            Opencast.ToVideodisplay.setccBool(false);
         }
     }
     
     /**
         @memberOf Opencast.FromVideodisplay
-        @description Toogle between play and pause.
-        @param sting state 
+        @description Set the play/pause state and change the css style of the play/pause button.
+        @param String state 
     */
     function setPlayPauseState(state) {
         if (state === playing) {
@@ -117,16 +142,13 @@ Opencast.FromVideodisplay = (function () {
                 alt: play,
                 title: play
             });
+           
+            $("#btn_play_pause").attr("className", "btn_play_out");
             
-            if (Opencast.ToVideodisplay.getPressKey() === true)
-            {
-                $("#btn_play_pause").attr("className", "btn_play_out");
-            }
-            else
+            if (Opencast.mouseOverBool === true)
             {
                 $("#btn_play_pause").attr("className", "btn_play_over");
             }
-            
             Opencast.ToVideodisplay.doSetCurrentPlayPauseState(pausing);
         } 
         else {
@@ -136,12 +158,9 @@ Opencast.FromVideodisplay = (function () {
                 title: pause
             });
            
-            if (Opencast.ToVideodisplay.getPressKey() === true)
-            {
-                $("#btn_play_pause").attr("className", "btn_pause_out");
-             
-            }
-            else
+            $("#btn_play_pause").attr("className", "btn_pause_out");
+            
+            if (Opencast.mouseOverBool === true)
             {
                 $("#btn_play_pause").attr("className", "btn_pause_over");
             }
@@ -152,15 +171,26 @@ Opencast.FromVideodisplay = (function () {
     
     /**
         @memberOf Opencast.FromVideodisplay
-        @description Mute the player.
+        @description Toggle the volume between mute or unmute.
     */
-    function setDoToggleVolume() {
-        $("#btn_volume").attr({ 
-            value: unmute,
-            alt: unmute,
-            title: unmute,
-            src: "./icons/volume---mute.png"
-        });
+    function setDoMute() {
+     
+        if (Videodisplay.getVolume() !== 0)
+        {
+            Opencast.volume = Videodisplay.getVolume();
+        }
+        Opencast.ToVideodisplay.doToggleVolume();
+    }
+    
+    /**
+        @memberOf Opencast.FromVideodisplay
+        @description Set the captions in html
+        @param Html text 
+    */
+    function setCaptions(text) {
+        var elm = document.createElement('li');
+        elm.innerHTML = text;        
+        $('#captions').empty().append(elm);
     }
     
     return {
@@ -170,9 +200,11 @@ Opencast.FromVideodisplay = (function () {
         setTotalTime: setTotalTime,
         setDuration: setDuration,
         setProgress : setProgress,
-        setCaptions : setCaptions,
         setPlayPauseState : setPlayPauseState,
         setCaptionsButton : setCaptionsButton,
-        setDoToggleVolume : setDoToggleVolume
+        setDoUnmute : setDoUnmute,
+        setCaptions : setCaptions,
+        setDoMute : setDoMute
+       
     };
 }());
