@@ -55,6 +55,11 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-http</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -67,7 +72,8 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Bundle-Activator> org.opencastproject.engage.impl.Activator </Bundle-Activator>
             <Private-Package> org.opencastproject.engage.impl </Private-Package>
-            <Import-Package>org.opencastproject.util, *</Import-Package>
+            <Import-Package>org.opencastproject.http, *</Import-Package>
+            <!-- <Import-Package>org.opencastproject.util, *</Import-Package> -->
             <Service-Component>
               OSGI-INF/engage-service.xml,
               OSGI-INF/engage-service-rest.xml,
