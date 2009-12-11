@@ -8,7 +8,6 @@
 var Opencast = Opencast || {};
 
 Opencast.volume = 1.0;
-Opencast.mouseOverBool = false;
 
 $(document).ready(function () {
     $("#slider").slider();
@@ -34,19 +33,7 @@ $(document).ready(function () {
         {
             Opencast.global.doUnmute();
         }
-    });
-    
-    var simpleEdit = fluid.inlineEdit("#simpleEdit", {
-        selectors : {
-            text: ".editableText",
-            editContainer: "#editorContainer",
-            edit: "#editField"
-        },
-        useTooltip : true,
-        tooltipDelay : 500
-    });
-    
-
+    });  
 });
 
 Opencast.global = (function () {
@@ -65,9 +52,9 @@ Opencast.global = (function () {
             $("#btn_volume").attr({ 
                 value: mute,
                 alt: mute,
-                title: mute
+                title: mute,
+                src: "./icons/volume---high.png"
             });
-            $("#btn_volume").attr("className", "oc-btn-volume-high");
         } 
     }
     
@@ -78,12 +65,11 @@ Opencast.global = (function () {
     function mouseOver() {
         if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === playing) {
             $("#btn_play_pause").attr("className", "btn_pause_over");
-            Opencast.mouseOverBool = true;
         }
          else if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === pausing) {
             $("#btn_play_pause").attr("className", "btn_play_over");
-            Opencast.mouseOverBool = true;
         }
+  
     }
     /**
         @memberOf Opencast.global
@@ -92,19 +78,18 @@ Opencast.global = (function () {
     function mouseOut() {
         if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === playing) {
             $("#btn_play_pause").attr("className", "btn_pause_out");
-            Opencast.mouseOverBool = false;
         }
         else if (Opencast.ToVideodisplay.getCurrentPlayPauseState() === pausing) {
             $("#btn_play_pause").attr("className", "btn_play_out");
-            Opencast.mouseOverBool = false;
         }
+
     }
-    
-   
+
     return {
         doUnmute : doUnmute,
         mouseOver : mouseOver,
         mouseOut : mouseOut
+
     };
 }());
 

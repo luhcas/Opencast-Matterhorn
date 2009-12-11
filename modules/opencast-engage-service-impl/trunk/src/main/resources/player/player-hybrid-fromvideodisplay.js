@@ -12,7 +12,6 @@ Opencast.FromVideodisplay = (function () {
         play    = "Play",
         pause   = "Pause",
         unmute  = "Unmute",
-        mute    = "Mute",
         ccon    = "Closed Caption On",
         ccoff   = "Closed Caption Off";
     
@@ -32,11 +31,6 @@ Opencast.FromVideodisplay = (function () {
     */
     function setVolume(newVolume) {
         $('#volume_slider').slider('value', newVolume);
-        
-        if (newVolume !== 0)
-        {
-            Opencast.FromVideodisplay.setDoUnmute();
-        }
     }
 
     /**
@@ -77,27 +71,37 @@ Opencast.FromVideodisplay = (function () {
 
     /**
         @memberOf Opencast.FromVideodisplay
+        @description Set the html captions.
+        @param html text 
+    */
+    function setCaptions(text) {
+        $("#captions").html(text);
+    }
+    
+    /**
+        @memberOf Opencast.FromVideodisplay
         @description Toggle the cc button between on or off.
         @param boolean bool 
     */
     function setCaptionsButton(bool) {
+       
         if (bool === true)
         {
             $("#btn_cc").attr({ 
                 value: ccoff,
                 alt: ccoff,
-                title: ccoff
+                title: ccoff,
+                src: "./icons/cc_on.png"
             });
-            $("#btn_cc").attr("className", "oc-btn-cc-on");
         }
         else
         {
             $("#btn_cc").attr({ 
                 value: ccon,
                 alt: ccon,
-                title: ccon
+                title: ccon,
+                src: "./icons/cc_off.png"
             });
-            $("#btn_cc").attr("className", "oc-btn-cc-off");
         }
     }
     
@@ -113,13 +117,16 @@ Opencast.FromVideodisplay = (function () {
                 alt: play,
                 title: play
             });
-           
-            $("#btn_play_pause").attr("className", "btn_play_out");
             
-            if (Opencast.mouseOverBool === true)
+            if (Opencast.ToVideodisplay.getPressKey() === true)
+            {
+                $("#btn_play_pause").attr("className", "btn_play_out");
+            }
+            else
             {
                 $("#btn_play_pause").attr("className", "btn_play_over");
             }
+            
             Opencast.ToVideodisplay.doSetCurrentPlayPauseState(pausing);
         } 
         else {
@@ -129,9 +136,12 @@ Opencast.FromVideodisplay = (function () {
                 title: pause
             });
            
-            $("#btn_play_pause").attr("className", "btn_pause_out");
-            
-            if (Opencast.mouseOverBool === true)
+            if (Opencast.ToVideodisplay.getPressKey() === true)
+            {
+                $("#btn_play_pause").attr("className", "btn_pause_out");
+             
+            }
+            else
             {
                 $("#btn_play_pause").attr("className", "btn_pause_over");
             }
@@ -144,32 +154,13 @@ Opencast.FromVideodisplay = (function () {
         @memberOf Opencast.FromVideodisplay
         @description Mute the player.
     */
-    function setDoMute() {
+    function setDoToggleVolume() {
         $("#btn_volume").attr({ 
             value: unmute,
             alt: unmute,
-            title: unmute
+            title: unmute,
+            src: "./icons/volume---mute.png"
         });
-        $("#btn_volume").attr("className", "oc-btn-volume-mute");
-    }
-    
-    
-        /**
-           @memberOf Opencast.FromVideodisplay
-           @description Unmute the player.
-        */
-    function setDoUnmute() {
-        $("#btn_volume").attr({ 
-                value: mute,
-                alt: mute,
-                title: mute
-            });
-    }
-    
-    function setCaptions(text) {
-        var elm = document.createElement('li');
-        elm.innerHTML = text;        
-        $('#captions').empty().append(elm);
     }
     
     return {
@@ -179,10 +170,9 @@ Opencast.FromVideodisplay = (function () {
         setTotalTime: setTotalTime,
         setDuration: setDuration,
         setProgress : setProgress,
+        setCaptions : setCaptions,
         setPlayPauseState : setPlayPauseState,
         setCaptionsButton : setCaptionsButton,
-        setDoMute : setDoMute,
-        setDoUnmute : setDoUnmute,
-        setCaptions : setCaptions
+        setDoToggleVolume : setDoToggleVolume
     };
 }());

@@ -1,3 +1,8 @@
+.oc-player {
+  position:relative;
+}
+
+
 .matterhorn-progress-bar
 {
   border:0px solid #D3D3D3;

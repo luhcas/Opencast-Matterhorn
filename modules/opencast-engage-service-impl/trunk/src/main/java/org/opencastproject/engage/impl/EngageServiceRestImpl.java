@@ -33,15 +33,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The REST endpoint 
+ * The REST endpoint
  */
 @Path("/")
 public class EngageServiceRestImpl implements EngageService {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(EngageServiceImpl.class);
-  
+
   private EngageService service;
-  
+
   public void setService(EngageService service) {
     this.service = service;
   }
@@ -54,9 +54,9 @@ public class EngageServiceRestImpl implements EngageService {
   }
 
   protected final String docs;
-  
+
   /**
-   * Creates an engage service 
+   * Creates an engage service
    */
   public EngageServiceRestImpl() {
     String docsFromClassloader = null;
@@ -73,52 +73,46 @@ public class EngageServiceRestImpl implements EngageService {
     docs = docsFromClassloader;
   }
 
-  public String deliverPlayer(String mediaPackageId) {
-    return service.deliverPlayer(mediaPackageId);
+  public String deliverPlayer(String mediaPackageIdBase64Encoded) {
+    return service.deliverPlayer(mediaPackageIdBase64Encoded);
   }
-  
+
   public String deliverBrowsePage() {
     return service.deliverBrowsePage();
   }
-  
+
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("search")
   public String search(@Context HttpServletRequest request) {
     return "Search";
   }
-  
+
   @GET
   @Produces(MediaType.TEXT_HTML)
-  @Path("/browse")
+  @Path("/browse.html")
   public String browse(@Context HttpServletRequest request) {
     return deliverBrowsePage();
   }
-  
+
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("search/episodes")
-  public String episodesByDate(
-          @QueryParam("start") int start, 
-          @Context HttpServletRequest request) 
-  {
-    return service.getEpisodesByDate(start, 10); 
+  public String episodesByDate(@QueryParam("start") int start, @Context HttpServletRequest request) {
+    return service.getEpisodesByDate(start, 10);
   }
-  
-  public String getEpisodesByDate(int limit, int offset)
-  {
+
+  public String getEpisodesByDate(int limit, int offset) {
     return null;
   }
-  
+
   @GET
   @Produces(MediaType.TEXT_HTML)
-  @Path("watch/{name}/{localName}")
-  public String watch(
-          @PathParam("name") String name, 
-          @PathParam("localName") String localName, 
+  @Path("watch/{mediaPackageIdBase64Encoded}")
+  public String watch(@PathParam("mediaPackageIdBase64Encoded") String mediaPackageIdBase64Encoded,
           @Context HttpServletRequest request) {
-    
-    return deliverPlayer(name+"/"+localName);
+
+    return deliverPlayer(mediaPackageIdBase64Encoded);
   }
-  
+
 }

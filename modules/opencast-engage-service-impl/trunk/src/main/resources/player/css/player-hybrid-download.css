@@ -2,7 +2,7 @@
 
 .oc-title-bar
 {
-	width:              397px;
+	width:              380px;
 	height:             20px;
 	margin-left:        10px;
 	margin-top:         5px;
@@ -18,105 +18,48 @@
 
 .oc-controls 
 {
-    position:           absolute;
-    top:                370px;
+    position:absolute;
+    top:320px;
 }	
 
-.oc-videocontrols-holder
-{
-    width:              401px;
-    height:             30px;
-    background:         transparent url(../background/title.png) repeat-x center top;
-    margin-left:        10px;
-    border:             ridge 1px #999999;
-
-}
-
-.oc-videocontrols-holder td
-{
-    border:             0;
-    padding-top:        0;
-    padding-bottom:     0;
-    
-
-}
-
-.oc-videocontrols-holder_old
+#oc-videocontrols-holder
 {
     width:              380px;
-    height:             30px;
+    heigth:             20px;
     margin-left:        10px;
-    margin-right:       0;
-    margin-top:         0;
-    margin-bottom:      0;
-    padding:            0;
-    background:         transparent url(../background/title.png) repeat-x center top;
+    background: transparent url(../background/title.png) repeat-x center top;
     border:             ridge 1px #999999;
 }
                         
-.oc-timeline_old
+.oc-timeline
 {
-    width:              33%;
-    height:             100%;
-    display:            table-cell;
-    vertical-align:     middle;
     color:              #444444; 
     font-family:        verdana;
     font-size:          0.8em;
-    float:              left;
+    float:left;
+    margin-left:5px;
+    margin-top:6px;
+}
+.oc-buttons
+{
+    float:left;
+    margin-left: 10px;
+    margin-top:4px;
+    text-align:center;
 }
 
 .oc-volume
 {
-    width:              33%;
-    height:             100%;
-    display:            table-cell;
-    vertical-align:     middle;
-    float:              right;
+    float:right;
+    margin-left: 5px;
+    margin-top: 3px;
+    margin-right: 5px;
 }
 
-.oc-btn-volume-high
-{
-    overflow: hidden;
-    width:              16px;
-    height:             16px;
-    border:             0;
-    margin:             0;
-    background:         transparent url(../icons/volumehigh.png) no-repeat center top;
-    text-indent:        -1000em;
-    cursor:             pointer; /* hand-shaped cursor */
-    cursor:             hand; /* for IE 5.x */
-}
-
-.oc-btn-volume-low
-{
-    overflow: hidden;
-    width:              16px;
-    height:             16px;
-    border:             0;
-    margin:             0;
-    background:         transparent url(../icons/volumelow.png) no-repeat center top;
-    text-indent:        -1000em;
-    cursor:             pointer; /* hand-shaped cursor */
-    cursor:             hand; /* for IE 5.x */
-}
-
-.oc-btn-volume-mute
-{
-    overflow: hidden;
-    width:              16px;
-    height:             16px;
-    border:             0;
-    margin:             0;
-    background:         transparent url(../icons/volumemute.png) no-repeat center top;
-    text-indent:        -1000em;
-    cursor:             pointer; /* hand-shaped cursor */
-    cursor:             hand; /* for IE 5.x */
-}
 
 #slider
 {
-	width:              399px;
+	width:              380px;
 	margin-left:        10px;
 	margin-bottom:      10px;
 }
@@ -126,33 +69,12 @@
 	display:            inline-block;
 	width:              70px;
 	margin-left:        5px;
-	margin-right:       5px;
+    margin-right:       10px;
 }
 
-.oc-btn-cc-off
+.oc-btn-cc
 {
-    overflow: hidden;
-    width:              16px;
-    height:             16px;
-    margin:             0;
-    border:             0;
-    background:         transparent url(../icons/cc_off.png) no-repeat center top;
-    text-indent:        -1000em;
-    cursor:             pointer; /* hand-shaped cursor */
-    cursor:             hand; /* for IE 5.x */
-}
-
-.oc-btn-cc-on
-{
-    overflow: hidden;
-    width:              16px;
-    height:             16px;
-    margin:             0;
-    border:             0;
-    background:         transparent url(../icons/cc_on.png) no-repeat center top;
-    text-indent:        -1000em;
-    cursor:             pointer; /* hand-shaped cursor */
-    cursor:             hand; /* for IE 5.x */
+	
 }
 
 #info
@@ -162,23 +84,28 @@
     margin-top:         70px;
 }
 
+.oc-captions
+{
+ 	position:absolute; 
+ 	left:-10000px; top:auto; 
+ 	width:1px; 
+ 	height:1px; 
+ 	overflow:hidden;
+}	
+
 #oc-video-display-container
 {
     margin:             10px;
     margin-bottom:      0px;
-    margin-left:        10px;
-}
-
-.overflow-hidden {
-    overflow: hidden;
+    margin-left:12px;
 }
 
 .btn_skip_backward
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/skipbackward.png) no-repeat center top;
   text-indent:          -1000em;
@@ -188,10 +115,10 @@
 
 .btn_skip_backward_over
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/skipbackwardover.png) no-repeat center top;
   text-indent:          -1000em;
@@ -201,10 +128,10 @@
 
 .btn_skip_backward_out
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/skipbackward.png) no-repeat center top;
   text-indent:          -5000em;
@@ -214,10 +141,10 @@
 
 .btn_rewind
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/rewind.png) no-repeat center top;
   text-indent:          -1000em;
@@ -227,10 +154,10 @@
 
 .btn_rewind_over
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/rewindover.png) no-repeat center top;
   text-indent:          -1000em;
@@ -240,10 +167,10 @@
 
 .btn_rewind_out
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/rewind.png) no-repeat center top;
   text-indent:          -5000em;
@@ -253,10 +180,10 @@
 
 .btn_play
 {
-  overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/play.png) no-repeat center top;
   text-indent:          -1000em;
@@ -266,10 +193,10 @@
 
 .btn_play_over
 {
-  overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/playover.png) no-repeat center top;
   text-indent:          -1000em;
@@ -279,10 +206,10 @@
 
 .btn_play_out
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/play.png) no-repeat center top;
   text-indent:          -5000em;
@@ -292,10 +219,10 @@
 
 .btn_pause
 {
-  overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/pause.png) no-repeat center top;
   text-indent:          -1000em;
@@ -305,10 +232,10 @@
 
 .btn_pause_over
 {
-  overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/pauseover.png) no-repeat center top;
   text-indent:          -1000em;
@@ -318,10 +245,10 @@
 
 .btn_pause_out
 {
-  overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/pause.png) no-repeat center top;
   text-indent:          -5000em;
@@ -331,10 +258,10 @@
 
 .btn_fast_forward
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/fastforward.png) no-repeat center top;
   text-indent:          -1000em;
@@ -344,10 +271,10 @@
 
 .btn_fastForward_over
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/fastforwardover.png) no-repeat center top;
   text-indent:          -1000em;
@@ -357,10 +284,10 @@
 
 .btn_fastForward_out
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/fastforward.png) no-repeat center top;
   text-indent:          -5000em;
@@ -370,10 +297,10 @@
 
 .btn_skip_forward
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/skipforward.png) no-repeat center top;
   text-indent:          -5000em;
@@ -383,10 +310,10 @@
 
 .btn_skip_forward_over
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/skipforwardover.png) no-repeat center top;
   text-indent:          -5000em;
@@ -396,10 +323,10 @@
 
 .btn_skip_forward_out
 {
-    overflow: hidden;
   width:                16px;
   height:               16px;
   margin:               0;
+  padding-top:          5px;
   border:               0;
   background:           transparent url(../icons/skipforward.png) no-repeat center top;
   text-indent:          -5000em;
@@ -407,32 +334,3 @@
   cursor:               hand; /* for IE 5.x */
 }
 
-          
-#simpleEdit .inlineEdit-invitation 
-{
-  border:               0px solid blue;
-  background:           transparent;
-  color:                blue;
-  padding:              0;
-  margin:               0;
-}
-
-#editField 
-{
-  width:                40px;
-  border:               0;
-  color:                #999;
-  padding-top:          2px;
-  padding-bottom:       2px;
-  margin:               0;
-}
-
-#captions {
-    position: absolute;
-    top:420px;
-    list-style-type:none;
-}
-
-#captions li {
-    list-style-type:none;
-}
