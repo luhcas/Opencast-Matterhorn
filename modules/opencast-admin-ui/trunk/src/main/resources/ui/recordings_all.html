@@ -25,11 +25,11 @@
 
       function updateUI() {
         AdminUI.displayRecordingCounts();
-        $('#recordings-table-container').xslt("rest/recordings/processing", "xsl/recordings_processing.xsl", function() {
+        /*$('#recordings-table-container').xslt("rest/recordings/processing", "xsl/recordings_processing.xsl", function() {
           // currently empty
         });
         // make table sortable
-        $('#recordingsTable').tablesorter();
+        $('#recordingsTable').tablesorter();*/
       }
 
     </script>
@@ -47,7 +47,7 @@
         <div id="category-select-container">
           <ul class="category-selector">
             <li class="category-selector-item">
-              <a href="recordings_all.html">All <span id="count-total"></span></a>
+              <span>All <span id="count-total"></span></span>
             </li>
             <li class="category-selector-spacer">
               &#124;
@@ -65,7 +65,7 @@
               &#124;
             </li>
             <li class="category-selector-item">
-              <span>Processing <span id="count-processing"></span></span>
+              <a href="recordings_processing.html">Processing <span id="count-processing"></span></a>
             </li>
             <li class="category-selector-spacer">
               &#124;
@@ -91,20 +91,7 @@
 
         <!-- recordings table -->
         <div id="recordings-table-container" style="clear:both;">
-          <table id="recordingsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
-            <thead>
-              <tr>
-                <th width="25%">Title</th>
-                <th width="15%">Presenter</th>
-                <th width="20%">Course/Series</th>
-                <th width="20%">Recording Date and Time</th>
-                <th width="10%">Capture Agent</th>
-                <th width="10%">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
+          <center>Under development. When implemented will show all recordings in the system.</center>
         </div>
       </div>
     </div>
