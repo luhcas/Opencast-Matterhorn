@@ -535,14 +535,10 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     super.clear();
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Object clone() throws CloneNotSupportedException {
-    DublinCoreCatalogImpl clone = null;
-    try {
-      clone = (DublinCoreCatalogImpl) DublinCoreCatalogImpl.newInstance();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    DublinCoreCatalogImpl clone = (DublinCoreCatalogImpl)super.clone();
     if (data instanceof HashMap)
       clone.data = (Map<EName, List<CatalogEntry>>) ((HashMap) data).clone();
     else

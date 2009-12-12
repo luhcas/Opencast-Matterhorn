@@ -173,7 +173,7 @@ public class EncoderEngineFactoryImpl extends EncoderEngineFactory {
           Map<String, EncodingProfile> profiles = new HashMap<String, EncodingProfile>();
           for (Map.Entry<String, Class<?>> entry : engineClasses.entrySet()) {
             String profileId = entry.getKey();
-            if (profileId.equals(engineClass)) {
+            if (profileId.equals(engineClass)) { // FIXME comparing a string to a class will always be false
               EncodingProfile p = mgr.getProfile(profileId);
               if (p != null)
                 profiles.put(profileId, p);

@@ -156,7 +156,10 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
    */
   @Override
   public MediaPackageElementFlavor clone() throws CloneNotSupportedException {
-    MediaPackageElementFlavor m = new MediaPackageElementFlavor(type, subtype, description);
+    MediaPackageElementFlavor m = (MediaPackageElementFlavor)super.clone();
+    m.type = this.type;
+    m.subtype = this.subtype;
+    m.description = this.description;
     m.equivalents.addAll(equivalents);
     return m;
   }

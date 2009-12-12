@@ -21,6 +21,7 @@ import org.osgi.framework.BundleContext;
 /**
  * Activates the search service implementation.
  */
+// FIXME This class does nothing.  Why is it here?  Why is this module even here?
 public class Activator implements BundleActivator {
 
   public static BundleContext bc = null;

@@ -79,7 +79,7 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * @see org.opencastproject.composer.api.EncoderEngine#removeEncoderListener(org.opencastproject.composer.api.EncoderListener)
    */
   public void removeEncoderListener(EncoderListener listener) {
-    listeners.remove(listeners);
+    listeners.remove(listener);
   }
 
   /**

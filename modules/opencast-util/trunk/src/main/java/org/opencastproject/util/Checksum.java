@@ -110,14 +110,12 @@ public final class Checksum implements Serializable {
 
   @Override
   public int hashCode() {
-    return (new String(value_)).hashCode();
+    return value_.hashCode();
   }
 
   @Override
   public String toString() {
-    String str = new String(value_);
-    str += " (" + type_ + ")";
-    return str;
+    return value_ + " (" + type_ + ")";
   }
 
   /**

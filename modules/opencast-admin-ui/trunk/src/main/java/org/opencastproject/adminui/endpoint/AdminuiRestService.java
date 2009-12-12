@@ -182,7 +182,7 @@ public class AdminuiRestService {
   @Path("countRecordings")
   public Response countRecordings() {
     HashMap<String,Integer> stats = getRecordingsStatistic();
-    Iterator<String> i = stats.keySet().iterator();
+    Iterator<String> i = stats.keySet().iterator(); // FIXME entrySet() is more efficient since you call get(key)
     JSONObject out = new JSONObject();
     while (i.hasNext()) {
       String key = i.next();
@@ -243,15 +243,15 @@ public class AdminuiRestService {
             break;
           case PAUSED:
           case STOPPED:
-            inactive++;
+            inactive++; // FIXME I think you want a break here, right?  Or are all paused and stopped workflows also finished?
           case SUCCEEDED:
             finished++;
         }
       }
-      out.put("processing", new Integer(processing));
-      out.put("inactive", new Integer(inactive));
-      out.put("errors", new Integer(errors));
-      out.put("finished", new Integer(finished));
+      out.put("processing", new Integer(processing)); // FIXME valueOf is more efficient, see below
+      out.put("inactive", Integer.valueOf(inactive));
+      out.put("errors", Integer.valueOf(errors));
+      out.put("finished", Integer.valueOf(finished));
       total += i;
       logMessage += " workflow-service";
     } else {

@@ -373,8 +373,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     }
     
     Set<WorkflowOperationConfigurations> confs = new HashSet<WorkflowOperationConfigurations>();
-    for (String key : configurations.keySet()){
-      confs.add(new WorkflowOperationConfigurationsImpl(key, configurations.get(key)));
+    for(Entry<String, Set<WorkflowConfiguration>> entry : configurations.entrySet()) {
+      confs.add(new WorkflowOperationConfigurationsImpl(entry.getKey(), entry.getValue()));
     }
     
     return confs;

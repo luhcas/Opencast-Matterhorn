@@ -93,13 +93,13 @@ public class Param {
   }
   
   public void setChoices(String[] choices) {
-    if (choices != null) {
+    if (choices == null) {
+      this.choices = null;
+    } else {
       this.choices = new Vector<String>(choices.length);
       for (int i = 0; i < choices.length; i++) {
         addChoice(choices[i]);
       }
-    } else {
-      choices = null;
     }
   }
 

@@ -305,6 +305,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
   }
   
   public String toString () {
+    // FIXME replace string concatenation with commons lang's ToStringBuilder
     String text = "ID: "+getID()+", start: "+getStartdate().toString()+", end: "+getEnddate().toString()+", creator: "+getCreator()+", title: "+getTitle()+
           ", abstract: "+getAbstract()+", device: "+getDevice()+", location: "+getLocation()+", series: "+getSeriesID()+
           ", channel: "+getChannelID()+", attendees: ";

@@ -142,7 +142,7 @@ public class WorkflowQueryImpl implements WorkflowQuery {
   public ElementTuple getElementTuple() {
     return elementTuple;
   }
-  class ElementTuple {
+  static class ElementTuple {
     String elementType, elementFlavor;
     boolean exists;
     ElementTuple(String elementType, String elementFlavor, boolean exists) {

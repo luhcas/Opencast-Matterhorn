@@ -127,12 +127,13 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
   }
 
   protected void returnConnection(Connection conn) {
-    try {
-      if (conn != null)
+    if (conn != null) {
+      try {
         conn.setAutoCommit(true);
         conn.close();
-    } catch (SQLException e) {
-      logger.error("Unable to close database connection:" + e.getMessage());
+      } catch (SQLException e) {
+        logger.error("Unable to close database connection:" + e.getMessage());
+      }
     }
   }
 
@@ -515,17 +516,25 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     } catch (Exception e) {
       try {
         conn.rollback();
-      } catch (SQLException e1) {
-        throw new RuntimeException(e1);
+      } catch (SQLException e2) {
+        throw new RuntimeException(e2);
       }
       throw new RuntimeException(e);
     } finally {
-      if (updateStatment != null)
+      if (updateStatment != null) {
         try {
           updateStatment.close();
         } catch (SQLException e) {
           throw new RuntimeException(e);
         }
+      }
+      if(addElementsStatement != null) {
+        try {
+          addElementsStatement.close();
+        } catch (SQLException e1) {
+          throw new RuntimeException(e1);
+        }
+      }
       returnConnection(conn);
     }
   }

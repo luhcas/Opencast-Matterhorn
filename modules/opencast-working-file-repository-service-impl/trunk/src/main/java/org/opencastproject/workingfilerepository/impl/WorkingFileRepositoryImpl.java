@@ -60,7 +60,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     checkId(mediaPackageID);
     checkId(mediaPackageElementID);
     File f = getFile(mediaPackageID, mediaPackageElementID);
-    logger.info("Attempting to delete file " + f.getAbsolutePath());
+    logger.info("Attempting to delete file {}", f.getAbsolutePath());
     if(f.canWrite()) {
       f.delete();
     } else {
@@ -68,7 +68,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
               mediaPackageID + "/" + mediaPackageElementID);
     }
     File d = getDirectory(mediaPackageID, mediaPackageElementID);
-    logger.info("Attempting to delete directory " + d.getAbsolutePath());
+    logger.info("Attempting to delete directory {}", d.getAbsolutePath());
     if(d.canWrite()){
       d.delete();
     }
@@ -82,7 +82,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     checkId(mediaPackageID);
     checkId(mediaPackageElementID);
     File f = getFile(mediaPackageID, mediaPackageElementID);
-    logger.info("Attempting to read file " + f.getAbsolutePath());
+    logger.debug("Attempting to read file {}", f.getAbsolutePath());
     try {
       return new FileInputStream(f);
     } catch (FileNotFoundException e) {
@@ -114,13 +114,13 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     checkId(mediaPackageElementID);
     File f = new File(rootDirectory + File.separator + mediaPackageID + File.separator + 
             mediaPackageElementID + File.separator + filename);
-    logger.info("Attempting to write a file to " + f.getAbsolutePath());
+    logger.debug("Attempting to write a file to {}", f.getAbsolutePath());
     try {
       if( ! f.exists()) {
-        logger.info("Attempting to create a new file at " + f.getAbsolutePath());
+        logger.debug("Attempting to create a new file at {}", f.getAbsolutePath());
         File mediaPackageElementDirectory = getDirectory(mediaPackageID, mediaPackageElementID);
         if( ! mediaPackageElementDirectory.exists()) {
-          logger.info("Attempting to create a new directory at " + mediaPackageElementDirectory.getAbsolutePath());
+          logger.debug("Attempting to create a new directory at {}", mediaPackageElementDirectory.getAbsolutePath());
           FileUtils.forceMkdir(mediaPackageElementDirectory);
         } else{
 //          logger.error("Integrity error: directory " + mediaPackageID + "/" + mediaPackageElementID + 
@@ -130,7 +130,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
         }
         f.createNewFile();
       } else {
-        logger.info("Attempting to overwrite the file at " + f.getAbsolutePath());
+        logger.info("Attempting to overwrite the file at {}", f.getAbsolutePath());
       }
       IOUtils.copy(in, new FileOutputStream(f));
       return getURI(mediaPackageID, mediaPackageElementID);
@@ -150,8 +150,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     File directory = getDirectory(mediaPackageID, mediaPackageElementID);
     String[] files = directory.list();
     if(files.length != 1){
-      logger.error("Integrity error: Element directory " + mediaPackageID + "/" + mediaPackageElementID + 
-              "is empty or contains more than one element");
+      logger.error("Integrity error: Element directory {} is empty or contains more than one element", 
+              mediaPackageID + "/" + mediaPackageElementID);
       throw new RuntimeException("Directory " + mediaPackageID + "/" + mediaPackageElementID +
               "does not contain exactly one element");
     }
@@ -164,16 +164,16 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
 
   @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {
-    logger.info("updating properties on " + this);
+    logger.info("updating properties on {}", this);
     String newRootDirectory = (String)props.get("root");
     if(newRootDirectory != null) {
-      logger.info("setting root directory to " + newRootDirectory);
+      logger.info("setting root directory to {}", newRootDirectory);
       rootDirectory = newRootDirectory;
       createRootDirectory();
     }
     String newServerUrl = (String)props.get("serverUrl");
     if(newServerUrl != null) {
-      logger.info("setting serverUrl to " + newServerUrl);
+      logger.info("setting serverUrl to {}", newServerUrl);
       serverUrl = newServerUrl;
     }
   }

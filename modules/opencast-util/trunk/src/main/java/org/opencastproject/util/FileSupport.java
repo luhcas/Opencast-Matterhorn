@@ -491,7 +491,7 @@ public class FileSupport {
         && !targetLocation.getName().equals(sourceLocation.getName())) {
 
       dest = targetLocation;
-      targetLocation = targetLocation.getParentFile();
+      targetLocation = targetLocation.getParentFile(); // FIXME targetLocation is never read, so setting this does nothing
     } else if (targetLocation.exists() && sourceLocation.isFile()
         && targetLocation.isFile()) {
       dest = targetLocation;

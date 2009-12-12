@@ -85,13 +85,16 @@ public class WorkflowRestService {
 
   public void activate(ComponentContext cc) {
     // Get the configured server URL
-    if(cc == null) serverUrl = UrlSupport.DEFAULT_BASE_URL;
-    String ccServerUrl = cc.getBundleContext().getProperty("serverUrl");
-    logger.info("configured server url is " + ccServerUrl);
-    if(ccServerUrl == null) {
+    if(cc == null) {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
-      serverUrl = ccServerUrl;
+      String ccServerUrl = cc.getBundleContext().getProperty("serverUrl");
+      logger.info("configured server url is " + ccServerUrl);
+      if(ccServerUrl == null) {
+        serverUrl = UrlSupport.DEFAULT_BASE_URL;
+      } else {
+        serverUrl = ccServerUrl;
+      }
     }
 
     // Pre-load the documentation

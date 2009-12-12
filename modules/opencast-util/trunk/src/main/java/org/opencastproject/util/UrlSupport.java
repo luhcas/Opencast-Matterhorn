@@ -350,13 +350,13 @@ public class UrlSupport {
       }
       // Special characters
       if ((value == new Character('-').charValue())
-          || (value == new Character('_').charValue())
-          || (value == new Character('.').charValue())
-          || (value == new Character(',').charValue())
-          || (value == new Character(';').charValue())) {
+          || (value == '_')
+          || (value == '.')
+          || (value == ',')
+          || (value == ';')) {
         continue;
       }
-      return new Character(original.charAt(i));
+      return Character.valueOf(original.charAt(i));
     }
     return null;
   }

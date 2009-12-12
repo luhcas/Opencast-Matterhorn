@@ -63,10 +63,10 @@ public class TemplateLoader {
    */
   public String doReplacements(String subject, HashMap<String, String> replacementMap) {
     Iterator<String> i = replacementMap.keySet().iterator();
-    String out = new String(subject); // just for the case that replacementMap is empty
+    String out = subject; // just for the case that replacementMap is empty
     while (i.hasNext()) {
       String currentKey = i.next();
-      out = out.replaceAll("<:" + currentKey + ":>", (String) replacementMap.get(currentKey));
+      out = out.replaceAll("<:" + currentKey + ":>", (String) replacementMap.get(currentKey)); // FIXME use entrySet()
     }
     return out;
   }

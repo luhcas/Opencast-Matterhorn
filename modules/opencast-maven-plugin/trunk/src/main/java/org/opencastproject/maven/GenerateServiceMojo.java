@@ -119,14 +119,12 @@ public class GenerateServiceMojo extends AbstractMojo {
 class DirectoryMover extends DirectoryWalker {
   
   String serviceName = null;
-  String artifactName = null;
   @SuppressWarnings("unchecked")
   List results = new ArrayList();
   @SuppressWarnings("unchecked")
   public DirectoryMover(String serviceName, String artifactName) {
     super();
     this.serviceName = serviceName;
-    this.artifactName = artifactName;
     try {
       super.walk(new File(artifactName), results);
       for(Iterator iter = results.iterator(); iter.hasNext();) {
@@ -148,13 +146,11 @@ class DirectoryMover extends DirectoryWalker {
 
 class FileMover extends DirectoryWalker {
   String serviceName = null;
-  String artifactName = null;
   @SuppressWarnings("unchecked")
   Collection results = new ArrayList();
   public FileMover(String serviceName, String artifactName) {
     super();
     this.serviceName = serviceName;
-    this.artifactName = artifactName;
     try {
       super.walk(new File(artifactName), results);
     } catch (IOException e) {
@@ -174,13 +170,11 @@ class FileMover extends DirectoryWalker {
 
 class FileFixer extends DirectoryWalker {
   String serviceName = null;
-  String artifactName = null;
   @SuppressWarnings("unchecked")
   Collection results = new ArrayList();
   public FileFixer(String serviceName, String artifactName) {
     super();
     this.serviceName = serviceName;
-    this.artifactName = artifactName;
     try {
       super.walk(new File(artifactName), results);
     } catch (IOException e) {

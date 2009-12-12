@@ -126,7 +126,7 @@ public class XmlRpcEngineController implements Runnable {
     for (XmlRpcJob job : joblist) {
       engine.fileEncodingFailed(job.getSourceFile(), job.getEncodingProfile(), reason);
     }
-    synchronized (joblist) {
+    synchronized (joblist) { // FIXME CopyOnWriteArrayList should never be externally synchronized
       joblist.clear();
     }
 
@@ -182,7 +182,7 @@ public class XmlRpcEngineController implements Runnable {
       Object result = execute("engine.submitJob", arguments);
       if (result instanceof Integer) {
         int jobId = ((Integer) result).intValue();
-        synchronized (joblist) {
+        synchronized (joblist) { // FIXME CopyOnWriteArrayList should never be externally synchronized
           joblist.add(new XmlRpcJob(jobId, track, format, setting));
         }
         log_.trace("Submitted track " + track + " to episode engine with settings " + setting.getName());
@@ -301,7 +301,7 @@ public class XmlRpcEngineController implements Runnable {
    */
   private List<XmlRpcJob> getJobs(File sourceFile, EncodingProfile profile) {
     List<XmlRpcJob> jobs = new ArrayList<XmlRpcJob>();
-    synchronized (joblist) {
+    synchronized (joblist) { // FIXME CopyOnWriteArrayList should never be externally synchronized
       for (XmlRpcJob job : joblist) {
         if (job.getSourceFile().equals(sourceFile) && job.getEncodingProfile().equals(profile))
           jobs.add(job);
@@ -384,7 +384,7 @@ public class XmlRpcEngineController implements Runnable {
               // Remove job and notify observers regardless of
               // other settings that are applied to this track
               List<XmlRpcJob> associatedJobs = null;
-              synchronized (joblist) {
+              synchronized (joblist) { // FIXME CopyOnWriteArrayList should never be externally synchronized
                 joblist.remove(job);
                 associatedJobs = getJobs(track, encodingProfile);
                 joblist.removeAll(associatedJobs);
@@ -404,7 +404,7 @@ public class XmlRpcEngineController implements Runnable {
               // Remove job and notify observers regardless of
               // other settings that are applied to this track
               List<XmlRpcJob> associatedJobs = null;
-              synchronized (joblist) {
+              synchronized (joblist) { // FIXME CopyOnWriteArrayList should never be externally synchronized
                 joblist.remove(job);
                 associatedJobs = getJobs(track, encodingProfile);
                 joblist.removeAll(associatedJobs);

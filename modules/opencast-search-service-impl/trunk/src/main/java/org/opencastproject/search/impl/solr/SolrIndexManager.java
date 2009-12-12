@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -392,9 +393,11 @@ public class SolrIndexManager {
     // dc:available
     if (dc.hasValue(DublinCore.PROPERTY_AVAILABLE)) {
       Object temporal = EncodingSchemeUtils.decodeTemporal(dc.get(DublinCore.PROPERTY_AVAILABLE).get(0));
+      // FIXME a Temporal will never be a Date
       if (temporal instanceof Date) {
         solrInput.addField(SolrFields.DC_AVAILABLE_FROM, temporal);
       }
+      // FIXME a Temporal will never be a DCMIPeriod
       if (temporal instanceof DCMIPeriod) {
         DCMIPeriod period = ((DCMIPeriod) temporal);
         if (period.hasStart()) {
@@ -415,6 +418,7 @@ public class SolrIndexManager {
    * @param mpeg7
    *          the mpeg7 catalog
    */
+  @SuppressWarnings("unused")
   private void addMpeg7Metadata(SolrUpdateableInputDocument solrInput, Mpeg7Catalog mpeg7) {
 
     // Check for multimedia content
@@ -583,11 +587,10 @@ public class SolrIndexManager {
       String maxKeyword = null;
 
       // get maximum from importance list
-      Iterator<String> key = importance.keySet().iterator();
-      while (key.hasNext()) {
-        keyword = key.next();
-        if (max < importance.get(keyword)) {
-          max = importance.get(keyword);
+      for(Entry<String, Double> entry : importance.entrySet()) {
+        keyword = entry.getKey();
+        if (max < entry.getValue()) {
+          max = entry.getValue();
           maxKeyword = keyword;
         }
       }

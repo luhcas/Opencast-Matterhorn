@@ -71,7 +71,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
    * 
    * @throws ConfigurationException
    */
-  private void initEncoder() throws ConfigurationException {
+  private synchronized void initEncoder() throws ConfigurationException {
     Properties ffmpegProperties = new Properties();
     try {
       ffmpegProperties.load(FFmpegEncoderEngine.class.getResourceAsStream(PROPERTIES_FILE));

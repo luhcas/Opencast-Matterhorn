@@ -92,7 +92,7 @@ public class CalendarGenerator {
           ParameterList plAtt = new ParameterList();
           plAtt.add(new Cn(attendees[i]));
           // TODO Organizer should be URI (email-address?) created fake adress
-          if (attendees[i] != e.getDevice()) event.getProperties().add(new Attendee(plAtt, attendees[i].replace(" ","_")+"@matterhorn.opencast"));
+          if ( ! attendees[i].equals(e.getDevice())) event.getProperties().add(new Attendee(plAtt, attendees[i].replace(" ","_")+"@matterhorn.opencast"));
         }
       }
       if (e.getResources() != null) {

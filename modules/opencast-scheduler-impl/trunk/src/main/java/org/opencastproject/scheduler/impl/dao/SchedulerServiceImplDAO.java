@@ -45,6 +45,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   /**
    * The Connection to the database
    */
+  // FIXME The connections should not be treated as thread safe.  Borrow a connection in each method.
   Connection con;
 
   
@@ -81,8 +82,9 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       e.setID(e.createID());
     }
     logger.debug("adding event "+e.toString());
+    PreparedStatement s = null;
     try {
-      PreparedStatement s = con.prepareStatement("INSERT INTO EVENT ( eventid , startdate , enddate ) VALUES (?, ?, ?)");
+      s = con.prepareStatement("INSERT INTO EVENT ( eventid , startdate , enddate ) VALUES (?, ?, ?)");
       s.setString(1, e.getID());
       s.setLong(2, e.getStartdate().getTime());
       s.setLong(3, e.getEnddate().getTime());
@@ -100,6 +102,15 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
         logger.error("Could not rollback database after error in adding new event");
       }
       return null;
+    } finally {
+      // FIXME Please close all record sets, prepared statements (I've closed this one for you), and connections in a finally block
+      if(s != null) {
+        try {
+          s.close();
+        } catch (SQLException e1) {
+          throw new RuntimeException(e1);
+        }
+      }
     }
     logger.debug("added event "+e.toString());
     return e; 
@@ -452,7 +463,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @return true is the database AND all needed tables are available 
    */
   public boolean dbCheck () {
-    String tables = "";
+    StringBuilder tables = new StringBuilder();;
     logger.debug("checking if scheduler-db is available." );
     try {
       if (con == null) throw new SQLException("No database connected");
@@ -460,17 +471,19 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       String[] names = { "TABLE" }; 
       ResultSet rs = meta.getTables(null, null, null, names);
       while (rs.next()) {
-        tables = tables + rs.getString("TABLE_NAME") + " ";
+        tables.append(rs.getString("TABLE_NAME"));
+        tables.append(" ");
       }
     } catch (SQLException e) {
       logger.error("Problem checking if event database is present and complete "+e.getMessage());
     }
-    
-    if (! tables.contains("EVENTMETADATA")) return false;
-    if (! tables.contains("ATTENDEES")) return false;
-    if (! tables.contains("EVENT")) return false;
-    if (! tables.contains("RESOURCESSERIES")) return false;
-    if (! tables.contains("RESOURCES")) return false;
+
+    String tablesString = tables.toString();
+    if (! tablesString.contains("EVENTMETADATA")) return false;
+    if (! tablesString.contains("ATTENDEES")) return false;
+    if (! tablesString.contains("EVENT")) return false;
+    if (! tablesString.contains("RESOURCESSERIES")) return false;
+    if (! tablesString.contains("RESOURCES")) return false;
     logger.info("scheduler-db is available. Tables: " + tables);
     return true;
   }

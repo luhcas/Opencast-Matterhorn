@@ -132,7 +132,7 @@ public class StreamHelper extends Thread {
     this.outputStream = redirect;
     this.logger = logger;
     this.contentBuffer = contentBuffer;
-    start();
+    start(); // FIXME This class should either be final, or should not start threads in the constructor.
   }
 
   /**

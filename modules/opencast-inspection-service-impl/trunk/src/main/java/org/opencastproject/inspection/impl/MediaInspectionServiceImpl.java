@@ -23,6 +23,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Stream;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.media.mediapackage.track.AudioStreamImpl;
 import org.opencastproject.media.mediapackage.track.TrackImpl;
@@ -37,7 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.security.NoSuchAlgorithmException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -80,13 +83,23 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     } else {
       MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
       TrackImpl track;
-      try {
-        MediaPackageElement element = elementBuilder.elementFromURI(uri, Type.Track,
-                MediaPackageElements.INDEFINITE_TRACK);
+        MediaPackageElement element;
+        try {
+          element = elementBuilder.elementFromURI(uri, Type.Track,
+                  MediaPackageElements.INDEFINITE_TRACK);
+        } catch (UnsupportedElementException e) {
+          throw new RuntimeException(e);
+        }
         track = (TrackImpl) element;
         if (metadata.getDuration() != null)
           track.setDuration(metadata.getDuration());
-        track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+        try {
+          track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+        } catch (NoSuchAlgorithmException e) {
+          throw new RuntimeException(e);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
         List<AudioStreamMetadata> audioList = metadata.getAudioStreamMetadata();
         if (audioList != null && !audioList.isEmpty()) {
           for (int i = 0; i < audioList.size(); i++) {
@@ -117,10 +130,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
             track.addStream(video);
           }
         }
-      } catch (Exception e) {
-        e.printStackTrace();
-        throw new RuntimeException(e);
-      } // FIXME: how should we determine flavor?
+        // FIXME: how should we determine flavor?
       return track;
     }
   }
@@ -152,67 +162,74 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     } else {
       MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
       TrackImpl track;
+      MediaPackageElement element;
       try {
-        MediaPackageElement element = elementBuilder.elementFromURI(originalTrackUrl, Type.Track,
+        element = elementBuilder.elementFromURI(originalTrackUrl, Type.Track,
                 MediaPackageElements.INDEFINITE_TRACK);
-        // init the new track with old
-        track = (TrackImpl) element;
-        track.setChecksum(originalTrack.getChecksum());
-        track.setDuration(originalTrack.getDuration());
-        track.setElementDescription(originalTrack.getElementDescription());
-        track.setFlavor(originalTrack.getFlavor());
-        track.setIdentifier(originalTrack.getIdentifier());
-        track.setMimeType(originalTrack.getMimeType());
-        track.setReference(originalTrack.getReference());
-        track.setSize(originalTrack.getSize());
-        track.setURI(originalTrackUrl);
-        // enrich the new track with basic info
-        if (track.getDuration() == -1L || override)
-          track.setDuration(metadata.getDuration());
-        if (track.getChecksum() == null || override)
-          track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
-        // find all streams
-        Dictionary<String, Stream> streamsId2Stream = new Hashtable<String, Stream>();
-        for (Stream stream : originalTrack.getStreams()) {
-          streamsId2Stream.put(stream.getIdentifier(), stream);
-        }
-
-        // audio list
-        List<AudioStreamMetadata> audioList = metadata.getAudioStreamMetadata();
-        if (audioList != null && !audioList.isEmpty()) {
-          for (int i = 0; i < audioList.size(); i++) {
-            AudioStreamImpl audio = new AudioStreamImpl("audio-" + (i + 1));
-            AudioStreamMetadata a = audioList.get(i);
-            audio.setBitRate(a.getBitRate());
-            audio.setChannels(a.getChannels());
-            audio.setFormat(a.getFormat());
-            audio.setFormatVersion(a.getFormatVersion());
-            audio.setResolution(a.getResolution());
-            audio.setSamplingRate(a.getSamplingRate());
-            // TODO: retain the original audio metadata
-            track.addStream(audio);
-          }
-        }
-        // video list
-        List<VideoStreamMetadata> videoList = metadata.getVideoStreamMetadata();
-        if (videoList != null && !videoList.isEmpty()) {
-          for (int i = 0; i < audioList.size(); i++) {
-            VideoStreamImpl video = new VideoStreamImpl("video-" + (i + 1));
-            VideoStreamMetadata v = videoList.get(i);
-            video.setBitRate(v.getBitRate());
-            video.setFormat(v.getFormat());
-            video.setFormatVersion(v.getFormatVersion());
-            video.setFrameHeight(v.getFrameHeight());
-            video.setFrameRate(v.getFrameRate());
-            video.setFrameWidth(v.getFrameWidth());
-            video.setScanOrder(v.getScanOrder());
-            video.setScanType(v.getScanType());
-            // TODO: retain the original video metadata
-            track.addStream(video);
-          }
-        }
-      } catch (Exception e) {
+      } catch (UnsupportedElementException e) {
         throw new RuntimeException(e);
+      }
+      // init the new track with old
+      track = (TrackImpl) element;
+      track.setChecksum(originalTrack.getChecksum());
+      track.setDuration(originalTrack.getDuration());
+      track.setElementDescription(originalTrack.getElementDescription());
+      track.setFlavor(originalTrack.getFlavor());
+      track.setIdentifier(originalTrack.getIdentifier());
+      track.setMimeType(originalTrack.getMimeType());
+      track.setReference(originalTrack.getReference());
+      track.setSize(originalTrack.getSize());
+      track.setURI(originalTrackUrl);
+      // enrich the new track with basic info
+      if (track.getDuration() == -1L || override)
+        track.setDuration(metadata.getDuration());
+      if (track.getChecksum() == null || override)
+        try {
+          track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+        } catch (NoSuchAlgorithmException e) {
+          throw new RuntimeException(e);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      // find all streams
+      Dictionary<String, Stream> streamsId2Stream = new Hashtable<String, Stream>();
+      for (Stream stream : originalTrack.getStreams()) {
+        streamsId2Stream.put(stream.getIdentifier(), stream);
+      }
+
+      // audio list
+      List<AudioStreamMetadata> audioList = metadata.getAudioStreamMetadata();
+      if (audioList != null && !audioList.isEmpty()) {
+        for (int i = 0; i < audioList.size(); i++) {
+          AudioStreamImpl audio = new AudioStreamImpl("audio-" + (i + 1));
+          AudioStreamMetadata a = audioList.get(i);
+          audio.setBitRate(a.getBitRate());
+          audio.setChannels(a.getChannels());
+          audio.setFormat(a.getFormat());
+          audio.setFormatVersion(a.getFormatVersion());
+          audio.setResolution(a.getResolution());
+          audio.setSamplingRate(a.getSamplingRate());
+          // TODO: retain the original audio metadata
+          track.addStream(audio);
+        }
+      }
+      // video list
+      List<VideoStreamMetadata> videoList = metadata.getVideoStreamMetadata();
+      if (videoList != null && !videoList.isEmpty()) {
+        for (int i = 0; i < audioList.size(); i++) {
+          VideoStreamImpl video = new VideoStreamImpl("video-" + (i + 1));
+          VideoStreamMetadata v = videoList.get(i);
+          video.setBitRate(v.getBitRate());
+          video.setFormat(v.getFormat());
+          video.setFormatVersion(v.getFormatVersion());
+          video.setFrameHeight(v.getFrameHeight());
+          video.setFrameRate(v.getFrameRate());
+          video.setFrameWidth(v.getFrameWidth());
+          video.setScanOrder(v.getScanOrder());
+          video.setScanType(v.getScanType());
+          // TODO: retain the original video metadata
+          track.addStream(video);
+        }
       }
       return track;
     }

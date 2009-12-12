@@ -80,8 +80,7 @@ public class IngestRestService {
     MediaPackage mp;
     try {
       mp = service.createMediaPackage();
-      MediapackageType mpt = new MediapackageType();
-      mpt = MediapackageType.fromXml(mp.toXml());
+      MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
       return Response.ok(mpt).build();
     } catch (Exception e) {
       return Response.serverError().status(400).build();

@@ -32,7 +32,7 @@ import java.util.Properties;
 /**
  * Wrapper for the Telestream Episode Compression Engine.
  */
-public class EpisodeEncoderEngine extends AbstractEncoderEngine {
+public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
 
   /** Name of the properties file */
   public static final String EPISODE_PROPERTIES = "/episode.properties";
@@ -111,7 +111,7 @@ public class EpisodeEncoderEngine extends AbstractEncoderEngine {
 
     // Start the monitor
     monitorThread.setDaemon(true);
-    monitorThread.start();
+    monitorThread.start(); // Since this is dangerous for subclasses, I've made this class final (jmh)
   }
 
   /**
@@ -125,7 +125,7 @@ public class EpisodeEncoderEngine extends AbstractEncoderEngine {
 
     // Start the monitor
     monitorThread.setDaemon(true);
-    monitorThread.start();
+    monitorThread.start(); // Since this is dangerous for subclasses, I've made this class final (jmh)
   }
 
   /**
@@ -159,7 +159,7 @@ public class EpisodeEncoderEngine extends AbstractEncoderEngine {
 
       // Xmlrpc password
       xmlrpcPassword = (String) properties.get(OPT_XMLRPC_PASSWORD);
-      if (xmlrpcPath == null) {
+      if (xmlrpcPath == null) { // FIXME This can never occur, since a config exception would be thrown earlier
         xmlrpcPassword = XMLRPC_DEFAULT_PASSWORD;
         log_.debug("Episode xmlrpc password was not set, using default");
       } else {
@@ -178,7 +178,7 @@ public class EpisodeEncoderEngine extends AbstractEncoderEngine {
               monitorFrequency * 1000L);
       monitorThread = new Thread(xmlrpcController);
 
-    } catch (Exception e) {
+    } catch (Exception e) { // FIXME Findbugs says that no exception is thrown here, so this isn't needed
       throw new ConfigurationException("Episode engine setup failed: " + e.getMessage());
     }
   }

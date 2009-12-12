@@ -68,7 +68,7 @@ public class StaticHttpContext implements ManagedService {
     }
   }
 
-  class StaticContext implements HttpContext {
+  static class StaticContext implements HttpContext {
     private String baseResourcePath;
 
     public StaticContext(String baseResourcePath) {
