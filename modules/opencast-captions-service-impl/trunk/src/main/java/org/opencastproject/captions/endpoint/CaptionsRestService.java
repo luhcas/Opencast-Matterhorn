@@ -70,7 +70,7 @@ public class CaptionsRestService {
   }
 
   protected void activate(ComponentContext context) {
-    logger.info("ACTIVATE: service={}" + service);
+    logger.info("ACTIVATE: service={}", service);
   } 
 
   /**
