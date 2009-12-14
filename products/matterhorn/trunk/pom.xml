@@ -707,6 +707,17 @@
       </roles>
       <timezone>+1</timezone>
     </developer>
+    <developer>
+      <id>twunden</id>
+      <name>Tobias Wunden</name>
+      <email>tobias.wunden@id.ethz.ch</email>
+      <organization>ETH Zürich</organization>
+      <organizationUrl>http://www.ethz.ch</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
 
   <contributors><!-- TODO? --></contributors>
