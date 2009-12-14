@@ -61,7 +61,7 @@ public class DocData {
         this.notes.add(notes[i]);
       }
     }
-    logger.info("Created new Doc: " + name);
+    logger.info("Created new Doc: {}", name);
   }
 
   /**

@@ -111,9 +111,9 @@ public class DocUtil {
       Writer output = new StringWriter();
       template.process(data, output);
       result = output.toString();
-      logger.info("Generated complete document ("+result.length()+" chars) from template ("+templateName+")");
+      logger.info("Generated complete document ({} chars) from template ({})", result.length(), templateName);
     } catch (TemplateException e) {
-      logger.error("Failed while processing the Doc template ("+templateName+"): " + e);
+      logger.error("Failed while processing the Doc template ({}): {}", templateName, e);
       result = "ERROR:: Failed while processing the template ("+templateName+"): " + e + " \n Template: " + textTemplate + " \n Data: " + data;
     } catch (IOException e) {
       throw new RuntimeException("Failure while sending freemarker output to stream", e);

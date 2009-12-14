@@ -253,7 +253,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
   @SuppressWarnings("unchecked")
   public void updated(Dictionary properties) throws ConfigurationException {
-    logger.info("Updating configuration on " + this.getClass().getName());
+    logger.info("Updating configuration on {}", this.getClass().getName());
     // TODO Update the local path to the mediainfo binary
   }
 

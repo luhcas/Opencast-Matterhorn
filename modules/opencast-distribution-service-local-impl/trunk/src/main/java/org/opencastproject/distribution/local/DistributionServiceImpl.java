@@ -73,7 +73,7 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
     File attachmentsDirectory = new File(mediaPackageDirectory, "attachments");
     try {
       FileUtils.forceMkdir(mediaPackageDirectory);
-      logger.info("created directory " + mediaPackageDirectory);
+      logger.info("created directory {}", mediaPackageDirectory);
       FileUtils.forceMkdir(mediaDirectory);
       FileUtils.forceMkdir(metadataDirectory);
       FileUtils.forceMkdir(attachmentsDirectory);
@@ -114,9 +114,9 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
       File f = new File(updatedRootDir);
       if(f.exists()) {
         this.distributionDirectory = f;
-        logger.info("Set distribution directory to " + updatedRootDir);
+        logger.info("Set distribution directory to {}", updatedRootDir);
       } else {
-        logger.warn("Can not set distribution directory to " + updatedRootDir + ".  Directory does not exist");
+        logger.warn("Can not set distribution directory to {}.  Directory does not exist", updatedRootDir);
       }
     }
   }

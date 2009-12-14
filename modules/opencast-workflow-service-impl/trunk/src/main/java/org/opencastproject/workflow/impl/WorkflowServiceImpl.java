@@ -203,9 +203,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     boolean runnable = isRunnable(workflowDefinition, availableOperations, checkedWorkflows);
     int wfCount = checkedWorkflows.size() - 1;
     if (runnable)
-      log_.info("Workflow " + workflowDefinition + ", containing " + wfCount + " derived workflows is runnable");
+      log_.info("Workflow {}, containing {} derived workflows, is runnable", workflowDefinition, wfCount);
     else
-      log_.warn("Workflow " + workflowDefinition + ", containing " + wfCount + " derived workflows is not runnable");
+      log_.warn("Workflow {}, containing {} derived workflows, is not runnable", workflowDefinition, wfCount);
     return runnable;
   }
 
@@ -229,15 +229,15 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     // Test availability of operation handler and catch workflows
     for (WorkflowOperationDefinition op : workflowDefinition.getOperations()) {
       if (!availableOperations.contains(op.getName())) {
-        log_.info(workflowDefinition + " is not runnable due to missing operation " + op);
+        log_.info("{} is not runnable due to missing operation {}", workflowDefinition, op);
         return false;
       }
       String catchWorkflow = op.getExceptionHandlingWorkflow();
       if (catchWorkflow != null) {
         WorkflowDefinition catchWorkflowDefinition = getWorkflowDefinitionByName(catchWorkflow);
         if (catchWorkflowDefinition == null) {
-          log_.info(workflowDefinition + " is not runnable due to missing catch workflow " + catchWorkflow
-                  + " on operation " + op);
+          log_.info("{} is not runnable due to missing catch workflow {} on operation {}",
+                  new Object[] {workflowDefinition, catchWorkflow, op});
           return false;
         }
         if (!isRunnable(catchWorkflowDefinition, availableOperations, checkedWorkflows))
@@ -334,7 +334,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     }
     
     String id = UUID.randomUUID().toString();
-    log_.info("Starting a new workflow instance with ID=" + id);
+    log_.info("Starting a new workflow instance with ID={}", id);
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition);
     workflowInstance.setId(id);
     try {
@@ -401,7 +401,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       return handlerList.get(index);
     }
 
-    log_.info("No workflow operation handlers found for operation " + operation.getName());
+    log_.info("No workflow operation handlers found for operation {}", operation.getName());
     return null;
   }
 

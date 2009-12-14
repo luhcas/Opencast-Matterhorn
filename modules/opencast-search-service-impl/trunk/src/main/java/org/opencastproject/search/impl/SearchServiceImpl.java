@@ -87,14 +87,14 @@ public class SearchServiceImpl implements SearchService {
    */
   private void setupSolr(String solrRoot) {
     try {
-      log_.info("Setting up solr search index at " + solrRoot);
+      log_.info("Setting up solr search index at {}", solrRoot);
       File solrConfigDir = new File(solrRoot, "conf");
 
       // Create the config directory
       if (solrConfigDir.exists()) {
-        log_.info("solr search index found at " + solrConfigDir);
+        log_.info("solr search index found at {}", solrConfigDir);
       } else {
-        log_.info("solr config directory doesn't exist.  Creating " + solrConfigDir);
+        log_.info("solr config directory doesn't exist.  Creating {}", solrConfigDir);
         FileUtils.forceMkdir(solrConfigDir);
       }
 
@@ -289,7 +289,7 @@ public class SearchServiceImpl implements SearchService {
    */
   public void add(MediaPackage mediaPackage) throws SearchException {
     try {
-      log_.info("Adding mediapackage " + mediaPackage.getIdentifier() + " to search index");
+      log_.info("Adding mediapackage {} to search index", mediaPackage.getIdentifier());
       solrIndexManager.add(mediaPackage);
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -303,7 +303,7 @@ public class SearchServiceImpl implements SearchService {
    */
   public void delete(String mediaPackageId) throws SearchException {
     try {
-      log_.info("Removing mediapackage " + mediaPackageId + " from search index");
+      log_.info("Removing mediapackage {} from search index", mediaPackageId);
       solrIndexManager.delete(mediaPackageId);
     } catch (SolrServerException e) {
       throw new SearchException(e);

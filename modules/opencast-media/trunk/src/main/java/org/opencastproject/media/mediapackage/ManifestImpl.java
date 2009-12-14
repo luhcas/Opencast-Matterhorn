@@ -927,7 +927,7 @@ final class ManifestImpl {
       }
     } else {
       manifest.identifier = IdBuilderFactory.newInstance().newIdBuilder().createNew();
-      log_.info("Created handle " + manifest.identifier + " for manifest");
+      log_.info("Created handle {} for manifest", manifest.identifier);
     }
 
     // Start time

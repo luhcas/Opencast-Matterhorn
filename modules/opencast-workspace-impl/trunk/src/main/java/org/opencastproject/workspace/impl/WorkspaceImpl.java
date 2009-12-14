@@ -66,7 +66,7 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     if(f.exists()) {
       return f;
     } else {
-      logger.info("Copying " + urlString + " to " + f.getAbsolutePath());
+      logger.info("Copying {} to {}", urlString, f.getAbsolutePath());
       try {
         FileUtils.copyURLToFile(uri.toURL(), f);
         return f;

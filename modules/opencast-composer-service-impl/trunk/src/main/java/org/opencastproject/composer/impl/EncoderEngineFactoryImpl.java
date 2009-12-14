@@ -73,7 +73,7 @@ public class EncoderEngineFactoryImpl extends EncoderEngineFactory {
           int separatorLocation = key.lastIndexOf('.');
           String engineId = key.substring(PROP_PREFIX.length(), separatorLocation);
           if (!engineList.contains(engineId))
-            log_.info("Adding " + engineId + " to the list of encoding engines");
+            log_.info("Adding {} to the list of encoding engines", engineId);
             engineList.add(engineId);
         }
       }

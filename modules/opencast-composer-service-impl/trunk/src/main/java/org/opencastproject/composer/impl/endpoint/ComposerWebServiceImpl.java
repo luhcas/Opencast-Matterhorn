@@ -59,7 +59,8 @@ public class ComposerWebServiceImpl implements ComposerWebService {
     if(mediaPackageType == null || sourceTrackId == null || profileId == null) {
       throw new IllegalArgumentException("mediapackage, sourceTrackId, and profileId must not be null");
     }
-    logger.info("Encoding track " + sourceTrackId + " of mediapackage " + mediaPackageType.getId() + " using profile " + profileId);
+    logger.info("Encoding track {} of mediapackage {} using profile {}",
+            new String[] {sourceTrackId, mediaPackageType.getId(), profileId});
     // Build a media package from the POSTed XML
     MediaPackage mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().
         loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));

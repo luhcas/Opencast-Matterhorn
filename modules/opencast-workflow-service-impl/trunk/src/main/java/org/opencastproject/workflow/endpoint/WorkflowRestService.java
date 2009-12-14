@@ -89,7 +89,7 @@ public class WorkflowRestService {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
       String ccServerUrl = cc.getBundleContext().getProperty("serverUrl");
-      logger.info("configured server url is " + ccServerUrl);
+      logger.info("configured server url is {}", ccServerUrl);
       if(ccServerUrl == null) {
         serverUrl = UrlSupport.DEFAULT_BASE_URL;
       } else {

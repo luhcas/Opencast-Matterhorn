@@ -45,7 +45,7 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
    * @see org.apache.felix.fileinstall.ArtifactInstaller#install(java.io.File)
    */
   public void install(File artifact) throws Exception {
-    logger.info("Installing workflow from file " + artifact.getAbsolutePath());
+    logger.info("Installing workflow from file {}", artifact.getAbsolutePath());
     InputStream stream = null;
     try {
       stream = new FileInputStream(artifact);
@@ -61,7 +61,7 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
    * @see org.apache.felix.fileinstall.ArtifactInstaller#uninstall(java.io.File)
    */
   public void uninstall(File artifact) throws Exception {
-    logger.info("Uninstalling workflow from file " + artifact.getAbsolutePath());
+    logger.info("Uninstalling workflow from file {}", artifact.getAbsolutePath());
     InputStream stream = null;
     try {
       stream = new FileInputStream(artifact);

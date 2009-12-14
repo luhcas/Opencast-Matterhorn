@@ -45,7 +45,7 @@ public class DistributionWebServiceImpl implements DistributionWebService {
   
   @WebMethod()
   public void distribute(@WebParam(name="distribution-entity") MediapackageType mediaPackage) {
-    logger.info("Distributing " + mediaPackage);
+    logger.info("Distributing {}", mediaPackage);
     try {
       service.distribute(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(
               IOUtils.toInputStream(mediaPackage.toXml())));

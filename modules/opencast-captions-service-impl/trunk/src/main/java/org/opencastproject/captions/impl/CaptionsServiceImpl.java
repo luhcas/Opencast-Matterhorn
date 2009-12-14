@@ -195,7 +195,8 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
       MediaPackageElement element = mpeb.elementFromURI(uri, MediaPackageElement.Type.Catalog, captionsFlavor);
       element.setIdentifier(elementId);
       mediaPackage.add(element);
-      logger.info("Updated the media package ("+mediaPackage.getIdentifier().compact()+") caption ("+elementId+"): " + uri);
+      logger.info("Updated the media package ({}) caption ({}): {}",
+              new Object[] {mediaPackage.getIdentifier().compact(), elementId, uri});
     } catch (UnsupportedElementException e) {
       logger.error(e.toString(), e);
       throw new IllegalStateException("Failed while adding caption to media package ("+mediaPackage.getIdentifier().compact()+"):" + e);

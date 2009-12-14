@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="workflowsamples" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.http.StaticResource" />
-  <property name="service.description" value="Workflow Controler" />
+  <property name="service.description" value="Workflow Samples" />
   <property name="alias" value="/workflow/samples" />
   <property name="classpath" value="/sample" />
   <property name="welcome.file" value="index.txt" />

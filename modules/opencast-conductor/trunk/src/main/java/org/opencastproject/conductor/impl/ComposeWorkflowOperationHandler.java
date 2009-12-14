@@ -93,7 +93,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     
     Track sourceTrack = mediaPackage.getTrack(sourceTrackId);
     if (sourceTrack == null) {
-      logger.info("Source track '" + sourceTrackId + "' was not found in media package and will not be encoded");
+      logger.info("Source track '{}' was not found in media package and will not be encoded", sourceTrackId);
       return mediaPackage;
     }
     
@@ -109,7 +109,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     // }
     for (EncodingProfile profile : profileList) {
       if (operation.getConfiguration(profile.getIdentifier()) != null) {
-        logger.info("Encoding track " + sourceTrackId + " using profile " + profile.getIdentifier());
+        logger.info("Encoding track {} using profile {}", sourceTrackId, profile.getIdentifier());
         Track composedTrack = composerService.encode(mediaPackage, sourceTrackId, targetTrackId, profile.getIdentifier());
         // store new tracks to mediaPackage
         if (profile.getFlavor() != null)

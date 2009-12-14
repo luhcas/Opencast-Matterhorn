@@ -44,7 +44,7 @@ public class StaticHttpContext implements ManagedService {
 
   public StaticHttpContext() {
     defaultPath = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "static";
-    logger.info("Registering resources at " + defaultPath + " at URL /static");
+    logger.info("Registering resources at {} at URL /static", defaultPath);
     context = new StaticContext(defaultPath);
   }
   

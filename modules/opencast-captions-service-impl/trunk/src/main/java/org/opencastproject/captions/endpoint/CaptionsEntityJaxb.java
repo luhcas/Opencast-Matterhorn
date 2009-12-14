@@ -43,7 +43,7 @@ public class CaptionsEntityJaxb {
   private static final Logger logger = LoggerFactory.getLogger(CaptionsEntityJaxb.class);
 
   public CaptionsEntityJaxb(CaptionsMediaItem entity) {
-    logger.info("Creating a " + CaptionsEntityJaxb.class.getName() + " from " + entity);
+    logger.info("Creating a {} from {}", new String[]{CaptionsEntityJaxb.class.getName(), entity.toString()});
     this.mp = entity.getMediaPackage();
     this.workflowId = entity.getWorkflowId();
     this.mediaPackageId = entity.getMediaPackage().getIdentifier().compact();

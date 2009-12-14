@@ -119,7 +119,7 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
         sb.append(cmd);
         sb.append(" ");
       }
-      log_.info("Executing encoding command: " + sb.toString());
+      log_.info("Executing encoding command: {}", sb);
       ProcessBuilder pbuilder = new ProcessBuilder(command);
       pbuilder.redirectErrorStream(REDIRECT_ERROR_STREAM);
       encoderProcess = pbuilder.start();
@@ -138,11 +138,11 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
         throw new EncoderException(this, "Encoder exited abnormally with status " + exitCode);
       }
 
-      log_.info("Track " + source + " successfully encoded to " + profile.getName());
+      log_.info("Track {} successfully encoded to {}", source, profile.getName());
       fireEncoded(this, source, profile);
       return new File(source.getParent(), FilenameUtils.getBaseName(inf) + profile.getSuffix());
     } catch (EncoderException e) {
-      log_.warn("Error while encoding track " + source + " to " + profile.getName() + ": " + e.getMessage());
+      log_.warn("Error while encoding track {} to {}: {}",new Object[] {source, profile.getName(), e.getMessage()});
       fireEncodingFailed(this, source, profile, e);
       throw e;
     } catch (Exception e) {

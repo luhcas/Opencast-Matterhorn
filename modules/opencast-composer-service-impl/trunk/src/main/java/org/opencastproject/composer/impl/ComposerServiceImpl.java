@@ -123,9 +123,9 @@ public class ComposerServiceImpl implements ComposerService {
     try {
       in = new FileInputStream(encodingOutput);
       returnURL = workspace.put(mediaPackage.getIdentifier().compact(), targetTrackId, encodingOutput.getName(), in);
-      log_.info("Copied the encoded file to the workspace at " + returnURL);
+      log_.info("Copied the encoded file to the workspace at {}", returnURL);
 //      encodingOutput.delete();
-//      log_.info("Deleted the local copy of the encoded file at " + encodingOutput.getAbsolutePath());
+//      log_.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
     } catch (Exception e) {
       log_.error("unable to put the encoded file into the workspace");
       e.printStackTrace();
