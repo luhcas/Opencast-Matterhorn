@@ -54,7 +54,7 @@ uploadEvents.btnAnotherUpload = function() {
 /** fired when user has selected a file in the file dialog */
 uploadEvents.fileSelected = function(file) {
     if (file.size > 2147483648) {
-      alert('The maximum size for a file to be uploaded is 2 GB. The file you selected is bigger than 2 GB and thus cannot be uploaded.');
+      alert('This system supports the uploading of files less then 2GB. The file you have selected is bigger then 2GB and cannot be uploaded.');
     } else {
       uploadManager.selectedFile = file;
       uploadUI.setFilename(file.name);
