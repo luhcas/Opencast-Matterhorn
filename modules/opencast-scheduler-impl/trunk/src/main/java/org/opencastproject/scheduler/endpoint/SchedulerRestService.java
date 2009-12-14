@@ -88,11 +88,14 @@ public class SchedulerRestService {
   }
   
   @POST
-  @Produces(MediaType.TEXT_XML)
+  @Produces(MediaType.TEXT_PLAIN)
   @Path("updateEvent")
   public Response updateEvent (@FormParam("event") SchedulerEventJaxbImpl e) {
-    service.updateEvent(e.getEvent());
-    return Response.ok(service.updateEvent(e.getEvent())).build();
+    if(service.updateEvent(e.getEvent())) {
+      return Response.ok(true).build();
+    } else {
+      return Response.serverError().build();
+    }
   }
   
   @POST

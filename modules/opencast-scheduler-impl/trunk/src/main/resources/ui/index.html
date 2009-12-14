@@ -43,21 +43,24 @@
          */
         
         var eventFields = {
-          "title":       new EventField('title', true),
-          "creator":     new EventField('creator'),
-          "contributor": new EventField('contributor'),
-          "series-id":   new EventField('series'),
-          "subject":     new EventField('subject'),
-          "language":    new EventField('language'),
-          "abstract":    new EventField('description'),
-          "channel-id":  new EventFieldGroup(new Array('distMatterhornMM'), true),
-          "license":     new EventField('license'),
-          "startdate":   new EventFieldGroup(new Array('startDate', 'startTimeHour', 'startTimeMin', 'startTimePeriod'), true, getStartDate, setStartDate, checkStartDate),
-          "enddate":     new EventFieldGroup(new Array('durationHour', 'durationMin'), true, getDuration, setDuration, checkDuration), //returns a date incremented by duration.
-          "resources":   new EventFieldGroup(new Array('audio','audioVideo','audioScreen', 'audioVideoScreen'), true),
-          "attendees":   new EventField('location'),
-          "device-id":   new EventField('location', true)
+          "id":           new EventField('eventID'),
+          "title":        new EventField('title', true),
+          "creator":      new EventField('creator'),
+          "contributor":  new EventField('contributor'),
+          "series-id":    new EventField('series'),
+          "subject":      new EventField('subject'),
+          "language":     new EventField('language'),
+          "abstract":     new EventField('description'),
+          "channel-id":   new EventFieldGroup(new Array('distMatterhornMM'), true),
+          "license":      new EventField('license'),
+          "startdate":    new EventFieldGroup(new Array('startDate', 'startTimeHour', 'startTimeMin', 'startTimePeriod'), true, getStartDate, setStartDate, checkStartDate),
+          "enddate":      new EventFieldGroup(new Array('durationHour', 'durationMin'), true, getDuration, setDuration, checkDuration), //returns a date incremented by duration.
+          "resources":    new EventFieldGroup(new Array('audio','audioVideo','audioScreen', 'audioVideoScreen'), true),
+          "attendees":    new EventField('attendees', true),
+          "device-id":    new EventField('attendees')
         };
+        
+        //Form Manager, handles saving, loading, de/serialization, and validation
         
         eventsManager = new EventManager(eventFields);
         
@@ -79,6 +82,13 @@
         
         $('#submitButton').click(schedulerUI.submitForm);
         $('#resetButton').click(schedulerUI.resetForm);
+
+        var eventID = schedulerUI.getURLParams('eventID');
+        if(eventID && schedulerUI.getURLParams('edit')){
+          $.get(SCHEDULER_URL + '/getEvent?eventID=' + eventID, schedulerUI.loadEvent, 'xml');
+        }
+        
+        schedulerUI.loadKnownAgents();
       }
       
       $(document).ready(initPage);
@@ -111,6 +121,12 @@
                 </li>
                 <li id="missing-startdate" class="missing-fields-item">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose a starting date for the recording.
+                </li>
+                <li id="missing-attendees" class="missing-fields-item">
+                  <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose a capture agent to recorde the event.
+                </li>
+                <li id="missing-enddate" class="missing-fields-item">
+                  <span class="fl-icon inline-icon icon-bullet" title=""></span>You must have a duration greater than 0.
                 </li>
               </ul>
             </div>
@@ -276,7 +292,7 @@
                           </td>
                         </tr>
                         <tr>
-                          <td>Duration:</td>
+                          <td id="label-enddate">Duration:</td>
                           <td>
                             hours
                             <select id="durationHour">
@@ -315,12 +331,11 @@
                     <span class="fl-icon icon-help" id="help_recording" />
                   </li>
                   <li class="required" style="clear: both;">
-                    <label class="fl-label"  id="label-agent">Capture Agent:</label>
+                    <label class="fl-label"  id="label-attendees">Capture Agent:</label>
                     <div>
-                      <select id="location" name="location">
-                        <option value="agentid12345"></option>
+                      <select id="attendees" name="attendees">
                       </select>
-                      <span class="fl-icon icon-help"  id="help_agent" />
+                      <span class="fl-icon icon-help"  id="help_attendees" />
                     </div>
                   </li>
                   <li class="required">
@@ -348,6 +363,7 @@
           <table>
             <tr>
               <td>
+                <input type="hidden" id="eventID" />
                 <input type="button" value="submit" id="submitButton" />
                 <input type="reset" value="reset" id="resetButton" />
                 <span style="color: red; font-size: 1.4em;">*</span> Required

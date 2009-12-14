@@ -88,7 +88,11 @@ public class SchedulerEventJaxbImpl {
   @XmlTransient
   public SchedulerEvent getEvent() {
     SchedulerEventImpl event = new SchedulerEventImpl();
-    event.setID(event.createID());
+    if(id != ""){
+      event.setID(id);
+    }else{
+      event.setID(event.createID());
+    }
     event.setMetadata(metadata);
     event.setStartdate(new Date(start));
     if (duration > 0 )

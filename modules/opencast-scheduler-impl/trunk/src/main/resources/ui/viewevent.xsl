@@ -4,6 +4,9 @@
   <!-- Because of an issue with XPath we have to use &#x2D; to represent '-'
    otherwise it tries to evaluate hyphen-minus as a subtraction operator. -->
   <xsl:template match="event">
+    <div class="fl-container-800">
+      <center><h2>View Recording</h2></center>
+    </div>
     <div class="fl-container-600">
       <div class="fl-widget">
         <div class="fl-widget-content form-box-container">

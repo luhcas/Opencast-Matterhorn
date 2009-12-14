@@ -1,7 +1,8 @@
 // Configurable Page Variables
-var BASE_URL      = 'http://localhost:8080';
-var SCHEDULER_URL = BASE_URL + '/scheduler/rest';
-var WORKFLOW_URL  = BASE_URL + '/workflow/rest';
+var BASE_URL          = '';
+var SCHEDULER_URL     = BASE_URL + '/scheduler/rest';
+var WORKFLOW_URL      = BASE_URL + '/workflow/rest';
+var CAPTURE_ADMIN_URL = BASE_URL + '/capture-admin/rest';
 
 /**
  *  EventManager Object
@@ -73,21 +74,23 @@ function serialize() {
     var doc = this.createDoc();
     var metadata = doc.createElement('metadata');
     for(var i in this.fields){
-      if(i == "startdate" || i == "enddate" || i == "duration" || i == "resources" || i == "attendees"){
-        el = doc.createElement(i);
-        if(i == "startdate" || i == "enddate" || i == "duration"){
-          el.appendChild(doc.createTextNode(this.fields[i].getValue().getTime()));
+      if(this.fields[i].getValue()){
+        if(i == "startdate" || i == "enddate" || i == "duration" || i == "resources" || i == "attendees" || i == "id"){
+            el = doc.createElement(i);
+            if(i == "startdate" || i == "enddate" || i == "duration"){
+              el.appendChild(doc.createTextNode(this.fields[i].getValue().getTime()));
+            }else{
+              el.appendChild(doc.createTextNode(this.fields[i].getValue()));
+            }
+            doc.documentElement.appendChild(el);
         }else{
-          el.appendChild(doc.createTextNode(this.fields[i].getValue()));
+          var item = doc.createElement('item');
+          var val = doc.createElement('value');
+          val.appendChild(doc.createTextNode(this.fields[i].getValue()));
+          item.setAttribute('key', i);
+          item.appendChild(val);
+          metadata.appendChild(item);
         }
-        doc.documentElement.appendChild(el);
-      }else{
-        var item = doc.createElement('item');
-        var val = doc.createElement('value');
-        val.appendChild(doc.createTextNode(this.fields[i].getValue()));
-        item.setAttribute('key', i);
-        item.appendChild(val);
-        metadata.appendChild(item);
       }
     }
     doc.documentElement.appendChild(metadata);
@@ -106,20 +109,22 @@ EventManager.prototype.serialize = serialize;
  *  Populate form with values from an existing event.
  *  @param {DOM Object}
  *  
- *  This approach needs more work. Probably need custom deserializing functions like
- *  serilizing.
+ *  This approach needs more work. Probably need custom deserializing and
+ *  serilizing functions for each EventField/Group.
  */
 function populateForm(document){
   for(var e in this.fields){
+    //Todo: select the agent field when loading an event.
     if(e != "resources" || e != "attendees" || e != "channel-id"){
       switch(e){
         case 'startdate':
-          //console.log('start: ' + $("item[key='" + e + "'] > value", document).text());
-          this.fields[e].setValue(new Date(parseInt($("item[key='" + e + "'] > value", document).text())*1000));
+          this.fields[e].setValue(new Date(parseInt($("startdate", document).text())));
           break;
         case 'enddate': //we have to know the start date before we can use the enddate to sort out duration. This is dumb, talk to rudiger about switching to just use duration.
-          //console.log('end: ' + $("item[key='" + e + "'] > value", document).text());
-          new Date((parseInt($("item[key='" + e + "'] > value", document).text()) - this.fields['startdate'].getValue().getTime())*1000)
+          this.fields[e].setValue(parseInt($("duration", document).text()));
+          break;
+        case 'id':
+          this.fields[e].setValue($("id", document).text());
           break;
         default:
           this.fields[e].setValue($("item[key='" + e + "'] > value", document).text());
@@ -332,10 +337,11 @@ function getDuration() {
 
 /**
  *  Overrides setValue for EventFieldGroup for duration fields
- *  @param {integer} Duration in seconds
+ *  @param {integer} Duration in milliseconds
  */
 function setDuration(val) {
   if(this.groupElements['durationHour'] && this.groupElements['durationMin']){
+    val = val/1000; //milliseconds -> seconds
     var hour  = Math.floor(val/3600);
     var min   = Math.floor((val/60) % 60);
     this.groupElements['durationHour'].val(hour);
@@ -349,7 +355,7 @@ function setDuration(val) {
  */
 function checkDuration(){
   if(this.groupElements['durationHour'] && this.groupElements['durationMin'] &&
-     (this.groupElements['durationHour'].val() !== 0 && this.groupElements['durationMin'].val() !== 0)){
+     (this.groupElements['durationHour'].val() !== '0' && this.groupElements['durationMin'].val() !== '00')){
     return true;
   }
   return false;
