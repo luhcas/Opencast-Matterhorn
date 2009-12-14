@@ -37,7 +37,7 @@ uploadEvents.btnClear = function() {
 /** fired if cancel button in upload progress overlay is clicked */
 uploadEvents.btnCancelUpload = function() {
     uploadUI.log("EVENT: " + "Submit button clicked");
-    if (confirm(uploadManager.selectedFile.name + ' is still uploading.\nAre you sure you want to cancel?')) {
+    if (confirm(uploadManager.selectedFile.name + ' is still uploading.\nAre you sure you want to stop the upload?')) {
       uploadManager.cancelUpload();
     }
 }

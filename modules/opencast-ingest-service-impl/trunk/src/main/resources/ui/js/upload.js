@@ -49,7 +49,7 @@ uploadManager.init = function() {
         file_queued_handler : uploadEvents.fileSelected,
         upload_start_handler : uploadEvents.uploadStarted,
         upload_progress_handler : uploadEvents.uploadProgress,
-        upload_complete_handler : uploadEvents.uploadComplete,
+        upload_success_handler : uploadEvents.uploadComplete,
         upload_error_handler : uploadEvents.uploadError
     } );
    selectedFile = null;
@@ -69,8 +69,8 @@ uploadManager.startUpload = function() {
 
 /** Cancels the current upload and generates an upload error event */
 uploadManager.cancelUpload = function() {
-    uploadManager.uploader.cancelUpload(uploadManager.selectedFile, false);
-    uploadEvents.uploadError(uploadManager.selectedFile, 000, "Upload aborted by user.");
+    uploadManager.uploader.stopUpload(uploadManager.selectedFile, false);
+    //uploadEvents.uploadError(uploadManager.selectedFile, 000, "Upload aborted by user.");
 }
 
 /** Collect metadata from the forms
