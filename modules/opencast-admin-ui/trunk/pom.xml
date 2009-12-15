@@ -122,7 +122,7 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package>org.opencastproject.http, *</Import-Package>
             <Export-Package> org.opencastproject.adminui.* </Export-Package>
-            <Private-Package>org.json.*, ui.*</Private-Package>
+            <Private-Package>org.json.*, ui.*, uitests.*</Private-Package>
             <Embed-Dependency>
               json_simple;inline=true
             </Embed-Dependency>

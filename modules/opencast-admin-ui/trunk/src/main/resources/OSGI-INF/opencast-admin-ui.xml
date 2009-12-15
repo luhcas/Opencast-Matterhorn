@@ -5,6 +5,9 @@
   <property name="alias" value="/admin" />
   <property name="classpath" value="/ui" />
   <property name="welcome.file" value="index.html" />
+
+  <property name="test.classpath" value="/uitests" />
+  <property name="test.suite" value="GoogleTestSuite.html" />
   <service>
     <provide interface="org.opencastproject.http.StaticResource" />
   </service>
