@@ -107,29 +107,10 @@
             </Export-Package>
             <Private-Package>
               html,
-              solr.*,
-              org.tartarus.*,
-              org.apache.solr.*,
-              org.apache.lucene.*,
-              org.apache.derby.*,
               org.json.simple,
               org.json.simple.parser
             </Private-Package>
             <Embed-Dependency>
-              lucene-analyzers;inline=true,
-              lucene-memory;inline=true,
-              solr-common;inline=true,
-              solr-core;inline=true,
-              solr-dataimporthandler;inline=true,
-              solr-solrj;inline=true,
-              solr-lucene-contrib;inline=true,
-              solr-lucene-core;inline=true,
-              solr-lucene-highlighter;inline=true,
-              solr-lucene-queries;inline=true,
-              solr-lucene-snowball;inline=true,
-              solr-lucene-spellchecker;inline=true,
-              stax-utils;inline=true,
-              derby;inline=true,
               json_simple;inline=true
             </Embed-Dependency>
             <Service-Component>

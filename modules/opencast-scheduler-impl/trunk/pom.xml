@@ -95,13 +95,13 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.scheduler.* </Export-Package>
-			<Import-Package>
-				org.opencastproject.http, 
-				*;resolution:=optional
-			</Import-Package>
+      			<Import-Package>
+      				org.opencastproject.http, 
+      				*;resolution:=optional
+      			</Import-Package>
             <Private-Package>
               org.apache.derby.*
-              net.fortuna.ical4j.*
+              <!-- net.fortuna.ical4j.* -->
             </Private-Package>
             <Embed-Dependency>
               derby;inline=true,

@@ -154,9 +154,9 @@
             <Private-Package>
               html,
               solr.*,
-              org.tartarus.*,
-              org.apache.solr.*,
-              org.apache.lucene.*,
+              org.tartarus.*;-split-package:=merge-first,
+              org.apache.solr.*;-split-package:=merge-first,
+              org.apache.lucene.*;-split-package:=merge-first,
             </Private-Package>
             <Export-Package>
               org.opencastproject.search.impl.*,
