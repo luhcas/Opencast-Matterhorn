@@ -121,7 +121,8 @@ Opencast.ariaSlider = (function ()
         @param Target target, Number value 
     */
     function changeValueFromVideodisplay(target, value) {
-        var ratio = calibrate(target);
+     
+    	var ratio = calibrate(target);
         var min = parseInt(target.getAttribute('aria-valuemin'));
         var max = parseInt(target.getAttribute('aria-valuemax'));
         var newValue = Math.min(Math.max(value, min), max);

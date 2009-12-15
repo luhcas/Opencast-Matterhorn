@@ -59,7 +59,7 @@
 			import mx.core.Application;
 			import mx.events.FlexEvent;
 			
-			import com.adobe.strobe.caption.TextElement;
+			
 			
 			//private static const REMOTE_PROGRESSIVE:String 		= "http://vs1.rz.uos.de/public/virtmm/test/Pechakucha-zoo_hd.mp4";
 			//private static const REMOTE_STREAM:String 		  	= "rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv";
@@ -181,6 +181,8 @@
 			/**  */
 			private function playHeadChange(event:PlayheadChangeEvent):void
 			{	
+				
+				
 				model.currentPlayhead = event.newPosition;
 				
 				var newPositionString:String = t.getTC(event.newPosition);

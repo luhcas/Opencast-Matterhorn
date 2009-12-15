@@ -183,8 +183,6 @@
 		    public function closedCaptions( bool:Boolean ):void
 		    {
 		    	Swiz.dispatchEvent( new ClosedCaptionsEvent(bool) );
-		    	
-		    	
 		    }
 		   
 		    /**
@@ -206,7 +204,6 @@
 			{
 				return model.player.volume;
 			}
-			
 			
 			/**
              * setccBool

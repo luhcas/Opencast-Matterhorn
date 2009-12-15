@@ -30,6 +30,11 @@
         <script type="text/javascript" src="player-hybrid-fromvideodisplay.js"></script>
         <script type="text/javascript" src="player-hybrid-tovideodisplay.js"></script>
         <script type="text/javascript" src="aria/js/ariaSlider.js"></script>
+        <script type="text/javascript" src="swffix/swffix.js"></script>
+        <script type="text/javascript">
+        SWFFix.registerObject("oc_Videodisplay", "10.0.0", "swffix/expressInstall.swf");
+        </script>
+        
      </head>
 
     <body>
@@ -104,23 +109,22 @@
             quality="high"
             allowScriptAccess="always"
             src="Videodisplay.swf">
-      </object>
+       </object>
     </div>
 
-    <!--<div id="info" class="fl-offScreen-hidden">-->
+    <!--  <div id="info" class="fl-offScreen-hidden">-->
     <div id="info" class="">
-     
         <p>Keyboard Shortcuts:</p>
           Control + Alt + P   = Pause/Play toggle the video<br>
           Control + Alt + S   = Stop the video.<br>
           Control + Alt + M   = Mute/Unmute toggle<br>
           Control + Alt + U   = Volume Up<br>
           Control + Alt + D   = Volume Down<br>
-          Control + Alt 0 - 9 = Seek<br>
+          Control + Alt 0 - 9 = Seek the time slider<br>
           Control + Alt + C   = Captions toggle<br>
           Control + Alt + F   = Forward<br>
           Control + Alt + R   = Rewind<br>
-         <br>
+          <br>
     </div>
 
     <ul id="captions" aria-channel="main" aria-relevant="additions" aria-atomic="true" aria-live="polite" role="log" class="fl-offScreen-hidden">

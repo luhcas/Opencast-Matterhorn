@@ -52,11 +52,6 @@ package org.opencast.engage.videodisplay.control
 		private var lastPlayPauseState:String = "";
 		private var volume:Number = 1;
 		private var skipVolume:Number = 0.1;
-		private var volumeLowest:Number = 0.2;
-		private var volumeLow:Number = 0.4;
-		private var volumeMiddle:Number = 0.6;
-		private var volumeHigh:Number = 0.8;
-		private var volumeHighest:Number = 1;
 		private var percent:int = 100;
 		
 		/** Constructor */
@@ -328,18 +323,6 @@ package org.opencast.engage.videodisplay.control
 		public function closedCaptions( event : ClosedCaptionsEvent ) : void
 		{
 			model.ccBoolean = event.ccBoolean;
-			
-			
-			
-			/*
-			
-			if( model.ccBoolean == true )
-			{
-				model.ccBoolean = false;
-			}else
-			{
-				model.ccBoolean = true;
-			}*/
 		}
 	}
 }

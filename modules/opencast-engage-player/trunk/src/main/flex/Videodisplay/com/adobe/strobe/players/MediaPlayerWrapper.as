@@ -514,7 +514,6 @@ package com.adobe.strobe.players
 			dispatchEvent(new VolumeChangeEvent(0 , mediaPlayer.volume));
 			dispatchEvent(new PanChangeEvent(0 , mediaPlayer.pan));
 			dispatchEvent(new MutedChangeEvent(mediaPlayer.muted));
-			Alert.show( mediaPlayer.volume.toString());
 		}
 
 		private function get mediaPlayer() : MediaPlayer
