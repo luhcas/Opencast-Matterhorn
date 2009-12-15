@@ -245,7 +245,7 @@ public class RestEndpoint {
     return match;
   }
   /**
-   * @return the calculated query string for a GET endpoint (e.g. ?blah=1)
+   * @return the calculated query string for a GET endpoint (e.g. ?blah=1), will be urlencoded for html display
    */
   public String getQueryString() {
     String qs = "";
@@ -260,18 +260,18 @@ public class RestEndpoint {
           sb.append(p.getName());
           sb.append("=");
           if (p.getDefaultValue() != null) {
-            try {
-              sb.append(URLEncoder.encode(p.getDefaultValue(),"UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-              sb.append(p.getDefaultValue());
-            }
+            sb.append(p.getDefaultValue());
           } else {
             sb.append("{");
             sb.append(p.getName());
             sb.append("}");
           }
         }
-        qs = sb.toString();
+        try {
+          qs = URLEncoder.encode(sb.toString(),"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+          qs = sb.toString();
+        }
       }
     }
     return qs;

@@ -208,10 +208,14 @@
         <#else>
         <a href="#" class="form_link">${endpoint.form.title!"Testing form"} (click to reveal)</a>
         <div class="hidden_form">
-          <form id="form_${endpoint.name}" action="${meta.url}${endpoint.path}" method="${endpoint.method}" enctype="multipart/form-data">
-            <#if (endpoint.form.ajaxSubmit)><input class="form_ajax_submit" type="hidden" name="form_ajax_submit" value="${endpoint.name}" /></#if>
+          <form id="form_${endpoint.name}" class="form_test_form" action="${meta.url}${endpoint.path}" method="${endpoint.method}" enctype="multipart/form-data">
+            <input class="form_action_holder" type="hidden" value="${meta.url}${endpoint.path}" />
+            <input class="form_endpoint_name" type="hidden" value="${endpoint.name}" />
+            <#if (endpoint.form.ajaxSubmit)>
+            <input class="form_ajax_submit" type="hidden" value="1" />
+            </#if>
             <div>
-                <strong>Form action:</strong> <tt class="form_path">${endpoint.path}</tt>
+                <strong>Form action:</strong> <tt class="form_path">${meta.url}${endpoint.path}</tt>
                 <#if (endpoint.form.usesPathFormat)>
                   [<label for="${endpoint.name}_FORMAT">Format</label>:
                   <select id="${endpoint.name}_FORMAT" name="form_path_format">
@@ -224,11 +228,12 @@
             </div>
             <table class="testing" cellpadding="0" cellspacing="0">
               <#list endpoint.form.items as item>
-              <tr class="form_field<#if item.required> form_required<#else> form_optional</#if><#if item.path> form_path_param</#if>">
+              <tr class="form_field <#if item.required>form_required<#else>form_optional</#if>">
                 <#if item.type == "text">
                 <td class="form_textarea" colspan="3">
                   <label for="${endpoint.name}_${item.name}">${item.name}</label>:<br/>
-                  <textarea id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field_text" rows="${(item.attributes.rows)!'3'}" cols="${(item.attributes.cols)!'80'}">${item.defaultValue!}</textarea>
+                  <textarea id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field_text form_param_submit" 
+                    rows="${(item.attributes.rows)!'3'}" cols="${(item.attributes.cols)!'80'}">${item.defaultValue!}</textarea>
                   <div class="form_field_description">${item.description!}</div>
                 </td>
                 <#elseif item.type == "boolean">
@@ -236,7 +241,8 @@
                   <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
                 </td>
                 <td>
-                  <input id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field" type="checkbox" value="${item.defaultValue!}" />
+                  <input id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field <#if item.path>form_param_path<#else>form_param_submit</#if>" 
+                    type="checkbox" value="${item.defaultValue!}" />
                 </td>
                 <td class="form_field_description">${item.description!}</td>
                 <#elseif item.type == "file">
@@ -244,7 +250,7 @@
                   <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
                 </td>
                 <td>
-                  <input id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field_file" class="form_field" type="file" />
+                  <input id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field_file" class="form_field form_param_upload" type="file" />
                 </td>
                 <td class="form_field_description">${item.description!}</td>
                 <#elseif item.type == "enum">
@@ -252,7 +258,7 @@
                   <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
                 </td>
                 <td>
-                  <select id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field">
+                  <select id="${endpoint.name}_${item.name}" class="form_field <#if item.path>form_param_path<#else>form_param_submit</#if>" name="${item.name}">
                     <#list item.choices as choice>
                     <option value="${choice}"<#if (choice == item.defaultValue)> selected="selected"</#if>>${choice}</option>
                     </#list>
@@ -264,7 +270,8 @@
                   <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
                 </td>
                 <td>
-                  <input class="form_field" id="${endpoint.name}_${item.name}" name="${item.name}" type="text" value="${item.defaultValue!}" size="${(item.attributes.size)!'30'}" />
+                  <input id="${endpoint.name}_${item.name}" class="form_field <#if item.path>form_param_path<#else>form_param_submit</#if>" name="${item.name}" 
+                    type="text" value="${item.defaultValue!}" size="${(item.attributes.size)!'30'}" />
                 </td>
                 <td class="form_field_description">${item.description!}</td>
                 </#if>
@@ -320,6 +327,7 @@
 <script type="text/javascript"
   src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
 <script type="text/javascript">
+/*global alert, jQuery  */
 (function($) {
     $("a.form_link").click(
         function() {
@@ -327,15 +335,57 @@
             var $form = $this.parent().find("div.hidden_form");
             $form.toggle(400);
             $this.parent().find("div.form_submit input").click(
-            	function() {
-            		$form.hide(200);
-            		$this.show();
-            	}
+                function() {
+                    $form.hide(200);
+                    $this.show();
+                }
             );
             $this.hide();
             return false;
         }
     );
+    /**
+     * Takes a path and integrates the pathParams values into it
+     * @param {String} path the path with keys (e.g. /my/{thing}/{stuff})
+     * @param {Array} params the params to put into the path (e.g. {'thing':'apple'})
+     */
+    function updatePath(path, params) {
+        var newPath = path;
+        for (var key in params) {
+            var value = params[key];
+            if (value) {
+                newPath = newPath.replace('{'+key+'}',value);
+            }
+        }
+        return newPath;
+    }
+    // do operation on all testing forms
+    $("form.form_test_form").each( function() {
+        var $form = $(this);
+        if ($form.find("input.form_action_holder").length >= 1) {
+            var form_path = $form.find("input.form_action_holder").val();
+            // now find and put the event handler on all path params
+            var $pathParams = $form.find(".form_param_path");
+            $pathParams.change( function() {
+                var params = [];
+                var check = $form;
+                $form.find(".form_param_path").each( function() {
+                    var $param = $(this);
+                    params[$param.attr('name')] = $param.val();
+                });
+                var path = updatePath(form_path, params);
+                // update form and display
+                $form.attr('action', path);
+                var check = $form.find(".form_path");
+                $form.find(".form_path").html(path);
+            });
+            if ($form.find("input.form_ajax_submit").length >= 1) {
+              // the form will use ajax submit
+              var form_key = $form.find("input.form_endpoint_name").val();
+              // add an event handler to the form submit
+            }
+        }
+    });
 }(jQuery));
 </script>
 
