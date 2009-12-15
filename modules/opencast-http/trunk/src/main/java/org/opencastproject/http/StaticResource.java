@@ -85,7 +85,7 @@ public class StaticResource extends HttpServlet {
     String servletPath = req.getServletPath();
     String path = pathInfo == null ? servletPath : servletPath + pathInfo;
     Boolean testMode = "true".equalsIgnoreCase(componentContext.getBundleContext().getProperty("testMode"));
-    logger.info("handling path {}, pathInfo={}, servletPath={}, testMode={}", new Object[] {path, pathInfo, servletPath});
+    logger.debug("handling path {}, pathInfo={}, servletPath={}, testMode={}", new Object[] {path, pathInfo, servletPath, testMode});
     
     // If the URL points to a "directory", redirect to the welcome file
     if("/".equals(path) || alias.equals(path) || (alias + "/").equals(path)) {
@@ -96,7 +96,7 @@ public class StaticResource extends HttpServlet {
         } else {
           redirectPath = alias + "/" + welcomeFile;
         }
-        logger.info("redirecting {} to {}", new String[] {path, redirectPath});
+        logger.debug("redirecting {} to {}", new String[] {path, redirectPath});
         resp.sendRedirect(redirectPath);
         return;
       } catch (IOException e) {
@@ -123,14 +123,14 @@ public class StaticResource extends HttpServlet {
           if( ! servletPath.equals(alias)) {
             classpathToResource = testClasspath.substring(1) + servletPath;
           } else {
-            classpathToResource = testClasspath.substring(1) + "/" + welcomeFile;
+            classpathToResource = testClasspath.substring(1) + "/" + testSuite;
           }
         } else {
           classpathToResource = testClasspath.substring(1) + pathInfo;
         }
         url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
       }
-      logger.info("opening url {} {}", new Object[] {classpathToResource, url});
+      logger.debug("opening url {} {}", new Object[] {classpathToResource, url});
       
       String md5 = DigestUtils.md5Hex(url.openStream());
       if(md5.equals(req.getHeader("If-None-Match"))) {

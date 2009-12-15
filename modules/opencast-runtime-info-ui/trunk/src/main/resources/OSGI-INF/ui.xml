@@ -7,7 +7,6 @@
   <property name="welcome.file" value="index.html" />
 
   <property name="test.classpath" value="/uitests" />
-  <property name="test.suite" value="core/TestRunner.html" />
 
   <service>
     <provide interface="org.opencastproject.http.StaticResource" />
