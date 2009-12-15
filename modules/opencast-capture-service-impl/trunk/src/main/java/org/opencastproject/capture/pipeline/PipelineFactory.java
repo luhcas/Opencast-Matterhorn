@@ -92,21 +92,21 @@ public class PipelineFactory {
             devName = DeviceName.HAUPPAUGE_WINTV;
           else if (deviceString.contains("BT878"))
             devName = DeviceName.BLUECHERRY_PROVIDEO;
-          // Non-V4L file. If it exists, assume it is ingestable
-          // TODO: Fix security risk. Any file on CaptureAgent filesytem could be ingested
           else {
-            if (new File(srcLoc).isFile()) {
-              devName = DeviceName.FILE;
-            }
-            else {
-              logger.error("Do not recognized device: {}.", srcLoc);
-              return null;
-            }
+            logger.error("Do not recognized device: {}.", srcLoc);
+            return null;
           }
         }
       } catch (JV4LInfoException e) {
-        logger.error("Could not access device: {}.", srcLoc);
-        continue;
+        // Non-V4L file. If it exists, assume it is ingestable
+        // TODO: Fix security risk. Any file on CaptureAgent filesytem could be ingested
+        if (new File(srcLoc).isFile()) {
+          devName = DeviceName.FILE;
+        }
+        else {
+          logger.error("No such file: {}.", srcLoc);
+          return null;
+        }
       }
       
       // devices will store the CaptureDevice list arbitrary order
