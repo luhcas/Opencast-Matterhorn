@@ -39,6 +39,9 @@ public class StaticResource extends HttpServlet {
   String classpath;
   String alias;
   String welcomeFile;
+  String testClasspath;
+  String testSuite;
+
   HttpService httpService;
   ComponentContext componentContext;
 
@@ -56,8 +59,10 @@ public class StaticResource extends HttpServlet {
     }
     alias = (String)componentContext.getProperties().get("alias");
     classpath = (String)componentContext.getProperties().get("classpath");
-    logger.info("registering classpath:{} at {} with welcome file {} {}",
-            new Object[] {classpath, alias, welcomeFile, welcomeFileSpecified ? "" : "(via default)"});
+    testSuite = (String)componentContext.getProperties().get("test.suite");
+    testClasspath = (String)componentContext.getProperties().get("test.classpath");
+    logger.info("registering classpath:{} at {} with welcome file {} {}, test suite: {} from classpath {}",
+            new Object[] {classpath, alias, welcomeFile, welcomeFileSpecified ? "" : "(via default)", testSuite, testClasspath});
     try {
       httpService.registerServlet(alias, this, null, null);
     } catch (Exception e) {
@@ -79,8 +84,8 @@ public class StaticResource extends HttpServlet {
     String pathInfo = req.getPathInfo();
     String servletPath = req.getServletPath();
     String path = pathInfo == null ? servletPath : servletPath + pathInfo;
-
-    logger.debug("handling path {}, pathInfo={}, servletPath={}", new String[] {path, pathInfo, servletPath});
+    Boolean testMode = "true".equalsIgnoreCase(componentContext.getBundleContext().getProperty("testMode"));
+    logger.info("handling path {}, pathInfo={}, servletPath={}, testMode={}", new Object[] {path, pathInfo, servletPath});
     
     // If the URL points to a "directory", redirect to the welcome file
     if("/".equals(path) || alias.equals(path) || (alias + "/").equals(path)) {
@@ -91,7 +96,7 @@ public class StaticResource extends HttpServlet {
         } else {
           redirectPath = alias + "/" + welcomeFile;
         }
-        logger.debug("redirecting {} to {}", new String[] {path, redirectPath});
+        logger.info("redirecting {} to {}", new String[] {path, redirectPath});
         resp.sendRedirect(redirectPath);
         return;
       } catch (IOException e) {
@@ -113,7 +118,20 @@ public class StaticResource extends HttpServlet {
       }
 
       URL url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
-      logger.debug("opening url {} {}", new Object[] {classpathToResource, url});
+      if(url == null && testMode) {
+        if(pathInfo == null) {
+          if( ! servletPath.equals(alias)) {
+            classpathToResource = testClasspath.substring(1) + servletPath;
+          } else {
+            classpathToResource = testClasspath.substring(1) + "/" + welcomeFile;
+          }
+        } else {
+          classpathToResource = testClasspath.substring(1) + pathInfo;
+        }
+        url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
+      }
+      logger.info("opening url {} {}", new Object[] {classpathToResource, url});
+      
       String md5 = DigestUtils.md5Hex(url.openStream());
       if(md5.equals(req.getHeader("If-None-Match"))) {
         resp.setStatus(304);

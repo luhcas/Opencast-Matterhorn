@@ -144,9 +144,14 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
       String alias = (String)ref.getProperty("alias");
       String welcomeFile = (String)ref.getProperty("welcome.file");
       String welcomePath = "/".equals(alias) ? alias + welcomeFile : alias + "/" + welcomeFile;
+      String testSuite = (String)ref.getProperty("test.suite");
       JSONObject endpoint = new JSONObject();
       endpoint.put("description", description);
       endpoint.put("welcomepage", serverUrl + welcomePath);
+      if(testSuite != null) {
+        String testSuitePath = "/".equals(alias) ? alias + testSuite : alias + "/" + testSuite;
+        endpoint.put("testsuite", serverUrl + testSuitePath);
+      }
       json.add(endpoint);
     }
     return json;
