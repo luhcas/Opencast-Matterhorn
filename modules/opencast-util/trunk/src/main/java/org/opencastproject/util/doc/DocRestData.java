@@ -89,8 +89,9 @@ public class DocRestData extends DocData {
           }
           if ( count != endpoint.getPathParams().size() ) {
             throw new IllegalArgumentException("Path ("+endpoint.path+") does not match path parameters ("+
-                    endpoint.getRequiredParams()+") for endpoint ("+endpoint.name+
-                    "), the path must contain the same number of path params as the pathParams list");
+                    endpoint.getPathParams()+") for endpoint ("+endpoint.name+
+                    "), the path must contain the same number of path params ("+count+
+                    ") as the pathParams list ("+endpoint.getPathParams().size()+")");
           }
           // handle the forms
           if (endpoint.getForm() != null) {
