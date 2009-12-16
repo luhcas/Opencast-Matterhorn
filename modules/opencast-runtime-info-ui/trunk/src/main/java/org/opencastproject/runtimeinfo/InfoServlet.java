@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -50,6 +51,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
   private static final String RS_CONTEXT_FILTER = "(" + RS_CONTEXT + "=*)";
   
   private BundleContext bundleContext;
+
   /**
    * {@inheritDoc}
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -148,7 +150,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
       JSONObject endpoint = new JSONObject();
       endpoint.put("description", description);
       endpoint.put("welcomepage", serverUrl + welcomePath);
-      if(testSuite != null && "true".equalsIgnoreCase(bundleContext.getProperty("testMode"))) {
+      if(testSuite != null && isTestMode()) {
         String testSuitePath = "/".equals(alias) ? alias + testSuite : alias + "/" + testSuite;
         endpoint.put("testsuite", serverUrl + testSuitePath);
       }
@@ -157,12 +159,18 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     return json;
   }
   
+  protected boolean isTestMode() {
+    return "true".equalsIgnoreCase(bundleContext.getProperty("testMode"));
+  }
+  
   private ServiceTracker httpTracker;
   
   public void start(BundleContext context) throws Exception {
     logger.debug("start()");
     this.bundleContext = context;
     final HttpServlet servlet = this;
+    final HttpServlet testSuite = new TestSuiteServlet();
+    
     httpTracker = new ServiceTracker(context, HttpService.class
         .getName(), null) {
       @Override
@@ -171,6 +179,9 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
         try {
           HttpContext httpContext = httpService.createDefaultHttpContext();
           httpService.registerServlet("/info.json", servlet, null, httpContext);
+          if(isTestMode()) {
+            httpService.registerServlet("/TestSuite.html", testSuite, null, httpContext);
+          }
         } catch (ServletException e) {
           e.printStackTrace();
         } catch (NamespaceException e) {
@@ -186,6 +197,31 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     logger.debug("stop()");
     if(httpTracker != null) {
       httpTracker.close();
+    }
+  }
+  
+  class TestSuiteServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      String serverUrl = getServerUrl();
+      PrintWriter out = resp.getWriter();
+      out.println("<html><head><meta content=\"text/html; charset=ISO-8859-1\" http-equiv=\"content-type\"><title>Test Suite</title></head>");
+      out.println("<body><table cellpadding=\"1\" cellspacing=\"1\"border=\"1\"><tbody><tr><td><b>Test Suite</b></td></tr>");
+      try {
+        for(ServiceReference ref : getUserInterfaceServiceReferences()) {
+          String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
+          String alias = (String)ref.getProperty("alias");
+          String testSuite = (String)ref.getProperty("test.suite");
+          if(testSuite != null) {
+            String testSuitePath = "/".equals(alias) ? serverUrl + alias + testSuite : serverUrl + alias + "/" + testSuite;
+            out.println("<tr><td><a href=\"" + testSuitePath + "\">" + description + "</a></td></tr>");
+          }
+        }
+      } catch (InvalidSyntaxException e) {
+        out.println("<tr><td>Error: unable to generate this test suite</td></tr>");
+        logger.error(e.getMessage());
+      }
+      out.println("</tbody></table></body></html>");
     }
   }
 }
