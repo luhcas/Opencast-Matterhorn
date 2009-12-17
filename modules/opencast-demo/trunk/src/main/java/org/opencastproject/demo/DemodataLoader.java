@@ -173,6 +173,10 @@ public class DemodataLoader {
       MediaPackage mediaPackage = mpBuilder.loadFromManifest(new FileInputStream(manifestFile));
       Id mediapackageId = mediaPackage.getIdentifier();
   
+      if (verbose) {
+        System.out.println("Ingesting media package " + mediapackageId);
+      }
+
       // Upload metadata catalogs to working file repository
       for (Catalog catalog : mediaPackage.getCatalogs()) {
         client = new DefaultHttpClient();
@@ -207,10 +211,6 @@ public class DemodataLoader {
       formParams.add(new BasicNameValuePair("mediapackage", serializedMediaPackage));
       formParams.add(new BasicNameValuePair("properties", "mediapackage=" + packageDir));
       postStart.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
-  
-      if (verbose) {
-        System.out.println("Ingesting media package " + mediapackageId);
-      }
   
       // Grab the new workflow instance from the response
       client = new DefaultHttpClient();
