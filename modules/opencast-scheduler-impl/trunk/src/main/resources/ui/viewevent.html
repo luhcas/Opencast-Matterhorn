@@ -19,7 +19,6 @@
     <script type="text/javascript" src="js/viewevent.js"></script>
     <script type="text/javascript" src="js/jquery.xslt.js"></script>
     <script type="text/javascript">
-      var workflowID = null;
       if(document.location.search){
         var params = document.location.search.substr(1).split('&');
         for(var p in params){
@@ -31,26 +30,14 @@
         }
       }
       
-      $(document).ready(function() { 
-                        //$.get("http://localhost/~msutton/test.xml", handleWorkflow);
-                        $('#stage').xslt("http://orochi.unl.edu:8080/scheduler/ui/event.xml", "viewevent.xsl", callback);
-                        });
-      
-      function handleWorkflow(workflowDoc){
-        //TODO: better selector to get just the metadata we want.
-        console.log($("metadata:first catalog url", workflowDoc).text());
-        var dcUrl = $("metadata:first catalog url", workflowDoc).text();
-      }
-      
-      function callback(){
-        $('.folder-head').click(function(){
-                                $(this).children('.fl-icon').toggleClass('icon-arrow-right');
-                                $(this).children('.fl-icon').toggleClass('icon-arrow-down');
-                                $(this).next().toggle('fast');
-                                return false;
-                                });
-      }
-      </script>
+      $(document).ready(
+        function() { 
+          if(workflowID){
+            $.get("/workflow/rest/instance/" + workflowID + ".xml", handleWorkflow);
+          }
+        }
+      );
+    </script>
   </head>
   <body>
     <!-- fl-centered doesn't work in winXP-IE8 -->
@@ -59,9 +46,7 @@
         <li class="fl-activeTab"><a href="../../admin/ui/recordings_upcoming.html">Recordings</a></li>
         <li class=""><a href="../../admin/ui/agents_status.html">Capture Agents</a></li>
       </ul>
-      <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
-        
-      </div>
+      <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;" />
     </div>
   </body>
 </html>

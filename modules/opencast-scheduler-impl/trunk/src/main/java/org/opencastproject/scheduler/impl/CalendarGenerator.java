@@ -101,6 +101,8 @@ public class CalendarGenerator {
         for (int i = 0; i < resources.length; i++) resList.add(resources[i]);     
         event.getProperties().add(new Resources(resList));
       }
+      //TODO: We need to add a second attachment that contains the Agent ID, Distribution Channel, and selected Inputs.
+      //event.getProperties().add(new Attach( <some xml thingy here> );
         event.getProperties().add(new Attach((dcGenerator.generateAsBase64(e))));
       //event.getProperties().add(new XProperty(name));
     } catch (URISyntaxException e1) {

@@ -54,5 +54,5 @@ public interface SchedulerWebService {
   
   @WebMethod()
   @WebResult(name="array")
-  public SchedulerEventJaxbImpl [] getUpcommingEvents ();  
+  public SchedulerEventJaxbImpl [] getUpcomingEvents ();  
 }

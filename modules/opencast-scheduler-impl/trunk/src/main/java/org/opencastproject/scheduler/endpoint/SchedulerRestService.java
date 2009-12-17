@@ -130,9 +130,10 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("getUpcommingEvents")
-  public SchedulerEventJaxbImpl [] getUpcommingEvents () {
-    SchedulerEvent [] events = service.getUpcommingEvents();
+  @Path("getUpcomingEvents")
+  public SchedulerEventJaxbImpl [] getUpcomingEvents () {
+    logger.info("Getting upcoming events!");
+    SchedulerEvent [] events = service.getUpcomingEvents();
     SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
     for (int i = 0; i < events.length; i++) jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
     return jaxbEvents;

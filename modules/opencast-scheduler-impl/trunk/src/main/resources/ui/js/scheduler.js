@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+
 // Configurable Page Variables
 var BASE_URL          = '';
 var SCHEDULER_URL     = BASE_URL + '/scheduler/rest';
@@ -10,8 +26,11 @@ var CAPTURE_ADMIN_URL = BASE_URL + '/capture-admin/rest';
  *  @class
  */
 function EventManager(eventFields){
+  //Contains an array of eventFields
   this.fields         = eventFields || new Array();
+  //Defines the root namespace for scheduler service
   this.rootNS         = 'http://scheduler.opencastproject.org';
+  //Defines the root element of xml document used for scheudler service
   this.rootEl         = 'scheduler-event';
 }
 
@@ -69,20 +88,29 @@ EventManager.prototype.checkForm = checkForm;
  *  scheduler service: addEvent
  */
 function serialize() {
-  //Todo: EventField/Group should know how to render themselves. this is a hack
+  //Todo: EventField/Group should know how to render themselves. this is bad, refactor
   if(this.checkForm()){
     var doc = this.createDoc();
     var metadata = doc.createElement('metadata');
     for(var i in this.fields){
       if(this.fields[i].getValue()){
-        if(i == "startdate" || i == "enddate" || i == "duration" || i == "resources" || i == "attendees" || i == "id"){
-            el = doc.createElement(i);
-            if(i == "startdate" || i == "enddate" || i == "duration"){
-              el.appendChild(doc.createTextNode(this.fields[i].getValue().getTime()));
-            }else{
-              el.appendChild(doc.createTextNode(this.fields[i].getValue()));
-            }
-            doc.documentElement.appendChild(el);
+        el = doc.createElement(i);
+        if(i == "startdate" || i == "enddate" || i == "duration"){
+          el.appendChild(doc.createTextNode(this.fields[i].getValue().getTime()));
+          doc.documentElement.appendChild(el);
+        }else if(i == "attendees"){
+          var attendee = doc.createElement("attendee");
+          attendee.appendChild(doc.createTextNode(this.fields[i].getValue()));
+          el.appendChild(attendee);
+          doc.documentElement.appendChild(el);
+        }else if(i == "id"){
+          el.appendChild(doc.createTextNode(this.fields[i].getValue()));
+          doc.documentElement.appendChild(el);
+        }else if(i == "resources"){
+          var resource = doc.createElement("resource");
+          resource.appendChild(doc.createTextNode(this.fields[i].getValue()));
+          el.appendChild(resource);
+          doc.documentElement.appendChild(el);
         }else{
           var item = doc.createElement('item');
           var val = doc.createElement('value');
@@ -163,6 +191,7 @@ function EventField(id, required, getValue, setValue, checkValue){
     throw "Unable to find field " + id;
   }
   this.required   = required || false;
+  this.value      = null;
 
   // If getValue is specified, override the default getValue.
   if($.isFunction(getValue)){
@@ -355,7 +384,7 @@ function setDuration(val) {
  */
 function checkDuration(){
   if(this.groupElements['durationHour'] && this.groupElements['durationMin'] &&
-     (this.groupElements['durationHour'].val() !== '0' && this.groupElements['durationMin'].val() !== '00')){
+     (this.groupElements['durationHour'].val() !== "0" || this.groupElements['durationMin'].val() !== "0")){
     return true;
   }
   return false;

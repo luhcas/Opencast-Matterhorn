@@ -72,6 +72,7 @@
             <li>
               <label class="fl-label">Distribution Channel(s):</label>
               <!-- Distribution Channels -->
+              Matterhorn Media Module
               <xsl:value-of select="distribution" />
             </li>
             <li>

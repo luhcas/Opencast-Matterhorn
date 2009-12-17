@@ -43,7 +43,7 @@
 }
 
 .formbox-header-text {
-    margin-left: 10px;
+    margin-left: 1.2em;
 }
 
 .folder-icon {
@@ -76,7 +76,7 @@
 }
 
 .form-box-table th,td {
-  border: 0px;
+  border: 0;
 }
 
 .form-box-group {
@@ -129,6 +129,7 @@ eg, 5 items * 1.2em line-height = 6em */
 }
 
 .form-list li {
+  clear: both;
   margin-bottom: 1em;
 }
 
@@ -146,7 +147,7 @@ eg, 5 items * 1.2em line-height = 6em */
     background: lightgreen;
     width:430px;
     text-align:center;
-    margin-bottom:15px;
+    margin-bottom:2em;
 }
 .data-row {
     width:100%;

@@ -301,7 +301,6 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   public SchedulerEvent[] getEvents(SchedulerFilter filter) {
     String query = "SELECT DISTINCT EVENT.eventid, EVENT.startdate, EVENT.enddate FROM EVENT JOIN EVENTMETADATA ON EVENT.eventid = EVENTMETADATA.eventid ";
     String where = ""; 
-    
     if (filter != null) {
       query += " WHERE ";
       if (filter.getDeviceFilter() != null) {

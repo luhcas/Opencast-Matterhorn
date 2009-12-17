@@ -92,8 +92,8 @@ public class SchedulerWebServiceImpl implements SchedulerWebService {
    */
   @WebMethod()
   @WebResult(name="array")
-  public SchedulerEventJaxbImpl [] getUpcommingEvents () {
-    SchedulerEvent [] events = service.getUpcommingEvents();
+  public SchedulerEventJaxbImpl [] getUpcomingEvents () {
+    SchedulerEvent [] events = service.getUpcomingEvents();
     SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
     for (int i = 0; i < events.length; i++) jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
     return jaxbEvents;
