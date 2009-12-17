@@ -86,4 +86,5 @@ uploadEvents.uploadComplete = function(file) {
 uploadEvents.uploadError = function(file, code, message) {
     uploadUI.hideProgressOverlay();
     uploadManager.uploading = false;
+    alert('Error during upload: ' + code + "\n" + message);
 }

@@ -37,7 +37,7 @@ uploadManager.init = function() {
         file_types_description : "All Files",
         file_upload_limit : 0,
         file_queue_limit : 0,
-        file_post_name : "mediafile",
+        file_post_name : "track",
         debug: true,
 
         button_placeholder_id : "uploader",
@@ -58,12 +58,12 @@ uploadManager.init = function() {
 /** Colloects the metadata from the form and starts the file upload */
 uploadManager.startUpload = function() {
     uploadManager.collectMetadata();
-    /* var list = "";    
+    var list = "";
     for (key in uploadManager.metadata) {
         list += "[" + key + "]:" + uploadManager.metadata[key] + "\n";
         uploadManager.uploader.addFileParam(uploadManager.selectedFile.id, key, uploadManager.metadata[key]);
     }
-    alert("Metadata:\n" + list);*/
+    //alert("Metadata:\n" + list);
     uploadManager.uploader.startUpload(uploadManager.selectedFile.id);
 }
 
@@ -76,14 +76,15 @@ uploadManager.cancelUpload = function() {
 /** Collect metadata from the forms
  *  TODO use form.serialize() the serialize the forms */
 uploadManager.collectMetadata = function() {
-    uploadManager.metadata = { title       : document.getElementById("title").value,
-                               presenter   : document.getElementById("contributor").value,
-                               description : document.getElementById("description").value,
-                               language    : document.getElementById("language").value,
-                               series      : document.getElementById('series').value,
-                               department  : document.getElementById('department').value,
-                               content     : document.getElementById('mediacontent').value,
-                               subject     : document.getElementById('subject').value
+    uploadManager.metadata = { 'title'       : document.getElementById("title").value,
+                               'contributor'   : document.getElementById("contributor").value,
+                               'abstract'    : document.getElementById("description").value,
+                               'language'    : document.getElementById("language").value,
+                               'isPartOf'    : document.getElementById('series').value,
+                               'department'  : document.getElementById('department').value,
+                               'type'     : document.getElementById('mediacontent').value,
+                               'subject'     : document.getElementById('subject').value,
+                               'license'     : document.getElementById('license').value
                              };
                              /*
                                distSakai   : document.getElementById("distSakai").checked,
