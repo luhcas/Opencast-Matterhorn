@@ -24,6 +24,7 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Mpeg7Catalog;
 import org.opencastproject.media.mediapackage.dublincore.DublinCore;
+import org.opencastproject.media.mediapackage.dublincore.DublinCoreValue;
 import org.opencastproject.media.mediapackage.dublincore.utils.DCMIPeriod;
 import org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils;
 import org.opencastproject.media.mediapackage.mpeg7.ContentSegment;
@@ -346,7 +347,18 @@ public class SolrIndexManager {
 
     // dc:created
     if (dc.hasValue(DublinCore.PROPERTY_CREATED)) {
-      Date date = EncodingSchemeUtils.decodeMandatoryDate(dc.get(DublinCore.PROPERTY_CREATED).get(0));
+      DublinCoreValue created = dc.get(DublinCore.PROPERTY_CREATED).get(0);
+      Date date = null;
+      // TODO: Is there a (more performing) way to do this without try/catch?
+      try {
+        date = EncodingSchemeUtils.decodeMandatoryDate(dc.get(DublinCore.PROPERTY_CREATED).get(0));
+      } catch (IllegalArgumentException e) {
+        DCMIPeriod period = EncodingSchemeUtils.decodeMandatoryPeriod(created);
+        if (period != null)
+          date = period.getStart();
+        else
+          throw new IllegalArgumentException("Created date is neither a date nor a period");
+      }
       solrInput.addField(SolrFields.DC_CREATED, date);
     }
 
