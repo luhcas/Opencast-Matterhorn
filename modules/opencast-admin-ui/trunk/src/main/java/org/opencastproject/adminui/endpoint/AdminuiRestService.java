@@ -202,7 +202,7 @@ public class AdminuiRestService {
 
     // get number of upcoming recordings if scheduler is present
     if (schedulerService != null) {
-      SchedulerEvent[] events = schedulerService.getUpcommingEvents();
+      SchedulerEvent[] events = schedulerService.getUpcomingEvents();
       out.put("upcoming", new Integer(events.length));
       logMessage += "scheduler-service";
       total += events.length;
@@ -271,7 +271,7 @@ public class AdminuiRestService {
     RecordingDataViewList out = new RecordingDataViewListImpl();
     if (schedulerService != null) {
       logger.info("getting upcoming recordings from scheudler");
-      SchedulerEvent[] events = schedulerService.getUpcommingEvents();
+      SchedulerEvent[] events = schedulerService.getUpcomingEvents();
       for (int i = 0; i < events.length; i++) {
         RecordingDataView item = new RecordingDataViewImpl();
         item.setTitle(events[i].getTitle());
