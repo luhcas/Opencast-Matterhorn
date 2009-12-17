@@ -22,9 +22,13 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.identifier.Id;
 
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
-
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.NameValuePair;
@@ -45,7 +49,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -54,11 +57,17 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
@@ -82,87 +91,166 @@ public class DemodataLoader {
 
     String host = DEFAULT_HOST;
     boolean verbose = true;
-    MediaPackageBuilder mpBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
+    boolean random = false;
+    int samples = Integer.MAX_VALUE;
 
-    if (args.length > 2) {
-      System.err.println("Wrong number of arguments");
-      System.err.println("Usage: demoloader [-q] <host>");
-      System.exit(1);
-    }
+    // Parse commandline
+    try {
+      CommandLine cmd = setupCommandline(args);
 
-    for (String arg : args) {
-      if ("-q".equals(arg)) {
-        verbose = false;
-      } else {
+      // Samples
+      if (cmd.hasOption('n')) {
         try {
-          URL url = new URL(args[0]);
-          host = url.toExternalForm();
-        } catch (MalformedURLException e) {
-          System.err.println("Invalid host. Please use http://<hostname>:<portname>");
+          samples = Integer.parseInt(cmd.getOptionValue('n'));
+        } catch (NumberFormatException e) {
+          System.err.println("Error parsing number of samples");
           System.exit(1);
         }
       }
-    }
 
-    HttpClient client = null;
+      // Verbose?
+      verbose = !cmd.hasOption('q');
 
-    try {
-      client = new DefaultHttpClient();
-      String loadDemoDataWorkflow = loadWorkflow("/demo-workflow.xml");
-      File[] packages = unzipDemoData("/demo-data.zip");
+      // Random selection?
+      random = cmd.hasOption('r');
 
-      for (File packageDir : packages) {
-        mpBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(packageDir));
-        File manifestFile = new File(packageDir, "index.xml");
-        MediaPackage mediaPackage = mpBuilder.loadFromManifest(new FileInputStream(manifestFile));
-        Id mediapackageId = mediaPackage.getIdentifier();
-
-        // Upload metadata catalogs to working file repository
-        for (Catalog catalog : mediaPackage.getCatalogs()) {
-          client = new DefaultHttpClient();
-          MultipartEntity postEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-          URI catalogUrl = catalog.getURI();
-          String filename = catalogUrl.getPath().substring(catalogUrl.getPath().lastIndexOf('/') + 1);
-          URI uploadedCatalogUrl = new URI(host + "/files/" + mediapackageId.compact() + "/" + catalog.getIdentifier());
-          postEntity.addPart("file", new InputStreamBody(catalog.getURI().toURL().openStream(), filename));
-          HttpPost post = new HttpPost(uploadedCatalogUrl);
-          post.setEntity(postEntity);
-          client.execute(post);
-          catalog.setURI(uploadedCatalogUrl);
+      // Host
+      try {
+        if (cmd.getArgs().length > 0) {
+          URL url = new URL(cmd.getArgs()[0]);
+          host = url.toExternalForm();
+        } else {
+          host = "http://localhost:8080";
         }
-
-        // Serialize the modified media package into a string
-        String serializedMediaPackage = null;
-        try {
-          Writer out = new StringWriter();
-          XMLSerializer serializer = new XMLSerializer(out, new OutputFormat(mediaPackage.toXml()));
-          serializer.serialize(mediaPackage.toXml());
-          serializedMediaPackage = out.toString();
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-
-        // Start a workflow instance via the rest endpoint
-        HttpPost postStart = new HttpPost(host + "/workflow/rest/start");
-        List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-
-        formParams.add(new BasicNameValuePair("definition", loadDemoDataWorkflow));
-        formParams.add(new BasicNameValuePair("mediapackage", serializedMediaPackage));
-        formParams.add(new BasicNameValuePair("properties", "mediapackage=" + packageDir));
-        postStart.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
-
-        if (verbose) {
-          System.out.println("Ingesting media package " + mediapackageId);
-        }
-
-        // Grab the new workflow instance from the response
-        client = new DefaultHttpClient();
-        client.execute(postStart);
+      } catch (MalformedURLException e) {
+        System.err.println("Invalid host. Please use http://<hostname>:<portname>");
+        System.exit(1);
       }
+
+    } catch (ParseException e) {
+      System.exit(1);
+    }
+    
+    // Load the data
+    try {
+      File[] packages = unzipDemoData("/demo-data.zip");
+      if (!random) {
+        for (File packageDir : packages) {
+          if (samples <= 0)
+            break;
+          loadSample(packageDir, host, verbose);
+          samples--;
+        }
+      } else {
+        samples = Math.min(samples, packages.length);
+        Random rdm = new Random();
+        while (samples > 0) {
+          loadSample(packages[rdm.nextInt(packages.length)], host, verbose);
+          samples--;
+        }
+      }
+
     } catch (Exception e) {
       e.printStackTrace();
+    }
+  }
+
+  /**
+   * Loads the given media package into the matterhorn installation.
+   * 
+   * @param packageDir
+   *          the mediapackage root directory
+   */
+  protected static void loadSample(File packageDir, String host, boolean verbose) throws Exception {
+    HttpClient client = new DefaultHttpClient();
+    String loadDemoDataWorkflow = loadWorkflow("/demo-workflow.xml");
+    MediaPackageBuilder mpBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
+
+    try {
+
+      mpBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(packageDir));
+      File manifestFile = new File(packageDir, "index.xml");
+      MediaPackage mediaPackage = mpBuilder.loadFromManifest(new FileInputStream(manifestFile));
+      Id mediapackageId = mediaPackage.getIdentifier();
+  
+      // Upload metadata catalogs to working file repository
+      for (Catalog catalog : mediaPackage.getCatalogs()) {
+        client = new DefaultHttpClient();
+        MultipartEntity postEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        URI catalogUrl = catalog.getURI();
+        String filename = catalogUrl.getPath().substring(catalogUrl.getPath().lastIndexOf('/') + 1);
+        URI uploadedCatalogUrl = new URI(host + "/files/" + mediapackageId.compact() + "/" + catalog.getIdentifier());
+        postEntity.addPart("file", new InputStreamBody(catalog.getURI().toURL().openStream(), filename));
+        HttpPost post = new HttpPost(uploadedCatalogUrl);
+        post.setEntity(postEntity);
+        client.execute(post);
+        catalog.setURI(uploadedCatalogUrl);
+      }
+  
+      // Do the xml serialization
+      String serializedMediaPackage = null;
+      Writer out = new StringWriter();
+      DOMSource domSource = new DOMSource(mediaPackage.toXml());
+      StreamResult streamResult = new StreamResult(out);
+      TransformerFactory tf = TransformerFactory.newInstance();
+      Transformer serializer = tf.newTransformer();
+      serializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+      serializer.setOutputProperty(OutputKeys.INDENT, "yes");
+      serializer.transform(domSource, streamResult);
+      serializedMediaPackage = out.toString();
+  
+      // Start a workflow instance via the rest endpoint
+      HttpPost postStart = new HttpPost(host + "/workflow/rest/start");
+      List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+  
+      formParams.add(new BasicNameValuePair("definition", loadDemoDataWorkflow));
+      formParams.add(new BasicNameValuePair("mediapackage", serializedMediaPackage));
+      formParams.add(new BasicNameValuePair("properties", "mediapackage=" + packageDir));
+      postStart.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
+  
+      if (verbose) {
+        System.out.println("Ingesting media package " + mediapackageId);
+      }
+  
+      // Grab the new workflow instance from the response
+      client = new DefaultHttpClient();
+      client.execute(postStart);
     } finally {
       client.getConnectionManager().shutdown();
+    }
+  }
+
+  /**
+   * Creates the commandline options.
+   * 
+   * @param args
+   *          the commandline arguments
+   * @throws ParseException
+   *           If there are errors parsing the commandline
+   */
+  @SuppressWarnings("static-access")
+  protected static CommandLine setupCommandline(String[] args) throws ParseException {
+    Options cmdOptions = new Options();
+    cmdOptions.addOption("h", "help", false, "display this help screen");
+    cmdOptions.addOption("n", true, "number of datasets to load");
+    cmdOptions.addOption("q", "quiet", false, "be quiet, don't add verbose output");
+    cmdOptions.addOption("r", "random", false, "choose samples randomly");
+    cmdOptions.addOption(OptionBuilder.hasArgs().withArgName("number").withDescription("number of samples to load")
+            .withLongOpt("number").create("n"));
+    CommandLineParser cmdParser = new GnuParser();
+    CommandLine cmd = null;
+    try {
+      cmd = cmdParser.parse(cmdOptions, args);
+      if (cmd.hasOption('h')) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("demoloader", cmdOptions);
+        System.exit(0);
+      }
+      return cmd;
+    } catch (ParseException e) {
+      HelpFormatter formatter = new HelpFormatter();
+      formatter.printHelp("demoloader", cmdOptions);
+      throw e;
     }
   }
 
