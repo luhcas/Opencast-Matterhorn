@@ -22,6 +22,7 @@ uploadEvents.fieldChanged = function(field) {
 uploadEvents.btnSubmit = function() {
     uploadUI.log("EVENT: " + "Submit button clicked");
     if (uploadManager.checkUpload(true)) {
+        uploadUI.showProgressOverlay();
         uploadManager.startUpload();
     } else {
         uploadUI.displayMissingFields();
@@ -65,7 +66,6 @@ uploadEvents.fileSelected = function(file) {
 
 /** fired when swfUpload has started the upload */
 uploadEvents.uploadStarted = function(file) {
-    uploadUI.showProgressOverlay();
     uploadManager.uploading = true;
 }
 

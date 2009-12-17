@@ -273,9 +273,14 @@
                 <div class="progressbarContainer">
                     <div id="ProgressBar" class="progressbar">
                         <div id="progressIndicator" class="progressIndicator"></div>
-                        <div id="progressLabel" class="progressLabel">0%</div>
+                        <div id="progressLabel" class="progressLabel">Initialization in progress</div>
                     </div>
                 </div>
+                <center><button type="button" onclick="uploadEvents.btnCancelUpload();">Cancel</button></center>
+            </div>
+            <div id="uploadProgressOverlayLinux" class="uploadProgressOverlay fl-centered">
+                <center><b>Upload in Progress</b></center>
+                <div id="linuxMessage">For Linux an upload progress bar is not supported. Your browser may seem to have crashed but it is actually uploading. Please stay patient.</div>
                 <center><button type="button" onclick="uploadEvents.btnCancelUpload();">Cancel</button></center>
             </div>
 
