@@ -167,7 +167,7 @@ public class SearchResultItemImpl implements SearchResultItem {
   private SortedSet<MediaSegmentImpl> mediaSegments = null;
 
   @XmlElementWrapper(name = "file-locations")
-  @XmlElement(name = "location")
+  @XmlElement(name = "URI")
   private List<URI> locations;
 
   /**

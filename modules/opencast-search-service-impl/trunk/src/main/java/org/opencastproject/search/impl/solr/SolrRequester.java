@@ -285,10 +285,7 @@ public class SolrRequester {
           // setting file locations
           List<URI> locations = new LinkedList<URI>();
           for (Track track : mediaPackage.getTracks()) {
-            // FIXME different way of removing original track from search results
-            String trackLocation = track.getURI().toString();
-            if (trackLocation.lastIndexOf(".") > trackLocation.length() - 7)
-              locations.add(track.getURI());
+            locations.add(track.getURI());
           }
           for (Attachment attachment : mediaPackage.getAttachments()) {
             locations.add(attachment.getURI());
