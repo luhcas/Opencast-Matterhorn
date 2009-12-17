@@ -243,13 +243,13 @@ public class DemodataLoader {
       cmd = cmdParser.parse(cmdOptions, args);
       if (cmd.hasOption('h')) {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("demoloader", cmdOptions);
+        formatter.printHelp("demoloader [url]", cmdOptions);
         System.exit(0);
       }
       return cmd;
     } catch (ParseException e) {
       HelpFormatter formatter = new HelpFormatter();
-      formatter.printHelp("demoloader", cmdOptions);
+      formatter.printHelp("demoloader [url]", cmdOptions);
       throw e;
     }
   }
