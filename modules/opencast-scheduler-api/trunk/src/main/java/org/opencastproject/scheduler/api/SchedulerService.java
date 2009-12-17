@@ -66,7 +66,7 @@ public interface SchedulerService {
    * return a list of all events that will be recorded in the future
    * @return The List of events.
    */
-  public SchedulerEvent [] getUpcommingEvents (); 
+  public SchedulerEvent [] getUpcomingEvents (); 
   
   /**
    * generates the Dublin Core metadata set for the event specified by the ID
