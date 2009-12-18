@@ -96,17 +96,30 @@ public class ComposerServiceImpl implements ComposerService {
    *      java.lang.String, java.lang.String)
    */
   public Track encode(MediaPackage mediaPackage, String sourceTrackId, String targetTrackId, String profileId) throws EncoderException {
-    StringBuilder message = new StringBuilder();
-    message.append("encoding job started on:\nMedia package=");
-    message.append(mediaPackage.getIdentifier());
-    message.append("\nTrack ID=");
-    message.append(sourceTrackId);
+    return encode(mediaPackage, sourceTrackId, sourceTrackId, targetTrackId, profileId);
+  }
 
-    // Get the track and make sure it's there
-    Track track = mediaPackage.getTrack(sourceTrackId);
-    if (track == null)
-      throw new RuntimeException("Unable to encode non-existing track " + sourceTrackId);
-    File workspaceVersion = workspace.get(track.getURI());
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.media.mediapackage.MediaPackage, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+   */
+  @Override
+  public Track encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
+          String targetTrackId, String profileId) throws EncoderException {
+
+    log_.info("encoding track {} for media package {} using source audio track {} and source video track {}",
+      new String[] {targetTrackId, mediaPackage.getIdentifier().toString(), sourceAudioTrackId, sourceVideoTrackId});
+    
+    // Get the tracks and make sure they exist
+    Track audioTrack = mediaPackage.getTrack(sourceAudioTrackId);
+    if (audioTrack == null)
+      throw new RuntimeException("Unable to encode non-existent audio track " + sourceAudioTrackId);
+    File audioFile = workspace.get(audioTrack.getURI());
+
+    Track videoTrack = mediaPackage.getTrack(sourceVideoTrackId);
+    if (videoTrack == null)
+      throw new RuntimeException("Unable to encode non-existent video track " + sourceVideoTrackId);
+    File videoFile = workspace.get(videoTrack.getURI());
 
     // Create the engine
     EncoderEngine engine = EncoderEngineFactory.newInstance().newEngineByProfile(profileId);
@@ -115,7 +128,7 @@ public class ComposerServiceImpl implements ComposerService {
       throw new RuntimeException("Profile '" + profileId + " is unkown");
     
     // Do the work
-    File encodingOutput = engine.encode(workspaceVersion, profile);
+    File encodingOutput = engine.encode(audioFile, videoFile, profile);
 
     // Put the file in the workspace
     URI returnURL = null;

@@ -232,8 +232,9 @@
                             exception-handler-workflow="Default Error Handler"
                             description="Encode media">
                             <configurations>
-                              <configuration key="source-track-id">track-1</configuration>
-                              <configuration key="target-track-id">track-2</configuration>
+                              <configuration key="audio-source-track-id">track-1</configuration>
+                              <configuration key="video-source-track-id">track-2</configuration>
+                              <configuration key="target-track-id">track-3</configuration>
                             </configurations>
                           </operation>
                           <operation
@@ -242,7 +243,7 @@
                             exception-handler-workflow="Default Error Handler"
                             description="Distribute media to distribution channels">
                             <configurations>
-                              <configuration key="source-track-id">track-2</configuration>
+                              <configuration key="source-track-id">track-3</configuration>
                             </configurations>
                           </operation>
                           <operation
@@ -258,10 +259,23 @@
                       <mediapackage id="10.0000/1" start="2007-12-05T13:40:00" duration="1004400000">
                         <media>
                           <track id="track-1" type="track/presentation">
+                            <mimetype>audio/quicktime</mimetype>
+                            <url>@SAMPLES_URL@/aonly.mp3</url>
+                            <checksum type="md5">950f9fa49caa8f1c5bbc36892f6fd062</checksum>
+                            <duration>10472</duration>
+                            <audio>
+                              <channels>2</channels>
+                              <bitdepth>0</bitdepth>
+                              <bitrate>128004.0</bitrate>
+                              <samplingrate>44100</samplingrate>
+                            </audio>
+                          </track>
+
+                          <track id="track-2" type="track/presentation">
                             <mimetype>video/quicktime</mimetype>
-                            <url>@SAMPLES_URL@/media.mov</url>
+                            <url>@SAMPLES_URL@/vonly.mov</url>
                             <checksum type="md5">43b7d843b02c4a429b2f547a4f230d31</checksum>
-                            <duration>1004400000</duration>
+                            <duration>14546</duration>
                             <video>
                               <device type="UFG03" version="30112007" vendor="Unigraf" />
                               <encoder type="H.264" version="7.4" vendor="Apple Inc" />

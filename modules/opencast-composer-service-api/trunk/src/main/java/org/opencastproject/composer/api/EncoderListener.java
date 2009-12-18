@@ -29,12 +29,12 @@ public interface EncoderListener {
    * 
    * @param engine
    *          the encoding engine
-   * @param sourceFile
-   *          the file that was encoded
+   * @param sourceFiles
+   *          the source files being encoded
    * @param profile
    *          the encoding profile
    */
-  void fileEncoded(EncoderEngine engine, File sourceFile, EncodingProfile profile);
+  void fileEncoded(EncoderEngine engine, EncodingProfile profile, File... sourceFiles);
 
   /**
    * Tells the listener that the given file could not be encoded into
@@ -42,14 +42,14 @@ public interface EncoderListener {
    * 
    * @param engine
    *          the encoding engine
-   * @param sourceFile
-   *          the file that was encoded
+   * @param sourceFiles
+   *          the source files being encoded
    * @param profile
    *          the encoding profile
    * @param cause
    *          the failure reason
    */
-  void fileEncodingFailed(EncoderEngine engine, File sourceFile, EncodingProfile profile, Throwable cause);
+  void fileEncodingFailed(EncoderEngine engine, EncodingProfile profile, Throwable cause, File... sourceFiles);
 
   /**
    * Tells the listener about encoding progress while the file is being encoded into

@@ -30,12 +30,12 @@ public interface CmdlineEncoderListener extends EncoderListener {
    * Notifies the listener of any console output from the encoder either to stdin or stderr.
    * 
    * @param file
-   *          the file that is being encoded
+   *          the files that are being encoded
    * @param format
    *          the encoder format in use
    * @param message
    *          the output message
    */
-  void notifyEncoderOutput(File file, EncodingProfile format, String message);
+  void notifyEncoderOutput(EncodingProfile format, String message, File... file);
 
 }

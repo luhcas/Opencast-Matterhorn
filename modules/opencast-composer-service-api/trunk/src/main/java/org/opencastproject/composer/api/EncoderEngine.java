@@ -44,8 +44,10 @@ public interface EncoderEngine {
   /**
    * Encodes a file into the specified format.
    * 
-   * @param source
-   *          the file to encode
+   * @param audio source
+   *          the audio file to use in encoding
+   * @param video source
+   *          the video file to use in encoding
    * @param format
    *          the media format definition
    * @return the encoded file
@@ -53,7 +55,7 @@ public interface EncoderEngine {
    * @throws EncoderException
    *           if an error occurs during encoding
    */
-  File encode(File source, EncodingProfile format) throws EncoderException;
+  File encode(File audioSource, File videoSource, EncodingProfile format) throws EncoderException;
 
   /**
    * Returns <code>true</code> if the encoder engine supports multithreading.

@@ -14,28 +14,40 @@
       the track ID in the media package to encode.
       <form action="encode" method="POST">
         Media Package XML<br/>
-        <textarea rows="20" cols="80" id="mediapackage" name="mediapackage">
-          <mediapackage id="00000/1" start="2007-12-05T13:40:00" duration="1004400000">
-            <media>
-              <track id="track-1" type="track/presentation">
-                <mimetype>video/quicktime</mimetype>
-                <url>http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/av.mov</url>
-                <checksum type="md5">43b7d843b02c4a429b2f547a4f230d31</checksum>
-                <duration>1004400000</duration>
-                <video>
-                  <device type="UFG03" version="30112007" vendor="Unigraf" />
-                  <encoder type="H.264" version="7.4" vendor="Apple Inc" />
-                  <resolution>640x480</resolution>
-                  <scanType type="progressive" />
-                  <bitrate>540520</bitrate>
-                  <frameRate>2</frameRate>
-                </video>
-              </track>
-            </media>
-          </mediapackage>
-        </textarea><br/>
-        Source Track ID: <input type="text" id="sourceTrackId" name="sourceTrackId" value="track-1"/>
-        Target Track ID: <input type="text" id="targetTrackId" name="targetTrackId" value="track-2"/>
+<textarea rows="20" cols="80" id="mediapackage" name="mediapackage"><mediapackage id="00000/1" start="2007-12-05T13:40:00" duration="1004400000">
+  <media>
+    <track id="track-1" type="track/presentation">
+      <mimetype>audio/quicktime</mimetype>
+      <url>http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/aonly.mov</url>
+      <checksum type="md5">950f9fa49caa8f1c5bbc36892f6fd062</checksum>
+      <duration>10472</duration>
+      <audio>
+        <channels>2</channels>
+        <bitdepth>0</bitdepth>
+        <bitrate>128004.0</bitrate>
+        <samplingrate>44100</samplingrate>
+      </audio>
+    </track>
+
+    <track id="track-2" type="track/presentation">
+      <mimetype>video/quicktime</mimetype>
+      <url>http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/vonly.mov</url>
+      <checksum type="md5">43b7d843b02c4a429b2f547a4f230d31</checksum>
+      <duration>14546</duration>
+      <video>
+        <device type="UFG03" version="30112007" vendor="Unigraf" />
+        <encoder type="H.264" version="7.4" vendor="Apple Inc" />
+        <resolution>640x480</resolution>
+        <scanType type="progressive" />
+        <bitrate>540520</bitrate>
+        <frameRate>2</frameRate>
+      </video>
+    </track>
+  </media>
+</mediapackage></textarea><br/>
+        Audio source Track ID: <input type="text" id="audioSourceTrackId" name="audioSourceTrackId" value="track-1"/>
+        Video source Track ID: <input type="text" id="videoSourceTrackId" name="videoSourceTrackId" value="track-2"/>
+        Target Track ID: <input type="text" id="targetTrackId" name="targetTrackId" value="track-3"/>
         Profile ID: <input type="text" id="profileId" name="profileId" value="analysis-tracks.http"/>
         <input type="submit" value="Encode"/>
       </form>

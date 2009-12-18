@@ -23,8 +23,34 @@ import org.opencastproject.media.mediapackage.Track;
  */
 public interface ComposerService {
 
+  /**
+   * Encode one track, using that track's audio and video streams.
+   * 
+   * @param mediaPackage The media package containing the source track
+   * @param sourceTrackId The ID of the source track within the media package
+   * @param targetTrackId The ID of the track to generate
+   * @param profileId The profile to use for encoding
+   * @return The track that results from the encoding
+   * @throws EncoderException
+   */
   public Track encode(MediaPackage mediaPackage, String sourceTrackId, String targetTrackId, String profileId) throws EncoderException;
 
+  /**
+   * Encode the video stream from one track and the audio stream from another, into a new {@link Track}.
+   * 
+   * @param mediaPackage The media package containing the source track
+   * @param sourceTrackId The ID of the source track within the media package
+   * @param targetTrackId The ID of the track to generate
+   * @param profileId The profile to use for encoding
+   * @return The track that results from the encoding
+   * @throws EncoderException
+   */
+  public Track encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
+          String targetTrackId, String profileId) throws EncoderException;
+
+  /**
+   * @return All registered {@link EncodingProfile}s.
+   */
   EncodingProfile[] listProfiles();
   
 }

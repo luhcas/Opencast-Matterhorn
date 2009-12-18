@@ -24,6 +24,7 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
@@ -50,8 +51,10 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
    */
   public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    logger.info("run() compose workflow operation");
-
+    logger.info("run() compose workflow operation on {}", workflowInstance);
+    for(WorkflowConfiguration config : workflowInstance.getConfigurations()) {
+      logger.info("config {} = {}", config.getKey(), config.getValue());
+    }
     MediaPackage resultingMediaPackage;
 
     // FIXME change when encode is called (think how to pass properties)
@@ -88,15 +91,26 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
    */
   private MediaPackage encode(MediaPackage mediaPackage, WorkflowOperationInstance operation) throws EncoderException,
           MediaPackageException, UnsupportedElementException {
-    String sourceTrackId = operation.getConfiguration("source-track-id");
+    String videoSourceTrackId = operation.getConfiguration("video-source-track-id");
+    String audioSourceTrackId = operation.getConfiguration("audio-source-track-id");
+    // If there is no separate audio track, use the audio from the video file
+    if(audioSourceTrackId == null) {
+      audioSourceTrackId = videoSourceTrackId;
+    }
     String targetTrackId = operation.getConfiguration("target-track-id");
     
-    Track sourceTrack = mediaPackage.getTrack(sourceTrackId);
-    if (sourceTrack == null) {
-      logger.info("Source track '{}' was not found in media package and will not be encoded", sourceTrackId);
+    Track audioSourceTrack = mediaPackage.getTrack(audioSourceTrackId);
+    if (audioSourceTrack == null) {
+      logger.info("Source track '{}' was not found in media package and will not be encoded", audioSourceTrackId);
       return mediaPackage;
     }
-    
+
+    Track videoSourceTrack = mediaPackage.getTrack(videoSourceTrackId);
+    if (videoSourceTrack == null) {
+      logger.info("Source track '{}' was not found in media package and will not be encoded", videoSourceTrackId);
+      return mediaPackage;
+    }
+
     // TODO profile retrieval, matching for media type (Audio, Visual, AudioVisual, EnhancedAudio, Image,
     // ImageSequence, Cover)
     // String[] profiles = ((String)properties.get("encode")).split(" ");
@@ -109,12 +123,14 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     // }
     for (EncodingProfile profile : profileList) {
       if (operation.getConfiguration(profile.getIdentifier()) != null) {
-        logger.info("Encoding track {} using profile {}", sourceTrackId, profile.getIdentifier());
-        Track composedTrack = composerService.encode(mediaPackage, sourceTrackId, targetTrackId, profile.getIdentifier());
+        logger.info("Encoding audio track {} and video track {} using profile {}",
+                new String[] {audioSourceTrackId, videoSourceTrackId, profile.getIdentifier()});
+        Track composedTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, targetTrackId, profile.getIdentifier());
         // store new tracks to mediaPackage
         if (profile.getFlavor() != null)
           composedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(profile.getFlavor()));
-        mediaPackage.addDerived(composedTrack, sourceTrack);
+        // FIXME derived media comes from multiple sources, so how do we choose which is the "parent" of the derived media?
+        mediaPackage.addDerived(composedTrack, videoSourceTrack);
         break;
       }
     }

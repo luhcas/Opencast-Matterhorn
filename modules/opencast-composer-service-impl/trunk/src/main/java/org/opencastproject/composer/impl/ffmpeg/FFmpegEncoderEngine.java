@@ -111,13 +111,13 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
    * @return the argument list
    */
   @Override
-  protected List<String> buildArgumentList(File file, EncodingProfile profile) throws EncoderException {
+  protected List<String> buildArgumentList(EncodingProfile format) throws EncoderException {
     List<String> argumentList = new ArrayList<String>();
-    String commandline = commandlines.get(profile.getIdentifier());
+    String commandline = commandlines.get(format.getIdentifier());
     if (commandline == null) {
-      commandline = profile.getExtension(CMD_SUFFIX);
+      commandline = format.getExtension(CMD_SUFFIX);
       if (commandline == null)
-        throw new EncoderException(this, "No commandline configured for " + profile);
+        throw new EncoderException(this, "No commandline configured for " + format);
     }
     String[] args = commandline.split(" ");
     for (String a : args)
@@ -136,8 +136,8 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
    *          the message returned by the encoder
    */
   @Override
-  protected void handleEncoderOutput(File track, EncodingProfile format, String message) {
-    super.handleEncoderOutput(track, format, message);
+  protected void handleEncoderOutput(EncodingProfile format, String message, File... sourceFiles) {
+    super.handleEncoderOutput(format, message, sourceFiles);
     message = message.trim();
     if (message.equals(""))
       return;
@@ -180,7 +180,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
   protected File getOutputFile(File source, EncodingProfile profile) {
     File outputFile = null;
     try {
-      List<String> arguments = buildArgumentList(source, profile);
+      List<String> arguments = buildArgumentList(profile);
       // TODO: Very unsafe! Improve!
       outputFile = new File(arguments.get(arguments.size() - 1));
     } catch (EncoderException e) {

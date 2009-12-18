@@ -253,9 +253,9 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
    * @see org.opencastproject.composer.impl.AbstractEncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile)
    */
   @Override
-  public File encode(File source, EncodingProfile format) throws EncoderException {
-    xmlrpcController.submitJob(source, format);
+  public File encode(File audioSource, File videoSource, EncodingProfile format) throws EncoderException {
     throw new UnsupportedOperationException("Not yet implemented");
+//    xmlrpcController.submitJob(source, format);
     // TODO Wait for encoding outcome
     // File outputFile = null;
     //return outputFile;
@@ -280,7 +280,7 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
    *          the encoding profile
    */
   void fileEncoded(File file, EncodingProfile profile) {
-    fireEncoded(this, file, profile);
+    fireEncoded(this, profile, file);
   }
 
   /**
@@ -295,7 +295,7 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
    *          the reason of failure
    */
   void fileEncodingFailed(File file, EncodingProfile profile, String reason) {
-    fireEncodingFailed(this, file, profile, new EncoderException(this, reason));
+    fireEncodingFailed(this, profile, new EncoderException(this, reason), file);
   }
 
   /**

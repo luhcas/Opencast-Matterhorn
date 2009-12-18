@@ -17,7 +17,6 @@
 package org.opencastproject.composer.impl;
 
 import org.opencastproject.composer.api.EncoderEngine;
-import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncoderListener;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfile.MediaType;
@@ -81,13 +80,6 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
   public void removeEncoderListener(EncoderListener listener) {
     listeners.remove(listener);
   }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.EncoderEngine#encode(File, org.opencastproject.composer.api.EncodingProfile)
-   */
-  public abstract File encode(File source, EncodingProfile profile) throws EncoderException;
 
   /**
    * Returns the location of the output file.
@@ -178,10 +170,10 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * @param profile
    *          the media format
    */
-  protected void fireEncoded(EncoderEngine engine, File track, EncodingProfile profile) {
+  protected void fireEncoded(EncoderEngine engine, EncodingProfile profile, File... sourceFiles) {
     for (EncoderListener l : listeners) {
       try {
-        l.fileEncoded(engine, track, profile);
+        l.fileEncoded(engine, profile, sourceFiles);
       } catch (Throwable t) {
         log_.error("Encoder listener " + l + " threw exception while handling callback");
       }
@@ -200,12 +192,12 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * @param cause
    *          the reason of failure
    */
-  protected void fireEncodingFailed(EncoderEngine engine, File sourceFile, EncodingProfile profile, Throwable cause) {
+  protected void fireEncodingFailed(EncoderEngine engine, EncodingProfile profile, Throwable cause, File...sourceFiles) {
     for (EncoderListener l : listeners) {
       try {
-        l.fileEncodingFailed(engine, sourceFile, profile, cause);
+        l.fileEncodingFailed(engine, profile, cause, sourceFiles);
       } catch (Throwable t) {
-        log_.error("Encoder listener " + l + " threw exception while handling callback");
+        log_.error("Encoder listener {} threw exception while handling callback", l);
       }
     }
   }

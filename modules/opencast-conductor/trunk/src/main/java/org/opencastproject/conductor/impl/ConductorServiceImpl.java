@@ -34,7 +34,6 @@ import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.UUID;
 
 /**
  * This is the default implementation of the conductor service.
@@ -116,8 +115,12 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
           // encoding first track to flash
           properties.put("encode", "true");
           properties.put("compose/flash.http", "true");
-          properties.put("compose/source-track-id", mp.getTracks()[0].getIdentifier());
-          properties.put("compose/target-track-id", UUID.randomUUID().toString());
+          // TODO This assumes that the tracks are in a proper order.  This will not always be the case.
+          properties.put("compose/video-source-track-id", mp.getTracks()[0].getIdentifier());
+          if(mp.getTracks().length > 1) {
+            properties.put("compose/audio-source-track-id", mp.getTracks()[1].getIdentifier());
+          }
+          properties.put("compose/target-track-id", "track-" + (mp.getTracks().length+1));
         }
         properties.put("local", "true");
 

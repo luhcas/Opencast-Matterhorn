@@ -41,6 +41,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
@@ -59,7 +61,8 @@ public class ComposerRestService {
    * Encodes a track in a media package.
    * 
    * @param mediaPackageType The JAXB version of MediaPackage
-   * @param sourceTrackId The ID of the source track in the media package to be encoded
+   * @param audioSourceTrackId The ID of the audio source track in the media package to be encoded
+   * @param videoSourceTrackId The ID of the video source track in the media package to be encoded
    * @param profileId The profile to use in encoding this track
    * @return The JAXB version of {@link Track} {@link TrackType} 
    * @throws Exception
@@ -67,29 +70,30 @@ public class ComposerRestService {
   @POST
   @Path("encode")
   @Produces(MediaType.TEXT_XML)
-  public TrackType encode(
+  public Response encode(
           @FormParam("mediapackage") MediapackageType mediaPackageType,
-          @FormParam("sourceTrackId") String sourceTrackId,
+          @FormParam("audioSourceTrackId") String audioSourceTrackId,
+          @FormParam("videoSourceTrackId") String videoSourceTrackId,
           @FormParam("targetTrackId") String targetTrackId,
           @FormParam("profileId") String profileId) throws Exception {
     // Ensure that the POST parameters are present
-    if(mediaPackageType == null || sourceTrackId == null || profileId == null) {
-      throw new IllegalArgumentException("mediapackage, sourceTrackId, and profileId must not be null");
+    if(mediaPackageType == null || audioSourceTrackId == null || videoSourceTrackId == null || profileId == null) {
+      return Response.status(Status.BAD_REQUEST).entity("mediapackage, audioSourceTrackId, videoSourceTrackId, and profileId must not be null").build();
     }
-    logger.info("Encoding track {} of mediapackage {} using profile {}",
-            new String[] {sourceTrackId, mediaPackageType.getId(), profileId});
+    logger.info("Encoding audio track {} and video track {} of mediapackage {} using profile {}",
+            new String[] {audioSourceTrackId, videoSourceTrackId, mediaPackageType.getId(), profileId});
 
     // Build a media package from the POSTed XML
     MediaPackage mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().
         loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));
     
-    // Encode the specified track
-    Track track = composerService.encode(mediaPackage, sourceTrackId, targetTrackId, profileId);
+    // Encode the specified tracks
+    Track track = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, targetTrackId, profileId);
     
     // Return the JAXB version of the track
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     doc.appendChild(track.toManifest(doc, new DefaultMediaPackageSerializerImpl()));
-    return TrackType.fromXml(doc);
+    return Response.ok(TrackType.fromXml(doc)).build();
   }
 
   /**
