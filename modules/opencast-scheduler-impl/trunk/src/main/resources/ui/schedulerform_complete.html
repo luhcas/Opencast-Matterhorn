@@ -1,98 +1,90 @@
-<div class="fl-container-600">
-
-    <center><div class="notification-header">
+<div class="fl-container-800">
+    <div class="notification-header">
         A recording with the following information has been scheduled:
-    </div></center>
-
-    <table id="data-title" class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
-           Title:
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-
-    <table id="data-creator"class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
+    </div>
+    <div id="data-title" class="data-row">
+        <div class="data-label">
+          Title:
+        </div>
+        <div class="data-value" />
+    </div>
+    <div id="data-creator" class="data-row">
+        <div class="data-label">
            Presenter:
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-
-    <table id="data-contributor"class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
+        </div>
+        <div class="data-value" />
+    </div>
+    <div id="data-contributor" class="data-row">
+        <div class="data-label">
            Sponsoring Department:
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-
-    <table id="data-series-id" class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
+        </div>
+        <div class="data-value" />
+    </div>
+    <div id="data-series-id" class="data-row">
+        <div class="data-label">
            Series:
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-
-    <table id="data-subject" class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
+        </div>
+        <div class="data-value" />
+    </div>
+    <div id="data-subject" class="data-row">
+        <div class="data-label">
             Subject:
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-
-    <table id="data-language" class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
+        </div>
+        <div class="data-value" />
+    </div>
+    <div id="data-language" class="data-row">
+        <div class="data-label">
             Language:
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-
-    <table id="data-abstract" class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
+        </div>
+        <div class="data-value"  />
+    </div>
+    <div id="data-abstract" class="data-row">
+        <div class="data-label">
            Description:
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-    
-    <table id="data-channel-id" class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
+        </div>
+        <div class="expand-detail">
+          <div id="abstract" class="data-value detail-hide" />
+          <div class="detail-switch" onclick="schedulerUI.toggleDetails(this, $('#abstract'))">[more]</div>
+        </div>
+    </div>
+    <div id="data-channel-id" class="data-row">
+        <div class="data-label">
            Distribution:
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-    
-    <table id="data-license" class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
+        </div>
+        <div class="data-value" />
+    </div>
+    <div id="data-license" class="data-row">
+        <div class="data-label">
            License:
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-
-    <table id="data-startdate" class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
+        </div>
+        <div class="data-value" />
+    </div>
+    <div id="data-startdate" class="data-row">
+        <div class="data-label">
            Recording Start:
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-    
-    <table id="data-enddate" class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
+        </div>
+        <div class="data-value" />
+    </div>
+    <div id="data-enddate" class="data-row">
+        <div class="data-label">
            Recording Duration:
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-    
-    <table id="data-device-id" class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
+        </div>
+        <div class="data-value" />
+    </div>
+    <div id="data-device-id" class="data-row">
+        <div class="data-label">
            Capture Agent:
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-    
-    <table id="data-resources" class="data-row" border="0"><tr>
-        <td class="data-label" align="right" valign="top">
+        </div>
+        <div class="data-value" />
+    </div>
+    <div id="data-resources" class="data-row">
+        <div class="data-label">
            Input(s):
-        </td>
-        <td class="data-value" valign="top"></td>
-    </tr></table>
-    <center><a href="javascript:location.reload()">Schedule another recording >></a></center>
+        </div>
+        <div class="data-value" />
+    </div>
+    <div style="text-align: center;">
+      <a href="/admin/recordings_upcoming.html"><< Back to Recordings</a>
+      <a href="javascript:location.reload()">Schedule another recording >></a>
+    </div>
 </div>

@@ -7,7 +7,7 @@
     <div class="fl-container-800">
       <center><h2>View Recording</h2></center>
     </div>
-    <div class="fl-container-600">
+    <div class="fl-container-800">
       <div class="fl-widget">
         <div class="fl-widget-content form-box-container">
           <ul class="fl-controls-right form-list">
@@ -31,7 +31,7 @@
       </div>
     </div>
     
-    <div class="fl-container-600">
+    <div class="fl-container-800">
       <div class="fl-widget">
         <div class="fl-widget-titlebar folder-head">
           <span class="fl-icon icon-arrow-right folder-icon">Additional Content</span>
@@ -64,7 +64,7 @@
       </div>
     </div>
     
-    <div class="fl-container-600">
+    <div class="fl-container-800">
       <div class="fl-widget">
         <div class="fl-widget-titlebar form-box-title"><b>Distribution</b></div>
         <div class="fl-widget-content form-box-container">
@@ -85,7 +85,7 @@
       </div>
     </div>
     
-    <div class="fl-container-600">
+    <div class="fl-container-800">
       <div class="fl-widget">
         <div class="fl-widget-titlebar form-box-title"><b>Capture</b></div>
         <div class="fl-widget-content form-box-container">
@@ -111,7 +111,6 @@
               <xsl:value-of select="inputs" />
             </li>
           </ul>
-          <br />
         </div>
       </div>
     </div>

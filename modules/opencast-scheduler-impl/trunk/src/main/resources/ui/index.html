@@ -25,7 +25,7 @@
         $('#startDate').datepicker({showOn: 'button', buttonImage: 'img/calendar.gif', buttonImageOnly: true});
         $('#startDate').datepicker('setDate', new Date());
         
-        $('.required > label').prepend('<span style="color: red; font-size: 1.4em;">*</span>');
+        $('.required > label').prepend('<span style="color: red;">*</span>');
         
         $('.folder-head').click(
                                 function(){
@@ -85,6 +85,7 @@
 
         var eventID = schedulerUI.getURLParams('eventID');
         if(eventID && schedulerUI.getURLParams('edit')){
+          $("#page-title").text("Edit Recording");
           $.get(SCHEDULER_URL + '/getEvent?eventID=' + eventID, schedulerUI.loadEvent, 'xml');
         }
         
@@ -96,17 +97,17 @@
   </head>
   <body>
     <!-- fl-centered doesn't work in winXP-IE8 -->
-    <div class="fl-container-flex fl-theme-coal">
-      <ul class="fl-tabs fl-tabs-left">
-        <li class="fl-activeTab"><a href="../../admin/ui/recordings_upcoming.html">Recordings</a></li>
-        <li class=""><a href="../../admin/ui/agents_status.html">Capture Agents</a></li>
+    <div class="fl-container-850 fl-theme-coal">
+      <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
+        <li class="fl-activeTab"><a href="/admin/recordings_upcoming.html">Recordings</a></li>
+        <li class=""><a href="/admin/agents_status.html">Capture Agents</a></li>
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
-        <div class="fl-container-800">
-          <center><h2>Schedule Recording</h2></center>
+        <div class="fl-container-800" style="text-align: center;">
+          <h2 id="page-title">Schedule Recording</h2>
         </div>
         <!-- missing fields notification -->
-        <div class="fl-container-600" id="missingFields-container" style="display:none;">
+        <div class="fl-container-800" id="missingFields-container" style="display:none;">
           <div class="fl-widget">
             <div class="fl-widget-titlebar warnbox-title">
               <b class="formbox-header-text" style="color:white;">Missing Inputs</b>
@@ -134,7 +135,7 @@
         </div>
         
         <!-- Common Scheduling Information -->
-        <div class="fl-container-600">
+        <div class="fl-container-800">
           <div class="fl-widget">
             <div class="fl-widget-content form-box-container">
               <form action="">
@@ -161,7 +162,7 @@
         </div>
         
         <!-- Optional Information -->
-        <div class="fl-container-600">
+        <div class="fl-container-800">
           <div class="fl-widget">
             <div class="fl-widget-titlebar folder-head">
               <span class="fl-icon icon-arrow-right folder-icon"></span>
@@ -187,7 +188,7 @@
                   </li>
                   <li class="additionalMeta">
                     <label class="fl-label" for="description" id="label-description">Description:</label>
-                    <textarea name="description" id="description" class="form-field" cols="50" rows="10"></textarea>
+                    <textarea name="description" id="description" class="form-field" rows="5"></textarea>
                     <span class="fl-icon icon-help"  id="help_description" />
                   </li>
                 </ul>
@@ -197,7 +198,7 @@
         </div>
         
         <!-- Distribution and Licensing -->
-        <div class="fl-container-600">
+        <div class="fl-container-800">
           <div class="fl-widget">
             <div class="fl-widget-titlebar form-box-title"><b>Distribution</b></div>
             <div class="fl-widget-content form-box-container">
@@ -241,94 +242,84 @@
         </div>
         
         <!-- Scheduling Specifics -->
-        <div class="fl-container-600">
+        <div class="fl-container-800">
           <div class="fl-widget">
             <div class="fl-widget-titlebar form-box-title"><b>Capture</b></div>
             <div class="fl-widget-content form-box-container">
               <form action="">
                 <ul class="fl-controls-right form-list">
                   <li class="required">
-                    <label class="fl-label form-box-label" id="label-stardate">Recording Start Time:</label>
-                    <div style="float: left;">
-                      <table>
-                        <tr>
-                          <td id="label-startdate">Date:</td>
-                          <td><input type="text" size="10" name="startDate" id="startDate" /></td>
-                        </tr>
-                        <tr>
-                          <td>Time:</td>
-                          <td> 
-                            <select id="startTimeHour">
-                              <option>1</option>
-                              <option>2</option>
-                              <option>3</option>
-                              <option>4</option>
-                              <option>5</option>
-                              <option>6</option>
-                              <option>7</option>
-                              <option>8</option>
-                              <option>9</option>
-                              <option>10</option>
-                              <option>11</option>
-                              <option>12</option>
-                            </select>
-                            <select id="startTimeMin">
-                              <option>00</option>
-                              <option>05</option>
-                              <option>15</option>
-                              <option>20</option>
-                              <option>25</option>
-                              <option>30</option>
-                              <option>35</option>
-                              <option>40</option>
-                              <option>45</option>
-                              <option>50</option>
-                              <option>55</option>
-                            </select>
-                            <select id="startTimePeriod">
-                              <option>am</option>
-                              <option>pm</option>
-                            </select>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td id="label-enddate">Duration:</td>
-                          <td>
-                            hours
-                            <select id="durationHour">
-                              <option value="0">0</option>
-                              <option value="1">1</option>
-                              <option value="2">2</option>
-                              <option value="3">3</option>
-                              <option value="4">4</option>
-                              <option value="5">5</option>
-                              <option value="6">6</option>
-                              <option value="7">7</option>
-                              <option value="8">8</option>
-                              <option value="9">9</option>
-                              <option value="10">10</option>
-                              <option value="11">11</option>
-                              <option value="12">12</option>
-                            </select>
-                            minutes
-                            <select id="durationMin">
-                              <option value="0">00</option>
-                              <option value="5">05</option>
-                              <option value="15">15</option>
-                              <option value="20">20</option>
-                              <option value="25">25</option>
-                              <option value="30">30</option>
-                              <option value="35">35</option>
-                              <option value="40">40</option>
-                              <option value="45">45</option>
-                              <option value="50">50</option>
-                              <option value="55">55</option>
-                            </select>
-                          </td>
-                        </tr>
-                      </table>
-                    </div>
+                    <label class="fl-label form-box-label" id="label-stardate">Start Date:</label>
+                    <input type="text" size="10" name="startDate" id="startDate" style="margin-right:5px;"/></td>
                     <span class="fl-icon icon-help" id="help_recording" />
+                  </li>
+                  <li class="required">
+                    <label class="fl-label form-box-label" id="label-starttime">Start Time:</label>
+                    <select id="startTimeHour">
+                      <option>1</option>
+                      <option>2</option>
+                      <option>3</option>
+                      <option>4</option>
+                      <option>5</option>
+                      <option>6</option>
+                      <option>7</option>
+                      <option>8</option>
+                      <option>9</option>
+                      <option>10</option>
+                      <option>11</option>
+                      <option>12</option>
+                    </select>
+                    <select id="startTimeMin">
+                      <option>00</option>
+                      <option>05</option>
+                      <option>15</option>
+                      <option>20</option>
+                      <option>25</option>
+                      <option>30</option>
+                      <option>35</option>
+                      <option>40</option>
+                      <option>45</option>
+                      <option>50</option>
+                      <option>55</option>
+                    </select>
+                    <select id="startTimePeriod">
+                      <option>am</option>
+                      <option>pm</option>
+                    </select>
+                  </li>
+                  <li class="required">
+                    <label class="fl-label form-box-label" id="label-enddate">Duration:</label>
+                    <select id="durationHour">
+                      <option value="0">0</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                      <option value="9">9</option>
+                      <option value="10">10</option>
+                      <option value="11">11</option>
+                      <option value="12">12</option>
+                    </select>
+                    hour(s)
+                    <select id="durationMin">
+                      <option value="0">0</option>
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="15">15</option>
+                      <option value="20">20</option>
+                      <option value="25">25</option>
+                      <option value="30">30</option>
+                      <option value="35">35</option>
+                      <option value="40">40</option>
+                      <option value="45">45</option>
+                      <option value="50">50</option>
+                      <option value="55">55</option>
+                    </select>
+                    minutes
                   </li>
                   <li class="required" style="clear: both;">
                     <label class="fl-label"  id="label-attendees">Capture Agent:</label>
@@ -340,7 +331,7 @@
                   </li>
                   <li class="required">
                     <label class="fl-label" id="label-input">Input(s):</label>
-                    <div class="form-radio-group" style="float: left;">
+                    <div class="form-radio-group" style="float: left; top: 3px; position: relative;">
                       <input type="radio" id="audio" name="inputs" value="1" checked="checked" />
                       <label for="audio">Audio Only</label>
                       <input type="radio" id="audioVideo" name="inputs" value="3" />
@@ -359,18 +350,28 @@
           </div>
         </div>
         
-        <form action="">
-          <table>
-            <tr>
-              <td>
+        <div class="fl-container-800">
+          <div class="fl-widget">
+            <div class="fl-widget-content fl-fix">
+              <form action="">
                 <input type="hidden" id="eventID" />
-                <input type="button" value="submit" id="submitButton" />
-                <input type="reset" value="reset" id="resetButton" />
-                <span style="color: red; font-size: 1.4em;">*</span> Required
-              </td>
-            </tr>
-          </table>
-        </form>
+                <ul class="fl-controls-right wu-reset field-list">
+                  <li class="">
+                    <span class="fl-label form-label">&nbsp;</span>
+                      <input type="button" value="Submit" id="submitButton" />
+                      <input type="reset" value="Cancel" id="resetButton" />
+                    </span>
+                  </li>
+                  <li class="" style="margin-top: 0.6em;">
+                    <span class="fl-label form-label">&nbsp;</span>
+                      <span style="color: red;">*</span> Required
+                    </span>
+                  </li>
+                </ul>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
       
       <!-- template for the popup help box -->
