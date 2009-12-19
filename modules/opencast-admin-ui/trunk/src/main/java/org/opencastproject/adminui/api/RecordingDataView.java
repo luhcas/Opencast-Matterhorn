@@ -26,7 +26,18 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 @XmlJavaTypeAdapter(RecordingDataViewImpl.Adapter.class)
 public interface RecordingDataView {
-
+  /**
+   * returns the id of the recording
+   * @return String id of recording
+   */
+  String getId();
+  
+  /**
+   * sets the id
+   * @param id
+   */
+  void setId(String id);
+  
   /**
    * returns the title of the recording
    * @return String Title of recording

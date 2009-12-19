@@ -30,6 +30,9 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class RecordingDataViewImpl implements RecordingDataView {
 
+  @XmlElement(name="id")
+  private String id;
+  
   @XmlElement(name="title")
   private String title;
 
@@ -59,6 +62,14 @@ public class RecordingDataViewImpl implements RecordingDataView {
   static class Adapter extends XmlAdapter<RecordingDataViewImpl, RecordingDataView> {
     public RecordingDataViewImpl marshal(RecordingDataView op) throws Exception {return (RecordingDataViewImpl)op;}
     public RecordingDataView unmarshal(RecordingDataViewImpl op) throws Exception {return op;}
+  }
+  
+  public String getId() {
+    return id;
+  }
+  
+  public void setId(String id) {
+    this.id = id;
   }
 
   public String getTitle() {
