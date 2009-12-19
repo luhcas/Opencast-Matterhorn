@@ -128,6 +128,7 @@ public class AdminuiRestService {
       //WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery()).getItems();
       for (int i = 0; i < workflows.length; i++) {
         RecordingDataView item = new RecordingDataViewImpl();
+        item.setId(workflows[i].getId());
         DublinCoreCatalog dcCatalog = getDublinCore(workflows[i].getCurrentMediaPackage());
         if (dcCatalog != null) {
           item.setTitle(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_TITLE));
@@ -274,6 +275,7 @@ public class AdminuiRestService {
       SchedulerEvent[] events = schedulerService.getUpcomingEvents();
       for (int i = 0; i < events.length; i++) {
         RecordingDataView item = new RecordingDataViewImpl();
+        item.setId(events[i].getID());
         item.setTitle(events[i].getTitle());
         item.setPresenter(events[i].getCreator());
         item.setSeries(events[i].getSeriesID());    // FIXME get title for seriesID
