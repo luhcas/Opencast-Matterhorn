@@ -145,3 +145,17 @@ schedulerUI.toggleDetails = function(elSwitch, el){
     $(elSwitch).text("[more]");
   }
 }
+
+schedulerUI.toggleDetails = function(elSwitch, el){
+  if(el.hasClass("detail-hide")){
+    el.removeClass("detail-hide");
+    el.addClass("detail-show");
+    elSwitch.style.verticalAlign = "bottom";
+    $(elSwitch).text("[less]");
+  }else{
+    el.removeClass("detail-show");
+    el.addClass("detail-hide");
+    elSwitch.style.verticalAlign = "top";
+    $(elSwitch).text("[more]");
+  }
+}
