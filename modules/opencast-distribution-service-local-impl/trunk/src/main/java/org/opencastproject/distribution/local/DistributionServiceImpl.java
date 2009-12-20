@@ -19,10 +19,12 @@ import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
@@ -80,19 +82,19 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
       for (Track track : mediaPackage.getTracks()) {
         if(Arrays.binarySearch(elementIds, track.getIdentifier()) >= 0) {
           File trackFile = workspace.get(track.getURI());
-          FileUtils.copyFile(trackFile, new File(mediaDirectory, trackFile.getName()));
+          FileUtils.copyFile(trackFile, new File(mediaDirectory, getTargetFileName(track)));
         }
       }
       for (Catalog catalog : mediaPackage.getCatalogs()) {
         if(Arrays.binarySearch(elementIds, catalog.getIdentifier()) >= 0) {
           File catalogFile = workspace.get(catalog.getURI());
-          FileUtils.copyFile(catalogFile, new File(metadataDirectory, catalogFile.getName()));
+          FileUtils.copyFile(catalogFile, new File(metadataDirectory, getTargetFileName(catalog)));
         }
       }
       for (Attachment attachment : mediaPackage.getAttachments()) {
         if(Arrays.binarySearch(elementIds, attachment.getIdentifier()) >= 0) {
           File attachmentFile = workspace.get(attachment.getURI());
-          FileUtils.copyFile(attachmentFile, new File(attachmentsDirectory, attachmentFile.getName()));
+          FileUtils.copyFile(attachmentFile, new File(attachmentsDirectory, getTargetFileName(attachment)));
         }
       }
     } catch (Exception e) {
@@ -102,6 +104,9 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
     return mediaPackage; // TODO: Should the URLs for the distributed files be added to the media package?
   }
 
+  protected String getTargetFileName(MediaPackageElement element) {
+    return element.getIdentifier() + "." + FilenameUtils.getExtension(element.getURI().toString());
+  }
   /**
    * {@inheritDoc}
    * 

@@ -73,8 +73,8 @@ public class DistributionServiceImplTest {
     Assert.assertTrue(mediaDir.exists());
     Assert.assertTrue(metadataDir.exists());
     Assert.assertTrue(attachmentsDir.exists());
-    Assert.assertTrue(new File(mediaDir, "media.mov").exists());
-    Assert.assertTrue(new File(metadataDir, "dublincore.xml").exists());
+    Assert.assertTrue(new File(mediaDir, "track-1.mov").exists()); // the filenames are changed to reflect the element ID
+    Assert.assertTrue(new File(metadataDir, "catalog-1.xml").exists());
     Assert.assertTrue( ! new File(metadataDir, "mpeg7.xml").exists());
     Assert.assertTrue( ! new File(attachmentsDir, "attachment.txt").exists());
   }

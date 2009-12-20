@@ -16,6 +16,10 @@
 package org.opencastproject.conductor.impl;
 
 import org.opencastproject.distribution.api.DistributionService;
+import org.opencastproject.media.mediapackage.Attachment;
+import org.opencastproject.media.mediapackage.Catalog;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -24,6 +28,9 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The workflow definition for handling "distribute" operations
@@ -58,16 +65,27 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
     
     // TODO: Determine which distribution channels should be called
 
-    if (workflowInstance.getConfiguration("local") != null) {
+//    if (workflowInstance.getConfiguration("local") != null) {
       try {
         logger.info("Distributing to the local repository");
-        distributionService.distribute(workflowInstance.getCurrentMediaPackage());
+        Set<String> elementIds = new HashSet<String>();
+        MediaPackage mp = workflowInstance.getCurrentMediaPackage();
+        for(Track track : mp.getTracks()) {
+          elementIds.add(track.getIdentifier());
+        }
+        for(Catalog cat : mp.getCatalogs()) {
+          elementIds.add(cat.getIdentifier());
+        }
+        for(Attachment a : mp.getAttachments()) {
+          elementIds.add(a.getIdentifier());
+        }
+        distributionService.distribute(mp, elementIds.toArray(new String[elementIds.size()]));
       } catch (RuntimeException e) {
         throw new WorkflowOperationException(e);
       }
-    } else {
-      logger.info("Distribution to local repository skipped");
-    }
+//    } else {
+//      logger.info("Distribution to local repository skipped");
+//    }
 
     // TODO Add any distributed media to the media package
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), null, false);
