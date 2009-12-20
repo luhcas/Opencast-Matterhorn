@@ -18,7 +18,6 @@ package org.opencastproject.workspace.impl;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.osgi.service.cm.ConfigurationException;
@@ -28,8 +27,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Dictionary;
+import java.util.UUID;
 
 /**
  * Implements a simple cache for remote URIs.  Delegates methods to {@link WorkingFileRepository}
@@ -54,13 +57,8 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     
   public File get(URI uri) {
     String urlString = uri.toString();
-    String urlHash = DigestUtils.md5Hex(urlString);
-    String urlExtension = FilenameUtils.getExtension(urlString);
+    String urlHash = getFilenameSafeHash(urlString);
     String fileName = rootDirectory + File.separator + urlHash;
-    if( ! org.apache.commons.lang.StringUtils.isEmpty(urlExtension)) {
-      fileName = fileName.concat(".");
-      fileName = fileName.concat(urlExtension);
-    }
     // See if there's a matching file under the root directory
     File f = new File(fileName);
     if(f.exists()) {
@@ -76,6 +74,19 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     }
   }
 
+  protected String getFilenameSafeHash(String urlString) {
+    try {
+      String urlEncoded = URLEncoder.encode(urlString, "UTF-8");
+      if(urlEncoded.length() < 255) return urlEncoded;
+    } catch(UnsupportedEncodingException e) {}
+    String random = UUID.randomUUID().toString();
+    String urlExtension = FilenameUtils.getExtension(urlString);
+    if( ! org.apache.commons.lang.StringUtils.isEmpty(urlExtension)) {
+      random = random.concat(".").concat(urlExtension);
+    }
+    logger.info("using '{}' to represent url '{}', which is too long to store as a filename", random, urlString);
+    return random;
+  }
   public void delete(String mediaPackageID, String mediaPackageElementID) {
     repo.delete(mediaPackageID, mediaPackageElementID);
   }
@@ -90,7 +101,19 @@ public class WorkspaceImpl implements Workspace, ManagedService {
   }
 
   public URI put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in) {
-    repo.put(mediaPackageID, mediaPackageElementID, fileName, in);
+    // if this is a url encoded filename, decoded it and take the last part of the path
+    String shortFileName;
+    try {
+      String decoded = URLDecoder.decode(fileName, "UTF-8");
+      logger.debug("{} decoded to {}", fileName, decoded);
+      String[] sa = decoded.split("/");
+      shortFileName = sa[sa.length-1];
+    } catch (Exception e) {
+      // just be sure to deal with a null decoded
+      logger.debug(e.getMessage());
+      shortFileName = fileName;
+    }
+    repo.put(mediaPackageID, mediaPackageElementID, shortFileName, in);
     return getURI(mediaPackageID, mediaPackageElementID);
   }
 

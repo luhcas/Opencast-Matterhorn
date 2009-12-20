@@ -48,4 +48,13 @@ public class WorkspaceImplTest {
     File fromWorkspace2 = workspace.get(source2.toURI());
     Assert.assertFalse(fromWorkspace1.getAbsolutePath().equals(fromWorkspace2.getAbsolutePath()));
   }
+  
+  @Test
+  public void testLongFilenames() throws Exception {
+    WorkspaceImpl workspace = new WorkspaceImpl("target/junit-workspace-rootdir");
+    File source = new File("target/test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/opencast_header.gif");
+    URL urlToSource = source.toURI().toURL();
+    Assert.assertTrue(urlToSource.toString().length() > 255);
+    Assert.assertNotNull(workspace.get(urlToSource.toURI()));
+  }
 }
