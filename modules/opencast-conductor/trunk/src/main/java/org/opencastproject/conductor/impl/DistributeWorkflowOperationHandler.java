@@ -66,6 +66,7 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
     // TODO: Determine which distribution channels should be called
 
 //    if (workflowInstance.getConfiguration("local") != null) {
+      MediaPackage resultingMediaPackage = null;
       try {
         logger.info("Distributing to the local repository");
         Set<String> elementIds = new HashSet<String>();
@@ -79,7 +80,7 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
         for(Attachment a : mp.getAttachments()) {
           elementIds.add(a.getIdentifier());
         }
-        distributionService.distribute(mp, elementIds.toArray(new String[elementIds.size()]));
+        resultingMediaPackage = distributionService.distribute(mp, elementIds.toArray(new String[elementIds.size()]));
       } catch (RuntimeException e) {
         throw new WorkflowOperationException(e);
       }
@@ -87,7 +88,6 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
 //      logger.info("Distribution to local repository skipped");
 //    }
 
-    // TODO Add any distributed media to the media package
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), null, false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, null, false);
   }
 }

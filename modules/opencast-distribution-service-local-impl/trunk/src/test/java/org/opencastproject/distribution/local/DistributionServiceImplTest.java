@@ -47,6 +47,7 @@ public class DistributionServiceImplTest {
     
     distributionRoot = new File("./target/static");
     service = new DistributionServiceImpl(distributionRoot);
+    service.activate(null);
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     service.setWorkspace(workspace);
 
