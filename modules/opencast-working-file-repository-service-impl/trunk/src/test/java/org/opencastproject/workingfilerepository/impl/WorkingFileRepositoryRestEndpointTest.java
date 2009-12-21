@@ -10,6 +10,6 @@ public class WorkingFileRepositoryRestEndpointTest {
   public void testDocumentation() {
     WorkingFileRepositoryRestEndpoint endpoint = new WorkingFileRepositoryRestEndpoint();
     String docs = endpoint.getDocumentation();
-    Assert.assertTrue(docs.startsWith("<html>"));
+    Assert.assertTrue(docs.indexOf("<html") > -1);
   }
 }
