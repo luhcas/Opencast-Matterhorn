@@ -100,8 +100,8 @@
       				*;resolution:=optional
       			</Import-Package>
             <Private-Package>
-              org.apache.derby.*
-              <!-- net.fortuna.ical4j.* -->
+              org.apache.derby.*,
+              net.fortuna.ical4j.*
             </Private-Package>
             <Embed-Dependency>
               derby;inline=true,

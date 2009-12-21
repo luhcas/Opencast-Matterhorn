@@ -18,7 +18,6 @@ package org.opencastproject.scheduler.endpoint;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.scheduler.impl.SchedulerEventImpl;
-import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -38,7 +37,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * FIXME -- Add javadocs
+ * REST ndpoint for Scheduler Service
  */
 @Path("/")
 public class SchedulerRestService {
@@ -64,8 +63,15 @@ public class SchedulerRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("getDublinCoreMetadata")
   public String getDublinCoreMetadata(@QueryParam("eventID") String eventID) {
-    return ((SchedulerServiceImpl)service).getDublinCoreMetadata(eventID);
+    return service.getDublinCoreMetadata(eventID);
   }  
+
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  @Path("getCaptureAgentMetadata")
+  public String getCaptureAgentMetadata(@QueryParam("eventID") String eventID) {
+    return service.getCaptureAgentMetadata(eventID);
+  }    
   
   @POST
   @Produces(MediaType.TEXT_XML)
@@ -124,8 +130,7 @@ public class SchedulerRestService {
   }  
   
   /**
-   * Lists all events in the database, without any filter
-   * TODO only a stub for debugging, because there is no UI to schow these at the moment
+   * Lists all future events in the database, without any filter
    * @return XML with all events 
    */
   @GET

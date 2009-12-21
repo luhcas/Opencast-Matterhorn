@@ -25,16 +25,24 @@ import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.ResourceList;
+import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.parameter.Cn;
+import net.fortuna.ical4j.model.parameter.Encoding;
+import net.fortuna.ical4j.model.parameter.FmtType;
+import net.fortuna.ical4j.model.parameter.Value;
+import net.fortuna.ical4j.model.parameter.XParameter;
 import net.fortuna.ical4j.model.property.Attach;
 import net.fortuna.ical4j.model.property.Attendee;
+import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.Description;
 import net.fortuna.ical4j.model.property.Location;
 import net.fortuna.ical4j.model.property.Organizer;
+import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.RelatedTo;
 import net.fortuna.ical4j.model.property.Resources;
 import net.fortuna.ical4j.model.property.Uid;
+import net.fortuna.ical4j.model.property.Version;
 
 /**
  * TODO: Comment me!
@@ -45,11 +53,16 @@ public class CalendarGenerator {
   
   Calendar cal;
   DublinCoreGenerator dcGenerator;
+  CaptureAgentMetadataGenerator caGenerator;
   
   
-  public CalendarGenerator (DublinCoreGenerator dcGenerator) {
+  public CalendarGenerator (DublinCoreGenerator dcGenerator, CaptureAgentMetadataGenerator caGenerator) {
     cal = new Calendar();
+    cal.getProperties().add(new ProdId("Opencast Matterhorn Calendar File 0.5"));
+    cal.getProperties().add(Version.VERSION_2_0);
+    cal.getProperties().add(CalScale.GREGORIAN);
     this.dcGenerator = dcGenerator;
+    this.caGenerator = caGenerator;
   }
   
   /**
@@ -101,14 +114,29 @@ public class CalendarGenerator {
         for (int i = 0; i < resources.length; i++) resList.add(resources[i]);     
         event.getProperties().add(new Resources(resList));
       }
-      //TODO: We need to add a second attachment that contains the Agent ID, Distribution Channel, and selected Inputs.
-      //event.getProperties().add(new Attach( <some xml thingy here> );
-        event.getProperties().add(new Attach((dcGenerator.generateAsBase64(e))));
-      //event.getProperties().add(new XProperty(name));
+        ParameterList dcParameters = new ParameterList();
+        dcParameters.add(new FmtType("application/xml"));
+        dcParameters.add(Value.BINARY);
+        dcParameters.add(Encoding.BASE64);
+        dcParameters.add(new XParameter("X-APPLE-FILE\nNAME", "metadata.xml"));
+        event.getProperties().add(new Attach(dcParameters, dcGenerator.generateAsString(e).getBytes()));
+        
+        ParameterList caParameters = new ParameterList();
+        caParameters.add(new FmtType("application/text"));        
+        caParameters.add(Value.BINARY);
+        caParameters.add(Encoding.BASE64);
+        caParameters.add(new XParameter("X-APPLE-FILE NAME", "agent.properties"));
+        event.getProperties().add(new Attach(caParameters, caGenerator.generateAsString(e).getBytes()));
     } catch (URISyntaxException e1) {
       logger.error("could not create Calendar entry for Event "+ e.toString()+". Reason : "+e1.getMessage());
-    } 
+      return false;
+    }
     cal.getComponents().add(event);
+    try {
+      cal.validate();
+    } catch (ValidationException e1) {
+      logger.error("Could not validate Calendar, after event "+ e.getID()+" was added");
+    }
     logger.debug("new VEvent = "+event.toString() );
     return true;
   }

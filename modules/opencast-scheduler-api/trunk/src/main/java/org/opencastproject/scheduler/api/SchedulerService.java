@@ -74,5 +74,12 @@ public interface SchedulerService {
    * @return A XML with the Dublin Core metadata
    */
   public String getDublinCoreMetadata (String eventID);
+  
+  /**
+   * generates the Capture Agent specific metadata set for the event specified by the ID
+   * @param eventID The ID of the demanded event 
+   * @return A Java Properties file with the metadata
+   */
+  public String getCaptureAgentMetadata (String eventID);
 }
 

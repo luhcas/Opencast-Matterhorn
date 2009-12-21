@@ -47,11 +47,16 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
   ComponentContext componentContext;  
   
   DublinCoreGenerator dcGenerator;
+  CaptureAgentMetadataGenerator caGenerator;
  
   public void setDublinCoreGenerator(DublinCoreGenerator dcGenerator) {
     this.dcGenerator = dcGenerator;
   }
 
+  public void setCaptureAgentMetadataGenerator(CaptureAgentMetadataGenerator caGenerator) {
+    this.caGenerator = caGenerator;
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerService#addEvent(org.opencastproject.scheduler.api.SchedulerEvent)
@@ -65,7 +70,7 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
   public String getCalendarForCaptureAgent(String captureAgentID) {
     // TODO real URL
     SchedulerFilter filter = getFilterForCaptureAgent (captureAgentID); 
-    CalendarGenerator cal = new CalendarGenerator(dcGenerator);
+    CalendarGenerator cal = new CalendarGenerator(dcGenerator, caGenerator);
     SchedulerEvent[] events = getEvents(filter);
     for (int i = 0; i < events.length; i++) cal.addEvent(events[i]);
     return cal.getCalendar().toString();
@@ -146,19 +151,24 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
     URL dcMappingURL = componentContext.getBundleContext().getBundle().getResource("config/dublincoremapping.properties");
     logger.info("Using Dublin Core Mapping from "+dcMappingURL);
     try {
-      URLConnection con = dcMappingURL.openConnection();
-     /* BufferedReader in = new BufferedReader( new InputStreamReader( con.getInputStream()));
-      String text = "";
-      String line;
-      while ((line = in.readLine()) != null) {
-        text += line +"\n";
-      }
-      logger.info("content: "+ text); */
-      if (dcMappingURL != null) 
+      if (dcMappingURL != null)  {
+        URLConnection con = dcMappingURL.openConnection();
         dcGenerator = new DublinCoreGenerator(con.getInputStream());
+      }
     } catch (IOException e) {
       logger.error("Could not open URL connection to Dublin Core Mapping File after activation");
     }
+    
+    URL caMappingURL = componentContext.getBundleContext().getBundle().getResource("config/captureagentmetadatamapping.properties");
+    logger.info("Using Capture Agent Metadata Mapping from "+caMappingURL);
+    try {
+      if (caMappingURL != null) {
+        URLConnection con = caMappingURL.openConnection();
+        caGenerator = new CaptureAgentMetadataGenerator(con.getInputStream());
+      }
+    } catch (IOException e) {
+      logger.error("Could not open URL connection to Capture Agent Metadata Mapping File after activation");
+    }    
   }  
   
   /**
@@ -173,5 +183,18 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
     }
     return dcGenerator.generateAsString(event);
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.scheduler.api.SchedulerService#getDublinCoreMetadata(java.lang.String)
+   */
+  public String getCaptureAgentMetadata (String eventID) {
+    SchedulerEvent event = getEvent(eventID);
+    if (caGenerator == null){
+      logger.error("Capture Agent Metadata generator not initialized");
+      return null;
+    }
+    return caGenerator.generateAsString(event);
+  }  
   
 }

@@ -19,11 +19,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Properties;
+
+import net.fortuna.ical4j.data.CalendarBuilder;
+import net.fortuna.ical4j.data.ParserException;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.component.VEvent;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
@@ -33,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import junit.framework.Assert;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -77,6 +87,7 @@ public class SchedulerServiceImplTest {
     // set Metadata Mapping Files. This depends on if its called from OSGI or in a regular case.
     try {
       ((SchedulerServiceImplDAO)service).setDublinCoreGenerator(new DublinCoreGenerator(new FileInputStream(resourcesRoot+ File.separator+"config"+File.separator+"dublincoremapping.properties")));
+      ((SchedulerServiceImplDAO)service).setCaptureAgentMetadataGenerator(new CaptureAgentMetadataGenerator(new FileInputStream(resourcesRoot+ File.separator+"config"+File.separator+"captureagentmetadatamapping.properties")));
     } catch (FileNotFoundException e) {
       Assert.fail(e.getMessage());
     } catch (IOException e) {
@@ -101,7 +112,26 @@ public class SchedulerServiceImplTest {
     event.setCreator("secret lecturer");
     SchedulerEvent eventUpdated = service.addEvent(event);
     Assert.assertEquals(service.getEvent(eventUpdated.getID()).getLocation(), event.getLocation());
-    //Assert.assertTrue(service.getCalendarForCaptureAgent("testrecorder").contains("secret lecturer"));
+    System.out.println (service.getCalendarForCaptureAgent("testrecorder"));
+    CalendarBuilder calBuilder = new CalendarBuilder();
+    Calendar cal;
+    // TODO iCal4j does not build the calendar that it created itself, because of a Problem with base64 and maximum line length (see MH-1870)
+  /*  try {
+      cal = calBuilder.build(new StringReader(service.getCalendarForCaptureAgent("testrecorder")));
+      ComponentList vevents = cal.getComponents(VEvent.VEVENT);
+      for (int i = 0; i < vevents.size(); i++) {
+        PropertyList attachments = ((VEvent)vevents.get(i)).getProperties(Property.ATTACH);
+        for (int j = 0; j < attachments.size(); j++) {
+          String attached = ((Property)attachments.get(j)).getValue();
+          attached = new String (Base64.decodeBase64(attached));
+          System.out.println(attached);
+        }
+      } 
+    } catch (IOException e) {
+      Assert.fail(e.getMessage());
+    } catch (ParserException e) {
+      Assert.fail(e.getMessage());
+    } */
     eventUpdated.setStartdate(new Date(System.currentTimeMillis()+2000));
     eventUpdated.setContributor("Matterhorn");
     Assert.assertTrue(service.updateEvent(eventUpdated));

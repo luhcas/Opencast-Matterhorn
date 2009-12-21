@@ -299,7 +299,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * TODO Adapt filter to new database structure
    */
   public SchedulerEvent[] getEvents(SchedulerFilter filter) {
-    String query = "SELECT DISTINCT EVENT.eventid, EVENT.startdate, EVENT.enddate FROM EVENT JOIN EVENTMETADATA ON EVENT.eventid = EVENTMETADATA.eventid ";
+    String query = "SELECT DISTINCT EVENT.eventid as eventid, startdate, enddate FROM EVENT JOIN EVENTMETADATA ON EVENT.eventid = EVENTMETADATA.eventid ";
     String where = ""; 
     if (filter != null) {
       query += " WHERE ";
@@ -330,7 +330,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       PreparedStatement s = con.prepareStatement(query+where); // TODO use PreparedStatement more in the intended way
       ResultSet rs = s.executeQuery();
       while (rs.next()) {
-        SchedulerEvent e = getEvent(rs.getString("EVENT.eventid"));
+        SchedulerEvent e = getEvent(rs.getString("eventid"));
         events.add(e);
       }
     } catch (SQLException e) {
@@ -376,9 +376,6 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    */
   public boolean updateEvent(SchedulerEvent e) {
     if (! dbIDExists(e.getID())) return false;
-//    String query = "UPDATE EVENT SET startdate = "+e.getStartdate().getTime()+", " +
-//                    " enddate = "+e.getEnddate().getTime()+", " +
-//                    " WHERE eventid = '"+e.getID()+"'"; 
     try {
       PreparedStatement s = con.prepareStatement("UPDATE EVENT SET startdate = ?, enddate = ? WHERE eventid = ?");
       s.setLong(1, e.getStartdate().getTime());

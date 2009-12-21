@@ -52,7 +52,6 @@ public class DublinCoreGenerator {
   
   private static final Logger logger = LoggerFactory.getLogger(DublinCoreGenerator.class);
   
-  Hashtable<String, String> dcMetadata;
   MetadataMapper mapper;
 
   
@@ -74,7 +73,7 @@ public class DublinCoreGenerator {
    */
   public DublinCoreCatalog generate (SchedulerEvent event) {
     logger.info("creating Dublin Core  information for event " + event.getID());
-    dcMetadata =  mapper.convert(event.getMetadata());
+    Hashtable<String, String> dcMetadata =  mapper.convert(event.getMetadata());
     
     DublinCoreCatalog dcCatalog = DublinCoreCatalogImpl.newInstance();
 
@@ -109,7 +108,7 @@ public class DublinCoreGenerator {
       TransformerFactory factory = TransformerFactory.newInstance();
       Transformer transformer = factory.newTransformer();
       transformer.transform(source, result);
-      return stringWriter.getBuffer().toString(); 
+      return stringWriter.getBuffer().toString().trim(); 
     } catch (ParserConfigurationException e) {
       logger.error("Could not parse DublinCoreCatalog: "+ e.getMessage());
     } catch (IOException e) {
