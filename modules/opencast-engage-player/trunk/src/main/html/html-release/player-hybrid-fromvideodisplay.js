@@ -67,6 +67,7 @@ Opencast.FromVideodisplay = (function ()
     function setCurrentTime(text) 
     {
         $("#time-current").text(text);
+        $("#time-current").attr("value",text)
         $("#slider_seek_Rail").attr("title", "Time " + text);
     }
 
@@ -193,6 +194,11 @@ Opencast.FromVideodisplay = (function ()
         $('#captions').empty().append(elm);
     }
     
+    function hearTimeInfo(aMsg)
+    {
+       Opencast.global.addAlert(aMsg);
+    }
+    
     return {
         setPlayhead : setPlayhead,
         setVolume : setVolume,
@@ -204,7 +210,8 @@ Opencast.FromVideodisplay = (function ()
         setCaptionsButton : setCaptionsButton,
         setDoUnmute : setDoUnmute,
         setCaptions : setCaptions,
-        setDoMute : setDoMute
+        setDoMute : setDoMute,
+        hearTimeInfo : hearTimeInfo
        
     };
 }());

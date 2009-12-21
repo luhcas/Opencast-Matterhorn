@@ -297,7 +297,12 @@ Opencast.ToVideodisplay = (function ()
                 doToggleVolume();
             }
             
-            if (e.which === 80 || e.which === 112 || e.which === 83 || e.which === 115 || e.which === 77 || e.which === 109 || e.which === 85 || e.which === 117  || e.which === 68 || e.which === 100 || e.which === 48 || e.which === 49 || e.which === 50 || e.which === 51 || e.which === 52 || e.which === 53 || e.which === 54  || e.which === 55 || e.which === 56 || e.which === 57 || e.which === 67 || e.which === 99 || e.which === 82 || e.which === 114 || e.which === 70 || e.which === 102 || e.which === 83 || e.which === 115)
+            if (e.which === 84 || e.which === 116) // t or T
+            {
+            	Opencast.global.addAlert($("#time-current").attr("value"));
+            }
+            
+            if (e.which === 80 || e.which === 112 || e.which === 83 || e.which === 84 || e.which === 116 || e.which === 115 || e.which === 77 || e.which === 109 || e.which === 85 || e.which === 117  || e.which === 68 || e.which === 100 || e.which === 48 || e.which === 49 || e.which === 50 || e.which === 51 || e.which === 52 || e.which === 53 || e.which === 54  || e.which === 55 || e.which === 56 || e.which === 57 || e.which === 67 || e.which === 99 || e.which === 82 || e.which === 114 || e.which === 70 || e.which === 102 || e.which === 83 || e.which === 115)
             {
                 Videodisplay.passCharCode(e.which);
                
@@ -306,6 +311,7 @@ Opencast.ToVideodisplay = (function ()
             {
                 Opencast.volume = Videodisplay.getVolume();
             }
+            
             return false;
         }
     }); 

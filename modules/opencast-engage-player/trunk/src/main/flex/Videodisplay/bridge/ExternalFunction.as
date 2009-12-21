@@ -21,6 +21,9 @@ package bridge
  		public static const MUTE:String					= 'Opencast.FromVideodisplay.setDoMute';
  		
  		public static const SETCAPTIONSBUTTON:String	= 'Opencast.FromVideodisplay.setCaptionsButton';
+        
+        public static const HEARTIMEINFO:String         = 'Opencast.FromVideodisplay.hearTimeInfo'; 		
+ 		
  		
  	}
 }

@@ -103,12 +103,14 @@ Opencast.global = (function () {
         }
         catch (exception) 
         {
-            //alert('Wrong Time enter like this: HH:MM:SS');
+        	addAlert('Wrong Time enter like this: HH:MM:SS');
+        	
         }
         
         if (seekHour > 99 || seekMinutes > 59 || seekSeconds > 59)
         {
-            //alert('Wrong Time enter like this: HH:MM:SS');
+        	addAlert('Wrong Time enter like this: HH:MM:SS');
+        	
         } 
         else 
         {
@@ -117,6 +119,27 @@ Opencast.global = (function () {
         }
     }
     
+    function removeOldAlert()
+    {
+      var oldAlert = document.getElementById("alert");
+      if (oldAlert)
+        document.body.removeChild(oldAlert);
+    }
+
+    function addAlert(aMsg)
+    {
+      Opencast.ToVideodisplay.doPause();
+      removeOldAlert();
+      var newAlert = document.createElement("div");
+      newAlert.setAttribute("role", "alert");
+      newAlert.setAttribute("id", "alert");
+      newAlert.setAttribute("class", "fl-offScreen-hidden");
+      var msg = document.createTextNode(aMsg);
+      newAlert.appendChild(msg);
+      document.body.appendChild(newAlert);
+    }
+
+
     /**
         @memberOf Opencast.global
         @description When the learner press a key.
@@ -147,6 +170,8 @@ Opencast.global = (function () {
         mouseOver : mouseOver,
         mouseOut : mouseOut,
         editTime : editTime,
-        keyListener : keyListener
+        keyListener : keyListener,
+        addAlert : addAlert,
+        removeOldAlert : removeOldAlert
     };
 }());

@@ -41,13 +41,7 @@ package org.opencast.engage.videodisplay.control.event
 		public static var SEEKNINE : String         = "seekNine";
 		public static var VOLUMEUP : String			= "volumeUp";
 		public static var VOLUMEDOWN : String		= "volumeDown";
-		
-		// now more use? tickt mh1349
-		//public static var VOLUMELOWEST : String		= "volumeLowest";
-		//public static var VOLUMELOW : String		= "volumeLow";
-		//public static var VOLUMEMIDDLE : String		= "volumeMiddle";
-		//public static var VOLUMEHIGH : String		= "volumeHigh";
-		//public static var VOLUMEHIGHEST : String	= "volumeHighest";
+		public static var TIME : String             = "time";
 		
 		
 		private var _videoControlType : String;

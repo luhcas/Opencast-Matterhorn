@@ -19,6 +19,7 @@ package org.opencast.engage.videodisplay.model
 	
 	import mx.collections.ArrayCollection;
 	
+	import org.opencast.engage.videodisplay.control.util.TimeCode;
 	import org.opencast.engage.videodisplay.vo.LanguageVO;
 	[Bindable]
 	public class VideodisplayModel
@@ -72,6 +73,12 @@ package org.opencast.engage.videodisplay.model
 		
 		// Volume of the Player
 		public var playerVolume:Number = 1.0;
+		
+		// Fullscreen Mode
+		public var fullscreenMode:Boolean = false;
+		
+		// Time Code
+		public var timeCode:TimeCode = new TimeCode();
 		
 		public function VideodisplayModel()
         {

@@ -17,7 +17,9 @@ package org.opencast.engage.videodisplay.control
 {
 	import bridge.ExternalFunction;
 	
+	import flash.events.TimerEvent;
 	import flash.external.ExternalInterface;
+	import flash.utils.Timer;
 	
 	import mx.controls.Alert;
 	import mx.core.Application;
@@ -53,6 +55,7 @@ package org.opencast.engage.videodisplay.control
 		private var volume:Number = 1;
 		private var skipVolume:Number = 0.1;
 		private var percent:int = 100;
+		private var showTimeInformationTimer:Timer;
 		
 		/** Constructor */
 		public function VideodisplayController()
@@ -189,9 +192,30 @@ package org.opencast.engage.videodisplay.control
                                                         	Swiz.dispatchEvent( new ClosedCaptionsEvent(true) );
                                                         }
                                                         ExternalInterface.call(ExternalFunction.SETCAPTIONSBUTTON, model.ccBoolean);
-                                                        break;                                                                                     
+                                                        break;         
+                                                   
+                case VideoControlEvent.TIME:            Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));
+                                                        ExternalInterface.call(ExternalFunction.HEARTIMEINFO, model.timeCode.getTC( model.currentPlayhead) );
+                                                        showTimeInformationTimer = new Timer(4000,1);
+										                showTimeInformationTimer.addEventListener( TimerEvent.TIMER, timerComplete );
+										                showTimeInformationTimer.start();
+										                
+										                
+                                                                                                                                         
             }
 		}
+		
+		/** setVolume 
+        * 
+        * When the timer ist at the end, play the video.
+        * 
+        * @eventType event:TimerEvent
+        * */
+		public function timerComplete( event:TimerEvent ):void 
+        {
+            Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));
+            
+        }
 
 		/** setVolume 
 		* 

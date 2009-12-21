@@ -166,6 +166,7 @@ package com.adobe.strobe.players
 		*/
 		public function set playheadUpdateInterval(milliseconds : Number) : void
 		{
+			
 			mediaPlayer.playheadUpdateInterval = milliseconds;
 		}
 
@@ -196,13 +197,13 @@ package com.adobe.strobe.players
 		/**
 		*  True when the source mediaElement has the IPausible trait.
 		*/	
-		/*
+		
 		[Event(event = "pausibleChange" , type = "org.openvideoplayer.events.MediaStateChangeEvent")]
 		public function get  pausible() : Boolean
 		{
 		return mediaPlayer.pausible;
 		}
-		*/
+		
 		/**
 		*  True when the source mediaElement has the ISeekable trait.
 		*/
@@ -306,8 +307,6 @@ package com.adobe.strobe.players
 		[ChangeEvent(event = "volumeChange" , type = "org.openvideoplayer.events.VolumeChangeEvent")]
 		public function get volume() : Number
 		{
-			//return mediaPlayer.audible ?  mediaPlayer.volume : 0;
-			//return mediaPlayer.volume;
 			return mediaPlayer.audible ?  mediaPlayer.volume : 0;
 		}
 
@@ -398,8 +397,6 @@ package com.adobe.strobe.players
 		*/
 		public function play() : void
 		{
-			//mediaPlayer.play();	    	
-			//mediaPlayer.play();	    	
 			if(mediaPlayer.playable)
 			{
 				mediaPlayer.play();
@@ -417,8 +414,6 @@ package com.adobe.strobe.players
 		*/			
 		public function get seeking() : Boolean
 		{
-			//return mediaPlayer.seeking;
-			//return mediaPlayer.seeking;
 			return mediaPlayer.seekable ? mediaPlayer.seeking : false;
 		}
 
@@ -430,8 +425,6 @@ package com.adobe.strobe.players
 		*/	    
 		public function seek(time : Number) : void
 		{
-			//mediaPlayer.seek(time);	    				
-			//mediaPlayer.seek(time);	    				
 			if(mediaPlayer.seekable)
 			{
 				mediaPlayer.seek(time);
@@ -453,8 +446,6 @@ package com.adobe.strobe.players
 		*/	
 		public function canSeekTo(time : Number) : Boolean
 		{
-			//return mediaPlayer.canSeekTo(time);		
-			//return mediaPlayer.canSeekTo(time);		
 			return mediaPlayer.seekable ? mediaPlayer.canSeekTo(time) : false;
 		}
 
@@ -466,8 +457,6 @@ package com.adobe.strobe.players
 		*/		
 		public function get buffering() : Boolean
 		{
-			//return mediaPlayer.buffering;	    	
-			//return mediaPlayer.buffering;	    	
 			return mediaPlayer.bufferable ? mediaPlayer.buffering : false;
 		}
 
@@ -478,8 +467,6 @@ package com.adobe.strobe.players
 		*/		
 		public function get bufferLength() : Number
 		{
-			//return mediaPlayer.bufferLength;	    	
-			//return mediaPlayer.bufferLength;	    	
 			return mediaPlayer.bufferable ?  mediaPlayer.bufferLength : 0;
 		}
 
@@ -494,8 +481,6 @@ package com.adobe.strobe.players
 		*/		
 		public function get bufferTime() : Number
 		{
-			//return mediaPlayer.bufferTime;		    	
-			//return mediaPlayer.bufferTime;		    	
 			return  mediaPlayer.bufferable ? mediaPlayer.bufferTime : 0;
 		}
 
@@ -508,7 +493,7 @@ package com.adobe.strobe.players
 		{
 			dispatchEvent(event.clone());
 		}
-
+		
 		private function audibleChanged(event : MediaPlayerCapabilityChangeEvent) : void
 		{
 			dispatchEvent(new VolumeChangeEvent(0 , mediaPlayer.volume));

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+ -->
+<mx:HBox 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="100%"
+	height="50"
+	horizontalAlign="center"
+	verticalAlign="middle"
+	
+	>
+    
+<mx:Script>
+        <![CDATA[
+        	import org.opencast.engage.videodisplay.state.PlayerState;
+        	import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
+        	import org.swizframework.Swiz;
+        	import mx.core.Application;
+        	import mx.controls.Alert;
+        	import org.opencast.engage.videodisplay.model.VideodisplayModel;
+           
+            [Autowire]
+            [Bindable]
+            public var model:VideodisplayModel;
+            
+            /**
+             * onSeek
+             * 
+             * Seek the video
+             * 
+             * */
+            private function onSeek():void
+            {
+                if ( model.player.seekable )
+                {
+                   model.player.seek(seekBar.value);
+                }   
+            }
+            
+            /**
+             * onVolume
+             * 
+             * Change the volume of the video
+             * 
+             * */
+            private function onVolume():void
+            {
+                model.player.volume = volumeSlider.value;
+            }
+            
+        ]]>
+    </mx:Script>
+    
+    <mx:Label 
+    	width="80"
+    	height="40"
+    	textAlign="center"
+    	text="{ model.timeCode.getTC(model.currentPlayhead) }"
+    	styleName="videocontrollerLabel"
+    	toolTip="Current Time {model.timeCode.getTC(model.currentPlayhead) } "
+    	/>
+    	
+    <mx:Label 
+    	width="80"
+    	height="40"
+        textAlign="center"
+    	text="{ model.timeCode.getTC(model.currentDuration) }"
+    	styleName="videocontrollerLabel"
+    	toolTip="Duration {model.timeCode.getTC(model.currentDuration) } "
+    	/>
+    	
+    <mx:Spacer 
+    	width="20"
+    	/>
+    
+    <mx:Button 
+    	width="40"
+    	height="40"
+    	toolTip="Skip Backward Button"
+    	styleName="SkipBackward"
+    	click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SKIPBACKWARD)) }"
+    	/>
+    	
+    <mx:Button 
+    	width="40"
+        height="40"
+        toolTip="Rewind Button"
+        styleName="Rewind"
+        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.REWIND)) }"
+        />
+        
+    <mx:Button 
+    	width="40"
+        height="40"
+    	toolTip="{ model.currentPlayerState == PlayerState.PAUSING ? 'Play Button' : 'Pause Button' }"
+        styleName="{ model.currentPlayerState == PlayerState.PAUSING ? 'Play' : 'Pause' }"
+        click="{ model.currentPlayerState == PlayerState.PLAYING ? Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE)) : Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY)); }"
+        />
+    
+    <mx:Button 
+    	width="40"
+        height="40"
+    	toolTip="Fast Forward Button"
+        styleName="FastForward"
+        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.FASTFORWARD)) }"
+        />
+        
+    <mx:Button 
+        width="40"
+        height="40"
+        toolTip="Skip Forward Button"
+        styleName="SkipForward"
+        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SKIPFORWARD)) }"
+        />  
+        
+     <mx:Spacer 
+        width="20"
+        />
+        
+     <mx:HSlider                
+        id = "seekBar" 
+        width="100%"
+        maximum="{ model.player.duration }"
+        value="{ model.currentPlayhead }"
+        change="{ onSeek() }"
+        toolTip="Current Time {model.timeCode.getTC(model.currentPlayhead) } "
+        />
+     
+     <mx:Spacer 
+     	width="20"
+     	/>
+       
+     <mx:Button 
+        width="40"
+        height="40"	
+        toolTip="{ model.ccBoolean == true ? 'Closed Caption Off' : 'Closed Caption On' }"
+        styleName="{ model.ccBoolean == true ? 'ccOff' : 'ccOn' }"
+        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.CLOSEDCAPTIONS)) }"
+       />  
+       
+    <mx:HSlider     
+        width = "50"    
+        maximum = "1"
+        id = "volumeSlider" 
+        change = "{ onVolume() }"
+        value = "{ model.player.volume }"
+        toolTip="Volume:  { (model.player.volume * 100).toFixed(0) } %"
+        />
+        
+    <mx:Spacer 
+        width="20"
+        />
+
+</mx:HBox>

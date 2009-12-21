@@ -17,9 +17,6 @@
 	 */
 -->
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-	left="5" right="5" top="5" bottom="5"
-	verticalAlign="bottom"
-	horizontalAlign="center"
 	creationComplete="{ onCreationComplete() }">
 	<mx:Script>
 		<![CDATA[

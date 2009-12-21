@@ -148,7 +148,7 @@
 		click="Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));"
 		width="{this.width/5}"
 		height="{playButton_up.width}"
-		styleName="Play"
+		styleName="PlayBig"
 		visible="false"
 		verticalCenter="0"
 		horizontalCenter="0"
@@ -162,7 +162,7 @@
 		click="Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));"
 		width="{this.width/5}"
 		height="{pauseButton_up.width}"
-		styleName="Pause"
+		styleName="PauseBig"
 		visible="false"
 		verticalCenter="0"
 		horizontalCenter="0"
@@ -171,28 +171,48 @@
 		rollOut="{ hideButton(); }"
 		toolTip="Pause"
 		/>
-		
-	<mx:VBox 
-		width="100%"
-		height="100%"
-		left="5" right="5" top="5" bottom="5"
-		horizontalAlign="right"
-		verticalAlign="bottom"
-		>
-		
-		<mx:Button
-	    	id="btn_fullscreen"
-	        styleName="Fullscreen"
-	       	click="{ toggleFullScreen() }" 
-	       	toolTip="Fullscreen"
-	       	/>
-	        
-    </mx:VBox>
-        
-    <view:CaptionsView 
-    	id="captionsView"
+	
+		<mx:HBox
 			width="100%"
 			height="100%"
-			/>
-    		   
+			left="5" right="5" top="5" bottom="5"
+			verticalAlign="bottom"
+			>
+            
+            <mx:VBox
+            	width="100%"
+            	>
+            	
+            	<view:CaptionsView 
+		            id="captionsView"
+		            width="100%"
+		            horizontalAlign="center"
+		            />
+		            
+		        <mx:Spacer 
+		        	height="20"
+		        	visible="{model.fullscreenMode}"
+                    includeInLayout="{model.fullscreenMode}"
+		        	/>
+	            
+		        <view:VideocontrollerView
+		            id="videocontrollerView"
+		            width="100%"
+		            height="100%"
+		            horizontalAlign="center"
+		            visible="{model.fullscreenMode}"
+		            includeInLayout="{model.fullscreenMode}"
+		            />
+            
+             </mx:VBox>
+	            
+	        <mx:Button
+		    	id="btn_fullscreen"
+		        styleName="{ model.fullscreenMode == false ? 'Fullscreen' : 'Normalscreen' }"
+		       	click="{ toggleFullScreen() }" 
+		       	toolTip="{ model.fullscreenMode == false ? 'Fullscreen' : 'Normalscreen' }"
+		       	/>
+		    
+		</mx:HBox>
+
 </mx:Canvas>

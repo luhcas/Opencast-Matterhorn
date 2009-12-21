@@ -23,6 +23,7 @@
 	backgroundColor="#000000"
 	preinitialize="{ onPreinitialize(); }"
 	addedToStage="onAddedToStage()"
+	applicationComplete="init(event)"
 	xmlns:view="org.opencast.engage.videodisplay.view.*"
 	xmlns:ns1="bridge.*">
 	<mx:Style source="style/standard_videodisplay.css"/>
@@ -40,6 +41,8 @@
 			import org.opencast.engage.videodisplay.model.VideodisplayModel;
 			import org.opencast.engage.videodisplay.business.VideodisplayBean;
 			import org.swizframework.Swiz;
+			import flash.display.StageDisplayState;
+			
 			
 			
 			[Autowire]
@@ -48,13 +51,39 @@
 			
 			private var _timeCode:TimeCode;
 			
-      		private var showTimeInformationTimer:Timer;
+      		
+			 /** 
+             * init
+             * 
+             * initialization
+             * */
+			private function init(evt:Event):void {
+                /* Set up full screen handler. */
+                Application.application.stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenHandler);
+            }
+
+            /** 
+             * fullScreenHandler
+             * 
+             * Save the status of the fullscreen mode
+             * */
+            private function fullScreenHandler(evt:FullScreenEvent):void 
+            {
+                if (evt.fullScreen) 
+                {
+                    model.fullscreenMode = true;
+                } 
+                else 
+                {
+                    model.fullscreenMode = false;
+                }
+            }
+
 			
 			/** 
 			 * onPreinitialize
 			 * 
 			 * load Beans 
-			 * 
 			 * */
 			private function onPreinitialize():void 
 			{
@@ -67,7 +96,6 @@
 			 * 
 			 * Create a new Time Code.
 			 * Add an event listener for the keyboard.
-			 * 
 			 * */
 			private function onAddedToStage():void
 			{
@@ -79,7 +107,6 @@
 			 * play
 			 * 
 			 * When the learnder click on the play button
-			 * 
 			 * */
 			public function play():void
 			{
@@ -90,7 +117,6 @@
 			 * pause
 			 * 
 			 * When the learnder click on the pause button
-			 * 
 			 * */
 			public function pause():void
 			{
@@ -101,7 +127,6 @@
 			 * stop
 			 * 
 			 * When the learnder click on the stop button
-			 * 
 			 * */
 			public function stop():void			
 			{
@@ -112,7 +137,6 @@
 			 * skipBackward
 			 * 
 			 * When the learnder click on the skip backward button
-			 * 
 			 * */
 			public function skipBackward():void			
 			{
@@ -123,7 +147,6 @@
 			 * rewind
 			 * 
 			 * When the learnder click on the rewind button
-			 * 
 			 * */
 			public function rewind():void			
 			{
@@ -134,7 +157,6 @@
 			 * fastForward
 			 * 
 			 * When the learnder click on the fast forward button
-			 * 
 			 * */
 			public function fastForward():void			
 			{
@@ -145,7 +167,6 @@
 			 * skipForward
 			 * 
 			 * When the learnder click on the skip forward button
-			 * 
 			 * */
 			public function skipForward():void			
 			{
@@ -154,7 +175,6 @@
 			
 			/**
 			 * seek
-			 * 
 			 * 
 			 * Wehn the learner seek the video
 			 * */
@@ -167,7 +187,6 @@
 		     * setLanguage
 		     * 
 		     * Set the language of the captions
-		     * 
 		     * */
 		    public function setLanguage( language:String ):void
 		    {
@@ -178,7 +197,6 @@
 		     * setClosedCaptions
 		     * 
 		     * To see the captions
-		     * 
 		     * */
 		    public function closedCaptions( bool:Boolean ):void
 		    {
@@ -344,23 +362,17 @@
 				else if(charCode == 70 || charCode == 102) // F or f
 				{
 					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.FASTFORWARD));	
-				}				
+				}	
+				// time
+                else if(charCode == 84 || charCode == 116) // t
+                {
+                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.TIME));  
+                }
+							
 			}
 			
-			/**
-			 * hideTimeInformation
-			 * 
-			 * 
-			 */ 
-      		private function hideTimeInformation(event:TimerEvent):void
-      		{
-        		Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));
-        		try 
-          		{
-            		ExternalInterface.call('showTimeInformation', "");
-          		} 
-          		catch (e:TypeError) {}
-      		}
+			
+      		
   		]]>
 	</mx:Script>
 	<ns1:FABridge />
@@ -369,7 +381,7 @@
 		width="100%"
 		height="100%"
 		/>
-		
+	
 	<view:Splashscreen id="splash"
 		width="100%"
 		height="100%"/>
