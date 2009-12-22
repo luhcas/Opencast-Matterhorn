@@ -19,7 +19,6 @@ import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -51,43 +50,25 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
    */
   public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.info("run() distribution workflow operation");
-    // if(workflowInstance.getProperties() != null && workflowInstance.getProperties().keySet().contains("itunes")) {
-    // logger.info("Distributing media to itunes for media package " +
-    // workflowInstance.getSourceMediaPackage().getIdentifier());
-    // }
-    // if(workflowInstance.getProperties() != null && workflowInstance.getProperties().keySet().contains("youtube")) {
-    // logger.info("Distributing media to youTube for media package " +
-    // workflowInstance.getSourceMediaPackage().getIdentifier());
-    // }
-    // if(workflowInstance.getProperties() == null || workflowInstance.getProperties().isEmpty()) {
-    // logger.info("This workflow contains no properties, so we can't distribute any media");
-    // }
-    
-    // TODO: Determine which distribution channels should be called
-
-//    if (workflowInstance.getConfiguration("local") != null) {
-      MediaPackage resultingMediaPackage = null;
-      try {
-        logger.info("Distributing to the local repository");
-        Set<String> elementIds = new HashSet<String>();
-        MediaPackage mp = workflowInstance.getCurrentMediaPackage();
-        for(Track track : mp.getTracks()) {
-          elementIds.add(track.getIdentifier());
-        }
-        for(Catalog cat : mp.getCatalogs()) {
-          elementIds.add(cat.getIdentifier());
-        }
-        for(Attachment a : mp.getAttachments()) {
-          elementIds.add(a.getIdentifier());
-        }
-        resultingMediaPackage = distributionService.distribute(mp, elementIds.toArray(new String[elementIds.size()]));
-      } catch (RuntimeException e) {
-        throw new WorkflowOperationException(e);
+    MediaPackage resultingMediaPackage = null;
+    try {
+      logger.info("Distributing to the local repository");
+      Set<String> elementIds = new HashSet<String>();
+      // Distribute only the media files specified by the "source-track-id" configuration
+      String trackIdToDistribute = workflowInstance.getCurrentOperation().getConfiguration("source-track-id");
+      if(trackIdToDistribute != null) elementIds.add(trackIdToDistribute);
+      MediaPackage mp = workflowInstance.getCurrentMediaPackage();
+      // By default, distribute all metadata catalogs and attachments
+      for(Catalog cat : mp.getCatalogs()) {
+        elementIds.add(cat.getIdentifier());
       }
-//    } else {
-//      logger.info("Distribution to local repository skipped");
-//    }
-
+      for(Attachment a : mp.getAttachments()) {
+        elementIds.add(a.getIdentifier());
+      }
+      resultingMediaPackage = distributionService.distribute(mp, elementIds.toArray(new String[elementIds.size()]));
+    } catch (RuntimeException e) {
+      throw new WorkflowOperationException(e);
+    }
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, null, false);
   }
 }

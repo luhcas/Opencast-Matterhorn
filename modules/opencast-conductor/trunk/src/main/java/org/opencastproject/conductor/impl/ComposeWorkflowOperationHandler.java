@@ -19,7 +19,6 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
@@ -126,9 +125,8 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
         logger.info("Encoding audio track {} and video track {} using profile {}",
                 new String[] {audioSourceTrackId, videoSourceTrackId, profile.getIdentifier()});
         Track composedTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, targetTrackId, profile.getIdentifier());
+        composedTrack.setFlavor(videoSourceTrack.getFlavor());
         // store new tracks to mediaPackage
-        if (profile.getFlavor() != null)
-          composedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(profile.getFlavor()));
         // FIXME derived media comes from multiple sources, so how do we choose which is the "parent" of the derived media?
         mediaPackage.addDerived(composedTrack, videoSourceTrack);
         break;
