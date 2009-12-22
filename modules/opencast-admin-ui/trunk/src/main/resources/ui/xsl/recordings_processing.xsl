@@ -32,7 +32,10 @@
   <xsl:template match="ns1:recording">
     <tr>
       <td>
-        <xsl:value-of select="title" />
+        <a>
+          <xsl:attribute name="href">/scheduler/ui/viewevent.html?eventID=<xsl:value-of select="id" /></xsl:attribute>
+          <xsl:value-of select="title" />
+        </a>
       </td>
       <td>
         <xsl:value-of select="presenter" />
