@@ -61,6 +61,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  *       &lt;/sequence&gt;
  *       &lt;attribute name=&quot;id&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&gt;
  *       &lt;attribute name=&quot;type&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&gt;
+ *       &lt;attribute name=&quot;ref&quot; type=&quot;{http://www.w3.org/2001/XMLSchema}string&quot; /&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
  * &lt;/complexType&gt;
@@ -86,6 +87,8 @@ public class TrackType {
   protected String id;
   @XmlAttribute
   protected String type;
+  @XmlAttribute
+  protected String ref;
 
   /**
    * Gets the value of the mimetype property.
@@ -248,6 +251,27 @@ public class TrackType {
    */
   public void setType(String value) {
     this.type = value;
+  }
+
+  /**
+   * Gets the value of the ref property.
+   * 
+   * @return possible object is {@link String }
+   * 
+   */
+  public String getRef() {
+    return ref;
+  }
+
+  /**
+   * Sets the value of the ref property.
+   * 
+   * @param value
+   *          allowed object is {@link String }
+   * 
+   */
+  public void setRef(String value) {
+    this.ref = value;
   }
 
   public String toXml() throws Exception {

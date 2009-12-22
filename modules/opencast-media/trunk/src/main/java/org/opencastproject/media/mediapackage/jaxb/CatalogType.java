@@ -197,5 +197,4 @@ public class CatalogType {
   public void setRef(String value) {
     this.ref = value;
   }
-
 }

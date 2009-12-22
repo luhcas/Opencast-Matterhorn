@@ -43,7 +43,7 @@ public class EngageDownloadTrackBuilderPlugin extends AbstractTrackBuilderPlugin
   private final static Logger log_ = LoggerFactory.getLogger(EngageDownloadTrackBuilderPlugin.class);
 
   public EngageDownloadTrackBuilderPlugin() throws IllegalStateException {
-    setPriority(0);
+    setPriority(1);
   }
 
   /**
@@ -83,6 +83,7 @@ public class EngageDownloadTrackBuilderPlugin extends AbstractTrackBuilderPlugin
   public MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException {
     log_.trace("Creating video track from " + uri);
     Track track = TrackImpl.fromURI(uri);
+    track.setFlavor(MediaPackageElements.ENGAGE_TRACK);
     return track;
   }
 
@@ -95,6 +96,7 @@ public class EngageDownloadTrackBuilderPlugin extends AbstractTrackBuilderPlugin
   protected TrackImpl trackFromManifest(String id, URI uri) {
     TrackImpl track = (TrackImpl) TrackImpl.fromURI(uri);
     track.setIdentifier(id);
+    track.setFlavor(MediaPackageElements.ENGAGE_TRACK);
     return track;
   }
 

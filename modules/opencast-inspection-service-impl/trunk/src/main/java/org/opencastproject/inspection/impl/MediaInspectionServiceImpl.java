@@ -20,6 +20,7 @@ import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Stream;
 import org.opencastproject.media.mediapackage.Track;
@@ -142,6 +143,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
    */
   public Track enrich(Track originalTrack, Boolean override) {
     URI originalTrackUrl = originalTrack.getURI();
+    MediaPackageElementFlavor flavor = originalTrack.getFlavor() == null ? MediaPackageElements.INDEFINITE_TRACK : originalTrack.getFlavor();
     logger.debug("enrych(" + originalTrackUrl + ") called");
 
     // Get the file from the URL
@@ -160,21 +162,18 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       logger.warn("Unable to acquire media metadata for " + originalTrackUrl);
       return null;
     } else {
-      MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-      TrackImpl track;
-      MediaPackageElement element;
+      TrackImpl track = null;
       try {
-        element = elementBuilder.elementFromURI(originalTrackUrl, Type.Track,
-                MediaPackageElements.INDEFINITE_TRACK);
+        track = (TrackImpl) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+          .elementFromURI(originalTrackUrl, Type.Track, flavor);
       } catch (UnsupportedElementException e) {
         throw new RuntimeException(e);
       }
       // init the new track with old
-      track = (TrackImpl) element;
       track.setChecksum(originalTrack.getChecksum());
       track.setDuration(originalTrack.getDuration());
       track.setElementDescription(originalTrack.getElementDescription());
-      track.setFlavor(originalTrack.getFlavor());
+      track.setFlavor(flavor);
       track.setIdentifier(originalTrack.getIdentifier());
       track.setMimeType(originalTrack.getMimeType());
       track.setReference(originalTrack.getReference());
