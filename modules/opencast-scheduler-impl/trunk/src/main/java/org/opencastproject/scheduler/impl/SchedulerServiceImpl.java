@@ -18,6 +18,7 @@ package org.opencastproject.scheduler.impl;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
+
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
@@ -73,7 +74,7 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
     CalendarGenerator cal = new CalendarGenerator(dcGenerator, caGenerator);
     SchedulerEvent[] events = getEvents(filter);
     for (int i = 0; i < events.length; i++) cal.addEvent(events[i]);
-    return cal.getCalendar().toString();
+    return cal.getCalendar().toString(); // CalendarOutputter performance sucks (jmh)
   }
 
   /**

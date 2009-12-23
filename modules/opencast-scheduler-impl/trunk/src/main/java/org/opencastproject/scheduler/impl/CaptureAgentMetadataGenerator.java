@@ -16,18 +16,18 @@
 
 package org.opencastproject.scheduler.impl;
 
+import org.opencastproject.scheduler.api.SchedulerEvent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
-
-import org.apache.commons.codec.binary.Base64;
-import org.opencastproject.scheduler.api.SchedulerEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Map.Entry;
 
 /**
  * 
@@ -64,17 +64,14 @@ public class CaptureAgentMetadataGenerator {
     Properties caCatalog = new Properties();
     
     String [] res = event.getResources();
-    String resList = "";
+    StringBuilder resList = new StringBuilder();
     for (int i = 0; i < res.length; i++) {
-      if (i > 0) resList += ","; //skip "," in front of first value
-      resList +=res[i];
+      if (i > 0) resList.append(","); //skip "," in front of first value
+      resList.append(res[i]);
     }
-    caCatalog.setProperty("capture.devices.names", resList);
-    
-    Enumeration<String> keys = caMetadata.keys();
-    while (keys.hasMoreElements()) {
-      String key = keys.nextElement();
-      caCatalog.put (key, caMetadata.get(key));
+    caCatalog.setProperty("capture.devices.names", resList.toString());
+    for (Entry<String, String> e : caMetadata.entrySet()) {
+      caCatalog.put (e.getKey(), e.getValue());
     }       
     return caCatalog;
   }
@@ -88,19 +85,10 @@ public class CaptureAgentMetadataGenerator {
     StringWriter writer = new StringWriter();
     try {
       generate(event).store(writer, "Capture Agent specific data");
-      return writer.getBuffer().toString();
+      return writer.toString();
     } catch (IOException e) {
       logger.error("Could not convert Capture Agent Data to String");
     }
     return null;
-  }
-  
-  /**
-   * Generates a Properties list with the Capture Agent metadata from the provided event and encodes it with Base64 
-   * @param event The SchedulerEvent from which the metadata should be generated as Capture Agent specific data 
-   * @return A String with a Base64 encoded Properties List with Capture Agent specific Data
-   */
-  public byte [] generateAsBase64 (SchedulerEvent event) {
-    return Base64.encodeBase64(generateAsString(event).getBytes());
   }
 }

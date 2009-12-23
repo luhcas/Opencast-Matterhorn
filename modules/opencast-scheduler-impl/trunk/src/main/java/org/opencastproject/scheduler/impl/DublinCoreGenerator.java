@@ -33,7 +33,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.codec.binary.Base64;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
@@ -118,16 +117,7 @@ public class DublinCoreGenerator {
     }
     return null;
   }
-  
-  /**
-   * Generates a XML with the Dublin Core metadata from the provided event and encodes it with Base64 
-   * @param event The SchedulerEvent from which the metadata should be generated as Dublin Core 
-   * @return A String with a Base64 encoded XML representation of the Dublin Core metadata
-   */
-  public byte [] generateAsBase64 (SchedulerEvent event) {
-    return Base64.encodeBase64(generateAsString(event).getBytes());
-  }
-  
+
   /**
    * Checks if the provided key is a valid Dublin Core XML tag
    * @param key The key that should be checked

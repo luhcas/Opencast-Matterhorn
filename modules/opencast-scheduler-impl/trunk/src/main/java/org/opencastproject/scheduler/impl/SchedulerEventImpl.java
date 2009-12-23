@@ -33,7 +33,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
 
   private static final Logger logger = LoggerFactory.getLogger(SchedulerEventImpl.class);
   
-  LinkedList <String> attendees;
+  LinkedList <String> attendees; // TODO: these look more like SortedSets than LinkedLists to me (jmh)
   LinkedList <String> resources;
   String id;
   Date start = new Date(0);

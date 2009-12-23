@@ -15,8 +15,6 @@
  */
 package org.opencastproject.scheduler.impl;
 
-import java.net.URISyntaxException;
-
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,15 +117,17 @@ public class CalendarGenerator {
         dcParameters.add(Value.BINARY);
         dcParameters.add(Encoding.BASE64);
         dcParameters.add(new XParameter("X-APPLE-FILE\nNAME", "metadata.xml"));
-        event.getProperties().add(new Attach(dcParameters, dcGenerator.generateAsString(e).getBytes()));
+        Attach metadataAttachment = new Attach(dcParameters, dcGenerator.generateAsString(e).getBytes("UTF-8"));
+        event.getProperties().add(metadataAttachment);
         
         ParameterList caParameters = new ParameterList();
         caParameters.add(new FmtType("application/text"));        
         caParameters.add(Value.BINARY);
         caParameters.add(Encoding.BASE64);
         caParameters.add(new XParameter("X-APPLE-FILE NAME", "agent.properties"));
-        event.getProperties().add(new Attach(caParameters, caGenerator.generateAsString(e).getBytes()));
-    } catch (URISyntaxException e1) {
+        Attach agentsAttachment = new Attach(caParameters, caGenerator.generateAsString(e).getBytes("UTF-8"));
+        event.getProperties().add(agentsAttachment);
+    } catch (Exception e1) {
       logger.error("could not create Calendar entry for Event "+ e.toString()+". Reason : "+e1.getMessage());
       return false;
     }
@@ -140,5 +140,4 @@ public class CalendarGenerator {
     logger.debug("new VEvent = "+event.toString() );
     return true;
   }
-  
 }
