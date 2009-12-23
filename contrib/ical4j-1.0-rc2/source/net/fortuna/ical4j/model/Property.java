@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 
+import net.fortuna.ical4j.model.property.Attach;
 import net.fortuna.ical4j.util.Strings;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -233,7 +234,7 @@ public abstract class Property extends Content {
      * @see java.lang.Object#toString()
      */
     public final String toString() {
-        final StringBuffer buffer = new StringBuffer();
+        StringBuffer buffer = new StringBuffer();
         buffer.append(getName());
         if (getParameters() != null) {
             buffer.append(getParameters());
@@ -245,11 +246,37 @@ public abstract class Property extends Content {
         else {
             buffer.append(Strings.valueOf(getValue()));
         }
+        if(this instanceof Attach) {
+          buffer = fixAttachmentLineBreaks(buffer.toString());
+        }
         buffer.append(Strings.LINE_SEPARATOR);
 
         return buffer.toString();
     }
 
+    /**
+     * Replaces 
+     * @param original
+     * @return
+     */
+    protected StringBuffer fixAttachmentLineBreaks(String original) {
+      String withoutWhitespace = original.replaceAll("\\s", "");
+      int index = 0, increment = 72, len = withoutWhitespace.length();
+      StringBuffer sb = new StringBuffer();
+      while(index < len) {
+        if(index == 0) {
+          sb.append(withoutWhitespace.substring(index, index + 1 + Math.min(increment, (len-index))));
+          index += increment + 1;
+        } else {
+          sb.append(" ");
+          sb.append(withoutWhitespace.substring(index, index + Math.min(increment, (len-index))));
+          index += increment;
+        }
+        sb.append(Strings.LINE_SEPARATOR);
+      }
+      return sb;
+    }
+    
     /**
      * Indicates whether this property is a calendar property.
      * @return boolean
