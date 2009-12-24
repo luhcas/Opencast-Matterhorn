@@ -28,7 +28,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.search.api </Export-Package>
+            <Export-Package> 
+              org.opencastproject.search.api,
+              org.opencastproject.feed.api            
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>
