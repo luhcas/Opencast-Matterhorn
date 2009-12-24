@@ -33,6 +33,8 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ExecutionException;
+
 /**
  * The workflow definition for handling "compose" operations
  */
@@ -60,11 +62,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     if (workflowInstance.getConfiguration("encode") != null) {
       try {
         resultingMediaPackage = encode(workflowInstance.getCurrentMediaPackage(), workflowInstance.getCurrentOperation());
-      } catch (EncoderException e) {
-        throw new WorkflowOperationException(e);
-      } catch (MediaPackageException e) {
-        throw new WorkflowOperationException(e);
-      } catch (UnsupportedElementException e) {
+      } catch (Exception e) {
         throw new WorkflowOperationException(e);
       }
     } else {
@@ -87,9 +85,11 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
    * @throws EncoderException
    * @throws MediaPackageException
    * @throws UnsupportedElementException
+   * @throws ExecutionException 
+   * @throws InterruptedException 
    */
   private MediaPackage encode(MediaPackage mediaPackage, WorkflowOperationInstance operation) throws EncoderException,
-          MediaPackageException, UnsupportedElementException {
+          MediaPackageException, UnsupportedElementException, InterruptedException, ExecutionException {
     String videoSourceTrackId = operation.getConfiguration("video-source-track-id");
     String audioSourceTrackId = operation.getConfiguration("audio-source-track-id");
     // If there is no separate audio track, use the audio from the video file
@@ -124,7 +124,8 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
       if (operation.getConfiguration(profile.getIdentifier()) != null) {
         logger.info("Encoding audio track {} and video track {} using profile {}",
                 new String[] {audioSourceTrackId, videoSourceTrackId, profile.getIdentifier()});
-        Track composedTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, targetTrackId, profile.getIdentifier());
+        Track composedTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId,
+                targetTrackId, profile.getIdentifier()).get();
         composedTrack.setFlavor(videoSourceTrack.getFlavor());
         // store new tracks to mediaPackage
         // FIXME derived media comes from multiple sources, so how do we choose which is the "parent" of the derived media?

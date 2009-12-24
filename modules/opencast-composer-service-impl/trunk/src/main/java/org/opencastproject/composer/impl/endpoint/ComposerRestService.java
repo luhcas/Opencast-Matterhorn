@@ -87,8 +87,8 @@ public class ComposerRestService {
     MediaPackage mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().
         loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));
     
-    // Encode the specified tracks
-    Track track = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, targetTrackId, profileId);
+    // Encode the specified tracks, TODO Make use of the Future to turn this into an asynchronous rest call
+    Track track = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, targetTrackId, profileId).get();
     
     // Return the JAXB version of the track
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();

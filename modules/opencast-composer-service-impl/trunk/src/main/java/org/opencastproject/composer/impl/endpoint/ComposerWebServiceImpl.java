@@ -65,8 +65,8 @@ public class ComposerWebServiceImpl implements ComposerWebService {
     MediaPackage mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().
         loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));
     
-    // Encode the specified track
-    Track track = composerService.encode(mediaPackage, sourceTrackId, targetTrackId, profileId);
+    // Encode the specified track, TODO Make use of the Future to turn this into an asynchronous web service call
+    Track track = composerService.encode(mediaPackage, sourceTrackId, targetTrackId, profileId).get();
     
     // Return the JAXB version of the track
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();

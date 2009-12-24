@@ -18,6 +18,8 @@ package org.opencastproject.composer.api;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.Track;
 
+import java.util.concurrent.Future;
+
 /**
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this encoding job.
  */
@@ -33,7 +35,7 @@ public interface ComposerService {
    * @return The track that results from the encoding
    * @throws EncoderException
    */
-  public Track encode(MediaPackage mediaPackage, String sourceTrackId, String targetTrackId, String profileId) throws EncoderException;
+  public Future<Track> encode(MediaPackage mediaPackage, String sourceTrackId, String targetTrackId, String profileId) throws EncoderException;
 
   /**
    * Encode the video stream from one track and the audio stream from another, into a new {@link Track}.
@@ -45,7 +47,7 @@ public interface ComposerService {
    * @return The track that results from the encoding
    * @throws EncoderException
    */
-  public Track encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
+  public Future<Track> encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
           String targetTrackId, String profileId) throws EncoderException;
 
   /**
