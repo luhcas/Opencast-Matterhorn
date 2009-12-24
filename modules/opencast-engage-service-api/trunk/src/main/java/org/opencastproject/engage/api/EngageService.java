@@ -29,7 +29,7 @@ public interface EngageService {
   //String deliverPlayer(String filename, String mediaHost);
   
   /**
-   * Returns an HTML page that lists all available mediafiles.
+   * Returns an HTML page that lists all available media files.
    * @deprecated
    * @return HTML page
    */
@@ -44,6 +44,7 @@ public interface EngageService {
   
   /** 
    * Returns an HTML page with a player that plays the mediaPackageId.
+   * @deprecated
    * @param episodeId
    * @return HTML page
    */
@@ -51,8 +52,17 @@ public interface EngageService {
   
   /** 
    * Returns an HTML page with the latest available episodes
+   * @deprecated
    * @return HTML page
    */
   String deliverBrowsePage();
   
+  
+  /**
+   * Returns a EpisodeViewList episodes. If the search service is not present an empty list is returned.
+   * 
+   * @return EpisodeViewList list of episodes
+   */
+  EpisodeViewListResultImpl getEpisodesByDate(int page);
+
 }
