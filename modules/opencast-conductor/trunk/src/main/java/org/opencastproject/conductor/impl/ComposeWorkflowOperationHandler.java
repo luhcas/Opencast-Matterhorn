@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * The workflow definition for handling "compose" operations
@@ -114,18 +115,14 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     // ImageSequence, Cover)
     // String[] profiles = ((String)properties.get("encode")).split(" ");
     EncodingProfile[] profileList = composerService.listProfiles();
-    // for(String profileID : profiles){
-    // logger.info("Encoding track " + trackID + " with " + profileID + "profile");
-    // Track composedTrack = composerService.encode(mediaPackage, trackID, profileID);
-    // // store new tracks to mediaPackage
-    // mediaPackage.add(composedTrack);
-    // }
     for (EncodingProfile profile : profileList) {
       if (operation.getConfiguration(profile.getIdentifier()) != null) {
         logger.info("Encoding audio track {} and video track {} using profile {}",
                 new String[] {audioSourceTrackId, videoSourceTrackId, profile.getIdentifier()});
-        Track composedTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId,
-                targetTrackId, profile.getIdentifier()).get();
+        Future<Track> futureComposedTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId,
+                targetTrackId, profile.getIdentifier());
+        // is there anything we can be doing while we wait for the track to be composed?
+        Track composedTrack = futureComposedTrack.get();
         composedTrack.setFlavor(videoSourceTrack.getFlavor());
         // store new tracks to mediaPackage
         // FIXME derived media comes from multiple sources, so how do we choose which is the "parent" of the derived media?
