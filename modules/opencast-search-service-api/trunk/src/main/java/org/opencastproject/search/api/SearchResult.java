@@ -26,48 +26,48 @@ public interface SearchResult {
    * 
    * @return Item list.
    */
-  public abstract SearchResultItem[] getItems();
+  SearchResultItem[] getItems();
 
   /**
    * Get the user query.
    * 
    * @return The user query.
    */
-  public abstract String getQuery();
+  String getQuery();
 
   /**
    * Get the total number of items found.
    * 
    * @return The number.
    */
-  public abstract long size();
+  long size();
 
   /**
    * Get the offset.
    * 
    * @return The offset.
    */
-  public abstract long getOffset();
+  long getOffset();
 
   /**
    * Get the limit.
    * 
    * @return The limit.
    */
-  public abstract long getLimit();
+  long getLimit();
 
   /**
    * Get the search time.
    * 
    * @return The time in ms.
    */
-  public abstract long getSearchTime();
+  long getSearchTime();
 
   /**
    * Get the page of the current result.
    * 
    * @return The page.
    */
-  public abstract long getPage();
+  long getPage();
 
 }

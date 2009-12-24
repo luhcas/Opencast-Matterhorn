@@ -29,25 +29,26 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * The search result represents a set of result items that has been compiled as a result for a search operation.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="search-result", namespace="http://search.opencastproject.org/")
+@XmlType(name="search-results", namespace="http://search.opencastproject.org/", propOrder={"query", "resultSet"})
+@XmlRootElement(name="search-results", namespace="http://search.opencastproject.org/")
 public class SearchResultImpl implements SearchResult {
 
   /** Logging facility */
   static Logger log_ = LoggerFactory.getLogger(SearchResultImpl.class);
 
   /** A list of search items. */
-  @XmlElementWrapper(name="search-results")
+  @XmlElement(name="result")
   private List<SearchResultItemImpl> resultSet = null;
 
   /** The query that yielded the result set */
-  @XmlElement
+  @XmlElement(name="query")
   private String query = null;
 
   /** The pagination offset. */

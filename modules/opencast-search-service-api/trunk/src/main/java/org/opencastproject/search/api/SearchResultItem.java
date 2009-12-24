@@ -38,165 +38,161 @@ public interface SearchResultItem {
   /**
    * @return the id
    */
-  public String getId();
+  String getId();
 
   /**
    * Returns the media package that was used to create the entry in the search index.
    * 
    * @return the media package
    */
-  public MediaPackage getMediaPackage();
+  MediaPackage getMediaPackage();
 
   /**
    * @return the dcExtent
    */
-  public long getDcExtent();
+  long getDcExtent();
 
   /**
    * @return the dcTitle
    */
-  public String getDcTitle();
+  String getDcTitle();
 
   /**
    * @return the dcSubject
    */
-  public String getDcSubject();
+  String getDcSubject();
 
   /**
    * @return the dcCreator
    */
-  public String getDcCreator();
+  String getDcCreator();
 
   /**
    * @return the dcPublisher
    */
-  public String getDcPublisher();
+  String getDcPublisher();
 
   /**
    * @return the dcContributor
    */
-  public String getDcContributor();
+  String getDcContributor();
 
   /**
    * @return the dcAbtract
    */
-  public String getDcAbstract();
+  String getDcAbstract();
 
   /**
    * @return the dcCreated
    */
-  public Date getDcCreated();
+  Date getDcCreated();
 
   /**
    * @return the dcAvailableFrom
    */
-  public Date getDcAvailableFrom();
+  Date getDcAvailableFrom();
 
   /**
    * @return the dcAvailableTo
    */
-  public Date getDcAvailableTo();
+  Date getDcAvailableTo();
 
   /**
    * @return the dcLanguage
    */
-  public String getDcLanguage();
+  String getDcLanguage();
 
   /**
    * @return the dcRightsHolder
    */
-  public String getDcRightsHolder();
+  String getDcRightsHolder();
 
   /**
    * @return the dcSpatial
    */
-  public String getDcSpatial();
+  String getDcSpatial();
 
   /**
    * @return the dcTemporal
    */
-  public String getDcTemporal();
+  String getDcTemporal();
 
   /**
    * @return the dcIsPartOf
    */
-  public String getDcIsPartOf();
+  String getDcIsPartOf();
 
   /**
    * @return the dcReplaces
    */
-  public String getDcReplaces();
+  String getDcReplaces();
 
   /**
    * @return the dcType
    */
-  public String getDcType();
+  String getDcType();
 
   /**
    * @return the dcAccessRights
    */
-  public String getDcAccessRights();
+  String getDcAccessRights();
 
   /**
    * @return the dcLicense
    */
-  public String getDcLicense();
+  String getDcLicense();
 
   /**
    * @return the mediaType
    */
-  public SearchResultItemType getType();
+  SearchResultItemType getType();
 
   /**
    * @return the keywords
    */
-  public String[] getKeywords();
+  String[] getKeywords();
 
   /**
    * @return the cover
    */
-  public String getCover();
+  String getCover();
 
   /**
    * @return the modified
    */
-  public Date getModified();
+  Date getModified();
 
   /**
    * @return the score
    */
-  public double getScore();
+  double getScore();
 
   /**
-   * Get the file location list.
+   * Get the linked media files.
    * 
    * @return URI file locations
    */
-  public URI[] getLocations();
+  URI[] getMedia();
 
   /**
-   * Get a certain file location.
+   * Get the linked metadata catalogs.
    * 
-   * @param index
-   *          The file index.
-   * @return URI location of file or null if there is no file with that index
+   * @return URI file locations
    */
-  public URI getLocation(int index);
+  URI[] getCatalogs();
+
+  /**
+   * Get the linked attachments.
+   * 
+   * @return URI file locations
+   */
+  URI[] getAttachments();
 
   /**
    * Get the result item segment list.
    * 
    * @return The segment list.
    */
-  public MediaSegment[] getSegments();
-
-  /**
-   * Get a certain segment by index.
-   * 
-   * @param number
-   *          The segment number.
-   * @return if segment is NIL returns null, else returns the segment
-   */
-  public MediaSegment getSegment(int number);
+  MediaSegment[] getSegments();
 
 }

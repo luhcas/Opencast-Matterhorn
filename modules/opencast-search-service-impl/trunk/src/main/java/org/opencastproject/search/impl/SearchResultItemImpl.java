@@ -46,8 +46,8 @@ import javax.xml.bind.annotation.XmlType;
  * This class models an item in the search result. It represents a 'video' or 'series' object.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "search-result", namespace = "http://search.opencastproject.org/")
-@XmlRootElement(name = "search-result", namespace = "http://search.opencastproject.org/")
+@XmlType(name = "result", namespace = "http://search.opencastproject.org/")
+@XmlRootElement(name = "result", namespace = "http://search.opencastproject.org/")
 public class SearchResultItemImpl implements SearchResultItem {
 
   /** Serial version id **/
@@ -166,9 +166,17 @@ public class SearchResultItemImpl implements SearchResultItem {
   @XmlElementWrapper(name = "media-segments")
   private SortedSet<MediaSegmentImpl> mediaSegments = null;
 
-  @XmlElementWrapper(name = "file-locations")
-  @XmlElement(name = "URI")
-  private List<URI> locations;
+  @XmlElementWrapper(name = "media")
+  @XmlElement(name = "url")
+  private List<URI> media;
+
+  @XmlElementWrapper(name = "catalogs")
+  @XmlElement(name = "url")
+  private List<URI> catalogs;
+
+  @XmlElementWrapper(name = "attachments")
+  @XmlElement(name = "url")
+  private List<URI> attachments;
 
   /**
    * {@inheritDoc}
@@ -546,28 +554,17 @@ public class SearchResultItemImpl implements SearchResultItem {
     return mediaPackage;
   }
 
-  public void setLocations(List<URI> locations) {
-    this.locations = locations;
+  public void setMedia(List<URI> media) {
+    this.media = media;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.api.SearchResultItem#getLocations()
+   * @see org.opencastproject.search.api.SearchResultItem#getMedia()
    */
-  public URI[] getLocations() {
-    return locations.toArray(new URI[locations.size()]);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchResultItem#getLocation(int)
-   */
-  public URI getLocation(int index) {
-    if (index < 0 || index >= locations.size())
-      return null;
-    return locations.get(index);
+  public URI[] getMedia() {
+    return media.toArray(new URI[media.size()]);
   }
 
   public MediapackageType getMediaPackageJaxb() {
@@ -686,20 +683,6 @@ public class SearchResultItemImpl implements SearchResultItem {
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchResultItem#getSegment(int)
-   */
-  public MediaSegment getSegment(int number) {
-    for (MediaSegment s : mediaSegments) {
-      if (s.getIndex() == number) {
-        return s;
-      }
-    }
-    return null;
-  }
-
-  /**
    * Comparator used to sort media segments.
    */
   private static class MediaSegmentComparator implements Comparator<MediaSegment> {
@@ -725,5 +708,31 @@ public class SearchResultItemImpl implements SearchResultItem {
       return o2.getIndex() - o1.getIndex();
     }
 
+  }
+
+  public synchronized void setCatalogs(List<URI> catalogs) {
+    this.catalogs = catalogs;
+  }
+
+  public synchronized void setAttachments(List<URI> attachments) {
+    this.attachments = attachments;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.search.api.SearchResultItem#getAttachments()
+   */
+  @Override
+  public URI[] getAttachments() {
+    return attachments.toArray(new URI[attachments.size()]);
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.search.api.SearchResultItem#getCatalogs()
+   */
+  @Override
+  public URI[] getCatalogs() {
+    return catalogs.toArray(new URI[catalogs.size()]);
   }
 }
