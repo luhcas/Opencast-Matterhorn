@@ -114,6 +114,11 @@
       <artifactId>stax-utils</artifactId>
       <version>20040917</version>
     </dependency>
+    <dependency>
+      <groupId>rome</groupId>
+      <artifactId>rome</artifactId>
+      <version>1.0</version>
+    </dependency>
     
     <!--
     The following dependencies are part of the solr distribution, but we are leaving out of the search service (for now)
