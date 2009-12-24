@@ -19,18 +19,24 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.util.Dictionary;
 import java.util.HashMap;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.opencastproject.engage.api.EngageService;
+import org.opencastproject.engage.api.EpisodeView;
+import org.opencastproject.engage.api.EpisodeViewImpl;
+import org.opencastproject.engage.api.EpisodeViewListImpl;
+import org.opencastproject.engage.api.EpisodeViewListResultImpl;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
 import org.opencastproject.search.api.SearchService;
 import org.osgi.service.cm.ConfigurationException;
@@ -54,9 +60,8 @@ public class EngageServiceImpl implements EngageService, ManagedService {
   public static String engagePath = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator
           + "workingfilerepo" + File.separator + "engage";
   public static String templatePath = "/player/templates";
-  public static String playerTemplate = "player.tmpl.html";
+  public static String playerTemplate = "player-jquery.html.tmpl";
   public static String browseTemplate = "search/browse.tmpl.html";
-  public static String searchHeaderTemplate = "search/oc-search-header.tmpl.html";
   public static String searchResultItemTemplate = "search/oc-search-result-item.tmpl.html";
 
   private SearchService searchService;
@@ -108,8 +113,9 @@ public class EngageServiceImpl implements EngageService, ManagedService {
     tmplLoader = new TemplateLoader(templatePath);
     String path = File.separator + "demo-data" + File.separator;
 
-    addToSearchService(path, "manifest-demo01.xml", "dublincore-demo01.xml");
-    addToSearchService(path, "manifest-demo02.xml", "dublincore-demo02.xml");
+    addToSearchService(path, "manifest-demo1.xml", "dublincore-demo1.xml");
+    addToSearchService(path, "manifest-demo2.xml", "dublincore-demo2.xml");
+    addToSearchService(path, "manifest-demo3.xml", "dublincore-demo3.xml");
   }
 
   private void addToSearchService(String path, String manifestFile, String dublincoreFile) {
@@ -168,8 +174,9 @@ public class EngageServiceImpl implements EngageService, ManagedService {
    *          the component context
    */
   public void deactivate(ComponentContext componentContext) {
-    searchService.delete("10.0000/01");
-    searchService.delete("10.0000/02");
+    searchService.delete("10.0000/1");
+    searchService.delete("10.0000/2");
+    searchService.delete("10.0000/3");
   }
 
   /**
@@ -188,47 +195,47 @@ public class EngageServiceImpl implements EngageService, ManagedService {
    * @param episodeId
    * @return HTML page
    */
-  public String deliverPlayer(String mediaPackageIdBase64Encoded) {
-
-    // Variables
-    String mediaPackageId;
-
-    // Base64 Decode media package id
-    mediaPackageId = new String(Base64.decodeBase64(mediaPackageIdBase64Encoded.getBytes()));
-
+  public String deliverPlayer(String episodeId) {
     StringBuilder sb = new StringBuilder();
+    sb.append("<html>");
 
-    SearchResultItem[] result = searchService.getEpisodeById(mediaPackageId).getItems();
-    String title = "no title";
+    sb.append("MediaPackage ID: " + episodeId + "<br>");
+
+    SearchResultItem[] result = searchService.getEpisodeById(episodeId).getItems();
+    String title = null;
     String playerTrackUrl = null;
     // String mediaPackageId;
     for (int i = 0; i < result.length; i++) {
       title = result[i].getDcTitle();
       // mediaPackageId = result[i].getId();
-      playerTrackUrl = result[i].getMediaPackage().getTrack("track-1").getURI().toString();
+     // playerTrackUrl = result[i].getMediaPackage().getTrack("track-1").getURI().toString();
+      playerTrackUrl = "http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv";
     }
 
-    String searchHeaderTmpl = tmplLoader.loadTemplate(searchHeaderTemplate);
+    if (title != null)
+      sb.append("Title: " + title + "<br>");
+
     String template = tmplLoader.loadTemplate(playerTemplate);
     HashMap<String, String> map = new HashMap<String, String>();
     if (playerTrackUrl != null) {
       map.put("videoURL", playerTrackUrl);
-      map.put("oc-episode-title", title);
-      map.put("oc-engage-search-header", searchHeaderTmpl);
+      sb.append("track-1: " + playerTrackUrl + "<br>");
     }
 
     sb.append(tmplLoader.doReplacements(template, map));
+
+    sb.append("</html>");
 
     return sb.toString();
   }
 
   public String deliverBrowsePage() {
-    // Variables
     String browsePage = tmplLoader.loadTemplate(browseTemplate);
     String searchResultItemTmpl = tmplLoader.loadTemplate(searchResultItemTemplate);
 
-    // Get the search result from the search service
-    SearchResultItem[] result = searchService.getEpisodesByDate(0, 30).getItems();
+    SearchResult searchResult = searchService.getEpisodesByDate(0, 10);
+
+    SearchResultItem[] result = searchService.getEpisodesByDate(0, 10).getItems();
 
     StringBuilder searchResultItems = new StringBuilder();
     for (int i = 0; i < result.length; i++) {
@@ -244,26 +251,102 @@ public class EngageServiceImpl implements EngageService, ManagedService {
   }
 
   private String fillSearchResultItem(String searchResultItemTmpl, SearchResultItem s) {
+    String title = s.getDcTitle();
+    // String mediaPackageId = s.getId();
 
-    // Variables
-    String title;
-    String mediaPackageId;
-    HashMap<String, String> map;
-
-    // Get the media package id
-    mediaPackageId = s.getId();
-
-    // Base64 Encode media package id
-    String mediaPackageIdEncoded = new String(Base64.encodeBase64(mediaPackageId.getBytes()));
-
-    // Get the media package title
-    title = s.getDcTitle();
-
-    // Create a map to put into the strings that will be replaced inside of the template
-    map = new HashMap<String, String>();
-    map.put("oc-search-result-item-title", "<a href=\"watch/" + mediaPackageIdEncoded + "\">" + title + "</a>" + "\n");
+    HashMap<String, String> map = new HashMap<String, String>();
+    map.put("oc-search-result-item-title", title);
 
     return tmplLoader.doReplacements(searchResultItemTmpl, map);
-
   }
+
+  /**
+   * Returns a EpisodeViewList episodes. If the search service is not present an empty list is returned.
+   * 
+   * @return EpisodeViewList list of episodes
+   */
+  public EpisodeViewListResultImpl getEpisodesByDate(int page) {
+    // Variables
+    int pagemax, episodesMax, fromIndex, toIndex;
+    String mediaPackageId, title, videoURL;
+    EpisodeViewListResultImpl episodeViewListResult;
+    EpisodeViewListImpl episodeViewList;
+    EpisodeView episodeViewItem;
+
+    // Creating a new EpisodeViewListResultImpl
+    episodeViewListResult = new EpisodeViewListResultImpl();
+
+    // Creating a new EpisodeViewListImpl
+    episodeViewList = new EpisodeViewListImpl();
+
+    // Adding episodeViewList to episodeViewListResult
+    episodeViewListResult.setEpisodeViewList(episodeViewList);
+
+    // Checking if the searchService is available
+    if (searchService == null) {
+      logger.warn("search service not present, returning empty list");
+      return episodeViewListResult;
+    }
+
+    // Get episodes by date from the search service
+    SearchResultItem[] searchResultItems = searchService.getEpisodesByDate(0, 52).getItems();
+
+    // Set episodesMax
+    episodesMax = searchResultItems.length;
+
+    // Set the episodes max
+    episodeViewListResult.setEpisodesMax(episodesMax);
+
+    // Calculate the page maximum
+    pagemax = searchResultItems.length / 10;
+
+    if (searchResultItems.length % 10 != 0)
+      pagemax = pagemax + 1;
+    else if (pagemax == 0)
+      pagemax = 1;
+
+    // Set the page maximum
+    episodeViewListResult.setPageMax(pagemax);
+
+    // Calculate fromIndex
+    fromIndex = (page * 10) - 10;
+
+    // Set the fromIndex
+    episodeViewListResult.setFromIndex(fromIndex + 1);
+
+    // Calculate toIndex
+    toIndex = Math.min(fromIndex + 10, searchResultItems.length);
+
+    // Set the toIndex
+    episodeViewListResult.setToIndex(toIndex);
+
+    for (int i = fromIndex; i < toIndex; i++) {
+      // Get the the sarchResultItem on position i in the array
+      SearchResultItem searchResultItem = searchResultItems[i];
+
+      // Getting fields from the searchResultItem
+      mediaPackageId = searchResultItem.getId();
+      title = searchResultItem.getDcTitle();
+      //videoURL = searchResultItem.getMediaPackage().getTrack("track-1").getURI().toString();
+      videoURL = "http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv";
+
+      try {
+        // URLEncode the media package id
+        mediaPackageId = URLEncoder.encode(mediaPackageId, "UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        e.printStackTrace();
+      }
+
+      // Setting fields to the episodeViewItem
+      episodeViewItem = new EpisodeViewImpl();
+      episodeViewItem.setTitle(title);
+      episodeViewItem.setURLEncodedMediaPackageId(mediaPackageId);
+
+      // Adding the episodeViewItem to the episodeViewList
+      episodeViewList.add(episodeViewItem);
+    }
+
+    return episodeViewListResult;
+  }
+
 }

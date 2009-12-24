@@ -77,7 +77,8 @@
             <Service-Component>
               OSGI-INF/engage-service.xml,
               OSGI-INF/engage-service-rest.xml,
-              OSGI-INF/player.xml
+              OSGI-INF/player.xml,
+              OSGI-INF/searchui.xml
             </Service-Component>
           </instructions>
         </configuration>

@@ -29,6 +29,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
 import org.opencastproject.engage.api.EngageService;
+import org.opencastproject.engage.api.EpisodeViewListResultImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,8 +74,8 @@ public class EngageServiceRestImpl implements EngageService {
     docs = docsFromClassloader;
   }
 
-  public String deliverPlayer(String mediaPackageIdBase64Encoded) {
-    return service.deliverPlayer(mediaPackageIdBase64Encoded);
+  public String deliverPlayer(String mediaPackageId) {
+    return service.deliverPlayer(mediaPackageId);
   }
 
   public String deliverBrowsePage() {
@@ -108,11 +109,20 @@ public class EngageServiceRestImpl implements EngageService {
 
   @GET
   @Produces(MediaType.TEXT_HTML)
-  @Path("watch/{mediaPackageIdBase64Encoded}")
-  public String watch(@PathParam("mediaPackageIdBase64Encoded") String mediaPackageIdBase64Encoded,
+  @Path("watch/{mediaPackageId}")
+  public String watch(@PathParam("mediaPackageId") String mediaPackageId,
           @Context HttpServletRequest request) {
 
-    return deliverPlayer(mediaPackageIdBase64Encoded);
+    return deliverPlayer(mediaPackageId);
   }
+
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("search/{page}")
+  public EpisodeViewListResultImpl getEpisodesByDate(@PathParam("page") int page) {
+    
+    return service.getEpisodesByDate(page);
+  }
+
 
 }
