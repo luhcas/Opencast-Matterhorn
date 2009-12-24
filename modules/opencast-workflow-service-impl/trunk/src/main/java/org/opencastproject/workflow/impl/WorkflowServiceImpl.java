@@ -30,6 +30,7 @@ import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationDefinitionListImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -442,17 +443,20 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
             } catch (WorkflowOperationException e) {
               log_.warn("Operation " + operationDefinition + " failed:" + e.getMessage());
               // If the operation is set to fail on error, set the workflow to "failed" and run the exception handling
-              // workflow operations
+              // workflow operations if specified
               if (operationDefinition.isFailWorkflowOnException()) {
+                opInstance.setState(State.FAILING.name());
                 wfi.setState(State.FAILING.name());
                 failed = true;
 
                 // Replace the next operations with those from the failure handling workflow
                 String catchWorkflowName = operationDefinition.getExceptionHandlingWorkflow();
                 WorkflowDefinition catchWorkflowDefinition = getWorkflowDefinitionByName(catchWorkflowName);
-                if (catchWorkflowDefinition == null) {
-                  log_.warn("Unable to execute catch workflow " + catchWorkflowName + " for operation "
-                          + operationDefinition);
+                if (catchWorkflowName == null || catchWorkflowDefinition == null) {
+                  log_.warn("Unable to execute catch workflow {} for operation {}.", catchWorkflowName, operationDefinition);
+                  opInstance.setState(State.FAILED.name());
+                  wfi.setState(State.FAILED.name());
+                  update(wfi); // Save the instance, since we've set the workflow instance and operation instance states
                   return;
                 }
 
@@ -499,6 +503,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         // All of the workflow operation definitions have run, so set the state and save it.
         if (failed) {
           wfi.setState(State.FAILED.name());
+          // set any "FAILING" operations to "FAILED"
+          for(WorkflowOperationInstance op : wfi.getWorkflowOperationInstanceList()) {
+            if(State.FAILING.equals(op.getState())) ((WorkflowOperationInstanceImpl)op).setState(State.FAILED.name());
+          }
         } else {
           wfi.setState(State.SUCCEEDED.name());
         }

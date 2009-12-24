@@ -55,10 +55,13 @@ public class WorkflowServiceImplTest {
   private static final String storageRoot = "target" + File.separator + "workflow-test-db";
 
   private static WorkflowServiceImpl service = null;
-  private static WorkflowDefinition definition1 = null;
+  private static WorkflowDefinition workingDefinition = null;
+  private static WorkflowDefinition failingDefinitionWithoutErrorHandler = null;
+  private static WorkflowDefinition failingDefinitionWithErrorHandler = null;
   private static MediaPackage mediapackage1 = null;
   private static MediaPackage mediapackage2 = null;
-  private static WorkflowOperationHandler operationHandler = null;
+  private static WorkflowOperationHandler succeedingOperationHandler = null;
+  private static WorkflowOperationHandler failingOperationHandler = null;
   private static JdbcConnectionPool cp = null;
 
   @BeforeClass
@@ -70,15 +73,17 @@ public class WorkflowServiceImplTest {
       Assert.fail(e.getMessage());
     }
 
-    // create an operation handler for our workflows
-    operationHandler = new TestWorkflowOperationHandler();
-
+    // create operation handlers for our workflows
+    succeedingOperationHandler = new SucceedingWorkflowOperationHandler();
+    failingOperationHandler = new FailingWorkflowOperationHandler();
+    
     // instantiate a service implementation and its DAO, overriding the methods that depend on the osgi runtime
     service = new WorkflowServiceImpl() {
       protected Set<HandlerRegistration> getRegisteredHandlers() {
         Set<HandlerRegistration> set = new HashSet<HandlerRegistration>();
-        set.add(new HandlerRegistration("op1", operationHandler));
-        set.add(new HandlerRegistration("op2", operationHandler));
+        set.add(new HandlerRegistration("op1", succeedingOperationHandler));
+        set.add(new HandlerRegistration("op2", succeedingOperationHandler));
+        set.add(new HandlerRegistration("op3", failingOperationHandler));
         return set;
       }
     };
@@ -90,8 +95,15 @@ public class WorkflowServiceImplTest {
     service.activate(null);
 
     try {
-      definition1 = WorkflowBuilder.getInstance().parseWorkflowDefinition(
+      workingDefinition = WorkflowBuilder.getInstance().parseWorkflowDefinition(
               WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-1.xml"));
+      failingDefinitionWithoutErrorHandler = WorkflowBuilder.getInstance().parseWorkflowDefinition(
+              WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-2.xml"));
+      failingDefinitionWithErrorHandler = WorkflowBuilder.getInstance().parseWorkflowDefinition(
+              WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-3.xml"));
+      service.registerWorkflowDefinition(workingDefinition);
+      service.registerWorkflowDefinition(failingDefinitionWithoutErrorHandler);
+      service.registerWorkflowDefinition(failingDefinitionWithErrorHandler);
       MediaPackageBuilder mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
       mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
       mediapackage1 = mediaPackageBuilder.loadFromManifest(WorkflowServiceImplTest.class
@@ -108,12 +120,12 @@ public class WorkflowServiceImplTest {
     System.out.println("All tests finished... tearing down...");
     service.deactivate();
     service = null;
-    operationHandler = null;
+    succeedingOperationHandler = null;
   }
 
   @Test
   public void testGetWorkflowInstanceById() {
-    WorkflowInstance instance = service.start(definition1, mediapackage1, null);
+    WorkflowInstance instance = service.start(workingDefinition, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
     while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
@@ -147,7 +159,7 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.getWorkflowInstances(
             service.newWorkflowQuery().withMediaPackage(mediapackage1.getIdentifier().toString())).size());
 
-    WorkflowInstance instance = service.start(definition1, mediapackage1, null);
+    WorkflowInstance instance = service.start(workingDefinition, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
     while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
@@ -183,7 +195,7 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
     Assert.assertEquals(0, service.getWorkflowInstances(service.newWorkflowQuery().withEpisode(episodeId)).size());
 
-    WorkflowInstance instance = service.start(definition1, mediapackage1, null);
+    WorkflowInstance instance = service.start(workingDefinition, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
     while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
@@ -211,7 +223,7 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
     Assert.assertEquals(0, service.getWorkflowInstances(service.newWorkflowQuery().withCurrentOperation("op2")).size());
 
-    WorkflowInstance instance = service.start(definition1, mediapackage1, null);
+    WorkflowInstance instance = service.start(workingDefinition, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
     while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
@@ -240,7 +252,7 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.getWorkflowInstances(
             service.newWorkflowQuery().withText("Climate").withCount(100).withStartPage(0)).size());
 
-    WorkflowInstance instance = service.start(definition1, mediapackage1, null);
+    WorkflowInstance instance = service.start(workingDefinition, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
     while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
@@ -269,11 +281,11 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.getWorkflowInstances(service.newWorkflowQuery().withText("Climate").withCount(100).withStartPage(0)).size());
 
     List<WorkflowInstance> instances = new ArrayList<WorkflowInstance>();
-    instances.add(service.start(definition1, mediapackage1, null));
-    instances.add(service.start(definition1, mediapackage1, null));
-    instances.add(service.start(definition1, mediapackage2, null));
-    instances.add(service.start(definition1, mediapackage2, null));
-    instances.add(service.start(definition1, mediapackage1, null));
+    instances.add(service.start(workingDefinition, mediapackage1, null));
+    instances.add(service.start(workingDefinition, mediapackage1, null));
+    instances.add(service.start(workingDefinition, mediapackage2, null));
+    instances.add(service.start(workingDefinition, mediapackage2, null));
+    instances.add(service.start(workingDefinition, mediapackage1, null));
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
     for (WorkflowInstance instance : instances) {
@@ -320,7 +332,7 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
     Assert.assertEquals(0, service.getWorkflowInstances(q).size());
 
-    WorkflowInstance instance = service.start(definition1, mediapackage1, null);
+    WorkflowInstance instance = service.start(workingDefinition, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
     while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
@@ -350,7 +362,7 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
     Assert.assertEquals(0, service.getWorkflowInstances(q).size());
 
-    WorkflowInstance instance = service.start(definition1, mediapackage1, null);
+    WorkflowInstance instance = service.start(workingDefinition, mediapackage1, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
     while (!service.getWorkflowById(instance.getId()).getState().equals(State.SUCCEEDED)) {
@@ -377,8 +389,8 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
     Assert.assertEquals(0, service.getWorkflowInstances(service.newWorkflowQuery()).size());
 
-    WorkflowInstance instance1 = service.start(definition1, mediapackage1, null);
-    WorkflowInstance instance2 = service.start(definition1, mediapackage2, null);
+    WorkflowInstance instance1 = service.start(workingDefinition, mediapackage1, null);
+    WorkflowInstance instance2 = service.start(workingDefinition, mediapackage2, null);
 
     // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
     while (! service.getWorkflowById(instance1.getId()).getState().equals(State.SUCCEEDED) ||
@@ -403,6 +415,41 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
+  @Test
+  public void testFailingOperationWithErrorHandler() {
+    WorkflowInstance instance = service.start(failingDefinitionWithErrorHandler, mediapackage1, null);
+    while (! service.getWorkflowById(instance.getId()).getState().equals(State.FAILED)) {
+      System.out.println("Waiting for workflow to fail... current state is " + service.getWorkflowById(instance.getId()).getState());
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+      }
+    }
+    Assert.assertEquals(State.FAILED, service.getWorkflowById(instance.getId()).getState());
+    // The second operation should have failed
+    Assert.assertEquals(State.FAILED, service.getWorkflowById(instance.getId()).getWorkflowOperationInstanceList().get(1).getState());
+    
+    // cleanup the database
+    service.removeFromDatabase(instance.getId());
+  }
+  
+  @Test
+  public void testFailingOperationWithoutErrorHandler() {
+    WorkflowInstance instance = service.start(failingDefinitionWithoutErrorHandler, mediapackage1, null);
+    while (! service.getWorkflowById(instance.getId()).getState().equals(State.FAILED)) {
+      System.out.println("Waiting for workflow to fail... current state is " + service.getWorkflowById(instance.getId()).getState());
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+      }
+    }
+    Assert.assertEquals(State.FAILED, service.getWorkflowById(instance.getId()).getState());
+    Assert.assertEquals(State.FAILED, service.getWorkflowById(instance.getId()).getCurrentOperation().getState());
+    
+    // cleanup the database
+    service.removeFromDatabase(instance.getId());
+  }
+
   /**
    * Starts 100 concurrent workflows to test DB deadlocking.  This takes a while, so this test is ignored by default.
    * @throws Exception
@@ -414,7 +461,7 @@ public class WorkflowServiceImplTest {
     List<WorkflowInstance> instances = new ArrayList<WorkflowInstance>();
     for(int i=0; i<100; i++) {
       MediaPackage mp = i % 2 == 0 ? mediapackage1 : mediapackage2;
-      instances.add(service.start(definition1, mp, null));
+      instances.add(service.start(workingDefinition, mp, null));
     }
 
     // Give the workflows a chance to finish before looping
@@ -434,9 +481,15 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(100, service.countWorkflowInstances());
   }
 
-  static class TestWorkflowOperationHandler implements WorkflowOperationHandler {
+  static class SucceedingWorkflowOperationHandler implements WorkflowOperationHandler {
     public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediapackage1, null, false);
+    }
+  }
+
+  static class FailingWorkflowOperationHandler implements WorkflowOperationHandler {
+    public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+      throw new WorkflowOperationException("this operation handler always fails.  that's the point.");
     }
   }
 }
