@@ -10,6 +10,7 @@
 Opencast.ariaSlider = (function () 
 {
     var gDragging    = '',
+    	test = 1,
         gDragOffset  = 0,
         sliderVolume = 'slider_volume_Thumb',
         sliderSeek   = 'slider_seek_Thumb';
@@ -87,8 +88,8 @@ Opencast.ariaSlider = (function ()
     function changeValue(target, value) 
     {
         var ratio = calibrate(target);
-        var min = parseInt(target.getAttribute('aria-valuemin'));
-        var max = parseInt(target.getAttribute('aria-valuemax'));
+        var min = parseFloat(target.getAttribute('aria-valuemin'));
+        var max = parseFloat(target.getAttribute('aria-valuemax'));
         var newValue = Math.min(Math.max(value, min), max);
         var newPos = Math.round(newValue * ratio);
         target.style.left = newPos + 'px';
@@ -111,6 +112,7 @@ Opencast.ariaSlider = (function ()
         if (target.id === sliderSeek)
         {
             target.setAttribute('aria-valuetext', 'Time: ' + newValue);
+            $("#seekLabel").text('Seek: ' + newValue);
             Videodisplay.seek(newValue);
         }
     }
@@ -121,9 +123,10 @@ Opencast.ariaSlider = (function ()
         @param Target target, Number value 
     */
     function changeValueFromVideodisplay(target, value) {
-        var ratio = calibrate(target);
-        var min = parseInt(target.getAttribute('aria-valuemin'));
-        var max = parseInt(target.getAttribute('aria-valuemax'));
+     
+    	var ratio = calibrate(target);
+        var min = parseFloat(target.getAttribute('aria-valuemin'));
+        var max = parseFloat(target.getAttribute('aria-valuemax'));
         var newValue = Math.min(Math.max(value, min), max);
         var newPos = Math.round(newValue * ratio);
         target.style.left = newPos + 'px';
@@ -148,7 +151,7 @@ Opencast.ariaSlider = (function ()
         @param Target target, Number value 
     */
     function increment(target, byChunk) {
-        var newValue = parseInt(target.getAttribute('aria-valuenow')) + (byChunk ? 10 : 1); 
+        var newValue = parseFloat(target.getAttribute('aria-valuenow')) + (byChunk ? 10 : 1); 
         changeValue(target, newValue);
     }
 
@@ -158,7 +161,7 @@ Opencast.ariaSlider = (function ()
         @param Target target, Number value 
     */
     function decrement(target, byChunk) {
-        var newValue = parseInt(target.getAttribute('aria-valuenow')) - (byChunk ? 10 : 1); 
+        var newValue = parseFloat(target.getAttribute('aria-valuenow')) - (byChunk ? 10 : 1); 
         changeValue(target, newValue);	
     }
 

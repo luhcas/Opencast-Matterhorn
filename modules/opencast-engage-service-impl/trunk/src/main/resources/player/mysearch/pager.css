@@ -1,20 +1,29 @@
-  ul#navigation {
+  ul#Navigation {
     margin: 0; padding: 0.8em;
     text-align: center;
+    border: 1px solid black;
+    background-color: silver;
   }
   
-  ul#navigation li {
+  ul#Navigation li {
     list-style: none;
     display: inline;
     margin: 0.4em; padding: 0;
   }
 
-  ul#navigation a, ul#navigation span {
-
+  ul#Navigation a, ul#Navigation span {
+    padding: 0.2em 1em;
+    text-decoration: none; font-weight: bold;
+    border: 1px solid black;
+    border-left-color: white; border-top-color: white;
+    color: green; background-color: #ccc;
   }
-
-  ul#navigation a:hover {
+  * html ul#Navigation a, * html ul#Navigation span {
+    width: 1em;    /* nur fuer IE 5.0x erforderlich */
+    w/idth: auto;  /* sicherheitshalber fuer IE 6 zurueckgesetzt */
   }
-
-  ul#navigation span {
+  ul#Navigation a:hover, ul#Navigation span {
+    border-color: white;
+    border-left-color: black; border-top-color: black;
+    color: white; background-color: gray;
   }

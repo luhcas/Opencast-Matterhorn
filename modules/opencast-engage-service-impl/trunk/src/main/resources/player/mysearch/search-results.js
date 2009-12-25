@@ -54,11 +54,6 @@ Opencast.search = ( function() {
     li.innerHTML = text;
     $('#navigation').append(li);
 
-    // Pipe before page numbers
-    li = document.createElement('li');
-    li.innerHTML = "<span>" + "|" + "</span>";
-    $('#navigation').append(li);
-    
     // take care for the page buttons
     for ( var i = 1; i <= maxPageId; i++) {
       li = document.createElement('li');
@@ -72,13 +67,13 @@ Opencast.search = ( function() {
        *   and the running index is greater than 4
        * then insert a span containing "..."
        */
-      if (!spanBeforeSet && currentPageId >= 5 && i > 1 && (currentPageId-(OFFSET+2) != 1 ) ) {
+      if (!spanBeforeSet && currentPageId >= 5 && i > 1) {
         text = "<span>" + "..." + "</span>";
         i = currentPageId - (OFFSET+1);
         spanBeforeSet = true;
         
       }
-       else if (!spanAfterSet &&  (i-OFFSET) >currentPageId && maxPageId-1 > i && i > 4) {
+       else if (!spanAfterSet &&  (i-OFFSET) >currentPageId && i > 4) {
         text = "<span>" + "..." + "</span>";
         i = maxPageId-1;
         spanAfterSet = true;
@@ -95,11 +90,6 @@ Opencast.search = ( function() {
       $('#navigation').append(li);
     }
 
-    // Pipe after page numbers
-    li = document.createElement('li');
-    li.innerHTML = "<span>" + "|" + "</span>";
-    $('#navigation').append(li);
-    
     // take care for the next page button
     if (currentPageId >= maxPageId) {
       text = "<span>" + NEXT_TEXT + "</span>";
@@ -144,7 +134,7 @@ Opencast.search = ( function() {
    * @description Gets the max page ID
    */
   function getMaxPageID() {
-    return 20;
+    return 10;
   }
 
   /**
