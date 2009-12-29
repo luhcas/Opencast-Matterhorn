@@ -67,9 +67,15 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     json.writeJSONString(response.getWriter());
   }
 
+  /**
+   * Gets the server yrl including protocol and port as a string.  Returns null if the server url has not been
+   * explicitly identified in the container.
+   *
+   * @return A URL or null if the server has not been set   
+   */
   protected String getServerUrl() {
     String serverUrl = bundleContext.getProperty("serverUrl");
-    return serverUrl == null ? "http://localhost:8080" : serverUrl;
+    return serverUrl;
   }
   
   protected ServiceReference[] getSoapServiceReferences() throws InvalidSyntaxException {
@@ -95,6 +101,10 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     }
     if (serviceRefs == null) return json;
     String serverUrl = getServerUrl();
+    //check for relative paths
+    if (serverUrl == null){
+        serverUrl="";
+    }
     for (ServiceReference ref : serviceRefs) {
       String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
       String servletContextPath = (String)ref.getProperty(WS_CONTEXT);
@@ -118,6 +128,10 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     }
     if (serviceRefs == null) return json;
     String serverUrl = getServerUrl();
+    //check for relative paths
+    if (serverUrl == null){
+        serverUrl="";
+    }
     for (ServiceReference jaxRsRef : serviceRefs) {
       String description = (String)jaxRsRef.getProperty(Constants.SERVICE_DESCRIPTION);
       String servletContextPath = (String)jaxRsRef.getProperty(RS_CONTEXT);
@@ -141,6 +155,10 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     }
     if (serviceRefs == null) return json;
     String serverUrl = getServerUrl();
+    //check for relative paths
+    if (serverUrl == null){
+        serverUrl="";
+    }
     for (ServiceReference ref : serviceRefs) {
       String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
       String alias = (String)ref.getProperty("alias");
@@ -204,6 +222,10 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     private static final long serialVersionUID = 1L;
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
       String serverUrl = getServerUrl();
+      //check for relative paths
+      if (serverUrl == null){
+        serverUrl="";
+      }
       PrintWriter out = resp.getWriter();
       out.println("<html><head><meta content=\"text/html; charset=ISO-8859-1\" http-equiv=\"content-type\"><title>Test Suite</title></head>");
       out.println("<body><table cellpadding=\"1\" cellspacing=\"1\"border=\"1\"><tbody><tr><td><b>Test Suite</b></td></tr>");
