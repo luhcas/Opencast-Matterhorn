@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import java.net.URLEncoder;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -198,7 +200,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
           HttpContext httpContext = httpService.createDefaultHttpContext();
           httpService.registerServlet("/info.json", servlet, null, httpContext);
           if(isTestMode()) {
-            httpService.registerServlet("/TestSuite.html", testSuite, null, httpContext);
+            httpService.registerServlet("/TestSuites.html", testSuite, null, httpContext);
           }
         } catch (ServletException e) {
           e.printStackTrace();
@@ -228,7 +230,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
       }
       PrintWriter out = resp.getWriter();
       out.println("<html><head><meta content=\"text/html; charset=ISO-8859-1\" http-equiv=\"content-type\"><title>Test Suite</title></head>");
-      out.println("<body><table cellpadding=\"1\" cellspacing=\"1\"border=\"1\"><tbody><tr><td><b>Test Suite</b></td></tr>");
+      out.println("<body><h1>Acceptance Test Suites</h1><ul>");
       try {
         for(ServiceReference ref : getUserInterfaceServiceReferences()) {
           String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
@@ -236,14 +238,15 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
           String testSuite = (String)ref.getProperty("test.suite");
           if(testSuite != null) {
             String testSuitePath = "/".equals(alias) ? serverUrl + alias + testSuite : serverUrl + alias + "/" + testSuite;
-            out.println("<tr><td><a href=\"" + testSuitePath + "\">" + description + "</a></td></tr>");
+            testSuitePath = URLEncoder.encode(testSuitePath, "ISO-8859-1");
+            out.println("<li><a href=\"core/TestRunner.html?test=" + testSuitePath + "\">" + description + "</a></li>");
           }
         }
       } catch (InvalidSyntaxException e) {
-        out.println("<tr><td>Error: unable to generate this test suite</td></tr>");
+        out.println("<li>Error: unable to generate this test suite</li>");
         logger.error(e.getMessage());
       }
-      out.println("</tbody></table></body></html>");
+      out.println("</ul></body></html>");
     }
   }
 }
