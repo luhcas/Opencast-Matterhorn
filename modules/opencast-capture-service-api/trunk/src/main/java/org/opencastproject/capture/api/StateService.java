@@ -20,17 +20,20 @@ import java.util.Map;
 import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.Recording;
 
+//TODO: A "device" is reserved for a lower level concept, specifically something like /dev/vga2usb.  Call these capture agents instead.
 /**
- * OSGi service for querying the capture device's current state (MH-58)
+ * Service for querying the capture device's current state (MH-58)
  */
 public interface StateService {
 
+  //TODO: add an @see for Agent
   /**
    * Gets the internal Agent used to store this agent's status
    * @return The Agent which represents this capture agent
    */
   public Agent getAgent();
 
+  //TODO: explain why we are passing strings instead of something more type safe
   /**
    * Sets the state of the agent.  Note that this should not change the *actual* state of the agent, only update the StatusService's record of its state.
    * @param state The state of the agent.  Should be defined in AgentState.
@@ -45,6 +48,7 @@ public interface StateService {
    */
   public String getAgentState();
 
+  //TODO: indicate the format of the string (is it an item defined in AgentState?  Maybe this whole interface needs an introduction as to why strings are being passed?)
   /**
    * Gets the state of all recordings in the system
    * @return A map of recording-state pairs

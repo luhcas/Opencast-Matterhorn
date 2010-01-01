@@ -42,6 +42,7 @@ public interface CaptureAgent {
    */
   boolean startCapture(Properties configuration);
 
+  //TODO: provide @see link for configuration properties, or at least an a href link to a configurations file in the repo
   /**
    * Starting a simple capture.
    * 

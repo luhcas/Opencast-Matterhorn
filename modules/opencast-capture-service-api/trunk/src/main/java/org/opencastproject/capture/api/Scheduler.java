@@ -24,19 +24,21 @@ import java.net.URL;
 public interface Scheduler {
 
   /**
-   * Sets the schedule data URL form which to gather scheduling data
+   * Sets the schedule data URL from which to gather scheduling data.
    * @param url The URL to pull the calendaring data from
    */
+  //TODO: what should this url point to?  an ical feed?  if so, indicate the format of the feed (e.g. just the ical spec?  identify which spec)
   public void setScheduleEndpoint(URL url);
 
   /**
    * Gets the current schedule data URL
    * @return The current schedule data URL
    */
+  //TODO: what should this url point to?  an ical feed?  if so, indicate the format of the feed (e.g. just the ical spec?  identify which spec)
   public URL getScheduleEndpoint();
 
   /**
-   * Polls the current schedule data URL for new scheduling data
+   * Polls the current schedule endpoint URL for new scheduling data
    * If the new schedule data contains an error or is unreachable the previous recording schedule is used instead
    */
   public void updateCalendar();
@@ -51,6 +53,7 @@ public interface Scheduler {
    * Gets the time between refreshes of the scheduling data
    * @return The time between refreshes of the scheduling data
    */
+  //TODO: indicate the unit of time in the @return (seconds)
   public long getPollingTime();
 
   /**
@@ -62,16 +65,19 @@ public interface Scheduler {
    * Checks to see if the system is polling for new calendar data
    * @return True if the system is set to poll for new data, false otherwise
    */
+  //TODO: does this mean the client is currently in the middle of the poll, or whether the client will periodically poll?  It sounds like the former, but I think it should be the latter.  If it should be the latter, it should be renamed to something like isPollingEnabled()
   public boolean isPolling();
 
   /**
    * Disables polling for new calendar data
    */
+  //TODO: why two methods?  enablePolling(false) seems just as clear and is one less api item to read
   public void disablePolling();
 
   /**
    * Starts the scheduling system.  Calling this enables scheduled captures.
    */
+  //TODO: refactor this to startScheduler() instead.
   public void enableScheduler();
 
   /**
@@ -83,5 +89,6 @@ public interface Scheduler {
   /**
    * Stops the scheduling system.  Calling this disables scheduled captures.
    */
+  //TODO: refactor this to stopScheduler() instead
   public void disableScheduler();
 }
