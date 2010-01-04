@@ -84,7 +84,7 @@ public class MetadataMapper {
     while (keys.hasMoreElements()) {
       String key = keys.nextElement();
       if (key != null && mappingAvailable(key) && metadataSet.get(key) != null) {
-        logger.info("Mapping "+ key +" on "+resolveKey(key) +" value: "+metadataSet.get(key) );
+        logger.debug("Mapping "+ key +" on "+resolveKey(key) +" value: "+metadataSet.get(key) );
         updatedMetadata.put(resolveKey(key), metadataSet.get(key));
       }
     }

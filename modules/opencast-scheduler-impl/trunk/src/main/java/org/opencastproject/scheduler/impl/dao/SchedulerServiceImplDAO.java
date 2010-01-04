@@ -43,11 +43,9 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImplDAO.class);
   
   /**
-   * The Connection to the database
+   * The DataSource for the database
    */
-  // FIXME The connections should not be treated as thread safe.  Borrow a connection in each method.
-  Connection con;
-
+  DataSource dataSource;
   
   /**
    * default Constructor, needed for OSGI Bundle activation
@@ -56,12 +54,12 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   public SchedulerServiceImplDAO() { }
   
   /**
-   * Alterative constructor, used by Unit Test for example
+   * Alternative constructor, used by Unit Test for example
    * @param c A database connection (tested for derby and H2)
    */
-  public SchedulerServiceImplDAO(Connection c) {
+  public SchedulerServiceImplDAO(DataSource ds) {
     try {
-    setDatabase(c);
+    setDataSource(ds);
     } catch (SQLException e) {
       //TODO: does not use specified logging method
       logger.error("could not init database for scheduler. "+e.getMessage());
@@ -74,45 +72,53 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @see org.opencastproject.scheduler.api.SchedulerService#addEvent(org.opencastproject.scheduler.api.SchedulerEvent)
    */
   public SchedulerEvent addEvent(SchedulerEvent e) {
+    logger.debug("Adding new event");
     if (e == null || ! e.valid()) {
       logger.info("Event that was added is not valid.");
       return null;
     }
-    while (dbIDExists(e.getID())) {
-      e.setID(e.createID());
-    }
-    logger.debug("adding event "+e.toString());
     PreparedStatement s = null;
+    Connection con = null;
     try {
+      con = getConnection();
+      while (dbIDExists(e.getID(), con)) {
+        e.setID(e.createID());
+      }
+      logger.debug("adding event "+e.toString());
       s = con.prepareStatement("INSERT INTO EVENT ( eventid , startdate , enddate ) VALUES (?, ?, ?)");
       s.setString(1, e.getID());
       s.setLong(2, e.getStartdate().getTime());
       s.setLong(3, e.getEnddate().getTime());
       s.executeUpdate();
       
-      saveAttendees(e.getID(), e.getAttendees());
-      saveResources(e.getID(), e.getResources());
-      saveMetadata(e.getID(), e.getMetadata());
+      saveAttendees(e.getID(), e.getAttendees(), con);
+      saveResources(e.getID(), e.getResources(), con);
+      saveMetadata(e.getID(), e.getMetadata(), con);
       con.commit();
     } catch (SQLException e1) {
       logger.error("Could not insert event. "+ e1.getMessage());
       try {
-        con.rollback();
+        if (con != null) con.rollback();
       } catch (SQLException e2) {
         logger.error("Could not rollback database after error in adding new event");
       }
       return null;
     } finally {
-      // FIXME Please close all record sets, prepared statements (I've closed this one for you), and connections in a finally block
       if(s != null) {
         try {
           s.close();
         } catch (SQLException e1) {
-          throw new RuntimeException(e1);
+          logger.error("Could not close statement: "+e1.getMessage());
         }
       }
+      if (con != null)
+        try {
+          closeConnection(con);
+        } catch (SQLException e1) {
+          logger.error("Could not close connection: "+e1.getMessage());
+        }
     }
-    logger.debug("added event "+e.toString());
+    logger.debug("added event "+e.getID());
     return e; 
   }
  
@@ -121,15 +127,18 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * SQL-Statements will not be commited, that has to be done by the method that calls this method.
    * @param eventID the eventID for which the attendees will be saved  
    * @param attendees The array with the attendees
+   * @param con The connection needs to be passed too, because the changes will be commited later.
    * @throws SQLException
    */
-  private void saveAttendees (String eventID, String [] attendees) throws SQLException {
-      for (int i = 0; i < attendees.length; i++) {
-        PreparedStatement s = con.prepareStatement("INSERT INTO ATTENDEES (eventid, attendee) VALUES (?, ?)");
-        s.setString(1, eventID);
-        s.setString(2, attendees[i]);
-        s.executeUpdate();
-      }
+  private void saveAttendees (String eventID, String [] attendees, Connection con) throws SQLException {
+    PreparedStatement s = null;
+    for (int i = 0; i < attendees.length; i++) {
+      s = con.prepareStatement("INSERT INTO ATTENDEES (eventid, attendee) VALUES (?, ?)");
+      s.setString(1, eventID);
+      s.setString(2, attendees[i]);
+      s.executeUpdate();
+      s.close();
+    }
   }
   
   /**
@@ -137,14 +146,17 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * SQL-Statements will not be commited, that has to be done by the method that calls this method.
    * @param eventID the eventID for which the resources will be saved  
    * @param resources The Array with the resources
+   * @param con The connection needs to be passed too, because the changes will be commited later.
    * @throws SQLException
    */
-  private void saveResources (String eventID, String [] resources) throws SQLException {
+  private void saveResources (String eventID, String [] resources, Connection con) throws SQLException {
+    PreparedStatement s = null;
     for (int i = 0; i < resources.length; i++) {
-      PreparedStatement s = con.prepareStatement("INSERT INTO RESOURCES (eventid, resource) VALUES (?, ?)");
+      s = con.prepareStatement("INSERT INTO RESOURCES (eventid, resource) VALUES (?, ?)");
       s.setString(1, eventID);
       s.setString(2, resources[i]);
       s.execute();
+      s.close();
     }
   }
   
@@ -153,18 +165,20 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * SQL-Statements will not be commited, that has to be done by the method that calls this method.
    * @param eventID the eventID for which the resources will be saved  
    * @param metadata The hashtable with the metadata
+   * @param con The connection needs to be passed too, because the changes will be commited later.
    * @throws SQLException
    */
-  private void saveMetadata (String eventID, Hashtable<String, String> metadata) throws SQLException {
+  private void saveMetadata (String eventID, Hashtable<String, String> metadata, Connection con) throws SQLException {
+    PreparedStatement s = null;
     String [] keys = metadata.keySet().toArray(new String [0]);
     for (int i = 0; i < keys.length; i++){
-      PreparedStatement s = con.prepareStatement("INSERT INTO EVENTMETADATA (eventid, metadatakey, metadatavalue) VALUES (?, ?, ?)");
+      s = con.prepareStatement("INSERT INTO EVENTMETADATA (eventid, metadatakey, metadatavalue) VALUES (?, ?, ?)");
       s.setString(1, eventID);
       s.setString(2, keys[i]);
       s.setString(3, metadata.get(keys[i]));
       s.execute();
+      s.close();
     } 
-
   }  
   
   /**
@@ -172,7 +186,8 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @param eventID The eventID to check.
    * @return true is the ID is already in the database, or ID is null
    */
-  private boolean dbIDExists (String eventID) {
+  private boolean dbIDExists (String eventID, Connection con) {
+    logger.debug("Checking if ID "+eventID+" exists.");
     if (eventID == null) return true; //make sure an new ID is created, if no ID is present
     try {
       PreparedStatement s = con.prepareStatement("SELECT eventid FROM EVENT WHERE eventid = ?");
@@ -190,34 +205,50 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @see org.opencastproject.scheduler.api.SchedulerService#getEvent(java.lang.String)
    */
   public SchedulerEvent getEvent(String eventID) {
+    Connection con = null;
     SchedulerEvent e = null;
+    PreparedStatement s = null;
     try {
-      PreparedStatement s = con.prepareStatement("SELECT * FROM EVENT WHERE eventid = ?");
+      con = getConnection();
+      s = con.prepareStatement("SELECT * FROM EVENT WHERE eventid = ?");
       s.setString(1, eventID);      
       ResultSet rs = s.executeQuery();
       if (! rs.next()) return null;      
-      e = buildEvent(rs);
+      e = buildEvent(rs, con);
     } catch (SQLException e1) {
       logger.error("Could not read SchedulerEvent "+eventID+" from database. "+e1.getMessage());
       return null;
     }
+    if (s!= null)
+      try {
+        s.close();
+      } catch (SQLException e1) {
+        logger.error("Could not close Statement: "+e1.getMessage());
+      }
+    if (con != null)
+      try {
+        closeConnection(con);
+      } catch (SQLException e2) {
+        logger.error("Connection could not be closed: "+e2.getMessage());
+      }
     return e;
   }
   
   /**
    * constructs a new SchedulerEvent from what's in the current result set
+   * @param con Connection to save total connections to the DB
    * @param rs the result set with the event that should be constructed
    * @return an new SchedulerEvent
    */
-  private SchedulerEvent buildEvent (ResultSet rs) {
+  private SchedulerEvent buildEvent (ResultSet rs, Connection con) {
     SchedulerEvent e = new SchedulerEventImpl();
     try { 
       e.setID(rs.getString("eventid"));
       e.setStartdate(new Date (rs.getLong("startdate")));
       e.setEnddate(new Date (rs.getLong("enddate")));
-      e.setAttendees(getAttendees(e.getID()));
-      e.setResources(getResources(e.getID()));
-      ((SchedulerEventImpl)e).setMetadata(getMetadata(e.getID()));
+      e.setAttendees(getAttendees(e.getID(), con));
+      e.setResources(getResources(e.getID(), con));
+      e.setMetadata(getMetadata(e.getID(), con));
     } catch (SQLException e1) {
       logger.error("\tCould not read SchedulerEvent from database. "+e1.getMessage());
       return null;
@@ -228,40 +259,52 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   /**
    * Reads the attendees for an event from the database
    * @param eventID the event for which the attendees should be loaded.
+   * @param con Connection to save total connections to the DB
    * @return the list of attendees 
    * @throws SQLException
    */
-  private String [] getAttendees (String eventID) throws SQLException {
+  private String [] getAttendees (String eventID, Connection con) throws SQLException {
+    logger.debug("querying attendees");
     PreparedStatement s = con.prepareStatement("SELECT attendee FROM ATTENDEES WHERE eventid = ?");
     s.setString(1, eventID);
     ResultSet rs = s.executeQuery();
-    return resultsToArray(rs);
+    String [] results = resultsToArray(rs);
+    s.close();
+    return results;
   }
 
   /**
    * Reads the resources for an event from the database
    * @param eventID the event for which the resources should be loaded.
+   * @param con Connection to save total connections to the DB
    * @return the list of resources 
    * @throws SQLException
    */
-  private String [] getResources (String eventID) throws SQLException {
+  private String [] getResources (String eventID, Connection con) throws SQLException {
+    logger.debug("querying resources");
     PreparedStatement s = con.prepareStatement("SELECT resource FROM RESOURCES WHERE eventid = ?");
     s.setString(1, eventID);
     ResultSet rs = s.executeQuery();
-    return resultsToArray(rs);
+    String [] results = resultsToArray(rs);
+    s.close();
+    return results;
   }
   
   /**
    * Reads the metadata for an event from the database
    * @param eventID the event for which the metadata should be loaded.
+   * @param con Connection to save total connections to the DB
    * @return the Hashtable with metadata 
    * @throws SQLException
    */
-  private Hashtable<String, String> getMetadata (String eventID) throws SQLException {
+  private Hashtable<String, String> getMetadata (String eventID, Connection con) throws SQLException {
+    logger.debug("querying metadata");
     PreparedStatement s = con.prepareStatement("SELECT * FROM EVENTMETADATA WHERE eventid = ?");
     s.setString(1, eventID);
     ResultSet rs = s.executeQuery();
-    return resultsToHashtable(rs);
+    Hashtable<String, String> results = resultsToHashtable(rs);
+    s.close();
+    return results;
   }  
   
   /**
@@ -326,8 +369,11 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     }
     
     LinkedList<SchedulerEvent> events = new LinkedList<SchedulerEvent>();
+    Connection con = null;
+    PreparedStatement s = null;
     try {
-      PreparedStatement s = con.prepareStatement(query+where); // TODO use PreparedStatement more in the intended way
+      con = getConnection();
+      s = con.prepareStatement(query+where); // TODO use PreparedStatement more in the intended way
       ResultSet rs = s.executeQuery();
       while (rs.next()) {
         SchedulerEvent e = getEvent(rs.getString("eventid"));
@@ -336,6 +382,18 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     } catch (SQLException e) {
       logger.error("Could not read events from database" + e.getMessage());
     }
+    if (s != null)
+      try {
+        s.close();
+      } catch (SQLException e) {
+        logger.error("Statement could not be closed: "+e.getMessage());
+      }
+    if (con != null)
+      try {
+        closeConnection(con);
+      } catch (SQLException e) {
+        logger.error("Connection could not be closed: "+e.getMessage());
+      }
     return events.toArray(new SchedulerEvent[0]);
   }
 
@@ -344,19 +402,27 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @see org.opencastproject.scheduler.api.SchedulerService#removeEvent(java.lang.String)
    */
   public boolean removeEvent(String eventID) {
+    logger.debug("removing event "+eventID);
+    Connection con = null;
+    PreparedStatement s = null;
     try {
-      PreparedStatement s = con.prepareStatement("DELETE FROM EVENT WHERE eventid = ?");
+      con = getConnection();
+      s = con.prepareStatement("DELETE FROM EVENT WHERE eventid = ?");
       s.setString(1, eventID);
       s.executeUpdate();
+      s.close();
       s = con.prepareStatement("DELETE FROM RESOURCES WHERE eventid = ?");
       s.setString(1, eventID);
       s.executeUpdate();
+      s.close();
       s = con.prepareStatement("DELETE FROM ATTENDEES WHERE eventid = ?");
       s.setString(1, eventID);
       s.executeUpdate();
+      s.close();
       s = con.prepareStatement("DELETE FROM EVENTMETADATA WHERE eventid = ?");
       s.setString(1, eventID);
       s.executeUpdate();
+      s.close();
       con.commit();
     } catch (SQLException e) {
       logger.error("Could not delete event "+eventID+": "+e.getMessage());
@@ -366,7 +432,21 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
         logger.error("could not rollback after error in deleting event "+eventID+": "+e1.getMessage());
       }
       return false;
+    } finally {
+      if (s != null)
+        try {
+          s.close();
+        } catch (SQLException e) {
+          logger.error("Statement could not be closed: "+e.getMessage());
+        }
+      if (con != null)
+        try {
+          closeConnection(con);
+        } catch (SQLException e) {
+          logger.error("Connection could not be closed: "+e.getMessage());
+        }
     }
+    logger.debug("Event "+eventID+" deleted");
     return true;
   }
   
@@ -375,16 +455,23 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @see org.opencastproject.scheduler.api.SchedulerService#updateEvent(org.opencastproject.scheduler.api.SchedulerEvent)
    */
   public boolean updateEvent(SchedulerEvent e) {
-    if (! dbIDExists(e.getID())) return false;
+    logger.debug("Updating Event "+ e.getID());
+    Connection con = null;
+    PreparedStatement s = null;
     try {
-      PreparedStatement s = con.prepareStatement("UPDATE EVENT SET startdate = ?, enddate = ? WHERE eventid = ?");
+      con = getConnection();
+      if (! dbIDExists(e.getID(), con)) {
+        logger.error("Could not update, ID "+e.getID()+" does not exist");
+        return false;
+      }
+      s = con.prepareStatement("UPDATE EVENT SET startdate = ?, enddate = ? WHERE eventid = ?");
       s.setLong(1, e.getStartdate().getTime());
       s.setLong(2, e.getEnddate().getTime());
       s.setString(3, e.getID());
       
-      updateAttendees(e.getID(), e.getAttendees());
-      updateResources(e.getID(), e.getResources());
-      updateMetadata(e.getID(), e.getMetadata());
+      updateAttendees(e.getID(), e.getAttendees(), con);
+      updateResources(e.getID(), e.getResources(), con);
+      updateMetadata(e.getID(), e.getMetadata(), con);
       con.commit();
     } catch (SQLException e1) {
       logger.error("could not update event "+ e.getID()+": "+e1.getMessage());
@@ -394,73 +481,98 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
         logger.error("could not rollback after error in updating event "+e.getID()+": "+e2.getMessage());
       }
       return false;
+    } finally {
+      if (s != null)
+        try {
+          s.close();
+        } catch (SQLException e1) {
+          logger.error("Statement could not be closed: "+e1.getMessage());
+        }
+      if (con != null)
+        try {
+          closeConnection(con);
+        } catch (SQLException e1) {
+          logger.error("Connection could not be closed: "+e1.getMessage());
+        }
     }
-    return dbIDExists(e.getID());
+    logger.debug("Event Updated "+e.getID());
+    return true;
   }
    
   /**
    * To update the attendee list it will be deleted and saved again. No better idea how to do this at the moment
    * @param eventID The eventID for which the list should be updated
    * @param attendees The list of attendees that should be updated 
+   * @param con The connection needs to be passed too, because the changes will be commited later.
    * @throws SQLException
    */
-  private void updateAttendees (String eventID, String [] attendees) throws SQLException {
+  private void updateAttendees (String eventID, String [] attendees, Connection con) throws SQLException {
     PreparedStatement s = con.prepareStatement("DELETE FROM ATTENDEES WHERE eventid = ? ");
     s.setString(1, eventID);
     s.executeUpdate();
+    s.close();
     
-    saveAttendees(eventID, attendees);
+    saveAttendees(eventID, attendees, con);
   }
   
   /**
    * To update the resources list it will be deleted and saved again. No better idea how to do this at the moment
    * @param eventID The eventID for which the list should be updated
    * @param resources The list of resources that should be updated 
+   * @param con The connection needs to be passed too, because the changes will be commited later.
    * @throws SQLException
    */
-  private void updateResources (String eventID, String [] resources) throws SQLException {
+  private void updateResources (String eventID, String [] resources, Connection con) throws SQLException {
     PreparedStatement s = con.prepareStatement("DELETE FROM RESOURCES WHERE eventid = ? ");
     s.setString(1, eventID);
     s.executeUpdate();
-    saveResources(eventID, resources);
+    s.close();
+    
+    saveResources(eventID, resources, con);
   }
 
   /**
    * To update the Metdata list it will be deleted and saved again. No better idea how to do this at the moment
    * @param eventID The eventID for which the list should be updated
    * @param metadata The list of metadata that should be updated 
+   * @param con The connection needs to be passed too, because the changes will be commited later.
    * @throws SQLException
    */
-  private void updateMetadata (String eventID, Hashtable<String, String> metadata) throws SQLException {
+  private void updateMetadata (String eventID, Hashtable<String, String> metadata, Connection con) throws SQLException {
     PreparedStatement s = con.prepareStatement("DELETE FROM EVENTMETADATA WHERE eventid = ? ");
     s.setString(1, eventID);
     s.executeUpdate();
-    saveMetadata(eventID, metadata);
+    s.close();
+    
+    saveMetadata(eventID, metadata, con);
   }  
   
   /**
-   * Sets the database connection, that this scheduler should work with. 
-   * @param con The connection to the database.
-   * @throws SQLException 
+   * Creates a Connection to the SQL Database from the DataSource that need to be provided 
+   * @return a Connection object
+   * @throws SQLException
    */
-  void setDatabase (Connection con) throws SQLException {
-    this.con = con;
-    if (con == null || con.isClosed()) {
-      logger.error("no valid connection was set");
-      throw new SQLException ("SQL-Connection is not vaild"); 
-    }
-      
+  private Connection getConnection () throws SQLException {
+    if (dataSource == null) throw new SQLException("No DataSource available");
+    Connection con = dataSource.getConnection();
+    logger.debug("creating connection "+con);
     con.setAutoCommit(false);
-    if (! dbCheck()) dbCreate();    
+    return con;
+  }
+  
+  private void closeConnection (Connection con) throws SQLException {
+    logger.debug("Connection closed "+con);
+    if (con != null) con.close();
   }
   
   /**
    * Checks is a database with all necessary tables is available
    * @return true is the database AND all needed tables are available 
    */
-  public boolean dbCheck () {
+  public boolean dbCheck (Connection con) {
     StringBuilder tables = new StringBuilder();;
-    logger.debug("checking if scheduler-db is available." );
+    logger.info("checking if scheduler-db is available." );
+    
     try {
       if (con == null) throw new SQLException("No database connected");
       DatabaseMetaData meta = con.getMetaData();
@@ -489,10 +601,11 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @return true, if a database could be created and tables could be checked. False, if the database check encountered errors.  
    * @throws SQLException if an error  
    */
-  private boolean dbCreate () throws SQLException {
+  private boolean dbCreate (Connection con) throws SQLException {
     logger.info("creating new scheduler database.");
+    PreparedStatement s = null;
     try {
-      PreparedStatement s = con.prepareStatement("CREATE TABLE EVENTMETADATA (eventid varchar(255) NOT NULL, metadatakey varchar(255) NOT NULL, metadatavalue varchar(4096))");
+      s = con.prepareStatement("CREATE TABLE EVENTMETADATA (eventid varchar(255) NOT NULL, metadatakey varchar(255) NOT NULL, metadatavalue varchar(4096))");
       s.executeUpdate();
       s = con.prepareStatement("CREATE TABLE ATTENDEES ( attendee varchar(255) NOT NULL, eventid varchar(255) NOT NULL)");
       s.executeUpdate();
@@ -507,21 +620,28 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       logger.error("Could not create new database structure. "+e.getMessage());
       con.rollback();
       throw new SQLException(e);
+    } finally {
+      if (s != null) s.close();
     }
-    return dbCheck(); //Check for tables to make sure that the underlying database referes the tables in the correct way (for example derby did only know Uppercase table names)  
+    return dbCheck(con); //Check for tables to make sure that the underlying database refers the tables in the correct way (for example derby did only know Uppercase table names)  
   }  
   
   
   /**
-   * method to connect with opencast-db
-   * @param ds Datasource object
+   * Sets the database connection, that this scheduler should work with. 
+   * @param con The connection to the database.
+   * @throws SQLException 
    */
-  public void setDataSource (DataSource ds) {
-    try {
-      setDatabase(ds.getConnection());
-    } catch (SQLException e) {
-      logger.error("Could not get Connection from DataSource");
+  public void setDataSource (DataSource ds) throws SQLException{
+    logger.info("Setting DataSource "+ds);
+    if (ds == null) {
+      logger.error("no valid DataSource was set");
+      throw new SQLException ("SQL-Connection is not vaild"); 
     }
+    dataSource = ds;
+    Connection con = getConnection();
+    if (! dbCheck(con)) dbCreate(con);
+    closeConnection(con);
   }
   
 }

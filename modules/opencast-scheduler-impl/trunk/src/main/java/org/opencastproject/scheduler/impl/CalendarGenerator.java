@@ -116,15 +116,15 @@ public class CalendarGenerator {
         dcParameters.add(new FmtType("application/xml"));
         dcParameters.add(Value.BINARY);
         dcParameters.add(Encoding.BASE64);
-        dcParameters.add(new XParameter("X-APPLE-FILE\nNAME", "metadata.xml"));
+        dcParameters.add(new XParameter("X-APPLE-FILENAME", "metadata.xml"));
         Attach metadataAttachment = new Attach(dcParameters, dcGenerator.generateAsString(e).getBytes("UTF-8"));
         event.getProperties().add(metadataAttachment);
         
-        ParameterList caParameters = new ParameterList();
+        ParameterList caParameters = new ParameterList(); 
         caParameters.add(new FmtType("application/text"));        
         caParameters.add(Value.BINARY);
         caParameters.add(Encoding.BASE64);
-        caParameters.add(new XParameter("X-APPLE-FILE NAME", "agent.properties"));
+        caParameters.add(new XParameter("X-APPLE-FILENAME", "agent.properties"));
         Attach agentsAttachment = new Attach(caParameters, caGenerator.generateAsString(e).getBytes("UTF-8"));
         event.getProperties().add(agentsAttachment);
     } catch (Exception e1) {

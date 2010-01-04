@@ -23,7 +23,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Properties;
+
+import javax.sql.DataSource;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
@@ -44,6 +48,7 @@ import junit.framework.Assert;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,24 +60,12 @@ public class SchedulerServiceImplTest {
   private static final String storageRoot = "target" + File.separator + "scheduler-test-db";
   private static final String resourcesRoot = "src" + File.separator + "main" + File.separator + "resources";
 
-  private Connection connectToDatabase(File storageDirectory) {
+  private DataSource connectToDatabase(File storageDirectory) {
     if (storageDirectory == null) {
       storageDirectory = new File(File.separator + "tmp" + File.separator +"opencast" + File.separator + "scheduler-db");
     }
-    String jdbcUrl = "jdbc:derby:" + storageDirectory.getAbsolutePath();
-    String driver = "org.apache.derby.jdbc.EmbeddedDriver";
-    try {
-      Class.forName(driver).newInstance();      
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    Connection conn = null;
-    try {
-      Properties props = new Properties();
-      conn = DriverManager.getConnection(jdbcUrl + ";create=true", props);
-    } catch (SQLException e) {
-    }
-    return conn;
+      JdbcConnectionPool cp = JdbcConnectionPool.create("jdbc:h2:" + storageDirectory + ";LOCK_MODE=1", "sa", "sa");
+    return cp;
   }    
   
   @Before
@@ -103,15 +96,20 @@ public class SchedulerServiceImplTest {
   @Test
   public void testEventManagement() {
     SchedulerEvent event = new SchedulerEventImpl();
-    event.setID("rrolf1001"); 
+    event.setID(event.createID()); 
     event.setTitle("new recording");
     event.setStartdate(new Date (System.currentTimeMillis())); 
     event.setEnddate(new Date (System.currentTimeMillis()+50000));
     event.setLocation("42/201");
     event.setDevice("testrecorder");
     event.setCreator("secret lecturer");
+    event.addResource("vga");
     SchedulerEvent eventUpdated = service.addEvent(event);
-    Assert.assertEquals(service.getEvent(eventUpdated.getID()).getLocation(), event.getLocation());
+    Assert.assertNotNull(eventUpdated);
+    Assert.assertNotNull(eventUpdated.getID());
+    SchedulerEvent loadedEvent = service.getEvent(eventUpdated.getID());
+    logger.debug("loaded: "+loadedEvent);
+    Assert.assertEquals(loadedEvent.getLocation(), event.getLocation());
     CalendarBuilder calBuilder = new CalendarBuilder();
     Calendar cal;
     try {
@@ -122,7 +120,17 @@ public class SchedulerServiceImplTest {
         PropertyList attachments = ((VEvent)vevents.get(i)).getProperties(Property.ATTACH);
         for (int j = 0; j < attachments.size(); j++) {
           String attached = ((Property)attachments.get(j)).getValue();
+          String filename = ((Property)attachments.get(j)).getParameter("X-APPLE-FILENAME").getValue();
           attached = new String (Base64.decodeBase64(attached));
+          if (filename.equals("agent.properties")) {
+            Assert.assertTrue(attached.contains("capture.device.id="+event.getDevice()));
+            Assert.assertTrue(attached.contains("event.title="+event.getTitle()));
+          }
+          if (filename.equals("metadata.xml")) {
+            Assert.assertTrue(attached.contains(event.getLocation()));
+            Assert.assertTrue(attached.contains(event.getTitle()));
+          }
+          logger.info("iCal attachment checked: "+filename);
         }
       }
     } catch (IOException e) {
