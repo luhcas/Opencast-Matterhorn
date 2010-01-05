@@ -31,6 +31,7 @@ public interface SearchService {
    * @param mediaPackage
    *          the media package
    * @throws SearchException
+   *           if an error occurs while adding the media package
    */
   void add(MediaPackage mediaPackage) throws SearchException;
 
@@ -40,6 +41,7 @@ public interface SearchService {
    * @param mediaPackageId
    *          id of the media package to remove
    * @throws SearchException
+   *           if an error occurs while removing the media package
    */
   void delete(String mediaPackageId) throws SearchException;
 
@@ -49,10 +51,10 @@ public interface SearchService {
    * @param text
    *          The user query.
    * @param offset
-   *          The offset.
+   *          the offset
    * @param limit
-   *          The limit.
-   * @return The regular result.
+   *          the limit
+   * @return the search result
    * @throws SearchException
    */
   SearchResult getEpisodesAndSeriesByText(String text, int offset, int limit) throws SearchException;
@@ -62,7 +64,7 @@ public interface SearchService {
    * 
    * @param seriesId
    *          The series id.
-   * @return The regular result.
+   * @return the search result
    * @throws SearchException
    */
   SearchResult getEpisodesBySeries(String seriesId) throws SearchException;
@@ -71,10 +73,10 @@ public interface SearchService {
    * Processes a series search for a given series id, creates and returns a regular search result.
    * 
    * @param offset
-   *          The offset.
+   *          the offset
    * @param limit
-   *          The limit.
-   * @return The regular result.
+   *          the limit
+   * @return the search result
    * @throws SearchException
    */
   SearchResult getSeriesByDate(int offset, int limit) throws SearchException;
@@ -85,10 +87,10 @@ public interface SearchService {
    * @param id
    *          of the series to search for
    * @param offset
-   *          The offset.
+   *          the offset
    * @param limit
-   *          The limit.
-   * @return The regular result.
+   *          the limit
+   * @return the search result
    * @throws SearchException
    */
   SearchResult getSeriesById(String seriesId) throws SearchException;
@@ -99,9 +101,9 @@ public interface SearchService {
    * @param text
    *          The user query.
    * @param offset
-   *          The offset.
+   *          the offset
    * @param limit
-   *          The limit.
+   *          the limit
    * @return The search result
    * @throws SearchException
    */
@@ -123,7 +125,7 @@ public interface SearchService {
    * 
    * @param id
    *          of the series to search for
-   * @return The regular result.
+   * @return the search result
    * @throws SearchException
    */
   SearchResult getEpisodeById(String episodeId) throws SearchException;
@@ -132,10 +134,10 @@ public interface SearchService {
    * Processes a recent items search. Lists all items descending ordered by last modification date.
    * 
    * @param offset
-   *          The offset.
+   *          the offset
    * @param limit
-   *          The limit.
-   * @return The popular result.
+   *          the limit
+   * @return the search result
    * @throws SearchException
    */
   SearchResult getEpisodesByDate(int limit, int offset) throws SearchException;
@@ -146,12 +148,27 @@ public interface SearchService {
    * @param text
    *          The user query.
    * @param offset
-   *          The offset.
+   *          the offset
    * @param limit
-   *          The limit.
-   * @return The regular result.
+   *          the limit
+   * @return the search result
    * @throws SearchException
    */
   SearchResult getEpisodesByText(String text, int offset, int limit) throws SearchException;
+
+  /**
+   * Sends a query to the search service. Depending on the service implementation, the query might be an sql statement a
+   * solr query or something similar. In the future, a higher level query language might be a better solution.
+   * 
+   * @param query
+   *          the search query
+   * @param offset
+   *          the offset
+   * @param limit
+   *          the limit
+   * @return the search result
+   * @throws SearchException
+   */
+  SearchResult getByQuery(String query, int limit, int offset) throws SearchException;
 
 }

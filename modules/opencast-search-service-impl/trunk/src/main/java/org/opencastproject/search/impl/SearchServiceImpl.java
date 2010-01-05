@@ -285,6 +285,21 @@ public class SearchServiceImpl implements SearchService {
   /**
    * {@inheritDoc}
    * 
+   * @see org.opencastproject.search.api.SearchService#getByQuery(java.lang.String, int, int)
+   */
+  @Override
+  public SearchResult getByQuery(String query, int limit, int offset) throws SearchException {
+    try {
+      log_.debug("Searching index using custom query '" + query + "'");
+      return solrRequester.getByQuery(query, limit, offset);
+    } catch (SolrServerException e) {
+      throw new SearchException(e);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchService#add(org.opencastproject.media.mediapackage.MediaPackage)
    */
   public void add(MediaPackage mediaPackage) throws SearchException {

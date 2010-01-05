@@ -88,7 +88,7 @@ public class FeedManager {
         if (linkTemplate != null)
           generator.setLinkTemplate(linkTemplate);
         if (generator.accept(query)) {
-          return generator.createFeed(type, query, locale);
+          return generator.createFeed(type, query);
         }
       } catch (InstantiationException e) {
         log_.error("Error creating new instance of class " + pluginClass.getName());

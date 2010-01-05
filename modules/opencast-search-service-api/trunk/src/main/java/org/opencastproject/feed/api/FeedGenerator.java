@@ -16,8 +16,6 @@
 
 package org.opencastproject.feed.api;
 
-import java.util.Locale;
-
 /**
  * A <code>FeedGenerator</code> is able to create an xml feed of the requested type, based on a query string.
  * <p>
@@ -33,23 +31,23 @@ public interface FeedGenerator {
   String getFeedIdentifier();
 
   /**
-   * Return the locale dependend feed name.
+   * Return the feed name.
    * 
    * @return the feed name
    */
-  String getFeedName(Locale locale);
+  String getName();
 
   /**
-   * Return the locale dependend feed description
+   * Return the feed description
    */
-  String getFeedDescription(Locale locale);
+  String getDescription();
 
   /**
-   * Return the locale dependend feed link.
+   * Return the feed link.
    * 
    * @return the feed link
    */
-  String getFeedLink(Locale locale);
+  String getFeedLink();
 
   /**
    * Returns <code>true</code> if the generator is able to satisfy the request for a feed described by the query. The
@@ -67,11 +65,9 @@ public interface FeedGenerator {
    *          the feed type
    * @param query
    *          the request
-   * @param locale
-   *          the request locale
    * @return the feed or <code>null</code>
    */
-  Feed createFeed(Feed.Type type, String[] query, Locale locale);
+  Feed createFeed(Feed.Type type, String[] query);
 
   /**
    * Sets the entry's base url that will be used to form the episode link in the feeds. If the url contains a
@@ -81,5 +77,19 @@ public interface FeedGenerator {
    *          the url
    */
   void setLinkTemplate(String url);
+  
+  /**
+   * Returns the copyright for the feed.
+   * 
+   * @return the feed
+   */
+  String getCopyright();
+  
+  /**
+   * Returns the url to the cover art.
+   * 
+   * @return the cover
+   */
+  String getCover();
 
 }

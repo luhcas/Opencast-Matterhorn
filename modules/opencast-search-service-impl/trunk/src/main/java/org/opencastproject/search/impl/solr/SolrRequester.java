@@ -71,7 +71,7 @@ public class SolrRequester {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.solr.Test#getEpisodesAndSeriesByText(java.lang.String, int, int)
+   * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesByText(java.lang.String, int, int)
    */
   public SearchResult getEpisodesAndSeriesByText(String text, int offset, int limit) throws SolrServerException {
     String uq = SolrUtils.clean(text);
@@ -87,7 +87,7 @@ public class SolrRequester {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.solr.Test#getEpisodesBySeries(java.lang.String)
+   * @see org.opencastproject.search.api.SearchService#getEpisodesBySeries(java.lang.String)
    */
   public SearchResult getEpisodesBySeries(String seriesId) throws SolrServerException {
     String q = SolrFields.DC_IS_PART_OF + ":" + SolrUtils.clean(seriesId);
@@ -100,7 +100,7 @@ public class SolrRequester {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.solr.Test#getSeriesByDate(int, int)
+   * @see org.opencastproject.search.api.SearchService#getSeriesByDate(int, int)
    */
   public SearchResult getSeriesByDate(int limit, int offset) throws SolrServerException {
     String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series;
@@ -116,7 +116,7 @@ public class SolrRequester {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.solr.Test#getSeriesById(java.lang.String, int, int)
+   * @see org.opencastproject.search.api.SearchService#getSeriesById(java.lang.String, int, int)
    */
   public SearchResult getSeriesById(String seriesId) throws SolrServerException {
     String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series + " AND " + SolrFields.ID + ":" + seriesId;
@@ -128,7 +128,7 @@ public class SolrRequester {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.solr.Test#getSeriesByText(java.lang.String, int, int)
+   * @see org.opencastproject.search.api.SearchService#getSeriesByText(java.lang.String, int, int)
    */
   public SearchResult getSeriesByText(String text, int offset, int limit) throws SolrServerException {
     StringBuffer sb = boost(SolrUtils.clean(text));
@@ -144,7 +144,7 @@ public class SolrRequester {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.solr.Test#getEpisodesAndSeriesById(java.lang.String)
+   * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesById(java.lang.String)
    */
   public SearchResult getEpisodeAndSeriesById(String seriesId) throws SolrServerException {
     seriesId = SolrUtils.clean(seriesId);
@@ -179,7 +179,7 @@ public class SolrRequester {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.solr.Test#getEpisodeById(java.lang.String)
+   * @see org.opencastproject.search.api.SearchService#getEpisodeById(java.lang.String)
    */
   public SearchResult getEpisodeById(String episodeId) throws SolrServerException {
     String q = SolrFields.ID + ":" + episodeId;
@@ -192,7 +192,7 @@ public class SolrRequester {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.solr.Test#getEpisodesByDate(int, int)
+   * @see org.opencastproject.search.api.SearchService#getEpisodesByDate(int, int)
    */
   public SearchResult getEpisodesByDate(int offset, int limit) throws SolrServerException {
     String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual;
@@ -208,11 +208,26 @@ public class SolrRequester {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.solr.Test#getEpisodesByText(java.lang.String, int, int)
+   * @see org.opencastproject.search.api.SearchService#getEpisodesByText(java.lang.String, int, int)
    */
   public SearchResult getEpisodesByText(String text, int offset, int limit) throws SolrServerException {
     StringBuffer sb = boost(SolrUtils.clean(text));
     SolrQuery query = new SolrQuery(sb.toString());
+    query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
+    query.setStart(offset);
+    if (limit > 0)
+      query.setRows(limit);
+    query.setFields("* score");
+    return createSearchResult(query);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#getByQuery(java.lang.String, int, int)
+   */
+  public SearchResult getByQuery(String q, int limit, int offset) throws SolrServerException {
+    SolrQuery query = new SolrQuery(q);
     query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
     query.setStart(offset);
     if (limit > 0)
