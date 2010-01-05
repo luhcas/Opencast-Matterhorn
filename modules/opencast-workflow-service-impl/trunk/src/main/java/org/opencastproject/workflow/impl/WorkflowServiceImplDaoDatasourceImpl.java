@@ -447,9 +447,6 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       String currentOperation = null;
       if (mp != null) {
         mediaPackageId = mp.getIdentifier().toString();
-        episodeId = findEpisodeId(instance.getSourceMediaPackage());
-        seriesId = findSeriesId(instance.getSourceMediaPackage());
-        text = getDublinCoreText(instance.getSourceMediaPackage());
         WorkflowOperationInstance op = instance.getCurrentOperation();
         if(op != null) currentOperation = op.getName();
       }
@@ -464,6 +461,9 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
         updateStatment.setString(4, instance.getId());
         updateStatment.execute();
       } else {
+        episodeId = findEpisodeId(instance.getSourceMediaPackage());
+        seriesId = findSeriesId(instance.getSourceMediaPackage());
+        text = getDublinCoreText(instance.getSourceMediaPackage());
         // Add it
         updateStatment = conn.prepareStatement("insert into oc_workflow values(?, ?, ?, ?, ?, ?, ?, ?, ?)");
         updateStatment.setString(1, instance.getId());
