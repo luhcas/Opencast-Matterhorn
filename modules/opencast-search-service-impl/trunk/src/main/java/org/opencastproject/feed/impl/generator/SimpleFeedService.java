@@ -25,7 +25,6 @@ import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.solr.SolrFields;
 import org.opencastproject.util.StringSupport;
 
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,10 +71,34 @@ public class SimpleFeedService extends AbstractFeedService implements FeedGenera
    * @param propertiesFile
    *          path to the properties
    */
-  public SimpleFeedService(String uri, String feedHome, MediaPackageElementFlavor rssFlavor,
-          String entryLinkTemplate, String propertiesFile) {
+  public SimpleFeedService(String uri, String feedHome, MediaPackageElementFlavor rssFlavor, String entryLinkTemplate,
+          String propertiesFile) {
     super(uri, propertiesFile, rssFlavor, entryLinkTemplate);
     init(propertiesFile);
+  }
+
+  /**
+   * Callback used by the OSGi environment when this component is started.
+   * 
+   * @param context
+   *          the osgi component context
+   * @throws Exception
+   *           if starting the component is resulting in an error
+   */
+  public void start(ComponentContext context) throws Exception {
+    // TODO: Implement
+  }
+
+  /**
+   * Callback used by the OSGi environment when this component is taken down.
+   * 
+   * @param context
+   *          the osgi component context
+   * @throws Exception
+   *           if taking the component down is resulting in an error
+   */
+  public void stop(ComponentContext context) throws Exception {
+    // TODO: Implement
   }
 
   /**
@@ -419,16 +442,6 @@ public class SimpleFeedService extends AbstractFeedService implements FeedGenera
       return solrQuery.toString();
     }
 
-  }
-
-  @Override
-  public void start(ComponentContext context) throws Exception {
-  }
-
-  @Override
-  public void stop(ComponentContext context) throws Exception {
-    // TODO Auto-generated method stub
-    
   }
 
 }
