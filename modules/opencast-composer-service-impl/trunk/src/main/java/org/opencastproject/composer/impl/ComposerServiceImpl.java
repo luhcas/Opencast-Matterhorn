@@ -57,7 +57,7 @@ public class ComposerServiceImpl implements ComposerService {
 
   /** Reference to the workspace service */
   private Workspace workspace = null;
-
+  
   /**  */
   ExecutorService executor = null;
 
@@ -133,9 +133,9 @@ public class ComposerServiceImpl implements ComposerService {
         // Create the engine
         EncoderEngine engine = EncoderEngineFactory.newInstance().newEngineByProfile(profileId);
         EncodingProfile profile = profileManager.getProfile(profileId);
-        if (profile == null)
+        if (profile == null) {
           throw new RuntimeException("Profile '" + profileId + " is unkown");
-              
+        }
           // Do the work
           File encodingOutput;
           try {
@@ -178,5 +178,4 @@ public class ComposerServiceImpl implements ComposerService {
     Collection<EncodingProfile> profiles = profileManager.getProfiles().values();
     return profiles.toArray(new EncodingProfile[profiles.size()]);
   }
-
 }

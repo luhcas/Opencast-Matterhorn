@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.composer.impl.endpoint.ComposerRestService" immediate="true">
+<component name="org.opencastproject.composer.impl.endpoint.ComposerRestService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.composer.impl.endpoint.ComposerRestService" />
   <property name="service.description" value="Composer REST Endpoint" />
   <property name="service.exported.interfaces" value="org.opencastproject.composer.impl.endpoint.ComposerRestService" />
@@ -10,4 +10,6 @@
   </service>
   <reference name="composerService" interface="org.opencastproject.composer.api.ComposerService"
     cardinality="1..1" policy="static" bind="setComposerService" />
+  <reference name="dao" interface="org.opencastproject.composer.impl.endpoint.ComposerServiceDao"
+    cardinality="1..1" policy="static" bind="setDao" />
 </component>

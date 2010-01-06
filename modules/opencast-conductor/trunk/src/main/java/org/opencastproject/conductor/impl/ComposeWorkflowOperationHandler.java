@@ -119,10 +119,11 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
       if (operation.getConfiguration(profile.getIdentifier()) != null) {
         logger.info("Encoding audio track {} and video track {} using profile {}",
                 new String[] {audioSourceTrackId, videoSourceTrackId, profile.getIdentifier()});
-        Future<Track> futureComposedTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId,
+        Future<Track> futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId,
                 targetTrackId, profile.getIdentifier());
         // is there anything we can be doing while we wait for the track to be composed?
-        Track composedTrack = futureComposedTrack.get();
+        Track composedTrack = futureTrack.get();
+        if(composedTrack == null) throw new RuntimeException("unable to retrieve composed track");
         composedTrack.setFlavor(videoSourceTrack.getFlavor());
         // store new tracks to mediaPackage
         // FIXME derived media comes from multiple sources, so how do we choose which is the "parent" of the derived media?

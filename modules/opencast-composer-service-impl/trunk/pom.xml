@@ -22,6 +22,16 @@
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-inspection-service-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-workspace-api</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
@@ -42,6 +52,14 @@
       <artifactId>jsr311-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_compendium</artifactId>
+    </dependency>
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
@@ -60,19 +78,15 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.2.123</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-    	<groupId>org.opencastproject</groupId>
-    	<artifactId>opencast-inspection-service-api</artifactId>
-    	<version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-    	<groupId>org.opencastproject</groupId>
-    	<artifactId>opencast-workspace-api</artifactId>
-    	<version>0.1-SNAPSHOT</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
@@ -90,8 +104,8 @@
             <Embed-Dependency>xmlrpc-client</Embed-Dependency>
             <Service-Component>
               OSGI-INF/composer-service.xml,
-              OSGI-INF/composer-service-rest.xml,
-              OSGI-INF/composer-service-soap.xml
+              OSGI-INF/composer-service-dao.xml,
+              OSGI-INF/composer-service-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workspace.impl;
 
+import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -22,6 +23,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +34,10 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.Map.Entry;
 
 /**
  * Implements a simple cache for remote URIs.  Delegates methods to {@link WorkingFileRepository}
@@ -45,18 +50,45 @@ public class WorkspaceImpl implements Workspace, ManagedService {
   
   private WorkingFileRepository repo;
   private String rootDirectory = null;
-
+  private Map<String, String> filesystemMappings;
+  
   public WorkspaceImpl() {
     this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workspace");
   }
+  
   public WorkspaceImpl(String rootDirectory) {
     this.rootDirectory = rootDirectory;
     createRootDirectory();
   }
 
+  public void activate(ComponentContext cc) {
+    filesystemMappings = new HashMap<String, String>();
+    String serverUrl;
+    if(cc == null || cc.getBundleContext().getProperty("serverUrl") == null) {
+      serverUrl = UrlSupport.DEFAULT_BASE_URL;
+    } else {
+      serverUrl = cc.getBundleContext().getProperty("serverUrl");
+    }
+    // TODO Remove hard coded path
+    filesystemMappings.put(serverUrl, System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo");
+  }
     
   public File get(URI uri) {
     String urlString = uri.toString();
+    
+    // If any local filesystem mappings match this uri, just return the file handle
+    for(Entry<String, String> entry : filesystemMappings.entrySet()) {
+      if(urlString.startsWith(entry.getKey())) {
+        String basePath = entry.getValue();
+        String pathInfo = urlString.substring(entry.getKey().length());
+        File f = new File(basePath + pathInfo);
+        if(f.exists()) {
+          logger.debug("found local file {} for URL {}", f.getAbsolutePath(), urlString);
+          return f;
+        }
+      }
+    }
+    
     String urlHash = getFilenameSafeHash(urlString);
     String fileName = rootDirectory + File.separator + urlHash;
     // See if there's a matching file under the root directory

@@ -30,16 +30,9 @@ import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
 
 /**
  * Tests the functionality of a remote workflow service rest endpoint
@@ -71,18 +64,8 @@ public class ComposerRestEndpointTest {
 
     // Grab the new track from the response
     String postResponse = EntityUtils.toString(client.execute(postEncode).getEntity());
-    String id = getTrackId(postResponse);
-
-    Assert.assertEquals("track-3", id);
-
-  }
-
-  protected String getTrackId(String xml) throws Exception {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setNamespaceAware(true);
-    DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.parse(IOUtils.toInputStream(xml));
-    return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("id");
+    System.out.println("postResponse=" + postResponse);
+    Assert.assertTrue(postResponse.contains("<ns2:receipt xmlns:ns2=\"http://composer.opencastproject.org/\""));
   }
 
   protected String getSampleMediaPackage() throws Exception {

@@ -23,6 +23,11 @@
 
 package org.opencastproject.media.mediapackage.jaxb;
 
+import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.media.mediapackage.Track;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -30,6 +35,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -73,7 +79,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 @XmlType(name = "trackType", propOrder = { "mimetype", "url", "checksum", "duration", "video", "audio" })
 @XmlRootElement(name = "track")
 public class TrackType {
-
+  private static final Logger logger = LoggerFactory.getLogger(TrackType.class);
   @XmlElement(required = true)
   protected String mimetype;
   @XmlElement(required = true)
@@ -274,22 +280,44 @@ public class TrackType {
     this.ref = value;
   }
 
+  static JAXBContext jaxbContext = null;
+  
+  static {
+    try {
+      jaxbContext = JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb", TrackType.class.getClassLoader());
+    } catch (JAXBException e) {
+      throw new RuntimeException("Unable to initialize JAXB context for the mediapackage.jaxb package");
+    }
+  }
+
   public String toXml() throws Exception {
     StringWriter sw = new StringWriter();
-    JAXBContext jaxbContext = JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
     Marshaller marshaller = jaxbContext.createMarshaller();
     marshaller.marshal(this, sw);
     return sw.toString();
   }
 
-  public static TrackType fromXml(Document mediaPackageXml) throws Exception {
-    JAXBContext jaxbContext = JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb");
+  public Track toTrack() throws Exception {
+    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
+            new InputSource(new StringReader(toXml())));
+    return (Track)MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromManifest(doc, null);
+  }
+
+  public static TrackType fromXml(Document trackXml) throws Exception {
+    if(trackXml == null) throw new RuntimeException("trackXml must not be null");
+    if(trackXml.getDocumentElement() == null) throw new RuntimeException("trackXml must have a document element");
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-    return unmarshaller.unmarshal(mediaPackageXml, TrackType.class).getValue();
+    return unmarshaller.unmarshal(trackXml, TrackType.class).getValue();
   }
 
   public static TrackType valueOf(String xmlString) throws Exception {
     return fromXml(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(
             new InputSource(new StringReader(xmlString))));
+  }
+  
+  public static TrackType fromTrack(Track track) throws Exception {
+    Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+    doc.appendChild(track.toManifest(doc, null));
+    return fromXml(doc);
   }
 }

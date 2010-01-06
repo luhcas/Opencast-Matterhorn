@@ -47,7 +47,7 @@ public class Activator implements BundleActivator {
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
   public void start(BundleContext context) throws Exception {
-    cp = JdbcConnectionPool.create("jdbc:h2:" + rootDir + ";LOCK_MODE=1", "sa", "sa");
+    cp = JdbcConnectionPool.create("jdbc:h2:" + rootDir + ";LOCK_MODE=1;MVCC=TRUE", "sa", "sa");
     Dictionary<String, String> props = new Hashtable<String, String>();
     props.put("vendor", "h2");
     datasourceRegistration = context.registerService(DataSource.class.getName(), cp, props);

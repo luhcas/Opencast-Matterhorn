@@ -19,6 +19,7 @@ import static org.junit.Assert.fail;
 
 import junit.framework.Assert;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -26,9 +27,16 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 public class WorkspaceImplTest {
+  WorkspaceImpl workspace;
+  
+  @Before
+  public void setup() throws Exception {
+    workspace = new WorkspaceImpl("target/junit-workspace-rootdir");    
+    workspace.activate(null);
+  }
+
   @Test
   public void testGetRemoteFile() {
-    WorkspaceImpl workspace = new WorkspaceImpl("target/junit-workspace-rootdir");
     URL fileURL = getClass().getClassLoader().getResource("opencast_header.gif");
     File f = null;
     try {
@@ -41,7 +49,6 @@ public class WorkspaceImplTest {
 
   @Test
   public void testLocalFileUrls() throws Exception {
-    WorkspaceImpl workspace = new WorkspaceImpl("target/junit-workspace-rootdir");
     File source1 = new File("target/test-classes/opencast_header.gif");
     File source2 = new File("target/test-classes/opencast_header2.gif");
     File fromWorkspace1 = workspace.get(source1.toURI());
@@ -51,7 +58,6 @@ public class WorkspaceImplTest {
   
   @Test
   public void testLongFilenames() throws Exception {
-    WorkspaceImpl workspace = new WorkspaceImpl("target/junit-workspace-rootdir");
     File source = new File("target/test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/opencast_header.gif");
     URL urlToSource = source.toURI().toURL();
     Assert.assertTrue(urlToSource.toString().length() > 255);

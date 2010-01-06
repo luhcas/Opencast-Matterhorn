@@ -88,7 +88,7 @@ public class WorkflowServiceImplTest {
       }
     };
     String randomId = UUID.randomUUID().toString();
-    cp = JdbcConnectionPool.create("jdbc:h2:target/" + randomId + ";LOCK_MODE=1", "sa", "sa");
+    cp = JdbcConnectionPool.create("jdbc:h2:target/" + randomId + ";LOCK_MODE=1;MVCC=TRUE", "sa", "sa");
     WorkflowServiceImplDaoDatasourceImpl dao = new WorkflowServiceImplDaoDatasourceImpl(cp);
     dao.activate(null);
     service.setDao(dao);

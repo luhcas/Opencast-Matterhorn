@@ -35,7 +35,7 @@ public interface ComposerService {
    * @return The track that results from the encoding
    * @throws EncoderException
    */
-  public Future<Track> encode(MediaPackage mediaPackage, String sourceTrackId, String targetTrackId, String profileId) throws EncoderException;
+  Future<Track> encode(MediaPackage mediaPackage, String sourceTrackId, String targetTrackId, String profileId) throws EncoderException;
 
   /**
    * Encode the video stream from one track and the audio stream from another, into a new {@link Track}.
@@ -47,7 +47,7 @@ public interface ComposerService {
    * @return The track that results from the encoding
    * @throws EncoderException
    */
-  public Future<Track> encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
+  Future<Track> encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
           String targetTrackId, String profileId) throws EncoderException;
 
   /**

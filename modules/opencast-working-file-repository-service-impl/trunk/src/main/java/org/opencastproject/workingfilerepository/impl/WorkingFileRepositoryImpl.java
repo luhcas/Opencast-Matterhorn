@@ -51,6 +51,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
 
   public WorkingFileRepositoryImpl(String rootDirectory, String serverUrl) {
     this.rootDirectory = rootDirectory;
+    // FIXME This defaults to localhost:8080, regardless of the serverUrl configured in the bundle context
     this.serverUrl = serverUrl;
     createRootDirectory();
   }
