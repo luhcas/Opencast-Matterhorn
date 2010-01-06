@@ -42,12 +42,19 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URI;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
+import javax.sql.DataSource;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -56,12 +63,15 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.json.simple.JSONObject;
+import org.opencastproject.media.mediapackage.identifier.Id;
 
 /**
  * Creates and augments Matterhorn MediaPackages using the api. Stores media into the Working File Repository.
  */
 @Path("/")
 public class IngestRestService {
+
   private static final Logger logger = LoggerFactory.getLogger(IngestRestService.class);
   private MediaPackageBuilderFactory factory = null;
   private MediaPackageBuilder builder = null;
@@ -99,7 +109,6 @@ public class IngestRestService {
   // return Response.serverError().status(400).build();
   // }
   // }
-
   @POST
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -167,6 +176,135 @@ public class IngestRestService {
     }
   }
 
+  /* -------------------- start of Benjamins weekend-fun -------------------- */
+
+  /* modifyed version of addCatalog */
+  @POST
+  @Produces(MediaType.TEXT_XML)
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  @Path("addCatalogFromFile")
+  public Response addMediaPackageCatalogFromFile(@FormParam("file") String file, @FormParam("flavor") String flavor,
+          @FormParam("mediaPackage") MediapackageType mpt) {
+    //logger.info("adding Catalog");
+    try {
+      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
+      mp = service.addCatalog(IOUtils.toInputStream(file), MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      mpt = MediapackageType.fromXml(mp.toXml());
+      return Response.ok(mpt).build();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return Response.serverError().status(400).build();
+    }
+  }
+
+  /* modifyed version of addTrack */
+  @POST
+  @Produces(MediaType.TEXT_XML)
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  @Path("addTrackMonitored")
+  public Response addTrackMonitored(@Context HttpServletRequest request) {
+    //logger.info("adding Track monitored");
+    try {
+      if (ServletFileUpload.isMultipartContent(request)) {
+        ServletFileUpload upload = new ServletFileUpload();
+        FileUploadListener listener = new FileUploadListener();
+        MediaPackage mp = null;
+        listener.setConnection(getSQLConnection(myDataSource));
+        upload.setProgressListener(listener);
+        /* NOTE: mediaPackage MUST be send before track (see FileItemStream doc) */
+        for (FileItemIterator iter = upload.getItemIterator(request); iter.hasNext();) {
+          FileItemStream item = iter.next();
+          if (item.getFieldName().equals("mediaPackage")) {
+            mp = builder.loadFromManifest(item.openStream());
+            Id mpID = mp.getIdentifier();
+            listener.setMediaPackageID(mpID.compact());
+          } else if (item.getFieldName().equals("track")) {
+            String fullname = item.getName();
+            String slashType = (fullname.lastIndexOf("\\") > 0) ? "\\" : "/";
+            int startIndex = fullname.lastIndexOf(slashType);
+            String filename = fullname.substring(startIndex + 1, fullname.length());
+            listener.setFilename(filename);
+            /* This will only work if the mediaPackage is received before the track. */
+            service.addTrack(item.openStream(), MediaPackageElements.INDEFINITE_TRACK, mp);
+          }
+        }
+        MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
+        service.ingest(mp);
+        return Response.ok(mpt).build();
+      }
+      return Response.serverError().status(400).build();
+    } catch (Exception e) {
+      e.printStackTrace();
+      return Response.serverError().status(400).build();
+    }
+  }
+
+  @GET
+  @Path("getUploadProgress/{mpId}/{filename}")
+  public Response getUploadProgress(@PathParam("mpId") String mediaPackageID, @PathParam("filename") String filename) {
+    JSONObject obj = new JSONObject();
+    obj.put("total", 0);
+    obj.put("received", 0);
+    try {
+      Connection con = getSQLConnection(myDataSource);
+      PreparedStatement s = con.prepareStatement("SELECT total, received FROM UPLOADPROGRESS WHERE mediapackageId = ? AND filename = ?");
+      s.setString(1, mediaPackageID);
+      s.setString(2, filename);
+      ResultSet rs = s.executeQuery();
+      if (rs.next()) {
+        obj.put("total", rs.getString("UPLOADPROGRESS.total"));
+        obj.put("received", rs.getString("UPLOADPROGRESS.received"));
+      }
+      con.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return Response.ok(obj.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+  }
+  private DataSource myDataSource;    // this should be moved to head of file
+
+  /**
+   * method to connect with opencast-db
+   * @param ds Datasource object
+   */
+  public void setDataSource(DataSource ds) {
+    logger.info("registering DataSource");
+    myDataSource = ds;
+
+    // check for existence of UPLOADPROGRESS table, create it if not present
+    try {
+      boolean exists = false;
+      Connection con = getSQLConnection(myDataSource);
+      DatabaseMetaData meta = con.getMetaData();
+      ResultSet rs = meta.getTables(null, null, "UPLOADPROGRESS", null);
+      while (rs.next()) {                                                  // this could be done in a more elegant way
+        if (rs.getString("TABLE_NAME").equals("UPLOADPROGRESS")) {
+          exists = true;
+          break;
+        }
+      }
+      if (!exists) {
+        logger.info("table UPLOADPROGRESS not existing, creating it");
+        PreparedStatement s = con.prepareStatement("CREATE TABLE UPLOADPROGRESS (mediapackageId varchar(255), filename varchar(2048), total bigint, received bigint)");
+        s.executeUpdate();
+        con.commit();
+      }
+      con.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private Connection getSQLConnection(DataSource ds) throws SQLException {
+    Connection con = ds.getConnection();
+    if (con == null) {
+      throw new SQLException("Unable to get connection from DataSource");
+    } else {
+      return con;
+    }
+  }
+
+  /* --------------------- end of Benjamins weekend-fun --------------------- */
   @POST
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -263,7 +401,6 @@ public class IngestRestService {
   public String getDocumentation() {
     return docs;
   }
-
   protected final String docs;
 
   public IngestRestService() {

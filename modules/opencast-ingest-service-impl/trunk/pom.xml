@@ -119,6 +119,16 @@
     	<artifactId>htmlunit</artifactId>
     	<version>2.6</version>
     </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-db</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -135,6 +145,13 @@
               META-INF.services;-split-package:=merge-first,
               de.schlichtherle.*;-split-package:=merge-first
             </Private-Package>
+            <Private-Package>
+              org.json.simple,
+              org.json.simple.parser
+            </Private-Package>
+            <Embed-Dependency>
+              json_simple;inline=true
+            </Embed-Dependency>
             <Import-Package> org.opencastproject.http, *;resolution:=optional </Import-Package>
             <Service-Component>
               OSGI-INF/ingest-service.xml,

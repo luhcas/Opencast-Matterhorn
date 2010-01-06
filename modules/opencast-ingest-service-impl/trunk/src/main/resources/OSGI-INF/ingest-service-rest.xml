@@ -10,4 +10,7 @@
   </service>
   <reference name="service-impl" interface="org.opencastproject.ingest.api.IngestService"
     cardinality="1..1" policy="static" bind="setService" />
+  <reference name="dataSource"
+		interface="javax.sql.DataSource"
+		cardinality="1..1" policy="static" bind="setDataSource" />
 </component>
