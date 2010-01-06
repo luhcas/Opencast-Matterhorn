@@ -15,12 +15,14 @@
  */
 package org.opencastproject.workingfilerepository.impl;
 
+import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,16 +47,26 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   private String serverUrl = null;
 
   public WorkingFileRepositoryImpl() {
-    this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo",
-            "http://localhost:8080");
   }
 
   public WorkingFileRepositoryImpl(String rootDirectory, String serverUrl) {
     this.rootDirectory = rootDirectory;
-    // FIXME This defaults to localhost:8080, regardless of the serverUrl configured in the bundle context
     this.serverUrl = serverUrl;
-    createRootDirectory();
   }
+  
+  public void activate(ComponentContext cc) {
+    if(cc == null || cc.getBundleContext().getProperty("serverUrl") == null) {
+      serverUrl = UrlSupport.DEFAULT_BASE_URL;
+    } else {
+      serverUrl = cc.getBundleContext().getProperty("serverUrl");
+    }
+    if(cc == null || cc.getBundleContext().getProperty("workingFileRepoPath") == null) {
+      rootDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo";
+    } else {
+      rootDirectory = cc.getBundleContext().getProperty("workingFileRepoPath");
+    }
+    createRootDirectory();
+}
 
 
   public void delete(String mediaPackageID, String mediaPackageElementID) {

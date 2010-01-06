@@ -64,7 +64,6 @@ public class ComposerRestEndpointTest {
 
     // Grab the new track from the response
     String postResponse = EntityUtils.toString(client.execute(postEncode).getEntity());
-    System.out.println("postResponse=" + postResponse);
     Assert.assertTrue(postResponse.contains("<ns2:receipt xmlns:ns2=\"http://composer.opencastproject.org/\""));
   }
 

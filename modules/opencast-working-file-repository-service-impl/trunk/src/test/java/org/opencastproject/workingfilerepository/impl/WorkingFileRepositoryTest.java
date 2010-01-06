@@ -18,6 +18,7 @@ public class WorkingFileRepositoryTest {
   
   @Before
   public void setup() {
+    repo.activate(null);
     // Load an image file via the classpath to test whether we can put it into the repository
     InputStream in = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
     logger.info("Working with input stream " + in);

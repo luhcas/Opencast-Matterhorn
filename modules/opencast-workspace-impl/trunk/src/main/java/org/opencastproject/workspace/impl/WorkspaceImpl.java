@@ -63,14 +63,14 @@ public class WorkspaceImpl implements Workspace, ManagedService {
 
   public void activate(ComponentContext cc) {
     filesystemMappings = new HashMap<String, String>();
-    String serverUrl;
+    String filesUrl;
     if(cc == null || cc.getBundleContext().getProperty("serverUrl") == null) {
-      serverUrl = UrlSupport.DEFAULT_BASE_URL;
+      filesUrl = UrlSupport.DEFAULT_BASE_URL + "/files";
     } else {
-      serverUrl = cc.getBundleContext().getProperty("serverUrl");
+      filesUrl = cc.getBundleContext().getProperty("serverUrl") + "/files";
     }
     // TODO Remove hard coded path
-    filesystemMappings.put(serverUrl, System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo");
+    filesystemMappings.put(filesUrl, System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo");
   }
     
   public File get(URI uri) {
@@ -78,10 +78,11 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     
     // If any local filesystem mappings match this uri, just return the file handle
     for(Entry<String, String> entry : filesystemMappings.entrySet()) {
-      if(urlString.startsWith(entry.getKey())) {
-        String basePath = entry.getValue();
-        String pathInfo = urlString.substring(entry.getKey().length());
-        File f = new File(basePath + pathInfo);
+      String baseUrl = entry.getKey();
+      String baseFilesystemPath = entry.getValue();
+      if(urlString.startsWith(baseUrl)) {
+        String pathExtraInfo = urlString.substring(baseUrl.length());
+        File f = new File(baseFilesystemPath + pathExtraInfo);
         if(f.exists()) {
           logger.debug("found local file {} for URL {}", f.getAbsolutePath(), urlString);
           return f;
