@@ -28,7 +28,7 @@ public interface FeedGenerator {
    * 
    * @return the feed identifier
    */
-  String getFeedIdentifier();
+  String getIdentifier();
 
   /**
    * Return the feed name.

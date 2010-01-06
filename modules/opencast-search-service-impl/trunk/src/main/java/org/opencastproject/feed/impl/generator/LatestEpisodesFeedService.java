@@ -18,7 +18,7 @@ package org.opencastproject.feed.impl.generator;
 
 import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.feed.api.Feed.Type;
-import org.opencastproject.feed.impl.AbstractFeedGenerator;
+import org.opencastproject.feed.impl.AbstractFeedService;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchService;
@@ -29,10 +29,10 @@ import org.slf4j.LoggerFactory;
 /**
  * This feed generator creates a feed for the latest episodes across all series.
  */
-public class RecentEpisodesFeedGenerator extends AbstractFeedGenerator implements FeedGenerator {
+public class LatestEpisodesFeedService extends AbstractFeedService implements FeedGenerator {
 
   /** Logging facility */
-  private static Logger log_ = LoggerFactory.getLogger(RecentEpisodesFeedGenerator.class);
+  private static Logger log_ = LoggerFactory.getLogger(LatestEpisodesFeedService.class);
 
   /** The feed type */
   private static final String QUERY = "recent";
@@ -52,7 +52,7 @@ public class RecentEpisodesFeedGenerator extends AbstractFeedGenerator implement
    * @param entryLinkTemplate
    *          template for link generation
    */
-  public RecentEpisodesFeedGenerator(String uri, String feedHome, MediaPackageElementFlavor rssFlavor,
+  public LatestEpisodesFeedService(String uri, String feedHome, MediaPackageElementFlavor rssFlavor,
           String entryLinkTemplate) {
     super(QUERY, feedHome, rssFlavor, entryLinkTemplate);
     setName("Recent episodes");
@@ -77,7 +77,7 @@ public class RecentEpisodesFeedGenerator extends AbstractFeedGenerator implement
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#loadFeedData(org.opencastproject.feed.api.Feed.Type,
+   * @see org.opencastproject.feed.impl.AbstractFeedService#loadFeedData(org.opencastproject.feed.api.Feed.Type,
    *      java.lang.String[], int, int)
    */
   protected SearchResult loadFeedData(Type type, String query[], int limit, int offset) {

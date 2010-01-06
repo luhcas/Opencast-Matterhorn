@@ -18,7 +18,7 @@ package org.opencastproject.feed.impl.generator;
 
 import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.feed.api.Feed.Type;
-import org.opencastproject.feed.impl.AbstractFeedGenerator;
+import org.opencastproject.feed.impl.AbstractFeedService;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchService;
@@ -31,10 +31,10 @@ import org.slf4j.LoggerFactory;
  * feed type and version, and <code>accept()</code> returns <code>true</code> if the search service returns a result for
  * that series.
  */
-public class SeriesEpisodesFeedGenerator extends AbstractFeedGenerator implements FeedGenerator {
+public class SeriesEpisodesFeedService extends AbstractFeedService implements FeedGenerator {
 
   /** the logging facility provided by log4j */
-  static Logger log_ = LoggerFactory.getLogger(SeriesEpisodesFeedGenerator.class);
+  static Logger log_ = LoggerFactory.getLogger(SeriesEpisodesFeedService.class);
 
   /** The series identifier */
   protected String seriesId = null;
@@ -52,7 +52,7 @@ public class SeriesEpisodesFeedGenerator extends AbstractFeedGenerator implement
    * @param entryLinkTemplate
    *          the link template
    */
-  public SeriesEpisodesFeedGenerator(String feedHome, MediaPackageElementFlavor rssFlavor, String entryLinkTemplate) {
+  public SeriesEpisodesFeedService(String feedHome, MediaPackageElementFlavor rssFlavor, String entryLinkTemplate) {
     super("series", feedHome, rssFlavor, entryLinkTemplate);
     setName("Series");
   }
@@ -89,16 +89,16 @@ public class SeriesEpisodesFeedGenerator extends AbstractFeedGenerator implement
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getFeedIdentifier()
+   * @see org.opencastproject.feed.impl.AbstractFeedService#getIdentifier()
    */
-  public String getFeedIdentifier() {
+  public String getIdentifier() {
     return seriesId;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getName()
+   * @see org.opencastproject.feed.impl.AbstractFeedService#getName()
    */
   public String getName() {
     return seriesId;
@@ -107,7 +107,7 @@ public class SeriesEpisodesFeedGenerator extends AbstractFeedGenerator implement
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getDescription()
+   * @see org.opencastproject.feed.impl.AbstractFeedService#getDescription()
    */
   public String getDescription() {
     return seriesId;
@@ -116,7 +116,7 @@ public class SeriesEpisodesFeedGenerator extends AbstractFeedGenerator implement
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#loadFeedData(org.opencastproject.feed.api.Feed.Type,
+   * @see org.opencastproject.feed.impl.AbstractFeedService#loadFeedData(org.opencastproject.feed.api.Feed.Type,
    *      java.lang.String[], int, int)
    */
   protected SearchResult loadFeedData(Type type, String query[], int limit, int offset) {

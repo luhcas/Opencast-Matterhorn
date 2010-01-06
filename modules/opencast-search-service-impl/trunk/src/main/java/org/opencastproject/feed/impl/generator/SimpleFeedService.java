@@ -18,13 +18,15 @@ package org.opencastproject.feed.impl.generator;
 
 import org.opencastproject.feed.api.Feed;
 import org.opencastproject.feed.api.FeedGenerator;
-import org.opencastproject.feed.impl.AbstractFeedGenerator;
+import org.opencastproject.feed.impl.AbstractFeedService;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.solr.SolrFields;
 import org.opencastproject.util.StringSupport;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,10 +44,10 @@ import java.util.StringTokenizer;
 /**
  * This feed generator creates the feeds from the properties file <code>/WEB-INF/conf/feeds.properties</code>.
  */
-public class SimpleFeedGenerator extends AbstractFeedGenerator implements FeedGenerator {
+public class SimpleFeedService extends AbstractFeedService implements FeedGenerator {
 
   /** the logging facility provided by log4j */
-  protected final static Logger log_ = LoggerFactory.getLogger(SimpleFeedGenerator.class);
+  protected final static Logger log_ = LoggerFactory.getLogger(SimpleFeedService.class);
 
   /** The defined feeds */
   protected static Map<String, FeedDefinition> feedDefinitions = null;
@@ -70,7 +72,7 @@ public class SimpleFeedGenerator extends AbstractFeedGenerator implements FeedGe
    * @param propertiesFile
    *          path to the properties
    */
-  public SimpleFeedGenerator(String uri, String feedHome, MediaPackageElementFlavor rssFlavor,
+  public SimpleFeedService(String uri, String feedHome, MediaPackageElementFlavor rssFlavor,
           String entryLinkTemplate, String propertiesFile) {
     super(uri, propertiesFile, rssFlavor, entryLinkTemplate);
     init(propertiesFile);
@@ -89,16 +91,16 @@ public class SimpleFeedGenerator extends AbstractFeedGenerator implements FeedGe
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getFeedIdentifier()
+   * @see org.opencastproject.feed.impl.AbstractFeedService#getIdentifier()
    */
-  public String getFeedIdentifier() {
+  public String getIdentifier() {
     return feed.getUri();
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getName()
+   * @see org.opencastproject.feed.impl.AbstractFeedService#getName()
    */
   public String getName() {
     return feed.getName();
@@ -107,7 +109,7 @@ public class SimpleFeedGenerator extends AbstractFeedGenerator implements FeedGe
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getDescription()
+   * @see org.opencastproject.feed.impl.AbstractFeedService#getDescription()
    */
   public String getDescription() {
     return feed.getDescription();
@@ -116,7 +118,7 @@ public class SimpleFeedGenerator extends AbstractFeedGenerator implements FeedGe
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getFeedLink()
+   * @see org.opencastproject.feed.impl.AbstractFeedService#getFeedLink()
    */
   public String getFeedLink() {
     return feed.getLink();
@@ -142,7 +144,7 @@ public class SimpleFeedGenerator extends AbstractFeedGenerator implements FeedGe
   }
 
   /**
-   * @see ch.ethz.replay.core.store.feed.AbstractFeedGenerator#loadFeedData(org.opencastproject.feed.api.Feed.Type,
+   * @see AbstractFeedService.ethz.replay.core.store.feed.AbstractFeedGenerator#loadFeedData(org.opencastproject.feed.api.Feed.Type,
    *      java.lang.String[], int, int)
    */
   @Override
@@ -417,6 +419,16 @@ public class SimpleFeedGenerator extends AbstractFeedGenerator implements FeedGe
       return solrQuery.toString();
     }
 
+  }
+
+  @Override
+  public void start(ComponentContext context) throws Exception {
+  }
+
+  @Override
+  public void stop(ComponentContext context) throws Exception {
+    // TODO Auto-generated method stub
+    
   }
 
 }

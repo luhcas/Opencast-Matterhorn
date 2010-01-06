@@ -46,7 +46,7 @@ import java.util.Set;
  * This class provides basic functionality for creating feeds and is used as the base implementation for the default
  * feed generators.
  */
-public abstract class AbstractFeedGenerator implements FeedGenerator {
+public abstract class AbstractFeedService implements FeedGenerator {
 
   /** A default value for limit */
   protected static final int DEFAULT_LIMIT = 10;
@@ -94,7 +94,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
   protected String description = null;
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(AbstractFeedGenerator.class);
+  private final static Logger log_ = LoggerFactory.getLogger(AbstractFeedService.class);
 
   /**
    * Creates a new abstract feed generator.
@@ -108,7 +108,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
    * @param entryLinkTemplate
    *          the link template
    */
-  public AbstractFeedGenerator(String uri, String feedHome, MediaPackageElementFlavor rssFlavor,
+  public AbstractFeedService(String uri, String feedHome, MediaPackageElementFlavor rssFlavor,
           String entryLinkTemplate) {
     this.identifier = uri;
     this.feedHome = feedHome;
@@ -119,9 +119,9 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.api.FeedGenerator#getFeedIdentifier()
+   * @see org.opencastproject.feed.api.FeedGenerator#getIdentifier()
    */
-  public String getFeedIdentifier() {
+  public String getIdentifier() {
     return identifier;
   }
 
@@ -253,7 +253,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     }
 
     // Create the feed
-    feed = createFeed(getFeedIdentifier(), new ContentImpl(getName()), new ContentImpl(getDescription()), getFeedLink());
+    feed = createFeed(getIdentifier(), new ContentImpl(getName()), new ContentImpl(getDescription()), getFeedLink());
     feed.setEncoding(ENCODING);
 
     // TODO: Set feed icon and other metadata
