@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import java.util.Map.Entry;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -184,11 +185,11 @@ public class AdminuiRestService {
   @Path("countRecordings")
   public Response countRecordings() {
     HashMap<String,Integer> stats = getRecordingsStatistic();
-    Iterator<String> i = stats.keySet().iterator(); // FIXME entrySet() is more efficient since you call get(key)
+    Iterator<Entry<String,Integer>> i = stats.entrySet().iterator();
     JSONObject out = new JSONObject();
     while (i.hasNext()) {
-      String key = i.next();
-      out.put(key, stats.get(key));
+      Entry<String,Integer> ent = i.next();
+      out.put(ent.getKey(), ent.getValue());
     }
     return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
   }
@@ -245,12 +246,13 @@ public class AdminuiRestService {
             break;
           case PAUSED:
           case STOPPED:
-            inactive++; // FIXME I think you want a break here, right?  Or are all paused and stopped workflows also finished?
+            inactive++; 
+            break;
           case SUCCEEDED:
             finished++;
         }
       }
-      out.put("processing", new Integer(processing)); // FIXME valueOf is more efficient, see below
+      out.put("processing", Integer.valueOf(processing));
       out.put("inactive", Integer.valueOf(inactive));
       out.put("errors", Integer.valueOf(errors));
       out.put("finished", Integer.valueOf(finished));
