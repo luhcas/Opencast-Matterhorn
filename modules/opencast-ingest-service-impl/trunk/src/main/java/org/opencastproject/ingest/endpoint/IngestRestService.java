@@ -59,6 +59,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -94,7 +95,7 @@ public class IngestRestService {
       return Response.ok(mpt).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -107,7 +108,7 @@ public class IngestRestService {
   // service.discardMediaPackage(mp);
   // return Response.ok("Media package discarded.").build();
   // } catch (Exception e) {
-  // return Response.serverError().status(400).build();
+  // return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
   // }
   // }
   @POST
@@ -125,7 +126,7 @@ public class IngestRestService {
       return Response.ok(mpt).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -142,7 +143,7 @@ public class IngestRestService {
       return Response.ok(mpt).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -160,7 +161,7 @@ public class IngestRestService {
       return Response.ok(mpt).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -177,7 +178,7 @@ public class IngestRestService {
       return Response.ok(mpt).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -198,7 +199,7 @@ public class IngestRestService {
       return Response.ok(mpt).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -237,10 +238,10 @@ public class IngestRestService {
         service.ingest(mp);
         return Response.ok(mpt).build();
       }
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.BAD_REQUEST).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -324,7 +325,7 @@ public class IngestRestService {
       return Response.ok(mpt).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -341,7 +342,7 @@ public class IngestRestService {
       return Response.ok(mpt).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -369,10 +370,10 @@ public class IngestRestService {
         service.ingest(mp);
         return Response.ok(mpt).build();
       }
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.BAD_REQUEST).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -384,7 +385,7 @@ public class IngestRestService {
       service.addZippedMediaPackage(mp);
     } catch (Exception e) {
       logger.warn(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.ok().build();
   }
@@ -400,7 +401,7 @@ public class IngestRestService {
       return Response.ok(mpt).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
