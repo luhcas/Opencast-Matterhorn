@@ -14,7 +14,7 @@ var AdminUI = AdminUI || {};
 AdminUI.init = function() {
 
     $('#button_schedule').click( function() {
-        window.location.href = '../../scheduler/ui/index.html';
+        window.location.href = '../../admin/scheduler.html';
     });
 
     $('#button_upload').click( function() {

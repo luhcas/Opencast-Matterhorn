@@ -1,0 +1,250 @@
+body {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.wu-tab-content {
+  border-left:1px solid black;
+  border-right:1px solid black;
+  border-bottom:1px solid black;
+  padding: 12px;
+}
+
+#stage li {
+  overflow: hidden;
+}
+
+#stage {
+  padding-left: 24px;
+}
+
+.icon-arrow-right {
+  background-image: url(../img/arrow-right.png);
+  background-offset: 0 0;
+}
+
+.icon-arrow-down {
+  background-image: url(../img/arrow-down.png);
+  background-offset: 0 0;
+}
+
+.icon-help {
+  background-image: url(../img/help.png);
+  background-offset: 0 0;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.icon-add {
+  background-image: url(../img/add.png);
+  background-offset: 0 0;
+  display: inline-block;
+}
+
+.icon-sub {
+  background-image: url(../img/minus.png);
+  background-offset: 0 0;
+  display: inline-block;
+}
+
+.icon-bullet {
+  background-image: url(../img/bullet-arrow.png);
+  background-offset: 0 0;
+}
+
+.inline-icon {
+  display: inline-block;
+}
+
+/* folding widget */
+
+.folder-head {
+  cursor: pointer;
+  background-color: silver;
+  margin-bottom: 0px;
+}
+
+.formbox-header-text {
+  margin-left: 1.2em;
+}
+
+.folder-icon {
+  float: left;
+}
+
+.folder-content {
+  display: none;
+  border: solid 1px silver;
+}
+
+/* form-box */
+
+.form-box-container {
+  border: 0;
+}
+
+.form-box-title {
+  background-color: silver;
+  padding-left: 0.5em;
+}
+
+.form-box-table {
+  width: 100%;
+}
+
+.form-box-table th {
+  text-align: right;
+  font-weight: normal;
+}
+
+.form-box-table th,td {
+  border: 0;
+}
+
+.form-box-group {
+  margin: 0;
+  padding: 0;
+}
+
+.form-box-group li {
+  /* Stipulate the height of each item so that 
+   vertical return = items * height */
+  
+  line-height: 1.2em;
+  
+  /* Clear the default margins & padding 
+   so we can style the list from scratch */
+  
+  margin: 0;
+  padding: 0;
+}
+
+.form-box-group .column1 {
+  margin-left: 0;
+}
+
+.form-box-group .column2 {
+  margin-left: 15em;
+}
+
+/* Bring the first item of each column 
+ back up to the level of item 1.
+ Vertical return = items * height.
+ eg, 5 items * 1.2em line-height = 6em */
+
+.form-box-group .reset
+{
+  margin-top: -2.4em;
+}
+
+.disable-label {
+  color: gray;
+}
+
+.form-field {
+  width: 450px !important;
+}
+
+.form-list{
+  margin-left: 1em;
+}
+
+.form-list li {
+  clear: both;
+  margin-bottom: 4px;
+  padding: 3px;
+  overflow: hidden;
+}
+
+.form-list label {
+  font-weight: normal;
+}
+
+.form-radio-group {
+}
+
+/* complete/feedback view */
+.notification-header {
+  border: 1px solid black;
+  background: lightgreen;
+  width:430px;
+  text-align:center;
+  margin-bottom:2em;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.warnbox-title {
+  background:#FA5858;
+}
+.warnbox-content {
+  border:1px solid #FA5858;
+}
+
+.warnbox-content ul li {
+  list-style-type: none;
+}
+
+.data-row {
+  width:100%;
+  margin-bottom:1em;
+  display:none;
+}
+
+.data-label {
+  width:150px;
+  display: inline-block;
+  vertical-align: top;
+  text-align: right;
+}
+
+.data-value {
+  margin-left: 1em;
+  display: inline-block;
+  width: 550px;
+  overflow: hidden;
+}
+
+.expand-detail {
+  width: 620px;
+  display: inline-block;
+}
+
+.detail-show {
+  height: inherit;
+}
+
+.detail-hide {
+  height: 1.2em;
+}
+
+.detail-switch {
+  display: inline-block;
+  vertical-align: top;
+  cursor: pointer;
+  color: blue;
+}
+
+/* Fluid Skinning System Overrides */
+
+.fl-widget .fl-widget-content {
+  margin: 0px;
+}
+
+.fl-controls-right .fl-label {
+  width: 30%;
+}
+
+.fl-activeTab {
+  background-color: white !important;
+}
+
+.fl-activeTab a {
+  background-color: white !important;
+  border-bottom-color: white !important;
+}
+
+.fl-theme-coal .fl-widget {
+  border: 1px solid #000000;
+  padding: 0px;
+}

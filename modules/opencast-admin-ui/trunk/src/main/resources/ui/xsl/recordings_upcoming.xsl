@@ -32,7 +32,7 @@
     <tr>
       <td>
         <a>
-          <xsl:attribute name="href">/scheduler/ui/index.html?eventID=<xsl:value-of select="id" />&amp;edit</xsl:attribute>
+          <xsl:attribute name="href">/admin/scheduler.html?eventID=<xsl:value-of select="id" />&amp;edit</xsl:attribute>
           <xsl:value-of select="title" />
         </a>
       </td>

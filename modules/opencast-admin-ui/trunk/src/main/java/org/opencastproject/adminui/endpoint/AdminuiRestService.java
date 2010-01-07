@@ -282,7 +282,7 @@ public class AdminuiRestService {
         item.setId(events[i].getID());
         item.setTitle(events[i].getTitle());
         item.setPresenter(events[i].getCreator());
-        item.setSeries(events[i].getSeriesID());    // FIXME get title for seriesID
+        item.setSeries(events[i].getSeriesID());    // FIXME get title for seriesID -- not used by now
         item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
         item.setStartTime(Long.toString(events[i].getEnddate().getTime()));
         item.setCaptureAgent(events[i].getDevice());
