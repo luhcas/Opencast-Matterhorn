@@ -17,14 +17,20 @@
 package org.opencastproject.feed.impl;
 
 import org.opencastproject.feed.api.Feed;
+import org.opencastproject.feed.api.FeedGenerator;
 
 import com.sun.syndication.io.SyndFeedOutput;
 
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -52,8 +58,11 @@ public class FeedServlet extends HttpServlet {
   /** The serial version uid */
   private static final long serialVersionUID = -4623160106007127801L;
 
-  /** the logging facility provided by log4j */
-  static Logger log_ = LoggerFactory.getLogger(FeedServlet.class);
+  /** Logging facility */
+  private static Logger log_ = LoggerFactory.getLogger(FeedServlet.class);
+
+  /** List of feed generators */
+  private List<FeedGenerator> feeds = new ArrayList<FeedGenerator>();
 
   /**
    * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
@@ -78,10 +87,17 @@ public class FeedServlet extends HttpServlet {
     else if (feedInfo.getType().equals(Feed.Type.RSS))
       response.setContentType("application/rss+xml");
 
-    // Have the feed manager create the requested feed
-    Feed feed = FeedManager.createFeed(feedInfo.getType(), feedInfo.getQuery(), request.getLocale());
+    // Have a feed generator create the requested feed
+    Feed feed = null;
+    for (FeedGenerator generator : feeds) {
+      if (generator.accept(feedInfo.getQuery())) {
+        feed = generator.createFeed(feedInfo.getType(), feedInfo.getQuery());
+        break;
+      }
+    }
+
+    // Have we found a feed generator?
     if (feed == null) {
-      // response.sendError(HttpServletResponse.SC_NO_CONTENT);
       response.sendError(HttpServletResponse.SC_NOT_FOUND);
       return;
     }
@@ -93,8 +109,7 @@ public class FeedServlet extends HttpServlet {
     SyndFeedOutput output = new SyndFeedOutput();
     Writer responseWriter = response.getWriter();
     try {
-      if (feed != null)
-        output.output(new RomeFeed(feed, feedInfo), responseWriter);
+      output.output(new RomeFeed(feed, feedInfo), responseWriter);
     } catch (Exception e) {
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
@@ -137,6 +152,42 @@ public class FeedServlet extends HttpServlet {
     for (int i = 0; i < queryLength; i++)
       query[i] = pathElements[i + 2];
     return new FeedInfo(type, version, query);
+  }
+  
+  /**
+   * Sets the http service.
+   * 
+   * @param httpService the http service
+   */
+  public void setHttpService(HttpService httpService) {
+    try {
+      HttpContext httpContext = httpService.createDefaultHttpContext();
+      httpService.registerServlet("/feeds", FeedServlet.this, null, httpContext);
+    } catch (ServletException e) {
+      e.printStackTrace();
+    } catch (NamespaceException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  /**
+   * Adds the feed generator to the list of generators.
+   * 
+   * @param generator the generator
+   */
+  public void addFeedGenerator(FeedGenerator generator) {
+    log_.info("Registering feed generator {}", generator);
+    feeds.add(generator);
+  }
+
+  /**
+   * Removes the generator from the list of feed generators.
+   * 
+   * @param generator the feed generator
+   */
+  public void removeFeedGenerator(FeedGenerator generator) {
+    log_.info("Registering feed generator {}", generator);
+    feeds.remove(generator);
   }
 
 }

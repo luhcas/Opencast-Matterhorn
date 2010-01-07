@@ -37,13 +37,20 @@ public interface Feed {
         return Atom;
     }
   };
+  
+  /**
+   * Returns the feed type.
+   * 
+   * @return the feed type
+   */
+  Type getType();
 
   /**
    * Returns the charset encoding of a the feed.
    * 
    * @return the charset encoding of the feed
    */
-  public String getEncoding();
+  String getEncoding();
 
   /**
    * Sets the charset encoding of a the feed.
@@ -51,7 +58,7 @@ public interface Feed {
    * @param encoding
    *          the charset encoding of the feed
    */
-  public void setEncoding(String encoding);
+  void setEncoding(String encoding);
 
   /**
    * Returns the feed URI.
@@ -239,7 +246,7 @@ public interface Feed {
    * 
    * @return the feed contributors, <b>null</b> if none
    */
-  public List<Person> getContributors();
+  List<Person> getContributors();
 
   /**
    * Sets the feed contributors.
@@ -360,7 +367,7 @@ public interface Feed {
    *          the URI of the module
    * @return The module with the given URI, <b>null</b> if none
    */
-  public FeedExtension getModule(String uri);
+  FeedExtension getModule(String uri);
 
   /**
    * Returns the feed modules.

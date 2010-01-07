@@ -14,33 +14,25 @@
  *
  */
 
-package org.opencastproject.feed.impl.generator;
+package org.opencastproject.feed.impl;
 
 import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.feed.api.Feed.Type;
-import org.opencastproject.feed.impl.AbstractFeedService;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.search.api.SearchResult;
-import org.opencastproject.search.api.SearchService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This feed generator implements a feed for series. The series argument is taken from the first url parameter after the
- * feed type and version, and <code>accept()</code> returns <code>true</code> if the search service returns a result for
- * that series.
+ * feed type and version, and {@link #accept(String[])} returns <code>true</code> if the search service returns a result
+ * for that series identifier.
  */
-public class SeriesEpisodesFeedService extends AbstractFeedService implements FeedGenerator {
-
-  /** the logging facility provided by log4j */
-  static Logger log_ = LoggerFactory.getLogger(SeriesEpisodesFeedService.class);
+public class SeriesFeedService extends AbstractFeedService implements FeedGenerator {
 
   /** The series identifier */
-  protected String seriesId = null;
+  protected ThreadLocal<String> series = new ThreadLocal<String>();
 
-  /** The search service */
-  private SearchService searchService = null;
+  /** The series data */
+  protected ThreadLocal<SearchResult> seriesData = new ThreadLocal<SearchResult>();
 
   /**
    * Creates a new feed generator for series.
@@ -49,11 +41,13 @@ public class SeriesEpisodesFeedService extends AbstractFeedService implements Fe
    *          the feed's home url
    * @param rssFlavor
    *          the flavor identifying rss tracks
+   * @param atomFlavor
+   *          the flavors identifying tracks to be included in atom feeds
    * @param entryLinkTemplate
    *          the link template
    */
-  public SeriesEpisodesFeedService(String feedHome, MediaPackageElementFlavor rssFlavor, String entryLinkTemplate) {
-    super("series", feedHome, rssFlavor, entryLinkTemplate);
+  public SeriesFeedService(String feedHome, MediaPackageElementFlavor rssFlavor, MediaPackageElementFlavor[] atomFlavors, String entryLinkTemplate) {
+    super("series", feedHome, rssFlavor, atomFlavors, entryLinkTemplate);
     setName("Series");
   }
 
@@ -61,81 +55,70 @@ public class SeriesEpisodesFeedService extends AbstractFeedService implements Fe
    * @see org.opencastproject.feed.api.FeedGenerator#accept(java.lang.String[])
    */
   public boolean accept(String[] query) {
-    if (searchService == null || query.length == 0)
+    boolean generalChecksPassed = super.accept(query);
+    if (!generalChecksPassed)
       return false;
 
-    // Build the series id. Last parameter is expected to be the
-    // format identifier:
+    // Build the series id, first parameter is the selector. Note that if the series identifier
+    // contained slashes (e. g. in the case of a handle or doi), we need to reassemble the
+    // identifier
     StringBuffer id = new StringBuffer();
     int idparts = query.length - 1;
-    for (int i = 0; i < idparts; i++) {
+    for (int i = 1; i < idparts; i++) {
       if (id.length() > 0)
         id.append("/");
       id.append(query[i]);
     }
 
-    // TODO: Store seriesId in a ThreadLocal
-    seriesId = id.toString();
     try {
       // To check if we can accept the query it is enough to query for just one result
-      // TODO: Store result in a ThreadLocal and reuse in loadFeedData();
-      SearchResult result = searchService.getEpisodeAndSeriesById(seriesId);
-      return result != null && result.size() > 0;
+      SearchResult result = searchService.getEpisodeAndSeriesById(id.toString());
+      if (result != null && result.size() > 0) {
+        series.set(id.toString());
+        seriesData.set(result);
+        return true;
+      }
     } catch (Exception e) {
       return false;
     }
+    return false;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedService#getIdentifier()
+   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getIdentifier()
    */
   public String getIdentifier() {
-    return seriesId;
+    return series.get();
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedService#getName()
+   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getName()
    */
   public String getName() {
-    return seriesId;
+    return seriesData.get().getItems()[0].getDcTitle();
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedService#getDescription()
+   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getDescription()
    */
   public String getDescription() {
-    return seriesId;
+    return seriesData.get().getItems()[0].getDcAbstract();
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.impl.AbstractFeedService#loadFeedData(org.opencastproject.feed.api.Feed.Type,
+   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#loadFeedData(org.opencastproject.feed.api.Feed.Type,
    *      java.lang.String[], int, int)
    */
   protected SearchResult loadFeedData(Type type, String query[], int limit, int offset) {
-    try {
-      return searchService.getEpisodeAndSeriesById(seriesId);
-    } catch (Exception e) {
-      log_.error("Cannot retrieve solr result for feed '" + type.toString() + "' with query '" + query + "'.");
-      return null;
-    }
-  }
-
-  /**
-   * Sets the search service.
-   * 
-   * @param searchService
-   *          the search service
-   */
-  public void setSearchService(SearchService searchService) {
-    this.searchService = searchService;
+    return seriesData.get();
   }
 
 }

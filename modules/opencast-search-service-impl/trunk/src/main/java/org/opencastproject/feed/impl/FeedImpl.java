@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * TODO: Comment me
+ * Default feed implementation.
  */
 public class FeedImpl implements Feed {
 
@@ -76,34 +76,64 @@ public class FeedImpl implements Feed {
   /** The list of contributors */
   private List<Person> contributors = null;
 
+  /** Link to the feed homepage */
   private String link = null;
+
+  /** The feed type */
+  private Type type = null;
 
   /**
    * Constructor used to create a new feed with the given uri and title.
    * 
+   * @param type
+   *          feed type
    * @param uri
    *          the feed uri
    * @param title
    *          the feed title
    * @param description
    *          the feed description
+   * @param link
+   *          the link to the feed homepage
    */
-  FeedImpl(String uri, Content title, Content description, String link) {
+  FeedImpl(Type type, String uri, Content title, Content description, String link) {
+    this.type = type;
     this.uri = uri;
     this.title = title;
     this.description = description;
     this.link = link;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.feed.api.Feed#getType()
+   */
+  public Type getType() {
+    return type;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.feed.api.Feed#getLink()
+   */
   public String getLink() {
     return link;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.feed.api.Feed#setLink(java.lang.String)
+   */
   public void setLink(String link) {
     this.link = link;
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#addAuthor(org.opencastproject.feed.api.Person)
    */
   public void addAuthor(Person author) {
@@ -113,6 +143,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#addContributor(org.opencastproject.feed.api.Person)
    */
   public void addContributor(Person contributor) {
@@ -122,6 +154,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#addEntry(org.opencastproject.feed.api.FeedEntry)
    */
   public void addEntry(FeedEntry entry) {
@@ -131,6 +165,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#addLink(org.opencastproject.feed.api.Link)
    */
   public void addLink(Link link) {
@@ -140,6 +176,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#addModule(org.opencastproject.feed.api.FeedExtension)
    */
   public void addModule(FeedExtension module) {
@@ -149,6 +187,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getAuthors()
    */
   public List<Person> getAuthors() {
@@ -156,6 +196,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getCategories()
    */
   public List<Category> getCategories() {
@@ -163,6 +205,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getContributors()
    */
   public List<Person> getContributors() {
@@ -170,6 +214,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getCopyright()
    */
   public String getCopyright() {
@@ -177,6 +223,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getDescription()
    */
   public Content getDescription() {
@@ -184,6 +232,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getEncoding()
    */
   public String getEncoding() {
@@ -191,6 +241,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getEntries()
    */
   public List<FeedEntry> getEntries() {
@@ -198,6 +250,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getImage()
    */
   public Image getImage() {
@@ -205,6 +259,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getLanguage()
    */
   public String getLanguage() {
@@ -212,6 +268,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getLinks()
    */
   public List<Link> getLinks() {
@@ -219,6 +277,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getModule(java.lang.String)
    */
   public FeedExtension getModule(String uri) {
@@ -231,6 +291,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getModules()
    */
   public List<FeedExtension> getModules() {
@@ -238,6 +300,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getPublishedDate()
    */
   public Date getPublishedDate() {
@@ -245,6 +309,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getTitle()
    */
   public Content getTitle() {
@@ -252,6 +318,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#getUri()
    */
   public String getUri() {
@@ -259,6 +327,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setAuthors(java.util.List)
    */
   public void setAuthors(List<Person> authors) {
@@ -266,6 +336,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setCategories(java.util.List)
    */
   public void setCategories(List<Category> categories) {
@@ -273,6 +345,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setContributors(java.util.List)
    */
   public void setContributors(List<Person> contributors) {
@@ -280,6 +354,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setCopyright(java.lang.String)
    */
   public void setCopyright(String copyright) {
@@ -287,6 +363,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setDescription(java.lang.String)
    */
   public void setDescription(String description) {
@@ -294,6 +372,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setDescription(org.opencastproject.feed.api.Content)
    */
   public void setDescription(Content description) {
@@ -301,6 +381,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setEncoding(java.lang.String)
    */
   public void setEncoding(String encoding) {
@@ -308,6 +390,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setEntries(java.util.List)
    */
   public void setEntries(List<FeedEntry> entries) {
@@ -315,6 +399,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setImage(org.opencastproject.feed.api.Image)
    */
   public void setImage(Image image) {
@@ -322,6 +408,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setLanguage(java.lang.String)
    */
   public void setLanguage(String language) {
@@ -329,6 +417,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setLinks(java.util.List)
    */
   public void setLinks(List<Link> links) {
@@ -336,6 +426,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setModules(java.util.List)
    */
   public void setModules(List<FeedExtension> modules) {
@@ -343,6 +435,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setPublishedDate(java.util.Date)
    */
   public void setPublishedDate(Date publishedDate) {
@@ -350,6 +444,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setTitle(java.lang.String)
    */
   public void setTitle(String title) {
@@ -357,6 +453,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setTitle(org.opencastproject.feed.api.Content)
    */
   public void setTitle(Content title) {
@@ -364,6 +462,8 @@ public class FeedImpl implements Feed {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.Feed#setUri(java.lang.String)
    */
   public void setUri(String uri) {

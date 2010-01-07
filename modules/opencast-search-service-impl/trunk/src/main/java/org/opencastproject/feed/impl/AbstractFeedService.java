@@ -13,88 +13,94 @@
  *  permissions and limitations under the License.
  *
  */
-
 package org.opencastproject.feed.impl;
 
-import org.opencastproject.feed.api.Content;
-import org.opencastproject.feed.api.Enclosure;
-import org.opencastproject.feed.api.Feed;
-import org.opencastproject.feed.api.FeedEntry;
-import org.opencastproject.feed.api.FeedExtension;
-import org.opencastproject.feed.api.FeedGenerator;
-import org.opencastproject.feed.api.Content.Mode;
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.feed.api.Feed.Type;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.search.api.SearchResult;
-import org.opencastproject.search.api.SearchResultItem;
-import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
-import org.opencastproject.util.StringSupport;
+import org.opencastproject.search.api.SearchService;
 
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.MalformedURLException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Dictionary;
 
 /**
- * This class provides basic functionality for creating feeds and is used as the base implementation for the default
- * feed generators.
+ * Convenience implementation that is intended to serve as a base implementation for feed generator services. It handles
+ * service activation, reads a default set of properties (see below) and can be configured to track the opencast
+ * {@link SearchService} by using {@link #setSearchService(SearchService)}.
+ * <p>
+ * By using this implementation as the basis for feed services, only the two methods {@link #accept(String[])} and
+ * {@link #loadFeedData(Type, String[], int, int)} need to be implemented by subclasses.
+ * <p>
+ * In the {@link #activate(ComponentContext)} method, the following properties are being read from the component
+ * properties:
+ * <ul>
+ * <li><code>feed.uri</code> - the feed uri</li>
+ * <li><code>feed.selector</code> the pattern that is used to determine if the feed implementation wants to handle a
+ * request, e. g. the selector {{latest}} in {{http://<servername>/feeds/atom/0.3/latest}} maps the latest feed handler
+ * to urls containing that selector</li>
+ * <li><code>feed.name</code> - name of this feed</li>
+ * <li><code>feed.description</code> - an abstract of this feed</li>
+ * <li><code>feed.copyright</code> - the feed copyright note</li>
+ * <li><code>feed.home</code> - url of the feed's home page</li>
+ * <li><code>feed.cover</code> - url of the feed's cover image</li>
+ * <li><code>feed.entry</code> - template to create a link to a feed entry</li>
+ * <li><code>feed.rssflavor</code> - flavor identifying rss feed media package elements</li>
+ * <li><code>feed.atomflavors</code> - comma separated list of flavors identifying atom feed media package elements</li>
+ * </ul>
  */
-public abstract class AbstractFeedService implements FeedGenerator {
+public abstract class AbstractFeedService extends AbstractFeedGenerator {
 
-  /** A default value for limit */
-  protected static final int DEFAULT_LIMIT = 10;
+  /** Logging facility */
+  private static Logger log_ = LoggerFactory.getLogger(AbstractFeedService.class);
 
-  /** Unlimited */
-  protected static final int NO_LIMIT = Integer.MAX_VALUE;
+  /** Property key for the feed uri */
+  public static final String PROP_URI = "feed.uri";
 
-  /** A default value for offset */
-  protected static final int DEFAULT_OFFSET = 0;
+  /** Property key for the feed selector pattern */
+  public static final String PROP_SELECTOR = "feed.selector";
 
-  /** The date parser format **/
-  protected static final String DATE_FORMAT = "dd.MM.yyyy HH:mm:ss";
+  /** Property key for the feed name */
+  public static final String PROP_NAME = "feed.name";
 
-  /** The default feed encoding */
-  public static final String ENCODING = "UTF-8";
+  /** Property key for the feed description */
+  public static final String PROP_DESCRIPTION = "feed.description";
 
-  /** Link to the user interface */
-  protected String linkTemplate = null;
+  /** Property key for the feed copyright note */
+  public static final String PROP_COPYRIGHT = "feed.copyright";
 
-  /** The feed **/
-  protected Feed feed = null;
+  /** Property key for the feed home url */
+  public static final String PROP_HOME = "feed.home";
 
-  /** The feed homepage */
-  protected String feedHome = null;
+  /** Property key for the feed cover url */
+  public static final String PROP_COVER = "feed.cover";
 
-  /** Feed extensions */
-  protected List<FeedExtension> extensions = null;
+  /** Property key for the feed entry link template */
+  public static final String PROP_ENTRY = "feed.entry";
 
-  /** Default format for rss feeds */
-  protected MediaPackageElementFlavor rssTrackFlavor = null;
+  /** Property key for the feed rss media element flavor */
+  public static final String PROP_RSSFLAVOR = "feed.rssflavor";
 
-  /** the feed uri */
-  protected String identifier = null;
+  /** Property key for the feed atom media element flavor */
+  public static final String PROP_ATOMFLAVORS = "feed.atomflavors";
 
-  /** The feed name */
-  protected String name = null;
+  /** The selector used to match urls */
+  protected String selector = null;
 
-  /** Url to the cover image */
-  protected String cover = null;
+  /** The search service */
+  protected SearchService searchService = null;
 
-  /** Copyright notice */
-  protected String copyright = null;
-
-  /** The feed description */
-  protected String description = null;
-
-  /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(AbstractFeedService.class);
+  /**
+   * Creates a new abstract feed generator.
+   * <p>
+   * <b>Note:</b> Subclasses using this constructor need to set required member variables prior to calling
+   * {@link #createFeed(org.opencastproject.feed.api.Feed.Type, String[])} for the first time.
+   */
+  protected AbstractFeedService() {
+    super();
+  }
 
   /**
    * Creates a new abstract feed generator.
@@ -105,561 +111,118 @@ public abstract class AbstractFeedService implements FeedGenerator {
    *          the feed's home url
    * @param rssFlavor
    *          the flavor identifying rss tracks
+   * @param atomFlavor
+   *          the flavors identifying tracks to be included in atom feeds
    * @param entryLinkTemplate
    *          the link template
    */
   public AbstractFeedService(String uri, String feedHome, MediaPackageElementFlavor rssFlavor,
-          String entryLinkTemplate) {
-    this.identifier = uri;
-    this.feedHome = feedHome;
-    this.rssTrackFlavor = rssFlavor;
-    this.linkTemplate = entryLinkTemplate;
+          MediaPackageElementFlavor[] atomFlavors, String entryLinkTemplate) {
+    super(uri, feedHome, rssFlavor, atomFlavors, entryLinkTemplate);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.api.FeedGenerator#getIdentifier()
+   * @see org.opencastproject.feed.api.FeedGenerator#accept(java.lang.String[])
    */
-  public String getIdentifier() {
-    return identifier;
-  }
-
-  /**
-   * Sets the feed name.
-   * 
-   * @param name
-   *          the feed name
-   */
-  public void setName(String name) {
-    this.name = name;
+  public boolean accept(String[] query) {
+    if (searchService == null) {
+      log_.warn("{} denies to handle request for {} due to missing search service", this, query);
+      return false;
+    } else if (selector == null) {
+      log_.warn("{} denies to handle request for {} since no selector is defined", this);
+      return false;
+    } else if (query.length == 0) {
+      log_.warn("{} denies to handle unknown request", this);
+      return false;
+    } else if (!query[0].toLowerCase().equals(selector)) {
+      log_.warn("{} denies to handle request for {}", this, query);
+    }
+    log_.warn("{} accepts to handle request for {}", this, query);
+    return true;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.feed.api.FeedGenerator#getName()
+   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#loadFeedData(org.opencastproject.feed.api.Feed.Type,
+   *      java.lang.String[], int, int)
    */
-  public String getName() {
-    return name;
-  }
+  protected abstract SearchResult loadFeedData(Type type, String[] query, int limit, int offset);
 
   /**
-   * Sets the feed description.
+   * Callback used by the OSGi environment when this component is started. The method tries to read the following
+   * properties from the service's component context:
+   * <ul>
+   * <li><code>feed.uri</code> - the feed uri</li>
+   * <li><code>feed.selector</code> the pattern that is used to determine if the feed implementation wants to handle a
+   * request, e. g. the selector {{latest}} in {{http://<servername>/feeds/atom/0.3/latest}} maps the latest feed
+   * handler to urls containing that selector</li>
+   * <li><code>feed.name</code> - name of this feed</li>
+   * <li><code>feed.description</code> - an abstract of this feed</li>
+   * <li><code>feed.copyright</code> - the feed copyright note</li>
+   * <li><code>feed.home</code> - url of the feed's home page</li>
+   * <li><code>feed.cover</code> - url of the feed's cover image</li>
+   * <li><code>feed.entry</code> - template to create a link to a feed entry</li>
+   * <li><code>feed.rssflavor</code> - media package flavor identifying rss feed media package elements</li>
+   * <li><code>feed.atomflavors</code> - comma separated list of flavors identifying atom feed media package elements</li>
+   * </ul>
    * 
-   * @param description
-   *          the feed description
+   * @param context
+   *          the osgi component context
+   * @throws Exception
+   *           if starting the component is resulting in an error
    */
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.feed.api.FeedGenerator#getDescription()
-   */
-  public String getDescription() {
-    return description;
-  }
-
-  /**
-   * Sets the copyright notice.
-   * 
-   * @param copyright
-   *          the copyright notice
-   */
-  public void setCopyright(String copyright) {
-    this.copyright = copyright;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.feed.api.FeedGenerator#getCopyright()
-   */
-  @Override
-  public String getCopyright() {
-    return copyright;
-  }
-
-  /**
-   * Sets the url to the cover url.
-   * 
-   * @param cover
-   *          the cover url
-   */
-  public void setCover(String cover) {
-    this.cover = cover;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.feed.api.FeedGenerator#getCover()
-   */
-  @Override
-  public String getCover() {
-    return cover;
-  }
-
-  /**
-   * Loads and returns the feed data.
-   * 
-   * @param type
-   *          the requested feed type
-   * @param query
-   *          the query parameter
-   * @param limit
-   *          the number of entries
-   * @param offset
-   *          the starting entry
-   * @return the feed data
-   */
-  protected abstract SearchResult loadFeedData(Feed.Type type, String query[], int limit, int offset);
-
-  /**
-   * Creates a new feed.
-   * 
-   * @param uri
-   *          the feed identifier
-   * @param title
-   *          the feed title
-   * @param description
-   *          the feed description
-   * @param link
-   *          the link to the feed homepage
-   * @return the new feed
-   */
-  protected Feed createFeed(String uri, Content title, Content description, String link) {
-    return new FeedImpl(uri, title, description, link);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.feed.api.FeedGenerator#createFeed(org.opencastproject.feed.api.Feed.Type,
-   *      java.lang.String[])
-   */
-  public Feed createFeed(Feed.Type type, String[] query) {
-    SearchResult result = null;
-
-    // Have the concrete implementation load the feed data
-    try {
-      result = loadFeedData(type, query, DEFAULT_LIMIT, DEFAULT_OFFSET);
-    } catch (Exception e) {
-      log_.error("Cannot retrieve solr result for feed '" + type.toString() + "' with query '" + query + "'.");
-      return null;
-    }
-
-    // Create the feed
-    feed = createFeed(getIdentifier(), new ContentImpl(getName()), new ContentImpl(getDescription()), getFeedLink());
-    feed.setEncoding(ENCODING);
-
-    // TODO: Set feed icon and other metadata
-
-    // Check if a default format has been specified
-    // TODO: Parse flavor and set member variable rssTrackFlavor
-    // String rssFlavor = query.length > 1 ? query[query.length - 1] : null;
-
-    // Iterate over the feed data and create the entries
-    for (SearchResultItem resultItem : result.getItems()) {
-      try {
-        extensions.clear();
-        if (resultItem.getType().equals(SearchResultItemType.Series))
-          addSeries(type, query, resultItem);
-        else
-           addEpisode(type, query, resultItem);
-      } catch (Throwable t) {
-        log_.error("Error creating entry with id " + resultItem.getId() + " for feed " + this + ": " + t.getMessage(),
-                t);
-      }
-    }
-    return feed;
-  }
-
-  /**
-   * Adds series information to the feed.
-   * 
-   * @param type the feed type
-   * @param query the query that results in the feed
-   * @param resultItem the series item
-   * @return the feed
-   */
-  protected Feed addSeries(Feed.Type type, String[] query, SearchResultItem resultItem) {
-    Date d = resultItem.getDcCreated();
-
-    if (!StringSupport.isEmpty(resultItem.getDcTitle()))
-      feed.setTitle(resultItem.getDcTitle());
-
-    if (!StringSupport.isEmpty(resultItem.getDcAbstract()))
-      feed.setDescription(resultItem.getDcAbstract());
-
-    if (!StringSupport.isEmpty(resultItem.getDcCreator()))
-      feed.addAuthor(new PersonImpl(resultItem.getDcCreator()));
-
-    if (!StringSupport.isEmpty(resultItem.getDcContributor()))
-      feed.addContributor(new PersonImpl(resultItem.getDcContributor()));
-
-    if (!StringSupport.isEmpty(resultItem.getDcAccessRights()))
-      feed.setCopyright(resultItem.getDcAccessRights());
-
-    if (!StringSupport.isEmpty(resultItem.getDcLanguage()))
-      feed.setLanguage(resultItem.getDcLanguage());
-
-    feed.setUri(resultItem.getId());
-    feed.addLink(new LinkImpl(getLinkForEntry(type, resultItem)));
-
-    if (d != null)
-      feed.setPublishedDate(d);
-
-    // TODO: Finish cover support
-    // Set the cover image
-    // String coverUrl = null;
-    // DistributionFormat coverFormat = mgr.getMediaFormat(DistributionFormat.FEED_COVER_IMAGE);
-    // if (!StringSupport.isEmpty(resultItem.getCover()))
-    // coverUrl = resultItem.getCover();
-    // else if (coverFormat != null)
-    // coverUrl = MediaFormatSupport.getCoverImageUrl(coverFormat, resultItem);
-    // if (coverUrl != null)
-    // feed.setImage(new ImageImpl(coverUrl, resultItem.getDcTitle()));
-
-    return feed;
-  }
-  
-  /**
-   * Adds episode information to the feed.
-   * 
-   * @param type the feed type
-   * @param query the query that results in the feed
-   * @param resultItem the episodes item
-   * @return the feed
-   */
-  protected Feed addEpisode(Feed.Type type, String[] query, SearchResultItem resultItem) {
-    Date d = resultItem.getDcCreated();
-    String link = getLinkForEntry(type, resultItem);
-    String title = resultItem.getDcTitle();
-    FeedEntry entry = createEntry(title, link, resultItem.getId());
-
-    //
-    // Add extension modules (itunes, dc, doi)
-
-    // iTunes extension
-
-    ITunesFeedEntryExtension iTunesEntry = new ITunesFeedEntryExtension();
-    iTunesEntry.setDuration(resultItem.getDcExtent());
-    // Additional iTunes properties
-    iTunesEntry.setBlocked(false);
-    iTunesEntry.setExplicit(false);
-    // TODO: Add iTunes keywords and subtitles
-    // iTunesEntry.setKeywords(keywords);
-    // iTunesEntry.setSubtitle(subtitle);
-
-    // DC extension
-
-    DublinCoreExtension dcExtension = new DublinCoreExtension();
-    // Additional dublin core properties
-    dcExtension.setTitle(title);
-    dcExtension.setIdentifier(resultItem.getId());
-
-    // Set contributor
-    if (!StringSupport.isEmpty(resultItem.getDcContributor())) {
-      for (String contributor : resultItem.getDcContributor().split(";;")) {
-        entry.addContributor(new PersonImpl(contributor));
-        dcExtension.addContributor(contributor);
-      }
-    }
-
-    // Set creator
-    if (!StringSupport.isEmpty(resultItem.getDcCreator())) {
-      for (String creator : resultItem.getDcCreator().split(";;")) {
-        if (iTunesEntry.getAuthor() == null)
-          iTunesEntry.setAuthor(creator);
-        entry.addAuthor(new PersonImpl(creator));
-        dcExtension.addCreator(creator);
-      }
-    }
-
-    // Set publisher
-    if (!StringSupport.isEmpty(resultItem.getDcPublisher())) {
-      dcExtension.addPublisher(resultItem.getDcPublisher());
-    }
-
-    // Set rights
-    if (!StringSupport.isEmpty(resultItem.getDcAccessRights())) {
-      dcExtension.setRights(resultItem.getDcAccessRights());
-    }
-
-    // Set abstract
-    if (!StringSupport.isEmpty(resultItem.getDcAbstract())) {
-      String summary = resultItem.getDcAbstract();
-      entry.setDescription(new ContentImpl(summary));
-      iTunesEntry.setSummary(summary);
-      dcExtension.setDescription(summary);
-    }
-
-    // Set the language
-    if (!StringSupport.isEmpty(resultItem.getDcLanguage())) {
-      dcExtension.setLanguage(resultItem.getDcLanguage());
-    }
-
-    // Set the publication date
-    if (d != null) {
-      entry.setPublishedDate(d);
-      dcExtension.setDate(d);
-    }
-
-    // TODO: Finish dc support
-
-    // Set format
-    // if (!StringSupport.isEmpty(resultItem.getMediaType())) {
-    // dcExtension.setFormat(resultItem.getMediaType());
-    // }
-
-    // dcEntry.setCoverage(arg0);
-    // dcEntry.setRelation(arg0);
-    // dcEntry.setSource(arg0);
-    // dcEntry.setSubject(arg0);
-
-    // Add the enclosures
-    addEnclosures(entry, type, resultItem);
-
-    // Set the cover image
-    // String coverUrl = null;
-    // DistributionFormat coverFormat = mgr.getMediaFormat(DistributionFormat.FEED_COVER_IMAGE);
-    // if (!StringSupport.isEmpty(resultItem.getCover()))
-    // coverUrl = resultItem.getCover();
-    // else if (coverFormat != null)
-    // coverUrl = MediaFormatSupport.getCoverImageUrl(coverFormat, resultItem);
-    // if (coverUrl != null && coverFormat != null)
-    // setImage(entry, coverUrl);
-
-    extensions.add(iTunesEntry);
-    extensions.add(dcExtension);
-    entry.setExtensions(getExtensions(resultItem));
-
-    // Add entry to feed
-    feed.addEntry(entry);  
-  
-    return feed;
-  }
-
-  /**
-   * Returns a list of enabled extensions for the given result item.
-   * 
-   * @param item
-   *          the result item
-   * @return the feed extensions
-   */
-  protected List<FeedExtension> getExtensions(SearchResultItem item) {
-    return extensions;
-  }
-
-  /**
-   * Creates a new feed entry that can be added to the feed.
-   * 
-   * @param title
-   *          the entry title
-   * @param link
-   *          link to the orginal resource
-   * @param uri
-   *          the entry uri
-   * @return the feed
-   */
-  protected FeedEntry createEntry(String title, String link, String uri) {
-    return createEntry(title, null, link, uri);
-  }
-
-  /**
-   * Creates a new feed entry that can be added to the feed.
-   * 
-   * @param title
-   *          the entry title
-   * @param description
-   *          the entry description
-   * @param link
-   *          link to the orginal resource
-   * @param uri
-   *          the entry uri
-   * @return the feed
-   */
-  protected FeedEntry createEntry(String title, String description, String link, String uri) {
-    if (feed == null)
-      throw new IllegalStateException("Feed must be created prior to creating feed entries");
-    FeedEntryImpl entry = new FeedEntryImpl(feed, title, description, new LinkImpl(link), uri);
-    return entry;
-  }
-
-  /**
-   * Adds the image as a content element to the feed entry.
-   * 
-   * @param entry
-   *          the feed entry
-   * @param imageUrl
-   *          the image url
-   * @return the image
-   */
-  protected Content setImage(FeedEntry entry, String imageUrl) {
-    StringBuffer buf = new StringBuffer("<div xmlns=\"http://www.w3.org/1999/xhtml\">");
-    buf.append("<img src=\"");
-    buf.append(imageUrl);
-    buf.append("\" />");
-    buf.append("</div>");
-    Content image = new ContentImpl(buf.toString(), "application/xhtml+xml", Mode.Xml);
-    entry.addContent(image);
-    return image;
-  }
-
-  /**
-   * Adds the enclosures to the feed entry. In case of an rss feed, where only one enclosure is supported, either the
-   * one identified by <code>defaultFormat</code> or the first one in the format list is chosen.
-   * 
-   * @param entry
-   *          the feed entry
-   * @param resultItem
-   *          the result item from the solr index
-   * @param defaultFormat
-   *          default distribution format (rss feeds only)
-   * @return the list of formats that have been added
-   */
-  protected List<Track> addEnclosures(FeedEntry entry, Feed.Type type, SearchResultItem resultItem)
-          throws IllegalStateException {
-    MediaPackage mediaPackage = resultItem.getMediaPackage();
-    List<Track> enclosedFormats = new ArrayList<Track>();
-
-    // Assemble formats to add
-    Set<String> trackIds = getTracksForEntry(type, resultItem);
-
-    // Did we find any distribution formats?
-    if (trackIds.size() == 0) {
-      log_.warn("No media formats found for feed entry {}", entry);
-      return enclosedFormats;
-    }
-
-    // Create enclosures
-    for (String trackId : trackIds) {
-      Track track = mediaPackage.getTrack(trackId);
-      String trackUrl = null;
-      try {
-        trackUrl = track.getURI().toURL().toExternalForm();
-        String trackMimeType = track.getMimeType().toString();
-        long trackLength = track.getSize();
-        Enclosure enclosure = new EnclosureImpl(trackUrl, trackMimeType, trackLength);
-        entry.addEnclosure(enclosure);
-        enclosedFormats.add(track);
-      } catch (MalformedURLException e) {
-        log_.error("Error converting {} to string", trackUrl, e);
-      }
-    }
-
-    return enclosedFormats;
-  }
-
-  /**
-   * Returns the identifier of those tracks that are to be included as enclosures in the feed. Note that for a feed type
-   * of {@link Feed.Type#RSS}, the list must exactly contain one single entry.
-   * <p>
-   * This default implementation will include the track identified by the flavor as specified in the constructor for rss
-   * feeds and every distribution track for atom feeds.
-   * 
-   * @param type
-   *          the feed type
-   * @param resultItem
-   *          the result item
-   * @return the set of identifier
-   */
-  protected Set<String> getTracksForEntry(Feed.Type type, SearchResultItem resultItem) {
-    Set<String> s = new HashSet<String>();
-    MediaPackage mediaPackage = resultItem.getMediaPackage();
-
-    if (type.equals(Feed.Type.RSS)) {
-      if (rssTrackFlavor != null) {
-        Track[] tracks = mediaPackage.getTracks(rssTrackFlavor);
-        if (tracks.length == 1)
-          s.add(tracks[0].getIdentifier());
-        else if (tracks.length == 0)
-          log_.warn("No distributed media matching {} found for rss feed entry", rssTrackFlavor);
-        else {
-          log_.warn("More than one distributed media matching {} for rss feed entry found", rssTrackFlavor);
-        }
-      }
-    } else {
-      for (Track t : mediaPackage.getTracks()) {
-        // TODO: Select distribution tracks, not only derived ones
-        if (t.getReference() != null) {
-          s.add(t.getIdentifier());
-        }
-      }
-    }
-    return s;
-  }
-
-  /**
-   * Sets the url to the feed's homepage.
-   * 
-   * @param url
-   *          the homepage
-   */
-  public void setFeedLink(String url) {
-    this.feedHome = url;
-  }
-
-  /**
-   * Returns the url to the feed's homepage.
-   * 
-   * @return the feed home
-   */
-  public String getFeedLink() {
-    return feedHome;
-  }
-
-  /**
-   * Sets the entry's base url that will be used to form the episode link in the feeds. If the url contains a
-   * placeholder in the form <code>{0}</code>, it will be replaced by the episode id.
-   * 
-   * @param url
-   *          the url
-   */
-  public void setLinkTemplate(String url) {
-    linkTemplate = url;
-  }
-
-  /**
-   * Returns the link template to the default user interface.
-   * 
-   * @return the link to the ui
-   */
-  public String getLinkTemplate() {
-    return linkTemplate;
-  }
-
-  /**
-   * Generates a link for the current feed entry by using the entry identifier and the result of
-   * {@link #getLinkTemplate()} to create the url. Overwrite this method to provide your own way of generating links to
-   * feed entries.
-   * 
-   * @param type
-   *          the feed type
-   * @param solrResultItem
-   *          solr search result for this feed entry
-   * @return the link to the ui
-   */
-  protected String getLinkForEntry(Feed.Type type, SearchResultItem solrResultItem) {
+  public void activate(ComponentContext context) throws Exception {
+    Dictionary<?, ?> properties = context.getProperties();
+    uri = (String) properties.get(PROP_URI);
+    selector = (String) properties.get(PROP_SELECTOR);
+    name = (String) properties.get(PROP_NAME);
+    description = (String) properties.get(PROP_DESCRIPTION);
+    copyright = (String) properties.get(PROP_COPYRIGHT);
+    home = (String) properties.get(PROP_HOME);
+    cover = (String) properties.get(PROP_COVER);
+    linkTemplate = (String) properties.get(PROP_ENTRY);
+    String rssFlavor = (String) properties.get(PROP_RSSFLAVOR);
+    if (rssFlavor != null)
+      rssTrackFlavor = MediaPackageElementFlavor.parseFlavor(rssFlavor);
+    else
+      throw new IllegalStateException("Feed rss format (feed.rssflavor) must be configured");
+    String atomFlavors = (String) properties.get(PROP_ATOMFLAVORS);
+    if (atomFlavors != null) {
+      String[] flavors = atomFlavors.split(",; ");
+      for (String f : flavors)
+        addAtomTrackFlavor(MediaPackageElementFlavor.parseFlavor(f));
+    } else
+      throw new IllegalStateException("Feed atom formats (feed.atomflavors) must be configured");
+    if (uri == null)
+      throw new IllegalStateException("Feed uri (feed.uri) must be configured");
+    if (name == null)
+      throw new IllegalStateException("Feed name (feed.name) must be configured");
+    if (home == null)
+      throw new IllegalStateException("Feed url (feed.home) must be configured");
     if (linkTemplate == null)
-      throw new IllegalStateException("No template defined");
-    return MessageFormat.format(linkTemplate, solrResultItem.getId());
+      throw new IllegalStateException("Feed link template (feed.entry) must be configured");
   }
 
   /**
-   * {@inheritDoc}
+   * Sets the search service.
    * 
-   * @see java.lang.Object#toString()
+   * @param searchService
+   *          the search service
    */
-  @Override
-  public String toString() {
-    if (this.getName() != null)
-      return getName();
-    return super.toString();
+  public void setSearchService(SearchService searchService) {
+    this.searchService = searchService;
+  }
+
+  /**
+   * Returns the search service.
+   * 
+   * @return the search services
+   */
+  protected SearchService getSearchService() {
+    return searchService;
   }
 
 }
