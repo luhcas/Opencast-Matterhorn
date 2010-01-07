@@ -29,6 +29,7 @@ import javax.sql.DataSource;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.impl.SchedulerEventImpl;
+import org.opencastproject.scheduler.impl.SchedulerFilterImpl;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -364,7 +365,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       }
       if (filter.getOrderBy() != null) {
         if (where.length() == 0) where += " 1 ";
-        where += " ORDER BY EVENT."+filter.getOrderBy()+" "; 
+        where += " ORDER BY EVENT."+((SchedulerFilterImpl) filter).getOrderBySQL()+" "; 
       }
     }
     
@@ -468,6 +469,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       s.setLong(1, e.getStartdate().getTime());
       s.setLong(2, e.getEnddate().getTime());
       s.setString(3, e.getID());
+      s.executeUpdate();
       
       updateAttendees(e.getID(), e.getAttendees(), con);
       updateResources(e.getID(), e.getResources(), con);

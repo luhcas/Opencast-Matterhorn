@@ -61,7 +61,7 @@ public class SchedulerBuilder {
    *
    * @param   in - the input stream
    * @return  a SchedulerEventJaxImpl
-   * @thows   And exception if creation of the event fails.
+   * @throws   And exception if creation of the event fails.
    */
   public SchedulerEventJaxbImpl parseSchedulerEventJaxbImpl(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();

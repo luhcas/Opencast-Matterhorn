@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * TODO: Comment me!
+ * JaxB implementation of metadata fields in the Scheduler Event 
  *
  */
 @XmlType(name="metadata", namespace="http://scheduler.opencastproject.org")

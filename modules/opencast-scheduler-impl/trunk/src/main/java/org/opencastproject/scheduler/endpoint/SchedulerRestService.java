@@ -18,13 +18,15 @@ package org.opencastproject.scheduler.endpoint;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.scheduler.impl.SchedulerEventImpl;
-
+import org.opencastproject.util.UrlSupport;
+import org.osgi.service.component.ComponentContext;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.Date;
 
 import javax.ws.rs.FormParam;
@@ -35,14 +37,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 /**
- * REST ndpoint for Scheduler Service
+ * REST Endpoint for Scheduler Service
  */
 @Path("/")
 public class SchedulerRestService {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerRestService.class);
   private SchedulerService service;
+  
+  protected String docs = null;
+  protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
+  
   public void setService(SchedulerService service) {
     this.service = service;
   }
@@ -51,43 +61,83 @@ public class SchedulerRestService {
     this.service = null;
   }
   
+  public void activate(ComponentContext cc) {
+    // Get the configured server URL
+    if(cc == null) {
+      serverUrl = UrlSupport.DEFAULT_BASE_URL;
+    } else {
+      String ccServerUrl = cc.getBundleContext().getProperty("serverUrl");
+      logger.info("configured server url is {}", ccServerUrl);
+      if(ccServerUrl == null) {
+        serverUrl = UrlSupport.DEFAULT_BASE_URL;
+      } else {
+        serverUrl = ccServerUrl;
+      }
+    }
+
+    // Pre-load the documentation
+    String docsFromClassloader = null;
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/html/index.html");
+      docsFromClassloader = IOUtils.toString(in);
+      docsFromClassloader = docsFromClassloader.replaceAll("@SERVER_URL@", serverUrl + "/scheduler/rest");
+    } catch (IOException e) {
+      logger.error("failed to read documentation", e);
+      docsFromClassloader = "unable to load documentation for " + SchedulerRestService.class.getName();
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+    docs = docsFromClassloader;
+
+  }  
+  
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("getEvent")
-  public SchedulerEventJaxbImpl getEvent(@QueryParam("eventID") String eventID) {
+  public Response getEvent(@QueryParam("eventID") String eventID) {
     SchedulerEvent event = service.getEvent(eventID);
-    return new SchedulerEventJaxbImpl(event);
+    if (event == null) return Response.status(Status.BAD_REQUEST).build();
+    return Response.ok(new SchedulerEventJaxbImpl(event)).build();
   }
   
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("getDublinCoreMetadata")
-  public String getDublinCoreMetadata(@QueryParam("eventID") String eventID) {
-    return service.getDublinCoreMetadata(eventID);
+  public Response getDublinCoreMetadata(@QueryParam("eventID") String eventID) {
+    String result = service.getDublinCoreMetadata(eventID);
+    if (result == null) return Response.status(Status.BAD_REQUEST).build();
+    return Response.ok(result).build();
   }  
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("getCaptureAgentMetadata")
-  public String getCaptureAgentMetadata(@QueryParam("eventID") String eventID) {
-    return service.getCaptureAgentMetadata(eventID);
+  public Response getCaptureAgentMetadata(@QueryParam("eventID") String eventID) {
+    String result = service.getCaptureAgentMetadata(eventID);
+    if (result == null) return Response.status(Status.BAD_REQUEST).build();
+    return Response.ok(result).build();
   }    
   
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("addEvent")
-  public SchedulerEventJaxbImpl addEvent (@FormParam("event") SchedulerEventJaxbImpl e) {
+  public Response addEvent (@FormParam("event") SchedulerEventJaxbImpl e) {
+    if (e == null) {
+      logger.error("Event that should be added is null");
+      return Response.status(Status.BAD_REQUEST).build();
+    }
     SchedulerEvent i = e.getEvent();
     if(i == null){
       logger.info("Event was null.");
     }
     SchedulerEvent j = service.addEvent(i);
     logger.info("Adding event "+j.getID()+" to scheduler");
-    return new SchedulerEventJaxbImpl(j);
+    return Response.ok(new SchedulerEventJaxbImpl(j)).build();
   }
   
   @GET
-  @Produces(MediaType.TEXT_XML)
+  @Produces(MediaType.TEXT_PLAIN)
   @Path("removeEvent")
   public Response removeEvent (@QueryParam("eventID") String eventID) {
     return Response.ok(service.removeEvent(eventID)).build();
@@ -107,8 +157,31 @@ public class SchedulerRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("getEvents")
-  public SchedulerEventJaxbImpl [] getEvents (@FormParam("filter") SchedulerFilterJaxbImpl filter) {
-    SchedulerEvent [] events = service.getEvents(filter.getFilter());
+  public SchedulerEventJaxbImpl [] getEvents (@FormParam("filter") String filter) {
+    if (filter == null) {
+      logger.error("Filter is null");
+      return new SchedulerEventJaxbImpl [0];
+    }
+    logger.info("Filter: "+ filter);
+    SchedulerFilterJaxbImpl filterJaxB = null;
+    try {
+      JAXBContext jaxbContext = JAXBContext.newInstance(SchedulerFilterJaxbImpl.class);
+      logger.info("context created");
+      Unmarshaller m = jaxbContext.createUnmarshaller();
+      logger.info("unmarshaler ready");
+      filterJaxB =  (SchedulerFilterJaxbImpl) m.unmarshal(new StringReader(filter));      
+      logger.info("unmarshaler read");      
+    } catch (JAXBException e) {
+      logger.error(e.getMessage());
+      e.printStackTrace();
+    }      
+    if (filterJaxB == null) {
+      logger.error("FilterJaxB is null");
+      return new SchedulerEventJaxbImpl [0];
+    }
+    logger.info("Filter events with "+filterJaxB.getFilter());
+    SchedulerEvent [] events = service.getEvents(filterJaxB.getFilter());
+    if (events == null) return new SchedulerEventJaxbImpl [0];
     SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
     for (int i = 0; i < events.length; i++) jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
     return jaxbEvents;
@@ -116,7 +189,7 @@ public class SchedulerRestService {
   
   /**
    * Lists all events in the database, without any filter
-   * TODO only a stub for debugging, because there is no UI to schow these at the moment
+   * TODO only a stub for debugging, because there is no UI to show these at the moment
    * @return XML with all events 
    */
   @GET
@@ -125,7 +198,10 @@ public class SchedulerRestService {
   public SchedulerEventJaxbImpl [] getEvents () {
     SchedulerEvent [] events = service.getEvents(null);
     SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
-    for (int i = 0; i < events.length; i++) jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
+    for (int i = 0; i < events.length; i++) { 
+      jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
+      logger.info("JaxB version of event "+events[i]+ "created");
+    }
     return jaxbEvents;
   }  
   
@@ -146,14 +222,21 @@ public class SchedulerRestService {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("getCalendarForCaptureAgent")
-  public String getCalendarForCaptureAgent (@QueryParam("captureAgentID") String captureAgentID) {
-    return service.getCalendarForCaptureAgent(captureAgentID);
+  public Response getCalendarForCaptureAgent (@QueryParam("captureAgentID") String captureAgentID) {
+    String result = service.getCalendarForCaptureAgent(captureAgentID);
+    if (result == null) return Response.status(Status.BAD_REQUEST).build();
+    return Response.ok(result).build();
   }
   
+  /**
+   * returns the REST documentation
+   * @return the REST documentation, if available
+   */
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
+    if (docs == null) return "No documetation available.";
     return docs;
   }
   
@@ -187,22 +270,44 @@ public class SchedulerRestService {
     String answer = "demo-data inserted, ID="+event2.getID();
     return answer;
   }
-
-  protected final String docs;
   
-  public SchedulerRestService() {
-    String docsFromClassloader = null;
-    InputStream in = null;
-    try {
-      in = getClass().getResourceAsStream("/html/index.html");
-      docsFromClassloader = IOUtils.toString(in);
-    } catch (IOException e) {
-      logger.error("failed to read documentation", e);
-      docsFromClassloader = "unable to load documentation for " + SchedulerRestService.class.getName();
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-    docs = docsFromClassloader;
-  }
   
+/*    @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("getFilter")
+ public Response getFilter () {
+   SchedulerFilter filter = new SchedulerFilterImpl();
+   filter.setStart(new Date(System.currentTimeMillis()));
+   filter.setEnd(new Date(System.currentTimeMillis()+2222222));
+   filter.setOrderBy("time-desc");
+   filter.setAbstractFilter("text");
+   filter.setAttendeeFilter("attendee");
+   filter.setTitleFilter("title");
+   filter.setChannelIDFilter("1");
+   filter.setContributorFilter("contributor");
+   filter.setCreatorFilter("creator");
+   filter.setDeviceFilter("rekorder");
+   filter.setEventIDFilter("event-id");
+   filter.setLocationFilter("room");
+   filter.setResourceFilter("resource");
+   filter.setSeriesIDFilter("series");
+   SchedulerFilterJaxbImpl filterxml = new SchedulerFilterJaxbImpl(filter);
+   logger.info("Filter ready");
+   JAXBContext jaxbContext;
+   String result = "";
+  try {
+    jaxbContext = JAXBContext.newInstance(SchedulerFilterJaxbImpl.class);
+    logger.info("context created");
+    Marshaller m = jaxbContext.createMarshaller();
+    logger.info("marshaler ready");
+    StringWriter write = new StringWriter();
+    m.marshal(filterxml, write);
+    logger.info("MArshaler written");
+    result = write.toString();
+  } catch (JAXBException e) {
+    logger.error(e.getMessage());
+  }  
+   return Response.ok(result).build();
+ }
+*/  
 }

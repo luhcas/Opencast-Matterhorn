@@ -23,7 +23,7 @@ import javax.jws.WebResult;
 import javax.jws.WebService;
 
 /**
- *
+ * Interface for SOAP Webservice, currently not in use
  */
 @WebService()
 public interface SchedulerWebService {

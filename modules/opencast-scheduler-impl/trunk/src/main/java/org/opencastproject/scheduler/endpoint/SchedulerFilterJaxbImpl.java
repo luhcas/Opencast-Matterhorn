@@ -30,12 +30,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO: Comment me!
+ * JaxB Implementation of SchedulerFilter
  *
  */
 
-@XmlType(name="scheduler-filter", namespace="http://scheduler.opencastproject.org/")
-@XmlRootElement(name="scheduler-filter", namespace="http://scheduler.opencastproject.org/")
+@XmlType(name="SchedulerFilter", namespace="http://scheduler.opencastproject.org/")
+@XmlRootElement(name="SchedulerFilter", namespace="http://scheduler.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SchedulerFilterJaxbImpl {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerFilterJaxbImpl.class);
@@ -51,9 +51,9 @@ public class SchedulerFilterJaxbImpl {
   @XmlElement(name="abstract")
   String abstr;
   @XmlElement(name="startdate")
-  Date start;
+  long start;
   @XmlElement(name="enddate")
-  Date end;
+  long end;
   @XmlElement(name="contributor")
   String contributor;
   @XmlElement(name="series-id")
@@ -78,8 +78,8 @@ public class SchedulerFilterJaxbImpl {
     title = filter.getTitleFilter();
     creator = filter.getCreatorFilter();
     abstr = filter.getAbstractFilter();
-    start = filter.getStart();
-    end = filter.getEnd();
+    if (filter.getStart() != null) start = filter.getStart().getTime();
+    if (filter.getEnd() != null)end = filter.getEnd().getTime();
     contributor = filter.getContributorFilter();
     seriesID = filter.getSeriesIDFilter();
     channelID = filter.getChannelIDFilter();
@@ -87,27 +87,37 @@ public class SchedulerFilterJaxbImpl {
     attendee = filter.getAttendeeFilter();
     resource = filter.getResourceFilter();
     orderBy = filter.getOrderBy();
+    logger.info("Filter created");
   }
   
   @XmlTransient
   public SchedulerFilter getFilter() {
     SchedulerFilterImpl filter = new SchedulerFilterImpl();
-    filter.setEventIDFilter(eventID);
-    filter.setDeviceFilter(device);
-    filter.setTitleFilter(title);
-    filter.setCreatorFilter(creator);
-    filter.setAbstractFilter(abstr);
-    filter.setStart(start);
-    filter.setEnd(end);
-    filter.setContributorFilter(contributor);
-    filter.setSeriesIDFilter(seriesID);
-    filter.setChannelIDFilter(channelID);
-    filter.setLocationFilter(location);
-    filter.setAttendeeFilter(attendee);
-    filter.setResourceFilter(resource);
-    filter.setOrderBy(orderBy);
+    if (eventID != null) filter.setEventIDFilter(eventID);
+    if (device != null) filter.setDeviceFilter(device);
+    if (title != null) filter.setTitleFilter(title);
+    if (creator != null) filter.setCreatorFilter(creator);
+    if (abstr != null) filter.setAbstractFilter(abstr);
+    if (start > 0) filter.setStart(new Date (start));
+    if (end > start) filter.setEnd(new Date(end));
+    if (contributor != null) filter.setContributorFilter(contributor);
+    if (seriesID != null) filter.setSeriesIDFilter(seriesID);
+    if (channelID != null) filter.setChannelIDFilter(channelID);
+    if (channelID != null) filter.setLocationFilter(location);
+    if (attendee != null) filter.setAttendeeFilter(attendee);
+    if (resource != null) filter.setResourceFilter(resource);
+    if (orderBy != null) filter.setOrderBy(orderBy);
     return filter;
   }  
-  
+ 
+  /**
+   * valueOf function is called by JAXB to bind values. This function calls the ScheduleEvent factory.
+   *
+   *  @param    xml string representation of an event.
+   *  @return   instantiated event SchdeulerFilterJaxbImpl.
+   */
+  public static SchedulerFilterJaxbImpl valueOf(String xmlString) throws Exception {
+    return (SchedulerFilterJaxbImpl) SchedulerBuilder.getInstance().parseSchedulerFilterJaxbImpl(xmlString);
+  }
   
 }

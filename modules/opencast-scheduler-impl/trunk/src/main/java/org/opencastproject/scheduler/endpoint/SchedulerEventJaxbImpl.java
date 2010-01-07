@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO: Comment me!
+ * JaxB implementation of the SchedulerEvent
  *
  */
 @XmlType(name="SchedulerEvent", namespace="http://scheduler.opencastproject.org")

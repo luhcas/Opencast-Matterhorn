@@ -19,12 +19,16 @@ import java.util.Date;
 
 
 import org.opencastproject.scheduler.api.SchedulerFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * TODO: Comment me!
+ * Implementation of the SchedulerFilter interface
  *
  */
 public class SchedulerFilterImpl implements SchedulerFilter {
+  
+  private static final Logger logger = LoggerFactory.getLogger(SchedulerFilterImpl.class);
 
   String attendee;
   String resource;
@@ -40,6 +44,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
   String location;  
   String eventID;
   String orderBy;
+  String orderBySQL;
   
   public SchedulerFilterImpl () {
     
@@ -272,23 +277,51 @@ public class SchedulerFilterImpl implements SchedulerFilter {
   public String getOrderBy() {
     return orderBy;
   }
+  
+  public String getOrderBySQL() {
+    return orderBySQL;
+  }  
 
   /**
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setOrderBy(java.lang.String)
    */
   public boolean setOrderBy(String order) throws IllegalArgumentException {
+    if (order == null) {
+      logger.error ("Order is null");
+      return false;
+    }
     if (! (order.equalsIgnoreCase("title") || order.equalsIgnoreCase("creator") || order.equalsIgnoreCase("series") || 
         order.equalsIgnoreCase("time-asc") || order.equalsIgnoreCase("time-desc") || order.equalsIgnoreCase("contributor") || 
         order.equalsIgnoreCase("channel") || order.equalsIgnoreCase("location") || order.equalsIgnoreCase("device"))) 
           throw new IllegalArgumentException("No valid value for order: "+order);
     orderBy = order;
-    if (order.equals("series")) orderBy = "seriesid";
-    if (order.equals("device")) orderBy = "deviceid";
-    if (order.equals("channel")) orderBy = "channelid";
-    if (order.equals("time-asc")) orderBy = "startdate ASC";
-    if (order.equals("time-desc")) orderBy = "startdate DESC";
+    orderBySQL = order;
+    if (order.equals("series")) orderBySQL = "seriesid";
+    if (order.equals("device")) orderBySQL = "deviceid";
+    if (order.equals("channel")) orderBySQL = "channelid";
+    if (order.equals("time-asc")) orderBySQL = "startdate ASC";
+    if (order.equals("time-desc")) orderBySQL = "startdate DESC";
     return true;
+  }
+  
+  public String toString () {
+    String result = "SchedulerFilter = ";
+    if (attendee != null) result += "attendee pattern = "+attendee+", ";
+    if (resource != null) result += "resource pattern = "+resource+", ";
+    if (device != null) result += "device pattern = "+device+", ";
+    if (title != null) result += "title pattern = "+title+", ";
+    if (creator != null) result += "creator pattern = "+creator+", ";
+    if (abstr != null) result += "abstract pattern = "+abstr+", ";
+    if (contributor != null) result += "contributor pattern = "+contributor+", ";
+    if (seriesID != null) result += "seriesID = "+seriesID+", ";
+    if (channelID != null) result += "channelID pattern = "+channelID+", ";
+    if (location != null) result += "location pattern = "+location+", ";
+    if (eventID != null) result += "eventID = "+eventID+", ";
+    if (start != null) result += "start of period = "+start+", ";
+    if (end != null) result += "end of period = "+end+", ";
+    if (orderBy != null) result += "order by "+orderBy;
+    return result;
   }
 
 }
