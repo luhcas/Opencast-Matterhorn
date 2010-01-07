@@ -17,7 +17,6 @@ package org.opencastproject.scheduler.endpoint;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
-import org.opencastproject.scheduler.impl.SchedulerEventImpl;
 import org.opencastproject.util.UrlSupport;
 import org.osgi.service.component.ComponentContext;
 import org.apache.commons.io.IOUtils;
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.util.Date;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -189,7 +187,6 @@ public class SchedulerRestService {
   
   /**
    * Lists all events in the database, without any filter
-   * TODO only a stub for debugging, because there is no UI to show these at the moment
    * @return XML with all events 
    */
   @GET
@@ -240,74 +237,4 @@ public class SchedulerRestService {
     return docs;
   }
   
-  
-  /**
-   * TODO only for debugging. Checks if tables are present and creates a new event starting now.
-   * @return Status information 
-   */
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("info")
-  public String info() {
-    logger.debug("getting status info for scheduling service");
-    SchedulerEventImpl event = new SchedulerEventImpl();
-    event.setTitle("test-info");
-    event.setDevice("rec19");
-    event.addAttendee("rec19");
-    event.addAttendee("Ruediger Rolf");
-    event.addResource("vga");
-    event.addResource("audio");
-    event.setChannelID("1");
-    event.setCreator("Adam Hochman");
-    long time1 = System.currentTimeMillis()+11111111;
-    long time2 = time1 + 11111111 + 1111111;
-    Date date1 = new Date(time1);
-    Date date2 = new Date(time2);
-    logger.debug("Info times "+time1+" = "+date1.getTime()+", "+time2+" = "+ date2.getTime());
-    event.setStartdate(date1);
-    event.setEnddate(date2);
-    SchedulerEvent event2 = service.addEvent(event);
-    String answer = "demo-data inserted, ID="+event2.getID();
-    return answer;
-  }
-  
-  
-/*    @GET
-  @Produces(MediaType.TEXT_XML)
-  @Path("getFilter")
- public Response getFilter () {
-   SchedulerFilter filter = new SchedulerFilterImpl();
-   filter.setStart(new Date(System.currentTimeMillis()));
-   filter.setEnd(new Date(System.currentTimeMillis()+2222222));
-   filter.setOrderBy("time-desc");
-   filter.setAbstractFilter("text");
-   filter.setAttendeeFilter("attendee");
-   filter.setTitleFilter("title");
-   filter.setChannelIDFilter("1");
-   filter.setContributorFilter("contributor");
-   filter.setCreatorFilter("creator");
-   filter.setDeviceFilter("rekorder");
-   filter.setEventIDFilter("event-id");
-   filter.setLocationFilter("room");
-   filter.setResourceFilter("resource");
-   filter.setSeriesIDFilter("series");
-   SchedulerFilterJaxbImpl filterxml = new SchedulerFilterJaxbImpl(filter);
-   logger.info("Filter ready");
-   JAXBContext jaxbContext;
-   String result = "";
-  try {
-    jaxbContext = JAXBContext.newInstance(SchedulerFilterJaxbImpl.class);
-    logger.info("context created");
-    Marshaller m = jaxbContext.createMarshaller();
-    logger.info("marshaler ready");
-    StringWriter write = new StringWriter();
-    m.marshal(filterxml, write);
-    logger.info("MArshaler written");
-    result = write.toString();
-  } catch (JAXBException e) {
-    logger.error(e.getMessage());
-  }  
-   return Response.ok(result).build();
- }
-*/  
 }

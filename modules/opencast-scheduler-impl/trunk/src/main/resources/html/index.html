@@ -399,23 +399,24 @@
          <td>
            <form action="getEvents" method="POST">
              SchedulerFilter XML<br/>
-             <textarea rows="20" cols="80" id="filter" name="filter">        
-<ns1:SchedulerFilter xmlns:ns1="http://scheduler.opencastproject.org">
-  <event-id>exact id to search for</event-id>
-  <device-id>pattern to search for</device-id>
-  <title>pattern to search for</title>
-  <creator>pattern to search for</creator>
-  <abstract>A short description of the content of the lecture</abstract>
-  <startdate>begin of the period of valid events</startdate>
-  <enddate>end of the period of valid events</enddate>
-  <contributor>pattern to search for</contributor>
-  <series-id>ID of the series which will be filtered</series-id>
-  <channel-id>ID of the channel that will be filtered</channel-id>
-  <location>pattern to search for</location>
-  <resources>pattern to search for</resources>
-  <attendee>ID of recorder to search for</attendee>
-  <order-by>title|creator|series|time-asc|time-desc|contributor|channel|location|device</order-by>
-</ns1:SchedulerFilter>
+             <textarea rows="20" cols="80" id="filter" name="filter">    
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:SchedulerFilter xmlns:ns2="http://scheduler.opencastproject.org/">
+<event-id>exact id to search for</event-id>
+<device>pattern to search for</device>
+<title>pattern to search for</title>
+<creator>pattern to search for</creator>
+<abstract>A short description of the content of the lecture</abstract>
+<startdate>begin of the period of valid events</startdate>
+<enddate>end of the period of valid events</enddate>
+<contributor>pattern to search for</contributor>
+<series-id>ID of the series which will be filtered</series-id>
+<channel-id>ID of the channel that will be filtered</channel-id>
+<location>pattern to search for</location>
+<attendee>pattern to search for</attendee>
+<resource>pattern to search for</resource>
+<order-by>title|creator|series|time-asc|time-desc|contributor|channel|location|device</order-by>
+</ns2:SchedulerFilter>
              </textarea><br/>
      		 <input type="submit" value="get filtered Events"/>
           </form>        

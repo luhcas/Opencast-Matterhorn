@@ -352,7 +352,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       }      
       if (filter.getEventIDFilter() != null) {
         if (where.length() > 0) where += " AND ";
-        where = " eventid = '"+filter.getEventIDFilter()+"' ";
+        where = " EVENT.eventid = '"+filter.getEventIDFilter()+"' ";
       }
      
       if (filter.getStart() != null) {
