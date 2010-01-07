@@ -42,12 +42,18 @@ public class Activator implements BundleActivator {
     this.rootDir = rootDir;
   }
 
+  private String getConfigProperty(String config, String defaultValue) {
+    return config == null ? defaultValue : config;
+  }
   /**
    * {@inheritDoc}
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
   public void start(BundleContext context) throws Exception {
-    cp = JdbcConnectionPool.create("jdbc:h2:" + rootDir + ";LOCK_MODE=1;MVCC=TRUE", "sa", "sa");
+    String jdbcUrl = getConfigProperty(context.getProperty("jdbcUrl"), "jdbc:h2:" + rootDir + ";LOCK_MODE=1;MVCC=TRUE");
+    String jdbcUser = getConfigProperty(context.getProperty("jdbcUser"), "sa");
+    String jdbcPass = getConfigProperty(context.getProperty("jdbcPass"), "sa");
+    cp = JdbcConnectionPool.create(jdbcUrl, jdbcUser, jdbcPass);
     Dictionary<String, String> props = new Hashtable<String, String>();
     props.put("vendor", "h2");
     datasourceRegistration = context.registerService(DataSource.class.getName(), cp, props);
