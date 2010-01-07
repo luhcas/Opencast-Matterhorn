@@ -83,7 +83,7 @@ public class WorkspaceImpl implements Workspace, ManagedService {
       if(urlString.startsWith(baseUrl)) {
         String pathExtraInfo = urlString.substring(baseUrl.length());
         File f = new File(baseFilesystemPath + pathExtraInfo);
-        if(f.exists()) {
+        if(f.exists() && f.isFile() && f.canRead()) {
           logger.debug("found local file {} for URL {}", f.getAbsolutePath(), urlString);
           return f;
         }
