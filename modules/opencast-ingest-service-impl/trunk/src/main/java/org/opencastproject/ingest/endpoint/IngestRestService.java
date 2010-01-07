@@ -93,6 +93,7 @@ public class IngestRestService {
       MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
       return Response.ok(mpt).build();
     } catch (Exception e) {
+      logger.warn(e.getMessage());
       return Response.serverError().status(400).build();
     }
   }
@@ -123,6 +124,7 @@ public class IngestRestService {
 
       return Response.ok(mpt).build();
     } catch (Exception e) {
+      logger.warn(e.getMessage());
       return Response.serverError().status(400).build();
     }
   }
@@ -139,6 +141,7 @@ public class IngestRestService {
       mpt = MediapackageType.fromXml(mp.toXml());
       return Response.ok(mpt).build();
     } catch (Exception e) {
+      logger.warn(e.getMessage());
       return Response.serverError().status(400).build();
     }
   }
@@ -156,6 +159,7 @@ public class IngestRestService {
       mpt = MediapackageType.fromXml(mp.toXml());
       return Response.ok(mpt).build();
     } catch (Exception e) {
+      logger.warn(e.getMessage());
       return Response.serverError().status(400).build();
     }
   }
@@ -172,6 +176,7 @@ public class IngestRestService {
       mpt = MediapackageType.fromXml(mp.toXml());
       return Response.ok(mpt).build();
     } catch (Exception e) {
+      logger.warn(e.getMessage());
       return Response.serverError().status(400).build();
     }
   }
@@ -192,7 +197,7 @@ public class IngestRestService {
       mpt = MediapackageType.fromXml(mp.toXml());
       return Response.ok(mpt).build();
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.warn(e.getMessage());
       return Response.serverError().status(400).build();
     }
   }
@@ -234,7 +239,7 @@ public class IngestRestService {
       }
       return Response.serverError().status(400).build();
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.warn(e.getMessage());
       return Response.serverError().status(400).build();
     }
   }
@@ -257,7 +262,7 @@ public class IngestRestService {
       }
       con.close();
     } catch (SQLException e) {
-      e.printStackTrace();
+      logger.warn(e.getMessage());
     }
     return Response.ok(obj.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
   }
@@ -291,7 +296,7 @@ public class IngestRestService {
       }
       con.close();
     } catch (SQLException e) {
-      e.printStackTrace();
+      logger.warn(e.getMessage());
     }
   }
 
@@ -318,6 +323,7 @@ public class IngestRestService {
       mpt = MediapackageType.fromXml(mp.toXml());
       return Response.ok(mpt).build();
     } catch (Exception e) {
+      logger.warn(e.getMessage());
       return Response.serverError().status(400).build();
     }
   }
@@ -334,6 +340,7 @@ public class IngestRestService {
       mpt = MediapackageType.fromXml(mp.toXml());
       return Response.ok(mpt).build();
     } catch (Exception e) {
+      logger.warn(e.getMessage());
       return Response.serverError().status(400).build();
     }
   }
@@ -364,6 +371,7 @@ public class IngestRestService {
       }
       return Response.serverError().status(400).build();
     } catch (Exception e) {
+      logger.warn(e.getMessage());
       return Response.serverError().status(400).build();
     }
   }
@@ -375,7 +383,7 @@ public class IngestRestService {
     try {
       service.addZippedMediaPackage(mp);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.warn(e.getMessage());
       return Response.serverError().status(400).build();
     }
     return Response.ok().build();
@@ -391,6 +399,7 @@ public class IngestRestService {
       mpt = MediapackageType.fromXml(mp.toXml());
       return Response.ok(mpt).build();
     } catch (Exception e) {
+      logger.warn(e.getMessage());
       return Response.serverError().status(400).build();
     }
   }
