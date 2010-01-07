@@ -21,13 +21,18 @@ import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.SearchResultImpl;
+import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Param.Type;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -52,21 +57,63 @@ public class SearchRestService {
   protected String docs;
   
   public SearchRestService() {
-    // Pre-load the documentation
-    String docsFromClassloader = null;
-    InputStream in = null;
-    try {
-      in = getClass().getResourceAsStream("/html/index.html");
-      docsFromClassloader = IOUtils.toString(in);
-    } catch (IOException e) {
-      logger.error("failed to read documentation", e);
-      docsFromClassloader = "unable to load documentation for " + SearchRestService.class.getName();
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-    docs = docsFromClassloader;
+    this.docs = generateDocs();
+  }
+  
+  protected String generateDocs() {
+    DocRestData data = new DocRestData("Search", "Search Service", "/search/rest", new String[] {"$Rev$"});
+    // episode
+    RestEndpoint episodeEndpoint = new RestEndpoint("episode", RestEndpoint.Method.GET, "/episode", "Search for episodes matching the query parameters");
+    episodeEndpoint.addFormat(new Format("xml", null, null));
+    episodeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results, expressed as xml"));
+    episodeEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The ID of the single episode to be returned, if it exists"));
+    episodeEndpoint.addOptionalParam(new Param("seriesId", Type.STRING, null, "All episodes in the series with this ID"));
+    episodeEndpoint.addOptionalParam(new Param("q", Type.STRING, null, "Any episode that matches this free-text query"));
+    episodeEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0", "The maximum number of items to return per page"));
+    episodeEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
+    episodeEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, episodeEndpoint);
+
+    // series
+    RestEndpoint seriesEndpoint = new RestEndpoint("series", RestEndpoint.Method.GET, "/series", "Search for series matching the query parameters");
+    seriesEndpoint.addFormat(new Format("xml", null, null));
+    seriesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results, expressed as xml"));
+    seriesEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The series ID. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
+    seriesEndpoint.addOptionalParam(new Param("q", Type.STRING, null, "Any series that matches this free-text query. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
+    seriesEndpoint.addOptionalParam(new Param("episodes", Type.BOOLEAN, null, "Whether to include this series episodes.  This can be used in combination with id or q"));
+    seriesEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0", "The maximum number of items to return per page"));
+    seriesEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
+    seriesEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, seriesEndpoint);
+
+    // add
+    RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.POST, "/add", "Adds a mediapackage to the search index");
+    addEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containing the search results"));
+    addEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(), "The media package to add to the search index"));
+    addEndpoint.addFormat(new Format("xml", null, null));
+    addEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, addEndpoint);    
+
+    return DocUtil.generate(data);
   }
 
+  protected String generateMediaPackage() {
+    return "<mediapackage start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n" +
+    "  <metadata>\n" +
+    "    <catalog id=\"catalog-1\" type=\"metadata/dublincore\">\n" +
+    "      <mimetype>text/xml</mimetype>\n" +
+    "      <url>http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/dublincore.xml</url>\n" +
+    "      <checksum type=\"md5\">2b8a52878c536e64e20e309b5d7c1070</checksum>\n" +
+    "    </catalog>\n" +
+    "    <catalog id=\"catalog-3\" type=\"metadata/mpeg-7\" ref=\"track:track-1\">\n" +
+    "      <mimetype>text/xml</mimetype>\n" +
+    "      <url>http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/mpeg7.xml</url>\n" +
+    "      <checksum type=\"md5\">2b8a52878c536e64e20e309b5d7c1070</checksum>\n" +
+    "    </catalog>\n" +
+    "  </metadata>\n" +
+    "</mediapackage>";
+  }
+  
   @GET
   @Path("docs")
   public String getDocs() {
@@ -86,7 +133,7 @@ public class SearchRestService {
 
   @POST
   @Path("remove")
-  public void delete(String mediaPackageId) throws SearchException {
+  public void delete(@QueryParam("id") String mediaPackageId) throws SearchException {
     searchService.delete(mediaPackageId);
   }
 
@@ -100,12 +147,12 @@ public class SearchRestService {
           @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
     // If id is specified, do a search based on id
-    if(id != null) {
+    if(!StringUtils.isEmpty(id)) {
       return includeEpisodes ? (SearchResultImpl) searchService.getEpisodeAndSeriesById(id) :
         (SearchResultImpl) searchService.getSeriesById(id);
     }
     // If text is specified, do a free text search.  Otherwise, just return the most recent series
-    if(text == null) {
+    if(StringUtils.isEmpty(text)) {
       return (SearchResultImpl) searchService.getSeriesByDate(limit, offset);
     } else {
       return (SearchResultImpl) searchService.getSeriesByText(text, offset, limit);
@@ -122,18 +169,18 @@ public class SearchRestService {
           @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
     // Try searching by episode ID first
-    if(id != null) {
+    if(!StringUtils.isEmpty(id)) {
       logger.debug("Searching for episodes by episode ID");
       return (SearchResultImpl) searchService.getEpisodeById(id);
     }
     // Then try searching by series ID
-    if(seriesId != null) {
+    if(!StringUtils.isEmpty(seriesId)) {
       logger.debug("Searching for episodes by series ID");
       return (SearchResultImpl) searchService.getEpisodesBySeries(seriesId);
     }
     
     // If text is specified, do a free text search.  Otherwise, just return the most recent episodes
-    if(text == null) {
+    if(StringUtils.isEmpty(text)) {
       logger.debug("Searching for all episodes, ordered by date");
       return (SearchResultImpl) searchService.getEpisodesByDate(limit, offset);
     } else {
