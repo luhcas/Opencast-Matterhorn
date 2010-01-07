@@ -22,7 +22,14 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
+import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -45,7 +52,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,25 +102,160 @@ public class WorkflowRestService {
         serverUrl = ccServerUrl;
       }
     }
+    docs = generateDocs();
+  }
 
-    // Pre-load the documentation
-    String docsFromClassloader = null;
-    InputStream in = null;
-    try {
-      in = getClass().getResourceAsStream("/html/index.html");
-      docsFromClassloader = IOUtils.toString(in);
-      docsFromClassloader = docsFromClassloader.replaceAll("@SERVER_URL@", serverUrl + "/workflow/rest");
-      docsFromClassloader = docsFromClassloader.replaceAll("@SAMPLES_URL@", serverUrl + "/workflow/samples");
-    } catch (IOException e) {
-      logger.error("failed to read documentation", e);
-      docsFromClassloader = "unable to load documentation for " + WorkflowRestService.class.getName();
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-    docs = docsFromClassloader;
+  protected String generateDocs() {
+    DocRestData data = new DocRestData("Workflow", "Workflow Service", "/workflow/rest", new String[] {"$Rev$"});
+    // Workflow Definitions
+    RestEndpoint defsEndpoint = new RestEndpoint("defs", RestEndpoint.Method.GET, "/definitions.{format}", "Returns all available workflow definitions");
+    defsEndpoint.addFormat(new Format("xml", null, null));
+    defsEndpoint.addFormat(new Format("json", null, null));
+    defsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
+    defsEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results, xml or json"));
+    defsEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, defsEndpoint);
+    
+    // Workflow Instances
+    RestEndpoint instancesEndpoint = new RestEndpoint("instances", RestEndpoint.Method.GET, "/instances.{format}", "Returns workflow instances matching the query parameters");
+    instancesEndpoint.addFormat(new Format("xml", null, null));
+    instancesEndpoint.addFormat(new Format("json", null, null));
+    instancesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
+    instancesEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results, xml or json"));
+    instancesEndpoint.addOptionalParam(new Param("state", Type.STRING, "succeeded", "Limit the resulting workflow instances to those currently in this state"));
+    instancesEndpoint.addOptionalParam(new Param("q", Type.STRING, "climate", "Limit the resulting workflow instances to those with this string somewhere in its metadata catalogs"));
+    instancesEndpoint.addOptionalParam(new Param("count", Type.STRING, "20", "The number of results to return per page (max is 100)"));
+    instancesEndpoint.addOptionalParam(new Param("startPage", Type.STRING, "1", "The page of results to display"));
+    instancesEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, instancesEndpoint);
 
+    // Workflow Instance
+    RestEndpoint instanceEndpoint = new RestEndpoint("instance", RestEndpoint.Method.GET, "/instance/{id}.{format}", "Returns a single workflow instance");
+    instanceEndpoint.addFormat(new Format("xml", null, null));
+    instanceEndpoint.addFormat(new Format("json", null, null));
+    instanceEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
+    instanceEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow instance with this ID was not found"));
+    instanceEndpoint.addPathParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
+    instanceEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results, xml or json"));
+    instanceEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, instanceEndpoint);
+
+    // Start a new Workflow Instance
+    RestEndpoint startEndpoint = new RestEndpoint("start", RestEndpoint.Method.POST, "/start", "Start a new workflow instance");
+    startEndpoint.addFormat(new Format("xml", null, null));
+    startEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, workflow running or queued"));
+    startEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(), "The media package upon which to perform the workflow"));
+    startEndpoint.addRequiredParam(new Param("definition", Type.TEXT, generateWorkflowDefinition(), "The workflow definition"));
+    startEndpoint.addRequiredParam(new Param("properties", Type.TEXT, "encode=true\nflash.http=true\nyouTube=true\nitunes=false", "The properties to set for this workflow instance"));
+    startEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, startEndpoint);
+
+    // Stop a Workflow Instance
+    RestEndpoint stopEndpoint = new RestEndpoint("stop", RestEndpoint.Method.GET, "/stop/{id}", "Stop a running workflow instance (currently a get, but should probably be a POST or even DELETE?)");
+    stopEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, workflow stopped"));
+    stopEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow instance with this ID was not found"));
+    stopEndpoint.addPathParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
+    stopEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, stopEndpoint);
+
+    // Suspend a Workflow Instance
+    RestEndpoint suspendEndpoint = new RestEndpoint("suspend", RestEndpoint.Method.GET, "/suspend/{id}", "Suspends a running workflow instance (currently a get, but should probably be a POST)");
+    suspendEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, workflow suspended"));
+    suspendEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow instance with this ID was not found"));
+    suspendEndpoint.addPathParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
+    suspendEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, suspendEndpoint);
+
+    // Resume a Workflow Instance
+    RestEndpoint resumeEndpoint = new RestEndpoint("resume", RestEndpoint.Method.GET, "/resume/{id}", "Resumes a suspended workflow instance (currently a get, but should probably be a POST)");
+    resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, suspended workflow has now resumed"));
+    resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A suspended workflow instance with this ID was not found"));
+    resumeEndpoint.addPathParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
+    resumeEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, resumeEndpoint);
+
+    return DocUtil.generate(data);
   }
   
+  protected String generateMediaPackage() {
+    String samplesUrl = serverUrl + "/workflow/samples";
+    
+    return "<mediapackage start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n" +
+    "  <media>\n" +
+    "    <track id=\"track-1\" type=\"track/presentation\">\n" +
+    "      <mimetype>audio/mp3</mimetype>\n" +
+    "      <url>" + samplesUrl + "/aonly.mp3</url>\n" +
+    "      <checksum type=\"md5\">950f9fa49caa8f1c5bbc36892f6fd062</checksum>\n" +
+    "      <duration>10472</duration>\n" +
+    "      <audio>\n" +
+    "        <channels>2</channels>\n" +
+    "        <bitdepth>0</bitdepth>\n" +
+    "        <bitrate>128004.0</bitrate>\n" +
+    "        <samplingrate>44100</samplingrate>\n" +
+    "      </audio>\n" +
+    "    </track>\n" +
+    "    <track id=\"track-2\" type=\"track/presentation\">\n" +
+    "      <mimetype>video/quicktime</mimetype>\n" +
+    "      <url>" + samplesUrl + "/vonly.mov</url>\n" +
+    "      <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n" +
+    "      <duration>14546</duration>\n" +
+    "      <video>\n" +
+    "        <device type=\"UFG03\" version=\"30112007\" vendor=\"Unigraf\" />\n" +
+    "        <encoder type=\"H.264\" version=\"7.4\" vendor=\"Apple Inc\" />\n" +
+    "        <resolution>640x480</resolution>\n" +
+    "        <scanType type=\"progressive\" />\n" +
+    "        <bitrate>540520</bitrate>\n" +
+    "        <frameRate>2</frameRate>\n" +
+    "      </video>\n" +
+    "    </track>\n" +
+    "  </media>\n" +
+    "  <metadata>\n" +
+    "    <catalog id=\"catalog-1\" type=\"metadata/dublincore\">\n" +
+    "      <mimetype>text/xml</mimetype>\n" +
+    "      <url>" + samplesUrl + "/dc-1.xml</url>\n" +
+    "      <checksum type=\"md5\">20e466615251074e127a1627fd0dae3e</checksum>\n" +
+    "    </catalog>\n" +
+    "  </metadata>\n" +
+    "</mediapackage>";
+  }
+  
+  protected String generateWorkflowDefinition() {
+    return "<workflow-definition>\n" +
+    "  <title>Transcode and Distribute</title>\n" +
+    "  <description>\n" +
+    "    A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,\n" +
+    "    along with their associated metadata, to the distribution channels.\n" +
+    "  </description>\n" +
+    "  <operations>\n" +
+    "    <operation\n" +
+    "      name=\"compose\"\n" +
+    "      fail-on-error=\"true\"\n" +
+    "      exception-handler-workflow=\"Default Error Handler\"\n" +
+    "      description=\"Encode media\">\n" +
+    "      <configurations>\n" +
+    "        <configuration key=\"audio-source-track-id\">track-1</configuration>\n" +
+    "        <configuration key=\"video-source-track-id\">track-2</configuration>\n" +
+    "        <configuration key=\"target-track-id\">track-3</configuration>\n" +
+    "      </configurations>\n" +
+    "    </operation>\n" +
+    "    <operation\n" +
+    "      name=\"distribute\"\n" +
+    "      fail-on-error=\"true\"\n" +
+    "      exception-handler-workflow=\"Default Error Handler\"\n" +
+    "      description=\"Distribute media to distribution channels\">\n" +
+    "      <configurations>\n" +
+    "        <configuration key=\"source-track-id\">track-3</configuration>\n" +
+    "      </configurations>\n" +
+    "    </operation>\n" +
+    "    <operation\n" +
+    "      name=\"publish\"\n" +
+    "      fail-on-error=\"true\"\n" +
+    "      exception-handler-workflow=\"Default Error Handler\"\n" +
+    "      description=\"Add metadata to the search index\" />\n" +
+    "  </operations>\n" +
+    "</workflow-definition>";
+  }
+
   @SuppressWarnings("unchecked")
   @GET
   @Path("definitions.{output:.*}")
