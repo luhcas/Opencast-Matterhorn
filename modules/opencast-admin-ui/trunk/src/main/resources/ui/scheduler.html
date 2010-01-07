@@ -57,7 +57,7 @@
           "enddate":      new EventFieldGroup(new Array('durationHour', 'durationMin'), true, getDuration, setDuration, checkDuration), //returns a date incremented by duration.
           "resources":    new EventFieldGroup(new Array('audio','audioVideo','audioScreen', 'audioVideoScreen'), true),
           "attendees":    new EventField('attendees', true),
-          "device-id":    new EventField('attendees')
+          "device":       new EventField('attendees')
         };
         
         //Form Manager, handles saving, loading, de/serialization, and validation
