@@ -15,40 +15,59 @@
  */
 package org.opencastproject.capture.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.Dictionary;
-import java.util.Properties;
-
-import org.apache.commons.io.FileUtils;
-import org.gstreamer.Bus;
-import org.gstreamer.GstObject;
-import org.gstreamer.Pipeline;
-import org.gstreamer.State;
-import org.gstreamer.event.EOSEvent;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.StateService;
-import org.opencastproject.capture.impl.jobs.IngestJob;
-import org.opencastproject.capture.impl.jobs.StopCaptureJob;
 import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
+import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.util.ZipUtil;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.gstreamer.Bus;
+import org.gstreamer.GstObject;
+import org.gstreamer.Pipeline;
+import org.gstreamer.State;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
-import org.osgi.service.component.ComponentContext;
-import org.quartz.CronExpression;
-import org.quartz.CronTrigger;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLConnection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.Vector;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 
 /**
@@ -58,44 +77,31 @@ import org.slf4j.LoggerFactory;
 public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
-  private static final long default_capture_length = 1 * 60 * 60 * 1000; //1 Hour
+  // TODO: move outside
+  //private static final long default_capture_length = 1 * 60 * 60 * 1000; //1 Hour
 
+  /** The agent's pipeline **/
   private Pipeline pipe = null;
-  private ConfigurationManager config = ConfigurationManager.getInstance();
+
+  /** Keeps the recordings which have not been succesfully ingested yet **/
+  HashMap<String, RecordingImpl> pendingRecordings = new HashMap<String,RecordingImpl>();
 
   /** The agent's current state.  Used for logging */
-  private String agent_state = null;
+  private String agentState = null;
   /** A pointer to the current capture directory.  Note that this should be null except for when we are actually capturing */
-  private File current_capture_dir = null;
+  //private File currentCaptureDir = null;
   /** The properties object for the current capture.  NOTE THAT THIS WILL BE NULL IF THE AGENT IS NOT CURRENTLY CAPTURING. */
-  private Properties current_capture_properties = null;
-  /** A pointer to the state service.  This is where all of the recording state information should be kept. */
-  private StateService state_service = null;
-  /** The scheduler which is used to schedule stopCapture calls */
-  private Scheduler captureScheduler = null;
+  //private Properties currentCaptureProps = null;
 
-  /**
-   * Called when the bundle is activated.
-   * @param cc The component context
-   */
-  public void activate(ComponentContext cc) {
+  /** A pointer to the state service.  This is where all of the recording state information should be kept. */
+  private StateService stateService = null;
+  
+  /** Indicates the ID of the recording currently being recorded **/
+  private String currentRecID = null;
+
+  public CaptureAgentImpl() {
     logger.info("Starting CaptureAgentImpl.");
     setAgentState(AgentState.IDLE);
-    try {
-      //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
-      Properties captureProperties = new Properties();
-      captureProperties.load(getClass().getClassLoader().getResourceAsStream("config/capture_scheduler.properties"));
-      StdSchedulerFactory sched_fact = new StdSchedulerFactory(captureProperties);
-      //Create and start the capture scheduler
-      captureScheduler = sched_fact.getScheduler();
-      if (!captureScheduler.isStarted()) {
-        captureScheduler.start();
-      }
-    } catch (SchedulerException e) {
-      throw new RuntimeException("Internal error in capture scheduler, unable to start.", e);
-    } catch (IOException e) {
-      throw new RuntimeException("IOException, unable to load Quartz properties file for capture scheduling.");
-    }
   }
 
   /**
@@ -103,7 +109,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * @return The service this agent pushes its state to.
    */
   public StateService getStateService() {
-    return state_service;
+    return stateService;
   }
 
   /**
@@ -111,24 +117,25 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * @param service The service to push the state information to
    */
   public void setStateService(StateService service) {
-    state_service = service;
-    setAgentState(agent_state);
+    stateService = service;
+    setAgentState(agentState);
   }
 
   /**
    * Unsets the state service which this capture agent should push its state to.
    */
   public void unsetStateService() {
-    state_service = null;
+    stateService = null;
   }
-  
+
 
   /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.recorder.api.CaptureAgent#startCapture()
    */
-  public boolean startCapture() {
+  @Override
+  public String startCapture() {
 
     logger.info("Starting capture using default values for MediaPackage and properties.");
 
@@ -138,10 +145,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     } catch (org.opencastproject.util.ConfigurationException e) {
       logger.error("Wrong configuration for the default media package: {}.", e.getMessage());
-      return false;
+      return null;
     } catch (MediaPackageException e) {
       logger.error("Media Package exception: {}.", e.getMessage());
-      return false;
+      return null;
     }
 
     return startCapture(pack, null);
@@ -152,10 +159,11 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * 
    * @see org.opencastproject.recorder.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage)
    */
-  public boolean startCapture(MediaPackage mediaPackage) {
+  @Override
+  public String startCapture(MediaPackage mediaPackage) {
 
     logger.info("Starting capture using default values for the capture properties and a passed in media package.");
-    
+
     return startCapture(mediaPackage, null);
 
   }
@@ -165,7 +173,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * 
    * @see org.opencastproject.recorder.api.CaptureAgent#startCapture(java.util.HashMap)
    */
-  public boolean startCapture(Properties properties) {
+  @Override
+  public String startCapture(Properties properties) {
     logger.info("Starting capture using a passed in properties and default media package.");
 
     // Creates default MediaPackage
@@ -174,10 +183,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     } catch (org.opencastproject.util.ConfigurationException e) {
       logger.error("Wrong configuration for the default media package: {}.", e.getMessage());
-      return false;
+      return null;
     } catch (MediaPackageException e) {
       logger.error("Media Package exception: {}.", e.getMessage());
-      return false;
+      return null;
     }
 
     return startCapture(pack, properties);
@@ -190,73 +199,48 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    *      org.opencastproject.recorder.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage,
    *      HashMap properties)
    */
-  public boolean startCapture(MediaPackage mediaPackage, Properties properties) {
+  @Override
+  public String startCapture(MediaPackage mediaPackage, Properties properties) {
 
-    if (current_capture_dir != null || !agent_state.equals(AgentState.IDLE)) {
-      logger.warn("Unable to start capture, a different capture is still in progress in {}.", current_capture_dir.getAbsolutePath());
-      return false;
+    if (currentRecID != null || !agentState.equals(AgentState.IDLE)) {
+      logger.warn("Unable to start capture, a different capture is still in progress in {}.",
+              pendingRecordings.get(currentRecID).getDir().getAbsolutePath());
+      return null;
     } else {
       setAgentState(AgentState.CAPTURING);
     }
+    
+    // Creates a new recording object, checking if it was correctly initialized
+    RecordingImpl newRec = new RecordingImpl(mediaPackage, properties);
+    if (newRec.getRecordingID() == null) {
+      logger.error("Couldn't create a valid recording ID");
+      setAgentState(AgentState.IDLE);
+      return null;
+    }
+
+    // Checks there is no duplicate ID
+    String recordingID = newRec.getRecordingID();
+
+    if (pendingRecordings.containsKey(recordingID)) {
+      logger.error("There is already a recording with ID {}", recordingID);
+      setAgentState(AgentState.IDLE);
+      setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+      return null;
+    } else {
+      pendingRecordings.put(recordingID, newRec);
+      currentRecID = recordingID;
+    }
+
 
     logger.info("Initializing devices for capture.");
 
-    // merges properties without overwriting the system's configuration
-    Properties merged = config.merge(properties, false);
 
-    String recordingID = null;
-
-    //Figure out where captureDir lives
-    if (merged.containsKey(CaptureParameters.RECORDING_ROOT_URL)) {
-      current_capture_dir = new File(merged.getProperty(CaptureParameters.RECORDING_ROOT_URL));
-      if (merged.containsKey(CaptureParameters.RECORDING_ID)) {
-        recordingID = merged.getProperty(CaptureParameters.RECORDING_ID);
-      } else {
-        //In this case they've set the root URL, but not the recording ID.  Get the id from that url instead then.
-        logger.warn("{} was set, but not {}.", CaptureParameters.RECORDING_ROOT_URL, CaptureParameters.RECORDING_ID);
-        String[] pathAry = merged.getProperty(CaptureParameters.RECORDING_ROOT_URL).split(File.separator);
-        recordingID = pathAry[pathAry.length-1];
-        merged.put(CaptureParameters.RECORDING_ID, recordingID);
-      }
-    } else {
-      //If there is a recording ID use it, otherwise it's unscheduled so just grab a timestamp
-      if (merged.containsKey(CaptureParameters.RECORDING_ID)) {
-        recordingID = merged.getProperty(CaptureParameters.RECORDING_ID);
-        current_capture_dir = new File(merged.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), recordingID);
-      } else {
-        //Unscheduled capture, use a timestamp value instead
-        recordingID = "Unscheduled-" + System.currentTimeMillis();
-        merged.setProperty(CaptureParameters.RECORDING_ID, recordingID);
-        current_capture_dir = new File(merged.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), recordingID);
-      }
-      merged.put(CaptureParameters.RECORDING_ROOT_URL, current_capture_dir.getAbsolutePath());
-    }
-
-    //Setup the root capture dir, also make sure that it exists.
-    if (!current_capture_dir.exists()) {
-      try {
-        FileUtils.forceMkdir(current_capture_dir);
-      } catch (IOException e) {
-        logger.error("IOException creating required directory {}.", current_capture_dir.toString());
-        setAgentState(AgentState.IDLE);
-        setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-        return false;
-      }
-      //Should have been created.  Let's make sure of that.
-      if (!current_capture_dir.exists()) {
-        logger.error("Unable to start capture, could not create required directory {}.", current_capture_dir.toString());
-        setAgentState(AgentState.IDLE);
-        setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-        return false;
-      }
-    }
-
-    pipe = PipelineFactory.create(merged);
+    pipe = PipelineFactory.create(newRec.getProperties());
 
     if (pipe == null) {
-      logger.error("Capture could not start, pipeline was null!");
+      logger.error("Capture {} could not start, pipeline was null!", recordingID);
       setAgentState(AgentState.IDLE);
-      return false;
+      return null;
     }
 
     Bus bus = pipe.getBus();
@@ -280,65 +264,14 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       }
     });
 
-    current_capture_properties = merged;
+    pipe.play();
 
-    CronExpression end = null;
-    if (current_capture_properties.containsKey(CaptureParameters.RECORDING_END)) {
-      try {
-        end = new CronExpression(current_capture_properties.getProperty(CaptureParameters.RECORDING_END));
-      } catch (ParseException e) {
-        logger.error("Invalid end time for capture {}, skipping startup!", recordingID);
-        setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-        setAgentState(AgentState.IDLE);
-        return false;
-      }
-    } else {
-      try {
-        Date date = new Date(System.currentTimeMillis() + default_capture_length);
-        StringBuilder sb = new StringBuilder();
-        //TODO:  Remove the deprecated calls here.
-        sb.append(date.getSeconds() + " ");
-        sb.append(date.getMinutes() + " ");
-        sb.append(date.getHours() + " ");
-        sb.append(date.getDate() + " ");
-        sb.append(date.getMonth() + 1 + " "); //Note:  Java numbers months from 0-11, Quartz uses 1-12.  Sigh.
-        sb.append("? ");
-        end = new CronExpression(sb.toString());
-      } catch (ParseException e) {
-        logger.error("Parsing exception in default length fallback code.  This is very bad.");
-        setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-        setAgentState(AgentState.IDLE);
-        return false;
-      }
-    }
-    JobDetail job = new JobDetail("STOP-" + recordingID, Scheduler.DEFAULT_GROUP, StopCaptureJob.class);
-    job.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
-
-    CronTrigger trig = new CronTrigger();
-    trig.setName(recordingID);
-    trig.setCronExpression(end);
-
-    try {
-      captureScheduler.scheduleJob(job, trig);
-    } catch (SchedulerException e) {
-      logger.error("Unable to schedule stopCapture for {}, skipping capture: {}.", recordingID, e.toString());
-      e.printStackTrace();
-      setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-      setAgentState(AgentState.IDLE);
-      return false;
-    }
-    
-//    pipe.play();
-
-    // It **SEEMS** the state changes are immediate (for the test i've done so far)
     while (pipe.getState() != State.PLAYING);
     logger.info("{} started.", pipe.getName());
-    //Gst.main();
-    //Gst.deinit();
 
     setRecordingState(recordingID, RecordingState.CAPTURING);
-    setAgentState(AgentState.CAPTURING);
-    return true;
+    //setAgentState(AgentState.CAPTURING);
+    return recordingID;
   }
 
   /**
@@ -352,33 +285,44 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return false;
     }
 
-    File stopFlag = new File(current_capture_dir, "capture.stopped");
+    if (currentRecID == null) { 
+      logger.warn("There is no currentRecID assigned, but the Pipeline is not null!!!");
+      pipe.stop();
+      pipe = null;
+      setAgentState(AgentState.IDLE);
+      return false;
+    }
+
+    RecordingImpl theRec = pendingRecordings.get(currentRecID);
+    File stopFlag = new File(theRec.getDir(), "capture.stopped");
 
     //Take the properties out of the class level variable so that we can start capturing again immediately without worrying about overwriting them.
-    Properties cur = current_capture_properties;
-    current_capture_properties = null;
+    //Properties cur = currentCaptureProps;
+    //currentCaptureProps = null;
+    currentRecID = null;
 
     //Update the states of everything.
-    String recordingID = cur.getProperty(CaptureParameters.RECORDING_ID);
-    setRecordingState(recordingID, RecordingState.CAPTURE_FINISHED);
+    //String recordingID = cur.getProperty(CaptureParameters.RECORDING_ID);
+    setRecordingState(theRec.getRecordingID(), RecordingState.CAPTURE_FINISHED);
     setAgentState(AgentState.IDLE);
-    current_capture_dir = null;
+    //currentCaptureDir = null;
 
     try {
       // Sending End Of Stream event to the Pipeline so its components stop appropriately
-      pipe.sendEvent(new EOSEvent());
+      //pipe.sendEvent(new EOSEvent());
       //while (pipe.getState() != State.NULL);
-      pipe.setState(State.NULL);
+      //pipe.setState(State.NULL);
+      pipe.stop();
 
-     // Gst.deinit();
+      // Gst.deinit();
 
       stopFlag.createNewFile();
     } catch (IOException e) {
-      setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
+      setRecordingState(theRec.getRecordingID(), RecordingState.UPLOAD_ERROR);
       logger.error("IOException: Could not create \"capture.stopped\" file: {}.", e.getMessage());
-      //TODO:  Is this capture.stopped file required for ingest to work?  Then it should die here rather than trying to build the manifest.
+      return false; 
     }
-
+    /*
     try {
       IngestJob.scheduleJob(cur, state_service);
     } catch (IOException e) {
@@ -390,7 +334,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
       return false;
     }
-
+     */
     return true;
   }
 
@@ -398,15 +342,276 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.CaptureAgent#stopCapture()
    */
+  @Override
   public boolean stopCapture(String recordingID) {
-    if (current_capture_properties != null) {
-      String current_id = current_capture_properties.getProperty(CaptureParameters.RECORDING_ID); 
-      if (recordingID.equals(current_id)) {
+    if (currentRecID != null) {
+      //String current_id = currentCaptureProps.getProperty(CaptureParameters.RECORDING_ID); 
+      if (recordingID.equals(currentRecID)) {
         return stopCapture();
       }
     }
     return false;
   }
+
+  /**
+   * Generates the manifest.xml file from the files specified in the properties
+   * @return A status boolean 
+   */
+  public boolean createManifest(String recID) {
+
+    RecordingImpl recording = pendingRecordings.get(recID);    
+    if (recording == null) {
+      logger.error("[createManifest] Recording {} not found!", recID);
+      return false;
+    } else
+      logger.debug("Generating manifest for recording {}", recID);
+
+    String[] friendlyNames = recording.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES).split(",");
+    Document metaFile = null;
+    
+    // Includes the tracks in the MediaPackage
+    try {
+      MediaPackageElementBuilder elemBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+      MediaPackageElementFlavor flavor = null; 
+
+      // Adds the files present in the Properties
+      for (String name : friendlyNames) {
+        name = name.trim();
+
+        if (name == "")
+          continue;
+
+        // TODO: This should be modified to allow a more flexible way of detecting the track flavour.
+        // Suggestions: a dedicated class or a/several field(s) in the properties indicating what type of track is each
+        if (name.equals("PRESENTER") || name.equals("AUDIO"))
+          flavor = MediaPackageElements.PRESENTER_TRACK;
+        else if (name.equals("SCREEN"))
+          flavor = MediaPackageElements.PRESENTATION_TRACK;
+        
+        String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
+        File outputFile = new File(recording.getDir(), recording.getProperty(outputProperty));
+
+        // Adds the file to the MediaPackage
+        if (outputFile.exists())
+          recording.getMediaPackage().add(elemBuilder.elementFromURI(new URI(outputFile.getName()),
+                  MediaPackageElement.Type.Track,
+                  flavor));
+        else 
+          logger.warn ("Required file {} not found", outputFile.getName());
+      } 
+
+      // TODO: Attach files outside this class, before calling startCapture()
+      // Adds the rest of the files (in case some attachment was left there by the scheduler)
+      /* File[] files = captureDir.listFiles();
+      for (File item : files)
+        // Discards the "capture.stopped" file and the files in the properties --they have already been processed
+        // Also checks the file exists
+        if (item.exists() && (!props.contains(item.getName().trim())) && (!item.getName().equals("capture.stopped")))
+          pkg.add(new URI(item.getName()));*/
+    } catch (UnsupportedElementException e) {
+      logger.error("Unsupported Element Exception: {}.", e.getMessage());
+      return false;
+    } catch (URISyntaxException e) {
+      logger.error("URI Exception: {}.", e.getMessage());
+      return false;
+    }
+    
+    /*// Create a metadata catalog with some info
+    // TODO: Should this be moved out to its own method?
+    try {
+      // Create the document to hold the metadata
+      metaFile = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+      
+      // Keep the root node of the document
+      Element root = metaFile.createElement("agent-metadata");
+      
+      // Inserts the agent name node
+      Element agentName = metaFile.createElement("agent-name");
+      // FIXME: Where do we get the Capture Agent name?
+      agentName.setTextContent("Change Me");
+      root.appendChild(agentName);
+      
+      // Inserts the "mappings" node
+      Node mappings = metaFile.createElement("mappings");
+      root.appendChild(mappings);
+      
+      // Inserts the friendly names and the mappings
+      for (String fName : friendlyNames) {
+        //// Friendly name
+        Element friendlyName = metaFile.createElement("friendly-name");
+        friendlyName.setTextContent(fName);
+        mappings.appendChild(friendlyName);
+        //// Mapping
+        Element mapping = metaFile.createElement("mapping");
+        mapping.setAttribute("friendly-name", fName);
+        Element input = metaFile.createElement("input");
+        String inputDevice = recording.getProperty(
+                CaptureParameters.CAPTURE_DEVICE_PREFIX +
+                fName +
+                CaptureParameters.CAPTURE_DEVICE_SOURCE
+                );
+        input.setTextContent(inputDevice);
+        Element flavor = metaFile.createElement("flavor");
+        // TODO: This should be changed according with the solution adopted for the "TODO" in line 449
+        if (fName.equals("PRESENTER") || fName.equals("AUDIO"))
+          flavor.setTextContent(MediaPackageElements.PRESENTER_TRACK.toString());
+        else if (fName.equals("SCREEN"))
+          flavor.setTextContent(MediaPackageElements.PRESENTATION_TRACK.toString());
+        
+        mapping.appendChild(input);
+        mapping.appendChild(flavor);
+        mappings.appendChild(mapping);
+      }
+      
+      // Inserts the zipName
+      Element zNameElement = metaFile.createElement("zip-name");
+      zNameElement.setTextContent(recording.getZipName());
+      root.appendChild(zNameElement);
+      
+      // Adds this document to the MediaPackage
+      recording.getMediaPackage().add(new URI(recording.getAgentCatalogName()));
+      
+    } catch (ParserConfigurationException e) {
+      logger.error("Parser Exception when creating an XML Document: {}", e.getMessage());
+      return false;
+    } catch (UnsupportedElementException e) {
+      logger.error("The agent metadata file seems not to be supported by the MediaPackage implementation: {}", e.getMessage());
+      return false;
+    } catch (URISyntaxException e) {
+      logger.error("Incorrect URI for the agent metadata file: {}. Cause: {}", recording.getAgentCatalogName(), e.getMessage());
+      return false;
+    }*/
+    
+    // Serialize the metadata file and the MediaPackage
+    try {
+      // Gets the manifest.xml as a Document object
+      Document doc = recording.getMediaPackage().toXml();
+
+      // Defines a transformer to convert the object in a xml file
+      Transformer transformer = TransformerFactory.newInstance().newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+      // Initializes StreamResult with File object to save to file
+      File manifestFile = new File(recording.getDir(), recording.getManifestName());
+      StreamResult stResult = new StreamResult(new FileOutputStream(manifestFile));
+      DOMSource source = new DOMSource(doc);
+      transformer.transform(source, stResult);
+
+      // Closes the stream to make sure all the content is written to the file
+      stResult.getOutputStream().close();
+      
+      // TODO: Descomentar
+      /*// Serializes the metadata catalog
+      stResult = new StreamResult(new FileOutputStream(new File(recording.getDir(), recording.getAgentCatalogName())));
+      source = new DOMSource(metaFile);
+      transformer.transform(source, stResult);
+
+      // Closes the stream to make sure all the content is written to the file
+      stResult.getOutputStream().close();*/
+      
+      // Stores the File reference to the MediaPackage in the corresponding recording
+      recording.setManifest(manifestFile);
+
+    } catch (MediaPackageException e) {
+      logger.error("MediaPackage Exception: {}.", e.getMessage());
+      return false;
+    } catch (TransformerException e) {
+      logger.error("Transformer Exception: {}.", e.getMessage());
+      return false;
+    } catch (IOException e) {
+      logger.error("I/O Exception: {}.", e.getMessage());
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Compresses the files contained in the output directory
+   * @param ZIP_NAME - The name of the zip file created
+   * @return A File reference to the file zip created
+   */
+  public File zipFiles(String recID) {
+
+    RecordingImpl recording = pendingRecordings.get(recID);
+
+    if (recording == null) {
+      logger.error("[createManifest] Recording {} not found!", recID);
+      return null;
+    }
+
+    Iterable<MediaPackageElement> mpElements = recording.getMediaPackage().elements();
+    Vector<File> filesToZip = new Vector<File>();
+    
+    // Adds the manifest first
+    filesToZip.add(recording.getManifest());
+    
+    for (MediaPackageElement item : mpElements) {
+      File tmpFile = new File(recording.getDir(), item.getURI().toString());
+      // TODO: Is this really a warning or should we fail completely and return an error?
+      if (!tmpFile.exists())
+        logger.warn("Required file {} doesn't exist!", tmpFile.getName());
+      filesToZip.add(tmpFile);
+    }
+    
+    logger.info("Zipping {} files:", filesToZip.size());
+    for (File f : filesToZip)
+      logger.info("--> {}", f.getName());
+    
+    return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), recording.getDir().getAbsolutePath() + File.separator + recording.getZipName());
+  }
+
+  
+  /**
+   * Sends a file to the REST ingestion service
+   * @param url : The service URL
+   * @param fileDesc : The descriptor for the media package
+   */
+  public int ingest(String recID) {
+    
+    RecordingImpl recording = pendingRecordings.get(recID);
+    
+    if (recording == null) {
+      logger.error("[createManifest] Recording {} not found!", recID);
+      return -1;
+    }
+
+    String url = recording.getProperty(CaptureParameters.INGEST_ENDPOINT_URL);
+    //File baseDir = recording.getDir();
+
+    HttpClient client = new DefaultHttpClient();
+    HttpPost postMethod = new HttpPost(url);
+    int retValue = -1;
+
+    File fileDesc = new File(recording.getDir(), "media.zip");
+
+    try {
+      // Sets the file as the body of the request
+      FileEntity myFileEntity = new FileEntity(fileDesc, URLConnection.getFileNameMap().getContentTypeFor(fileDesc.getName()));
+
+      logger.warn("Sending the file " + fileDesc.getAbsolutePath() + " with a size of "+ fileDesc.length());
+
+      postMethod.setEntity(myFileEntity);
+
+      // Send the file
+      HttpResponse response = client.execute(postMethod);
+
+      retValue = response.getStatusLine().getStatusCode();
+
+      //singleton.setRecordingState(recordingID, RecordingState.UPLOAD_FINISHED);
+    } catch (ClientProtocolException e) {
+      logger.error("Failed to submit the data: {}.", e.getMessage());
+      //singleton.setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
+    } catch (IOException e) {
+      logger.error("I/O Exception: {}.", e.getMessage());
+      //singleton.setRecordingState(recordingID, RecordingState.UPLOAD_ERROR);
+    } finally {
+      client.getConnectionManager().shutdown();
+      //setAgentState(AgentState.IDLE);
+    }
+
+    return retValue;
+  } 
 
   /**
    * Sets the machine's current encoding status
@@ -415,9 +620,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * @see org.opencastproject.capture.api.AgentState
    */
   private void setAgentState(String state) {
-    agent_state = state;
-    if (state_service != null) {
-      state_service.setAgentState(agent_state);
+    agentState = state;
+    if (stateService != null) {
+      stateService.setAgentState(agentState);
     } else {
       logger.warn("State service for capture agent is null, unable to push updates to remote server!");
     }
@@ -428,7 +633,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * @see org.opencastproject.capture.api.CaptureAgent#getAgentState()
    */
   public String getAgentState() {
-    return agent_state;
+    return agentState;
   }
 
   /**
@@ -436,15 +641,25 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * @param recordingID The ID of the recording to update
    * @param state The state to update the recording to
    */
+  // TODO: Move this to the Recording class
   private void setRecordingState(String recordingID, String state) {
-    if (state_service != null) {
-      state_service.setRecordingState(recordingID, state);
+    if (stateService != null) {
+      stateService.setRecordingState(recordingID, state);
     } else {
       logger.warn("State service for capture agent is null, unable to push updates to remote server!");
     }
   }
 
+  /**
+   * @param recID
+   * @return A Recording with ID recID, or null if it doesn't exists
+   */
+  public RecordingImpl getRecording(String recID) {
+    return pendingRecordings.get(recID);
+  }
+
   public void updated(Dictionary props) throws ConfigurationException {
     // Update any configuration properties here
   }
+
 }

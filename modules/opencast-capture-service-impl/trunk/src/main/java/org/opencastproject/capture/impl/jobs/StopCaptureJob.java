@@ -15,21 +15,20 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.opencastproject.capture.impl.CaptureAgentImpl;
+import org.opencastproject.capture.impl.SchedulerImpl;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.opencastproject.capture.impl.CaptureParameters;
 import org.quartz.Job;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Date;
 
 /**
  * The class responsible for stopping a capture.
@@ -37,32 +36,47 @@ import org.slf4j.LoggerFactory;
 public class StopCaptureJob implements Job {
   
   private static final Logger logger = LoggerFactory.getLogger(StopCaptureJob.class);
-
+  
+  // TODO: Move these constants into some common interface such as 'JobParameters'
+  /** Constant used to define the key for the recording ID which is pulled out of the execution context */
+  public static final String RECORDING_ID = "recording_id";
+  
   /**
    * Stops the capture.
    * {@inheritDoc}
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-
-    logger.error("Stopcapturejob firing");
-    //Figure out where we're sending the data
-    //TODO:  Should this be hardcoded, or grabbed from some config?
-    HttpPost remoteServer = new HttpPost("http://localhost:8080/capture/rest/stopCapture");
-    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-
-    String recordingID = ctx.getMergedJobDataMap().getString(CaptureParameters.RECORDING_ID);
-
-    //Note that config must be the same as the name in the endpoint!
-    formParams.add(new BasicNameValuePair("recordingID", recordingID));
     
-    //Send the data
+    logger.info ("Initiating stopCaptureJob");
+    
     try {
-      remoteServer.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
-      HttpClient client = new DefaultHttpClient();
-      client.execute(remoteServer);
+      // Extract the Capture Agent to stop the capture ASAP
+      CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(SchedulerImpl.CAPTURE_AGENT);
+      ca.stopCapture();
+      
+      // Extract the recording ID
+      String recordingID = ctx.getMergedJobDataMap().getString(RECORDING_ID);
+      
+      // Create job and trigger
+      JobDetail job = new JobDetail("SerializeJob", Scheduler.DEFAULT_GROUP, SerializeJob.class);
+      // TODO: Should we need a cron trigger in case the serialization fails? 
+      // Or do we assume that is an unrecoverable error?
+      SimpleTrigger trigger = new SimpleTrigger("SerializeJobTrigger", Scheduler.DEFAULT_GROUP, new Date());
+      trigger.getJobDataMap().put(RECORDING_ID, recordingID);
+      trigger.getJobDataMap().put(SchedulerImpl.CAPTURE_AGENT, ca);
+
+      //Schedule the serializeJob
+      ctx.getScheduler().scheduleJob(job, trigger);
+      
+      logger.info("stopCaptureJob complete");
+      
+    } catch (SchedulerException e) {
+      logger.error("Couldn't schedule task: {}", e.getMessage());
+      e.printStackTrace();
     } catch (Exception e) {
-      logger.error("Unable to stop capture: {}.", e.getMessage());
+      logger.error("Unexpected exception: {}", e.getMessage());
+      e.printStackTrace();
     }
   }
 

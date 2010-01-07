@@ -53,7 +53,7 @@ public class CaptureRestService {
   @Produces(MediaType.TEXT_PLAIN)
   @Path("startCapture")
   public Response startCapture() {
-    boolean out;
+    String out;
     try {
       out = service.startCapture();
       return Response.ok("Start Capture OK. OUT: " + out).build();
@@ -73,7 +73,7 @@ public class CaptureRestService {
       logger.error("Unable to parse configuration string into valid capture config.  Continuing with default settings.");
     }
 
-    boolean out;
+    String out;
     try {
       out = service.startCapture(configuration);
       return Response.ok("Start Capture OK. OUT: " + out).build();

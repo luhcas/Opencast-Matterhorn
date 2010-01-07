@@ -15,6 +15,7 @@
  */
 package org.opencastproject.capture.endpoint;
 
+
 import org.opencastproject.media.mediapackage.MediaPackage;
 
 import java.util.Properties;
@@ -31,19 +32,19 @@ import javax.jws.WebService;
 public interface CaptureWebService {
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public boolean startCapture();
+  public String startCapture();
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public boolean startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage);
+  public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage);
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public boolean startCapture(@WebParam(name = "configuration") Properties configuration);
+  public String startCapture(@WebParam(name = "configuration") Properties configuration);
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public boolean startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage,
+  public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage,
           @WebParam(name = "configuration") Properties configuration);
   
   @WebMethod()

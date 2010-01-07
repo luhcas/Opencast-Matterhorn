@@ -18,8 +18,8 @@ package org.opencastproject.capture.endpoint;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.media.mediapackage.MediaPackage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
@@ -33,7 +33,7 @@ import javax.jws.WebService;
  */
 @WebService()
 public class CaptureWebServiceImpl implements CaptureWebService {
-  private static final Logger logger = LoggerFactory.getLogger(CaptureWebServiceImpl.class);
+  //private static final Logger logger = LoggerFactory.getLogger(CaptureWebServiceImpl.class);
 
   private CaptureAgent service;
 
@@ -47,31 +47,34 @@ public class CaptureWebServiceImpl implements CaptureWebService {
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public boolean startCapture() {
+  @Override
+  public String startCapture() {
     return service.startCapture();
   }
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public boolean startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage) {
+  public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage) {
     return service.startCapture(mediaPackage);
   }
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public boolean startCapture(@WebParam(name = "configuration") Properties configuration) {
+  @Override
+  public String startCapture(@WebParam(name = "configuration") Properties configuration) {
     return service.startCapture(configuration);
   }
 
   @WebMethod()
   @WebResult(name = "recorder-info")
-  public boolean startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage,
+  public String startCapture(@WebParam(name = "media-package") MediaPackage mediaPackage,
           @WebParam(name = "configuration") Properties configuration) {
     return service.startCapture(mediaPackage, configuration);
   }
   
   @WebMethod()
   @WebResult(name = "recorder-info")
+  @Override
   public boolean stopCapture() {
     return service.stopCapture();
   }

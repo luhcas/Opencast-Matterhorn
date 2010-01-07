@@ -15,34 +15,44 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import org.opencastproject.capture.impl.CaptureAgentImpl;
+import org.opencastproject.capture.impl.CaptureParameters;
+import org.opencastproject.capture.impl.SchedulerImpl;
+import org.opencastproject.media.mediapackage.MediaPackage;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.quartz.Job;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Properties;
 
 /**
  * The class responsible for starting a capture.
  */
 public class StartCaptureJob implements Job {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(StartCaptureJob.class);
 
+  // TODO: Move these constants into some common interface such as 'JobParameters'  
   /** Constant used to define the key for the properties object which is pulled out of the execution context */
   public static final String CAPTURE_PROPS = "capture_props";
-  
+
+  /** Constant used to define the key for the media package object which is pulled out of the execution context */
+  public static final String MEDIA_PACKAGE = "media_package";
+
+  /** Constant used to define the key for the Dublic Core catalog which is pulled out of the execution context */
+  // TODO: necessary????
+  //public static final String DUBLIN_CORE = "dublin_core";
+
   /**
    * Starts the capture itself.
    * {@inheritDoc}
@@ -50,31 +60,109 @@ public class StartCaptureJob implements Job {
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
 
-    //Figure out where we're sending the data
-    //TODO:  Should this be hardcoded, or grabbed from some config?
-    HttpPost remoteServer = new HttpPost("http://localhost:8080/capture/rest/startCapture");
-    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+    CaptureAgentImpl ca = null;
+    MediaPackage mp = null;
+    Properties props = null;
 
-    Properties p = (Properties) ctx.getMergedJobDataMap().get(CAPTURE_PROPS);
+    //// Extracts the necessary parameters for calling startCapture()
+    // The capture agent
+    ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(SchedulerImpl.CAPTURE_AGENT);
+    // The MediaPackage
+    mp = (MediaPackage)ctx.getMergedJobDataMap().get(MEDIA_PACKAGE);
+    // The capture Properties
+    props = (Properties)ctx.getMergedJobDataMap().get(CAPTURE_PROPS);
 
-    ByteArrayOutputStream contents = new ByteArrayOutputStream();
-    try {
-      p.store(contents, "");
-    } catch (IOException e) {
-      logger.error("Unable to store properties for trasport to REST endpoint: {}.", e.getMessage());
+    if (ca == null) {
+      logger.error("No capture agent provided! Capture Interrupted");
+      return;
     }
 
-    //Note that config must be the same as the name in the endpoint!
-    formParams.add(new BasicNameValuePair("config", contents.toString()));
-    
-    //Send the data
+    // TODO: Considering ONLY the case where we have both parameters. Should we create default MPkg. and/or Properties otherwise?
+    if (props == null || mp == null) {
+      logger.error("Insufficient parameters provided. startCapture() needs Properties and a MediaPackage to proceed");
+      return;
+    }
+
     try {
-      remoteServer.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
-      HttpClient client = new DefaultHttpClient();
-      client.execute(remoteServer);
+
+      // Get the stopCaptureJob scheduling ready in case something happens, so we don't need to stop the capture afterwards
+      Date time2Stop = DateFormat.getDateInstance().parse(props.getProperty(CaptureParameters.RECORDING_END));
+
+      JobDetail job = new JobDetail("StopCapture", Scheduler.DEFAULT_GROUP, StopCaptureJob.class);
+      SimpleTrigger trigger = new SimpleTrigger("StopCaptureTrigger", Scheduler.DEFAULT_GROUP, time2Stop);
+
+      trigger.getJobDataMap().put(SchedulerImpl.CAPTURE_AGENT, ca);
+
+      // Actually does the service
+      String recordingID = ca.startCapture(mp, props);
+
+      // Stores the recordingID so that it can be passed from one job to the other
+      trigger.getJobDataMap().put(StopCaptureJob.RECORDING_ID, recordingID);
+
+      // Schedules the stop event
+      ctx.getScheduler().scheduleJob(job, trigger);
+      logger.info("stopCapture scheduled");
+
+    } catch (SchedulerException e) {
+      logger.error("Couldn't schedule task: {}", e.getMessage());
+      //e.printStackTrace();
+    } catch (ParseException e) {
+      logger.error("Invalid time for stopping capture: {}. Aborting.\n{}", props.get(CaptureParameters.RECORDING_END), e.getMessage());
+      //e.printStackTrace();
     } catch (Exception e) {
-      logger.error("Unable to start capture: {}.", e.getMessage());
+      logger.error("Unexpected exception: {}\nJob may have not been executed", e.getMessage());
+      e.printStackTrace();
     }
   }
+
+  //This code was taken out from CaptureAgentImpl and should belong here.
+  //It does basically the same functionality than this job
+  //TODO: Verify that everything which is done below is also implemented above and delete this comment
+  
+  /*    CronExpression end = null;
+  if (current_capture_properties.containsKey(CaptureParameters.RECORDING_END)) {
+    try {
+      end = new CronExpression(current_capture_properties.getProperty(CaptureParameters.RECORDING_END));
+    } catch (ParseException e) {
+      logger.error("Invalid end time for capture {}, skipping startup!", recordingID);
+      setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+      setAgentState(AgentState.IDLE);
+      return false;
+    }
+  } else {
+    try {
+      Date date = new Date(System.currentTimeMillis() + default_capture_length);
+      StringBuilder sb = new StringBuilder();
+      //TODO:  Remove the deprecated calls here.
+      sb.append(date.getSeconds() + " ");
+      sb.append(date.getMinutes() + " ");
+      sb.append(date.getHours() + " ");
+      sb.append(date.getDate() + " ");
+      sb.append(date.getMonth() + 1 + " "); //Note:  Java numbers months from 0-11, Quartz uses 1-12.  Sigh.
+      sb.append("? ");
+      end = new CronExpression(sb.toString());
+    } catch (ParseException e) {
+      logger.error("Parsing exception in default length fallback code.  This is very bad.");
+      setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+      setAgentState(AgentState.IDLE);
+      return false;
+    }
+  }
+  JobDetail job = new JobDetail("STOP-" + recordingID, Scheduler.DEFAULT_GROUP, StopCaptureJob.class);
+  job.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
+
+  CronTrigger trig = new CronTrigger();
+  trig.setName(recordingID);
+  trig.setCronExpression(end);
+
+  try {
+    captureScheduler.scheduleJob(job, trig);
+  } catch (SchedulerException e) {
+    logger.error("Unable to schedule stopCapture for {}, skipping capture: {}.", recordingID, e.toString());
+    e.printStackTrace();
+    setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+    setAgentState(AgentState.IDLE);
+    return false;
+  }*/
 
 }

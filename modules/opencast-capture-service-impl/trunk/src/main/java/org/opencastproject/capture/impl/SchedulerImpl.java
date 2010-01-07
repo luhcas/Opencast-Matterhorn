@@ -58,9 +58,12 @@ import org.slf4j.LoggerFactory;
 
 public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler, ManagedService {
 
+  // TODO: Move these constants into some common interface such as 'JobParameters'  
   /** A constant which defines the key to retrieve a pointer to this object in the Quartz job classes.  This is required for PollCalendarJob to know who to push updated calendar data to */
   public static final String SCHEDULER = "scheduler";
-
+  /** Constant used to define the key for the CaptureAgentImpl object which is pulled out of the execution context */
+  public static final String CAPTURE_AGENT = "capture_agent";
+  
   /** The properties of the scheduler for the calendar polling system */
   private static Properties pollingProperties = null;
 

@@ -15,24 +15,24 @@
  */
 package org.opencastproject.capture.impl;
 
-import junit.framework.Assert;
+//import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 
 public class StatusServiceImplTest {
-  private CaptureAgentImpl service = null;
+  //private CaptureAgentImpl service = null;
 
   @Before
   public void setup() {
-    service = new CaptureAgentImpl();
+/*    service = new CaptureAgentImpl();
     service.activate(null);
-    Assert.assertNotNull(service);
+    Assert.assertNotNull(service);*/
   }
 
   @After
   public void teardown() {
-    service = null;
+    //service = null;
   }
 
   //TODO:  Roll all of these tests into the capture agent tests in the testing harness

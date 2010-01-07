@@ -15,102 +15,117 @@
  */
 package org.opencastproject.capture.impl;
 
+
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.util.ConfigurationException;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.quartz.TriggerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Properties;
 
 public class CaptureAgentImplTest {
-    private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);
-    
-    
-    private CaptureAgentImpl service = null;
-    /** Defines the default paths for the files captured
-        TODO: Should be better to use the ConfigurationManager to be more faithful to the way in which this is actually done?
-        TODO: At least use File.separator to be more system-independent */
-    
-    private final File outDir = new File(this.getClass().getResource("/.").getFile(), "captures");
-    private final String[] outFiles = {new String("professor.mpg"),
-                                       new String("screen.mpg"),
-                                       new String("microphone.mp2"),
-                                       new String("capture.stopped")};
-    private final long msecs = 10000;
-    Properties props = null;
-    
-    @Before
-        public void setup() {
-        service = new CaptureAgentImpl();
-        // TODO: Is it right to call this method to force the initialization as if the bundle was activated?
-        service.activate(null);
+  private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);
 
-        // Creates the Properties for the test
-        props = new Properties();
-        // TODO: Changing the test capture directory to one under resources directory
-        props.setProperty(CaptureParameters.RECORDING_ID, "CaptureTest-" + System.currentTimeMillis());
-        props.setProperty(CaptureParameters.RECORDING_ROOT_URL, outDir.getAbsolutePath());
-        props.setProperty(CaptureParameters.CAPTURE_DEVICE_NAMES, "SCREEN,PRESENTER,AUDIO");
-        props.setProperty("capture.device.PRESENTER.src", "/dev/video0");
-        props.setProperty("capture.device.PRESENTER.outputfile", outFiles[0]);
-        props.setProperty("capture.device.SCREEN.src", "/dev/video1");
-        props.setProperty("capture.device.SCREEN.outputfile", outFiles[1]);
-        props.setProperty("capture.device.AUDIO.src", "hw:0");
-        props.setProperty("capture.device.AUDIO.outputfile", outFiles[2]);
+  private static final CaptureAgentImpl captAg = new CaptureAgentImpl();
+  private static Properties props = null;;
+  private final File outDir = new File(this.getClass().getResource("/.").getFile(), "capture_tmp");
+  private static MediaPackage mp;
 
-        // Checks that output files don't exist
-        for (String checkFile : outFiles) {
-            File auxFile = new File(outDir, checkFile);
-            if (auxFile.exists())
-                auxFile.delete();
-        }
-    }
+  @Before
+  public void setup() {
     
-    @After
-        public void teardown() {
-        service = null;
+    try {
+      mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
+    } catch (ConfigurationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (MediaPackageException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
+    long time = TriggerUtils.getNextGivenSecondDate(null,10).getTime();
     
-    @Test
-        public void testCapture() {
-        
-        try {
-            logger.info("Starting capture.");
-            
-            service.startCapture(props);
+    props = new Properties();
+    props.setProperty(CaptureParameters.RECORDING_ID, "TestID");
+    props.setProperty(CaptureParameters.RECORDING_END, DateFormat.getDateInstance().format(new Date(time)));
+    props.setProperty(CaptureParameters.RECORDING_ROOT_URL, outDir.getAbsolutePath());
+    props.setProperty(CaptureParameters.CAPTURE_DEVICE_NAMES, "SCREEN,PRESENTER,AUDIO");
+    props.setProperty("capture.device.PRESENTER.src", this.getClass().getResource("/capture/camera.mpg").getFile());
+    props.setProperty("capture.device.PRESENTER.outputfile", "professor.mpg");
+    props.setProperty("capture.device.SCREEN.src", this.getClass().getResource("/capture/screen.mpg").getFile());
+    props.setProperty("capture.device.SCREEN.outputfile", "screen.mpg");
+    props.setProperty("capture.device.AUDIO.src", this.getClass().getResource("/capture/audio.mp3").getFile());
+    props.setProperty("capture.device.AUDIO.outputfile", "microphone.mp3");
+    props.setProperty(CaptureParameters.INGEST_ENDPOINT_URL, "http://nightly.opencastproject.org/ingest/rest/addZippedMediaPackage");
+  }
+
+  @After
+  public void teardown() {
+    //
+  }
+
+  @Test
+  public void testCapture() {
+
+    try {
+      logger.info("Starting capture.");
+
+      String recID = captAg.startCapture(mp, props);
+
+      logger.info("Starting timing.");
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        logger.error("Unexpected exception while sleeping: {}.", e.getMessage());
+        Assert.fail("Unexpected exception while sleeping: " + e.getMessage());
+      }
+
+      logger.info("End of timing. Stopping...");
+
+      boolean result = captAg.stopCapture();
+
+      // Checks correct return value
+      Assert.assertTrue(result);
+      // Checks for the existence of the expected files, including "capture.stopped"
+      String[] devNames = props.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES).split(",");
+      for (String item : devNames) {
+        File auxFile = new File(outDir, props.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + item + CaptureParameters.CAPTURE_DEVICE_DEST));
+        logger.info("Checking file {}", auxFile.getAbsolutePath());
+        Assert.assertTrue(auxFile.exists());
+        logger.info("OK {}", auxFile.getAbsolutePath());
+      }
+
+      // Creates the manifest
+      result = captAg.createManifest(recID);
+      Assert.assertTrue(result);
       
-            logger.info("Starting timing.");
-            try {
-                Thread.sleep(msecs);
-            } catch (InterruptedException e) {
-                logger.error("Unexpected exception while sleeping: {}.", e.getMessage());
-                Assert.fail("Unexpected exception while sleeping: " + e.getMessage());
-            }
-            
-            logger.info("End of timing. Stopping...");
-            
-            boolean result = service.stopCapture();
-            
-            // Checks correct return value
-            Assert.assertTrue(result);
+      // Zips files
+      File zip = captAg.zipFiles(recID);
+      Assert.assertNotNull(zip);
+      Assert.assertTrue(zip.exists());
       
-        } catch (UnsatisfiedLinkError e) {
-            logger.error("Could not properly test capture agent: {}.", e.getMessage());
-        }
-    
-        // Checks for the existence of the expected files, including "capture.stopped"
-        for (String item : outFiles) {
-            File auxFile = new File(outDir, item);
-            Assert.assertTrue(auxFile.exists());
-        }
+      // Ingests
+      int code = captAg.ingest(recID);
+      Assert.assertEquals(code, 200);
 
-        logger.info("Checked files exist");
-       
+      logger.info("Recording {} successfully ingested!!", recID);
+    } catch (UnsatisfiedLinkError e) {
+      logger.error("Could not properly test capture agent: {}.", e.getMessage());
     }
-    
+
+  }
+
 }
 
 
