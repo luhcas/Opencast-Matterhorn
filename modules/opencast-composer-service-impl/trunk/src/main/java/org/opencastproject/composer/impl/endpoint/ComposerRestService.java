@@ -24,14 +24,19 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.media.mediapackage.jaxb.TrackType;
+import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Param.Type;
 
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -196,18 +201,70 @@ public class ComposerRestService {
   protected final String docs;
   
   public ComposerRestService() {
-    // Pre-load the documentation
-    String docsFromClassloader = null;
-    InputStream in = null;
-    try {
-      in = getClass().getResourceAsStream("/html/index.html");
-      docsFromClassloader = IOUtils.toString(in);
-    } catch (IOException e) {
-      logger.error("failed to read documentation", e);
-      docsFromClassloader = "unable to load documentation for " + ComposerRestService.class.getName();
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-    docs = docsFromClassloader;
+    docs = generateDocs();
+  }
+  
+  protected String generateDocs() {
+    DocRestData data = new DocRestData("workingfilerepository", "Working file repository", "/composer/rest", new String[] {"$Rev$"});
+    // profiles
+    RestEndpoint profilesEndpoint = new RestEndpoint("profiles", RestEndpoint.Method.GET, "/profiles", "Retrieve the encoding profiles");
+    profilesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document describing the available encoding profiles"));
+    profilesEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, profilesEndpoint);
+
+    // receipt
+    RestEndpoint receiptEndpoint = new RestEndpoint("receipt", RestEndpoint.Method.GET, "/receipt/{id}.xml", "Retrieve a receipt for an encoding task");
+    receiptEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containint the status of the encoding job, and the track produced by this encoding job if it the task is finished"));
+    receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the receipt id"));
+    receiptEndpoint.addFormat(new Format("xml", null, null));
+    receiptEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, receiptEndpoint);
+    
+    // encode
+    RestEndpoint encodeEndpoint = new RestEndpoint("encode", RestEndpoint.Method.POST, "/encode",
+            "Starts an encoding process, based on the specified encoding profile ID, the media package, and the track ID in the media package to encode");
+    encodeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containint the receipt for the encoding task"));
+    encodeEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(), "The mediapackage containing the source tracks"));
+    encodeEndpoint.addRequiredParam(new Param("audioSourceTrackId", Type.STRING, "track-1", "The track ID containing the audio stream"));
+    encodeEndpoint.addRequiredParam(new Param("videoSourceTrackId", Type.STRING, "track-2", "The track ID containing the video stream"));
+    encodeEndpoint.addRequiredParam(new Param("targetTrackId", Type.STRING, "track-3", "The ID to use for the newly composed track"));
+    encodeEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "flash.http", "The encoding profile to use"));
+    encodeEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, encodeEndpoint);
+
+    return DocUtil.generate(data);
+  }
+  
+  protected String generateMediaPackage() {
+    return "<mediapackage start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n" +
+    "  <media>\n" +
+    "    <track id=\"track-1\" type=\"track/presentation\">\n" +
+    "      <mimetype>audio/mp3</mimetype>\n" +
+    "      <url>http://source.opencastproject.org/svn/modules/opencast-workflow-service-impl/trunk/src/main/resources/sample/aonly.mp3</url>\n" +
+    "      <checksum type=\"md5\">950f9fa49caa8f1c5bbc36892f6fd062</checksum>\n" +
+    "      <duration>10472</duration>\n" +
+    "      <audio>\n" +
+    "        <channels>2</channels>\n" +
+    "        <bitdepth>0</bitdepth>\n" +
+    "        <bitrate>128004.0</bitrate>\n" +
+    "        <samplingrate>44100</samplingrate>\n" +
+    "      </audio>\n" +
+    "    </track>\n" +
+    "    <track id=\"track-2\" type=\"track/presentation\">\n" +
+    "      <mimetype>video/quicktime</mimetype>\n" +
+    "      <url>http://source.opencastproject.org/svn/modules/opencast-workflow-service-impl/trunk/src/main/resources/sample/vonly.mov</url>\n" +
+    "      <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n" +
+    "      <duration>14546</duration>\n" +
+    "      <video>\n" +
+    "        <device type=\"UFG03\" version=\"30112007\" vendor=\"Unigraf\" />\n" +
+    "        <encoder type=\"H.264\" version=\"7.4\" vendor=\"Apple Inc\" />\n" +
+    "        <resolution>640x480</resolution>\n" +
+    "        <scanType type=\"progressive\" />\n" +
+    "        <bitrate>540520</bitrate>\n" +
+    "        <frameRate>2</frameRate>\n" +
+    "      </video>\n" +
+    "    </track>\n" +
+    "  </media>\n" +
+    "</mediapackage>";
   }
 }

@@ -18,6 +18,8 @@ package org.opencastproject.composer.api;
 
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * An encoding format encapsulates all the relevant configuration data for encoding a media file to a certain encoding
  * formats.
@@ -27,6 +29,7 @@ public interface EncodingProfile {
   /**
    * Input and output formats.
    */
+  @XmlType(name = "media-type", namespace = "http://composer.opencastproject.org/")
   public enum MediaType {
 
     Audio, Visual, AudioVisual, EnhancedAudio, Image, ImageSequence, Cover;

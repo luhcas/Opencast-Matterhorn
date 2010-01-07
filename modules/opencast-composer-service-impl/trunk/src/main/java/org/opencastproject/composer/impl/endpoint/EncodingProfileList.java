@@ -23,11 +23,13 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * A JAXB annotated collection wrapper for {@link EncodingProfileImpl}s.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name="encoding-profiles", namespace="http://composer.opencastproject.org/")
 @XmlRootElement(name="encoding-profiles", namespace="http://composer.opencastproject.org/")
 public class EncodingProfileList {
   public EncodingProfileList() {}
