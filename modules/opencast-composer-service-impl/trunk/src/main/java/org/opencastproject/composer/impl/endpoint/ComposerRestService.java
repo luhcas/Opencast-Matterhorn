@@ -205,7 +205,7 @@ public class ComposerRestService {
   }
   
   protected String generateDocs() {
-    DocRestData data = new DocRestData("workingfilerepository", "Working file repository", "/composer/rest", new String[] {"$Rev$"});
+    DocRestData data = new DocRestData("Composer", "Composer Service", "/composer/rest", new String[] {"$Rev$"});
     // profiles
     RestEndpoint profilesEndpoint = new RestEndpoint("profiles", RestEndpoint.Method.GET, "/profiles", "Retrieve the encoding profiles");
     profilesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document describing the available encoding profiles"));
@@ -230,7 +230,7 @@ public class ComposerRestService {
     encodeEndpoint.addRequiredParam(new Param("targetTrackId", Type.STRING, "track-3", "The ID to use for the newly composed track"));
     encodeEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "flash.http", "The encoding profile to use"));
     encodeEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, encodeEndpoint);
+    data.addEndpoint(RestEndpoint.Type.WRITE, encodeEndpoint);
 
     return DocUtil.generate(data);
   }
