@@ -118,8 +118,7 @@
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/scheduler-service.xml,
-              OSGI-INF/scheduler-service-rest.xml,
-              OSGI-INF/scheduler-service-ui.xml
+              OSGI-INF/scheduler-service-rest.xml
             </Service-Component>
           </instructions>
         </configuration>
