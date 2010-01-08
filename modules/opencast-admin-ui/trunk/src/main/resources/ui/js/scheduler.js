@@ -436,10 +436,10 @@ function checkStartDate(){
       date &&
       this.groupElements['startTimeHour'] &&
       this.groupElements['startTimeMin']){
-    console.log(date.getDate() + ":" + now.getDate() + "," + date.getMonth() + ":" + now.getMonth() + "," + date.getYear() + ":" + now.getYear() + "," + this.groupElements['startTimeHour'].val() + ":" + now.getHours());
-    if(date.getDate() == now.getDate() && 
-       date.getMonth() == now.getMonth() &&
-       date.getYear() == now.getYear() &&
+    //console.log(date.getDate() + ":" + now.getDate() + "," + date.getMonth() + ":" + now.getMonth() + "," + date.getYear() + ":" + now.getYear() + "," + this.groupElements['startTimeHour'].val() + ":" + now.getHours());
+    if(date.getDate() >= now.getDate() && 
+       date.getMonth() >= now.getMonth() &&
+       date.getYear() >= now.getYear() &&
        this.groupElements['startTimeHour'].val() > now.getHours()){
       return true;
     }else{
