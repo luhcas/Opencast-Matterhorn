@@ -32,7 +32,8 @@ import java.util.Date;
 import java.util.Dictionary;
 
 /**
- * FIXME -- Add javadocs
+ * Implementation of org.opencastproject.scheduler.api.SchedulerService
+ * @see org.opencastproject.scheduler.api.SchedulerService
  */
 public abstract class SchedulerServiceImpl implements SchedulerService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImpl.class);
@@ -40,12 +41,12 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
   /** 
    * Properties that are updated by ManagedService updated method
    */
-  Dictionary properties;
+  protected Dictionary properties;
   
   /**
    * The component context that is passed when activate is called
    */
-  ComponentContext componentContext;  
+  protected ComponentContext componentContext;  
   
   DublinCoreGenerator dcGenerator;
   CaptureAgentMetadataGenerator caGenerator;

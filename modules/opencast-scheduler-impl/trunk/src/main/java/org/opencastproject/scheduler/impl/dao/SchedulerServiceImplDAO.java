@@ -31,6 +31,7 @@ import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.impl.SchedulerEventImpl;
 import org.opencastproject.scheduler.impl.SchedulerFilterImpl;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
+import org.opencastproject.util.UrlSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +78,23 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     if (e == null || ! e.valid()) {
       logger.info("Event that was added is not valid.");
       return null;
+    }
+    if (e.getMetadata().get("ingest-url") == null) {
+      String ingestUrl = null;
+      if(componentContext == null) {
+        logger.info("No Component Context available, constructing default ingest URL.");
+        ingestUrl = UrlSupport.DEFAULT_BASE_URL+"/ingest/rest";
+      } else {
+        String ccIngestUrl = componentContext.getBundleContext().getProperty("capture.ingest.endpoint");
+        logger.info("configured ingest url is {}", ccIngestUrl);
+        if(ccIngestUrl == null) {
+          logger.info("ingest URL not found in config file, constructing default");
+          ingestUrl = UrlSupport.DEFAULT_BASE_URL+"/ingest/rest";
+        } else {
+          ingestUrl = ccIngestUrl;
+        }
+      }      
+      e.getMetadata().put("ingest-url", ingestUrl);
     }
     PreparedStatement s = null;
     Connection con = null;
@@ -555,7 +573,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @throws SQLException
    */
   private Connection getConnection () throws SQLException {
-    if (dataSource == null) throw new SQLException("No DataSource available");
+    if (dataSource == null) throw new RuntimeException("No DataSource available");
     Connection con = dataSource.getConnection();
     logger.debug("creating connection "+con);
     con.setAutoCommit(false);
