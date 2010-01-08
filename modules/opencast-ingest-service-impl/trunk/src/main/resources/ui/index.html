@@ -19,17 +19,8 @@
     <!-- scripts -->
     <script type="text/javascript" src="js/jquery-1.3.2.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.7.2.matterhorn.min.js"></script>
-    <script type="text/javascript" src="js/jquery.form.js"></script>
-    <script type="text/javascript" src="js/oc.upload.js"></script>
-    <script type="text/javascript" src="js/oc.utils.js"></script>
     <script type="text/javascript">
       $(function() {
-
-        var mediaPackage = null;  // holds the MediaPackage document while ingestion
-        var metadata = null;
-        var updateURL = '../rest/getUploadProgress/';  // url for retrieving the upload progress infomation
-        var updateInterval = null;
-        var updateRequested = false;    // locks updateProgressbar so that there's always only a single call to getUploadProgress running
 
         // de-/collapse collapsables
         $('.collapse-control').click(function() {
@@ -62,106 +53,6 @@
           return !missing;
         }
 
-        // Event: Submit button clicked
-        $('#btnSubmit').click( function() {
-          if (checkRequiredFields()) {
-            $('#uploadProgress-dialog').dialog({
-              modal : true,
-              title : 'Uploading',
-              resizeable : false,
-              buttons : {'Abort' : function(){$(this).dialog("destroy");} },
-              open : function() { 
-                $('#uploadProgress-bar').progressbar({value:0});
-                $('#uploadProgress-status').text("Connecting to Matterhorn server...");
-                ocUpload.createMediaPackage(mediaPackageCreated);
-              }
-            });
-          } else {
-            $('#container-missingFields').show('fast');
-          }
-        });
-
-        // Event: MediaPackge created
-        function mediaPackageCreated(mp) {
-          $('#uploadProgress-status').text('MediaPackage created, sending metadata...');
-
-          // gather metadata and create Dublin Core document
-          mediaPackage = mp;
-          metadata = ocUtils.formToMap(document.basicData);
-          metadata = ocUtils.mergeMaps( metadata, ocUtils.formToMap(document.additionalData));
-          metadata = ocUtils.mergeMaps( metadata, ocUtils.formToMap(document.distributionData));
-          var dcCatalog = ocUpload.createDublinCoreCatalog(metadata);
-          
-          ocUpload.addCatalog(mediaPackage, dcCatalog, catalogAdded);
-        }
-
-        // Event: Catalog added
-        function catalogAdded(mp) {
-          $('#uploadProgress-status').text('Sending file...');
-          mediaPackage = mp;
-          ocUpload.addTrack(mediaPackage, document.fileSubmit, ingestComplete, startingUpload);
-        }
-
-        // Event: file upload is about to start
-        function startingUpload(mediaPackageId, filename) {
-          updateURL += mediaPackageId + '/' + filename;
-          updateInterval = window.setInterval(updateProgressbar, 1000);
-        }
-
-        // get upload progress and update progressbar
-        function updateProgressbar() {
-          if (!updateRequested) {
-            updateRequested = true;
-            $.getJSON(updateURL, function(data) {
-              if (data['total'] > 0) {   // if getUploadProgress is asked prematurely it just returns zeros
-                if (data['received'] == data['total']) {
-                  window.clearInterval(updateInterval);
-                  fileUploaded();
-                } else {
-                  updateRequested = false;
-                  var percent = Math.round((data['total'] / data['received'])  * 100);
-                  $('#uploadProgress-bar').progressbar('value', percent);
-                }
-              }
-            });
-          }
-        }
-
-        // Event: File has been uploaded, waiting for final mediaPackage
-        function fileUploaded() {
-          $('#uploadProgress-bar').progressbar('value', 100);
-          $('#uploadProgress-status').text('Waiting for answer...');
-        }
-        
-        // Event: final MediaPackage received
-        function ingestComplete(mp) {
-          //alert(ocUtils.xmlToString(mp));
-          $('#uploadProgress-dialog').dialog('destroy');
-          $('#stage').load('complete.html', function() {
-            // fill in metadata
-            for (key in metadata) {
-              if (metadata[key]) {
-                $('#field-' + key).css('display','block').children('.fieldValue').text(metadata[key]);
-              }
-            }
-            // fill in media analysis information
-            var track = mp.getElementsByTagName('track')[0];
-            if (track) {
-              var video = track.getElementsByTagName('video')[0];
-              if (video) {
-                $('#field-encoder .fieldValue').text(video.getElementsByTagName('encoder')[0].getAttribute('type'));
-                $('#field-resolution .fieldValue').text(video.getElementsByTagName('resolution')[0].childNodes[0].nodeValue);
-                $('#field-duration .fieldValue').text(track.getElementsByTagName('duration')[0].childNodes[0].nodeValue);
-                $('#field-bitrate .fieldValue').text(video.getElementsByTagName('bitrate')[0].childNodes[0].nodeValue);
-                $('#field-framerate .fieldValue').text(video.getElementsByTagName('frameRate')[0].childNodes[0].nodeValue);
-              }
-            } else {
-              alert('Media Analysis did not return any results. The Ingest was not successful!');
-            }
-
-          });
-        }
-
         // Call themeroller app
         $('#themeroller-container').click(function() {
           if (!/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)) {
@@ -191,7 +82,7 @@
       <div id="container-heading container">
         <center>
           <h2>
-            Upload Recording - Ajax version
+            Upload Recording - Simple HTML version
           </h2>
         </center>
       </div>
@@ -214,10 +105,11 @@
         </div>
       </div>
 
-      <!-- basic metadata -->
-      <div id="container-basicData" class="container ui-widget">
-        <div id="content-basicData" class="ui-widget-content ui-helper-clearfix">
-          <form id="basicData" name="basicData">
+      <form id="uploadForm" name="uploadForm" action="../rest/addMediaPackage" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
+
+        <!-- basic metadata -->
+        <div id="container-basicData" class="container ui-widget">
+          <div id="content-basicData" class="ui-widget-content ui-helper-clearfix">
             <ul class="no-bullets formField-list">
               <!-- field: Title -->
               <li class="ui-helper-clearfix">
@@ -238,15 +130,13 @@
                 <span class="helpIcon">&nbsp;</span>
               </li>
             </ul>
-          </form>
+          </div>
         </div>
-      </div>
 
-      <!-- additional metadata -->
-      <div id="container-additionalData" class="container ui-widget">
-        <div id="heading-additionalData" class="ui-widget-header collapse-control collapse-control-closed">Additional Description</div>
-        <div id="content-basicData" class="ui-widget-content ui-helper-clearfix collapsable" style="display:none;">
-          <form id="additionalData" name="additionalData">
+        <!-- additional metadata -->
+        <div id="container-additionalData" class="container ui-widget">
+          <div id="heading-additionalData" class="ui-widget-header collapse-control collapse-control-closed">Additional Description</div>
+          <div id="content-basicData" class="ui-widget-content ui-helper-clearfix collapsable" style="display:none;">
             <ul class="no-bullets formField-list">
               <!-- field: Series -->
               <li class="ui-helper-clearfix">
@@ -273,113 +163,93 @@
                 <span class="helpIcon">&nbsp;</span>
               </li>
             </ul>
-          </form>
+          </div>
         </div>
-      </div>
 
-      <!-- distribution data -->
-      <div id="container-additionalData" class="container ui-widget">
-        <div id="heading-additionalData" class="ui-widget-header">Distribution</div>
-        <div id="content-basicData" class="ui-widget-content ui-helper-clearfix">
-          <ul class="no-bullets formField-list">
-            <!-- field: Distribution channels -->
-            <li class="ui-helper-clearfix">
-              <span class="formField-label"><span class="color-red">* </span>Distribution Channel:</span>
-              <input type="checkbox" class="formField" checked="true" disabled="true">
-              <span style="float:left;">Matterhorn Media Module</span>
-              <span class="helpIcon">&nbsp;</span>
-            </li>
-            <!-- field: License -->
-            <li class="ui-helper-clearfix">
-              <span class="formField-label">License:</span>
-              <form id="distributionData" name="distributionData">
-                <input type="text" class="formField" id="license" name="license">
-              </form>
-              <span class="helpIcon">&nbsp;</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- file upload -->
-      <div id="container-additionalData" class="container ui-widget">
-        <div id="heading-additionalData" class="ui-widget-header">File Upload</div>
-        <div id="content-basicData" class="ui-widget-content ui-helper-clearfix">
-          <ul class="no-bullets formField-list">
-            <!-- field: Media File Content -->
-            <li class="ui-helper-clearfix">
-              <form id="mediaContent" name="mediaContent">
-                <span class="formField-label"><span class="color-red">* </span>Media File Content:</span>
-                <select name="mediacontent" id="mediacontent" class="requiredField" style="float:left;margin:3px;" required="true">
-                  <option value="">Choose one:</option>
-                  <option value="audio">Audio</option>
-                  <option value="video/presenter">Presenter (Video)</option>
-                  <option value="video/audience">Audience (Video)</option>
-                  <option value="video/slides">Presentation slides (video)</option>
-                  <option value="video/other">Other document (video)</option>
-                  <option value="other">Other (video)</option>
-                </select>
+        <!-- distribution data -->
+        <div id="container-additionalData" class="container ui-widget">
+          <div id="heading-additionalData" class="ui-widget-header">Distribution</div>
+          <div id="content-basicData" class="ui-widget-content ui-helper-clearfix">
+            <ul class="no-bullets formField-list">
+              <!-- field: Distribution channels -->
+              <!-- <li class="ui-helper-clearfix">
+                <span class="formField-label"><span class="color-red">* </span>Distribution Channel:</span>
+                <input type="checkbox" class="formField" checked="true" disabled="true">
+                <span style="float:left;">Matterhorn Media Module</span>
                 <span class="helpIcon">&nbsp;</span>
-              </form>
-            </li>
-            <!-- field: Media File -->
-            <li class="ui-helper-clearfix">
-              <form id="fileSubmit" name="fileSubmit" action="../rest/addTrackMonitored" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
-                <textarea name="mediaPackage" class="mediaPackage" cols="60" rows="10" style="display:none;"></textarea>
+              </li> -->
+              <!-- field: License -->
+              <li class="ui-helper-clearfix">
+                <span class="formField-label">License:</span>
+                <input type="text" class="formField" id="license" name="license">
+                <span class="helpIcon">&nbsp;</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- file upload -->
+        <div id="container-additionalData" class="container ui-widget">
+          <div id="heading-additionalData" class="ui-widget-header">File Upload</div>
+          <div id="content-basicData" class="ui-widget-content ui-helper-clearfix">
+            <ul class="no-bullets formField-list">
+              <!-- field: Media File Content -->
+              <!--
+              <li class="ui-helper-clearfix">
+                  <span class="formField-label"><span class="color-red">* </span>Media File Content:</span>
+                  <select name="mediacontent" id="mediacontent" class="requiredField" style="float:left;margin:3px;" required="true">
+                    <option value="">Choose one:</option>
+                    <option value="audio">Audio</option>
+                    <option value="video/presenter">Presenter (Video)</option>
+                    <option value="video/audience">Audience (Video)</option>
+                    <option value="video/slides">Presentation slides (video)</option>
+                    <option value="video/other">Other document (video)</option>
+                    <option value="other">Other (video)</option>
+                  </select>
+                  <span class="helpIcon">&nbsp;</span>
+              </li> -->
+              <!-- field: Media File -->
+              <li class="ui-helper-clearfix">
                 <span class="formField-label"><span class="color-red">* </span>Media File:</span>
                 <input type="file" id="track" name="track" class="requiredField" style="float:left;">
                 <span class="helpIcon">&nbsp;</span>
-              </form>
-            </li>
-            <li class="ui-helper-clearfix">
-              <span class="formField-label">&nbsp;</span>
-              <span>File must be 2GB or less</span>
-            </li>
-          </ul>
+              </li>
+              <li class="ui-helper-clearfix">
+                <span class="formField-label">&nbsp;</span>
+                <span>File must be 2GB or less</span>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
 
-      <!-- submit/cancel controls -->
-      <div id="container-additionalData" class="container ui-widget">
-        <div id="content-basicData" class="ui-widget-content ui-helper-clearfix">
-          <ul class="no-bullets formField-list">
-            <!-- submit / cancal button -->
-            <li class="ui-helper-clearfix">
-              <span class="formField-label">&nbsp;</span>
-              <button id="btnSubmit" type="button">Submit</button>
-              <button id="btnCancle" type="button" onclick="history.back();">Cancel</button>
-              <a href="simpleform.html" style="float:right;">Switch to simple HTML upload form</a>
-            </li>
-            <!-- * = required -->
-            <li class="ui-helper-clearfix">
-              <span class="formField-label">&nbsp;</span>
-              <span class="color-red">* </span>required
-            </li>
-          </ul>
+        <!-- submit/cancel controls -->
+        <div id="container-additionalData" class="container ui-widget">
+          <div id="content-basicData" class="ui-widget-content ui-helper-clearfix">
+            <ul class="no-bullets formField-list">
+              <!-- submit / cancal button -->
+              <li class="ui-helper-clearfix">
+                <span class="formField-label">&nbsp;</span>
+                <input type="submit" id="btnSubmit" value="Submit">
+                <button id="btnCancle" type="button" onclick="history.back();">Cancel</button>
+                <!-- <a href="index.html" style="float:right;">Switch to AJAX upload form</a> -->
+              </li>
+              <!-- * = required -->
+              <li class="ui-helper-clearfix">
+                <span class="formField-label">&nbsp;</span>
+                <span class="color-red">* </span>required
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
+
+      </form>
 
       <!-- END of stage -->
-    </div>
-
-    <!-- upload progress dialog -->
-    <div id="uploadProgress-dialog" style="display:none;">
-      <div id="uploadProgress-status" style="padding-top:10px;padding-bottom:10px;">duud</div>
-      <div id="uploadProgress-bar" style="height:16px;"></div>
     </div>
 
     <!-- ThemeRoller link -->
     <div id="themeroller-container">
       <img src="img/themeroller.png" alt="Themeroller: change this UIs apperance">
-    </div>
-
-    <!-- form to submit the DC catalog -->
-    <div style="display:none;">
-      <form id="dcSubmit" name="dcSubmit" action="../rest/addCatalogFromFile" method="POST" enctype="multipart/form-data" accept-charset="UTF-8" >
-        <input type="text" name="flavor" value="metadata/dublincore">
-        <textarea name="mediaPackage" id="mediaPackage"></textarea>
-        <textarea name="file" id="file"></textarea>
-      </form>
     </div>
 
   </body>
