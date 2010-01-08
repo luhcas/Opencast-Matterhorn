@@ -88,10 +88,14 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
         String ccIngestUrl = componentContext.getBundleContext().getProperty("capture.ingest.endpoint");
         logger.info("configured ingest url is {}", ccIngestUrl);
         if(ccIngestUrl == null) {
-          logger.info("ingest URL not found in config file, constructing default");
-          ingestUrl = UrlSupport.DEFAULT_BASE_URL+"/ingest/rest";
-        } else {
-          ingestUrl = ccIngestUrl;
+          logger.info("ingest URL not found in config file, constructing default based on server URL");
+          ccIngestUrl = componentContext.getBundleContext().getProperty("serverURL")+"/ingest/rest";
+          if(ccIngestUrl == null) {
+            logger.info("ingest URL not found in config file, constructing default");
+            ingestUrl = UrlSupport.DEFAULT_BASE_URL+"/ingest/rest";
+          } else {
+            ingestUrl = ccIngestUrl;
+          }
         }
       }      
       e.getMetadata().put("ingest-url", ingestUrl);
