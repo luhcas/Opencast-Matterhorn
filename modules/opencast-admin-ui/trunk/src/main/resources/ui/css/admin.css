@@ -23,6 +23,8 @@ body {
     background:red;
 }
 
+/* Icons */
+
 .icon {
     width:16px;
     height:16px;
@@ -47,6 +49,108 @@ body {
     background-image: url(../img/camera.png);
 }
 
+.icon-arrow-right {
+  background-image: url(../img/arrow-right.png);
+  background-offset: 0 0;
+}
+
+.icon-arrow-down {
+  background-image: url(../img/arrow-down.png);
+  background-offset: 0 0;
+}
+
+.icon-help {
+  background-image: url(../img/help.png);
+  background-offset: 0 0;
+  vertical-align: top;
+}
+
+.icon-bullet {
+  background-image: url(../img/bullet-arrow.png);
+  background-offset: 0 0;
+}
+
+.inline-icon {
+  display: inline-block;
+}
+
+/* folding widget */
+
+.folder-head {
+  cursor: pointer;
+  background-color: silver;
+  margin-bottom: 0px;
+}
+
+.folder-icon {
+  float: left;
+}
+
+.folder-content {
+  display: none;
+}
+
+/* form-box */
+
+.form-box-container {
+  border: 0;
+}
+
+.form-box-title {
+  background-color: silver;
+  padding-left: 0.5em;
+}
+
+/* Form Fields */
+
+.disable-label {
+  color: gray;
+}
+
+.form-field {
+  width: 450px !important;
+}
+
+.form-list{
+  margin-left: 1em;
+}
+
+.form-list li {
+  clear: both;
+  margin-bottom: 4px;
+  padding: 3px;
+  overflow: hidden;
+}
+
+.form-list label {
+  font-weight: normal;
+}
+
+/* Notifications */
+/*
+.notification-header {
+  border: 1px solid black;
+  background: lightgreen;
+  width:430px;
+  text-align:center;
+  margin-bottom:2em;
+  margin-left: auto;
+  margin-right: auto;
+}*/
+
+.warnbox-title {
+  background:#FA5858;
+  padding-left: 1.2em;
+}
+
+.warnbox-content {
+  border:1px solid #FA5858;
+}
+
+.warnbox-content ul li {
+  list-style-type: none;
+}
+
 #category-selector-container {float:left;width:auto;}
 .category-selector {}
 .category-selector li {float:left;list-style:none;}
@@ -65,4 +169,38 @@ body {
 
 #stage {
     background:white;
+    padding-left: 24px; /**/
+}
+
+#stage li { /**/
+  overflow: hidden;
+}
+
+/* Fluid Skinning System Overrides */
+
+.fl-widget .fl-widget-content {
+  margin: 0px;
+}
+
+.fl-controls-right .fl-label {
+  width: 30%;
+}
+
+.fl-activeTab {
+  background-color: white !important;
+}
+
+.fl-activeTab a {
+  background-color: white !important;
+  border-bottom-color: white !important;
+}
+
+.fl-theme-coal .fl-widget {
+  border: 1px solid #000000;
+  padding: 0px;
+}
+
+.fl-theme-coal .fl-icon {
+  background-color: inherit;
+  display: inline-block;
 }

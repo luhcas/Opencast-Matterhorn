@@ -400,9 +400,6 @@ function getStartDate(){
     date = this.groupElements['startDate'].datepicker('getDate').getTime() / 1000; // Get date in milliseconds, convert to seconds.
     date += this.groupElements['startTimeHour'].val() * 3600; // convert hour to seconds, add to date.
     date += this.groupElements['startTimeMin'].val() * 60; //convert minutes to seconds, add to date.
-    if(this.groupElements['startTimePeriod'].val() == "pm"){
-      date += 12 * 3600; //add 12 hours for PM;
-    }
     date = date * 1000; //back to milliseconds
     this.value = new Date(date);
   }
@@ -415,16 +412,10 @@ function getStartDate(){
  *  @param {Date Object}
  */
 function setStartDate(date){
-  if(this.groupElements['startDate'] && this.groupElements['startTimeHour'] && this.groupElements['startTimeMin'] && this.groupElements['startTimePeriod']){
-    this.groupElements['startTimePeriod'].val('am');
+  if(this.groupElements['startDate'] && this.groupElements['startTimeHour'] && this.groupElements['startTimeMin']){
     var hour = date.getHours();
     //console.log('Hours: ' + hour);
-    if(hour === 0){
-      hour = 12;
-    }else if( hour >= 12 ) {
-      hour = hour - 12;
-      this.groupElements['startTimePeriod'].val('pm');
-    }
+    
     //console.log("Minutes: " + date.getMinutes());
     this.groupElements['startTimeHour'].val(hour);
     this.groupElements['startTimeMin'].val(date.getMinutes());
@@ -439,12 +430,21 @@ function setStartDate(date){
  *  @return {boolean} True if the startDate is valid, otherwise false.
  */
 function checkStartDate(){
+  var date = this.groupElements['startDate'].datepicker('getDate');
+  var now = new Date();
   if( this.groupElements['startDate'] &&
-      this.groupElements['startDate'].datepicker('getDate') &&
+      date &&
       this.groupElements['startTimeHour'] &&
-      this.groupElements['startTimeMin'] &&
-      this.groupElements['startTimePeriod']){
-    return true;
+      this.groupElements['startTimeMin']){
+    console.log(date.getDate() + ":" + now.getDate() + "," + date.getMonth() + ":" + now.getMonth() + "," + date.getYear() + ":" + now.getYear() + "," + this.groupElements['startTimeHour'].val() + ":" + now.getHours());
+    if(date.getDate() == now.getDate() && 
+       date.getMonth() == now.getMonth() &&
+       date.getYear() == now.getYear() &&
+       this.groupElements['startTimeHour'].val() > now.getHours()){
+      return true;
+    }else{
+      return false;
+    }
   }
   return false;
 }

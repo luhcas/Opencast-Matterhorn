@@ -30,23 +30,23 @@ function handleWorkflow(workflowDoc){
   var dcURL = $("ns2\\:workflow-instance", workflowDoc).find("metadata:first > catalog[type='metadata/dublincore'] url").text();
   //TODO: get extra metadata catalog URL
   //var caURL = $("ns2\\:workflow-instance", testDoc).find("metadata:first > catalog[type='metadata/extra'] url").text();
-  console.log(dcURL);
+  //console.log(dcURL);
   testDoc = workflowDoc;
   
   eventid = eventDoc.createElement('event-id');
   eventid.appendChild(eventDoc.createTextNode($('ns2\\:workflow-instance', workflowDoc).attr('id')));
   eventDoc.documentElement.appendChild(eventid);
-  console.log(eventid);
+  //console.log(eventid);
   
   startdate = eventDoc.createElement('startdate');
   startdate.appendChild(eventDoc.createTextNode($('ns2\\:workflow-instance', workflowDoc).find('mediapackage').attr('start')));
   eventDoc.documentElement.appendChild(startdate);
-  console.log(startdate);
+  //console.log(startdate);
   
   duration = eventDoc.createElement('duration');
   duration.appendChild(eventDoc.createTextNode($('ns2\\:workflow-instance', workflowDoc).find('mediapackage').attr('duration')));
   eventDoc.documentElement.appendChild(duration);
-  console.log(duration);
+  //console.log(duration);
   
   $.get(dcURL, handleDCMetadata);
   //TODO: Get the extra metadata catalog, we need the Agent's id and the inputs selected.
@@ -64,46 +64,46 @@ function handleDCMetadata(metadataDoc){
   title = eventDoc.createElement('title');
   title.appendChild(eventDoc.createTextNode($('dcterms\\:title', metadataDoc).text()));
   eventDoc.documentElement.appendChild(title);
-  console.log(title);
+  //console.log(title);
   
   creator = eventDoc.createElement('creator');
   creator.appendChild(eventDoc.createTextNode($('dcterms\\:creator', metadataDoc).text()))
   eventDoc.documentElement.appendChild(creator);
-  console.log(creator);
+  //console.log(creator);
   
   contributor = eventDoc.createElement('contributor');
   contributor.appendChild(eventDoc.createTextNode($('dcterms\\:contributor', metadataDoc).text()))
   eventDoc.documentElement.appendChild(contributor);
-  console.log(contributor);
+  //console.log(contributor);
   
   description = eventDoc.createElement('description');
   description.appendChild(eventDoc.createTextNode($('dcterms\\:description', metadataDoc).text()))
   eventDoc.documentElement.appendChild(description);
-  console.log(description);
+  //console.log(description);
   
   series = eventDoc.createElement('series');
   series.appendChild(eventDoc.createTextNode($('dcterms\\:isPartOf', metadataDoc).text()))
   eventDoc.documentElement.appendChild(series);
-  console.log(series);
+  //console.log(series);
   
   license = eventDoc.createElement('license');
   license.appendChild(eventDoc.createTextNode($('dcterms\\:license', metadataDoc).text()))
   eventDoc.documentElement.appendChild(license);
-  console.log(license);
+  //console.log(license);
   
   language = eventDoc.createElement('language');
   language.appendChild(eventDoc.createTextNode($('dcterms\\:language', metadataDoc).text()))
   eventDoc.documentElement.appendChild(language);
-  console.log(language);
+  //console.log(language);
   
   subject = eventDoc.createElement('subject');
   subject.appendChild(eventDoc.createTextNode($('dcterms\\:subject', metadataDoc).text()))
   eventDoc.documentElement.appendChild(subject);
-  console.log(subject);
+  //console.log(subject);
   
   //Hopefully we've loaded an xml document with the values we want, transform and append this.
   doc = serialize(eventDoc);
-  console.log(doc);
+  //console.log(doc);
   if(doc){
     $('#stage').xslt(doc, "xsl/viewevent.xsl", callback);
   }

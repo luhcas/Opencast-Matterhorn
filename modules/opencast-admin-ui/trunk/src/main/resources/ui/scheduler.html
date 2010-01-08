@@ -5,10 +5,12 @@
     <title>Scheduler UI</title>
     
     <!-- style -->
-    <link rel="stylesheet" type="text/css" href="css/fss-reset.css" />
-    <link rel="stylesheet" type="text/css" href="css/fss-layout.css" />
-    <link rel="stylesheet" type="text/css" href="css/fss-theme-coal.css" />
+    <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css" />
+    <link href="infusion-1.1.2/fss/css/fss-layout.css" rel="stylesheet" type="text/css" />
+    <link href="infusion-1.1.2/fss/css/fss-text.css" rel="stylesheet" type="text/css" />
+    <link href="infusion-1.1.2/fss/css/fss-theme-coal.css" rel="stylesheet" type="text/css" />
     
+    <link rel="stylesheet" type="text/css" href="css/admin.css" />
     <link rel="stylesheet" type="text/css" href="css/scheduler.css" />
     <link rel="stylesheet" type="text/css" href="css/popuphelp.css" />
     <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.7.2.custom.css" />
@@ -24,6 +26,9 @@
       function initPage() {
         $('#startDate').datepicker({showOn: 'button', buttonImage: 'img/calendar.gif', buttonImageOnly: true});
         $('#startDate').datepicker('setDate', new Date());
+        var now = new Date();
+        now.setHours(now.getHours() + 1);
+        $('#startTimeHour').val(now.getHours());
         
         $('.required > label').prepend('<span style="color: red;">*</span>');
         
@@ -53,7 +58,7 @@
           "abstract":     new EventField('description'),
           "channel-id":   new EventFieldGroup(new Array('distMatterhornMM'), true),
           "license":      new EventField('license'),
-          "startdate":    new EventFieldGroup(new Array('startDate', 'startTimeHour', 'startTimeMin', 'startTimePeriod'), true, getStartDate, setStartDate, checkStartDate),
+          "startdate":    new EventFieldGroup(new Array('startDate', 'startTimeHour', 'startTimeMin'), true, getStartDate, setStartDate, checkStartDate),
           "enddate":      new EventFieldGroup(new Array('durationHour', 'durationMin'), true, getDuration, setDuration, checkDuration), //returns a date incremented by duration.
           "resources":    new EventFieldGroup(new Array('audio','audioVideo','audioScreen', 'audioVideoScreen'), true),
           "attendees":    new EventField('attendees', true),
@@ -110,7 +115,7 @@
         <div class="fl-container-800" id="missingFields-container" style="display:none;">
           <div class="fl-widget">
             <div class="fl-widget-titlebar warnbox-title">
-              <b class="formbox-header-text" style="color:white;">Missing Inputs</b>
+              <b>Missing Inputs</b>
             </div>
             <div class="fl-widget-content warnbox-content">
               <ul>
@@ -121,7 +126,7 @@
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose at least one <a href="javascript:document.getElementById('distITunesU').focus();">distribution channel</a>.
                 </li>
                 <li id="missing-startdate" class="missing-fields-item">
-                  <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose a starting date for the recording.
+                  <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose a starting date for the recording. It must not be in the past.
                 </li>
                 <li id="missing-attendees" class="missing-fields-item">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose a capture agent to recorde the event.
@@ -256,18 +261,30 @@
                   <li class="required">
                     <label class="fl-label form-box-label" id="label-starttime">Start Time:</label>
                     <select id="startTimeHour">
-                      <option>1</option>
-                      <option>2</option>
-                      <option>3</option>
-                      <option>4</option>
-                      <option>5</option>
-                      <option>6</option>
-                      <option>7</option>
-                      <option>8</option>
-                      <option>9</option>
-                      <option>10</option>
-                      <option>11</option>
-                      <option>12</option>
+                      <option value="0">00</option>
+                      <option value="1">01</option>
+                      <option value="2">02</option>
+                      <option value="3">03</option>
+                      <option value="4">04</option>
+                      <option value="5">05</option>
+                      <option value="6">06</option>
+                      <option value="7">07</option>
+                      <option value="8">08</option>
+                      <option value="9">09</option>
+                      <option value="10">10</option>
+                      <option value="11">11</option>
+                      <option value="12">12</option>
+                      <option value="13">13</option>
+                      <option value="14">14</option>
+                      <option value="15">15</option>
+                      <option value="16">16</option>
+                      <option value="17">17</option>
+                      <option value="18">18</option>
+                      <option value="19">19</option>
+                      <option value="20">20</option>
+                      <option value="21">21</option>
+                      <option value="22">22</option>
+                      <option value="23">23</option>
                     </select>
                     <select id="startTimeMin">
                       <option>00</option>
@@ -281,10 +298,6 @@
                       <option>45</option>
                       <option>50</option>
                       <option>55</option>
-                    </select>
-                    <select id="startTimePeriod">
-                      <option>am</option>
-                      <option>pm</option>
                     </select>
                   </li>
                   <li class="required">
