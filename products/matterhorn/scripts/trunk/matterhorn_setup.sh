@@ -43,12 +43,12 @@ install_3p ()
   wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   sudo dpkg -i libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   rm -f libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
-  wget http://downloads.sourceforge.net/mediainfo/libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
-  sudo dpkg -i libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
-  rm -f libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
-  wget http://downloads.sourceforge.net/mediainfo/mediainfo_0.7.24-1_i386.Debian_5.deb
-  sudo dpkg -i mediainfo_0.7.24-1_i386.Debian_5.deb
-  rm -f mediainfo_0.7.24-1_i386.Debian_5.deb
+  wget http://downloads.sourceforge.net/mediainfo/libmediainfo0_0.7.19-1_i386.Ubuntu_9.04.deb
+  sudo dpkg -i libmediainfo0_0.7.19-1_i386.Ubuntu_9.04.deb
+  rm -f libmediainfo0_0.7.19-1_i386.Ubuntu_9.04.deb
+  wget http://downloads.sourceforge.net/mediainfo/mediainfo_0.7.19-1_i386.Debian_5.deb
+  sudo dpkg -i mediainfo_0.7.19-1_i386.Debian_5.deb
+  rm -f mediainfo_0.7.19-1_i386.Debian_5.deb
 
   #ocr support
   echo "ocr support"
@@ -59,6 +59,8 @@ install_3p ()
   sudo curl http://tesseract-ocr.googlecode.com/files/tesseract-2.00.eng.tar.gz | sudo tar xz
   cd tessdata
   sudo chmod 755 *
+
+  sudo cp /usr/bin/mediainfo /usr/local/bin/mediainfo
 }
 
 install_ffmpeg ()
@@ -127,7 +129,7 @@ if [ -z $MY_IP ]; then
 else
   # update felix config (url)
   mv $CONF_DIR/config.properties $CONF_DIR/config.properties_old
-  sed "s/http:\/\/localhost:808./http:\/\/$MY_IP/" $CONF_DIR/config.properties_old > $CONF_DIR/config.properties
+  sed "s/http:\/\/localhost:808./http:\/\/$MY_IP:8080/" $CONF_DIR/config.properties_old > $CONF_DIR/config.properties
   chown -R matterhorn $CONF_DIR
   chgrp -R matterhorn $CONF_DIR
 
