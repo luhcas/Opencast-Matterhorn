@@ -144,7 +144,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     logger.debug("added event "+e.getID());
     return e; 
   }
- 
+  
   /**
    * Saves the attendee list to the database.
    * SQL-Statements will not be commited, that has to be done by the method that calls this method.
@@ -420,6 +420,48 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     return events.toArray(new SchedulerEvent[0]);
   }
 
+  /**
+   * Looks for events that are conflicting with the given event, because they use the same recorder at the same time
+   * @param e The event that should be checked
+   * @return All events that are in conflict.
+   */
+  public SchedulerEvent [] findConflictingEvents (SchedulerEvent e) {
+    Connection con = null;
+    PreparedStatement s = null;
+    LinkedList<SchedulerEvent> events = new LinkedList<SchedulerEvent>();
+    try {
+      con = getConnection();
+      s = con.prepareStatement("SELECT DISTINCT EVENT.eventid as eventid, startdate, enddate FROM EVENT JOIN EVENTMETADATA ON EVENT.eventid = EVENTMETADATA.eventid" +
+        " WHERE EVENTMETADATA.metadatakey = 'device' AND EVENTMETADATA.metadatavalue = ? " +
+        "AND ((EVENT.startdate >= ? AND EVENT.enddate <= ?) OR (EVENT.startdate >= ? AND EVENT.enddate <= ?)) ");
+      s.setString(1, e.getDevice());
+      s.setLong(2, e.getStartdate().getTime());
+      s.setLong(3, e.getStartdate().getTime());
+      s.setLong(4, e.getEnddate().getTime());
+      s.setLong(5, e.getEnddate().getTime());
+      ResultSet rs = s.executeQuery();
+      while (rs.next()) {
+        SchedulerEvent event = getEvent(rs.getString("eventid"));
+        events.add(event);
+      }
+    } catch (SQLException e1) {
+      logger.error("Could not read events from database" + e1.getMessage());
+    }
+    if (s != null)
+      try {
+        s.close();
+      } catch (SQLException e1) {
+        logger.error("Statement could not be closed: "+e1.getMessage());
+      }
+    if (con != null)
+      try {
+        closeConnection(con);
+      } catch (SQLException e1) {
+        logger.error("Connection could not be closed: "+e1.getMessage());
+      }
+    return events.toArray(new SchedulerEvent[0]);
+  }  
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerService#removeEvent(java.lang.String)

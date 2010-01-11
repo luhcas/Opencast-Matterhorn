@@ -39,6 +39,7 @@ import net.fortuna.ical4j.model.component.VEvent;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
+import org.opencastproject.scheduler.endpoint.SchedulerRestService;
 import org.opencastproject.scheduler.impl.dao.SchedulerServiceImplDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,5 +147,14 @@ public class SchedulerServiceImplTest {
     Assert.assertNotNull(service.getEvents(null));
     service.removeEvent(eventUpdated.getID());
     Assert.assertNull(service.getEvent(eventUpdated.getID()));   
+  }
+  
+  @Test
+  public void testRESTDocs () {
+    SchedulerRestService restService = new SchedulerRestService();
+    restService.setService(service);
+    restService.activate(null);
+    
+    Assert.assertNotNull(restService.getDocumentation());
   }
 }

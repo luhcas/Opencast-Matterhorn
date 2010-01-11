@@ -43,7 +43,7 @@ import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
 
 /**
- * TODO: Comment me!
+ *Create an iCalendar from the provided SchedulerEvents
  *
  */
 public class CalendarGenerator {

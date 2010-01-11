@@ -70,7 +70,6 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
    * @see org.opencastproject.scheduler.api.SchedulerService#getCalendarForCaptureAgent(java.lang.String)
    */
   public String getCalendarForCaptureAgent(String captureAgentID) {
-    // TODO real URL
     SchedulerFilter filter = getFilterForCaptureAgent (captureAgentID); 
     CalendarGenerator cal = new CalendarGenerator(dcGenerator, caGenerator);
     SchedulerEvent[] events = getEvents(filter);
