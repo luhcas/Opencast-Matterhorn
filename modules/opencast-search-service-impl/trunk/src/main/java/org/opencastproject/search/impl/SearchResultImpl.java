@@ -45,7 +45,7 @@ public class SearchResultImpl implements SearchResult {
 
   /** A list of search items. */
   @XmlElement(name = "result")
-  private List<SearchResultItem> resultSet = null;
+  private List<SearchResultItemImpl> resultSet = null;
 
   /** The query that yielded the result set */
   @XmlElement(name = "query")
@@ -71,7 +71,7 @@ public class SearchResultImpl implements SearchResult {
    * A no-arg constructor needed by JAXB
    */
   public SearchResultImpl() {
-    this.resultSet = new ArrayList<SearchResultItem>();
+    this.resultSet = new ArrayList<SearchResultItemImpl>();
   }
 
   /**
@@ -102,7 +102,7 @@ public class SearchResultImpl implements SearchResult {
    * @param item
    *          the item to add
    */
-  public void addItem(SearchResultItem item) {
+  public void addItem(SearchResultItemImpl item) {
     if (item == null)
       throw new IllegalArgumentException("Parameter item cannot be null");
     resultSet.add(item);
