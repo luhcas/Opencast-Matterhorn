@@ -46,8 +46,6 @@ import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,8 +58,6 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.Vector;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -278,6 +274,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.CaptureAgent#stopCapture()
    */
+  @Override
   public boolean stopCapture() {
     if (pipe == null) {
       logger.warn("Pipeline is null, unable to stop capture.");
@@ -353,6 +350,73 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     return false;
   }
 
+  // TODO: This should go in a separate method. Was in createManifest but makes it too long.
+  /*// Create a metadata catalog with some info
+  // TODO: Should this be moved out to its own method?
+  try {
+    // Create the document to hold the metadata
+    metaFile = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+    
+    // Keep the root node of the document
+    Element root = metaFile.createElement("agent-metadata");
+    
+    // Inserts the agent name node
+    Element agentName = metaFile.createElement("agent-name");
+    // FIXME: Where do we get the Capture Agent name?
+    agentName.setTextContent("Change Me");
+    root.appendChild(agentName);
+    
+    // Inserts the "mappings" node
+    Node mappings = metaFile.createElement("mappings");
+    root.appendChild(mappings);
+    
+    // Inserts the friendly names and the mappings
+    for (String fName : friendlyNames) {
+      //// Friendly name
+      Element friendlyName = metaFile.createElement("friendly-name");
+      friendlyName.setTextContent(fName);
+      mappings.appendChild(friendlyName);
+      //// Mapping
+      Element mapping = metaFile.createElement("mapping");
+      mapping.setAttribute("friendly-name", fName);
+      Element input = metaFile.createElement("input");
+      String inputDevice = recording.getProperty(
+              CaptureParameters.CAPTURE_DEVICE_PREFIX +
+              fName +
+              CaptureParameters.CAPTURE_DEVICE_SOURCE
+              );
+      input.setTextContent(inputDevice);
+      Element flavor = metaFile.createElement("flavor");
+      // TODO: This should be changed according with the solution adopted for the "TODO" in line 449
+      if (fName.equals("PRESENTER") || fName.equals("AUDIO"))
+        flavor.setTextContent(MediaPackageElements.PRESENTER_TRACK.toString());
+      else if (fName.equals("SCREEN"))
+        flavor.setTextContent(MediaPackageElements.PRESENTATION_TRACK.toString());
+      
+      mapping.appendChild(input);
+      mapping.appendChild(flavor);
+      mappings.appendChild(mapping);
+    }
+    
+    // Inserts the zipName
+    Element zNameElement = metaFile.createElement("zip-name");
+    zNameElement.setTextContent(recording.getZipName());
+    root.appendChild(zNameElement);
+    
+    // Adds this document to the MediaPackage
+    recording.getMediaPackage().add(new URI(recording.getAgentCatalogName()));
+    
+  } catch (ParserConfigurationException e) {
+    logger.error("Parser Exception when creating an XML Document: {}", e.getMessage());
+    return false;
+  } catch (UnsupportedElementException e) {
+    logger.error("The agent metadata file seems not to be supported by the MediaPackage implementation: {}", e.getMessage());
+    return false;
+  } catch (URISyntaxException e) {
+    logger.error("Incorrect URI for the agent metadata file: {}. Cause: {}", recording.getAgentCatalogName(), e.getMessage());
+    return false;
+  }*/
+
   /**
    * Generates the manifest.xml file from the files specified in the properties
    * @return A status boolean 
@@ -415,73 +479,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       logger.error("URI Exception: {}.", e.getMessage());
       return false;
     }
-    
-    /*// Create a metadata catalog with some info
-    // TODO: Should this be moved out to its own method?
-    try {
-      // Create the document to hold the metadata
-      metaFile = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-      
-      // Keep the root node of the document
-      Element root = metaFile.createElement("agent-metadata");
-      
-      // Inserts the agent name node
-      Element agentName = metaFile.createElement("agent-name");
-      // FIXME: Where do we get the Capture Agent name?
-      agentName.setTextContent("Change Me");
-      root.appendChild(agentName);
-      
-      // Inserts the "mappings" node
-      Node mappings = metaFile.createElement("mappings");
-      root.appendChild(mappings);
-      
-      // Inserts the friendly names and the mappings
-      for (String fName : friendlyNames) {
-        //// Friendly name
-        Element friendlyName = metaFile.createElement("friendly-name");
-        friendlyName.setTextContent(fName);
-        mappings.appendChild(friendlyName);
-        //// Mapping
-        Element mapping = metaFile.createElement("mapping");
-        mapping.setAttribute("friendly-name", fName);
-        Element input = metaFile.createElement("input");
-        String inputDevice = recording.getProperty(
-                CaptureParameters.CAPTURE_DEVICE_PREFIX +
-                fName +
-                CaptureParameters.CAPTURE_DEVICE_SOURCE
-                );
-        input.setTextContent(inputDevice);
-        Element flavor = metaFile.createElement("flavor");
-        // TODO: This should be changed according with the solution adopted for the "TODO" in line 449
-        if (fName.equals("PRESENTER") || fName.equals("AUDIO"))
-          flavor.setTextContent(MediaPackageElements.PRESENTER_TRACK.toString());
-        else if (fName.equals("SCREEN"))
-          flavor.setTextContent(MediaPackageElements.PRESENTATION_TRACK.toString());
         
-        mapping.appendChild(input);
-        mapping.appendChild(flavor);
-        mappings.appendChild(mapping);
-      }
-      
-      // Inserts the zipName
-      Element zNameElement = metaFile.createElement("zip-name");
-      zNameElement.setTextContent(recording.getZipName());
-      root.appendChild(zNameElement);
-      
-      // Adds this document to the MediaPackage
-      recording.getMediaPackage().add(new URI(recording.getAgentCatalogName()));
-      
-    } catch (ParserConfigurationException e) {
-      logger.error("Parser Exception when creating an XML Document: {}", e.getMessage());
-      return false;
-    } catch (UnsupportedElementException e) {
-      logger.error("The agent metadata file seems not to be supported by the MediaPackage implementation: {}", e.getMessage());
-      return false;
-    } catch (URISyntaxException e) {
-      logger.error("Incorrect URI for the agent metadata file: {}. Cause: {}", recording.getAgentCatalogName(), e.getMessage());
-      return false;
-    }*/
-    
     // Serialize the metadata file and the MediaPackage
     try {
       // Gets the manifest.xml as a Document object
@@ -500,7 +498,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       // Closes the stream to make sure all the content is written to the file
       stResult.getOutputStream().close();
       
-      // TODO: Descomentar
+      // TODO: Move this out to another method, together with the code block commented above this method
       /*// Serializes the metadata catalog
       stResult = new StreamResult(new FileOutputStream(new File(recording.getDir(), recording.getAgentCatalogName())));
       source = new DOMSource(metaFile);
