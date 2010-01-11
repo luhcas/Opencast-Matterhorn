@@ -164,6 +164,7 @@
               org.apache.lucene.*;-split-package:=merge-first,
             </Private-Package>
             <Export-Package>
+              org.opencastproject.feed.impl.*,
               org.opencastproject.search.impl.*,
               org.opencastproject.search.endpoint
             </Export-Package>
@@ -180,10 +181,12 @@
               solr-lucene-queries;inline=true,
               solr-lucene-snowball;inline=true,
               solr-lucene-spellchecker;inline=true,
-              stax-utils;inline=true
+              stax-utils;inline=true,
+              rome;inline=true
             </Embed-Dependency>
             <Service-Component>
-              OSGI-INF/search-service-rest.xml
+              OSGI-INF/search-service-rest.xml,
+              OSGI-INF/feed-service.xml
             </Service-Component>
           </instructions>
         </configuration>
