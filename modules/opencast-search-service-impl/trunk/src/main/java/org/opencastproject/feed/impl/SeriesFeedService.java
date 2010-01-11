@@ -18,7 +18,6 @@ package org.opencastproject.feed.impl;
 
 import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.feed.api.Feed.Type;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.search.api.SearchResult;
 
 /**
@@ -33,23 +32,6 @@ public class SeriesFeedService extends AbstractFeedService implements FeedGenera
 
   /** The series data */
   protected ThreadLocal<SearchResult> seriesData = new ThreadLocal<SearchResult>();
-
-  /**
-   * Creates a new feed generator for series.
-   * 
-   * @param feedHome
-   *          the feed's home url
-   * @param rssFlavor
-   *          the flavor identifying rss tracks
-   * @param atomFlavor
-   *          the flavors identifying tracks to be included in atom feeds
-   * @param entryLinkTemplate
-   *          the link template
-   */
-  public SeriesFeedService(String feedHome, MediaPackageElementFlavor rssFlavor, MediaPackageElementFlavor[] atomFlavors, String entryLinkTemplate) {
-    super("series", feedHome, rssFlavor, atomFlavors, entryLinkTemplate);
-    setName("Series");
-  }
 
   /**
    * @see org.opencastproject.feed.api.FeedGenerator#accept(java.lang.String[])
@@ -90,7 +72,7 @@ public class SeriesFeedService extends AbstractFeedService implements FeedGenera
    * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getIdentifier()
    */
   public String getIdentifier() {
-    return series.get();
+    return series.get() != null ? series.get() : super.getIdentifier();
   }
 
   /**
@@ -99,7 +81,8 @@ public class SeriesFeedService extends AbstractFeedService implements FeedGenera
    * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getName()
    */
   public String getName() {
-    return seriesData.get().getItems()[0].getDcTitle();
+    SearchResult rs = seriesData.get();
+    return (rs != null) ? rs.getItems()[0].getDcTitle() : super.getName();
   }
 
   /**
@@ -108,7 +91,8 @@ public class SeriesFeedService extends AbstractFeedService implements FeedGenera
    * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getDescription()
    */
   public String getDescription() {
-    return seriesData.get().getItems()[0].getDcAbstract();
+    SearchResult rs = seriesData.get();
+    return (rs != null) ? rs.getItems()[0].getDcAbstract() : super.getDescription();
   }
 
   /**
