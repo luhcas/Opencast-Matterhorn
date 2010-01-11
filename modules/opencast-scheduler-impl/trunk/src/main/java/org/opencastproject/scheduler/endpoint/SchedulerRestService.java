@@ -359,7 +359,7 @@ public class SchedulerRestService {
     RestEndpoint findConflictingEventsEndpoint = new RestEndpoint("findConflictingEvents", RestEndpoint.Method.POST, "/findConflictingEvents", "Looks for events that are conflicting with the given event, because they use the same recorder at the same time ");
     findConflictingEventsEndpoint.addFormat(new Format("xml", null, null));
     findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of SchedulerEvents as XML returned"));
-    addEventEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateSchedulerEvent(), "The SchedulerEvent that should be checked for conflicts."));
+    findConflictingEventsEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateSchedulerEvent(), "The SchedulerEvent that should be checked for conflicts."));
     findConflictingEventsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, findConflictingEventsEndpoint);  
 
@@ -395,29 +395,29 @@ public class SchedulerRestService {
    * @return A XML with a SchedulerEvent
    */ 
   private String generateSchedulerEvent() {
-    return "<ns1:SchedulerEvent xmlns:ns1=\"http://scheduler.opencastproject.org\">"+
-           "<id>c0e3d8a7-7ecc-479b-aee7-8da369e445f2</id>"+
-           "<metadata>"+
-           "  <item key=\"channel-id\"><value>1</value></item>"+
-           "  <item key=\"creator\"><value>lecturer</value></item>"+
-           "  <item key=\"device\"><value>recorder</value></item>"+
-           "  <item key=\"title\"><value>Test title</value></item>"+
-           "  <item key=\"abstract\"><value>a description of the event</value></item>"+
-           "  <item key=\"contributor\"><value>The contribution institution</value></item>"+
-           "  <item key=\"series-id\"><value>c0e3d8a7-7ecc-479b-1234-8da369e445f2</value></item>"+
-           "  <item key=\"location\"><value>my room</value></item>"+
-           "</metadata>"+
-           "<startdate>1262631892201</startdate>"+
-           "<enddate>1262644114423</enddate>"+
-           "<duration>12222222</duration>"+
-           "<attendees>"+
-           "  <attendee>recorder</attendee>"+
-           "  <attendee>another attendee</attendee>"+
-           "</attendees>"+
-           "<resources>"+
-           "  <resource>vga</resource>"+
-           "  <resource>audio</resource>"+
-           "</resources>"+
+    return "<ns1:SchedulerEvent xmlns:ns1=\"http://scheduler.opencastproject.org\">\n"+
+           "<id>c0e3d8a7-7ecc-479b-aee7-8da369e445f2</id>\n"+
+           "<metadata>\n"+
+           "  <item key=\"channel-id\"><value>1</value></item>\n"+
+           "  <item key=\"creator\"><value>lecturer</value></item>\n"+
+           "  <item key=\"device\"><value>recorder</value></item>\n"+
+           "  <item key=\"title\"><value>Test title</value></item>\n"+
+           "  <item key=\"abstract\"><value>a description of the event</value></item>\n"+
+           "  <item key=\"contributor\"><value>The contribution institution</value></item>\n"+
+           "  <item key=\"series-id\"><value>c0e3d8a7-7ecc-479b-1234-8da369e445f2</value></item>\n"+
+           "  <item key=\"location\"><value>my room</value></item>\n"+
+           "</metadata>\n"+
+           "<startdate>1262631892201</startdate>\n"+
+           "<enddate>1262644114423</enddate>\n"+
+           "<duration>12222222</duration>\n"+
+           "<attendees>\n"+
+           "  <attendee>recorder</attendee>\n"+
+           "  <attendee>another attendee</attendee>\n"+
+           "</attendees>\n"+
+           "<resources>\n"+
+           "  <resource>vga</resource>\n"+
+           "  <resource>audio</resource>\n"+
+           "</resources>\n"+
            "</ns1:SchedulerEvent>";
   }  
   
@@ -427,21 +427,21 @@ public class SchedulerRestService {
    * @return A XML with a SchedulerFilter
    */
   private String generateSchedulerFilter() {
-     return "<ns2:SchedulerFilter xmlns:ns2=\"http://scheduler.opencastproject.org/\">"+
-            " <event-id>exact id to search for</event-id>"+
-            " <device>pattern to search for</device>"+
-            " <title>pattern to search for</title>"+
-            " <creator>pattern to search for</creator>"+
-            " <abstract>A short description of the content of the lecture</abstract>" +
-            " <startdate>begin of the period of valid events</startdate>" +
-            " <enddate>end of the period of valid events</enddate>" +
-            " <contributor>pattern to search for</contributor>" +
-            " <series-id>ID of the series which will be filtered</series-id>" +
-            " <channel-id>ID of the channel that will be filtered</channel-id>" +
-            " <location>pattern to search for</location>" +
-            " <attendee>pattern to search for</attendee>" +
-            " <resource>pattern to search for</resource>" +
-            " <order-by>title|creator|series|time-asc|time-desc|contributor|channel|location|device</order-by>" +
+     return "<ns2:SchedulerFilter xmlns:ns2=\"http://scheduler.opencastproject.org/\">\n"+
+            " <event-id>exact id to search for</event-id>\n"+
+            " <device>pattern to search for</device>\n"+
+            " <title>pattern to search for</title>\n"+
+            " <creator>pattern to search for</creator>\n"+
+            " <abstract>A short description of the content of the lecture</abstract>\n" +
+            " <startdate>begin of the period of valid events</startdate>\n" +
+            " <enddate>end of the period of valid events</enddate>\n" +
+            " <contributor>pattern to search for</contributor>\n" +
+            " <series-id>ID of the series which will be filtered</series-id>\n" +
+            " <channel-id>ID of the channel that will be filtered</channel-id>\n" +
+            " <location>pattern to search for</location>\n" +
+            " <attendee>pattern to search for</attendee>\n" +
+            " <resource>pattern to search for</resource>\n" +
+            " <order-by>title|creator|series|time-asc|time-desc|contributor|channel|location|device</order-by>\n" +
             "</ns2:SchedulerFilter>";
   }
   
