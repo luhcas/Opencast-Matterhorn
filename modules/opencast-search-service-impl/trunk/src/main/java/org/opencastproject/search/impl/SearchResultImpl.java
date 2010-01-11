@@ -36,19 +36,19 @@ import javax.xml.bind.annotation.XmlType;
  * The search result represents a set of result items that has been compiled as a result for a search operation.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="search-results", namespace="http://search.opencastproject.org/", propOrder={"query", "resultSet"})
-@XmlRootElement(name="search-results", namespace="http://search.opencastproject.org/")
+@XmlType(name = "search-results", namespace = "http://search.opencastproject.org/", propOrder = { "query", "resultSet" })
+@XmlRootElement(name = "search-results", namespace = "http://search.opencastproject.org/")
 public class SearchResultImpl implements SearchResult {
 
   /** Logging facility */
   static Logger log_ = LoggerFactory.getLogger(SearchResultImpl.class);
 
   /** A list of search items. */
-  @XmlElement(name="result")
-  private List<SearchResultItemImpl> resultSet = null;
+  @XmlElement(name = "result")
+  private List<SearchResultItem> resultSet = null;
 
   /** The query that yielded the result set */
-  @XmlElement(name="query")
+  @XmlElement(name = "query")
   private String query = null;
 
   /** The pagination offset. */
@@ -59,6 +59,10 @@ public class SearchResultImpl implements SearchResult {
   @XmlAttribute
   private long limit = 10;
 
+  /** The number of hits total, regardless of the limit */
+  @XmlAttribute
+  private long total = 0;
+
   /** The search time in milliseconds */
   @XmlAttribute
   private long searchTime = 0;
@@ -66,7 +70,9 @@ public class SearchResultImpl implements SearchResult {
   /**
    * A no-arg constructor needed by JAXB
    */
-  public SearchResultImpl() {}
+  public SearchResultImpl() {
+    this.resultSet = new ArrayList<SearchResultItem>();
+  }
 
   /**
    * Creates a new and empty search result.
@@ -75,8 +81,9 @@ public class SearchResultImpl implements SearchResult {
    *          the query
    */
   public SearchResultImpl(String query) {
+    this();
     if (query == null)
-      throw new IllegalArgumentException("Quey cannot be null");
+      throw new IllegalArgumentException("Query cannot be null");
     this.query = query;
   }
 
@@ -98,9 +105,7 @@ public class SearchResultImpl implements SearchResult {
   public void addItem(SearchResultItem item) {
     if (item == null)
       throw new IllegalArgumentException("Parameter item cannot be null");
-    if (resultSet == null)
-      resultSet = new ArrayList<SearchResultItemImpl>();
-    resultSet.add((SearchResultItemImpl)item);
+    resultSet.add(item);
   }
 
   /**
@@ -176,6 +181,24 @@ public class SearchResultImpl implements SearchResult {
    */
   public void setSearchTime(long searchTime) {
     this.searchTime = searchTime;
+  }
+
+  /**
+   * Sets the total hit count.
+   * 
+   * @param total the total hit count
+   */
+  public void setTotal(long total) {
+    this.total = total;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchResult#getTotalSize()
+   */
+  public long getTotalSize() {
+    return total;
   }
 
   /**

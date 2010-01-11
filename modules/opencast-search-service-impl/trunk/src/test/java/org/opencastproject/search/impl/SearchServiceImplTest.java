@@ -100,9 +100,11 @@ public class SearchServiceImplTest {
     assertEquals(1, service.getEpisodesByDate(0, Integer.MAX_VALUE).size());
     
     // Test for various fields
-    SearchResultItem result = service.getEpisodeById("10.0000/1").getItems()[0];
-    assertNotNull(result.getMediaPackage());
-    assertEquals(1, result.getMediaPackage().getCatalogs().length);
+    SearchResult result = service.getEpisodeById("10.0000/1");
+    assertEquals(1, result.getTotalSize());
+    SearchResultItem resultItem = result.getItems()[0];
+    assertNotNull(resultItem.getMediaPackage());
+    assertEquals(1, resultItem.getMediaPackage().getCatalogs().length);
   }
 
   /**

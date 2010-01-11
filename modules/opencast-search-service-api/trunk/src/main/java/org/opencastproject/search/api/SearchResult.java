@@ -36,11 +36,18 @@ public interface SearchResult {
   String getQuery();
 
   /**
-   * Get the total number of items found.
+   * Get the total number of items found, limited by the value returned by {@link #getLimit()}.
    * 
    * @return The number.
    */
   long size();
+  
+  /**
+   * Returns the number of hits for this query, regardless of the limit that has been defined.
+   * 
+   * @return the total number of hits.
+   */
+  long getTotalSize();
 
   /**
    * Get the offset.

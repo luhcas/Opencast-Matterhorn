@@ -260,6 +260,7 @@ public class SolrRequester {
     result.setSearchTime(solrResponse.getQTime());
     result.setOffset(solrResponse.getResults().getStart());
     result.setLimit(solrResponse.getResults().getNumFound());
+    result.setTotal(solrResponse.getResults().getNumFound());
 
     // Walk through response and create new items with title, creator, etc:
     for (SolrDocument doc : solrResponse.getResults()) {
