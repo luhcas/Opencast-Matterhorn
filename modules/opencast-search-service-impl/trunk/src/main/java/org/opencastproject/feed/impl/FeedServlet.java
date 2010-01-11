@@ -163,6 +163,7 @@ public class FeedServlet extends HttpServlet {
     try {
       HttpContext httpContext = httpService.createDefaultHttpContext();
       httpService.registerServlet("/feeds", FeedServlet.this, null, httpContext);
+      log_.debug("Feed servlet registered");
     } catch (ServletException e) {
       e.printStackTrace();
     } catch (NamespaceException e) {
@@ -176,7 +177,7 @@ public class FeedServlet extends HttpServlet {
    * @param generator the generator
    */
   public void addFeedGenerator(FeedGenerator generator) {
-    log_.info("Registering feed generator {}", generator);
+    log_.info("Registering '{}' feed generator", generator.getIdentifier());
     feeds.add(generator);
   }
 
@@ -186,7 +187,7 @@ public class FeedServlet extends HttpServlet {
    * @param generator the feed generator
    */
   public void removeFeedGenerator(FeedGenerator generator) {
-    log_.info("Registering feed generator {}", generator);
+    log_.info("Removing '{}' feed generator", generator.getIdentifier());
     feeds.remove(generator);
   }
 
