@@ -187,23 +187,12 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
     String rssFlavor = (String) properties.get(PROP_RSSFLAVOR);
     if (rssFlavor != null)
       rssTrackFlavor = MediaPackageElementFlavor.parseFlavor(rssFlavor);
-    else
-      throw new IllegalStateException("Feed rss format (feed.rssflavor) must be configured");
     String atomFlavors = (String) properties.get(PROP_ATOMFLAVORS);
     if (atomFlavors != null) {
       String[] flavors = atomFlavors.split(",; ");
       for (String f : flavors)
         addAtomTrackFlavor(MediaPackageElementFlavor.parseFlavor(f));
-    } else
-      throw new IllegalStateException("Feed atom formats (feed.atomflavors) must be configured");
-    if (uri == null)
-      throw new IllegalStateException("Feed uri (feed.uri) must be configured");
-    if (name == null)
-      throw new IllegalStateException("Feed name (feed.name) must be configured");
-    if (home == null)
-      throw new IllegalStateException("Feed url (feed.home) must be configured");
-    if (linkTemplate == null)
-      throw new IllegalStateException("Feed link template (feed.entry) must be configured");
+    }
   }
 
   /**
