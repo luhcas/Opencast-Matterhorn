@@ -96,6 +96,8 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
           } else {
             ingestUrl = ccIngestUrl;
           }
+        } else {
+          ingestUrl = ccIngestUrl;
         }
       }      
       e.getMetadata().put("ingest-url", ingestUrl);
