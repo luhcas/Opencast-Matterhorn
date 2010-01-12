@@ -51,27 +51,35 @@ body {
 
 .icon-arrow-right {
   background-image: url(../img/arrow-right.png);
-  background-offset: 0 0;
+  background-position: 0 0;
 }
 
 .icon-arrow-down {
   background-image: url(../img/arrow-down.png);
-  background-offset: 0 0;
+  background-position: 0 0;
 }
 
 .icon-help {
   background-image: url(../img/help.png);
-  background-offset: 0 0;
+  background-position: 0 0;
   vertical-align: top;
 }
 
 .icon-bullet {
   background-image: url(../img/bullet-arrow.png);
-  background-offset: 0 0;
+  background-position: 0 0;
 }
 
 .inline-icon {
   display: inline-block;
+}
+
+.loadingAnimation {
+  background-image:url(../img/loading.gif);
+  background-position: center;
+  background-repeat:no-repeat;
+  height:40px;
+  width:100%;
 }
 
 /* folding widget */
@@ -158,13 +166,16 @@ body {
 .category-selector-spacer {margin-left:5px; margin-right:5px;}
 .category-selector-item-disabled {color:gray;}
 
+.state-selector {color:blue;text-decoration:underline;cursor:pointer;}
+.state-selector-active {color:black;text-decoration:none !important;font-weight:bold;cursor:default;}
+
 #add-buttons-container {
     float:right;
 }
 
 #recordings-table-container {
     background:white;
-    margin-top:40px; 
+    margin-top:50px;
 }
 
 #stage {

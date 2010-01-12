@@ -112,6 +112,10 @@ public class AdminuiRestService {
     if ( (state.toUpperCase().equals("FINISHED")) || (state.toUpperCase().equals("ALL")) ) {
       out.addAll(getRecordingsFromWorkflowService(State.SUCCEEDED));
     }
+    if ( (state.toUpperCase().equals("FAILED")) || (state.toUpperCase().equals("ALL")) ) {
+      out.addAll(getRecordingsFromWorkflowService(State.FAILED));
+      out.addAll(getRecordingsFromWorkflowService(State.FAILING));
+    }
     return out;
   }
 
