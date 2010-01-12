@@ -236,7 +236,8 @@ public class SchedulerRestService {
       logger.error("event is null");
       return new SchedulerEventJaxbImpl [0];
     }
-    SchedulerEvent [] events = service.findConflictingEvents(e.getEvent());
+    SchedulerEvent [] events = null; // FIXME -- compilation error below
+//    SchedulerEvent [] events = service.findConflictingEvents(e.getEvent());
     if (events == null) return new SchedulerEventJaxbImpl [0];
     SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
     for (int i = 0; i < events.length; i++) jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);

@@ -110,7 +110,6 @@
       				*;resolution:=optional
       			</Import-Package>
             <Private-Package>
-              javax.sql.*,
               net.fortuna.ical4j.*
             </Private-Package>
             <Embed-Dependency>
