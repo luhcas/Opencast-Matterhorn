@@ -18,7 +18,6 @@ package org.opencastproject.search.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
-import java.net.URI;
 import java.util.Date;
 
 /**
@@ -166,27 +165,6 @@ public interface SearchResultItem {
    * @return the score
    */
   double getScore();
-
-  /**
-   * Get the linked media files.
-   * 
-   * @return URI file locations
-   */
-  URI[] getMedia();
-
-  /**
-   * Get the linked metadata catalogs.
-   * 
-   * @return URI file locations
-   */
-  URI[] getCatalogs();
-
-  /**
-   * Get the linked attachments.
-   * 
-   * @return URI file locations
-   */
-  URI[] getAttachments();
 
   /**
    * Get the result item segment list.

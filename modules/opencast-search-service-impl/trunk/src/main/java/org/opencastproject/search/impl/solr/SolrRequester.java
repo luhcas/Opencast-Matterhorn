@@ -16,13 +16,10 @@
 
 package org.opencastproject.search.impl.solr;
 
-import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
 import org.opencastproject.search.impl.MediaSegmentImpl;
@@ -39,10 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -297,25 +291,8 @@ public class SolrRequester {
           mediaPackage = builder
                   .loadFromManifest(new ByteArrayInputStream(mediaPackageFieldValue.toString().getBytes()));
           item.setMediaPackage(mediaPackage);
-
-          // setting file locations
-          List<URI> media = new ArrayList<URI>();
-          for (Track track : mediaPackage.getTracks()) {
-            media.add(track.getURI());
-          }
-          item.setMedia(media);
-          List<URI> attachments = new ArrayList<URI>();
-          for (Attachment attachment : mediaPackage.getAttachments()) {
-            attachments.add(attachment.getURI());
-          }
-          item.setAttachments(attachments);
-          List<URI> catalogs = new ArrayList<URI>();
-          for (Catalog catalog : mediaPackage.getCatalogs()) {
-            catalogs.add(catalog.getURI());
-          }
-          item.setCatalogs(catalogs);
-
-        } catch (MediaPackageException e) {
+          item.setMediaPackageJaxb(MediapackageType.valueOf(mediaPackageFieldValue.toString()));
+        } catch (Exception e) {
           log_.warn("Unable to read media package from search result", e);
         }
       }

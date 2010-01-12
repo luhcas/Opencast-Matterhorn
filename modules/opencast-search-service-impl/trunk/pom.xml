@@ -157,7 +157,6 @@
               *;resolution:=optional
             </Import-Package>
             <Private-Package>
-              html,
               solr.*,
               org.tartarus.*;-split-package:=merge-first,
               org.apache.solr.*;-split-package:=merge-first,

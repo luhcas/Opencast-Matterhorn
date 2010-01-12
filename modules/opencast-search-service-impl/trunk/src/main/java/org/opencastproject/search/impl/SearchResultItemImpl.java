@@ -24,7 +24,6 @@ import org.opencastproject.search.api.SearchResultItem;
 
 import org.apache.commons.io.IOUtils;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -165,18 +164,6 @@ public class SearchResultItemImpl implements SearchResultItem {
   /** Media segment list **/
   @XmlElementWrapper(name = "media-segments")
   private SortedSet<MediaSegmentImpl> mediaSegments = null;
-
-  @XmlElementWrapper(name = "media")
-  @XmlElement(name = "url")
-  private List<URI> media;
-
-  @XmlElementWrapper(name = "catalogs")
-  @XmlElement(name = "url")
-  private List<URI> catalogs;
-
-  @XmlElementWrapper(name = "attachments")
-  @XmlElement(name = "url")
-  private List<URI> attachments;
 
   /**
    * {@inheritDoc}
@@ -554,19 +541,6 @@ public class SearchResultItemImpl implements SearchResultItem {
     return mediaPackage;
   }
 
-  public void setMedia(List<URI> media) {
-    this.media = media;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchResultItem#getMedia()
-   */
-  public URI[] getMedia() {
-    return media.toArray(new URI[media.size()]);
-  }
-
   public MediapackageType getMediaPackageJaxb() {
     if (mediaPackageJaxb == null && mediaPackage != null) {
       try {
@@ -708,31 +682,5 @@ public class SearchResultItemImpl implements SearchResultItem {
       return o2.getIndex() - o1.getIndex();
     }
 
-  }
-
-  public synchronized void setCatalogs(List<URI> catalogs) {
-    this.catalogs = catalogs;
-  }
-
-  public synchronized void setAttachments(List<URI> attachments) {
-    this.attachments = attachments;
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.search.api.SearchResultItem#getAttachments()
-   */
-  @Override
-  public URI[] getAttachments() {
-    return attachments.toArray(new URI[attachments.size()]);
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.search.api.SearchResultItem#getCatalogs()
-   */
-  @Override
-  public URI[] getCatalogs() {
-    return catalogs.toArray(new URI[catalogs.size()]);
   }
 }
