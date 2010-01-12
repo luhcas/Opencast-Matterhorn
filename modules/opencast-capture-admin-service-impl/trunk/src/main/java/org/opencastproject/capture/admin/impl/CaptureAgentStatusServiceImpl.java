@@ -72,6 +72,13 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
       logger.debug("Setting Agent {} to state {}.", agentName, state);
       req.setState(state);
     } else {
+      if (agentName == null || agentName.equals("")) {
+        logger.debug("Unable to set agent state, agent name is blank or null");
+        return;
+      } else if (state == null) {
+        logger.debug("Unable to set agent state, no state specified");
+        return;
+      }
       logger.debug("Creating Agent {} with state {}.", agentName, state);
       Agent a = new Agent(agentName, state);
       agents.put(agentName, a);
@@ -131,6 +138,10 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
       logger.debug("Setting Recording {} to state {}.", id, state);
       req.setState(state);
     } else {
+      if (id == null || id.equals("")) {
+        logger.debug("Unable to set agent state, agent name is blank or null");
+        return;
+      }
       logger.debug("Creating Recording {} with state {}.", id, state);
       Recording r = new Recording(id, state);
       recordings.put(id, r);

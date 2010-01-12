@@ -53,17 +53,19 @@ public class StopCaptureJob implements Job {
     try {
       // Extract the Capture Agent to stop the capture ASAP
       CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(SchedulerImpl.CAPTURE_AGENT);
-      ca.stopCapture();
-      
+
       // Extract the recording ID
       String recordingID = ctx.getMergedJobDataMap().getString(RECORDING_ID);
-      
+
+      //This needs to specify which job to stop - otherwise we could end up stopping something else if the expected job failed earlier.
+      ca.stopCapture(recordingID);
+
       // Create job and trigger
       JobDetail job = new JobDetail("SerializeJob", Scheduler.DEFAULT_GROUP, SerializeJob.class);
       // TODO: Should we need a cron trigger in case the serialization fails? 
       // Or do we assume that is an unrecoverable error?
       SimpleTrigger trigger = new SimpleTrigger("SerializeJobTrigger", Scheduler.DEFAULT_GROUP, new Date());
-      trigger.getJobDataMap().put(RECORDING_ID, recordingID);
+      trigger.getJobDataMap().put(StopCaptureJob.RECORDING_ID, recordingID);
       trigger.getJobDataMap().put(SchedulerImpl.CAPTURE_AGENT, ca);
 
       //Schedule the serializeJob

@@ -40,8 +40,15 @@ import net.fortuna.ical4j.model.property.Duration;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
-import org.opencastproject.capture.impl.jobs.StartCaptureJob;
+import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.impl.jobs.PollCalendarJob;
+import org.opencastproject.capture.impl.jobs.StartCaptureJob;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
@@ -93,6 +100,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /** The configuration for this service */
   private ConfigurationManager config = null;
+
+  private CaptureAgent captureAgent = null;
 
   public void deactivate() {
     shutdown();
@@ -164,6 +173,14 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     } catch (IOException e) {
       throw new RuntimeException("IOException, unable to load Quartz properties file for capture scheduling.");
     }
+  }
+
+  public void setCaptureAgent(CaptureAgent agent) {
+    captureAgent = agent;
+  }
+
+  public void unsetCaptureAgent() {
+    captureAgent = null;
   }
 
   /**
@@ -411,6 +428,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           }
         }
 
+        MediaPackage pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
         //For each attachment
         while (iter.hasNext()) {
           Property p = iter.next();
@@ -422,41 +440,25 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           }
           String contents = getAttachmentAsString(p);
 
-          //If the file is not the properties file for the capture, store it
-          //Otherwise put it into the job's detail package
+          //Handle any attachments
           //TODO:  Should this string be hardcoded?
-          if (!filename.equals("capture.properties")) {
-            try {
-              URL u = new File(captureDir, filename).toURI().toURL();
-              writeFile(u, contents);
-            } catch (MalformedURLException e) {
-              log.warn("Malformed URL exception while trying to write capture.properties file for {}!", start.toString());
-            } catch (NullPointerException e) {
-              log.warn("Null Pointer exception while trying to write capture.properties file for {}: {}", start.toString(), e.getMessage());
-            }
-          } else {
-            //Create a properties object and put it into the job's data map for access later
-            //TODO:  Watch for large memory usage here.  Each object is created when the calendar is loaded and then must live until the job fires (4+ months?)
-            //TODO:  What happens if there are multiple capture.properties?
-            try {
-              Properties temp = new Properties();
-              temp.load(new StringReader(contents));
+          if (filename.equals("agent.properties")) {
+            Properties jobProps = new Properties();
+            jobProps.load(new StringReader(contents));
+            jobProps.putAll(props);
+            job.getJobDataMap().put(StartCaptureJob.CAPTURE_PROPS, jobProps);
+            hasProperties = true;
+          } else if (filename.equals("metadata.xml")) {
+            pack.add(new File(captureDir, filename).toURI(), MediaPackageElement.Type.Attachment, MediaPackageElements.DUBLINCORE_CATALOG);
 
-              for (Object key : temp.keySet()) {
-                props.setProperty((String) key, (String) temp.get(key));
-              }
-
-              props.store(new FileWriter(new File(captureDir, filename)), "");
-
-              hasProperties = true;
-            } catch (IOException e) {
-              log.warn("Unable to read from capture.properties file, using defaults for this capture.");
-            }
+            job.getJobDataMap().put(StartCaptureJob.MEDIA_PACKAGE, pack);
           }
+          URL u = new File(captureDir, filename).toURI().toURL();
+          writeFile(u, contents);
         }
-        //Put the properties into the job
-        job.getJobDataMap().put(StartCaptureJob.CAPTURE_PROPS, props);
-        
+
+        job.getJobDataMap().put(SchedulerImpl.CAPTURE_AGENT, captureAgent);
+
         if (!hasProperties) {
           log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", start.toString());
         }
@@ -471,6 +473,19 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       log.error("Invalid scheduling data: {}.", e.getMessage());
     } catch (ParseException e) {
       log.error("Parsing error: {}.", e.getMessage());
+    } catch (org.opencastproject.util.ConfigurationException e) {
+      log.error("Configuration exception: {}.", e.getMessage());
+    } catch (MediaPackageException e) {
+      log.error("MediaPackageException exception: {}.", e.getMessage());
+    } catch (IllegalArgumentException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (UnsupportedElementException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
   }
 

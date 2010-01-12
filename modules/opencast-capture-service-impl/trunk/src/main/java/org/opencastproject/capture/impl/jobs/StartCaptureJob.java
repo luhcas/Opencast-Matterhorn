@@ -15,25 +15,22 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
+import java.text.ParseException;
+import java.util.Properties;
+
 import org.opencastproject.capture.impl.CaptureAgentImpl;
 import org.opencastproject.capture.impl.CaptureParameters;
 import org.opencastproject.capture.impl.SchedulerImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
-
+import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SimpleTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.Properties;
 
 /**
  * The class responsible for starting a capture.
@@ -86,10 +83,10 @@ public class StartCaptureJob implements Job {
     try {
 
       // Get the stopCaptureJob scheduling ready in case something happens, so we don't need to stop the capture afterwards
-      Date time2Stop = DateFormat.getDateInstance().parse(props.getProperty(CaptureParameters.RECORDING_END));
+      String time2Stop = props.getProperty(CaptureParameters.RECORDING_END);
 
       JobDetail job = new JobDetail("StopCapture", Scheduler.DEFAULT_GROUP, StopCaptureJob.class);
-      SimpleTrigger trigger = new SimpleTrigger("StopCaptureTrigger", Scheduler.DEFAULT_GROUP, time2Stop);
+      CronTrigger trigger = new CronTrigger("StopCaptureTrigger", Scheduler.DEFAULT_GROUP, time2Stop);
 
       trigger.getJobDataMap().put(SchedulerImpl.CAPTURE_AGENT, ca);
 
