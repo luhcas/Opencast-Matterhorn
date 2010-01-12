@@ -81,5 +81,12 @@ public interface SchedulerService {
    * @return A Java Properties file with the metadata
    */
   public String getCaptureAgentMetadata (String eventID);
+  
+  /**
+   * Looks for events that are conflicting with the given event, because they use the same recorder at the same time
+   * @param e The event that should be checked
+   * @return All events that are in conflict.
+   */  
+  public SchedulerEvent [] findConflictingEvents (SchedulerEvent e);  
 }
 
