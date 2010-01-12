@@ -35,6 +35,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -114,7 +115,7 @@ public class SchedulerRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("getDublinCoreMetadata/{eventID}")
-  public Response getDublinCoreMetadata(@QueryParam("eventID") String eventID) {
+  public Response getDublinCoreMetadata(@PathParam("eventID") String eventID) {
     String result = service.getDublinCoreMetadata(eventID);
     if (result == null) return Response.status(Status.BAD_REQUEST).build();
     return Response.ok(result).build();
@@ -128,7 +129,7 @@ public class SchedulerRestService {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("getCaptureAgentMetadata/{eventID}")
-  public Response getCaptureAgentMetadata(@QueryParam("eventID") String eventID) {
+  public Response getCaptureAgentMetadata(@PathParam("eventID") String eventID) {
     String result = service.getCaptureAgentMetadata(eventID);
     if (result == null) return Response.status(Status.BAD_REQUEST).build();
     return Response.ok(result).build();
@@ -165,7 +166,7 @@ public class SchedulerRestService {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("removeEvent/{eventID}")
-  public Response removeEvent (@QueryParam("eventID") String eventID) {
+  public Response removeEvent (@PathParam("eventID") String eventID) {
     return Response.ok(service.removeEvent(eventID)).build();
   }
   
@@ -283,7 +284,7 @@ public class SchedulerRestService {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("getCalendarForCaptureAgent/{captureAgentID}")
-  public Response getCalendarForCaptureAgent (@QueryParam("captureAgentID") String captureAgentID) {
+  public Response getCalendarForCaptureAgent (@PathParam("captureAgentID") String captureAgentID) {
     String result = service.getCalendarForCaptureAgent(captureAgentID);
     if (result == null) return Response.status(Status.BAD_REQUEST).build();
     return Response.ok(result).build();

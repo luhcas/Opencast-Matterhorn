@@ -77,7 +77,7 @@ public class DublinCoreGenerator {
     DublinCoreCatalog dcCatalog = DublinCoreCatalogImpl.newInstance();
 
     dcCatalog.add(DublinCoreCatalog.PROPERTY_IDENTIFIER, new DublinCoreValue(event.getID()));
-    dcCatalog.add(DublinCoreCatalog.PROPERTY_DATE, new DublinCoreValue(event.getStartdate().toString()));
+    dcCatalog.add(DublinCoreCatalog.PROPERTY_CREATED, new DublinCoreValue(event.getStartdate().toString()));
     Enumeration<String> keys = dcMetadata.keys();
     while (keys.hasMoreElements()) {
       String key = keys.nextElement();

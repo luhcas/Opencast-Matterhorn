@@ -369,6 +369,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   public SchedulerEvent[] getEvents(SchedulerFilter filter) {
     String query = "SELECT DISTINCT EVENT.eventid as eventid, startdate, enddate FROM EVENT JOIN EVENTMETADATA ON EVENT.eventid = EVENTMETADATA.eventid ";
     String where = ""; 
+    logger.debug ("Filter = "+ filter);
     if (filter != null) {
       query += " WHERE ";
       if (filter.getDeviceFilter() != null) {
@@ -399,6 +400,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     try {
       con = getConnection();
       s = con.prepareStatement(query+where); // TODO use PreparedStatement more in the intended way
+      logger.debug("Query for Events: "+s);
       ResultSet rs = s.executeQuery();
       while (rs.next()) {
         SchedulerEvent e = getEvent(rs.getString("eventid"));
