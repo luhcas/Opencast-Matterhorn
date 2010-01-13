@@ -15,6 +15,8 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.opencastproject.capture.admin.api.AgentState;
+
 import org.osgi.service.command.CommandSession;
 
 /**
@@ -49,9 +51,11 @@ public class CaptureAgentShellCommands {
    * Tells the capture agent to start capturing with the default set of properties.
    */
   public void start(CommandSession session, String[] args) {
-    if (recordingId != null) {
-      System.err.println("There is already a recording running (" + recordingId + ")");
+    if (!AgentState.IDLE.equals(agent.getAgentState())) {
+      System.err.println("The agent is currently busy (" + recordingId + ")");
       return;
+    } else if (recordingId != null) {
+      System.err.println("Skipping recording " + recordingId + "");
     }
     recordingId = agent.startCapture();
     System.out.println("Recording " + recordingId +  " started");
@@ -73,6 +77,7 @@ public class CaptureAgentShellCommands {
       System.err.println("Nothing has been recorded");
       return;
     }
+    agent.createManifest(recordingId);
     System.out.println("Zipping recording (" + recordingId + ")");
     agent.zipFiles(recordingId);
     System.out.println("Ingesting recording (" + recordingId + ")");

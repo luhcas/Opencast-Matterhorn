@@ -31,6 +31,7 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.util.ZipUtil;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -50,6 +51,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -249,6 +252,26 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       if (everythingOk) {
         logger.info("Preparing for mock capture.");
         mockCapture = true;
+
+        for (String device : deviceList) {
+          String key = "capture.device." + device + ".src";
+          String value = (String)properties.get(key);
+          File src = new File(value);
+          String destFileNameKey = CaptureParameters.CAPTURE_DEVICE_PREFIX  + device + CaptureParameters.CAPTURE_DEVICE_DEST;
+          String destFileName = (String)properties.get(destFileNameKey);
+          File dest = new File(newRec.getDir(), destFileName);
+          logger.debug("Copying mock file {} to {}", src, dest);
+          try {
+            IOUtils.copy(new FileInputStream(src), new FileOutputStream(dest));
+          } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+
         return recordingID;
       }
     }
@@ -383,8 +406,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   public boolean createManifest(String recID) {
 
-    RecordingImpl recording = pendingRecordings.get(recID);
-
+    RecordingImpl recording = pendingRecordings.get(recID);    
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
       return false;
@@ -502,7 +524,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     filesToZip.add(recording.getManifest());
     
     for (MediaPackageElement item : mpElements) {
-
       File tmpFile = new File(item.getURI().normalize());
       // TODO: Is this really a warning or should we fail completely and return an error?
       if (!tmpFile.exists())
@@ -524,9 +545,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * @param fileDesc : The descriptor for the media package
    */
   public int ingest(String recID) {
-
+    
     RecordingImpl recording = pendingRecordings.get(recID);
-
+    
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
       return -1;
