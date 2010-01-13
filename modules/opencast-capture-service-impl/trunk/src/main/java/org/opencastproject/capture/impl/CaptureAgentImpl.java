@@ -74,7 +74,7 @@ import javax.xml.transform.stream.StreamResult;
  */
 public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
-
+  
   // TODO: move outside
   //private static final long default_capture_length = 1 * 60 * 60 * 1000; //1 Hour
 
@@ -96,6 +96,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   
   /** Indicates the ID of the recording currently being recorded **/
   private String currentRecID = null;
+  
+  /** Capturing files only? */
+  private boolean mockCapture = false;
 
   public CaptureAgentImpl() {
     logger.info("Starting CaptureAgentImpl.");
@@ -149,7 +152,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return null;
     }
 
-    return startCapture(pack, null);
+    return startCapture(pack, ConfigurationManager.getInstance().getAllProperties());
   }
 
   /**
@@ -162,7 +165,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     logger.info("Starting capture using default values for the capture properties and a passed in media package.");
 
-    return startCapture(mediaPackage, null);
+    return startCapture(mediaPackage, ConfigurationManager.getInstance().getAllProperties());
 
   }
 
@@ -231,9 +234,23 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       currentRecID = recordingID;
     }
 
-
-    logger.info("Initializing devices for capture.");
-
+    // Is this a "mock" capture?
+    mockCapture = false;
+    if (properties != null && properties.get(CaptureParameters.CAPTURE_DEVICE_NAMES) != null) {
+      String[] deviceList = ((String)properties.get(CaptureParameters.CAPTURE_DEVICE_NAMES)).split(",");
+      boolean everythingOk = true;
+      for (String device : deviceList) {
+        String key = "capture.device." + device + ".src";
+        String value = (String)properties.get(key);
+        if (value == null || !(new File(value).isFile()))
+          everythingOk = false;
+      }
+      if (everythingOk) {
+        logger.info("Preparing for mock capture.");
+        mockCapture = true;
+        return recordingID;
+      }
+    }
 
     pipe = PipelineFactory.create(newRec.getProperties());
 
@@ -241,8 +258,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       logger.error("Capture {} could not start, pipeline was null!", recordingID);
       setAgentState(AgentState.IDLE);
       setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-      return null;
+      return recordingID;
     }
+
+    logger.info("Initializing devices for capture.");
 
     Bus bus = pipe.getBus();
     bus.connect(new Bus.EOS() {
@@ -281,7 +300,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   @Override
   public boolean stopCapture() {
-    if (pipe == null) {
+    if (pipe == null && !mockCapture) {
       logger.warn("Pipeline is null, unable to stop capture.");
       setAgentState(AgentState.IDLE);
       return false;
@@ -306,6 +325,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     //Update the states of everything.
     setRecordingState(theRec.getRecordingID(), RecordingState.CAPTURE_FINISHED);
     setAgentState(AgentState.IDLE);
+    
+    // No need to stop a pipeline if it's a mock capture
+    if (mockCapture)
+      return true;
 
     try {
       // Sending End Of Stream event to the Pipeline so its components stop appropriately
@@ -618,7 +641,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public void activate(ComponentContext ctx) {
     Dictionary<String, Object> commands = new Hashtable<String, Object>();
     commands.put(CommandProcessor.COMMAND_SCOPE, "capture");
-    commands.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "status", "start" });
+    commands.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "status", "start", "stop", "ingest", "reset" });
     logger.info("Registering capture agent osgi shell commands");
     ctx.getBundleContext().registerService(CaptureAgentShellCommands.class.getName(), new CaptureAgentShellCommands(this), commands);
   }

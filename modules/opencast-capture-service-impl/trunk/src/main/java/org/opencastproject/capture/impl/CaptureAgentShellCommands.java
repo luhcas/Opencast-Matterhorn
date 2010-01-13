@@ -15,8 +15,6 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.api.CaptureAgent;
-
 import org.osgi.service.command.CommandSession;
 
 /**
@@ -25,7 +23,10 @@ import org.osgi.service.command.CommandSession;
 public class CaptureAgentShellCommands {
 
   /** The agent that is being controlled */
-  private CaptureAgent agent = null;
+  private CaptureAgentImpl agent = null;
+  
+  /** Current recording identifier */
+  private String recordingId = null;
 
   /**
    * Creates a command object for the given capture agent.
@@ -33,7 +34,7 @@ public class CaptureAgentShellCommands {
    * @param agent
    *          the agent
    */
-  CaptureAgentShellCommands(CaptureAgent agent) {
+  CaptureAgentShellCommands(CaptureAgentImpl agent) {
     this.agent = agent;
   }
 
@@ -48,14 +49,42 @@ public class CaptureAgentShellCommands {
    * Tells the capture agent to start capturing with the default set of properties.
    */
   public void start(CommandSession session, String[] args) {
-    agent.startCapture();
+    if (recordingId != null) {
+      System.err.println("There is already a recording running (" + recordingId + ")");
+      return;
+    }
+    recordingId = agent.startCapture();
+    System.out.println("Recording " + recordingId +  " started");
   }
   
   /**
    * Tells the capture agent to stop capturing.
    */
   public void stop() {
-    agent.stopCapture();
+    agent.stopCapture(recordingId);
+    System.out.println("Recording " + recordingId +  " stopped");
   }
-  
+
+  /**
+   * Tells the capture agent to 
+   */
+  public void ingest() {
+    if (recordingId == null) {
+      System.err.println("Nothing has been recorded");
+      return;
+    }
+    System.out.println("Zipping recording (" + recordingId + ")");
+    agent.zipFiles(recordingId);
+    System.out.println("Ingesting recording (" + recordingId + ")");
+    agent.ingest(recordingId);
+    recordingId = null;
+  }
+
+  /**
+   * Tells the capture agent to forget about the current recording
+   */
+  public void reset() {
+    recordingId = null;
+  }
+
 }
