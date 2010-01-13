@@ -10,7 +10,6 @@
 Opencast.ariaSlider = (function () 
 {
     var gDragging    = '',
-    	test = 1,
         gDragOffset  = 0,
         sliderVolume = 'slider_volume_Thumb',
         sliderSeek   = 'slider_seek_Thumb';
@@ -124,7 +123,7 @@ Opencast.ariaSlider = (function ()
     */
     function changeValueFromVideodisplay(target, value) {
      
-    	var ratio = calibrate(target);
+        var ratio = calibrate(target);
         var min = parseFloat(target.getAttribute('aria-valuemin'));
         var max = parseFloat(target.getAttribute('aria-valuemax'));
         var newValue = Math.min(Math.max(value, min), max);

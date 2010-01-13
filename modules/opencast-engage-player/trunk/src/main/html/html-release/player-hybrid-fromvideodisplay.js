@@ -34,12 +34,12 @@ Opencast.FromVideodisplay = (function ()
     */
     function setDoUnmute() 
     {
-        if ($("#btn_volume").attr("value") === unmute) 
+        if ($("#btn_volume").attr("value") === mute) 
         {  
             $("#btn_volume").attr({ 
-                value: mute,
-                alt: mute,
-                title: mute
+                value: unmute,
+                alt: unmute,
+                title: unmute
             });
             $("#btn_volume").attr("className", "oc-btn-volume-high");
         }
@@ -67,7 +67,7 @@ Opencast.FromVideodisplay = (function ()
     function setCurrentTime(text) 
     {
         $("#time-current").text(text);
-        $("#time-current").attr("value",text)
+        $("#time-current").attr("value", text);
         $("#slider_seek_Rail").attr("title", "Time " + text);
     }
 
@@ -112,21 +112,23 @@ Opencast.FromVideodisplay = (function ()
         if (bool === true)
         {
             $("#btn_cc").attr({ 
-                value: ccoff,
-                alt: ccoff,
-                title: ccoff
+                value: ccon,
+                alt: ccon,
+                title: ccon
             });
             $("#btn_cc").attr("className", "oc-btn-cc-on");
+            $("#btn_cc").attr('aria-pressed', 'true');
             Opencast.ToVideodisplay.setccBool(true);
         }
         else
         {
             $("#btn_cc").attr({ 
-                value: ccon,
-                alt: ccon,
-                title: ccon
+                value: ccoff,
+                alt: ccoff,
+                title: ccoff
             });
             $("#btn_cc").attr("className", "oc-btn-cc-off");
+            $("#btn_cc").attr('aria-pressed', 'false');
             Opencast.ToVideodisplay.setccBool(false);
         }
     }
@@ -144,7 +146,8 @@ Opencast.FromVideodisplay = (function ()
                 title: play
             });
            
-            $("#btn_play_pause").attr("className", "btn_play_out");
+            $("#btn_play_pause").attr('className', 'btn_play_out');
+            $("#btn_play_pause").attr('aria-pressed', 'false');
             
             if (Opencast.mouseOverBool === true)
             {
@@ -160,6 +163,7 @@ Opencast.FromVideodisplay = (function ()
             });
            
             $("#btn_play_pause").attr("className", "btn_pause_out");
+            $("#btn_play_pause").attr('aria-pressed', 'true');
             
             if (Opencast.mouseOverBool === true)
             {
@@ -194,9 +198,24 @@ Opencast.FromVideodisplay = (function ()
         $('#captions').empty().append(elm);
     }
     
-    function hearTimeInfo(aMsg)
+    /**
+        @memberOf Opencast.FromVideodisplay
+        @description Go to the function Opencast.global.addAlert(alertMessage).
+        @param Html text 
+    */
+    function hearTimeInfo(alertMessage)
     {
-       Opencast.global.addAlert(aMsg);
+        Opencast.global.addAlert(alertMessage);
+    }
+    
+    /**
+        @memberOf Opencast.FromVideodisplay
+        @description Go to the function Opencast.global.toggleInfo().
+    */
+    function toggleInfo()
+    {
+        Opencast.global.toggleInfo();
+     
     }
     
     return {
@@ -211,7 +230,7 @@ Opencast.FromVideodisplay = (function ()
         setDoUnmute : setDoUnmute,
         setCaptions : setCaptions,
         setDoMute : setDoMute,
-        hearTimeInfo : hearTimeInfo
-       
+        hearTimeInfo : hearTimeInfo,
+        toggleInfo : toggleInfo
     };
 }());

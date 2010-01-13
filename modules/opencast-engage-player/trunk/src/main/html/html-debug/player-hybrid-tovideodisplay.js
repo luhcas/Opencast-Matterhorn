@@ -119,13 +119,11 @@ Opencast.ToVideodisplay = (function ()
         // Checking if btn_play_pause is "play"
         if (currentPlayPauseState === pausing) 
         {
-            // Changing the volume to 1.0 and the value of the button of btn_volume to "unmute"
             Opencast.FromVideodisplay.setPlayPauseState(playing);
             doPlay();
         } 
         else 
         {
-            // Changing the volume to 0.0 and the value of the button of btn_volume to "mute"
             Opencast.FromVideodisplay.setPlayPauseState(pausing);
             doPause();
         }
@@ -168,11 +166,13 @@ Opencast.ToVideodisplay = (function ()
     {
         doClosedCaptions(true);
         $("#btn_cc").attr({ 
-            value: ccoff,
-            alt: ccoff,
-            title: ccoff
+            value: ccon,
+            alt: ccon,
+            title: ccon
         });
+        
         $("#btn_cc").attr("className", "oc-btn-cc-on");
+        $("#btn_cc").attr('aria-pressed', 'true');
     }
 
     /**
@@ -183,11 +183,12 @@ Opencast.ToVideodisplay = (function ()
     {
         doClosedCaptions(false);
         $("#btn_cc").attr({ 
-            value: ccon,
-            alt: ccon,
-            title: ccon
+            value: ccoff,
+            alt: ccoff,
+            title: ccoff
         });
         $("#btn_cc").attr("className", "oc-btn-cc-off");
+        $("#btn_cc").attr('aria-pressed', 'false');
     }
 
     /**
@@ -198,7 +199,7 @@ Opencast.ToVideodisplay = (function ()
     function doToogleClosedCaptions() 
     {
         // Checking if btn_cc is "CC off"
-        if ($("#btn_cc").attr("value") === ccon) 
+        if ($("#btn_cc").attr("value") === ccoff) 
         {
             setccBool(true);
             Videodisplay.setccBool(true);
@@ -228,14 +229,16 @@ Opencast.ToVideodisplay = (function ()
     function doToggleVolume() 
     {
         // Checking if btn_volume is "mute"
-        if ($("#btn_volume").attr("value") === mute) 
+        if ($("#btn_volume").attr('value') === unmute) 
         {
             $("#btn_volume").attr({ 
-                value: unmute,
-                alt: unmute,
-                title: unmute
+                value: mute,
+                alt: mute,
+                title: mute
             });
-            $("#btn_volume").attr("className", "oc-btn-volume-mute");
+            $("#btn_volume").attr('className', 'oc-btn-volume-mute');
+            $("#btn_volume").attr('aria-pressed', 'true');
+            
             doSetVolume(0);
             // When the Button cc is not press before
             if (getccBool() === false)
@@ -246,11 +249,13 @@ Opencast.ToVideodisplay = (function ()
         else 
         {
             $("#btn_volume").attr({ 
-                value: mute,
-                alt: mute,
-                title: mute
+                value: unmute,
+                alt: unmute,
+                title: unmute
             });
-            $("#btn_volume").attr("className", "oc-btn-volume-high");
+            $("#btn_volume").attr('className', 'oc-btn-volume-high');
+            $("#btn_volume").attr('aria-pressed', 'false');
+            
             doSetVolume(Opencast.volume);
             // When the Button cc is not press before
             if (getccBool() === false)
@@ -296,16 +301,9 @@ Opencast.ToVideodisplay = (function ()
             {
                 doToggleVolume();
             }
-            
-            if (e.which === 84 || e.which === 116) // t or T
-            {
-            	Opencast.global.addAlert($("#time-current").attr("value"));
-            }
-            
-            if (e.which === 80 || e.which === 112 || e.which === 83 || e.which === 84 || e.which === 116 || e.which === 115 || e.which === 77 || e.which === 109 || e.which === 85 || e.which === 117  || e.which === 68 || e.which === 100 || e.which === 48 || e.which === 49 || e.which === 50 || e.which === 51 || e.which === 52 || e.which === 53 || e.which === 54  || e.which === 55 || e.which === 56 || e.which === 57 || e.which === 67 || e.which === 99 || e.which === 82 || e.which === 114 || e.which === 70 || e.which === 102 || e.which === 83 || e.which === 115)
+            if (e.which === 80 || e.which === 112 || e.which === 83 || e.which === 84 || e.which === 116 || e.which === 115 || e.which === 77 || e.which === 109 || e.which === 85 || e.which === 117  || e.which === 68 || e.which === 100 || e.which === 48 || e.which === 49 || e.which === 50 || e.which === 51 || e.which === 52 || e.which === 53 || e.which === 54  || e.which === 55 || e.which === 56 || e.which === 57 || e.which === 67 || e.which === 99 || e.which === 82 || e.which === 114 || e.which === 70 || e.which === 102 || e.which === 83 || e.which === 115 || e.which === 73 || e.which === 105)
             {
                 Videodisplay.passCharCode(e.which);
-               
             }
             if (e.which === 85 || e.which === 68) // press arrow up or down
             {

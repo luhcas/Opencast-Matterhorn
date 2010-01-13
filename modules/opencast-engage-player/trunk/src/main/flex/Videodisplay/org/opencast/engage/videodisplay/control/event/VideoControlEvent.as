@@ -41,7 +41,8 @@ package org.opencast.engage.videodisplay.control.event
 		public static var SEEKNINE : String         = "seekNine";
 		public static var VOLUMEUP : String			= "volumeUp";
 		public static var VOLUMEDOWN : String		= "volumeDown";
-		public static var TIME : String             = "time";
+		public static var HEARTIMEINFO : String     = "hearTimeInfo";
+		public static var INFORMATION : String      = "Information";
 		
 		
 		private var _videoControlType : String;

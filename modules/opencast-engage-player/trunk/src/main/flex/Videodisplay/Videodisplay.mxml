@@ -362,18 +362,21 @@
 				else if(charCode == 70 || charCode == 102) // F or f
 				{
 					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.FASTFORWARD));	
-				}	
+				}
+					
 				// time
-                else if(charCode == 84 || charCode == 116) // t
+                else if(charCode == 84 || charCode == 116) // T or t
                 {
-                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.TIME));  
+                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.HEARTIMEINFO));  
                 }
-							
+                
+                // Information
+                else if(charCode == 73 || charCode == 105) // I or i
+                {
+                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.INFORMATION));  
+                }
 			}
-			
-			
-      		
-  		]]>
+		]]>
 	</mx:Script>
 	<ns1:FABridge />
 	

@@ -21,7 +21,6 @@ package org.opencast.engage.videodisplay.control
 	import flash.external.ExternalInterface;
 	import flash.utils.Timer;
 	
-	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.IResponder;
@@ -194,13 +193,13 @@ package org.opencast.engage.videodisplay.control
                                                         ExternalInterface.call(ExternalFunction.SETCAPTIONSBUTTON, model.ccBoolean);
                                                         break;         
                                                    
-                case VideoControlEvent.TIME:            Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));
+                case VideoControlEvent.HEARTIMEINFO:    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE ));
                                                         ExternalInterface.call(ExternalFunction.HEARTIMEINFO, model.timeCode.getTC( model.currentPlayhead) );
-                                                        showTimeInformationTimer = new Timer(4000,1);
-										                showTimeInformationTimer.addEventListener( TimerEvent.TIMER, timerComplete );
-										                showTimeInformationTimer.start();
-										                
-										                
+                                                        break;  
+                                                        
+                case VideoControlEvent.INFORMATION:     ExternalInterface.call(ExternalFunction.TOGGLEINFO, '' );           
+                                                        break;                             
+
                                                                                                                                          
             }
 		}

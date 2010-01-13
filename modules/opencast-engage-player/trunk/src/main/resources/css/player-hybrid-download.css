@@ -16,11 +16,33 @@
 	font-size:          1em;
 }
 
+
 #info
 {
     margin-left:        10px; 
     margin-right:       10px; 
     margin-top:         70px;
+}
+
+.oc_infoDisplayBlock
+{
+    display:            block;
+    margin-left:        10px; 
+    margin-right:       10px; 
+    margin-top:         10px;
+
+}
+
+.oc_infoDisplayNone
+{
+    display:            none;
+}
+
+.oc_btn_info
+{
+    overflow:           hidden;
+    cursor:             pointer; /* hand-shaped cursor */
+    cursor:             hand; /* for IE 5.x */
 }
 
 .oc-controls 

@@ -12,7 +12,7 @@ Opencast.mouseOverBool = false;
 
 $(document).ready(function () {
   
-     Opencast.ariaSlider.init();
+	Opencast.ariaSlider.init();
     
     var simpleEdit = fluid.inlineEdit("#simpleEdit", {
         selectors : {
@@ -23,6 +23,16 @@ $(document).ready(function () {
         useTooltip : true,
         tooltipDelay : 500
     });
+    
+    $("#btn_cc").attr('role','button');
+    $("#btn_cc").attr('aria-pressed','false'); 
+
+    $("#btn_volume").attr('role','button');
+    $("#btn_volume").attr('aria-pressed','false');
+
+    $("#btn_play_pause").attr('role','button');
+    $("#btn_play_pause").attr('aria-pressed','false');
+
 });
 
 /**
@@ -33,7 +43,8 @@ Opencast.global = (function () {
     var playing = "playing",
     pausing     = "pausing",
     unmute      = "Unmute",
-    mute        = "Mute";
+    mute        = "Mute",
+    infoBool    = false;
 
     /**
         @memberOf Opencast.global
@@ -80,18 +91,50 @@ Opencast.global = (function () {
         }
     }
     
+ 
+    /**
+        @memberOf Opencast.global
+        @description Remove the alert div.
+    */
+    function removeOldAlert()
+    {
+        var oldAlert = document.getElementById("alert");
+        if (oldAlert)
+        {
+            document.body.removeChild(oldAlert);
+        }
+    }
+
+    /**
+        @memberOf Opencast.global
+        @description Remove the old alert div and create an new div with the aria role alert.
+        @param String alertMessage
+    */
+    function addAlert(alertMessage)
+    {
+        removeOldAlert();
+        var newAlert = document.createElement("div");
+        newAlert.setAttribute("role", "alert");
+        newAlert.setAttribute("id", "alert");
+        newAlert.setAttribute("class", "fl-offScreen-hidden");
+        var msg = document.createTextNode(alertMessage);
+        newAlert.appendChild(msg);
+        document.body.appendChild(newAlert);
+    }
+
+    
     /**
         @memberOf Opencast.global
         @description When the learner edit the current time.
     */
-    function editTime() 
+    function editTime()
     {
+    
         var timeString = $("#editField").attr("value");
-        
         timeString = timeString.replace(/[-\/]/g, ':'); 
         timeString = timeString.replace(/[^0-9: ]/g, ''); 
         timeString = timeString.replace(/ +/g, ' '); 
-        
+    
         var time = timeString.split(':');
 
         try
@@ -99,18 +142,16 @@ Opencast.global = (function () {
             var seekHour = parseInt(time[0], 10);
             var seekMinutes = parseInt(time[1], 10);
             var seekSeconds = parseInt(time[2], 10);
-          
+      
         }
         catch (exception) 
         {
-        	addAlert('Wrong Time enter like this: HH:MM:SS');
-        	
+            addAlert('Wrong Time enter like this: HH:MM:SS');
         }
-        
+       
         if (seekHour > 99 || seekMinutes > 59 || seekSeconds > 59)
         {
-        	addAlert('Wrong Time enter like this: HH:MM:SS');
-        	
+            addAlert('Wrong Time enter like this: HH:MM:SS');
         } 
         else 
         {
@@ -119,31 +160,28 @@ Opencast.global = (function () {
         }
     }
     
-    function removeOldAlert()
-    {
-      var oldAlert = document.getElementById("alert");
-      if (oldAlert)
-        document.body.removeChild(oldAlert);
+    /**
+        @memberOf Opencast.global
+        @description Toggle between Keyboard Shurtcuts visible or unvisible.
+    */
+    function toggleInfo() {
+        if (infoBool === false)
+        {
+            $("#infoBlock").attr("className", "oc_infoDisplayBlock");
+            addAlert( $("#infoBlock").text());
+            infoBool = true;
+        }
+        else if (infoBool === true)
+        {
+            $("#infoBlock").attr("className", "oc_infoDisplayNone");
+            infoBool = false;
+        }
     }
-
-    function addAlert(aMsg)
-    {
-      Opencast.ToVideodisplay.doPause();
-      removeOldAlert();
-      var newAlert = document.createElement("div");
-      newAlert.setAttribute("role", "alert");
-      newAlert.setAttribute("id", "alert");
-      newAlert.setAttribute("class", "fl-offScreen-hidden");
-      var msg = document.createTextNode(aMsg);
-      newAlert.appendChild(msg);
-      document.body.appendChild(newAlert);
-    }
-
 
     /**
         @memberOf Opencast.global
         @description When the learner press a key.
-        @param event evt
+        @param Event evt
     */
     function keyListener(evt) {
         var charCode;
@@ -162,7 +200,6 @@ Opencast.global = (function () {
         {
             editTime(); 
         }
-        
     }
     
     return {
@@ -172,6 +209,7 @@ Opencast.global = (function () {
         editTime : editTime,
         keyListener : keyListener,
         addAlert : addAlert,
-        removeOldAlert : removeOldAlert
+        removeOldAlert : removeOldAlert,
+        toggleInfo : toggleInfo
     };
 }());
