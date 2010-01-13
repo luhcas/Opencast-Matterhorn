@@ -31,7 +31,7 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.util.ZipUtil;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -51,7 +51,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -103,6 +102,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   /** Capturing files only? */
   private boolean mockCapture = false;
 
+  private static final String samplesDir = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "samples";
+  
   public CaptureAgentImpl() {
     logger.info("Starting CaptureAgentImpl.");
     setAgentState(AgentState.IDLE);
@@ -243,10 +244,11 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     if (properties != null && properties.get(CaptureParameters.CAPTURE_DEVICE_NAMES) != null) {
       String[] deviceList = ((String)properties.get(CaptureParameters.CAPTURE_DEVICE_NAMES)).split(",");
       boolean everythingOk = true;
+      File f = new File(samplesDir);
       for (String device : deviceList) {
-        String key = "capture.device." + device + ".src";
+        String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
         String value = (String)properties.get(key);
-        if (value == null || !(new File(value).isFile()))
+        if (value == null || !(new File(f, value).isFile()))
           everythingOk = false;
       }
       if (everythingOk) {
@@ -256,19 +258,17 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         for (String device : deviceList) {
           String key = "capture.device." + device + ".src";
           String value = (String)properties.get(key);
-          File src = new File(value);
+          File src = new File(f, value);
           String destFileNameKey = CaptureParameters.CAPTURE_DEVICE_PREFIX  + device + CaptureParameters.CAPTURE_DEVICE_DEST;
           String destFileName = (String)properties.get(destFileNameKey);
           File dest = new File(newRec.getDir(), destFileName);
           logger.debug("Copying mock file {} to {}", src, dest);
           try {
-            IOUtils.copy(new FileInputStream(src), new FileOutputStream(dest));
+            FileUtils.copyFile(src, dest);
           } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
           } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
           }
         }
 
@@ -664,9 +664,26 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public void activate(ComponentContext ctx) {
     Dictionary<String, Object> commands = new Hashtable<String, Object>();
     commands.put(CommandProcessor.COMMAND_SCOPE, "capture");
-    commands.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "status", "start", "stop", "ingest", "reset" });
+    commands.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "status", "start", "stop", "ingest", "reset", "capture" });
     logger.info("Registering capture agent osgi shell commands");
     ctx.getBundleContext().registerService(CaptureAgentShellCommands.class.getName(), new CaptureAgentShellCommands(this), commands);
+    copyMediaToFiles();
+  }
+
+  /**
+   * Copy sample media included in the bundle to java.io.tmpdir/opencast/samples.
+   */
+  protected void copyMediaToFiles() {
+    File tmpDir = new File(samplesDir);
+    try {
+      tmpDir.mkdirs();
+      logger.info("Preparing sample media");
+      FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/audio.mp3"), new File(tmpDir, "audio.mp3"));
+      FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/screen.mpg"), new File(tmpDir, "screen.mpg"));
+      FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/camera.mpg"), new File(tmpDir, "camera.mpg"));
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to copy media to " + tmpDir, e);
+    }
   }
 
 }

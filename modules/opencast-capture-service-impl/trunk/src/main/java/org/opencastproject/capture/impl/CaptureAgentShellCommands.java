@@ -17,8 +17,6 @@ package org.opencastproject.capture.impl;
 
 import org.opencastproject.capture.admin.api.AgentState;
 
-import org.osgi.service.command.CommandSession;
-
 /**
  * Implementation of shell commands for the capture agent.
  */
@@ -50,7 +48,7 @@ public class CaptureAgentShellCommands {
   /**
    * Tells the capture agent to start capturing with the default set of properties.
    */
-  public void start(CommandSession session, String[] args) {
+  public void start() {
     if (!AgentState.IDLE.equals(agent.getAgentState())) {
       System.err.println("The agent is currently busy (" + recordingId + ")");
       return;
@@ -90,6 +88,20 @@ public class CaptureAgentShellCommands {
    */
   public void reset() {
     recordingId = null;
+  }
+  
+  /**
+   * Starts and then stops a fake capture, then ingests the "captured" media. Same as calling
+   * <ul>
+   *  <li><code>start()</code></li>
+   *  <li><code>stop()</code></li>
+   *  <li><code>ingest()</code></li>
+   * </ul>
+   */
+  public void capture() {
+    start();
+    stop();
+    ingest();
   }
 
 }
