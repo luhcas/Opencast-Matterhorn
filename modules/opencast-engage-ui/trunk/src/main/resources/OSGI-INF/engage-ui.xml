@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="engage.ui" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.http.StaticResource" />
+  <property name="service.description" value="Engage UI" />
+  <property name="alias" value="/engage/ui" />
+  <property name="classpath" value="/ui" />
+  <property name="welcome.file" value="index.html" />
+
+  <property name="test.classpath" value="/uitests" />
+  <property name="test.suite" value="TestSuite.html" />
+  <service>
+    <provide interface="org.opencastproject.http.StaticResource" />
+  </service>
+  <reference name="http-service" interface="org.osgi.service.http.HttpService" cardinality="1..1" policy="static" bind="setHttpService"/>
+</component>
+
