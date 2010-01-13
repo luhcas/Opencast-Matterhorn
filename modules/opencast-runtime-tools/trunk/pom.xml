@@ -67,6 +67,21 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.webconsole</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.shell</artifactId>
+      <version>1.4.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix.gogo</groupId>
+      <artifactId>org.apache.felix.gogo.console</artifactId>
+      <version>0.2.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix.gogo</groupId>
+      <artifactId>org.apache.felix.gogo.runtime</artifactId>
+      <version>0.2.2</version>
+    </dependency>
 
     <!-- CXF -->
     <dependency>
