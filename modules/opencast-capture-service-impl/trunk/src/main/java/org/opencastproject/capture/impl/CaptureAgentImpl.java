@@ -231,7 +231,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
       return null;
     } else {
-      logger.warn("GDL: " + recordingID + "\n"+newRec.getProperties().toString());
       pendingRecordings.put(recordingID, newRec);
       currentRecID = recordingID;
     }
@@ -317,7 +316,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     }
 
     RecordingImpl theRec = pendingRecordings.get(currentRecID);
-    logger.warn("GDL: " + currentRecID + "\n"+theRec.getProperties().toString());
     File stopFlag = new File(theRec.getDir(), "capture.stopped");
 
     //Take the properties out of the class level variable so that we can start capturing again immediately without worrying about overwriting them.
@@ -386,7 +384,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public boolean createManifest(String recID) {
 
     RecordingImpl recording = pendingRecordings.get(recID);
-    logger.warn("GDL: " + recID + "\n"+recording.getProperties().toString());
+
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
       return false;
@@ -491,7 +489,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public File zipFiles(String recID) {
 
     RecordingImpl recording = pendingRecordings.get(recID);
-    logger.warn("GDL: " + recID + "\n"+recording.getProperties().toString());
+
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
       return null;
@@ -504,7 +502,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     filesToZip.add(recording.getManifest());
     
     for (MediaPackageElement item : mpElements) {
-      logger.info("GDL: \"" + item.getURI().toString() + "\" " + item.getURI().isAbsolute());
+
       File tmpFile = new File(item.getURI().normalize());
       // TODO: Is this really a warning or should we fail completely and return an error?
       if (!tmpFile.exists())
@@ -528,7 +526,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public int ingest(String recID) {
 
     RecordingImpl recording = pendingRecordings.get(recID);
-    logger.warn("GDL: " + recID + "\n"+recording.getProperties().toString());
+
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
       return -1;

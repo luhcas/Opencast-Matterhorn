@@ -151,7 +151,7 @@
               org.gstreamer,
               net.java.dev.jna,
               net.fortuna.ical4j.*,
-              org.apache.http.*
+              org.apache.http.*;-split-package:=merge-first
             </Private-Package>
             <Embed-Dependency>
               jv4linfo;inline=true,
