@@ -14,8 +14,13 @@ cat >&1 <<END
 ********************************************
 ** Installing third party components      **
 **                                        **
-** VM OS: $MY_OS    **
+** VM OS: $MY_OS        **
 ** VM IP: $MY_IP              **
+**                                        **
+** Matterhorn is installed in:            **
+**    Home:    /usr/local/matterhorn      **
+**    Bundles: /var/lib/matterhorn        **
+**    Config:  /etc/matterhorn            **
 **                                        **
 ** For further information, please visit  **
 **   http://www.opencastproject.org       **
@@ -43,12 +48,12 @@ install_3p ()
   wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   sudo dpkg -i libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   rm -f libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
-  wget http://downloads.sourceforge.net/mediainfo/libmediainfo0_0.7.19-1_i386.Ubuntu_9.04.deb
-  sudo dpkg -i libmediainfo0_0.7.19-1_i386.Ubuntu_9.04.deb
-  rm -f libmediainfo0_0.7.19-1_i386.Ubuntu_9.04.deb
-  wget http://downloads.sourceforge.net/mediainfo/mediainfo_0.7.19-1_i386.Debian_5.deb
-  sudo dpkg -i mediainfo_0.7.19-1_i386.Debian_5.deb
-  rm -f mediainfo_0.7.19-1_i386.Debian_5.deb
+  wget http://downloads.sourceforge.net/mediainfo/libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
+  sudo dpkg -i libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
+  rm -f libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
+  wget http://downloads.sourceforge.net/mediainfo/mediainfo_0.7.24-1_i386.Debian_5.deb
+  sudo dpkg -i mediainfo_0.7.24-1_i386.Debian_5.deb
+  rm -f mediainfo_0.7.24-1_i386.Debian_5.deb
 
   #ocr support
   echo "ocr support"
@@ -136,6 +141,9 @@ else
   # connected, start main task
   echo show_stat
 
+  echo "Default keyboard layout is US; Do you want to reconfigure? (y/n)"
+  read kbresp
+
   echo "Do you want to install 3rd party tools? (y/n)"
   read p3resp
 
@@ -143,7 +151,14 @@ else
   read ffresp
   
   echo "Installation Java and a few other items..."
-  sudo apt-get -y --force-yes install wget subversion sun-java6-jdk git-core
+  sudo apt-get -y --force-yes install wget subversion git-core
+
+  # Reconfigure Console?
+  if [ $kbresp = "y" ] || [ $kbresp = "Y" ]; then
+    sudo dpkg-reconfigure console-setup
+  else
+    echo "Keeping default keyboard layout."
+  fi
 
   # Install 3P tools?
   if [ $p3resp = "y" ] || [ $p3resp = "Y" ]; then
