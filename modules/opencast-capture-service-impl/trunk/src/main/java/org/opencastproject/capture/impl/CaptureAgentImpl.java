@@ -15,34 +15,6 @@
  */
 package org.opencastproject.capture.impl;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.Vector;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.FileEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.gstreamer.Bus;
-import org.gstreamer.GstObject;
-import org.gstreamer.Pipeline;
-import org.gstreamer.State;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureAgent;
@@ -58,12 +30,43 @@ import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.util.ZipUtil;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.gstreamer.Bus;
+import org.gstreamer.GstObject;
+import org.gstreamer.Pipeline;
+import org.gstreamer.State;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.command.CommandProcessor;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.Vector;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines
@@ -604,6 +607,20 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   public void updated(Dictionary props) throws ConfigurationException {
     // Update any configuration properties here
+  }
+
+  /**
+   * Callback from the OSGi container once this service is started. This is where we register our shell commands.
+   * 
+   * @param ctx
+   *          the component context
+   */
+  public void activate(ComponentContext ctx) {
+    Dictionary<String, Object> commands = new Hashtable<String, Object>();
+    commands.put(CommandProcessor.COMMAND_SCOPE, "capture");
+    commands.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "status", "start" });
+    logger.info("Registering capture agent osgi shell commands");
+    ctx.getBundleContext().registerService(CaptureAgentShellCommands.class.getName(), new CaptureAgentShellCommands(this), commands);
   }
 
 }

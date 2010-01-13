@@ -126,6 +126,11 @@
       <artifactId>httpmime</artifactId>
       <version>4.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.felix.karaf.shell</groupId>
+      <artifactId>org.apache.felix.karaf.shell.console</artifactId>
+      <version>1.0.0</version>
+  	</dependency>
   </dependencies>
   <build>
     <plugins>
@@ -159,7 +164,6 @@
             </Embed-Dependency>
             <Export-Package>
               org.opencastproject.capture.impl.*,
-              org.opencastproject.capture.jobs.*,
               org.opencastproject.capture.pipeline.*,
               org.opencastproject.capture.endpoint
             </Export-Package>
