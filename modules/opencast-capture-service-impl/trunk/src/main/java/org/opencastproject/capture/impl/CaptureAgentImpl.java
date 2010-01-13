@@ -216,7 +216,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     if (newRec.getRecordingID() == null) {
       logger.error("Couldn't create a valid recording ID");
       setAgentState(AgentState.IDLE);
-      //TODO:  Heh, now what?  We can't set it if the id doesn't exist...
+      //TODO:  Heh, now what?  We can't set a capture error if the id doesn't exist...
       //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
       return null;
     }
@@ -227,9 +227,11 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     if (pendingRecordings.containsKey(recordingID)) {
       logger.error("There is already a recording with ID {}", recordingID);
       setAgentState(AgentState.IDLE);
-      setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+      //TODO:  Do we set the recording to an error state here?
+      //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
       return null;
     } else {
+      logger.warn("GDL: " + recordingID + "\n"+newRec.getProperties().toString());
       pendingRecordings.put(recordingID, newRec);
       currentRecID = recordingID;
     }
@@ -315,6 +317,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     }
 
     RecordingImpl theRec = pendingRecordings.get(currentRecID);
+    logger.warn("GDL: " + currentRecID + "\n"+theRec.getProperties().toString());
     File stopFlag = new File(theRec.getDir(), "capture.stopped");
 
     //Take the properties out of the class level variable so that we can start capturing again immediately without worrying about overwriting them.
@@ -368,7 +371,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   @Override
   public boolean stopCapture(String recordingID) {
     if (currentRecID != null) {
-      //String current_id = currentCaptureProps.getProperty(CaptureParameters.RECORDING_ID); 
       if (recordingID.equals(currentRecID)) {
         return stopCapture();
       }
@@ -383,7 +385,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   public boolean createManifest(String recID) {
 
-    RecordingImpl recording = pendingRecordings.get(recID);    
+    RecordingImpl recording = pendingRecordings.get(recID);
+    logger.warn("GDL: " + recID + "\n"+recording.getProperties().toString());
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
       return false;
@@ -488,7 +491,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public File zipFiles(String recID) {
 
     RecordingImpl recording = pendingRecordings.get(recID);
-
+    logger.warn("GDL: " + recID + "\n"+recording.getProperties().toString());
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
       return null;
@@ -523,9 +526,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * @param fileDesc : The descriptor for the media package
    */
   public int ingest(String recID) {
-    
+
     RecordingImpl recording = pendingRecordings.get(recID);
-    
+    logger.warn("GDL: " + recID + "\n"+recording.getProperties().toString());
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
       return -1;
@@ -533,6 +536,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     URL url = null;
     try {
+      logger.info("Ingest URL is " + recording.getProperty(CaptureParameters.INGEST_ENDPOINT_URL));
       url = new URL(recording.getProperty(CaptureParameters.INGEST_ENDPOINT_URL));
     } catch (NullPointerException e) {
       logger.warn("Nullpointer while parsing ingest target URL.");
