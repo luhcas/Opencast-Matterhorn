@@ -38,7 +38,7 @@
         <module>opencast-conductor</module>
         <module>opencast-distribution-service-api</module>
         <module>opencast-distribution-service-local-impl</module>
-        <module>opencast-engage-player</module>
+        <!-- module>opencast-engage-player</module -->
         <module>opencast-engage-ui</module>
         <module>opencast-http</module>
         <module>opencast-ingest-service-api</module>
