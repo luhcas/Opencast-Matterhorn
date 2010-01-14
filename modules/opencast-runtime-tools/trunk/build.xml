@@ -395,6 +395,8 @@
     
     <!-- configure -->
     <chmod perm="755" file="${ffmpeg.workdir}/configure"/>
+    <chmod perm="755" file="${ffmpeg.workdir}/doc/texi2pod.pl"/>
+    <chmod perm="755" file="${ffmpeg.workdir}/version.sh"/>
     <echo message="Configuring ffmpeg build environment"/>
     <exec executable="${ffmpeg.absworkdir}/configure" dir="${ffmpeg.absworkdir}" resolveexecutable="true" failonerror="true">
       <arg line="--source-path=${ffmpeg.absworkdir}"/>
