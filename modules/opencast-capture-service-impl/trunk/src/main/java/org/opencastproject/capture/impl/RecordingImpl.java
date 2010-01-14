@@ -63,10 +63,11 @@ public class RecordingImpl {
 
   /** 
    * Constructs a RecordingImpl object using the Properties and MediaPackage provided
-   * @param props
-   * @param mp
+   * @param props The {@code Properties} object associated to this recording
+   * @param mp    The {@code MediaPackage} with this recording files
+   * @throws IOException If the base directory could not be fetched
    */
-  RecordingImpl(MediaPackage mp, Properties properties) {
+  RecordingImpl(MediaPackage mp, Properties properties) throws IOException, IllegalArgumentException {
     // Stores the MediaPackage
     this.mPkg = mp;
 
@@ -100,6 +101,12 @@ public class RecordingImpl {
       props.put(CaptureParameters.RECORDING_ROOT_URL, baseDir.getAbsolutePath());
     }
     
+    // Checks that recordingID is not null (can't be, otherwise we won't be able to identify the recording
+    if (recordingID == null) {
+      logger.error("Couldn't get a proper recordingID from Properties");
+      throw new IllegalArgumentException("Couldn't get a proper recordingID from Properties");
+    }
+    
     //Setup the root capture dir, also make sure that it exists.
     if (!baseDir.exists()) {
       try {
@@ -107,32 +114,35 @@ public class RecordingImpl {
       } catch (IOException e) {
         logger.error("IOException creating required directory {}.", baseDir.toString());
         //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+        throw e;
       }
       //Should have been created.  Let's make sure of that.
       if (!baseDir.exists()) {
         logger.error("Unable to start capture, could not create required directory {}.", baseDir.toString());
         //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+        throw new IOException ("Unable to create base directory");
       }
     }
-
+    
+    
   }
   
   /**
-   * @return the props
+   * @return The {@code Properties} object associated with the recording
    */
   public Properties getProperties() {
     return props;
   }
 
   /**
-   * @param props the props to set
+   * @param props A {@code Properties} object to associate to the recording
    */
   public void setProps(Properties props) {
     this.props = props;
   }
 
   /**
-   * @return the MediaPackage
+   * @return The current MediaPackage
    */
   public MediaPackage getMediaPackage() {
     return mPkg;
@@ -141,19 +151,20 @@ public class RecordingImpl {
   /**
    * @param mPkg the MediaPackage to set
    */
+  // TODO: As one can get a copy of the local MediaPackage and modify it outside, this method may not be necessary
   public void setMediaPackage(MediaPackage mPkg) {
     this.mPkg = mPkg;
   }
   
   /**
-   * @return the recordingID
+   * @return The ID for this recording
    */
   public String getRecordingID() {
     return recordingID;
   }
   
   /**
-   * @return the baseDir
+   * @return A {@code File} object pointing to the directory where this recording files are
    */
   public File getDir() {
     return baseDir;
@@ -161,21 +172,29 @@ public class RecordingImpl {
 
   
   /**
-   * 
+   * Gets a property from the local {@code Properties} object
    * @param key The property name
-   * @return The property value, or null if it doesn't exist
+   * @return The property value, or {@code null} if it doesn't exist
+   * @see java.util.Properties#getProperty(String)
    */
   public String getProperty(String key) {
     return props.getProperty(key);
   }
   
+  /**
+   * Sets a property in the local {@code Properties} object (by simply calling its own setProperty method)
+   * @param  key The property name
+   * @param  value The value to be set
+   * @return The previous value of the specified key in this property list, or null if it did not have one.
+   * @see java.util.Properties#setProperty(String, String)
+   */
   public String setProperty(String key, String value) {
     return (String)props.setProperty(key, value);
   }
   
   /**
-   * Returns the manifest associated to this recording
-   * @return A File object with the path of the manifest, or null if it has not been yet created
+   * Gets the manifest for this recording
+   * @return A {@code File} object with the path of the manifest, or {@code null} if it has not been yet created
    */
   public File getManifest() {
     return manifest;
@@ -184,7 +203,7 @@ public class RecordingImpl {
   /**
    * Sets the manifest for this recording
    * @param manifest
-   * @return A boolean indicating success or failure
+   * @return A {@code boolean} indicating success or failure
    */
   public boolean setManifest(File manifest) {
     if (manifest != null && manifest.exists()) {
@@ -197,7 +216,7 @@ public class RecordingImpl {
   
   /**
    * Gets the name assigned to the Zip File ingested
-   * @return A String with the name
+   * @return A {@code String} with the name
    */
   public String getZipName() {
    return ZIP_NAME; 
@@ -205,12 +224,16 @@ public class RecordingImpl {
   
   /**
    * Gets the name assigned to the manifest file.
-   * @return A String with the name
+   * @return A {@code String} with the name
    */
   public String getManifestName() {
     return MANIFEST_NAME;
   }
   
+  /**
+   * Gets the name assigned to the capture metadata catalog
+   * @return A {@code String} with the name
+   */
   public String getAgentCatalogName() {
     return AGENT_CATALOG_NAME;
   }

@@ -26,6 +26,7 @@ import org.opencastproject.util.ConfigurationException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -45,8 +46,6 @@ import java.util.Properties;
  * The unit test for scheduling the workflow
  *
  */
-
-// FIXME: Create a shorter and more comprehensive test.
 public class SchedulingTest {
   private static final Logger logger = LoggerFactory.getLogger(SchedulingTest.class);
   private static Scheduler sched;
@@ -57,7 +56,7 @@ public class SchedulingTest {
   
   @Before
   public void init() {
- /*   try {
+    try {
       sched = new StdSchedulerFactory().getScheduler();
       sched.start();
     } catch (SchedulerException e) {
@@ -88,22 +87,22 @@ public class SchedulingTest {
     props.setProperty("capture.device.AUDIO.src", this.getClass().getResource("/capture/audio.mp3").getFile());
     props.setProperty("capture.device.AUDIO.outputfile", "microphone.mp3");
     props.setProperty(CaptureParameters.INGEST_ENDPOINT_URL, "http://nightly.opencastproject.org/ingest/rest/addZippedMediaPackage");
-*/  }
+  }
 
   @After
   public void teardown() {
-/*    try {
+    try {
       sched.shutdown(true);
     } catch (SchedulerException e) {
       logger.error("Scheduler did not shut down cleanly");
       e.printStackTrace();
-    }*/
+    }
   }
 
-  @Test
+  @Test @Ignore
   public void testTest() {
     
-/*    //Setup the job
+    //Setup the job
     JobDetail job = new JobDetail("starting_capture", Scheduler.DEFAULT_GROUP, StartCaptureJob.class);
     
     long time = TriggerUtils.getNextGivenSecondDate(null,5).getTime();
@@ -124,6 +123,6 @@ public class SchedulingTest {
     } catch (InterruptedException e) {
       logger.error("Interrupted Exception: {}", e.getMessage());
       e.printStackTrace();
-    }    */
+    }    
   }
 }

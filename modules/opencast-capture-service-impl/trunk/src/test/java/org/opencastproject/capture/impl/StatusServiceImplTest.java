@@ -15,40 +15,43 @@
  */
 package org.opencastproject.capture.impl;
 
-//import junit.framework.Assert;
+import org.opencastproject.capture.admin.api.AgentState;
+
+import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 public class StatusServiceImplTest {
-  //private CaptureAgentImpl service = null;
+  private CaptureAgentImpl service = null;
 
   @Before
   public void setup() {
-/*    service = new CaptureAgentImpl();
+    service = new CaptureAgentImpl();
     service.activate(null);
-    Assert.assertNotNull(service);*/
+    Assert.assertNotNull(service);
   }
 
   @After
   public void teardown() {
-    //service = null;
+    service = null;
   }
 
   //TODO:  Roll all of these tests into the capture agent tests in the testing harness
-/*
-  @Test
+  @Test @Ignore
   public void testStartup() {
     Assert.assertEquals(AgentState.IDLE, service.getAgentState());
   }
 
-  @Test
+  @Test @Ignore
   public void testStart() {
     service.startCapture();
     Assert.assertEquals(AgentState.CAPTURING, service.getAgentState());
   }
 
-  @Test
+  @Test @Ignore
   public void testStop() {
     service.startCapture();
     Assert.assertEquals(AgentState.CAPTURING, service.getAgentState());
@@ -56,7 +59,7 @@ public class StatusServiceImplTest {
     Assert.assertEquals(AgentState.UPLOADING, service.getAgentState());
   }
 
-  @Test
+  @Test @Ignore
   public void testHalt() {
     service.startCapture();
     Assert.assertEquals(AgentState.CAPTURING, service.getAgentState());
@@ -65,6 +68,5 @@ public class StatusServiceImplTest {
     service.stopCapture();
     Assert.assertEquals(AgentState.IDLE, service.getAgentState());
   }
-   */
 
 }

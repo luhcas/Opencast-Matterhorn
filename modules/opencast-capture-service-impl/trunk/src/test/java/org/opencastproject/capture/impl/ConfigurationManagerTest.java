@@ -19,6 +19,7 @@ package org.opencastproject.capture.impl;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Properties;
@@ -42,12 +43,12 @@ public class ConfigurationManagerTest {
     configManager = null;
   }
   
-  @Test
+  @Test @Ignore
   public void testMerge() {
     
   }
   
-  @Test
+  @Test @Ignore
   public void testGetAllProperties() {
     Properties properties;
     

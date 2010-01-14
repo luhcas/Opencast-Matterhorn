@@ -28,7 +28,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
-import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingStateUpdate;
 import org.opencastproject.capture.api.StateService;
@@ -49,7 +48,7 @@ public class StatusRestService {
     this.service = service;
   }
 
-  public void unsetService(CaptureAgentStatusService service) {
+  public void unsetService(StateService service) {
     this.service = null;
   }
 

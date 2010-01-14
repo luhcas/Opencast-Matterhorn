@@ -7,5 +7,5 @@
     <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
   <reference name="stateService" interface="org.opencastproject.capture.api.StateService"
-    cardinality="1..1" policy="static" bind="setStateService" />
+    cardinality="1..1" policy="static" bind="setStateService" unbind="unsetStateService" />
 </component>
