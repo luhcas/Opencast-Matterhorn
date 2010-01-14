@@ -107,7 +107,7 @@ public interface SearchService {
    * @return The search result
    * @throws SearchException
    */
-  SearchResult getSeriesByText(String text, int offset, int limit) throws SearchException;
+  SearchResult getSeriesByText(String text, int limit, int offset) throws SearchException;
 
   /**
    * Processes a series search for a given series id, creates and returns a regular search result. The result contains
@@ -154,7 +154,7 @@ public interface SearchService {
    * @return the search result
    * @throws SearchException
    */
-  SearchResult getEpisodesByText(String text, int offset, int limit) throws SearchException;
+  SearchResult getEpisodesByText(String text, int limit, int offset) throws SearchException;
 
   /**
    * Sends a query to the search service. Depending on the service implementation, the query might be an sql statement a

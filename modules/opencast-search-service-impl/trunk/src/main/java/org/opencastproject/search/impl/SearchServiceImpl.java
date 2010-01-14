@@ -190,10 +190,10 @@ public class SearchServiceImpl implements SearchService {
    * 
    * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesByText(java.lang.String, int, int)
    */
-  public SearchResult getEpisodesAndSeriesByText(String text, int offset, int limit) throws SearchException {
+  public SearchResult getEpisodesAndSeriesByText(String text, int limit, int offset) throws SearchException {
     try {
       log_.debug("Searching index for episodes and series matching '" + text + "'");
-      return solrRequester.getEpisodesAndSeriesByText(text, offset, limit);
+      return solrRequester.getEpisodesAndSeriesByText(text, limit, offset);
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }
@@ -204,10 +204,10 @@ public class SearchServiceImpl implements SearchService {
    * 
    * @see org.opencastproject.search.api.SearchService#getEpisodesByDate(int, int)
    */
-  public SearchResult getEpisodesByDate(int offset, int limit) throws SearchException {
+  public SearchResult getEpisodesByDate(int limit, int offset) throws SearchException {
     try {
       log_.debug("Asking index for episodes by date");
-      return solrRequester.getEpisodesByDate(offset, limit);
+      return solrRequester.getEpisodesByDate(limit, offset);
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }
@@ -232,9 +232,9 @@ public class SearchServiceImpl implements SearchService {
    * 
    * @see org.opencastproject.search.api.SearchService#getEpisodesByText(java.lang.String, int, int)
    */
-  public SearchResult getEpisodesByText(String text, int offset, int limit) throws SearchException {
+  public SearchResult getEpisodesByText(String text, int limit, int offset) throws SearchException {
     try {
-      return solrRequester.getEpisodesByText(text, offset, limit);
+      return solrRequester.getEpisodesByText(text, limit, offset);
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }
@@ -273,10 +273,10 @@ public class SearchServiceImpl implements SearchService {
    * 
    * @see org.opencastproject.search.api.SearchService#getSeriesByText(java.lang.String, int, int)
    */
-  public SearchResult getSeriesByText(String text, int offset, int limit) throws SearchException {
+  public SearchResult getSeriesByText(String text, int limit, int offset) throws SearchException {
     try {
       log_.debug("Searching index for series matching '" + text + "'");
-      return solrRequester.getSeriesByText(text, offset, limit);
+      return solrRequester.getSeriesByText(text, limit, offset);
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }

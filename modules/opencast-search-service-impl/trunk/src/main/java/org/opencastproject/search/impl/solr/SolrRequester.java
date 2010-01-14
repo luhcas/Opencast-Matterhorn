@@ -67,7 +67,7 @@ public class SolrRequester {
    * 
    * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesByText(java.lang.String, int, int)
    */
-  public SearchResult getEpisodesAndSeriesByText(String text, int offset, int limit) throws SolrServerException {
+  public SearchResult getEpisodesAndSeriesByText(String text, int limit, int offset) throws SolrServerException {
     String uq = SolrUtils.clean(text);
     StringBuffer sb = boost(uq);
     SolrQuery query = new SolrQuery(sb.toString());
@@ -124,7 +124,7 @@ public class SolrRequester {
    * 
    * @see org.opencastproject.search.api.SearchService#getSeriesByText(java.lang.String, int, int)
    */
-  public SearchResult getSeriesByText(String text, int offset, int limit) throws SolrServerException {
+  public SearchResult getSeriesByText(String text, int limit, int offset) throws SolrServerException {
     StringBuffer sb = boost(SolrUtils.clean(text));
     SolrQuery query = new SolrQuery(sb.toString());
     query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series);
@@ -188,7 +188,7 @@ public class SolrRequester {
    * 
    * @see org.opencastproject.search.api.SearchService#getEpisodesByDate(int, int)
    */
-  public SearchResult getEpisodesByDate(int offset, int limit) throws SolrServerException {
+  public SearchResult getEpisodesByDate(int limit, int offset) throws SolrServerException {
     String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual;
     SolrQuery query = new SolrQuery(q);
     query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
@@ -204,7 +204,7 @@ public class SolrRequester {
    * 
    * @see org.opencastproject.search.api.SearchService#getEpisodesByText(java.lang.String, int, int)
    */
-  public SearchResult getEpisodesByText(String text, int offset, int limit) throws SolrServerException {
+  public SearchResult getEpisodesByText(String text, int limit, int offset) throws SolrServerException {
     StringBuffer sb = boost(SolrUtils.clean(text));
     SolrQuery query = new SolrQuery(sb.toString());
     query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
@@ -253,7 +253,7 @@ public class SolrRequester {
     SearchResultImpl result = new SearchResultImpl(query.getQuery());
     result.setSearchTime(solrResponse.getQTime());
     result.setOffset(solrResponse.getResults().getStart());
-    result.setLimit(solrResponse.getResults().getNumFound());
+    result.setLimit(solrResponse.getResults().size());
     result.setTotal(solrResponse.getResults().getNumFound());
 
     // Walk through response and create new items with title, creator, etc:

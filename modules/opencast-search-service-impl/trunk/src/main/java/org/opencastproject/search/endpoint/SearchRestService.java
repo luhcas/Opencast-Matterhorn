@@ -155,7 +155,7 @@ public class SearchRestService {
     if(StringUtils.isEmpty(text)) {
       return (SearchResultImpl) searchService.getSeriesByDate(limit, offset);
     } else {
-      return (SearchResultImpl) searchService.getSeriesByText(text, offset, limit);
+      return (SearchResultImpl) searchService.getSeriesByText(text, limit, offset);
     }
   }
 
@@ -185,7 +185,7 @@ public class SearchRestService {
       return (SearchResultImpl) searchService.getEpisodesByDate(limit, offset);
     } else {
       logger.debug("Searching for episodes via free text search");
-      return (SearchResultImpl) searchService.getEpisodesByText(text, offset, limit);
+      return (SearchResultImpl) searchService.getEpisodesByText(text, limit, offset);
     }
   }
 
@@ -195,6 +195,6 @@ public class SearchRestService {
           @QueryParam("q") String text,
           @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
-    return (SearchResultImpl) searchService.getEpisodesAndSeriesByText(text, offset, limit);
+    return (SearchResultImpl) searchService.getEpisodesAndSeriesByText(text, limit, offset);
   }
 }
