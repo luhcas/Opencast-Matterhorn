@@ -20,6 +20,7 @@ import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.pipeline.PipelineFactory;
+import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
@@ -29,6 +30,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.util.ZipUtil;
 
 import org.apache.commons.io.FileUtils;
@@ -270,6 +272,15 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
           } catch (IOException e) {
             throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
           }
+        }
+
+        // Add the sample dublin core, otherwise the recording won't show up in search
+        File dcCatalog = new File(f, "dublincore.xml");
+        try {
+          MediaPackageElementBuilder eb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+          mediaPackage.add(eb.elementFromURI(dcCatalog.toURI(), Type.Catalog, DublinCoreCatalog.FLAVOR));
+        } catch (UnsupportedElementException e) {
+          throw new RuntimeException("Error adding " + dcCatalog + " to recording");
         }
 
         return recordingID;
@@ -681,6 +692,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/audio.mp3"), new File(tmpDir, "audio.mp3"));
       FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/screen.mpg"), new File(tmpDir, "screen.mpg"));
       FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/camera.mpg"), new File(tmpDir, "camera.mpg"));
+      FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/dublincore.xml"), new File(tmpDir, "dublincore.xml"));
     } catch (IOException e) {
       throw new RuntimeException("Unable to copy media to " + tmpDir, e);
     }
