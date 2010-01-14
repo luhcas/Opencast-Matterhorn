@@ -14,7 +14,7 @@ cat >&1 <<END
 ********************************************
 ** Installing third party components      **
 **                                        **
-** VM OS: $MY_OS        **
+** VM OS: $MY_OS    **
 ** VM IP: $MY_IP              **
 **                                        **
 ** Matterhorn is installed in:            **
@@ -38,7 +38,7 @@ install_3p ()
   echo "Installing 3rd party tools.  This process will take several minutes..."
 
   cd $INST_DIR
-
+  sudo apt-get -y --force-yes install openssh-server openssh-client
   sudo apt-get -y --force-yes install build-essential zlib1g-dev patch byacc
 
   #opencv
@@ -64,7 +64,7 @@ install_3p ()
   sudo curl http://tesseract-ocr.googlecode.com/files/tesseract-2.00.eng.tar.gz | sudo tar xz
   cd tessdata
   sudo chmod 755 *
-
+  
   sudo cp /usr/bin/mediainfo /usr/local/bin/mediainfo
 }
 
@@ -74,24 +74,24 @@ install_ffmpeg ()
 
   cd $INST_DIR
 
-  #ffmpeg support
-  #http://ubuntuforums.org/showthread.php?t=786095
-  sudo apt-get -y --force-yes install checkinstall yasm texi2html libfaac-dev libfaad-dev libmp3lame-dev libsdl1.2-dev libtheora-dev libx11-dev libxvidcore4-dev zlib1g-dev
- 
-  git clone -n git://git.videolan.org/x264.git
+  sudo apt-get -y --force-yes update
+  sudo apt-get -y --force-yes install build-essential subversion git-core checkinstall yasm texi2html libfaac-dev libfaad-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libsdl1.2-dev libx11-dev libxfixes-dev libxvidcore4-dev zlib1g-dev
+  sudo apt-get -y --force-yes install libtheora-dev
+
+  cd
+  git clone git://git.videolan.org/x264.git
   cd x264
-  git checkout fe83a906ee1bb5170b112de717818e278ff59ddb
   ./configure
   make
-  sudo checkinstall --fstrans=no --install=yes --pkgname=x264 --pkgversion "1:0.svn`date +%Y%m%d`-0.0ubuntu1" --default
-  cd ..
-  #todo: should be safe to delete x264 sources now
-
-  svn checkout -r 20427 svn://svn.ffmpeg.org/ffmpeg/trunk ffmpeg
+  sudo checkinstall --pkgname=x264 --pkgversion "1:0.svn`date +%Y%m%d`" --backup=no --default
+  
+  cd
+  svn checkout svn://svn.ffmpeg.org/ffmpeg/trunk ffmpeg
   cd ffmpeg
-  ./configure --enable-gpl --enable-nonfree --enable-pthreads --enable-libfaac --enable-libfaad --enable-libmp3lame --enable-libtheora --enable-libx264 --enable-libxvid --enable-x11grab
+  ./configure --enable-gpl --enable-version3 --enable-nonfree --enable-postproc --enable-pthreads --enable-libfaac --enable-libfaad --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libtheora --enable-libx264 --enable-libxvid --enable-x11grab
   make
-  sudo checkinstall --fstrans=no --install=yes --pkgname=ffmpeg --pkgversion "3:0.svn`date +%Y%m%d`-12ubuntu3" --default
+  sudo checkinstall --pkgname=ffmpeg --pkgversion "4:0.5+svn`date +%Y%m%d`" --backup=no --default
+  hash ffmpeg
 }
 
 start_mh ()
@@ -109,6 +109,11 @@ start_mh ()
   echo "" | sudo tee -a $MOTD_FILE
   echo "********************************************" | sudo tee -a $MOTD_FILE
   echo "** Matterhorn cosole is at http://$MY_IP:8080" | sudo tee -a $MOTD_FILE
+  echo "**                                        **" | sudo tee -a $MOTD_FILE
+  echo "** Matterhorn is installed in:            **" | sudo tee -a $MOTD_FILE
+  echo "**    Home:    /usr/local/matterhorn      **" | sudo tee -a $MOTD_FILE
+  echo "**    Bundles: /var/lib/matterhorn        **" | sudo tee -a $MOTD_FILE
+  echo "**    Config:  /etc/matterhorn            **" | sudo tee -a $MOTD_FILE
   echo "********************************************" | sudo tee -a $MOTD_FILE
 
   # remove matterhorn setup script
@@ -132,16 +137,10 @@ if [ -z $MY_IP ]; then
   echo "Matterhorn Installation process cannot proceed."
   echo "Please diagnose network problem and restart the VM."
 else
-  # update felix config (url)
-  mv $CONF_DIR/config.properties $CONF_DIR/config.properties_old
-  sed "s/http:\/\/localhost:808./http:\/\/$MY_IP:8080/" $CONF_DIR/config.properties_old > $CONF_DIR/config.properties
-  chown -R matterhorn $CONF_DIR
-  chgrp -R matterhorn $CONF_DIR
-
   # connected, start main task
-  echo show_stat
+  show_stat
 
-  echo "Default keyboard layout is US; Do you want to reconfigure? (y/n)"
+  echo "Default keyboard is US; Do you want to reconfigure? (y/n)"
   read kbresp
 
   echo "Do you want to install 3rd party tools? (y/n)"
@@ -149,16 +148,22 @@ else
 
   echo "Do you want to install ffmpeg? (y/n)"
   read ffresp
-  
-  echo "Installation Java and a few other items..."
-  sudo apt-get -y --force-yes install wget subversion git-core
 
-  # Reconfigure Console?
+  # update felix config (url)
+  mv $CONF_DIR/config.properties $CONF_DIR/config.properties_old
+  sed "s/http:\/\/localhost:808./http:\/\/$MY_IP:8080/" $CONF_DIR/config.properties_old > $CONF_DIR/config.properties
+  chown -R matterhorn $CONF_DIR
+  chgrp -R matterhorn $CONF_DIR
+
+  # Reconfigure Keyboard?
   if [ $kbresp = "y" ] || [ $kbresp = "Y" ]; then
     sudo dpkg-reconfigure console-setup
   else
-    echo "Keeping default keyboard layout."
+    echo "Keeping default keybord configuration."
   fi
+  
+  echo "Installation wget, subversion and git."
+  sudo apt-get -y --force-yes install wget subversion git-core
 
   # Install 3P tools?
   if [ $p3resp = "y" ] || [ $p3resp = "Y" ]; then
@@ -178,3 +183,4 @@ else
 
   echo "done."
 fi
+
