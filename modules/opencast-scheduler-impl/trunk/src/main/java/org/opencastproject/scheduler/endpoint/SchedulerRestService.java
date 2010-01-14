@@ -37,7 +37,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -101,7 +100,8 @@ public class SchedulerRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("getEvent/{eventID}")
-  public Response getEvent(@QueryParam("eventID") String eventID) {
+  public Response getEvent(@PathParam("eventID") String eventID) {
+    logger.info("Event Lookup: " + eventID);
     SchedulerEvent event = service.getEvent(eventID);
     if (event == null) return Response.status(Status.BAD_REQUEST).build();
     return Response.ok(new SchedulerEventJaxbImpl(event)).build();
