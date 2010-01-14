@@ -4,7 +4,7 @@
 # Define some constants
 #
 MH_VERSION=0.4
-JIRA_TKT=MH-1432
+JIRA_TKT=MH-1991
 FELIX_VER=felix-framework-2.0.1
 
 WORKING_DIR=/Users/mtrehan/Matterhorn
@@ -85,8 +85,8 @@ if [ ! -d "$EXPORT_DIR" ]; then
   mkdir $EXPORT_DIR
 fi
 cd $EXPORT_DIR
-#rm -rf $EXPORT_NAME
-#svn export $SVN_URL $EXPORT_NAME
+rm -rf $EXPORT_NAME
+svn export $SVN_URL $EXPORT_NAME
 
 #
 # Change file ownership/group to tomcat
@@ -147,6 +147,9 @@ do
     cp $jar $MATTERHORN_DIR/lib/.
   done;
 done
+
+cp $SVN_DIR/opencast-test-harness/target/*.jar $MATTERHORN_BUNDLE_DIR/.
+
 
 MH_DIR=matterhorn-$MH_VERSION
 MH_TAR=$MH_DIR.tar

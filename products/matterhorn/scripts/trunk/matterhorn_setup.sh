@@ -12,18 +12,18 @@ cat >&1 <<END
 ********************************************
 ******** Finishing Matterhorn Setup ********
 ********************************************
-** Installing third party components      **
-**                                        **
-** VM OS: $MY_OS    **
-** VM IP: $MY_IP              **
-**                                        **
-** Matterhorn is installed in:            **
-**    Home:    /usr/local/matterhorn      **
-**    Bundles: /var/lib/matterhorn        **
-**    Config:  /etc/matterhorn            **
-**                                        **
-** For further information, please visit  **
-**   http://www.opencastproject.org       **
+** Installing third party components
+**
+** VM OS: $MY_OS
+** VM IP: $MY_IP
+**
+** Matterhorn is installed in:
+**    Home:    /usr/local/matterhorn
+**    Bundles: /var/lib/matterhorn
+**    Config:  /etc/matterhorn
+**
+** For further information, please visit
+**   http://www.opencastproject.org
 ********************************************
 
 For a complete list of 3rd party tools, please visit:
@@ -45,15 +45,15 @@ install_3p ()
   sudo apt-get -y --force-yes install libcv1 libcv-dev opencv-doc
 
   #install media info
-  wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
-  sudo dpkg -i libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
-  rm -f libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
-  wget http://downloads.sourceforge.net/mediainfo/libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
-  sudo dpkg -i libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
-  rm -f libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
-  wget http://downloads.sourceforge.net/mediainfo/mediainfo_0.7.24-1_i386.Debian_5.deb
-  sudo dpkg -i mediainfo_0.7.24-1_i386.Debian_5.deb
-  rm -f mediainfo_0.7.24-1_i386.Debian_5.deb
+  #wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
+  #sudo dpkg -i libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
+  #rm -f libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
+  #wget http://downloads.sourceforge.net/mediainfo/libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
+  #sudo dpkg -i libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
+  #rm -f libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
+  #wget http://downloads.sourceforge.net/mediainfo/mediainfo_0.7.24-1_i386.Debian_5.deb
+  #sudo dpkg -i mediainfo_0.7.24-1_i386.Debian_5.deb
+  #rm -f mediainfo_0.7.24-1_i386.Debian_5.deb
 
   #ocr support
   echo "ocr support"
@@ -65,7 +65,7 @@ install_3p ()
   cd tessdata
   sudo chmod 755 *
   
-  sudo cp /usr/bin/mediainfo /usr/local/bin/mediainfo
+  #sudo cp /usr/bin/mediainfo /usr/local/bin/mediainfo
 }
 
 install_ffmpeg ()
@@ -96,24 +96,23 @@ install_ffmpeg ()
 
 start_mh ()
 {
-  echo "Installing Felix..."
+  echo "Starting Matterhorn..."
 
   FELIX=felix-framework-2.0.1
   FELIX_DIR=/usr/local/$FELIX
 
   cd $INST_DIR
 
-  echo "Starting Matterhorn..."
   sudo -u matterhorn /usr/local/matterhorn/bin/startup.sh
 
   echo "" | sudo tee -a $MOTD_FILE
   echo "********************************************" | sudo tee -a $MOTD_FILE
   echo "** Matterhorn cosole is at http://$MY_IP:8080" | sudo tee -a $MOTD_FILE
-  echo "**                                        **" | sudo tee -a $MOTD_FILE
-  echo "** Matterhorn is installed in:            **" | sudo tee -a $MOTD_FILE
-  echo "**    Home:    /usr/local/matterhorn      **" | sudo tee -a $MOTD_FILE
-  echo "**    Bundles: /var/lib/matterhorn        **" | sudo tee -a $MOTD_FILE
-  echo "**    Config:  /etc/matterhorn            **" | sudo tee -a $MOTD_FILE
+  echo "**" | sudo tee -a $MOTD_FILE
+  echo "** Matterhorn is installed in:" | sudo tee -a $MOTD_FILE
+  echo "**    Home:    /usr/local/matterhorn" | sudo tee -a $MOTD_FILE
+  echo "**    Bundles: /var/lib/matterhorn" | sudo tee -a $MOTD_FILE
+  echo "**    Config:  /etc/matterhorn" | sudo tee -a $MOTD_FILE
   echo "********************************************" | sudo tee -a $MOTD_FILE
 
   # remove matterhorn setup script
