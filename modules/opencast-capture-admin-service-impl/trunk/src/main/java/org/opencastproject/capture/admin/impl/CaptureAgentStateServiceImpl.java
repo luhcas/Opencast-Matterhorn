@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.AgentState;
-import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
+import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.osgi.service.cm.ConfigurationException;
@@ -32,21 +32,21 @@ import org.slf4j.LoggerFactory;
 /**
  * FIXME -- Add javadocs
  */
-public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService, ManagedService {
-  private static final Logger logger = LoggerFactory.getLogger(CaptureAgentStatusServiceImpl.class);
+public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, ManagedService {
+  private static final Logger logger = LoggerFactory.getLogger(CaptureAgentStateServiceImpl.class);
 
   private HashMap<String, Agent> agents;
   private HashMap<String, Recording> recordings;
 
-  public CaptureAgentStatusServiceImpl() {
-    logger.info("CaptureAgentStatusServiceImpl starting.");
+  public CaptureAgentStateServiceImpl() {
+    logger.info("CaptureAgentStateServiceImpl starting.");
     agents = new HashMap<String, Agent>();
     recordings = new HashMap<String, Recording>();
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#getAgentState(java.lang.String)
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getAgentState(java.lang.String)
    */
   public Agent getAgentState(String agentName) {
     Agent req = agents.get(agentName);
@@ -63,7 +63,7 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#setAgentState(java.lang.String, java.lang.String)
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#setAgentState(java.lang.String, java.lang.String)
    */
   public void setAgentState(String agentName, String state) {
     Agent req = agents.get(agentName);
@@ -87,7 +87,7 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#removeAgent(java.lang.String)
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#removeAgent(java.lang.String)
    */
   public void removeAgent(String agentName) {
     logger.debug("Removing Agent {}.", agentName);
@@ -96,7 +96,7 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#getKnownAgents()
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getKnownAgents()
    */
   public Map<String, Agent> getKnownAgents() {
     return agents;
@@ -104,7 +104,7 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#getAgentCapabilities()
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getAgentCapabilities()
    */
   public Map<String, String> getAgentCapabilities() {
     //TODO:  Fill this in for MH-1336
@@ -113,7 +113,7 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#getRecordingState(java.lang.String)
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getRecordingState(java.lang.String)
    */
   public Recording getRecordingState(String id) {
     Recording req = recordings.get(id);
@@ -130,7 +130,7 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#setRecordingState(java.lang.String, java.lang.String)
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#setRecordingState(java.lang.String, java.lang.String)
    */
   public void setRecordingState(String id, String state) {
     Recording req = recordings.get(id);
@@ -150,7 +150,7 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#removeRecording(java.lang.String)
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#removeRecording(java.lang.String)
    */
   public void removeRecording(String id) {
     logger.debug("Removing Recording {}.", id);
@@ -159,7 +159,7 @@ public class CaptureAgentStatusServiceImpl implements CaptureAgentStatusService,
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStatusService#getKnownRecordings()
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getKnownRecordings()
    */
   public Map<String,Recording> getKnownRecordings() {
     return recordings;

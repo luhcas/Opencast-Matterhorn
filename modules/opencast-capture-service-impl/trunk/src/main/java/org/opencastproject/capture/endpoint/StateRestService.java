@@ -35,12 +35,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The REST endpoint for the status service on the capture device
+ * The REST endpoint for the state service on the capture device
  */
 @Path("/")
-public class StatusRestService {
+public class StateRestService {
 
-  private static final Logger logger = LoggerFactory.getLogger(StatusRestService.class);
+  private static final Logger logger = LoggerFactory.getLogger(StateRestService.class);
 
   private StateService service;
 
@@ -81,7 +81,7 @@ public class StatusRestService {
 
   protected final String docs;
 
-  public StatusRestService() {
+  public StateRestService() {
     String docsFromClassloader = null;
     InputStream in = null;
     try {
@@ -89,7 +89,7 @@ public class StatusRestService {
       docsFromClassloader = IOUtils.toString(in);
     } catch (IOException e) {
       logger.error("failed to read documentation", e);
-      docsFromClassloader = "unable to load documentation for " + StatusRestService.class.getName();
+      docsFromClassloader = "unable to load documentation for " + StateRestService.class.getName();
     } finally {
       IOUtils.closeQuietly(in);
     }

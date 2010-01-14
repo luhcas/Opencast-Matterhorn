@@ -7,16 +7,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.AgentState;
-import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
+import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
+import org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl;
 
-public class CaptureAgentStatusServiceImplTest {
-  private CaptureAgentStatusService service = null;
+public class CaptureAgentStateServiceImplTest {
+  private CaptureAgentStateService service = null;
 
   @Before
   public void setup() {
-    service = new CaptureAgentStatusServiceImpl();
+    service = new CaptureAgentStateServiceImpl();
     Assert.assertNotNull(service);
   }
 

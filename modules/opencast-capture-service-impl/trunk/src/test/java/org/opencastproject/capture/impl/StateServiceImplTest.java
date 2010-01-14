@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class StatusServiceImplTest {
+public class StateServiceImplTest {
   private CaptureAgentImpl service = null;
 
   @Before

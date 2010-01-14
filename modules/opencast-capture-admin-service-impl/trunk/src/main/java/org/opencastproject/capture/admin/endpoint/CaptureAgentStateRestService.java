@@ -34,7 +34,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.AgentStateUpdate;
-import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
+import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingStateUpdate;
 import org.slf4j.Logger;
@@ -44,14 +44,14 @@ import org.slf4j.LoggerFactory;
  * FIXME -- Add javadocs
  */
 @Path("/")
-public class CaptureAgentStatusRestService {
-  private static final Logger logger = LoggerFactory.getLogger(CaptureAgentStatusRestService.class);
-  private CaptureAgentStatusService service;
-  public void setService(CaptureAgentStatusService service) {
+public class CaptureAgentStateRestService {
+  private static final Logger logger = LoggerFactory.getLogger(CaptureAgentStateRestService.class);
+  private CaptureAgentStateService service;
+  public void setService(CaptureAgentStateService service) {
     this.service = service;
   }
 
-  public void unsetService(CaptureAgentStatusService service) {
+  public void unsetService(CaptureAgentStateService service) {
     this.service = null;
   }
 
@@ -132,7 +132,7 @@ public class CaptureAgentStatusRestService {
 
   protected final String docs;
   
-  public CaptureAgentStatusRestService() {
+  public CaptureAgentStateRestService() {
     String docsFromClassloader = null;
     InputStream in = null;
     try {
@@ -140,7 +140,7 @@ public class CaptureAgentStatusRestService {
       docsFromClassloader = IOUtils.toString(in);
     } catch (IOException e) {
       logger.error("failed to read documentation", e);
-      docsFromClassloader = "unable to load documentation for " + CaptureAgentStatusRestService.class.getName();
+      docsFromClassloader = "unable to load documentation for " + CaptureAgentStateRestService.class.getName();
     } finally {
       IOUtils.closeQuietly(in);
     }

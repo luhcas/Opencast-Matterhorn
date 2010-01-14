@@ -397,7 +397,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   /**
    * Generates the manifest.xml file from the files specified in the properties
-   * @return A status boolean 
+   * @return A state boolean 
    */
   public boolean createManifest(String recID) {
 
@@ -597,7 +597,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   } 
 
   /**
-   * Sets the machine's current encoding status
+   * Sets the machine's current encoding state
    * 
    * @param state The state for the agent.  Defined in AgentState.
    * @see org.opencastproject.capture.api.AgentState

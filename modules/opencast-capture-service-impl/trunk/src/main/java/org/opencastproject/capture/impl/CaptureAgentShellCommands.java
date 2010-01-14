@@ -39,7 +39,7 @@ public class CaptureAgentShellCommands {
   }
 
   /**
-   * Prints the capture agent status to <code>System.out</code>.
+   * Prints the capture agent state to <code>System.out</code>.
    */
   public void status() {
     System.out.println(agent.getAgentState());

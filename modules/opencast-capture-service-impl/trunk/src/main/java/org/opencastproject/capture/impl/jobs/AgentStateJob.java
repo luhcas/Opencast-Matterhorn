@@ -39,42 +39,42 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * This class is responsible for pushing the agent's status to the remote status service
+ * This class is responsible for pushing the agent's state to the remote state service
  */
-public class AgentStatusJob implements Job {
+public class AgentStateJob implements Job {
 
-  private static final Logger logger = LoggerFactory.getLogger(AgentStatusJob.class);
+  private static final Logger logger = LoggerFactory.getLogger(AgentStateJob.class);
 
   public static final String STATE_SERVICE = "state_service";
   private ConfigurationManager config = ConfigurationManager.getInstance();
-  private StateService status = null;
+  private StateService state = null;
 
   /**
-   * Pushes the agent's status to the remote status service
+   * Pushes the agent's state to the remote state service
    * {@inheritDoc}
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    status = (StateService) ctx.getMergedJobDataMap().get(STATE_SERVICE);
+    state = (StateService) ctx.getMergedJobDataMap().get(STATE_SERVICE);
     sendAgentState();
     sendRecordingState();
   }
 
   /**
-   * Sends an agent state update to the capture-admin status service
+   * Sends an agent state update to the capture-admin state service
    */
   private void sendAgentState() {
 
     //Figure out where we're sending the data
-    String url = config.getItem(CaptureParameters.AGENT_STATUS_ENDPOINT_URL);
+    String url = config.getItem(CaptureParameters.AGENT_STATE_ENDPOINT_URL);
     if (url == null) {
-      logger.warn("URL for {} is invalid, unable to push state to remote server.", CaptureParameters.AGENT_STATUS_ENDPOINT_URL);
+      logger.warn("URL for {} is invalid, unable to push state to remote server.", CaptureParameters.AGENT_STATE_ENDPOINT_URL);
       return;
     }
 
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
-    Agent a = status.getAgent();
+    Agent a = state.getAgent();
 
     formParams.add(new BasicNameValuePair("agentName", a.getName()));
     formParams.add(new BasicNameValuePair("state", a.getState()));
@@ -88,14 +88,14 @@ public class AgentStatusJob implements Job {
   private void sendRecordingState() {
 
     //Figure out where we're sending the data
-    String url = config.getItem(CaptureParameters.RECORDING_STATUS_ENDPOINT_URL);
+    String url = config.getItem(CaptureParameters.RECORDING_STATE_ENDPOINT_URL);
     if (url == null) {
-      logger.warn("URL for {} is invalid, unable to push recording state to remote server.", CaptureParameters.RECORDING_STATUS_ENDPOINT_URL);
+      logger.warn("URL for {} is invalid, unable to push recording state to remote server.", CaptureParameters.RECORDING_STATE_ENDPOINT_URL);
       return;
     }
 
     //For each recording being tracked by the system send an update
-    Map<String, Recording> recordings = status.getKnownRecordings();
+    Map<String, Recording> recordings = state.getKnownRecordings();
     for (Entry<String, Recording> e : recordings.entrySet()) {
       List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 

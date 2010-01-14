@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * API for the capture-admin service (MH-1336, MH-1394, MH-1457, MH-1475 and MH-1476)
  */
-public interface CaptureAgentStatusService {
+public interface CaptureAgentStateService {
 
   /**
    * Returns the last known state of a given agent

@@ -28,14 +28,14 @@ public interface StateService {
 
   //TODO: add an @see for Agent
   /**
-   * Gets the internal Agent used to store this agent's status
+   * Gets the internal Agent used to store this agent's state
    * @return The Agent which represents this capture agent
    */
   public Agent getAgent();
 
   //TODO: explain why we are passing strings instead of something more type safe
   /**
-   * Sets the state of the agent.  Note that this should not change the *actual* state of the agent, only update the StatusService's record of its state.
+   * Sets the state of the agent.  Note that this should not change the *actual* state of the agent, only update the StateService's record of its state.
    * @param state The state of the agent.  Should be defined in AgentState.
    * @see org.opencastproject.capture.api.AgentState
    */

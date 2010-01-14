@@ -61,14 +61,14 @@ public interface CaptureParameters {
   /** The name of the agent */ 
   public static final String AGENT_NAME = "capture.agent.name";
   
-  /** The URL of the remote status service */
-  public static final String AGENT_STATUS_ENDPOINT_URL = "capture.agent.status.endpoint.url";
+  /** The URL of the remote state service */
+  public static final String AGENT_STATE_ENDPOINT_URL = "capture.agent.state.endpoint.url";
 
-  /** The time between attempts to push the agent's status to the status service */
-  public static final String AGENT_STATUS_POLLING_INTERVAL = "capture.agent.status.polling.interval";
+  /** The time between attempts to push the agent's state to the state service */
+  public static final String AGENT_STATE_POLLING_INTERVAL = "capture.agent.state.polling.interval";
 
-  /** The URL of the remote recording status service */
-  public static final String RECORDING_STATUS_ENDPOINT_URL = "capture.recording.status.endpoint.url";
+  /** The URL of the remote recording state service */
+  public static final String RECORDING_STATE_ENDPOINT_URL = "capture.recording.state.endpoint.url";
 
   /** The ID of a capture */
   public static final String RECORDING_ID = "capture.recording.id";

@@ -26,7 +26,7 @@ import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.api.StateService;
-import org.opencastproject.capture.impl.jobs.AgentStatusJob;
+import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.quartz.JobDetail;
@@ -107,11 +107,11 @@ public class StateServiceImpl implements StateService, ManagedService {
   }
 
   /**
-   * Creates the Quartz task which pushes the agent's status to the status server
+   * Creates the Quartz task which pushes the agent's state to the state server
    */
   private void createPollingTask() {
     try {
-      long pollTime = Long.parseLong(ConfigurationManager.getInstance().getItem(CaptureParameters.AGENT_STATUS_POLLING_INTERVAL)) * 1000L;
+      long pollTime = Long.parseLong(ConfigurationManager.getInstance().getItem(CaptureParameters.AGENT_STATE_POLLING_INTERVAL)) * 1000L;
       Properties pollingProperties = new Properties();
       pollingProperties.load(getClass().getClassLoader().getResourceAsStream("config/state_update_scheduler.properties"));
       StdSchedulerFactory sched_fact = new StdSchedulerFactory(pollingProperties);
@@ -125,22 +125,22 @@ public class StateServiceImpl implements StateService, ManagedService {
       pollScheduler.start();
   
       //Setup the polling
-      JobDetail job = new JobDetail("agentStatusUpdate", Scheduler.DEFAULT_GROUP, AgentStatusJob.class);
+      JobDetail job = new JobDetail("agentStateUpdate", Scheduler.DEFAULT_GROUP, AgentStateJob.class);
 
-      job.getJobDataMap().put(AgentStatusJob.STATE_SERVICE, this);
+      job.getJobDataMap().put(AgentStateJob.STATE_SERVICE, this);
 
       //TODO:  Support changing the polling interval
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
-      SimpleTrigger trigger = new SimpleTrigger("status_polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime);
+      SimpleTrigger trigger = new SimpleTrigger("state_polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime);
 
       //Schedule the update
       pollScheduler.scheduleJob(job, trigger);
     } catch (NumberFormatException e) {
-      logger.error("Invalid time specified in the {} value, unable to push status to remote server!", CaptureParameters.AGENT_STATUS_POLLING_INTERVAL);
+      logger.error("Invalid time specified in the {} value, unable to push state to remote server!", CaptureParameters.AGENT_STATE_POLLING_INTERVAL);
     } catch (IOException e) {
-      logger.error("IOException caught in StateSingleton: {}.", e.getMessage());
+      logger.error("IOException caught in StateServiceImpl: {}.", e.getMessage());
     } catch (SchedulerException e) {
-      logger.error("SchedulerException in StateSingleton: {}.", e.getMessage());
+      logger.error("SchedulerException in StateServiceImpl: {}.", e.getMessage());
     }
   }
 
