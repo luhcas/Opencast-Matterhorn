@@ -96,8 +96,25 @@ chown -R mtrehan $MATTERHORN_DIR
 chgrp -R staff $EXPORT_DIR/$EXPORT_NAME
 chgrp -R staff $MATTERHORN_DIR
 
-echo "You can now update the version number and press enter to continue..."
-read
+# Update the version number
+
+cd $SVN_DIR
+
+sed '1,$s/\>0.1-SNAPSHOT\</\>0.5-RC\</' $SVN_DIR/pom.xml >/tmp/branch-pom.xml
+cp /tmp/branch-pom.xml $SVN_DIR/pom.xml
+
+for i in opencast-*
+do
+  echo " Module: $i"
+
+  if [ -f $SVN_DIR/$i/pom.xml ]; then
+    echo " 0.5-RC: $i"
+    sed '1,$s/\>0.1-SNAPSHOT\</\>0.5-RC\</' $SVN_DIR/$i/pom.xml >/tmp/branch-pom.xml
+    cp /tmp/branch-pom.xml $SVN_DIR/$i/pom.xml
+    sleep 1
+  fi
+
+done
 
 #
 # Build
