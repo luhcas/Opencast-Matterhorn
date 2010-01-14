@@ -37,15 +37,24 @@ popupHelp.helpTexts = {
         "Enter the description of this recordings content."
     ],
     
-    
     "distribution" : [
         "Distribution channels",
         "Specify the channels to which you would like this recording distributed."
     ],
     
-    "recording" : [
-        "Start and End Time",
-        "Select the start and end times for this recording."
+    "startdate" : [
+        "Start Date",
+        "Select the start and end date for this recording."
+    ],
+    
+    "starttime" : [
+        "Start Time",
+        "Select a start time for this recording. Note: 24h time"
+    ],
+    
+    "duration" : [
+        "Duration",
+        "Select a duration for this recording. Must be larger than 0 hours and 0 minutes."
     ],
     
     "agent" : [

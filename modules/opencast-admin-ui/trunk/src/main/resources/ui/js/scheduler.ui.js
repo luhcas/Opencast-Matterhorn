@@ -20,9 +20,12 @@ var schedulerUI = schedulerUI || { };
 /**
  *  clearForm resets all the form values to defaults.
  */
-schedulerUI.clearForm = function() {
+schedulerUI.resetForm = function() {
   $.each($('form'), function() { this.reset(); });
-  //change duration.
+  $('#startDate').datepicker('setDate', new Date());
+  var now = new Date();
+  now.setHours(now.getHours() + 1);
+  $('#startTimeHour').val(now.getHours());
   return true;
 };
 

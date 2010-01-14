@@ -24,8 +24,9 @@
     <script type="text/javascript" src="js/scheduler.ui.js"></script>
     <script type="text/javascript">
       function initPage() {
-        $('#startDate').datepicker({showOn: 'button', buttonImage: 'img/calendar.gif', buttonImageOnly: true});
+        $('#startDate').datepicker({showOn: 'both', buttonImage: 'img/calendar.gif', buttonImageOnly: true});
         $('#startDate').datepicker('setDate', new Date());
+        //$('#startDate').click( function(){ $('#startDate').datepicker('show'); } );
         var now = new Date();
         now.setHours(now.getHours() + 1);
         $('#startTimeHour').val(now.getHours());
@@ -91,7 +92,7 @@
         var eventID = schedulerUI.getURLParams('eventID');
         if(eventID && schedulerUI.getURLParams('edit')){
           $("#page-title").text("Edit Recording");
-          $.get(SCHEDULER_URL + '/getEvent?eventID=' + eventID, schedulerUI.loadEvent, 'xml');
+          $.get(SCHEDULER_URL + '/getEvent/' + eventID, schedulerUI.loadEvent, 'xml');
         }
         
         schedulerUI.loadKnownAgents();
@@ -104,7 +105,7 @@
     <!-- fl-centered doesn't work in winXP-IE8 -->
     <div class="fl-container-850 fl-theme-coal">
       <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-        <li class="fl-activeTab"><a href="recordings.html">Recordings</a></li>
+        <li class="fl-activeTab"><a href="/admin/">Recordings</a></li>
         <li class=""><a href="/admin/agents_status.html">Capture Agents</a></li>
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
@@ -255,8 +256,8 @@
                 <ul class="fl-controls-right form-list">
                   <li class="required">
                     <label class="fl-label form-box-label" id="label-stardate">Start Date:</label>
-                    <input type="text" size="10" name="startDate" id="startDate" style="margin-right:5px;"/></td>
-                    <span class="fl-icon icon-help" id="help_recording" />
+                    <input type="text" size="10" name="startDate" id="startDate" style="margin-right:5px;" /></td>
+                    <span class="fl-icon icon-help" id="help_startdate" />
                   </li>
                   <li class="required">
                     <label class="fl-label form-box-label" id="label-starttime">Start Time:</label>
@@ -299,6 +300,7 @@
                       <option>50</option>
                       <option>55</option>
                     </select>
+                    <span class="fl-icon icon-help" id="help_starttime" />
                   </li>
                   <li class="required">
                     <label class="fl-label form-box-label" id="label-enddate">Duration:</label>
@@ -333,6 +335,7 @@
                       <option value="55">55</option>
                     </select>
                     minutes
+                    <span class="fl-icon icon-help" id="help_duration" />
                   </li>
                   <li class="required" style="clear: both;">
                     <label class="fl-label"  id="label-attendees">Capture Agent:</label>

@@ -38,6 +38,15 @@
 
 /* Event View */
 
+.notification-header {
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px;
+  background-color: #7f7;
+  text-align: center;
+  font-weight: bold;
+}
+
 .data-row {
   width:100%;
   margin-bottom:1em;
