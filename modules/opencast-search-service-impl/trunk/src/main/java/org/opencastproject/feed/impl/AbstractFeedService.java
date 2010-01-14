@@ -134,12 +134,13 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
       log_.warn("{} denies to handle request for {} since no selector is defined", this);
       return false;
     } else if (query.length == 0) {
-      log_.warn("{} denies to handle unknown request", this);
+      log_.debug("{} denies to handle unknown request", this);
       return false;
     } else if (!query[0].toLowerCase().equals(selector)) {
-      log_.warn("{} denies to handle request for {}", this, query);
+      log_.debug("{} denies to handle request for {}", this, query);
+      return false;
     }
-    log_.warn("{} accepts to handle request for {}", this, query);
+    log_.debug("{} accepts to handle request for {}", this, query);
     return true;
   }
 

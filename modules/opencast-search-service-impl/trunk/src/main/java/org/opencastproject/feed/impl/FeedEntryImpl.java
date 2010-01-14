@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * TODO: Comment
+ * Implementation for a feed entry.
  */
 public class FeedEntryImpl implements FeedEntry {
 
@@ -375,6 +375,15 @@ public class FeedEntryImpl implements FeedEntry {
    */
   public Feed getSource() {
     return feed;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return (title != null) ? title.getValue() : uri;
   }
 
 }

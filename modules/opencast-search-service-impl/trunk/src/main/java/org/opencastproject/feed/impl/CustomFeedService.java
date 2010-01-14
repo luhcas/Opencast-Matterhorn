@@ -91,7 +91,7 @@ public class CustomFeedService extends AbstractFeedService implements FeedGenera
     String query = (String) context.getProperties().get(PROP_QUERY);
     if (query != null && !"".equals(query)) {
       solrQuery = query;
-      log_.info("Confguring custom feed with query '{}'", query);
+      log_.debug("Configuring custom feed with query '{}'", query);
     }
   }
 

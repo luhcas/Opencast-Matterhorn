@@ -596,7 +596,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
 
     // Did we find any distribution formats?
     if (trackIds.size() == 0) {
-      log_.warn("No media formats found for feed entry {}", entry);
+      log_.debug("No media formats found for feed entry {}", entry);
       return enclosedFormats;
     }
 

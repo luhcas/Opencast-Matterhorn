@@ -177,7 +177,7 @@ public class FeedServlet extends HttpServlet {
    * @param generator the generator
    */
   public void addFeedGenerator(FeedGenerator generator) {
-    log_.info("Registering '{}' feed generator", generator.getIdentifier());
+    log_.info("Registering '{}' feed", generator.getIdentifier());
     feeds.add(generator);
   }
 
@@ -187,7 +187,7 @@ public class FeedServlet extends HttpServlet {
    * @param generator the feed generator
    */
   public void removeFeedGenerator(FeedGenerator generator) {
-    log_.info("Removing '{}' feed generator", generator.getIdentifier());
+    log_.info("Removing '{}' feed", generator.getIdentifier());
     feeds.remove(generator);
   }
 
