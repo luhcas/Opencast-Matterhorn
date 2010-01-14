@@ -24,6 +24,8 @@ import org.w3c.dom.Node;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class provides base functionality for media package elements.
@@ -50,6 +52,9 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
 
   /** The element's type, e. g. 'track/slide' */
   protected MediaPackageElementFlavor flavor = null;
+
+  /** The tags */
+  protected Set<String> tags = null;
 
   /** The element's location */
   protected URI uri = null;
@@ -129,6 +134,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
     this.mimeType = mimeType;
     this.uri = uri;
     this.checksum = checksum;
+    this.tags = new HashSet<String>();
   }
 
   /**
@@ -146,6 +152,48 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    */
   public String getIdentifier() {
     return id;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackageElement#addTag(java.lang.String)
+   */
+  public void addTag(String tag) {
+    if (tag == null)
+      throw new IllegalArgumentException("Tag must not be null");
+    tags.add(tag);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackageElement#removeTag(java.lang.String)
+   */
+  public void removeTag(String tag) {
+    if (tag == null)
+      return;
+    tags.remove(tag);
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.media.mediapackage.MediaPackageElement#containsTag(java.lang.String)
+   */
+  @Override
+  public boolean containsTag(String tag) {
+    if (tag == null)
+      return false;
+    return tags.contains(tag);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackageElement#getTags()
+   */
+  public String[] getTags() {
+    return tags.toArray(new String[tags.size()]);
   }
 
   /**
@@ -397,6 +445,17 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
       Element descriptionNode = document.createElement("description");
       descriptionNode.appendChild(document.createTextNode(description));
       node.appendChild(descriptionNode);
+    }
+    
+    // Tags
+    if (tags != null && tags.size() > 0) {
+      Element tagsNode = document.createElement("tags");
+      node.appendChild(tagsNode);
+      for (String tag : tags) {
+        Element tagNode = document.createElement("tag");
+        tagsNode.appendChild(tagNode);
+        tagsNode.appendChild(document.createTextNode(tag));
+      }
     }
 
     // Url

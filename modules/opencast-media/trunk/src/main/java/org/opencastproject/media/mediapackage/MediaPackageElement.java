@@ -75,6 +75,38 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
   void setElementDescription(String description);
 
   /**
+   * Tags the media package element with the given tag.
+   * 
+   * @param tag
+   *          the tag
+   */
+  void addTag(String tag);
+
+  /**
+   * Removes the tag from the media package element.
+   * 
+   * @param tag
+   *          the tag
+   */
+  void removeTag(String tag);
+
+  /**
+   * Returns <code>true</code> if the media package element contains the given tag.
+   * 
+   * @param tag
+   *          the tag
+   * @return <code>true</code> if the element is tagged
+   */
+  boolean containsTag(String tag);
+
+  /**
+   * Returns the tags for this media package element or an empty array if there are no tags.
+   * 
+   * @return the tags
+   */
+  String[] getTags();
+
+  /**
    * Returns the media package if the element has been added, <code>null</code> otherwise.
    * 
    * @return the media package

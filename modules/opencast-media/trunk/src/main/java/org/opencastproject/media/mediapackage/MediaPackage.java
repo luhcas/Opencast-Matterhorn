@@ -105,7 +105,16 @@ public interface MediaPackage {
    * @return the element
    */
   MediaPackageElement getElementById(String id);
-  
+
+  /**
+   * Returns the elements that are tagged with the given tag or an empty array if no such elements are found.
+   * 
+   * @param tag
+   *          the tag
+   * @return the elements
+   */
+  MediaPackageElement[] getElementsByTag(String tag);
+
   /**
    * Returns all elements of this media package with the given flavor.
    * 
@@ -128,6 +137,15 @@ public interface MediaPackage {
    * @return the tracks
    */
   Track[] getTracks();
+
+  /**
+   * Returns the tracks that are tagged with the given tag or an empty array if no such tracks are found.
+   * 
+   * @param tag
+   *          the tag
+   * @return the tracks
+   */
+  Track[] getTracksByTag(String tag);
 
   /**
    * Returns the tracks that are part of this media package and match the given flavor as defined in {@link Track}.
@@ -194,6 +212,15 @@ public interface MediaPackage {
   Attachment[] getAttachments();
 
   /**
+   * Returns the attachments that are tagged with the given tag or an empty array if no such attachments are found.
+   * 
+   * @param tag
+   *          the tag
+   * @return the attachments
+   */
+  Attachment[] getAttachmentsByTag(String tag);
+
+  /**
    * Returns the attachments that are part of this media package and match the specified flavor.
    * 
    * @param flavor
@@ -255,6 +282,15 @@ public interface MediaPackage {
    * @return the catalogs
    */
   Catalog[] getCatalogs();
+
+  /**
+   * Returns the catalogs that are tagged with the given tag or an empty array if no such catalogs are found.
+   * 
+   * @param tag
+   *          the tag
+   * @return the catalogs
+   */
+  Catalog[] getCatalogsByTag(String tag);
 
   /**
    * Returns the catalogs associated with this media package that matches the specified flavor.

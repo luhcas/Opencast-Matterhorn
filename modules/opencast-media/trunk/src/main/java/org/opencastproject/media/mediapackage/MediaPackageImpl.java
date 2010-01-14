@@ -147,6 +147,19 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getElementById(java.lang.String)
+   */
+  public MediaPackageElement[] getElementsByTag(String tag) {
+    List<MediaPackageElement> result = new ArrayList<MediaPackageElement>();
+    for (MediaPackageElement element : manifest.getEntries()) {
+      if (element.containsTag(tag)) {
+        result.add(element);
+      }
+    }
+    return result.toArray(new MediaPackageElement[result.size()]);
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.media.mediapackage.MediaPackage#getElementsByFlavor(org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
@@ -240,6 +253,15 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getCatalogsByTag(java.lang.String)
+   */
+  public Catalog[] getCatalogsByTag(String tag) {
+    return manifest.getCatalogsByTag(tag);
+  }
+
+  /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#getCatalogs(MediaPackageElementFlavor)
    */
   public Catalog[] getCatalogs(MediaPackageElementFlavor type) {
@@ -294,6 +316,15 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public Track[] getTracks() {
     return manifest.getTracks();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getTracksByTag(java.lang.String)
+   */
+  public Track[] getTracksByTag(String tag) {
+    return manifest.getTracksByTag(tag);
   }
 
   /**
@@ -381,6 +412,15 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public Attachment[] getAttachments() {
     return manifest.getAttachments();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getAttachmentsByTag(java.lang.String)
+   */
+  public Attachment[] getAttachmentsByTag(String tag) {
+    return manifest.getAttachmentsByTag(tag);
   }
 
   /**

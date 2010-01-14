@@ -57,7 +57,7 @@ final class ManifestImpl {
 
   /** the logging facility provided by log4j */
   private final static Logger log_ = LoggerFactory.getLogger(ManifestImpl.class.getName());
-  
+
   /** id builder, for internal use only */
   private static final IdBuilder idBuilder = new UUIDIdBuilderImpl();
 
@@ -99,7 +99,6 @@ final class ManifestImpl {
    *          the media package identifier
    * @throws IOException
    *           if the specified file does not exist or cannot be created
-
    */
   ManifestImpl(Id identifier) {
     this.identifier = identifier;
@@ -286,6 +285,24 @@ final class ManifestImpl {
   }
 
   /**
+   * Returns the attachments that are tagged with the given tag or an empty string array.
+   * 
+   * @param tag
+   *          the tag
+   * @return the attachments
+   */
+  public Track[] getTracksByTag(String tag) {
+    List<Track> result = new ArrayList<Track>();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e instanceof Track && e.containsTag(tag))
+          result.add((Track) e);
+      }
+    }
+    return result.toArray(new Track[result.size()]);
+  }
+
+  /**
    * Returns the media package's tracks matching the specified flavor.
    * 
    * @param flavor
@@ -419,6 +436,24 @@ final class ManifestImpl {
       }
     }
     return null;
+  }
+
+  /**
+   * Returns the attachments that are tagged with the given tag or an empty string array.
+   * 
+   * @param tag
+   *          the tag
+   * @return the attachments
+   */
+  public Attachment[] getAttachmentsByTag(String tag) {
+    List<Attachment> result = new ArrayList<Attachment>();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e instanceof Attachment && e.containsTag(tag))
+          result.add((Attachment) e);
+      }
+    }
+    return result.toArray(new Attachment[result.size()]);
   }
 
   /**
@@ -575,6 +610,24 @@ final class ManifestImpl {
   Catalog[] getCatalogs() {
     Collection<Catalog> catalogs = loadCatalogs();
     return catalogs.toArray(new Catalog[catalogs.size()]);
+  }
+
+  /**
+   * Returns the attachments that are tagged with the given tag or an empty string array.
+   * 
+   * @param tag
+   *          the tag
+   * @return the attachments
+   */
+  public Catalog[] getCatalogsByTag(String tag) {
+    List<Catalog> result = new ArrayList<Catalog>();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e instanceof Catalog && e.containsTag(tag))
+          result.add((Catalog) e);
+      }
+    }
+    return result.toArray(new Catalog[result.size()]);
   }
 
   /**
@@ -917,12 +970,12 @@ final class ManifestImpl {
 
     // Handle or ID (we currently have a mix, so we need to support both)
     String id = xPath.evaluate("/mediapackage/@id", doc);
-    
+
     if (id != null && !"".equals(id)) {
       try {
         manifest.identifier = IdBuilderFactory.newInstance().newIdBuilder().fromString(id);
-      } catch(Exception e) {
-        // The default ID builder didn't work?  Try the handle builder.
+      } catch (Exception e) {
+        // The default ID builder didn't work? Try the handle builder.
         manifest.identifier = HandleBuilderFactory.newInstance().newHandleBuilder().fromValue(id);
       }
     } else {
