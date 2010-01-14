@@ -127,11 +127,10 @@ package org.opencast.engage.videodisplay.control
 									  					ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
 									  					break;
 									  					
-				 case VideoControlEvent.MUTE:           ExternalInterface.call(ExternalFunction.MUTE, '');
-                                                        
+				case VideoControlEvent.MUTE:            ExternalInterface.call(ExternalFunction.MUTE, '');
                                                         break;
-										    			
-                case VideoControlEvent.VOLUMEUP:		if( model.player.volume != 1 )
+                                                        
+                 case VideoControlEvent.VOLUMEUP:		if( model.player.volume != 1 )
 														{
 															model.player.volume = model.player.volume + skipVolume;
 														}

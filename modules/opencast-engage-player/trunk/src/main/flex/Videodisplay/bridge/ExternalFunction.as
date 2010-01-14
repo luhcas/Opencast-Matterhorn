@@ -24,9 +24,9 @@ package bridge
         
         public static const HEARTIMEINFO:String         = 'Opencast.FromVideodisplay.hearTimeInfo'; 
         
-        public static const TOGGLEINFO:String         = 'Opencast.FromVideodisplay.toggleInfo'; 
+        public static const TOGGLEINFO:String           = 'Opencast.FromVideodisplay.toggleInfo';
         
+        public static const OPENCASTVOLUME:String       = 'Opencast.FromVideodisplay.setOpencastVolume'; 
         
-        
- 	}
+    }
 }

@@ -58,7 +58,17 @@ Opencast.FromVideodisplay = (function ()
         }
         Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(sliderVolume), newVolume);
     }
-
+    
+    /**
+        @memberOf Opencast.FromVideodisplay
+        @description Set the volume.
+        @param Number newVolume 
+    */
+    function setOpencastVolume(newVolume) 
+    {
+       Opencast.volume = newVolume; 
+    }
+    
     /**
         @memberOf Opencast.FromVideodisplay
         @description Set the current time of the video.
@@ -221,6 +231,7 @@ Opencast.FromVideodisplay = (function ()
     return {
         setPlayhead : setPlayhead,
         setVolume : setVolume,
+        setOpencastVolume : setOpencastVolume,
         setCurrentTime : setCurrentTime,
         setTotalTime: setTotalTime,
         setDuration: setDuration,

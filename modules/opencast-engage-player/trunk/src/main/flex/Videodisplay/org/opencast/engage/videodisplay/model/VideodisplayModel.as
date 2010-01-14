@@ -18,6 +18,7 @@ package org.opencast.engage.videodisplay.model
 	import com.adobe.strobe.players.MediaPlayerWrapper;
 	
 	import mx.collections.ArrayCollection;
+	import mx.controls.ProgressBar;
 	
 	import org.opencast.engage.videodisplay.control.util.TimeCode;
 	import org.opencast.engage.videodisplay.vo.LanguageVO;
@@ -79,6 +80,16 @@ package org.opencast.engage.videodisplay.model
 		
 		// Time Code
 		public var timeCode:TimeCode = new TimeCode();
+		
+		[Embed("../../../../../../../resources/icons/volumemuteBig.png")]
+        public var MuteIcon:Class;
+        
+        [Embed("../../../../../../../resources/icons/volumehighBig.png")]
+        public var UnmuteIcon:Class;
+        
+        public var progressPercent:int = 0;
+        
+        public var progressBar:ProgressBar = new ProgressBar();
 		
 		public function VideodisplayModel()
         {

@@ -173,8 +173,6 @@ Button.ccOff
   selectedDisabledSkin: Embed(source='skin_opencast.swf', symbol='btn_cc_down');  
 }
 
-
-
 .captions
 {
 	color: #ffffff;
@@ -186,5 +184,18 @@ Button.ccOff
 {
     color: #ffffff;
     font-size: 16; 
+}
+
+.HSliderSeek
+{
+   thumb-skin: Embed(source='skin_opencast.swf', symbol='thumb_slider');
+}
+
+.HSliderVolume
+{
+   thumb-skin: Embed(source='skin_opencast.swf', symbol='thumb_slider');
    
+   thumbUpSkin: Embed(source='skin_opencast.swf', symbol='thumb_slider');
+   thumbDownSkin: Embed(source='skin_opencast.swf', symbol='thumb_slider');
+   thumbOverSkin: Embed(source='skin_opencast.swf', symbol='thumb_slider');
 }

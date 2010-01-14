@@ -193,7 +193,7 @@ function AC_Generateobj(objAttrs, params, embedAttrs)
 		  str += '<param name ="movie" value="Videodisplay.swf" >';
 		  str += '<param name="quality"value="high">';
 		  str += '<param name="bgcolor" value="#000000" />';
-			str += '<param name="flashvars" VALUE="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml">';
+			str += '<param name="flashvars" VALUE="bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uos.de/public/virtmm/test/Pechakucha-zoo_hd.mp4&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml">';
 			str += '<param name="allowScriptAccess" value="sameDomain" />';
     	
     	str += '<embed ';

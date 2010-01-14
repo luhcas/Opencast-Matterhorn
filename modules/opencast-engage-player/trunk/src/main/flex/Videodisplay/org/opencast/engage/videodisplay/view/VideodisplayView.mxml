@@ -169,6 +169,8 @@
 	            	try 
 	            	{
 	            		ExternalInterface.call(ExternalFunction.SETPROGRESS, context.stream.bytesLoaded / context.stream.bytesTotal * 100);
+	            	    model.progressPercent = context.stream.bytesLoaded / context.stream.bytesTotal * 100;
+	            	    model.progressBar.setProgress( context.stream.bytesLoaded / context.stream.bytesTotal * 100 , 100 );
 	            	} 
 	            	catch (e:TypeError) {}
 	          	}

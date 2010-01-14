@@ -175,7 +175,7 @@
 		<mx:HBox
 			width="100%"
 			height="100%"
-			left="5" right="5" top="5" bottom="5"
+			left="5" right="5" top="5" bottom="0"
 			verticalAlign="bottom"
 			>
             
@@ -188,7 +188,7 @@
 		            width="100%"
 		            horizontalAlign="center"
 		            />
-		            
+		        
 		        <mx:Spacer 
 		        	height="20"
 		        	visible="{model.fullscreenMode}"
@@ -199,20 +199,30 @@
 		            id="videocontrollerView"
 		            width="100%"
 		            height="100%"
-		            horizontalAlign="center"
 		            visible="{model.fullscreenMode}"
 		            includeInLayout="{model.fullscreenMode}"
 		            />
             
              </mx:VBox>
-	            
-	        <mx:Button
-		    	id="btn_fullscreen"
-		        styleName="{ model.fullscreenMode == false ? 'Fullscreen' : 'Normalscreen' }"
-		       	click="{ toggleFullScreen() }" 
-		       	toolTip="{ model.fullscreenMode == false ? 'Fullscreen' : 'Normalscreen' }"
-		       	/>
-		    
+             
+            <mx:VBox 
+            	horizontalGap="0"
+            	verticalGap="0"
+            	>
+            	
+                <mx:Button
+			    	id="btn_fullscreen"
+			        styleName="{ model.fullscreenMode == false ? 'Fullscreen' : 'Normalscreen' }"
+			       	click="{ toggleFullScreen() }" 
+			       	toolTip="{ model.fullscreenMode == false ? 'Fullscreen' : 'Normalscreen' }"
+			       	/>
+		       	
+		       <mx:Spacer 
+		       	  height="5"
+		       	  />
+		       	
+		      </mx:VBox>
+		       	
 		</mx:HBox>
 
 </mx:Canvas>

@@ -16,23 +16,23 @@
  *
  */
  -->
-<mx:HBox 
+<mx:Canvas 
 	xmlns:mx="http://www.adobe.com/2006/mxml" 
 	width="100%"
-	height="50"
-	horizontalAlign="center"
-	verticalAlign="middle"
-	
-	>
+	height="40"
+	backgroundAlpha="1.0"
+	xmlns:view="org.opencast.engage.videodisplay.view.*">
     
 <mx:Script>
         <![CDATA[
+        	import bridge.ExternalFunction;
         	import org.opencast.engage.videodisplay.state.PlayerState;
         	import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
         	import org.swizframework.Swiz;
         	import mx.core.Application;
         	import mx.controls.Alert;
         	import org.opencast.engage.videodisplay.model.VideodisplayModel;
+        	import flash.external.ExternalInterface;
            
             [Autowire]
             [Bindable]
@@ -61,109 +61,205 @@
             private function onVolume():void
             {
                 model.player.volume = volumeSlider.value;
+                ExternalInterface.call(ExternalFunction.SETVOLUME, volumeSlider.value * 100);
+                ExternalInterface.call(ExternalFunction.OPENCASTVOLUME, volumeSlider.value);
+                
+            }
+           
+            /**
+             * seekDataTipFunc
+             * 
+             * Generate the string for the tool tip of the Seek Slider.
+             * 
+             * */
+            private function seekDataTipFunc(val:String):String 
+            {
+                var value:int = int(val);
+                return model.timeCode.getTC(value);
+            }
+            
+            /**
+             * volumeDataTipFunc
+             * 
+             * Generate the string for the tool tip of the Seek Slider.
+             * 
+             * */
+            private function volumeDataTipFunc(val:String):String 
+            {
+                var numb:Number = new Number( val );
+                return (numb * 100).toFixed(0) + ' %';
             }
             
         ]]>
     </mx:Script>
     
-    <mx:Label 
-    	width="80"
-    	height="40"
-    	textAlign="center"
-    	text="{ model.timeCode.getTC(model.currentPlayhead) }"
-    	styleName="videocontrollerLabel"
-    	toolTip="Current Time {model.timeCode.getTC(model.currentPlayhead) } "
-    	/>
-    	
-    <mx:Label 
-    	width="80"
-    	height="40"
-        textAlign="center"
-    	text="{ model.timeCode.getTC(model.currentDuration) }"
-    	styleName="videocontrollerLabel"
-    	toolTip="Duration {model.timeCode.getTC(model.currentDuration) } "
-    	/>
-    	
-    <mx:Spacer 
-    	width="20"
-    	/>
+    <mx:Fade id="fadeOut" duration="100" alphaFrom="1.0" alphaTo="0.0"/>
+    <mx:Fade id="fadeIn" duration="100" alphaFrom="0.0" alphaTo="1.0"/>
     
-    <mx:Button 
-    	width="40"
-    	height="40"
-    	toolTip="Skip Backward Button"
-    	styleName="SkipBackward"
-    	click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SKIPBACKWARD)) }"
-    	/>
     	
-    <mx:Button 
-    	width="40"
-        height="40"
-        toolTip="Rewind Button"
-        styleName="Rewind"
-        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.REWIND)) }"
-        />
-        
-    <mx:Button 
-    	width="40"
-        height="40"
-    	toolTip="{ model.currentPlayerState == PlayerState.PAUSING ? 'Play Button' : 'Pause Button' }"
-        styleName="{ model.currentPlayerState == PlayerState.PAUSING ? 'Play' : 'Pause' }"
-        click="{ model.currentPlayerState == PlayerState.PLAYING ? Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE)) : Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY)); }"
-        />
-    
-    <mx:Button 
-    	width="40"
-        height="40"
-    	toolTip="Fast Forward Button"
-        styleName="FastForward"
-        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.FASTFORWARD)) }"
-        />
-        
-    <mx:Button 
-        width="40"
-        height="40"
-        toolTip="Skip Forward Button"
-        styleName="SkipForward"
-        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SKIPFORWARD)) }"
-        />  
-        
-     <mx:Spacer 
-        width="20"
-        />
-        
-     <mx:HSlider                
-        id = "seekBar" 
-        width="100%"
-        maximum="{ model.player.duration }"
-        value="{ model.currentPlayhead }"
-        change="{ onSeek() }"
-        toolTip="Current Time {model.timeCode.getTC(model.currentPlayhead) } "
-        />
-     
-     <mx:Spacer 
-     	width="20"
-     	/>
-       
-     <mx:Button 
-        width="40"
-        height="40"	
-        toolTip="{ model.ccBoolean == true ? 'Closed Caption Off' : 'Closed Caption On' }"
-        styleName="{ model.ccBoolean == true ? 'ccOff' : 'ccOn' }"
-        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.CLOSEDCAPTIONS)) }"
-       />  
-       
-    <mx:HSlider     
-        width = "50"    
-        maximum = "1"
-        id = "volumeSlider" 
-        change = "{ onVolume() }"
-        value = "{ model.player.volume }"
-        toolTip="Volume:  { (model.player.volume * 100).toFixed(0) } %"
-        />
-        
-    <mx:Spacer 
-        width="20"
-        />
+    <mx:HBox 
+    	id="hb_videocontroller"
+    	width="100%"
+    	height="40"
+    	backgroundColor="#000000"
+        backgroundAlpha="0.0"
+    	verticalAlign="middle"
+    	visible="false"
+    	hideEffect="{ fadeOut }" 
+    	showEffect="{ fadeIn }"
+    	rollOut="{ this.hb_videocontroller.visible = false  }"
+        >
+    	
+        <mx:Label 
+	    	width="80"
+	    	textAlign="center"
+	    	text="{ model.timeCode.getTC(model.currentPlayhead) }"
+	    	styleName="videocontrollerLabel"
+	    	toolTip="Current Time {model.timeCode.getTC(model.currentPlayhead) } "
+	    	/>
+	    	
+	    <mx:Label 
+	        width="25"
+	        textAlign="center"
+	        text="of"
+	        styleName="videocontrollerLabel"
+	        />	
+	    
+	    <mx:Label 
+	    	width="80"
+	    	textAlign="center"
+	    	text="{ model.timeCode.getTC(model.currentDuration) }"
+	    	styleName="videocontrollerLabel"
+	    	toolTip="Duration {model.timeCode.getTC(model.currentDuration) } "
+	    	/>
+	    	
+	    <mx:Spacer 
+	    	width="20"
+	    	/>
+	    
+	    <mx:Button 
+	    	width="40"
+	    	height="40"
+	    	y="-40"
+	    	toolTip="Skip Backward Button"
+	    	styleName="SkipBackward"
+	    	click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SKIPBACKWARD)) }"
+	    	/>
+	    	
+	    <mx:Button 
+	    	width="40"
+	        height="40"
+	        toolTip="Rewind Button"
+	        styleName="Rewind"
+	        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.REWIND)) }"
+	        />
+	        
+	    <mx:Button 
+	    	width="40"
+	        height="40"
+	    	toolTip="{ model.currentPlayerState == PlayerState.PAUSING ? 'Play Button' : 'Pause Button' }"
+	        styleName="{ model.currentPlayerState == PlayerState.PAUSING ? 'Play' : 'Pause' }"
+	        click="{ model.currentPlayerState == PlayerState.PLAYING ? Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE)) : Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY)); }"
+	        />
+	    
+	    <mx:Button 
+	    	width="40"
+	        height="40"
+	    	toolTip="Fast Forward Button"
+	        styleName="FastForward"
+	        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.FASTFORWARD)) }"
+	        />
+	        
+	    <mx:Button 
+	        width="40"
+	        height="40"
+	        toolTip="Skip Forward Button"
+	        styleName="SkipForward"
+	        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SKIPFORWARD)) }"
+	        />  
+	        
+	     <mx:Spacer 
+	        width="20"
+	        />
+	        
+	     <mx:Canvas
+	     	width="100%"
+	     	height="20"
+	     	>
+	     	
+	        <view:ProgressBarView 
+            	id="pg_video"
+            	width="100%"
+            	height="100%"
+            	/>
+            
+            <mx:HSlider                
+                id = "seekBar" 
+                width="100%"
+                maximum="{ model.player.duration }"
+                value="{ model.currentPlayhead }"
+                change="{ onSeek() }"
+                toolTip="Current Time {model.timeCode.getTC(model.currentPlayhead) } "
+                dataTipFormatFunction="seekDataTipFunc"
+                styleName="HSliderSeek"
+                />
+	        
+	     </mx:Canvas>   
+	     <mx:Spacer 
+	        width="20"
+	        />
+	        
+	     <mx:Image 
+	        width="40" height="40" 
+	        autoLoad="true"
+	        buttonMode="true"
+	        useHandCursor="true"
+	        source="{ model.player.volume == 0 ?   model.MuteIcon : model.UnmuteIcon }"
+	        toolTip="{ model.player.volume == 0 ? 'Unmute' : 'Mute'}"
+	        click="{ Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.MUTE )) }"
+	        />   
+	        
+	     <mx:Spacer 
+	        width="20"
+	        />
+	        
+	     <mx:HSlider     
+	        width = "50"    
+	        maximum = "1"
+	        id = "volumeSlider" 
+	        change = "{ onVolume() }"
+	        value = "{ model.player.volume }"
+	        toolTip="Volume:  { (model.player.volume * 100).toFixed(0) } %"
+	        styleName="HSliderVolume"
+	        dataTipFormatFunction="volumeDataTipFunc"
+	        />
+	        
+	        
+	    <mx:Spacer 
+	        width="20"
+	        />
+	        
+	    <mx:Button 
+	        width="40"
+	        height="40" 
+	        toolTip="{ model.ccBoolean == true ? 'Closed Caption Off' : 'Closed Caption On' }"
+	        styleName="{ model.ccBoolean == true ? 'ccOff' : 'ccOn' }"
+	        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.CLOSEDCAPTIONS)) }"
+	       />  
+	    
+	    <mx:Spacer 
+            width="20"
+            />
 
-</mx:HBox>
+    </mx:HBox>
+    
+    <mx:Canvas 
+        width="100%"
+        height="40"
+        backgroundColor="#000000"
+        backgroundAlpha="0.0"
+        rollOver="{ this.hb_videocontroller.visible = true   }"
+        visible="{ this.hb_videocontroller.visible == true ? false : true }"
+        />
+    
+</mx:Canvas>
