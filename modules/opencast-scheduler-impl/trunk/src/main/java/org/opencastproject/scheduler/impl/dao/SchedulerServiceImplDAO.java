@@ -83,16 +83,16 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       String ingestUrl = null;
       if(componentContext == null) {
         logger.info("No Component Context available, constructing default ingest URL.");
-        ingestUrl = UrlSupport.DEFAULT_BASE_URL+"/ingest/rest";
+        ingestUrl = UrlSupport.DEFAULT_BASE_URL+"/ingest/rest/addZippedMediaPackage";
       } else {
         String ccIngestUrl = componentContext.getBundleContext().getProperty("capture.ingest.endpoint");
         logger.info("configured ingest url is {}", ccIngestUrl);
         if(ccIngestUrl == null) {
           logger.info("ingest URL not found in config file, constructing default based on server URL");
-          ccIngestUrl = componentContext.getBundleContext().getProperty("serverURL")+"/ingest/rest";
+          ccIngestUrl = componentContext.getBundleContext().getProperty("serverURL")+"/ingest/rest/addZippedMediaPackage";
           if(ccIngestUrl == null) {
             logger.info("ingest URL not found in config file, constructing default");
-            ingestUrl = UrlSupport.DEFAULT_BASE_URL+"/ingest/rest";
+            ingestUrl = UrlSupport.DEFAULT_BASE_URL+"/ingest/rest/addZippedMediaPackage";
           } else {
             ingestUrl = ccIngestUrl;
           }
