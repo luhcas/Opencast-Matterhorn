@@ -4,7 +4,7 @@
   <property name="service.description" value="Service Listing User Interface" />
   <property name="alias" value="/" />
   <property name="classpath" value="/ui" />
-  <property name="welcome.file" value="index.html" />
+  <property name="welcome.file" value="welcome.html" />
 
   <property name="test.classpath" value="/uitests" />
 
