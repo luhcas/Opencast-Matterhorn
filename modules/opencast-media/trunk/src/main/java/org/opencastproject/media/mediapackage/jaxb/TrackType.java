@@ -33,6 +33,8 @@ import org.xml.sax.InputSource;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -42,6 +44,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -76,7 +79,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "trackType", propOrder = { "mimetype", "url", "checksum", "duration", "video", "audio" })
+@XmlType(name = "trackType", propOrder = { "mimetype", "url", "checksum", "duration", "video", "audio", "tags" })
 @XmlRootElement(name = "track")
 public class TrackType {
   private static final Logger logger = LoggerFactory.getLogger(TrackType.class);
@@ -319,5 +322,18 @@ public class TrackType {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     doc.appendChild(track.toManifest(doc, null));
     return fromXml(doc);
+  }
+
+  @XmlElementWrapper(name="tags")
+  @XmlElement(name="tag")
+  protected SortedSet<String> tags;
+
+  public SortedSet<String> getTags() {
+    if(tags == null) tags = new TreeSet<String>();
+    return tags;
+  }
+
+  public void setTags(SortedSet<String> tags) {
+    this.tags = tags;
   }
 }

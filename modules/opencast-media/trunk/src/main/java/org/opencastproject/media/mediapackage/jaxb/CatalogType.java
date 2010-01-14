@@ -23,10 +23,14 @@
 
 package org.opencastproject.media.mediapackage.jaxb;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -56,7 +60,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "catalogType", propOrder = { "mimetype", "url", "checksum" })
+@XmlType(name = "catalogType", propOrder = { "mimetype", "url", "checksum", "tags" })
 public class CatalogType {
 
   @XmlElement(required = true)
@@ -196,5 +200,18 @@ public class CatalogType {
    */
   public void setRef(String value) {
     this.ref = value;
+  }
+
+  @XmlElementWrapper(name="tags")
+  @XmlElement(name="tag")
+  protected SortedSet<String> tags;
+
+  public SortedSet<String> getTags() {
+    if(tags == null) tags = new TreeSet<String>();
+    return tags;
+  }
+
+  public void setTags(SortedSet<String> tags) {
+    this.tags = tags;
   }
 }
