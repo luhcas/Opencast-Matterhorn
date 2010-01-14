@@ -196,7 +196,7 @@ public class WorkflowRestService {
     "    </track>\n" +
     "    <track id=\"track-2\" type=\"track/presentation\">\n" +
     "      <mimetype>video/quicktime</mimetype>\n" +
-    "      <url>" + samplesUrl + "/vonly.mov</url>\n" +
+    "      <url>" + samplesUrl + "/vonly.mpg</url>\n" +
     "      <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n" +
     "      <duration>14546</duration>\n" +
     "      <video>\n" +

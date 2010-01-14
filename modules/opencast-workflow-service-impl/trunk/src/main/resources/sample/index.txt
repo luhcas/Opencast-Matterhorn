@@ -2,7 +2,5 @@ This directory contains sample files for use in testing workflows:
 
 dc-1.xml
 aonly.mp3
-aonly.mov
-vonly.mov
-media.mov
+vonly.mpg
 mediapackage-1.xml
