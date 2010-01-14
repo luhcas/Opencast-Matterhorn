@@ -2,7 +2,7 @@
   <media>
     <track id="track-1" type="track/presentation">
       <mimetype>video/quicktime</mimetype>
-      <url>@SAMPLES_URL@/media.mov</url>
+      <url>@SAMPLES_URL@/vonly.mpg</url>
       <checksum type="md5">43b7d843b02c4a429b2f547a4f230d31</checksum>
       <duration>1004400000</duration>
       <video>
