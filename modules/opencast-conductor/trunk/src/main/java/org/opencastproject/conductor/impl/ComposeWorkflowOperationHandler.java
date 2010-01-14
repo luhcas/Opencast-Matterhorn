@@ -19,6 +19,7 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
@@ -98,6 +99,8 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
       audioSourceTrackId = videoSourceTrackId;
     }
     String targetTrackId = operation.getConfiguration("target-track-id");
+    String targetTrackTags = operation.getConfiguration("target-track-tags");
+    String targetTrackFlavor = operation.getConfiguration("target-track-flavor");
     
     Track audioSourceTrack = mediaPackage.getTrack(audioSourceTrackId);
     if (audioSourceTrack == null) {
@@ -124,7 +127,22 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
         // is there anything we can be doing while we wait for the track to be composed?
         Track composedTrack = futureTrack.get();
         if(composedTrack == null) throw new RuntimeException("unable to retrieve composed track");
-        composedTrack.setFlavor(videoSourceTrack.getFlavor());
+
+        // Add the flavor, either from the operation configuration or from th ecomposer
+        if (targetTrackFlavor != null)
+          composedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(targetTrackFlavor));
+        else
+          composedTrack.setFlavor(videoSourceTrack.getFlavor());
+        logger.debug("Composed track has flavor '{}'", composedTrack.getFlavor());
+
+        // Add tags
+        if (targetTrackTags != null) {
+          for (String tag : targetTrackTags.split(" ,;")) {
+            logger.debug("Tagging composed track with '{}'", tag);
+            composedTrack.addTag(tag);
+          }
+        }
+        
         // store new tracks to mediaPackage
         // FIXME derived media comes from multiple sources, so how do we choose which is the "parent" of the derived media?
         mediaPackage.addDerived(composedTrack, videoSourceTrack);
