@@ -20,7 +20,7 @@ sudo ubuntu-vm-builder vmw6 karmic --arch 'i386' --mem '512' --cpus 1 \
 --addpkg zlib1g-dev --addpkg libpng12-dev --addpkg libjpeg62-dev \
 --addpkg libtiff4-dev --addpkg ssh --addpkg maven2 --addpkg subversion \
 --addpkg wget --addpkg curl --addpkg update-motd \
---addpkg expect-dev --addpkg expect
+--addpkg expect-dev --addpkg expect --addpkg samba --addpkg nano
 
 #change the vm to use nat networking instead of bridged
 sed -i 's/bridged/nat/g' ubuntu-vmw6/opencast.vmx
@@ -39,7 +39,9 @@ sudo mv sources.list mnt/etc/apt/sources.list
 
 #copy config scripts into vm
 sudo cp config.sh mnt/home/opencast/config.sh
+sudo chmod 755 mnt/home/opencast/config.sh
 sudo cp external_tools.sh mnt/home/opencast/external_tools.sh
+sudo chmod 755 mnt/home/opencast/external_tools.sh
 
 #check out svn
 if [ -e opencast ]; then
@@ -74,7 +76,8 @@ sudo cp -r x264 mnt/home/opencast/
 
 #get maven to update whatever dependancies we might have for opencast
 cd opencast
-mvn -fn -DskipTests
+#todo: username is hard coded, how can I get around this?
+sudo -u cab938 mvn -fn -DskipTests
 cd ..
 
 #copy the maven repo across
@@ -82,16 +85,29 @@ sudo cp -r .m2 mnt/home/opencast/
 
 #try and mount the first boot script
 sudo cp -r firstboot.sh mnt/etc/init.d/
-ln -s mnt/etc/init.d/firstboot.sh mnt/etc/init.d/
+ln -s /etc/init.d/firstboot.sh mnt/etc/rc2.d/S99firstboot
+sudo chmod 755 mnt/etc/init.d/firstboot.sh
+sudo chmod 755 mnt/etc/rc2.d/S99firstboot
+
+#mediainfo bug
+ln -s mnt/usr/bin/mediainfo mnt/usr/local/bin/mediainfo
 
 #lets set opencast to own her files
 sudo chown 1000:1000 mnt/home/opencast/*
-sudo find . -exec chown 1000:1000 '{}' \;
+cd mnt/home/opencast/
+sudo find .svn -exec chown 1000:1000 '{}' \;
+sudo find .m2 -exec chown 1000:1000 '{}' \;
+cd ../../..
 
 #unmount the vm disk image and cleanup
 sudo vmware-mount -d mnt
+sleep 2
 sudo rm -rf mnt
 
 #archive it all for download
 echo "Building archive opencast-$OC_REV.zip."
 zip -db -r opencast-$OC_REV.zip ubuntu-vmw6
+
+#copy it to the web
+#scp opencast-$OC_REV.zip cab938@aries:/var/www/opencast/unofficial-vms/
+

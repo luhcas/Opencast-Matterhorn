@@ -49,9 +49,9 @@ echo "Downloading and installing media info."
 wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
 sudo dpkg -i libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
 rm -f libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
-wget http://downloads.sourceforge.net/mediainfo/libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
-sudo dpkg -i libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
-rm -f libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
-wget http://downloads.sourceforge.net/mediainfo/mediainfo_0.7.24-1_i386.Debian_5.deb
-sudo dpkg -i mediainfo_0.7.24-1_i386.Debian_5.deb
-rm -f mediainfo_0.7.24-1_i386.Debian_5.deb
+wget http://downloads.sourceforge.net/mediainfo/libmediainfo0_0.7.19-1_i386.Ubuntu_9.04.deb
+sudo dpkg -i libmediainfo0_0.7.19-1_i386.Ubuntu_9.04.deb
+rm -f libmediainfo0_0.7.19-1_i386.Ubuntu_9.04.deb
+wget http://downloads.sourceforge.net/mediainfo/mediainfo_0.7.19-1_i386.Debian_5.deb
+sudo dpkg -i mediainfo_0.7.19-1_i386.Debian_5.deb
+rm -f mediainfo_0.7.19-1_i386.Debian_5.deb
