@@ -19,11 +19,14 @@ import org.opencastproject.feed.api.Feed.Type;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchService;
+import org.opencastproject.util.UrlSupport;
 
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Dictionary;
 import java.util.StringTokenizer;
 
@@ -100,7 +103,7 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
 
   /** The search service */
   protected SearchService searchService = null;
-
+  
   /**
    * Creates a new abstract feed generator.
    * <p>
@@ -187,15 +190,17 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
    *           if starting the component is resulting in an error
    */
   public void activate(ComponentContext context) throws Exception {
+    String serverUrl = context.getBundleContext().getProperty("serverUrl");
+    if(serverUrl == null) serverUrl = UrlSupport.DEFAULT_BASE_URL;
     Dictionary<?, ?> properties = context.getProperties();
     uri = (String) properties.get(PROP_URI);
     selector = (String) properties.get(PROP_SELECTOR);
     name = (String) properties.get(PROP_NAME);
     description = (String) properties.get(PROP_DESCRIPTION);
     copyright = (String) properties.get(PROP_COPYRIGHT);
-    home = (String) properties.get(PROP_HOME);
-    cover = (String) properties.get(PROP_COVER);
-    linkTemplate = (String) properties.get(PROP_ENTRY);
+    home = ensureUrl(((String) properties.get(PROP_HOME)), serverUrl);
+    cover = ensureUrl((String) properties.get(PROP_COVER), serverUrl);
+    linkTemplate = ensureUrl((String) properties.get(PROP_ENTRY), serverUrl);
     String rssFlavor = (String) properties.get(PROP_RSSFLAVOR);
     if (rssFlavor != null)
       rssTrackFlavor = MediaPackageElementFlavor.parseFlavor(rssFlavor);
@@ -217,6 +222,22 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
       for (String tag : atomTags.split("\\W")) {
         addAtomTag(tag);
       }
+    }
+  }
+
+  /**
+   * Ensures that this string is an absolute URL.  If not, prepend the local serverUrl to the string.
+   * 
+   * @param string The absolute or relative URL
+   * @param string The base URL to prepend
+   * @return An absolute URL
+   */
+  protected String ensureUrl(String string, String baseUrl) {
+    try {
+      new URL(string);
+      return string;
+    } catch (MalformedURLException e) {
+      return baseUrl + string;
     }
   }
 

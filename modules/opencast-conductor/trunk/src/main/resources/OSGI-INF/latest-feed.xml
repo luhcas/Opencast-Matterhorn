@@ -7,9 +7,9 @@
   <property name="feed.name" value="Latest episodes" />
   <property name="feed.description" value="Latest episodes on site" />
   <property name="feed.copyright" value="All rights reserved by The Opencast Project" />
-  <property name="feed.home" value="http://localhost:8080/engage/searchui" />
-  <property name="feed.entry" value="http://localhost:8080/engage/watch/{0}" />
-  <property name="feed.cover" value="http://localhost:8080/engage/feed-cover.png" />
+  <property name="feed.home" value="/engage/searchui" />
+  <property name="feed.entry" value="/engage/watch/{0}" />
+  <property name="feed.cover" value="/engage/feed-cover.png" />
   <!--
   <property name="feed.rssflavor" value="engage/rss" />
   <property name="feed.atomflavors" value="engage/atom" />
