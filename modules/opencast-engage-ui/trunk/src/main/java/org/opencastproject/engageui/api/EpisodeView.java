@@ -137,4 +137,17 @@ public interface EpisodeView {
    */
   String getDcCreator();
 
+  /**
+   * sets the video url
+   * 
+   * @param creator
+   */
+  void setVideoUrl(String videoUrl);
+
+  /**
+   * returns the video url of the episode
+   * 
+   * @return String videoUrl
+   */
+  String getVideoUrl();
 }

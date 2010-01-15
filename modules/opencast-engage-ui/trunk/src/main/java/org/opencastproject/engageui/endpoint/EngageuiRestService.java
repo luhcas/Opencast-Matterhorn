@@ -47,6 +47,8 @@ public class EngageuiRestService {
 
   public static final int TITLE_MAX_LENGTH = 60;
   public static final int ABSTRACT_MAX_LENGTH = 175;
+  public static final String PLAYER_TRACK_ID = "track-1";
+  public static final String DEFAULT_VIDEO_URL = "http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv";
 
   public void setSearchService(SearchService service) {
     logger.info("binding SearchService");
@@ -60,12 +62,86 @@ public class EngageuiRestService {
 
   @GET
   @Produces(MediaType.TEXT_XML)
+  @Path("episode")
+  public EpisodeViewImpl getEpisodeById(@QueryParam("episodeId") String episodeId) {
+    // Variables
+    String mediaPackageId, dcTitle, dcCreator, dcContributor, dcAbstract, cover, dcCreated, dcRightsHolder, videoUrl;
+    EpisodeViewImpl episodeViewItem = null;
+    SearchResult result;
+    DateFormat format;
+    SearchResultItem[] searchResultItems;
+
+    result = searchService.getEpisodeById(episodeId);
+
+    // Get a DateFormat
+    format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+
+    searchResultItems = result.getItems();
+
+    for (int i = 0; i < searchResultItems.length; i++) {
+      // Get the the sarchResultItem on position i in the array
+      SearchResultItem searchResultItem = searchResultItems[i];
+
+      // Getting fields from the searchResultItem
+      mediaPackageId = searchResultItem.getId();
+      cover = searchResultItem.getCover();
+
+      dcTitle = searchResultItem.getDcTitle();
+
+      dcCreator = searchResultItem.getDcCreator();
+
+      dcContributor = searchResultItem.getDcContributor();
+      dcAbstract = searchResultItem.getDcAbstract();
+      dcRightsHolder = searchResultItem.getDcRightsHolder();
+
+      // Get and format the recording date
+      if (searchResultItem.getDcCreated() == null)
+        dcCreated = "";
+      else
+        dcCreated = format.format(searchResultItem.getDcCreated());
+
+      try {
+        videoUrl = searchResultItem.getMediaPackage().getTrack(PLAYER_TRACK_ID).getURI().toString();
+      } catch (Exception e) {
+        // Set default video url
+        videoUrl = DEFAULT_VIDEO_URL;
+      }
+
+      try {
+        // URLEncode the media package id
+        mediaPackageId = URLEncoder.encode(mediaPackageId, "UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        e.printStackTrace();
+      }
+
+      // Setting fields to the episodeViewItem
+      episodeViewItem = new EpisodeViewImpl();
+      episodeViewItem.setDcTitle(dcTitle);
+      episodeViewItem.setDcCreator(dcCreator);
+      episodeViewItem.setDcContributor(dcContributor);
+      episodeViewItem.setDcAbstract(dcAbstract);
+      episodeViewItem.setDcRightsHolder(dcRightsHolder);
+      episodeViewItem.setVideoUrl(videoUrl);
+
+      episodeViewItem.setDcCreated(dcCreated);
+      if (cover == null || cover.equals(""))
+        episodeViewItem.setCover("img/thumbnail.png");
+      else
+        episodeViewItem.setCover(cover);
+      episodeViewItem.setURLEncodedMediaPackageId(mediaPackageId);
+    }
+
+    return episodeViewItem;
+  }
+
+  @GET
+  @Produces(MediaType.TEXT_XML)
   @Path("search")
   public EpisodeViewListResultImpl getEpisodesByDate(@QueryParam("q") String text, @QueryParam("page") int page) {
     // Variables
     int pagemax, fromIndex, toIndex;
     long episodesMax;
-    String mediaPackageId, dcTitle, dcCreator, dcContributor, dcAbstract, cover, dcCreated, dcRightsHolder;
+    String mediaPackageId, dcTitle, dcCreator, dcContributor, dcAbstract, cover, dcCreated, dcRightsHolder, videoUrl;
     EpisodeViewListResultImpl episodeViewListResult;
     EpisodeViewListImpl episodeViewList;
     EpisodeView episodeViewItem;
@@ -88,10 +164,9 @@ public class EngageuiRestService {
 
     if (StringUtils.isEmpty(text)) {
       // Get episodes by date from the search service
-      result = searchService.getEpisodesByDate((page - 1) * 10, 10);
-    }
-    else{
-      result = searchService.getEpisodesByText(text, (page - 1) * 10, 10);
+      result = searchService.getEpisodesByDate(10, (page - 1) * 10);
+    } else {
+      result = searchService.getEpisodesByText(text, 10, (page - 1) * 10);
     }
 
     SearchResultItem[] searchResultItems = result.getItems();
@@ -117,7 +192,11 @@ public class EngageuiRestService {
     fromIndex = (page * 10) - 10;
 
     // Set the fromIndex
-    episodeViewListResult.setFromIndex(fromIndex + 1);
+    if (searchResultItems.length == 0) {
+      episodeViewListResult.setFromIndex(0);
+    } else {
+      episodeViewListResult.setFromIndex(fromIndex + 1);
+    }
 
     // Calculate toIndex
     toIndex = Math.min(fromIndex + 10, (page - 1) * 10 + searchResultItems.length);
@@ -157,6 +236,13 @@ public class EngageuiRestService {
         dcCreated = format.format(searchResultItem.getDcCreated());
 
       try {
+        videoUrl = searchResultItem.getMediaPackage().getTrack("track-1").getURI().toString();
+      } catch (Exception e) {
+        // Set default video url
+        videoUrl = "http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv";
+      }
+
+      try {
         // URLEncode the media package id
         mediaPackageId = URLEncoder.encode(mediaPackageId, "UTF-8");
       } catch (UnsupportedEncodingException e) {
@@ -170,6 +256,7 @@ public class EngageuiRestService {
       episodeViewItem.setDcContributor(dcContributor);
       episodeViewItem.setDcAbstract(dcAbstract);
       episodeViewItem.setDcRightsHolder(dcRightsHolder);
+      episodeViewItem.setVideoUrl(videoUrl);
 
       episodeViewItem.setDcCreated(dcCreated);
       if (cover == null || cover.equals(""))

@@ -54,6 +54,9 @@ public class EpisodeViewImpl implements EpisodeView {
   @XmlElement(name = "dcCreated")
   private String dcCreated;
 
+  @XmlElement(name = "videoUrl")
+  private String videoUrl;
+
   public EpisodeViewImpl() {
   }
 
@@ -146,5 +149,15 @@ public class EpisodeViewImpl implements EpisodeView {
   @Override
   public void setDcCreator(String dcCreator) {
     this.dcCreator = dcCreator;
+  }
+
+  @Override
+  public String getVideoUrl() {
+    return this.videoUrl;
+  }
+
+  @Override
+  public void setVideoUrl(String videoUrl) {
+    this.videoUrl = videoUrl;
   }
 }

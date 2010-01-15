@@ -16,7 +16,7 @@ xmlns:ns2="http://searchui.opencastproject.org/">
 			        <div class="left-container23">
 			            <b> 
 			              <a>
-                      <xsl:attribute name="href">../watch/<xsl:value-of select="mediaPackageId" /></xsl:attribute>
+                      <xsl:attribute name="href">watch.html?id=<xsl:value-of select="mediaPackageId" /></xsl:attribute>
                       <xsl:value-of select="dcTitle" />
                     </a>
                   </b> by <xsl:value-of select="dcCreator" /><br/>

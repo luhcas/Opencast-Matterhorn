@@ -95,25 +95,6 @@
               </resources>
             </configuration>
           </execution>
-         <!-- <execution> see MH-2042
-            <id>copy-resources-player</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/target/classes/ui/player/</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>../opencast-engage-player/target/hybrid-player</directory>
-                  <includes>
-                    <include> **/* </include>
-                  </includes>                  
-                  <filtering>false</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution> -->
         </executions>
       </plugin>
       <plugin>
@@ -125,6 +106,7 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Private-Package>
+              template.*,
               ui.*, 
               uitests.*,
               player
