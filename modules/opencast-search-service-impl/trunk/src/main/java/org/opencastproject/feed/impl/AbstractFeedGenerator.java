@@ -76,6 +76,12 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
   /** Formats for atom feeds */
   protected Set<MediaPackageElementFlavor> atomTrackFlavors = null;
 
+  /** Tags used to mark rss tracks */
+  protected Set<String> rssTags = null;
+
+  /** Tags used to mark atom tracks */
+  protected Set<String> atomTags = null;
+
   /** the feed uri */
   protected String uri = null;
 
@@ -102,6 +108,8 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
    */
   protected AbstractFeedGenerator() {
     atomTrackFlavors = new HashSet<MediaPackageElementFlavor>();
+    rssTags = new HashSet<String>();
+    atomTags = new HashSet<String>();
   }
 
   /**
@@ -556,7 +564,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
   }
 
   /**
-   * Remvoes the flavor to the set of flavors of tracks that are to be included in atom feeds.
+   * Removes the flavor from the set of flavors of tracks that are to be included in atom feeds.
    * 
    * @param flavor
    *          the flavor to add
@@ -572,6 +580,64 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
    */
   protected Set<MediaPackageElementFlavor> getAtomTrackFlavors() {
     return atomTrackFlavors;
+  }
+
+  /**
+   * Adds the tag to the set of tags that identify the tracks that are to be included in atom feeds.
+   * 
+   * @param tag
+   *          the tag to add
+   */
+  protected void addAtomTag(String tag) {
+    atomTags.add(tag);
+  }
+
+  /**
+   * Removes the tag from the set of tags that identify the tracks that are to be included in atom feeds.
+   * 
+   * @param tag
+   *          the tag to add
+   */
+  protected void removeAtomTag(String tag) {
+    atomTags.remove(tag);
+  }
+
+  /**
+   * Returns the tags of the tracks to be included in atom feeds.
+   * 
+   * @return the tags for atom feed tracks
+   */
+  protected Set<String> getAtomTags() {
+    return atomTags;
+  }
+
+  /**
+   * Adds the tag to the set of tags that identify the tracks that are to be included in rss feeds.
+   * 
+   * @param tag
+   *          the tag to add
+   */
+  protected void addRSSTag(String tag) {
+    rssTags.add(tag);
+  }
+
+  /**
+   * Removes the tag from the set of tags that identify the tracks that are to be included in rss feeds.
+   * 
+   * @param tag
+   *          the tag to add
+   */
+  protected void removeRSSTag(String tag) {
+    rssTags.remove(tag);
+  }
+
+  /**
+   * Returns the tags of the tracks to be included in rss feeds.
+   * 
+   * @return the tags for rss feed tracks
+   */
+  protected Set<String> getRSSTags() {
+    return rssTags;
   }
 
   /**
@@ -633,27 +699,51 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
    * @return the set of identifier
    */
   protected Set<String> getTracksForEntry(Feed feed, SearchResultItem resultItem) {
-    Set<String> s = new HashSet<String>();
     MediaPackage mediaPackage = resultItem.getMediaPackage();
 
-    if (Feed.Type.RSS.equals(feed.getType())) {
-      if (rssTrackFlavor != null) {
-        Track[] tracks = mediaPackage.getTracks(rssTrackFlavor);
-        if (tracks.length == 1)
-          s.add(tracks[0].getIdentifier());
-        else if (tracks.length == 0)
-          log_.warn("No distributed media matching {} found for rss feed entry", rssTrackFlavor);
-        else {
-          log_.warn("More than one distributed media matching {} for rss feed entry found", rssTrackFlavor);
-        }
-      }
-    } else {
-      for (MediaPackageElementFlavor flavor : atomTrackFlavors) {
+    Set<String> s = new HashSet<String>();
+    Set<MediaPackageElementFlavor> flavors = new HashSet<MediaPackageElementFlavor>();
+    Set<String> tags = new HashSet<String>();
+
+    switch (feed.getType()) {
+      case RSS:
+        if (rssTrackFlavor != null)
+          flavors.add(rssTrackFlavor);
+        tags.addAll(rssTags);
+        break;
+      case Atom:
+        flavors.addAll(atomTrackFlavors);
+        tags.addAll(atomTags);
+        break;
+    }
+
+    // Collect track id's by flavor
+    if (flavors.size() > 0) {
+      for (MediaPackageElementFlavor flavor : flavors) {
         MediaPackageElement[] elements = mediaPackage.getElementsByFlavor(flavor);
         for (MediaPackageElement element : elements)
           s.add(element.getIdentifier());
       }
     }
+
+    // Collect track id's by tag
+    if (tags.size() > 0) {
+      for (String tag : tags) {
+        MediaPackageElement[] elements = mediaPackage.getElementsByTag(tag);
+        for (MediaPackageElement element : elements)
+          s.add(element.getIdentifier());
+      }
+    }
+
+    if (Feed.Type.RSS.equals(feed.getType()) && s.size() > 1) {
+      log_.warn("More than one distributed media item found for rss feed entry, keeping only the first one");
+      String idToKeep = s.iterator().next();
+      s.clear();
+      s.add(idToKeep);
+    } else if (s.size() == 0) {
+      log_.warn("No distributed media found for feed entry");
+    }
+    
     return s;
   }
 

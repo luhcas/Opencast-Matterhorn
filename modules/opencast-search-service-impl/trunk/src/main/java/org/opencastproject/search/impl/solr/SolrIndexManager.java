@@ -21,11 +21,9 @@ import org.opencastproject.media.mediapackage.Cover;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Mpeg7Catalog;
-import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.dublincore.DublinCore;
 import org.opencastproject.media.mediapackage.dublincore.DublinCoreValue;
 import org.opencastproject.media.mediapackage.dublincore.utils.DCMIPeriod;
@@ -163,17 +161,19 @@ public class SolrIndexManager {
    */
   public boolean add(MediaPackage sourceMediaPackage) throws SolrServerException {
     MediaPackage mp = cloneMediaPackage(sourceMediaPackage);
-    try {
-      for(Track track : mp.getTracks()) {
-        if( ! MediaPackageElements.ENGAGE_TRACK.equals(track.getFlavor())) {
-            log_.debug("Removing {} from the mediapackage to be indexed, since its flavor is {}, not {}",
-                    new Object[] {track.getIdentifier(), track.getFlavor(), MediaPackageElements.ENGAGE_TRACK});
-            mp.remove(track);
-        }
-      }
-    } catch (MediaPackageException e) {
-      throw new RuntimeException(e);
-    }
+    // TODO: Cleanup should happen outside of this manager, it's too specialized to
+    // filter on some flavor that is not part of the system knowledge
+//    try {
+//      for(Track track : mp.getTracks()) {
+//        if( ! MediaPackageElements.ENGAGE_TRACK.equals(track.getFlavor())) {
+//            log_.debug("Removing {} from the mediapackage to be indexed, since its flavor is {}, not {}",
+//                    new Object[] {track.getIdentifier(), track.getFlavor(), MediaPackageElements.ENGAGE_TRACK});
+//            mp.remove(track);
+//        }
+//      }
+//    } catch (MediaPackageException e) {
+//      throw new RuntimeException(e);
+//    }
     UpdateRequest solrRequest = new UpdateRequest();
     solrRequest.setAction(ACTION.COMMIT, true, true);
     SolrUpdateableInputDocument episodeDocument = createEpisodeInputDocument(mp);

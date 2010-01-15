@@ -11,8 +11,12 @@
   <property name="feed.home" value="http://localhost:8080/engage/searchui" />
   <property name="feed.entry" value="http://localhost:8080/engage/watch/{0}" />
   <property name="feed.cover" value="http://localhost:8080/engage/feed-cover.png" />
+  <!--
   <property name="feed.rssflavor" value="engage/rss" />
   <property name="feed.atomflavors" value="engage/atom" />
+  -->
+  <property name="feed.rsstags" value="rss" />
+  <property name="feed.atomtags" value="atom" />
   <service>
     <provide interface="org.opencastproject.feed.api.FeedGenerator" />
   </service>

@@ -50,6 +50,8 @@ import java.util.StringTokenizer;
  * <li><code>feed.entry</code> - template to create a link to a feed entry</li>
  * <li><code>feed.rssflavor</code> - flavor identifying rss feed media package elements</li>
  * <li><code>feed.atomflavors</code> - comma separated list of flavors identifying atom feed media package elements</li>
+ * <li><code>feed.rsstags</code> - tags identifying rss feed media package elements</li>
+ * <li><code>feed.atomtags</code> - comma separated list of tags identifying atom feed media package elements</li>
  * </ul>
  */
 public abstract class AbstractFeedService extends AbstractFeedGenerator {
@@ -86,6 +88,12 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
 
   /** Property key for the feed atom media element flavor */
   public static final String PROP_ATOMFLAVORS = "feed.atomflavors";
+
+  /** Property key for the feed rss media element flavor */
+  public static final String PROP_RSSTAGS = "feed.rsstags";
+
+  /** Property key for the feed atom media element flavor */
+  public static final String PROP_ATOMTAGS = "feed.atomtags";
 
   /** The selector used to match urls */
   protected String selector = null;
@@ -169,6 +177,8 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
    * <li><code>feed.entry</code> - template to create a link to a feed entry</li>
    * <li><code>feed.rssflavor</code> - media package flavor identifying rss feed media package elements</li>
    * <li><code>feed.atomflavors</code> - comma separated list of flavors identifying atom feed media package elements</li>
+   * <li><code>feed.rsstags</code> - tags identifying rss feed media package elements</li>
+   * <li><code>feed.atomtags</code> - comma separated list of tags identifying atom feed media package elements</li>
    * </ul>
    * 
    * @param context
@@ -194,6 +204,18 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
       StringTokenizer tok = new StringTokenizer(atomFlavors, " ,;");
       while (tok.hasMoreTokens()) {
         addAtomTrackFlavor(MediaPackageElementFlavor.parseFlavor(tok.nextToken()));
+      }
+    }
+    String rssTags = (String) properties.get(PROP_RSSTAGS);
+    if (rssTags != null) {
+       for (String tag : rssTags.split("\\W")) {
+         addRSSTag(tag);
+       }
+    }
+    String atomTags = (String) properties.get(PROP_ATOMTAGS);
+    if (atomTags != null) {
+      for (String tag : atomTags.split("\\W")) {
+        addAtomTag(tag);
       }
     }
   }
