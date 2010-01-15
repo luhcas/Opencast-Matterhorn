@@ -19,7 +19,6 @@ import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -33,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Dictionary;
 
 /**
@@ -86,7 +84,6 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
    * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage)
    */
   public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) {
-    Arrays.sort(elementIds);
     File mediaPackageDirectory = new File(distributionDirectory, mediaPackage.getIdentifier().compact());
     File mediaDirectory = new File(mediaPackageDirectory, "media");
     File metadataDirectory = new File(mediaPackageDirectory, "metadata");
@@ -100,14 +97,28 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
       for (String id : elementIds) {
         MediaPackageElement element = mediaPackage.getElementById(id);
         File sourceFile = workspace.get(element.getURI());
-        File destination = new File(mediaDirectory, getTargetFileName(element));
+        File directory = null;
+        switch (element.getElementType()) {
+          case Track:
+            directory = mediaDirectory;
+            break;
+          case Catalog:
+            directory = metadataDirectory;
+            break;
+          case Attachment:
+            directory = attachmentsDirectory;
+            break;
+          default:
+            throw new IllegalStateException("Someone is trying to distribute strange things here");
+        }
+        File destination = new File(directory, getTargetFileName(element));
         FileUtils.copyFile(sourceFile, destination);
-        URI newTrackUri = new URI(serverUrl + "/" + mediaPackageDirectory.getName() + "/" + mediaDirectory.getName()
+        URI newTrackUri = new URI(serverUrl + "/" + mediaPackageDirectory.getName() + "/" + directory.getName()
                 + "/" + destination.getName());
-        Track newTrack = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
+        MediaPackageElement newElement = MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
                 newTrackUri, element.getElementType(), element.getFlavor());
-        newTrack.setIdentifier(element.getIdentifier() + "-dist");
-        mediaPackage.addDerived(newTrack, element);
+        newElement.setIdentifier(element.getIdentifier() + "-dist");
+        mediaPackage.addDerived(newElement, element);
       }
     } catch (Exception e) {
       e.printStackTrace();
