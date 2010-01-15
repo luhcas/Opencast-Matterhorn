@@ -16,9 +16,8 @@
 package org.opencastproject.conductor.impl;
 
 import org.opencastproject.distribution.api.DistributionService;
-import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -53,22 +52,30 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
     MediaPackage resultingMediaPackage = null;
     try {
       logger.info("Distributing to the local repository");
-      Set<String> elementIds = new HashSet<String>();
+
       // Distribute only the media files specified by the "source-track-id" configuration
-      String trackIdToDistribute = workflowInstance.getCurrentOperation().getConfiguration("source-track-id");
-      if(trackIdToDistribute != null) elementIds.add(trackIdToDistribute);
-      MediaPackage mp = workflowInstance.getCurrentMediaPackage();
-      // By default, distribute all metadata catalogs and attachments
-      for(Catalog cat : mp.getCatalogs()) {
-        elementIds.add(cat.getIdentifier());
+      String tags = workflowInstance.getCurrentOperation().getConfiguration("tags");
+      MediaPackage currentMediaPackage = workflowInstance.getCurrentMediaPackage();
+      if (tags == null) {
+        logger.warn("No tags have been specified");
+        return WorkflowBuilder.getInstance().buildWorkflowOperationResult(currentMediaPackage, null, false);
       }
-      for(Attachment a : mp.getAttachments()) {
-        elementIds.add(a.getIdentifier());
+
+      // Look for elements matching any tag
+      Set<String> elementIds = new HashSet<String>();
+      for (String tag : tags.split("\\W")) {
+        MediaPackageElement[] elts = currentMediaPackage.getElementsByTag(tag);
+        for (MediaPackageElement e : elts) {
+          elementIds.add(e.getIdentifier());
+        }
       }
-      resultingMediaPackage = distributionService.distribute(mp, elementIds.toArray(new String[elementIds.size()]));
+      
+      resultingMediaPackage = distributionService.distribute(currentMediaPackage, elementIds.toArray(new String[elementIds.size()]));
     } catch (RuntimeException e) {
       throw new WorkflowOperationException(e);
     }
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, null, false);
   }
+  
+  
 }

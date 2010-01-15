@@ -60,17 +60,6 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
   public void activate(ComponentContext componentContext) {
     logger.info("init() loading default workflow definitions");
     try {
-      InputStream review = ConductorServiceImpl.class.getClassLoader().getResourceAsStream("/workflows/review.xml");
-      workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(review));
-
-      InputStream distOnly = ConductorServiceImpl.class.getClassLoader().getResourceAsStream(
-              "/workflows/distribute-only.xml");
-      workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(distOnly));
-
-      InputStream composeAndDist = ConductorServiceImpl.class.getClassLoader().getResourceAsStream(
-              "/workflows/compose-and-distribute.xml");
-      workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(composeAndDist));
-
       InputStream errorHandler = ConductorServiceImpl.class.getClassLoader().getResourceAsStream(
               "/workflows/default-error-handler.xml");
       workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(errorHandler));

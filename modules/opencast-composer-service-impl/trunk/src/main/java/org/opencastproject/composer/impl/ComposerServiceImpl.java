@@ -48,7 +48,7 @@ public class ComposerServiceImpl implements ComposerService {
 
   /** The logging instance */
   private static final Logger log_ = LoggerFactory.getLogger(ComposerServiceImpl.class);
-  
+
   /** Encoding profile manager */
   private EncodingProfileManager profileManager = null;
 
@@ -57,7 +57,7 @@ public class ComposerServiceImpl implements ComposerService {
 
   /** Reference to the workspace service */
   private Workspace workspace = null;
-  
+
   /**  */
   ExecutorService executor = null;
 
@@ -103,22 +103,26 @@ public class ComposerServiceImpl implements ComposerService {
    * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.media.mediapackage.MediaPackage,
    *      java.lang.String, java.lang.String)
    */
-  public Future<Track> encode(MediaPackage mediaPackage, String sourceTrackId, String targetTrackId, String profileId) throws EncoderException {
+  public Future<Track> encode(MediaPackage mediaPackage, String sourceTrackId, String targetTrackId, String profileId)
+          throws EncoderException {
     return encode(mediaPackage, sourceTrackId, sourceTrackId, targetTrackId, profileId);
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.media.mediapackage.MediaPackage, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.media.mediapackage.MediaPackage,
+   *      java.lang.String, java.lang.String, java.lang.String, java.lang.String)
    */
   @Override
-  public Future<Track> encode(final MediaPackage mediaPackage, final String sourceVideoTrackId, final String sourceAudioTrackId,
-          final String targetTrackId, final String profileId) throws EncoderException {
+  public Future<Track> encode(final MediaPackage mediaPackage, final String sourceVideoTrackId,
+          final String sourceAudioTrackId, final String targetTrackId, final String profileId) throws EncoderException {
     Callable<Track> callable = new Callable<Track>() {
       public Track call() {
         log_.info("encoding track {} for media package {} using source audio track {} and source video track {}",
-                new String[] {targetTrackId, mediaPackage.getIdentifier().toString(), sourceAudioTrackId, sourceVideoTrackId});
-              
+                new String[] { targetTrackId, mediaPackage.getIdentifier().toString(), sourceAudioTrackId,
+                        sourceVideoTrackId });
+
         // Get the tracks and make sure they exist
         Track audioTrack = mediaPackage.getTrack(sourceAudioTrackId);
         if (audioTrack == null)
@@ -136,34 +140,36 @@ public class ComposerServiceImpl implements ComposerService {
         if (profile == null) {
           throw new RuntimeException("Profile '" + profileId + " is unkown");
         }
-          // Do the work
-          File encodingOutput;
-          try {
-            encodingOutput = engine.encode(audioFile, videoFile, profile);
-          } catch(EncoderException e) {
-            throw new RuntimeException(e);
-          }
 
-          // Put the file in the workspace
-          URI returnURL = null;
-          InputStream in = null;
-          try {
-            in = new FileInputStream(encodingOutput);
-            returnURL = workspace.put(mediaPackage.getIdentifier().compact(), targetTrackId, encodingOutput.getName(), in);
-            log_.debug("Copied the encoded file to the workspace at {}", returnURL);
-//                  encodingOutput.delete();
-//                  log_.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
-          } catch (Exception e) {
-            log_.error("unable to put the encoded file into the workspace");
-            e.printStackTrace();
-          } finally {
-            IOUtils.closeQuietly(in);
-          }
+        // Do the work
+        File encodingOutput;
+        try {
+          encodingOutput = engine.encode(audioFile, videoFile, profile);
+        } catch (EncoderException e) {
+          throw new RuntimeException(e);
+        }
 
-          // Have the encoded track inspected and return the result
-          Track inspectedTrack = inspectionService.inspect(returnURL);
-          inspectedTrack.setIdentifier(targetTrackId);
-          return inspectedTrack;
+        // Put the file in the workspace
+        URI returnURL = null;
+        InputStream in = null;
+        try {
+          in = new FileInputStream(encodingOutput);
+          returnURL = workspace
+                  .put(mediaPackage.getIdentifier().compact(), targetTrackId, encodingOutput.getName(), in);
+          log_.debug("Copied the encoded file to the workspace at {}", returnURL);
+          // encodingOutput.delete();
+          // log_.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
+        } catch (Exception e) {
+          log_.error("unable to put the encoded file into the workspace");
+          e.printStackTrace();
+        } finally {
+          IOUtils.closeQuietly(in);
+        }
+
+        // Have the encoded track inspected and return the result
+        Track inspectedTrack = inspectionService.inspect(returnURL);
+        inspectedTrack.setIdentifier(targetTrackId);
+        return inspectedTrack;
       }
     };
     return executor.submit(callable);

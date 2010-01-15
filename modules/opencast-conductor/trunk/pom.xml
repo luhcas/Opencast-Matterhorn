@@ -96,7 +96,6 @@
               OSGI-INF/operations/compose.xml,
               OSGI-INF/operations/distribute.xml,
               OSGI-INF/operations/error-handler.xml,
-              OSGI-INF/operations/review.xml,
               OSGI-INF/operations/publish.xml,
               OSGI-INF/aggregation-feed.xml,
               OSGI-INF/custom-feed.xml,

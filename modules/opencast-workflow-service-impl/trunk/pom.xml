@@ -106,7 +106,6 @@
               org.opencastproject.workflow.endpoint
             </Export-Package>
             <Private-Package>
-              html,
               org.json.simple,
               org.json.simple.parser
             </Private-Package>

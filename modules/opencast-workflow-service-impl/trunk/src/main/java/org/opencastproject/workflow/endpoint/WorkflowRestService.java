@@ -52,6 +52,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -220,40 +221,11 @@ public class WorkflowRestService {
   }
   
   protected String generateWorkflowDefinition() {
-    return "<workflow-definition>\n" +
-    "  <title>Transcode and Distribute</title>\n" +
-    "  <description>\n" +
-    "    A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,\n" +
-    "    along with their associated metadata, to the distribution channels.\n" +
-    "  </description>\n" +
-    "  <operations>\n" +
-    "    <operation\n" +
-    "      name=\"compose\"\n" +
-    "      fail-on-error=\"true\"\n" +
-    "      exception-handler-workflow=\"Default Error Handler\"\n" +
-    "      description=\"Encode media\">\n" +
-    "      <configurations>\n" +
-    "        <configuration key=\"audio-source-track-id\">track-1</configuration>\n" +
-    "        <configuration key=\"video-source-track-id\">track-2</configuration>\n" +
-    "        <configuration key=\"target-track-id\">track-3</configuration>\n" +
-    "      </configurations>\n" +
-    "    </operation>\n" +
-    "    <operation\n" +
-    "      name=\"distribute\"\n" +
-    "      fail-on-error=\"true\"\n" +
-    "      exception-handler-workflow=\"Default Error Handler\"\n" +
-    "      description=\"Distribute media to distribution channels\">\n" +
-    "      <configurations>\n" +
-    "        <configuration key=\"source-track-id\">track-3</configuration>\n" +
-    "      </configurations>\n" +
-    "    </operation>\n" +
-    "    <operation\n" +
-    "      name=\"publish\"\n" +
-    "      fail-on-error=\"true\"\n" +
-    "      exception-handler-workflow=\"Default Error Handler\"\n" +
-    "      description=\"Add metadata to the search index\" />\n" +
-    "  </operations>\n" +
-    "</workflow-definition>";
+    try {
+      return IOUtils.toString(getClass().getResourceAsStream("/sample/compose-distribute-publish.xml"));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @SuppressWarnings("unchecked")

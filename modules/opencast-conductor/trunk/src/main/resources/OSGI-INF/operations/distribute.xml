@@ -2,7 +2,7 @@
 <component name="org.opencastproject.conductor.impl.DistributeWorkflowOperationHandler" immediate="true">
   <implementation class="org.opencastproject.conductor.impl.DistributeWorkflowOperationHandler" />
   <property name="service.description" value="Distribute Workflow Handler" />
-  <property name="workflow.operation" value="distribute" />
+  <property name="workflow.operation" value="distribute_local" />
   <service>
     <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
   </service>
