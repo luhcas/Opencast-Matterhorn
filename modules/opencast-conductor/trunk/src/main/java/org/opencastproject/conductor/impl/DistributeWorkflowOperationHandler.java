@@ -72,7 +72,7 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
 
       // Look for elements matching any tag
       Set<String> elementIds = new HashSet<String>();
-      for (String tag : tags.split(" ,;")) {
+      for (String tag : tags.split("\\W")) {
         MediaPackageElement[] elts = currentMediaPackage.getElementsByTag(tag);
         for (MediaPackageElement e : elts) {
           elementIds.add(e.getIdentifier());
