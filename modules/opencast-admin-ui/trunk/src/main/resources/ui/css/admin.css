@@ -187,6 +187,27 @@ body {
   overflow: hidden;
 }
 
+.sortable {
+  cursor:pointer;
+  background-image:url(../img/bg.gif);
+  background-position: center right;
+  background-repeat:no-repeat;
+}
+
+.sortable-asc {
+  cursor:pointer;
+  background-image:url(../img/asc.gif);
+  background-position: center right;
+  background-repeat:no-repeat;
+}
+
+.sortable-desc {
+  cursor:pointer;
+  background-image:url(../img/desc.gif);
+  background-position: center right;
+  background-repeat:no-repeat;
+}
+
 /* Fluid Skinning System Overrides */
 
 .fl-widget .fl-widget-content {

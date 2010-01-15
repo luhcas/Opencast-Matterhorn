@@ -15,11 +15,11 @@
     <table id="recordingsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
       <thead>
         <tr>
-          <th width="30%">Title</th>
-          <th width="20%">Presenter</th>
-          <th width="20%">Course/Series</th>
-          <th width="20%" class=".date-column">Recording Date and Time</th>
-          <th width="10%">Capture Agent</th>
+          <th width="30%" class="sortable">Title</th>
+          <th width="20%" class="sortable">Presenter</th>
+          <th width="20%" class="sortable">Course/Series</th>
+          <th width="20%" class="sortable date-column">Recording Date &amp; Time</th>
+          <th width="10%" class="sortable">Capture Agent</th>
         </tr>
       </thead>
       <tbody>
