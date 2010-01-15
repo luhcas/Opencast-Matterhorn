@@ -104,7 +104,7 @@ public class AggregationFeedService extends AbstractFeedService implements FeedG
     super.activate(context);
     String series = (String) context.getProperties().get(PROP_SERIES);
     if (series != null && !"".equals(series)) {
-      setSeries(series.split(",; "));
+      setSeries(series.split("\\W"));
       log_.debug("Configuring aggregation feed with series {}", series);
     }
   }

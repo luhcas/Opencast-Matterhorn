@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
+import java.util.StringTokenizer;
 
 /**
  * Convenience implementation that is intended to serve as a base implementation for feed generator services. It handles
@@ -190,9 +191,10 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
       rssTrackFlavor = MediaPackageElementFlavor.parseFlavor(rssFlavor);
     String atomFlavors = (String) properties.get(PROP_ATOMFLAVORS);
     if (atomFlavors != null) {
-      String[] flavors = atomFlavors.split(",; ");
-      for (String f : flavors)
-        addAtomTrackFlavor(MediaPackageElementFlavor.parseFlavor(f));
+      StringTokenizer tok = new StringTokenizer(atomFlavors, " ,;");
+      while (tok.hasMoreTokens()) {
+        addAtomTrackFlavor(MediaPackageElementFlavor.parseFlavor(tok.nextToken()));
+      }
     }
   }
 
