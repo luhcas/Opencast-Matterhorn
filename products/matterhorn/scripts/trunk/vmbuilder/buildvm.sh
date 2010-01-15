@@ -1,5 +1,8 @@
 #!/bin/sh
 
+export $USER=cab938
+export $M2=/home/cab938/.m2
+
 #install extras that we need if running this script
 sudo apt-get install ubuntu-vm-builder subversion zip git-core maven2
 
@@ -77,17 +80,17 @@ sudo cp -r x264 mnt/home/opencast/
 #get maven to update whatever dependancies we might have for opencast
 cd opencast
 #todo: username is hard coded, how can I get around this?
-sudo -u cab938 mvn -fn -DskipTests
+sudo -u $USER mvn -fn -DskipTests
 cd ..
 
 #copy the maven repo across
-sudo cp -r .m2 mnt/home/opencast/
+sudo cp -r $M2 mnt/home/opencast/
 
 #try and mount the first boot script
-sudo cp -r firstboot.sh mnt/etc/init.d/
-ln -s /etc/init.d/firstboot.sh mnt/etc/rc2.d/S99firstboot
-sudo chmod 755 mnt/etc/init.d/firstboot.sh
-sudo chmod 755 mnt/etc/rc2.d/S99firstboot
+sudo cp -r firstboot.sh mnt/etc/rc2.d/S99firstboot.sh
+#ln -s /etc/init.d/firstboot.sh mnt/etc/rc2.d/S99firstboot
+#sudo chmod 755 mnt/etc/init.d/firstboot.sh
+sudo chmod 755 mnt/etc/rc2.d/S99firstboot.sh
 
 #mediainfo bug
 ln -s mnt/usr/bin/mediainfo mnt/usr/local/bin/mediainfo
@@ -106,7 +109,7 @@ sudo rm -rf mnt
 
 #archive it all for download
 echo "Building archive opencast-$OC_REV.zip."
-zip -db -r opencast-$OC_REV.zip ubuntu-vmw6
+zip -db -r -9 opencast-$OC_REV.zip ubuntu-vmw6
 
 #copy it to the web
 #scp opencast-$OC_REV.zip cab938@aries:/var/www/opencast/unofficial-vms/
