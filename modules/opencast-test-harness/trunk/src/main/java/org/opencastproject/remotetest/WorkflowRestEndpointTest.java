@@ -86,6 +86,19 @@ public class WorkflowRestEndpointTest {
     JSONObject json = (JSONObject) JSONValue.parse(jsonResponse);
     if(json == null) Assert.fail("JSON response should not be null, but is " + jsonResponse);
     Assert.assertEquals(id, json.get("workflow_id"));
+    
+    // Ensure that the workflow finishes successfully
+    int attempts = 0;
+    while(true) {
+      if(++attempts == 60) Assert.fail("workflow rest endpoint test has hung");
+      getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".xml");
+      getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
+      String state = getWorkflowInstanceStatus(getResponse);
+      if("FAILED".equals(state)) Assert.fail("workflow instance " + id + " failed");
+      if("SUCCEEDED".equals(state)) break;
+      System.out.println("workflow " + id + " is " + state);
+      Thread.sleep(1000);
+    }
   }
 
   protected String getWorkflowInstanceId(String xml) throws Exception {
@@ -94,6 +107,14 @@ public class WorkflowRestEndpointTest {
     DocumentBuilder builder = factory.newDocumentBuilder();
     Document doc = builder.parse(IOUtils.toInputStream(xml));
     return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("id");
+  }
+
+  protected String getWorkflowInstanceStatus(String xml) throws Exception {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setNamespaceAware(true);
+    DocumentBuilder builder = factory.newDocumentBuilder();
+    Document doc = builder.parse(IOUtils.toInputStream(xml));
+    return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("state");
   }
 
   protected String getSampleMediaPackage() throws Exception {
