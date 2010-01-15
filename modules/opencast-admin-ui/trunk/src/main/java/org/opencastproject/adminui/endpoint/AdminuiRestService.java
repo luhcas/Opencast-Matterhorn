@@ -20,8 +20,8 @@ import org.opencastproject.adminui.api.RecordingDataViewImpl;
 import org.opencastproject.adminui.api.RecordingDataViewList;
 import org.opencastproject.adminui.api.RecordingDataViewListImpl;
 import org.opencastproject.capture.admin.api.AgentState;
+import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
-import org.opencastproject.capture.admin.api.CaptureAgentStatusService;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.EName;
@@ -34,22 +34,21 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
 
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import java.util.Map.Entry;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.json.simple.JSONObject;
 
 /**
  * REST endpoint for the Admin UI proxy service
@@ -60,7 +59,7 @@ public class AdminuiRestService {
 
   private SchedulerService schedulerService;
   private WorkflowService workflowService;
-  private CaptureAgentStatusService captureAdminService;
+  private CaptureAgentStateService captureAdminService;
 
   public void setSchedulerService(SchedulerService service) {
     logger.info("binding SchedulerService");
@@ -82,12 +81,12 @@ public class AdminuiRestService {
     workflowService = null;
   }
 
-  public void setCaptureAdminService(CaptureAgentStatusService service) {
+  public void setCaptureAdminService(CaptureAgentStateService service) {
     logger.info("binding CaptureAgentStatusService");
     captureAdminService = service;
   }
 
-  public void unsetCaptureAdminService(CaptureAgentStatusService service) {
+  public void unsetCaptureAdminService(CaptureAgentStateService service) {
     logger.info("unbinding CaptureAgentStatusService");
     captureAdminService = null;
   }
