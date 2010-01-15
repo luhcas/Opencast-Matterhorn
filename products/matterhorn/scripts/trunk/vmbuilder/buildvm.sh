@@ -1,7 +1,7 @@
 #!/bin/sh
 
-export $USER=cab938
-export $M2=/home/cab938/.m2
+export USER=cab938
+export M2=/home/cab938/.m2
 
 #install extras that we need if running this script
 sudo apt-get install ubuntu-vm-builder subversion zip git-core maven2
