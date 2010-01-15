@@ -19,6 +19,7 @@ package org.opencastproject.media.mediapackage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.util.ConfigurationException;
 
 import org.junit.Test;
@@ -81,12 +82,12 @@ public class MediaPackageTest extends AbstractMediaPackageTest {
 
       // Create a media package and add an element
       MediaPackage mediaPackage = mediaPackageBuilder.createNew();
-      MediaPackageElement dcCatalog = mediaPackage.add(dcFile.toURI());
+      MediaPackageElement dcCatalog = mediaPackage.add(dcFile.toURI(), Type.Catalog, DublinCoreCatalog.FLAVOR);
       
       // Add the "derived" catalog
       MediaPackageElementFlavor derivedFlavor = new MediaPackageElementFlavor("dublincore", "specialedition");
       MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-      MediaPackageElement derivedElement = elementBuilder.elementFromURI(dcFile.toURI());
+      MediaPackageElement derivedElement = elementBuilder.elementFromURI(dcFile.toURI(), Type.Catalog, DublinCoreCatalog.FLAVOR);
       derivedElement.setFlavor(derivedFlavor);
       mediaPackage.addDerived(derivedElement, dcCatalog);
       

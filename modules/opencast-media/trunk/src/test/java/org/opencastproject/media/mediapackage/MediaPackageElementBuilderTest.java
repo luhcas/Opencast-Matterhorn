@@ -19,6 +19,7 @@ package org.opencastproject.media.mediapackage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.media.mediapackage.dublincore.DublinCoreTest;
 
 import org.junit.Before;
@@ -57,7 +58,7 @@ public class MediaPackageElementBuilderTest {
   public void testElementFromFile() {
     try {
       catalogFile = DublinCoreTest.class.getResource("/dublincore.xml").toURI();
-      MediaPackageElement element = mediaPackageElementBuilder.elementFromURI(catalogFile);
+      MediaPackageElement element = mediaPackageElementBuilder.elementFromURI(catalogFile, Type.Catalog, DublinCoreCatalog.FLAVOR);
       assertEquals(Catalog.TYPE, element.getElementType());
       assertEquals(MediaPackageElements.DUBLINCORE_CATALOG, element.getFlavor());
     } catch (UnsupportedElementException e) {

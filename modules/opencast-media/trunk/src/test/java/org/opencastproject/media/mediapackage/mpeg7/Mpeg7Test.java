@@ -27,7 +27,6 @@ import org.opencastproject.util.FileSupport;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -72,7 +71,7 @@ public class Mpeg7Test {
    */
   @Test
   public void testFromFile() {
-    Mpeg7Catalog mpeg7 = parse(catalogFile.toURI());
+    Mpeg7Catalog mpeg7 = Mpeg7CatalogImpl.fromURI(catalogFile.toURI());
     testContent(mpeg7);
   }
 
@@ -83,7 +82,7 @@ public class Mpeg7Test {
   public void testNewInstance() {
     try {
       // Read the sample catalog
-      Mpeg7Catalog mpeg7Sample = parse(catalogFile.toURI());
+      Mpeg7Catalog mpeg7Sample = Mpeg7CatalogImpl.fromURI(catalogFile.toURI());
 
       // Create a new catalog and fill it with a few fields
       Mpeg7Catalog mpeg7New = Mpeg7CatalogImpl.newInstance();
@@ -105,7 +104,7 @@ public class Mpeg7Test {
       trans.transform(source, result);
 
       // Re-read the saved catalog and test for its content
-      Mpeg7Catalog mpeg7NewFromDisk = parse(mpeg7New.getURI());
+      Mpeg7Catalog mpeg7NewFromDisk = Mpeg7CatalogImpl.fromURI(mpeg7New.getURI());
       // TODO: Test content
       // testContent(mpeg7NewFromDisk);
 
@@ -247,28 +246,6 @@ public class Mpeg7Test {
             .getTemporalDecomposition();
     assertFalse(v2Decomposition.segments().hasNext());
 
-  }
-
-  /**
-   * Parses the test catalog.
-   * 
-   * @param uri
-   *          the file containing the catalog
-   * @return the mpeg-7 object representation
-   */
-  private Mpeg7Catalog parse(URI uri) {
-    Mpeg7Catalog mpeg7 = null;
-    try {
-      mpeg7 = Mpeg7CatalogImpl.fromURI(uri);
-      return mpeg7;
-    } catch (IOException e) {
-      fail("Error accessing the catalog: " + e.getMessage());
-    } catch (ParserConfigurationException e) {
-      fail("Error creating a parser for the catalog: " + e.getMessage());
-    } catch (SAXException e) {
-      fail("Error parsing the catalog: " + e.getMessage());
-    }
-    throw new IllegalStateException("Shouldn't get here!");
   }
 
 }

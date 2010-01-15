@@ -21,10 +21,14 @@ import static org.junit.Assert.fail;
 
 import org.opencastproject.util.ConfigurationException;
 
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
@@ -33,10 +37,35 @@ import javax.xml.xpath.XPathFactory;
 /**
  * Test case used to make sure the media package serializer works as expected.
  */
+@Ignore
 public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
+  
+  /** a uri pointing to a web resource */
+  URI webURI = null;
 
+  /** a uri pointing to a linux file system resource */
+  URI linuxRootURI = null;
+
+  /** a uri pointing to a linux file system resource */
+  URI linuxURI = null;
+
+  /** a uri pointing to a windows file system resource */
+  URI windowsRootURI = null;
+
+  /** a uri pointing to a windows file system resource */
+  URI windowsURI = null;
+  
+  @Before
+  public void setup() throws Exception {
+    webURI = new URI("http://www.opencastproject.org/dc.xml");
+    linuxRootURI = new URI("file:///Users/John+Doe/My+Mediapackage");
+    linuxURI = new URI("file:///Users/John+Doe/My+Mediapackage/dc.xml");
+    windowsRootURI = new URI("file://c:\\\\Users\\John+Doe\\My+Mediapackage");
+    windowsURI = new URI("file://c:\\\\Users\\John+Doe\\My+Mediapackage\\dc.xml");
+  }
+  
   @Test
-  public void testRelativePaths() {
+  public void testRelativeNativePaths() {
     try {
       XPath xPath = XPathFactory.newInstance().newXPath();
 
@@ -48,9 +77,10 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
       MediaPackageSerializer serializer = null;
       serializer = new DefaultMediaPackageSerializerImpl(manifestFile.getParentFile());
       Document xml = mediaPackage.toXml(serializer);
+      
+      // Test linux file relative to media package root
       String expected = dcFile.getAbsolutePath().substring(packageDir.getAbsolutePath().length() + 1);
       assertEquals(expected, xPath.evaluate("//url", xml));
-
     } catch (MediaPackageException e) {
       fail("Media package excpetion while reading media package from manifest: " + e.getMessage());
     } catch (ConfigurationException e) {
@@ -64,4 +94,65 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
     }
   }
 
+  @Test
+  public void testRelativeLinuxPaths() {
+    try {
+      XPath xPath = XPathFactory.newInstance().newXPath();
+
+      // Create a media package and add an element
+      MediaPackage mediaPackage = mediaPackageBuilder.createNew();
+      mediaPackage.add(linuxURI);
+
+      // Test relative path, using serializer
+      MediaPackageSerializer serializer = null;
+      serializer = new DefaultMediaPackageSerializerImpl(new File(linuxRootURI));
+      Document xml = mediaPackage.toXml(serializer);
+      
+      // Test linux file relative to media package root
+      String expected = linuxURI.toString().substring(linuxRootURI.toString().length() + 1);
+      assertEquals(expected, xPath.evaluate("//url", xml));
+    } catch (MediaPackageException e) {
+      fail("Media package excpetion while reading media package from manifest: " + e.getMessage());
+    } catch (ConfigurationException e) {
+      fail("Configuration exception while reading media package from manifest: " + e.getMessage());
+    } catch (MalformedURLException e) {
+      fail("Exception while creating url: " + e.getMessage());
+    } catch (UnsupportedElementException e) {
+      fail("Error while creating media package: " + e.getMessage());
+    } catch (XPathExpressionException e) {
+      fail("Selecting node form xml document failed: " + e.getMessage());
+    }
+  }
+
+  @Test
+  public void testRelativeWindowsPaths() {
+    try {
+      XPath xPath = XPathFactory.newInstance().newXPath();
+
+      // Create a media package and add an element
+      MediaPackage mediaPackage = mediaPackageBuilder.createNew();
+      mediaPackage.add(windowsURI);
+
+      // Test relative path, using serializer
+      MediaPackageSerializer serializer = null;
+      serializer = new DefaultMediaPackageSerializerImpl(new File(windowsRootURI));
+      Document xml = mediaPackage.toXml(serializer);
+      
+      // Test windows file relative to media package root
+      String expected = windowsURI.toString().substring(windowsRootURI.toString().length() + 1);
+      assertEquals(expected, xPath.evaluate("//url", xml));
+    } catch (MediaPackageException e) {
+      fail("Media package excpetion while reading media package from manifest: " + e.getMessage());
+    } catch (ConfigurationException e) {
+      fail("Configuration exception while reading media package from manifest: " + e.getMessage());
+    } catch (MalformedURLException e) {
+      fail("Exception while creating url: " + e.getMessage());
+    } catch (UnsupportedElementException e) {
+      fail("Error while creating media package: " + e.getMessage());
+    } catch (XPathExpressionException e) {
+      fail("Selecting node form xml document failed: " + e.getMessage());
+    }
+  }
+
+  
 }

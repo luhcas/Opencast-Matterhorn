@@ -98,6 +98,10 @@ public class Mpeg7Parser extends DefaultHandler {
    */
   public Mpeg7Parser() {
   }
+  
+  public Mpeg7Parser(Mpeg7CatalogImpl catalog) {
+    this.mpeg7Doc = catalog;
+  }
 
   /**
    * Parses the mpeg-7 catalog file and returns its object representation.
@@ -115,7 +119,8 @@ public class Mpeg7Parser extends DefaultHandler {
    *           if the provided file does not contain mpeg-7 data
    */
   public Mpeg7CatalogImpl parse(InputStream is) throws ParserConfigurationException, SAXException, IOException {
-    mpeg7Doc = new Mpeg7CatalogImpl();
+    if (mpeg7Doc == null)
+      mpeg7Doc = new Mpeg7CatalogImpl();
     SAXParserFactory factory = SAXParserFactory.newInstance();
     // REPLAY does not use a DTD here
     factory.setValidating(false);

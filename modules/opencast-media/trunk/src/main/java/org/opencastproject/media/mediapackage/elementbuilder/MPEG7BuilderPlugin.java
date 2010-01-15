@@ -94,45 +94,15 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   public boolean accept(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
-    try {
-      // Check type and flavor
-      if (type != null && flavor != null)
-        return type.equals(Catalog.TYPE) && flavor.equals(Mpeg7Catalog.FLAVOR);
-      else if (type != null && !type.equals(Catalog.TYPE))
-        return false;
-      else if (flavor != null && !flavor.equals(Mpeg7Catalog.FLAVOR))
-        return false;
-
-      // Still uncertain. Let's try to read the catalog
-      Mpeg7Parser parser = new Mpeg7Parser();
-      parser.parse(uri.toURL().openStream());
-      return true;
-    } catch (IllegalArgumentException e) {
-      return false;
-    } catch (ParserConfigurationException e) {
-      return false;
-    } catch (SAXException e) {
-      return false;
-    } catch (IOException e) {
-      return false;
-    }
+     return type != null && type.equals(Catalog.TYPE) && flavor != null && flavor.equals(Mpeg7Catalog.FLAVOR);
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURI(URI)
    */
   public MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException {
-    try {
-      log_.trace("Creating mpeg-7 metadata container from " + uri);
-      return Mpeg7CatalogImpl.fromURI(uri);
-    } catch (IOException e) {
-      throw new UnsupportedElementException("Error reading mpeg-7 from " + uri + " : " + e.getMessage());
-    } catch (ParserConfigurationException e) {
-      throw new UnsupportedElementException("Parser configuration exception while reading mpeg-7 metadata from " + uri
-              + " : " + e.getMessage());
-    } catch (SAXException e) {
-      throw new UnsupportedElementException("Error parsing mpeg-7 catalog " + uri + " : " + e.getMessage());
-    }
+    log_.trace("Creating mpeg-7 metadata container from " + uri);
+    return Mpeg7CatalogImpl.fromURI(uri);
   }
 
   /**

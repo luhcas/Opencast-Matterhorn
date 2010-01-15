@@ -41,12 +41,10 @@ import org.opencastproject.util.UnknownFileTypeException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
@@ -94,7 +92,7 @@ public class DublinCoreTest {
   @Test
   public void testFromFile() {
     DublinCoreCatalog dc = null;
-    dc = parse(catalogFile.toURI());
+    dc = DublinCoreCatalogImpl.fromURI(catalogFile.toURI());
 
     // Check if the fields are available
     assertEquals("ETH Zurich, Switzerland", dc.getFirst(PROPERTY_PUBLISHER, LANGUAGE_UNDEFINED));
@@ -113,7 +111,7 @@ public class DublinCoreTest {
     try {
 
       // Read the sample catalog
-      DublinCoreCatalog dcSample = parse(catalogFile.toURI());
+      DublinCoreCatalog dcSample = DublinCoreCatalogImpl.fromURI(catalogFile.toURI());
 
       // Create a new catalog and fill it with a few fields
       DublinCoreCatalog dcNew = DublinCoreCatalogImpl.newInstance();
@@ -160,7 +158,7 @@ public class DublinCoreTest {
       trans.transform(source, result);
 
       // Re-read the saved catalog and test for its content
-      DublinCoreCatalog dcNewFromDisk = parse(dcNew.getURI());
+      DublinCoreCatalog dcNewFromDisk = DublinCoreCatalogImpl.fromURI(dcNew.getURI());
       assertEquals(dcSample.getFirst(PROPERTY_IDENTIFIER), dcNewFromDisk.getFirst(PROPERTY_IDENTIFIER));
       assertEquals(dcSample.getFirst(PROPERTY_TITLE, "en"), dcNewFromDisk.getFirst(PROPERTY_TITLE, "en"));
       assertEquals(dcSample.getFirst(PROPERTY_PUBLISHER), dcNewFromDisk.getFirst(PROPERTY_PUBLISHER));
@@ -182,7 +180,7 @@ public class DublinCoreTest {
     try {
 
       // Read the sample catalog
-      DublinCoreCatalog dcSample = parse(catalogFile.toURI());
+      DublinCoreCatalog dcSample = DublinCoreCatalogImpl.fromURI(catalogFile.toURI());
 
       // Create a new catalog and fill it with a few fields
       DublinCoreCatalog dcNew = DublinCoreCatalogImpl.newInstance();
@@ -349,25 +347,4 @@ public class DublinCoreTest {
     assertEquals("Klaus", dc.get(PROPERTY_CREATOR, LANGUAGE_UNDEFINED).get(0));
   }
 
-  /**
-   * Parses the test catalog.
-   * 
-   * @param uri
-   *          the url containing the catalog
-   * @return the dublin core object representation
-   */
-  private DublinCoreCatalog parse(URI uri) {
-    DublinCoreCatalog dc;
-    try {
-      dc = DublinCoreCatalogImpl.fromURI(uri);
-      return dc;
-    } catch (IOException e) {
-      fail("Error accessing the catalog: " + e.getMessage());
-    } catch (ParserConfigurationException e) {
-      fail("Error creating a parser for the catalog: " + e.getMessage());
-    } catch (SAXException e) {
-      fail("Error parsing the catalog: " + e.getMessage());
-    }
-    throw new IllegalStateException("Shouldn't get here!");
-  }
 }

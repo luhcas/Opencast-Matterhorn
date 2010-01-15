@@ -31,14 +31,12 @@ import org.opencastproject.util.MimeTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
@@ -81,17 +79,8 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
         return false;
       else if (flavor != null && !flavor.equals(MediaPackageElements.DUBLINCORE_CATALOG))
         return false;
-
-      // Still uncertain. Let's try to read the catalog
-      DublinCoreCatalogImpl.fromURI(uri);
-      return true;
+      return false;
     } catch (IllegalArgumentException e) {
-      return false;
-    } catch (ParserConfigurationException e) {
-      return false;
-    } catch (SAXException e) {
-      return false;
-    } catch (IOException e) {
       return false;
     }
   }
@@ -188,12 +177,6 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
       throw new UnsupportedElementException("Error while reading catalog information from manifest: " + e.getMessage());
     } catch (NoSuchAlgorithmException e) {
       throw new UnsupportedElementException("Unsupported digest algorithm: " + e.getMessage());
-    } catch (ParserConfigurationException e) {
-      throw new UnsupportedElementException("Unable to create parser for dublin core catalog " + url + ": " + e.getMessage());
-    } catch (IOException e) {
-      throw new UnsupportedElementException("Error while reading dublin core catalog " + url + ": " + e.getMessage());
-    } catch (SAXException e) {
-      throw new UnsupportedElementException("Error while parsing dublin core catalog " + url + ": " + e.getMessage());
     } catch (URISyntaxException e) {
       throw new UnsupportedElementException("Error while reading dublin core catalog " + url + ": " + e.getMessage());
     }
@@ -203,17 +186,8 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
    * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURI(URI)
    */
   public MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException {
-    try {
-      log_.trace("Creating dublin core metadata container from " + uri);
-      return DublinCoreCatalogImpl.fromURI(uri);
-    } catch (IOException e) {
-      throw new UnsupportedElementException("Error reading dublin core from " + uri + " : " + e.getMessage());
-    } catch (ParserConfigurationException e) {
-      throw new UnsupportedElementException("Parser configuration exception while reading dublin core catalog from " + uri
-              + " : " + e.getMessage());
-    } catch (SAXException e) {
-      throw new UnsupportedElementException("Error parsing dublin core catalog " + uri + " : " + e.getMessage());
-    }
+    log_.trace("Creating dublin core metadata container from " + uri);
+    return DublinCoreCatalogImpl.fromURI(uri);
   }
 
   /**
