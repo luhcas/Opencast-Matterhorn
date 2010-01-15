@@ -65,64 +65,60 @@
     -->
 
 	<!-- encode to quicktime download -->
-	<!-- 
     <operation
       name="compose"
       fail-on-error="true"
       exception-handler-workflow="Default Error Handler"
-      description="Encode presenter (camera) to Quicktime download">
+      description="Encode presenter (camera) to quicktime/mp4 download">
       <configurations>
         <configuration key="audio-source-track-flavor">*</configuration>
         <configuration key="video-source-track-flavor">track/presenter</configuration>
         <configuration key="target-track-flavor">track/presenter</configuration>
         <configuration key="target-track-tags">atom</configuration>
-        <configuration key="encoding-profile">mp4.http</configuration>
+        <configuration key="encoding-profile">mov-low.http</configuration>
       </configurations>
     </operation>
     <operation
       name="compose"
       fail-on-error="true"
       exception-handler-workflow="Default Error Handler"
-      description="Encode presentation (screen) to Quicktime download">
+      description="Encode presentation (screen) to quicktime/mpeg4 download">
       <configurations>
         <configuration key="audio-source-track-flavor">*</configuration>
         <configuration key="video-source-track-flavor">track/presentation</configuration>
         <configuration key="target-track-flavor">track/presentation</configuration>
         <configuration key="target-track-tags">rss, atom</configuration>
-        <configuration key="encoding-profile">mp4.http</configuration>
+        <configuration key="encoding-profile">mov-low.http</configuration>
       </configurations>
     </operation>
-    -->
     
    	<!-- encode to avi download -->
-	<!-- 
     <operation
       name="compose"
       fail-on-error="true"
       exception-handler-workflow="Default Error Handler"
-      description="Encode presenter (camera) to AVI download">
+      description="Encode presenter (camera) to avi/mpeg4 download">
       <configurations>
         <configuration key="audio-source-track-flavor">*</configuration>
         <configuration key="video-source-track-flavor">track/presenter</configuration>
         <configuration key="target-track-flavor">track/presenter</configuration>
         <configuration key="target-track-tags">atom</configuration>
-        <configuration key="encoding-profile">avi.http</configuration>
+        <configuration key="encoding-profile">avi-low.http</configuration>
       </configurations>
     </operation>
     <operation
       name="compose"
       fail-on-error="true"
       exception-handler-workflow="Default Error Handler"
-      description="Encode presentation (screen) to AVI download">
+      description="Encode presentation (screen) to avi/mpeg4 download">
       <configurations>
         <configuration key="audio-source-track-flavor">*</configuration>
         <configuration key="video-source-track-flavor">track/presentation</configuration>
         <configuration key="target-track-flavor">track/presentation</configuration>
         <configuration key="target-track-tags">rss, atom</configuration>
-        <configuration key="encoding-profile">avi.http</configuration>
+        <configuration key="encoding-profile">avi-low.http</configuration>
       </configurations>
     </operation>
-    -->
  
     <!-- encode to cover image -->
 	<!-- 

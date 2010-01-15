@@ -26,6 +26,7 @@ import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.mpeg7.Audio;
 import org.opencastproject.media.mediapackage.mpeg7.Video;
+import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -103,9 +104,11 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     if (audioSourceTrackId == null) {
       audioSourceTrackId = videoSourceTrackId;
     }
+
     String targetTrackId = "track-" + (mediaPackage.getTracks().length + 2);
     String targetTrackTags = operation.getConfiguration("target-track-tags");
     String targetTrackFlavor = operation.getConfiguration("target-track-flavor");
+    String encodingProfile = operation.getConfiguration("encoding-profile");
 
     Track audioSourceTrack = mediaPackage.getTrack(audioSourceTrackId);
     if (audioSourceTrack == null) {
@@ -118,13 +121,13 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
       logger.info("Source track '{}' was not found in media package and will not be encoded", videoSourceTrackId);
       return mediaPackage;
     }
-
+    
     // TODO profile retrieval, matching for media type (Audio, Visual, AudioVisual, EnhancedAudio, Image,
     // ImageSequence, Cover)
     // String[] profiles = ((String)properties.get("encode")).split(" ");
     EncodingProfile[] profileList = composerService.listProfiles();
     for (EncodingProfile profile : profileList) {
-      if (operation.getConfiguration(profile.getIdentifier()) != null) {
+      if (profile.getIdentifier().equals(encodingProfile)) {
         logger.info("Encoding audio track '{}' and video track '{}' using profile '{}'", new String[] { audioSourceTrackId,
                 videoSourceTrackId, profile.getIdentifier() });
         Future<Track> futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId,
@@ -139,6 +142,10 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
           composedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(targetTrackFlavor));
         logger.debug("Composed track has flavor '{}'", composedTrack.getFlavor());
 
+        // Set the mimetype
+        if (profile.getMimeType() != null)
+          composedTrack.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
+        
         // Add tags
         if (targetTrackTags != null) {
           for (String tag : targetTrackTags.split("\\W")) {
