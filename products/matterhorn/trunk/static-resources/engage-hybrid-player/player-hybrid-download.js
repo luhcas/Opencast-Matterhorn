@@ -10,30 +10,6 @@ Opencast.volume = 1.0;
 Opencast.mouseOverBool = false;
 
 
-$(document).ready(function () {
-  
-	Opencast.ariaSlider.init();
-    
-    var simpleEdit = fluid.inlineEdit("#simpleEdit", {
-        selectors : {
-            text: ".editableText",
-            editContainer: "#editorContainer",
-            edit: "#editField"
-        },
-        useTooltip : true,
-        tooltipDelay : 500
-    });
-    
-    $("#btn_cc").attr('role','button');
-    $("#btn_cc").attr('aria-pressed','false'); 
-
-    $("#btn_volume").attr('role','button');
-    $("#btn_volume").attr('aria-pressed','false');
-
-    $("#btn_play_pause").attr('role','button');
-    $("#btn_play_pause").attr('aria-pressed','false');
-
-});
 
 /**
 @namespace the global Opencast namespace global
