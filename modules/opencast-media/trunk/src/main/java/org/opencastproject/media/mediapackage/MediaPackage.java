@@ -555,13 +555,6 @@ public interface MediaPackage {
   void removeCover() throws MediaPackageException;
 
   /**
-   * Returns the media package's size in bytes.
-   * 
-   * @return the media package size
-   */
-  long getSize();
-
-  /**
    * Adds <code>observer</code> to the list of observers of this media package.
    * 
    * @param observer

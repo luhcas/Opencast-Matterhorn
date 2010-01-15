@@ -44,9 +44,6 @@ public final class MediaPackageImpl implements MediaPackage {
   /** The media media package meta data */
   ManifestImpl manifest = null;
 
-  /** The media package size */
-  private long size = -1;
-
   /** List of observers */
   List<MediaPackageObserver> observers = new ArrayList<MediaPackageObserver>();
 
@@ -705,24 +702,6 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public void renameTo(Id identifier) {
     manifest.setIdentifier(identifier);
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#getSize()
-   */
-  public long getSize() {
-    if (size >= 0)
-      return size;
-    size = 0;
-    for (MediaPackageElement e : manifest.getEntries()) {
-      long elementSize = e.getSize();
-      if (elementSize < 0) {
-        log_.warn("Package element " + e + " returned invalid size " + elementSize);
-        return -1;
-      }
-      size += e.getSize();
-    }
-    return size;
   }
 
   /**
