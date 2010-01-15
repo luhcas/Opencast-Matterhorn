@@ -206,7 +206,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   }
 
   public String toString() {
-    return new ToStringBuilder(this).append(this.id).append(this.title).append(this.description).toString();
+    return new ToStringBuilder("workflow instance").append(this.id).append(this.title).toString();
   }
 
   @Override

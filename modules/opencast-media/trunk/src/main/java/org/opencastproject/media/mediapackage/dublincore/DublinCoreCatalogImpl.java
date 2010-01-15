@@ -201,7 +201,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     DublinCoreParser parser = new DublinCoreParser(this);
     try {
       isLoaded = true;
-      log_.info("Reading dublin core catalog content from " + uri);
+      log_.debug("Reading dublin core catalog content from " + uri);
       parser.parse(uri.toURL().openStream());
     } catch (Exception e) {
       isLoaded = false;

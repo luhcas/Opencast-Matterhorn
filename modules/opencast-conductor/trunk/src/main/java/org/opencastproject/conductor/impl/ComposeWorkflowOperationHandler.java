@@ -27,7 +27,6 @@ import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.mpeg7.Audio;
 import org.opencastproject.media.mediapackage.mpeg7.Video;
 import org.opencastproject.workflow.api.WorkflowBuilder;
-import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
@@ -44,10 +43,19 @@ import java.util.concurrent.Future;
  * The workflow definition for handling "compose" operations
  */
 public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler {
+  
+  /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowOperationHandler.class);
 
-  private ComposerService composerService;
+  /** The composer service */
+  private ComposerService composerService = null;
 
+  /**
+   * Callback for the OSGi declarative services configuration.
+   * 
+   * @param composerService
+   *          the composer service
+   */
   protected void setComposerService(ComposerService composerService) {
     this.composerService = composerService;
   }
@@ -58,19 +66,17 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
    */
   public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    logger.info("run() compose workflow operation on {}", workflowInstance);
-    for (WorkflowConfiguration config : workflowInstance.getConfigurations()) {
-      logger.info("config {} = {}", config.getKey(), config.getValue());
-    }
-    MediaPackage resultingMediaPackage;
+    logger.debug("Running compose workflow operation on {}", workflowInstance);
 
+    // Encode the media package
+    MediaPackage resultingMediaPackage = null;
     try {
       resultingMediaPackage = encode(workflowInstance.getCurrentMediaPackage(), workflowInstance.getCurrentOperation());
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
     }
 
-    logger.info("run() compose operation completed");
+    logger.debug("Compose operation completed");
 
     // TODO Add new media track(s) to the media package
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, null, false);
@@ -91,14 +97,6 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
   private MediaPackage encode(MediaPackage mediaPackage, WorkflowOperationInstance operation) throws EncoderException,
           MediaPackageException, UnsupportedElementException, InterruptedException, ExecutionException {
 
-
-//    <configuration key="audio-source-track-flavor">*</configuration>
-//    <configuration key="video-source-track-flavor">track/presenter</configuration>
-//    <configuration key="target-track-flavor">track/presenter</configuration>
-//    <configuration key="target-track-tags">engage</configuration>
-//    <configuration key="encoding-profile">flash.http</configuration>
-//  </configurations>
-  
     String videoSourceTrackId = getTrack(mediaPackage, Video.class, operation.getConfiguration("video-source-track-flavor"));
     String audioSourceTrackId = getTrack(mediaPackage, Audio.class, operation.getConfiguration("audio-source-track-flavor"));
     // If there is no separate audio track, use the audio from the video file
@@ -127,7 +125,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     EncodingProfile[] profileList = composerService.listProfiles();
     for (EncodingProfile profile : profileList) {
       if (operation.getConfiguration(profile.getIdentifier()) != null) {
-        logger.info("Encoding audio track {} and video track {} using profile {}", new String[] { audioSourceTrackId,
+        logger.info("Encoding audio track '{}' and video track '{}' using profile '{}'", new String[] { audioSourceTrackId,
                 videoSourceTrackId, profile.getIdentifier() });
         Future<Track> futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId,
                 targetTrackId, profile.getIdentifier());
@@ -136,7 +134,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
         if (composedTrack == null)
           throw new RuntimeException("unable to retrieve composed track");
 
-        // Add the flavor, either from the operation configuration or from th ecomposer
+        // Add the flavor, either from the operation configuration or from the composer
         if (targetTrackFlavor != null)
           composedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(targetTrackFlavor));
         logger.debug("Composed track has flavor '{}'", composedTrack.getFlavor());

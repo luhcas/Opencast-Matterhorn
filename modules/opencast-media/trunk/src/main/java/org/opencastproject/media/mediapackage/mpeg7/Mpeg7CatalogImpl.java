@@ -153,7 +153,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
     Mpeg7Parser parser = new Mpeg7Parser(this);
     try {
       isLoaded = true;
-      log_.info("Reading mpeg-7 catalog content from " + uri);
+      log_.debug("Reading mpeg-7 catalog content from " + uri);
       parser.parse(uri.toURL().openStream());
     } catch (Exception e) {
       isLoaded = false;

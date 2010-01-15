@@ -46,9 +46,10 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
    */
   public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
 
-    logger.info("run() publish workflow operation");
+    logger.debug("Running publish workflow operation");
 
     MediaPackage mp = workflowInstance.getCurrentMediaPackage();
+    logger.info("Publishing media package {} to search index", mp);
 
     try {
       // adding media package to the search index
@@ -57,7 +58,7 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
       throw new WorkflowOperationException(e);
     }
 
-    logger.info("run() publish operation completed");
+    logger.debug("Running publish operation completed");
 
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, null, false);
   }

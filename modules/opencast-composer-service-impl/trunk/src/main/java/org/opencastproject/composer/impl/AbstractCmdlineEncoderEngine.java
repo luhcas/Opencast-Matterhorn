@@ -135,12 +135,12 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       }
 
       log_.info("Audio track {} and video track {} successfully encoded using profile '{}'",
-              new String[] {audioSource.getName(), videoSource.getName(), profile.getName()});
+              new String[] {audioSource.getName(), videoSource.getName(), profile.getIdentifier()});
       fireEncoded(this, profile, audioSource, videoSource);
       return new File(videoSource.getParent(), FilenameUtils.getBaseName(videoInput) + profile.getSuffix());
     } catch (EncoderException e) {
       log_.warn("Error while encoding audio track {} and video track {} using '{}': {}",
-              new String[] {audioSource.getName(), videoSource.getName(), profile.getName(), e.getMessage()});
+              new String[] {audioSource.getName(), videoSource.getName(), profile.getIdentifier(), e.getMessage()});
       fireEncodingFailed(this, profile, e, audioSource, videoSource);
       throw e;
     } catch (Exception e) {
