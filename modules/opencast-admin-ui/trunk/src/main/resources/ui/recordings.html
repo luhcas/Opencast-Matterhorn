@@ -17,6 +17,7 @@
     <script type="text/javascript" src="js/jquery.xslt.js"></script>
     <script type="text/javascript" src="js/jquery.xslt.js"></script>
     <script type="text/javascript">
+      var statsInterval;
 
       $(document).ready( function() {
         /* Event: Scheduler button clicked */
@@ -79,6 +80,9 @@
 
         // request and display statistics
         displayRecordingStats();
+
+        // init update interval for recording stats
+        statsInterval = windows.setInterval( 3000, displayRecordingStats() );
       });
 
       /**
