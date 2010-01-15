@@ -18,7 +18,7 @@
           <th width="25%">Title</th>
           <th width="15%">Presenter</th>
           <th width="20%">Course/Series</th>
-          <th width="20%">Recording Date and Time</th>
+          <th width="20%" class="date-column">Recording Date and Time</th>
           <th width="10%">Capture Agent</th>
           <th width="10%">Status</th>
         </tr>
@@ -45,7 +45,7 @@
       </td>
       <td class="td-TimeDate">
         <span class="date-start">
-          <xsl:value-of select="startTime" />
+          <span class="time-raw" style="display:none;"><xsl:value-of select="startTime" /></span>
         </span>
         <!-- <span class="date-end">
           <xsl:value-of select="endTime" />

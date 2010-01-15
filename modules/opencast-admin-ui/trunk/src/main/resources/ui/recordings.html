@@ -36,11 +36,40 @@
           injectLoadingAnimation($('#recordings-table-container'));
           var state = $(this).attr('state');
           $('#recordings-table-container').xslt("rest/recordings/"+state, "xsl/recordings_"+state+".xsl", function() {
-            // call makeLocaleDateString
+            if ($('.date-column').length > 0) {
+              // if date date/time column is present
+              $('.date-start').each( function() {     // format date/time to locale string
+                var ts = $(this).children('.time-raw').text();
+                
+                $(document.createElement('span')).text(makeLocaleDateString(ts)).appendTo($(this));
+              });
+              $('#recordingsTable').tablesorter({   // init tablesorter with custom parser for the date column
+                headers: {
+                  3: {
+                    sorter: 'date'
+                  }
+                }
+              });
+            } else {  // if no date/time column is present, init tablesorter the default way
+              $('#recordingsTable').tablesorter();
+            }
           });
-          $('#recordingsTable').tablesorter();
           return false;
         })
+
+        // register custom table cell value parser for Date/Time column
+        $.tablesorter.addParser({
+          id: 'date',
+          is: function(){return false;},
+          format: function(s) {
+            var elm = document.createElement('div');
+            elm.innerHTML = s;
+            return $(elm).children('.time-raw').text();
+          },
+          type: 'numeric'
+        });
+
+        // request and display statistics
         displayRecordingStats();
       });
 

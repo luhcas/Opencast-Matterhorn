@@ -20,7 +20,7 @@
       .formField-list li {margin-bottom: 4px;}
       .formField-label {width:30% !important; text-align:right; margin-right:5px; float:left;}
       .formField {width:440px !important;float:left;}
-      .no-bullets {list-style-type: none;}
+      .no-bullets li {list-style-type: none;}
       .collapse-control {padding-left:18px;cursor:pointer;background:silver;}
       .collapse-control-closed {background-image:url(img/arrow-right.png);background-position:top left !important; background-repeat:no-repeat;}
       .collapse-control-open {background-image:url(img/arrow-down.png);background-position:top left !important; background-repeat:no-repeat;}
@@ -128,7 +128,7 @@
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
         <div class="fl-container-800" style="text-align: center;">
-          <h2 id="page-title">Media File Upload</h2>
+          <h2 id="page-title">Upload Recording</h2>
         </div>
 
         <!-- missing fields notification -->
@@ -137,10 +137,13 @@
           <div id="content-missingFields" class="fl-widget-content warnbox-content">
             <ul>
               <li id="notification-title" class="missing-fields-item">
-                Please enter a <a href="javascript:document.uploadForm.title.focus();">title</a> for the recording.
+                <span class="fl-icon inline-icon icon-bullet"></span>Please enter a <a href="javascript:document.uploadForm.title.focus();">title</a> for the recording.
+              </li>
+              <li id="notification-mediacontent" class="missing-fields-item">
+                <span class="fl-icon inline-icon icon-bullet"></span>Please select the <a href="javascript:document.getElementById('mediacontent').focus();">media file content</a> -- the type of content the media file contains.
               </li>
               <li id="notification-track" class="missing-fields-item">
-                Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload.
+                <span class="fl-icon inline-icon icon-bullet"></span>Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload.
               </li>
             </ul>
           </div>
@@ -214,6 +217,15 @@
               <ul class="no-bullets formField-list">
                 <!-- field: License -->
                 <li class="ui-helper-clearfix">
+                  <span class="formField-label"><span class="color-red">* </span>Distribution channel(s):</span>
+                  <span id="dist" style="float:left;">
+                    <input type="checkbox" checked="true" disabled="true">
+                    &nbsp;Matterhorn media module
+                  </span>
+                  <span class="helpIcon">&nbsp;</span>
+                </li>
+                <!-- field: License -->
+                <li class="ui-helper-clearfix">
                   <span class="formField-label">License:</span>
                   <input type="text" class="formField" id="license" name="license">
                   <span class="helpIcon">&nbsp;</span>
@@ -227,6 +239,20 @@
             <div id="heading-additionalData" class="fl-widget-titlebar titlebar">File Upload</div>
             <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
               <ul class="no-bullets formField-list">
+                <!-- field: Media file content -->
+                <li class="ui-helper-clearfix">
+                  <span class="formField-label"><span class="color-red">* </span>Media file content:</span>
+                  <select name="mediacontent" id="mediacontent" class="requiredField" style="float:left;margin:3px;">
+                    <option value="">Choose one:</option>
+                    <option value="audio">Audio</option>
+                    <option value="video/presenter">Presenter (Video)</option>
+                    <option value="video/audience">Audience (Video)</option>
+                    <option value="video/slides">Presentation slides (video)</option>
+                    <option value="video/other">Other document (video)</option>
+                    <option value="other">Other (video)</option>
+                  </select>
+                  <span class="helpIcon">&nbsp;</span>
+                </li>
                 <!-- field: Media File -->
                 <li class="ui-helper-clearfix">
                   <span class="formField-label"><span class="color-red">* </span>Media File:</span>
