@@ -141,7 +141,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
 
         // Add tags
         if (targetTrackTags != null) {
-          for (String tag : targetTrackTags.split(" ,;")) {
+          for (String tag : targetTrackTags.split("\\W")) {
             logger.debug("Tagging composed track with '{}'", tag);
             composedTrack.addTag(tag);
           }
