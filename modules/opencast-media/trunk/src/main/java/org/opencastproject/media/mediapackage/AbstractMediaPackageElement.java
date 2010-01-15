@@ -448,13 +448,13 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
     }
     
     // Tags
-    if (tags != null && tags.size() > 0) {
+    if (tags.size() > 0) {
       Element tagsNode = document.createElement("tags");
       node.appendChild(tagsNode);
       for (String tag : tags) {
         Element tagNode = document.createElement("tag");
         tagsNode.appendChild(tagNode);
-        tagsNode.appendChild(document.createTextNode(tag));
+        tagNode.appendChild(document.createTextNode(tag));
       }
     }
 

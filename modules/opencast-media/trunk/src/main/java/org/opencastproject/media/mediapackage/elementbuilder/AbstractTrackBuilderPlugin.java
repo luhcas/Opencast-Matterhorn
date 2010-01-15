@@ -30,6 +30,7 @@ import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.net.URI;
@@ -147,6 +148,12 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
       String description = (String) xpath.evaluate("description/text()", elementNode, XPathConstants.STRING);
       if (description != null && !description.trim().equals(""))
         track.setElementDescription(description.trim());
+
+      // tags
+      NodeList tagNodes = (NodeList) xpath.evaluate("tags/tag", elementNode, XPathConstants.NODESET);
+      for (int i = 0; i < tagNodes.getLength(); i++) {
+        track.addTag(tagNodes.item(i).getTextContent());
+      }
 
       // duration
       try {

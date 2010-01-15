@@ -30,6 +30,7 @@ import org.opencastproject.util.MimeTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -212,10 +213,16 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       if (mimeType != null)
         attachment.setMimeType(mimeType);
 
-      // description
+      // Set the description
       String description = xpath.evaluate("description/text()", elementNode);
       if (description != null && !description.equals(""))
         attachment.setElementDescription(description.trim());
+
+      // Set tags
+      NodeList tagNodes = (NodeList) xpath.evaluate("tags/tag", elementNode, XPathConstants.NODESET);
+      for (int i = 0; i < tagNodes.getLength(); i++) {
+        attachment.addTag(tagNodes.item(i).getTextContent());
+      }
 
       return specializeAttachment(attachment);
     } catch (XPathExpressionException e) {

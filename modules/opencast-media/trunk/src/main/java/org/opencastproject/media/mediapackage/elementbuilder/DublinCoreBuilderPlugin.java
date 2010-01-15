@@ -31,6 +31,7 @@ import org.opencastproject.util.MimeTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.net.URI;
@@ -169,8 +170,15 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
       if (checksum != null)
         dc.setChecksum(checksum);
 
+      // Set Mimetype
       if (mimeType != null)
         dc.setMimeType(mimeType);
+      
+      // Tags
+      NodeList tagNodes = (NodeList) xpath.evaluate("tags/tag", elementNode, XPathConstants.NODESET);
+      for (int i = 0; i < tagNodes.getLength(); i++) {
+        dc.addTag(tagNodes.item(i).getTextContent());
+      }
 
       return dc;
     } catch (XPathExpressionException e) {

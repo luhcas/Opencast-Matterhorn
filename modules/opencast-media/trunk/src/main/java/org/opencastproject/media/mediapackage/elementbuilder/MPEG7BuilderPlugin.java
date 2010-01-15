@@ -32,6 +32,7 @@ import org.opencastproject.util.MimeTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -179,6 +180,12 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
       // Set the mime type
       if (mimeType != null)
         mpeg7.setMimeType(mimeType);
+
+      // Set the tags
+      NodeList tagNodes = (NodeList) xpath.evaluate("tags/tag", elementNode, XPathConstants.NODESET);
+      for (int i = 0; i < tagNodes.getLength(); i++) {
+        mpeg7.addTag(tagNodes.item(i).getTextContent());
+      }
 
       return mpeg7;
     } catch (XPathExpressionException e) {

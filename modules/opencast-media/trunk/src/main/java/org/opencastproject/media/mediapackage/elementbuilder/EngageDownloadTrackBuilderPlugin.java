@@ -94,7 +94,7 @@ public class EngageDownloadTrackBuilderPlugin extends AbstractTrackBuilderPlugin
 
   @Override
   protected TrackImpl trackFromManifest(String id, URI uri) {
-    TrackImpl track = (TrackImpl) TrackImpl.fromURI(uri);
+    TrackImpl track = TrackImpl.fromURI(uri);
     track.setIdentifier(id);
     track.setFlavor(MediaPackageElements.ENGAGE_TRACK);
     return track;
