@@ -89,6 +89,13 @@ public interface MediaPackage {
   Iterable<MediaPackageElement> elements();
 
   /**
+   * Returns all of the elements.
+   * 
+   * @return the elements
+   */
+  MediaPackageElement[] getElements();
+
+  /**
    * Returns the element that is identified by the given reference or <code>null</code> if no such element exists.
    * 
    * @param reference

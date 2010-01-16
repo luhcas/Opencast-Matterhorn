@@ -59,6 +59,8 @@ public interface SearchService {
    */
   SearchResult getEpisodesAndSeriesByText(String text, int offset, int limit) throws SearchException;
 
+  SearchResult getByQuery(SearchQuery q) throws SearchException;
+  
   /**
    * Processes a series search for a given series id, creates and returns a regular search result.
    * 

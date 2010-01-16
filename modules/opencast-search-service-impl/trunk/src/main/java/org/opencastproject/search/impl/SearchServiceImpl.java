@@ -18,6 +18,7 @@ package org.opencastproject.search.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.search.api.SearchException;
+import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.solr.SolrConnection;
@@ -320,6 +321,20 @@ public class SearchServiceImpl implements SearchService {
     try {
       log_.info("Removing mediapackage {} from search index", mediaPackageId);
       solrIndexManager.delete(mediaPackageId);
+    } catch (SolrServerException e) {
+      throw new SearchException(e);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.search.api.SearchService#getByQuery(org.opencastproject.search.api.SearchQuery)
+   */
+  @Override
+  public SearchResult getByQuery(SearchQuery q) throws SearchException {
+    try {
+      log_.debug("Searching index using query object '" + q + "'");
+      return solrRequester.getByQuery(q);
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }

@@ -17,9 +17,11 @@ package org.opencastproject.search.endpoint;
 
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchService;
+import org.opencastproject.search.impl.SearchQueryImpl;
 import org.opencastproject.search.impl.SearchResultImpl;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -33,6 +35,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -67,7 +72,6 @@ public class SearchRestService {
     episodeEndpoint.addFormat(new Format("xml", null, null));
     episodeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results, expressed as xml"));
     episodeEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The ID of the single episode to be returned, if it exists"));
-    episodeEndpoint.addOptionalParam(new Param("seriesId", Type.STRING, null, "All episodes in the series with this ID"));
     episodeEndpoint.addOptionalParam(new Param("q", Type.STRING, null, "Any episode that matches this free-text query"));
     episodeEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0", "The maximum number of items to return per page"));
     episodeEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
@@ -164,29 +168,24 @@ public class SearchRestService {
   @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_JSON})
   public SearchResultImpl getEpisode(
           @QueryParam("id") String id,
-          @QueryParam("seriesId") String seriesId,
           @QueryParam("q") String text,
+          @QueryParam("tag") String[] tags,
+          @QueryParam("flavor") String[] flavors,
           @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
-    // Try searching by episode ID first
-    if(!StringUtils.isEmpty(id)) {
-      logger.debug("Searching for episodes by episode ID");
-      return (SearchResultImpl) searchService.getEpisodeById(id);
-    }
-    // Then try searching by series ID
-    if(!StringUtils.isEmpty(seriesId)) {
-      logger.debug("Searching for episodes by series ID");
-      return (SearchResultImpl) searchService.getEpisodesBySeries(seriesId);
+
+    // Prepare the flavors
+    List<MediaPackageElementFlavor> flavorSet = new ArrayList<MediaPackageElementFlavor>();
+    if (flavors != null) {
+      for (String f : flavors) {
+        flavorSet.add(MediaPackageElementFlavor.parseFlavor(f));
+      }
     }
     
-    // If text is specified, do a free text search.  Otherwise, just return the most recent episodes
-    if(StringUtils.isEmpty(text)) {
-      logger.debug("Searching for all episodes, ordered by date");
-      return (SearchResultImpl) searchService.getEpisodesByDate(limit, offset);
-    } else {
-      logger.debug("Searching for episodes via free text search");
-      return (SearchResultImpl) searchService.getEpisodesByText(text, limit, offset);
-    }
+    SearchQueryImpl search = new SearchQueryImpl();
+    search.withId(id).withElementFlavors(flavorSet.toArray(new MediaPackageElementFlavor[flavorSet.size()])).
+    withText(text).withElementTags(tags).withLimit(limit).withOffset(offset);
+    return (SearchResultImpl)searchService.getByQuery(search);
   }
 
   @GET

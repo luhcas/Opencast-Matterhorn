@@ -50,6 +50,8 @@ public interface SolrFields {
   public static final String OC_COVER = "oc_cover";
   public static final String OC_MODIFIED = "oc_modified";
   public static final String OC_MEDIATYPE = "oc_mediatype";
+  public static final String OC_ELEMENTTAGS = "oc_elementtags";
+  public static final String OC_ELEMENTFLAVORS = "oc_elementflavors";
 
   /** Solr ranking score */
   public static final String SCORE = "score";

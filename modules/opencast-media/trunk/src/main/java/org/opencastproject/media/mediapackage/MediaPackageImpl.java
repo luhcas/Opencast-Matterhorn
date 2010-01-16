@@ -116,6 +116,15 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getElements()
+   */
+  public MediaPackageElement[] getElements() {
+    return manifest.getEntries();
+  }
+
+  /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#getElementByReference(org.opencastproject.media.mediapackage.MediaPackageReference)
    */
   public MediaPackageElement getElementByReference(MediaPackageReference reference) {
