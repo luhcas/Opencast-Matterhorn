@@ -4,7 +4,7 @@
   <property name="service.description" value="Administrative UIs" />
   <property name="alias" value="/admin" />
   <property name="classpath" value="/ui" />
-  <property name="welcome.file" value="recordings.html" />
+  <property name="welcome.file" value="recordings.html?show=upcoming" />
 
   <property name="test.classpath" value="/uitests" />
   <property name="test.suite" value="TestSuite.html" />
