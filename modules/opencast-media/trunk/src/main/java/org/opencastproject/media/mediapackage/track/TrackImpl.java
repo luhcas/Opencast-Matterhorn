@@ -17,11 +17,13 @@
 package org.opencastproject.media.mediapackage.track;
 
 import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
+import org.opencastproject.media.mediapackage.AudioStream;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageSerializer;
 import org.opencastproject.media.mediapackage.Stream;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.VideoStream;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 
@@ -33,12 +35,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class is the base implementation for a media track, which itself is part of a media package, representing e. g.
- * the speaker video or the slide presentation movie.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @author Christoph E. Driessen <ced@neopoly.de>
- * @version $Id: TrackImpl.java 2905 2009-07-15 16:16:05Z ced $
+ * This class is the base implementation for a media track, which itself is part
+ * of a media package, representing e. g. the speaker video or the slide
+ * presentation movie.
  */
 public class TrackImpl extends AbstractMediaPackageElement implements Track {
 
@@ -62,7 +61,8 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
    * @param mimeType
    *          the track mime type
    */
-  TrackImpl(MediaPackageElementFlavor flavor, MimeType mimeType, URI uri, long size, Checksum checksum) {
+  TrackImpl(MediaPackageElementFlavor flavor, MimeType mimeType, URI uri,
+          long size, Checksum checksum) {
     super(Type.Track, flavor, uri, size, checksum, mimeType);
   }
 
@@ -73,12 +73,6 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
    *          the track flavor
    * @param uri
    *          the track location
-   * @throws IOException
-   *           if the track file cannot be accessed
-   * @throws UnknownFileTypeException
-   *           if the file is of an unknown file type
-   * @throws NoSuchAlgorithmException
-   *           if the track's checksum cannot be computed
    */
   TrackImpl(MediaPackageElementFlavor flavor, URI uri) {
     super(Type.Track, flavor, uri);
@@ -124,6 +118,34 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
   }
 
   /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.Track#hasAudio()
+   */
+  @Override
+  public boolean hasAudio() {
+    for (Stream s : streams) {
+      if (s instanceof AudioStream)
+        return true;
+    }
+    return false;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.Track#hasVideo()
+   */
+  @Override
+  public boolean hasVideo() {
+    for (Stream s : streams) {
+      if (s instanceof VideoStream)
+        return true;
+    }
+    return false;
+  }
+
+  /**
    * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toManifest(org.w3c.dom.Document)
    */
   @Override
@@ -133,7 +155,8 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
     // duration
     if (duration >= 0) {
       Node durationNode = document.createElement("duration");
-      durationNode.appendChild(document.createTextNode(Long.toString(duration)));
+      durationNode
+              .appendChild(document.createTextNode(Long.toString(duration)));
       node.appendChild(durationNode);
     }
 
@@ -150,10 +173,12 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
   public String getDescription() {
     StringBuffer buf = new StringBuffer("");
     /*
-     * todo boolean details = false; if (hasVideo()) { details = true; buf.append(videoSettings); } if (hasAudio()) {
-     * String audioCodec = audioSettings.toString(); if (!hasVideo() || !audioCodec.equals(videoSettings.toString())) {
-     * if (details) buf.append(" / "); details = true; buf.append(audioCodec); } } if (!details) {
-     * buf.append(getMimeType()); }
+     * todo boolean details = false; if (hasVideo()) { details = true;
+     * buf.append(videoSettings); } if (hasAudio()) { String audioCodec =
+     * audioSettings.toString(); if (!hasVideo() ||
+     * !audioCodec.equals(videoSettings.toString())) { if (details)
+     * buf.append(" / "); details = true; buf.append(audioCodec); } } if
+     * (!details) { buf.append(getMimeType()); }
      */
     return buf.toString().toLowerCase();
   }

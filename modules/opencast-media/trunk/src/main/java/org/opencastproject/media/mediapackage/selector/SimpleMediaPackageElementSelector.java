@@ -23,6 +23,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElementSelector;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,13 +49,13 @@ public class SimpleMediaPackageElementSelector<T extends MediaPackageElement>
    * @see org.opencastproject.media.mediapackage.MediaPackageElementSelector#select(org.opencastproject.media.mediapackage.MediaPackage)
    */
   @SuppressWarnings("unchecked")
-  public T[] select(MediaPackage mediaPackage) {
-    Set<T> result = new HashSet<T>();
-
+  public Collection<T> select(MediaPackage mediaPackage) {
+    Set<T> result = new HashSet<T>();    
+    Class type = getParametrizedType();
     for (MediaPackageElement e : mediaPackage.getElements()) {
 
       // Does the type match?
-      if (e.getClass().isAssignableFrom(getParametrizedType())) {
+      if (type.isAssignableFrom(e.getClass())) {
 
         // Any of the flavors?
         if (flavors.size() > 0 && !flavors.contains(e.getFlavor()))
@@ -77,7 +78,7 @@ public class SimpleMediaPackageElementSelector<T extends MediaPackageElement>
       }
     }
 
-    return (T[]) result.toArray();
+    return result;
   }
 
   /**
@@ -106,7 +107,7 @@ public class SimpleMediaPackageElementSelector<T extends MediaPackageElement>
                       + getClass().getName()
                       + " does not specify any type parameter.");
     }
-    return entityClass.getClass();
+    return entityClass;
   }
 
   /**

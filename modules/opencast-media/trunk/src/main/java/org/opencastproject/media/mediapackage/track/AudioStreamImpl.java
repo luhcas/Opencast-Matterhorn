@@ -56,7 +56,7 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
    *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
    */
   public Node toManifest(Document document, MediaPackageSerializer serializer) {
-    Element node = document.createElement("Audio");
+    Element node = document.createElement("audio");
     // Stream ID
     node.setAttribute("id", getIdentifier());
 

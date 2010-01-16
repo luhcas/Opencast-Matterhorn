@@ -24,6 +24,7 @@ import org.opencastproject.media.mediapackage.TrackSupport;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -71,15 +72,15 @@ public class StreamElementSelector<S extends Stream> extends
    */
   @SuppressWarnings("unchecked")
   @Override
-  public Track[] select(MediaPackage mediaPackage) {
-    Track[] candidates = super.select(mediaPackage);
+  public Collection<Track> select(MediaPackage mediaPackage) {
+    Collection<Track> candidates = super.select(mediaPackage);
     List<Track> result = new ArrayList<Track>();
     for (Track t : candidates) {
       if (TrackSupport.byType(t.getStreams(), getParametrizedStreamType()).length > 0) {
         result.add(t);
       }
     }
-    return result.toArray(new Track[result.size()]);
+    return result;
   }
 
   /**

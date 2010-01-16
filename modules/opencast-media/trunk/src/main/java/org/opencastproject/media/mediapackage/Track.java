@@ -17,7 +17,8 @@
 package org.opencastproject.media.mediapackage;
 
 /**
- * This interface describes methods and fields for audio and video tracks as part of a media package.
+ * This interface describes methods and fields for audio and video tracks as
+ * part of a media package.
  * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @author Christoph E. Driessen <ced@neopoly.de>
@@ -31,9 +32,24 @@ public interface Track extends MediaPackageElement {
   Type TYPE = Type.Track;
 
   /**
-   * Return the streams that make up the track. Tracks consist of at least one stream.
+   * Return the streams that make up the track. Tracks consist of at least one
+   * stream.
    */
   Stream[] getStreams();
+
+  /**
+   * Returns <code>true</code> if the track features an audio stream.
+   * 
+   * @return <code>true</code> if the track has an audio stream
+   */
+  boolean hasAudio();
+
+  /**
+   * Returns <code>true</code> if the track features a video stream.
+   * 
+   * @return <code>true</code> if the track has a video stream
+   */
+  boolean hasVideo();
 
   /**
    * Returns the track duration in milliseconds.

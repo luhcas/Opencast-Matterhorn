@@ -215,7 +215,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       // video list
       List<VideoStreamMetadata> videoList = metadata.getVideoStreamMetadata();
       if (videoList != null && !videoList.isEmpty()) {
-        for (int i = 0; i < audioList.size(); i++) {
+        for (int i = 0; i < videoList.size(); i++) {
           VideoStreamImpl video = new VideoStreamImpl("video-" + (i + 1));
           VideoStreamMetadata v = videoList.get(i);
           video.setBitRate(v.getBitRate());

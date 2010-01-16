@@ -1,6 +1,6 @@
 <mediapackage id="00000/2" start="2007-12-05T13:40:00" duration="10044">
   <media>
-    <track id="track-1" type="track/presentation">
+    <track id="track-1" type="presentation/source">
       <mimetype>video/quicktime</mimetype>
       <url>/vonly.mov</url>
       <checksum type="md5">43b7d843b02c4a429b2f547a4f230d31</checksum>

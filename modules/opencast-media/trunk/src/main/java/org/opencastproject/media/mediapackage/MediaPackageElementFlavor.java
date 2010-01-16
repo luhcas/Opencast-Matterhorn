@@ -95,7 +95,7 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
   /**
    * Returns the major type of this element type. Major types are more of a technical description.
    * <p/>
-   * For example, if the element type is a presentation movie which is represented as <code>track/presentation</code>,
+   * For example, if the element type is a presentation movie which is represented as <code>presentation/source</code>,
    * this method will return <code>track</code>.
    * 
    * @return the type
@@ -107,7 +107,7 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
   /**
    * Returns the minor type of this element type. Minor types define the meaning.
    * <p/>
-   * For example, if the element type is a presentation movie which is represented as <code>track/presentation</code>,
+   * For example, if the element type is a presentation movie which is represented as <code>presentation/source</code>,
    * this method will return <code>presentation</code>.
    * 
    * @return the subtype

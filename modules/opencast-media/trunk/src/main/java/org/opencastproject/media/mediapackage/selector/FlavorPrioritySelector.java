@@ -19,7 +19,7 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,13 +40,12 @@ public class FlavorPrioritySelector<T extends MediaPackageElement> extends Simpl
    * 
    * @see org.opencastproject.media.mediapackage.MediaPackageElementSelector#select(org.opencastproject.media.mediapackage.MediaPackage)
    */
-  @SuppressWarnings("unchecked")
-  public T[] select(MediaPackage mediaPackage) {
+  public Collection<T> select(MediaPackage mediaPackage) {
     Set<T> candidates = new HashSet<T>();
     Set<T> result = new HashSet<T>();
 
     // Have the super implementation match type, flavor and tags
-    candidates.addAll(Arrays.asList(super.select(mediaPackage)));
+    candidates.addAll(super.select(mediaPackage));
 
     // Return the first element based on the flavor
     result: for (MediaPackageElementFlavor flavor : flavors) {
@@ -58,7 +57,7 @@ public class FlavorPrioritySelector<T extends MediaPackageElement> extends Simpl
       }
     }
 
-    return (T[]) result.toArray();
+    return result;
   }
 
 }

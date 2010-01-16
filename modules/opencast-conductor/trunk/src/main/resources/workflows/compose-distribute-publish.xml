@@ -6,6 +6,14 @@
   </description>
   <operations>
   
+  	<!-- inspect the media -->
+    <operation
+      name="inspect"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Inspect the media package">
+    </operation>
+ 
 	<!-- encode to flash download -->
     <operation
       name="compose"
@@ -13,10 +21,10 @@
       exception-handler-workflow="Default Error Handler"
       description="Encode presenter (camera) video to Flash download">
       <configurations>
-        <configuration key="audio-source-track-flavor">*</configuration>
-        <configuration key="video-source-track-flavor">track/presenter</configuration>
-        <configuration key="target-track-flavor">track/presenter</configuration>
-        <configuration key="target-track-tags">engage</configuration>
+        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/source</configuration>
+        <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
       </configurations>
     </operation>
@@ -26,10 +34,10 @@
       exception-handler-workflow="Default Error Handler"
       description="Encode presentation (screen) to Flash download">
       <configurations>
-        <configuration key="audio-source-track-flavor">*</configuration>
-        <configuration key="video-source-track-flavor">track/presentation</configuration>
-        <configuration key="target-track-flavor">track/presentation</configuration>
-        <configuration key="target-track-tags">engage</configuration>
+        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presentation/source</configuration>
+        <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
       </configurations>
     </operation>
@@ -42,10 +50,10 @@
       exception-handler-workflow="Default Error Handler"
       description="Encode presenter (camera) to Flash streaming">
       <configurations>
-        <configuration key="audio-source-track-flavor">*</configuration>
-        <configuration key="video-source-track-flavor">track/presenter</configuration>
-        <configuration key="target-track-flavor">track/presenter</configuration>
-        <configuration key="target-track-tags">engage</configuration>
+        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/source</configuration>
+        <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.rtmp</configuration>
       </configurations>
     </operation>
@@ -55,10 +63,10 @@
       exception-handler-workflow="Default Error Handler"
       description="Encode presentation (screen) to Flash streaming">
       <configurations>
-        <configuration key="audio-source-track-flavor">*</configuration>
-        <configuration key="video-source-track-flavor">track/presentation</configuration>
-        <configuration key="target-track-flavor">track/presentation</configuration>
-        <configuration key="target-track-tags">engage</configuration>
+        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presentation/source</configuration>
+        <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.rtmp</configuration>
       </configurations>
     </operation>
@@ -71,10 +79,10 @@
       exception-handler-workflow="Default Error Handler"
       description="Encode presenter (camera) to quicktime/mp4 download">
       <configurations>
-        <configuration key="audio-source-track-flavor">*</configuration>
-        <configuration key="video-source-track-flavor">track/presenter</configuration>
-        <configuration key="target-track-flavor">track/presenter</configuration>
-        <configuration key="target-track-tags">atom</configuration>
+        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/source</configuration>
+        <configuration key="target-tags">atom</configuration>
         <configuration key="encoding-profile">mov-low.http</configuration>
       </configurations>
     </operation>
@@ -84,10 +92,10 @@
       exception-handler-workflow="Default Error Handler"
       description="Encode presentation (screen) to quicktime/mpeg4 download">
       <configurations>
-        <configuration key="audio-source-track-flavor">*</configuration>
-        <configuration key="video-source-track-flavor">track/presentation</configuration>
-        <configuration key="target-track-flavor">track/presentation</configuration>
-        <configuration key="target-track-tags">rss, atom</configuration>
+        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presentation/source</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">mov-low.http</configuration>
       </configurations>
     </operation>
@@ -99,10 +107,10 @@
       exception-handler-workflow="Default Error Handler"
       description="Encode presenter (camera) to avi/mpeg4 download">
       <configurations>
-        <configuration key="audio-source-track-flavor">*</configuration>
-        <configuration key="video-source-track-flavor">track/presenter</configuration>
-        <configuration key="target-track-flavor">track/presenter</configuration>
-        <configuration key="target-track-tags">atom</configuration>
+        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/source</configuration>
+        <configuration key="target-tags">atom</configuration>
         <configuration key="encoding-profile">avi-low.http</configuration>
       </configurations>
     </operation>
@@ -112,10 +120,10 @@
       exception-handler-workflow="Default Error Handler"
       description="Encode presentation (screen) to avi/mpeg4 download">
       <configurations>
-        <configuration key="audio-source-track-flavor">*</configuration>
-        <configuration key="video-source-track-flavor">track/presentation</configuration>
-        <configuration key="target-track-flavor">track/presentation</configuration>
-        <configuration key="target-track-tags">rss, atom</configuration>
+        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presentation/source</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">avi-low.http</configuration>
       </configurations>
     </operation>
@@ -128,9 +136,10 @@
       exception-handler-workflow="Default Error Handler"
       description="Encode presenter (camera) to cover image">
       <configurations>
-        <configuration key="video-source-track-flavor">track/presenter</configuration>
-        <configuration key="target-track-flavor">track/presenter</configuration>
-        <configuration key="target-track-tags">atom</configuration>
+        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/source</configuration>
+        <configuration key="target-tags">atom</configuration>
         <configuration key="encoding-profile">cover.http</configuration>
       </configurations>
     </operation>
@@ -140,9 +149,10 @@
       exception-handler-workflow="Default Error Handler"
       description="Encode presentation (screen) to cover image">
       <configurations>
-        <configuration key="video-source-track-flavor">track/presentation</configuration>
-        <configuration key="target-track-flavor">track/presentation</configuration>
-        <configuration key="target-track-tags">rss, atom, engage</configuration>
+        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presentation/source</configuration>
+        <configuration key="target-tags">rss, atom, engage</configuration>
         <configuration key="encoding-profile">cover.http</configuration>
         <configuration key="offset">0.5</configuration>
       </configurations>

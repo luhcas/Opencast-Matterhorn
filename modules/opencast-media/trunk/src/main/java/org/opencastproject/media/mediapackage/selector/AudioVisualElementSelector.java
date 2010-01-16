@@ -22,6 +22,7 @@ import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.TrackSupport;
 import org.opencastproject.media.mediapackage.VideoStream;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,6 +32,12 @@ import java.util.Set;
  */
 public class AudioVisualElementSelector extends
         SimpleMediaPackageElementSelector<Track> {
+
+  /** Explicit video flavor */
+  protected MediaPackageElementFlavor videoFlavor = null;
+
+  /** Explicit audio flavor */
+  protected MediaPackageElementFlavor audioFlavor = null;
 
   /**
    * Creates a new selector.
@@ -61,15 +68,87 @@ public class AudioVisualElementSelector extends
   }
 
   /**
+   * Specifies an explicit audio flavor.
+   * 
+   * @param flavor
+   *          the flavor
+   */
+  public void setAudioFlavor(String flavor) {
+    if (flavor == null) {
+      audioFlavor = null;
+      return;
+    }
+    setAudioFlavor(MediaPackageElementFlavor.parseFlavor(flavor));
+  }
+
+  /**
+   * Specifies an explicit audio flavor.
+   * 
+   * @param flavor
+   *          the flavor
+   */
+  public void setAudioFlavor(MediaPackageElementFlavor flavor) {
+    if (flavor != null)
+      addFlavor(flavor);
+    audioFlavor = flavor;
+  }
+
+  /**
+   * Returns the explicit audio flavor or <code>null</code> if none was
+   * specified.
+   * 
+   * @return the audio flavor
+   */
+  public MediaPackageElementFlavor getAudioFlavor() {
+    return audioFlavor;
+  }
+
+  /**
+   * Specifies an explicit video flavor.
+   * 
+   * @param flavor
+   *          the flavor
+   */
+  public void setVideoFlavor(String flavor) {
+    if (flavor == null) {
+      videoFlavor = null;
+      return;
+    }
+    setVideoFlavor(MediaPackageElementFlavor.parseFlavor(flavor));
+  }
+
+  /**
+   * Specifies an explicit video flavor.
+   * 
+   * @param flavor
+   *          the flavor
+   */
+  public void setVideoFlavor(MediaPackageElementFlavor flavor) {
+    if (flavor != null)
+      addFlavor(flavor);
+    videoFlavor = flavor;
+  }
+
+  /**
+   * Returns the explicit video flavor or <code>null</code> if none was
+   * specified.
+   * 
+   * @return the video flavor
+   */
+  public MediaPackageElementFlavor getVideoFlavor() {
+    return videoFlavor;
+  }
+
+  /**
    * Returns a track or a number of tracks from the media package that together
-   * contain audio and video. If no such combination can be found, i. g. there
+   * contain audio and video. If no such combination can be found, e. g. there
    * is no audio or video at all, an empty array is returned.
    * 
    * @see org.opencastproject.media.mediapackage.selector.SimpleMediaPackageElementSelector#select(org.opencastproject.media.mediapackage.MediaPackage)
    */
   @Override
-  public Track[] select(MediaPackage mediaPackage) {
-    Track[] candidates = super.select(mediaPackage);
+  public Collection<Track> select(MediaPackage mediaPackage) {
+    Collection<Track> candidates = super.select(mediaPackage);
     Set<Track> result = new HashSet<Track>();
 
     boolean foundAudio = false;
@@ -78,13 +157,14 @@ public class AudioVisualElementSelector extends
     // Try to look for the perfect match: a track containing audio and video
     for (Track t : candidates) {
       if (TrackSupport.byType(t.getStreams(), AudioStream.class).length > 0) {
-        if (!foundAudio) {
+        if (!foundAudio && (audioFlavor == null || audioFlavor.equals(t.getFlavor()))) {
           result.add(t);
           foundAudio = true;
         }
       }
+      // TODO: Fix! byType is not working, let's audio streams pass as video streams
       if (TrackSupport.byType(t.getStreams(), VideoStream.class).length > 0) {
-        if (!foundVideo) {
+        if (!foundVideo  && (videoFlavor == null || videoFlavor.equals(t.getFlavor()))) {
           result.add(t);
           foundVideo = true;
         }
@@ -92,7 +172,7 @@ public class AudioVisualElementSelector extends
     }
 
     // We were lucky, a combination was found!
-    return result.toArray(new Track[result.size()]);
+    return result;
   }
 
 }

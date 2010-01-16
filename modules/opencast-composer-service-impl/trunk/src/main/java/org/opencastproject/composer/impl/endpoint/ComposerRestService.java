@@ -238,7 +238,7 @@ public class ComposerRestService {
   protected String generateMediaPackage() {
     return "<mediapackage start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n" +
     "  <media>\n" +
-    "    <track id=\"track-1\" type=\"track/presentation\">\n" +
+    "    <track id=\"track-1\" type=\"presentation/source\">\n" +
     "      <mimetype>audio/mp3</mimetype>\n" +
     "      <url>http://source.opencastproject.org/svn/modules/opencast-workflow-service-impl/trunk/src/main/resources/sample/aonly.mp3</url>\n" +
     "      <checksum type=\"md5\">950f9fa49caa8f1c5bbc36892f6fd062</checksum>\n" +
@@ -250,7 +250,7 @@ public class ComposerRestService {
     "        <samplingrate>44100</samplingrate>\n" +
     "      </audio>\n" +
     "    </track>\n" +
-    "    <track id=\"track-2\" type=\"track/presentation\">\n" +
+    "    <track id=\"track-2\" type=\"presentation/source\">\n" +
     "      <mimetype>video/quicktime</mimetype>\n" +
     "      <url>http://source.opencastproject.org/svn/modules/opencast-workflow-service-impl/trunk/src/main/resources/sample/vonly.mov</url>\n" +
     "      <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n" +
