@@ -165,7 +165,7 @@ public class EncodingProfileTest {
     // Test profile with existing extension
     profile = profiles.get(CoverProfileId);
     String commandline = "-i #{in.path} -y -r 1 -t 1 -f image2 -s 160x120 #{out.dir}/#{in.name}#{out.suffix}";
-    assertEquals(commandline, profile.getExtension("ffmpeg.commandline"));
+    assertEquals(commandline, profile.getExtension("ffmpeg.command"));
   }
 
   /**

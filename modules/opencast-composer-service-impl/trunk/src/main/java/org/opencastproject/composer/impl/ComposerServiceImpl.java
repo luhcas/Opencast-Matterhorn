@@ -125,14 +125,14 @@ public class ComposerServiceImpl implements ComposerService {
 
         // Get the tracks and make sure they exist
         Track audioTrack = mediaPackage.getTrack(sourceAudioTrackId);
-        if (audioTrack == null)
-          throw new RuntimeException("Unable to encode non-existent audio track " + sourceAudioTrackId);
-        File audioFile = workspace.get(audioTrack.getURI());
+        File audioFile = null;
+        if (audioTrack != null)
+          audioFile = workspace.get(audioTrack.getURI());
 
+        File videoFile = null;
         Track videoTrack = mediaPackage.getTrack(sourceVideoTrackId);
-        if (videoTrack == null)
-          throw new RuntimeException("Unable to encode non-existent video track " + sourceVideoTrackId);
-        File videoFile = workspace.get(videoTrack.getURI());
+        if (videoTrack != null)
+          videoFile = workspace.get(videoTrack.getURI());
 
         // Create the engine
         EncoderEngine engine = EncoderEngineFactory.newInstance().newEngineByProfile(profileId);

@@ -42,6 +42,9 @@ public class EncoderEngineFactoryImpl extends EncoderEngineFactory {
   /** Property prefix for encoder configuration */
   private static final String PROP_PREFIX = "encoder.";
 
+  /** Property suffix for encoder class configuration */
+  private static final String CLASS_SUFFIX = ".class";
+
   /** The engines */
   private Map<String, Class<?>> engineClasses = null;
 
@@ -69,7 +72,7 @@ public class EncoderEngineFactoryImpl extends EncoderEngineFactory {
       config.load(EncoderEngineFactoryImpl.class.getResourceAsStream(SETTINGS_FILE));
       for (Object keyObject : config.keySet()) {
         String key = keyObject.toString();
-        if (key.startsWith(PROP_PREFIX)) {
+        if (key.startsWith(PROP_PREFIX) && key.endsWith(CLASS_SUFFIX)) {
           int separatorLocation = key.lastIndexOf('.');
           String engineId = key.substring(PROP_PREFIX.length(), separatorLocation);
           if (!engineList.contains(engineId))

@@ -38,14 +38,18 @@ import java.util.Map;
 /**
  * Wrapper around any kind of command line controllable encoder.
  * <p/>
- * <strong>Note:</strong> Registered {@link EncoderListener}s <em>won't</em> receive a file in method
- * {@link EncoderListener#fileEncoded(EncoderEngine, File, EncodingProfile)} because it cannot be guaranteed that only
- * <em>one</em> file will be the result of the encoding. Imagine encoding to an image series.
+ * <strong>Note:</strong> Registered {@link EncoderListener}s <em>won't</em> receive a
+ * file in method
+ * {@link EncoderListener#fileEncoded(EncoderEngine, File, EncodingProfile)}
+ * because it cannot be guaranteed that only <em>one</em> file will be the
+ * result of the encoding. Imagine encoding to an image series.
  */
-public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine implements EncoderEngine {
+public abstract class AbstractCmdlineEncoderEngine extends
+        AbstractEncoderEngine implements EncoderEngine {
 
   /**
-   * If true STDERR and STDOUT of the spawned process will be mixed so that both can be read via STDIN
+   * If true STDERR and STDOUT of the spawned process will be mixed so that both
+   * can be read via STDIN
    */
   private static final boolean REDIRECT_ERROR_STREAM = true;
 
@@ -56,13 +60,15 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
   private String cmdlineOptions = "";
 
   /** parameters substituted in the command line options string */
-  private Map<String, Object> params = new HashMap<String, Object>();
+  private Map<String, String> params = new HashMap<String, String>();
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(AbstractCmdlineEncoderEngine.class.getName());
+  private final static Logger log_ = LoggerFactory
+          .getLogger(AbstractCmdlineEncoderEngine.class.getName());
 
   /**
-   * Creates a new CmdlineEncoderEngine with <code>binary</code> as the workhorse.
+   * Creates a new CmdlineEncoderEngine with <code>binary</code> as the
+   * workhorse.
    */
   public AbstractCmdlineEncoderEngine(String binary) {
     super(false);
@@ -75,6 +81,7 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.EncoderEngine#needsLocalWorkCopy()
    */
   public boolean needsLocalWorkCopy() {
@@ -83,24 +90,32 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, java.io.File, org.opencastproject.composer.api.EncodingProfile)
+   * 
+   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File,
+   *      java.io.File, org.opencastproject.composer.api.EncodingProfile)
    */
   @Override
-  public File encode(File audioSource, File videoSource, EncodingProfile profile) throws EncoderException {
+  public File encode(File audioSource, File videoSource, EncodingProfile profile)
+          throws EncoderException {
     // build command
     BufferedReader in = null;
     Process encoderProcess = null;
     try {
       // Set encoding parameters
-      String audioInput = FilenameUtils.normalize(audioSource.getAbsolutePath());
-      String videoInput = FilenameUtils.normalize(videoSource.getAbsolutePath());
-      params.put("in.audio.path", audioInput);
+      String audioInput = null;
+      if (audioSource != null) {
+        audioInput = FilenameUtils
+                .normalize(audioSource.getAbsolutePath());
+        params.put("in.audio.path", audioInput);
+        params.put("in.audio.name", FilenameUtils.getBaseName(audioInput));
+        params.put("in.audio.extension", FilenameUtils.getExtension(audioInput));
+        params.put("in.audio.filename", FilenameUtils.getName(audioInput));
+      }
+      String videoInput = FilenameUtils
+                .normalize(videoSource.getAbsolutePath());
       params.put("in.video.path", videoInput);
-      params.put("in.audio.name", FilenameUtils.getBaseName(audioInput));
       params.put("in.video.name", FilenameUtils.getBaseName(videoInput));
-      params.put("in.audio.extension", FilenameUtils.getExtension(audioInput));
       params.put("in.video.extension", FilenameUtils.getExtension(videoInput));
-      params.put("in.audio.filename", FilenameUtils.getName(audioInput));
       params.put("in.video.filename", FilenameUtils.getName(videoInput));
       params.put("out.dir", videoSource.getParent());
       params.put("out.suffix", profile.getSuffix());
@@ -111,7 +126,7 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       // TODO: Parallelisation (threading)
       List<String> command = buildCommand(profile);
       StringBuilder sb = new StringBuilder();
-      for(String cmd : command) {
+      for (String cmd : command) {
         sb.append(cmd);
         sb.append(" ");
       }
@@ -121,7 +136,8 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       encoderProcess = pbuilder.start();
 
       // tell encoder listeners about output
-      in = new BufferedReader(new InputStreamReader(encoderProcess.getInputStream()));
+      in = new BufferedReader(new InputStreamReader(encoderProcess
+              .getInputStream()));
       String line;
       while ((line = in.readLine()) != null) {
         handleEncoderOutput(profile, line, audioSource, videoSource);
@@ -131,21 +147,42 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       encoderProcess.waitFor();
       int exitCode = encoderProcess.exitValue();
       if (exitCode != 0) {
-        throw new EncoderException(this, "Encoder exited abnormally with status " + exitCode);
+        throw new EncoderException(this,
+                "Encoder exited abnormally with status " + exitCode);
       }
 
-      log_.info("Audio track {} and video track {} successfully encoded using profile '{}'",
-              new String[] {audioSource.getName(), videoSource.getName(), profile.getIdentifier()});
+      if (audioSource != null) {
+        log_.info(
+                "Audio track {} and video track {} successfully encoded using profile '{}'",
+                new String[] { audioSource.getName(), videoSource.getName(), profile.getIdentifier() }
+        );
+      } else {
+        log_.info(
+                "Video track {} successfully encoded using profile '{}'",
+                new String[] { videoSource.getName(), profile.getIdentifier() }
+        );
+      }
       fireEncoded(this, profile, audioSource, videoSource);
-      return new File(videoSource.getParent(), FilenameUtils.getBaseName(videoInput) + profile.getSuffix());
+      return new File(videoSource.getParent(), FilenameUtils
+              .getBaseName(videoInput)
+              + profile.getSuffix());
     } catch (EncoderException e) {
-      log_.warn("Error while encoding audio track {} and video track {} using '{}': {}",
-              new String[] {audioSource.getName(), videoSource.getName(), profile.getIdentifier(), e.getMessage()});
+      if (audioSource != null) {
+        log_.warn("Error while encoding audio track {} and video track {} using '{}': {}",
+                      new String[] { audioSource.getName(),
+                              videoSource.getName(), profile.getIdentifier(),
+                              e.getMessage() });
+      } else {
+        log_.warn("Error while encoding video track {} using '{}': {}",
+                new String[] { videoSource.getName(), profile.getIdentifier(),
+                        e.getMessage() });
+      }
       fireEncodingFailed(this, profile, e, audioSource, videoSource);
       throw e;
     } catch (Exception e) {
-      String msg = "Error while encoding audio " + audioSource.getName() + " and video " + videoSource.getName() + " to "
-        + profile.getName() + ": " + e.getMessage();
+      String msg = "Error while encoding audio " + audioSource.getName()
+              + " and video " + videoSource.getName() + " to "
+              + profile.getName() + ": " + e.getMessage();
       log_.warn(msg);
       fireEncodingFailed(this, profile, e, audioSource, videoSource);
       throw new EncoderException(this, msg, e);
@@ -156,7 +193,8 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
   }
 
   /**
-   * Handles the encoder output by analyzing it first and then firing it off to the registered listeners.
+   * Handles the encoder output by analyzing it first and then firing it off to
+   * the registered listeners.
    * 
    * @param format
    *          the target media format
@@ -165,7 +203,8 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
    * @param sourceFiles
    *          the source files that are being encoded
    */
-  protected void handleEncoderOutput(EncodingProfile format, String message, File... sourceFiles) {
+  protected void handleEncoderOutput(EncodingProfile format, String message,
+          File... sourceFiles) {
     message = message.trim();
     fireEncoderMessage(format, message, sourceFiles);
   }
@@ -183,19 +222,30 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
   }
 
   /**
+   * Returns the parameters that will replace the variable placeholders on the
+   * commandline, such as <code>in.video.name</code> etc.
+   * 
+   * @return the parameters
+   */
+  protected Map<String, String> getCommandlineParameters() {
+    return params;
+  }
+
+  /**
    * Creates the command that is sent to the commandline encoder.
    * 
    * @return the commandline
    * @throws EncoderException
    *           in case of any error
    */
-  protected List<String> buildCommand(EncodingProfile profile) throws EncoderException {
+  protected List<String> buildCommand(EncodingProfile profile)
+          throws EncoderException {
     List<String> command = new ArrayList<String>();
     command.add(binary);
     List<String> arguments = buildArgumentList(profile);
     for (String arg : arguments) {
-      for (Map.Entry<String, Object> e : params.entrySet()) {
-        arg = arg.replace("#{" + e.getKey() + "}", e.getValue().toString());
+      for (Map.Entry<String, String> e : params.entrySet()) {
+        arg = arg.replace("#{" + e.getKey() + "}", e.getValue());
       }
       command.add(arg);
     }
@@ -213,8 +263,9 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
    * @throws EncoderException
    *           in case of any error
    */
-  protected List<String> buildArgumentList(EncodingProfile format) throws EncoderException {
-    String optionString = processCommandTemplates(cmdlineOptions);
+  protected List<String> buildArgumentList(EncodingProfile format)
+          throws EncoderException {
+    String optionString = replaceCommandlineParameters(cmdlineOptions);
     String[] options = optionString.split(" ");
     List<String> arguments = new ArrayList<String>(options.length);
     arguments.addAll(Arrays.asList(options));
@@ -222,14 +273,15 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
   }
 
   /**
-   * Processes the command options by replacing the templates with their actual values.
+   * Processes the command options by replacing the templates with their actual
+   * values.
    * 
    * @return the commandline
    */
-  protected String processCommandTemplates(String cmd) {
+  protected String replaceCommandlineParameters(String cmd) {
     String r = cmd;
-    for (Map.Entry<String, Object> e : params.entrySet()) {
-      r = r.replace("#{" + e.getKey() + "}", e.getValue().toString());
+    for (Map.Entry<String, String> e : params.entrySet()) {
+      r = r.replace("#{" + e.getKey() + "}", e.getValue());
     }
     return r;
   }
@@ -237,8 +289,8 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
   // -- Attributes
 
   /**
-   * Set the commandline options in a single string. Parameters in the form of <code>#{param}</code> will be
-   * substituted.
+   * Set the commandline options in a single string. Parameters in the form of
+   * <code>#{param}</code> will be substituted.
    * 
    * @see #setInputFile(String)
    * @see #setOutputDirectory(String)
@@ -249,7 +301,8 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
   }
 
   /**
-   * Adds a command line parameter that will be substituted along with the default parameters.
+   * Adds a command line parameter that will be substituted along with the
+   * default parameters.
    * 
    * @see #setCmdlineOptions(String)
    */
@@ -258,8 +311,8 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
   }
 
   /**
-   * Tells the registered listeners that the given track has been encoded into <code>file</code>, using the encoding
-   * format <code>format</code>.
+   * Tells the registered listeners that the given track has been encoded into
+   * <code>file</code>, using the encoding format <code>format</code>.
    * 
    * @param sourceFile
    *          the original track
@@ -268,13 +321,16 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
    * @param message
    *          the message
    */
-  protected void fireEncoderMessage(EncodingProfile format, String message, File... sourceFiles) {
+  protected void fireEncoderMessage(EncodingProfile format, String message,
+          File... sourceFiles) {
     for (EncoderListener l : this.listeners) {
       if (l instanceof CmdlineEncoderListener) {
         try {
-          ((CmdlineEncoderListener) l).notifyEncoderOutput(format, message, sourceFiles);
+          ((CmdlineEncoderListener) l).notifyEncoderOutput(format, message,
+                  sourceFiles);
         } catch (Throwable th) {
-          log_.error("EncoderListener " + l + " threw exception while processing callback", th);
+          log_.error("EncoderListener " + l
+                  + " threw exception while processing callback", th);
         }
       }
     }

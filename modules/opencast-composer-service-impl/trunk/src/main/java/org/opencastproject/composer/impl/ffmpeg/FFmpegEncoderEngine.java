@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -46,17 +45,12 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
   /** The ffmpeg properties file */
   public static final String PROPERTIES_FILE = "/ffmpeg.properties";
 
-  /** The ffmpeg properties key prefix */
-  private static final String PROFILE_PREFIX = "profile.";
-
   /** The ffmpeg commandline suffix */
-  public static final String CMD_SUFFIX = "ffmpeg.commandline";
-
-  /** The commandline definitions */
-  protected static Map<String, String> commandlines = null;
+  public static final String CMD_SUFFIX = "ffmpeg.command";
 
   /** the logging facility provided by log4j */
-  private static final Logger log_ = LoggerFactory.getLogger(FFmpegEncoderEngine.class);
+  private static final Logger log_ = LoggerFactory
+          .getLogger(FFmpegEncoderEngine.class);
 
   /**
    * Creates the ffmpeg encoder engine.
@@ -67,37 +61,25 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
   }
 
   /**
-   * Initializes the FFMpeg encoder by looking up the commandlines for the various distribution formats.
+   * Initializes the FFMpeg encoder by looking up the commandlines for the
+   * various distribution formats.
    * 
    * @throws ConfigurationException
    */
   private synchronized void initEncoder() throws ConfigurationException {
     Properties ffmpegProperties = new Properties();
     try {
-      ffmpegProperties.load(FFmpegEncoderEngine.class.getResourceAsStream(PROPERTIES_FILE));
+      ffmpegProperties.load(FFmpegEncoderEngine.class
+              .getResourceAsStream(PROPERTIES_FILE));
     } catch (IOException e) {
-      log_.error("Error reading configuration for ffmpeg encoder engine: " + e.getMessage());
+      log_.error("Error reading configuration for ffmpeg encoder engine: "
+              + e.getMessage());
     }
 
     // Check binary location
     String binary = ffmpegProperties.getProperty(OPT_BINARY);
     if (binary != null) {
       setBinary(binary);
-    }
-
-    // Read formats
-    if (commandlines == null) {
-      commandlines = new HashMap<String, String>();
-      for (Map.Entry<Object, Object> entry : ffmpegProperties.entrySet()) {
-        String key = entry.getKey().toString();
-        if (key.startsWith(PROFILE_PREFIX) && key.endsWith(CMD_SUFFIX)) {
-          int endIndex = key.length() - CMD_SUFFIX.length() - 1;
-          String formatKey = key.substring(PROFILE_PREFIX.length(), endIndex);
-          String commandline = entry.getValue().toString();
-          commandlines.put(formatKey, commandline);
-          log_.debug("Commandline for '" + formatKey + "' is " + commandline);
-        }
-      }
     }
   }
 
@@ -111,22 +93,43 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
    * @return the argument list
    */
   @Override
-  protected List<String> buildArgumentList(EncodingProfile format) throws EncoderException {
+  protected List<String> buildArgumentList(EncodingProfile format)
+          throws EncoderException {
+    String commandline = format.getExtension(CMD_SUFFIX);
+    if (commandline == null)
+      throw new EncoderException(this, "No commandline configured for "
+              + format);
+
+    // Process the commandline. The variables in that commandline might either
+    // be replaced by commandline parts from the configuration or commandline
+    // parameters as specified at runtime.
     List<String> argumentList = new ArrayList<String>();
-    String commandline = commandlines.get(format.getIdentifier());
-    if (commandline == null) {
-      commandline = format.getExtension(CMD_SUFFIX);
-      if (commandline == null)
-        throw new EncoderException(this, "No commandline configured for " + format);
+    for (Map.Entry<String, String> entry : format.getExtensions().entrySet()) {
+      String key = entry.getKey();
+      if (key.startsWith(CMD_SUFFIX) && key.length() > CMD_SUFFIX.length()) {
+        String value = replaceCommandlineParameters(entry.getValue());
+        String partName = "#\\{" + key.substring(CMD_SUFFIX.length() + 1) + "\\}";
+        if (!value.matches(".*#\\{.*\\}.*"))
+          commandline = commandline.replaceAll(partName, value);
+      }
     }
+
+    // Replace the commandline parameters passed in at compile time
+    commandline = replaceCommandlineParameters(commandline);
+
+    // Remove unused commandline parts
+    commandline = commandline.replaceAll("#\\{.*\\}", "");
+
     String[] args = commandline.split(" ");
     for (String a : args)
-      argumentList.add(a);
+      if (!"".equals(a.trim()))
+        argumentList.add(a);
     return argumentList;
   }
 
   /**
-   * Handles the encoder output by analyzing it first and then firing it off to the registered listeners.
+   * Handles the encoder output by analyzing it first and then firing it off to
+   * the registered listeners.
    * 
    * @param track
    *          the track that is currently being encoded
@@ -136,7 +139,8 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
    *          the message returned by the encoder
    */
   @Override
-  protected void handleEncoderOutput(EncodingProfile format, String message, File... sourceFiles) {
+  protected void handleEncoderOutput(EncodingProfile format, String message,
+          File... sourceFiles) {
     super.handleEncoderOutput(format, message, sourceFiles);
     message = message.trim();
     if (message.equals(""))
@@ -147,15 +151,21 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
       return;
 
     // Others go to trace logging
-    if (message.startsWith("FFmpeg version") || message.startsWith("configuration") || message.startsWith("lib")
+    if (message.startsWith("FFmpeg version")
+            || message.startsWith("configuration") || message.startsWith("lib")
             || message.startsWith("frame=") || message.startsWith("built on"))
 
       log_.trace(message);
 
     // Some to debug
-    else if (message.startsWith("Input #") || message.startsWith("Duration:") || message.startsWith("Stream #")
-            || message.startsWith("Stream mapping") || message.startsWith("Output #") || message.startsWith("video:")
-            || message.startsWith("PIX_FMT_YUV420P will be used as an intermediate format for rescaling"))
+    else if (message.startsWith("Input #")
+            || message.startsWith("Duration:")
+            || message.startsWith("Stream #")
+            || message.startsWith("Stream mapping")
+            || message.startsWith("Output #")
+            || message.startsWith("video:")
+            || message
+                    .startsWith("PIX_FMT_YUV420P will be used as an intermediate format for rescaling"))
 
       log_.debug(message);
 
@@ -174,7 +184,9 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.impl.AbstractEncoderEngine#getOutputFile(java.io.File, org.opencastproject.composer.api.EncodingProfile)
+   * 
+   * @see org.opencastproject.composer.impl.AbstractEncoderEngine#getOutputFile(java.io.File,
+   *      org.opencastproject.composer.api.EncodingProfile)
    */
   @Override
   protected File getOutputFile(File source, EncodingProfile profile) {
