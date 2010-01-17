@@ -1,0 +1,26 @@
+README for Scripts
+
+1) rc.local
+
+	This script is added to a VM's /etc directory.  It checks whether matterhorn
+	setup has already been run on the VM.  If it hasn't been run, it displayed a
+	message asking the user to log in, otherwise it tells how the user can access
+	the Matterhorn welcome page on this VM.
+	
+2) matterhorn_setup.sh
+
+	This script is added to a VM's /etc/profile.d directory.  When a user logs in
+	for the very first time, this script runs and installs 3rd party tools
+	(including ffmpeg), as selected by the user via prompts.  Upon successful
+	completion, the script moves itself into the /usr/local/matterhorn/bin directory.
+	This script also modifies the motd.tail file to display instructions for accessing
+	Matterhorn welcome page.
+		
+3) release.sh
+
+	This script is meant for Release Manager (RM).  The JIRA_TKT variable must be
+	changed to the Jira ticket related to a particular release.  Matterhorn version
+	number variable must also be updated.  Since this script uses gpg to digitally
+	sign the release file, it is intended to be run locally on the RM's computer,
+	since the gpg private key resides on that computer.  This script exports Matterhorn
+	from svn repo, builds, tar-zips the files and creates checksums.
