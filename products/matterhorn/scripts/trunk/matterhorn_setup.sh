@@ -107,7 +107,7 @@ start_mh ()
 
   echo "" | sudo tee -a $MOTD_FILE
   echo "********************************************" | sudo tee -a $MOTD_FILE
-  echo "** Matterhorn cosole is at http://$MY_IP:8080" | sudo tee -a $MOTD_FILE
+  echo "** Matterhorn console is at http://$MY_IP:8080" | sudo tee -a $MOTD_FILE
   echo "**" | sudo tee -a $MOTD_FILE
   echo "** Matterhorn is installed in:" | sudo tee -a $MOTD_FILE
   echo "**    Home:    /usr/local/matterhorn" | sudo tee -a $MOTD_FILE
