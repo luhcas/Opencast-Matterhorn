@@ -1,10 +1,24 @@
-/* CSS file */
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
 
 .oc-title-bar
 {
 	width:              397px;
 	height:             20px;
-	margin-left:        10px;
+	margin-left:        0px;
 	margin-top:         5px;
 	background-image:   url(../background/title.png);
 	background-repeat:  repeat-x;
@@ -16,10 +30,9 @@
 	font-size:          1em;
 }
 
-
 #info
 {
-    margin-left:        10px; 
+    margin-left:        0px; 
     margin-right:       10px; 
     margin-top:         70px;
 }
@@ -27,7 +40,7 @@
 .oc_infoDisplayBlock
 {
     display:            block;
-    margin-left:        10px; 
+    margin-left:        0px; 
     margin-right:       10px; 
     margin-top:         10px;
 
@@ -54,7 +67,7 @@
 #oc-slider
 {
     width:              399px;
-    margin-left:        10px;
+    margin-left:        0px;
     margin-bottom:      10px;
     position: relative; 
     text-align: left;
@@ -96,7 +109,7 @@
     width:              401px;
     height:             30px;
     background:         transparent url(../background/title.png) repeat-x center top;
-    margin-left:        10px;
+    margin-left:        0px;
     border:             ridge 1px #999999;
 }
 
@@ -232,7 +245,7 @@
 
 .btn_play_out
 {
-    overflow: hidden;
+  overflow:             hidden;
   width:                16px;
   height:               16px;
   margin:               0;
@@ -373,19 +386,6 @@
     cursor:             hand; /* for IE 5.x */
 }
 
-.oc-btn-volume-low
-{
-    overflow:           hidden;
-    width:              16px;
-    height:             16px;
-    border:             0;
-    margin:             0;
-    background:         transparent url(../icons/volumelow.png) no-repeat center top;
-    text-indent:        -1000em;
-    cursor:             pointer; /* hand-shaped cursor */
-    cursor:             hand; /* for IE 5.x */
-}
-
 .oc-btn-volume-mute
 {
     overflow:           hidden;
@@ -457,7 +457,7 @@
 {
     margin:             10px;
     margin-bottom:      0px;
-    margin-left:        10px;
+    margin-left:        0px;
 }
 
 .overflow-hidden 

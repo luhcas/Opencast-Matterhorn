@@ -16,15 +16,15 @@
 package org.opencast.engage.videodisplay.vo
 {
 	import mx.collections.ArrayCollection;
+	
 	/**
 	* 	CaptionSetVO
 	* 
-	*	@author jemden
-	*	@version 1.0
 	*/
 	[Bindable]
 	public class CaptionSetVO
 	{
+		/** Constructor */
 		public function CaptionSetVO()
 		{
 			super();
@@ -34,6 +34,13 @@ package org.opencast.engage.videodisplay.vo
 		public var captions : ArrayCollection;
 		public var lang : String;
 		public var style : String;
+		
+		/** 
+		 * toString
+		 * 
+		 * return the captions of the video
+		 * 
+		 *  */
 		public function toString() : String
 		{
 			var result : String = "";

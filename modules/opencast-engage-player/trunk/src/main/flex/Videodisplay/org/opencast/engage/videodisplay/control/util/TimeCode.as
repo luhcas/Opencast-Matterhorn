@@ -15,19 +15,36 @@
  */
 package org.opencast.engage.videodisplay.control.util
 {
+    /**
+    *   TimeCode
+    * 
+    */
 	public class TimeCode
 	{
 		private var _showHours : Boolean;
+		
+		/** Constructor */
 		public function TimeCode()
 		{
 			_showHours = true;
 		}
-
+        
+        /** 
+        * showHours
+        * 
+        * set the _showHours
+        * */
 		public function showHours(show : Boolean) : void
 		{
 			_showHours = show;
 		}
-
+        
+        /** 
+        * getTC
+        * 
+        * Get the time, like HH:MM:SS.
+        * 
+        * */
 		public function getTC(seconds : Number) : String
 		{
 			if(typeof(seconds) != "number")
@@ -66,45 +83,5 @@ package org.opencast.engage.videodisplay.control.util
 
 			return result;
 		}
-
-		public function getTCompressed(seconds : Number) : String
-		{
-			if(typeof(seconds) != "number")
-				return "00:";
-			var result : String = "";
-			var myTime : Date = new Date(2007 , 0 , 1 , 0 , 0 , seconds);
-			// hours
-			if (_showHours == true)
-			{
-				if (myTime.getHours() < 10)
-				{
-					if(myTime.getHours() != 0)
-						result = "0" + myTime.getHours() + ":";
-				}else
-				{
-					result = myTime.getHours() + ":";
-				}
-			}
-
-			// minutes
-			if (myTime.getMinutes() < 10)
-			{
-				result += "0" + myTime.getMinutes() + ":";
-			}else
-			{
-				result += myTime.getMinutes() + ":";
-			}
-
-			// seconds
-			if (myTime.getSeconds() < 10)
-			{
-				result += "0" + myTime.getSeconds();
-			}else
-			{
-				result += myTime.getSeconds();
-			}
-
-			return result;
-		}
-	}
+    }
 }

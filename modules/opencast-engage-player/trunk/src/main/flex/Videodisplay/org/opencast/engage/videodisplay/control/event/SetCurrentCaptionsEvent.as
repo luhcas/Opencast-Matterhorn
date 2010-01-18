@@ -16,16 +16,28 @@
 package org.opencast.engage.videodisplay.control.event
 {
 	import flash.events.Event;
+	
+	/**
+    *   SetCurrentCaptionsEvent
+    * 
+    */
 	public class SetCurrentCaptionsEvent extends Event
 	{
 		public static var EVENT_NAME : String = 'SetCurrentCaptionsEvent';
 		private var _language : String;
+		
+		/** Constructor */
 		public function SetCurrentCaptionsEvent(language : String , bubbles : Boolean = false , cancelable : Boolean = false)
 		{
 			super(EVENT_NAME , bubbles , cancelable);
 			_language = language;
 		}
-
+        
+        /** 
+        * language
+        * 
+        * Get the language.
+        *  */
 		public function get language() : String
 		{
 			return _language;

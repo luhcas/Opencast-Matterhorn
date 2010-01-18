@@ -6,6 +6,7 @@
     @namespace the global Opencast namespace ariaSlider
     
     http://www.paciellogroup.com/blog/?p=68
+    http://accessify.com/tools-and-wizards/accessibility-tools/aria/slider-generator/
 */
 Opencast.ariaSlider = (function () 
 {
@@ -98,12 +99,11 @@ Opencast.ariaSlider = (function ()
         if (target.id === sliderVolume)
         {
             target.setAttribute('aria-valuetext', 'Volume: ' + Math.round(newValue) + '%');
-            Opencast.ToVideodisplay.doSetVolume(newValue / 100);
-            Opencast.volume = newValue / 100;
-           
-            if (value !== 0 && Opencast.ToVideodisplay.getccBool() === false)
+            Opencast.Player.doSetVolume(newValue / 100);
+            Opencast.Player.setPlayerVolume(newValue / 100);
+            if (value !== 0 && Opencast.Player.getccBool() === false)
             {
-                Opencast.ToVideodisplay.setClosedCaptionsOff();
+                Opencast.Player.setClosedCaptionsOff();
             }
         }
         
@@ -122,8 +122,7 @@ Opencast.ariaSlider = (function ()
         @param Target target, Number value 
     */
     function changeValueFromVideodisplay(target, value) {
-     
-        var ratio = calibrate(target);
+    	var ratio = calibrate(target);
         var min = parseFloat(target.getAttribute('aria-valuemin'));
         var max = parseFloat(target.getAttribute('aria-valuemax'));
         var newValue = Math.min(Math.max(value, min), max);

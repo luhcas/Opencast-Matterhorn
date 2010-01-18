@@ -16,6 +16,11 @@
 package org.opencast.engage.videodisplay.control.responder
 {
 	import mx.rpc.events.ResultEvent;
+	
+	/**
+    *   IResponder
+    * 
+    */
 	public interface IResponder
 	{
 		/**  */

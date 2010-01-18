@@ -15,6 +15,10 @@
  */
 package org.opencast.engage.videodisplay.state
 {
+	/**
+    *   PlayerState
+    * 
+    */
 	public class PlayerState
 	{
 		public static const PLAYING : String = 'playing';

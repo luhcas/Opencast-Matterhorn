@@ -8,6 +8,12 @@
 	<version>0.1-SNAPSHOT</version>
 	<packaging>swf</packaging>
 	<name>opencast-engage-player</name>
+	
+	<parent>
+    <groupId>org.opencastproject</groupId>
+    <artifactId>base</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  	</parent>
 
 	<properties>
 		<sourceFile>Videodisplay.mxml</sourceFile>
@@ -51,6 +57,7 @@
 					<accessible>true</accessible>
 					<headlessServer>true</headlessServer>
 					<showWarnings>false</showWarnings>
+					
 					<output>${project.build.directory}/hybrid-player/Videodisplay.swf</output>
 					<!--<coverageViewerPath>/Applications/CoverageViewer.app</coverageViewerPath>-->
 				</configuration>

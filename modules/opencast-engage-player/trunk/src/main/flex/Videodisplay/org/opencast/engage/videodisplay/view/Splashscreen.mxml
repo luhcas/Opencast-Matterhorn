@@ -19,17 +19,18 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 	backgroundAlpha="1.0"
 	currentState="{model.currentPlayerState}"
+	xmlns:view="org.opencast.engage.videodisplay.view.*"
+	>
 	
-	xmlns:view="org.opencast.engage.videodisplay.view.*">
 	<mx:Script>
 		<![CDATA[
-			import mx.controls.Alert;
-			import mx.core.Application;
 			import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
 		  	import org.opencast.engage.videodisplay.state.PlayerState;
 		  	import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
 		  	import org.swizframework.Swiz;
 		  	import org.opencast.engage.videodisplay.model.VideodisplayModel;
+		  	import mx.controls.Alert;
+            import mx.core.Application;
 			
 			[Autowire]
 			[Bindable]
@@ -99,37 +100,57 @@
               		// ignore
           		}
       		}
+      		
 		]]>
 	</mx:Script>
 	<mx:states>
-		<mx:State name="{PlayerState.PLAYING}">
-			<mx:SetProperty target="{playButton_up}"
+		<mx:State 
+			name="{PlayerState.PLAYING}"
+			>
+			<mx:SetProperty 
+				target="{playButton_up}"
 				name="visible"
-				value="false"/>
-			<mx:SetProperty target="{pauseButton_up}"
+				value="false"
+				/>
+			<mx:SetProperty 
+				target="{pauseButton_up}"
 				name="visible"
-				value="false"/>
+				value="false"
+				/>
 		</mx:State>
-		<mx:State name="{PlayerState.PAUSING}">
+		<mx:State 
+			name="{PlayerState.PAUSING}"
+			>
 			<mx:SetProperty target="{playButton_up}"
 				name="visible"
-				value="true"/>
-			<mx:SetProperty target="{pauseButton_up}"
+				value="true"
+				/>
+			<mx:SetProperty 
+				target="{pauseButton_up}"
 				name="visible"
-				value="false"/>
+				value="false"
+				/>
 		</mx:State>
 	</mx:states>
 	
 	<mx:transitions>
-		<mx:Transition id="fadeOut"
+		<mx:Transition 
+			id="fadeOut"
 			fromState="{PlayerState.PLAYING}"
-			toState="{PlayerState.PAUSING}">
-			<mx:Parallel target="{curtain}"/>
+			toState="{PlayerState.PAUSING}"
+			>
+			<mx:Parallel 
+				target="{curtain}"
+				/>
 		</mx:Transition>
-		<mx:Transition id="fadeIn"
+		<mx:Transition 
+			id="fadeIn"
 			fromState="{PlayerState.PAUSING}"
-			toState="{PlayerState.PLAYING}">
-			<mx:Parallel target="{curtain}"/>
+			toState="{PlayerState.PLAYING}"
+			>
+			<mx:Parallel 
+				target="{curtain}"
+				/>
 		</mx:Transition>
 	</mx:transitions>
 	
@@ -210,7 +231,7 @@
             	verticalGap="0"
             	>
             	
-                <mx:Button
+            	<mx:Button
 			    	id="btn_fullscreen"
 			        styleName="{ model.fullscreenMode == false ? 'Fullscreen' : 'Normalscreen' }"
 			       	click="{ toggleFullScreen() }" 

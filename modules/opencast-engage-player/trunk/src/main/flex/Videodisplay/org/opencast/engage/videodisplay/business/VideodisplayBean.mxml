@@ -20,8 +20,19 @@
 	xmlns="org.swizframework.util.*"
 	xmlns:business="org.opencast.engage.videodisplay.business.*"
 	xmlns:model="org.opencast.engage.videodisplay.model.*"
-	xmlns:control="org.opencast.engage.videodisplay.control.*">
-	<business:VideodisplayDelegate id="videodisplayDelegate"/>
-	<model:VideodisplayModel id="videodisplayModel"/>
-	<control:VideodisplayController id="videodisplayController"/>
+	xmlns:control="org.opencast.engage.videodisplay.control.*"
+	>
+	
+	<business:VideodisplayDelegate 
+		id="videodisplayDelegate"
+		/>
+	
+	<model:VideodisplayModel 
+		id="videodisplayModel"
+		/>
+	
+	<control:VideodisplayController 
+		id="videodisplayController"
+		/>
+		
 </BeanLoader>

@@ -22,12 +22,20 @@ package org.opencast.engage.videodisplay.model
 	
 	import org.opencast.engage.videodisplay.control.util.TimeCode;
 	import org.opencast.engage.videodisplay.vo.LanguageVO;
+	
 	[Bindable]
 	public class VideodisplayModel
 	{
+		// Media Player Wrapper
 		public var player : MediaPlayerWrapper;
+	
+	    // Current Duration
 		public var currentDuration : Number;
+		
+		// Current Playhead
 		public var currentPlayhead : Number;
+		
+		// Current Player State
 		public var currentPlayerState : String;
 		
 		// Current Caption Set
@@ -81,19 +89,21 @@ package org.opencast.engage.videodisplay.model
 		// Time Code
 		public var timeCode:TimeCode = new TimeCode();
 		
-		[Embed("../../../../../../../resources/icons/volumemuteBig.png")]
+		// Progress Percent
+        public var progressPercent:int = 0;
+        
+        // Progress Bar
+        public var progressBar:ProgressBar = new ProgressBar();
+        
+        [Embed("../../../../../../../resources/icons/volumemuteBig.png")]
         public var MuteIcon:Class;
         
         [Embed("../../../../../../../resources/icons/volumehighBig.png")]
         public var UnmuteIcon:Class;
         
-        public var progressPercent:int = 0;
-        
-        public var progressBar:ProgressBar = new ProgressBar();
-		
+        /** Constructor */		
 		public function VideodisplayModel()
         {
-        	
         }
 	}
 }

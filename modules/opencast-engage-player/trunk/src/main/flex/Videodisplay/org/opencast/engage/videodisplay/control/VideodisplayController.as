@@ -21,6 +21,7 @@ package org.opencast.engage.videodisplay.control
 	import flash.external.ExternalInterface;
 	import flash.utils.Timer;
 	
+	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.IResponder;
@@ -44,10 +45,9 @@ package org.opencast.engage.videodisplay.control
 	import org.swizframework.controller.AbstractController;
 	public class VideodisplayController extends AbstractController
 	{
-		/**  */
 		[Autowire]
 		public var model : VideodisplayModel;
-		/**  */
+		
 		[Autowire]
 		public var delegate : VideodisplayDelegate;
 		private var lastPlayPauseState:String = "";
@@ -79,21 +79,27 @@ package org.opencast.engage.videodisplay.control
 		  	switch(event.videoControlType)
             {
 				case VideoControlEvent.PLAY:			if( !model.player.playing)
+				                                        {
 						    								model.player.play();
+				                                        }
 						  								model.currentPlayerState = PlayerState.PLAYING;
 													   	currentPlayPauseState = PlayerState.PAUSING;
 													   	ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
 													   	break;
 												
 				case VideoControlEvent.PAUSE: 			if(model.player.playing)
+		  				  								{
 		  				  									model.player.pause();
+		  				  								}
 									  					model.currentPlayerState = PlayerState.PAUSING;
 									  					currentPlayPauseState = PlayerState.PLAYING;
 									  					ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
 														break;
 												
 				case VideoControlEvent.STOP: 			if(model.player.playing)
+														{
 															model.player.pause();
+													   }
 													  	model.player.seek(0);
 													  	model.currentPlayerState = PlayerState.PAUSING;
 						  								currentPlayPauseState = PlayerState.PLAYING;
@@ -121,7 +127,9 @@ package org.opencast.engage.videodisplay.control
 								
 				case VideoControlEvent.SKIPFORWARD: 	model.player.seek( model.currentDuration - 1);
 														if(model.player.playing)
+														{
 		  				  									model.player.pause();
+									  			        }
 									  					model.currentPlayerState = PlayerState.PAUSING;
 									  					currentPlayPauseState = PlayerState.PLAYING;
 									  					ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
@@ -184,10 +192,12 @@ package org.opencast.engage.videodisplay.control
                 case VideoControlEvent.CLOSEDCAPTIONS:  if(model.ccBoolean)
                                                         {
                                                         	Swiz.dispatchEvent( new ClosedCaptionsEvent(false) );
+                                                        	model.ccButtonBool = false;
                                                         }
                                                         else
                                                         {
                                                         	Swiz.dispatchEvent( new ClosedCaptionsEvent(true) );
+                                                        	model.ccButtonBool = true;
                                                         }
                                                         ExternalInterface.call(ExternalFunction.SETCAPTIONSBUTTON, model.ccBoolean);
                                                         break;         
@@ -197,10 +207,9 @@ package org.opencast.engage.videodisplay.control
                                                         break;  
                                                         
                 case VideoControlEvent.INFORMATION:     ExternalInterface.call(ExternalFunction.TOGGLEINFO, '' );           
-                                                        break;                             
-
-                                                                                                                                         
-            }
+                                                        break;   
+               
+             }
 		}
 		
 		/** setVolume 

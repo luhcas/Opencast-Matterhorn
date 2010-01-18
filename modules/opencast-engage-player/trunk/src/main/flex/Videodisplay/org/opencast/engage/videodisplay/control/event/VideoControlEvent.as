@@ -16,6 +16,11 @@
 package org.opencast.engage.videodisplay.control.event
 {
 	import flash.events.Event;
+	
+	/**
+    *   VideoControlEvent
+    * 
+    */
 	public class VideoControlEvent extends Event
 	{
 		public static var EVENT_NAME : String 		= 'VideoControlEvent';
@@ -43,15 +48,20 @@ package org.opencast.engage.videodisplay.control.event
 		public static var VOLUMEDOWN : String		= "volumeDown";
 		public static var HEARTIMEINFO : String     = "hearTimeInfo";
 		public static var INFORMATION : String      = "Information";
-		
-		
 		private var _videoControlType : String;
+		
+		/** Constructor */
 		public function VideoControlEvent(videoControlType : String , bubbles : Boolean = false , cancelable : Boolean = false )
 		{
 			super(EVENT_NAME , bubbles , cancelable);
 			_videoControlType = videoControlType;
 		}
 
+        /** 
+        * videoControlType
+        * 
+        * Get the video control type
+        *  */
 		public function get videoControlType() : String
 		{
 			return _videoControlType;

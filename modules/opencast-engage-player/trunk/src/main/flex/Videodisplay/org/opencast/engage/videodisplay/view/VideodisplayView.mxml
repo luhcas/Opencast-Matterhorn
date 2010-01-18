@@ -21,13 +21,14 @@
 	xmlns:players="com.adobe.strobe.players.*"
 	xmlns:mx="http://www.adobe.com/2006/mxml"
 	xmlns:view="org.opencast.engage.videodisplay.view.*"
-	resize="{ resizeVideodisplay() }">
+	resize="{ resizeVideodisplay() }"
+	>
+	
 	<mx:Script>
 		<![CDATA[
 			import bridge.ExternalFunction;
 			import org.openvideoplayer.events.VolumeChangeEvent;
 			import org.opencast.engage.videodisplay.control.event.ResizeVideodisplayEvent;
-			import mx.controls.Alert;
 			import org.openvideoplayer.utils.URL;
 			import org.openvideoplayer.proxies.TemporalProxyElement;
 			import org.openvideoplayer.composition.SerialElement;
@@ -54,42 +55,31 @@
 			import org.openvideoplayer.net.NetLoader;
 			import org.openvideoplayer.media.URLResource;
 			import org.openvideoplayer.video.VideoElement;
-			
-
 			import mx.core.Application;
 			import mx.events.FlexEvent;
-			
-			
-			
-			//private static const REMOTE_PROGRESSIVE:String 		= "http://vs1.rz.uos.de/public/virtmm/test/Pechakucha-zoo_hd.mp4";
-			//private static const REMOTE_STREAM:String 		  	= "rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/femaf09_2009_4_17_10_18.flv";
-			
-			//private static const CAPTION_URL:String			= 'http://localhost/opencast-engage-player/dfxp/car.dfxp.xml';
-			//private static const DFXPFLVEXAMPLE:String		= 'http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv';
-			
-			//private static const DFXPFLVEXAMPLE:String		= 'http://localhost/opencast-engage-player/dfxp/schnee.flv';
-			
+			import mx.controls.Alert;
 			
 			[Autowire]
 			[Bindable]
 			public var model:VideodisplayModel;
 			
 			private var t:TimeCode;
-			 
 			private var videoURL:String;
-			
 			private var captionURL:String;
-			
 			private var media:VideoElement;
-			
 			private var autoplay:Boolean = false;
+			private const TIMER_INTERVAL_BYTES_LOADED:int = 200;
+            private var bytesLodedTimer:Timer;        
+			private var lastNewPositionString:String = "00:00:00";
+			private var currentDurationString:String = "00:00:00";
 			
-  			private const TIMER_INTERVAL_BYTES_LOADED:int = 200;
-
-  			private var bytesLodedTimer:Timer;        
-			
-			/**  */
-			protected function initPlayer():void
+			/** 
+			 * initPlayer
+			 * 
+			 * Init the Videoplayer.
+			 * 
+			 *  */
+			public function initPlayer():void
 			{
 				model.player = this.wrapper;
 				t = new TimeCode();
@@ -98,19 +88,27 @@
 				bytesLodedTimer.addEventListener(TimerEvent.TIMER, progress);
 				bytesLodedTimer.start();
 				
-				
 				if(Application.application.parameters.video_url != undefined)
+			    {
 					videoURL = Application.application.parameters.video_url;
-				//else
-					//videoURL = DFXPFLVEXAMPLE;
+			    }
+				else
+			    {
+				    Alert.show("Wrong Video-URL, please contact your Admin.");
+			    }
 				
 		       	if(Application.application.parameters.captions != undefined)
+		        {
 		      		captionURL = Application.application.parameters.captions;
-		      	//else
-		      		//captionURL = CAPTION_URL;
+		        }
+		      	else
+		      	{
+		      		//Alert.show("Wrong Captions-URL, please contact your Admin.");
+
+		      	}	
 		      	
-		      	if(Application.application.parameters.autoplay != undefined)
-          			autoplay = (Application.application.parameters.autoplay == "true");
+		    	if(Application.application.parameters.autoplay != undefined)
+          	     	autoplay = (Application.application.parameters.autoplay == "true");
 	          	
 		      	if( captionURL != null )
 		      	{
@@ -132,7 +130,12 @@
 				wrapper.addEventListener(VolumeChangeEvent.VOLUME_CHANGE, volumeChange );
 			}
 			
-			/**  */
+			/** 
+			 * autoPlayOff
+			 * 
+			 * @eventType event:PlayheadChangeEvent
+			 * 
+			 *  */
 			private function autoPlayOff(event:PlayheadChangeEvent):void
 			{
 			    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.STOP));
@@ -141,7 +144,12 @@
           		wrapper.visible = true;
 			}
 			
-			/**  */
+			/**  
+			 * durationChange
+			 * 
+			 * @eventType event:DurationChangeEvent
+			 * 
+			 * */
 			private function durationChange(event:DurationChangeEvent):void
 			{	
 				// Store new duration as current duration in the videodisplay model
@@ -152,14 +160,24 @@
 		    	ExternalInterface.call(ExternalFunction.SETTOTALTIME, currentDurationString);
 		    }
 			
-			/**  */
+			/** 
+			 * dimChange
+			 * 
+			 * @eventType event:DimensionChangeEvent
+			 * 
+			 *  */
 			private function dimChange(event:DimensionChangeEvent):void
 			{	
 				// 	debugDimensions.text = event.newWidth +" "+event.newHeight;
 				//	ExternalInterface.call('setLog', "WidthxHeight: "+event.newWidth +"x"+event.newHeight);
 			}
 			
-			/**  */
+			/** 
+			 * progress
+			 * 
+			 * @eventType event:TimerEvent
+			 * 
+			 *  */
 			private function progress(event:TimerEvent):void
 			{
 	        	var loadable:ILoadable = media.getTrait(MediaTraitType.LOADABLE) as ILoadable;
@@ -176,11 +194,12 @@
 	          	}
 	        }
 
-			
-			private var lastNewPositionString:String = "00:00:00";
-			private var currentDurationString:String = "00:00:00";
-			
-			/**  */
+			/** 
+			 * playHeadChange
+			 * 
+			 * @eventType event:PlayheadChangeEvent
+			 * 
+			 *  */
 			private function playHeadChange(event:PlayheadChangeEvent):void
 			{	
 				
@@ -209,7 +228,10 @@
       			}
 			}
 			
-			/**  */
+			/** 
+			 * toggleMediaListeners
+			 * 
+			 *  */
 			private function toggleMediaListeners(media:MediaElement, on:Boolean):void
 			{
 				if (media != null)
@@ -225,19 +247,20 @@
 				}
 			}
 			
-			/**  */
+			/** 
+			 * onLoadableStateChange
+			 * 
+			 *  */
 			private function onLoadableStateChange(event:LoadableStateChangeEvent):void
 			{
-				// debugLoadState.text = event.newState.toString();
-	
-				if (event.newState == LoadState.LOADED)
+	            if (event.newState == LoadState.LOADED)
 				{
-					if(!autoplay)
-			  	{
-			    	model.player.volume = 0.0;
-			    	wrapper.visible = false;
-			    	wrapper.addEventListener(PlayheadChangeEvent.PLAYHEAD_CHANGE, autoPlayOff);
-			  	}
+				    if(!autoplay)
+			  	    {
+			    	    model.player.volume = 0.0;
+			    	    wrapper.visible = false;
+			    	    wrapper.addEventListener(PlayheadChangeEvent.PLAYHEAD_CHANGE, autoPlayOff);
+			  	    }
 				}
 			}
 			
@@ -265,8 +288,12 @@
 			
 		]]>
 	</mx:Script>
-	<players:MediaPlayerWrapper id="wrapper"
+	
+	<players:MediaPlayerWrapper 
+		id="wrapper"
 		width="100%"
 		height="100%"
-		addedToStage="initPlayer()"/>
+		addedToStage="initPlayer()"
+		/>
+		
 </mx:Canvas>

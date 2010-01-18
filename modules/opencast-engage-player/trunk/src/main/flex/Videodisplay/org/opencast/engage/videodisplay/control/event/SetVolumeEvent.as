@@ -16,16 +16,28 @@
 package org.opencast.engage.videodisplay.control.event
 {
 	import flash.events.Event;
+	
+	/**
+    *   SetVolumeEvent
+    * 
+    */
 	public class SetVolumeEvent extends Event
 	{
 		public static var EVENT_NAME : String = 'SetVolumeEvent';
 		private var _volume : Number;
+	
+	   /** Constructor */
 		public function SetVolumeEvent(volume : Number , bubbles : Boolean = false , cancelable : Boolean = false )
 		{
 			super(EVENT_NAME , bubbles , cancelable);
 			_volume = volume;
 		}
-
+        
+        /** 
+        * volume
+        * 
+        * Get the volume.
+        *  */
 		public function get volume() : Number
 		{
 			return _volume;

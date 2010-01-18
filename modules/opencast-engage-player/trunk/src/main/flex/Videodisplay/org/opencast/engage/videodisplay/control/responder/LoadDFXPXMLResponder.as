@@ -23,18 +23,23 @@ package org.opencast.engage.videodisplay.control.responder
 	import org.opencast.engage.videodisplay.vo.CaptionSetVO;
 	import org.opencast.engage.videodisplay.vo.CaptionVO;
 	import org.swizframework.Swiz;
+	
+	/**
+    *   LoadDFXPXMLResponder
+    * 
+    */
 	public class LoadDFXPXMLResponder implements IResponder
 	{
-		/**  */
 		[Autowire]
 		public var model : VideodisplayModel;
+		
 		/** Constructor */
 		public function LoadDFXPXMLResponder()
 		{
 			Swiz.autowire( this );
 		}
 
-		/**  */
+		/** result */
 		public function result( data : Object ) : void
 		{
 			model.captionSets = new ArrayCollection();
@@ -91,6 +96,8 @@ package org.opencast.engage.videodisplay.control.responder
 
 		/**
 		*  stringToNumber
+		 * 
+		 * Convert the string to a number.
 		*/
 		public function stringToNumber(timestamp : String) : Number
 		{
@@ -117,7 +124,8 @@ package org.opencast.engage.videodisplay.control.responder
 
 			return result;
 		}
-
+        
+        /** */
 		public function fault(info : Object) : void
 		{
 		}

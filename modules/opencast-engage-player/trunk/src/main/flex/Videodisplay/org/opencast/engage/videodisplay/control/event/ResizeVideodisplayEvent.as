@@ -16,9 +16,16 @@
 package org.opencast.engage.videodisplay.control.event
 {
 	import flash.events.Event;
+	
+	/**
+    *   ResizeVideodisplayEvent
+    * 
+    */
 	public class ResizeVideodisplayEvent extends Event
 	{
 		public static var EVENT_NAME : String = 'ResizeVideodisplayEvent';
+		
+		/** Constructor */
 		public function ResizeVideodisplayEvent(bubbles : Boolean = false , cancelable : Boolean = false)
 		{
 			super(EVENT_NAME , bubbles , cancelable);

@@ -17,24 +17,27 @@
 	 */
 -->
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-	creationComplete="{ onCreationComplete() }">
+	creationComplete="{ onCreationComplete() }"
+	>
+	
 	<mx:Script>
 		<![CDATA[
-			import mx.controls.Alert;
-			import mx.events.ValidationResultEvent;
 			import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
 		  	import org.opencast.engage.videodisplay.state.PlayerState;
 		  	import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
 		  	import org.swizframework.Swiz;
 		  	import org.opencast.engage.videodisplay.model.VideodisplayModel;
+		  	import mx.controls.Alert;
+            import mx.events.ValidationResultEvent;
 			
 			[Autowire]
 			[Bindable]
 			public var model:VideodisplayModel;
 			
 			/**
+			 * onCreationComplete
 			 * 
-			 * 
+			 * Add a shadow filter to the text.
 			 * */
 			private function onCreationComplete():void
 			{
