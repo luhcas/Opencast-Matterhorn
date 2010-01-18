@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -137,13 +138,20 @@ public class AdminuiRestService {
         DublinCoreCatalog dcCatalog = getDublinCore(workflows[i].getCurrentMediaPackage());
         if (dcCatalog != null) {
           item.setTitle(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_TITLE));
-          item.setPresenter(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_CREATOR));
+          item.setPresenter(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_CONTRIBUTOR));
           item.setSeries(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_IS_PART_OF));
           item.setStartTime(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_DATE));  // FIXME get timestamp
-          item.setCaptureAgent(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_SPATIAL)); //FIXME get capture agent from where...?
-          WorkflowOperationInstance operation = workflows[i].getCurrentOperation();
+          item.setCaptureAgent(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_CREATOR)); //FIXME get capture agent from where...?
+          // Get last WorkflowOperationInstance from WorkflowOperationInstanceList
+          WorkflowOperationInstance operation = null;
+          ListIterator<WorkflowOperationInstance> instances = workflows[i].getWorkflowOperationInstanceList().getOperationInstance().listIterator();
+          while (instances.hasNext()) {
+            operation = instances.next();
+          }
           if (operation != null) {
-            item.setProcessingStatus(operation.getName());
+            item.setProcessingStatus(operation.getName() + " : " + operation.getState().toString());
+          } else {
+            logger.warn("Could not get any WorkflowOperationInstance from WorkflowInstance.");
           }
           // TODO get distribution status #openquestion is there a way to find out if a workflowOperation does distribution?
           out.add(item);
@@ -265,7 +273,7 @@ public class AdminuiRestService {
       logger.warn("workflow service not present, unable to retrieve workflow statistics");
     }
     out.put("total", total);
-    logger.info(logMessage);
+    //logger.info(logMessage);
     return out;
   }
 

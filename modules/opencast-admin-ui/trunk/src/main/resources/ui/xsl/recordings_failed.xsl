@@ -19,7 +19,7 @@
           <th width="15%" class="sortable">Presenter</th>
           <th width="20%" class="sortable">Course/Series</th>
           <th width="20%" class="sortable date-column">Recording Date &amp; Time</th>
-          <th width="10%" class="sortable">Capture Agent</th>
+          <!-- <th width="10%" class="sortable">Capture Agent</th> -->
           <th width="10%" class="sortable">Status</th>
         </tr>
       </thead>
@@ -51,11 +51,11 @@
           <xsl:value-of select="endTime" />
         </span> -->
       </td>
-      <td>
+      <!-- <td>
         <xsl:value-of select="captureAgent" />
-      </td>
+      </td> -->
       <td>
-        <xsl:value-of select="distributionStatus" />
+        <xsl:value-of select="processingStatus" />
       </td>
     </tr>
   </xsl:template>
