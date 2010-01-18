@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
 
 /**
@@ -96,24 +95,7 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
         
         // execute 'Transcode, Distribute and Publish workflow'
         WorkflowDefinition def = workflowService.getWorkflowDefinitionByName("Transcode, Distribute and Publish");
-        HashMap<String, String> properties = new HashMap<String, String>();
-        if (mp.getTracks().length == 0) {
-          // no track to encode, skipping encoding
-          properties.put("encode", "false");
-        } else {
-          // encoding first track to flash
-          properties.put("encode", "true");
-          properties.put("compose/flash.http", "true");
-          // TODO This assumes that the tracks are in a proper order.  This will not always be the case.
-          properties.put("compose/video-source-track-id", mp.getTracks()[0].getIdentifier());
-          if(mp.getTracks().length > 1) {
-            properties.put("compose/audio-source-track-id", mp.getTracks()[1].getIdentifier());
-          }
-          properties.put("compose/target-track-id", "track-" + (mp.getTracks().length+1));
-        }
-        properties.put("local", "true");
-
-        workflowService.start(def, mp, properties);
+        workflowService.start(def, mp, null);
 
         // execute 'review' workflow
         // workflowService.start(workflowService.getWorkflowDefinitionByName("Review"), mp, new HashMap<String, String>());

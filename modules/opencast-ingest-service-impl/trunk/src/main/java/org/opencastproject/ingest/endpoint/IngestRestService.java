@@ -26,6 +26,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.dublincore.DublinCore;
 import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
+import org.opencastproject.media.mediapackage.identifier.Id;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 
 import org.apache.commons.fileupload.FileItemIterator;
@@ -33,6 +34,7 @@ import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.io.IOUtils;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -41,12 +43,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URI;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 import javax.ws.rs.Consumes;
@@ -64,8 +66,6 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.json.simple.JSONObject;
-import org.opencastproject.media.mediapackage.identifier.Id;
 
 /**
  * Creates and augments Matterhorn MediaPackages using the api. Stores media into the Working File Repository.
@@ -351,6 +351,7 @@ public class IngestRestService {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addMediaPackage")
   public Response addMediaPackage(@Context HttpServletRequest request) {
+    MediaPackageElementFlavor flavor = MediaPackageElements.INDEFINITE_TRACK;
     try {
       MediaPackage mp = service.createMediaPackage();
       DublinCoreCatalog dcc = DublinCoreCatalogImpl.newInstance();
@@ -358,10 +359,16 @@ public class IngestRestService {
         for (FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
           FileItemStream item = iter.next();
           if (item.isFormField()) {
-            EName en = new EName(DublinCore.TERMS_NS_URI, item.getFieldName());
-            dcc.add(en, Streams.asString(item.openStream()));
+            String fieldName = item.getFieldName();
+            if(fieldName.equals("flavor")) {
+              flavor = MediaPackageElementFlavor.parseFlavor(Streams.asString(item.openStream()));
+            } else {
+              // TODO not all form fields should be treated as dublin core fields
+              EName en = new EName(DublinCore.TERMS_NS_URI, fieldName);              
+              dcc.add(en, Streams.asString(item.openStream()));
+            }
           } else {
-            service.addTrack(item.openStream(), MediaPackageElements.INDEFINITE_TRACK, mp);
+            service.addTrack(item.openStream(), flavor, mp);
           }
         }
         String xml = getStringFromDocument(dcc.toXml());
