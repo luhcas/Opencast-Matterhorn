@@ -1,0 +1,268 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+
+    <head>
+        <title>Matterhorn Workflows</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <!-- styles -->
+        <link href="css/workflow.css" rel="stylesheet" type="text/css" />
+        <link href="css/jquery-ui-1.7.2.custom.css" rel="stylesheet" type="text/css" />
+
+        <!-- scripts -->
+        <script type="text/javascript" src="js/jquery-1.3.2.min.js"></script>
+        <script type="text/javascript" src="js/jquery-ui-1.7.2.custom.min.js"></script>
+        <script type="text/javascript" src="js/json.js"></script>
+        <script type="text/javascript" src="js/workflow.js"></script>
+        <script type="text/javascript" src="js/workflow.ui.js"></script>
+        <script type="text/javascript" src="js/workflow.events.js"></script>
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+            
+                $('.workflow-state-selector').click(
+                function() {
+                    log('$: .workflow-state-selector clicked');
+                    var state = $(this).attr('id').substr(13);
+                    $('.workflow-state-selector').removeClass('workflow-state-selector-active');
+                    $(this).addClass('workflow-state-selector-active');
+                    workflowEvents.stateSelected(state);
+                }
+            );
+
+                $('.auto-update-switch').click(function() {
+                    log('$: .auto-update-switch clicked');
+                    var update_switch = document.getElementById('auto-update-switch');
+                    update_switch.checked = (!update_switch.checked);
+                    workflowEvents.autoUpdateClicked();
+                });
+
+                $('.workflow-list-item').mouseenter(function(){
+                    //log('$: .workflow-list-item mouseenter');
+                    workflowUI.resetSelectedItem();
+                    var elm = $(this);
+                    var controls = $('#workflow-controls');
+                    var offset = elm.offset();
+                    elm.addClass('workflow-list-item-focus');
+                    elm.children('.workflow-item-inner-border').addClass('workflow-item-inner-border-invisible');
+                    /* enable control buttons */
+                    controls.css( {
+                        'top' : offset.top,
+                        'left' : offset.left + elm.width() + 2
+                    } );
+                    var state = workflowUI.instances[elm.attr('id').substr(5)].workflow_state;
+                    controls.children('.icon').css('display', 'none');
+                    if (state == 'paused') {
+                        controls.children('.icon-stop').css('display','inline');
+                        controls.children('.icon-repeat').css('display','inline');
+                    } else if ((state == 'stopped') || (state == 'succeeded')) {
+                        controls.children('.icon-repeat').css('display','inline');
+                    } else if (state == 'running') {
+                        controls.children('.icon-stop').css('display','inline');
+                        controls.children('.icon-pause').css('display','inline');
+                    } else if (state == 'failing') {
+                        controls.children('.icon-repeat').css('display','inline');
+                    } else {
+                        return false;
+                    }
+                    controls.addClass('workflow-item-bg-' + state);
+                    controls.removeClass('ui-helper-hidden');
+                    return false;
+                });
+
+                $('.workflow-item-control').click(function() {
+                    var action = $(this).attr('id').substr(5);
+                    log('$: workflow-item-control clicked');
+                    var url = workflowController.rest_base + '/' + action + '/' + workflowUI.selected_item;
+                    log('GET ' + url);
+                    $.get( url, function(d,s) {
+                        log('returned ' + s);
+                    } );
+                    return false;
+                });
+
+                $('.workflow-list-item').click(function() {
+                    log('$: workflow-list-item clicked');
+                    var id = $(this).attr('id').substr(5);
+                    workflowUI.displayWorkflowDialog(workflowUI.instances[id]);
+                    return false;
+                });
+
+                $('.tab-link').click(function() {
+                    log("tab clicked");
+                    var parent = $(this).parent().parent();
+                    parent.children().removeClass('ui-state-active');
+                    $(this).parent().addClass('ui-state-active');
+                    parent.parent().children('.tab-content').css('display','none');
+                    parent.parent().children('.tab-content').css('visibility','hidden');
+                    var content_id = $(this).attr('tab');
+                    log('activating ' + content_id);
+                    parent.parent().children('.'+content_id).css('display','block');
+                    parent.parent().children('.tab-content').css('visibility','inherit');
+                    return false;
+                });
+
+                workflowUI.init();
+            });
+        </script>
+
+    </head>
+
+    <body>
+
+        <div id="state-selector-container" class="state-selector-container ui-helper-reset">
+            <ul style="list-style:none;">
+                <li id="select-state-paused" class="workflow-state-selector">
+                    <span class="icon icon-paused"></span>
+                    <span class="state-label">Review</span>
+                </li>
+                <li>
+                    &nbsp;
+                </li>
+                <li id="select-state-all" class="workflow-state-selector workflow-state-selector-active">
+                    <span class="icon icon-all"></span>
+                    <span class="state-label">All</span>
+                </li>
+                <li id="select-state-running" class="workflow-state-selector">
+                    <span class="icon icon-running"></span>
+                    <span class="state-label">Running</span>
+                </li>
+                <li id="select-state-succeeded" class="workflow-state-selector">
+                    <span class="icon icon-succeeded"></span>
+                    <span class="state-label">Succeeded</span>
+                </li>
+                <li id="select-state-failing" class="workflow-state-selector">
+                    <span class="icon icon-failing"></span>
+                    <span class="state-label">Failing</span>
+                </li>
+            </ul>
+            <input id="auto-update-switch" type="checkbox" onclick="workflowEvents.autoUpdateClicked();">
+            <span class="auto-update-switch">auto update</span><br>
+            <button type="button" onclick="workflowEvents.updateTriggered();">update</button>
+        </div>
+
+        <!-- List of workflows -->
+        <div id="workflow-list-container" class="workflow-list-container">
+            <!-- TODO add view bar -->
+            <div id="workflow-list" class="workflow-list">
+            </div>
+        </div>
+
+        <!-- controls right to the focused item in workflow list -->
+        <div id="workflow-controls" class="workflow-controls-container" style="left:-200px;">
+            <!-- <div id="icon-start" class="icon icon-play workflow-item-control"></div> -->
+            <div id="icon-suspend" class="icon icon-pause workflow-item-control"></div>
+            <div id="icon-resume" class="icon icon-repeat workflow-item-control"></div>
+            <div id="icon-stop" class="icon icon-stop workflow-item-control"></div>
+        </div>
+
+        <!-- templates -->
+        <div style="position:absolute; left:-9999;">
+            <div class="workflow-list-item-template workflow-list-item ui-helper-clearfix" style="display:block;">
+                <div class="workflow-item-inner-border ui-helper-clearfix workflow-basic-info">
+                    <span class="icon"></span>
+                    <div class="workflow-item-field left-float">
+                        <div class="workflow-item-wftitle"></div>
+                        <div class="workflow-item-wfid"></div>
+                    </div>
+                    <div class="workflow-item-mptitle left-float"></div>
+                    <div class="workflow-item-operation left-float"></div>
+                </div>
+            </div>
+            <ul>
+                <li id="kv-table-data-row-template" class="kv-table-data-row ui-helper-clearfix ui-helper-hidden">
+                    <div class="kv-table-data-key">
+                        <!-- Key -->
+                    </div>
+                    <div class="kv-table-data-value">
+                        <!-- Value -->
+                    </div>
+                </li>
+
+                <li id="log-table-data-row-template" class="log-table-data-row ui-helper-clearfix ui-helper-hidden">
+                    <div class="log-table-data-operation">
+                        <!-- op name -->
+                    </div>
+                    <div class="log-table-data-description">
+                        <!-- op description -->
+                    </div>
+                    <div class="log-table-data-state">
+                        <span class="icon"></span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- template for the detailed view of a worklflow instance -->
+        <div id="workflow-dialog-template" class="workflow-dialog ui-helper-hidden" title="Workflow Instace">
+
+            <div class="ui-helper-clearfix workflow-basic-info dialog-header">
+                <span class="icon"></span>
+                <div class="workflow-item-field left-float">
+                    <div class="workflow-item-wftitle">test</div>
+                    <div class="workflow-item-wfid">test</div>
+                </div>
+                <div class="workflow-item-mptitle left-float">test</div>
+                <div class="workflow-item-operation left-float">test</div>
+            </div>
+
+            <div class="dialog-tabs ui-tabs ui-widget ui-widget-content">
+                <ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header">
+                    <li class="tab-header ui-state-default ui-state-active ui-widget-header"><a class="tab-link tab-link-mp" tab="tab-content-mp">Media Package</a></li>
+                    <li class="tab-header ui-state-default ui-widget-header"><a class="tab-link tab-link-log" tab="tab-content-log">Operations Log</a></li>
+                    <li class="tab-header ui-state-default ui-widget-header"><a class="tab-link tab-link-prop" tab="tab-content-prop">Properties</a></li>
+                </ul>
+
+                <!-- Media Package Tab -->
+                <div class="tab-content tab-content-mp ui-helper-clearfix" style="display:block;">
+                    <div class="kv-table-head-row ui-helper-clearfix">
+                        <div class="kv-table-head-key">
+                            Field
+                        </div>
+                        <div class="kv-table-head-value">
+                            Value
+                        </div>
+                    </div>
+                    <ul class="kv-table mp-table ui-helper-reset">
+                        <!-- this is where the data goes -->
+                    </ul>
+                </div>
+
+                <!-- log tab -->
+                <div class="tab-content tab-content-log">
+                    <div class="log-table-head-row ui-helper-clearfix">
+                        <div class="log-table-head-operation">
+                            Operation
+                        </div>
+                        <div class="log-table-head-description">
+                            Description
+                        </div>
+                        <div class="log-table-head-state">
+                            &nbsp;
+                        </div>
+                    </div>
+                    <ul class="log-table ui-helper-reset">
+                        <!-- this is where the data goes -->
+                    </ul>
+                </div>
+
+                <!-- properties tab -->
+                <div class="tab-content tab-content-prop">
+                    <div class="kv-table-head-row ui-helper-clearfix">
+                        <div class="kv-table-head-key">
+                            Key
+                        </div>
+                        <div class="kv-table-head-value">
+                            Value
+                        </div>
+                    </div>
+                    <ul class="kv-table prop-table ui-helper-reset">
+                        <!-- this is where the data goes -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </body>
+
+</html>
