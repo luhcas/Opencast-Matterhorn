@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.conductor.impl.WorkflowDefinitionScanner" immediate="true">
+  <implementation class="org.opencastproject.conductor.impl.WorkflowDefinitionScanner" />
+  <property name="service.description" value="Workflow Definition Scanner" />
+  <service>
+    <provide interface="org.apache.felix.fileinstall.ArtifactInstaller" />
+  </service>
+  <reference name="service-impl" interface="org.opencastproject.workflow.api.WorkflowService"
+    cardinality="1..1" policy="static" bind="setWorkflowService" />
+</component>
