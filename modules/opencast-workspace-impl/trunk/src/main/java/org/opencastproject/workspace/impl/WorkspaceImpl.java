@@ -109,7 +109,7 @@ public class WorkspaceImpl implements Workspace, ManagedService {
 
   protected String getFilenameSafeHash(String urlString) {
     try {
-      String urlEncoded = URLEncoder.encode(urlString, "UTF-8");
+      String urlEncoded = URLEncoder.encode(urlString, "UTF-8").replaceAll("\\.", "-");
       if(urlEncoded.length() < 255) return urlEncoded;
     } catch(UnsupportedEncodingException e) {}
     String random = UUID.randomUUID().toString();
