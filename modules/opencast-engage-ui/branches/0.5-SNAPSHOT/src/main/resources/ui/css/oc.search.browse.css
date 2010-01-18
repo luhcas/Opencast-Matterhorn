@@ -1,0 +1,90 @@
+body
+{
+  text-align:center;
+}
+
+.oc-holder {
+  text-align: left; 
+  border:0;
+  padding:0;
+  margin: 0 auto;
+  margin-top: 10px;
+  width:980px;
+}
+
+.oc-search-bar-holder {
+  position:relative;
+}
+
+.oc-search-bar {
+  position:absolute;
+  top: 0;
+  right: 0;
+}
+
+.oc-search-result-holder {
+  position:relative;
+}
+
+.oc-search-result-header{
+  position:relative;
+}
+
+.oc-sort-controls {
+  position:absolute;
+  top: 0;
+  right: 0;
+}
+
+.oc-search-result-items{
+  position:relative;
+}
+.oc-search-result-item{
+  position:relative;
+  margin-top:2px;
+  position:relative;
+  padding:0px;
+  background-color: #EEEEEE;
+}
+
+div.table-row {
+  padding:0px;
+  width:100%;
+  height:74px;
+}
+
+div.left-container13 {
+  text-align:center;
+  float:left;
+  border:0px;
+  margin:0px;
+  padding-top:5px;
+  width:100px;
+}
+
+div.left-container23 {
+  float:left;
+  border:0px;
+  margin:0px;
+  padding:5px;
+  width:690px;
+}
+
+div.right-container13 {
+  
+  float:right;
+  text-align: right;
+  border:0px;
+  margin:0px;
+  padding:5px;
+  width:170px;
+}
+
+.oc-pager{
+  text-align:center;
+  margin-top:2px;
+  margin-bottom:20px;
+  width:100%;
+  position:relative;
+  background-color: #DDDDDD;
+}
