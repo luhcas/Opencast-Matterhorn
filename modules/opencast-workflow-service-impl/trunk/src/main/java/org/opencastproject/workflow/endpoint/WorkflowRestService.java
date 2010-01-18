@@ -68,6 +68,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 /**
  * A REST endpoint for the {@link WorkflowService}
@@ -313,6 +314,7 @@ public class WorkflowRestService {
           @PathParam("id") String id,
           @PathParam("output") String output) throws Exception {
     WorkflowInstance instance = service.getWorkflowById(id);
+    if(instance == null) return Response.status(Status.NOT_FOUND).entity("Workflow instance " + id + " does not exist").build();
     if("json".equals(output)) {
       return Response.ok(getWorkflowInstanceAsJson(instance, true).toString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
     } else {
