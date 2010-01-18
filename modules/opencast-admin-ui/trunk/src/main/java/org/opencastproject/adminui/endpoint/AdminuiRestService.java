@@ -138,7 +138,7 @@ public class AdminuiRestService {
         DublinCoreCatalog dcCatalog = getDublinCore(workflows[i].getCurrentMediaPackage());
         if (dcCatalog != null) {
           item.setTitle(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_TITLE));
-          item.setPresenter(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_CONTRIBUTOR));
+          item.setPresenter(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_CREATOR));
           item.setSeries(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_IS_PART_OF));
           item.setStartTime(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_DATE));  // FIXME get timestamp
           item.setCaptureAgent(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_CREATOR)); //FIXME get capture agent from where...?
