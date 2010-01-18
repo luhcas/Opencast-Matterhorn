@@ -8,13 +8,13 @@
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-http</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>0.5-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
