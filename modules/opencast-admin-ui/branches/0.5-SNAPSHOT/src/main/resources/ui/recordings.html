@@ -1,0 +1,218 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>Recordings in Processing</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <!-- styles -->
+        <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css" />
+        <link href="infusion-1.1.2/fss/css/fss-layout.css" rel="stylesheet" type="text/css" />
+        <link href="infusion-1.1.2/fss/css/fss-text.css" rel="stylesheet" type="text/css" />
+        <link href="infusion-1.1.2/fss/css/fss-theme-coal.css" rel="stylesheet" type="text/css" />
+        <link href="css/admin.css" rel="stylesheet" type="text/css" />
+        <link href="css/tablesorter.css" rel="stylesheet" type="text/css" />
+
+        <!-- scripts -->
+        <script type="text/javascript" src="infusion-1.1.2/InfusionAll.js"></script>
+        <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
+        <script type="text/javascript" src="js/jquery.xslt.js"></script>
+        <script type="text/javascript" src="js/jquery.xslt.js"></script>
+        <script type="text/javascript">
+            var statsInterval;
+            var updateRequested = false;
+
+            $(document).ready( function() {
+                /* Event: Scheduler button clicked */
+                $('#button_schedule').click( function() {
+                    window.location.href = '../../admin/scheduler.html';
+                });
+
+                /* Event: Upload button clicked */
+                $('#button_upload').click( function() {
+                    window.location.href = '../../admin/upload.html';
+                });
+        
+                /* Event: Recording State selector clicked */
+                $('.state-selector').click( function() {
+                    var state = $(this).attr('state');
+                    window.location.href = 'recordings.html?show='+state;
+                    return false;
+                })
+
+                // register custom table cell value parser for Date/Time column
+                $.tablesorter.addParser({
+                    id: 'date',
+                    is: function(){return false;},
+                    format: function(s) {
+                        var elm = document.createElement('div');
+                        elm.innerHTML = s;
+                        return $(elm).children('.time-raw').text();
+                    },
+                    type: 'numeric'
+                });
+
+                // request and display statistics
+                displayRecordingStats();
+
+                // init update interval for recording stats
+                statsInterval = window.setInterval( 'displayRecordingStats();', 3000 );
+
+                var show = '';
+                show = gup('show');
+                if (show == '') {
+                    show='upcoming';
+                }
+                displayRecordings(show);
+            });
+
+            /**
+             * get and display recording statistics
+             */
+            displayRecordingStats = function() {
+                if (!updateRequested) {
+                    updateRequested = true;
+                    $.getJSON("rest/countRecordings",
+                    function(data) {
+                        updateRequested = false;
+                        for (key in data) {
+                            var elm = $('#count-' + key);
+                            if (elm) {
+                                elm.text('(' + data[key] + ')');
+                            }
+                        }
+                    });
+                }
+            }
+
+            displayRecordings = function(state) {
+                $('.state-selector').removeClass('state-selector-active');
+                $('.selector-'+state).addClass('state-selector-active');
+                injectLoadingAnimation($('#recordings-table-container'));
+                $('#recordings-table-container').xslt("rest/recordings/"+state, "xsl/recordings_"+state+".xsl", function() {
+                    if ($('.date-column').length > 0) {
+                        // if date date/time column is present
+                        $('.date-start').each( function() {     // format date/time to locale string
+                            var ts = $(this).children('.time-raw').text();
+                            var time = document.createElement('span');
+                            if (ts != '') {
+                                $(time).css('color','black').text(makeLocaleDateString(ts));
+                            } else {
+                                $(time).css('color','gray').text('NA');  // display a gray 'NA' if no timestamp available
+                            }
+                            $(this).append(time);
+                        });
+                        $('#recordingsTable').tablesorter({   // init tablesorter with custom parser for the date column
+                            cssAsc: 'sortable-asc',
+                            cssDesc: 'sortable-desc',
+                            sortList: [[3,0]],
+                            headers: {
+                                3: {
+                                    sorter: 'date'
+                                }
+                            }
+                        });
+                    } else {  // if no date/time column is present, init tablesorter the default way
+                        $('#recordingsTable').tablesorter({cssAsc: 'sortable-asc', cssDesc: 'sortable-desc'});
+                    }
+                });
+            }
+
+            /**
+             * convert timestamp to locale date string
+             * @param timestamp
+             * @return Strng localized String representation of timestamp
+             */
+            makeLocaleDateString = function(timestamp) {
+                var date = new Date();
+                date.setTime(timestamp);
+                return date.toLocaleString();
+            }
+
+            /**
+             * inject a 'loading' animation in the specified element
+             */
+            injectLoadingAnimation = function(elm) {
+                anim = document.createElement('div');
+                $(anim).addClass('loadingAnimation');
+                $(elm).empty().append(anim);
+            }
+
+            function gup( name ) {
+                name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+                var regexS = "[\\?&]"+name+"=([^&#]*)";
+                var regex = new RegExp( regexS );
+                var results = regex.exec( window.location.href );
+                if( results == null )
+                    return "";
+                else
+                    return results[1];
+            }
+        </script>
+    </head>
+    <body>
+        <!-- fl-centered doesn't work in winXP-IE8 -->
+        <div class="fl-container-flex fl-centered fl-theme-coal">
+            <ul class="fl-tabs fl-tabs-left">
+                <li class="fl-activeTab"><a href="recordings.html">Recordings</a></li>
+                <li class=""><a href="agents_status.html">Capture Agents</a></li>
+            </ul>
+            <div id="stage" class="fl-tab-content wu-tab-content fl-fix">
+
+                <!-- recording state selector -->
+                <div id="category-select-container">
+                    <ul class="category-selector">
+                        <li class="category-selector-item">
+                            <span class="state-selector selector-all" state="all">All <span id="count-total"></span></span>
+                        </li>
+                        <li class="category-selector-spacer">
+                            &#124;
+                        </li>
+                        <li class="category-selector-item">
+                            <span class="state-selector selector-upcoming" state="upcoming">Upcoming <span id="count-upcoming"></span></span>
+                        </li>
+                        <li class="category-selector-spacer">
+                            &#124;
+                        </li>
+                        <li class="category-selector-item">
+                            <span class="state-selector selector-capturing" state="capturing">Capturing <span id="count-capturing"></span></span>
+                        </li>
+                        <li class="category-selector-spacer">
+                            &#124;
+                        </li>
+                        <li class="category-selector-item">
+                            <span class="state-selector selector-processing" state="processing">Processing <span id="count-processing"></span></span>
+                        </li>
+                        <li class="category-selector-spacer">
+                            &#124;
+                        </li>
+                        <li class="category-selector-item">
+                            <span class="state-selector selector-finished" state="finished">Finished <span id="count-finished"></span></span>
+                        </li>
+                        <li class="category-selector-spacer">
+                            &#124;
+                        </li>
+                        <li class="category-selector-item">
+                            <span class="state-selector selector-failed" state="failed">Failed <span id="count-errors">()</span></span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Add/Schedule Buttons -->
+                <div id="add-buttons-container">
+                    <button type="button" id="button_schedule">
+                        <span class="icon icon-add">&nbsp;</span>
+                        <span>Schedule Recording</span>
+                    </button>
+                    <button type="button" id="button_upload">
+                        <span class="icon icon-add">&nbsp;</span>
+                        <span>Upload Recording</span>
+                    </button>
+                </div>
+
+                <!-- recordings table -->
+                <div id="recordings-table-container" style="clear:both;">
+                    <!-- This is where the rendered table goes -->
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

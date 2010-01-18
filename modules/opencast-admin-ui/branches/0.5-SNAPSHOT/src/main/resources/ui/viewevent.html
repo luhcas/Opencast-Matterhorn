@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Scheduler UI</title>
+    
+    <!-- style -->
+    <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css" />
+    <link href="infusion-1.1.2/fss/css/fss-layout.css" rel="stylesheet" type="text/css" />
+    <link href="infusion-1.1.2/fss/css/fss-text.css" rel="stylesheet" type="text/css" />
+    <link href="infusion-1.1.2/fss/css/fss-theme-coal.css" rel="stylesheet" type="text/css" />
+    
+    <link rel="stylesheet" type="text/css" href="css/admin.css" />
+    <link rel="stylesheet" type="text/css" href="css/scheduler.css" />
+    <link rel="stylesheet" type="text/css" href="css/popuphelp.css" />
+    <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.7.2.custom.css" />
+    
+    <!-- scripts -->
+    <script type="text/javascript" src="infusion-1.1.2/InfusionAll.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.7.2.custom.min.js"></script>
+    <script type="text/javascript" src="js/viewevent.js"></script>
+    <script type="text/javascript" src="js/jquery.xslt.js"></script>
+    <script type="text/javascript">
+      if(document.location.search){
+        var params = document.location.search.substr(1).split('&');
+        for(var p in params){
+          eq = params[p].indexOf("=");
+          if(params[p].indexOf("workflow") != -1 && eq != -1){
+            workflowID = params[p].substr(eq+1);
+            break;
+          }
+        }
+      }
+      
+      $(document).ready(
+        function() { 
+          if(workflowID){
+            $.get("/workflow/rest/instance/" + workflowID + ".xml", handleWorkflow);
+          }
+        }
+      );
+    </script>
+  </head>
+  <body>
+    <!-- fl-centered doesn't work in winXP-IE8 -->
+    <div class="fl-container-850 fl-theme-coal">
+      <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
+        <li class="fl-activeTab"><a href="/admin/recordings.html">Recordings</a></li>
+        <li class=""><a href="/admin/agents_status.html">Capture Agents</a></li>
+      </ul>
+      <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;" />
+      <div style="text-align: center;">
+        <a href="/admin/recordings_upcoming.html"><< Back to Recordings</a>
+      </div>
+    </div>
+  </body>
+</html>
