@@ -38,6 +38,16 @@ public class CaptureAgentStateServiceImplTest {
     Assert.assertEquals(0, service.getKnownAgents().size());
   }
 
+  @Test
+  public void badAgentData() {
+    service.setAgentState(null, AgentState.IDLE);
+    Assert.assertEquals(0, service.getKnownAgents().size());
+    service.setAgentState("", AgentState.IDLE);
+    Assert.assertEquals(0, service.getKnownAgents().size());
+    service.setAgentState("something", null);
+    Assert.assertEquals(0, service.getKnownAgents().size());
+  }
+
   private void verifyAgent(String name, String state) {
     Agent agent = service.getAgentState(name);
     Assert.assertEquals(name, agent.getName());
@@ -79,10 +89,21 @@ public class CaptureAgentStateServiceImplTest {
 
   @Test
   public void nonExistantRecording() {
-    Recording Recording = service.getRecordingState("doesNotExist");
-    Assert.assertEquals("doesNotExist", Recording.getID());
-    Assert.assertEquals(RecordingState.UNKNOWN, Recording.getState());
+    Recording recording = service.getRecordingState("doesNotExist");
+    Assert.assertEquals("doesNotExist", recording.getID());
+    Assert.assertEquals(RecordingState.UNKNOWN, recording.getState());
   }
+
+  @Test
+  public void badRecordingData() {
+    service.setRecordingState(null, RecordingState.CAPTURING);
+    Assert.assertEquals(0, service.getKnownRecordings().size());
+    service.setRecordingState("", AgentState.IDLE);
+    Assert.assertEquals(0, service.getKnownRecordings().size());
+    service.setRecordingState("something", null);
+    Assert.assertEquals(0, service.getKnownRecordings().size());
+  }
+
 
   @Test
   public void noRecordings() {
@@ -90,9 +111,9 @@ public class CaptureAgentStateServiceImplTest {
   }
 
   private void verifyRecording(String id, String state) {
-    Recording Recording = service.getRecordingState(id);
-    Assert.assertEquals(id, Recording.getID());
-    Assert.assertEquals(state, Recording.getState());
+    Recording recording = service.getRecordingState(id);
+    Assert.assertEquals(id, recording.getID());
+    Assert.assertEquals(state, recording.getState());
   }
 
   @Test

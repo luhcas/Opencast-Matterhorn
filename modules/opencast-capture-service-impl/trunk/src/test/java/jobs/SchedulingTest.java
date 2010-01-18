@@ -15,19 +15,23 @@
  */
 package jobs;
 
-import org.opencastproject.capture.impl.CaptureAgentImpl;
-import org.opencastproject.capture.impl.CaptureParameters;
-import org.opencastproject.capture.impl.SchedulerImpl;
-import org.opencastproject.capture.impl.jobs.StartCaptureJob;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.util.ConfigurationException;
+import java.io.File;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.opencastproject.capture.impl.CaptureAgentImpl;
+import org.opencastproject.capture.impl.CaptureParameters;
+import org.opencastproject.capture.impl.jobs.JobParameters;
+import org.opencastproject.capture.impl.jobs.StartCaptureJob;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.util.ConfigurationException;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -36,11 +40,6 @@ import org.quartz.TriggerUtils;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Properties;
 
 /**
  * The unit test for scheduling the workflow
@@ -109,9 +108,9 @@ public class SchedulingTest {
     //Create a new trigger                    Name       Group name               Start       End   # of times to repeat               Repeat interval
     SimpleTrigger trigger = new SimpleTrigger("starting_capture", Scheduler.DEFAULT_GROUP, new Date(time));
 
-    trigger.getJobDataMap().put(SchedulerImpl.CAPTURE_AGENT, captAg);
-    trigger.getJobDataMap().put(StartCaptureJob.CAPTURE_PROPS, props);
-    trigger.getJobDataMap().put(StartCaptureJob.MEDIA_PACKAGE, mp);
+    trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captAg);
+    trigger.getJobDataMap().put(JobParameters.CAPTURE_PROPS, props);
+    trigger.getJobDataMap().put(JobParameters.MEDIA_PACKAGE, mp);
 
     //Schedule the update
     try {

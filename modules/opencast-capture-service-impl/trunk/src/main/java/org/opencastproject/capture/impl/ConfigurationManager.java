@@ -85,8 +85,8 @@ public class ConfigurationManager {
       logger.warn("Malformed URL for {}, disabling polling.", CaptureParameters.CAPTURE_CONFIG_URL);
     }
 
-    //TODO:  Redo this bit.  We should be able to read config data from 1) a remote source 2) a cached local copy of the config data
-    // Checking the filesystem for configuration file
+    // Checking the filesystem for configuration file.
+    //Note that we check the remote source at the bottom of this function using a timer and an UpdateConfig class
     try {
       localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_FILESYSTEM_URL));
       properties.load(new FileInputStream(localConfig));
@@ -211,14 +211,14 @@ public class ConfigurationManager {
   
   /**
    * Read a remote properties file and load it into memory.
+   * This call merges whatever updated configuration settings it gets with the currently existing onse.
+   * Note that this means to *clear* a setting on the capture agent one must set it to *blank* on the server
    */
   private void retrieveConfigFromServer() {
     if (url == null) {
       return;
     }
 
-    //TODO:  Doc that this is a merge operation rather than a straight up replcae
-    //ie, that to clear a setting from the admin service you have to set it to blank rather than just ignore it
     try {
       URLConnection urlc = url.openConnection();
       Properties temp = new Properties();
@@ -260,7 +260,7 @@ public class ConfigurationManager {
    * Merges the given Properties with the ConfigurationManager's properties. Will
    * not overwrite the ConfigurationManager if specified.
    * 
-   * @param properties Properties object to be merged with ConfigurationManager
+   * @param p Properties object to be merged with ConfigurationManager
    * @param overwrite true if this should overwrite the ConfigurationManager's properties, false if not
    * @return the merged properties
    */

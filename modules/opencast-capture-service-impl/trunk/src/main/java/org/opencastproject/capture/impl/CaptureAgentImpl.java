@@ -15,43 +15,6 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.admin.api.AgentState;
-import org.opencastproject.capture.admin.api.RecordingState;
-import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.capture.api.StateService;
-import org.opencastproject.capture.pipeline.PipelineFactory;
-import org.opencastproject.media.mediapackage.DublinCoreCatalog;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
-import org.opencastproject.util.ZipUtil;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.FileEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.gstreamer.Bus;
-import org.gstreamer.GstObject;
-import org.gstreamer.Pipeline;
-import org.gstreamer.State;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
-import org.osgi.service.command.CommandProcessor;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -71,6 +34,42 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.gstreamer.Bus;
+import org.gstreamer.GstObject;
+import org.gstreamer.Pipeline;
+import org.gstreamer.State;
+import org.opencastproject.capture.admin.api.AgentState;
+import org.opencastproject.capture.admin.api.RecordingState;
+import org.opencastproject.capture.api.CaptureAgent;
+import org.opencastproject.capture.api.StateService;
+import org.opencastproject.capture.pipeline.PipelineFactory;
+import org.opencastproject.media.mediapackage.DublinCoreCatalog;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
+import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
+import org.opencastproject.util.ZipUtil;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
+import org.osgi.service.command.CommandProcessor;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 /**
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines
@@ -504,8 +503,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return null;
     }
 
-    logger.warn("GDL: " + recID + "\n"+recording.getProperties().toString());
-    
     Iterable<MediaPackageElement> mpElements = recording.getMediaPackage().elements();
     Vector<File> filesToZip = new Vector<File>();
 
@@ -539,7 +536,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     RecordingImpl recording = pendingRecordings.get(recID);
     
     if (recording == null) {
-      logger.error("[createManifest] Recording {} not found!", recID);
+      logger.error("[ingest] Recording {} not found!", recID);
       return -1;
     }
 

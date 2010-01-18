@@ -15,11 +15,10 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import org.opencastproject.capture.admin.api.Agent;
-import org.opencastproject.capture.admin.api.Recording;
-import org.opencastproject.capture.api.StateService;
-import org.opencastproject.capture.impl.CaptureParameters;
-import org.opencastproject.capture.impl.ConfigurationManager;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -27,16 +26,16 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.opencastproject.capture.admin.api.Agent;
+import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.capture.api.StateService;
+import org.opencastproject.capture.impl.CaptureParameters;
+import org.opencastproject.capture.impl.ConfigurationManager;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * This class is responsible for pushing the agent's state to the remote state service
@@ -45,7 +44,6 @@ public class AgentStateJob implements Job {
 
   private static final Logger logger = LoggerFactory.getLogger(AgentStateJob.class);
 
-  public static final String STATE_SERVICE = "state_service";
   private ConfigurationManager config = ConfigurationManager.getInstance();
   private StateService state = null;
 
@@ -55,7 +53,7 @@ public class AgentStateJob implements Job {
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    state = (StateService) ctx.getMergedJobDataMap().get(STATE_SERVICE);
+    state = (StateService) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE);
     sendAgentState();
     sendRecordingState();
   }

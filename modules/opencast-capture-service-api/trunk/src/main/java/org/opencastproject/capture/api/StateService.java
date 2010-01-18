@@ -20,16 +20,15 @@ import java.util.Map;
 import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.Recording;
 
-//TODO: A "device" is reserved for a lower level concept, specifically something like /dev/vga2usb.  Call these capture agents instead.
 /**
- * Service for querying the capture device's current state (MH-58)
+ * Service for querying the capture agent's current state (MH-58)
  */
 public interface StateService {
 
-  //TODO: add an @see for Agent
   /**
    * Gets the internal Agent used to store this agent's state
    * @return The Agent which represents this capture agent
+   * @see org.opencastproject.capture.admin.api.Agent
    */
   public Agent getAgent();
 

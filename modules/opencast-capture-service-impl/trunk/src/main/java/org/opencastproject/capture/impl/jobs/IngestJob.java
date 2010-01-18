@@ -16,8 +16,7 @@
 package org.opencastproject.capture.impl.jobs;
 
 import org.opencastproject.capture.impl.CaptureAgentImpl;
-import org.opencastproject.capture.impl.SchedulerImpl;
-
+import org.opencastproject.capture.impl.CaptureParameters;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.Scheduler;
@@ -42,10 +41,10 @@ public class IngestJob implements StatefulJob {
     logger.info("Initiating ingestJob");
     
     // Obtains the recordingID
-    String recordingID = ctx.getMergedJobDataMap().getString(StopCaptureJob.RECORDING_ID);
+    String recordingID = ctx.getMergedJobDataMap().getString(CaptureParameters.RECORDING_ID);
     
     // Obtains the CaptureAgentImpl from the context
-    CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(SchedulerImpl.CAPTURE_AGENT);
+    CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
 
     logger.info("Proceeding to try ingestion");
     // Tries ingestion

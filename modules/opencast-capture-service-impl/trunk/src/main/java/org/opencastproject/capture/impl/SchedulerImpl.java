@@ -41,6 +41,7 @@ import net.fortuna.ical4j.model.property.Duration;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.opencastproject.capture.api.CaptureAgent;
+import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.PollCalendarJob;
 import org.opencastproject.capture.impl.jobs.StartCaptureJob;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -63,14 +64,12 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * TODO: Comment me!
+ *
+ */
 public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler, ManagedService {
 
-  // TODO: Move these constants into some common interface such as 'JobParameters'  
-  /** A constant which defines the key to retrieve a pointer to this object in the Quartz job classes.  This is required for PollCalendarJob to know who to push updated calendar data to */
-  public static final String SCHEDULER = "scheduler";
-  /** Constant used to define the key for the CaptureAgentImpl object which is pulled out of the execution context */
-  public static final String CAPTURE_AGENT = "capture_agent";
-  
   /** The properties of the scheduler for the calendar polling system */
   private static Properties pollingProperties = null;
 
@@ -142,7 +141,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         //Create a new trigger                    Name       Group name               Start       End   # of times to repeat               Repeat interval
         SimpleTrigger trigger = new SimpleTrigger("polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime);
   
-        trigger.getJobDataMap().put(SCHEDULER, this);
+        trigger.getJobDataMap().put(JobParameters.SCHEDULER, this);
   
         //Schedule the update
         pollScheduler.scheduleJob(job, trigger);
@@ -194,8 +193,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.capture.api.StateService#updateCalendar()
+   * @see org.opencastproject.capture.api.Scheduler#updateCalendar()
    */
   public void updateCalendar() {
 
@@ -293,9 +291,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         if (out != null) {
           out.close();
         }
-      } catch (IOException e) {
-        //TODO:  What goes here?  The JVM should clean this up shortly...
-      }
+      } catch (IOException e) {}
     }
   }
 
@@ -446,18 +442,18 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
             Properties jobProps = new Properties();
             jobProps.load(new StringReader(contents));
             jobProps.putAll(props);
-            job.getJobDataMap().put(StartCaptureJob.CAPTURE_PROPS, jobProps);
+            job.getJobDataMap().put(JobParameters.CAPTURE_PROPS, jobProps);
             hasProperties = true;
           } else if (filename.equals("metadata.xml")) {
             pack.add(new File(captureDir, filename).toURI(), MediaPackageElement.Type.Attachment, MediaPackageElements.DUBLINCORE_CATALOG);
 
-            job.getJobDataMap().put(StartCaptureJob.MEDIA_PACKAGE, pack);
+            job.getJobDataMap().put(JobParameters.MEDIA_PACKAGE, pack);
           }
           URL u = new File(captureDir, filename).toURI().toURL();
           writeFile(u, contents);
         }
 
-        job.getJobDataMap().put(SchedulerImpl.CAPTURE_AGENT, captureAgent);
+        job.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgent);
 
         if (!hasProperties) {
           log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", start.toString());
@@ -559,10 +555,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.capture.api.ScheduleService#disableScheduler()
+   * @see org.opencastproject.capture.api.Scheduler#stopScheduler()
    */
-  public void disableScheduler() {
+  public void stopScheduler() {
     try {
       if (captureScheduler != null) {
         captureScheduler.pauseAll();
@@ -574,10 +569,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.capture.api.ScheduleService#enableScheduler()
+   * @see org.opencastproject.capture.api.Scheduler#startScheduler()
    */
-  public void enableScheduler() {
+  public void startScheduler() {
     try {
       if (captureScheduler != null) {
         captureScheduler.start();
@@ -591,30 +585,20 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.capture.api.StateService#disablePolling()
+   * @see org.opencastproject.capture.api.Scheduler#enablePolling(boolean)
    */
-  public void disablePolling() {
+  public void enablePolling(boolean enable) {
     try {
-      if (pollScheduler != null) {
-        pollScheduler.pauseAll();
-      }
-    } catch (SchedulerException e) {
-      log.error("Unable to disable polling scheduler: {}.", e.getMessage());
-    }    
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.capture.api.StateService#enablePolling()
-   */
-  public void enablePolling() {
-    try {
-      if (pollScheduler != null) {
-        pollScheduler.pauseAll();
+      if (enable) {
+        if (pollScheduler != null) {
+          pollScheduler.pauseAll();
+        } else {
+          log.error("Unable to start polling, the scheduler is null!");
+        }
       } else {
-        log.error("Unable to start polling, the scheduler is null!");
+        if (pollScheduler != null) {
+          pollScheduler.pauseAll();
+        }        
       }
     } catch (SchedulerException e) {
       log.error("Unable to disable polling scheduler: {}.", e.getMessage());
@@ -626,7 +610,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @see org.opencastproject.capture.api.Scheduler#getPollingTime()
    */
   public long getPollingTime() {
-    return pollTime;
+    return pollTime / 1000L;
   }
 
   /**
@@ -638,7 +622,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       log.warn("Unable to set polling time to less than 1 second.");
       return;
     }
-    pollTime = pollingTime;
+    pollTime = pollingTime * 1000L;
     //TODO:  Actually do something with this changed time.  This would involve rescheduling the polling.
   }
 
@@ -680,9 +664,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.Scheduler#isPolling()
+   * @see org.opencastproject.capture.api.Scheduler#isPollingEnabled()
    */
-  public boolean isPolling() {
+  public boolean isPollingEnabled() {
     if (pollScheduler != null) {
       try {
         return pollScheduler.isStarted();

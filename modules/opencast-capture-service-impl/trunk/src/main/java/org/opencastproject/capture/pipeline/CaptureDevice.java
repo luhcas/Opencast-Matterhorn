@@ -44,6 +44,7 @@ public class CaptureDevice {
    * @param name
    *          The name of the device
    */
+  //TODO:  This javadoc is out of date
   public CaptureDevice(String loc, DeviceName name, String output) {
     this.location = loc;
     this.name = name;

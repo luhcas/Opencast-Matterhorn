@@ -67,7 +67,7 @@ public class CaptureAgentImplTest {
     props.setProperty("capture.device.SCREEN.outputfile", "screen.mpg");
     props.setProperty("capture.device.AUDIO.src", this.getClass().getResource("/capture/audio.mp3").getFile());
     props.setProperty("capture.device.AUDIO.outputfile", "audio.mp3");
-    props.setProperty(CaptureParameters.INGEST_ENDPOINT_URL, "http://nightly.opencastproject.org/ingest/rest/addZippedMediaPackage");
+    props.setProperty(CaptureParameters.INGEST_ENDPOINT_URL, "http://localhost:8080/ingest/rest/addZippedMediaPackage");
   }
 
   @After

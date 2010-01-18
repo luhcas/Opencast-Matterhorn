@@ -15,9 +15,10 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import org.opencastproject.capture.impl.CaptureAgentImpl;
-import org.opencastproject.capture.impl.SchedulerImpl;
+import java.text.ParseException;
 
+import org.opencastproject.capture.impl.CaptureAgentImpl;
+import org.opencastproject.capture.impl.CaptureParameters;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDetail;
@@ -27,8 +28,6 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.text.ParseException;
 
 /**
  * Class to schedule the task of serializing the MediaPackage (this means: obtaining an XML
@@ -48,10 +47,10 @@ public class SerializeJob implements Job {
     logger.info("Initiating serializeJob");
     
     // Obtains the recordingID
-    String recordingID = ctx.getMergedJobDataMap().getString(StopCaptureJob.RECORDING_ID);
+    String recordingID = ctx.getMergedJobDataMap().getString(CaptureParameters.RECORDING_ID);
     
     // Obtains the CaptureAgentImpl from the context
-    CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(SchedulerImpl.CAPTURE_AGENT);
+    CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
     
     // Creates manifest
     ca.createManifest(recordingID);
@@ -68,8 +67,8 @@ public class SerializeJob implements Job {
     CronTrigger trigger;
     try {
       trigger = new CronTrigger("IngestJobTrigger", Scheduler.DEFAULT_GROUP, "IngestJob", Scheduler.DEFAULT_GROUP, "0/20 * * * * ?");
-      trigger.getJobDataMap().put(SchedulerImpl.CAPTURE_AGENT, ca);
-      trigger.getJobDataMap().put(StopCaptureJob.RECORDING_ID, recordingID);
+      trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, ca);
+      trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
 
       //Schedule the update
       ctx.getScheduler().scheduleJob(job, trigger);

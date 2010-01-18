@@ -31,7 +31,7 @@ public class PollCalendarJob implements Job {
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    SchedulerImpl sched = (SchedulerImpl) ctx.getMergedJobDataMap().get(SchedulerImpl.SCHEDULER);
+    SchedulerImpl sched = (SchedulerImpl) ctx.getMergedJobDataMap().get(JobParameters.SCHEDULER);
     sched.updateCalendar();
   }
 }

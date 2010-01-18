@@ -15,17 +15,16 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
+import java.io.File;
+import java.util.Properties;
+
 import org.opencastproject.capture.impl.CaptureParameters;
 import org.opencastproject.util.FileSupport;
-
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.Properties;
 
 /**
  * Cleans up captures if the capture has been successfully ingested and the 
@@ -35,9 +34,6 @@ import java.util.Properties;
 public class CleanCaptureJob implements Job {
   
   private static final Logger logger = LoggerFactory.getLogger(CleanCaptureJob.class);
-  
-  /** Constant used to define the key for the properties object which is pulled out of the execution context */
-  public static final String CAPTURE_PROPS = "capture_props";
   
   /** File signifying ingestion of media has been completed */
   public static final String CAPTURE_INGESTED = "captured.ingested";
@@ -51,7 +47,7 @@ public class CleanCaptureJob implements Job {
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
     try {
-      Properties p = (Properties) ctx.getMergedJobDataMap().get(CAPTURE_PROPS);
+      Properties p = (Properties) ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_PROPS);
       File rootDir = new File(p.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
       
       if (rootDir.isDirectory()) {

@@ -27,6 +27,7 @@ import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.jobs.AgentStateJob;
+import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.quartz.JobDetail;
@@ -127,7 +128,7 @@ public class StateServiceImpl implements StateService, ManagedService {
       //Setup the polling
       JobDetail job = new JobDetail("agentStateUpdate", Scheduler.DEFAULT_GROUP, AgentStateJob.class);
 
-      job.getJobDataMap().put(AgentStateJob.STATE_SERVICE, this);
+      job.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
 
       //TODO:  Support changing the polling interval
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval

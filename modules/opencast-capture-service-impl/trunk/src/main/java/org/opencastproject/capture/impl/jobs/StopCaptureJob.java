@@ -15,9 +15,10 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import org.opencastproject.capture.impl.CaptureAgentImpl;
-import org.opencastproject.capture.impl.SchedulerImpl;
+import java.util.Date;
 
+import org.opencastproject.capture.impl.CaptureAgentImpl;
+import org.opencastproject.capture.impl.CaptureParameters;
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -28,18 +29,12 @@ import org.quartz.SimpleTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
-
 /**
  * The class responsible for stopping a capture.
  */
 public class StopCaptureJob implements Job {
   
   private static final Logger logger = LoggerFactory.getLogger(StopCaptureJob.class);
-  
-  // TODO: Move these constants into some common interface such as 'JobParameters'
-  /** Constant used to define the key for the recording ID which is pulled out of the execution context */
-  public static final String RECORDING_ID = "recording_id";
   
   /**
    * Stops the capture.
@@ -52,10 +47,10 @@ public class StopCaptureJob implements Job {
     
     try {
       // Extract the Capture Agent to stop the capture ASAP
-      CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(SchedulerImpl.CAPTURE_AGENT);
+      CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
 
       // Extract the recording ID
-      String recordingID = ctx.getMergedJobDataMap().getString(RECORDING_ID);
+      String recordingID = ctx.getMergedJobDataMap().getString(CaptureParameters.RECORDING_ID);
 
       //This needs to specify which job to stop - otherwise we could end up stopping something else if the expected job failed earlier.
       ca.stopCapture(recordingID);
@@ -65,8 +60,8 @@ public class StopCaptureJob implements Job {
       // TODO: Should we need a cron trigger in case the serialization fails? 
       // Or do we assume that is an unrecoverable error?
       SimpleTrigger trigger = new SimpleTrigger("SerializeJobTrigger", Scheduler.DEFAULT_GROUP, new Date());
-      trigger.getJobDataMap().put(StopCaptureJob.RECORDING_ID, recordingID);
-      trigger.getJobDataMap().put(SchedulerImpl.CAPTURE_AGENT, ca);
+      trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
+      trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, ca);
 
       //Schedule the serializeJob
       ctx.getScheduler().scheduleJob(job, trigger);
