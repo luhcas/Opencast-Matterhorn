@@ -4,7 +4,7 @@
   <groupId>org.opencastproject</groupId>
   <artifactId>base</artifactId>
   <packaging>pom</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.6-SNAPSHOT</version>
   <name>Opencast Matterhorn</name>
   <description>The Opencast Project's Matterhorn software is a media capture, processing, and distribution system</description>
   <url>http://opencastproject.org</url>
@@ -169,7 +169,7 @@
           <dependency>
             <groupId>org.opencastproject</groupId>
             <artifactId>opencast-build-tools</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.6-SNAPSHOT</version>
             <scope>test</scope>
           </dependency>
         </dependencies>
