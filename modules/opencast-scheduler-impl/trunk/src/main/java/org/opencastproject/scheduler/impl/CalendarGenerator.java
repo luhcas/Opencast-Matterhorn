@@ -54,6 +54,11 @@ public class CalendarGenerator {
   CaptureAgentMetadataGenerator caGenerator;
   
   
+  /**
+   * default constructor that creates a CalendarGenerator object
+   * @param dcGenerator A DublinCoreGenerator is needed but cannot be constructed in this object
+   * @param caGenerator A CaptureAgentMetadataGenerator is needed but cannot be constructed in this object
+   */
   public CalendarGenerator (DublinCoreGenerator dcGenerator, CaptureAgentMetadataGenerator caGenerator) {
     cal = new Calendar();
     cal.getProperties().add(new ProdId("Opencast Matterhorn Calendar File 0.5"));

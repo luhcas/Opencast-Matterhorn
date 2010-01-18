@@ -51,10 +51,18 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
   DublinCoreGenerator dcGenerator;
   CaptureAgentMetadataGenerator caGenerator;
  
+  /**
+   * Sets a DublinCoreGenerator
+   * @param dcGenerator The DublinCoreGenerator that should be used
+   */
   public void setDublinCoreGenerator(DublinCoreGenerator dcGenerator) {
     this.dcGenerator = dcGenerator;
   }
 
+  /**
+   * Sets the CaptureAgentMetadataGenerator 
+   * @param caGenerator The CaptureAgentMetadataGenerator that should be used
+   */
   public void setCaptureAgentMetadataGenerator(CaptureAgentMetadataGenerator caGenerator) {
     this.caGenerator = caGenerator;
   }

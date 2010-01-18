@@ -305,6 +305,11 @@ public class SchedulerFilterImpl implements SchedulerFilter {
     return true;
   }
   
+  /**
+   * 
+   * {@inheritDoc}
+   * @see java.lang.Object#toString()
+   */
   public String toString () {
     String result = "SchedulerFilter = ";
     if (attendee != null) result += "attendee pattern = "+attendee+", ";

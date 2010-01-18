@@ -18,7 +18,7 @@ package org.opencastproject.scheduler.api;
 import java.util.Date;
 
 /**
- * TODO: Comment me!
+ * The Scheduler Filter is used to filter the events that would come back from an search operation on the database.
  *
  */
 public interface SchedulerFilter {

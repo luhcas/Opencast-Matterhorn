@@ -64,9 +64,17 @@ public class SchedulerEventJaxbImpl {
   @XmlElement(name="resource")
   LinkedList <String> resources;  
   
+  /**
+   * Default constructor without any import.
+   */
   public SchedulerEventJaxbImpl() {
     metadata = new Hashtable<String, String>();
   }
+  
+  /**
+   * Constructs a JaxB representations of a SchedulerEvent
+   * @param event
+   */
   public SchedulerEventJaxbImpl(SchedulerEvent event) {
     logger.info("Creating a " + SchedulerEventJaxbImpl.class.getName() + " from " + event);
     id = event.getID();
@@ -85,6 +93,11 @@ public class SchedulerEventJaxbImpl {
     
   }
   
+  
+  /**
+   * Converts the JaxB representation of the SchedulerEvent into a regular SchedulerEvent
+   * @return the Scheduler Event represented by this object
+   */
   @XmlTransient
   public SchedulerEvent getEvent() {
     SchedulerEventImpl event = new SchedulerEventImpl();

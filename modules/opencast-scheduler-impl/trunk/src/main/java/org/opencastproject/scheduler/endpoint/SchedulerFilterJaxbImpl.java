@@ -69,8 +69,21 @@ public class SchedulerFilterJaxbImpl {
   @XmlElement(name="order-by")
   String orderBy;
   
+  /**
+   * Default constructor without any import.
+   */
   public SchedulerFilterJaxbImpl() {}
+  
+  /**
+   * TODO don't know where this comes from
+   * @param tmp
+   */
   public SchedulerFilterJaxbImpl(String tmp) {}
+  
+  /**
+   * Constructs a JaxB representations of a SchedulerFilter
+   * @param event
+   */
   public SchedulerFilterJaxbImpl(SchedulerFilter filter) {
     logger.info("Creating a " + SchedulerFilterJaxbImpl.class.getName() + " from " + filter);
     eventID = filter.getEventIDFilter();
@@ -90,6 +103,10 @@ public class SchedulerFilterJaxbImpl {
     logger.info("Filter created");
   }
   
+  /**
+   * Converts the JaxB representation of the SchedulerFilter into a regular SchedulerFilter
+   * @return the Scheduler Filter represented by this object
+   */
   @XmlTransient
   public SchedulerFilter getFilter() {
     SchedulerFilterImpl filter = new SchedulerFilterImpl();
@@ -111,7 +128,7 @@ public class SchedulerFilterJaxbImpl {
   }  
  
   /**
-   * valueOf function is called by JAXB to bind values. This function calls the ScheduleEvent factory.
+   * valueOf function is called by JAXB to bind values. This function calls the Scheduler factory.
    *
    *  @param    xml string representation of an event.
    *  @return   instantiated event SchdeulerFilterJaxbImpl.

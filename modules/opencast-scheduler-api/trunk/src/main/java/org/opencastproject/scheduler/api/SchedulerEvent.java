@@ -19,7 +19,8 @@ import java.util.Date;
 import java.util.Hashtable;
 
 /**
- * TODO: Comment me!
+ * The SchedulerVvent is the central data structure that will be used in the scheduler. It stores all data that will be needed for an event.
+ * It will be stored permanently somewhere.  
  *
  */
 public interface SchedulerEvent {
