@@ -1,0 +1,175 @@
+<workflow-definition>
+  <title>track</title>
+  <description>
+    A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
+    along with their associated metadata, to the distribution channels.
+  </description>
+  <operations>
+  
+	<!-- encode to flash download -->
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) video to Flash download">
+      <configurations>
+        <configuration key="audio-source-track-flavor">*</configuration>
+        <configuration key="video-source-track-flavor">presenter/source</configuration>
+        <configuration key="target-track-flavor">presenter/source</configuration>
+        <configuration key="target-track-tags">engage</configuration>
+        <configuration key="encoding-profile">flash.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to Flash download">
+      <configurations>
+        <configuration key="audio-source-track-flavor">*</configuration>
+        <configuration key="video-source-track-flavor">presentation/source</configuration>
+        <configuration key="target-track-flavor">presentation/source</configuration>
+        <configuration key="target-track-tags">engage</configuration>
+        <configuration key="encoding-profile">flash.http</configuration>
+      </configurations>
+    </operation>
+
+	<!-- encode to flash streaming -->
+	<!-- 
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) to Flash streaming">
+      <configurations>
+        <configuration key="audio-source-track-flavor">*</configuration>
+        <configuration key="video-source-track-flavor">presenter/source</configuration>
+        <configuration key="target-track-flavor">presenter/source</configuration>
+        <configuration key="target-track-tags">engage</configuration>
+        <configuration key="encoding-profile">flash.rtmp</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to Flash streaming">
+      <configurations>
+        <configuration key="audio-source-track-flavor">*</configuration>
+        <configuration key="video-source-track-flavor">presentation/source</configuration>
+        <configuration key="target-track-flavor">presentation/source</configuration>
+        <configuration key="target-track-tags">engage</configuration>
+        <configuration key="encoding-profile">flash.rtmp</configuration>
+      </configurations>
+    </operation>
+    -->
+
+	<!-- encode to quicktime download -->
+	<!-- 
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) to Quicktime download">
+      <configurations>
+        <configuration key="audio-source-track-flavor">*</configuration>
+        <configuration key="video-source-track-flavor">presenter/source</configuration>
+        <configuration key="target-track-flavor">presenter/source</configuration>
+        <configuration key="target-track-tags">atom</configuration>
+        <configuration key="encoding-profile">mp4.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to Quicktime download">
+      <configurations>
+        <configuration key="audio-source-track-flavor">*</configuration>
+        <configuration key="video-source-track-flavor">presentation/source</configuration>
+        <configuration key="target-track-flavor">presentation/source</configuration>
+        <configuration key="target-track-tags">rss, atom</configuration>
+        <configuration key="encoding-profile">mp4.http</configuration>
+      </configurations>
+    </operation>
+    -->
+    
+   	<!-- encode to avi download -->
+	<!-- 
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) to AVI download">
+      <configurations>
+        <configuration key="audio-source-track-flavor">*</configuration>
+        <configuration key="video-source-track-flavor">presenter/source</configuration>
+        <configuration key="target-track-flavor">presenter/source</configuration>
+        <configuration key="target-track-tags">atom</configuration>
+        <configuration key="encoding-profile">avi.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to AVI download">
+      <configurations>
+        <configuration key="audio-source-track-flavor">*</configuration>
+        <configuration key="video-source-track-flavor">presentation/source</configuration>
+        <configuration key="target-track-flavor">presentation/source</configuration>
+        <configuration key="target-track-tags">rss, atom</configuration>
+        <configuration key="encoding-profile">avi.http</configuration>
+      </configurations>
+    </operation>
+    -->
+ 
+    <!-- encode to cover image -->
+	<!-- 
+    <operation
+      name="snapshot"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) to cover image">
+      <configurations>
+        <configuration key="video-source-track-flavor">presenter/source</configuration>
+        <configuration key="target-track-flavor">presenter/source</configuration>
+        <configuration key="target-track-tags">atom</configuration>
+        <configuration key="encoding-profile">cover.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="snapshot"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to cover image">
+      <configurations>
+        <configuration key="video-source-track-flavor">presentation/source</configuration>
+        <configuration key="target-track-flavor">presentation/source</configuration>
+        <configuration key="target-track-tags">rss, atom, engage</configuration>
+        <configuration key="encoding-profile">cover.http</configuration>
+        <configuration key="offset">0.5</configuration>
+      </configurations>
+    </operation>
+    -->
+
+    <operation
+      name="distribute_local"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Distribute media to the local distribution channel">
+      <configurations>
+        <configuration key="tags">engage,atom,rss</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      name="publish"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Add metadata to the search index">
+      <configurations>
+      </configurations>
+    </operation>
+  </operations>
+</workflow-definition>
