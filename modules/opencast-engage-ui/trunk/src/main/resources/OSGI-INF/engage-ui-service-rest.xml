@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.engageui.endpoint.EngageuiRestService" immediate="true">
+<component name="org.opencastproject.engageui.endpoint.EngageuiRestService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.engageui.endpoint.EngageuiRestService" />
   <property name="service.description" value="Engage UI REST Proxy" />
   <property name="service.exported.interfaces" value="org.opencastproject.engageui.endpoint.EngageuiRestService" />

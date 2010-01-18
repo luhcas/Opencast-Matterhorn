@@ -24,15 +24,27 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
 import org.opencastproject.engageui.api.EpisodeView;
 import org.opencastproject.engageui.api.EpisodeViewImpl;
 import org.opencastproject.engageui.api.EpisodeViewListImpl;
 import org.opencastproject.engageui.api.EpisodeViewListResultImpl;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
 import org.opencastproject.search.api.SearchService;
+import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Param.Type;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,12 +112,7 @@ public class EngageuiRestService {
       else
         dcCreated = format.format(searchResultItem.getDcCreated());
 
-      try {
-        videoUrl = searchResultItem.getMediaPackage().getTrack(PLAYER_TRACK_ID).getURI().toString();
-      } catch (Exception e) {
-        // Set default video url
-        videoUrl = DEFAULT_VIDEO_URL;
-      }
+      videoUrl = getVideoUrl(searchResultItem.getMediaPackage());
 
       try {
         // URLEncode the media package id
@@ -137,7 +144,7 @@ public class EngageuiRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("search")
-  public EpisodeViewListResultImpl getEpisodesByDate(@QueryParam("q") String text, @QueryParam("page") int page) {
+  public Response getEpisodesByDate(@QueryParam("q") String text, @QueryParam("page") int page) {
     // Variables
     int pagemax, fromIndex, toIndex;
     long episodesMax;
@@ -159,7 +166,8 @@ public class EngageuiRestService {
     // Checking if the searchService is available
     if (searchService == null) {
       logger.warn("search service not present, returning empty list");
-      return episodeViewListResult;
+      // in case of error
+      Response.status(Status.BAD_REQUEST).build();
     }
 
     if (StringUtils.isEmpty(text)) {
@@ -235,12 +243,7 @@ public class EngageuiRestService {
       else
         dcCreated = format.format(searchResultItem.getDcCreated());
 
-      try {
-        videoUrl = searchResultItem.getMediaPackage().getTrack("track-1").getURI().toString();
-      } catch (Exception e) {
-        // Set default video url
-        videoUrl = "http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv";
-      }
+      videoUrl = getVideoUrl(searchResultItem.getMediaPackage());
 
       try {
         // URLEncode the media package id
@@ -269,7 +272,22 @@ public class EngageuiRestService {
       episodeViewList.add(episodeViewItem);
     }
 
-    return episodeViewListResult;
+    return Response.ok(episodeViewListResult).build();
+  }
+
+  /**
+   * Iterates through the tracks of an mediaPackage and returns the video url of the last track
+   * @param mediaPackage
+   * @return String the video url
+   */
+  private String getVideoUrl(MediaPackage mediaPackage) {
+    Track[] tracks = mediaPackage.getTracks();
+    // Set default video url
+    String videoUrl = DEFAULT_VIDEO_URL;
+    for (Track track : tracks) {
+      videoUrl = track.getURI().toString();
+    }
+    return videoUrl;
   }
 
   /**
@@ -282,9 +300,38 @@ public class EngageuiRestService {
     return docs;
   }
 
-  protected final String docs;
+  protected String docs;
 
   public EngageuiRestService() {
-    docs = "FIXME -- add documentation";
+  }
+
+  /**
+   * The method that will be called, if the service is activated
+   * 
+   * @param cc
+   *          The ComponentContext of this service
+   */
+  public void activate(ComponentContext cc) {
+    docs = generateDocs();
+  }
+
+  /**
+   * Generates the REST documentation
+   * 
+   * @return The HTML with the documentation
+   */
+  protected String generateDocs() {
+    DocRestData data = new DocRestData("Engage", "Engage UI", "/engageui/rest", new String[] { "$Rev$" });
+    // Scheduler addEvent
+    RestEndpoint getEpisodesByDate = new RestEndpoint("getEpisodesByDate", RestEndpoint.Method.POST,
+            "/getEpisodesByDate", "Gets the episode with the given episode id.");
+    getEpisodesByDate.addFormat(new Format("xml", null, null));
+    getEpisodesByDate.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, result returned"));
+    getEpisodesByDate.addRequiredParam(new Param("episodeId", Type.TEXT, "123456",
+            "The episode that should be requested"));
+    getEpisodesByDate.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, getEpisodesByDate);
+
+    return DocUtil.generate(data);
   }
 }
