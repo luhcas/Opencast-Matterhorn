@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.engage.impl.EngageServiceRestImpl" immediate="true">
+  <implementation class="org.opencastproject.engage.impl.EngageServiceRestImpl" />
+  <property name="service.description" value="Engage REST Endpoint" />
+  <property name="service.exported.interfaces" value="*" />
+  <property name="service.exported.configs" value="org.apache.cxf.rs" />
+  <property name="org.apache.cxf.rs.httpservice.context" value="/engage" />
+  <service>
+    <provide interface="org.opencastproject.engage.impl.EngageServiceRestImpl" />
+  </service>
+  <reference name="service-impl" interface="org.opencastproject.engage.api.EngageService"
+    cardinality="1..1" policy="static" bind="setService" />
+</component>

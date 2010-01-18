@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.engage.searchui" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.http.StaticResource" />
+  <property name="service.description" value="Matterhorn Search UI" />
+  <property name="alias" value="/engage/searchui" />
+  <property name="classpath" value="/searchui" />
+  <property name="welcome.file" value="index.html" />
+  <service>
+    <provide interface="org.opencastproject.http.StaticResource" />
+  </service>
+  <reference name="http-service" interface="org.osgi.service.http.HttpService"
+    cardinality="1..1" policy="static" bind="setHttpService" />
+</component> 
