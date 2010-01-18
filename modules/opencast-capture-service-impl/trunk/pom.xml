@@ -5,27 +5,27 @@
   <artifactId>opencast-capture-service-impl</artifactId>
   <packaging>bundle</packaging>
   <name>opencast-capture-service-impl</name>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.6-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-capture-service-api</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-capture-admin-service-api</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>0.6-SNAPSHOT</version>
     </dependency>
     <!--<dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-db</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>0.6-SNAPSHOT</version>
     </dependency>-->
     <dependency>
       <groupId>net.luniks.linux.jv4linfo</groupId>
