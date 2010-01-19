@@ -82,7 +82,7 @@
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
         <configuration key="target-flavor">presenter/source</configuration>
-        <configuration key="target-tags">atom</configuration>
+        <configuration key="target-tags">atom, captioning</configuration>
         <configuration key="encoding-profile">mov-low.http</configuration>
       </configurations>
     </operation>
@@ -95,7 +95,7 @@
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
         <configuration key="target-flavor">presentation/source</configuration>
-        <configuration key="target-tags">rss, atom</configuration>
+        <configuration key="target-tags">rss, atom, captioning</configuration>
         <configuration key="encoding-profile">mov-low.http</configuration>
       </configurations>
     </operation>
