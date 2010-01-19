@@ -25,6 +25,7 @@ import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.media.mediapackage.jaxb.TrackType;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
@@ -61,7 +62,8 @@ import javax.ws.rs.core.Response.Status;
 @Path("/")
 public class ComposerRestService {
   private static final Logger logger = LoggerFactory.getLogger(ComposerRestService.class);
-  
+  protected String docs;
+  protected String serverUrl;
   protected ComposerService composerService;
   public void setComposerService(ComposerService composerService) {
     this.composerService = composerService;
@@ -76,6 +78,15 @@ public class ComposerRestService {
   protected Thread pollingThread = null;
   protected boolean poll;
   public void activate(ComponentContext cc) {
+    // Generate the docs, using the local server URL
+    if(cc.getBundleContext().getProperty("serverUrl") == null) {
+      serverUrl = UrlSupport.DEFAULT_BASE_URL;
+    } else {
+      serverUrl = cc.getBundleContext().getProperty("serverUrl");
+    }
+    docs = generateDocs();
+
+    // Set up polling to persist the state of running encoding jobs
     futuresMap = new ConcurrentHashMap<String, Future<Track>>();
     poll = true;
     pollingThread = new Thread(new Runnable() {
@@ -202,12 +213,6 @@ public class ComposerRestService {
   public String getDocumentation() {
     return docs;
   }
-
-  protected final String docs;
-  
-  public ComposerRestService() {
-    docs = generateDocs();
-  }
   
   protected String generateDocs() {
     DocRestData data = new DocRestData("Composer", "Composer Service", "/composer/rest", new String[] {"$Rev$"});
@@ -245,7 +250,7 @@ public class ComposerRestService {
     "  <media>\n" +
     "    <track id=\"track-1\" type=\"presentation/source\">\n" +
     "      <mimetype>audio/mp3</mimetype>\n" +
-    "      <url>http://source.opencastproject.org/svn/modules/opencast-workflow-service-impl/trunk/src/main/resources/sample/aonly.mp3</url>\n" +
+    "      <url>" + serverUrl + "/workflow/samples/aonly.mp3</url>\n" +
     "      <checksum type=\"md5\">950f9fa49caa8f1c5bbc36892f6fd062</checksum>\n" +
     "      <duration>10472</duration>\n" +
     "      <audio>\n" +
@@ -257,7 +262,7 @@ public class ComposerRestService {
     "    </track>\n" +
     "    <track id=\"track-2\" type=\"presentation/source\">\n" +
     "      <mimetype>video/quicktime</mimetype>\n" +
-    "      <url>http://source.opencastproject.org/svn/modules/opencast-workflow-service-impl/trunk/src/main/resources/sample/vonly.mov</url>\n" +
+    "      <url>" + serverUrl + "/workflow/samples/vonly.mpg</url>\n" +
     "      <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n" +
     "      <duration>14546</duration>\n" +
     "      <video>\n" +
