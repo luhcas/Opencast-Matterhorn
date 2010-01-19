@@ -32,7 +32,7 @@
   <xsl:template match="ns1:recording">
     <tr>
       <td>
-        <a>
+        <a title="View Recording">
           <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
           <xsl:value-of select="title" />
         </a>

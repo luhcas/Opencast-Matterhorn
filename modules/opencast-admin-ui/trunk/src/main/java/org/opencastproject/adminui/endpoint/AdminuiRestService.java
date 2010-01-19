@@ -149,7 +149,7 @@ public class AdminuiRestService {
             operation = instances.next();
           }
           if (operation != null) {
-            item.setProcessingStatus(operation.getName() + " : " + operation.getState().toString());
+            item.setProcessingStatus(operation.getState().toString() + " : " + operation.getName());
           } else {
             logger.warn("Could not get any WorkflowOperationInstance from WorkflowInstance.");
           }

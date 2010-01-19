@@ -13,12 +13,12 @@
     <xsl:output method="html"/>
 
     <xsl:template match="/">
-        <table class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
+        <table id="agentsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
             <thead>
                 <tr>
-                    <th width="33%">Agent Name</th>
-                    <th width="33%">Capabilities</th>
-                    <th width="33%">Status</th>
+                    <th width="33%" class="sortable">Agent Name</th>
+                    <th width="33%" class="sortable">Capabilities</th>
+                    <th width="33%" class="sortable">Status</th>
                 </tr>
             </thead>
             <tbody>
