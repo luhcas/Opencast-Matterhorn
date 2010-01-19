@@ -242,7 +242,7 @@
                 <!-- field: Media file content -->
                 <li class="ui-helper-clearfix">
                   <span class="formField-label"><span class="color-red">* </span>Media file content:</span>
-                  <select name="type" id="type" class="requiredField" style="float:left;margin:3px;">
+                  <select name="mediatype" id="mediatype" class="requiredField" style="float:left;margin:3px;">
                     <option value="">Choose one:</option>
                     <option value="audio">Audio</option>
                     <option value="video/presenter">Presenter (Video)</option>
@@ -251,6 +251,7 @@
                     <option value="video/other">Other document (video)</option>
                     <option value="other">Other (video)</option>
                   </select>
+                  <input type="hidden" name="flavor" id="flavor" value="presentation/source">
                   <span class="helpIcon">&nbsp;</span>
                 </li>
                 <!-- field: Media File -->
