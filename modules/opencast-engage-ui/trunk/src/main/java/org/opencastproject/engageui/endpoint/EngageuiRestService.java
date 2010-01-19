@@ -15,6 +15,29 @@
  */
 package org.opencastproject.engageui.endpoint;
 
+import org.opencastproject.engageui.api.EpisodeView;
+import org.opencastproject.engageui.api.EpisodeViewImpl;
+import org.opencastproject.engageui.api.EpisodeViewListImpl;
+import org.opencastproject.engageui.api.EpisodeViewListResultImpl;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.search.api.SearchResult;
+import org.opencastproject.search.api.SearchResultItem;
+import org.opencastproject.search.api.SearchService;
+import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Param.Type;
+
+import org.apache.commons.lang.StringUtils;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.DateFormat;
@@ -27,27 +50,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang.StringUtils;
-import org.opencastproject.engageui.api.EpisodeView;
-import org.opencastproject.engageui.api.EpisodeViewImpl;
-import org.opencastproject.engageui.api.EpisodeViewListImpl;
-import org.opencastproject.engageui.api.EpisodeViewListResultImpl;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.search.api.SearchResult;
-import org.opencastproject.search.api.SearchResultItem;
-import org.opencastproject.search.api.SearchService;
-import org.opencastproject.util.DocUtil;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Param.Type;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * REST endpoint for the Engage UI proxy service
  */
@@ -59,7 +61,6 @@ public class EngageuiRestService {
 
   public static final int TITLE_MAX_LENGTH = 60;
   public static final int ABSTRACT_MAX_LENGTH = 175;
-  public static final String PLAYER_TRACK_ID = "track-1";
   public static final String DEFAULT_VIDEO_URL = "http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv";
 
   public void setSearchService(SearchService service) {
@@ -281,13 +282,21 @@ public class EngageuiRestService {
    * @return String the video url
    */
   private String getVideoUrl(MediaPackage mediaPackage) {
-    Track[] tracks = mediaPackage.getTracks();
-    // Set default video url
-    String videoUrl = DEFAULT_VIDEO_URL;
-    for (Track track : tracks) {
-      videoUrl = track.getURI().toString();
+//    FlavorPrioritySelector<Track> selector = new FlavorPrioritySelector<Track>();
+//    selector.includeTag("engage");
+//    selector.addFlavor(MediaPackageElements.PRESENTATION_TRACK);
+//    selector.addFlavor(MediaPackageElements.PRESENTER_TRACK);
+//    Collection<Track> c = selector.select(mediaPackage);
+//    if(c.isEmpty()) return DEFAULT_VIDEO_URL;
+//    return c.iterator().next().getURI().toString();
+    for(Track track : mediaPackage.getTracks()) {
+      for(String tag : track.getTags()) {
+        if("engage".equals(tag) && (
+                MediaPackageElements.PRESENTATION_TRACK.equals(track.getFlavor()) || 
+                MediaPackageElements.PRESENTER_TRACK.equals(track.getFlavor()))) return track.getURI().toString();
+      }
     }
-    return videoUrl;
+    return DEFAULT_VIDEO_URL;
   }
 
   /**

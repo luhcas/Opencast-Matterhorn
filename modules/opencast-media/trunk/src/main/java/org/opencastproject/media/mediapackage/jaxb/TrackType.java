@@ -89,7 +89,7 @@ public class TrackType {
   protected String url;
   @XmlElement(required = true)
   protected ChecksumType checksum;
-  protected long duration;
+  protected long duration = -1;
   protected VideoType video;
   protected AudioType audio;
   @XmlAttribute
