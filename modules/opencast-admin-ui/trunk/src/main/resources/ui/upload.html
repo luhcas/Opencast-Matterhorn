@@ -47,7 +47,13 @@
               method: 'post',
               iframe : true,
               dataType : 'xml',
+              beforeSubmit: function() {
+                $('#gray-out').fadeIn('slow');
+                $('#upload-notification').fadeIn('fast');
+              },
               success : function(responseXML) {
+                $('#gray-out').fadeOut('fast');
+                $('#upload-notification').fadeOut('fast');
                 var media = responseXML.documentElement.getElementsByTagName('media');
                 if (media.length > 0) {
                   $('#stage').load('complete.html', function() {
@@ -291,6 +297,14 @@
 
         <!-- END of stage -->
       </div>
+    </div>
+
+    <div id="gray-out">
+      &nbsp;
+    </div>
+    <div id="upload-notification" style="padding-top:10px;">
+      <center>Uploading...</center>
+      <div class="loadingAnimation">&nbsp;</div>
     </div>
 
     <!-- template for the popup help box -->
