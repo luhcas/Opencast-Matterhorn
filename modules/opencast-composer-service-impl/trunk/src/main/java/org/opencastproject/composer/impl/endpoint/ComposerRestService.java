@@ -162,7 +162,12 @@ public class ComposerRestService {
     receipt.setStatus(STATUS.RUNNING.toString());
     logger.debug("created receipt {}", receipt.getId());
     try {
-      Future<Track> futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, targetTrackId, profileId);
+      Future<Track> futureTrack;
+      if(audioSourceTrackId == null) {
+        futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, targetTrackId, profileId);
+      } else {
+        futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, targetTrackId, profileId);
+      }
       futuresMap.put(receipt.getId(), futureTrack);
       return Response.ok().entity(receipt).build();
     } catch (RuntimeException e) {

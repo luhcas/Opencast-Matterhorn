@@ -64,6 +64,10 @@ public class ComposerRestEndpointTest {
     // Start a workflow instance via the rest endpoint
     HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/encode");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+    formParams.add(new BasicNameValuePair("audioSourceTrackId", "track-1"));
+    formParams.add(new BasicNameValuePair("videoSourceTrackId", "track-2"));
+    formParams.add(new BasicNameValuePair("targetTrackId", "track-3"));
+    formParams.add(new BasicNameValuePair("profileId", "flash.http"));
     formParams.add(new BasicNameValuePair("mediapackage", getSampleMediaPackage()));
     postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
