@@ -80,11 +80,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-inspection-service-api</artifactId>
-      <version>0.6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
     	<groupId>org.opencastproject</groupId>
     	<artifactId>opencast-workspace-api</artifactId>
     	<version>0.6-SNAPSHOT</version>

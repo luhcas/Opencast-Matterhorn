@@ -16,9 +16,6 @@
 package org.opencastproject.ingest.impl;
 
 import org.opencastproject.ingest.api.IngestService;
-import org.opencastproject.inspection.api.MediaInspectionService;
-import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
-import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
@@ -26,15 +23,14 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.util.ZipUtil;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.event.Event;
@@ -63,7 +59,6 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   private static final Logger logger = LoggerFactory.getLogger(IngestServiceImpl.class);
   private MediaPackageBuilder builder = null;
   private Workspace workspace;
-  private MediaInspectionService inspection;
   private String tempFolder;
 
   private String fs;
@@ -138,7 +133,6 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
           elId = UUID.randomUUID().toString();
           element.setIdentifier(elId);
         }
-        element = inspect(element);
         String filename = element.getURI().toURL().getFile();
         filename = filename.substring(filename.lastIndexOf("/"));
         URI newUrl = addContentToRepo(mp, elId, filename, element.getURI().toURL().openStream());
@@ -190,10 +184,10 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
    * @see org.opencastproject.ingest.api.IngestService#addMediaPackageTrack(InputStream, MediaPackageElementFlavor,
    *      MediaPackage)
    */
-  public MediaPackage addTrack(InputStream file, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+  public MediaPackage addTrack(InputStream in, String fileName, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
-    URI newUrl = addContentToRepo(mediaPackage, elementId, file);
+    URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
     return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track, flavor);
   }
 
@@ -216,10 +210,10 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
    * @see org.opencastproject.ingest.api.IngestService#addMediaPackageCatalog(InputStream, MediaPackageElementFlavor,
    *      MediaPackage)
    */
-  public MediaPackage addCatalog(InputStream file, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+  public MediaPackage addCatalog(InputStream in, String fileName, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
-    URI newUrl = addContentToRepo(mediaPackage, elementId, file);
+    URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
     return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Catalog, flavor);
   }
 
@@ -242,10 +236,10 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
    * @see org.opencastproject.ingest.api.IngestService#addMediaPackageAttachment(InputStream, MediaPackageElementFlavor,
    *      MediaPackage)
    */
-  public MediaPackage addAttachment(InputStream file, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+  public MediaPackage addAttachment(InputStream in, String fileName, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
-    URI newUrl = addContentToRepo(mediaPackage, elementId, file);
+    URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
     return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment, flavor);
   }
 
@@ -350,14 +344,8 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
 
   private URI addContentToRepo(MediaPackage mp, String elementId, URI uri) throws IOException, MediaPackageException,
           UnsupportedElementException {
-    return workspace.put(mp.getIdentifier().compact(), elementId, uri.toURL().openStream());
+    return workspace.put(mp.getIdentifier().compact(), elementId, FilenameUtils.getName(uri.toURL().toString()), uri.toURL().openStream());
     // return addContentToMediaPackage(mp, elementId, newUrl, type, flavor);
-  }
-
-  private URI addContentToRepo(MediaPackage mp, String elementId, InputStream file) throws MediaPackageException,
-          UnsupportedElementException, IOException {
-    return workspace.put(mp.getIdentifier().compact(), elementId, file);
-    // return addContentToMediaPackage(mp, elementId, url, type, flavor);
   }
 
   private URI addContentToRepo(MediaPackage mp, String elementId, String filename, InputStream file)
@@ -368,19 +356,8 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   private MediaPackage addContentToMediaPackage(MediaPackage mp, String elementId, URI uri,
           MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws MediaPackageException,
           UnsupportedElementException {
-    try {
-      MediaPackageElement mpe = mp.add(uri, type, flavor);
-      mp.remove(mpe);
-      mpe = inspect(mpe);
-      mp.add(mpe);
-      mpe.setIdentifier(elementId);
-    } catch (MediaPackageException mpe) {
-      logger.error("Failed to access media package for ingest");
-      throw mpe;
-    } catch (UnsupportedElementException uee) {
-      logger.error("Unsupported element for ingest");
-      throw uee;
-    }
+    MediaPackageElement mpe = mp.add(uri, type, flavor);
+    mpe.setIdentifier(elementId);
     return mp;
 
   }
@@ -408,21 +385,6 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
     }
   }
 
-  private MediaPackageElement inspect(MediaPackageElement element) {
-    if (inspection == null)
-      return element;
-    if (element.getElementType() == Type.Track) {
-      return inspection.enrich((Track) element, false);
-    }
-    if (element.getElementType() == Type.Catalog) {
-      return (Catalog) inspection.enrich((AbstractMediaPackageElement) element, false);
-    }
-    if (element.getElementType() == Type.Attachment) {
-      return inspection.enrich((AbstractMediaPackageElement) element, false);
-    }
-    return element;
-  }
-
   // ---------------------------------------------
   // --------- config ---------
   // ---------------------------------------------
@@ -435,14 +397,6 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   // ---------------------------------------------
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
-  }
-
-  public void setMediaInspection(MediaInspectionService inspection) {
-    this.inspection = inspection;
-  }
-
-  public void unsetMediaInspection(MediaInspectionService inspection) {
-    this.inspection = null;
   }
 
   public void setEventAdmin(EventAdmin eventAdmin) {

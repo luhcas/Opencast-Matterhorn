@@ -89,7 +89,7 @@ public interface IngestService {
    * @throws MalformedURLException
    * @throws IOException
    */
-  MediaPackage addTrack(InputStream mediaFile, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+  MediaPackage addTrack(InputStream mediaFile, String fileName, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, MalformedURLException, IOException;
 
   /**
@@ -124,7 +124,7 @@ public interface IngestService {
    * @throws MalformedURLException
    * @throws IOException
    */
-  MediaPackage addCatalog(InputStream catalog, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+  MediaPackage addCatalog(InputStream catalog, String fileName, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, MalformedURLException, IOException;
 
   /**
@@ -159,7 +159,7 @@ public interface IngestService {
    * @throws MalformedURLException
    * @throws IOException
    */
-  MediaPackage addAttachment(InputStream file, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+  MediaPackage addAttachment(InputStream file, String fileName, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, MalformedURLException, IOException;
 
   /**

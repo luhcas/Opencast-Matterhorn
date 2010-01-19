@@ -31,6 +31,8 @@ import org.opencastproject.media.mediapackage.track.TrackImpl;
 import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
+import org.opencastproject.util.MimeTypes;
+import org.opencastproject.util.UnknownFileTypeException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.cm.ConfigurationException;
@@ -40,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.util.Dictionary;
@@ -190,6 +193,17 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
+        
+      // Add the mime type if it's not already present
+      if(track.getMimeType() == null) {
+        try {
+          track.setMimeType(MimeTypes.fromURL(track.getURI().toURL()));
+        } catch (MalformedURLException e) {
+          logger.warn("Track {} has a malformed URL, {}", track.getIdentifier(), track.getURI());
+        } catch (UnknownFileTypeException e) {
+          logger.warn("Unable to detect the mimetype for track {} at {}", track.getIdentifier(), track.getURI());
+        }
+      }
       // find all streams
       Dictionary<String, Stream> streamsId2Stream = new Hashtable<String, Stream>();
       for (Stream stream : originalTrack.getStreams()) {

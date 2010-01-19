@@ -22,6 +22,7 @@ import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.dublincore.DublinCore;
@@ -134,17 +135,8 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addTrack")
-  public Response addMediaPackageTrack(@FormParam("file") InputStream file, @FormParam("flavor") String flavor,
-          @FormParam("mediaPackage") MediapackageType mpt) {
-    try {
-      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-      mp = service.addTrack(file, MediaPackageElementFlavor.parseFlavor(flavor), mp);
-      mpt = MediapackageType.fromXml(mp.toXml());
-      return Response.ok(mpt).build();
-    } catch (Exception e) {
-      logger.warn(e.getMessage());
-      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-    }
+  public Response addMediaPackageTrack(@Context HttpServletRequest request) {
+    return addMediaPackageElement(request, MediaPackageElement.Type.Attachment);
   }
 
   @POST
@@ -169,39 +161,30 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addCatalog")
-  public Response addMediaPackageCatalog(@FormParam("file") InputStream file, @FormParam("flavor") String flavor,
-          @FormParam("mediaPackage") MediapackageType mpt) {
-    try {
-      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-      mp = service.addCatalog(file, MediaPackageElementFlavor.parseFlavor(flavor), mp);
-      mpt = MediapackageType.fromXml(mp.toXml());
-      return Response.ok(mpt).build();
-    } catch (Exception e) {
-      logger.warn(e.getMessage());
-      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-    }
+  public Response addMediaPackageCatalog(@Context HttpServletRequest request) {
+    return addMediaPackageElement(request, MediaPackageElement.Type.Attachment);
   }
 
   /* -------------------- start of Benjamins weekend-fun -------------------- */
 
   /* modifyed version of addCatalog */
-  @POST
-  @Produces(MediaType.TEXT_XML)
-  @Consumes(MediaType.MULTIPART_FORM_DATA)
-  @Path("addCatalogFromFile")
-  public Response addMediaPackageCatalogFromFile(@FormParam("file") String file, @FormParam("flavor") String flavor,
-          @FormParam("mediaPackage") MediapackageType mpt) {
-    //logger.info("adding Catalog");
-    try {
-      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-      mp = service.addCatalog(IOUtils.toInputStream(file), MediaPackageElementFlavor.parseFlavor(flavor), mp);
-      mpt = MediapackageType.fromXml(mp.toXml());
-      return Response.ok(mpt).build();
-    } catch (Exception e) {
-      logger.warn(e.getMessage());
-      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-    }
-  }
+//  @POST
+//  @Produces(MediaType.TEXT_XML)
+//  @Consumes(MediaType.MULTIPART_FORM_DATA)
+//  @Path("addCatalogFromFile")
+//  public Response addMediaPackageCatalogFromFile(@FormParam("file") String file, @FormParam("flavor") String flavor,
+//          @FormParam("mediaPackage") MediapackageType mpt) {
+//    //logger.info("adding Catalog");
+//    try {
+//      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
+//      mp = service.addCatalog(IOUtils.toInputStream(file), MediaPackageElementFlavor.parseFlavor(flavor), mp);
+//      mpt = MediapackageType.fromXml(mp.toXml());
+//      return Response.ok(mpt).build();
+//    } catch (Exception e) {
+//      logger.warn(e.getMessage());
+//      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+//    }
+//  }
 
   /* modifyed version of addTrack */
   @POST
@@ -231,7 +214,7 @@ public class IngestRestService {
             String filename = fullname.substring(startIndex + 1, fullname.length());
             listener.setFilename(filename);
             /* This will only work if the mediaPackage is received before the track. */
-            service.addTrack(item.openStream(), MediaPackageElements.INDEFINITE_TRACK, mp);
+            service.addTrack(item.openStream(), item.getName(), MediaPackageElements.INDEFINITE_TRACK, mp);
           }
         }
         MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
@@ -333,13 +316,50 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addAttachment")
-  public Response addMediaPackageAttachment(@FormParam("file") InputStream file, @FormParam("flavor") String flavor,
-          @FormParam("mediaPackage") MediapackageType mpt) {
+  public Response addMediaPackageAttachment(@Context HttpServletRequest request) {
+    return addMediaPackageElement(request, MediaPackageElement.Type.Attachment);
+  }
+
+  
+  protected Response addMediaPackageElement(HttpServletRequest request, MediaPackageElement.Type type) {
+    MediaPackageElementFlavor flavor = MediaPackageElements.INDEFINITE_TRACK;
     try {
-      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-      mp = service.addAttachment(file, MediaPackageElementFlavor.parseFlavor(flavor), mp);
-      mpt = MediapackageType.fromXml(mp.toXml());
-      return Response.ok(mpt).build();
+      InputStream in = null;
+      String fileName = null;
+      MediaPackage mp = null;
+      if (ServletFileUpload.isMultipartContent(request)) {
+        for (FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
+          FileItemStream item = iter.next();
+          String fieldName = item.getFieldName();
+          if (item.isFormField()) {
+            if("flavor".equals(fieldName)) {
+              String flavorString = Streams.asString(item.openStream());
+              if(flavorString != null) flavor = MediaPackageElementFlavor.parseFlavor(flavorString);
+            } else if ("mediaPackage".equals(fieldName)) {
+              mp = builder.loadFromManifest(item.openStream());
+            }
+          } else {
+            fileName = item.getName();
+            in = item.openStream();
+          }
+        }
+        switch(type) {
+        case Attachment:
+          service.addAttachment(in, fileName, flavor, mp);
+          break;
+        case Catalog:
+          service.addCatalog(in, fileName, flavor, mp);
+          break;
+        case Track:
+          service.addTrack(in, fileName, flavor, mp);
+          break;
+        default:
+          throw new IllegalStateException("Type must be one of track, catalog, or attachment");
+        }
+        service.ingest(mp);
+        return Response.ok(getStringFromDocument(mp.toXml())).build();
+      }
+      return Response.serverError().status(Status.BAD_REQUEST).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -368,11 +388,11 @@ public class IngestRestService {
               dcc.add(en, Streams.asString(item.openStream()));
             }
           } else {
-            service.addTrack(item.openStream(), flavor, mp);
+            service.addTrack(item.openStream(), item.getName(), flavor, mp);
           }
         }
         String xml = getStringFromDocument(dcc.toXml());
-        service.addCatalog(IOUtils.toInputStream(xml), MediaPackageElements.DUBLINCORE_CATALOG, mp);
+        service.addCatalog(IOUtils.toInputStream(xml), "dublincore.xml", MediaPackageElements.DUBLINCORE_CATALOG, mp);
         MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
         service.ingest(mp);
         return Response.ok(mpt).build();
