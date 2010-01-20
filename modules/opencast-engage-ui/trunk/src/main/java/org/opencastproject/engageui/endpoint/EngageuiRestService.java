@@ -61,7 +61,7 @@ public class EngageuiRestService {
 
   public static final int TITLE_MAX_LENGTH = 60;
   public static final int ABSTRACT_MAX_LENGTH = 175;
-  public static final String DEFAULT_VIDEO_URL = "http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv";
+  public static final String DEFAULT_VIDEO_URL = "http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/matterhorn.mp4";
 
   public void setSearchService(SearchService service) {
     logger.info("binding SearchService");
