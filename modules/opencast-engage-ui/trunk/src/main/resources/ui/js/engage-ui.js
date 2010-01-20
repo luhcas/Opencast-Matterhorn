@@ -38,6 +38,6 @@ Opencast.engage = (function () {
     }
     
     return {
-      getMediaPackageId : getMediaPackageId,
+      getMediaPackageId : getMediaPackageId
     };
 }());
