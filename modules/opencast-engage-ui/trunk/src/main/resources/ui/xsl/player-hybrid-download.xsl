@@ -50,7 +50,7 @@
           <button id="btn_volume"        class="oc-btn-volume-high"          type="submit"  onclick="Opencast.Player.doToggleVolume();"          name="Unmute"               value="Unmute"               alt="Unmute"              title="Unmute"              ></button>
         </td>
         
-        <td align="center" valign="middle"style="padding-right:0">
+        <td align="center" valign="middle" style="padding-right:0">
           <!-- http://accessify.com/tools-and-wizards/accessibility-tools/aria/slider-generator/ -->
           <label id="volumeLabel" for="slider_volume_Rail" class="fl-offScreen-hidden">Volume</label>
           <div id="slider_volume_Rail" class="oc-slider-volume-Rail" title="Volume">
