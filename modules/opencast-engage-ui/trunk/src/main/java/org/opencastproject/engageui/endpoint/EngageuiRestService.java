@@ -331,13 +331,23 @@ public class EngageuiRestService {
    */
   protected String generateDocs() {
     DocRestData data = new DocRestData("Engage", "Engage UI", "/engageui/rest", new String[] { "$Rev$" });
-    // Scheduler addEvent
+    // Engage getEpisodeById
+    RestEndpoint getEpisodeById = new RestEndpoint("getEpisodeById", RestEndpoint.Method.POST, "/getEpisodeById",
+            "Gets the episode with the given episode id.");
+    getEpisodeById.addFormat(new Format("xml", null, null));
+    getEpisodeById.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, result returned"));
+    getEpisodeById
+            .addRequiredParam(new Param("episodeId", Type.TEXT, "123456", "The episode that should be requested"));
+    getEpisodeById.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, getEpisodeById);
+
+    // Engage getEpisodesByDate
     RestEndpoint getEpisodesByDate = new RestEndpoint("getEpisodesByDate", RestEndpoint.Method.POST,
-            "/getEpisodesByDate", "Gets the episode with the given episode id.");
+            "/getEpisodesByDate", "Search for episodes matching the query parameter");
     getEpisodesByDate.addFormat(new Format("xml", null, null));
     getEpisodesByDate.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, result returned"));
-    getEpisodesByDate.addRequiredParam(new Param("episodeId", Type.TEXT, "123456",
-            "The episode that should be requested"));
+    getEpisodesByDate.addRequiredParam(new Param("q", Type.TEXT, "", "Any episode that matches this free-text query"));
+    getEpisodesByDate.addRequiredParam(new Param("page", Type.TEXT, "1", "The page number"));
     getEpisodesByDate.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getEpisodesByDate);
 
