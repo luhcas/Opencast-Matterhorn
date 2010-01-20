@@ -90,8 +90,5 @@ function VideodisplayReady() {
 	Videodisplay.setccBool = function(ccBool) {
 		b_Videodisplay_root.setccBool(ccBool);
 	};
-	
-	
-	
-	
+
 }

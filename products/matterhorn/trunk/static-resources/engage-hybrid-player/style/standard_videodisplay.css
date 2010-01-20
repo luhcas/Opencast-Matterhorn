@@ -186,6 +186,12 @@ Button.ccOff
     font-size: 16; 
 }
 
+.audioLabel
+{
+    color: #ffffff;
+    font-size: 16; 
+}
+
 .HSliderSeek
 {
    thumb-skin: Embed(source='skin_opencast.swf', symbol='thumb_slider');
