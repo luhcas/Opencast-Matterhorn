@@ -80,9 +80,9 @@
   height: 1.2em;
 }
 
-.detail-switch {
-  display: inline-block;
+#detail-switch {
   vertical-align: top;
   cursor: pointer;
   color: blue;
+  display: none;
 }

@@ -20,13 +20,8 @@ var schedulerUI = schedulerUI || { };
 /**
  *  clearForm resets all the form values to defaults.
  */
-schedulerUI.resetForm = function() {
-  $.each($('form'), function() { this.reset(); });
-  $('#startDate').datepicker('setDate', new Date());
-  var now = new Date();
-  now.setHours(now.getHours() + 1);
-  $('#startTimeHour').val(now.getHours());
-  return true;
+schedulerUI.cancelForm = function() {
+  document.location = "recordings.html";
 };
 
 /**
@@ -69,7 +64,13 @@ schedulerUI.loadCompleteValues = function(){
         $('#data-' + field + ' .data-value').empty().append(eventsManager.fields[field].getValue().toString());
         $('#data-' + field).toggle();
       } else {
-        $('#data-' + field + ' .data-value').empty().append(eventsManager.fields[field].getValue());
+        var val = eventsManager.fields[field].getValue();
+        if(field == "abstract"){
+          if(val.length > 200){
+            $("#detail-switch").css("display", "inline-block");
+          }
+        }
+        $('#data-' + field + ' .data-value').empty().append(val);
         $('#data-' + field).toggle();
       }
     }

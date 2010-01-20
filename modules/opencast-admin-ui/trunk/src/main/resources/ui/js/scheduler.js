@@ -143,7 +143,7 @@ EventManager.prototype.serialize = serialize;
 function populateForm(document){
   for(var e in this.fields){
     //Todo: select the agent field when loading an event.
-    if(e != "resources" || e != "attendees" || e != "channel-id"){
+    if(e != "attendees" || e != "channel-id"){
       switch(e){
         case 'startdate':
           this.fields[e].setValue(new Date(parseInt($("startdate", document).text())));
@@ -154,23 +154,12 @@ function populateForm(document){
         case 'id':
           this.fields[e].setValue($("id", document).text());
           break;
+        case 'resources':
+          this.fields[e].setValue($("resource", document).text());
+          break;
         default:
           this.fields[e].setValue($("item[key='" + e + "'] > value", document).text());
       }
-      /*
-      if(this.fields[e] instanceof EventField){
-        this.fields[e].setValue($("item[key='" + e + "'] > value", document).text());
-      }else{
-        //bad hack, refactor
-        
-        //Dealing with resources(inputs) aka capabilities is uncertain at this point.
-        //Deal with this for editing later.
-        /*
-        console.log(e);
-        var o = {};
-        o[e] = $("item[key='" + e + "'] > value", document).text();
-        this.fields[e].setValue(o);
-      } */
     }
   }
 }
@@ -447,4 +436,76 @@ function checkStartDate(){
     }
   }
   return false;
+}
+
+/**
+ *  Overrides getValue for EventFieldGroup for input field
+ *  @return {string} Comma seperated string of inputs
+ */
+function getInputs(){
+  var selected = false;
+  for(var el in this.groupElements){
+    if($("#" + el)[0] && $("#" + el)[0].checked){
+      selected = $("#" + el);
+      break;
+    }
+  }
+  if(selected){
+    switch(selected.val()){
+      case "1":
+        this.value = "AUDIO";
+        break;
+      case "3":
+        this.value = "AUDIO,VIDEO";
+        break;
+      case "5":
+        this.value = "AUDIO,SCREEN";
+        break;
+      case "7":
+        this.value = "AUDIO,VIDEO,SCREEN";
+        break;
+      default:
+        throw "Unable to get selected input.";
+    }
+  }
+  return this.value;
+}
+
+/**
+ *  Overrides setValue for EventFieldGroup for input field
+ *  @param {string} Comma seperated string of inputs
+ */
+function setInputs(inputs){
+  //TODO: modify to be id independent.
+  switch(inputs){
+    case "AUDIO":
+      $("#audio")[0].checked = true;
+      break;
+    case "AUDIO,VIDEO":
+      $("#audioVideo")[0].checked = true;
+      break;
+    case "AUDIO,SCREEN":
+      $("#audioScreen")[0].checked = true;
+      break;
+    case "AUDIO,VIDEO,SCREEN":
+      $("#audioVideoScreen")[0].checked = true;
+      break;
+    default:
+      throw "Unable to set selected input.";
+  }
+}
+
+/**
+ *  Overrides checkValue for EventFieldGroup for input field
+ *  @return {boolean} True if one of the radios are checked
+ */
+function checkInputs(){
+  var checked = false;
+  for(var el in this.groupElements){
+    if($("#" + el)[0].checked){
+      checked = true;
+      break;
+    }
+  }
+  return checked;
 }

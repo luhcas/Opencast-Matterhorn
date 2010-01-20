@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Scheduler UI</title>
+    <title>Matterhorn - Schedule Recordings</title>
     
     <!-- style -->
     <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css" />
@@ -61,7 +61,7 @@
           "license":      new EventField('license'),
           "startdate":    new EventFieldGroup(new Array('startDate', 'startTimeHour', 'startTimeMin'), true, getStartDate, setStartDate, checkStartDate),
           "enddate":      new EventFieldGroup(new Array('durationHour', 'durationMin'), true, getDuration, setDuration, checkDuration), //returns a date incremented by duration.
-          "resources":    new EventFieldGroup(new Array('audio','audioVideo','audioScreen', 'audioVideoScreen'), true),
+          "resources":    new EventFieldGroup(new Array('audio','audioVideo','audioScreen', 'audioVideoScreen'), true, getInputs, setInputs, checkInputs),
           "attendees":    new EventField('attendees', true),
           "device":       new EventField('attendees')
         };
@@ -87,7 +87,7 @@
                         );
         
         $('#submitButton').click(schedulerUI.submitForm);
-        $('#resetButton').click(schedulerUI.resetForm);
+        $('#resetButton').click(schedulerUI.cancelForm);
 
         var eventID = schedulerUI.getURLParams('eventID');
         if(eventID && schedulerUI.getURLParams('edit')){
