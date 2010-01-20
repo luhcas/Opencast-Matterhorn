@@ -90,12 +90,21 @@ public abstract class AbstractCmdlineEncoderEngine extends
 
   /**
    * {@inheritDoc}
+   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile)
+   */
+  @Override
+  public File encode(File mediaSource, EncodingProfile format,Map<String, String> properties) throws EncoderException {
+    return encode(null, mediaSource, format, properties);
+  }
+
+  /**
+   * {@inheritDoc}
    * 
    * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File,
    *      java.io.File, org.opencastproject.composer.api.EncodingProfile)
    */
   @Override
-  public File encode(File audioSource, File videoSource, EncodingProfile profile)
+  public File encode(File audioSource, File videoSource, EncodingProfile profile, Map<String, String> properties)
           throws EncoderException {
     // build command
     BufferedReader in = null;
@@ -120,6 +129,8 @@ public abstract class AbstractCmdlineEncoderEngine extends
       params.put("out.dir", videoSource.getParent());
       params.put("out.suffix", profile.getSuffix());
 
+      if(properties != null) params.putAll(properties);
+      
       // create encoder process.
       // no special working dir is set which means the working dir of the
       // current java process is used.

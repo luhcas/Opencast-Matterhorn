@@ -20,7 +20,9 @@ import org.opencastproject.composer.api.EncoderEngine;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.workspace.api.Workspace;
@@ -35,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -103,9 +106,9 @@ public class ComposerServiceImpl implements ComposerService {
    * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.media.mediapackage.MediaPackage,
    *      java.lang.String, java.lang.String)
    */
-  public Future<Track> encode(MediaPackage mediaPackage, String sourceTrackId, String targetTrackId, String profileId)
+  public Future<Track> encode(MediaPackage mediaPackage, String sourceTrackId, String profileId)
           throws EncoderException {
-    return encode(mediaPackage, sourceTrackId, sourceTrackId, targetTrackId, profileId);
+    return encode(mediaPackage, sourceTrackId, sourceTrackId, profileId);
   }
 
   /**
@@ -116,7 +119,8 @@ public class ComposerServiceImpl implements ComposerService {
    */
   @Override
   public Future<Track> encode(final MediaPackage mediaPackage, final String sourceVideoTrackId,
-          final String sourceAudioTrackId, final String targetTrackId, final String profileId) throws EncoderException {
+          final String sourceAudioTrackId, final String profileId) throws EncoderException {
+    final String targetTrackId = "track-" + (mediaPackage.getTracks().length + 1);
     Callable<Track> callable = new Callable<Track>() {
       public Track call() {
         log_.info("encoding track {} for media package {} using source audio track {} and source video track {}",
@@ -144,11 +148,11 @@ public class ComposerServiceImpl implements ComposerService {
         // Do the work
         File encodingOutput;
         try {
-          encodingOutput = engine.encode(audioFile, videoFile, profile);
+          encodingOutput = engine.encode(audioFile, videoFile, profile, null);
         } catch (EncoderException e) {
           throw new RuntimeException(e);
         }
-
+        
         // Put the file in the workspace
         URI returnURL = null;
         InputStream in = null;
@@ -165,6 +169,7 @@ public class ComposerServiceImpl implements ComposerService {
         } finally {
           IOUtils.closeQuietly(in);
         }
+        if(encodingOutput != null) encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
 
         // Have the encoded track inspected and return the result
         Track inspectedTrack = inspectionService.inspect(returnURL);
@@ -183,5 +188,72 @@ public class ComposerServiceImpl implements ComposerService {
   public EncodingProfile[] listProfiles() {
     Collection<EncodingProfile> profiles = profileManager.getProfiles().values();
     return profiles.toArray(new EncodingProfile[profiles.size()]);
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.media.mediapackage.MediaPackage, java.lang.String, long)
+   */
+  @Override
+  public Future<Attachment> image(final MediaPackage mediaPackage, final String sourceVideoTrackId, final String profileId, final long time)
+          throws EncoderException {
+    final String targetAttachmentId = "attachment-" + (mediaPackage.getAttachments().length + 1);
+    Callable<Attachment> callable = new Callable<Attachment>() {
+      public Attachment call() {
+        log_.info("creating an image for media package {} using video track {}",
+                new String[] {mediaPackage.getIdentifier().toString(), sourceVideoTrackId });
+
+        // Get the video track and make sure it exists
+        File videoFile = null;
+        Track videoTrack = mediaPackage.getTrack(sourceVideoTrackId);
+        if (videoTrack != null)
+          videoFile = workspace.get(videoTrack.getURI());
+        if( ! videoTrack.hasVideo()) {
+          throw new RuntimeException("can not extract an image without a video stream");
+        }
+
+        // Create the engine
+        EncoderEngine engine = EncoderEngineFactory.newInstance().newEngineByProfile(profileId);
+        
+        EncodingProfile profile = profileManager.getProfile(profileId);
+        if (profile == null) {
+          throw new RuntimeException("Profile '" + profileId + " is unkown");
+        }
+        if(time < 0 || time > videoTrack.getDuration()) {
+          throw new IllegalArgumentException("Can not extract an image at time " + Long.valueOf(time) +
+                  " from a video track with duration " + Long.valueOf(videoTrack.getDuration()));
+        }
+
+        Map<String, String> properties = new HashMap<String, String>();
+        String timeAsString = Long.toString(time);
+        properties.put("time", timeAsString);
+        // Do the work
+        File encodingOutput;
+        try {
+          encodingOutput = engine.encode(videoFile, profile, properties);
+        } catch (EncoderException e) {
+          throw new RuntimeException(e);
+        }
+        
+        // Put the file in the workspace
+        URI returnURL = null;
+        InputStream in = null;
+        try {
+          in = new FileInputStream(encodingOutput);
+          returnURL = workspace
+                  .put(mediaPackage.getIdentifier().compact(), targetAttachmentId, encodingOutput.getName(), in);
+          log_.debug("Copied the encoded file to the workspace at {}", returnURL);
+        } catch (Exception e) {
+          log_.error("unable to put the encoded file into the workspace");
+          e.printStackTrace();
+        } finally {
+          IOUtils.closeQuietly(in);
+        }
+        if(encodingOutput != null) encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
+        return (Attachment) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
+                returnURL, Attachment.TYPE, null);
+      }
+    };
+    return executor.submit(callable);
   }
 }

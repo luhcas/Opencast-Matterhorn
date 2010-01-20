@@ -17,7 +17,7 @@
 package org.opencastproject.media.mediapackage.elementbuilder;
 
 import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.Cover;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.attachment.CoverImpl;
 
@@ -33,7 +33,7 @@ public class CoverBuilderPlugin extends AbstractAttachmentBuilderPlugin implemen
    * Creates a new attachment builder that will accept attachments of type {@link Cover}.
    */
   public CoverBuilderPlugin() {
-    super(Cover.FLAVOR);
+    super(MediaPackageElements.COVER_FLAVOR);
   }
 
   /**

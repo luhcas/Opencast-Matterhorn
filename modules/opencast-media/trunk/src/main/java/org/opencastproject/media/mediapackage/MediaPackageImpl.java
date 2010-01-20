@@ -514,15 +514,10 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#getCover()
    */
-  public Cover getCover() {
-    Attachment[] covers = getAttachments(Cover.FLAVOR);
+  public Attachment getCover() {
+    Attachment[] covers = getAttachments(MediaPackageElements.COVER_FLAVOR);
     if (covers.length > 0) {
-      if (covers[0] instanceof Cover)
-        return (Cover) covers[0];
-      else {
-        log_.warn("Cover with inconsistant object type contained in media package " + this);
-        return null;
-      }
+        return covers[0];
     }
     return null;
   }
@@ -530,8 +525,8 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#setCover(org.opencastproject.media.mediapackage.Cover)
    */
-  public void setCover(Cover cover) throws MediaPackageException, UnsupportedElementException {
-    Cover oldCover = getCover();
+  public void setCover(Attachment cover) throws MediaPackageException, UnsupportedElementException {
+    Attachment oldCover = getCover();
     if (oldCover != null)
       remove(oldCover);
     add(cover);
@@ -541,7 +536,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#removeCover()
    */
   public void removeCover() throws MediaPackageException {
-    Attachment[] covers = getAttachments(Cover.FLAVOR);
+    Attachment[] covers = getAttachments(MediaPackageElements.COVER_FLAVOR);
     if (covers.length > 0) {
       remove(covers[0]);
     }

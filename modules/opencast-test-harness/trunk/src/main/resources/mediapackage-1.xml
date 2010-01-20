@@ -1,8 +1,8 @@
-<mediapackage id="10.0000/99999" start="2007-12-05T13:40:00" duration="1004400000">
+<mediapackage start="2007-12-05T13:40:00" duration="1004400000">
   <media>
     <track id="track-1" type="presentation/source">
-      <mimetype>video/quicktime</mimetype>
-      <url>@SAMPLES_URL@/vonly.mpg</url>
+      <mimetype>video/mpeg</mimetype>
+      <url>@SAMPLES_URL@/screen.mpg</url>
       <checksum type="md5">43b7d843b02c4a429b2f547a4f230d31</checksum>
       <duration>1004400000</duration>
       <video>

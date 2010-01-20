@@ -19,6 +19,7 @@ package org.opencastproject.composer.api;
 import org.opencastproject.composer.api.EncodingProfile.MediaType;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * Interface for encoding engines like ffmpeg or telestream's episode engine.
@@ -55,7 +56,21 @@ public interface EncoderEngine {
    * @throws EncoderException
    *           if an error occurs during encoding
    */
-  File encode(File audioSource, File videoSource, EncodingProfile format) throws EncoderException;
+  File encode(File audioSource, File videoSource, EncodingProfile format,Map<String, String> properties) throws EncoderException;
+
+  /**
+   * Encodes a file into the specified format.
+   * 
+   * @param mediaSource
+   *          the media file to use in encoding
+   * @param format
+   *          the media format definition
+   * @return the encoded file
+   * 
+   * @throws EncoderException
+   *           if an error occurs during encoding
+   */
+  File encode(File mediaSource, EncodingProfile format, Map<String, String> properties) throws EncoderException;
 
   /**
    * Returns <code>true</code> if the encoder engine supports multithreading.

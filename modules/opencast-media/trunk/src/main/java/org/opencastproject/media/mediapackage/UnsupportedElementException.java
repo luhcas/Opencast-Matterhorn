@@ -18,11 +18,8 @@ package org.opencastproject.media.mediapackage;
 
 /**
  * This exception is thrown if an element is added to a {@link MediaPackage} and the element type is not supported.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: UnsupportedException.java 678 2008-08-05 14:56:22Z wunden $
  */
-public class UnsupportedElementException extends Exception {
+public class UnsupportedElementException extends RuntimeException {
 
   /** serial version id */
   private static final long serialVersionUID = 7594606321241704129L;

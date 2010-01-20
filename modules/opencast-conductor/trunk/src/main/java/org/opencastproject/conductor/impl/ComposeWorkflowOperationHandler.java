@@ -78,7 +78,6 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
 
     logger.debug("Compose operation completed");
 
-    // TODO Add new media track(s) to the media package
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, null, false);
   }
 
@@ -114,7 +113,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     String audioSourceTrackId = null;
     
     if (tracks.size() == 0) {
-      logger.info("Mediapackage {} has no suitable tracks to encode", mediaPackage);
+      logger.info("Mediapackage {} has no suitable tracks to encode based on flavor {}", mediaPackage, sourceVideoFlavor);
       return mediaPackage;
     } else {
       for (Track t : tracks) {
@@ -126,16 +125,13 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
       }
     }
     
-    String targetTrackId = "track-" + (mediaPackage.getTracks().length + 1);
-    
     // TODO profile retrieval, matching for media type (Audio, Visual, AudioVisual, EnhancedAudio, Image,
     // ImageSequence, Cover)
     // String[] profiles = ((String)properties.get("encode")).split(" ");
     EncodingProfile[] profileList = composerService.listProfiles();
     for (EncodingProfile profile : profileList) {
       if (profile.getIdentifier().equals(encodingProfile)) {
-        Future<Track> futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId,
-                targetTrackId, profile.getIdentifier());
+        Future<Track> futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, profile.getIdentifier());
         // is there anything we can be doing while we wait for the track to be composed?
         Track composedTrack = futureTrack.get();
         if (composedTrack == null)

@@ -200,5 +200,4 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
     }
     return outputFile;
   }
-
 }

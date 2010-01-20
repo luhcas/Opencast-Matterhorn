@@ -352,17 +352,12 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     if (d != null)
       feed.setPublishedDate(d);
 
-    // TODO: Finish cover support
-    // Set the cover image
-    // String coverUrl = null;
-    // DistributionFormat coverFormat = mgr.getMediaFormat(DistributionFormat.FEED_COVER_IMAGE);
-    // if (!StringSupport.isEmpty(resultItem.getCover()))
-    // coverUrl = resultItem.getCover();
-    // else if (coverFormat != null)
-    // coverUrl = MediaFormatSupport.getCoverImageUrl(coverFormat, resultItem);
-    // if (coverUrl != null)
-    // feed.setImage(new ImageImpl(coverUrl, resultItem.getDcTitle()));
-
+     //Set the cover image
+     String coverUrl = null;
+     if (!StringSupport.isEmpty(resultItem.getCover())) {
+       coverUrl = resultItem.getCover();
+       feed.setImage(new ImageImpl(coverUrl, resultItem.getDcTitle()));
+     }
     return feed;
   }
 
@@ -466,15 +461,12 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     // Add the enclosures
     addEnclosures(feed, entry, resultItem);
 
-    // Set the cover image
-    // String coverUrl = null;
-    // DistributionFormat coverFormat = mgr.getMediaFormat(DistributionFormat.FEED_COVER_IMAGE);
-    // if (!StringSupport.isEmpty(resultItem.getCover()))
-    // coverUrl = resultItem.getCover();
-    // else if (coverFormat != null)
-    // coverUrl = MediaFormatSupport.getCoverImageUrl(coverFormat, resultItem);
-    // if (coverUrl != null && coverFormat != null)
-    // setImage(entry, coverUrl);
+    //Set the cover image
+    String coverUrl = null;
+    if (!StringSupport.isEmpty(resultItem.getCover())) {
+      coverUrl = resultItem.getCover();
+      setImage(entry, coverUrl);
+    }
 
     entry.addExtension(iTunesEntry);
     entry.addExtension(dcExtension);

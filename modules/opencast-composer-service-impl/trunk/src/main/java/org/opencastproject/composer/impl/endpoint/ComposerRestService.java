@@ -19,6 +19,7 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.impl.EncodingProfileImpl;
 import org.opencastproject.composer.impl.endpoint.Receipt.STATUS;
+import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.Track;
@@ -37,7 +38,9 @@ import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -55,6 +58,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * A REST endpoint delegating functionality to the {@link ComposerService}
@@ -157,7 +165,6 @@ public class ComposerRestService {
           @FormParam("mediapackage") MediapackageType mediaPackageType,
           @FormParam("audioSourceTrackId") String audioSourceTrackId,
           @FormParam("videoSourceTrackId") String videoSourceTrackId,
-          @FormParam("targetTrackId") String targetTrackId,
           @FormParam("profileId") String profileId) throws Exception {
     // Ensure that the POST parameters are present
     if(mediaPackageType == null || audioSourceTrackId == null || videoSourceTrackId == null || profileId == null) {
@@ -175,15 +182,74 @@ public class ComposerRestService {
     try {
       Future<Track> futureTrack;
       if(audioSourceTrackId == null) {
-        futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, targetTrackId, profileId);
+        futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, profileId);
       } else {
-        futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, targetTrackId, profileId);
+        futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, profileId);
       }
       futuresMap.put(receipt.getId(), futureTrack);
       return Response.ok().entity(receipt).build();
     } catch (RuntimeException e) {
       e.printStackTrace();
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new Receipt(null, STATUS.FAILED.toString())).build();
+    }
+  }
+
+  /**
+   * Encodes a track in a media package.
+   * 
+   * @param mediaPackageType The JAXB version of MediaPackage
+   * @param audioSourceTrackId The ID of the audio source track in the media package to be encoded
+   * @param sourceTrackId The ID of the video source track in the media package to be encoded
+   * @param profileId The profile to use in encoding this track
+   * @return The JAXB version of {@link Track} {@link TrackType} 
+   * @throws Exception
+   */
+  @POST
+  @Path("image")
+  @Produces(MediaType.TEXT_XML)
+  public Response image(
+          @FormParam("mediapackage") MediapackageType mediaPackageType,
+          @FormParam("sourceTrackId") String sourceTrackId,
+          @FormParam("profileId") String profileId,
+          @FormParam("time") long time) throws Exception {
+    // Ensure that the POST parameters are present
+    if(mediaPackageType == null || sourceTrackId == null || profileId == null) {
+      return Response.status(Status.BAD_REQUEST).entity("mediapackage, sourceTrackId, and profileId must not be null").build();
+    }
+
+    // Build a media package from the POSTed XML
+    MediaPackage mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().
+        loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));
+    
+    // Asynchronously encode the specified tracks
+    Receipt receipt = dao.createReceipt();
+    receipt.setStatus(STATUS.RUNNING.toString());
+    logger.debug("created receipt {}", receipt.getId());
+    try {
+      Attachment image = composerService.image(mediaPackage, sourceTrackId, profileId, time).get();
+      return Response.ok().entity(documentToString(image)).build();
+    } catch(Exception e) {
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new Receipt(null, STATUS.FAILED.toString())).build();
+    }
+  }
+
+  /**
+   * @param image
+   * @return
+   */
+  private String documentToString(Attachment image) {
+    try {
+      Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+      image.toManifest(doc, null);
+      DOMSource domSource = new DOMSource();
+      StringWriter writer = new StringWriter();
+      StreamResult result = new StreamResult(writer);
+      TransformerFactory tf = TransformerFactory.newInstance();
+      Transformer transformer = tf.newTransformer();
+      transformer.transform(domSource, result);
+      return writer.toString();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -224,7 +290,7 @@ public class ComposerRestService {
 
     // receipt
     RestEndpoint receiptEndpoint = new RestEndpoint("receipt", RestEndpoint.Method.GET, "/receipt/{id}.xml", "Retrieve a receipt for an encoding task");
-    receiptEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containint the status of the encoding job, and the track produced by this encoding job if it the task is finished"));
+    receiptEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containing the status of the encoding job, and the track produced by this encoding job if it the task is finished"));
     receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the receipt id"));
     receiptEndpoint.addFormat(new Format("xml", null, null));
     receiptEndpoint.setTestForm(RestTestForm.auto());
@@ -233,14 +299,24 @@ public class ComposerRestService {
     // encode
     RestEndpoint encodeEndpoint = new RestEndpoint("encode", RestEndpoint.Method.POST, "/encode",
             "Starts an encoding process, based on the specified encoding profile ID, the media package, and the track ID in the media package to encode");
-    encodeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containint the receipt for the encoding task"));
+    encodeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containing the receipt for the encoding task"));
     encodeEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(), "The mediapackage containing the source tracks"));
     encodeEndpoint.addRequiredParam(new Param("audioSourceTrackId", Type.STRING, "track-1", "The track ID containing the audio stream"));
     encodeEndpoint.addRequiredParam(new Param("videoSourceTrackId", Type.STRING, "track-2", "The track ID containing the video stream"));
-    encodeEndpoint.addRequiredParam(new Param("targetTrackId", Type.STRING, "track-3", "The ID to use for the newly composed track"));
     encodeEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "flash.http", "The encoding profile to use"));
     encodeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, encodeEndpoint);
+
+    // image
+    RestEndpoint imageEndpoint = new RestEndpoint("image", RestEndpoint.Method.POST, "/image",
+            "Starts an image extraction process, based on the specified encoding profile ID, the media package, and the source track ID in the media package");
+    imageEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containing the image attachment"));
+    imageEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(), "The mediapackage containing the source tracks"));
+    imageEndpoint.addRequiredParam(new Param("time", Type.STRING, "1", "The number of seconds into the video to extract the image"));
+    imageEndpoint.addRequiredParam(new Param("sourceTrackId", Type.STRING, "track-2", "The track ID containing the video stream"));
+    imageEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "engage-image.http", "The encoding profile to use"));
+    imageEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, imageEndpoint);
 
     return DocUtil.generate(data);
   }
@@ -250,7 +326,7 @@ public class ComposerRestService {
     "  <media>\n" +
     "    <track id=\"track-1\" type=\"presentation/source\">\n" +
     "      <mimetype>audio/mp3</mimetype>\n" +
-    "      <url>" + serverUrl + "/workflow/samples/aonly.mp3</url>\n" +
+    "      <url>" + serverUrl + "/workflow/samples/audio.mp3</url>\n" +
     "      <checksum type=\"md5\">950f9fa49caa8f1c5bbc36892f6fd062</checksum>\n" +
     "      <duration>10472</duration>\n" +
     "      <audio>\n" +
@@ -262,7 +338,7 @@ public class ComposerRestService {
     "    </track>\n" +
     "    <track id=\"track-2\" type=\"presentation/source\">\n" +
     "      <mimetype>video/quicktime</mimetype>\n" +
-    "      <url>" + serverUrl + "/workflow/samples/vonly.mpg</url>\n" +
+    "      <url>" + serverUrl + "/workflow/samples/camera.mpg</url>\n" +
     "      <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n" +
     "      <duration>14546</duration>\n" +
     "      <video>\n" +

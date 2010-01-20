@@ -186,7 +186,7 @@ public class WorkflowRestService {
     "  <media>\n" +
     "    <track id=\"track-1\" type=\"presentation/source\">\n" +
     "      <mimetype>audio/mp3</mimetype>\n" +
-    "      <url>" + samplesUrl + "/aonly.mp3</url>\n" +
+    "      <url>" + samplesUrl + "/audio.mp3</url>\n" +
     "      <checksum type=\"md5\">950f9fa49caa8f1c5bbc36892f6fd062</checksum>\n" +
     "      <duration>10472</duration>\n" +
     "      <audio>\n" +
@@ -198,7 +198,7 @@ public class WorkflowRestService {
     "    </track>\n" +
     "    <track id=\"track-2\" type=\"presentation/source\">\n" +
     "      <mimetype>video/quicktime</mimetype>\n" +
-    "      <url>" + samplesUrl + "/vonly.mpg</url>\n" +
+    "      <url>" + samplesUrl + "/camera.mpg</url>\n" +
     "      <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n" +
     "      <duration>14546</duration>\n" +
     "      <video>\n" +

@@ -55,4 +55,7 @@ public interface MediaPackageElements {
   // TODO: Get rid of this
   MediaPackageElementFlavor ENGAGE_TRACK = new MediaPackageElementFlavor("engage", "download");
 
+  /** Element flavor definition */
+  MediaPackageElementFlavor COVER_FLAVOR = new MediaPackageElementFlavor("cover", "source", "Cover art");
+
 }

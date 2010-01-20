@@ -17,11 +17,7 @@
 package org.opencastproject.media.mediapackage;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: Cover.java 2905 2009-07-15 16:16:05Z ced $
+ * TODO Please remove this interface.
  */
 public interface Cover extends Attachment {
-
-  /** Element flavor definition */
-  MediaPackageElementFlavor FLAVOR = new MediaPackageElementFlavor("attachment", "cover", "Cover art");
 }

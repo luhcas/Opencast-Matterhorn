@@ -539,7 +539,7 @@ public interface MediaPackage {
    * 
    * @return the cover
    */
-  Cover getCover();
+  Attachment getCover();
 
   /**
    * Adds a cover to this media package.
@@ -551,7 +551,7 @@ public interface MediaPackage {
    * @throws UnsupportedElementException
    *           if the cover is of an unsupported format
    */
-  void setCover(Cover cover) throws MediaPackageException, UnsupportedElementException;
+  void setCover(Attachment cover) throws MediaPackageException, UnsupportedElementException;
 
   /**
    * Removes the cover from the media package.

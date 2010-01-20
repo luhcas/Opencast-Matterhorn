@@ -16,8 +16,8 @@
 
 package org.opencastproject.search.impl.solr;
 
+import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.Cover;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
@@ -293,15 +293,17 @@ public class SolrIndexManager {
     // Add flavors
     sb = new StringBuilder();
     for (MediaPackageElement element : mediaPackage.getElements()) {
-      sb.append(element.getFlavor().toString());
-      sb.append(" ");
+      if(element.getFlavor() != null) {
+        sb.append(element.getFlavor().toString());
+        sb.append(" ");
+      }
     }
     solrEpisodeDocument.addField(SolrFields.OC_ELEMENTFLAVORS, sb.toString());
 
     // Add cover
-    Cover cover = mediaPackage.getCover();
+    Attachment cover = mediaPackage.getCover();
     if (cover != null) {
-      solrEpisodeDocument.addField(SolrFields.OC_COVER, cover.getIdentifier());
+      solrEpisodeDocument.addField(SolrFields.OC_COVER, cover.getURI().toString());
     }
 
     // Add mpeg-7

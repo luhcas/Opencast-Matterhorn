@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -253,7 +254,7 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
    * @see org.opencastproject.composer.impl.AbstractEncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile)
    */
   @Override
-  public File encode(File audioSource, File videoSource, EncodingProfile format) throws EncoderException {
+  public File encode(File audioSource, File videoSource, EncodingProfile format, Map<String, String> properties) throws EncoderException {
     throw new UnsupportedOperationException("Not yet implemented");
 //    xmlrpcController.submitJob(source, format);
     // TODO Wait for encoding outcome
@@ -317,6 +318,15 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
   @Override
   public String toString() {
     return "Telestream Episode Engine";
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile)
+   */
+  @Override
+  public File encode(File mediaSource, EncodingProfile format, Map<String, String> properties) throws EncoderException {
+    return encode(null, mediaSource, format, properties);
   }
 
 }

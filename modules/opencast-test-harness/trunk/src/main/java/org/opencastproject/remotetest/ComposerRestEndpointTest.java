@@ -31,6 +31,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -61,12 +62,11 @@ public class ComposerRestEndpointTest {
     
   @Test
   public void testEncodeAudioAndVideoTracks() throws Exception {
-    // Start a workflow instance via the rest endpoint
+    // Start an encoding job via the rest endpoint
     HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/encode");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("audioSourceTrackId", "track-1"));
     formParams.add(new BasicNameValuePair("videoSourceTrackId", "track-2"));
-    formParams.add(new BasicNameValuePair("targetTrackId", "track-3"));
     formParams.add(new BasicNameValuePair("profileId", "flash.http"));
     formParams.add(new BasicNameValuePair("mediapackage", getSampleMediaPackage()));
     postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
@@ -88,6 +88,24 @@ public class ComposerRestEndpointTest {
     if( ! "FINISHED".equals(status)) {
       Assert.fail("receipt status terminated with status=" + status);
     }
+  }
+
+  @Ignore
+  @Test
+  public void testImageExtraction() throws Exception {
+    HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/image");
+    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+    formParams.add(new BasicNameValuePair("sourceTrackId", "track-2"));
+    formParams.add(new BasicNameValuePair("time", "1"));
+    formParams.add(new BasicNameValuePair("profileId", "feed-image.http"));
+    formParams.add(new BasicNameValuePair("mediapackage", getSampleMediaPackage()));
+    postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
+
+    // Grab the attachment from the response
+    HttpResponse postResponse = client.execute(postEncode);
+    Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
+    String postResponseXml = EntityUtils.toString(postResponse.getEntity());
+    System.out.println(postResponseXml);
   }
 
   protected String getSampleMediaPackage() throws Exception {

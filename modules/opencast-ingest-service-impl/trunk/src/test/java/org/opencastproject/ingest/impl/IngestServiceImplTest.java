@@ -15,7 +15,6 @@
  */
 package org.opencastproject.ingest.impl;
 
-import org.opencastproject.media.mediapackage.Cover;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Mpeg7Catalog;
@@ -99,7 +98,7 @@ public class IngestServiceImplTest {
     mediaPackage = service.createMediaPackage();
     service.addTrack(urlTrack, MediaPackageElements.INDEFINITE_TRACK, mediaPackage);
     service.addCatalog(urlCatalog, Mpeg7Catalog.FLAVOR, mediaPackage);
-    service.addAttachment(urlAttachment, Cover.FLAVOR, mediaPackage);
+    service.addAttachment(urlAttachment, MediaPackageElements.COVER_FLAVOR, mediaPackage);
     service.ingest(mediaPackage);
   }
 

@@ -18,6 +18,7 @@ package org.opencastproject.media.mediapackage.attachment;
 
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Cover;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 
@@ -49,7 +50,7 @@ public class CoverImpl extends AttachmentImpl implements Cover {
    *          the cover mime type
    */
   protected CoverImpl(String identifier, URI uri, long size, Checksum checksum, MimeType mimeType) {
-    super(identifier, Cover.FLAVOR, uri, size, checksum, mimeType);
+    super(identifier, MediaPackageElements.COVER_FLAVOR, uri, size, checksum, mimeType);
   }
 
   /**
@@ -65,7 +66,7 @@ public class CoverImpl extends AttachmentImpl implements Cover {
    *          the covers mime type
    */
   protected CoverImpl(URI uri, long size, Checksum checksum, MimeType mimeType) {
-    super(Cover.FLAVOR, uri, size, checksum, mimeType);
+    super(MediaPackageElements.COVER_FLAVOR, uri, size, checksum, mimeType);
   }
 
   /**

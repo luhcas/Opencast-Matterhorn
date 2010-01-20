@@ -90,14 +90,14 @@ public class WorkflowRestEndpointTest {
     // Ensure that the workflow finishes successfully
     int attempts = 0;
     while(true) {
-      if(++attempts == 60) Assert.fail("workflow rest endpoint test has hung");
+      if(++attempts == 20) Assert.fail("workflow rest endpoint test has hung");
       getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".xml");
       getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
       String state = getWorkflowInstanceStatus(getResponse);
       if("FAILED".equals(state)) Assert.fail("workflow instance " + id + " failed");
       if("SUCCEEDED".equals(state)) break;
       System.out.println("workflow " + id + " is " + state);
-      Thread.sleep(1000);
+      Thread.sleep(5000);
     }
   }
 

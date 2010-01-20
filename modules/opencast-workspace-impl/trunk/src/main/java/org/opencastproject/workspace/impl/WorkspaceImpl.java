@@ -90,10 +90,10 @@ public class WorkspaceImpl implements Workspace, ManagedService {
       }
     }
     
-    String urlHash = getFilenameSafeHash(urlString);
-    String fileName = rootDirectory + File.separator + urlHash;
+    String safeFilename = getSafeFilename(urlString);
+    String fullPath = rootDirectory + File.separator + safeFilename;
     // See if there's a matching file under the root directory
-    File f = new File(fileName);
+    File f = new File(fullPath);
     if(f.exists()) {
       return f;
     } else {
@@ -107,16 +107,15 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     }
   }
 
-  protected String getFilenameSafeHash(String urlString) {
+  protected String getSafeFilename(String urlString) {
+    String urlExtension = FilenameUtils.getExtension(urlString);
     try {
-      String urlEncoded = URLEncoder.encode(urlString, "UTF-8").replaceAll("\\.", "-");
-      if(urlEncoded.length() < 255) return urlEncoded;
+      String urlEncoded = URLEncoder.encode(urlString, "UTF-8");
+      String safeString = FilenameUtils.getBaseName(urlEncoded) + "." + urlExtension;
+      if(safeString.length() < 255) return safeString;
     } catch(UnsupportedEncodingException e) {}
     String random = UUID.randomUUID().toString();
-    String urlExtension = FilenameUtils.getExtension(urlString);
-    if( ! org.apache.commons.lang.StringUtils.isEmpty(urlExtension)) {
-      random = random.concat(".").concat(urlExtension);
-    }
+    random = random.concat(".").concat(urlExtension);
     logger.info("using '{}' to represent url '{}', which is too long to store as a filename", random, urlString);
     return random;
   }

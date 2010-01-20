@@ -15,6 +15,7 @@
  */
 package org.opencastproject.composer.api;
 
+import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.Track;
 
@@ -30,25 +31,24 @@ public interface ComposerService {
    * 
    * @param mediaPackage The media package containing the source track
    * @param sourceTrackId The ID of the source track within the media package
-   * @param targetTrackId The ID of the track to generate
    * @param profileId The profile to use for encoding
    * @return The track that results from the encoding
    * @throws EncoderException
    */
-  Future<Track> encode(MediaPackage mediaPackage, String sourceTrackId, String targetTrackId, String profileId) throws EncoderException;
+  Future<Track> encode(MediaPackage mediaPackage, String sourceTrackId, String profileId) throws EncoderException;
 
   /**
    * Encode the video stream from one track and the audio stream from another, into a new {@link Track}.
    * 
    * @param mediaPackage The media package containing the source track
    * @param sourceTrackId The ID of the source track within the media package
-   * @param targetTrackId The ID of the track to generate
    * @param profileId The profile to use for encoding
    * @return The track that results from the encoding
    * @throws EncoderException
    */
-  Future<Track> encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
-          String targetTrackId, String profileId) throws EncoderException;
+  Future<Track> encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId, String profileId) throws EncoderException;
+
+  Future<Attachment> image(MediaPackage mediaPackage, String sourceVideoTrackId, String profileId, long time) throws EncoderException;
 
   /**
    * @return All registered {@link EncodingProfile}s.
