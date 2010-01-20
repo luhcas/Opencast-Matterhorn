@@ -60,10 +60,13 @@ schedulerUI.eventSubmitComplete = function(data) {
 schedulerUI.loadCompleteValues = function(){
   for(field in eventsManager.fields){
     if(eventsManager.fields[field].getValue() != ""){
-      if(field == "startdate" || field == "enddate"){
-        $('#data-' + field + ' .data-value').empty().append(eventsManager.fields[field].getValue().toString());
+      if(field == "startdate"){
+        $('#data-' + field + ' .data-value').empty().append(eventsManager.fields[field].getValue().toLocaleString());
         $('#data-' + field).toggle();
-      } else {
+      }else if(field == "duration"){
+        $('#data-' + field + ' .data-value').empty().append(schedulerUI.parseDuration(eventsManager.fields[field].getValue()));
+        $('#data-' + field).toggle();
+      }else {
         var val = eventsManager.fields[field].getValue();
         if(field == "abstract"){
           if(val.length > 200){
@@ -148,4 +151,11 @@ schedulerUI.toggleDetails = function(elSwitch, el){
     elSwitch.style.verticalAlign = "top";
     $(elSwitch).text("[more]");
   }
+}
+
+schedulerUI.parseDuration = function(dur){
+  dur = dur / 1000;
+  var hours = Math.floor(dur / 3600);
+  var min   = Math.floor( ( dur /60 ) % 60 );
+  return hours + " hours, " + min + " minutes";
 }

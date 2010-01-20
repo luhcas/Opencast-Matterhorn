@@ -95,8 +95,11 @@ function serialize() {
     for(var i in this.fields){
       if(this.fields[i].getValue()){
         el = doc.createElement(i);
-        if(i == "startdate" || i == "enddate" || i == "duration"){
+        if(i == "startdate"){
           el.appendChild(doc.createTextNode(this.fields[i].getValue().getTime()));
+          doc.documentElement.appendChild(el);
+        }else if(i == "duration"){
+          el.appendChild(doc.createTextNode(this.fields[i].getValue()));
           doc.documentElement.appendChild(el);
         }else if(i == "attendees"){
           var attendee = doc.createElement("attendee");
@@ -148,7 +151,7 @@ function populateForm(document){
         case 'startdate':
           this.fields[e].setValue(new Date(parseInt($("startdate", document).text())));
           break;
-        case 'enddate': //we have to know the start date before we can use the enddate to sort out duration. This is dumb, talk to rudiger about switching to just use duration.
+        case 'duration': //we have to know the start date before we can use the enddate to sort out duration. This is dumb, talk to rudiger about switching to just use duration.
           this.fields[e].setValue(parseInt($("duration", document).text()));
           break;
         case 'id':
@@ -343,12 +346,10 @@ EventFieldGroup.prototype.checkValue = checkEventFieldGroupValue;
  *  @return {Date Object} Date object, start date, incremented by duration.
  */
 function getDuration() {
-  //to do: add duration to starttime, and return the end time.
   if(this.checkValue()){
     duration = this.groupElements['durationHour'].val() * 3600; // seconds per hour
     duration += this.groupElements['durationMin'].val() * 60; // seconds per min
-    //get the start date, increment it by the duration(in seconds), convert to milliseconds. bad coupling...refactor
-    this.value = new Date( eventsManager.fields['startdate'].getValue().getTime() + (duration * 1000) );
+    this.value = (duration * 1000);
   }
   return this.value;
 }
@@ -425,15 +426,13 @@ function checkStartDate(){
       date &&
       this.groupElements['startTimeHour'] &&
       this.groupElements['startTimeMin']){
-    //console.log(date.getDate() + ":" + now.getDate() + "," + date.getMonth() + ":" + now.getMonth() + "," + date.getYear() + ":" + now.getYear() + "," + this.groupElements['startTimeHour'].val() + ":" + now.getHours());
     if(date.getDate() >= now.getDate() && 
        date.getMonth() >= now.getMonth() &&
-       date.getYear() >= now.getYear() &&
-       this.groupElements['startTimeHour'].val() >= now.getHours() &&
-       this.groupElements['startTimeMin'].val() >= now.getMinutes()){
-      return true;
-    }else{
-      return false;
+       date.getYear() >= now.getYear()){
+      if((this.groupElements['startTimeHour'].val() == now.getHours() && this.groupElements['startTimeMin'].val() > now.getMinutes()) || 
+         this.groupElements['startTimeHour'].val() > now.getHours()){
+         return true;
+      }
     }
   }
   return false;
