@@ -722,6 +722,17 @@
       </roles>
       <timezone>+1</timezone>
     </developer>
+    <developer>
+      <id>msutton</id>
+      <name>Micah Sutton</name>
+      <email>msutton3@unl.edu</email>
+      <organization>University of Nebraska-Lincoln</organization>
+      <organizationUrl>http://www.unl.edu</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>-6</timezone>
+    </developer>
   </developers>
 
   <contributors><!-- TODO? --></contributors>
