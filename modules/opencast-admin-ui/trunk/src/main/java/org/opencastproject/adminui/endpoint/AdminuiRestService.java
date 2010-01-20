@@ -146,17 +146,19 @@ public class AdminuiRestService {
           item.setSeries(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_IS_PART_OF));
           item.setStartTime(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_DATE));  // FIXME get timestamp
           item.setCaptureAgent(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_CREATOR)); //FIXME get capture agent from where...?
-          // Get last WorkflowOperationInstance from WorkflowOperationInstanceList
           WorkflowOperationInstance operation = null;
           ListIterator<WorkflowOperationInstance> instances = workflows[i].getWorkflowOperationInstanceList().getOperationInstance().listIterator();
+          StringBuffer sb = new StringBuffer();
           while (instances.hasNext()) {
             operation = instances.next();
+            sb.append(operation.getState().toString() + ":" + operation.getName() + ";");
           }
-          if (operation != null) {
+          item.setProcessingStatus(sb.toString());
+          /*if (operation != null) {
             item.setProcessingStatus(operation.getState().toString() + " : " + operation.getName());
           } else {
             logger.warn("Could not get any WorkflowOperationInstance from WorkflowInstance.");
-          }
+          }*/
           // TODO get distribution status #openquestion is there a way to find out if a workflowOperation does distribution?
           out.add(item);
         } else {

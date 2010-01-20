@@ -37,6 +37,14 @@ body {
     background-image: url(../img/tick.png);
 }
 
+.icon-error {
+    background-image: url(../img/exclamation.png);
+}
+
+.icon-running {
+    background-image: url(../img/cog.png);
+}
+
 .icon-add {
     background-image: url(../img/add.png);
 }

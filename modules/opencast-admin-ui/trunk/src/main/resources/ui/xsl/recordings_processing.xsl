@@ -54,7 +54,7 @@
       <!-- <td>
         <xsl:value-of select="captureAgent" />
       </td> -->
-      <td>
+      <td class="processingStatus">
         <xsl:value-of select="processingStatus" />
       </td>
     </tr>

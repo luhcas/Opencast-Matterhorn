@@ -11,7 +11,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ns1="http://adminui.opencastproject.org/" version="1.0">
   <xsl:output method="html"/>
   <xsl:template match="ns1:recordingLists">
-    <center>Under development. When implemented will show all recordings in the system.</center>
+    <center>Under development. When implemented will show a list of all recordings that are in the capture phase.</center>
   </xsl:template>
 <!--
   <xsl:template match="ns1:recordingLists">
