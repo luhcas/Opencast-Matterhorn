@@ -108,9 +108,14 @@ public class SchedulerEventJaxbImpl {
     }
     event.setMetadata(metadata);
     event.setStartdate(new Date(start));
-    if (duration > 0 )
-      event.setStartdate(new Date(start+duration));
-    else event.setEnddate(new Date(end));
+    if (duration > 0 ) {
+      event.setEnddate(new Date(start+duration));
+    } else if(end > 0) {
+      event.setEnddate(new Date(end));
+    } else {
+      event.setEnddate(new Date(0));
+      logger.error("Must have either an enddate or duration!");
+    }
     event.setResources(resources.toArray(new String [0]));
     event.setAttendees(attendees.toArray(new String [0]));
     logger.info("Event created "+event.toString());
