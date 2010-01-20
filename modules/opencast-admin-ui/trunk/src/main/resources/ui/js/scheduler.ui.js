@@ -77,7 +77,8 @@ schedulerUI.loadCompleteValues = function(){
         $('#data-' + field).toggle();
       }
     }
-  }   
+  }
+  $("#links").css("display", "block");
 }
 
 schedulerUI.showNotificationBox = function() {
