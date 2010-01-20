@@ -66,7 +66,7 @@
 		</div>
 
     <div id="oc-video-display-container">
-      <object codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" height="400" width="320" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
+      <object codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" height="320" width="400" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"> 
         <param name ="movie" value="engage-hybrid-player/Videodisplay.swf"/>
         <param name="quality" value="high"/>
         <param name="allowScriptAccess" value="always"/>
