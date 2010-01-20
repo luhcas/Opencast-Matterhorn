@@ -429,7 +429,8 @@ function checkStartDate(){
     if(date.getDate() >= now.getDate() && 
        date.getMonth() >= now.getMonth() &&
        date.getYear() >= now.getYear() &&
-       this.groupElements['startTimeHour'].val() > now.getHours()){
+       this.groupElements['startTimeHour'].val() >= now.getHours() &&
+       this.groupElements['startTimeMin'].val() >= now.getMinutes()){
       return true;
     }else{
       return false;
