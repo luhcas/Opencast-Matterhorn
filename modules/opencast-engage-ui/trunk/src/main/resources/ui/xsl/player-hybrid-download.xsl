@@ -30,11 +30,7 @@
 								name="Current Time" title="Current Time" value="00:00:00">00:00:00</span>
 							<span id="editorContainer" name="Edit Current Time" title="Edit Current Time"
 								value="Edit Current Time">
-								<input id="editField" type="text" maxlength="9" size="9"
-									name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS"
-									value="Edit Current Time HH:MM:SS" onKeyPress="Opencast.global.keyListener(event);"
-									onchange="Opencast.global.editTime();" onFocus="Opencast.ToVideodisplay.doPause();"
-									onBlur="Opencast.ToVideodisplay.doPlay();" />
+							 <input id="editField" type="text" maxlength="9" size="9" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="Edit Current Time HH:MM:SS" onKeyPress="Opencast.Player.editTimeKeyListener(event);" onchange="Opencast.Player.editTime();" onFocus="Opencast.Player.doPause();" onBlur="Opencast.Player.doPlay();" />
 							</span>
 							of
 							<span id="time-total" role="timer" name="Total Time" title="Total Time"
@@ -43,50 +39,28 @@
 					</td>
 
 					<td align="center" valign="middle" style="padding-left:0">
-						<button id="btn_skip_backward" class="btn_skip_backward"
-							onmouseover="this.className='btn_skip_backward_over'" onmouseout="this.className='btn_skip_backward_out'"
-							type="submit" onclick="Opencast.ToVideodisplay.doSkipBackward();"
-							name="Skip Backward" value="Skip Backward" alt="Skip Backward"
-							title="Skip Backward"></button>
-						<button id="btn_rewind" class="btn_rewind"
-							onmouseover="this.className='btn_rewind_over'" onmouseout="this.className='btn_rewind_out'"
-							type="submit" onclick="Opencast.ToVideodisplay.doRewind();" name="Rewind"
-							value="Rewind" alt="Rewind" title="Rewind"></button>
-						<button id="btn_play_pause" class="btn_play"
-							onmouseover="Opencast.global.mouseOver();" onmouseout="Opencast.global.mouseOut();"
-							type="submit" onclick="Opencast.ToVideodisplay.doTogglePlayPause();"
-							name="Play" value="Play" alt="Play" title="Play"></button>
-						<button id="btn_fast_forward" class="btn_fast_forward"
-							onmouseover="this.className='btn_fastForward_over'" onmouseout="this.className='btn_fastForward_out'"
-							type="submit" onclick="Opencast.ToVideodisplay.doFastForward();"
-							name="Fast Forward" value="Fast Forward" alt="Fast Forward"
-							title="Fast Forward"></button>
-						<button id="btn_skip_forward" class="btn_skip_forward"
-							onmouseover="this.className='btn_skip_forward_over'" onmouseout="this.className='btn_skip_forward_out'"
-							type="submit" onclick="Opencast.ToVideodisplay.doSkipForward();"
-							name="Skip Forward" value="Skip Forward" alt="Skip Forward"
-							title="Skip Forward"></button>
+					    <button id="btn_skip_backward"  class="btn_skip_backward"  onmouseover="this.className='btn_skip_backward_over'"   onmouseout="this.className='btn_skip_backward_out'"  type="submit"  onclick="Opencast.Player.doSkipBackward();"     name="Skip Backward"  value="Skip Backward"   alt="Skip Backward"  title="Skip Backward" ></button>
+          <button id="btn_rewind"         class="btn_rewind"         onmouseover="this.className='btn_rewind_over'"          onmouseout="this.className='btn_rewind_out'"         type="submit"  onclick="Opencast.Player.doRewind();"           name="Rewind"         value="Rewind"          alt="Rewind"         title="Rewind"        ></button>
+          <button id="btn_play_pause"     class="btn_play"           onmouseover="Opencast.Player.PlayPauseMouseOver();"     onmouseout="Opencast.Player.PlayPauseMouseOut();"             type="submit"  onclick="Opencast.Player.doTogglePlayPause();"  name="Play"           value="Play"            alt="Play"           title="Play"          ></button>
+          <button id="btn_fast_forward"   class="btn_fast_forward"   onmouseover="this.className='btn_fastForward_over'"     onmouseout="this.className='btn_fastForward_out'"    type="submit"  onclick="Opencast.Player.doFastForward();"      name="Fast Forward"   value="Fast Forward"    alt="Fast Forward"   title="Fast Forward"  ></button>
+          <button id="btn_skip_forward"   class="btn_skip_forward"   onmouseover="this.className='btn_skip_forward_over'"    onmouseout="this.className='btn_skip_forward_out'"   type="submit"  onclick="Opencast.Player.doSkipForward();"      name="Skip Forward"   value="Skip Forward"    alt="Skip Forward"   title="Skip Forward"  ></button>
 					</td>
 
-					<td align="center" valign="middle" style="padding-right:0">
-						<button id="btn_volume" class="oc-btn-volume-high" type="submit"
-							onclick="Opencast.ToVideodisplay.doToggleVolume();" name="Unmute"
-							value="Unmute" alt="Unmute" title="Unmute"></button>
-					</td>
-
-					<td align="center" valign="middle" style="padding-right:0">
-						<label id="volumeLabel" for="slider_volume_Rail" class="fl-offScreen-hidden">Volume</label>
-						<div id="slider_volume_Rail" class="oc-slider-volume-Rail"
-							title="Volume">
-							<button id="slider_volume_Thumb" class="oc-slider-volume-Thumb"></button>
-						</div>
-					</td>
-
-					<td align="center" valign="middle" style="padding-right:5">
-						<button id="btn_cc" class="oc-btn-cc-off" type="submit"
-							onclick="Opencast.ToVideodisplay.doToogleClosedCaptions();" name="Closed Caption Off"
-							value="Closed Caption Off" alt="Closed Caption Off" title="Closed Caption Off"></button>
-					</td>
+        <td align="center" valign="middle"   style="padding-right:0" >  
+          <button id="btn_volume"        class="oc-btn-volume-high"          type="submit"  onclick="Opencast.Player.doToggleVolume();"          name="Unmute"               value="Unmute"               alt="Unmute"              title="Unmute"              ></button>
+        </td>
+        
+        <td align="center" valign="middle"style="padding-right:0">
+          <!-- http://accessify.com/tools-and-wizards/accessibility-tools/aria/slider-generator/ -->
+          <label id="volumeLabel" for="slider_volume_Rail" class="fl-offScreen-hidden">Volume</label>
+          <div id="slider_volume_Rail" class="oc-slider-volume-Rail" title="Volume">
+            <button id="slider_volume_Thumb" class="oc-slider-volume-Thumb"></button>
+          </div>
+        </td>
+       
+        <td align="center" valign="middle"   style="padding-right:5" >       
+          <button id="btn_cc"      class="oc-btn-cc-off"          type="submit"  onclick="Opencast.Player.doToogleClosedCaptions();"          name="Closed Caption Off"               value="Closed Caption Off"               alt="Closed Caption Off"              title="Closed Caption Off"              ></button>
+        </td>
 				</tr>
 			</table>
 		</div>
@@ -115,37 +89,26 @@
       </object>
     </div>
       
-		<div id="info">
-			<button id="btn_info" class="oc_btn_info" onClick="Opencast.global.toggleInfo();"
-				type="submit" name="Keyboard Shortcuts Information" value="Keyboard Shortcuts Information"
-				alt="Keyboard Shortcuts Information" title="Keyboard Shortcuts Information">Keyboard
-				Shortcuts Information</button>
-			<div id="infoBlock" class="oc_infoDisplayNone">
-				Press Control + Alt + I = Toggle the keyboard shortcuts information
-				between visible or unvisible.
-				<br />
-				Press Control + Alt + P = Toggle the video between pause or play.
-				<br />
-				Press Control + Alt + S = Stop the video.
-				<br />
-				Press Control + Alt + M = Toggle between mute or unmute the video.
-				<br />
-				Press Control + Alt + U = Volume up
-				<br />
-				Press Control + Alt + D = Volume down
-				<br />
-				Press Control + Alt 0 - 9 = Seek the time slider
-				<br />
-				Press Control + Alt + C = Toggle between captions on or off.
-				<br />
-				Press Control + Alt + F = Forward the video.
-				<br />
-				Press Control + Alt + R = Rewind the video.
-				<br />
-				Press Control + Alt + T = the current time for the screen reader
-				<br />
-			</div>
-		</div>
+    <div id="info" >
+      <button id="btn_info" class="oc_btn_info" onClick="Opencast.Player.toggleInfo();" type="submit" name="Keyboard Shortcuts Information"  value="Keyboard Shortcuts Information"   alt="Keyboard Shortcuts Information"  title="Keyboard Shortcuts Information" >Keyboard Shortcuts Information</button>
+      <div id="infoBlock" class="oc_infoDisplayNone" >
+          Press Control + Alt + I   = Toggle the keyboard shortcuts information between visible or unvisible.<br/>
+          Press Control + Alt + P   = Toggle the video between pause or play.<br/>
+          Press Control + Alt + S   = Stop the video.<br/>
+          Press Control + Alt + M   = Toggle between mute or unmute the video.<br/>
+          Press Control + Alt + U   = Volume up<br/>
+          Press Control + Alt + D   = Volume down<br/>
+          Press Control + Alt 0 - 9 = Seek the time slider<br/>
+          Press Control + Alt + C   = Toggle between captions on or off.<br/>
+          Press Control + Alt + F   = Forward the video.<br/>
+          Press Control + Alt + R   = Rewind the video.<br/>
+          Press Control + Alt + T   = the current time for the screen reader<br/>
+          Press on Mac cmd + = to zoom in the player<br/>
+          Press on Mac cmd - = to minimize the player<br/>
+          Press on Windows strg + = to zoom in the player<br/>
+          Press on Windows strg - = to minimize the player<br/>
+      </div>
+    </div>
 		<br/>
           <xsl:value-of select="ns2:episode/dcAbstract" />
 		<ul id="captions" aria-channel="main" aria-relevant="additions"

@@ -23,21 +23,7 @@
     <script type="text/javascript" src="jquery/jquery/jquery-1.3.2.js"></script>
     <script type="text/javascript" src="js/jquery.xslt.js"></script>
     <script type="text/javascript" src="js/engage-ui.js"></script>
-    
-    <script language="JavaScript" type="text/javascript">
-      <!--
-      // -----------------------------------------------------------------------------
-      // Globals
-      // Major version of Flash required
-      var requiredMajorVersion = 10;
-      // Minor version of Flash required
-      var requiredMinorVersion = 0;
-      // Minor version of Flash required
-      var requiredRevision = 0;
-      // -----------------------------------------------------------------------------
-      // -->
-    </script>
-        
+
     <script type="text/javascript">
       $(document).ready( function() {
 
@@ -79,17 +65,12 @@
           var elem11 = document.createElement("script");
           $(elem11).attr({type:"text/javascript", src:"engage-hybrid-player/player-hybrid-download.js"});
           
+          
           var elem12 = document.createElement("script");
-          $(elem12).attr({type:"text/javascript", src:"engage-hybrid-player/player-hybrid-fromvideodisplay.js"});
+          $(elem12).attr({type:"text/javascript", src:"engage-hybrid-player/aria/js/ariaSlider.js"});
 
           var elem13 = document.createElement("script");
-          $(elem13).attr({type:"text/javascript", src:"engage-hybrid-player/player-hybrid-tovideodisplay.js"});
-          
-          var elem14 = document.createElement("script");
-          $(elem14).attr({type:"text/javascript", src:"engage-hybrid-player/aria/js/ariaSlider.js"});
-
-          var elem15 = document.createElement("script");
-          $(elem15).attr({type:"text/javascript", src:"engage-hybrid-player/swffix/swffix.js"});
+          $(elem13).attr({type:"text/javascript", src:"engage-hybrid-player/swffix/swffix.js"});
 
           $('head').append(elem1);
           $('head').append(elem2);
@@ -104,8 +85,6 @@
           $('head').append(elem11);
           $('head').append(elem12);
           $('head').append(elem13);
-          $('head').append(elem14);
-          $('head').append(elem15);
 
           // Content of the player-hybrid-download.js document ready
           Opencast.ariaSlider.init(); 
