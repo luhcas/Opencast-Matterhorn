@@ -25,7 +25,9 @@
 	addedToStage="onAddedToStage()"
 	applicationComplete="init(event)"
 	xmlns:view="org.opencast.engage.videodisplay.view.*"
-	xmlns:ns1="bridge.*">
+	xmlns:ns1="bridge.*"
+	currentState="{model.mediaState}"
+	>
 	<mx:Style source="style/standard_videodisplay.css"/>
 	<mx:Script>
 		
@@ -43,16 +45,13 @@
 			import org.swizframework.Swiz;
 			import flash.display.StageDisplayState;
 			
-			
-			
 			[Autowire]
 			[Bindable]
 			public var model:VideodisplayModel;
 			
 			private var _timeCode:TimeCode;
 			
-      		
-			 /** 
+      		/** 
              * init
              * 
              * initialization
@@ -378,15 +377,30 @@
 			}
 		]]>
 	</mx:Script>
+	
+	<mx:states>
+        <mx:State name="video">
+            <mx:SetProperty target="{ bx_video }" name="visible" value="true"/>
+            <mx:SetProperty target="{ bx_video }" name="includeInLayout" value="true"/>
+        </mx:State>
+        <mx:State name="audio">
+            <mx:SetProperty target="{ bx_audio }" name="visible" value="true"/>
+            <mx:SetProperty target="{ bx_audio }" name="includeInLayout" value="true"/>
+        </mx:State>
+    </mx:states>
+    
 	<ns1:FABridge />
 	
-	<view:VideodisplayView id="display"
-		width="100%"
-		height="100%"
-		/>
-	
-	<view:Splashscreen id="splash"
-		width="100%"
-		height="100%"/>
+	<view:VideoView 
+		id="bx_video"
+        visible="false"
+        includeInLayout="false"
+        />
+    
+    <view:AudioView 
+    	id="bx_audio"
+        visible="false"
+        includeInLayout="false"
+    	/>
 
 </mx:Application>

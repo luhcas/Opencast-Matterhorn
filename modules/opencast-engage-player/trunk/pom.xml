@@ -9,6 +9,7 @@
 	<packaging>swf</packaging>
 	<name>opencast-engage-player</name>
 	
+
 	<parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -112,6 +113,10 @@
 						<reports>
 							<report>asdoc-report</report>
 						</reports>
+						<configuration>
+              			<windowTitle>Opencast Matterhorn Media Player API Doc</windowTitle>
+              			<footer>Opencast Matterhorn </footer>
+            			</configuration>
 					</reportSet>
 				</reportSets>
 			</plugin>
@@ -173,7 +178,7 @@
 		<dependency>
 			<groupId>com.adobe.osmf</groupId>
 			<artifactId>MediaFramework</artifactId>
-			<version>0.6</version>
+			<version>0.8</version>
 			<type>swc</type>
 		</dependency>
 		<dependency>

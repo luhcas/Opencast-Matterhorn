@@ -33,18 +33,18 @@
         <script type="text/javascript" src="swffix/swffix.js"></script>
        
         <script language="JavaScript" type="text/javascript">
-		        <!--
-						// -----------------------------------------------------------------------------
-						// Globals
-						// Major version of Flash required
-						var requiredMajorVersion = 10;
-						// Minor version of Flash required
-						var requiredMinorVersion = 0;
-						// Minor version of Flash required
-						var requiredRevision = 0;
-						// -----------------------------------------------------------------------------
-						// -->
-				</script>
+            <!--
+            // -----------------------------------------------------------------------------
+            // Globals
+            // Major version of Flash required
+            var requiredMajorVersion = 10;
+            // Minor version of Flash required
+            var requiredMinorVersion = 0;
+            // Minor version of Flash required
+            var requiredRevision = 0;
+            // -----------------------------------------------------------------------------
+            // -->
+        </script>
     </head>
 
     <body>
@@ -84,7 +84,7 @@
         <td align="center" valign="middle" style="padding-left:0" >      
           <button id="btn_skip_backward"  class="btn_skip_backward"  onmouseover="this.className='btn_skip_backward_over'"   onmouseout="this.className='btn_skip_backward_out'"  type="submit"  onclick="Opencast.Player.doSkipBackward();"     name="Skip Backward"  value="Skip Backward"   alt="Skip Backward"  title="Skip Backward" ></button>
           <button id="btn_rewind"         class="btn_rewind"         onmouseover="this.className='btn_rewind_over'"          onmouseout="this.className='btn_rewind_out'"         type="submit"  onclick="Opencast.Player.doRewind();"           name="Rewind"         value="Rewind"          alt="Rewind"         title="Rewind"        ></button>
-          <button id="btn_play_pause"     class="btn_play"           onmouseover="Opencast.global.mouseOver();"              onmouseout="Opencast.global.mouseOut();"             type="submit"  onclick="Opencast.Player.doTogglePlayPause();"  name="Play"           value="Play"            alt="Play"           title="Play"          ></button>
+          <button id="btn_play_pause"     class="btn_play"           onmouseover="Opencast.Player.PlayPauseMouseOver();"     onmouseout="Opencast.Player.PlayPauseMouseOut();"             type="submit"  onclick="Opencast.Player.doTogglePlayPause();"  name="Play"           value="Play"            alt="Play"           title="Play"          ></button>
           <button id="btn_fast_forward"   class="btn_fast_forward"   onmouseover="this.className='btn_fastForward_over'"     onmouseout="this.className='btn_fastForward_out'"    type="submit"  onclick="Opencast.Player.doFastForward();"      name="Fast Forward"   value="Fast Forward"    alt="Fast Forward"   title="Fast Forward"  ></button>
           <button id="btn_skip_forward"   class="btn_skip_forward"   onmouseover="this.className='btn_skip_forward_over'"    onmouseout="this.className='btn_skip_forward_out'"   type="submit"  onclick="Opencast.Player.doSkipForward();"      name="Skip Forward"   value="Skip Forward"    alt="Skip Forward"   title="Skip Forward"  ></button>
         </td>
@@ -93,7 +93,7 @@
           <button id="btn_volume"        class="oc-btn-volume-high"          type="submit"  onclick="Opencast.Player.doToggleVolume();"          name="Unmute"               value="Unmute"               alt="Unmute"              title="Unmute"              ></button>
         </td>
         
-        <td align="center" valign="middle"style="padding-right:0">
+        <td align="center" valign="middle" style="padding-right:0">
           <!-- http://accessify.com/tools-and-wizards/accessibility-tools/aria/slider-generator/ -->
           <label id="volumeLabel" for="slider_volume_Rail" class="fl-offScreen-hidden">Volume</label>
           <div id="slider_volume_Rail" class="oc-slider-volume-Rail" title="Volume">
@@ -108,61 +108,61 @@
     </div>
     
     <script language="JavaScript" type="text/javascript">
-			<!--
-			// Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
-			var hasProductInstall = DetectFlashVer(6, 0, 65);
-			
-			// Version check based upon the values defined in globals
-			var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
-			
-			if ( hasProductInstall && !hasRequestedVersion ) {
-			  // DO NOT MODIFY THE FOLLOWING FOUR LINES
-			  // Location visited after installation is complete if installation is required
-			  var MMPlayerType = (isIE == true) ? "ActiveX" : "PlugIn";
-			  var MMredirectURL = window.location;
-			  document.title = document.title.slice(0, 47) + " - Flash Player Installation";
-			  var MMdoctitle = document.title;
-			
-			  AC_FL_RunContent(
-			    "src", "playerProductInstall",
-			    "FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
-			    "width", "400",
-			    "height", "320",
-			    "align", "middle",
-			    "id", "oc_Videodisplay",
-			    "quality", "high",
-			    "bgcolor", "#FFFFFF",
-			    "name", "Videodisplay",
-			    "allowScriptAccess","sameDomain",
-			    "type", "application/x-shockwave-flash",
-			    "pluginspage", "http://www.adobe.com/go/getflashplayer"
-			  );
-			} else if (hasRequestedVersion) {
-			  // if we've detected an acceptable version
-			  // embed the Flash Content SWF when all tests are passed
-			  AC_FL_RunContent(
-					  "src", "Videodisplay",
-			      "width", "400",
-			      "height", "320",
-			      "id", "oc_Videodisplay",
-			      "quality", "high",
-			      "bgcolor", "#FFFFFF",
-			      "name", "Videodisplay",
-			      "allowfullscreen", "true",
-		        "flashvars", "bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml",
-					  "allowScriptAccess","sameDomain",
-			      "type", "application/x-shockwave-flash",
-			      "pluginspage", "http://www.adobe.com/go/getflashplayer"
-			  );
-			  } else {  // flash is too old or we can't detect the plugin
-			    var alternateContent = 'Alternate HTML content should be placed here. '
-			    + 'This content requires the Adobe Flash Player. '
-			    + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
-			    document.write(alternateContent);  // insert non-flash content
-			  }
-			// -->
-		</script>
-	  <div id="info" >
+      <!--
+      // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
+      var hasProductInstall = DetectFlashVer(6, 0, 65);
+      
+      // Version check based upon the values defined in globals
+      var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
+      
+      if ( hasProductInstall && !hasRequestedVersion ) {
+        // DO NOT MODIFY THE FOLLOWING FOUR LINES
+        // Location visited after installation is complete if installation is required
+        var MMPlayerType = (isIE == true) ? "ActiveX" : "PlugIn";
+        var MMredirectURL = window.location;
+        document.title = document.title.slice(0, 47) + " - Flash Player Installation";
+        var MMdoctitle = document.title;
+      
+        AC_FL_RunContent(
+          "src", "playerProductInstall",
+          "FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
+          "width", "400",
+          "height", "320",
+          "align", "middle",
+          "id", "oc_Videodisplay",
+          "quality", "high",
+          "bgcolor", "#FFFFFF",
+          "name", "Videodisplay",
+          "allowScriptAccess","sameDomain",
+          "type", "application/x-shockwave-flash",
+          "pluginspage", "http://www.adobe.com/go/getflashplayer"
+        );
+      } else if (hasRequestedVersion) {
+        // if we've detected an acceptable version
+        // embed the Flash Content SWF when all tests are passed
+        AC_FL_RunContent(
+            "src", "Videodisplay",
+            "width", "400",
+            "height", "320",
+            "id", "oc_Videodisplay",
+            "quality", "high",
+            "bgcolor", "#FFFFFF",
+            "name", "Videodisplay",
+            "allowfullscreen", "true",
+            "flashvars", "bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml",
+            "allowScriptAccess","sameDomain",
+            "type", "application/x-shockwave-flash",
+            "pluginspage", "http://www.adobe.com/go/getflashplayer"
+        );
+        } else {  // flash is too old or we can't detect the plugin
+          var alternateContent = 'Alternate HTML content should be placed here. '
+          + 'This content requires the Adobe Flash Player. '
+          + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
+          document.write(alternateContent);  // insert non-flash content
+        }
+      // -->
+    </script>
+    <div id="info" >
       <button id="btn_info" class="oc_btn_info" onClick="Opencast.Player.toggleInfo();" type="submit" name="Keyboard Shortcuts Information"  value="Keyboard Shortcuts Information"   alt="Keyboard Shortcuts Information"  title="Keyboard Shortcuts Information" >Keyboard Shortcuts Information</button>
       <div id="infoBlock" class="oc_infoDisplayNone" >
           Press Control + Alt + I   = Toggle the keyboard shortcuts information between visible or unvisible.<br>
@@ -176,6 +176,10 @@
           Press Control + Alt + F   = Forward the video.<br>
           Press Control + Alt + R   = Rewind the video.<br>
           Press Control + Alt + T   = the current time for the screen reader<br>
+          Press on Mac cmd + = to zoom in the player<br>
+          Press on Mac cmd - = to minimize the player<br>
+          Press on Windows strg + = to zoom in the player<br>
+          Press on Windows strg - = to minimize the player<br>
       </div>
     </div>
    

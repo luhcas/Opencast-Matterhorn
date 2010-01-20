@@ -75,6 +75,15 @@ IF MAVEN ISN`T YOUR CHOICE FOR WORKING WITH FLEX/AJAX/HTML
 ------
 
 
+CODE DOCUMENTATION:
+
+Maven will create the docs for this project
+
+mvn site
+
+creates the 'site' folder in the /target directory
+
+
 
 
 

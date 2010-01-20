@@ -37,6 +37,7 @@ package org.opencast.engage.videodisplay.control
 	import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
 	import org.opencast.engage.videodisplay.control.responder.LoadDFXPXMLResponder;
 	import org.opencast.engage.videodisplay.model.VideodisplayModel;
+	import org.opencast.engage.videodisplay.state.MediaState;
 	import org.opencast.engage.videodisplay.state.PlayerState;
 	import org.opencast.engage.videodisplay.vo.CaptionSetVO;
 	import org.opencast.engage.videodisplay.vo.CaptionVO;
@@ -81,58 +82,68 @@ package org.opencast.engage.videodisplay.control
 				case VideoControlEvent.PLAY:			if( !model.player.playing)
 				                                        {
 						    								model.player.play();
-				                                        }
-						  								model.currentPlayerState = PlayerState.PLAYING;
-													   	currentPlayPauseState = PlayerState.PAUSING;
-													   	ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
-													   	break;
+						    								
+						    							}
+						    							model.currentPlayerState = PlayerState.PLAYING;
+                                                        currentPlayPauseState = PlayerState.PAUSING;
+                                                        ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
+						  								break;
 												
 				case VideoControlEvent.PAUSE: 			if(model.player.playing)
 		  				  								{
 		  				  									model.player.pause();
+		  				  									
 		  				  								}
-									  					model.currentPlayerState = PlayerState.PAUSING;
-									  					currentPlayPauseState = PlayerState.PLAYING;
-									  					ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
-														break;
+		  				  								model.currentPlayerState = PlayerState.PAUSING;
+                                                        currentPlayPauseState = PlayerState.PLAYING;
+                                                        ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
+									  					break;
 												
 				case VideoControlEvent.STOP: 			if(model.player.playing)
-														{
+                                                        {
 															model.player.pause();
-													   }
+															model.currentPlayerState = PlayerState.PAUSING;
+                                                            currentPlayPauseState = PlayerState.PLAYING;
+                                                            ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
+													    }
 													  	model.player.seek(0);
-													  	model.currentPlayerState = PlayerState.PAUSING;
-						  								currentPlayPauseState = PlayerState.PLAYING;
-						  								ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
-														break;
+													  	break;
 												
-				case VideoControlEvent.SKIPBACKWARD: 	model.player.seek( model.skipBackwardTime );
-										    			break;
+				case VideoControlEvent.SKIPBACKWARD: 	model.player.seek( 0 );
+				                                        break;
 														
-				case VideoControlEvent.REWIND: 			if(model.player.playing)
+				case VideoControlEvent.REWIND: 			if( model.currentPlayhead +1 > model.rewindTime )
 				                                        {
-				                                            model.player.pause();
-                                                            model.player.seek( model.currentPlayhead - model.rewindTime );
-                                                            model.player.play();
-                                                        }
-				                                        else
-				                                        {
-				                                            model.player.seek( model.currentPlayhead - model.rewindTime );
+				                                            if(model.player.playing)
+	                                                        {
+	                                                            model.player.pause();
+	                                                            model.player.seek( model.currentPlayhead - model.rewindTime );
+	                                                            model.player.play();
+	                                                        }
+	                                                        else
+	                                                        {
+	                                                            model.player.seek( model.currentPlayhead - model.rewindTime );
+	                                                        }
 				                                        }
-				                                            
-										    			break;
+				                                        break;
 								
 				case VideoControlEvent.FASTFORWARD: 	model.player.seek( model.currentPlayhead + model.fastForwardTime );
 										    			break;
 								
-				case VideoControlEvent.SKIPFORWARD: 	model.player.seek( model.currentDuration - 1);
+				case VideoControlEvent.SKIPFORWARD: 	
 														if(model.player.playing)
-														{
+                                                        {
+		  				  									model.player.seek( model.currentDuration - 1);
 		  				  									model.player.pause();
+		  				  									model.currentPlayerState = PlayerState.PAUSING;
+                                                            currentPlayPauseState = PlayerState.PLAYING;
+                                                            ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
 									  			        }
-									  					model.currentPlayerState = PlayerState.PAUSING;
-									  					currentPlayPauseState = PlayerState.PLAYING;
-									  					ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
+									  			        else
+									  			        {
+									  			          model.player.seek( model.currentDuration - 1);
+									  			        }
+									  					
 									  					break;
 									  					
 				case VideoControlEvent.MUTE:            ExternalInterface.call(ExternalFunction.MUTE, '');

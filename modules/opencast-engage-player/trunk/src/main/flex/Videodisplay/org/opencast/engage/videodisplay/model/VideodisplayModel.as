@@ -15,19 +15,19 @@
 */
 package org.opencast.engage.videodisplay.model
 {
-	import com.adobe.strobe.players.MediaPlayerWrapper;
-	
 	import mx.collections.ArrayCollection;
 	import mx.controls.ProgressBar;
 	
 	import org.opencast.engage.videodisplay.control.util.TimeCode;
+	import org.opencast.engage.videodisplay.state.MediaState;
 	import org.opencast.engage.videodisplay.vo.LanguageVO;
+	import org.osmf.media.MediaPlayer;
 	
 	[Bindable]
 	public class VideodisplayModel
 	{
 		// Media Player Wrapper
-		public var player : MediaPlayerWrapper;
+		public var player : MediaPlayer;
 	
 	    // Current Duration
 		public var currentDuration : Number;
@@ -100,6 +100,15 @@ package org.opencast.engage.videodisplay.model
         
         [Embed("../../../../../../../resources/icons/volumehighBig.png")]
         public var UnmuteIcon:Class;
+        
+        // mediaState
+        public var mediaState:String = MediaState.VIDEO;
+        
+        // audioURLaudioURL
+        public var audioURL:String = "";
+        
+        // video Volume
+        public var videoVolume:Number = 1;
         
         /** Constructor */		
 		public function VideodisplayModel()

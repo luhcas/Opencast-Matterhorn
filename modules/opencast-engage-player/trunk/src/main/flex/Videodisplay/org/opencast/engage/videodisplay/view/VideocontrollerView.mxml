@@ -88,7 +88,6 @@
                 model.player.volume = volumeSlider.value;
                 ExternalInterface.call(ExternalFunction.SETVOLUME, volumeSlider.value * 100);
                 ExternalInterface.call(ExternalFunction.OPENCASTVOLUME, volumeSlider.value);
-                
             }
            
             /**
@@ -223,7 +222,7 @@
             <mx:HSlider                
                 id = "seekBar" 
                 width="100%"
-                maximum="{ model.player.duration }"
+                maximum="{ model.currentDuration }"
                 value="{ model.currentPlayhead }"
                 change="{ onSeek() }"
                 toolTip="Current Time {model.timeCode.getTC(model.currentPlayhead) } "
@@ -242,8 +241,8 @@
 	        autoLoad="true"
 	        buttonMode="true"
 	        useHandCursor="true"
-	        source="{ model.player.volume == 0 ?   model.MuteIcon : model.UnmuteIcon }"
-	        toolTip="{ model.player.volume == 0 ? 'Unmute' : 'Mute'}"
+	        source="{ model.videoVolume == 0 ?   model.MuteIcon : model.UnmuteIcon }"
+	        toolTip="{ model.videoVolume == 0 ? 'Unmute' : 'Mute'}"
 	        click="{ Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.MUTE )) }"
 	        />   
 	        
@@ -256,8 +255,8 @@
 	        maximum = "1"
 	        id = "volumeSlider" 
 	        change = "{ onVolume() }"
-	        value = "{ model.player.volume }"
-	        toolTip="Volume:  { (model.player.volume * 100).toFixed(0) } %"
+	        value = "{ model.videoVolume }"
+	        toolTip="Volume:  { (model.videoVolume * 100).toFixed(0) } %"
 	        styleName="HSliderVolume"
 	        dataTipFormatFunction="volumeDataTipFunc"
 	        />
