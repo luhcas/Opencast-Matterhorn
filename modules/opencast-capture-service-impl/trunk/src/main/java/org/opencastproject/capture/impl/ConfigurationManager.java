@@ -239,6 +239,7 @@ public class ConfigurationManager {
 
     try {
       if (!localConfig.isFile()) {
+        localConfig.getParentFile().mkdirs();
         localConfig.createNewFile();
       }
       properties.store(new FileOutputStream(localConfig), "capture config");

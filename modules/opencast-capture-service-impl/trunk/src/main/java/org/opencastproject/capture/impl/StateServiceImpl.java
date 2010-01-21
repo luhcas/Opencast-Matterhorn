@@ -120,7 +120,7 @@ public class StateServiceImpl implements StateService, ManagedService {
       //Create and start the scheduler
       Scheduler pollScheduler = sched_fact.getScheduler();
       if (pollScheduler.getJobGroupNames().length > 0) {
-        logger.info("createPollingTask has already been called.  Stop freakin' calling it already!");
+        logger.info("Duplicate attempt to create agent status task detected, ignoring...");
         return;
       }
       pollScheduler.start();
