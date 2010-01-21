@@ -30,7 +30,7 @@ function handleWorkflow(workflowDoc){
   var dcURL = $("ns2\\:workflow-instance", workflowDoc).find("metadata:first > catalog[type='metadata/dublincore'] url").text();
   //TODO: get extra metadata catalog URL
   //var caURL = $("ns2\\:workflow-instance", testDoc).find("metadata:first > catalog[type='metadata/extra'] url").text();
-  //console.log(dcURL);
+  console.log($("ns2\\:workflow-instance", workflowDoc).find("metadata:first").toString());
   testDoc = workflowDoc;
   
   eventid = eventDoc.createElement('event-id');
@@ -39,12 +39,14 @@ function handleWorkflow(workflowDoc){
   //console.log(eventid);
   
   startdate = eventDoc.createElement('startdate');
-  startdate.appendChild(eventDoc.createTextNode($('ns2\\:workflow-instance', workflowDoc).find('mediapackage').attr('start')));
+  start = parseDateTime($('ns2\\:workflow-instance', workflowDoc).find('mediapackage').attr('start'));
+  startdate.appendChild(eventDoc.createTextNode(start));
+  
   eventDoc.documentElement.appendChild(startdate);
   //console.log(startdate);
   
   duration = eventDoc.createElement('duration');
-  duration.appendChild(eventDoc.createTextNode($('ns2\\:workflow-instance', workflowDoc).find('mediapackage').attr('duration')));
+  duration.appendChild(eventDoc.createTextNode(parseDuration(parseInt($('ns2\\:workflow-instance', workflowDoc).find('mediapackage').attr('duration')))));
   eventDoc.documentElement.appendChild(duration);
   //console.log(duration);
   
@@ -164,4 +166,19 @@ function serialize(doc){
     return doc.xml;
   }
   return false;
+}
+
+function parseDuration(dur){
+  dur = dur / 1000;
+  var hours = Math.floor(dur / 3600);
+  var min   = Math.floor( ( dur /60 ) % 60 );
+  return hours + " hours, " + min + " minutes";
+}
+
+function parseDateTime(datetime){
+  //expects date in ical format of YYYY-MM-DDTHH:MM:SS e.g. 2007-12-05T13:40:00
+  var datetime = datetime.split("T");
+  var date = datetime[0].split("-");
+  var time = datetime[1].split(":");
+  return new Date(date[0], (date[1] - 1), date[2], time[0], time[1], time[2]).toLocaleString();
 }
