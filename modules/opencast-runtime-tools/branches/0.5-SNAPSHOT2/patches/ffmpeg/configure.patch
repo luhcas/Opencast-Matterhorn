@@ -1,0 +1,19 @@
+*** configure	2009-07-29 15:25:41.000000000 +0200
+--- configure.changed	2009-07-29 15:26:14.000000000 +0200
+***************
+*** 1227,1233 ****
+  DEPEND_CMD='$(CC) $(CFLAGS) -MM $< | sed -e "/^\#.*/d" -e "s,^[[:space:]]*$(*F)\\.o,$(@D)/$(*F).o,"'
+  
+  # find source path
+! source_path="$(dirname "$0")"
+  enable source_path_used
+  if test -z "$source_path" -o "$source_path" = "." ; then
+      source_path="$(pwd)"
+--- 1227,1233 ----
+  DEPEND_CMD='$(CC) $(CFLAGS) -MM $< | sed -e "/^\#.*/d" -e "s,^[[:space:]]*$(*F)\\.o,$(@D)/$(*F).o,"'
+  
+  # find source path
+! #source_path="$(dirname "$0")"
+  enable source_path_used
+  if test -z "$source_path" -o "$source_path" = "." ; then
+      source_path="$(pwd)"
