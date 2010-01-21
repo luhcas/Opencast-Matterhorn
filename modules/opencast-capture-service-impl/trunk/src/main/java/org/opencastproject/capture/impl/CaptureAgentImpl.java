@@ -282,7 +282,13 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         } catch (UnsupportedElementException e) {
           throw new RuntimeException("Error adding " + dcCatalog + " to recording");
         }
-
+        
+        // When we return the recording, the mock capture is completed so reset
+        // the CaptureAgent state
+        setAgentState(AgentState.IDLE);
+        mockCapture = false;
+        currentRecID = null;
+        
         return recordingID;
       }
     }

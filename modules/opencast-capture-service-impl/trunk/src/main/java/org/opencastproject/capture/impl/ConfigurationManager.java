@@ -143,7 +143,6 @@ public class ConfigurationManager {
   private void createCoreDirectories() {
     createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL, this);
     createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CACHE_URL, this);
-    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_URL, this);
     createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_VOLATILE_URL, this);
   }
 
