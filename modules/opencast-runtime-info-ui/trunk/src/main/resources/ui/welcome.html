@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
     <title>Opencast Matterhorn - Release 0.5: Start Climbing!</title>
     
     <script type="text/javascript" src="infusion-1.1.2/InfusionAll.js"></script>
@@ -12,21 +12,15 @@
                  $.each(data, function(section) {
                         if("rest" == section) {
                           $.each(data.rest, function(i) {
-                                 $('#restdocs').append("<li>" + data.rest[i].description + " <a href='" + data.rest[i].docs + "'>REST</a></li>");
-                                 })
-                        } else if("soap" == section) {
-                        $.each(data.soap, function(i) {
-                               $('#soapwsdl').append("<li>" + data.soap[i].description + " <a href='" + data.soap[i].wsdl + "'>SOAP</a></li>");
-                               })
+                            $('#restdocs').append("<li>" + data.rest[i].description + " <a href='" + data.rest[i].docs + "'>Docs</a></li>");
+                          })
                         }
-                        });
+                    });
                  });
        })(jQuery);
-      </script>
-    
+    </script>
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>
-  
   <body>
     <div id="wrapper">
       <div id="headergraphic"><a href="http://www.opencastproject.org"><img src="images/opencast_logo.gif" alt="Opencast" width="128" height="30" hspace="20" vspace="5" border="0" /></a></div>
@@ -51,8 +45,8 @@
           <h2>Release Notes</h2>
           <p>Covers &quot;what&#39;s new&quot;, install/build instructions, known issues, and frequently asked questions .  Please read these notes and the bug/feature reporting instructions before reporting any issues.</p>
           <ul class="links">
-            <li><a href="#">Read Notes</a></li>
-            <li><a href="#">Watch 0.5 Overview</a></li>
+            <li><a href="https://wiki.opencastproject.org/confluence/display/open/Release+0.5+Documentation">Read Notes</a></li>
+            <li><a href="welcome.mp4">Watch 0.5 Overview</a></li>
           </ul>
         </div>
         <div id="col2">
@@ -65,7 +59,7 @@
             <li> Monitor progress of recording through media pipeline.</li>
           </ul>
           <ul class="links">
-            <li><a href="admin/">Go to Admin Tools</a></li>
+            <li><a href="/admin/">Go to Admin Tools</a></li>
           </ul>
         </div>
         <div id="col2">
@@ -74,10 +68,10 @@
           <ul>
             <li>Create custom RSS feeds</li>
             <li>Search for Video by keyword</li>
-            <li> Accessible media player</li>
+            <li>Accessible media player</li>
           </ul>
           <ul class="links">
-            <li><a href="engage/ui/"> Go to Distribution Module</a></li>
+            <li><a href="/engage/ui/"> Go to Distribution Module</a></li>
           </ul>
         </div>
       </div>
@@ -97,11 +91,12 @@
           <div id="dev_links">
             <h2>Developer Links</h2>
             <ul class="links">
+              <li><a href="https://wiki.opencastproject.org/confluence/display/open/Release+0.5+FAQ">Release 0.5 FAQ</a></li>
               <li><a href="#">Javadocs</a></li>
               <li><a href="#">Admin Ajax/HTML/JS Docs</a></li>
               <li><a href="#">Engage Ajax/HTML/JS/ FLEX Docs</a></li>
-              <li><a href="#">System workflow overview</a></li>
-              <li><a href="#">Cookbooks</a></li>
+              <li><a href="https://wiki.opencastproject.org/confluence/display/open/Take+a+Look+Under+the+Hood">System Overview</a></li>
+              <li><a href="https://wiki.opencastproject.org/confluence/display/open/Cookbook">Cookbooks</a></li>
             </ul>
           </div>
           <div id="community">
