@@ -291,7 +291,7 @@ public class AdminuiRestService {
   private RecordingDataViewList getUpcomingRecordings() {
     RecordingDataViewList out = new RecordingDataViewListImpl();
     if (schedulerService != null) {
-      logger.info("getting upcoming recordings from scheudler");
+      logger.info("getting upcoming recordings from scheduler");
       SchedulerEvent[] events = schedulerService.getUpcomingEvents();
       for (int i = 0; i < events.length; i++) {
         RecordingDataView item = new RecordingDataViewImpl();
