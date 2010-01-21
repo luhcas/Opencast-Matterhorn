@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.capture.api.StateService" immediate="true">
+  <implementation class="org.opencastproject.capture.impl.StateServiceImpl" />
+  <property name="service.description" value="State Service" />
+  <service>
+    <provide interface="org.opencastproject.capture.api.StateService" />
+    <provide interface="org.osgi.service.cm.ManagedService" />
+  </service>
+</component>

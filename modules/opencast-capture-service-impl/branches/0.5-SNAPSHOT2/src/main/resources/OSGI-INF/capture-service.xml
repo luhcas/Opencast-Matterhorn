@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.capture.api.CaptureAgent" immediate="true" activate="activate">
+  <implementation class="org.opencastproject.capture.impl.CaptureAgentImpl" />
+  <property name="service.description" value="Capture Service" />
+  <service>
+    <provide interface="org.opencastproject.capture.api.CaptureAgent" />
+    <provide interface="org.osgi.service.cm.ManagedService" />
+  </service>
+  <reference name="stateService" interface="org.opencastproject.capture.api.StateService"
+    cardinality="1..1" policy="static" bind="setStateService" unbind="unsetStateService" />
+</component>
