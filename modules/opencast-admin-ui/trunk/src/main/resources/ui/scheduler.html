@@ -1,19 +1,19 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="content-type" content="text/html;charset=utf-8">
     <title>Matterhorn - Schedule Recordings</title>
     
     <!-- style -->
-    <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-layout.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-text.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-theme-coal.css" rel="stylesheet" type="text/css" />
+    <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css">
+    <link href="infusion-1.1.2/fss/css/fss-layout.css" rel="stylesheet" type="text/css">
+    <link href="infusion-1.1.2/fss/css/fss-text.css" rel="stylesheet" type="text/css">
+    <link href="infusion-1.1.2/fss/css/fss-theme-coal.css" rel="stylesheet" type="text/css">
     
-    <link rel="stylesheet" type="text/css" href="css/admin.css" />
-    <link rel="stylesheet" type="text/css" href="css/scheduler.css" />
-    <link rel="stylesheet" type="text/css" href="css/popuphelp.css" />
-    <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.7.2.custom.css" />
+    <link rel="stylesheet" type="text/css" href="css/admin.css">
+    <link rel="stylesheet" type="text/css" href="css/scheduler.css">
+    <link rel="stylesheet" type="text/css" href="css/popuphelp.css">
+    <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.7.2.custom.css">
     
     <!-- scripts -->
     <script type="text/javascript" src="infusion-1.1.2/InfusionAll.js"></script>
@@ -22,91 +22,12 @@
     <script type="text/javascript" src="js/scheduler.helptexts.json"></script>
     <script type="text/javascript" src="js/scheduler.js"></script>
     <script type="text/javascript" src="js/scheduler.ui.js"></script>
-    <script type="text/javascript">
-      function initPage() {
-        $('#startDate').datepicker({showOn: 'both', buttonImage: 'img/calendar.gif', buttonImageOnly: true});
-        $('#startDate').datepicker('setDate', new Date());
-        //$('#startDate').click( function(){ $('#startDate').datepicker('show'); } );
-        var now = new Date();
-        now.setHours(now.getHours() + 1);
-        $('#startTimeHour').val(now.getHours());
-        
-        $('.required > label').prepend('<span style="color: red;">*</span>');
-        
-        $('.folder-head').click(
-                                function(){
-                                $(this).children('.fl-icon').toggleClass('icon-arrow-right');
-                                $(this).children('.fl-icon').toggleClass('icon-arrow-down');
-                                $(this).next().toggle('fast');
-                                return false;
-                                }
-                                );
-        
-        /**
-         *  eventFields is an array of EventFields and EventFieldGroups, keyed on <item>'s key attribute described in scheduler
-         *  service contract for the addEvent rest endpoint.
-         *  @see https://wiki.opencastproject.org/confluence/display/open/Scheduler+Service
-         */
-        
-        var eventFields = {
-          "id":           new EventField('eventID'),
-          "title":        new EventField('title', true),
-          "creator":      new EventField('creator'),
-          "contributor":  new EventField('contributor'),
-          "series-id":    new EventField('series'),
-          "subject":      new EventField('subject'),
-          "language":     new EventField('language'),
-          "abstract":     new EventField('description'),
-          "channel-id":   new EventFieldGroup(new Array('distMatterhornMM'), true),
-          "license":      new EventField('license'),
-          "startdate":    new EventFieldGroup(new Array('startDate', 'startTimeHour', 'startTimeMin'), true, getStartDate, setStartDate, checkStartDate),
-          "duration":      new EventFieldGroup(new Array('durationHour', 'durationMin'), true, getDuration, setDuration, checkDuration), //returns a date incremented by duration.
-          "resources":    new EventFieldGroup(new Array('audio','audioVideo','audioScreen', 'audioVideoScreen'), true, getInputs, setInputs, checkInputs),
-          "attendees":    new EventField('attendees', true),
-          "device":       new EventField('attendees')
-        };
-        
-        //Form Manager, handles saving, loading, de/serialization, and validation
-        
-        eventsManager = new EventManager(eventFields);
-        
-        $('.icon-help').click(
-                              function(event) {
-                              popupHelp.displayHelp($(this), event);
-                              return false;
-                              }
-                              );
-        
-        $('body').click(
-                        function() {
-                        if ($('#helpbox').css('display') != 'none') {
-                        popupHelp.resetHelp();
-                        }
-                        return true;
-                        }
-                        );
-        
-        $('#submitButton').click(schedulerUI.submitForm);
-        $('#resetButton').click(schedulerUI.cancelForm);
-
-        var eventID = schedulerUI.getURLParams('eventID');
-        if(eventID && schedulerUI.getURLParams('edit')){
-          $("#page-title").text("Edit Recording");
-          $.get(SCHEDULER_URL + '/getEvent/' + eventID, schedulerUI.loadEvent, 'xml');
-        }
-        
-        schedulerUI.loadKnownAgents();
-      }
-      
-      $(document).ready(initPage);
-      </script>
   </head>
   <body>
-    <!-- fl-centered doesn't work in winXP-IE8 -->
     <div class="fl-container-850 fl-theme-coal">
       <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
         <li class="fl-activeTab"><a href="/admin/">Recordings</a></li>
-        <li class=""><a href="/admin/agents_status.html">Capture Agents</a></li>
+        <li><a href="/admin/agents_status.html">Capture Agents</a></li>
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
         <div class="fl-container-800" style="text-align: center;">
@@ -148,18 +69,18 @@
                 <ul class="fl-controls-right form-list">
                   <li class="required">
                     <label class="fl-label" for="title" id="label-title">Title:</label>
-                    <input type="text" class="form-field" name="title" id="title" />
-                    <span class="fl-icon icon-help"  id="help_title" />
+                    <input type="text" class="form-field" name="title" id="title">
+                    <span class="fl-icon icon-help"  id="help_title"></span>
                   </li>
                   <li>
                     <label class="fl-label" for="creator" id="label-creator">Presenter:</label>
-                    <input type="text" class="form-field" name="creator" id="creator" />
-                    <span class="fl-icon icon-help"  id="help_presenter" />
+                    <input type="text" class="form-field" name="creator" id="creator">
+                    <span class="fl-icon icon-help"  id="help_presenter"></span>
                   </li>
                   <li>
                     <label class="fl-label" for="contributor" id="label-contributor">Sponsoring Department:</label>
-                    <input type="text" class="form-field" name="contributor" id="contributor" />
-                    <span class="fl-icon icon-help"  id="help_contributor" />
+                    <input type="text" class="form-field" name="contributor" id="contributor">
+                    <span class="fl-icon icon-help"  id="help_contributor"></span>
                   </li>
                 </ul>
               </form>
@@ -179,23 +100,23 @@
                 <ul class="fl-controls-right form-list">
                   <li class="additionalMeta">
                     <label class="fl-label" for="series"  id="label-series">Series:</label>
-                    <input type="text" class="form-field" name="series" id="series" />
-                    <span class="fl-icon icon-help"  id="help_series" />
+                    <input type="text" class="form-field" name="series" id="series">
+                    <span class="fl-icon icon-help"  id="help_series"></span>
                   </li>
                   <li class="additionalMeta">
                     <label class="fl-label" for="subject" id="label-subject">Subject:</label>
-                    <input type="text" class="form-field" name="subject" id="subject" />
-                    <span class="fl-icon icon-help"  id="help_subject" />
+                    <input type="text" class="form-field" name="subject" id="subject">
+                    <span class="fl-icon icon-help"  id="help_subject"></span>
                   </li>
                   <li class="additionalMeta">
                     <label class="fl-label" for="language" id="label-language">Language:</label>
-                    <input type="text" class="form-field" name="language" id="language" />
-                    <span class="fl-icon icon-help"  id="help_language" />
+                    <input type="text" class="form-field" name="language" id="language">
+                    <span class="fl-icon icon-help"  id="help_language"></span>
                   </li>
                   <li class="additionalMeta">
                     <label class="fl-label" for="description" id="label-description">Description:</label>
-                    <textarea name="description" id="description" class="form-field" rows="5"></textarea>
-                    <span class="fl-icon icon-help"  id="help_description" />
+                    <textarea name="description" id="description" class="form-field" rows="5" cols="10"></textarea>
+                    <span class="fl-icon icon-help"  id="help_description"></span>
                   </li>
                 </ul>
               </form>
@@ -215,31 +136,17 @@
                     <div style="float: left;">
                       <ul class="form-box-group">
                         <li class="column1">
-                          <input type="checkbox" id="distMatterhornMM" value="Matterhorn Media Module" checked="checked" disabled="disabled" />
+                          <input type="checkbox" id="distMatterhornMM" value="Matterhorn Media Module" checked="checked" disabled="disabled">
                           <label for="distMatterhornMM">Matterhorn Media Module</label>
                         </li>
-                        <!--
-                         <li class="column1">
-                         <input type="checkbox" id="distITunesU" value="1" disabled="disabled" />
-                         <label for="distITunesU" class="disable-label">iTunesU</label>
-                         </li>
-                         <li class="column2 reset">
-                         <input type="checkbox" id="distYouTube" value="3" disabled="disabled" />
-                         <label for="distYouTube" class="disable-label">YouTube</label>
-                         </li>
-                         <li class="column2">
-                         <input type="checkbox" id="distSakai" value="4" disabled="disabled" />
-                         <label for="distSakai" class="disable-label">Sakai</label>
-                         </li>
-                         -->
                       </ul>
                     </div>
-                    <span class="fl-icon icon-help" id="help_distribution" />
+                    <span class="fl-icon icon-help" id="help_distribution"></span>
                   </li>
                   <li style="clear:both">
                     <label class="fl-label" for="license"  id="label-license">License:</label>
-                    <input type="text" name="license" id="license" class="form-field" />
-                    <span class="fl-icon icon-help" id="help_license" />
+                    <input type="text" name="license" id="license" class="form-field">
+                    <span class="fl-icon icon-help" id="help_license"></span>
                   </li>
                 </ul>
               </form>
@@ -256,8 +163,8 @@
                 <ul class="fl-controls-right form-list">
                   <li class="required">
                     <label class="fl-label form-box-label" id="label-stardate">Start Date:</label>
-                    <input type="text" size="10" name="startDate" id="startDate" style="margin-right:5px;" /></td>
-                    <span class="fl-icon icon-help" id="help_startdate" />
+                    <input type="text" size="10" name="startDate" id="startDate" style="margin-right:5px;">
+                    <span class="fl-icon icon-help" id="help_startdate"></span>
                   </li>
                   <li class="required">
                     <label class="fl-label form-box-label" id="label-starttime">Start Time:</label>
@@ -300,7 +207,7 @@
                       <option value="50">50</option>
                       <option value="55">55</option>
                     </select>
-                    <span class="fl-icon icon-help" id="help_starttime" />
+                    <span class="fl-icon icon-help" id="help_starttime"></span>
                   </li>
                   <li class="required">
                     <label class="fl-label form-box-label" id="label-enddate">Duration:</label>
@@ -335,30 +242,28 @@
                       <option value="55">55</option>
                     </select>
                     minutes
-                    <span class="fl-icon icon-help" id="help_duration" />
+                    <span class="fl-icon icon-help" id="help_duration"></span>
                   </li>
                   <li class="required" style="clear: both;">
                     <label class="fl-label"  id="label-attendees">Capture Agent:</label>
                     <div>
-                      <select id="attendees" name="attendees">
-                      </select>
-                      <span class="fl-icon icon-help"  id="help_attendees" />
+                      <select id="attendees" name="attendees"><option></select>
+                      <span class="fl-icon icon-help"  id="help_attendees"></span>
                     </div>
                   </li>
                   <li class="required">
                     <label class="fl-label" id="label-input">Input(s):</label>
                     <div class="form-radio-group" style="float: left; top: 3px; position: relative;">
-                      <input type="radio" id="audio" name="inputs" value="1" checked="checked" />
+                      <input type="radio" id="audio" name="inputs" value="1" checked="checked">
                       <label for="audio">Audio Only</label>
-                      <input type="radio" id="audioVideo" name="inputs" value="3" />
+                      <input type="radio" id="audioVideo" name="inputs" value="3">
                       <label for="audioVideo">Audio,Video</label>
-                      <input type="radio" id="audioScreen" name="inputs" value="5" />
+                      <input type="radio" id="audioScreen" name="inputs" value="5">
                       <label for="audioScreen">Audio,Screen</label>
-                      <input type="radio" id="audioVideoScreen" name="inputs" value="7" />
+                      <input type="radio" id="audioVideoScreen" name="inputs" value="7">
                       <label for="audioVideoScreen">Audio,Video,Screen</label>
                     </div>
-                    <span class="fl-icon icon-help" id="help_input" />
-                    <br />
+                    <span class="fl-icon icon-help" id="help_input"></span>
                   </li>
                 </ul>
               </form>
@@ -370,18 +275,16 @@
           <div class="fl-widget">
             <div class="fl-widget-content fl-fix">
               <form action="">
-                <input type="hidden" id="eventID" />
                 <ul class="fl-controls-right wu-reset field-list">
-                  <li class="">
-                    <span class="fl-label form-label">&nbsp;</span>
-                      <input type="button" value="Submit" id="submitButton" />
-                      <input type="reset" value="Cancel" id="resetButton" />
-                    </span>
+                  <li>
+                    <label class="fl-label">&nbsp;</label>
+                    <input type="button" value="Submit" id="submitButton">
+                    <input type="reset" value="Cancel" id="resetButton">
+                    <input type="hidden" id="eventID">
                   </li>
-                  <li class="" style="margin-top: 0.6em;">
-                    <span class="fl-label form-label">&nbsp;</span>
-                      <span style="color: red;">*</span> Required
-                    </span>
+                  <li style="margin-top: 0.6em;">
+                    <label class="fl-label">&nbsp;</label>
+                    <span style="color: red;">*</span> Required
                   </li>
                 </ul>
               </form>
@@ -392,9 +295,9 @@
       
       <!-- template for the popup help box -->
       <div id="helpBox" class="helpbox" style="display:none;">
-        <img src="img/lightbulb.png" alt="help" />
+        <img src="img/lightbulb.png" alt="help">
         <div id="helpTitle" style="display:inline;font-weight:bold; margin-left:10px;"></div>
-        <div id="helpText" style="padding-left:7px; padding-right:7px; white-space:normal;" />
+        <div id="helpText" style="padding-left:7px; padding-right:7px; white-space:normal;"></div>
       </div>
     </div>
   </body>

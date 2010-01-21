@@ -20,6 +20,83 @@ var SCHEDULER_URL     = BASE_URL + '/scheduler/rest';
 var WORKFLOW_URL      = BASE_URL + '/workflow/rest';
 var CAPTURE_ADMIN_URL = BASE_URL + '/capture-admin/rest';
 
+function initPage() {
+  $('#startDate').datepicker({showOn: 'both', buttonImage: 'img/calendar.gif', buttonImageOnly: true});
+  $('#startDate').datepicker('setDate', new Date());
+  
+  var now = new Date();
+  now.setHours(now.getHours() + 1);
+  $('#startTimeHour').val(now.getHours());
+  
+  $('.required > label').prepend('<span style="color: red;">*</span>');
+  
+  $('.folder-head').click(
+                          function(){
+                          $(this).children('.fl-icon').toggleClass('icon-arrow-right');
+                          $(this).children('.fl-icon').toggleClass('icon-arrow-down');
+                          $(this).next().toggle('fast');
+                          return false;
+                          }
+                          );
+  
+  /**
+   *  eventFields is an array of EventFields and EventFieldGroups, keyed on <item>'s key attribute described in scheduler
+   *  service contract for the addEvent rest endpoint.
+   *  @see https://wiki.opencastproject.org/confluence/display/open/Scheduler+Service
+   */
+  
+  var eventFields = {
+    "id":           new EventField('eventID'),
+    "title":        new EventField('title', true),
+    "creator":      new EventField('creator'),
+    "contributor":  new EventField('contributor'),
+    "series-id":    new EventField('series'),
+    "subject":      new EventField('subject'),
+    "language":     new EventField('language'),
+    "abstract":     new EventField('description'),
+    "channel-id":   new EventFieldGroup(new Array('distMatterhornMM'), true),
+    "license":      new EventField('license'),
+    "startdate":    new EventFieldGroup(new Array('startDate', 'startTimeHour', 'startTimeMin'), true, getStartDate, setStartDate, checkStartDate),
+    "duration":      new EventFieldGroup(new Array('durationHour', 'durationMin'), true, getDuration, setDuration, checkDuration), //returns a date incremented by duration.
+    "resources":    new EventFieldGroup(new Array('audio','audioVideo','audioScreen', 'audioVideoScreen'), true, getInputs, setInputs, checkInputs),
+    "attendees":    new EventField('attendees', true),
+    "device":       new EventField('attendees')
+  };
+  
+  //Form Manager, handles saving, loading, de/serialization, and validation
+  
+  eventsManager = new EventManager(eventFields);
+  
+  $('.icon-help').click(
+                        function(event) {
+                        popupHelp.displayHelp($(this), event);
+                        return false;
+                        }
+                        );
+  
+  $('body').click(
+                  function() {
+                  if ($('#helpbox').css('display') != 'none') {
+                  popupHelp.resetHelp();
+                  }
+                  return true;
+                  }
+                  );
+  
+  $('#submitButton').click(schedulerUI.submitForm);
+  $('#resetButton').click(schedulerUI.cancelForm);
+  
+  var eventID = schedulerUI.getURLParams('eventID');
+  if(eventID && schedulerUI.getURLParams('edit')){
+    $("#page-title").text("Edit Recording");
+    $.get(SCHEDULER_URL + '/getEvent/' + eventID, schedulerUI.loadEvent, 'xml');
+  }
+  
+  schedulerUI.loadKnownAgents();
+}
+
+$(document).ready(initPage);
+
 /**
  *  EventManager Object
  *  Handles form validation, serialization, and form value population
