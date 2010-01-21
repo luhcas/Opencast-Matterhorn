@@ -15,18 +15,6 @@
  */
 package org.opencastproject.capture.endpoint;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Properties;
-
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -38,6 +26,18 @@ import org.opencastproject.util.doc.Param.Type;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * FIXME -- Add javadocs
@@ -64,7 +64,18 @@ public class CaptureRestService {
     startPropEndpoint.addFormat(new Format("String", "The recording ID for the capture started", null));
     startPropEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
     startPropEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("Couldn't start capture with provided parameters"));
-    startPropEndpoint.addRequiredParam(new Param("config", Type.STRING, null, "The properties to set for this recording"));
+    // This is to get the default value for capture.properties from source.opencastproject.org
+    Param config = 
+      new Param (
+              "config", 
+              Type.STRING, 
+              null, 
+              "The properties to set for this recording. " +
+              "Those are specified in key-value pairs as described in " +
+              "<a href=\"http://java.sun.com/javase/6/docs/api/java/util/Properties.html#load(java.io.Reader)\"> " +
+              "this JavaDoc </a>" 
+      );
+    startPropEndpoint.addRequiredParam(config);
     startPropEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, startPropEndpoint);
 
@@ -125,7 +136,7 @@ public class CaptureRestService {
     try {
       configuration.load(new ByteArrayInputStream(config.getBytes()));
     } catch (IOException e1) {
-      logger.error("Unable to parse configuration string into valid capture config.  Continuing with default settings.");
+      logger.warn("Unable to parse configuration string into valid capture config.  Continuing with default settings.");
     }
 
     String out;

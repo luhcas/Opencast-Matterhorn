@@ -183,7 +183,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     try {
       pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     } catch (org.opencastproject.util.ConfigurationException e) {
-      logger.error("Wrong configuration for the default media package: {}.", e.getMessage());
+      logger.error("Configuration Exception creating media package: {}.", e.getMessage());
       return null;
     } catch (MediaPackageException e) {
       logger.error("Media Package exception: {}.", e.getMessage());
@@ -249,7 +249,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       File f = new File(samplesDir);
       for (String device : deviceList) {
         String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
-        String value = (String)properties.get(key);
+        String value = properties.getProperty(key);
         if (value == null || !(new File(f, value).isFile()))
           everythingOk = false;
       }
@@ -293,7 +293,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       logger.error("Capture {} could not start, pipeline was null!", recordingID);
       setAgentState(AgentState.IDLE);
       setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-      return recordingID;
+      currentRecID = null;
+      pendingRecordings.remove(recordingID);
+      return null;
     }
 
     logger.info("Initializing devices for capture.");
