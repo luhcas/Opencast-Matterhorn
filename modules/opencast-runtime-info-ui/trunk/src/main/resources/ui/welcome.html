@@ -12,7 +12,12 @@
                  $.each(data, function(section) {
                         if("rest" == section) {
                           $.each(data.rest, function(i) {
-                            $('#restdocs').append("<li>" + data.rest[i].description + " <a href='" + data.rest[i].docs + "'>Docs</a></li>");
+                            if(i < Math.floor(data.rest.length / 2)){
+                              parent = $('#docs1');
+                            }else{
+                              parent = $('#docs2');
+                            }
+                            parent.append("<li>" + data.rest[i].description + " <a href='" + data.rest[i].docs + "'>Docs</a></li>");
                           })
                         }
                     });
@@ -79,11 +84,11 @@
         <div id="col1-2">
           <h2>Services Documentation</h2>
           <div id="col1">
-            <ul id="restdocs">
+            <ul id="docs1">
             </ul>
           </div>
           <div id="col2">
-            <ul id="soapwsdl">
+            <ul id="docs2">
             </ul>
           </div>
         </div>
