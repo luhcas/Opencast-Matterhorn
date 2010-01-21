@@ -13,11 +13,11 @@
                         if("rest" == section) {
                           $.each(data.rest, function(i) {
                             if(i < Math.floor(data.rest.length / 2)){
-                              parent = $('#docs1');
+                              col = $('#docs1');
                             }else{
-                              parent = $('#docs2');
+                              col = $('#docs2');
                             }
-                            parent.append("<li>" + data.rest[i].description + " <a href='" + data.rest[i].docs + "'>Docs</a></li>");
+                            col.append("<li>" + data.rest[i].description + " <a href='" + data.rest[i].docs + "'>Docs</a></li>");
                           })
                         }
                     });
