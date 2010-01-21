@@ -59,7 +59,7 @@ popupHelp.helpTexts = {
     
     "agent" : [
         "Capture Agent",
-        "Enter the agent identifier that this recording will be using."
+        "Select the agent identifier that this recording will be using."
     ],
     
     "input" : [
