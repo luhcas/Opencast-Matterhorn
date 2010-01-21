@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.6-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT2</version>
   </parent>
   <dependencies>
     <dependency>
@@ -19,37 +19,37 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-conductor-api</artifactId>
-      <version>0.6-SNAPSHOT</version>
+      <version>0.5-SNAPSHOT2</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-workflow-service-api</artifactId>
-      <version>0.6-SNAPSHOT</version>
+      <version>0.5-SNAPSHOT2</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-inspection-service-api</artifactId>
-      <version>0.6-SNAPSHOT</version>
+      <version>0.5-SNAPSHOT2</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-composer-service-api</artifactId>
-      <version>0.6-SNAPSHOT</version>
+      <version>0.5-SNAPSHOT2</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-search-service-api</artifactId>
-      <version>0.6-SNAPSHOT</version>
+      <version>0.5-SNAPSHOT2</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-search-service-impl</artifactId>
-      <version>0.6-SNAPSHOT</version>
+      <version>0.5-SNAPSHOT2</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-distribution-service-api</artifactId>
-      <version>0.6-SNAPSHOT</version>
+      <version>0.5-SNAPSHOT2</version>
       <type>bundle</type>
     </dependency>
     <dependency>
