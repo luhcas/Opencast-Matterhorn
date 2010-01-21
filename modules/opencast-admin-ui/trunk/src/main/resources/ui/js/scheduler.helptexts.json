@@ -58,8 +58,8 @@ popupHelp.helpTexts = {
     ],
     
     "agent" : [
-        "Capture Agent or Location",
-        "Enter the agent identifier or location that this recording will be using."
+        "Capture Agent",
+        "Enter the agent identifier that this recording will be using."
     ],
     
     "input" : [
