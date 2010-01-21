@@ -42,7 +42,7 @@
             <div class="fl-widget-content warnbox-content">
               <ul>
                 <li id="missing-title" class="missing-fields-item">
-                  <span class="fl-icon inline-icon icon-bullet"></span>Please <a href="javascript:$('#title')[0].focus();">enter a title</a> for the recording.
+                  <span class="fl-icon inline-icon icon-bullet"></span>Please enter a <a href="javascript:$('#title')[0].focus();">title</a> for the recording.
                 </li>
                 <li id="missing-distibution" class="missing-fields-item">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose at least one <a href="javascript:document.getElementById('distITunesU').focus();">distribution channel</a>.
@@ -51,10 +51,10 @@
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose a starting date and time for the recording. It must not be in the past.
                 </li>
                 <li id="missing-attendees" class="missing-fields-item">
-                  <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose a capture agent to recorde the event.
+                  <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose a capture agent to record the event.
                 </li>
-                <li id="missing-enddate" class="missing-fields-item">
-                  <span class="fl-icon inline-icon icon-bullet" title=""></span>You must have a duration greater than 0.
+                <li id="missing-duration" class="missing-fields-item">
+                  <span class="fl-icon inline-icon icon-bullet" title=""></span>You must have a <a href="javascript:document.getElementById('durationHour').focus();">duration</a> greater than 0 hours and 0 minutes.
                 </li>
               </ul>
             </div>
@@ -210,7 +210,7 @@
                     <span class="fl-icon icon-help" id="help_starttime"></span>
                   </li>
                   <li class="required">
-                    <label class="fl-label form-box-label" id="label-enddate">Duration:</label>
+                    <label class="fl-label form-box-label" id="label-duration">Duration:</label>
                     <select id="durationHour">
                       <option value="0">0</option>
                       <option value="1">1</option>
