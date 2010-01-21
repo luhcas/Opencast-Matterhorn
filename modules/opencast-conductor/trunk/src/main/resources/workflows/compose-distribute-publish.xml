@@ -6,7 +6,7 @@
   </description>
   <operations>
   
-  	<!-- inspect the media -->
+    <!-- inspect the media -->
     <operation
       name="inspect"
       fail-on-error="true"
@@ -14,7 +14,7 @@
       description="Inspect the media package">
     </operation>
  
-	<!-- encode to flash download -->
+  <!-- encode to flash download -->
     <operation
       name="compose"
       fail-on-error="true"
@@ -23,7 +23,6 @@
       <configurations>
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
-        <configuration key="target-flavor">presenter/source</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
       </configurations>
@@ -36,14 +35,13 @@
       <configurations>
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
-        <configuration key="target-flavor">presentation/source</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
       </configurations>
     </operation>
 
-	<!-- encode to flash streaming -->
-	<!-- 
+  <!-- encode to flash streaming -->
+  <!-- 
     <operation
       name="compose"
       fail-on-error="true"
@@ -52,7 +50,6 @@
       <configurations>
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
-        <configuration key="target-flavor">presenter/source</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.rtmp</configuration>
       </configurations>
@@ -65,14 +62,13 @@
       <configurations>
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
-        <configuration key="target-flavor">presentation/source</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.rtmp</configuration>
       </configurations>
     </operation>
     -->
 
-	<!-- encode to quicktime download -->
+  <!-- encode to quicktime download -->
     <operation
       name="compose"
       fail-on-error="true"
@@ -81,7 +77,6 @@
       <configurations>
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
-        <configuration key="target-flavor">presenter/source</configuration>
         <configuration key="target-tags">atom, captioning</configuration>
         <configuration key="encoding-profile">mov-low.http</configuration>
       </configurations>
@@ -94,13 +89,12 @@
       <configurations>
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
-        <configuration key="target-flavor">presentation/source</configuration>
         <configuration key="target-tags">rss, atom, captioning</configuration>
         <configuration key="encoding-profile">mov-low.http</configuration>
       </configurations>
     </operation>
     
-   	<!-- encode to avi download -->
+    <!-- encode to avi download -->
     <operation
       name="compose"
       fail-on-error="true"
@@ -109,7 +103,6 @@
       <configurations>
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
-        <configuration key="target-flavor">presenter/source</configuration>
         <configuration key="target-tags">atom</configuration>
         <configuration key="encoding-profile">avi-low.http</configuration>
       </configurations>
@@ -122,7 +115,6 @@
       <configurations>
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
-        <configuration key="target-flavor">presentation/source</configuration>
         <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">avi-low.http</configuration>
       </configurations>
@@ -157,7 +149,35 @@
         <configuration key="time">1</configuration>
       </configurations>
     </operation>
-    -->
+
+    <operation
+      name="image"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) to cover image">
+      <configurations>
+        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">cover/source</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
+        <configuration key="encoding-profile">feed-image.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="image"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to cover image">
+      <configurations>
+        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">cover/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">engage-image.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
 
     <operation
       name="distribute_local"

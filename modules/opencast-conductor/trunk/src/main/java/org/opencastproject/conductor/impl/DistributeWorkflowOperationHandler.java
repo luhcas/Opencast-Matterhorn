@@ -24,6 +24,7 @@ import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +66,7 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
       // Check which tags have been configured
       String tags = workflowInstance.getCurrentOperation().getConfiguration("tags");
       MediaPackage currentMediaPackage = workflowInstance.getCurrentMediaPackage();
-      if (tags == null) {
+      if (StringUtils.trimToNull(tags) == null) {
         logger.warn("No tags have been specified");
         return WorkflowBuilder.getInstance().buildWorkflowOperationResult(currentMediaPackage, null, false);
       }
@@ -73,6 +74,7 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
       // Look for elements matching any tag
       Set<String> elementIds = new HashSet<String>();
       for (String tag : tags.split("\\W")) {
+        if(StringUtils.trimToNull(tag) == null) continue;
         MediaPackageElement[] elts = currentMediaPackage.getElementsByTag(tag);
         for (MediaPackageElement e : elts) {
           elementIds.add(e.getIdentifier());

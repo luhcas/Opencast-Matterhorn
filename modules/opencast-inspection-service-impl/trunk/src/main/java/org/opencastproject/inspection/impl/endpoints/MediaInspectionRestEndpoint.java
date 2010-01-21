@@ -87,6 +87,7 @@ public class MediaInspectionRestEndpoint {
           ScanTypeType scanType = of.createScanTypeType();
           scanType.setType(v.getScanType().name());
           video.setScanType(scanType);
+          video.setResolution(v.getFrameWidth() + "x" + v.getFrameHeight());
           track.setVideo(video);
         } else {
           throw new IllegalStateException("stream is of an unknown type: " + stream);

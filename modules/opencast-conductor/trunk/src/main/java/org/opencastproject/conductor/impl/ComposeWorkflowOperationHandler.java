@@ -32,6 +32,7 @@ import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,11 +98,11 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
           MediaPackageException, UnsupportedElementException, InterruptedException, ExecutionException {
 
     // Read the configuration properties
-    String sourceVideoFlavor = operation.getConfiguration("source-video-flavor");
-    String sourceAudioFlavor = operation.getConfiguration("source-audio-flavor");
-    String targetTrackTags = operation.getConfiguration("target-tags");
-    String targetTrackFlavor = operation.getConfiguration("target-flavor");
-    String encodingProfile = operation.getConfiguration("encoding-profile");
+    String sourceVideoFlavor = StringUtils.trimToNull(operation.getConfiguration("source-video-flavor"));
+    String sourceAudioFlavor = StringUtils.trimToNull(operation.getConfiguration("source-audio-flavor"));
+    String targetTrackTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
+    String targetTrackFlavor = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));
+    String encodingProfile = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
 
     // Select the tracks based on the flavors
     AudioVisualElementSelector avselector = new AudioVisualElementSelector();
@@ -149,6 +150,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
         // Add tags
         if (targetTrackTags != null) {
           for (String tag : targetTrackTags.split("\\W")) {
+            if(StringUtils.trimToNull(tag) == null) continue;
             logger.debug("Tagging composed track with '{}'", tag);
             composedTrack.addTag(tag);
           }
@@ -157,7 +159,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
         // store new tracks to mediaPackage
         // FIXME derived media comes from multiple sources, so how do we choose which is the "parent" of the derived
         // media?
-        mediaPackage.add(composedTrack);
+        mediaPackage.addDerived(composedTrack, mediaPackage.getElementById(videoSourceTrackId));
         break;
       }
     }

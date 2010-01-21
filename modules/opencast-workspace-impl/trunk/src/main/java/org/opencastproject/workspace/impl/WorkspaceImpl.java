@@ -29,10 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -109,16 +107,21 @@ public class WorkspaceImpl implements Workspace, ManagedService {
 
   protected String getSafeFilename(String urlString) {
     String urlExtension = FilenameUtils.getExtension(urlString);
-    try {
-      String urlEncoded = URLEncoder.encode(urlString, "UTF-8");
-      String safeString = FilenameUtils.getBaseName(urlEncoded) + "." + urlExtension;
-      if(safeString.length() < 255) return safeString;
-    } catch(UnsupportedEncodingException e) {}
+    String baseName = urlString.substring(0, urlString.length() - urlExtension.length());
+    String safeBaseName = baseName.replaceAll("\\W", ""); // FIXME -- make this safe and platform independent
+    String safeString = null;
+    if("".equals(urlExtension)) {
+      safeString = safeBaseName;
+    } else {
+      safeString = safeBaseName + "." + urlExtension;
+    }
+    if(safeString.length() < 255) return safeString;
     String random = UUID.randomUUID().toString();
     random = random.concat(".").concat(urlExtension);
     logger.info("using '{}' to represent url '{}', which is too long to store as a filename", random, urlString);
     return random;
   }
+  
   public void delete(String mediaPackageID, String mediaPackageElementID) {
     repo.delete(mediaPackageID, mediaPackageElementID);
   }
@@ -134,6 +137,10 @@ public class WorkspaceImpl implements Workspace, ManagedService {
 
   public URI put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in) {
     // if this is a url encoded filename, decoded it and take the last part of the path
+//    File mediaPackageDir = new File(rootDirectory, mediaPackageID); // TODO Make sure the clients are using path-safe directories
+//    mediaPackageDir.mkdir();
+//    File elementDir = new File(mediaPackageDir, mediaPackageElementID);
+//    elementDir.mkdir();
     String shortFileName;
     try {
       String decoded = URLDecoder.decode(fileName, "UTF-8");

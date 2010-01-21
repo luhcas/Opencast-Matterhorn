@@ -119,6 +119,11 @@
       <artifactId>rome</artifactId>
       <version>1.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.sun.syndication.feed.module</groupId>
+      <artifactId>itunes</artifactId>
+      <version>0.4</version>
+    </dependency>
     
     <!--
     The following dependencies are part of the solr distribution, but we are leaving out of the search service (for now)
@@ -160,7 +165,7 @@
               solr.*,
               org.tartarus.*;-split-package:=merge-first,
               org.apache.solr.*;-split-package:=merge-first,
-              org.apache.lucene.*;-split-package:=merge-first,
+              org.apache.lucene.*;-split-package:=merge-first
             </Private-Package>
             <Export-Package>
               org.opencastproject.feed.impl.*,
@@ -181,7 +186,8 @@
               solr-lucene-snowball;inline=true,
               solr-lucene-spellchecker;inline=true,
               stax-utils;inline=true,
-              rome;inline=true
+              rome;inline=true,
+              itunes;inline=true
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/search-service-rest.xml,

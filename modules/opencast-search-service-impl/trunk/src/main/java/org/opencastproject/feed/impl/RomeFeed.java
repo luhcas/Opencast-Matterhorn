@@ -32,6 +32,11 @@ import com.sun.syndication.feed.module.DCModuleImpl;
 import com.sun.syndication.feed.module.DCSubject;
 import com.sun.syndication.feed.module.DCSubjectImpl;
 import com.sun.syndication.feed.module.Module;
+import com.sun.syndication.feed.module.itunes.EntryInformation;
+import com.sun.syndication.feed.module.itunes.EntryInformationImpl;
+import com.sun.syndication.feed.module.itunes.FeedInformation;
+import com.sun.syndication.feed.module.itunes.FeedInformationImpl;
+import com.sun.syndication.feed.module.itunes.types.Duration;
 import com.sun.syndication.feed.synd.SyndCategory;
 import com.sun.syndication.feed.synd.SyndCategoryImpl;
 import com.sun.syndication.feed.synd.SyndContent;
@@ -53,8 +58,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * TODO: Comment me
- * TODO: Enable feed extensions that are currently commented out
+ * Wrapper around the Rome feed implementation
  */
 public class RomeFeed extends SyndFeedImpl {
 
@@ -281,14 +285,10 @@ public class RomeFeed extends SyndFeedImpl {
     for (FeedExtension extension : modules) {
       if (DublinCoreExtension.URI.equals(extension.getUri()))
         romeModules.add(toRomeModule((DublinCoreExtension) extension));
-      /*
       if (extension instanceof ITunesFeedExtension)
         romeModules.add(toRomeModule((ITunesFeedExtension) extension));
       if (extension instanceof ITunesFeedEntryExtension)
         romeModules.add(toRomeModule((ITunesFeedEntryExtension) extension));
-      if (extension instanceof DOIExtension)
-        romeModules.add(toRomeModule((DOIExtension) extension));
-      */
     }
     return romeModules;
   }
@@ -334,7 +334,6 @@ public class RomeFeed extends SyndFeedImpl {
    *          the itunes feed extension
    * @return the rome module
    */
-  /*
   private Module toRomeModule(ITunesFeedExtension ext) {
     FeedInformation m = new FeedInformationImpl();
     m.setAuthor(ext.getAuthor());
@@ -348,7 +347,6 @@ public class RomeFeed extends SyndFeedImpl {
     m.setSummary(ext.getSummary());
     return m;
   }
-  */
 
   /**
    * Creates a rome compatible itunes feed entry extension.
@@ -357,7 +355,6 @@ public class RomeFeed extends SyndFeedImpl {
    *          the itunes entry extension
    * @return the rome module
    */
-  /*
   private Module toRomeModule(ITunesFeedEntryExtension ext) {
     EntryInformation m = new EntryInformationImpl();
     m.setAuthor(ext.getAuthor());
@@ -369,20 +366,4 @@ public class RomeFeed extends SyndFeedImpl {
     m.setSummary(ext.getSummary());
     return m;
   }
-  */
-
-  /*
-  private Module toRomeModule(DOIExtension ext) {
-    DOIModuleImpl m = new DOIModuleImpl();
-    m.setDoi(ext.getDoi());
-    m.setAlsoPublishedAs(ext.getAlsoPublishedAs());
-    m.setCompiledBy(ext.getCompiledBy());
-    m.setIssueNumber(ext.getIssueNumber());
-    m.setMode(ext.getMode());
-    m.setRegistrationAgency(ext.getRegistrationAgency());
-    m.setStructuralType(ext.getStructuralType());
-    return m;
-  }
-  */
-  
 }

@@ -31,7 +31,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -90,7 +89,6 @@ public class ComposerRestEndpointTest {
     }
   }
 
-  @Ignore
   @Test
   public void testImageExtraction() throws Exception {
     HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/image");
@@ -103,9 +101,9 @@ public class ComposerRestEndpointTest {
 
     // Grab the attachment from the response
     HttpResponse postResponse = client.execute(postEncode);
-    Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
     String postResponseXml = EntityUtils.toString(postResponse.getEntity());
     System.out.println(postResponseXml);
+    Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
   }
 
   protected String getSampleMediaPackage() throws Exception {

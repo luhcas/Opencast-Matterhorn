@@ -32,6 +32,7 @@ import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,15 +100,15 @@ public class ImageWorkflowOperationHandler implements WorkflowOperationHandler {
           MediaPackageException, UnsupportedElementException, InterruptedException, ExecutionException {
 
     // Read the configuration properties
-    String sourceVideoFlavor = operation.getConfiguration("source-flavor");
-    String sourceTags = operation.getConfiguration("source-tags");
-    String targetImageTags = operation.getConfiguration("target-tags");
-    String targetImageFlavor = operation.getConfiguration("target-flavor");
-    String encodingProfile = operation.getConfiguration("encoding-profile");
-    String timeConfiguration = operation.getConfiguration("time");
+    String sourceVideoFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
+    String sourceTags = StringUtils.trimToNull(operation.getConfiguration("source-tags"));
+    String targetImageTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
+    String targetImageFlavor = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));
+    String encodingProfile = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
+    String timeConfiguration = StringUtils.trimToNull(operation.getConfiguration("time"));
 
     Set<String> sourceTagSet = null;
-    if(sourceTags != null) {
+    if(StringUtils.trimToNull(sourceTags) != null) {
       sourceTagSet = new HashSet<String>();
       sourceTagSet.addAll(Arrays.asList(sourceTags.split("\\W")));
     }
@@ -161,7 +162,7 @@ public class ImageWorkflowOperationHandler implements WorkflowOperationHandler {
               if (targetImageTags != null) {
                 for (String tag : targetImageTags.split("\\W")) {
                   logger.debug("Tagging image with '{}'", tag);
-                  composedImage.addTag(tag);
+                  if(StringUtils.trimToNull(tag) != null) composedImage.addTag(tag);
                 }
               }
               // store new image in the mediaPackage

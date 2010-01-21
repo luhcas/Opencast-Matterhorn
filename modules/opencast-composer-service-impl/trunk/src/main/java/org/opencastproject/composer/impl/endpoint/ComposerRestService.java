@@ -229,6 +229,7 @@ public class ComposerRestService {
       Attachment image = composerService.image(mediaPackage, sourceTrackId, profileId, time).get();
       return Response.ok().entity(documentToString(image)).build();
     } catch(Exception e) {
+      logger.warn("Unable to extract image: " + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new Receipt(null, STATUS.FAILED.toString())).build();
     }
   }

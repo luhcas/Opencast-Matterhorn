@@ -20,7 +20,10 @@ import org.opencastproject.engageui.api.EpisodeViewImpl;
 import org.opencastproject.engageui.api.EpisodeViewListImpl;
 import org.opencastproject.engageui.api.EpisodeViewListResultImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.MediaPackageReference;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
@@ -290,10 +293,15 @@ public class EngageuiRestService {
 //    if(c.isEmpty()) return DEFAULT_VIDEO_URL;
 //    return c.iterator().next().getURI().toString();
     for(Track track : mediaPackage.getTracks()) {
-      for(String tag : track.getTags()) {
-        if("engage".equals(tag) && (
-                MediaPackageElements.PRESENTATION_TRACK.equals(track.getFlavor()) || 
-                MediaPackageElements.PRESENTER_TRACK.equals(track.getFlavor()))) return track.getURI().toString();
+      MediaPackageReference ref = track.getReference();
+      if(ref != null) {
+        MediaPackageElement parent = mediaPackage.getElementById(ref.getIdentifier());
+        if(parent != null) {
+          MediaPackageElementFlavor parentFlavor = parent.getFlavor();
+          if(parentFlavor != null && (parentFlavor.equals(MediaPackageElements.PRESENTATION_TRACK) || parentFlavor.equals(MediaPackageElements.PRESENTER_TRACK))) {
+            return track.getURI().toString();
+          }
+        }
       }
     }
     return DEFAULT_VIDEO_URL;
