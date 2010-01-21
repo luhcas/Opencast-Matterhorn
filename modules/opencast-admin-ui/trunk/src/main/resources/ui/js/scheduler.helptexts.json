@@ -44,7 +44,7 @@ popupHelp.helpTexts = {
     
     "startdate" : [
         "Start Date",
-        "Select the start and end date for this recording."
+        "Select the start date for this recording."
     ],
     
     "starttime" : [

@@ -33,7 +33,7 @@
       }
       
       $(document).ready(
-        function() { 
+        function() {
           if(workflowID){
             $.get("/workflow/rest/instance/" + workflowID + ".xml", handleWorkflow);
           }
