@@ -140,7 +140,10 @@ public class StaticResource extends HttpServlet {
         return;
       }
       resp.setHeader("ETag", md5);
-      resp.setHeader("Content-Type", new MimetypesFileTypeMap().getContentType(url.getFile()));
+      String contentType = new MimetypesFileTypeMap().getContentType(url.getFile());
+      if(contentType != "application/octet-stream"){
+        resp.setHeader("Content-Type", contentType);
+      }
       InputStream in = url.openStream();
       IOUtils.copy(in, resp.getOutputStream());
     } catch (Exception e) {
