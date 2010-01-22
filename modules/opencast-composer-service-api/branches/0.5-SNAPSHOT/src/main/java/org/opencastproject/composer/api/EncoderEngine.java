@@ -106,4 +106,10 @@ public interface EncoderEngine {
    */
   boolean needsLocalWorkCopy();
 
+  /**
+   * Allows the Encoder to have configuration params passed into it from the service
+   * @param config a map of key (String) -> value configuration settings
+   */
+  void setConfig(Map<String, Object> config);
+
 }
