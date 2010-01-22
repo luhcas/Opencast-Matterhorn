@@ -19,7 +19,7 @@ var eventDoc = null;
 //WorkflowID is parsed from the URL parameters and is the ID of the workflow used to gather the required metadata.
 var workflowID = null;
 
-var debug = null;
+var debugDoc = null;
 /**
  *  handleWorkflow parses the workflow xml, grabs the URLs of the additional metadata catalogs
  *  and makes additional ajax calls to bring in the metadata.
@@ -27,29 +27,27 @@ var debug = null;
  *  @param {XML Document}
  */
 function handleWorkflow(workflowDoc){
-  console.log(workflowDoc);
+  //console.log(workflowDoc);
   eventDoc = createDoc();
-  var dcURL = $("ns2\\:workflow-instance", workflowDoc).find("metadata:first > catalog[type='metadata/dublincore'] url").text();
+  var dcURL = $(workflowDoc.documentElement).find("metadata:first > catalog[type='metadata/dublincore'] url").text();
   //TODO: get extra metadata catalog URL
   //var caURL = $("ns2\\:workflow-instance", testDoc).find("metadata:first > catalog[type='metadata/extra'] url").text();
-  debug = workflowDoc;
   //console.log($("ns2\\:workflow-instance", workflowDoc));
-  testDoc = workflowDoc;
   
   eventid = eventDoc.createElement('event-id');
-  eventid.appendChild(eventDoc.createTextNode($('ns2\\:workflow-instance', workflowDoc).attr('id')));
+  eventid.appendChild(eventDoc.createTextNode($(workflowDoc.documentElement).attr('id')));
   eventDoc.documentElement.appendChild(eventid);
   //console.log(eventid);
   
   startdate = eventDoc.createElement('startdate');
-  start = parseDateTime($('ns2\\:workflow-instance', workflowDoc).find('mediapackage').attr('start'));
+  start = parseDateTime($(workflowDoc.documentElement).find('mediapackage').attr('start'));
   startdate.appendChild(eventDoc.createTextNode(start));
   
   eventDoc.documentElement.appendChild(startdate);
   //console.log(startdate);
   
   duration = eventDoc.createElement('duration');
-  duration.appendChild(eventDoc.createTextNode(parseDuration(parseInt($('ns2\\:workflow-instance', workflowDoc).find('mediapackage').attr('duration')))));
+  duration.appendChild(eventDoc.createTextNode(parseDuration(parseInt($(workflowDoc.documentElement).find('mediapackage').attr('duration')))));
   eventDoc.documentElement.appendChild(duration);
   //console.log(duration);
   
@@ -65,6 +63,7 @@ function handleWorkflow(workflowDoc){
  *  @param {XML Document}
  */
 function handleDCMetadata(metadataDoc){
+  debugDoc = metadataDoc;
   //TODO: This is a fast to code, but poor method of loading our values. Refactor.
   title = eventDoc.createElement('title');
   title.appendChild(eventDoc.createTextNode($('dcterms\\:title', metadataDoc).text()));
@@ -116,11 +115,11 @@ function handleDCMetadata(metadataDoc){
 
 function handleCatalogMetadata(metadataDoc){
   inputs = eventDoc.createElement('inputs');
-  inputs.appendChild(eventDoc.createTextNode($('ns2\\:workflow-instance', metadataDoc).attr('id')));
+  inputs.appendChild(eventDoc.createTextNode($(metadataDoc.documentElement).attr('id')));
   eventDoc.documentElement.appendChild(inputs);
   
   agent = eventDoc.createElement('agent');
-  agent.appendChild(eventDoc.createTextNode($('ns2\\:workflow-instance', metadataDoc).attr('id')));
+  agent.appendChild(eventDoc.createTextNode($(metadataDoc.documentElement).attr('id')));
   eventDoc.documentElement.appendChild(agent);
 }
 
