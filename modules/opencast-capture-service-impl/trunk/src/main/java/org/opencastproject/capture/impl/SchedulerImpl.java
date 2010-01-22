@@ -152,6 +152,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       } else {
         log.info("{} has been set to less than 1, calendar updates disabled.", CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL);
       }
+    } catch (StringIndexOutOfBoundsException e) {
+      log.warn("Unable to build valid scheduling data endpoint from key {}: {}.  Value must end in a / character.", CaptureParameters.CAPTURE_SCHEDULE_URL, config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL));
     } catch (MalformedURLException e) {
       log.warn("Invalid location specified for {} unable to retrieve new scheduling data: {}.", CaptureParameters.CAPTURE_SCHEDULE_URL, config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL));
     } catch (NumberFormatException e) {
@@ -364,6 +366,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       captureScheduler.shutdown();
       SchedulerFactory sched_fact = new StdSchedulerFactory(captureProperties);
       captureScheduler = sched_fact.getScheduler();
+      captureScheduler.start();
 
       ComponentList list = newCal.getComponents(Component.VEVENT);
       for (Object item : list) {
