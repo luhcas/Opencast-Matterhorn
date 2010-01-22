@@ -31,7 +31,8 @@ import org.junit.runners.Suite.SuiteClasses;
   WorkingFileRepoRestEndpointTest.class,
   DistributionLocalRestEndpointTest.class,
   IngestZipTest.class,
-  ComposerRestEndpointTest.class
+  ComposerRestEndpointTest.class,
+  CaptureRestEndpointTest.class
 })
 public class AllRemoteTests {
   public static String BASE_URL = "http://localhost:8080";
