@@ -5,17 +5,17 @@
   <artifactId>opencast-media</artifactId>
   <packaging>bundle</packaging>
   <name>opencast-media</name>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.5-RC1</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5-RC1</version>
   </parent>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-util</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5-RC1</version>
     </dependency>
     <dependency>
       <groupId>commons-collections</groupId>
