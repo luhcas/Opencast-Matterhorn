@@ -96,8 +96,9 @@ public class EncoderEngineFactoryImpl extends EncoderEngineFactory {
       String profileList = config.getProperty(PROP_PREFIX + engineId + ".profiles");
       String defaultString = config.getProperty(PROP_PREFIX + engineId + ".default");
 
-      if (className == null)
+      if (className == null) {
         throw new ConfigurationException("Class not specified for engine '" + engineId + "'");
+      }
 
       // Create the engine
       EncoderEngine engine = null;
@@ -112,6 +113,7 @@ public class EncoderEngineFactoryImpl extends EncoderEngineFactory {
       } catch (IllegalAccessException e) {
         throw new ConfigurationException("Access exception while creating encoder engine: " + e.getMessage(), e);
       }
+      engine.setConfig(engineConfig);
 
       // Get the profile list
       List<String> profiles = new ArrayList<String>();
@@ -184,6 +186,7 @@ public class EncoderEngineFactoryImpl extends EncoderEngineFactory {
           }          
           ((AbstractEncoderEngine)engine).setSupportedProfiles(profiles);
         }
+        engine.setConfig(engineConfig);
         return engine;
       } catch (InstantiationException e) {
         throw new ConfigurationException("Instantiation exception while creating encoder engine: " + e.getMessage(), e);

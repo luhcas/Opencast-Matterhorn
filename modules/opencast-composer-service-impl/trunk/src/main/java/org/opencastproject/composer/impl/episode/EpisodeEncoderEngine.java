@@ -129,6 +129,10 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
     monitorThread.start(); // Since this is dangerous for subclasses, I've made this class final (jmh)
   }
 
+  public void setConfig(Map<String, Object> config) {
+    // not used here
+  }
+
   /**
    * Configures the compression engine wrapper for use with an xmlrpc controller.
    * 
@@ -253,7 +257,6 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
    * {@inheritDoc}
    * @see org.opencastproject.composer.impl.AbstractEncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile)
    */
-  @Override
   public File encode(File audioSource, File videoSource, EncodingProfile format, Map<String, String> properties) throws EncoderException {
     throw new UnsupportedOperationException("Not yet implemented");
 //    xmlrpcController.submitJob(source, format);
@@ -324,7 +327,6 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
    * {@inheritDoc}
    * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile)
    */
-  @Override
   public File encode(File mediaSource, EncodingProfile format, Map<String, String> properties) throws EncoderException {
     return encode(null, mediaSource, format, properties);
   }

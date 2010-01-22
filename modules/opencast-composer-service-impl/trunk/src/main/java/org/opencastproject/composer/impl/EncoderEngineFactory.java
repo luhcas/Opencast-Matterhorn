@@ -19,6 +19,8 @@ package org.opencastproject.composer.impl;
 import org.opencastproject.composer.api.EncoderEngine;
 import org.opencastproject.util.ConfigurationException;
 
+import java.util.Map;
+
 /**
  * Factory used to obtain an encoder engine based on the node configuration and an optional encoding profile passed.
  */
@@ -83,6 +85,15 @@ public class EncoderEngineFactory {
       }
     }
     return factory_;
+  }
+
+  protected Map<String, Object> engineConfig = null;
+  /**
+   * Sets the config used by all engines instantiated by this factory
+   * @param config the map of config keys to values
+   */
+  public void setEngineConfig(Map<String, Object> config) {
+    this.engineConfig = config;
   }
 
   /**

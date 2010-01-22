@@ -19,6 +19,7 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderEngine;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
+import org.opencastproject.composer.impl.ffmpeg.FFmpegEncoderEngine;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -28,6 +29,7 @@ import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -64,6 +67,9 @@ public class ComposerServiceImpl implements ComposerService {
   /**  */
   ExecutorService executor = null;
 
+  private Map<String, Object> encoderEngineConfig = new ConcurrentHashMap<String, Object>();
+  public static final String CONFIG_FFMPEG_PATH = "composer.ffmpegpath";
+
   /**
    * Callback for declarative services configuration that will introduce us to the media inspection service.
    * Implementation assumes that the reference is configured as being static.
@@ -87,6 +93,22 @@ public class ComposerServiceImpl implements ComposerService {
   }
 
   /**
+   * OSGI activator
+   */
+  public void activate(ComponentContext cc) {
+    // 
+    if (cc == null || cc.getBundleContext().getProperty(CONFIG_FFMPEG_PATH) == null) {
+      // DEFAULT - https://issues.opencastproject.org/jira/browse/MH-2158
+      log_.info("ZZZ DEFAULT "+CONFIG_FFMPEG_PATH+": "+FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
+    } else {
+      // use CONFIG
+      String path = cc.getBundleContext().getProperty(CONFIG_FFMPEG_PATH);
+      encoderEngineConfig.put(FFmpegEncoderEngine.CONFIG_FFMPEG_BINARY, path);
+      log_.info("ZZZ CONFIG "+CONFIG_FFMPEG_PATH+": " + path);
+    }
+  }
+
+  /**
    * Activator that will make sure the encoding profiles are loaded.
    */
   protected void activate(Map<String, String> map) {
@@ -98,6 +120,7 @@ public class ComposerServiceImpl implements ComposerService {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+    
   }
 
   /**
@@ -117,7 +140,6 @@ public class ComposerServiceImpl implements ComposerService {
    * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.media.mediapackage.MediaPackage,
    *      java.lang.String, java.lang.String, java.lang.String, java.lang.String)
    */
-  @Override
   public Future<Track> encode(final MediaPackage mediaPackage, final String sourceVideoTrackId,
           final String sourceAudioTrackId, final String profileId) throws EncoderException {
     final String targetTrackId = "track-" + (mediaPackage.getTracks().length + 1);
@@ -139,7 +161,8 @@ public class ComposerServiceImpl implements ComposerService {
           videoFile = workspace.get(videoTrack.getURI());
 
         // Create the engine
-        EncoderEngine engine = EncoderEngineFactory.newInstance().newEngineByProfile(profileId);
+        EncoderEngineFactory factory = EncoderEngineFactory.newInstance();
+        EncoderEngine engine = factory.newEngineByProfile(profileId);
         EncodingProfile profile = profileManager.getProfile(profileId);
         if (profile == null) {
           throw new RuntimeException("Profile '" + profileId + " is unkown");
@@ -194,7 +217,6 @@ public class ComposerServiceImpl implements ComposerService {
    * {@inheritDoc}
    * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.media.mediapackage.MediaPackage, java.lang.String, long)
    */
-  @Override
   public Future<Attachment> image(final MediaPackage mediaPackage, final String sourceVideoTrackId, final String profileId, final long time)
           throws EncoderException {
     final String targetAttachmentId = "attachment-" + (mediaPackage.getAttachments().length + 1);
@@ -206,12 +228,15 @@ public class ComposerServiceImpl implements ComposerService {
         // Get the video track and make sure it exists
         File videoFile = null;
         Track videoTrack = mediaPackage.getTrack(sourceVideoTrackId);
-        if (videoTrack != null)
+        if (videoTrack != null) {
           videoFile = workspace.get(videoTrack.getURI());
-        if( ! videoTrack.hasVideo()) {
-          throw new RuntimeException("can not extract an image without a video stream");
+          if( ! videoTrack.hasVideo()) {
+            throw new RuntimeException("can not extract an image without a video stream");
+          }
+        } else {
+          throw new RuntimeException("videoTrack cannot be null");
         }
-
+          
         // Create the engine
         EncoderEngine engine = EncoderEngineFactory.newInstance().newEngineByProfile(profileId);
         

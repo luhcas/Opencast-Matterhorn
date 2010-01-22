@@ -37,7 +37,8 @@ import java.util.Properties;
 public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
 
   /** Default location of the ffmepg binary (resembling the installer) */
-  private static final String FFMPEG_BINARY_DEFAULT = "/usr/local/bin/ffmpeg";
+  public static final String FFMPEG_BINARY_DEFAULT = "/usr/local/bin/ffmpeg";
+  public static final String CONFIG_FFMPEG_BINARY = "ffmpeg.binary";
 
   /** Name of the ffmpeg binary option */
   private static final String OPT_BINARY = "ffmpeg.binary";
@@ -58,6 +59,20 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
   public FFmpegEncoderEngine() {
     super(FFMPEG_BINARY_DEFAULT);
     initEncoder();
+  }
+
+  /**
+   * Allows for configuration
+   * @param config
+   */
+  public void setConfig(Map<String, Object> config) {
+    if (config != null) {
+      if (config.containsKey(CONFIG_FFMPEG_BINARY)) {
+        String binary = (String)config.get(CONFIG_FFMPEG_BINARY);
+        setBinary(binary);
+        log_.info("FFmpegEncoderEngine config binary: "+binary);
+      }
+    }
   }
 
   /**
