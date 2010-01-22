@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.http.StaticHttpContext" immediate="true">
+  <implementation class="org.opencastproject.http.StaticHttpContext" />
+  <property name="service.description" value="Opencast static content" />
+  <service>
+    <provide interface="org.opencastproject.http.StaticHttpContext" />
+  </service>
+  <reference name="httpService" interface="org.osgi.service.http.HttpService"
+    cardinality="1..1" policy="static" bind="setHttpService" unbind="unsetHttpService" />
+</component>
