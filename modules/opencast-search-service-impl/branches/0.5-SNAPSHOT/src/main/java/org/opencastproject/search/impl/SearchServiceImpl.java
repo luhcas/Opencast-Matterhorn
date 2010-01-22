@@ -24,6 +24,7 @@ import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.solr.SolrConnection;
 import org.opencastproject.search.impl.solr.SolrIndexManager;
 import org.opencastproject.search.impl.solr.SolrRequester;
+import org.opencastproject.util.IoSupport;
 import org.opencastproject.util.PathSupport;
 
 import org.apache.commons.io.FileUtils;
@@ -49,6 +50,8 @@ public class SearchServiceImpl implements SearchService {
   /** Log facility */
   private static final Logger log_ = LoggerFactory.getLogger(SearchServiceImpl.class);
 
+  public static final String CONFIG_SOLR_ROOT = "search.searchindexdir";
+
   /** Connection to the solr database */
   private SolrConnection solrConnection = null;
 
@@ -62,6 +65,15 @@ public class SearchServiceImpl implements SearchService {
   private String solrRoot = null;
 
   /**
+   * Creates a search service that places solr into a subdirectory of <code>java.io.tmpdir</code> called
+   * <code>opencast/searchindex</code>.
+   */
+  public SearchServiceImpl() {
+    // DEFAULT TMP DIR
+    this(IoSupport.getSystemTmpDir() + "opencast" + File.separator + "searchindex");
+  }
+
+  /**
    * Creates a search service that puts solr into the given root directory. If the directory doesn't exist, it will be
    * created by the service.
    * 
@@ -73,11 +85,29 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * Creates a search service that places solr into a subdirectory of <code>java.io.tmpdir</code> called
-   * <code>opencast/searchindex</code>.
+   * Service activator, called via declarative services configuration.
+   * 
+   * @param componentContext
+   *          the component context
    */
-  public SearchServiceImpl() {
-    this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "searchindex");
+  public void activate(ComponentContext cc) {
+    if (cc != null && cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT) != null) {
+      // use CONFIG
+      this.solrRoot = cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT);
+      log_.info("CONFIG "+CONFIG_SOLR_ROOT+": " + this.solrRoot);
+    } else {
+      // DEFAULT
+      log_.info("DEFAULT "+CONFIG_SOLR_ROOT+": " + this.solrRoot);
+    }
+    setupSolr(this.solrRoot);
+  }
+
+  public void deactivate() {
+    try {
+      solrConnection.destroy();
+    } catch (Throwable t) {
+      log_.error("Error closing the solr connection");
+    }
   }
 
   /**
@@ -137,24 +167,6 @@ public class SearchServiceImpl implements SearchService {
       IOUtils.copy(in, new FileOutputStream(file));
     } catch (IOException e) {
       throw new RuntimeException("Error copying solr classpath resource to the filesystem", e);
-    }
-  }
-
-  /**
-   * Service activator, called via declarative services configuration.
-   * 
-   * @param componentContext
-   *          the component context
-   */
-  public void activate(ComponentContext componentContext) {
-    setupSolr(solrRoot);
-  }
-
-  public void deactivate() {
-    try {
-      solrConnection.destroy();
-    } catch (Throwable t) {
-      log_.error("Error closing the solr connection");
     }
   }
 
@@ -288,7 +300,6 @@ public class SearchServiceImpl implements SearchService {
    * 
    * @see org.opencastproject.search.api.SearchService#getByQuery(java.lang.String, int, int)
    */
-  @Override
   public SearchResult getByQuery(String query, int limit, int offset) throws SearchException {
     try {
       log_.debug("Searching index using custom query '" + query + "'");
@@ -330,7 +341,6 @@ public class SearchServiceImpl implements SearchService {
    * {@inheritDoc}
    * @see org.opencastproject.search.api.SearchService#getByQuery(org.opencastproject.search.api.SearchQuery)
    */
-  @Override
   public SearchResult getByQuery(SearchQuery q) throws SearchException {
     try {
       log_.debug("Searching index using query object '" + q + "'");
