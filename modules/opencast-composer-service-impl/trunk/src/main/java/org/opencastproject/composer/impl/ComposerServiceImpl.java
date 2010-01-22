@@ -99,12 +99,12 @@ public class ComposerServiceImpl implements ComposerService {
     // 
     if (cc == null || cc.getBundleContext().getProperty(CONFIG_FFMPEG_PATH) == null) {
       // DEFAULT - https://issues.opencastproject.org/jira/browse/MH-2158
-      log_.info("ZZZ DEFAULT "+CONFIG_FFMPEG_PATH+": "+FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
+      log_.info("DEFAULT "+CONFIG_FFMPEG_PATH+": "+FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
     } else {
       // use CONFIG
       String path = cc.getBundleContext().getProperty(CONFIG_FFMPEG_PATH);
       encoderEngineConfig.put(FFmpegEncoderEngine.CONFIG_FFMPEG_BINARY, path);
-      log_.info("ZZZ CONFIG "+CONFIG_FFMPEG_PATH+": " + path);
+      log_.info("CONFIG "+CONFIG_FFMPEG_PATH+": " + path);
     }
   }
 
