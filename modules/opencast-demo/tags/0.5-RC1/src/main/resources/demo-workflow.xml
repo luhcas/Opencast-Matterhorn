@@ -1,0 +1,7 @@
+<workflow-definition>
+  <title>Distributes and publishes the demo media and metadata</title>
+  <operations>
+    <operation name="distribute"/>
+    <operation name="publish"/>
+  </operations>
+</workflow-definition>
