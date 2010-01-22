@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5-RC1</version>
   </parent>
   <dependencies>
     <dependency>
@@ -19,7 +19,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-workflow-service-api</artifactId>
-      <version>0.5-SNAPSHOT</version>
+      <version>0.5-RC1</version>
     </dependency>
   </dependencies>
   <build>
