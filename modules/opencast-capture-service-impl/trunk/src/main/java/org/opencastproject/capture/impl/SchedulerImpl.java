@@ -40,6 +40,8 @@ import net.fortuna.ical4j.model.property.Duration;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.PollCalendarJob;
@@ -122,9 +124,13 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     }
 
     try {
-      String remoteBase = config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL);
-      if (remoteBase.charAt(remoteBase.length()-1) != '/') {
+      String remoteBase = StringUtils.trimToNull(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL));
+      if (remoteBase != null && remoteBase.charAt(remoteBase.length()-1) != '/') {
         remoteBase = remoteBase + "/";
+      } else if (remoteBase == null) {
+        remoteBase = cc.getBundleContext().getProperty("serverUrl");
+        if (remoteBase == null)
+          throw new IllegalStateException("Base url is not configured, and neither is the server url");
       }
       remoteCalendarURL = new URL(new URL(remoteBase), config.getItem(CaptureParameters.AGENT_NAME));
 
