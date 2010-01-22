@@ -49,7 +49,6 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
@@ -123,7 +122,12 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     }
 
     try {
-      remoteCalendarURL = new URL(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL));
+      String remoteBase = config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL);
+      if (remoteBase.charAt(remoteBase.length()-1) != '/') {
+        remoteBase = remoteBase + "/";
+      }
+      remoteCalendarURL = new URL(new URL(remoteBase), config.getItem(CaptureParameters.AGENT_NAME));
+
       //Times are in seconds in the config file, so multiply by 1000
       pollTime = Long.parseLong(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL)) * 1000L;
       if (pollTime > 1) {
@@ -149,9 +153,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         log.info("{} has been set to less than 1, calendar updates disabled.", CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL);
       }
     } catch (MalformedURLException e) {
-      log.warn("Invalid location specified for {} unable to retrieve new scheduling data.", CaptureParameters.CAPTURE_SCHEDULE_URL);
+      log.warn("Invalid location specified for {} unable to retrieve new scheduling data: {}.", CaptureParameters.CAPTURE_SCHEDULE_URL, config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL));
     } catch (NumberFormatException e) {
-      log.warn("Invalid polling interval for {} unable to retrieve new scheduling data.", CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL);
+      log.warn("Invalid polling interval for {} unable to retrieve new scheduling data: {}.", CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL, config.getItem(CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL));
     } catch (IOException e) {
       throw new RuntimeException("IOException, unable to load bundled Quartz properties file for calendar polling.", e);
     } catch (SchedulerException e) {
@@ -473,15 +477,10 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       log.error("Configuration exception: {}.", e.getMessage());
     } catch (MediaPackageException e) {
       log.error("MediaPackageException exception: {}.", e.getMessage());
-    } catch (IllegalArgumentException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    } catch (MalformedURLException e) {
+      log.error("MalformedURLException: {}.", e.getMessage());
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (UnsupportedElementException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("IOException: {}.", e.getMessage());
     }
   }
 

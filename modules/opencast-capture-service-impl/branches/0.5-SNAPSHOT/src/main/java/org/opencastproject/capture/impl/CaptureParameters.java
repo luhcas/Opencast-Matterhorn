@@ -37,9 +37,6 @@ public interface CaptureParameters {
   /** The URL of the config directory under the root directory */
   public static final String CAPTURE_FILESYSTEM_CONFIG_URL = "capture.filesystem.config.url";
 
-  /** The URL of the capture directory under the root directory */
-  public static final String CAPTURE_FILESYSTEM_CAPTURE_URL = "capture.filesystem.capture.url";
-
   /** The URL of the caching directory under the root directory */
   public static final String CAPTURE_FILESYSTEM_CACHE_URL = "capture.filesystem.cache.url";
 
