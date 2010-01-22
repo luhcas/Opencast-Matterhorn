@@ -2,13 +2,12 @@
 <html>
   <!------------------------- HEAD ------------------------->
   <head>
-    <title>Opencast Matterhorn - Media Player - </title>
+    <title>Opencast Matterhorn - </title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
     <!-- styles -->
-    <link rel="stylesheet" type="text/css" href="css/watch.css" />
-    <link rel="stylesheet" type="text/css" href="css/oc.search.browse.css" />
-        
+    <link rel="stylesheet" type="text/css" href="css/embed.css" />
+    
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-reset.css" />
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-layout.css" />
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-text.css" />
@@ -33,21 +32,6 @@
         $('#stage').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function() {
           // some code to run after the mapping
 
-          // set the title of the page
-          $('title').append($('#oc-title').html());
-
-          // set the title on the top of the player
-          $('#stage-title').append("<h2>"+ $('#oc-title').html() + " by " + $('#oc-creator').html() + "</h2>");
-
-         // set the abstract
-          $('#abstract').append($('#oc-abstract').html());
-
-          // set embed field
-          var watchUrl = window.location.href;
-          var embedUrl = watchUrl.replace(/watch.html/g, "embed.html")
-          var embed = $('#oc-embed').val().replace(/src_url/g, embedUrl);
-          $('#oc-embed').val(embed);
-          
           var elem1 = document.createElement("script");
           $(elem1).attr({type:"text/javascript", src:"engage-hybrid-player/ACFLRunContent/AC_OETags.js"});
           
@@ -130,52 +114,9 @@
   <!------------------------- BODY ------------------------->
   <body>
     <div class="oc-holder">
-      <a href="../../welcome.html"><img src="img/opencast_logo.gif" alt="Opencast" width="128" height="30" border="0" /></a>
-      <div class="oc-search-bar-holder fl-helper-clearfix">
-        &nbsp;
-        <div class="oc-search-bar">
-          <form action="index.html">
-            <input id="searchField" type="text" name="q" value="" />
-            <input type="submit" value="Search" />
-          </form>
-        </div>
-      </div>
-      <div class="oc-search-result-header">
-          
-    
-      </div>
-      <div id="stage-title">
-    
-      </div>
       <div id="stage">
         loading player...
       </div>
-      <div id="info" >
-        <button id="btn_info" class="oc_btn_info" onClick="Opencast.Player.toggleInfo();" type="submit" name="Keyboard Shortcuts Information"  value="Keyboard Shortcuts Information"   alt="Keyboard Shortcuts Information"  title="Keyboard Shortcuts Information" >Keyboard Shortcuts Information</button>
-        <div id="infoBlock" class="oc_infoDisplayNone" >
-            Press Control + Alt + I   = Toggle the keyboard shortcuts information between visible or unvisible.<br/>
-            Press Control + Alt + P   = Toggle the video between pause or play.<br/>
-            Press Control + Alt + S   = Stop the video.<br/>
-            Press Control + Alt + M   = Toggle between mute or unmute the video.<br/>
-            Press Control + Alt + U   = Volume up<br/>
-            Press Control + Alt + D   = Volume down<br/>
-            Press Control + Alt 0 - 9 = Seek the time slider<br/>
-            Press Control + Alt + C   = Toggle between captions on or off.<br/>
-            Press Control + Alt + F   = Forward the video.<br/>
-            Press Control + Alt + R   = Rewind the video.<br/>
-            Press Control + Alt + T   = the current time for the screen reader<br/>
-            Press on Mac cmd + = to zoom in the player<br/>
-            Press on Mac cmd - = to minimize the player<br/>
-            Press on Windows strg + = to zoom in the player<br/>
-            Press on Windows strg - = to minimize the player<br/>
-        </div>
-      </div>
-      <div id="abstract">
-      </div>
-      <br>
-      Embed this recording:<br>
-        <textarea wrap="virtual" rows="5" cols="50" id="oc-embed" class="oc-embed" >&lt;iframe src="src_url" style="border:0px #FFFFFF none;" name="Opencast Matterhorn - Media Player" scrolling="no" frameborder="1" marginheight="0px" marginwidth="0px" height="400" width="420"&gt;&lt;/iframe&gt;</textarea>
-
     </div>
   </body>
 </html>

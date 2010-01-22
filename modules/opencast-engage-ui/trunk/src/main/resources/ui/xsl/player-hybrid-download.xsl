@@ -4,11 +4,6 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ns2="http://searchui.opencastproject.org/">
 	<xsl:template match="/">
-	  <h2><xsl:value-of select="ns2:episode/dcTitle" /> by <xsl:value-of select="ns2:episode/dcCreator" /></h2>
-	  
-		<div id="title-bar" class="oc-title-bar">
-			<p>Progressive Download Hybrid Player</p>
-		</div>
 		<div id="controls" class="oc-controls-tmp">
 
 			<div id="oc-slider">
@@ -88,31 +83,14 @@
           </embed>
       </object>
     </div>
-      
-    <div id="info" >
-      <button id="btn_info" class="oc_btn_info" onClick="Opencast.Player.toggleInfo();" type="submit" name="Keyboard Shortcuts Information"  value="Keyboard Shortcuts Information"   alt="Keyboard Shortcuts Information"  title="Keyboard Shortcuts Information" >Keyboard Shortcuts Information</button>
-      <div id="infoBlock" class="oc_infoDisplayNone" >
-          Press Control + Alt + I   = Toggle the keyboard shortcuts information between visible or unvisible.<br/>
-          Press Control + Alt + P   = Toggle the video between pause or play.<br/>
-          Press Control + Alt + S   = Stop the video.<br/>
-          Press Control + Alt + M   = Toggle between mute or unmute the video.<br/>
-          Press Control + Alt + U   = Volume up<br/>
-          Press Control + Alt + D   = Volume down<br/>
-          Press Control + Alt 0 - 9 = Seek the time slider<br/>
-          Press Control + Alt + C   = Toggle between captions on or off.<br/>
-          Press Control + Alt + F   = Forward the video.<br/>
-          Press Control + Alt + R   = Rewind the video.<br/>
-          Press Control + Alt + T   = the current time for the screen reader<br/>
-          Press on Mac cmd + = to zoom in the player<br/>
-          Press on Mac cmd - = to minimize the player<br/>
-          Press on Windows strg + = to zoom in the player<br/>
-          Press on Windows strg - = to minimize the player<br/>
-      </div>
-    </div>
 		<br/>
-          <xsl:value-of select="ns2:episode/dcAbstract" />
 		<ul id="captions" aria-channel="main" aria-relevant="additions"
 			aria-atomic="true" aria-live="polite" role="log" class="fl-offScreen-hidden">
 		</ul>
+		
+		<div id="oc-title" style="display: none"><xsl:value-of select="ns2:episode/dcTitle" /></div>
+		<div id="oc-creator" style="display: none"><xsl:value-of select="ns2:episode/dcCreator" /></div>
+		<div id="oc-abstract" style="display: none"><xsl:value-of select="ns2:episode/dcAbstract" /></div>
+		
 	</xsl:template>
 </xsl:stylesheet>
