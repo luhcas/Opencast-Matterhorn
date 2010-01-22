@@ -77,21 +77,21 @@ public class WorkspaceImpl implements Workspace, ManagedService {
         this.rootDirectory = tmpdir + "opencast" + File.separator + "workspace";
         createRootDirectory();
       }
-      logger.info("AZ: DEFAULT "+WORKSPACE_ROOTDIR+": "+this.rootDirectory);
+      logger.info("DEFAULT "+WORKSPACE_ROOTDIR+": "+this.rootDirectory);
     } else {
       // use rootDir from CONFIG
       this.rootDirectory = cc.getBundleContext().getProperty(WORKSPACE_ROOTDIR);
-      logger.info("AZ: CONFIG "+WORKSPACE_ROOTDIR+": "+this.rootDirectory);
+      logger.info("CONFIG "+WORKSPACE_ROOTDIR+": "+this.rootDirectory);
       createRootDirectory();
     }
     String workingFileDir = tmpdir + "opencast" + File.separator + "workingfilerepo";
     if (cc != null && cc.getBundleContext().getProperty(WORKSPACE_WORKING_FILEDIR) != null) {
       // use CONFIG
       workingFileDir = cc.getBundleContext().getProperty(WORKSPACE_WORKING_FILEDIR);
-      logger.info("AZ: CONFIG "+WORKSPACE_WORKING_FILEDIR+": "+workingFileDir);
+      logger.info("CONFIG "+WORKSPACE_WORKING_FILEDIR+": "+workingFileDir);
     } else {
       // DEFAULT
-      logger.info("AZ: DEFAULT "+WORKSPACE_WORKING_FILEDIR+": "+workingFileDir);
+      logger.info("DEFAULT "+WORKSPACE_WORKING_FILEDIR+": "+workingFileDir);
     }
 
     filesystemMappings = new HashMap<String, String>();
@@ -101,7 +101,7 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     } else {
       filesUrl = cc.getBundleContext().getProperty("serverUrl") + "/files";
     }
-    logger.info("AZ: Workspace filesystem mapping "+filesUrl+" => "+workingFileDir);
+    logger.info("Workspace filesystem mapping "+filesUrl+" => "+workingFileDir);
     filesystemMappings.put(filesUrl, workingFileDir);
   }
 
