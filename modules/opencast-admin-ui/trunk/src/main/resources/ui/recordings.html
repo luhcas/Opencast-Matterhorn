@@ -90,6 +90,20 @@
           $('.processingStatus').each( function() {
             var items = $(this).text().split(';');
             for (key=0; key < items.length-1; key++) {
+              var item = items[key];
+              item = item.replace(/SUCCEEDED/,'Succeeded')
+                         .replace(/FAILED/,'Failed')
+                         .replace(/inspect/,'inspect media')
+                         .replace(/compose/,'encode')
+                         .replace(/image/,'create cover image')
+                         .replace(/distribute_local/,'distribute')
+                         .replace(/publish/,'distribute');
+              $(this).text(item);
+              if ( items[key].match(/FAILED/) ) {
+                return;
+              }
+            }
+            /*for (key=0; key < items.length-1; key++) {
               $(this).empty();
               var item = items[key].split(':');
               if (item[0] == 'SUCCEEDED') {
@@ -103,7 +117,7 @@
               if ((item[0] == 'FAILED') || (item[0] == 'FAILING')) {
                 return;
               }
-            }
+            }*/
           });
           if ($('.date-column').length > 0) {
             // if date date/time column is present

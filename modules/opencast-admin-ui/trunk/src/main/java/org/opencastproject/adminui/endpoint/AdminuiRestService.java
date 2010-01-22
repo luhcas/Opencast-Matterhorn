@@ -151,7 +151,7 @@ public class AdminuiRestService {
           StringBuffer sb = new StringBuffer();
           while (instances.hasNext()) {
             operation = instances.next();
-            sb.append(operation.getState().toString() + ":" + operation.getName() + ";");
+            sb.append(operation.getState().toString() + ": " + operation.getName() + ";");
           }
           item.setProcessingStatus(sb.toString());
           /*if (operation != null) {
@@ -299,7 +299,7 @@ public class AdminuiRestService {
         item.setId(events[i].getID());
         item.setTitle(events[i].getTitle());
         item.setPresenter(events[i].getCreator());
-        item.setSeries(events[i].getSeriesID());    // FIXME get title for seriesID -- not used by now
+        item.setSeries(events[i].getSeriesID());    // actually it's the series title
         item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
         item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
         item.setCaptureAgent(events[i].getDevice());
