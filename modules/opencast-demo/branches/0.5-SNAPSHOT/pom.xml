@@ -5,7 +5,7 @@
   <artifactId>opencast-demo</artifactId>
   <packaging>jar</packaging>
   <name>opencast-demo</name>
-  <version>0.5-SNAPSHOT2</version>
+  <version>0.5-SNAPSHOT</version>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -14,7 +14,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-media</artifactId>
-      <version>0.5-SNAPSHOT2</version>
+      <version>0.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
