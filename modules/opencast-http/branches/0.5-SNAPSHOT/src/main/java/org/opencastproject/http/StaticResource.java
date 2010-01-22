@@ -30,6 +30,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import javax.activation.MimetypesFileTypeMap;
+
 /**
  * A static resource for registration with the http service.
  */
@@ -138,6 +140,10 @@ public class StaticResource extends HttpServlet {
         return;
       }
       resp.setHeader("ETag", md5);
+      String contentType = new MimetypesFileTypeMap().getContentType(url.getFile());
+      if(contentType != "application/octet-stream"){
+        resp.setHeader("Content-Type", contentType);
+      }
       InputStream in = url.openStream();
       IOUtils.copy(in, resp.getOutputStream());
     } catch (Exception e) {
