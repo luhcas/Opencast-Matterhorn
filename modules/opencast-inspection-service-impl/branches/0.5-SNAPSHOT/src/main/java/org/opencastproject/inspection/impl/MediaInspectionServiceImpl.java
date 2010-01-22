@@ -37,6 +37,7 @@ import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,14 +49,20 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Inspects media via the 3rd party MediaInfo tool by default, and can be configured to use other media analyzers.
  */
 public class MediaInspectionServiceImpl implements MediaInspectionService, ManagedService {
+  public static final String CONFIG_ANALYZER_CLASS = "inspection.analyzerclass";
+  public static final String CONFIG_ANALYZER_MEDIAINFOPATH = "inspection.mediainfopath";
+
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImpl.class);
 
   Workspace workspace;
+  Map<String, Object> analyzerConfig = new ConcurrentHashMap<String, Object>();
 
   public void setWorkspace(Workspace workspace) {
     logger.debug("setting " + workspace);
@@ -64,6 +71,28 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
   public void unsetWorkspace(Workspace workspace) {
     logger.debug("unsetting " + workspace);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void updated(Dictionary properties) throws ConfigurationException {
+    logger.info("TODO Updating configuration on {}", this.getClass().getName());
+    // TODO this is doing nothing
+  }
+
+  public void activate(ComponentContext cc) {
+    if (cc != null) {
+      if (cc.getBundleContext().getProperty(CONFIG_ANALYZER_CLASS) != null) {
+        // use analyzerclass from CONFIG
+        MediaAnalyzerFactory.analyzerClassName = cc.getBundleContext().getProperty(CONFIG_ANALYZER_CLASS);
+        logger.info("CONFIG "+CONFIG_ANALYZER_CLASS+": " + MediaAnalyzerFactory.analyzerClassName);
+      }
+      if (cc.getBundleContext().getProperty(CONFIG_ANALYZER_MEDIAINFOPATH) != null) {
+        // use binary path from CONFIG
+        String path = cc.getBundleContext().getProperty(CONFIG_ANALYZER_MEDIAINFOPATH);
+        analyzerConfig.put(MediaInfoAnalyzer.CONFIG_MEDIAINFO_BINARY, path);
+        logger.info("CONFIG "+CONFIG_ANALYZER_MEDIAINFOPATH+": " + path);
+      }
+    }
   }
 
   public Track inspect(URI uri) {
@@ -76,6 +105,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     try {
       MediaAnalyzerFactory analyzerFactory = MediaAnalyzerFactory.newInstance();
       MediaAnalyzer mediaAnalyzer = analyzerFactory.newMediaAnalyzer();
+      mediaAnalyzer.setConfig(analyzerConfig);
       metadata = mediaAnalyzer.analyze(file);
     } catch (Throwable t) {
       throw new IllegalStateException("Unable to create media analyzer", t);
@@ -261,12 +291,6 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         throw new RuntimeException(e);
       }
     return element;
-  }
-
-  @SuppressWarnings("unchecked")
-  public void updated(Dictionary properties) throws ConfigurationException {
-    logger.info("Updating configuration on {}", this.getClass().getName());
-    // TODO Update the local path to the mediainfo binary
   }
 
 }

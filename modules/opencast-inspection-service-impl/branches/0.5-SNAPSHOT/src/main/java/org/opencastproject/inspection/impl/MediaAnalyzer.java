@@ -17,6 +17,7 @@
 package org.opencastproject.inspection.impl;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * Interface for tools that analyze media files.
@@ -26,5 +27,10 @@ import java.io.File;
 public interface MediaAnalyzer {
 
   MediaContainerMetadata analyze(File media) throws MediaAnalyzerException;
+
+  /*
+   * Needed for https://issues.opencastproject.org/jira/browse/MH-2157 -AZ
+   */
+  void setConfig(Map<String, Object> config);
 
 }

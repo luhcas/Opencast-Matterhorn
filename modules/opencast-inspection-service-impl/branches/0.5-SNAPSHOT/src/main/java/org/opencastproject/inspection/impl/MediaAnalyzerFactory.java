@@ -39,8 +39,11 @@ public class MediaAnalyzerFactory {
   /** Name of the system property */
   public static final String PROPERTY_NAME = "opencast.mediaanalyzer";
 
-  /** The implementation class name */
-  private static String analyzerClassName = BUILDER_CLASS;
+  /** 
+   * The implementation class name
+   * This will get set from the service if there is a config value set
+   **/
+  protected static String analyzerClassName = BUILDER_CLASS;
 
   /** The singleton instance of this factory */
   private static final MediaAnalyzerFactory factory = new MediaAnalyzerFactory();
