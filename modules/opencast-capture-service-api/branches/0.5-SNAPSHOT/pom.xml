@@ -5,22 +5,22 @@
   <artifactId>opencast-capture-service-api</artifactId>
   <packaging>bundle</packaging>
   <name>opencast-capture-service-api</name>
-  <version>0.5-SNAPSHOT2</version>
+  <version>0.5-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.5-SNAPSHOT2</version>
+    <version>0.5-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-capture-admin-service-api</artifactId>
-      <version>0.5-SNAPSHOT2</version>
+      <version>0.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-media</artifactId>
-      <version>0.5-SNAPSHOT2</version>
+      <version>0.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
