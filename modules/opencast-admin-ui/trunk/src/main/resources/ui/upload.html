@@ -114,6 +114,12 @@
               $(this).prev('.formField-label').css('color','black');
             }
           });
+          // check for right file extension
+          if ($('#track').val() != '') {
+            var ext = $('track').val();
+            ext = ext.substr(ext.length-3);
+            wlert('Ext: ' + ext);
+          }
           if (!missing) {
             $('#container-missingFields').hide('fast');
           }
@@ -149,7 +155,7 @@
                 <span class="fl-icon inline-icon icon-bullet"></span>Please select the <a href="javascript:document.getElementById('flavor').focus();">media file content</a> -- the type of content the media file contains.
               </li>
               <li id="notification-track" class="missing-fields-item">
-                <span class="fl-icon inline-icon icon-bullet"></span>Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload.
+                <span class="fl-icon inline-icon icon-bullet"></span>Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload. The file muste be a video file (avi,mp4,mpg,mkv,flv or wmv).
               </li>
             </ul>
           </div>
