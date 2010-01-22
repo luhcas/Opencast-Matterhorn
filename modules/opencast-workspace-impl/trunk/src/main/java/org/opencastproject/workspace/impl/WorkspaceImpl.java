@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workspace.impl;
 
+import org.opencastproject.util.IoSupport;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
@@ -44,33 +45,76 @@ import java.util.Map.Entry;
  * TODO Implement cache invalidation using the caching headers, if provided, from the remote server.
  */
 public class WorkspaceImpl implements Workspace, ManagedService {
+  public static final String WORKSPACE_ROOTDIR = "workspace.rootdir";
+  public static final String WORKSPACE_WORKING_FILEDIR = "workspace.workingfiledir";
   private static final Logger logger = LoggerFactory.getLogger(WorkspaceImpl.class);
-  
+
   private WorkingFileRepository repo;
   private String rootDirectory = null;
   private Map<String, String> filesystemMappings;
   
   public WorkspaceImpl() {
-    this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workspace");
+    this(null);
   }
   
   public WorkspaceImpl(String rootDirectory) {
+    if (rootDirectory == null) {
+      // MH-2159 - we will still set the default tmp dir here
+      rootDirectory = IoSupport.getSystemTmpDir() + "opencast" + File.separator + "workspace";
+    }
     this.rootDirectory = rootDirectory;
     createRootDirectory();
   }
 
   public void activate(ComponentContext cc) {
+    // NOTE: warning - the test calls activate() with a NULL cc
+    String tmpdir = IoSupport.getSystemTmpDir();
+
+    // MH-2159 - load the root directory from config
+    if (cc == null || cc.getBundleContext().getProperty(WORKSPACE_ROOTDIR) == null) {
+      // DEFAULT rootDirectory
+      if (this.rootDirectory == null) {
+        this.rootDirectory = tmpdir + "opencast" + File.separator + "workspace";
+        createRootDirectory();
+      }
+      logger.info("AZ: DEFAULT "+WORKSPACE_ROOTDIR+": "+this.rootDirectory);
+    } else {
+      // use rootDir from CONFIG
+      this.rootDirectory = cc.getBundleContext().getProperty(WORKSPACE_ROOTDIR);
+      logger.info("AZ: CONFIG "+WORKSPACE_ROOTDIR+": "+this.rootDirectory);
+      createRootDirectory();
+    }
+    String workingFileDir = tmpdir + "opencast" + File.separator + "workingfilerepo";
+    if (cc != null && cc.getBundleContext().getProperty(WORKSPACE_WORKING_FILEDIR) != null) {
+      // use CONFIG
+      workingFileDir = cc.getBundleContext().getProperty(WORKSPACE_WORKING_FILEDIR);
+      logger.info("AZ: CONFIG "+WORKSPACE_WORKING_FILEDIR+": "+workingFileDir);
+    } else {
+      // DEFAULT
+      logger.info("AZ: DEFAULT "+WORKSPACE_WORKING_FILEDIR+": "+workingFileDir);
+    }
+
     filesystemMappings = new HashMap<String, String>();
     String filesUrl;
-    if(cc == null || cc.getBundleContext().getProperty("serverUrl") == null) {
+    if (cc == null || cc.getBundleContext().getProperty("serverUrl") == null) {
       filesUrl = UrlSupport.DEFAULT_BASE_URL + "/files";
     } else {
       filesUrl = cc.getBundleContext().getProperty("serverUrl") + "/files";
     }
-    // TODO Remove hard coded path
-    filesystemMappings.put(filesUrl, System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo");
+    logger.info("AZ: Workspace filesystem mapping "+filesUrl+" => "+workingFileDir);
+    filesystemMappings.put(filesUrl, workingFileDir);
   }
-    
+
+  @SuppressWarnings("unchecked")
+  public void updated(Dictionary props) throws ConfigurationException {
+    if (props != null) {
+      if (props.get("root") != null) {
+        rootDirectory = (String)props.get("root");
+        createRootDirectory();
+      }
+    }
+  }
+
   public File get(URI uri) {
     String urlString = uri.toString();
     
@@ -164,16 +208,8 @@ public class WorkspaceImpl implements Workspace, ManagedService {
     this.repo = null;
   }
 
-  @SuppressWarnings("unchecked")
-  public void updated(Dictionary props) throws ConfigurationException {
-    if(props.get("root") != null) {
-      rootDirectory = (String)props.get("root");
-      createRootDirectory();
-    }
-  }
-
   private void createRootDirectory() {
-    File f = new File(rootDirectory);
+    File f = new File(this.rootDirectory);
     if( ! f.exists()) {
       try {
         FileUtils.forceMkdir(f);

@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,6 +35,18 @@ public class IoSupport {
   /** the logging facility provided by log4j */
   private static Logger log_ = LoggerFactory.getLogger(IoSupport.class
       .getName());
+
+  public static String getSystemTmpDir() {
+    String tmpdir = System.getProperty("java.io.tmpdir");
+    if (tmpdir != null) {
+      if (! tmpdir.endsWith(File.separator)) {
+        tmpdir += File.separator;
+      }
+    } else {
+      tmpdir = File.separator + "tmp";
+    }
+    return tmpdir;
+  }
 
   private IoSupport() {
   }
