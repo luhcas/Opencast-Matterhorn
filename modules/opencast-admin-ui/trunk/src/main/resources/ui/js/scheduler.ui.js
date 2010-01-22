@@ -34,7 +34,7 @@ schedulerUI.submitForm = function() {
   try{
     var eventXML = eventsManager.serialize();
   }catch(e){
-    console.log(e);
+    alert(e);
   }
   if(eventXML){
     var method  = '/addEvent';
@@ -61,19 +61,21 @@ schedulerUI.loadCompleteValues = function(){
   for(field in eventsManager.fields){
     if(eventsManager.fields[field].getValue() != ""){
       if(field == "startdate"){
-        $('#data-' + field + ' .data-value').empty().append(eventsManager.fields[field].getValue().toLocaleString());
+        $('#data-' + field + ' > .data-value').empty().append(eventsManager.fields[field].getValue().toLocaleString());
         $('#data-' + field).toggle();
       }else if(field == "duration"){
-        $('#data-' + field + ' .data-value').empty().append(schedulerUI.parseDuration(eventsManager.fields[field].getValue()));
+        $('#data-' + field + ' > .data-value').empty().append(schedulerUI.parseDuration(eventsManager.fields[field].getValue()));
+        $('#data-' + field).toggle();
+      }else if(field == "abstract"){
+        var val = eventsManager.fields[field].getValue();
+        if(val.length > 200){
+          $("#detail-switch").css("display", "inline-block");
+        }
+        $('#' + field).empty().append(val);
         $('#data-' + field).toggle();
       }else {
         var val = eventsManager.fields[field].getValue();
-        if(field == "abstract"){
-          if(val.length > 200){
-            $("#detail-switch").css("display", "inline-block");
-          }
-        }
-        $('#data-' + field + ' .data-value').empty().append(val);
+        $('#data-' + field + ' > .data-value').empty().append(val);
         $('#data-' + field).toggle();
       }
     }

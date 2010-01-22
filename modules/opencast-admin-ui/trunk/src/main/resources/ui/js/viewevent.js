@@ -19,6 +19,7 @@ var eventDoc = null;
 //WorkflowID is parsed from the URL parameters and is the ID of the workflow used to gather the required metadata.
 var workflowID = null;
 
+var debug = null;
 /**
  *  handleWorkflow parses the workflow xml, grabs the URLs of the additional metadata catalogs
  *  and makes additional ajax calls to bring in the metadata.
@@ -26,11 +27,13 @@ var workflowID = null;
  *  @param {XML Document}
  */
 function handleWorkflow(workflowDoc){
+  console.log(workflowDoc);
   eventDoc = createDoc();
   var dcURL = $("ns2\\:workflow-instance", workflowDoc).find("metadata:first > catalog[type='metadata/dublincore'] url").text();
   //TODO: get extra metadata catalog URL
   //var caURL = $("ns2\\:workflow-instance", testDoc).find("metadata:first > catalog[type='metadata/extra'] url").text();
-  console.log($("ns2\\:workflow-instance", workflowDoc).find("metadata:first").toString());
+  debug = workflowDoc;
+  //console.log($("ns2\\:workflow-instance", workflowDoc));
   testDoc = workflowDoc;
   
   eventid = eventDoc.createElement('event-id');
@@ -176,9 +179,12 @@ function parseDuration(dur){
 }
 
 function parseDateTime(datetime){
-  //expects date in ical format of YYYY-MM-DDTHH:MM:SS e.g. 2007-12-05T13:40:00
-  var datetime = datetime.split("T");
-  var date = datetime[0].split("-");
-  var time = datetime[1].split(":");
-  return new Date(date[0], (date[1] - 1), date[2], time[0], time[1], time[2]).toLocaleString();
+  if(datetime){
+    //expects date in ical format of YYYY-MM-DDTHH:MM:SS e.g. 2007-12-05T13:40:00
+    datetime = datetime.split("T");
+    var date = datetime[0].split("-");
+    var time = datetime[1].split(":");
+    return new Date(date[0], (date[1] - 1), date[2], time[0], time[1], time[2]).toLocaleString();
+  }
+  return new Date(0);
 }
