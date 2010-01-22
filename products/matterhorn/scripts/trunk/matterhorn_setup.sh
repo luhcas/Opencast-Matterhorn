@@ -45,7 +45,7 @@ install_3p ()
   sudo apt-get -y --force-yes install libcv1 libcv-dev opencv-doc
 
   #install media info
-  #wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
+  wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   #sudo dpkg -i libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   #rm -f libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   #wget http://downloads.sourceforge.net/mediainfo/libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
@@ -86,7 +86,7 @@ install_ffmpeg ()
   sudo checkinstall --pkgname=x264 --pkgversion "1:0.svn`date +%Y%m%d`" --backup=no --default
   
   cd
-  svn checkout svn://svn.ffmpeg.org/ffmpeg/trunk ffmpeg
+  svn checkout -r 20641 svn://svn.ffmpeg.org/ffmpeg/trunk ffmpeg
   cd ffmpeg
   ./configure --enable-gpl --enable-version3 --enable-nonfree --enable-postproc --enable-pthreads --enable-libfaac --enable-libfaad --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libtheora --enable-libx264 --enable-libxvid --enable-x11grab
   make
@@ -119,6 +119,7 @@ start_mh ()
   sudo mv /etc/profile.d/matterhorn_setup.sh /usr/local/matterhorn/bin/.
 }
 
+############################### START HERE ###############################
 # Wait for network connection
 for ntime in 1 2 3 4 5 6 7 8 9 10
 do
@@ -138,21 +139,42 @@ if [ -z $MY_IP ]; then
 else
   # connected, start main task
   show_stat
+  echo "******** OPTIONS HAVE CHANGED, PLEASE READ CAREFULLY *********"
 
-  echo "Default keyboard is US; Do you want to reconfigure? (y/n)"
+  # Need to get a server name, not just y/n
+  proxsrv=y
+  while [ ${#proxsrv} -gt 0 ] && [ ${#proxsrv} -lt 8 ]
+  do
+    echo "**** To set up a proxy server, please enter the URL or press enter []?"
+    read proxsrv
+  done
+
+  # proxy server?
+  if [ ${#proxsrv} -gt 7 ]; then
+    sudo echo "http_proxy=$proxsrv" > /etc/profile.d/httpproxy.sh
+    sudo echo "export http_proxy" >> /etc/profile.d/httpproxy.sh
+    export http_proxy=$proxsrv
+  else
+    echo "No proxy server specified."
+  fi
+
+  echo "**** Default keyboard is US; Do you want to reconfigure? (y/n)"
   read kbresp
 
-  echo "Do you want to install 3rd party tools? (y/n)"
+  echo "**** Do you want to install 3rd party tools? (y/n)"
   read p3resp
 
-  echo "Do you want to install ffmpeg? (y/n)"
+  echo "**** Do you want to install ffmpeg? (y/n)"
   read ffresp
 
   # update felix config (url)
   mv $CONF_DIR/config.properties $CONF_DIR/config.properties_old
-  sed "s/http:\/\/localhost:808./http:\/\/$MY_IP:8080/" $CONF_DIR/config.properties_old > $CONF_DIR/config.properties
+  sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" $CONF_DIR/config.properties
   chown -R matterhorn $CONF_DIR
   chgrp -R matterhorn $CONF_DIR
+
+  # update capture properties
+  sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opencast/config/capture.properties
 
   # Reconfigure Keyboard?
   if [ $kbresp = "y" ] || [ $kbresp = "Y" ]; then
