@@ -1,18 +1,18 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-  <!------------------------- HEAD ------------------------->
+  <!-- HEAD -->
   <head>
     <title>Opencast Matterhorn - Upload Recording</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
     <!-- styles -->
-    <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-layout.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-text.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-theme-coal.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="css/admin.css" />
-    <link rel="stylesheet" type="text/css" href="css/popuphelp.css" />
-    <link type="text/css" href="css/upload.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-theme-coal.css">
+    <link rel="stylesheet" type="text/css" href="css/admin.css">
+    <link rel="stylesheet" type="text/css" href="css/popuphelp.css">
+    <link type="text/css" rel="stylesheet" href="css/upload.css">
     <style type="text/css">
       .container {margin-bottom: 10px;}
       .color-red {color:red;}
@@ -31,7 +31,7 @@
     <!-- scripts -->
     <script type="text/javascript" src="infusion-1.1.2/InfusionAll.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.7.2.custom.min.js"></script>
-    <script type="text/javascript" src="js/jquery.form.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.form.js"></script>
     <script type="text/javascript" src="js/upload.helptexts.json"></script>
     <script type="text/javascript">
       var metadata = {};
@@ -114,6 +114,19 @@
               $(this).prev('.formField-label').css('color','black');
             }
           });
+          // check for right file extension
+          if ($('#track').val() != '') {
+            var ext = $('#track').val();
+            ext = ext.substr(ext.length-3).toLowerCase();
+            var right = (ext == 'avi') || (ext == 'mpg') || (ext == 'mp4') || (ext == 'mkv') || (ext == 'flv') || (ext == 'mov') || (ext == 'wmv');
+            if (!right) {
+              $('#notification-track').show();
+              missing = true;
+            } else {
+              $('#notification-track').hide();
+              missing = false;
+            }
+          }
           if (!missing) {
             $('#container-missingFields').hide('fast');
           }
@@ -123,7 +136,7 @@
     </script>
   </head>
 
-  <!------------------------- BODY ------------------------->
+  <!-- BODY -->
   <body>
     <!-- BEGIN of stage -->
     <!-- fl-centered doesn't work in winXP-IE8 -->
@@ -134,7 +147,7 @@
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
         <div class="fl-container-800" style="text-align: center;">
-          <h2 id="page-title">Matterhorn - Upload Recording</h2>
+          <h2 id="page-title">Upload Recording</h2>
         </div>
 
         <!-- missing fields notification -->
@@ -145,11 +158,11 @@
               <li id="notification-title" class="missing-fields-item">
                 <span class="fl-icon inline-icon icon-bullet"></span>Please enter a <a href="javascript:document.uploadForm.title.focus();">title</a> for the recording.
               </li>
-              <li id="notification-type" class="missing-fields-item">
-                <span class="fl-icon inline-icon icon-bullet"></span>Please select the <a href="javascript:document.getElementById('type').focus();">media file content</a> -- the type of content the media file contains.
+              <li id="notification-flavor" class="missing-fields-item">
+                <span class="fl-icon inline-icon icon-bullet"></span>Please select the <a href="javascript:document.getElementById('flavor').focus();">media file content</a> -- the type of content the media file contains.
               </li>
               <li id="notification-track" class="missing-fields-item">
-                <span class="fl-icon inline-icon icon-bullet"></span>Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload.
+                <span class="fl-icon inline-icon icon-bullet"></span>Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload. The file muste be a video file (avi,mp4,mov,mpg,mkv,flv or wmv).
               </li>
             </ul>
           </div>
@@ -164,7 +177,7 @@
                 <!-- field: Title -->
                 <li class="ui-helper-clearfix">
                   <span class="formField-label"><span class="color-red">* </span>Title:</span>
-                  <input type="text" class="formField requiredField" id="title" name="title" required="true">
+                  <input type="text" class="formField requiredField" id="title" name="title">
                   <span class="helpIcon">&nbsp;</span>
                 </li>
                 <!-- field: Presenter -->
@@ -225,7 +238,7 @@
                 <li class="ui-helper-clearfix">
                   <span class="formField-label"><span class="color-red">* </span>Distribution channel(s):</span>
                   <span id="dist" style="float:left;">
-                    <input type="checkbox" checked="true" disabled="true">
+                    <input type="checkbox" checked="checked" disabled="disabled">
                     &nbsp;Matterhorn media module
                   </span>
                   <span class="helpIcon">&nbsp;</span>
@@ -314,9 +327,9 @@
 
     <!-- template for the popup help box -->
     <div id="helpBox" class="helpbox" style="display:none;">
-      <img src="img/lightbulb.png" alt="help" />
+      <img src="img/lightbulb.png" alt="help" >
       <div id="helpTitle" style="display:inline;font-weight:bold; margin-left:10px;"></div>
-      <div id="helpText" style="padding-left:7px; padding-right:7px; white-space:normal;" />
+      <div id="helpText" style="padding-left:7px; padding-right:7px; white-space:normal;"></div>
     </div>
 
   </body>

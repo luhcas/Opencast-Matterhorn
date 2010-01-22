@@ -1,21 +1,20 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
-    <title>Matterhorn Capture Agents</title>
+    <title>Opencast Matterhorn - Capture Agents</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!-- styles -->
-    <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-layout.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-text.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-theme-coal.css" rel="stylesheet" type="text/css" />
-    <link href="css/admin.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-theme-coal.css">
+    <link rel="stylesheet" type="text/css" href="css/admin.css">
 
     <!-- scripts -->
-    <script type="text/javascript" src="infusion-1.1.2/InfusionAll.js"></script>
-    <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
-    <script type="text/javascript" src="js/jquery.xslt.js"></script>
+    <script type="text/javascript" src="jquery/jquery-1.4.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
     <script type="text/javascript">
-
       $(document).ready( function() {
 
         $('#stage').xslt("../../capture-admin/rest/GetKnownAgents", "xsl/agents_status.xsl", function() {
@@ -23,7 +22,6 @@
         });
 
       });
-
     </script>
   </head>
   <body>

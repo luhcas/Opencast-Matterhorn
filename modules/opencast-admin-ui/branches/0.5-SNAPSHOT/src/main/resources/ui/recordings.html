@@ -1,21 +1,20 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
-    <title>Opencast Matterhorn Recordings</title>
+    <title>Opencast Matterhorn - Recordings</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!-- styles -->
-    <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-layout.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-text.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-theme-coal.css" rel="stylesheet" type="text/css" />
-    <link href="css/admin.css" rel="stylesheet" type="text/css" />
-    <link href="css/tablesorter.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-theme-coal.css">
+    <link rel="stylesheet" type="text/css" href="css/admin.css">
+    <link rel="stylesheet" type="text/css" href="css/tablesorter.css">
 
     <!-- scripts -->
-    <script type="text/javascript" src="infusion-1.1.2/InfusionAll.js"></script>
-    <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
-    <script type="text/javascript" src="js/jquery.xslt.js"></script>
-    <script type="text/javascript" src="js/jquery.xslt.js"></script>
+    <script type="text/javascript" src="jquery/jquery-1.4.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
     <script type="text/javascript">
       var statsInterval;
       var updateRequested = false;
@@ -91,6 +90,20 @@
           $('.processingStatus').each( function() {
             var items = $(this).text().split(';');
             for (key=0; key < items.length-1; key++) {
+              var item = items[key];
+              item = item.replace(/SUCCEEDED/,'Succeeded')
+                         .replace(/FAILED/,'Failed')
+                         .replace(/inspect/,'inspect media')
+                         .replace(/compose/,'encode')
+                         .replace(/image/,'create cover image')
+                         .replace(/distribute_local/,'distribute')
+                         .replace(/publish/,'distribute');
+              $(this).text(item);
+              if ( items[key].match(/FAILED/) ) {
+                return;
+              }
+            }
+            /*for (key=0; key < items.length-1; key++) {
               $(this).empty();
               var item = items[key].split(':');
               if (item[0] == 'SUCCEEDED') {
@@ -104,7 +117,7 @@
               if ((item[0] == 'FAILED') || (item[0] == 'FAILING')) {
                 return;
               }
-            }
+            }*/
           });
           if ($('.date-column').length > 0) {
             // if date date/time column is present

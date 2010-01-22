@@ -1,25 +1,24 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Matterhorn - View Recording</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >
+    <title>Opencast Matterhorn - View Recording</title>
     
     <!-- style -->
-    <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-layout.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-text.css" rel="stylesheet" type="text/css" />
-    <link href="infusion-1.1.2/fss/css/fss-theme-coal.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-theme-coal.css">
     
-    <link rel="stylesheet" type="text/css" href="css/admin.css" />
-    <link rel="stylesheet" type="text/css" href="css/scheduler.css" />
-    <link rel="stylesheet" type="text/css" href="css/popuphelp.css" />
-    <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.7.2.custom.css" />
+    <link rel="stylesheet" type="text/css" href="css/admin.css">
+    <link rel="stylesheet" type="text/css" href="css/scheduler.css">
     
-    <!-- scripts -->
-    <script type="text/javascript" src="infusion-1.1.2/InfusionAll.js"></script>
-    <script type="text/javascript" src="js/jquery-ui-1.7.2.custom.min.js"></script>
+    <!-- static library scripts -->
+    <script type="text/javascript" src="jquery/jquery-1.4.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
+    
+    <!-- page script -->
     <script type="text/javascript" src="js/viewevent.js"></script>
-    <script type="text/javascript" src="js/jquery.xslt.js"></script>
     <script type="text/javascript">
       if(document.location.search){
         var params = document.location.search.substr(1).split('&');
@@ -33,7 +32,7 @@
       }
       
       $(document).ready(
-        function() { 
+        function() {
           if(workflowID){
             $.get("/workflow/rest/instance/" + workflowID + ".xml", handleWorkflow);
           }
@@ -50,7 +49,7 @@
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;" ></div>
       <div style="text-align: center;">
-        <a href="recordings.html"><< Back to Recordings</a>
+        <a href="recordings.html">&lt;&lt; Back to Recordings</a>
       </div>
     </div>
   </body>
