@@ -1,0 +1,315 @@
+/* 
+    Document   : workflow
+    Created on : Nov 1, 2009, 7:28:23 PM
+    Author     : bwulff
+    Description:
+        
+*/
+
+root { 
+    display: block;
+}
+
+body {
+	font-size: 80%;
+    font-family: "Trebuchet MS", "Helvetica", "Arial",  "Verdana", "sans-serif";
+    padding:0px;
+}
+
+div {
+   /*border:1px solid yellow;*/
+    margin:0px;
+}
+.left-float {
+    float:left;
+}
+.state-selector-container {
+    background:#BDBDBD;
+}
+.state-label {
+    margin-left:5px;
+}
+.workflow-state-selector {
+    padding:5px;
+    margin-bottom:3px;
+}
+.workflow-state-selector-active {
+    background:white;
+}
+.state-selector-container {
+    float:left;
+    /*position:absolute;
+    left:0px;*/
+    width:150px;
+    max-width:150px;
+    height:100%;
+}
+.workflow-list-container {
+    float:left;
+    /*position:absolute;
+    left:150px;*/
+    width:700px;
+    max-width:700px;
+    height:100%;
+}
+
+.workflow-list {
+    position:absolute;
+    margin-left:20px;
+    margin-right:0px;
+    height:100%;
+    overflow:auto;
+}
+
+/* ---------- workflow list --------- */
+.workflow-list-item {
+    border: 2px solid white;
+    margin-right:20px;
+    width:640px;
+    margin-top:2px;
+    margin-bottom:2px;
+}
+
+.workflow-list-item-focus {
+    border: 2px solid gray;
+}
+
+/* background color according to state */
+.workflow-item-bg-running {
+    background:white;
+}
+.workflow-item-bg-paused {
+    background:#F5F6CE;
+}
+.workflow-item-bg-stopped {
+    background:#E6E6E6;
+}
+.workflow-item-bg-failing {
+    background:#F6CECE
+}
+.workflow-item-bg-succeeded {
+    background:#CEF6CE;
+}
+
+.workflow-item-inner-border {
+    border:1px solid silver;
+    padding-left:7px;
+    padding-top:4px;
+    padding-bottom:4px;
+    padding-right:3px;
+    min-height:30px;
+}
+
+.workflow-item-inner-border-invisible {
+    border:none;
+}
+
+.workflow-item-operation {
+    width:20%;
+    text-align:center;
+}
+
+.workflow-item-mptitle {
+    width:40%;
+}
+
+.workflow-item-wfid {
+    margin-top:5px;
+    font-size:0.7em;
+    color:gray;
+}
+
+.workflow-item-field {
+    width:31%;
+    white-space:normal
+}
+
+.workflow-item-wftitle {
+    margin-left:10px;
+}
+
+.workflow-item-mptitle {
+    font-weight:bold;
+}
+
+.workflow-controls-container {
+    position:absolute;
+    z-index:100;
+    min-height:16px;
+    width:20px;
+    padding:2px;
+    padding-top:3px;
+    padding-bottom:3px;
+    /*border-left:2px solid gray;*/
+    border-right:2px solid gray;
+    border-bottom:2px solid gray;
+    border-top:2px solid gray;
+}
+
+.workflow-item-control {
+    margin-left:3px;
+    display:none;
+    /*background:white;*/
+}
+
+.workflow-item-control-visible {
+    display:inline;
+}
+
+/*----------- workflow dialog --------------*/
+.workflow-dialog {
+}
+.dialog-header {
+    height:40px;
+    padding-left:7px;
+    padding-top:4px;
+    padding-right:3px;
+}
+.dialog-tabs {
+    height:200px;
+}
+.tab-content {
+    display:none;
+    width:628px;
+    padding: 10px 5px;
+}
+.tab-header-selected {
+    border-bottom:none;
+}
+.tab-header-unselected {
+    border-bottom:1px solid #aaaaaa;
+}
+
+/* key/value table */
+.kv-table {
+    width:628px;
+    height:130px;
+    overflow:auto;
+    list-style:none;
+}
+.kv-table-head-row {
+    width:628px;
+    padding-bottom:3px;
+    border-bottom:1px solid #aaaaaa;
+}
+.kv-table-data-row {
+    clear:left;
+    border-bottom:1px solid silver;
+}
+.kv-table-head-key {
+    font-weight:bold;
+    float:left;
+    width:160px;
+    padding-left:8px;
+}
+.kv-table-head-value {
+    font-weight:bold;
+    float:left;
+    width:460px;
+}
+.kv-table-data-key {
+    float:left;
+    width:160px;
+    padding-left:8px;
+}
+.kv-table-data-value {
+    float:left;
+    width:440px;
+}
+
+/* log table */
+.log-table {
+    border:1px solid red;
+    width:628px;
+    height:130px;
+    overflow:auto;
+    list-style:none;
+}
+.log-table-head-row {
+    width:628px;
+    padding-bottom:3px;
+    border-bottom:1px solid #aaaaaa;
+}
+.log-table-data-row {
+    clear:left;
+    border-bottom:1px solid silver;
+}
+.log-table-head-operation {
+    font-weight:bold;
+    float:left;
+    width:160px;
+    padding-left:8px;
+}
+.log-table-head-description {
+    font-weight:bold;
+    float:left;
+    width:440px;
+}
+.log-table-head-state {
+    font-weight:bold;
+    float:left;
+    width:20px;
+}
+.log-table-data-operation {
+    float:left;
+    width:160px;
+    padding-left:8px;
+}
+.log-table-data-description {
+    float:left;
+    width:420px;
+}
+.log-table-data-state {
+    float:left;
+    width:20px;
+    text-align:center;
+}
+
+/* --------- icons --------- */
+.icon {
+    float:left;
+    width:16px;
+    height:16px;
+    background-repeat:no-repeat;
+}
+
+.icon-all {
+    background-image: url(../img/asterisk_yellow.png);
+}
+
+/* TODO make famfam icons background trabsparent! */
+.icon-running {
+    background-image: url(../img/cog.png);
+}
+
+.icon-paused {
+    background-image: url(../img/wrench_orange.png);
+}
+
+.icon-failing {
+    background-image: url(../img/exclamation.png);
+}
+
+.icon-succeeded {
+    background-image: url(../img/tick.png);
+}
+
+.icon-play {
+    background-image: url(../img/control_play_blue.png);
+}
+
+.icon-repeat {
+    background-image: url(../img/control_repeat_blue.png);
+}
+
+.icon-stop {
+    background-image: url(../img/control_stop_blue.png);
+}
+
+.icon-pause {
+    background-image: url(../img/control_pause_blue.png);
+}
+
+.icon-loading {
+    background-image: url(../img/loading.gif);
+}
