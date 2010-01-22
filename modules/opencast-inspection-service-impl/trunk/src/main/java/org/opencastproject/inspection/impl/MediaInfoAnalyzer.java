@@ -51,6 +51,9 @@ import java.util.regex.Pattern;
  */
 public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
+  public static final String CONFIG_MEDIAINFO_BINARY = "mediainfo.binary";
+  public static final String DEFAULT_MEDIAINFO_PATH = "/usr/local/bin/mediainfo";
+
   private static final Logger log_ = LoggerFactory.getLogger(MediaInfoAnalyzer.class);
 
   private static final Map<String, Setter> CommonStreamProperties = new MapBuilder<String, Setter>().put("Format",
@@ -96,12 +99,30 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
   // --------------------------------------------------------------------------------------------
 
   public MediaInfoAnalyzer() {
-    super("/usr/local/bin/mediainfo");
+    // instantiated using MediaAnalyzerFactory via newInstance()
+    super(DEFAULT_MEDIAINFO_PATH);
   }
 
+  /**
+   * Allows configuration
+   * {@inheritDoc}
+   * @see org.opencastproject.inspection.impl.MediaAnalyzer#setConfig(java.util.Map)
+   */
+  public void setConfig(Map<String, Object> config) {
+    if (config != null) {
+      if (config.containsKey(CONFIG_MEDIAINFO_BINARY)) {
+        String binary = (String)config.get(CONFIG_MEDIAINFO_BINARY);
+        setBinary(binary);
+        log_.info("MediaInfoAnalyzer config binary: "+binary);
+      }
+    }
+  }
+
+/* NOT used as far as I can see  -AZ
   public MediaInfoAnalyzer(String binary) {
     super(binary);
   }
+*/
 
   /* Analysis */
 
