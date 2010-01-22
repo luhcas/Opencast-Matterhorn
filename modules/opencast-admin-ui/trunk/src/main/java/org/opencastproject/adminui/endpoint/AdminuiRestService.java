@@ -301,7 +301,7 @@ public class AdminuiRestService {
         item.setPresenter(events[i].getCreator());
         item.setSeries(events[i].getSeriesID());    // FIXME get title for seriesID -- not used by now
         item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
-        item.setStartTime(Long.toString(events[i].getEnddate().getTime()));
+        item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
         item.setCaptureAgent(events[i].getDevice());
         item.setProcessingStatus("scheduled");
         item.setDistributionStatus("not distributed");
