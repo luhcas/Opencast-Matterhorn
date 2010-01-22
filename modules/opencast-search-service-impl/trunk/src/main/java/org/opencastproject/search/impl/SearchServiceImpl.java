@@ -300,7 +300,6 @@ public class SearchServiceImpl implements SearchService {
    * 
    * @see org.opencastproject.search.api.SearchService#getByQuery(java.lang.String, int, int)
    */
-  @Override
   public SearchResult getByQuery(String query, int limit, int offset) throws SearchException {
     try {
       log_.debug("Searching index using custom query '" + query + "'");
@@ -342,7 +341,6 @@ public class SearchServiceImpl implements SearchService {
    * {@inheritDoc}
    * @see org.opencastproject.search.api.SearchService#getByQuery(org.opencastproject.search.api.SearchQuery)
    */
-  @Override
   public SearchResult getByQuery(SearchQuery q) throws SearchException {
     try {
       log_.debug("Searching index using query object '" + q + "'");
