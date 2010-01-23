@@ -184,9 +184,9 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
 
       log_.debug(message);
 
-    // And the rest is likely to deserve warning status
+    // And the rest is likely to deserve at least info
     else
-      log_.warn(message);
+      log_.info(message);
   }
 
   /**
