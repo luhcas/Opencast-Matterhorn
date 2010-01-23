@@ -230,7 +230,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         } catch (MalformedURLException e) {
           logger.warn("Track {} has a malformed URL, {}", track.getIdentifier(), track.getURI());
         } catch (UnknownFileTypeException e) {
-          logger.warn("Unable to detect the mimetype for track {} at {}", track.getIdentifier(), track.getURI());
+          logger.debug("Unable to detect the mimetype for track {} at {}", track.getIdentifier(), track.getURI());
         }
       }
       // find all streams

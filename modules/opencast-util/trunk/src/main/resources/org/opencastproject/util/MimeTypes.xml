@@ -115,7 +115,7 @@
     <Extensions>mpeg,mpg,m1s,m1a,mp2,mpm,mpa,m2a,mp3,swa</Extensions>
   </MimeType>
   <MimeType>
-    <Type>video/x-mpeg</Type>
+    <Type>video/mpeg</Type>
     <Description>MPEG media</Description>
     <Extensions>mpeg,mpg,m1s,m1v,m1a,m75,m15,mp2,mpm,mpv,mpa</Extensions>
   </MimeType>
@@ -165,11 +165,6 @@
     <Extensions>targa,tga</Extensions>
   </MimeType>
   <MimeType>
-    <Type>audio/x-mpeg</Type>
-    <Description>MPEG audio</Description>
-    <Extensions>mpeg,mpg,m1s,m1a,mp2,mpm,mpa,m2a,mp3,swa</Extensions>
-  </MimeType>
-  <MimeType>
     <Type>audio/x-m4b</Type>
     <Description>AAC audio book</Description>
     <Extensions>m4b</Extensions>
@@ -193,11 +188,6 @@
     <Type>audio/x-wav</Type>
     <Description>WAVE audio</Description>
     <Extensions>wav,bwf</Extensions>
-  </MimeType>
-  <MimeType>
-    <Type>video/mpeg</Type>
-    <Description>MPEG media</Description>
-    <Extensions>mpeg,mpg,m1s,m1v,m1a,m75,m15,mp2,mpm,mpv,mpa</Extensions>
   </MimeType>
   <MimeType>
     <Type>video/x-msvideo</Type>
