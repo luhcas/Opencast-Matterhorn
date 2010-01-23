@@ -38,6 +38,7 @@ import javax.activation.MimetypesFileTypeMap;
 public class StaticResource extends HttpServlet {
   private static final long serialVersionUID = 1L;
   private static final Logger logger = LoggerFactory.getLogger(StaticResource.class);
+  private final MimetypesFileTypeMap mimeMap = new MimetypesFileTypeMap(getClass().getClassLoader().getResourceAsStream("mimetypes"));
   String classpath;
   String alias;
   String welcomeFile;
@@ -140,7 +141,7 @@ public class StaticResource extends HttpServlet {
         return;
       }
       resp.setHeader("ETag", md5);
-      String contentType = new MimetypesFileTypeMap().getContentType(url.getFile());
+      String contentType = mimeMap.getContentType(url.getFile());
       if(contentType != "application/octet-stream"){
         resp.setHeader("Content-Type", contentType);
       }
