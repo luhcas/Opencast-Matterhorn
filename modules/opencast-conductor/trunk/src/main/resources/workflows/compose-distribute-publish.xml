@@ -195,6 +195,7 @@
       exception-handler-workflow="Default Error Handler"
       description="Add metadata to the search index">
       <configurations>
+        <configuration key="tags">engage,atom,rss</configuration>
       </configurations>
     </operation>
   </operations>
