@@ -14,6 +14,12 @@ else
   M2_REPO="/Users/johndoe/.m2/repository"
 fi
 
+if [ -n "${OPENCAST_LOGDIR:-x}" ]; then
+  OPENCAST_LOGDIR=$FELIX/logs
+else
+  FELIX="/Applications/Matterhorn"
+fi
+
 DEBUG_PORT="8000"
 DEBUG_SUSPEND="n"
 
@@ -24,7 +30,7 @@ DEBUG_SUSPEND="n"
 MAVEN_ARG="-DM2_REPO=$M2_REPO"
 FELIX_FILEINSTALL_OPTS="-Dfelix.fileinstall.dir=$FELIX/load"
 PAX_CONFMAN_OPTS="-Dbundles.configuration.location=$FELIX/conf"
-PAX_LOGGING_OPTS="-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN"
+PAX_LOGGING_OPTS="-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopencast.logdir=$OPENCAST_LOGDIR"
 UTIL_LOGGING_OPTS="-Djava.util.logging.config.file=$FELIX/conf/services/java.util.logging.properties"
 
 # Clear the felix cache directory
