@@ -29,7 +29,6 @@ import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,25 +92,10 @@ public class ComposerServiceImpl implements ComposerService {
   }
 
   /**
-   * OSGI activator
-   */
-  public void activate(ComponentContext cc) {
-    // 
-    if (cc == null || cc.getBundleContext().getProperty(CONFIG_FFMPEG_PATH) == null) {
-      // DEFAULT - https://issues.opencastproject.org/jira/browse/MH-2158
-      log_.info("DEFAULT "+CONFIG_FFMPEG_PATH+": "+FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
-    } else {
-      // use CONFIG
-      String path = cc.getBundleContext().getProperty(CONFIG_FFMPEG_PATH);
-      encoderEngineConfig.put(FFmpegEncoderEngine.CONFIG_FFMPEG_BINARY, path);
-      log_.info("CONFIG "+CONFIG_FFMPEG_PATH+": " + path);
-    }
-  }
-
-  /**
    * Activator that will make sure the encoding profiles are loaded.
    */
-  protected void activate(Map<String, String> map) {
+  @SuppressWarnings("unchecked")
+  protected void activate(Map map) {
     try {
       profileManager = new EncodingProfileManager();
       executor = Executors.newFixedThreadPool(4);
@@ -120,7 +104,18 @@ public class ComposerServiceImpl implements ComposerService {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    
+
+    // Configure ffmpeg
+    String path = (String)map.get(CONFIG_FFMPEG_PATH);
+    if (path == null) {
+      // DEFAULT - https://issues.opencastproject.org/jira/browse/MH-2158
+      log_.info("DEFAULT "+CONFIG_FFMPEG_PATH+": "+FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
+    } else {
+      // use CONFIG
+      encoderEngineConfig.put(FFmpegEncoderEngine.CONFIG_FFMPEG_BINARY, path);
+      log_.info("CONFIG "+CONFIG_FFMPEG_PATH+": " + path);
+    }
+
   }
 
   /**
