@@ -207,10 +207,8 @@ final class ManifestImpl {
    * 
    * @param element
    *          the element to remove
-   * @throws MediaPackageException
-   *           if removing the element fails
    */
-  void remove(MediaPackageElement element) throws MediaPackageException {
+  void remove(MediaPackageElement element) {
     if (element == null)
       throw new IllegalArgumentException("Media package element must not be null");
     if (elements.remove(element)) {

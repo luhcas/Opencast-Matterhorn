@@ -242,7 +242,11 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    */
   @Override
   public String toString() {
-    return "MPEG-7";
+    StringBuffer buf = new StringBuffer("mpeg-7");
+    if (getIdentifier() != null) {
+      buf.append(" '").append(getIdentifier()).append("'");
+    }
+    return buf.toString();
   }
 
   /**

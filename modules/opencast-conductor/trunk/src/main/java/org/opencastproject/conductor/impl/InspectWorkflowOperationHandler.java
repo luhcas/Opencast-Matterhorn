@@ -17,7 +17,6 @@ package org.opencastproject.conductor.impl;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -65,8 +64,6 @@ public class InspectWorkflowOperationHandler implements
       try {
         mediaPackage.remove(track);
         mediaPackage.add(inspectedTrack);
-      } catch (MediaPackageException e) {
-        logger.error("Error modifying media package {}", mediaPackage, e);
       } catch (UnsupportedElementException e) {
         logger.error("Error adding {} to media package", inspectedTrack, e);
       }

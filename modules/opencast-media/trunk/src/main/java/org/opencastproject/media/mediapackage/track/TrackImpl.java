@@ -206,6 +206,10 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
    */
   @Override
   public String toString() {
-    return "track '" + getFlavor() + "'";
+    StringBuffer result = new StringBuffer("track");
+    if (getIdentifier() != null) {
+      result.append(" '").append(getIdentifier()).append("'");
+    }
+    return result.toString();
   }
 }

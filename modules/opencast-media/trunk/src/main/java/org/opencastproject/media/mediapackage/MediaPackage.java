@@ -448,10 +448,8 @@ public interface MediaPackage {
    * 
    * @param track
    *          the track
-   * @throws MediaPackageException
-   *           if the track cannot be removed
    */
-  void remove(Track track) throws MediaPackageException;
+  void remove(Track track);
 
   /**
    * Adds catalog information to this media package.
@@ -468,10 +466,8 @@ public interface MediaPackage {
    * 
    * @param catalog
    *          the catalog
-   * @throws MediaPackageException
-   *           if the catalog cannot be removed
    */
-  void remove(Catalog catalog) throws MediaPackageException;
+  void remove(Catalog catalog);
 
   /**
    * Adds an attachment to this media package.
@@ -488,20 +484,16 @@ public interface MediaPackage {
    * 
    * @param element
    *          the media package element
-   * @throws MediaPackageException
-   *           if the element cannot be removed
    */
-  void remove(MediaPackageElement element) throws MediaPackageException;
+  void remove(MediaPackageElement element);
 
   /**
    * Removes the attachment from the media package.
    * 
    * @param attachment
    *          the attachment
-   * @throws MediaPackageException
-   *           if the attachment cannot be removed
    */
-  void remove(Attachment attachment) throws MediaPackageException;
+  void remove(Attachment attachment);
 
   /**
    * Adds an element to this media package that represents a derived version of <code>sourceElement</code>. Examples of
@@ -555,11 +547,8 @@ public interface MediaPackage {
 
   /**
    * Removes the cover from the media package.
-   * 
-   * @throws MediaPackageException
-   *           if the cover cannot be removed
    */
-  void removeCover() throws MediaPackageException;
+  void removeCover();
 
   /**
    * Adds <code>observer</code> to the list of observers of this media package.

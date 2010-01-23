@@ -233,7 +233,11 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    */
   @Override
   public String toString() {
-    return "Dublin Core";
+    StringBuffer buf = new StringBuffer("dublin core");
+    if (getIdentifier() != null) {
+      buf.append(" '").append(getIdentifier()).append("'");
+    }
+    return buf.toString();
   }
 
   @Override

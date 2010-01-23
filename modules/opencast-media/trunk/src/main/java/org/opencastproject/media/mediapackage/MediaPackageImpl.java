@@ -468,28 +468,28 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#remove(org.opencastproject.media.mediapackage.MediaPackageElement)
    */
-  public void remove(MediaPackageElement element) throws MediaPackageException {
+  public void remove(MediaPackageElement element) {
     removeElement(element);
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#remove(org.opencastproject.media.mediapackage.Attachment)
    */
-  public void remove(Attachment attachment) throws MediaPackageException {
+  public void remove(Attachment attachment) {
     removeElement(attachment);
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#remove(org.opencastproject.media.mediapackage.Catalog)
    */
-  public void remove(Catalog catalog) throws MediaPackageException {
+  public void remove(Catalog catalog) {
     removeElement(catalog);
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#remove(org.opencastproject.media.mediapackage.Track)
    */
-  public void remove(Track track) throws MediaPackageException {
+  public void remove(Track track) {
     removeElement(track);
   }
 
@@ -497,17 +497,12 @@ public final class MediaPackageImpl implements MediaPackage {
    * Removes an element from the media package
    * 
    * @param element
-   * @throws MediaPackageException
    */
-  protected void removeElement(MediaPackageElement element) throws MediaPackageException {
-    try {
-      if (element instanceof AbstractMediaPackageElement) {
-        ((AbstractMediaPackageElement) element).setMediaPackage(null);
-      }
-      manifest.remove(element);
-    } catch (Throwable t) {
-      throw new MediaPackageException(t);
+  protected void removeElement(MediaPackageElement element) {
+    if (element instanceof AbstractMediaPackageElement) {
+      ((AbstractMediaPackageElement) element).setMediaPackage(null);
     }
+    manifest.remove(element);
     fireElementRemoved(element);
   }
 
@@ -535,7 +530,7 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#removeCover()
    */
-  public void removeCover() throws MediaPackageException {
+  public void removeCover() {
     Attachment[] covers = getAttachments(MediaPackageElements.COVER_FLAVOR);
     if (covers.length > 0) {
       remove(covers[0]);

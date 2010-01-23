@@ -135,10 +135,8 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
   @Override
   public String toString() {
     StringBuffer buf = new StringBuffer("attachment");
-    if (getMimeType() != null) {
-      buf.append(" (");
-      buf.append(getMimeType());
-      buf.append(")");
+    if (getIdentifier() != null) {
+      buf.append(" '").append(getIdentifier()).append("'");
     }
     return buf.toString();
   }
