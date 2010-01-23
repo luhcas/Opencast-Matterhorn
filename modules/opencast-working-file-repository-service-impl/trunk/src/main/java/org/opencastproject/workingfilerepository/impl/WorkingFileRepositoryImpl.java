@@ -32,8 +32,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.Dictionary;
 
 /**
@@ -111,7 +113,11 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       if(f.getName().equals(mediaPackageElementID)) {
         return new URI(serverUrl + "/files/" + mediaPackageID + "/" + mediaPackageElementID);
       } else {
-        return new URI(serverUrl + "/files/" + mediaPackageID + "/" + mediaPackageElementID + "/" + f.getName());
+        try {
+          return new URI(serverUrl + "/files/" + mediaPackageID + "/" + mediaPackageElementID + "/" + URLEncoder.encode(f.getName(), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+          throw new RuntimeException(e);
+        }
       }
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
@@ -125,8 +131,13 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   public URI put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
     checkId(mediaPackageID);
     checkId(mediaPackageElementID);
-    File f = new File(rootDirectory + File.separator + mediaPackageID + File.separator + 
-            mediaPackageElementID + File.separator + filename);
+    File f = null;
+    try {
+      f = new File(rootDirectory + File.separator + mediaPackageID + File.separator + 
+              mediaPackageElementID + File.separator + URLEncoder.encode(filename, "UTF-8"));
+    } catch (UnsupportedEncodingException e1) {
+      throw new RuntimeException(e1);
+    }
     logger.debug("Attempting to write a file to {}", f.getAbsolutePath());
     try {
       if( ! f.exists()) {
