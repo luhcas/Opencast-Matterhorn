@@ -43,9 +43,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import javax.activation.MimetypesFileTypeMap;
+
 @Path("/")
 public class WorkingFileRepositoryRestEndpoint {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryRestEndpoint.class);
+  private final MimetypesFileTypeMap mimeMap = new MimetypesFileTypeMap(getClass().getClassLoader().getResourceAsStream("mimetypes"));
   protected WorkingFileRepository repo;
 
   public void setRepository(WorkingFileRepository repo) {
@@ -149,25 +152,25 @@ public class WorkingFileRepositoryRestEndpoint {
   }
 
   @GET
-  @Produces(MediaType.APPLICATION_OCTET_STREAM)
   @Path("{mediaPackageID}/{mediaPackageElementID}")
   public Response get(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID) {
     checkService();
     URI url = repo.getURI(mediaPackageID, mediaPackageElementID);
     String fileName = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
-    return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).entity(
+    String contentType = mimeMap.getContentType(fileName);
+    return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type", contentType).entity(
             repo.get(mediaPackageID, mediaPackageElementID)).build();
   }
 
   @GET
-  @Produces(MediaType.APPLICATION_OCTET_STREAM)
   @Path("{mediaPackageID}/{mediaPackageElementID}/{fileName}")
   public Response get(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID, @PathParam("fileName") String fileName) {
+    String contentType = mimeMap.getContentType(fileName);
     checkService();
-    return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).entity(
-            repo.get(mediaPackageID, mediaPackageElementID)).build();
+    return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type", contentType).entity(
+             repo.get(mediaPackageID, mediaPackageElementID)).build();
   }
 
   @GET
