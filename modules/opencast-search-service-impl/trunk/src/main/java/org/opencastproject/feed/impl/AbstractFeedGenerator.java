@@ -721,7 +721,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     // Collect track id's by tag
     if (tags.size() > 0) {
       for (String tag : tags) {
-        MediaPackageElement[] elements = mediaPackage.getElementsByTag(tag);
+        MediaPackageElement[] elements = mediaPackage.getTracksByTag(tag);
         for (MediaPackageElement element : elements)
           s.add(element.getIdentifier());
       }
