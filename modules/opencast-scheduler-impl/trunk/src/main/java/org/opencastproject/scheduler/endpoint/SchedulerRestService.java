@@ -326,7 +326,7 @@ public class SchedulerRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, updateEventEndpoint);    
     
     // Scheduler removeEvent
-    RestEndpoint removeEventEndpoint = new RestEndpoint("removeEvent", RestEndpoint.Method.GET, "/removeEvent/{eventID}", "Removes the specified event from the database. Returns true if the event was found and could be removed.");
+    RestEndpoint removeEventEndpoint = new RestEndpoint("removeEvent", RestEndpoint.Method.GET, "/removeEvent/{eventID}", "Removes the specified event from the database. Returns true if the event could be removed. It is also true if no event was found.");
     removeEventEndpoint.addFormat(new Format("boolean", null, null));
     removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, boolean returned"));
     removeEventEndpoint.addPathParam(new Param("eventID", Type.STRING, "c0e3d8a7-7ecc-479b-aee7-8da369e445f2", "The unique ID of the event."));
@@ -381,7 +381,7 @@ public class SchedulerRestService {
     data.addEndpoint(RestEndpoint.Type.READ, getCaptureAgentMetadataEndpoint);  
     
     // Scheduler getCalendarForCaptureAgent
-    RestEndpoint getCalendarForCaptureAgentEndpoint = new RestEndpoint("getCalendarForCaptureAgent", RestEndpoint.Method.GET, "/getCalendarForCaptureAgent/{captureAgentID}", "Gets the iCalendar with all (even old) events for the specified capture agent id. ");
+    RestEndpoint getCalendarForCaptureAgentEndpoint = new RestEndpoint("getCalendarForCaptureAgent", RestEndpoint.Method.GET, "/getCalendarForCaptureAgent/{captureAgentID}", "Gets the iCalendar with all upcoming events for the specified capture agent id. ");
     getCalendarForCaptureAgentEndpoint.addFormat(new Format("ics", "iCalendar", "http://tools.ietf.org/html/rfc2445"));
     getCalendarForCaptureAgentEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, iCalendar returned"));
     getCalendarForCaptureAgentEndpoint.addPathParam(new Param("captureAgentID", Type.STRING, "recorder", "The ID that specifies the capture agent."));

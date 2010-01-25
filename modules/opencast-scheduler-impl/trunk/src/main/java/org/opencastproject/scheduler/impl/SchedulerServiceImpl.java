@@ -94,6 +94,7 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
     SchedulerFilter filter = new SchedulerFilterImpl();
     filter.setDeviceFilter(captureAgentID);
     filter.setOrderBy("time-desc");
+    filter.setStart(new Date(System.currentTimeMillis()));
     return filter;
   }
 
