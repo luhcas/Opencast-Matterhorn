@@ -23,7 +23,7 @@ package org.opencastproject.capture.impl;
 public interface CaptureParameters {
 
   /** Location of the centralised configuration file */
-  public static final String CAPTURE_CONFIG_URL = "capture.config.url";
+  public static final String CAPTURE_CONFIG_ENDPOINT_URL = "capture.config.endpoint.url";
   
   /** The time to wait between updating the local copy of the configuration */
   public static final String CAPTURE_CONFIG_POLLING_INTERVAL = "capture.config.polling.interval";

@@ -15,6 +15,10 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,10 +30,6 @@ import java.net.URLConnection;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class for retrieving, storing and accessing both local and centralised 
@@ -53,6 +53,9 @@ public class ConfigurationManager {
   
   /** the local copy of the configuration */
   private File localConfig;
+
+  /** The machine-written copy of the configuration data.  Not to be edited by hand */
+  private File cachedConfig;
   
   /** Timer that will every at a specified interval to retrieve the centralised
    * configuration file from a server */
@@ -78,11 +81,24 @@ public class ConfigurationManager {
       logger.error("Unable to load bundle config file: {}.", e.getMessage());
     }
 
-    // Attempt to parse the location of the configuration server
+    createCoreDirectories();
+
+    //Setup the cached copy of the config and load it
     try {
-      url = new URL(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_URL));
-    } catch (MalformedURLException e) {
-      logger.warn("Malformed URL for {}, disabling polling.", CaptureParameters.CAPTURE_CONFIG_URL);
+      cachedConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
+      if (!cachedConfig.isFile()) {
+        cachedConfig.getParentFile().mkdirs();
+        cachedConfig.createNewFile();
+      }
+      if (!cachedConfig.isFile()) {
+        logger.warn("Unable to create cache for config file.");
+      } else {
+        properties.load(new FileInputStream(cachedConfig));
+      }
+    } catch (NullPointerException e) {
+      logger.warn("Malformed URL for {}: {}.", CaptureParameters.CAPTURE_CONFIG_CACHE_URL, properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
+    } catch (IOException e) {
+      logger.warn("IOException creating cached config file.");
     }
 
     // Checking the filesystem for configuration file.
@@ -96,21 +112,20 @@ public class ConfigurationManager {
       logger.warn("Could not load local configuration: " + e.getMessage());
     }
 
-    // In the event that our configuration file does not exist, try to load it from the cache
-    if (localConfig == null) {
-      try {
-        localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
-      } catch (NullPointerException e) {
-        logger.warn("Malformed URL for {}, disabling caching", CaptureParameters.CAPTURE_CONFIG_CACHE_URL);
-      }
+    // Attempt to parse the location of the configuration server
+    try {
+      url = new URL(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_ENDPOINT_URL));
+    } catch (MalformedURLException e) {
+      logger.warn("Malformed URL for {}, disabling polling.", CaptureParameters.CAPTURE_CONFIG_ENDPOINT_URL);
     }
-    
+
     // If this is the case capture there will be no capture devices specified
-    if (url == null && localConfig == null) {
+    if (url == null && localConfig == null && cachedConfig == null) {
       logger.error("No configuration data was found, this is very bad!");
-      //TODO:  return here?
+      throw new RuntimeException("No configuration data found for ConfigurationManager!");
     }
-    
+
+    retrieveConfigFromDisk();
     retrieveConfigFromServer();
     writeConfigFileToDisk();
     
@@ -133,8 +148,6 @@ public class ConfigurationManager {
       }
       timer.schedule(new UpdateConfig(), delay, delay);
     }
-
-    createCoreDirectories();
   }
 
   /**
@@ -210,8 +223,8 @@ public class ConfigurationManager {
   
   /**
    * Read a remote properties file and load it into memory.
-   * This call merges whatever updated configuration settings it gets with the currently existing onse.
-   * Note that this means to *clear* a setting on the capture agent one must set it to *blank* on the server
+   * This call merges whatever updated configuration settings it gets with the currently existing ones.
+   * Note that this means to *clear* a setting on the capture agent one must set it to *blank* on the server.
    */
   private void retrieveConfigFromServer() {
     if (url == null) {
@@ -224,7 +237,26 @@ public class ConfigurationManager {
       temp.load(urlc.getInputStream());
       merge(temp, true);
     } catch (Exception e) {
-      logger.warn("Could not get config file from server: {}.", e);
+      logger.warn("Could not get config file from server: {}.", e.getMessage());
+    }
+  }
+
+  /**
+   * Fetches the user-editable local copy of the configuration settings
+   * This call merges whatever updated configuration settings it gets with the currently existing ones.
+   * Note that this means to *clear* a setting on the capture agent one must set it to *blank* in the configuration file.
+   */
+  private void retrieveConfigFromDisk() {
+    if (localConfig == null) {
+      return;
+    }
+
+    try {
+      Properties t = new Properties();
+      t.load(new FileInputStream(localConfig));
+      merge(t, true);
+    } catch (Exception e) {
+      logger.warn("Exception reading {}:  {}.", localConfig.getAbsolutePath(), e.getMessage());
     }
   }
   
@@ -232,16 +264,16 @@ public class ConfigurationManager {
    * Stores a local copy of the properties on disk.
    */
   private void writeConfigFileToDisk() {
-    if (properties == null || localConfig == null) {
+    if (properties == null || cachedConfig == null) {
       return;
     }
 
     try {
-      if (!localConfig.isFile()) {
-        localConfig.getParentFile().mkdirs();
-        localConfig.createNewFile();
-      }
-      properties.store(new FileOutputStream(localConfig), "capture config");
+      if (!cachedConfig.isFile()) {
+        cachedConfig.getParentFile().mkdirs();
+        cachedConfig.createNewFile();
+      }  
+      properties.store(new FileOutputStream(cachedConfig), "Autogenerated config file, do not edit.");
     } catch (Exception e) {
       logger.warn("Could not write config file to disk: {}.", e.getMessage());
     }
