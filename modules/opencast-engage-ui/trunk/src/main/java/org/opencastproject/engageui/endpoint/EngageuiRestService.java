@@ -64,7 +64,6 @@ public class EngageuiRestService {
 
   public static final int TITLE_MAX_LENGTH = 60;
   public static final int ABSTRACT_MAX_LENGTH = 175;
-  public static final String DEFAULT_VIDEO_URL = "http://downloads.opencastproject.org/media/matterhorn.mp4";
 
   public void setSearchService(SearchService service) {
     logger.info("binding SearchService");
@@ -280,31 +279,35 @@ public class EngageuiRestService {
   }
 
   /**
-   * Iterates through the tracks of an mediaPackage and returns the video url of the last track
+   * Iterates through the tracks of a mediaPackage and returns the video url of the track with the flavor "presentation"
+   * or "presenter"
+   * 
    * @param mediaPackage
    * @return String the video url
    */
   private String getVideoUrl(MediaPackage mediaPackage) {
-//    FlavorPrioritySelector<Track> selector = new FlavorPrioritySelector<Track>();
-//    selector.includeTag("engage");
-//    selector.addFlavor(MediaPackageElements.PRESENTATION_TRACK);
-//    selector.addFlavor(MediaPackageElements.PRESENTER_TRACK);
-//    Collection<Track> c = selector.select(mediaPackage);
-//    if(c.isEmpty()) return DEFAULT_VIDEO_URL;
-//    return c.iterator().next().getURI().toString();
-    for(Track track : mediaPackage.getTracks()) {
+    // FlavorPrioritySelector<Track> selector = new FlavorPrioritySelector<Track>();
+    // selector.includeTag("engage");
+    // selector.addFlavor(MediaPackageElements.PRESENTATION_TRACK);
+    // selector.addFlavor(MediaPackageElements.PRESENTER_TRACK);
+    // Collection<Track> c = selector.select(mediaPackage);
+    // if(c.isEmpty()) return DEFAULT_VIDEO_URL;
+    // return c.iterator().next().getURI().toString();
+    for (Track track : mediaPackage.getTracks()) {
       MediaPackageReference ref = track.getReference();
-      if(ref != null) {
+      if (ref != null) {
         MediaPackageElement parent = mediaPackage.getElementById(ref.getIdentifier());
-        if(parent != null) {
+        if (parent != null) {
           MediaPackageElementFlavor parentFlavor = parent.getFlavor();
-          if(parentFlavor != null && (parentFlavor.equals(MediaPackageElements.PRESENTATION_TRACK) || parentFlavor.equals(MediaPackageElements.PRESENTER_TRACK))) {
+          if (parentFlavor != null
+                  && (parentFlavor.equals(MediaPackageElements.PRESENTATION_TRACK) || parentFlavor
+                          .equals(MediaPackageElements.PRESENTER_TRACK))) {
             return track.getURI().toString();
           }
         }
       }
     }
-    return DEFAULT_VIDEO_URL;
+    return null;
   }
 
   /**

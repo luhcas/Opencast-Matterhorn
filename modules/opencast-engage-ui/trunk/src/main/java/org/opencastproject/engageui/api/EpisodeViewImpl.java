@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- * A JAXB-anotated implementation of {@link EpisodeView}
+ * A JAXB-annotated implementation of {@link EpisodeView}
  */
 @XmlType(name = "episode", namespace = "http://searchui.opencastproject.org/")
 @XmlRootElement(name = "episode", namespace = "http://searchui.opencastproject.org/")
