@@ -618,8 +618,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.Scheduler#getPollingTime()
    */
-  public long getPollingTime() {
-    return pollTime / 1000L;
+  public int getPollingTime() {
+    return (int) (pollTime / 1000L);
   }
 
   /**
@@ -657,9 +657,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.Scheduler#isEnabled()
+   * @see org.opencastproject.capture.api.Scheduler#isSchedulerEnabled()
    */
-  public boolean isEnabled() {
+  public boolean isSchedulerEnabled() {
     if (captureScheduler != null) {
       try {
         return captureScheduler.isStarted();

@@ -21,14 +21,14 @@ import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.Recording;
 
 /**
- * Service for querying the capture agent's current state (MH-58)
+ * Service for querying the capture agent's current state (MH-58).
  */
 public interface StateService {
 
   /**
-   * Gets the internal Agent used to store this agent's state
-   * @return The Agent which represents this capture agent
-   * @see org.opencastproject.capture.admin.api.Agent
+   * Gets the internal Agent used to store this agent's state.
+   * @return The Agent which represents this capture agent.
+   * @see org.opencastproject.capture.api.AgentState
    */
   public Agent getAgent();
 
@@ -41,21 +41,21 @@ public interface StateService {
   public void setAgentState(String state);
 
   /**
-   * Gets the state of the agent
-   * @return The state of the agent (should be defined in AgentState)
+   * Gets the state of the agent.
+   * @return The state of the agent.  Should be defined in AgentState.
    * @see org.opencastproject.capture.api.AgentState
    */
   public String getAgentState();
 
   //TODO: indicate the format of the string (is it an item defined in AgentState?  Maybe this whole interface needs an introduction as to why strings are being passed?)
   /**
-   * Gets the state of all recordings in the system
+   * Gets a map of recording ID and Recording pairs containing all of the recordings the system is aware of.
    * @return A map of recording-state pairs
    */
   public Map<String,Recording> getKnownRecordings();
 
   /**
-   * Sets the recording's current state
+   * Sets the recording's current state.
    * 
    * @param recordingID The ID of the recording.
    * @param state The state for the recording.  Defined in RecordingState.
@@ -64,10 +64,10 @@ public interface StateService {
   public void setRecordingState(String recordingID, String state);
   
   /**
-   * Gets the state of a recording
+   * Gets the state of a recording.
    * 
-   * @param recordingID The ID of the recording in question
-   * @return A state (should be defined in RecordingState)
+   * @param recordingID The ID of the recording in question.
+   * @return A state defined in RecordingState.
    * @see org.opencastproject.capture.api.RecordingState
    */
   public Recording getRecordingState(String recordingID);

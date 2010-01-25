@@ -18,50 +18,50 @@ package org.opencastproject.capture.api;
 import java.net.URL;
 
 /**
- * Interface to OSGi service for fetching capture schedules and starting captures (MH-1052) 
+ * Interface to OSGi service for fetching capture schedules and starting captures (MH-1052).
  */
  
 public interface Scheduler {
 
   /**
    * Sets the schedule data URL from which to gather scheduling data.  This should be a endpoint which generates iCal (RFC 2445) format scheduling data.
-   * @param url The URL to pull the calendaring data from
+   * @param url The URL to pull the calendaring data from.
    */
   public void setScheduleEndpoint(URL url);
 
   /**
    * Gets the current schedule data URL.  This should be an endpoint which generates iCal (RFC 2445) format scheduling data.
-   * @return The current schedule data URL
+   * @return The current schedule data URL.
    */
   public URL getScheduleEndpoint();
 
   /**
-   * Polls the current schedule endpoint URL for new scheduling data
-   * If the new schedule data contains an error or is unreachable the previous recording schedule is used instead
+   * Polls the current schedule endpoint URL for new scheduling data.
+   * If the new schedule data contains an error or is unreachable the previous recording schedule is used instead.
    */
   public void updateCalendar();
 
   /**
-   * Sets the time between refreshes of the scheduling data
-   * @param pollingTime The time between polls, in seconds
+   * Sets the time between refreshes of the scheduling data.
+   * @param pollingTime The time between polls, in seconds.
    */
   public void setPollingTime(int pollingTime);
 
   /**
-   * Gets the time between refreshes of the scheduling data
-   * @return The number of seconds between refreshes of the scheduling data
+   * Gets the time between refreshes of the scheduling data.
+   * @return The number of seconds between refreshes of the scheduling data.
    */
-  public long getPollingTime();
+  public int getPollingTime();
 
   /**
    * Enables polling for new calendar data.
-   * @param enable True to enable polling, false otherwise
+   * @param enable True to enable polling, false otherwise.
    */
   public void enablePolling(boolean enable);
 
   /**
-   * Checks to see if the is set to automatically poll for new scheduling data
-   * @return True if the system is set to poll for new data, false otherwise
+   * Checks to see if the is set to automatically poll for new scheduling data.
+   * @return True if the system is set to poll for new data, false otherwise.
    */
   public boolean isPollingEnabled();
 
@@ -71,10 +71,10 @@ public interface Scheduler {
   public void startScheduler();
 
   /**
-   * Checks to see if the system is set to capture from its calendar data
-   * @return True if the system is set to capture from a schedule, false otherwise
+   * Checks to see if the system is set to capture from its calendar data.
+   * @return True if the system is set to capture from a schedule, false otherwise.
    */
-  public boolean isEnabled();
+  public boolean isSchedulerEnabled();
 
   /**
    * Stops the scheduling system.  Calling this disables scheduled captures.

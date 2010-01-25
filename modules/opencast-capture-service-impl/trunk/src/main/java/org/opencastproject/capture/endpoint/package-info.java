@@ -1,5 +1,5 @@
 /**
- * State and capture agent REST and WSDL Service endpoints
+ * State and capture agent REST and WSDL Service endpoints.
  */
 @XmlSchema(elementFormDefault = XmlNsForm.QUALIFIED, attributeFormDefault = XmlNsForm.QUALIFIED)
 package org.opencastproject.capture.endpoint;

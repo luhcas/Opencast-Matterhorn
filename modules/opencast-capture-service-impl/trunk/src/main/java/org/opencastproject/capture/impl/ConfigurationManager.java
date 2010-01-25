@@ -34,7 +34,7 @@ import java.util.TimerTask;
 /**
  * Class for retrieving, storing and accessing both local and centralised 
  * configuration files for the CaptureAgent. Uses java.util.Properties to store
- * configuration file which can read/write INI style config files
+ * configuration file which can read/write INI style config files.
  */
 public class ConfigurationManager {
   
@@ -151,7 +151,7 @@ public class ConfigurationManager {
   }
 
   /**
-   * Creates the core Opencast directories  
+   * Creates the core Opencast directories.
    */
   private void createCoreDirectories() {
     createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL, this);
@@ -160,9 +160,9 @@ public class ConfigurationManager {
   }
 
   /**
-   * Creates a file or directory
-   * @param key    The key to set in the configuration manager.  Key is set equal to name
-   * @param config The configuration manager to store the key-value pair
+   * Creates a file or directory.
+   * @param key    The key to set in the configuration manager.  Key is set equal to name.
+   * @param config The configuration manager to store the key-value pair.
    */
   private void createFileObj(String key, ConfigurationManager config) {
     File target = null;
@@ -181,7 +181,8 @@ public class ConfigurationManager {
   }
   
   /**
-   * @return the singleton ConfigurationManager
+   * Gets the configuration manager instance.
+   * @return the singleton ConfigurationManager.
    */
   public static synchronized ConfigurationManager getInstance() {
     if (manager == null)
@@ -190,9 +191,9 @@ public class ConfigurationManager {
   }
   
   /**
-   * Retrieve property for configuration
-   * @param key the key to retrieve from the property list
-   * @return the value corresponding to the key
+   * Retrieve property for configuration.
+   * @param key the key to retrieve from the property list.
+   * @return the value corresponding to the key.
    */
   public String getItem(String key) {
     if (properties == null) {
@@ -206,9 +207,9 @@ public class ConfigurationManager {
   }
   
   /**
-   * Add a key, value pair to the property list
-   * @param key the key to be placed in the properties list
-   * @param value the corresponding value
+   * Add a key, value pair to the property list.
+   * @param key the key to be placed in the properties list.
+   * @param value the corresponding value.
    */
   public void setItem(String key, String value) {
     if (properties == null) {
@@ -242,7 +243,7 @@ public class ConfigurationManager {
   }
 
   /**
-   * Fetches the user-editable local copy of the configuration settings
+   * Fetches the user-editable local copy of the configuration settings.
    * This call merges whatever updated configuration settings it gets with the currently existing ones.
    * Note that this means to *clear* a setting on the capture agent one must set it to *blank* in the configuration file.
    */
@@ -280,9 +281,8 @@ public class ConfigurationManager {
   }
   
   /**
-   * Returns a Dictionary of all the properties associated with this
-   * configuration manager
-   * @return the key/value pair mapping
+   * Returns a Dictionary of all the properties associated with this configuration manager.
+   * @return the key/value pair mapping.
    */
   public Properties getAllProperties() {
     return (Properties) properties.clone();
@@ -292,9 +292,9 @@ public class ConfigurationManager {
    * Merges the given Properties with the ConfigurationManager's properties. Will
    * not overwrite the ConfigurationManager if specified.
    * 
-   * @param p Properties object to be merged with ConfigurationManager
-   * @param overwrite true if this should overwrite the ConfigurationManager's properties, false if not
-   * @return the merged properties
+   * @param p Properties object to be merged with ConfigurationManager.
+   * @param overwrite true if this should overwrite the ConfigurationManager's properties, false if not.
+   * @return the merged properties.
    */
   public Properties merge(Properties p, boolean overwrite) {
     // if no properties specified, just return current configuration
