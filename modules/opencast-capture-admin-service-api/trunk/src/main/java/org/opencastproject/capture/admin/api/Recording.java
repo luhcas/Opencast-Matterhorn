@@ -16,31 +16,33 @@
 package org.opencastproject.capture.admin.api;
 
 /**
- * An in-memory construct to represent the state of a recording, and when it was last heard from 
+ * An in-memory construct to represent the state of a recording, and when it was last heard from.
  */
 public class Recording {
 
   /**
-   * The id of the recording
+   * The ID of the recording.
    */
   public String id;
 
   /**
-   * The state of the recording.  This should be defined from the constants in RecordingState
-   * @see org.opencastproject.capture.api.RecordingState
+   * The state of the recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.
+   * @see RecordingState
    */
   public String state;
 
   /**
    * The time at which the recording last checked in with this service.
-   * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in) 
+   * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in). 
    */
   public Long lastHeardFrom;
 
   /**
-   * Builds a representation of the recording
-   * @param id The name of the recording
-   * @param recordingState The state of the recording
+   * Builds a representation of the recording.
+   *
+   * @param recordingID The ID of the recording.
+   * @param recordingState The state of the recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.
+   * @see RecordingState
    */
   public Recording(String recordingID, String recordingState) {
     id = recordingID;
@@ -48,18 +50,19 @@ public class Recording {
   }
 
   /**
-   * Gets the ID of the recording
-   * @return The ID of the recording
+   * Gets the ID of the recording.
+   *
+   * @return The ID of the recording.
    */
   public String getID() {
     return id;
   }
 
   /**
-   * Sets the state of the recording, and updates the time it was last heard from
-   * 
-   * @see org.opencastproject.capture.api.RecordingState
-   * @param newState The new state of the recording.  This can be equal to the current one if the goal is to update the timestamp.
+   * Sets the state of the recording, and updates the time it was last heard from.
+   *
+   * @param newState The new state of the recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.  This can be equal to the current one if the goal is to update the timestamp.
+   * @see RecordingState
    */
   public void setState(String newState) {
     state = newState;
@@ -67,19 +70,19 @@ public class Recording {
   }
 
   /**
-   * Gets the state of the recording
-   * 
-   * @see org.opencastproject.capture.api.RecordingState
-   * @return The state of the recording as defined in RecordingState
+   * Gets the state of the recording.
+   *
+   * @return The state of the recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.
+   * @see RecordingState
    */
-
   public String getState() {
     return state;
   }
 
   /**
-   * Gets the time at which the recording last checked in
-   * @return The number of milliseconds since 1970 when the recording last checked in
+   * Gets the time at which the recording last checked in.
+   *
+   * @return The number of milliseconds since 1970 when the recording last checked in.
    */
   public Long getLastCheckinTime() {
     return lastHeardFrom;

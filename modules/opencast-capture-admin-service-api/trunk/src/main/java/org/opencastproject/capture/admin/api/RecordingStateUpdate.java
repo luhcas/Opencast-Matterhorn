@@ -30,29 +30,32 @@ import javax.xml.bind.annotation.XmlType;
 public class RecordingStateUpdate {
 
   /**
-   * The recording's ID
+   * The recording's ID.
    */
   @XmlElement(name="name")
   public String id;
   
   /**
-   * The state of the recording.  This should be defined from the constants in RecordingState
-   * @see org.opencastproject.capture.api.RecordingState
+   * The state of the recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.
+   * @see RecordingState
    */
   @XmlElement(name="state")
   public String state;
   
   /**
-   * The number of milliseconds since the last time the recording checked in.  Note that this is relative (ie, it's been 3000 ms) rather than absolute (milliseconds since 1970)
+   * The number of milliseconds since the last time the recording checked in.  Note that this is relative (ie, it's been 3000 ms) rather than absolute (milliseconds since 1970).
    */
   @XmlElement(name="time-since-last-update")
   public Long time_delta;
 
-  /** Required 0-arg constructor.  Does nothing, do not use */
+  /**
+   * Required 0-arg constructor.  Does nothing, do not use.
+   */
   public RecordingStateUpdate() {}
 
   /**
    * Builds an RecordingStateUpdate object about the Recording r.  This calculates the time delta for you.
+   *
    * @param r The recording you wish to know more information about
    */
   public RecordingStateUpdate(Recording r) {

@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * A representation of an agent which stores its name, state and time-since-last-update value
+ * A representation of an agent which stores its name, state and time-since-last-update value.
  */
 @XmlType(name="agent-state-update", namespace="http://capture.admin.opencastproject.org")
 @XmlRootElement(name="agent-state-update", namespace="http://capture.admin.opencastproject.org")
@@ -30,30 +30,33 @@ import javax.xml.bind.annotation.XmlType;
 public class AgentStateUpdate {
 
   /**
-   * The agent's name
+   * The agent's name.
    */
   @XmlElement(name="name")
   public String name;
 
   /**
-   * The state of the agent.  This should be defined from the constants in AgentState
-   * @see org.opencastproject.capture.api.AgentState
+   * The state of the agent.  This should be defined from the constants in {@link org.opencastproject.capture.admin.api.AgentState}.
+   * @see AgentState
    */
   @XmlElement(name="state")
   public String state;
 
   /**
-   * The number of milliseconds since the last time the agent checked in.  Note that this is relative (ie, it's been 3000 ms) rather than absolute (milliseconds since 1970)
+   * The number of milliseconds since the last time the agent checked in.  Note that this is relative (ie, it's been 3000 ms) rather than absolute (milliseconds since 1970).
    */
   @XmlElement(name="time-since-last-update")
   public Long time_delta;
 
-  /** Required 0-arg constructor.  Does nothing, do not use */
+  /**
+   * Required 0-arg constructor.  Does nothing, do not use.
+   */
   public AgentStateUpdate() {}
 
   /**
    * Builds an AgentStateUpdate object about the Agent a.  This calculates the time delta for you.
-   * @param a The agent you wish to know more information about
+   *
+   * @param a The agent you wish to know more information about.
    */
   public AgentStateUpdate(Agent a) {
     name = a.getName();

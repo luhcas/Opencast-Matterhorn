@@ -16,14 +16,21 @@
 package org.opencastproject.capture.admin.api;
 
 /**
- * A representation of a recording's current state (MH-1475)
+ * A representation of a recording's current state (MH-1475).
  */
 public interface RecordingState {
+  /** Constant <code>UNKNOWN="unknown"</code> */
   public static final String UNKNOWN = "unknown";
+  /** Constant <code>CAPTURING="capturing"</code> */
   public static final String CAPTURING = "capturing";
+  /** Constant <code>CAPTURE_FINISHED="capture_finished"</code> */
   public static final String CAPTURE_FINISHED = "capture_finished";
+  /** Constant <code>CAPTURE_ERROR="capture_error"</code> */
   public static final String CAPTURE_ERROR = "capture_error";
+  /** Constant <code>UPLOADING="uploading"</code> */
   public static final String UPLOADING = "uploading";
+  /** Constant <code>UPLOAD_FINISHED="upload_finished"</code> */
   public static final String UPLOAD_FINISHED = "upload_finished";
+  /** Constant <code>UPLOAD_ERROR="upload_error"</code> */
   public static final String UPLOAD_ERROR = "upload_error";
 }

@@ -16,11 +16,15 @@
 package org.opencastproject.capture.admin.api;
 
 /**
- * A representation of the capture client's current state (MH-730)
+ * A representation of the capture client's current state (MH-730).
  */
 public interface AgentState {
+  /** Constant <code>IDLE="idle"</code> */
   public static final String IDLE = "idle";
+  /** Constant <code>CAPTURING="capturing"</code> */
   public static final String CAPTURING = "capturing";
+  /** Constant <code>UPLOADING="uploading"</code> */
   public static final String UPLOADING = "uploading";
+  /** Constant <code>UNKNOWN="unknown"</code> */
   public static final String UNKNOWN = "unknown";
 }
