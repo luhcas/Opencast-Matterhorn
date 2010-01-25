@@ -138,7 +138,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   @Override
   public String startCapture() {
 
-    logger.info("Starting capture using default values for MediaPackage and properties.");
+    logger.debug("startCapture()");
 
     // Creates default MediaPackage
     MediaPackage pack;
@@ -163,7 +163,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   @Override
   public String startCapture(MediaPackage mediaPackage) {
 
-    logger.info("Starting capture using default values for the capture properties and a provided MediaPackage.");
+    logger.debug("startCapture(mediaPackage, properties): {}", mediaPackage);
 
     return startCapture(mediaPackage, ConfigurationManager.getInstance().getAllProperties());
 
@@ -176,7 +176,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   @Override
   public String startCapture(Properties properties) {
-    logger.info("Starting capture using a default MediaPackage and provided Properties");
+    logger.debug("startCapture(mediaPackage, properties): {}", properties);
 
     // Creates default MediaPackage
     MediaPackage pack;
@@ -202,7 +202,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   @Override
   public String startCapture(MediaPackage mediaPackage, Properties properties) {
-
+    
+    logger.debug("startCapture(mediaPackage, properties): {} {}", mediaPackage, properties);
+    
     if (currentRecID != null || !agentState.equals(AgentState.IDLE)) {
       logger.warn("Unable to start capture, a different capture is still in progress in {}.",
               pendingRecordings.get(currentRecID).getDir().getAbsolutePath());
@@ -250,11 +252,15 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       for (String device : deviceList) {
         String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
         String value = properties.getProperty(key);
-        if (value == null || !(new File(f, value).isFile()))
+        if (value == null || !(new File(f, value).isFile())) {
           everythingOk = false;
+          logger.warn("Everything is not okay, (key, value) = ({}, {})", key, value);
+          logger.warn("Everything is not okay, (key, isFile?) = ({}, {})", key, new File(f, value).isFile());
+
+        }
       }
       if (everythingOk) {
-        logger.info("Preparing for mock capture.");
+        logger.debug("Preparing for mock capture.");
         mockCapture = true;
 
         for (String device : deviceList) {
