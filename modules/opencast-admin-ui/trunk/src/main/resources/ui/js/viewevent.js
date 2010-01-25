@@ -116,6 +116,7 @@ function callback(){
                           return false;
                           }
                           );
+  
 }
 
 /**
@@ -165,5 +166,5 @@ function parseDateTime(datetime){
     var time = datetime[1].split(":");
     return new Date(date[0], (date[1] - 1), date[2], time[0], time[1], time[2]).toLocaleString();
   }
-  return new Date(0);
+  return ""
 }

@@ -64,6 +64,38 @@
       </div>
     </div>
     
+    <xsl:if test="string-length(startdate) &gt; 0"> 
+      <div class="fl-container-800" id="captureform">
+        <div class="fl-widget">
+          <div class="fl-widget-titlebar form-box-title"><b>Capture</b></div>
+          <div class="fl-widget-content form-box-container">
+            <ul class="fl-controls-right form-list">
+              <li>
+                <label class="fl-label">Recording Start Time:</label>
+                <!-- Recording Date/Time -->
+                <xsl:value-of select="startdate" />
+              </li>
+              <li>
+                <label class="fl-label">Duration:</label>
+                <!-- Duration -->
+                <xsl:value-of select="duration" />
+              </li>
+              <li>
+                <label class="fl-label">Capture Agent:</label>
+                <!-- Capture Agent -->
+                <xsl:value-of select="agent" />
+              </li>
+              <li>
+                <label class="fl-label">Input(s):</label>
+                <!-- Inputs -->
+                <xsl:value-of select="inputs" />
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </xsl:if>
+    
     <div class="fl-container-800">
       <div class="fl-widget">
         <div class="fl-widget-titlebar form-box-title"><b>Distribution</b></div>
@@ -79,36 +111,6 @@
               <label class="fl-label">License:</label>
               <!-- license -->
               <xsl:value-of select="license" />
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    
-    <div class="fl-container-800">
-      <div class="fl-widget">
-        <div class="fl-widget-titlebar form-box-title"><b>Capture</b></div>
-        <div class="fl-widget-content form-box-container">
-          <ul class="fl-controls-right form-list">
-            <li>
-              <label class="fl-label">Recording Start Time:</label>
-              <!-- Recording Date/Time -->
-              <xsl:value-of select="startdate" />
-            </li>
-            <li>
-              <label class="fl-label">Duration:</label>
-              <!-- Duration -->
-              <xsl:value-of select="duration" />
-            </li>
-            <li>
-              <label class="fl-label">Capture Agent:</label>
-              <!-- Capture Agent -->
-              <xsl:value-of select="agent" />
-            </li>
-            <li>
-              <label class="fl-label">Input(s):</label>
-              <!-- Inputs -->
-              <xsl:value-of select="inputs" />
             </li>
           </ul>
         </div>
