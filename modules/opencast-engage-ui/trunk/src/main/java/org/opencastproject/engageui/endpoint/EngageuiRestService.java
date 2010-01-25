@@ -64,6 +64,7 @@ public class EngageuiRestService {
 
   public static final int TITLE_MAX_LENGTH = 60;
   public static final int ABSTRACT_MAX_LENGTH = 175;
+  public static final String DEFAULT_VIDEO_URL = "http://downloads.opencastproject.org/media/matterhorn.mp4";
 
   public void setSearchService(SearchService service) {
     logger.info("binding SearchService");
@@ -78,7 +79,7 @@ public class EngageuiRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("episode")
-  public EpisodeViewImpl getEpisodeById(@QueryParam("episodeId") String episodeId) {
+  public Response getEpisodeById(@QueryParam("episodeId") String episodeId) {
     // Variables
     String mediaPackageId, dcTitle, dcCreator, dcContributor, dcAbstract, cover, dcCreated, dcRightsHolder, videoUrl;
     EpisodeViewImpl episodeViewItem = null;
@@ -141,7 +142,7 @@ public class EngageuiRestService {
       episodeViewItem.setURLEncodedMediaPackageId(mediaPackageId);
     }
 
-    return episodeViewItem;
+    return Response.ok(episodeViewItem).build();
   }
 
   @GET
