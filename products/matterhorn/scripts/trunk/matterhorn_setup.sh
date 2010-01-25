@@ -171,10 +171,7 @@ else
   read ffresp
 
   # update felix config (url)
-  mv $CONF_DIR/config.properties $CONF_DIR/config.properties_old
   sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" $CONF_DIR/config.properties
-  chown -R matterhorn $CONF_DIR
-  chgrp -R matterhorn $CONF_DIR
 
   # update capture properties
   sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opencast/config/capture.properties
