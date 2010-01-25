@@ -30,6 +30,11 @@
       <artifactId>commons-io</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <!-- Embedding opencast version of truezip -->
     <dependency>
       <groupId>org.opencastproject</groupId>

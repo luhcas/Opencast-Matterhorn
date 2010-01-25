@@ -15,6 +15,8 @@
  */
 package org.opencastproject.util.doc;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,10 +140,10 @@ public class Param {
   public String getDefaultValueHtml() {
     if (defaultValue != null) {
       if (defaultValue.length() > 20) {
-        return "<strong title=\""+defaultValue+"\">TEXT</strong>";
+        return "<strong title=\""+StringEscapeUtils.escapeHtml(defaultValue)+"\">TEXT</strong>";
       }
     }
-    return defaultValue;
+    return StringEscapeUtils.escapeHtml(defaultValue);
   }
 
   public String getType() {
