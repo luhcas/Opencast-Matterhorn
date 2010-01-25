@@ -20,7 +20,7 @@ EOF
 #install a mass of packages
 log_success_msg "Installing third party packages from Ubuntu repository"
 #sudo apt-get -y -f --install-recommends --force-yes install zlib1g-dev patch byacc libv1 libcv-dev opencv-doc build-essential subversion git-core checkinstall yasm texi2html libfaac-dev libfaad-dev libmp3lame-dev libsdl1.2-dev libtheora-dev libx11-dev libxvidcore4-dev zlib1g-dev libpng12-dev libjpeg62-dev libtiff4-dev ssh maven2 subversion wget sun-java6-jdk curl update-motd expect-dev expect libfaad-dev libfaac-dev libmp3lame-dev libtheora-dev wget maven2
-sudo apt-get -y -f --install-recommends --force-yes install  libfaac-dev libfaad-dev libmp3lame-dev sun-java6-jdk
+sudo apt-get -y -f --install-recommends --force-yes install libfaac-dev libfaad-dev libmp3lame-dev sun-java6-jdk git-core yasm checkinstall libtheora-dev
 
 #ffmpeg support
 #http://ubuntuforums.org/showthread.php?t=786095
@@ -39,7 +39,7 @@ log_action_cont_msg  "Updating x264"
 git checkout
 #git checkout fe83a906ee1bb5170b112de717818e278ff59ddb
 log_action_cont_msg  "Configuring x264"
-./configure
+./configure --enable-pic
 log_action_cont_msg  "Building x264"
 make
 sudo checkinstall --fstrans=no --install=yes --pkgname=x264 --pkgversion "1:0.svn`date +%Y%m%d`-0.0ubuntu1" --default

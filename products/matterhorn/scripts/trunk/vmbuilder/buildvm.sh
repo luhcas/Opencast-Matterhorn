@@ -1,14 +1,34 @@
 #!/bin/sh
 
-export USER=cab938
-export M2=/home/cab938/.m2
+export M2=`pwd`/m2/
 
 #install extras that we need if running this script
-sudo apt-get install ubuntu-vm-builder subversion zip git-core maven2
+sudo apt-get -y install ubuntu-vm-builder subversion zip git-core maven2
+
+if which vmware-mount >/dev/null; then
+	echo "VMware Mounter is installed."
+else
+	echo "VMware Mounter is not installed!"
+	exit
+fi
 
 #delete the old vm if it exists
+if [ -z "$(mount | grep `pwd`/mnt)" ];
+ then
+	echo "Nothing mounted"
+else
+	sudo vmware-mount -d mnt
+	sleep 2
+fi
 sudo rm -rf ubuntu-vmw6/
 sudo rm -rf mnt
+
+sudo mkdir mnt
+
+echo "=========================="
+echo "========Building VM======="
+echo "========Please Wait======="
+echo "=========================="
 
 #build the ubuntu vm
 sudo ubuntu-vm-builder vmw6 karmic --arch 'i386' --mem '512' --cpus 1 \
@@ -23,7 +43,8 @@ sudo ubuntu-vm-builder vmw6 karmic --arch 'i386' --mem '512' --cpus 1 \
 --addpkg zlib1g-dev --addpkg libpng12-dev --addpkg libjpeg62-dev \
 --addpkg libtiff4-dev --addpkg ssh --addpkg maven2 --addpkg subversion \
 --addpkg wget --addpkg curl --addpkg update-motd \
---addpkg expect-dev --addpkg expect --addpkg samba --addpkg nano
+--addpkg expect-dev --addpkg expect --addpkg samba --addpkg nano \
+--addpkg acpid
 
 #change the vm to use nat networking instead of bridged
 sed -i 's/bridged/nat/g' ubuntu-vmw6/opencast.vmx
@@ -31,6 +52,19 @@ sed -i 's/bridged/nat/g' ubuntu-vmw6/opencast.vmx
 #mount the vm image
 mkdir mnt
 sudo vmware-mount ubuntu-vmw6/disk0.vmdk 1 mnt
+if [ $? -ne 0 ]
+ then
+	echo "Unable to mount drive, fatal error!"
+	sudo vmware-mount -d mnt
+	exit
+else
+	echo "Drive mounted."
+fi
+
+echo "=========================="
+echo "==Copying Setup Scripts==="
+echo "=========================="
+
 
 #set the mirror that the vm should be using to download sources, making sure multiverse is in there for aac/etc
 echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse" > sources.list
@@ -46,6 +80,10 @@ sudo chmod 755 mnt/home/opencast/config.sh
 sudo cp external_tools.sh mnt/home/opencast/external_tools.sh
 sudo chmod 755 mnt/home/opencast/external_tools.sh
 
+echo "=========================="
+echo "=====Fetching Opencast===="
+echo "=========================="
+
 #check out svn
 if [ -e opencast ]; then
   cd opencast
@@ -57,6 +95,10 @@ fi
 sudo cp -r opencast mnt/home/opencast/
 export OC_REV=`svn info opencast | awk /Revision/ | cut -d " " -f 2`
 
+echo "=========================="
+echo "=====Fetching FFMpeg======"
+echo "=========================="
+
 #check out ffmpeg
 if [ -e ffmpeg ]; then
   cd ffmpeg
@@ -66,6 +108,10 @@ else
   svn checkout svn://svn.ffmpeg.org/ffmpeg/trunk ffmpeg
 fi
 sudo cp -r ffmpeg mnt/home/opencast/
+
+echo "=========================="
+echo "=====Fetching x264========"
+echo "=========================="
 
 #check out x264
 if [ -e x264 ]; then
@@ -77,14 +123,22 @@ else
 fi
 sudo cp -r x264 mnt/home/opencast/
 
+echo "=========================="
+echo "=====Building Opencast===="
+echo "=========================="
+
 #get maven to update whatever dependancies we might have for opencast
+pwd
 cd opencast
-#todo: username is hard coded, how can I get around this?
-sudo -u $USER mvn -fn -DskipTests
+mvn install -fn -DskipTests -Dmaven.repo.local=$M2/repository
 cd ..
 
 #copy the maven repo across
-sudo cp -r $M2 mnt/home/opencast/
+sudo cp -r $M2 mnt/home/opencast/.m2
+
+echo "=========================="
+echo "========Final Setup======="
+echo "=========================="
 
 #try and mount the first boot script
 sudo cp -r firstboot.sh mnt/etc/rc2.d/S99firstboot.sh
@@ -96,16 +150,16 @@ sudo chmod 755 mnt/etc/rc2.d/S99firstboot.sh
 ln -s mnt/usr/bin/mediainfo mnt/usr/local/bin/mediainfo
 
 #lets set opencast to own her files
-sudo chown 1000:1000 mnt/home/opencast/*
-cd mnt/home/opencast/
-sudo find .svn -exec chown 1000:1000 '{}' \;
-sudo find .m2 -exec chown 1000:1000 '{}' \;
-cd ../../..
+sudo chown -R 1000:1000 mnt/home/opencast/*
 
 #unmount the vm disk image and cleanup
 sudo vmware-mount -d mnt
 sleep 2
 sudo rm -rf mnt
+
+echo "================================="
+echo "=====Image Built, compressing===="
+echo "================================="
 
 #archive it all for download
 echo "Building archive opencast-$OC_REV.zip."
