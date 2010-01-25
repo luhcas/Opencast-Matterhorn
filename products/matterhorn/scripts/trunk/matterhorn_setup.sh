@@ -88,6 +88,9 @@ install_ffmpeg ()
   cd
   svn checkout -r 20641 svn://svn.ffmpeg.org/ffmpeg/trunk ffmpeg
   cd ffmpeg
+  rm -rf libswscale 
+  svn checkout -r 30380 svn://svn.ffmpeg.org/mplayer/trunk/libswscale libswscale
+
   ./configure --enable-gpl --enable-version3 --enable-nonfree --enable-postproc --enable-pthreads --enable-libfaac --enable-libfaad --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libtheora --enable-libx264 --enable-libxvid --enable-x11grab
   make
   sudo checkinstall --pkgname=ffmpeg --pkgversion "4:0.5+svn`date +%Y%m%d`" --backup=no --default
