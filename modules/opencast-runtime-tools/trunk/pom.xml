@@ -31,21 +31,15 @@
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_compendium</artifactId>
     </dependency>
-    <dependency>
+    <!-- why 2 compendiums here? I am removing the second one -AZ -->
+<!-- <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-    </dependency>
+ -->
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.eventadmin</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
