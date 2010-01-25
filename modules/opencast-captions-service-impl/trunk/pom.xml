@@ -12,7 +12,7 @@
   </parent>
 
   <!-- module specific stuff for the site -->
-  <name>Opencast Captions Service</name>
+  <name>opencast-captions-service-impl</name>
   <developers>
     <developer>
       <id>azeckoski</id>
