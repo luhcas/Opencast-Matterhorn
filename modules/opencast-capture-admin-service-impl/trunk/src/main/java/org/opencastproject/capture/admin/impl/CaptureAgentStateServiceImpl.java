@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * FIXME -- Add javadocs
+ * IMPL for the capture-admin service (MH-1336, MH-1394, MH-1457, MH-1475 and MH-1476).
  */
 public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentStateServiceImpl.class);
