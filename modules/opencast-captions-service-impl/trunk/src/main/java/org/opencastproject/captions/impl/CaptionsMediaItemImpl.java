@@ -26,6 +26,8 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import java.net.URI;
 
 public class CaptionsMediaItemImpl implements CaptionsMediaItem {
@@ -55,8 +57,20 @@ public class CaptionsMediaItemImpl implements CaptionsMediaItem {
     URI url = null;
     Track[] tracks = mediaPackage.getTracks();
     if (tracks != null && tracks.length > 0) {
-      Track track = tracks[0];
-      url = track.getURI();
+      // get the tagged track first if there is one
+      Track current = null;
+      for (Track track : tracks) {
+        String[] tags = track.getTags();
+        if (tags != null 
+                && ArrayUtils.contains(tags, CaptionsService.CAPTIONS_MEDIA_TAG) ) {
+          current = track;
+          break;
+        }
+      }
+      if (current == null) {
+        current = tracks[0]; // default to the first one in the set otherwise
+      }
+      url = current.getURI();
     }
     return url;
   }
