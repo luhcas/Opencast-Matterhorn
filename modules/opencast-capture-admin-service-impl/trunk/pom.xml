@@ -13,11 +13,6 @@
   </parent>
   <dependencies>
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-capture-admin-service-api</artifactId>
-      <version>0.6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
@@ -67,6 +62,12 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.opencastproject</groupId>
+    	<artifactId>opencast-capture-admin-service-api</artifactId>
+        <version>0.6-SNAPSHOT</version>
+    	<type>bundle</type>
     </dependency>
   </dependencies>
   <build>

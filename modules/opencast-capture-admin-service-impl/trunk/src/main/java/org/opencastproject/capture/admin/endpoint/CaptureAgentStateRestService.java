@@ -22,12 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -57,20 +58,24 @@ public class CaptureAgentStateRestService {
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("GetAgentState")
-  public AgentStateUpdate getAgentState(@QueryParam("agentName") String agentName) {
+  @Path("agents/{name}")
+  public AgentStateUpdate getAgentState(@PathParam("name") String agentName) {
     return new AgentStateUpdate(service.getAgentState(agentName));
   }
 
-  @POST
-  @Path("SetAgentState")
-  public Response setAgentState(@FormParam("agentName") String agentName, @FormParam("state") String state) {
+  @PUT
+  @Produces(MediaType.TEXT_XML)
+  @Path("agents/{name}")
+  public AgentStateUpdate setAgentState(@PathParam("name") String agentName, @FormParam("state") String state) {
     service.setAgentState(agentName, state);
-    return Response.ok(agentName + " set to " + state).build();
+    return new AgentStateUpdate(service.getAgentState(agentName));
+    //return Response.ok(agentName + " set to " + state).build();
   }
 
-  @POST
-  @Path("RemoveAgent")
+  @DELETE
+  @Path("agents/{name}")
+  //TODO: removeAgent should return a boolean indicating if the agent existed.
+  // This way this endpoint could return a 404 if the agent didn't exist, or OK otherwise
   public Response removeAgent(@FormParam("agentName") String agentName) {
     service.removeAgent(agentName);
     return Response.ok(agentName + " removed").build();
@@ -78,7 +83,7 @@ public class CaptureAgentStateRestService {
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("GetKnownAgents")
+  @Path("agents")
   public List<AgentStateUpdate> getKnownAgents() {
     LinkedList<AgentStateUpdate> update = new LinkedList<AgentStateUpdate>();
     Map<String, Agent> data = service.getKnownAgents();
@@ -91,28 +96,32 @@ public class CaptureAgentStateRestService {
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("GetRecordingState")
-  public RecordingStateUpdate getRecordingState(@QueryParam("id") String id) {
+  @Path("recordings/{id}")
+  public RecordingStateUpdate getRecordingState(@PathParam("id") String id) {
     return new RecordingStateUpdate(service.getRecordingState(id));
   }
 
-  @POST
-  @Path("SetRecordingState")
-  public Response setRecordingState(@FormParam("id") String id, @FormParam("state") String state) {
+  @PUT
+  @Path("recordings/{id}")
+  // TODO: setRecordingState should return a boolean indicating if this recording existed or not
+  // This way we could return a 404 if the recording doesn't exist, or OK otherwise
+  public Response setRecordingState(@PathParam("id") String id, @FormParam("state") String state) {
     service.setRecordingState(id, state);
     return Response.ok(id + " set to " + state).build();
   }
 
-  @POST
-  @Path("RemoveRecording")
-  public Response removeRecording(@FormParam("id") String id) {
+  @DELETE
+  @Path("recordings/{id}")
+  // TODO: removeRecording should return a boolean indicating if this recording existed or not
+  // This way we could return a 404 if the recording doesn't exist, or OK otherwise
+  public Response removeRecording(@PathParam("id") String id) {
     service.removeRecording(id);
     return Response.ok(id + " removed").build();
   }
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("GetKnownRecordings")
+  @Path("recordings")
   public List<RecordingStateUpdate> getAllRecordings() {
     LinkedList<RecordingStateUpdate> update = new LinkedList<RecordingStateUpdate>();
     Map<String, Recording> data = service.getKnownRecordings();
@@ -122,7 +131,7 @@ public class CaptureAgentStateRestService {
     }
     return update;
   }
-  
+
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
@@ -131,7 +140,7 @@ public class CaptureAgentStateRestService {
   }
 
   protected final String docs;
-  
+
   public CaptureAgentStateRestService() {
     String docsFromClassloader = null;
     InputStream in = null;
