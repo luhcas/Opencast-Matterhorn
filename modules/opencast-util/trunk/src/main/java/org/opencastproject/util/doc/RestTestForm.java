@@ -43,6 +43,10 @@ public class RestTestForm {
    */
   boolean fileUpload = false;
   /**
+   * This indicates that this test form is for a basic endpoint which has no params
+   */
+  boolean basic = false;
+  /**
    * This is used to render the test form in place of using the template
    */
   String html;
@@ -144,6 +148,9 @@ public class RestTestForm {
       this.fileUpload = true;
       this.ajaxSubmit = false;
     }
+    if (this.items.isEmpty() && endpoint.isGetMethod()) {
+      this.basic = true;
+    }
   }
 
   /**
@@ -210,6 +217,10 @@ public class RestTestForm {
   
   public boolean isFileUpload() {
     return fileUpload;
+  }
+
+  public boolean isBasic() {
+    return basic;
   }
 
   public String getHtml() {
