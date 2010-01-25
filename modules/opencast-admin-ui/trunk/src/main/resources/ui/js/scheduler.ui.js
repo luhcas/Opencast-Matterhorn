@@ -92,7 +92,7 @@ schedulerUI.showNotificationBox = function() {
  *  Calls handleAgentList to populate the dropdown.
  */
 schedulerUI.loadKnownAgents = function() {
-  $.get(CAPTURE_ADMIN_URL + "/GetKnownAgents", handleAgentList, 'xml');
+  $.get(CAPTURE_ADMIN_URL + "/agents", handleAgentList, 'xml');
 }
 
 /**
