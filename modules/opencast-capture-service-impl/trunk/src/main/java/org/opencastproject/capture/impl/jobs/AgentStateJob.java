@@ -69,6 +69,16 @@ public class AgentStateJob implements Job {
       logger.warn("URL for {} is invalid, unable to push state to remote server.", CaptureParameters.AGENT_STATE_ENDPOINT_URL);
       return;
     }
+    try {
+      if (url.charAt(url.length()-1) == '/') {
+        url += config.getItem(CaptureParameters.AGENT_NAME);
+      } else {
+        url += "/" + config.getItem(CaptureParameters.AGENT_NAME);
+      }
+    } catch (StringIndexOutOfBoundsException e) {
+      logger.warn("Unable to build valid state endpoint for agents.");
+      return;
+    }
 
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
@@ -91,6 +101,14 @@ public class AgentStateJob implements Job {
       logger.warn("URL for {} is invalid, unable to push recording state to remote server.", CaptureParameters.RECORDING_STATE_ENDPOINT_URL);
       return;
     }
+    try {
+      if (url.charAt(url.length() - 1) != '/') {
+        url += "/";
+      }
+    } catch (StringIndexOutOfBoundsException e) {
+      logger.warn("Unable to build valid state endpoint for recordings.");
+      return;
+    }
 
     //For each recording being tracked by the system send an update
     Map<String, Recording> recordings = state.getKnownRecordings();
@@ -100,7 +118,8 @@ public class AgentStateJob implements Job {
       formParams.add(new BasicNameValuePair("id", e.getKey()));
       formParams.add(new BasicNameValuePair("state", e.getValue().getState()));
 
-      send(formParams, url);
+      String myURL = url + e.getKey();
+      send(formParams, myURL);
     }
   }
 
