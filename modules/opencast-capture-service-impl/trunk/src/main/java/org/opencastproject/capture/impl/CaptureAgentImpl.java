@@ -294,7 +294,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         setAgentState(AgentState.IDLE);
         mockCapture = false;
         currentRecID = null;
-        
+        logger.debug("Mock capture completed successfully.");
         return recordingID;
       }
     }
@@ -349,7 +349,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   @Override
   public boolean stopCapture() {
-
+    
+    logger.debug("stopCapture() called.");
     // If pipe is null and no mock capture is on
     if (pipe == null && !mockCapture) {
       logger.warn("Pipeline is null, unable to stop capture.");
@@ -462,6 +463,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     // Serialize the metadata file and the MediaPackage
     try {
+      logger.debug("Serializing metadata and MediaPackage...");
       // Gets the manifest.xml as a Document object
       Document doc = recording.getMediaPackage().toXml();
 
@@ -511,6 +513,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   public File zipFiles(String recID) {
 
+    logger.debug("Compressing files...");
     RecordingImpl recording = pendingRecordings.get(recID);
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
@@ -546,7 +549,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * @param fileDesc : The descriptor for the media package
    */
   public int ingest(String recID) {
-    
+    logger.debug("Ingesting recording: {}", recID);
     RecordingImpl recording = pendingRecordings.get(recID);
     
     if (recording == null) {
@@ -591,6 +594,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       HttpResponse response = client.execute(postMethod);
 
       retValue = response.getStatusLine().getStatusCode();
+      
+      logger.debug("Called ingest, got return value of {}", retValue);
 
       setRecordingState(recID, RecordingState.UPLOAD_FINISHED);
     } catch (ClientProtocolException e) {

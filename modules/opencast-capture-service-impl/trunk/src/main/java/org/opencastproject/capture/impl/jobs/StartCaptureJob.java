@@ -45,6 +45,7 @@ public class StartCaptureJob implements Job {
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
 
+    logger.debug("StartCaptureJob executed.");
     CaptureAgentImpl ca = null;
     MediaPackage mp = null;
     Properties props = null;
