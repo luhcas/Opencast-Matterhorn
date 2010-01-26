@@ -733,6 +733,17 @@
       </roles>
       <timezone>-6</timezone>
     </developer>
+    <developer>
+      <id>jamiehodge</id>
+      <name>Jamie Hodge</name>
+      <email>jamieh@hum.ku.dk</email>
+      <organization>Copenhagen University</organization>
+      <organizationUrl>http://ku.dk</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
 
   <contributors><!-- TODO? --></contributors>
