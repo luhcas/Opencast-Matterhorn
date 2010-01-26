@@ -15,8 +15,14 @@
  */
 package org.opencastproject.capture.admin.endpoint;
 
-import java.io.IOException;
-import java.io.InputStream;
+import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Status;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +38,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.io.IOUtils;
 import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.AgentStateUpdate;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
@@ -136,23 +141,109 @@ public class CaptureAgentStateRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
+    if (docs == null) { docs = generateDocs(); }
     return docs;
   }
 
-  protected final String docs;
+  protected String docs;
+  private String[] notes = {
+    "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+    "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
 
-  public CaptureAgentStateRestService() {
-    String docsFromClassloader = null;
-    InputStream in = null;
-    try {
-      in = getClass().getResourceAsStream("/html/index.html");
-      docsFromClassloader = IOUtils.toString(in);
-    } catch (IOException e) {
-      logger.error("failed to read documentation", e);
-      docsFromClassloader = "unable to load documentation for " + CaptureAgentStateRestService.class.getName();
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-    docs = docsFromClassloader;
+  private String generateDocs() {
+    DocRestData data = new DocRestData("captureadminservice", "Capture Admin Service", "/capture-admin/rest", notes);
+
+    // getAgent
+    RestEndpoint endpoint = new RestEndpoint("getAgent", RestEndpoint.Method.GET,
+        "/agents/{name}",
+        "Return the state of a given capture agent");
+    endpoint.addPathParam(new Param("name", Param.Type.STRING, null,
+        "The name of a given capture agent"));
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addStatus(Status.OK("{agentState}"));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+
+    // setAgent
+    endpoint = new RestEndpoint("setAgent", RestEndpoint.Method.POST,
+        "/agents/{name}",
+        "Set the status of a given capture agent, registering it if it is new");
+    endpoint.addPathParam(new Param("name", Param.Type.STRING, null,
+        "The name of a given capture agent"));
+    endpoint.addRequiredParam(new Param("state", Param.Type.STRING, null,
+        "The state of the capture agent"));
+    endpoint.addFormat(new Format("HTML", null, null));
+    endpoint.addStatus(Status.OK("{agentName} set to {state}"));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // removeAgent
+    endpoint = new RestEndpoint("removeAgent", RestEndpoint.Method.DELETE,
+        "/agents/{name}",
+        "Remove record of a given capture agent");
+    endpoint.addPathParam(new Param("name", Param.Type.STRING, null,
+        "The name of a given capture agent"));
+    endpoint.addFormat(new Format("HTML", null, null));
+    endpoint.addStatus(Status.OK("{agentName} removed"));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // getKnownAgents
+    endpoint = new RestEndpoint("getKnownAgents", RestEndpoint.Method.GET,
+        "/agents",
+        "Return all registered capture agents and their state");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addStatus(Status.OK(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+
+    // getRecordingState
+    endpoint = new RestEndpoint("getRecordingState", RestEndpoint.Method.GET,
+        "/recordings/{id}",
+        "Return the state of a given recording");
+    endpoint.addPathParam(new Param("id", Param.Type.STRING, null,
+        "The ID of a given recording"));
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addStatus(Status.OK(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+
+    // setRecordingState
+    endpoint = new RestEndpoint("setRecordingState", RestEndpoint.Method.POST,
+        "/recordings/{id}",
+        "Set the status of a given recording, registering it if it is new");
+    endpoint.addPathParam(new Param("id", Param.Type.STRING, null,
+        "The ID of a given recording"));
+    endpoint.addRequiredParam(new Param("state", Param.Type.STRING, null,
+        "The state of the recording"));
+    endpoint.addFormat(new Format("HTML", null, null));
+    endpoint.addStatus(Status.OK("{id} set to {state}"));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // removeRecording
+    endpoint = new RestEndpoint("removeRecording", RestEndpoint.Method.DELETE,
+        "/recordings/{id}",
+        "Remove record of a given recording");
+    endpoint.addPathParam(new Param("id", Param.Type.STRING, null,
+        "The ID of a given recording"));
+    endpoint.addFormat(new Format("HTML", null, null));
+    endpoint.addStatus(Status.OK("{id} removed"));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // getAllRecordings
+    endpoint = new RestEndpoint("getAllRecordings", RestEndpoint.Method.GET,
+        "/recordings",
+        "Return all registered recordings and their state");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addStatus(Status.OK(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+
+    return DocUtil.generate(data);
   }
+
+  public CaptureAgentStateRestService() {}
 }
