@@ -116,7 +116,7 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * {@inheritDoc}
    * 
    * @see org.opencastproject.composer.api.EncoderEngine#supportsProfile(java.lang.String,
-   *      org.opencastproject.media.mediapackage.jaxb.TrackType)
+   *      org.opencastproject.media.mediapackage.Track)
    */
   public boolean supportsProfile(String profile, MediaType type) {
     if (supportedProfiles.containsKey(profile)) {

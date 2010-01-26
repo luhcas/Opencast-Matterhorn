@@ -16,16 +16,56 @@
 
 package org.opencastproject.media.mediapackage.track;
 
+import org.opencastproject.media.mediapackage.MediaPackageSerializer;
 import org.opencastproject.media.mediapackage.Stream;
 
-/**
- * X
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
- */
-abstract class AbstractStreamImpl implements Stream {
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
-  private String identifier;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlTransient
+@XmlAccessorType(XmlAccessType.NONE)
+public abstract class AbstractStreamImpl implements Stream {
+
+  @XmlID
+  @XmlAttribute(name="id")
+  protected String identifier;
+
+
+  @XmlElement(name="device")
+  protected Device device = new Device();
+  
+  @XmlElement(name="encoder")
+  protected Encoder encoder = new Encoder();
+
+  @XmlType(name="device")
+  static class Device {
+    @XmlAttribute(name="type")
+    protected String type;
+    @XmlAttribute(name="version")
+    protected String version;
+    @XmlAttribute(name="vendor")
+    protected String vendor;
+  }
+  
+  @XmlType(name="encoder")
+  static class Encoder {
+    @XmlAttribute(name="type")
+    protected String type;
+    @XmlAttribute(name="version")
+    protected String version;
+    @XmlAttribute(name="vendor")
+    protected String vendor;
+  }
+
+  protected AbstractStreamImpl() {}
 
   protected AbstractStreamImpl(String identifier) {
     this.identifier = identifier;
@@ -34,5 +74,65 @@ abstract class AbstractStreamImpl implements Stream {
   public String getIdentifier() {
     return identifier;
   }
+  
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }
 
+  public String getCaptureDevice() {
+    return device.type;
+  }
+
+  public String getCaptureDeviceVersion() {
+    return device.version;
+  }
+
+  public String getCaptureDeviceVendor() {
+    return device.vendor;
+  }
+
+  public String getFormat() {
+    return encoder.type;
+  }
+
+  public String getFormatVersion() {
+    return encoder.version;
+  }
+
+  public String getEncoderLibraryVendor() {
+    return encoder.vendor;
+  }
+
+  public void setCaptureDevice(String capturedevice) {
+    this.device.type = capturedevice;
+  }
+
+  public void setCaptureDeviceVersion(String capturedeviceVersion) {
+    this.device.version = capturedeviceVersion;
+  }
+
+  public void setCaptureDeviceVendor(String captureDeviceVendor) {
+    this.device.vendor = captureDeviceVendor;
+  }
+
+  public void setFormat(String format) {
+    this.encoder.type = format;
+  }
+
+  public void setFormatVersion(String formatVersion) {
+    this.encoder.version = formatVersion;
+  }
+
+  public void setEncoderLibraryVendor(String encoderLibraryVendor) {
+    this.encoder.vendor = encoderLibraryVendor;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.media.mediapackage.ManifestContributor#toManifest(org.w3c.dom.Document, org.opencastproject.media.mediapackage.MediaPackageSerializer)
+   */
+  @Override
+  public Node toManifest(Document document, MediaPackageSerializer serializer) {
+    throw new RuntimeException("unable to serialize " + this);
+  }
 }

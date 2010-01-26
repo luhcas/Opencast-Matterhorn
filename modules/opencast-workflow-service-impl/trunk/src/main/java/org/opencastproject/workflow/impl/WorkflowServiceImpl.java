@@ -16,7 +16,6 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowConfigurationImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -322,12 +321,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
           Map<String, String> properties) {
-    //Set<WorkflowConfiguration> configurations = new HashSet<WorkflowConfiguration>();
-    //if (properties != null) {
-    //  for(Entry<String, String> entry : properties.entrySet()) {
-    //    configurations.add(new WorkflowConfigurationImpl(entry.getKey(), entry.getValue()));
-    //  }
-    //}
     
     Set<WorkflowOperationConfigurations> configurations = new HashSet<WorkflowOperationConfigurations>();
     if(properties != null){
@@ -338,11 +331,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     log_.info("Starting a new workflow instance with ID={}", id);
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition);
     workflowInstance.setId(id);
-    try {
-      workflowInstance.setSourceMediaPackageType(MediapackageType.fromXml(mediaPackage.toXml()));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    workflowInstance.setSourceMediaPackage(mediaPackage);
     workflowInstance.setConfigurations(configurations);
     workflowInstance.setState(WorkflowInstance.State.RUNNING.name());
     dao.update(workflowInstance);
@@ -442,6 +431,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
               opInstance.setState(State.SUCCEEDED.name());
             } catch (WorkflowOperationException e) {
               log_.warn("Operation " + operationDefinition + " failed:" + e.getMessage());
+              e.printStackTrace();
               // If the operation is set to fail on error, set the workflow to "failed" and run the exception handling
               // workflow operations if specified
               if (operationDefinition.isFailWorkflowOnException()) {

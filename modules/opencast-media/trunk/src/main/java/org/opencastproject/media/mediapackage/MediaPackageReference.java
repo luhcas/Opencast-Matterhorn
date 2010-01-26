@@ -16,6 +16,8 @@
 
 package org.opencastproject.media.mediapackage;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * A <code>MediaPackageElementRef</code> provides means of pointing to other elements in the media package.
  * <p>
@@ -26,6 +28,7 @@ package org.opencastproject.media.mediapackage;
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: MediaPackageReference.java 1736 2008-12-19 11:19:43Z wunden $
  */
+@XmlJavaTypeAdapter(MediaPackageReferenceImpl.Adapter.class)
 public interface MediaPackageReference {
 
   public static final String TYPE_MEDIAPACKAGE = "mediapackage";

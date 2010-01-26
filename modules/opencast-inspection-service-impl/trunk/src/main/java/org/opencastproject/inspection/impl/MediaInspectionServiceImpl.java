@@ -21,7 +21,6 @@ import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Stream;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
@@ -113,14 +112,13 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
     if (metadata == null) {
       logger.warn("Unable to acquire media metadata for " + uri);
-      return null;
+      return null;  // TODO: does the contract for this service define what to do if the file isn't valid media?
     } else {
       MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
       TrackImpl track;
         MediaPackageElement element;
         try {
-          element = elementBuilder.elementFromURI(uri, Type.Track,
-                  MediaPackageElements.INDEFINITE_TRACK);
+          element = elementBuilder.elementFromURI(uri, Type.Track, null);
         } catch (UnsupportedElementException e) {
           throw new RuntimeException(e);
         }
@@ -134,6 +132,11 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
+        try {
+          track.setMimeType(MimeTypes.fromURL(file.toURI().toURL()));
+        } catch (Exception e) {
+          logger.info("unable to find mimetype for {}", file.getAbsolutePath());
+        }
         List<AudioStreamMetadata> audioList = metadata.getAudioStreamMetadata();
         if (audioList != null && !audioList.isEmpty()) {
           for (int i = 0; i < audioList.size(); i++) {
@@ -143,7 +146,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
             audio.setChannels(a.getChannels());
             audio.setFormat(a.getFormat());
             audio.setFormatVersion(a.getFormatVersion());
-            audio.setResolution(a.getResolution());
+            audio.setBitDepth(a.getResolution());
             audio.setSamplingRate(a.getSamplingRate());
             track.addStream(audio);
           }
@@ -175,7 +178,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
    */
   public Track enrich(Track originalTrack, Boolean override) {
     URI originalTrackUrl = originalTrack.getURI();
-    MediaPackageElementFlavor flavor = originalTrack.getFlavor() == null ? MediaPackageElements.INDEFINITE_TRACK : originalTrack.getFlavor();
+    MediaPackageElementFlavor flavor = originalTrack.getFlavor();
     logger.debug("enrych(" + originalTrackUrl + ") called");
 
     // Get the file from the URL
@@ -249,7 +252,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
           audio.setChannels(a.getChannels());
           audio.setFormat(a.getFormat());
           audio.setFormatVersion(a.getFormatVersion());
-          audio.setResolution(a.getResolution());
+          audio.setBitDepth(a.getResolution());
           audio.setSamplingRate(a.getSamplingRate());
           // TODO: retain the original audio metadata
           track.addStream(audio);

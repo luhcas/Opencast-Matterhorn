@@ -16,11 +16,6 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
-
-import org.apache.commons.io.IOUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +37,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowOperationResultImpl implements WorkflowOperationResult {
   @XmlElement(name="mediapackage")
-  protected MediapackageType resultingMediaPackage;
+  protected MediaPackage resultingMediaPackage;
   
   @XmlElementWrapper(name="properties")
   protected HashMap<String, String> resultingProperties;
@@ -52,7 +47,7 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
 
   public WorkflowOperationResultImpl() {}
   
-  public WorkflowOperationResultImpl(MediapackageType resultingMediaPackage, HashMap<String, String> resultingProperties, boolean wait) {
+  public WorkflowOperationResultImpl(MediaPackage resultingMediaPackage, HashMap<String, String> resultingProperties, boolean wait) {
     this.resultingMediaPackage = resultingMediaPackage;
     this.resultingProperties = resultingProperties;
     this.wait = wait;
@@ -63,12 +58,7 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
    * @see org.opencastproject.workflow.api.WorkflowOperationResult#getResultingMediaPackage()
    */
   public MediaPackage getResultingMediaPackage() {
-    try {
-      MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
-      return builder.loadFromManifest(IOUtils.toInputStream(resultingMediaPackage.toXml()));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return resultingMediaPackage;
   }
   /**
    * {@inheritDoc}
@@ -84,7 +74,7 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
   public boolean isWait() {
     return wait;
   }
-  public void setResultingMediaPackage(MediapackageType resultingMediaPackage) {
+  public void setResultingMediaPackage(MediaPackage resultingMediaPackage) {
     this.resultingMediaPackage = resultingMediaPackage;
   }
   public void setResultingProperties(HashMap<String, String> resultingProperties) {

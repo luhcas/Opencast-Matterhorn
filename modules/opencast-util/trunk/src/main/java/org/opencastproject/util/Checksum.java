@@ -24,23 +24,36 @@ import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
+
 /**
  * This class stores value and type of a generated checksum.
  *
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: Checksum.java 1639 2008-12-08 15:45:01Z wunden $
  */
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlType(name="checksum", namespace="http://mediapackage.opencastproject.org")
 public final class Checksum implements Serializable {
 
   /** Serial version uid */
   private static final long serialVersionUID = 1L;
 
   /** The checksum value */
-  private String value_ = null;
+  @XmlValue
+  protected String value_ = null;
 
   /** The checksum type */
-  private ChecksumType type_ = null;
+  @XmlAttribute(name="type")
+  protected ChecksumType type_ = null;
 
+  /** Needed by JAXB */
+  public Checksum() {}
+  
   /**
    * Creates a new checksum object of the specified value and checksum type.
    *

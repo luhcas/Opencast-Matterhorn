@@ -19,7 +19,6 @@ package org.opencastproject.media.mediapackage.track;
 import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.media.mediapackage.AudioStream;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageSerializer;
 import org.opencastproject.media.mediapackage.Stream;
 import org.opencastproject.media.mediapackage.Track;
@@ -34,20 +33,40 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
 /**
  * This class is the base implementation for a media track, which itself is part
  * of a media package, representing e. g. the speaker video or the slide
  * presentation movie.
  */
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlType(name="track", namespace="http://mediapackage.opencastproject.org")
+@XmlRootElement(name="track", namespace="http://mediapackage.opencastproject.org")
 public class TrackImpl extends AbstractMediaPackageElement implements Track {
 
   /** Serial version UID */
   private static final long serialVersionUID = -1092781733885994038L;
 
   /** The duration in milliseconds */
+  @XmlElement(name="duration")
   protected long duration = -1L;
 
-  private List<Stream> streams = new ArrayList<Stream>();
+  @XmlElement(name="audio")
+  protected List<AudioStream> audio = new ArrayList<AudioStream>();
+
+  @XmlElement(name="video")
+  protected List<VideoStream> video = new ArrayList<VideoStream>();
+
+  /** Needed by JAXB */
+  TrackImpl() {
+    this.elementType = Track.TYPE;
+  }
 
   /**
    * Creates a new track object.
@@ -86,7 +105,7 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
    * @return the track
    */
   public static TrackImpl fromURI(URI uri) {
-    return new TrackImpl(MediaPackageElements.INDEFINITE_TRACK, uri);
+    return new TrackImpl(null, uri);
   }
 
   /**
@@ -107,6 +126,9 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
   }
 
   public Stream[] getStreams() {
+    List<Stream> streams = new ArrayList<Stream>(audio.size() + video.size());
+    for(Stream s : audio) streams.add(s);
+    for(Stream s : video) streams.add(s);
     return streams.toArray(new Stream[streams.size()]);
   }
 
@@ -114,8 +136,15 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
    * Add a stream to the track.
    */
   public void addStream(AbstractStreamImpl stream) {
-    streams.add(stream);
+    if(stream instanceof AudioStreamImpl) {
+      audio.add((AudioStreamImpl)stream);
+    } else if(stream instanceof VideoStreamImpl){
+      video.add((VideoStreamImpl)stream);
+    } else {
+      throw new IllegalArgumentException("stream must be either audio or video");
+    }
   }
+
 
   /**
    * {@inheritDoc}
@@ -124,11 +153,7 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
    */
   @Override
   public boolean hasAudio() {
-    for (Stream s : streams) {
-      if (s instanceof AudioStream)
-        return true;
-    }
-    return false;
+    return audio != null && audio.size() > 0;
   }
 
   /**
@@ -138,11 +163,23 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
    */
   @Override
   public boolean hasVideo() {
-    for (Stream s : streams) {
-      if (s instanceof VideoStream)
-        return true;
-    }
-    return false;
+    return video != null && video.size() > 0;
+  }
+
+  public List<AudioStream> getAudio() {
+    return audio;
+  }
+
+  public void setAudio(List<AudioStream> audio) {
+    this.audio = audio;
+  }
+
+  public List<VideoStream> getVideo() {
+    return video;
+  }
+
+  public void setVideo(List<VideoStream> video) {
+    this.video = video;
   }
 
   /**
@@ -160,7 +197,9 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
       node.appendChild(durationNode);
     }
 
-    for (Stream s : streams)
+    for (Stream s : audio)
+      node.appendChild(s.toManifest(document, serializer));
+    for (Stream s : video)
       node.appendChild(s.toManifest(document, serializer));
     return node;
   }
@@ -212,4 +251,10 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
     }
     return result.toString();
   }
+
+  public static class Adapter extends XmlAdapter<TrackImpl, Track> {
+    public TrackImpl marshal(Track mp) throws Exception {return (TrackImpl)mp;}
+    public Track unmarshal(TrackImpl mp) throws Exception {return mp;}
+  }
+
 }

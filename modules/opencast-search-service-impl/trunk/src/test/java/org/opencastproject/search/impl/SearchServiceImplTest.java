@@ -77,7 +77,7 @@ public class SearchServiceImplTest {
    * Ads a simple media package that has a dublin core for the episode only.
    */
   @Test
-  public void testAddSimpleMediaPackage() {
+  public void testAddSimpleMediaPackage() throws Exception {
     MediaPackageBuilderFactory builderFactory = MediaPackageBuilderFactory.newInstance();
     MediaPackageBuilder mediaPackageBuilder = builderFactory.newMediaPackageBuilder();
     URL rootUrl = SearchServiceImplTest.class.getResource("/");
@@ -85,12 +85,8 @@ public class SearchServiceImplTest {
     
     // Load the simple media package
     MediaPackage mediaPackage = null;
-    try {
-      InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-simple.xml");
-      mediaPackage = mediaPackageBuilder.loadFromManifest(is);
-    } catch (MediaPackageException e) {
-      fail("Error loading simple media package");
-    }
+    InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-simple.xml");
+    mediaPackage = mediaPackageBuilder.loadFromManifest(is);
 
     // Add the media package to the search index
     service.add(mediaPackage);

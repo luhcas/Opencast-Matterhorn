@@ -16,6 +16,10 @@
 
 package org.opencastproject.media.mediapackage;
 
+import org.opencastproject.media.mediapackage.track.TrackImpl;
+
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * This interface describes methods and fields for audio and video tracks as
  * part of a media package.
@@ -24,6 +28,7 @@ package org.opencastproject.media.mediapackage;
  * @author Christoph E. Driessen <ced@neopoly.de>
  * @version $Id: Track.java 2905 2009-07-15 16:16:05Z ced $
  */
+@XmlJavaTypeAdapter(TrackImpl.Adapter.class)
 public interface Track extends MediaPackageElement {
 
   /**

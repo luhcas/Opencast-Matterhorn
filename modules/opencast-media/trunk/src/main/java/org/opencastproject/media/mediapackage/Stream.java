@@ -16,10 +16,9 @@
 
 package org.opencastproject.media.mediapackage;
 
+
 /**
  * A {@link org.opencastproject.media.mediapackage.Track} consists out of one or more streams.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public interface Stream extends ManifestContributor {
 
@@ -27,4 +26,6 @@ public interface Stream extends ManifestContributor {
    * Return an identifier that identifies a stream within it's track.
    */
   String getIdentifier();
+
 }
+

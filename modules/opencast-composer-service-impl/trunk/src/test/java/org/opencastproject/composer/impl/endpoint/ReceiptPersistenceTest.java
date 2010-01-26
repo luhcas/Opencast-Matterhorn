@@ -16,8 +16,9 @@
 package org.opencastproject.composer.impl.endpoint;
 
 
-import org.opencastproject.composer.impl.endpoint.ComposerServiceDaoJdbcImpl;
-import org.opencastproject.media.mediapackage.jaxb.TrackType;
+import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.Track;
 
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.AfterClass;
@@ -25,6 +26,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.net.URI;
 import java.util.UUID;
 
 public class ReceiptPersistenceTest {
@@ -56,16 +58,12 @@ public class ReceiptPersistenceTest {
   @Test
   public void testCrudOperations() throws Exception {
     Receipt receipt = dao.createReceipt();
-    TrackType t = new TrackType();
-    t.setId("track-1");
-    t.setUrl("file://test.mov"); // doesn't actually exist
+    Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
+            new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_TRACK);
     receipt.setTrack(t);
     dao.updateReceipt(receipt);
     
     Receipt receiptFromDb = dao.getReceipt(receipt.getId());
-    String receiptTrackId = receipt.getTrack().getId();
-    String receiptFromDbTrackId = receiptFromDb.getTrack().getId();
-    Assert.assertEquals(receiptTrackId, receiptFromDbTrackId);
+    Assert.assertEquals(receipt.getTrack().getIdentifier(), receiptFromDb.getTrack().getIdentifier());
   }
-
 }

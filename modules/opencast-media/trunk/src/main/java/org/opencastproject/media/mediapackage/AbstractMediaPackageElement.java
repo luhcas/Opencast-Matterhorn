@@ -22,23 +22,38 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.net.URI;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * This class provides base functionality for media package elements.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: AbstractMediaPackageElement.java 2905 2009-07-15 16:16:05Z ced $
  */
+@XmlTransient
+@XmlAccessorType(XmlAccessType.NONE)
 public abstract class AbstractMediaPackageElement implements MediaPackageElement, Serializable {
 
   /** Serial version uid */
   private static final long serialVersionUID = 1L;
 
   /** The element identifier */
+  @XmlID
+  @XmlAttribute(name="id")
   protected String id = null;
 
   /** The element's type whithin the manifest: Track, Catalog etc. */
@@ -48,13 +63,18 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   protected String description = null;
 
   /** The element's mime type, e. g. 'audio/mp3' */
+  @javax.xml.bind.annotation.XmlElement(name="mimetype")
   protected MimeType mimeType = null;
 
   /** The element's type, e. g. 'track/slide' */
+  @XmlAttribute(name="type")
+  @XmlJavaTypeAdapter(FlavorAdapter.class)
   protected MediaPackageElementFlavor flavor = null;
 
   /** The tags */
-  protected Set<String> tags = null;
+  @XmlElementWrapper(name="tags")
+  @javax.xml.bind.annotation.XmlElement(name="tag")
+  protected SortedSet<String> tags = new TreeSet<String>();
 
   /** The element's location */
   protected URI uri = null;
@@ -69,8 +89,12 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   protected MediaPackage mediaPackage = null;
 
   /** The optional reference to other elements or series */
+  @XmlAttribute(name="ref")
   protected MediaPackageReference reference = null;
 
+  /** Needed by JAXB */
+  protected AbstractMediaPackageElement() {}
+  
   /**
    * Creates a new media package element.
    * 
@@ -134,7 +158,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
     this.mimeType = mimeType;
     this.uri = uri;
     this.checksum = checksum;
-    this.tags = new HashSet<String>();
+    this.tags = new TreeSet<String>();
   }
 
   /**
@@ -182,7 +206,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    */
   @Override
   public boolean containsTag(String tag) {
-    if (tag == null)
+    if (tag == null || tags == null)
       return false;
     return tags.contains(tag);
   }
@@ -247,6 +271,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackageElement#getURI()
    */
+  @javax.xml.bind.annotation.XmlElement(name="url")
   public URI getURI() {
     return uri;
   }
@@ -266,6 +291,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackageElement#getChecksum()
    */
+  @javax.xml.bind.annotation.XmlElement(name="checksum")
   public Checksum getChecksum() {
     return checksum;
   }
@@ -341,14 +367,6 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    */
   void setMediaPackage(MediaPackage mediaPackage) {
     this.mediaPackage = mediaPackage;
-
-    // Adjust the reference
-    if (reference == null) {
-      if (mediaPackage != null)
-        reference = new MediaPackageReferenceImpl();
-      else
-        reference = null;
-    }
   }
 
   /**
@@ -499,4 +517,31 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
     return s.toLowerCase();
   }
 
+  public Object clone() {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    try {
+      Marshaller marshaller = MediaPackageImpl.context.createMarshaller();
+      marshaller.marshal(this, out);
+      Unmarshaller unmarshaller = MediaPackageImpl.context.createUnmarshaller();
+      ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+      return unmarshaller.unmarshal(in);
+    } catch (JAXBException e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  static class FlavorAdapter extends XmlAdapter<String, MediaPackageElementFlavor> {
+    @Override
+    public String marshal(MediaPackageElementFlavor flavor) throws Exception {
+      if(flavor == null) {
+        return null;
+      } else {
+        return flavor.toString();
+      }
+    }
+    @Override
+    public MediaPackageElementFlavor unmarshal(String str) throws Exception {
+      return MediaPackageElementFlavor.parseFlavor(str);
+    }
+  }
 }

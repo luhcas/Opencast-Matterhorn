@@ -93,8 +93,7 @@
             <Export-Package> org.opencastproject.distribution.local.* </Export-Package>
             <Service-Component>
               OSGI-INF/distribution-service-local.xml,
-              OSGI-INF/distribution-service-local-rest.xml,
-              OSGI-INF/distribution-service-local-soap.xml
+              OSGI-INF/distribution-service-local-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

@@ -28,7 +28,6 @@ import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.dublincore.DublinCore;
 import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.media.mediapackage.identifier.Id;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -92,8 +91,7 @@ public class IngestRestService {
     MediaPackage mp;
     try {
       mp = service.createMediaPackage();
-      MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
-      return Response.ok(mpt).build();
+      return Response.ok(mp).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -117,14 +115,10 @@ public class IngestRestService {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addTrack")
   public Response addMediaPackageTrack(@FormParam("url") String url, @FormParam("flavor") String flavor,
-          @FormParam("mediaPackage") MediapackageType mpt) {
+          @FormParam("mediaPackage") MediaPackage mp) {
     try {
-      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-      URI u = new URI(url);
-      mp = service.addTrack(u, MediaPackageElementFlavor.parseFlavor(flavor), mp);
-      mpt = MediapackageType.fromXml(mp.toXml());
-
-      return Response.ok(mpt).build();
+      mp = service.addTrack(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      return Response.ok(mp).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -144,13 +138,10 @@ public class IngestRestService {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addCatalog")
   public Response addMediaPackageCatalog(@FormParam("url") String url, @FormParam("flavor") String flavor,
-          @FormParam("mediaPackage") MediapackageType mpt) {
+          @FormParam("mediaPackage") MediaPackage mp) {
     try {
-      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-      URI u = new URI(url);
-      mp = service.addCatalog(u, MediaPackageElementFlavor.parseFlavor(flavor), mp);
-      mpt = MediapackageType.fromXml(mp.toXml());
-      return Response.ok(mpt).build();
+      MediaPackage resultingMediaPackage = service.addCatalog(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      return Response.ok(resultingMediaPackage).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -214,12 +205,11 @@ public class IngestRestService {
             String filename = fullname.substring(startIndex + 1, fullname.length());
             listener.setFilename(filename);
             /* This will only work if the mediaPackage is received before the track. */
-            service.addTrack(item.openStream(), item.getName(), MediaPackageElements.INDEFINITE_TRACK, mp);
+            service.addTrack(item.openStream(), item.getName(), null, mp);
           }
         }
-        MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
         service.ingest(mp);
-        return Response.ok(mpt).build();
+        return Response.ok(mp).build();
       }
       return Response.serverError().status(Status.BAD_REQUEST).build();
     } catch (Exception e) {
@@ -228,6 +218,7 @@ public class IngestRestService {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @GET
   @Path("getUploadProgress/{mpId}/{filename}")
   public Response getUploadProgress(@PathParam("mpId") String mediaPackageID, @PathParam("filename") String filename) {
@@ -299,13 +290,10 @@ public class IngestRestService {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addAttachment")
   public Response addMediaPackageAttachment(@FormParam("url") String url, @FormParam("flavor") String flavor,
-          @FormParam("mediaPackage") MediapackageType mpt) {
+          @FormParam("mediaPackage") MediaPackage mp) {
     try {
-      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-      URI u = new URI(url);
-      mp = service.addAttachment(u, MediaPackageElementFlavor.parseFlavor(flavor), mp);
-      mpt = MediapackageType.fromXml(mp.toXml());
-      return Response.ok(mpt).build();
+      mp = service.addAttachment(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      return Response.ok(mp).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -322,7 +310,7 @@ public class IngestRestService {
 
   
   protected Response addMediaPackageElement(HttpServletRequest request, MediaPackageElement.Type type) {
-    MediaPackageElementFlavor flavor = MediaPackageElements.INDEFINITE_TRACK;
+    MediaPackageElementFlavor flavor = null;
     try {
       InputStream in = null;
       String fileName = null;
@@ -371,7 +359,7 @@ public class IngestRestService {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addMediaPackage")
   public Response addMediaPackage(@Context HttpServletRequest request) {
-    MediaPackageElementFlavor flavor = MediaPackageElements.INDEFINITE_TRACK;
+    MediaPackageElementFlavor flavor = null;
     try {
       MediaPackage mp = service.createMediaPackage();
       DublinCoreCatalog dcc = DublinCoreCatalogImpl.newInstance();
@@ -393,9 +381,8 @@ public class IngestRestService {
         }
         String xml = getStringFromDocument(dcc.toXml());
         service.addCatalog(IOUtils.toInputStream(xml), "dublincore.xml", MediaPackageElements.DUBLINCORE_CATALOG, mp);
-        MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
         service.ingest(mp);
-        return Response.ok(mpt).build();
+        return Response.ok(mp).build();
       }
       return Response.serverError().status(Status.BAD_REQUEST).build();
     } catch (Exception e) {
@@ -420,12 +407,10 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_HTML)
   @Path("ingest")
-  public Response ingest(@FormParam("mediaPackage") MediapackageType mpt) {
+  public Response ingest(@FormParam("mediaPackage") MediaPackage mp) {
     try {
-      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
       service.ingest(mp);
-      mpt = MediapackageType.fromXml(mp.toXml());
-      return Response.ok(mpt).build();
+      return Response.ok(mp).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();

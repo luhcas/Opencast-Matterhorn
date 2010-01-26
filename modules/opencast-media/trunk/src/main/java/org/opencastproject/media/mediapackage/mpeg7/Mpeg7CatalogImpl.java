@@ -16,6 +16,8 @@
 
 package org.opencastproject.media.mediapackage.mpeg7;
 
+import org.opencastproject.media.mediapackage.Catalog;
+import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.Mpeg7Catalog;
 import org.opencastproject.media.mediapackage.XMLCatalogImpl;
 import org.opencastproject.util.Checksum;
@@ -35,15 +37,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 /**
  * Implements the mpeg-7 metadata container.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: Mpeg7CatalogImpl.java 2905 2009-07-15 16:16:05Z ced $
  */
 public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
 
@@ -51,7 +51,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
   private static final long serialVersionUID = 5521535164920498997L;
 
   /** The multimedia content list */
-  private Map<MultimediaContent.Type, MultimediaContentImpl<? extends MultimediaContentType>> multimediaContent = null;
+  private HashMap<MultimediaContent.Type, MultimediaContentImpl<? extends MultimediaContentType>> multimediaContent = null;
 
   /** The default element namespace */
   public static final String NS = "mpeg7";
@@ -112,6 +112,19 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    */
   protected Mpeg7CatalogImpl() {
     this(null, null, 0, null);
+  }
+
+  /**
+   * @param cat The original catalog to use as a template
+   */
+  public Mpeg7CatalogImpl(Catalog cat) {
+    this(cat.getURI(), cat.getSize(), cat.getChecksum());
+    this.setIdentifier(cat.getIdentifier());
+    this.mimeType = cat.getMimeType();
+    this.tags = new TreeSet<String>();
+    for(String t : cat.getTags()) tags.add(t);
+    this.flavor = Mpeg7Catalog.FLAVOR;
+    this.reference = cat.getReference();
   }
 
   /**
@@ -472,4 +485,17 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
     return null;
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public Object clone() {
+    Mpeg7CatalogImpl clone = new Mpeg7CatalogImpl(this);
+    if (data instanceof HashMap) {
+      clone.data = (Map<EName, List<CatalogEntry>>) ((HashMap) data).clone();
+    } else {
+      throw new RuntimeException("Bug: Cloning is currently only supported for HashMap based "
+              + "XMLCatalog implementations");
+    }
+    clone.multimediaContent = (HashMap<MultimediaContent.Type, MultimediaContentImpl<? extends MultimediaContentType>>)this.multimediaContent.clone();
+    return clone;
+  }
 }

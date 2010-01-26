@@ -22,22 +22,19 @@ import org.w3c.dom.Document;
 
 import java.io.IOException;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 /**
  * The Dublin Core catalog encapsulates dublin core metadata. For a reference to this standard, see
  * <code>http://dublincore.org/</code>.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: DublinCoreCatalog.java 2905 2009-07-15 16:16:05Z ced $
  */
+@XmlJavaTypeAdapter(XMLCatalogImpl.Adapter.class)
 public interface DublinCoreCatalog extends XMLCatalog, DublinCore, Cloneable {
 
   /** Element type definition */
   MediaPackageElementFlavor FLAVOR = new MediaPackageElementFlavor("metadata", "dublincore", "Dublin core catalog");
-
-  public Object clone() throws CloneNotSupportedException;
 
   /**
    * Saves the catalog to disk.

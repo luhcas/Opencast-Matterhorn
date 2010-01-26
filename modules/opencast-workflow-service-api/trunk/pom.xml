@@ -36,6 +36,15 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Import-Package>
+              org.opencastproject.media.mediapackage,
+              org.opencastproject.media.mediapackage.attachment,
+              org.opencastproject.media.mediapackage.dublincore,
+              org.opencastproject.media.mediapackage.identifier,
+              org.opencastproject.media.mediapackage.mpeg7,
+              org.opencastproject.media.mediapackage.track,
+              *
+            </Import-Package>
             <Export-Package> org.opencastproject.workflow.api </Export-Package>
           </instructions>
         </configuration>

@@ -16,16 +16,7 @@
 package org.opencastproject.inspection.impl.endpoints;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
-import org.opencastproject.media.mediapackage.Stream;
 import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.media.mediapackage.jaxb.AudioType;
-import org.opencastproject.media.mediapackage.jaxb.ChecksumType;
-import org.opencastproject.media.mediapackage.jaxb.ObjectFactory;
-import org.opencastproject.media.mediapackage.jaxb.ScanTypeType;
-import org.opencastproject.media.mediapackage.jaxb.TrackType;
-import org.opencastproject.media.mediapackage.jaxb.VideoType;
-import org.opencastproject.media.mediapackage.track.AudioStreamImpl;
-import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -33,6 +24,9 @@ import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Status;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
@@ -48,6 +42,8 @@ import javax.ws.rs.core.Response;
  */
 @Path("/")
 public class MediaInspectionRestEndpoint {
+  private static final Logger logger = LoggerFactory.getLogger(MediaInspectionRestEndpoint.class);
+  
   protected MediaInspectionService service;
 
   public void setService(MediaInspectionService service) {
@@ -63,38 +59,9 @@ public class MediaInspectionRestEndpoint {
   public Response getTrack(@QueryParam("url") URI url) {
     try {
       Track t = service.inspect(url);
-      ObjectFactory of = new ObjectFactory();
-      TrackType track = of.createTrackType();
-      ChecksumType checksum = of.createChecksumType();
-      checksum.setType(t.getChecksum().getType().getName());
-      checksum.setValue(t.getChecksum().getValue());
-      track.setDuration(t.getDuration());
-      track.setChecksum(checksum);
-
-      for (Stream stream : t.getStreams()) {
-        if (stream instanceof AudioStreamImpl) {
-          AudioStreamImpl a = (AudioStreamImpl) stream;
-          AudioType audio = of.createAudioType();
-          audio.setBitrate(a.getBitRate());
-          audio.setChannels(a.getChannels());
-          audio.setSamplingrate(a.getSamplingRate());
-          track.setAudio(audio);
-        } else if (stream instanceof VideoStreamImpl) {
-          VideoStreamImpl v = (VideoStreamImpl) stream;
-          VideoType video = of.createVideoType();
-          video.setBitrate(v.getBitRate());
-          video.setFrameRate(v.getFrameRate());
-          ScanTypeType scanType = of.createScanTypeType();
-          scanType.setType(v.getScanType().name());
-          video.setScanType(scanType);
-          video.setResolution(v.getFrameWidth() + "x" + v.getFrameHeight());
-          track.setVideo(video);
-        } else {
-          throw new IllegalStateException("stream is of an unknown type: " + stream);
-        }
-      }
-      return Response.ok(track).build();
+      return Response.ok(t).build();
     } catch (Exception e) {
+      logger.info(e.getMessage());
       return Response.serverError().status(400).build();
     }
   }

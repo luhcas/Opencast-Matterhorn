@@ -16,8 +16,11 @@
 
 package org.opencastproject.media.mediapackage;
 
+import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
+import org.opencastproject.media.mediapackage.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
+import org.opencastproject.util.MimeTypes;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -36,6 +39,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.XMLConstants;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -73,12 +79,10 @@ import javax.xml.transform.stream.StreamResult;
  * </pre>
  * 
  * However, reading of those documents is supported.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @author Christoph E. Driessen <ced@neopoly.de>
- * @version $Id: XMLCatalog.java 2375 2009-02-14 10:52:08Z ced $
  */
-public abstract class XMLCatalogImpl extends AbstractMediaPackageElement implements XMLCatalog {
+@XmlRootElement(name="catalog", namespace="http://mediapackage.opencastproject.org")
+@XmlType(name="catalog", namespace="http://mediapackage.opencastproject.org")
+public class XMLCatalogImpl extends AbstractMediaPackageElement implements XMLCatalog {
 
   /** Serial version UID */
   private static final long serialVersionUID = -908525367616L;
@@ -109,6 +113,12 @@ public abstract class XMLCatalogImpl extends AbstractMediaPackageElement impleme
   /** Namespace - prefix bindings */
   protected Bindings bindings = new Bindings(false);
 
+  /** Needed by JAXB */
+  protected XMLCatalogImpl() {
+    // default to text/xml mimetype
+    super(Type.Catalog, null, null, -1, null, MimeTypes.parseMimeType("text/xml"));
+  }
+  
   /**
    * Creates an abstract metadata container.
    * 
@@ -877,4 +887,34 @@ public abstract class XMLCatalogImpl extends AbstractMediaPackageElement impleme
       return prefix;
     }
   }
+
+  public static class Adapter extends XmlAdapter<XMLCatalogImpl, Catalog> {
+    public XMLCatalogImpl marshal(Catalog cat) throws Exception {
+      if(cat.getFlavor() == null) throw new IllegalArgumentException("catalog flavor must be set");
+      if(Mpeg7Catalog.FLAVOR.equals(cat.getFlavor())) {
+        return new Mpeg7CatalogImpl(cat);
+      } else {
+        return new DublinCoreCatalogImpl(cat);
+      }
+    }
+    // FIXME: Do not hard code the catalog subclasses.  See the MediaPackageElementBuilderPlugins for a means to achieve this.
+    public Catalog unmarshal(XMLCatalogImpl cat) throws Exception {
+      if(cat.getFlavor() == null) throw new IllegalArgumentException("catalog flavor must be set");
+      if(Mpeg7Catalog.FLAVOR.equals(cat.getFlavor())) {
+        return new Mpeg7CatalogImpl(cat);
+      } else {
+        return new DublinCoreCatalogImpl(cat);
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.media.mediapackage.XMLCatalog#toXml()
+   */
+  @Override
+  public Document toXml() throws ParserConfigurationException, TransformerException, IOException {
+    throw new RuntimeException("can not serialize " + this);
+  }
+
 }

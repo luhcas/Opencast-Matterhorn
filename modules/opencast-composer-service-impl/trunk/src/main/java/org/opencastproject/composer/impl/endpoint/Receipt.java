@@ -16,11 +16,9 @@
 package org.opencastproject.composer.impl.endpoint;
 
 import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.media.mediapackage.jaxb.TrackType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -28,7 +26,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * A receipt for an encoding job.  A Receipt may be used to track an encoding job once it has been queued.
@@ -47,23 +44,9 @@ public class Receipt {
     this.status = status;
   }
 
-  public Receipt(String id, String status, TrackType track) {
+  public Receipt(String id, String status, Track track) {
     this(id, status);
     this.track = track;
-  }
-
-  public Receipt(String id, String status, Track track) {
-    this(id, status, convertTrack(track));
-  }
-
-  private static TrackType convertTrack(Track t) {
-    try {
-      Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-      t.toManifest(doc, null);
-      return TrackType.fromXml(doc);
-    } catch(Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
   @XmlID
@@ -74,7 +57,7 @@ public class Receipt {
   String status;
   
   @XmlElement
-  TrackType track;
+  Track track;
 
   public String getId() {
     return id;
@@ -92,11 +75,11 @@ public class Receipt {
     this.status = status;
   }
 
-  public TrackType getTrack() {
+  public Track getTrack() {
     return track;
   }
 
-  public void setTrack(TrackType track) {
+  public void setTrack(Track track) {
     this.track = track;
   }
 }

@@ -18,7 +18,6 @@ package org.opencastproject.distribution.local;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -32,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Dictionary;
 
 /**
@@ -94,31 +94,34 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
       FileUtils.forceMkdir(mediaDirectory);
       FileUtils.forceMkdir(metadataDirectory);
       FileUtils.forceMkdir(attachmentsDirectory);
-      for (String id : elementIds) {
-        MediaPackageElement element = mediaPackage.getElementById(id);
-        File sourceFile = workspace.get(element.getURI());
-        File directory = null;
-        switch (element.getElementType()) {
-          case Track:
-            directory = mediaDirectory;
-            break;
-          case Catalog:
-            directory = metadataDirectory;
-            break;
-          case Attachment:
-            directory = attachmentsDirectory;
-            break;
-          default:
-            throw new IllegalStateException("Someone is trying to distribute strange things here");
+      Arrays.sort(elementIds);
+      for (MediaPackageElement element : mediaPackage.getElements()) {
+        if(Arrays.binarySearch(elementIds, element.getIdentifier()) >= 0) {
+          
+          File sourceFile = workspace.get(element.getURI());
+          File directory = null;
+          switch (element.getElementType()) {
+            case Track:
+              directory = mediaDirectory;
+              break;
+            case Catalog:
+              directory = metadataDirectory;
+              break;
+            case Attachment:
+              directory = attachmentsDirectory;
+              break;
+            default:
+              throw new IllegalStateException("Someone is trying to distribute strange things here");
+          }
+          File destination = new File(directory, getTargetFileName(element));
+          FileUtils.copyFile(sourceFile, destination);
+          
+          MediaPackageElement clone = (MediaPackageElement)element.clone();
+          clone.setURI(new URI(serverUrl + "/" + mediaPackageDirectory.getName() + "/" + directory.getName()
+                  + "/" + destination.getName()));
+          clone.setIdentifier(null);
+          mediaPackage.addDerived(clone, element);
         }
-        File destination = new File(directory, getTargetFileName(element));
-        FileUtils.copyFile(sourceFile, destination);
-        URI newTrackUri = new URI(serverUrl + "/" + mediaPackageDirectory.getName() + "/" + directory.getName()
-                + "/" + destination.getName());
-        MediaPackageElement newElement = MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
-                newTrackUri, element.getElementType(), element.getFlavor());
-        newElement.setIdentifier(element.getIdentifier() + "-dist");
-        mediaPackage.addDerived(newElement, element);
       }
     } catch (Exception e) {
       e.printStackTrace();

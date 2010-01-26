@@ -80,13 +80,12 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
    * @see org.osgi.service.event.EventHandler#handleEvent(org.osgi.service.event.Event)
    */
   public void handleEvent(Event event) {
-    logger.info("Received event");
-
     Object property = event.getProperty("mediaPackage");
     if (property == null || !(property instanceof String)) {
       // received event, but without or invalid media package
       logger.error("Property 'mediaPackage' not present or is invalid");
     } else {
+      logger.debug("Received mediapackage ingest event: {}", property);
       try {
         MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(
                 IOUtils.toInputStream((String) property));

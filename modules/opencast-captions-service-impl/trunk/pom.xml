@@ -144,8 +144,7 @@
             <Embed-Transitive>true</Embed-Transitive>
             <Service-Component>
               OSGI-INF/service.xml,
-              OSGI-INF/service-rest.xml,
-              OSGI-INF/service-soap.xml
+              OSGI-INF/service-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

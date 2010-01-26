@@ -134,6 +134,10 @@ final class ManifestImpl {
   long getStartDate() {
     return startTime;
   }
+  
+  void setStartDate(long startTime) {
+    this.startTime = startTime;
+  }
 
   /**
    * @see org.opencastproject.media.mediapackage.ManifestImpl#getEntries()
@@ -691,7 +695,7 @@ final class ManifestImpl {
     Collection<Catalog> catalogs = loadCatalogs();
     List<Catalog> candidates = new ArrayList<Catalog>(catalogs);
     for (Catalog c : catalogs) {
-      if (!flavor.equals(c.getFlavor()) || !reference.matches(c.getReference())) {
+      if (!flavor.equals(c.getFlavor()) || (c.getReference() != null && !c.getReference().matches(reference))) {
         candidates.remove(c);
       }
     }
@@ -1023,10 +1027,13 @@ final class ManifestImpl {
 
     // Read catalogs
     NodeList catalogNodes = (NodeList) xPath.evaluate("/mediapackage/metadata/catalog", doc, XPathConstants.NODESET);
+    log_.debug("{} catalog nodes found", catalogNodes.getLength());
     for (int i = 0; i < catalogNodes.getLength(); i++) {
       try {
         MediaPackageElement catalog = elementBuilder.elementFromManifest(catalogNodes.item(i), serializer);
+        log_.debug("catalog node {} (#{} of {}) parsed to {}", new Object[] {catalogNodes.item(i), i+1, catalogNodes.getLength(), catalog});
         if (catalog != null) {
+          log_.debug("catalog flavor={}", catalog.getFlavor());
           URI elementUrl = catalog.getURI();
           if (elementUrl != null) // TODO: Check existence
             manifest.add(catalog);
@@ -1045,6 +1052,7 @@ final class ManifestImpl {
         }
       } catch (Throwable t) {
         log_.warn("Error reading catalog: " + t.getMessage());
+        t.printStackTrace();
         throw new IllegalStateException(t);
       }
     }

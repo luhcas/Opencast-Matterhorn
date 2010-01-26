@@ -99,6 +99,12 @@
               javax.sql.*,
               org.opencastproject.workflow.api,
               org.opencastproject.http,
+              org.opencastproject.media.mediapackage,
+              org.opencastproject.media.mediapackage.attachment,
+              org.opencastproject.media.mediapackage.dublincore,
+              org.opencastproject.media.mediapackage.identifier,
+              org.opencastproject.media.mediapackage.mpeg7,
+              org.opencastproject.media.mediapackage.track,
               *;resolution:=optional
             </Import-Package>
             <Export-Package>

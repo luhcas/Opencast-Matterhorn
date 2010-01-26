@@ -21,7 +21,7 @@ import java.net.URL;
 /**
  * Implementation of a CNRI handle.
  */
-public final class HandleImpl implements Handle {
+public final class HandleImpl extends IdImpl implements Handle {
 
   /** Serial version UID */
   private static final long serialVersionUID = -6345773795959884639L;
@@ -31,9 +31,6 @@ public final class HandleImpl implements Handle {
 
   /** The local name */
   private String localName = null;
-
-  /** The complete identifier */
-  private String id = null;
 
   /** The url where this identifier is pointing to */
   private URL target = null;

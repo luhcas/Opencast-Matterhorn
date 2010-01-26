@@ -6,11 +6,6 @@
   activate="activate">
     <implementation class="org.opencastproject.composer.impl.ComposerServiceImpl" />
     <property name="service.description" value="Composer (Encoder) Service" />
-    <property name="service.exported.interfaces" value="*" />
-    <!-- property name="service.exported.configs" value="org.apache.cxf.rs" / -->
-    <property name="service.exported.configs" value="org.apache.cxf.ws" />
-    <!-- property name="org.apache.cxf.rs.httpservice.context" value="/encoder" / -->
-    <property name="org.apache.cxf.ws.httpservice.context" value="/private/composer" />
     <service>
       <provide interface="org.opencastproject.composer.api.ComposerService" />
     </service>

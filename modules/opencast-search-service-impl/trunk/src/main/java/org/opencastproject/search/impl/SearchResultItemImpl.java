@@ -17,12 +17,8 @@
 package org.opencastproject.search.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.search.api.MediaSegment;
 import org.opencastproject.search.api.SearchResultItem;
-
-import org.apache.commons.io.IOUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -38,7 +34,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -58,12 +53,8 @@ public class SearchResultItemImpl implements SearchResultItem {
   private String id = "";
 
   /** The media package */
-  @XmlTransient
-  private MediaPackage mediaPackage = null;
-
-  /** The jaxb version of the media package, in case this object needs to be serialized to xml */
   @XmlElement(name = "mediapackage")
-  private MediapackageType mediaPackageJaxb = null;
+  private MediaPackage mediaPackage = null;
 
   /** Dublin core field 'dc:extent' */
   @XmlElement
@@ -539,27 +530,6 @@ public class SearchResultItemImpl implements SearchResultItem {
    */
   public MediaPackage getMediaPackage() {
     return mediaPackage;
-  }
-
-  public MediapackageType getMediaPackageJaxb() {
-    if (mediaPackageJaxb == null && mediaPackage != null) {
-      try {
-        mediaPackageJaxb = MediapackageType.fromXml(mediaPackage.toXml());
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-    return mediaPackageJaxb;
-  }
-
-  public void setMediaPackageJaxb(MediapackageType mediaPackageJaxb) {
-    this.mediaPackageJaxb = mediaPackageJaxb;
-    try {
-      this.mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(
-              IOUtils.toInputStream(mediaPackageJaxb.toXml()));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
   /**

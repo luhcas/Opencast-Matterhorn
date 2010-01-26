@@ -71,10 +71,12 @@ public class ImageWorkflowOperationHandler implements WorkflowOperationHandler {
   public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.debug("Running image workflow operation on {}", workflowInstance);
 
+    MediaPackage src = MediaPackageUtil.clone(workflowInstance.getCurrentMediaPackage());
+
     // Create the image
     MediaPackage resultingMediaPackage = null;
     try {
-      resultingMediaPackage = image(workflowInstance.getCurrentMediaPackage(), workflowInstance.getCurrentOperation());
+      resultingMediaPackage = image(src, workflowInstance.getCurrentOperation());
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
     }
@@ -116,7 +118,7 @@ public class ImageWorkflowOperationHandler implements WorkflowOperationHandler {
     // Select the tracks based on the flavors
     Set<Track> videoTracks = new HashSet<Track>();
     for(Track track : mediaPackage.getTracks()) {
-      if(sourceVideoFlavor == null || sourceVideoFlavor.equals(track.getFlavor().toString())) {
+      if(sourceVideoFlavor == null || (track.getFlavor() != null && sourceVideoFlavor.equals(track.getFlavor().toString()))) {
         if(sourceTags == null) {
           videoTracks.add(track);
           continue;

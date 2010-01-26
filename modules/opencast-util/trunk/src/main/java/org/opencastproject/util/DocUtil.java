@@ -57,7 +57,7 @@ public class DocUtil {
     freemarkerConfig = new Configuration();
     freemarkerConfig.setObjectWrapper(new DefaultObjectWrapper());
     freemarkerConfig.clearTemplateCache();
-    logger.info("Created new freemarker template processor for DocUtils");
+    logger.debug("Created new freemarker template processor for DocUtils");
   }
 
   /**
@@ -111,7 +111,7 @@ public class DocUtil {
       Writer output = new StringWriter();
       template.process(data, output);
       result = output.toString();
-      logger.info("Generated complete document ({} chars) from template ({})", result.length(), templateName);
+      logger.debug("Generated complete document ({} chars) from template ({})", result.length(), templateName);
     } catch (TemplateException e) {
       logger.error("Failed while processing the Doc template ({}): {}", templateName, e);
       result = "ERROR:: Failed while processing the template ("+templateName+"): " + e + " \n Template: " + textTemplate + " \n Data: " + data;

@@ -38,8 +38,10 @@ public class ReceiptBuilder {
   protected JAXBContext jaxbContext = null;
   
   private ReceiptBuilder() throws JAXBException {
-    jaxbContext= JAXBContext.newInstance("org.opencastproject.composer.impl.endpoint:org.opencastproject.media.mediapackage.jaxb",
-            ReceiptBuilder.class.getClassLoader());
+    StringBuilder sb = new StringBuilder();
+    sb.append("org.opencastproject.media.mediapackage");
+    sb.append(":org.opencastproject.composer.impl.endpoint");
+    jaxbContext= JAXBContext.newInstance(sb.toString(), ReceiptBuilder.class.getClassLoader());
   }
   
   /**

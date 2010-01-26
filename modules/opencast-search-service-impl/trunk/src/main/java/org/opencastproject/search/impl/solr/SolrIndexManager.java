@@ -20,7 +20,6 @@ import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
@@ -38,7 +37,6 @@ import org.opencastproject.media.mediapackage.mpeg7.MultimediaContentType;
 import org.opencastproject.media.mediapackage.mpeg7.TextAnnotation;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.request.UpdateRequest.ACTION;
@@ -48,8 +46,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -161,7 +157,6 @@ public class SolrIndexManager {
    *           if an errors occurs while talking to solr
    */
   public boolean add(MediaPackage sourceMediaPackage) throws SolrServerException {
-    MediaPackage mp = cloneMediaPackage(sourceMediaPackage);
     // TODO: Cleanup should happen outside of this manager, it's too specialized to
     // filter on some flavor that is not part of the system knowledge
 //    try {
@@ -177,9 +172,10 @@ public class SolrIndexManager {
 //    }
     UpdateRequest solrRequest = new UpdateRequest();
     solrRequest.setAction(ACTION.COMMIT, true, true);
-    SolrUpdateableInputDocument episodeDocument = createEpisodeInputDocument(mp);
-    SolrUpdateableInputDocument seriesDocument = createSeriesInputDocument(mp);
-
+    SolrUpdateableInputDocument episodeDocument = createEpisodeInputDocument(sourceMediaPackage);
+    // FIXME: SolrUpdateableInputDocument seriesDocument = createSeriesInputDocument(sourceMediaPackage);
+    SolrUpdateableInputDocument seriesDocument = null;
+    
     // If neither an episode nor a series was contained, there is no point in trying to update
     if (episodeDocument == null && seriesDocument == null)
       return false;
@@ -205,21 +201,6 @@ public class SolrIndexManager {
     }
   }
   
-  protected MediaPackage cloneMediaPackage(MediaPackage sourceMediaPackage) {
-    try {
-      StringWriter writer = new StringWriter();
-      DOMSource domSource = new DOMSource(sourceMediaPackage.toXml());
-      StreamResult result = new StreamResult(writer);
-      TransformerFactory tf = TransformerFactory.newInstance();
-      Transformer transformer = tf.newTransformer();
-      transformer.transform(domSource, result);
-      InputStream in = IOUtils.toInputStream(writer.toString());
-      return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(in);
-    } catch(Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   /**
    * Creates a solr input document for the episode metadata of the media package.
    * 
@@ -246,6 +227,8 @@ public class SolrIndexManager {
       log_.error("Error trying to load series " + mediaPackageId, e);
     }
 
+    for(Catalog c : mediaPackage.getCatalogs()) log_.debug("Found catalog {}, flavor={}", c.getIdentifier(), c.getFlavor());
+    
     // Add dublin core
     if (!mediaPackage.hasCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE)) {
       log_.debug("No episode dublincore metadata found in media package " + mediaPackage);

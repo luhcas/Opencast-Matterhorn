@@ -109,6 +109,9 @@ public abstract class AbstractCmdlineEncoderEngine extends
     // build command
     BufferedReader in = null;
     Process encoderProcess = null;
+    if(videoSource == null && audioSource == null) {
+      throw new IllegalArgumentException("at least one (or both) of audioSource and videoSource must be specified.");
+    }
     try {
       // Set encoding parameters
       String audioInput = null;
@@ -120,13 +123,22 @@ public abstract class AbstractCmdlineEncoderEngine extends
         params.put("in.audio.extension", FilenameUtils.getExtension(audioInput));
         params.put("in.audio.filename", FilenameUtils.getName(audioInput));
       }
-      String videoInput = FilenameUtils
-                .normalize(videoSource.getAbsolutePath());
-      params.put("in.video.path", videoInput);
-      params.put("in.video.name", FilenameUtils.getBaseName(videoInput));
-      params.put("in.video.extension", FilenameUtils.getExtension(videoInput));
-      params.put("in.video.filename", FilenameUtils.getName(videoInput));
-      params.put("out.dir", videoSource.getParent());
+      if (videoSource != null) {
+        String videoInput = FilenameUtils
+                  .normalize(videoSource.getAbsolutePath());
+        params.put("in.video.path", videoInput);
+        params.put("in.video.name", FilenameUtils.getBaseName(videoInput));
+        params.put("in.video.extension", FilenameUtils.getExtension(videoInput));
+        params.put("in.video.filename", FilenameUtils.getName(videoInput));
+      }
+      File parentFile;
+      if(videoSource == null) {
+        parentFile = audioSource;
+      } else {
+        parentFile = videoSource;
+      }
+      params.put("out.dir", parentFile.getParent());
+      params.put("out.name", FilenameUtils.getBaseName(parentFile.getName()));
       params.put("out.suffix", profile.getSuffix());
 
       if(properties != null) params.putAll(properties);
@@ -165,7 +177,10 @@ public abstract class AbstractCmdlineEncoderEngine extends
       if (audioSource != null) {
         log_.info(
                 "Audio track {} and video track {} successfully encoded using profile '{}'",
-                new String[] { audioSource.getName(), videoSource.getName(), profile.getIdentifier() }
+                new String[] {
+                        (audioSource == null ? "N/A" : audioSource.getName()),
+                        (videoSource == null ? "N/A" : videoSource.getName()),
+                        profile.getIdentifier() }
         );
       } else {
         log_.info(
@@ -174,29 +189,31 @@ public abstract class AbstractCmdlineEncoderEngine extends
         );
       }
       fireEncoded(this, profile, audioSource, videoSource);
-      return new File(videoSource.getParent(), FilenameUtils
-              .getBaseName(videoInput)
-              + profile.getSuffix());
+      return new File(parentFile.getParent(), FilenameUtils.getBaseName(parentFile.getCanonicalPath()) + profile.getSuffix());
     } catch (EncoderException e) {
       if (audioSource != null) {
         log_.warn("Error while encoding audio track {} and video track {} using '{}': {}",
-                      new String[] { audioSource.getName(),
-                              videoSource.getName(), profile.getIdentifier(),
-                              e.getMessage() });
+                new String[] {
+                (audioSource == null ? "N/A" : audioSource.getName()),
+                (videoSource == null ? "N/A" : videoSource.getName()),
+                profile.getIdentifier(),
+                e.getMessage()});
       } else {
         log_.warn("Error while encoding video track {} using '{}': {}",
-                new String[] { videoSource.getName(), profile.getIdentifier(),
-                        e.getMessage() });
+                new String[] {
+                (videoSource == null ? "N/A" : videoSource.getName()),
+                profile.getIdentifier(),
+                e.getMessage()});
       }
       fireEncodingFailed(this, profile, e, audioSource, videoSource);
       throw e;
     } catch (Exception e) {
-      String msg = "Error while encoding audio " + audioSource.getName()
-              + " and video " + videoSource.getName() + " to "
-              + profile.getName() + ": " + e.getMessage();
-      log_.warn(msg);
+      log_.warn("Error while encoding audio {} and video {} to {}:{}, {}", new Object[] {
+              (audioSource == null ? "N/A" : audioSource.getName()),
+              (videoSource == null ? "N/A" : videoSource.getName()),
+              profile.getName(), e.getMessage()});
       fireEncodingFailed(this, profile, e, audioSource, videoSource);
-      throw new EncoderException(this, msg, e);
+      throw new EncoderException(this, e.getMessage(), e);
     } finally {
       IoSupport.closeQuietly(in);
       IoSupport.closeQuietly(encoderProcess);

@@ -25,7 +25,6 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.util.ZipUtil;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -39,6 +38,7 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
@@ -257,8 +257,9 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
       Dictionary<String, String> properties = new Hashtable<String, String>();
 
       // converting media package to String presentation
-      MediapackageType mpt = MediapackageType.fromXml(mp.toXml());
-      properties.put("mediaPackage", mpt.toXml());
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      mp.toXmlStream(out, false);
+      properties.put("mediaPackage", out.toString("UTF-8"));
       Event event = new Event("org/opencastproject/ingest/INGEST_DONE", properties);
 
       // waiting 3000 ms for confirmation from Conductor service

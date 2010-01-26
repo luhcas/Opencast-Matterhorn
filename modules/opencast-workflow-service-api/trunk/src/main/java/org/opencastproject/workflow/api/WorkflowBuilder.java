@@ -16,7 +16,6 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 
 import org.apache.commons.io.IOUtils;
 
@@ -43,7 +42,10 @@ public class WorkflowBuilder {
   protected JAXBContext jaxbContext = null;
   
   private WorkflowBuilder() throws JAXBException {
-    jaxbContext= JAXBContext.newInstance("org.opencastproject.media.mediapackage.jaxb:org.opencastproject.workflow.api", WorkflowBuilder.class.getClassLoader());
+    StringBuilder sb = new StringBuilder();
+    sb.append("org.opencastproject.media.mediapackage");
+    sb.append(":org.opencastproject.workflow.api");
+    jaxbContext= JAXBContext.newInstance(sb.toString(), WorkflowBuilder.class.getClassLoader());
   }
   
   /**
@@ -149,10 +151,9 @@ public class WorkflowBuilder {
   
   public WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage, Map<String, String> properties, boolean wait) {
     try {
-      MediapackageType mp = MediapackageType.fromXml(mediaPackage.toXml());
       HashMap<String, String> map = new HashMap<String, String>();
       if(properties != null) map.putAll(properties);
-      return new WorkflowOperationResultImpl(mp, map, wait);
+      return new WorkflowOperationResultImpl(mediaPackage, map, wait);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

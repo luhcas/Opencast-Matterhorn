@@ -18,6 +18,7 @@ package org.opencastproject.media.mediapackage.dublincore;
 
 import static org.opencastproject.util.Tool.cast;
 
+import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.XMLCatalogImpl;
@@ -50,6 +51,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
@@ -158,6 +160,19 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    */
   protected DublinCoreCatalogImpl() {
     this(null, null, 0, null);
+  }
+
+  /**
+   * @param cat The original catalog to use as a template
+   */
+  public DublinCoreCatalogImpl(Catalog cat) {
+    this(cat.getIdentifier(), cat.getURI(), cat.getSize(), cat.getChecksum());
+    this.setIdentifier(cat.getIdentifier());
+    this.mimeType = cat.getMimeType();
+    this.tags = new TreeSet<String>();
+    for(String t : cat.getTags()) tags.add(t);
+    this.flavor = DublinCoreCatalog.FLAVOR;
+    this.reference = cat.getReference();
   }
 
   /**
@@ -567,8 +582,8 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
 
   @SuppressWarnings("unchecked")
   @Override
-  public Object clone() throws CloneNotSupportedException {
-    DublinCoreCatalogImpl clone = (DublinCoreCatalogImpl) super.clone();
+  public Object clone() {
+    DublinCoreCatalogImpl clone = new DublinCoreCatalogImpl(this);
     if (data instanceof HashMap)
       clone.data = (Map<EName, List<CatalogEntry>>) ((HashMap) data).clone();
     else

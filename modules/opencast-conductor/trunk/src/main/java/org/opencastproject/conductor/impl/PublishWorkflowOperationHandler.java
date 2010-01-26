@@ -18,7 +18,6 @@ package org.opencastproject.conductor.impl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageReference;
-import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -52,52 +51,46 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
    */
   public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-
-    logger.debug("Running publish workflow operation");
-
-    MediaPackage mp = workflowInstance.getCurrentMediaPackage();
-    logger.info("Publishing media package {} to search index", mp);
-
-    // Check which tags have been configured
-    String tags = workflowInstance.getCurrentOperation().getConfiguration("tags");
-    if (StringUtils.trimToNull(tags) == null) {
-      logger.warn("No tags have been specified");
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, null, false);
-    }
-
-    // Look for elements matching any tag
-    Set<MediaPackageElement> keep = new HashSet<MediaPackageElement>();
-    for (String tag : tags.split("\\W")) {
-      if(StringUtils.trimToNull(tag) == null) continue;
-      keep.addAll(Arrays.asList(mp.getTracksByTag(tag)));
-      keep.addAll(Arrays.asList(mp.getAttachmentsByTag(tag)));
-      keep.addAll(Arrays.asList(mp.getCatalogs()));
-    }
-
-    // Remove what we don't want to publish (i. e. what is not tagged accordingly)
-    for(MediaPackageElement element : mp.getElements()) {
-      if( ! keep.contains(element)) {
-        mp.remove(element);
-      }
-    }
-
-    // Fix references
-    for(MediaPackageElement element : mp.getElements()) {
-      MediaPackageReference reference = element.getReference();
-      if (reference != null && mp.getElementByReference(reference) == null) {
-        element.clearReference();
-      }
-    }
-
     try {
+      MediaPackage mp = MediaPackageUtil.clone(workflowInstance.getCurrentMediaPackage());
+      logger.info("Publishing media package {} to search index", mp);
+
+      // Check which tags have been configured
+      String tags = workflowInstance.getCurrentOperation().getConfiguration("tags");
+      if (StringUtils.trimToNull(tags) == null) {
+        logger.warn("No tags have been specified");
+        return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, null, false);
+      }
+
+      // Look for elements matching any tag
+      Set<MediaPackageElement> keep = new HashSet<MediaPackageElement>();
+      for (String tag : tags.split("\\W")) {
+        if(StringUtils.trimToNull(tag) == null) continue;
+        keep.addAll(Arrays.asList(mp.getTracksByTag(tag)));
+        keep.addAll(Arrays.asList(mp.getAttachmentsByTag(tag)));
+        keep.addAll(Arrays.asList(mp.getCatalogs()));
+      }
+
+      // Remove what we don't want to publish (i. e. what is not tagged accordingly)
+      for(MediaPackageElement element : mp.getElements()) {
+        if( ! keep.contains(element)) {
+          mp.remove(element);
+        }
+      }
+
+      // Fix references
+      for(MediaPackageElement element : mp.getElements()) {
+        MediaPackageReference reference = element.getReference();
+        if (reference != null && mp.getElementByReference(reference) == null) {
+          element.clearReference();
+        }
+      }
       // adding media package to the search index
       searchService.add(mp);
-    } catch (SearchException e) {
-      throw new WorkflowOperationException(e);
+      logger.debug("Publish operation complete");
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, null, false);
+    } catch (Throwable t) {
+      throw new WorkflowOperationException(t);
     }
-
-    logger.debug("Running publish operation completed");
-
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, null, false);
   }
 }

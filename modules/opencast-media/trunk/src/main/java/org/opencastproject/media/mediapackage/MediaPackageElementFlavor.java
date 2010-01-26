@@ -24,8 +24,6 @@ import java.util.List;
  * ELement flavors describe {@link MediaPackageElement}s in a semantic way. They reveal or give at least a hint about
  * the meaning of an element.
  * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageElementFlavor.java 2905 2009-07-15 16:16:05Z ced $
  */
 public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPackageElementFlavor>, Serializable {
 
@@ -79,6 +77,8 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
     this.subtype = subtype.trim().toLowerCase();
     this.description = description;
   }
+
+  public MediaPackageElementFlavor() {}
 
   /**
    * Creates a new element type with the given type and subtype.

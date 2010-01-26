@@ -20,11 +20,8 @@ import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.impl.EncodingProfileImpl;
 import org.opencastproject.composer.impl.endpoint.Receipt.STATUS;
 import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageImpl;
 import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
-import org.opencastproject.media.mediapackage.jaxb.TrackType;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -34,7 +31,6 @@ import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Param.Type;
 
-import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +114,7 @@ public class ComposerRestService {
                   receipt.setStatus(STATUS.FAILED.toString());
                 } else {
                   receipt.setStatus(STATUS.FINISHED.toString());
-                  receipt.setTrack(TrackType.fromTrack(t));
+                  receipt.setTrack(t);
                 }
                 dao.updateReceipt(receipt);
                 entryIter.remove();
@@ -151,7 +147,7 @@ public class ComposerRestService {
   /**
    * Encodes a track in a media package.
    * 
-   * @param mediaPackageType The JAXB version of MediaPackage
+   * @param mediaPackage The MediaPackage referencing the media and metadata
    * @param audioSourceTrackId The ID of the audio source track in the media package to be encoded
    * @param videoSourceTrackId The ID of the video source track in the media package to be encoded
    * @param profileId The profile to use in encoding this track
@@ -162,19 +158,15 @@ public class ComposerRestService {
   @Path("encode")
   @Produces(MediaType.TEXT_XML)
   public Response encode(
-          @FormParam("mediapackage") MediapackageType mediaPackageType,
+          @FormParam("mediapackage") MediaPackageImpl mediaPackage,
           @FormParam("audioSourceTrackId") String audioSourceTrackId,
           @FormParam("videoSourceTrackId") String videoSourceTrackId,
           @FormParam("profileId") String profileId) throws Exception {
     // Ensure that the POST parameters are present
-    if(mediaPackageType == null || audioSourceTrackId == null || videoSourceTrackId == null || profileId == null) {
+    if(mediaPackage == null || audioSourceTrackId == null || videoSourceTrackId == null || profileId == null) {
       return Response.status(Status.BAD_REQUEST).entity("mediapackage, audioSourceTrackId, videoSourceTrackId, and profileId must not be null").build();
     }
 
-    // Build a media package from the POSTed XML
-    MediaPackage mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().
-        loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));
-    
     // Asynchronously encode the specified tracks
     Receipt receipt = dao.createReceipt();
     receipt.setStatus(STATUS.RUNNING.toString());
@@ -197,30 +189,26 @@ public class ComposerRestService {
   /**
    * Encodes a track in a media package.
    * 
-   * @param mediaPackageType The JAXB version of MediaPackage
+   * @param mediaPackage The MediaPackage referencing the media and metadata
    * @param audioSourceTrackId The ID of the audio source track in the media package to be encoded
    * @param sourceTrackId The ID of the video source track in the media package to be encoded
    * @param profileId The profile to use in encoding this track
-   * @return The JAXB version of {@link Track} {@link TrackType} 
+   * @return A {@link Response} with the resulting {@link Track} in the response body
    * @throws Exception
    */
   @POST
   @Path("image")
   @Produces(MediaType.TEXT_XML)
   public Response image(
-          @FormParam("mediapackage") MediapackageType mediaPackageType,
+          @FormParam("mediapackage") MediaPackageImpl mediaPackage,
           @FormParam("sourceTrackId") String sourceTrackId,
           @FormParam("profileId") String profileId,
           @FormParam("time") long time) throws Exception {
     // Ensure that the POST parameters are present
-    if(mediaPackageType == null || sourceTrackId == null || profileId == null) {
+    if(mediaPackage == null || sourceTrackId == null || profileId == null) {
       return Response.status(Status.BAD_REQUEST).entity("mediapackage, sourceTrackId, and profileId must not be null").build();
     }
 
-    // Build a media package from the POSTed XML
-    MediaPackage mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().
-        loadFromManifest(IOUtils.toInputStream(mediaPackageType.toXml()));
-    
     // Asynchronously encode the specified tracks
     Receipt receipt = dao.createReceipt();
     receipt.setStatus(STATUS.RUNNING.toString());
@@ -323,7 +311,7 @@ public class ComposerRestService {
   }
   
   protected String generateMediaPackage() {
-    return "<mediapackage start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n" +
+    return "<ns2:mediapackage xmlns:ns2=\"http://mediapackage.opencastproject.org\" start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n" +
     "  <media>\n" +
     "    <track id=\"track-1\" type=\"presentation/source\">\n" +
     "      <mimetype>audio/mp3</mimetype>\n" +
@@ -352,6 +340,6 @@ public class ComposerRestService {
     "      </video>\n" +
     "    </track>\n" +
     "  </media>\n" +
-    "</mediapackage>";
+    "</ns2:mediapackage>";
   }
 }

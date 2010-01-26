@@ -17,8 +17,7 @@ package org.opencastproject.distribution.local.endpoint;
 
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
+import org.opencastproject.media.mediapackage.MediaPackageImpl;
 import org.opencastproject.util.UrlSupport;
 
 import org.apache.commons.io.IOUtils;
@@ -59,18 +58,16 @@ public class DistributionRestService {
   @POST
   @Path("")
   @Produces(MediaType.TEXT_XML)
-  public Response distribute(@FormParam("mediapackage") MediapackageType mediaPackage, @FormParam("elementId") List<String> elementIds) throws Exception {
+  public Response distribute(@FormParam("mediapackage") MediaPackageImpl mediaPackage, @FormParam("elementId") List<String> elementIds) throws Exception {
     MediaPackage result = null;
     String[] elements = elementIds == null ? new String[0] : elementIds.toArray(new String[elementIds.size()]);
     try {
-      result = service.distribute(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(
-              IOUtils.toInputStream(mediaPackage.toXml())), elements);
+      result = service.distribute(mediaPackage, elements);
     } catch (Exception e) {
       e.printStackTrace();
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
-    MediapackageType jaxbResult = MediapackageType.fromXml(result.toXml());
-    return Response.ok(jaxbResult).build();
+    return Response.ok(result).build();
   }
   
   @GET

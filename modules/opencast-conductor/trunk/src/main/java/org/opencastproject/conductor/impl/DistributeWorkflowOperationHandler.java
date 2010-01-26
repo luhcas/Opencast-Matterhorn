@@ -16,6 +16,7 @@
 package org.opencastproject.conductor.impl;
 
 import org.opencastproject.distribution.api.DistributionService;
+import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -71,6 +72,9 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
         return WorkflowBuilder.getInstance().buildWorkflowOperationResult(currentMediaPackage, null, false);
       }
 
+      // Send a mediapackage clone to the distribution service so we don't manipulate mediapackages associated with previous workflow operations
+      MediaPackage clone = MediaPackageUtil.clone(currentMediaPackage);
+      
       // Look for elements matching any tag
       Set<String> elementIds = new HashSet<String>();
       for (String tag : tags.split("\\W")) {
@@ -81,15 +85,15 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
           logger.info("Distributing '{}' of {} to the local repository", e.getIdentifier(), currentMediaPackage);
         }
       }
-
-      resultingMediaPackage = distributionService.distribute(currentMediaPackage, elementIds
-              .toArray(new String[elementIds.size()]));
-
+      // FIXME: We currently distribute all catalogs, regardless of tags, since there is no opportunity to tag catalogs
+      for(Catalog c : clone.getCatalogs()) elementIds.add(c.getIdentifier());
+      
+      resultingMediaPackage = distributionService.distribute(clone, elementIds.toArray(new String[elementIds.size()]));
       logger.debug("Distribute operation completed");
     } catch (RuntimeException e) {
+      e.printStackTrace();
       throw new WorkflowOperationException(e);
     }
-
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, null, false);
   }
 

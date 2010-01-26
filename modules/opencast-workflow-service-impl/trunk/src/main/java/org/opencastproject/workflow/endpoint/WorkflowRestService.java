@@ -19,9 +19,8 @@ import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageImpl;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -53,7 +52,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -182,9 +180,9 @@ public class WorkflowRestService {
   protected String generateMediaPackage() {
     String samplesUrl = serverUrl + "/workflow/samples";
     
-    return "<mediapackage start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n" +
+    return "<ns2:mediapackage xmlns:ns2=\"http://mediapackage.opencastproject.org\" start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n" +
     "  <media>\n" +
-    "    <track id=\"track-1\" type=\"presentation/source\">\n" +
+    "    <track id=\"track-1\" type=\"presenter/source\">\n" +
     "      <mimetype>audio/mp3</mimetype>\n" +
     "      <url>" + samplesUrl + "/audio.mp3</url>\n" +
     "      <checksum type=\"md5\">950f9fa49caa8f1c5bbc36892f6fd062</checksum>\n" +
@@ -196,7 +194,7 @@ public class WorkflowRestService {
     "        <samplingrate>44100</samplingrate>\n" +
     "      </audio>\n" +
     "    </track>\n" +
-    "    <track id=\"track-2\" type=\"presentation/source\">\n" +
+    "    <track id=\"track-2\" type=\"presenter/source\">\n" +
     "      <mimetype>video/quicktime</mimetype>\n" +
     "      <url>" + samplesUrl + "/camera.mpg</url>\n" +
     "      <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n" +
@@ -218,7 +216,7 @@ public class WorkflowRestService {
     "      <checksum type=\"md5\">20e466615251074e127a1627fd0dae3e</checksum>\n" +
     "    </catalog>\n" +
     "  </metadata>\n" +
-    "</mediapackage>";
+    "</ns2:mediapackage>";
   }
   
   protected String generateWorkflowDefinition() {
@@ -328,19 +326,11 @@ public class WorkflowRestService {
   @Produces(MediaType.TEXT_XML)
   public WorkflowInstanceImpl start(
           @FormParam("definition") WorkflowDefinitionImpl workflowDefinition,
-          @FormParam("mediapackage") MediapackageType mediaPackage,
+          @FormParam("mediapackage") MediaPackageImpl mp,
           @FormParam("properties") LocalHashMap localMap) {
     Map<String, String> properties = localMap.getMap();
-    try {
-      InputStream in = IOUtils.toInputStream(mediaPackage.toXml());
-      MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(in);
-      WorkflowInstance instance = service.start(workflowDefinition, mp, properties);
-      return (WorkflowInstanceImpl)instance;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return (WorkflowInstanceImpl)service.start(workflowDefinition, mp, properties);
   }
-
   // FIXME Using GET for testing purposes only.
   
   @GET
@@ -373,8 +363,14 @@ public class WorkflowRestService {
 
   @SuppressWarnings("unchecked")
   protected JSONObject getWorkflowInstanceAsJson(WorkflowInstance workflow, boolean includeDublinCoreFields) throws Exception {
-    String mediaPackageTitle = getDublinCoreProperty(getDublinCore(workflow.getSourceMediaPackage()),
-            DublinCoreCatalog.PROPERTY_TITLE);
+    MediaPackage mp = workflow.getCurrentMediaPackage();
+    DublinCoreCatalog dc = getDublinCore(mp);
+    String mediaPackageTitle = null;
+    if(dc == null) {
+      mediaPackageTitle = mp.getIdentifier() + "(unknown)";
+    } else {
+      mediaPackageTitle = getDublinCoreProperty(dc, DublinCoreCatalog.PROPERTY_TITLE);
+    }
 
     JSONObject jsInstance = new JSONObject();
     jsInstance.put("workflow_id", workflow.getId());
@@ -388,8 +384,7 @@ public class WorkflowRestService {
     jsInstance.put("configuration", getConfigsAsJson(configs));
     WorkflowOperationInstanceList operations = workflow.getWorkflowOperationInstanceList();
     jsInstance.put("operations", getOperationsAsJson(operations));
-    if(includeDublinCoreFields) {
-      DublinCoreCatalog dc = getDublinCore(workflow.getCurrentMediaPackage());
+    if(includeDublinCoreFields && dc != null) {
       List<EName> props = new ArrayList<EName>(dc.getProperties());
       for(int i=0; i<props.size(); i++) {
         jsInstance.put("mediapackage_" + props.get(i).getLocalName().toLowerCase(), dc.getFirst(props.get(i)));

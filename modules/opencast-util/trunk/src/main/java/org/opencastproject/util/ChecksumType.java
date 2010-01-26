@@ -22,12 +22,16 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
+
 /**
  * Checksum type represents the method used to generate a checksum.
  *
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: ChecksumType.java 678 2008-08-05 14:56:22Z wunden $
  */
+@XmlType(name="checksumtype", namespace="http://mediapackage.opencastproject.org")
 public final class ChecksumType implements Serializable {
 
   /** Serial version uid */
@@ -40,7 +44,11 @@ public final class ChecksumType implements Serializable {
   public static final ChecksumType DEFAULT_TYPE = new ChecksumType("md5");
 
   /** The type name */
+  @XmlValue
   protected String type = null;
+
+  /** Needed by JAXB */
+  public ChecksumType() {}
 
   /**
    * Creates a new checksum type with the given type name.

@@ -23,7 +23,9 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.media.mediapackage.selector.AudioElementSelector;
 import org.opencastproject.media.mediapackage.selector.AudioVisualElementSelector;
+import org.opencastproject.media.mediapackage.selector.VideoElementSelector;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -67,7 +69,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
    */
   public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    logger.debug("Running compose workflow operation on {}", workflowInstance);
+    logger.debug("Running compose workflow operation on workflow {}", workflowInstance.getId());
 
     // Encode the media package
     MediaPackage resultingMediaPackage = null;
@@ -85,7 +87,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
   /**
    * Encode tracks from MediaPackage using profiles stored in properties and updates current MediaPackage.
    * 
-   * @param mediaPackage
+   * @param src The source media package
    * @param properties
    * @return
    * @throws EncoderException
@@ -94,9 +96,9 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
    * @throws ExecutionException
    * @throws InterruptedException
    */
-  private MediaPackage encode(MediaPackage mediaPackage, WorkflowOperationInstance operation) throws EncoderException,
+  private MediaPackage encode(MediaPackage src, WorkflowOperationInstance operation) throws EncoderException,
           MediaPackageException, UnsupportedElementException, InterruptedException, ExecutionException {
-
+    MediaPackage mediaPackage = MediaPackageUtil.clone(src);
     // Read the configuration properties
     String sourceVideoFlavor = StringUtils.trimToNull(operation.getConfiguration("source-video-flavor"));
     String sourceAudioFlavor = StringUtils.trimToNull(operation.getConfiguration("source-audio-flavor"));
@@ -105,10 +107,23 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     String encodingProfile = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
 
     // Select the tracks based on the flavors
-    AudioVisualElementSelector avselector = new AudioVisualElementSelector();
-    avselector.setVideoFlavor(sourceVideoFlavor);
-    avselector.setAudioFlavor(sourceAudioFlavor);
-    Collection<Track> tracks = avselector.select(mediaPackage);
+    
+    Collection<Track> tracks = null;
+    if (sourceAudioFlavor != null && sourceVideoFlavor != null) {
+      AudioVisualElementSelector avselector = new AudioVisualElementSelector();
+      avselector.setVideoFlavor(sourceVideoFlavor);
+      avselector.setAudioFlavor(sourceAudioFlavor);
+      tracks = avselector.select(mediaPackage);
+    } else if (sourceAudioFlavor != null) {
+      AudioElementSelector aselector = new AudioElementSelector();
+      aselector.setAudioFlavor(sourceAudioFlavor);
+      tracks = aselector.select(mediaPackage);
+    } else if(sourceVideoFlavor != null) {
+      VideoElementSelector vselector = new VideoElementSelector();
+      vselector.setVideoFlavor(sourceVideoFlavor);
+    } else {
+      throw new IllegalStateException("either source audio flavor or source video flavor or both must be specified");
+    }
     
     String videoSourceTrackId = null;
     String audioSourceTrackId = null;
@@ -120,7 +135,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
       for (Track t : tracks) {
         if (t.hasVideo()) {
           videoSourceTrackId = t.getIdentifier();
-        } else if (t.hasAudio() && !t.hasVideo()) {
+        } else if (t.hasAudio()) {
           audioSourceTrackId = t.getIdentifier();
         }
       }

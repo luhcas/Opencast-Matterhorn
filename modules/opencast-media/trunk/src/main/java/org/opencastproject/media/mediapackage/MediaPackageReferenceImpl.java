@@ -16,6 +16,8 @@
 
 package org.opencastproject.media.mediapackage;
 
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
 /**
  * Default implementation for a {@link MediaPackageReference}.
  */
@@ -139,7 +141,7 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
    */
   public boolean matches(MediaPackageReference reference) {
     if (reference == null)
-      throw new IllegalArgumentException("Argument reference must not be null");
+      return false;
     if (!type.equals(reference.getType()))
       return false;
     if (identifier.equals(reference.getIdentifier()))
@@ -189,4 +191,16 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
     return externalForm;
   }
 
+  public static class Adapter extends XmlAdapter<String, MediaPackageReference> {
+    @Override
+    public String marshal(MediaPackageReference ref) throws Exception {
+      if(ref == null) return null;
+      return ref.toString();
+    }
+    @Override
+    public MediaPackageReference unmarshal(String ref) throws Exception {
+      if(ref == null) return null;
+      return MediaPackageReferenceImpl.fromString(ref);
+    }
+  }
 }

@@ -23,11 +23,8 @@ import java.net.URI;
 
 /**
  * All classes that will be part of a media package must implement this interface.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageElement.java 2905 2009-07-15 16:16:05Z ced $
  */
-public interface MediaPackageElement extends ManifestContributor, Comparable<MediaPackageElement> {
+public interface MediaPackageElement extends ManifestContributor, Comparable<MediaPackageElement>, Cloneable {
 
   /**
    * The element type todo is the type definitly needed or can the flavor take its resposibilities?
@@ -238,4 +235,9 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
    */
   void clearReference();
 
+  /**
+   * Create a deep copy of this object.
+   * @return The copy
+   */
+  public Object clone();
 }

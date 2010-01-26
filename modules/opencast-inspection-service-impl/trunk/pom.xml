@@ -83,8 +83,7 @@
             <Export-Package> org.opencastproject.inspection.impl.* </Export-Package>
             <Service-Component>
               OSGI-INF/inspection-service.xml,
-              OSGI-INF/inspection-service-rest.xml,
-              OSGI-INF/inspection-service-soap.xml
+              OSGI-INF/inspection-service-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

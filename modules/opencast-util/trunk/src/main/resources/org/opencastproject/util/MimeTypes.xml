@@ -190,11 +190,6 @@
     <Extensions>wav,bwf</Extensions>
   </MimeType>
   <MimeType>
-    <Type>video/x-msvideo</Type>
-    <Description>Video For Windows (AVI)</Description>
-    <Extensions>avi,vfw</Extensions>
-  </MimeType>
-  <MimeType>
     <Type>audio/x-caf</Type>
     <Description>CAF audio</Description>
     <Extensions>caf</Extensions>
@@ -383,5 +378,10 @@
     <Type>application/java-archive</Type>
     <Description>Java archive</Description>
     <Extensions>jar</Extensions>
+  </MimeType>
+  <MimeType>
+    <Type>video/x-flv</Type>
+    <Description>Flash video</Description>
+    <Extensions>flv</Extensions>
   </MimeType>
 </MimeTypes>

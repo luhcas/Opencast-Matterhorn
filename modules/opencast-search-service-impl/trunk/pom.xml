@@ -159,6 +159,7 @@
             <Bundle-Activator> org.opencastproject.search.impl.Activator </Bundle-Activator>
             <Import-Package>
               org.opencastproject.search.api,
+              org.opencastproject.media.mediapackage.*,
               *;resolution:=optional
             </Import-Package>
             <Private-Package>

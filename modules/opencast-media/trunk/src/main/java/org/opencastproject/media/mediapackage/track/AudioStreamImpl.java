@@ -25,30 +25,55 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import java.util.UUID;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathException;
 
 /**
- * Implementation of {@link org.opencastproject.media.mediapackage.AudioStream}. This implementation shall be hidden.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
+ * Implementation of {@link org.opencastproject.media.mediapackage.AudioStream}.
  */
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlType(name="audio", namespace="http://mediapackage.opencastproject.org")
 public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
 
-  private Integer resolution;
-  private Integer channels;
-  private Integer samplingRate;
-  private Float bitRate;
-  private String captureDevice;
-  private String captureDeviceVersion;
-  private String captureDeviceVendor;
-  private String format;
-  private String formatVersion;
-  private String encoderLibraryVendor;
+  @XmlElement(name="bitdepth")
+  protected Integer bitdepth;
+
+  @XmlElement(name="channels")
+  protected Integer channels;
+  
+  @XmlElement(name="samplingrate")
+  protected Integer samplingrate;
+
+  @XmlElement(name="bitrate")
+  protected Float bitrate;
+
+  public AudioStreamImpl() {
+    this(UUID.randomUUID().toString());
+  }
 
   public AudioStreamImpl(String identifier) {
     super(identifier);
+  }
+
+  /**
+   * Construct an audio stream from another audio stream
+   * @param s
+   */
+  public AudioStreamImpl(AudioStreamImpl s) {
+    this.bitdepth = s.bitdepth;
+    this.bitrate = s.bitrate;
+    this.channels = s.channels;
+    this.device = s.device;
+    this.encoder = s.encoder;
+    this.identifier = s.identifier;
+    this.samplingrate = s.samplingrate;
   }
 
   /**
@@ -63,16 +88,16 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
     // Device
     Element deviceNode = document.createElement("device");
     boolean hasAttr = false;
-    if (captureDevice != null) {
-      deviceNode.setAttribute("type", captureDevice);
+    if (device.type != null) {
+      deviceNode.setAttribute("type", device.type);
       hasAttr = true;
     }
-    if (captureDeviceVersion != null) {
-      deviceNode.setAttribute("version", captureDeviceVersion);
+    if (device.version != null) {
+      deviceNode.setAttribute("version", device.version);
       hasAttr = true;
     }
-    if (captureDeviceVendor != null) {
-      deviceNode.setAttribute("vendor", captureDeviceVendor);
+    if (device.vendor != null) {
+      deviceNode.setAttribute("vendor", device.vendor);
       hasAttr = true;
     }
     if (hasAttr)
@@ -81,16 +106,16 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
     // Encoder
     Element encoderNode = document.createElement("encoder");
     hasAttr = false;
-    if (format != null) {
-      encoderNode.setAttribute("type", format);
+    if (encoder.type != null) {
+      encoderNode.setAttribute("type", encoder.type);
       hasAttr = true;
     }
-    if (formatVersion != null) {
-      encoderNode.setAttribute("version", formatVersion);
+    if (encoder.version != null) {
+      encoderNode.setAttribute("version", encoder.version);
       hasAttr = true;
     }
-    if (encoderLibraryVendor != null) {
-      encoderNode.setAttribute("vendor", encoderLibraryVendor);
+    if (encoder.vendor != null) {
+      encoderNode.setAttribute("vendor", encoder.vendor);
       hasAttr = true;
     }
     if (hasAttr)
@@ -104,23 +129,23 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
     }
 
     // Bit depth
-    if (resolution != null) {
+    if (bitdepth != null) {
       Element bitdepthNode = document.createElement("bitdepth");
-      bitdepthNode.appendChild(document.createTextNode(resolution.toString()));
+      bitdepthNode.appendChild(document.createTextNode(bitdepth.toString()));
       node.appendChild(bitdepthNode);
     }
 
     // Bit rate
-    if (bitRate != null) {
+    if (bitrate != null) {
       Element bitratenode = document.createElement("bitrate");
-      bitratenode.appendChild(document.createTextNode(bitRate.toString()));
+      bitratenode.appendChild(document.createTextNode(bitrate.toString()));
       node.appendChild(bitratenode);
     }
 
     // Sampling rate
-    if (samplingRate != null) {
+    if (samplingrate != null) {
       Element samplingrateNode = document.createElement("samplingrate");
-      samplingrateNode.appendChild(document.createTextNode(samplingRate.toString()));
+      samplingrateNode.appendChild(document.createTextNode(samplingrate.toString()));
       node.appendChild(samplingrateNode);
     }
 
@@ -146,7 +171,7 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
     try {
       String bd = (String) xpath.evaluate("bitdepth/text()", node, XPathConstants.STRING);
       if (!StringUtils.isBlank(bd))
-        as.resolution = new Integer(bd.trim());
+        as.bitdepth = new Integer(bd.trim());
     } catch (NumberFormatException e) {
       throw new IllegalStateException("Bit depth was malformatted: " + e.getMessage());
     }
@@ -164,7 +189,7 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
     try {
       String sr = (String) xpath.evaluate("framerate/text()", node, XPathConstants.STRING);
       if (!StringUtils.isBlank(sr))
-        as.samplingRate = new Integer(sr.trim());
+        as.samplingrate = new Integer(sr.trim());
     } catch (NumberFormatException e) {
       throw new IllegalStateException("Frame rate was malformatted: " + e.getMessage());
     }
@@ -173,7 +198,7 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
     try {
       String br = (String) xpath.evaluate("bitrate/text()", node, XPathConstants.STRING);
       if (!StringUtils.isBlank(br))
-        as.bitRate = new Float(br.trim());
+        as.bitrate = new Float(br.trim());
     } catch (NumberFormatException e) {
       throw new IllegalStateException("Bit rate was malformatted: " + e.getMessage());
     }
@@ -181,30 +206,30 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
     // device
     String captureDevice = (String) xpath.evaluate("device/@type", node, XPathConstants.STRING);
     if (!StringUtils.isBlank(captureDevice))
-      as.captureDevice = captureDevice;
+      as.device.type = captureDevice;
     String captureDeviceVersion = (String) xpath.evaluate("device/@version", node, XPathConstants.STRING);
     if (!StringUtils.isBlank(captureDeviceVersion))
-      as.captureDeviceVersion = captureDeviceVersion;
+      as.device.version = captureDeviceVersion;
     String captureDeviceVendor = (String) xpath.evaluate("device/@vendor", node, XPathConstants.STRING);
     if (!StringUtils.isBlank(captureDeviceVendor))
-      as.captureDeviceVendor = captureDeviceVendor;
+      as.device.vendor = captureDeviceVendor;
 
     // encoder
     String format = (String) xpath.evaluate("encoder/@type", node, XPathConstants.STRING);
     if (!StringUtils.isBlank(format))
-      as.format = format;
+      as.encoder.type = format;
     String formatVersion = (String) xpath.evaluate("encoder/@version", node, XPathConstants.STRING);
     if (!StringUtils.isBlank(formatVersion))
-      as.formatVersion = formatVersion;
+      as.encoder.version = formatVersion;
     String encoderLibraryVendor = (String) xpath.evaluate("encoder/@vendor", node, XPathConstants.STRING);
     if (!StringUtils.isBlank(encoderLibraryVendor))
-      as.encoderLibraryVendor = encoderLibraryVendor;
+      as.encoder.vendor = encoderLibraryVendor;
 
     return as;
   }
 
-  public Integer getResolution() {
-    return resolution;
+  public Integer getBitDepth() {
+    return bitdepth;
   }
 
   public Integer getChannels() {
@@ -212,41 +237,17 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
   }
 
   public Integer getSamplingRate() {
-    return samplingRate;
+    return samplingrate;
   }
 
   public Float getBitRate() {
-    return bitRate;
-  }
-
-  public String getCaptureDevice() {
-    return captureDevice;
-  }
-
-  public String getCaptureDeviceVersion() {
-    return captureDeviceVersion;
-  }
-
-  public String getCaptureDeviceVendor() {
-    return captureDeviceVendor;
-  }
-
-  public String getFormat() {
-    return format;
-  }
-
-  public String getFormatVersion() {
-    return formatVersion;
-  }
-
-  public String getEncoderLibraryVendor() {
-    return encoderLibraryVendor;
+    return bitrate;
   }
 
   // Setter
 
-  public void setResolution(Integer resolution) {
-    this.resolution = resolution;
+  public void setBitDepth(Integer bitdepth) {
+    this.bitdepth = bitdepth;
   }
 
   public void setChannels(Integer channels) {
@@ -254,35 +255,35 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
   }
 
   public void setSamplingRate(Integer samplingRate) {
-    this.samplingRate = samplingRate;
+    this.samplingrate = samplingRate;
   }
 
   public void setBitRate(Float bitRate) {
-    this.bitRate = bitRate;
+    this.bitrate = bitRate;
   }
 
   public void setCaptureDevice(String captureDevice) {
-    this.captureDevice = captureDevice;
+    this.device.type = captureDevice;
   }
 
   public void setCaptureDeviceVersion(String captureDeviceVersion) {
-    this.captureDeviceVersion = captureDeviceVersion;
+    this.device.version = captureDeviceVersion;
   }
 
   public void setCaptureDeviceVendor(String captureDeviceVendor) {
-    this.captureDeviceVendor = captureDeviceVendor;
+    this.device.vendor = captureDeviceVendor;
   }
 
   public void setFormat(String format) {
-    this.format = format;
+    this.encoder.type = format;
   }
 
   public void setFormatVersion(String formatVersion) {
-    this.formatVersion = formatVersion;
+    this.encoder.version = formatVersion;
   }
 
   public void setEncoderLibraryVendor(String encoderLibraryVendor) {
-    this.encoderLibraryVendor = encoderLibraryVendor;
+    this.encoder.vendor = encoderLibraryVendor;
   }
 
 }

@@ -18,12 +18,15 @@ package org.opencastproject.media.mediapackage;
 
 import org.opencastproject.media.mediapackage.track.ScanOrder;
 import org.opencastproject.media.mediapackage.track.ScanType;
+import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * A stream containing video data.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
+@XmlJavaTypeAdapter(VideoStream.Adapter.class)
 public interface VideoStream extends Stream {
 
   Float getBitRate();
@@ -49,4 +52,10 @@ public interface VideoStream extends Stream {
   String getFormatVersion();
 
   String getEncoderLibraryVendor();
+  public static class Adapter extends XmlAdapter<VideoStreamImpl, Stream> {
+    @Override
+    public VideoStreamImpl marshal(Stream v) throws Exception {return (VideoStreamImpl)v;}
+    @Override
+    public Stream unmarshal(VideoStreamImpl v) throws Exception {return v;}
+  }
 }

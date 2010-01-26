@@ -96,7 +96,7 @@ public class IngestServiceImplTest {
   @Test
   public void testThinClient() throws Exception {
     mediaPackage = service.createMediaPackage();
-    service.addTrack(urlTrack, MediaPackageElements.INDEFINITE_TRACK, mediaPackage);
+    service.addTrack(urlTrack, null, mediaPackage);
     service.addCatalog(urlCatalog, Mpeg7Catalog.FLAVOR, mediaPackage);
     service.addAttachment(urlAttachment, MediaPackageElements.COVER_FLAVOR, mediaPackage);
     service.ingest(mediaPackage);

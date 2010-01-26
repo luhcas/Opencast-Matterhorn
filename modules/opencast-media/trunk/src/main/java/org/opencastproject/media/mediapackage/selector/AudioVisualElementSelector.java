@@ -22,6 +22,7 @@ import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.TrackSupport;
 import org.opencastproject.media.mediapackage.VideoStream;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -112,9 +113,9 @@ public class AudioVisualElementSelector extends
   public void setVideoFlavor(String flavor) {
     if (flavor == null) {
       videoFlavor = null;
-      return;
+    } else {
+      setVideoFlavor(MediaPackageElementFlavor.parseFlavor(flavor));
     }
-    setVideoFlavor(MediaPackageElementFlavor.parseFlavor(flavor));
   }
 
   /**
@@ -148,7 +149,9 @@ public class AudioVisualElementSelector extends
    */
   @Override
   public Collection<Track> select(MediaPackage mediaPackage) {
-    Collection<Track> candidates = super.select(mediaPackage);
+    // instead of relying on the broken superclass, we'll inspect every track
+    //  Collection<Track> candidates = super.select(mediaPackage);
+    Collection<Track> candidates = Arrays.asList(mediaPackage.getTracks());
     Set<Track> result = new HashSet<Track>();
 
     boolean foundAudio = false;
@@ -170,6 +173,9 @@ public class AudioVisualElementSelector extends
         }
       }
     }
+    
+    if (!foundAudio || !foundVideo)
+      result.clear();
 
     // We were lucky, a combination was found!
     return result;

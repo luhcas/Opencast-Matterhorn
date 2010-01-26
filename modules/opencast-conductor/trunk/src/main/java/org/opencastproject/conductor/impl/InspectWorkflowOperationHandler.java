@@ -57,7 +57,7 @@ public class InspectWorkflowOperationHandler implements
   @Override
   public WorkflowOperationResult run(WorkflowInstance workflowInstance)
           throws WorkflowOperationException {
-    MediaPackage mediaPackage = workflowInstance.getCurrentMediaPackage();
+    MediaPackage mediaPackage = MediaPackageUtil.clone(workflowInstance.getCurrentMediaPackage());
     for (Track track : mediaPackage.getTracks()) {
       logger.info("Inspecting track '{}' of {}", track.getIdentifier(), mediaPackage);
       Track inspectedTrack = inspectionService.enrich(track, false);

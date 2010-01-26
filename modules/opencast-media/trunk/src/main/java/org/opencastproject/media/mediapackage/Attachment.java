@@ -16,12 +16,17 @@
 
 package org.opencastproject.media.mediapackage;
 
+import org.opencastproject.media.mediapackage.attachment.AttachmentImpl;
+
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * This interface describes methods and fields for attachments as part of a media package.
  * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: Attachment.java 2905 2009-07-15 16:16:05Z ced $
  */
+@XmlJavaTypeAdapter(AttachmentImpl.Adapter.class)
 public interface Attachment extends MediaPackageElement {
 
   /** Media package element type */

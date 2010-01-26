@@ -24,13 +24,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * Interface for a media package, which is a data container moving through the system, containing metadata, tracks and
  * attachments.
  * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackage.java 2908 2009-07-17 16:51:07Z ced $
  */
+@XmlJavaTypeAdapter(MediaPackageImpl.Adapter.class)
 public interface MediaPackage {
 
   /**
@@ -596,6 +597,15 @@ public interface MediaPackage {
    */
   Document toXml() throws MediaPackageException;
 
+  /**
+   * Writes an xml representation of this MediaPackage to a stream.
+   * 
+   * @param out The output stream
+   * @param format Whether to format the output for readability, or not (false gives better performance)
+   * @return
+   */
+  void toXmlStream(OutputStream out, boolean format);
+  
   /**
    * Saves the media package, utilizing the serializer when it comes to creating paths from urls.
    * 

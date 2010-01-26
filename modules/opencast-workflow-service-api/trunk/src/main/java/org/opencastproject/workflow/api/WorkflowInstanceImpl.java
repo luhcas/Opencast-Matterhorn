@@ -16,10 +16,7 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,16 +63,12 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @XmlElement(name="description")
   private String description;
 
-  //@XmlElement(name="configuration")
-  //@XmlElementWrapper(name="configurations")
-  //protected Set<WorkflowConfiguration> configurations;
-
   @XmlElement(name="scope")
   @XmlElementWrapper(name="configurations")
   protected Set<WorkflowOperationConfigurations> configurations;
   
   @XmlElement(name="mediapackage")
-  private MediapackageType sourceMediaPackageType;
+  private MediaPackage sourceMediaPackage;
   
   @XmlElement(name="operation-definitions")
   private WorkflowOperationDefinitionList workflowOperationDefinitionList;
@@ -114,24 +107,11 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     this.state = state;
   }
 
-  public MediapackageType getSourceMediaPackageType() {
-    return sourceMediaPackageType;
-  }
-  public void setSourceMediaPackageType(MediapackageType sourceMediaPackageType) {
-    this.sourceMediaPackageType = sourceMediaPackageType;
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#getSourceMediaPackage()
-   */
   public MediaPackage getSourceMediaPackage() {
-    if(sourceMediaPackageType == null) return null;
-    try {
-      return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(IOUtils.toInputStream(sourceMediaPackageType.toXml()));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return sourceMediaPackage;
+  }
+  public void setSourceMediaPackage(MediaPackage sourceMediaPackage) {
+    this.sourceMediaPackage = sourceMediaPackage;
   }
 
   /**
@@ -268,9 +248,11 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * @see org.opencastproject.workflow.api.WorkflowInstance#getConfigurations()
    */
   public Set<WorkflowConfiguration> getConfigurations() {
-    for(WorkflowOperationConfigurations confs : configurations){
-      if(confs.getName().equals("global")){
-        return confs.getConfigurations();
+    if(configurations != null && configurations.size() > 0) {
+      for(WorkflowOperationConfigurations confs : configurations){
+        if("global".equals(confs.getName()) && confs.getConfigurations() != null){
+          return confs.getConfigurations();
+        }
       }
     }
     return new HashSet<WorkflowConfiguration>();

@@ -91,12 +91,17 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package>
               org.opencastproject.feed.impl,
+              org.opencastproject.media.mediapackage,
+              org.opencastproject.media.mediapackage.attachment,
+              org.opencastproject.media.mediapackage.dublincore,
+              org.opencastproject.media.mediapackage.identifier,
+              org.opencastproject.media.mediapackage.mpeg7,
+              org.opencastproject.media.mediapackage.track,
               *
             </Import-Package>
             <Export-Package>org.opencastproject.conductor.*</Export-Package>
             <Service-Component>
               OSGI-INF/conductor-service.xml,
-              OSGI-INF/conductor-service-rest.xml,
               OSGI-INF/workflow-definition-scanner.xml,
               OSGI-INF/operations/compose.xml,
               OSGI-INF/operations/image.xml,

@@ -28,17 +28,27 @@ import org.w3c.dom.Node;
 
 import java.net.URI;
 
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
 /**
  * Basic implementation of an attachment.
- * 
- * @author Tobias wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: AttachmentImpl.java 2226 2009-02-09 13:06:20Z wunden $
  */
+@XmlType(name="attachment", namespace="http://mediapackage.opencastproject.org")
+@XmlRootElement(name="attachment", namespace="http://mediapackage.opencastproject.org")
 public class AttachmentImpl extends AbstractMediaPackageElement implements Attachment {
 
   /** Serial version UID */
   private static final long serialVersionUID = 6626531251856698138L;
 
+  /**
+   * Needed by JAXB
+   */
+  public AttachmentImpl() {
+    super(Type.Attachment, null, null);
+  }
+  
   /**
    * Creates an attachment.
    * 
@@ -141,4 +151,8 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
     return buf.toString();
   }
 
+  public static class Adapter extends XmlAdapter<AttachmentImpl, Attachment> {
+    public AttachmentImpl marshal(Attachment mp) throws Exception {return (AttachmentImpl)mp;}
+    public Attachment unmarshal(AttachmentImpl mp) throws Exception {return mp;}
+  }
 }

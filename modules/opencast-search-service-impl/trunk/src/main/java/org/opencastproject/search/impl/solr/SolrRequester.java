@@ -19,7 +19,6 @@ package org.opencastproject.search.impl.solr;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
@@ -308,7 +307,6 @@ public class SolrRequester {
           mediaPackage = builder
                   .loadFromManifest(new ByteArrayInputStream(mediaPackageFieldValue.toString().getBytes()));
           item.setMediaPackage(mediaPackage);
-          item.setMediaPackageJaxb(MediapackageType.valueOf(mediaPackageFieldValue.toString()));
         } catch (Exception e) {
           log_.warn("Unable to read media package from search result", e);
         }

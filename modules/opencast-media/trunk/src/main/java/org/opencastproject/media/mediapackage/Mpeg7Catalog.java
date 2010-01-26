@@ -22,15 +22,14 @@ import org.w3c.dom.Document;
 
 import java.io.IOException;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 /**
  * The <code>MPEG7</code> catalog encapsulates MPEG-7 metadata.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: Mpeg7Catalog.java 2905 2009-07-15 16:16:05Z ced $
  */
+@XmlJavaTypeAdapter(XMLCatalogImpl.Adapter.class)
 public interface Mpeg7Catalog extends XMLCatalog, Mpeg7 {
 
   /** Element type definition */

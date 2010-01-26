@@ -15,10 +15,8 @@
  */
 package org.opencastproject.search.endpoint;
 
-import org.opencastproject.media.mediapackage.MediaPackageBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.jaxb.MediapackageType;
+import org.opencastproject.media.mediapackage.MediaPackageImpl;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.SearchQueryImpl;
@@ -31,7 +29,6 @@ import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Param.Type;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +99,7 @@ public class SearchRestService {
   }
 
   protected String generateMediaPackage() {
-    return "<mediapackage start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n" +
+    return "<ns2:mediapackage xmlns:ns2=\"http://mediapackage.opencastproject.org\" start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n" +
     "  <metadata>\n" +
     "    <catalog id=\"catalog-1\" type=\"metadata/dublincore\">\n" +
     "      <mimetype>text/xml</mimetype>\n" +
@@ -115,7 +112,7 @@ public class SearchRestService {
     "      <checksum type=\"md5\">2b8a52878c536e64e20e309b5d7c1070</checksum>\n" +
     "    </catalog>\n" +
     "  </metadata>\n" +
-    "</mediapackage>";
+    "</ns2:mediapackage>";
   }
   
   @GET
@@ -126,13 +123,8 @@ public class SearchRestService {
   
   @POST
   @Path("add")
-  public void add(@FormParam("mediapackage") MediapackageType mediaPackage) throws SearchException {
-    MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
-    try {
-      searchService.add(builder.loadFromManifest(IOUtils.toInputStream(mediaPackage.toXml())));
-    } catch (Exception e) {
-      throw new SearchException(e);
-    }
+  public void add(@FormParam("mediapackage") MediaPackageImpl mediaPackage) throws SearchException {
+    searchService.add(mediaPackage);
   }
 
   @POST

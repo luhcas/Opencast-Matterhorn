@@ -16,14 +16,18 @@
 
 package org.opencastproject.media.mediapackage;
 
+import org.opencastproject.media.mediapackage.track.AudioStreamImpl;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * A stream containing audio data.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
+@XmlJavaTypeAdapter(AudioStream.Adapter.class)
 public interface AudioStream extends Stream {
 
-  Integer getResolution();
+  Integer getBitDepth();
 
   Integer getChannels();
 
@@ -42,4 +46,12 @@ public interface AudioStream extends Stream {
   String getFormatVersion();
 
   String getEncoderLibraryVendor();
+
+  public static class Adapter extends XmlAdapter<AudioStreamImpl, Stream> {
+    @Override
+    public AudioStreamImpl marshal(Stream v) throws Exception {return (AudioStreamImpl)v;}
+    @Override
+    public Stream unmarshal(AudioStreamImpl v) throws Exception {return v;}
+  }
+
 }

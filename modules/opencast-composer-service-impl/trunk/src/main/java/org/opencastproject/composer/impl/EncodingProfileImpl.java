@@ -59,10 +59,6 @@ public class EncodingProfileImpl implements EncodingProfile {
   @XmlElement(name = "mimetype")
   protected String mimeType = null;
 
-  /** Flavor */
-  @XmlElement(name = "flavor")
-  protected String flavor = null;
-
   /** The track types that this profile may be applied to */
   @XmlElement(name = "mediatype")
   protected MediaType[] applicableTypes = null;
@@ -151,25 +147,6 @@ public class EncodingProfileImpl implements EncodingProfile {
    */
   public String getMimeType() {
     return mimeType;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.EncodingProfile#getFlavor()
-   */
-  public String getFlavor() {
-    return flavor;
-  }
-
-  /**
-   * Sets the element flavor of the encoding result.
-   * 
-   * @param flavor
-   *          the flavor
-   */
-  void setFlavor(String flavor) {
-    this.flavor = flavor;
   }
 
   /**

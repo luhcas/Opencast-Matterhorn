@@ -16,9 +16,18 @@
 
 package org.opencastproject.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * This class implements the mime type. Note that mime types should not be
@@ -28,9 +37,12 @@ import java.util.List;
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: MimeType.java 1086 2008-09-10 10:52:24Z wunden $
  */
-public final class MimeType implements Cloneable, Comparable<MimeType>,
-    Serializable {
-
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlType(name="mimetype", namespace="http://mediapackage.opencastproject.org")
+@XmlJavaTypeAdapter(MimeType.Adapter.class)
+public final class MimeType implements Cloneable, Comparable<MimeType>, Serializable {
+  private static final Logger logger = LoggerFactory.getLogger(MimeType.class);
+  
   /** Serial version UID */
   private static final long serialVersionUID = -2895494708659187394L;
 
@@ -64,6 +76,10 @@ public final class MimeType implements Cloneable, Comparable<MimeType>,
   /** The mime type flavor description */
   private String flavorDescription_ = null;
 
+  public MimeType() {
+    this("", "", null);
+  }
+
   /**
    * Creates a new mime type with the given type and subtype.
    * 
@@ -94,11 +110,11 @@ public final class MimeType implements Cloneable, Comparable<MimeType>,
       throw new IllegalArgumentException(
           "Argument 'subtype' of mime type may not be null!");
     equivalents_ = new ArrayList<MIMEEquivalent>();
-    type_ = type.trim().toLowerCase();
-    subtype_ = subtype.trim().toLowerCase();
+    type_ = type.trim().toLowerCase().replaceAll("/", "");
+    subtype_ = subtype.trim().toLowerCase().replaceAll("/", "");
     suffixes_ = new ArrayList<String>();
     if (suffix != null) {
-      suffix_ = suffix.trim().toLowerCase();
+      suffix_ = suffix.trim().toLowerCase().replaceAll("/", "");
       addSuffix(suffix_);
     }
   }
@@ -446,4 +462,19 @@ public final class MimeType implements Cloneable, Comparable<MimeType>,
     return true;
   }
 
+  static class Adapter extends XmlAdapter<String, MimeType> {
+    @Override
+    public String marshal(MimeType mimeType) throws Exception {
+     return mimeType.type_ + "/" + mimeType.subtype_; 
+    }
+    @Override
+    public MimeType unmarshal(String str) throws Exception {
+      try {
+        return MimeTypes.parseMimeType(str);
+      } catch(Exception e) {
+        logger.info("unable to parse mimetype {}", str);
+        return null;
+      }
+    }
+  }
 }

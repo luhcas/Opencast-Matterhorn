@@ -18,12 +18,13 @@ package org.opencastproject.media.mediapackage;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * General definition for metadata catalogs.
  * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: Catalog.java 2905 2009-07-15 16:16:05Z ced $
  */
+@XmlJavaTypeAdapter(XMLCatalogImpl.Adapter.class)
 public interface Catalog extends MediaPackageElement, Serializable {
 
   /** Media package element type */

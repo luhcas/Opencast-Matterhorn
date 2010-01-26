@@ -92,7 +92,7 @@ public class MediaPackageReferenceTest extends AbstractMediaPackageTest {
     // Re-read the media package and test the references
     try {
       MediaPackageElement catalogX = mediaPackage.getElementById("catalog-x");
-      assertNotNull(catalogX.getReference());
+      assertTrue(catalogX.getReference() == null);
       MediaPackageElement catalogY = mediaPackage.getElementById("catalog-y");
       assertNotNull(catalogY.getReference());
       MediaPackageElement catalogZ = mediaPackage.getElementById("catalog-z");

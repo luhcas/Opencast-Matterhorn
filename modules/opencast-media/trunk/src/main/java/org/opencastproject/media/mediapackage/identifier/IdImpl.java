@@ -16,13 +16,26 @@
 
 package org.opencastproject.media.mediapackage.identifier;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
+
 /**
  * Simple and straightforward implementation of the {@link Id} interface.
  */
+@XmlType
+@XmlAccessorType(XmlAccessType.NONE)
 public class IdImpl implements Id {
 
   /** The identifier */
+  @XmlValue
   protected String id = null;
+
+  /**
+   * Needed for JAXB serialization
+   */
+  public IdImpl() {}
 
   /**
    * Creates a new serial identifier as created by {@link SerialBuilder}.
