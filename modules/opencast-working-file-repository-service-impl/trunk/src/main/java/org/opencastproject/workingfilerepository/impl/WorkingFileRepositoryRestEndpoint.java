@@ -30,6 +30,8 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
 import javax.servlet.http.HttpServletRequest;
@@ -167,10 +169,17 @@ public class WorkingFileRepositoryRestEndpoint {
   @Path("{mediaPackageID}/{mediaPackageElementID}/{fileName}")
   public Response get(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID, @PathParam("fileName") String fileName) {
+    InputStream in = repo.get(mediaPackageID, mediaPackageElementID);
     String contentType = mimeMap.getContentType(fileName);
+    int contentLength = 0;
+    try {
+      contentLength = in.available();
+    } catch (IOException e) {
+      logger.info("unable to get the content length for {}/{}/{}", new Object[] {mediaPackageElementID, mediaPackageElementID, fileName});
+    } // FIXME: this won't always work, depending on the implementation of the service
     checkService();
-    return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type", contentType).entity(
-             repo.get(mediaPackageID, mediaPackageElementID)).build();
+    return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type", contentType).
+      header("Content-length", contentLength).entity(in).build();
   }
 
   @GET
