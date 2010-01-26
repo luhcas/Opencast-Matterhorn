@@ -30,14 +30,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class to schedule the task of serializing the MediaPackage (this means: obtaining an XML
- * representation) and zipping it
+ * The class to schedule the task of serializing the MediaPackage (this means: obtaining an XML
+ * representation) and zipping it.
  *
  */
 public class SerializeJob implements Job {
   private static final Logger logger = LoggerFactory.getLogger(SerializeJob.class);
 
   /**
+   * Generates a manifest file then zips everything up so it can be ingested.  Also schedules a IngestJob
    * {@inheritDoc}
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */

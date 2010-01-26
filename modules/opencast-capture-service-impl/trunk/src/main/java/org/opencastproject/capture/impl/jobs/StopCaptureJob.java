@@ -37,7 +37,7 @@ public class StopCaptureJob implements Job {
   private static final Logger logger = LoggerFactory.getLogger(StopCaptureJob.class);
   
   /**
-   * Stops the capture.
+   * Stops the capture.  Also schedules a SerializeJob.
    * {@inheritDoc}
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */

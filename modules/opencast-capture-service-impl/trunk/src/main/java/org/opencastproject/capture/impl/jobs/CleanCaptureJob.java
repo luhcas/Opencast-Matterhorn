@@ -27,9 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Cleans up captures if the capture has been successfully ingested and the 
- * remaining diskspace is below a minimum threshold or above a maximum archive 
- * days threshold.
+ * The class which cleans up captures if the capture has been successfully ingested and the 
+ * remaining diskspace is below a minimum threshold or above a maximum archive days threshold.
  */
 public class CleanCaptureJob implements Job {
   
@@ -42,6 +41,7 @@ public class CleanCaptureJob implements Job {
   public static final long DAY_LENGTH_MILLIS = 86400000;
   
   /**
+   * Cleans up lectures which no longer need to be stored on the capture agent itself.
    * {@inheritDoc}
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */

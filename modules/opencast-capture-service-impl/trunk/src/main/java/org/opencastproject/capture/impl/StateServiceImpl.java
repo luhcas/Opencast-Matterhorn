@@ -39,8 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO: Comment me!
- *
+ * State service implementation.  This service keeps track of the states for the agent, as well as its recording(s).
  */
 public class StateServiceImpl implements StateService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(StateServiceImpl.class);
@@ -108,7 +107,7 @@ public class StateServiceImpl implements StateService, ManagedService {
   }
 
   /**
-   * Creates the Quartz task which pushes the agent's state to the state server
+   * Creates the Quartz task which pushes the agent's state to the state server.
    */
   private void createPollingTask() {
     try {
@@ -147,6 +146,5 @@ public class StateServiceImpl implements StateService, ManagedService {
 
   public void updated(Dictionary properties) throws ConfigurationException {
     // TODO Auto-generated method stub
-    
   }
 }

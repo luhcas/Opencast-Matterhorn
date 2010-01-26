@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is responsible for pushing the agent's state to the remote state service
+ * This class is responsible for pushing the agent's state to the remote state service.
  */
 public class AgentStateJob implements Job {
 
@@ -48,7 +48,7 @@ public class AgentStateJob implements Job {
   private StateService state = null;
 
   /**
-   * Pushes the agent's state to the remote state service
+   * Pushes the agent's state to the remote state service.
    * {@inheritDoc}
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
@@ -59,7 +59,7 @@ public class AgentStateJob implements Job {
   }
 
   /**
-   * Sends an agent state update to the capture-admin state service
+   * Sends an agent state update to the capture-admin state service.
    */
   private void sendAgentState() {
 
@@ -91,7 +91,7 @@ public class AgentStateJob implements Job {
   }
 
   /**
-   * Sends an update for each of the recordings currently being tracked in the system
+   * Sends an update for each of the recordings currently being tracked in the system.
    */
   private void sendRecordingState() {
 
@@ -124,9 +124,9 @@ public class AgentStateJob implements Job {
   }
 
   /**
-   * Utility method to POST data to a URL.  This method encodes the data in UTF-8 as post data, rather than multipart MIME
-   * @param formParams The data to send
-   * @param url The URL to send the data to
+   * Utility method to POST data to a URL.  This method encodes the data in UTF-8 as post data, rather than multipart MIME.
+   * @param formParams The data to send.
+   * @param url The URL to send the data to.
    */
   private void send(List<NameValuePair> formParams, String url) {
     HttpPost remoteServer = new HttpPost(url);

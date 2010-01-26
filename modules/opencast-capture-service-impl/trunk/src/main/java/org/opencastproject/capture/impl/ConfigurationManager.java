@@ -327,6 +327,7 @@ public class ConfigurationManager {
 
     @Override
     public void run() {
+      retrieveConfigFromDisk();
       retrieveConfigFromServer();
       writeConfigFileToDisk();
     }

@@ -26,13 +26,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Creates the manifest, then attempts to ingest the media to the remote server
+ * The class to create the manifest, then attempt to ingest the media to the remote server.
  */
 public class IngestJob implements StatefulJob {
 
   private static final Logger logger = LoggerFactory.getLogger(IngestJob.class);
   
   /**
+   * Attempts to ingest the job to the central core.
    * {@inheritDoc}
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
