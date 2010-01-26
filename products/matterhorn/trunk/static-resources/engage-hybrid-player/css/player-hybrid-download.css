@@ -14,27 +14,12 @@
  *
  */
 
-.oc-title-bar
-{
-	width:              397px;
-	height:             20px;
-	margin-left:        0px;
-	margin-top:         5px;
-	background-image:   url(../background/title.png);
-	background-repeat:  repeat-x;
-	border:             ridge 1px #999999;
-	color:              #444444;
-	padding-top:        2px;
-	padding-left:       2px;
-	font-family:        verdana;
-	font-size:          1em;
-}
-
 #info
 {
     margin-left:        0px; 
     margin-right:       10px; 
     margin-top:         70px;
+    position:           relative;
 }
 
 .oc_infoDisplayBlock
@@ -43,7 +28,6 @@
     margin-left:        0px; 
     margin-right:       10px; 
     margin-top:         10px;
-
 }
 
 .oc_infoDisplayNone
@@ -60,8 +44,8 @@
 
 .oc-controls 
 {
-    position:           absolute;
-    top:                370px;
+    position:           relative;
+    top:                340px;
 }
 
 #oc-slider
@@ -69,8 +53,8 @@
     width:              399px;
     margin-left:        0px;
     margin-bottom:      10px;
-    position: relative; 
-    text-align: left;
+    position:           relative; 
+    text-align:         left;
 }
 
 .oc-slider-seek-Rail 
@@ -101,8 +85,6 @@
     border:             1px solid #999999;
     position:           absolute;
 }
-
-	
 
 .oc-videocontrols-holder
 {
@@ -455,9 +437,10 @@
 
 #oc-video-display-container
 {
-    margin:             10px;
     margin-bottom:      0px;
     margin-left:        0px;
+    margin-top:         -50px;
+    
 }
 
 .overflow-hidden 
@@ -486,5 +469,17 @@
     width:              1px; 
     height:             1px; 
     overflow:           hidden;
+}
+
+.oc_editTime-hidden
+{
+    display: none;
+
+}
+
+.oc_editTime
+{
+    display: block;
+    float: left;
 }
 

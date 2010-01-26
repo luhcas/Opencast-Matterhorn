@@ -16,10 +16,10 @@
         <link rel="stylesheet" type="text/css" href="css/oc.player.css" />
         <link rel="stylesheet" type="text/css" href="css/player-hybrid-download.css" />
         
+        <script type="text/javascript" src="jquery/js/jquery-1.3.2.js"></script>
         <script type="text/javascript" src="ACFLRunContent/AC_OETags.js"></script>
         <script type="text/javascript" src="bridge/lib/FABridge.js"></script>
         <script type="text/javascript" src="bridge/Videodisplay.js"></script>
-        <script type="text/javascript" src="jquery/js/jquery-1.3.2.js"></script>
         <script type="text/javascript" src="jquery/js/jARIA.js"></script>
         <script type="text/javascript" src="jquery/js/jquery.keyboard-a11y.js"></script>
         <script type="text/javascript" src="jquery/js/jquery.tooltip.js"></script>
@@ -51,12 +51,12 @@
        <p style="color:red;">JavaScript is turned off in your web browser. So this site wouldn't work properly! <br />
           <strong>Please turn JavaScript on to use this site, then refresh the page.</strong>
        </p>
-     </noscript> 
-   
-    <div id="title-bar" class="oc-title-bar">
+     </noscript>
+     
+     <div >
         <p>Opencast Matterhorn - Media Player</p>
     </div>
-    
+   
     <div id="controls" class="oc-controls" >
        
       <div id="oc-slider" >
@@ -71,8 +71,8 @@
         <td align="left" valign="middle">
          <div id="simpleEdit">    
            <span id="time-current" role="timer" class="editableText" name="Current Time" title="Current Time" value="00:00:00" >00:00:00</span> 
-             <span id="editorContainer" name="Edit Current Time" title="Edit Current Time" value="Edit Current Time">
-               <input id="editField" type="text" maxlength="9" size="9" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="Edit Current Time HH:MM:SS" onKeyPress="Opencast.Player.editTimeKeyListener(event);" onchange="Opencast.Player.editTime();" onFocus="Opencast.Player.doPause();" onBlur="Opencast.Player.doPlay();" />
+             <span id="editorContainer" class ="oc_editTime-hidden" name="Edit Current Time" title="Edit Current Time" value="Edit Current Time">
+               <input id="editField" class ="oc_editTime-hidden" type="text" maxlength="9" size="9" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="Edit Current Time HH:MM:SS" onKeyPress="Opencast.Player.editTimeKeyListener(event);" onchange="Opencast.Player.editTime();" onFocus="Opencast.Player.doPause();" onBlur="Opencast.Player.doPlay();" />
              </span>
              of
              <span id="time-total" role="timer" name="Total Time" title="Total Time" tabIndex="0">00:00:00</span>
@@ -146,13 +146,13 @@
             "bgcolor", "#FFFFFF",
             "name", "Videodisplay",
             "allowfullscreen", "true",
-            "flashvars", "bridgeName=b_Videodisplay&amp;video_url=http://vs1.rz.uni-osnabrueck.de/public/virtmm/opencast/car.flv&amp;autoplay=false&amp;captions=dfxp/car.dfxp.xml",
+            "flashvars", "bridgeName=b_Videodisplay&amp;video_url=http://downloads.opencastproject.org/media/matterhorn.mp4&amp;autoplay=false&amp;captions=dfxp/matterhorn.dfxp.xml",
             "allowScriptAccess","sameDomain",
             "type", "application/x-shockwave-flash",
             "pluginspage", "http://www.adobe.com/go/getflashplayer"
         );
         } else {  // flash is too old or we can't detect the plugin
-          var alternateContent = 'Alternate HTML content should be placed here. '
+          var alternateContent = 'Alternate HTML content should be placed here.'
           + 'This content requires the Adobe Flash Player. '
           + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
           document.write(alternateContent);  // insert non-flash content
@@ -162,21 +162,21 @@
     <div id="info" >
       <button id="btn_info" class="oc_btn_info" onClick="Opencast.Player.toggleInfo();" type="submit" name="Keyboard Shortcuts Information"  value="Keyboard Shortcuts Information"   alt="Keyboard Shortcuts Information"  title="Keyboard Shortcuts Information" >Keyboard Shortcuts Information</button>
       <div id="infoBlock" class="oc_infoDisplayNone" >
-          Press Control + Alt + I   = Toggle the keyboard shortcuts information between visible or unvisible.<br>
-          Press Control + Alt + P   = Toggle the video between pause or play.<br>
-          Press Control + Alt + S   = Stop the video.<br>
-          Press Control + Alt + M   = Toggle between mute or unmute the video.<br>
+          Press Control + Alt + I   = Toggle the keyboard shortcuts information between visible or unvisible<br>
+          Press Control + Alt + P   = Toggle the video between pause or play<br>
+          Press Control + Alt + S   = Stop the video<br>
+          Press Control + Alt + M   = Toggle between mute or unmute the video<br>
           Press Control + Alt + U   = Volume up<br>
           Press Control + Alt + D   = Volume down<br>
-          Press Control + Alt 0 - 9 = Seek the time slider<br>
-          Press Control + Alt + C   = Toggle between captions on or off.<br>
-          Press Control + Alt + F   = Forward the video.<br>
-          Press Control + Alt + R   = Rewind the video.<br>
-          Press Control + Alt + T   = the current time for the screen reader<br>
-          Press on Mac cmd + = to zoom in the player<br>
-          Press on Mac cmd - = to minimize the player<br>
-          Press on Windows strg + = to zoom in the player<br>
-          Press on Windows strg - = to minimize the player<br>
+          Press Control + Alt 0 - 9 = Seek time slider<br>
+          Press Control + Alt + C   = Toggle between captions on or off<br>
+          Press Control + Alt + F   = Forward the video<br>
+          Press Control + Alt + R   = Rewind the video<br>
+          Press Control + Alt + T   = The current time for the screen reader<br>
+          Press on Mac cmd + = player zoom in<br>
+          Press on Mac cmd - = player zoom out<br>
+          Press on Windows strg + = player zoom in<br>
+          Press on Windows strg - = player zoom out<br>
       </div>
     </div>
    

@@ -6,7 +6,6 @@
 */
 var Opencast = Opencast || {};
 
-
 /**
     @namespace Opencast namespace Player
 */
