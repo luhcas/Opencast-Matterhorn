@@ -243,7 +243,7 @@ Opencast.Player = (function () {
         var newAlert = document.createElement("div");
         newAlert.setAttribute("role", "alert");
         newAlert.setAttribute("id", "alert");
-        newAlert.setAttribute("class", "fl-offScreen-hidden");
+        newAlert.setAttribute("class", "oc-offScreen-hidden");
         var msg = document.createTextNode(alertMessage);
         newAlert.appendChild(msg);
         document.body.appendChild(newAlert);
