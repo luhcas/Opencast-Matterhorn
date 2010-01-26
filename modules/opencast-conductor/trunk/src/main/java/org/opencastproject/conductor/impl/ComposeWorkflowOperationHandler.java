@@ -174,7 +174,8 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
         // store new tracks to mediaPackage
         // FIXME derived media comes from multiple sources, so how do we choose which is the "parent" of the derived
         // media?
-        mediaPackage.addDerived(composedTrack, mediaPackage.getElementById(videoSourceTrackId));
+        String parentId = videoSourceTrackId == null ? audioSourceTrackId : videoSourceTrackId; 
+        mediaPackage.addDerived(composedTrack, mediaPackage.getElementById(parentId));
         break;
       }
     }
