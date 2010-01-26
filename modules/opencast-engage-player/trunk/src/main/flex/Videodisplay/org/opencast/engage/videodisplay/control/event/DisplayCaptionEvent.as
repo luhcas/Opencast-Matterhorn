@@ -16,7 +16,6 @@
 package org.opencast.engage.videodisplay.control.event
 {
 	import flash.events.Event;
-	
 	/**
     *   DisplayCaptionEvent
     * 
@@ -24,7 +23,6 @@ package org.opencast.engage.videodisplay.control.event
 	public class DisplayCaptionEvent extends Event
 	{
 		public static var EVENT_NAME : String = 'DisplayCaptionEvent';
-		private var _newPosition : Number;
 		  
 		/** Constructor */
 		public function DisplayCaptionEvent(newPosition : Number , bubbles : Boolean = false , cancelable : Boolean = false)
@@ -32,6 +30,7 @@ package org.opencast.engage.videodisplay.control.event
 			super(EVENT_NAME , bubbles , cancelable);
 			_newPosition = newPosition;
 		}
+		private var _newPosition : Number;
 
         /**
         * position
@@ -42,7 +41,5 @@ package org.opencast.engage.videodisplay.control.event
 		{
 			return _newPosition;
 		}
-		
-		
 	}
 }

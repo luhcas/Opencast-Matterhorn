@@ -16,7 +16,6 @@
 package org.opencast.engage.videodisplay.control.event
 {
 	import flash.events.Event;
-	
 	/**
     *   LoadDFXPXMLEvent
     * 
@@ -24,7 +23,6 @@ package org.opencast.engage.videodisplay.control.event
 	public class LoadDFXPXMLEvent extends Event
 	{
 		public static var EVENT_NAME : String = 'LoadDFXPXML';
-		private var _source : String;
 		
 		/** Constructor */
 		public function LoadDFXPXMLEvent(source : String)
@@ -32,6 +30,12 @@ package org.opencast.engage.videodisplay.control.event
 			super(EVENT_NAME);
 			_source = source;
 		}
+		private var _source : String;
+		
+		// Override the inherited clone() method.
+        override public function clone():Event {
+            return new LoadDFXPXMLEvent(source);
+        }
 
         /** 
         * source
@@ -42,10 +46,5 @@ package org.opencast.engage.videodisplay.control.event
 		{
 			return _source;
 		}
-		
-		// Override the inherited clone() method.
-        override public function clone():Event {
-            return new LoadDFXPXMLEvent(source);
-        }
 	}
 }

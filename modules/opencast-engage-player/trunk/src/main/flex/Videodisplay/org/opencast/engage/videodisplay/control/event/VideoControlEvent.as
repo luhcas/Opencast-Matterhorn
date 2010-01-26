@@ -16,39 +16,37 @@
 package org.opencast.engage.videodisplay.control.event
 {
 	import flash.events.Event;
-	
 	/**
     *   VideoControlEvent
     * 
     */
 	public class VideoControlEvent extends Event
 	{
-		public static var EVENT_NAME : String 		= 'VideoControlEvent';
-		public static var PLAY : String 			= "play";
-		public static var PAUSE : String 			= "pause";
-		public static var STOP : String 			= "stop";
-		public static var SKIPBACKWARD : String 	= "skipBackward";
-		public static var REWIND : String 			= "rewind";
-		public static var FASTFORWARD : String 		= "fastForward";
-		public static var SKIPFORWARD : String 		= "skipForward";
-		public static var MUTE : String 			= "mute";
-		public static var UNMUTE : String 			= "unmute";
 		public static var CLOSEDCAPTIONS : String   = "closeCaptions";
-		public static var SEEKZERO : String         = "seekZero";
-		public static var SEEKONE : String          = "seekOne";
-		public static var SEEKTWO : String          = "seekTwo";
-		public static var SEEKTHREE : String        = "seekThree";
-		public static var SEEKFOUR : String         = "seekFour";
-		public static var SEEKFIVE : String         = "seekFive";
-		public static var SEEKSIX : String          = "seekSix";
-		public static var SEEKSEVEN : String        = "seekSeven";
-		public static var SEEKEIGHT : String        = "seekEight";
-		public static var SEEKNINE : String         = "seekNine";
-		public static var VOLUMEUP : String			= "volumeUp";
-		public static var VOLUMEDOWN : String		= "volumeDown";
+		public static var EVENT_NAME : String 		= 'VideoControlEvent';
+		public static var FASTFORWARD : String 		= "fastForward";
 		public static var HEARTIMEINFO : String     = "hearTimeInfo";
 		public static var INFORMATION : String      = "Information";
-		private var _videoControlType : String;
+		public static var MUTE : String 			= "mute";
+		public static var PAUSE : String 			= "pause";
+		public static var PLAY : String 			= "play";
+		public static var REWIND : String 			= "rewind";
+		public static var SEEKEIGHT : String        = "seekEight";
+		public static var SEEKFIVE : String         = "seekFive";
+		public static var SEEKFOUR : String         = "seekFour";
+		public static var SEEKNINE : String         = "seekNine";
+		public static var SEEKONE : String          = "seekOne";
+		public static var SEEKSEVEN : String        = "seekSeven";
+		public static var SEEKSIX : String          = "seekSix";
+		public static var SEEKTHREE : String        = "seekThree";
+		public static var SEEKTWO : String          = "seekTwo";
+		public static var SEEKZERO : String         = "seekZero";
+		public static var SKIPBACKWARD : String 	= "skipBackward";
+		public static var SKIPFORWARD : String 		= "skipForward";
+		public static var STOP : String 			= "stop";
+		public static var UNMUTE : String 			= "unmute";
+		public static var VOLUMEDOWN : String		= "volumeDown";
+		public static var VOLUMEUP : String			= "volumeUp";
 		
 		/** Constructor */
 		public function VideoControlEvent(videoControlType : String , bubbles : Boolean = false , cancelable : Boolean = false )
@@ -56,6 +54,12 @@ package org.opencast.engage.videodisplay.control.event
 			super(EVENT_NAME , bubbles , cancelable);
 			_videoControlType = videoControlType;
 		}
+		private var _videoControlType : String;
+		
+		// Override the inherited clone() method.
+        override public function clone():Event {
+            return new VideoControlEvent(videoControlType, bubbles, cancelable);
+        }
 
         /** 
         * videoControlType
@@ -66,10 +70,5 @@ package org.opencast.engage.videodisplay.control.event
 		{
 			return _videoControlType;
 		}
-		
-		// Override the inherited clone() method.
-        override public function clone():Event {
-            return new VideoControlEvent(videoControlType, bubbles, cancelable);
-        }
 	}
 }

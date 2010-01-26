@@ -16,7 +16,6 @@
 package org.opencast.engage.videodisplay.control.event
 {
 	import flash.events.Event;
-	
 	/**
     *   SetVolumeEvent
     * 
@@ -24,7 +23,6 @@ package org.opencast.engage.videodisplay.control.event
 	public class SetVolumeEvent extends Event
 	{
 		public static var EVENT_NAME : String = 'SetVolumeEvent';
-		private var _volume : Number;
 	
 	   /** Constructor */
 		public function SetVolumeEvent(volume : Number , bubbles : Boolean = false , cancelable : Boolean = false )
@@ -32,6 +30,12 @@ package org.opencast.engage.videodisplay.control.event
 			super(EVENT_NAME , bubbles , cancelable);
 			_volume = volume;
 		}
+		private var _volume : Number;
+		
+		// Override the inherited clone() method.
+        override public function clone():Event {
+            return new SetVolumeEvent(volume, bubbles, cancelable);
+        }
         
         /** 
         * volume
@@ -42,10 +46,5 @@ package org.opencast.engage.videodisplay.control.event
 		{
 			return _volume;
 		}
-		
-		// Override the inherited clone() method.
-        override public function clone():Event {
-            return new SetVolumeEvent(volume, bubbles, cancelable);
-        }
 	}
 }

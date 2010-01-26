@@ -16,7 +16,6 @@
 package org.opencast.engage.videodisplay.control.event
 {
 	import flash.events.Event;
-	
 	/**
     *   SetCurrentCaptionsEvent
     * 
@@ -24,7 +23,6 @@ package org.opencast.engage.videodisplay.control.event
 	public class SetCurrentCaptionsEvent extends Event
 	{
 		public static var EVENT_NAME : String = 'SetCurrentCaptionsEvent';
-		private var _language : String;
 		
 		/** Constructor */
 		public function SetCurrentCaptionsEvent(language : String , bubbles : Boolean = false , cancelable : Boolean = false)
@@ -32,6 +30,12 @@ package org.opencast.engage.videodisplay.control.event
 			super(EVENT_NAME , bubbles , cancelable);
 			_language = language;
 		}
+		private var _language : String;
+		
+		// Override the inherited clone() method.
+        override public function clone():Event {
+            return new SetCurrentCaptionsEvent(language, bubbles, cancelable);
+        }
         
         /** 
         * language
@@ -42,10 +46,5 @@ package org.opencast.engage.videodisplay.control.event
 		{
 			return _language;
 		}
-		
-		// Override the inherited clone() method.
-        override public function clone():Event {
-            return new SetCurrentCaptionsEvent(language, bubbles, cancelable);
-        }
 	}
 }

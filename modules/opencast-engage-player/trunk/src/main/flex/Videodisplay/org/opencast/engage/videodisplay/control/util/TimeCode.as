@@ -21,23 +21,13 @@ package org.opencast.engage.videodisplay.control.util
     */
 	public class TimeCode
 	{
-		private var _showHours : Boolean;
 		
 		/** Constructor */
 		public function TimeCode()
 		{
 			_showHours = true;
 		}
-        
-        /** 
-        * showHours
-        * 
-        * set the _showHours
-        * */
-		public function showHours(show : Boolean) : void
-		{
-			_showHours = show;
-		}
+		private var _showHours : Boolean;
         
         /** 
         * getTC
@@ -82,6 +72,16 @@ package org.opencast.engage.videodisplay.control.util
 			}
 
 			return result;
+		}
+        
+        /** 
+        * showHours
+        * 
+        * set the _showHours
+        * */
+		public function showHours(show : Boolean) : void
+		{
+			_showHours = show;
 		}
     }
 }

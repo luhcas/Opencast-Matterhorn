@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-	/**
+	 /**
 	 *  Copyright 2009 The Regents of the University of California
 	 *  Licensed under the Educational Community License, Version 2.0
 	 *  (the "License"); you may not use this file except in compliance
@@ -14,23 +14,22 @@
 	 *  or implied. See the License for the specific language governing
 	 *  permissions and limitations under the License.
 	 *
-	 */ 
+	 */
 -->
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
-	width="100%"
-	height="100%"
-	layout="absolute"
-	backgroundColor="#000000"
-	preinitialize="{ onPreinitialize(); }"
-	addedToStage="onAddedToStage()"
-	applicationComplete="init(event)"
-	xmlns:view="org.opencast.engage.videodisplay.view.*"
-	xmlns:ns1="bridge.*"
-	currentState="{model.mediaState}"
-	>
+				width="100%"
+				height="100%"
+				layout="absolute"
+				backgroundColor="#000000"
+				preinitialize="{ onPreinitialize(); }"
+				addedToStage="onAddedToStage()"
+				applicationComplete="init(event)"
+				xmlns:view="org.opencast.engage.videodisplay.view.*"
+				xmlns:ns1="bridge.*"
+				currentState="{model.mediaState}">
 	<mx:Style source="style/standard_videodisplay.css"/>
 	<mx:Script>
-		
+
 		<![CDATA[
 			import org.opencast.engage.videodisplay.control.util.TimeCode;
 			import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
@@ -44,377 +43,384 @@
 			import org.opencast.engage.videodisplay.business.VideodisplayBean;
 			import org.swizframework.Swiz;
 			import flash.display.StageDisplayState;
-			
+
 			[Autowire]
 			[Bindable]
 			public var model:VideodisplayModel;
-			
+
 			private var _timeCode:TimeCode;
-			
-      		/** 
-             * init
-             * 
-             * initialization
-             * */
-			private function init(evt:Event):void {
-                /* Set up full screen handler. */
-                Application.application.stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenHandler);
-            }
 
-            /** 
-             * fullScreenHandler
-             * 
-             * Save the status of the fullscreen mode
-             * */
-            private function fullScreenHandler(evt:FullScreenEvent):void 
-            {
-                if (evt.fullScreen) 
-                {
-                    model.fullscreenMode = true;
-                } 
-                else 
-                {
-                    model.fullscreenMode = false;
-                }
-            }
-
-			
-			/** 
-			 * onPreinitialize
-			 * 
-			 * load Beans 
+			/**
+			 * init
+			 *
+			 * initialization
 			 * */
-			private function onPreinitialize():void 
+			private function init(evt:Event):void
 			{
-				Swiz.getInstance().loadBeans( [VideodisplayBean ] );
+				/* Set up full screen handler. */
+				Application.application.stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenHandler);
+			}
+
+			/**
+			 * fullScreenHandler
+			 *
+			 * Save the status of the fullscreen mode
+			 * */
+			private function fullScreenHandler(evt:FullScreenEvent):void
+			{
+				if (evt.fullScreen)
+				{
+					model.fullscreenMode=true;
+				}
+				else
+				{
+					model.fullscreenMode=false;
+				}
+			}
+
+
+			/**
+			 * onPreinitialize
+			 *
+			 * load Beans
+			 * */
+			private function onPreinitialize():void
+			{
+				Swiz.getInstance().loadBeans([VideodisplayBean]);
 				Swiz.autowire(this);
 			}
-			
+
 			/**
 			 * onAddedToStage
-			 * 
+			 *
 			 * Create a new Time Code.
 			 * Add an event listener for the keyboard.
 			 * */
 			private function onAddedToStage():void
 			{
-			  	_timeCode = new TimeCode();
+				_timeCode=new TimeCode();
 				stage.addEventListener(KeyboardEvent.KEY_UP, reportKeyUp);
 			}
-			
+
 			/**
 			 * play
-			 * 
+			 *
 			 * When the learnder click on the play button
 			 * */
 			public function play():void
 			{
-				Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));		 
+				Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.PLAY));
 			}
-			
+
 			/**
 			 * pause
-			 * 
+			 *
 			 * When the learnder click on the pause button
 			 * */
 			public function pause():void
 			{
-				Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));
+				Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.PAUSE));
 			}
-			
+
 			/**
 			 * stop
-			 * 
+			 *
 			 * When the learnder click on the stop button
 			 * */
-			public function stop():void			
+			public function stop():void
 			{
-				Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.STOP));	
+				Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.STOP));
 			}
-			
+
 			/**
 			 * skipBackward
-			 * 
+			 *
 			 * When the learnder click on the skip backward button
 			 * */
-			public function skipBackward():void			
+			public function skipBackward():void
 			{
-				Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SKIPBACKWARD));	
+				Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.SKIPBACKWARD));
 			}
-			
+
 			/**
 			 * rewind
-			 * 
+			 *
 			 * When the learnder click on the rewind button
 			 * */
-			public function rewind():void			
+			public function rewind():void
 			{
-				Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.REWIND));	
+				Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.REWIND));
 			}
-			
+
 			/**
 			 * fastForward
-			 * 
+			 *
 			 * When the learnder click on the fast forward button
 			 * */
-			public function fastForward():void			
+			public function fastForward():void
 			{
-				Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.FASTFORWARD));	
+				Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.FASTFORWARD));
 			}
-			
+
 			/**
 			 * skipForward
-			 * 
+			 *
 			 * When the learnder click on the skip forward button
 			 * */
-			public function skipForward():void			
+			public function skipForward():void
 			{
-				Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SKIPFORWARD));	
+				Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.SKIPFORWARD));
 			}
-			
+
 			/**
 			 * seek
-			 * 
+			 *
 			 * Wehn the learner seek the video
 			 * */
 			public function seek(time:Number):void
-		    {
-		    	model.player.seek(time);
-		    }
-		    
-		    /**
-		     * setLanguage
-		     * 
-		     * Set the language of the captions
-		     * */
-		    public function setLanguage( language:String ):void
-		    {
-		    	Swiz.dispatchEvent( new SetCurrentCaptionsEvent(language));
-		    }
-		    
-		    /**
-		     * setClosedCaptions
-		     * 
-		     * To see the captions
-		     * */
-		    public function closedCaptions( bool:Boolean ):void
-		    {
-		    	Swiz.dispatchEvent( new ClosedCaptionsEvent(bool) );
-		    }
-		   
-		    /**
+			{
+				model.player.seek(time);
+			}
+
+			/**
+			 * setLanguage
+			 *
+			 * Set the language of the captions
+			 * */
+			public function setLanguage(language:String):void
+			{
+				Swiz.dispatchEvent(new SetCurrentCaptionsEvent(language));
+			}
+
+			/**
+			 * setClosedCaptions
+			 *
+			 * To see the captions
+			 * */
+			public function closedCaptions(bool:Boolean):void
+			{
+				Swiz.dispatchEvent(new ClosedCaptionsEvent(bool));
+			}
+
+			/**
 			 * setVolume
-			 * 
+			 *
 			 * Expects value between 0 and 1
-			 */ 
+			 */
 			public function setVolume(volume:Number):void
 			{
-				Swiz.dispatchEvent( new SetVolumeEvent(volume) );
+				Swiz.dispatchEvent(new SetVolumeEvent(volume));
 			}
-			
+
 			/**
 			 * getVolume
-			 * 
+			 *
 			 * Get the volume from the media player.
-			 */   
+			 */
 			public function getVolume():Number
 			{
 				return model.player.volume;
 			}
-			
+
 			/**
-             * setccBool
-             * 
-             * Set true when the cc Button is press
-             */   
-            public function setccBool(ccBool:Boolean):void
-            {
-                model.ccButtonBool = ccBool;   
-            }
-			
-		    /**
+			 * setccBool
+			 *
+			 * Set true when the cc Button is press
+			 */
+			public function setccBool(ccBool:Boolean):void
+			{
+				model.ccButtonBool=ccBool;
+			}
+
+			/**
 			 * reportKeyDown
-			 * 
-			 * 
-			 */ 
+			 *
+			 *
+			 */
 			private function reportKeyUp(event:KeyboardEvent):void
 			{
-				if( event.altKey && event.ctrlKey )
+				if (event.altKey && event.ctrlKey)
 				{
-					passCharCode( event.keyCode);
+					passCharCode(event.keyCode);
 				}
 			}
-			
+
 			/**
 			 * passCharCode
-			 * 
+			 *
 			 * When the learner press any key for the mediaplayer
-			 */ 
-			public function passCharCode( charCode:int ):void
-			{	
+			 */
+			public function passCharCode(charCode:int):void
+			{
 				// Play or pause the video
-				if(charCode == 80 || charCode == 112) // P or p
+				if (charCode == 80 || charCode == 112) // P or p
 				{
-					if(model.player.playing)
+					if (model.player.playing)
 					{
-						Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));	
+						Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.PAUSE));
 					}
 					else
 					{
-						Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));	
-				    }
+						Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.PLAY));
+					}
 				}
-				
+
 				// Mute the video
-                if(charCode == 83 || charCode == 115) // S or s
-                {
-                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.STOP)); 
-                }
-				
-				// Mute the video
-				if(charCode == 77 || charCode == 109) // M or m
+				if (charCode == 83 || charCode == 115) // S or s
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.MUTE));	
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.STOP));
 				}
-				
+
+				// Mute the video
+				if (charCode == 77 || charCode == 109) // M or m
+				{
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.MUTE));
+				}
+
 				// Volume up
-				if(charCode == 85 || charCode == 117) // U or u
+				if (charCode == 85 || charCode == 117) // U or u
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMEUP));	
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.VOLUMEUP));
 				}
-				
+
 				// Volume down
-				if(charCode == 68 || charCode == 100) // D or d
+				if (charCode == 68 || charCode == 100) // D or d
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.VOLUMEDOWN));	
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.VOLUMEDOWN));
 				}
-				
+
 				// Seek 0
-                if(charCode == 48 ) // 0
-                {
-                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKZERO)); 
-                }
-				
+				if (charCode == 48) // 0
+				{
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.SEEKZERO));
+				}
+
 				// Seek 1
-				if(charCode == 49 ) // 1
+				if (charCode == 49) // 1
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKONE));	
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.SEEKONE));
 				}
-				
+
 				// Seek 2
-				if(charCode == 50 ) // 2
+				if (charCode == 50) // 2
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKTWO));	
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.SEEKTWO));
 				}
-				
+
 				// Seek 3
-				if(charCode == 51 ) // 3
+				if (charCode == 51) // 3
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKTHREE));	
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.SEEKTHREE));
 				}
-				
+
 				// Seek 4
-				if(charCode == 52 ) // 4
+				if (charCode == 52) // 4
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKFOUR));	
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.SEEKFOUR));
 				}
-				
+
 				// Seek 5
-				if(charCode == 53 ) // 5
+				if (charCode == 53) // 5
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKFIVE));	
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.SEEKFIVE));
 				}
-				
+
 				// Seek 6
-                if(charCode == 54 ) // 6
-                {
-                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKSIX)); 
-                }
-                
-                // Seek 7
-                if(charCode == 55 ) // 7
-                {
-                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKSEVEN)); 
-                }
-                
-                // Seek 8
-                if(charCode == 56 ) // 8
-                {
-                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKEIGHT)); 
-                }
-                
-                // Seek 9
-                if(charCode == 57 ) // 9
-                {
-                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.SEEKNINE)); 
-                }
-				
+				if (charCode == 54) // 6
+				{
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.SEEKSIX));
+				}
+
+				// Seek 7
+				if (charCode == 55) // 7
+				{
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.SEEKSEVEN));
+				}
+
+				// Seek 8
+				if (charCode == 56) // 8
+				{
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.SEEKEIGHT));
+				}
+
+				// Seek 9
+				if (charCode == 57) // 9
+				{
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.SEEKNINE));
+				}
+
 				// Closed Caption
-				if(charCode == 67 || charCode == 99) // C or c
+				if (charCode == 67 || charCode == 99) // C or c
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.CLOSEDCAPTIONS));	
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.CLOSEDCAPTIONS));
 				}
-				
+
 				// rewind
-				if(charCode == 82 || charCode == 114) // R or r
+				if (charCode == 82 || charCode == 114) // R or r
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.REWIND));	
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.REWIND));
 				}
-				
+
 				// Fast forward
-				if(charCode == 70 || charCode == 102) // F or f
+				if (charCode == 70 || charCode == 102) // F or f
 				{
-					Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.FASTFORWARD));	
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.FASTFORWARD));
 				}
-					
+
 				// time
-                if(charCode == 84 || charCode == 116) // T or t
-                {
-                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.HEARTIMEINFO));  
-                }
-                
-                // Information
-                if(charCode == 73 || charCode == 105) // I or i
-                {
-                    Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.INFORMATION));  
-                }
+				if (charCode == 84 || charCode == 116) // T or t
+				{
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.HEARTIMEINFO));
+				}
+
+				// Information
+				if (charCode == 73 || charCode == 105) // I or i
+				{
+					Swiz.dispatchEvent(new VideoControlEvent(VideoControlEvent.INFORMATION));
+				}
 			}
 		]]>
 	</mx:Script>
-	
+
 	<mx:states>
-        <mx:State name="video">
-            <mx:SetProperty target="{ bx_video }" name="visible" value="true"/>
-            <mx:SetProperty target="{ bx_video }" name="includeInLayout" value="true"/>
-        </mx:State>
-        <mx:State name="audio">
-            <mx:SetProperty target="{ bx_audio }" name="visible" value="true"/>
-            <mx:SetProperty target="{ bx_audio }" name="includeInLayout" value="true"/>
-        </mx:State>
-        <mx:State name="error">
-            <mx:SetProperty target="{ bx_error }" name="visible" value="true"/>
-            <mx:SetProperty target="{ bx_error }" name="includeInLayout" value="true"/>
-        </mx:State>
-    </mx:states>
-    
-	<ns1:FABridge />
-	
-	<view:VideoView 
-		id="bx_video"
-        visible="false"
-        includeInLayout="false"
-        />
-    
-    <view:AudioView 
-    	id="bx_audio"
-        visible="false"
-        includeInLayout="false"
-    	/>
-    
-    <view:ErrorView 
-    	id="bx_error"
-    	visible="false"
-    	includeInLayout="false"
-    	/>
+		<mx:State name="video">
+			<mx:SetProperty target="{ bx_video }"
+							name="visible"
+							value="true"/>
+			<mx:SetProperty target="{ bx_video }"
+							name="includeInLayout"
+							value="true"/>
+		</mx:State>
+		<mx:State name="audio">
+			<mx:SetProperty target="{ bx_audio }"
+							name="visible"
+							value="true"/>
+			<mx:SetProperty target="{ bx_audio }"
+							name="includeInLayout"
+							value="true"/>
+		</mx:State>
+		<mx:State name="error">
+			<mx:SetProperty target="{ bx_error }"
+							name="visible"
+							value="true"/>
+			<mx:SetProperty target="{ bx_error }"
+							name="includeInLayout"
+							value="true"/>
+		</mx:State>
+	</mx:states>
+
+	<ns1:FABridge/>
+
+	<view:VideoView id="bx_video"
+					visible="false"
+					includeInLayout="false"/>
+
+	<view:AudioView id="bx_audio"
+					visible="false"
+					includeInLayout="false"/>
+
+	<view:ErrorView id="bx_error"
+					visible="false"
+					includeInLayout="false"/>
 
 </mx:Application>

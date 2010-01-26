@@ -16,7 +16,6 @@
 package org.opencast.engage.videodisplay.control.event
 {
 	import flash.events.Event;
-	
 	/**
     *   ResizeVideodisplayEvent
     * 

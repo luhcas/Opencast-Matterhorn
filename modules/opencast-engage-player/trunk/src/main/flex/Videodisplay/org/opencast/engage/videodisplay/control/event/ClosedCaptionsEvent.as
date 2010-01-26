@@ -16,7 +16,6 @@
 package org.opencast.engage.videodisplay.control.event
 {
 	import flash.events.Event;
-	
 	/**
     *   ClosedCaptionsEvent
     * 
@@ -24,7 +23,6 @@ package org.opencast.engage.videodisplay.control.event
 	public class ClosedCaptionsEvent extends Event
 	{
 		public static var EVENT_NAME : String = 'ClosedCaptionsEvent';
-		private var _ccBoolean : Boolean;
 		
 		/** Constructor */
 		public function ClosedCaptionsEvent(ccBoolean : Boolean , bubbles : Boolean = false , cancelable : Boolean = false)
@@ -32,6 +30,7 @@ package org.opencast.engage.videodisplay.control.event
 			super(EVENT_NAME , bubbles , cancelable);
 			_ccBoolean = ccBoolean;
 		}
+		private var _ccBoolean : Boolean;
 
         /**
         * ccBoolean

@@ -1,18 +1,15 @@
 package org.opencast.engage.brick.videodisplay.cases.model
-{	
+{
 	import com.adobe.strobe.players.MediaPlayerWrapper;
-	
 	import mx.collections.ArrayCollection;
-	
 	import org.flexunit.Assert;
 	import org.opencast.engage.brick.videodisplay.model.VideodisplayModel;
 	import org.opencast.engage.brick.videodisplay.vo.LanguageVO;
-    
     public class TestVideodisplayModel
     {
+        private var languageVO:LanguageVO;
     	
         private var videoDisplayModel:VideodisplayModel;
-        private var languageVO:LanguageVO;
 
         [Before]
         public function setUp():void
@@ -26,15 +23,40 @@ package org.opencast.engage.brick.videodisplay.cases.model
         {
             this.videoDisplayModel = null;
         }
-
+        
+        
         [Test]
-        public function testPlayerObject():void
+        public function testModelAttributes_captionSets():void
         {
-            var player : MediaPlayerWrapper;
-            this.videoDisplayModel.player = player;
-            Assert.assertTrue("VideodisplayModel needs a player object ", 
-                                this.videoDisplayModel.player = player, true );                   
-                          
+           var captionSets : ArrayCollection;
+            this.videoDisplayModel.captionSets = captionSets;
+            Assert.assertTrue("VideodisplayModel needs captionSets Array ", 
+                                this.videoDisplayModel.captionSets = captionSets, true );
+        }
+        
+        [Test]
+        public function testModelAttributes_captionsHeight():void
+        {
+            var captionsHeight : int = 50;
+            Assert.assertEquals("VideodisplayModel needs captionsHeight 50 for Captions ", 
+                                this.videoDisplayModel.captionsHeight == captionsHeight, true );                     
+        }
+        
+       	[Test]
+        public function testModelAttributes_ccBoolean():void
+        {
+            var ccBoolean : Boolean = true;
+            Assert.assertEquals("VideodisplayModel needs ccBoolean = true ", 
+                                this.videoDisplayModel.ccBoolean == ccBoolean, true );                     
+        }
+        
+        [Test]
+        public function testModelAttributes_currentCaptionSet():void
+        {
+            var currentCaptionSet : Array;
+            this.videoDisplayModel.currentCaptionSet = currentCaptionSet;
+            Assert.assertTrue("VideodisplayModel needs currentCaptionSet ", 
+                                this.videoDisplayModel.currentCaptionSet = currentCaptionSet, true );
         }
         
         
@@ -49,15 +71,6 @@ package org.opencast.engage.brick.videodisplay.cases.model
         }
         
         [Test]
-        public function testModelAttributes_currentPlayhead():void
-        {
-           	var currentPlayhead : Number;
-            this.videoDisplayModel.currentPlayhead = currentPlayhead;
-            Assert.assertTrue("VideodisplayModel needs currentPlayhead attribute ", 
-                                this.videoDisplayModel.currentPlayhead = currentPlayhead, true );
-        }
-        
-        [Test]
         public function testModelAttributes_currentPlayerState():void
         {
            var currentPlayerState : String;
@@ -67,21 +80,12 @@ package org.opencast.engage.brick.videodisplay.cases.model
         }
         
         [Test]
-        public function testModelAttributes_currentCaptionSet():void
+        public function testModelAttributes_currentPlayhead():void
         {
-            var currentCaptionSet : Array;
-            this.videoDisplayModel.currentCaptionSet = currentCaptionSet;
-            Assert.assertTrue("VideodisplayModel needs currentCaptionSet ", 
-                                this.videoDisplayModel.currentCaptionSet = currentCaptionSet, true );
-        }
-        
-        [Test]
-        public function testModelAttributes_oldSubtitle():void
-        {
-            var oldSubtitle : String = '';
-            this.videoDisplayModel.oldSubtitle = oldSubtitle;
-            Assert.assertEquals("VideodisplayModel needs a initial string ", 
-                                this.videoDisplayModel.oldSubtitle == '', true );                     
+           	var currentPlayhead : Number;
+            this.videoDisplayModel.currentPlayhead = currentPlayhead;
+            Assert.assertTrue("VideodisplayModel needs currentPlayhead attribute ", 
+                                this.videoDisplayModel.currentPlayhead = currentPlayhead, true );
         }
         
         [Test]
@@ -90,24 +94,6 @@ package org.opencast.engage.brick.videodisplay.cases.model
             var fontSizeCaptions : int = 16;
             Assert.assertEquals("VideodisplayModel needs fontSize 16 for Captions ", 
                                 this.videoDisplayModel.fontSizeCaptions == fontSizeCaptions, true );                     
-        }
-        
-        [Test]
-        public function testModelAttributes_captionsHeight():void
-        {
-            var captionsHeight : int = 50;
-            Assert.assertEquals("VideodisplayModel needs captionsHeight 50 for Captions ", 
-                                this.videoDisplayModel.captionsHeight == captionsHeight, true );                     
-        }
-        
-        
-        [Test]
-        public function testModelAttributes_captionSets():void
-        {
-           var captionSets : ArrayCollection;
-            this.videoDisplayModel.captionSets = captionSets;
-            Assert.assertTrue("VideodisplayModel needs captionSets Array ", 
-                                this.videoDisplayModel.captionSets = captionSets, true );
         }
         
         
@@ -120,14 +106,6 @@ package org.opencast.engage.brick.videodisplay.cases.model
                                 this.videoDisplayModel.languageComboBox = languageComboBox, true );
         }
         
-       	[Test]
-        public function testModelAttributes_ccBoolean():void
-        {
-            var ccBoolean : Boolean = true;
-            Assert.assertEquals("VideodisplayModel needs ccBoolean = true ", 
-                                this.videoDisplayModel.ccBoolean == ccBoolean, true );                     
-        }
-        
         [Test]
         public function testModelAttributes_languages():void
         {
@@ -135,18 +113,25 @@ package org.opencast.engage.brick.videodisplay.cases.model
               Assert.assertTrue("VideodisplayModel needs languageVO ", 
                                 this.videoDisplayModel.languages = languages, true );                     
         }
-       
-       
-       
-       /* [Test]
-        public function testModelAttributes_languages():void
+        
+        [Test]
+        public function testModelAttributes_oldSubtitle():void
         {
-            var test:int = 5;
-            var test1:int = 5;
-            Assert.assertEquals("simple test for flexmojos ", 
-                               test1 == test1, true );                     
-        }*/
+            var oldSubtitle : String = '';
+            this.videoDisplayModel.oldSubtitle = oldSubtitle;
+            Assert.assertEquals("VideodisplayModel needs a initial string ", 
+                                this.videoDisplayModel.oldSubtitle == '', true );                     
+        }
 
+        [Test]
+        public function testPlayerObject():void
+        {
+            var player : MediaPlayerWrapper;
+            this.videoDisplayModel.player = player;
+            Assert.assertTrue("VideodisplayModel needs a player object ", 
+                                this.videoDisplayModel.player = player, true );                   
+                          
+        }
     }
 }
 

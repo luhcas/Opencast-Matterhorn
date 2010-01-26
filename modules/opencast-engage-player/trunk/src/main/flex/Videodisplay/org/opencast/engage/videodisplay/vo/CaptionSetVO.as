@@ -16,7 +16,6 @@
 package org.opencast.engage.videodisplay.vo
 {
 	import mx.collections.ArrayCollection;
-	
 	/**
 	* 	CaptionSetVO
 	* 

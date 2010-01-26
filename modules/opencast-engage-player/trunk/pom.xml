@@ -8,13 +8,13 @@
 	<version>0.6-SNAPSHOT</version>
 	<packaging>swf</packaging>
 	<name>opencast-engage-player</name>
-	
+
 
 	<parent>
-    <groupId>org.opencastproject</groupId>
-    <artifactId>base</artifactId>
-    <version>0.6-SNAPSHOT</version>
-  	</parent>
+		<groupId>org.opencastproject</groupId>
+		<artifactId>base</artifactId>
+		<version>0.6-SNAPSHOT</version>
+	</parent>
 
 	<properties>
 		<sourceFile>Videodisplay.mxml</sourceFile>
@@ -24,18 +24,18 @@
 
 	<!-- This gets a pass for MH-1810 since it does not inherit the base POM -AZ -->
 	<repositories>
-		 <repository>
-		 <id>opencast</id>
-		 <url>http://repository.opencastproject.org/nexus/content/groups/public</url>
-		 </repository>
+		<repository>
+			<id>opencast</id>
+			<url>http://repository.opencastproject.org/nexus/content/groups/public</url>
+		</repository>
 	</repositories>
 	<pluginRepositories>
-		 <pluginRepository>
-		 <id>opencast</id>
-		 <url>http://repository.opencastproject.org/nexus/content/groups/public</url>
-		 </pluginRepository>
+		<pluginRepository>
+			<id>opencast</id>
+			<url>http://repository.opencastproject.org/nexus/content/groups/public</url>
+		</pluginRepository>
 	</pluginRepositories>
-	
+
 	<build>
 		<sourceDirectory>src/main/flex/Videodisplay</sourceDirectory>
 		<!--<testSourceDirectory>src/test/flex</testSourceDirectory>-->
@@ -58,7 +58,7 @@
 					<accessible>true</accessible>
 					<headlessServer>true</headlessServer>
 					<showWarnings>false</showWarnings>
-					
+
 					<output>${project.build.directory}/hybrid-player/Videodisplay.swf</output>
 					<!--<coverageViewerPath>/Applications/CoverageViewer.app</coverageViewerPath>-->
 				</configuration>
@@ -114,12 +114,12 @@
 							<report>asdoc-report</report>
 						</reports>
 						<configuration>
-              			<windowTitle>Opencast Matterhorn Media Player API Doc</windowTitle>
-              			<footer>Opencast Matterhorn </footer>
-              			<configFile>
+							<windowTitle>Opencast Matterhorn Media Player API Doc</windowTitle>
+							<footer>Opencast Matterhorn </footer>
+							<configFile>
               			${basedir}/asdoc-config.xml
               			</configFile>
-              			</configuration>
+						</configuration>
 					</reportSet>
 				</reportSets>
 			</plugin>

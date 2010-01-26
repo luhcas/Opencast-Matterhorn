@@ -23,20 +23,24 @@ package org.opencast.engage.videodisplay.control.responder
 	import org.opencast.engage.videodisplay.vo.CaptionSetVO;
 	import org.opencast.engage.videodisplay.vo.CaptionVO;
 	import org.swizframework.Swiz;
-	
 	/**
     *   LoadDFXPXMLResponder
     * 
     */
 	public class LoadDFXPXMLResponder implements IResponder
 	{
-		[Autowire]
-		public var model : VideodisplayModel;
 		
 		/** Constructor */
 		public function LoadDFXPXMLResponder()
 		{
 			Swiz.autowire( this );
+		}
+		[Autowire]
+		public var model : VideodisplayModel;
+        
+        /** */
+		public function fault(info : Object) : void
+		{
 		}
 
 		/** result */
@@ -127,11 +131,6 @@ package org.opencast.engage.videodisplay.control.responder
 			}
 
 			return result;
-		}
-        
-        /** */
-		public function fault(info : Object) : void
-		{
 		}
 	}
 }

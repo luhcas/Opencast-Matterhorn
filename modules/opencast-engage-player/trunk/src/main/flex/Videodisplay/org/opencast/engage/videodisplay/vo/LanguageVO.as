@@ -28,9 +28,9 @@ package org.opencast.engage.videodisplay.vo
 			this.short_name = short_name;
 			this.long_name = long_name;
 		}
+		public var long_name : String;
 
 		public var short_name : String;
-		public var long_name : String;
 		
 		/** 
 		 * toString

@@ -1,6 +1,7 @@
 package org.opencast.engage.brick.videodisplay.suites
 {
 	import org.opencast.engage.brick.videodisplay.cases.model.TestVideodisplayModel;
+	
 	public class EngageVideoDisplayTestSuite
 	{
 		
@@ -10,6 +11,5 @@ package org.opencast.engage.brick.videodisplay.suites
 		{
 		 var testVideodisplayModel:TestVideodisplayModel;
 		}
-
 	}
 }

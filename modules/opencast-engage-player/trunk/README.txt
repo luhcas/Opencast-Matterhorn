@@ -5,7 +5,7 @@ FlexBuilder + maven:
 
 Project uses flexmojos in order to build and maintain the code with maven. (http://code.google.com/p/flex-mojos/)
 
-Make sure that you include
+(Optional:
 
 <mirror>
       <!--This sends everything else to /public -->
@@ -15,7 +15,7 @@ Make sure that you include
 </mirror>
 
 in your maven settings.xml
-
+)
 
 After checkout please run
 
@@ -27,7 +27,7 @@ in your opencast-engage-player folder.
 After this you should be able to include the project in Eclipse.
 
 
-IMPORTANT: Remove the settings.xml again. Matterhorn won´t build in case you set the repository url.
+(Optional IMPORTANT: Remove the settings.xml again. Matterhorn won´t build in case you set the repository url.)
 
 -------------------
 
@@ -38,7 +38,7 @@ If you use maven for testing instead of FlexBuilder:
 Make sure that Flash Player is available on your clathpath; 
 Important to run the FlexUnitTests
 
-on MacOSX
+on MacOSX for example:
 export PATH=$PATH:/pathtoflashplayer/Flash\ Player.app/Contents/MacOS
 
 
