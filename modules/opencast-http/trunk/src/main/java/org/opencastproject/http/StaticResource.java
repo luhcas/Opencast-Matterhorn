@@ -26,11 +26,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import javax.activation.MimetypesFileTypeMap;
 
 /**
  * A static resource for registration with the http service.
@@ -108,7 +107,6 @@ public class StaticResource extends HttpServlet {
     }
     
     // Find and deliver the resource
-    try {
       String classpathToResource;
       if(pathInfo == null) {
         if( ! servletPath.equals(alias)) {
@@ -133,26 +131,42 @@ public class StaticResource extends HttpServlet {
         }
         url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
       }
-      logger.debug("opening url {} {}", new Object[] {classpathToResource, url});
       
-      String md5 = DigestUtils.md5Hex(url.openStream());
-      if(md5.equals(req.getHeader("If-None-Match"))) {
-        resp.setStatus(304);
+      if(url == null) {
+        try {
+          resp.sendError(404);
+        } catch (IOException e) {
+          logger.warn(e.getMessage());
+        }
         return;
       }
-      resp.setHeader("ETag", md5);
+      logger.debug("opening url {} {}", new Object[] {classpathToResource, url});
+      
+      try {
+        String md5 = DigestUtils.md5Hex(url.openStream());
+        if(md5.equals(req.getHeader("If-None-Match"))) {
+          resp.setStatus(304);
+          return;
+        }
+        resp.setHeader("ETag", md5);
+      } catch (IOException e) {
+        logger.warn("This system can not generate md5 hashes.");
+      }
       String contentType = mimeMap.getContentType(url.getFile());
-      if(contentType != "application/octet-stream"){
+      if( ! "application/octet-stream".equals(contentType)){
         resp.setHeader("Content-Type", contentType);
       }
-      InputStream in = url.openStream();
-      IOUtils.copy(in, resp.getOutputStream());
-    } catch (Exception e) {
+      InputStream in;
       try {
-        resp.sendError(404, e.getMessage());
-      } catch (IOException e1) {
-        e1.printStackTrace();
+        in = url.openStream();
+        IOUtils.copy(in, resp.getOutputStream());
+      } catch (IOException e) {
+        logger.warn("could not open or copy streams");
+        try {
+          resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (IOException e1) {
+          // We don't care
+        }
       }
-    }
   }
 }
