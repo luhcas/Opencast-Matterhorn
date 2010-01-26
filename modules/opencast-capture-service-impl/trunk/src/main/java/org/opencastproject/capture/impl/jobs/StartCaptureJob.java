@@ -39,7 +39,7 @@ public class StartCaptureJob implements Job {
   private static final Logger logger = LoggerFactory.getLogger(StartCaptureJob.class);
 
   /**
-   * Starts the capture itself.
+   * Starts the capture itself.  Also schedules a StopCaptureJob.
    * {@inheritDoc}
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
@@ -86,7 +86,8 @@ public class StartCaptureJob implements Job {
       trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
 
       // Schedules the stop event
-      ctx.getScheduler().scheduleJob(job, trigger);
+      Scheduler jobScheduler = (Scheduler) ctx.getMergedJobDataMap().get(JobParameters.JOB_SCHEDULER);
+      jobScheduler.scheduleJob(job, trigger);
       logger.info("stopCapture scheduled for: {}", trigger);
 
     } catch (SchedulerException e) {

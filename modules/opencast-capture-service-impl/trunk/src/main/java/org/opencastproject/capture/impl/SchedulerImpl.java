@@ -66,16 +66,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * TODO: Comment me!
- *
+ * Scheduler implementation class.  This class is responsible for retrieving iCal
+ * and then scheduling captures from the resulting calendaring data.
  */
 public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler, ManagedService {
-
-  /** The properties of the scheduler for the calendar polling system */
-  private static Properties pollingProperties = null;
-
-  /** The properties of the scheduler for the capture system */
-  private static Properties captureProperties = null;
 
   /** Log facility */
   private static final Logger log = LoggerFactory.getLogger(SchedulerImpl.class);
@@ -85,6 +79,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /** The scheduler which does the actual polling */
   private Scheduler pollScheduler = null;
+
+  /** The scheduler which keeps track of all of the post-capture jobs (StopCapture, Serialize, Ingest, etc) */
+  private Scheduler jobScheduler = null;
 
   /** The stored URL for the remote calendar source */
   private URL remoteCalendarURL = null;
@@ -103,13 +100,16 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   private CaptureAgent captureAgent = null;
 
+  /**
+   * Called when the bundle is deactivated.  This function shuts down all of the schedulers.
+   */
   public void deactivate() {
     shutdown();
   }
 
   /**
    * Called when the bundle is activated and does all of the activation for the schedulers.
-   * @param cc The component context
+   * @param cc The component context.
    */
   public void activate(ComponentContext cc) {
     config = ConfigurationManager.getInstance();
@@ -138,7 +138,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       pollTime = Long.parseLong(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL)) * 1000L;
       if (pollTime > 1) {
         //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
-        pollingProperties = new Properties();
+        Properties pollingProperties = new Properties();
         pollingProperties.load(getClass().getClassLoader().getResourceAsStream("config/calendar_polling_scheduler.properties"));
         sched_fact = new StdSchedulerFactory(pollingProperties);
   
@@ -171,8 +171,16 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     }
 
     try {
+      //Setup the factory to create the job scheduler
+      Properties jobProperties = new Properties();
+      jobProperties.load(getClass().getClassLoader().getResourceAsStream("config/ingest_scheduler.properties"));
+      sched_fact = new StdSchedulerFactory(jobProperties);
+      //Create and start the scheduler
+      jobScheduler = sched_fact.getScheduler();
+      jobScheduler.start();
+
       //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
-      captureProperties = new Properties();
+      Properties captureProperties = new Properties();
       captureProperties.load(getClass().getClassLoader().getResourceAsStream("config/capture_scheduler.properties"));
       sched_fact = new StdSchedulerFactory(captureProperties);
       //Create and start the capture scheduler
@@ -186,16 +194,23 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     }
   }
 
+  /**
+   * Sets the capture agent which this scheduler should be scheduling for.
+   * @param agent The agent.
+   */
   public void setCaptureAgent(CaptureAgent agent) {
     captureAgent = agent;
   }
 
+  /**
+   * Sets the capture agent for this scheduler to null.
+   */
   public void unsetCaptureAgent() {
     captureAgent = null;
   }
 
   /**
-   * {@inheritDoc}
+   * Overridden finalize function to shutdown all Quartz schedulers.
    * @see java.lang.Object#finalize()
    */
   @Override
@@ -230,9 +245,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Reads in a calendar from either an HTTP or local source and turns it into a iCal4j Calendar object
-   * @param url The URL to read the calendar data from
-   * @return A calendar object, or null in the case of an error or to indicate that no update should be performed
+   * Reads in a calendar from either an HTTP or local source and turns it into a iCal4j Calendar object.
+   * @param url The URL to read the calendar data from.
+   * @return A calendar object, or null in the case of an error or to indicate that no update should be performed.
    */
   private Calendar parseCalendar(URL url) {
 
@@ -285,9 +300,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Writes the contents variable to the URL passed in
-   * @param file The URL of the local file you wish to write to
-   * @param contents The contents of the file you wish to create
+   * Writes the contents variable to the URL.  Note that the URL must be a local URL.
+   * @param file The URL of the local file you wish to write to.
+   * @param contents The contents of the file you wish to create.
    */
   private void writeFile(URL file, String contents) {
     //TODO:  Handle file corruption issues for this block
@@ -308,9 +323,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Convenience method to read in a file from either a remote or local source
-   * @param url The URL to read the source data from
-   * @return A String containing the source data
+   * Convenience method to read in a file from either a remote or local source.
+   * @param url The URL to read the source data from.
+   * @return A String containing the source data.
    * @throws IOException
    */
   private String readCalendar(URL url) throws IOException, NullPointerException {
@@ -326,9 +341,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Returns a string of the name for every scheduled job
-   * Job titles are their DTSTART fields, so they look like 20091105T142500
-   * @return An array of Strings containing the name of every scheduled job
+   * Returns the name for every scheduled job.
+   * Job titles are their DTSTART fields, so they look like 20091105T142500.
+   * @return An array of Strings containing the name of every scheduled job, or null if there is an error.
    */
   public String[] getCaptureSchedule() {
     if (captureScheduler != null) {
@@ -342,7 +357,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Prints out the current schedules for both schedules
+   * Prints out the current schedules for both schedules.
    * @throws SchedulerException
    */
   private void checkSchedules() throws SchedulerException {
@@ -369,10 +384,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     log.debug("setCaptureSchedule(newCal)");
     try {
       //Clear the existing jobs and reschedule everything
-      captureScheduler.shutdown();
-      SchedulerFactory sched_fact = new StdSchedulerFactory(captureProperties);
-      captureScheduler = sched_fact.getScheduler();
-      captureScheduler.start();
+      for (String name : captureScheduler.getJobNames(Scheduler.DEFAULT_GROUP)) {
+        captureScheduler.deleteJob(name, Scheduler.DEFAULT_GROUP);
+      }
+      checkSchedules();
+      log.info("=====================");
 
       ComponentList list = newCal.getComponents(Component.VEVENT);
       for (Object item : list) {
@@ -468,6 +484,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         }
 
         job.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgent);
+        job.getJobDataMap().put(JobParameters.JOB_SCHEDULER, jobScheduler);
 
         if (!hasProperties) {
           log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", start.toString());
@@ -495,7 +512,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Decodes and returns a Base64 encoded attachment
+   * Decodes and returns a Base64 encoded attachment as a String.  Note that this function does *not*
+   * attempt to guess what the file might actually be.
    * @param property The attachment to decode
    * @return A String representation of the attachment
    * @throws ParseException
@@ -507,9 +525,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Parses an date to build a cron-like time string
-   * @param date The Date you want returned in a cronstring
-   * @return A cron-like scheduling string
+   * Parses an date to build a cron-like time string.
+   * @param date The Date you want returned in a cronstring.
+   * @return A cron-like scheduling string.
    * @throws ParseException
    */
   private CronExpression getCronString(Date date) throws ParseException {

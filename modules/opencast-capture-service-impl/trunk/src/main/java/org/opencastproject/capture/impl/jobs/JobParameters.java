@@ -15,19 +15,25 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
+/**
+ * Defines contants used in many of the jobs.  If you have a constant you need to add, this is the class it should live in.
+ */
 public interface JobParameters {
-  /** Constant used to define the key for the pointer to the state service */
+  /** Constant used to define the key for the pointer to the state service. */
   public static final String STATE_SERVICE = "state_service";
 
-  /** Constant used to define the key for the properties object which is pulled out of the execution context */
+  /** Constant used to define the key for the properties object which is pulled out of the execution context. */
   public static final String CAPTURE_PROPS = "capture_props";
 
-  /** Constant used to define the key for the media package object which is pulled out of the execution context */
+  /** Constant used to define the key for the media package object which is pulled out of the execution context. */
   public static final String MEDIA_PACKAGE = "media_package";
 
-  /** A constant which defines the key to retrieve a pointer to this object in the Quartz job classes.  This is required for PollCalendarJob to know who to push updated calendar data to */
+  /** A constant which defines the key to retrieve a pointer to this object in the Quartz job classes.  This is required for PollCalendarJob to know who to push updated calendar data to. */
   public static final String SCHEDULER = "scheduler";
 
-  /** Constant used to define the key for the CaptureAgentImpl object which is pulled out of the execution context */
+  /** Constant used to define the key for the CaptureAgentImpl object which is pulled out of the execution context. */
   public static final String CAPTURE_AGENT = "capture_agent";
+
+  /** Constant used to define the scheduler which should be used to schedule post-capture jobs in the appropriate classes. */
+  public static final String JOB_SCHEDULER = "job_scheduler";
 }
