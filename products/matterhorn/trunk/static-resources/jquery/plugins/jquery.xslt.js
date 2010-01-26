@@ -48,7 +48,7 @@
                         window.setTimeout(function() {
                             target.html(xm.transformNode(xs.XMLDocument));
                             callback();
-                        }, 50);
+                        }, 500);
                 }
             };
 
