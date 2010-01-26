@@ -104,6 +104,7 @@
         // check if data for required fields is missing
         function checkRequiredFields() {
           var missing = false;
+          var wrongtype = false;
           $('.requiredField').each( function() {
             if (!$(this).val()) {
               $('#notification-' + $(this).attr('id')).show();
@@ -121,13 +122,13 @@
             var right = (ext == 'avi') || (ext == 'mpg') || (ext == 'mp4') || (ext == 'mkv') || (ext == 'flv') || (ext == 'mov') || (ext == 'wmv');
             if (!right) {
               $('#notification-track').show();
-              missing = true;
+              wrongtype = true;
             } else {
               $('#notification-track').hide();
-              missing = false;
+              wrongtype = false;
             }
           }
-          if (!missing) {
+          if (!missing && !wrongtype) {
             $('#container-missingFields').hide('fast');
           }
           return !missing;
