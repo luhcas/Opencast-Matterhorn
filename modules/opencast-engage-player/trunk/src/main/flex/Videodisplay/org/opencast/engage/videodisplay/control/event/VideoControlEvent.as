@@ -66,5 +66,10 @@ package org.opencast.engage.videodisplay.control.event
 		{
 			return _videoControlType;
 		}
+		
+		// Override the inherited clone() method.
+        override public function clone():Event {
+            return new VideoControlEvent(videoControlType, bubbles, cancelable);
+        }
 	}
 }

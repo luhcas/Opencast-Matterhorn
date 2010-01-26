@@ -52,7 +52,7 @@ package org.opencast.engage.videodisplay.control.util
 			var result : String = "";
 			var myTime : Date = new Date(2007 , 0 , 1 , 0 , 0 , seconds);
 			// hours
-			if (_showHours == true)
+			if (_showHours)
 			{
 				if (myTime.getHours() < 10)
 				{

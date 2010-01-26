@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<tt xml:lang="en" xmlns="http://www.w3.org/2006/04/ttaf1" xmlns:tts="http://www.w3.org/2006/04/ttaf1#styling">
+  <head>
+    <styling>
+      <style id="b1" tts:fontWeight="normal" tts:color="#cccc00" />
+    </styling>
+  </head>
+  <body>
+    <div xml:lang="en" style="b1">
+      <p begin="0:00:02.600" end="0:00:03.080">I (heart) Matterhorn</p>
+      <p begin="0:00:03.080" end="0:00:05.019">ADAM HOCHMAN, UC BERKELEY: I think the<br />engage tools, the tools that really allow</p>
+      <p begin="0:00:05.019" end="0:00:12.019">you to interact and embrace the media is in<br />my mind what matters most, because that's</p>
+      <p begin="0:00:12.059" end="0:00:16.560">when the learner starts taking ownership of<br />the material that's being presented to them</p>
+      <p begin="0:00:16.560" end="0:00:20.360">ALLISON BLOODWORTH, UC BERKELEY: Seeing<br />how learners can use media in different and</p>
+      <p begin="0:00:20.360" end="0:00:26.380">new ways, remixing media, annotating media,<br />doing collaborative editing, perhaps sharing</p>
+      <p begin="0:00:26.380" end="0:00:31.039">the media with each other in new and exciting<br />ways is also really - it's kind of what Matterhorn</p>
+      <p begin="0:00:31.039" end="0:00:33.469">is all about, making it better for learners</p>
+      <p begin="0:00:33.469" end="0:00:38.679">JUDY STERN, UC BERKELEY: That's when the<br />use of webcasts and podcasts move beyond a</p>
+      <p begin="0:00:38.679" end="0:00:44.780">passive couch potato experience into something<br />that's a real learning tool where students</p>
+      <p begin="0:00:44.780" end="0:00:49.969">are interacting with the media and making<br />it meaningful to them</p>
+      <p begin="0:00:49.969" end="0:00:53.690">MARKUS KETTERL, UNIVERSITY OF OSNABRUECK:<br />We can do much more with all this data we</p>
+      <p begin="0:00:53.690" end="0:00:58.870">have that can be recorded out of the lecture<br />hall. We have slides, we have slide changes,</p>
+      <p begin="0:00:58.870" end="0:01:05.530">we have students that interrupt during the<br />lecture, asking questions and getting answers.</p>
+      <p begin="0:01:05.530" end="0:01:12.350">This is valuable information that needs to<br />be somewhere in user interfaces so later on,</p>
+      <p begin="0:01:12.350" end="0:01:16.680">people can really work with the content and<br />it's not just a copy out of the lecture hall.</p>
+      <p begin="0:01:16.680" end="0:01:22.420">It should be a real experience of what's happening<br />in the lecture hall. This is one of the major</p>
+      <p begin="0:01:22.420" end="0:01:27.369">differences between, let's say, just a video<br />on YouTube and the engage application.</p>
+      <p begin="0:01:27.369" end="0:01:33.409">OLAF SCHULTE, ETH ZURICH: We will have<br />a system that will navigate you to a point</p>
+      <p begin="0:01:33.409" end="0:01:40.119">in time in the video. If we detected a certain<br />word on the slide, then you can search for</p>
+      <p begin="0:01:40.119" end="0:01:46.460">that specific word, and jump into the video<br />right at the point where this word was on</p>
+      <p begin="0:01:46.460" end="0:01:47.929">the slide.</p>
+      <p begin="0:01:47.929" end="0:01:53.090">ALLISON: Thinking through what an administrator<br />might need, the different functionality and</p>
+      <p begin="0:01:53.090" end="0:01:58.049">pages, the different ways of organizing that<br />information - that's fairly natural to me,</p>
+      <p begin="0:01:58.049" end="0:02:00.259">so I love working on the administrative application.</p>
+      <p begin="0:02:00.259" end="0:02:07.259">OLAF: I really hope for a very comfortable<br />and reliable scheduling system, because I</p>
+      <p begin="0:02:08.500" end="0:02:15.500">think that's what administrators find helpful,<br />that towards the start of the semester they</p>
+      <p begin="0:02:16.470" end="0:02:21.500">don't have all this work of scheduling each<br />class individually. But rather it should be</p>
+      <p begin="0:02:21.500" end="0:02:28.440">integrated with other campus information systems.<br />So no scheduling or only a little scheduling</p>
+      <p begin="0:02:28.440" end="0:02:30.810">is needed at the start of the semester</p>
+      <p begin="0:02:30.810" end="0:02:33.660">CHRISTOPHER BROOKS, UNIVERSITY OF SASKATCHEWAN:<br />At the University of Saskatchewan we've got</p>
+      <p begin="0:02:33.660" end="0:02:37.680">a number of classrooms that aren't your typical<br />room, they don't have just one VGA or one</p>
+      <p begin="0:02:37.680" end="0:02:42.420">camera. We have audience cameras sometimes,<br />we have motion tracking cameras sometimes,</p>
+      <p begin="0:02:42.420" end="0:02:47.460">and sometimes we have multiple VGA screens.<br />Finding a lecture capture system that works</p>
+      <p begin="0:02:47.460" end="0:02:51.650">for this is really difficult, especially with<br />the commercial systems out there that aren't</p>
+      <p begin="0:02:51.650" end="0:02:55.380">as flexible as soemthing like Matterhorn is.</p>
+      <p begin="0:02:55.380" end="0:03:02.380">TOBIAS WUNDEN, ETH ZURICH: The one feature<br />that will blow people away once Matterhorn</p>
+      <p begin="0:03:02.560" end="0:03:09.560">is out will be the media analyis. I'm very<br />sure that Matterhorn will be far ahead of</p>
+      <p begin="0:03:11.180" end="0:03:17.320">any competitors that we might be having. The<br />media analysis is actually the future of lecture</p>
+      <p begin="0:03:17.320" end="0:03:22.540">recording. This is what you get out of the<br />whole thing once you get it automated and</p>
+      <p begin="0:03:22.540" end="0:03:22.950">scaled.</p>
+      <p begin="0:03:22.950" end="0:03:27.200">JOSH HOLTZMAN, UC BERKELEY: One of the<br />things I'm really excited about Matterhorn</p>
+      <p begin="0:03:27.200" end="0:03:32.770">is how modular the system is. So you can take<br />pieces of it, integrate with an existing lecture</p>
+      <p begin="0:03:32.770" end="0:03:38.750">capture system. You can take the entire thing<br />and run it as a standalone, top to bottom,</p>
+      <p begin="0:03:38.750" end="0:03:43.910">soup to nuts lecture capture system. You can<br />use it only if you need an encoding engine,</p>
+      <p begin="0:03:43.910" end="0:03:49.140">you can use it for that. So that, I think<br />that's a really powerful piece of the software.</p>
+    </div>
+  </body>
+</tt>

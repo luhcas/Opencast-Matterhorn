@@ -108,17 +108,21 @@ package org.opencast.engage.videodisplay.control.responder
 				switch (i)
 				{
 					case parts.length - 1 : var secondParts : Array = String(parts[i]).split(".");
-					result += secondParts[0] * 1000;
-					if(secondParts[1] != null)
-						if(secondParts[1] > 10)
-						result += secondParts[1] * 10;
-					else if(secondParts[1] > 0)
-						result += secondParts[1] * 100;
-					break;
+					                        result += secondParts[0] * 1000;
+    										if(secondParts[1] != null)
+										        if(secondParts[1] > 10)
+											    result += secondParts[1] * 10;
+										    else if(secondParts[1] > 0)
+											  result += secondParts[1] * 100;
+									     	break;
+									     	
 					case parts.length - 2 : result += parts[i] * 60000;
-					break;
+					                        break;
+					                        
 					case parts.length - 3 : result += parts[i] * 360000;
-					break;
+					                        break;
+					                        
+					default:                break;
 				}
 			}
 

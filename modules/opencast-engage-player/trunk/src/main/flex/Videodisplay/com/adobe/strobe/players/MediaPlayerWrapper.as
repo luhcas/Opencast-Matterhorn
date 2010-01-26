@@ -91,9 +91,7 @@ package com.adobe.strobe.players
             
             _playerSprite = new MediaPlayerSprite();                
             addChild(_playerSprite);
-            
-            dispatchEvent(new Event("mediaPlayerChange"));
-            
+                       
             // Add MediaPlayer event handlers.
             mediaPlayer.addEventListener(MediaPlayerCapabilityChangeEvent.AUDIBLE_CHANGE, redispatch);
             mediaPlayer.addEventListener(MediaPlayerCapabilityChangeEvent.BUFFERABLE_CHANGE, redispatch);
@@ -105,7 +103,7 @@ package com.adobe.strobe.players
             mediaPlayer.addEventListener(MediaPlayerCapabilityChangeEvent.TEMPORAL_CHANGE, redispatch);
             mediaPlayer.addEventListener(MediaPlayerCapabilityChangeEvent.VIEWABLE_CHANGE, redispatch);
             mediaPlayer.addEventListener(MediaPlayerCapabilityChangeEvent.DOWNLOADABLE_CHANGE, redispatch);
-            mediaPlayer.addEventListener(MediaErrorEvent.MEDIA_ERROR, onMediaError);
+            mediaPlayer.addEventListener(MediaErrorEvent.MEDIA_ERROR, redispatch);
             mediaPlayer.addEventListener(TimeEvent.DURATION_CHANGE, redispatch);
             mediaPlayer.addEventListener(TimeEvent.CURRENT_TIME_CHANGE, redispatch);
             mediaPlayer.addEventListener(TimeEvent.DURATION_REACHED, redispatch);
@@ -133,15 +131,6 @@ package com.adobe.strobe.players
                     
         protected var _playerSprite:MediaPlayerSprite;
         
-        private function onMediaError(event:MediaErrorEvent):void
-        {
-           var error:String = '';
-           
-           error += event.error.errorCode + '\n';
-           error += event.error.description + '\n';
-           error += event.error.detail;
-           
-           Alert.show( error );
-        }
+        
     }
 }

@@ -42,5 +42,10 @@ package org.opencast.engage.videodisplay.control.event
 		{
 			return _source;
 		}
+		
+		// Override the inherited clone() method.
+        override public function clone():Event {
+            return new LoadDFXPXMLEvent(source);
+        }
 	}
 }

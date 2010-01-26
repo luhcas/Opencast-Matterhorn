@@ -48,7 +48,7 @@ package org.opencast.engage.videodisplay.model
 		public var currentSubtitle : String = '';
 
 		// Font Size of the Captions
-		public var fontSizeCaptions : int = 16;
+		public var fontSizeCaptions : int = 12;
 
 		// Height of the captions
 		public var captionsHeight : int = 50;
@@ -89,17 +89,9 @@ package org.opencast.engage.videodisplay.model
 		// Time Code
 		public var timeCode:TimeCode = new TimeCode();
 		
-		// Progress Percent
-        public var progressPercent:int = 0;
-        
+	        
         // Progress Bar
         public var progressBar:ProgressBar = new ProgressBar();
-        
-        [Embed("../../../../../../../resources/icons/volumemuteBig.png")]
-        public var MuteIcon:Class;
-        
-        [Embed("../../../../../../../resources/icons/volumehighBig.png")]
-        public var UnmuteIcon:Class;
         
         // mediaState
         public var mediaState:String = MediaState.VIDEO;
@@ -109,6 +101,9 @@ package org.opencast.engage.videodisplay.model
         
         // video Volume
         public var videoVolume:Number = 1;
+        
+        // error 
+        public var error:Error;
         
         /** Constructor */		
 		public function VideodisplayModel()

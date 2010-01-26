@@ -116,7 +116,10 @@
 						<configuration>
               			<windowTitle>Opencast Matterhorn Media Player API Doc</windowTitle>
               			<footer>Opencast Matterhorn </footer>
-            			</configuration>
+              			<configFile>
+              			${basedir}/asdoc-config.xml
+              			</configFile>
+              			</configuration>
 					</reportSet>
 				</reportSets>
 			</plugin>

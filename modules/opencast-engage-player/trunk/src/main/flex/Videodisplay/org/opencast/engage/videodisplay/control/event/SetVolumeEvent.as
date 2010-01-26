@@ -42,5 +42,10 @@ package org.opencast.engage.videodisplay.control.event
 		{
 			return _volume;
 		}
+		
+		// Override the inherited clone() method.
+        override public function clone():Event {
+            return new SetVolumeEvent(volume, bubbles, cancelable);
+        }
 	}
 }

@@ -26,6 +26,8 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import org.osmf.events.MediaErrorEvent;
+			import mx.messaging.messages.ErrorMessage;
 			import org.osmf.utils.FMSURL;
 			import org.osmf.composition.SerialElement;
 			import mx.utils.LoaderUtil;
@@ -65,16 +67,19 @@
             [Autowire]
 			[Bindable]
 			public var model:VideodisplayModel;
+			
 			private var mediaElement:MediaElement;
 			private var _time:TimeCode;
 			private var captionURL:String;
 			private var mediaURL:String;
-			private const TIMER_INTERVAL_BYTES_LOADED:int = 200;
-            private var bytesLodedTimer:Timer;        
+			private const TIMER_INTERVAL_BYTES_LOADED:int = 250;
+            private var bytesLoadedTimer:Timer;        
 			private var lastNewPositionString:String = "00:00:00";
 			private var currentDurationString:String = "00:00:00";
 			private var bytesLoaded:Number = 0;
-			private var bytesTotal:Number = 0;			
+			private var bytesTotal:Number = 0;	
+			private var res:URLRequest;
+			
 			/** 
 			 * initPlayer
 			 * 
@@ -86,23 +91,21 @@
 				model.player = this.wrapper.mediaPlayer;
 				_time = new TimeCode();
 				
-				bytesLodedTimer = new Timer(0);    
-				bytesLodedTimer.addEventListener(TimerEvent.TIMER, progress);
-				bytesLodedTimer.start();
-				
+				bytesLoadedTimer = new Timer(TIMER_INTERVAL_BYTES_LOADED);    
+                bytesLoadedTimer.addEventListener(TimerEvent.TIMER, progress);
+                bytesLoadedTimer.start();
+                
 				// When the flash vars video_url ist not undifined
 				if(Application.application.parameters.video_url != undefined)
 			    {
 					mediaURL = Application.application.parameters.video_url;
-					
 					
 					var pos:int = mediaURL.lastIndexOf(".");
                     var fileType:String = mediaURL.substring(pos+1);
                 
                     switch(fileType) 
                     {
-                    
-	                    case "flv": mediaElement = new VideoElement(new NetLoader(), new URLResource(new URL(mediaURL)));
+                        case "flv": mediaElement = new VideoElement(new NetLoader(), new URLResource(new URL(mediaURL)));
 	                                ExternalInterface.call(ExternalFunction.SETVOLUME, 100);
 	                                model.mediaState = MediaState.VIDEO;
 	                                break;
@@ -119,24 +122,20 @@
 	                                model.audioURL  = mediaURL.substring(position+1);                             
 	                                break;
 	                    
-	                    default: Alert.show("Error, wrong media file, please contact your admin."); 
-	                             break;
+	                    default:    errorMessage("Error", "TRACK COULD NOT BE FOUND"); 
+	                                break;
                     }
 				}
 				else
 			    {
-				    Alert.show("Wrong Video-URL, please contact your Admin.");
+				    errorMessage("Error","TRACK COULD NOT BE FOUND");
 			    }
-			   
+			    
 			    // When the flash vars captions ist not undifined
 			    if(Application.application.parameters.captions != undefined)
 		        {
 		      		captionURL = Application.application.parameters.captions;
 		        }
-		      	else
-		      	{
-		      		//Alert.show("Wrong Captions-URL, please contact your Admin.");
-                }	
 		      	
 		      	// When the flash vars autoplay ist not undifined
 		    	if(Application.application.parameters.autoplay != undefined)
@@ -168,7 +167,6 @@
 		      	}
 		      	
 		      	// Set up the MediaPlayer.
-                
                 model.player.autoRewind = true;
                 
                 wrapper.scaleMode = ScaleMode.LETTERBOX;
@@ -178,8 +176,10 @@
                 wrapper.addEventListener(LoadEvent.BYTES_LOADED_CHANGE, onBytesLoadedChange);
                 wrapper.addEventListener(TimeEvent.CURRENT_TIME_CHANGE, onCurrentTimeChange);
                 wrapper.addEventListener(TimeEvent.DURATION_REACHED, onDurationReached);
+                wrapper.addEventListener(MediaErrorEvent.MEDIA_ERROR, onMediaError);
+                
                 wrapper.element = mediaElement;
-			}
+            }
 			
 			/**  
              * autoPlayOff
@@ -205,7 +205,6 @@
 				// Store new duration as current duration in the videodisplay model
 				model.currentDuration = event.time;
 				currentDurationString = _time.getTC(model.currentDuration);
-				
 				ExternalInterface.call(ExternalFunction.SETDURATION, event.time);
 		    	ExternalInterface.call(ExternalFunction.SETTOTALTIME, currentDurationString);
 		    	autoPlayOff();
@@ -229,7 +228,9 @@
                 }
                 
                 if(!model.player.seeking)
+                {
                   ExternalInterface.call(ExternalFunction.SETPLAYHEAD, event.time);
+                }
                 
                 if( captionURL != null )
                 {
@@ -284,22 +285,58 @@
 			 * */
 			private function progress(event:TimerEvent):void
 			{
-	           var loadable: LoadTrait = mediaElement.getTrait(MediaTraitType.LOAD) as LoadTrait;
-               if (loadable) 
-               {
-                    var context:NetLoadedContext = NetLoadedContext(loadable.loadedContext);
-                    model.progressPercent = context.stream.bytesLoaded / context.stream.bytesTotal;
-                    model.progressBar.setProgress( context.stream.bytesLoaded / context.stream.bytesTotal * 100, 100);
-                    try {
-                        ExternalInterface.call(ExternalFunction.SETPROGRESS, context.stream.bytesLoaded / context.stream.bytesTotal * 100);
-                    } catch (e:TypeError) {}
-                    
-                    if( model.progressPercent >= 1 )
-                    {
-                        bytesLodedTimer.stop();
-                    }
-                }
-            }
+	           if(model.mediaState == MediaState.VIDEO)
+	           {
+	               var loadableVideo: LoadTrait = mediaElement.getTrait(MediaTraitType.LOAD) as LoadTrait;
+	               if (loadableVideo) 
+	               {
+	                   var context:NetLoadedContext = NetLoadedContext(loadableVideo.loadedContext);
+	                   var progressVideo:Number = 0;
+	                    
+	                   try 
+	                   {
+	                       progressVideo = Math.round( context.stream.bytesLoaded / context.stream.bytesTotal * 100 );
+		                   ExternalInterface.call(ExternalFunction.SETPROGRESS, progressVideo);
+	                       model.progressBar.setProgress( progressVideo, 100);
+	                   } 
+	                   catch (e:TypeError)
+	                   {
+                            // ignore
+                       }
+	                    
+	                   if( progressVideo >= 100 )
+	                   {
+	                      bytesLoadedTimer.stop();
+	                   }
+	               } 
+	           }
+	           else
+	           {
+	               var loadableAudio: LoadTrait = mediaElement.getTrait(MediaTraitType.LOAD) as LoadTrait;
+	           
+                   if (loadableAudio) 
+                   {
+                       var audioProgress:Number = 0;
+                        
+                       try 
+                       {
+                           audioProgress = Math.round( loadableAudio.bytesLoaded / loadableAudio.bytesTotal * 100 );
+                           ExternalInterface.call(ExternalFunction.SETPROGRESS, audioProgress);
+                           model.progressBar.setProgress( audioProgress, 100);
+                       } 
+                       catch (e:TypeError)
+                       {
+                           // ignore
+                       }
+                       
+                       if( audioProgress >= 100 )
+                       {
+                           bytesLoadedTimer.stop();
+                         
+                       }
+                   } 
+	           }
+	        }
 
 			/**
 			 * resizeVideodisplay
@@ -324,7 +361,33 @@
 				model.videoVolume = event.volume;
 			}
 			
-		]]>
+			/**
+             * onMediaError
+             * 
+             * When the media file ist nocht available.
+             * 
+             * */
+			private function onMediaError( event:MediaErrorEvent ):void
+            {
+                model.error = new Error();
+                model.error.name = event.error.description;
+                model.error.message = event.error.detail;
+            }
+			
+			/**
+             * errorMessage
+             * 
+             * Set the error Message and switch the stage.
+             * 
+             * */
+            private function errorMessage( name:String, message:String ):void
+            {
+                model.error = new Error();
+                model.error.name = name;
+                model.error.message = message;
+                model.mediaState = MediaState.ERROR;
+            }
+        ]]>
 	</mx:Script>
 	
 	<players:MediaPlayerWrapper 

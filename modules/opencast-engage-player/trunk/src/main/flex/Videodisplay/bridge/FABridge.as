@@ -212,10 +212,11 @@ public class FABridge extends EventDispatcher implements IMXMLObject
         }
         _initChecked = true;
 
-        // oops! timing error. Player team is working on it.
-        var t:Timer = new Timer(200,1);
-        t.addEventListener(TimerEvent.TIMER,auxCheckInitialized);
-        t.start();
+        // timing error. Player team is working on it.
+        var timer:Timer = new Timer(200,1);
+        timer.addEventListener(TimerEvent.TIMER,auxCheckInitialized);
+        timer.start();
+
     }
 
     private function auxCheckInitialized(e:Event):void
@@ -234,7 +235,9 @@ public class FABridge extends EventDispatcher implements IMXMLObject
 
         if (bCanGetParams == false)
         {
-            var t:Timer = new Timer(100);
+
+            var timer:Timer = new Timer(100);
+
             var timerFunc:Function = function(e:TimerEvent):void
             {
                 if(baseObject.root != null)
@@ -250,14 +253,18 @@ public class FABridge extends EventDispatcher implements IMXMLObject
                     }
                     if (bCanGetParams)
                     {
-                        t.removeEventListener(TimerEvent.TIMER, timerFunc);
-                        t.stop();
+
+                        timer.removeEventListener(TimerEvent.TIMER, timerFunc);
+                        timer.stop();
+
                         dispatchInit();
                     }
                 }
             }
-            t.addEventListener(TimerEvent.TIMER, timerFunc);
-            t.start();
+
+            timer.addEventListener(TimerEvent.TIMER, timerFunc);
+            timer.start();
+
         }
         else
         {
@@ -803,12 +810,16 @@ public class FABridge extends EventDispatcher implements IMXMLObject
             var callLater:Boolean = checkToExecuteLater(obj, methodName);
 
             if (callLater) {
-                var t:Timer = new Timer(200, 1);
-                t.addEventListener(TimerEvent.TIMER, function():void {
+
+                var timer:Timer = new Timer(200, 1);
+                timer.addEventListener(TimerEvent.TIMER, function():void {
+
                     var ret_inner:* = serialize(obj[methodName].apply(null, deserialize(args)), true);
                     releaseRef(objID);
                 });
-                t.start();
+
+                timer.start();
+
             } else {
                 var ret:* = serialize(obj[methodName].apply(null, deserialize(args)), true);
                 releaseRef(objID);
@@ -903,8 +914,8 @@ public class FABridge extends EventDispatcher implements IMXMLObject
     {
         try
         {
-            var c:Class = Class(ApplicationDomain.currentDomain.getDefinition(className));
-            var instance:Object = new c();
+            var newClass:Class = Class(ApplicationDomain.currentDomain.getDefinition(className));
+            var instance:Object = new newClass();
         }
         catch(e:Error)
         {

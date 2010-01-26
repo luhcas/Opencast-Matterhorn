@@ -42,5 +42,7 @@ package org.opencast.engage.videodisplay.control.event
 		{
 			return _newPosition;
 		}
+		
+		
 	}
 }

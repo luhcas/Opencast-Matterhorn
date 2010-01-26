@@ -30,5 +30,10 @@ package org.opencast.engage.videodisplay.control.event
 		{
 			super(EVENT_NAME , bubbles , cancelable);
 		}
+		
+		// Override the inherited clone() method.
+        override public function clone():Event {
+            return new ResizeVideodisplayEvent(bubbles);
+        }
 	}
 }

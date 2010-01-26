@@ -51,12 +51,11 @@ package org.opencast.engage.videodisplay.control
 		
 		[Autowire]
 		public var delegate : VideodisplayDelegate;
-		private var lastPlayPauseState:String = "";
+
 		private var volume:Number = 1;
 		private var skipVolume:Number = 0.1;
 		private var percent:int = 100;
-		private var showTimeInformationTimer:Timer;
-		
+
 		/** Constructor */
 		public function VideodisplayController()
 		{
@@ -219,6 +218,8 @@ package org.opencast.engage.videodisplay.control
                                                         
                 case VideoControlEvent.INFORMATION:     ExternalInterface.call(ExternalFunction.TOGGLEINFO, '' );           
                                                         break;   
+                                                        
+                default:                                break;
                
              }
 		}
@@ -286,13 +287,11 @@ package org.opencast.engage.videodisplay.control
 					}
 				}
 				
-				
-
 				// When the learner will see the captions	
-				if( model.ccBoolean == true )
+				if( model.ccBoolean )
 				{
-					// When the capions are differently, than send the new captiopns
-					if(model.oldSubtitle != subtitle)
+					// When the capions are different, than send the new captions
+					if( model.oldSubtitle != subtitle )
 					{
 						model.currentSubtitle = '';
 						ExternalInterface.call(ExternalFunction.SETCAPTIONS , subtitle);
@@ -318,19 +317,26 @@ package org.opencast.engage.videodisplay.control
 		public function resizeVideodisplay( event : ResizeVideodisplayEvent ) : void
 		{
 			/**
-			* Application max width: 1080px, max Font Size ?, 1080/26 = 41px
-			* Application min widht: 109px, min Font Size ?, 109/26 = 4px
+			* Application max width: 1194px, max Font Size ?, 1194/33 = 36px ( 36 > 20 ) = 20px
+			* Application min widht: 231px, min Font Size ?, 231/33 = 7px
 			* 
 			* */
-			var divisor : int = 26;
+			var divisor : int = 33;
 			
-			if( Application.application.width / divisor < 28 )
+			if( Application.application.width == 400 )
 			{
-				model.fontSizeCaptions = Application.application.width / divisor;
+				model.fontSizeCaptions = 12; 
 			}
 			else
 			{
-				model.fontSizeCaptions = 28;
+			    if( Application.application.width / divisor < 20 )
+	            {
+	                model.fontSizeCaptions = Application.application.width / divisor;
+	            }
+	            else
+	            {
+	                model.fontSizeCaptions = 20;
+	            }
 			}
 		}
 

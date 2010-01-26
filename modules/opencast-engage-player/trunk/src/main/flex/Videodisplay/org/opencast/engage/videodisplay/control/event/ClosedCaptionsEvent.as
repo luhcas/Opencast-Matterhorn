@@ -42,5 +42,10 @@ package org.opencast.engage.videodisplay.control.event
 		{
 			return _ccBoolean;
 		}
+		
+		// Override the inherited clone() method.
+        override public function clone():Event {
+            return new ClosedCaptionsEvent(ccBoolean, bubbles, cancelable);
+        }
 	}
 }

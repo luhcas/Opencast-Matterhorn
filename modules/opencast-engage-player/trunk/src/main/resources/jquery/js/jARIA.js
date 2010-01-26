@@ -189,8 +189,4 @@ $.extend($.expr[':'], {
 	ariaState : "jQuery(a).ariaState(m[3].split(/=/)[0])==(/=/.test(m[3])?m[3].split(/=/)[1]:'true')"
 });
 
-$(document).ready(function(){
-	$(document).ariaParse();
-});
-
 })(jQuery);

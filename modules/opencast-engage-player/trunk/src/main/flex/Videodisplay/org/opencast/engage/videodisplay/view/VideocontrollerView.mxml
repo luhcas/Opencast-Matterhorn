@@ -236,14 +236,11 @@
 	        width="20"
 	        />
 	        
-	     <mx:Image 
+	     <mx:Button 
 	        width="40" height="40" 
-	        autoLoad="true"
-	        buttonMode="true"
-	        useHandCursor="true"
-	        source="{ model.videoVolume == 0 ?   model.MuteIcon : model.UnmuteIcon }"
-	        toolTip="{ model.videoVolume == 0 ? 'Unmute' : 'Mute'}"
+	        toolTip="{ model.videoVolume == 0 ? 'Mute' : 'Unmute'}"
 	        click="{ Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.MUTE )) }"
+	        styleName="{ model.videoVolume == 0 ? 'volumeMuteBig' : 'volumeHighBig' }"
 	        />   
 	        
 	     <mx:Spacer 
@@ -268,7 +265,7 @@
 	    <mx:Button 
 	        width="40"
 	        height="40" 
-	        toolTip="{ model.ccBoolean == true ? 'Closed Caption Off' : 'Closed Caption On' }"
+	        toolTip="{ model.ccBoolean == true ? 'Closed Caption On' : 'Closed Caption Off' }"
 	        styleName="{ model.ccBoolean == true ? 'ccOff' : 'ccOn' }"
 	        click="{ Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.CLOSEDCAPTIONS)) }"
 	       />  

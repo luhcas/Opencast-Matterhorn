@@ -192,6 +192,13 @@ Button.ccOff
     font-size: 16; 
 }
 
+.errorLabel
+{
+    color: #000000;
+    font-size: 16; 
+}
+
+
 .HSliderSeek
 {
    thumb-skin: Embed(source='skin_opencast.swf', symbol='thumb_slider');
@@ -204,4 +211,32 @@ Button.ccOff
    thumbUpSkin: Embed(source='skin_opencast.swf', symbol='thumb_slider');
    thumbDownSkin: Embed(source='skin_opencast.swf', symbol='thumb_slider');
    thumbOverSkin: Embed(source='skin_opencast.swf', symbol='thumb_slider');
+}
+
+.volumeMuteBig
+{
+  upSkin: Embed(source='../../../resources/icons/volumemuteBig.png');
+  overSkin: Embed(source='../../../resources/icons/volumemuteBig.png');
+  downSkin: Embed(source='../../../resources/icons/volumemuteBig.png');
+  disabledSkin: Embed(source='../../../resources/icons/volumemuteBig.png');
+  selectedUpSkin: Embed(source='../../../resources/icons/volumemuteBig.png'); 
+  selectedOverSkin: Embed(source='../../../resources/icons/volumemuteBig.png');
+  selectedDownSkin: Embed(source='../../../resources/icons/volumemuteBig.png');
+  selectedDisabledSkin: Embed(source='../../../resources/icons/volumemuteBig.png');  
+  
+   
+}
+
+.volumeHighBig
+{
+    
+  upSkin: Embed(source='../../../resources/icons/volumehighBig.png');
+  overSkin: Embed(source='../../../resources/icons/volumehighBig.png');
+  downSkin: Embed(source='../../../resources/icons/volumehighBig.png');
+  disabledSkin: Embed(source='../../../resources/icons/volumehighBig.png');
+  selectedUpSkin: Embed(source='../../../resources/icons/volumehighBig.png'); 
+  selectedOverSkin: Embed(source='../../../resources/icons/volumehighBig.png');
+  selectedDownSkin: Embed(source='../../../resources/icons/volumehighBig.png');
+  selectedDisabledSkin: Embed(source='../../../resources/icons/volumehighBig.png');  
+   
 }
