@@ -130,7 +130,7 @@ public class IngestRestService {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addTrack")
   public Response addMediaPackageTrack(@Context HttpServletRequest request) {
-    return addMediaPackageElement(request, MediaPackageElement.Type.Attachment);
+    return addMediaPackageElement(request, MediaPackageElement.Type.Track);
   }
 
   @POST
@@ -153,7 +153,7 @@ public class IngestRestService {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addCatalog")
   public Response addMediaPackageCatalog(@Context HttpServletRequest request) {
-    return addMediaPackageElement(request, MediaPackageElement.Type.Attachment);
+    return addMediaPackageElement(request, MediaPackageElement.Type.Catalog);
   }
 
   /* -------------------- start of Benjamins weekend-fun -------------------- */
