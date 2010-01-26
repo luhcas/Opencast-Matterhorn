@@ -163,7 +163,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   @Override
   public String startCapture(MediaPackage mediaPackage) {
 
-    logger.debug("startCapture(mediaPackage, properties): {}", mediaPackage);
+    logger.debug("startCapture(mediaPackage): {}", mediaPackage);
 
     return startCapture(mediaPackage, ConfigurationManager.getInstance().getAllProperties());
 
@@ -176,7 +176,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   @Override
   public String startCapture(Properties properties) {
-    logger.debug("startCapture(mediaPackage, properties): {}", properties);
+    logger.debug("startCapture(properties): {}", properties);
 
     // Creates default MediaPackage
     MediaPackage pack;
@@ -622,6 +622,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     agentState = state;
     if (stateService != null) {
       stateService.setAgentState(agentState);
+      logger.debug("Agent state set to: {}", agentState);
     } else {
       logger.warn("State service for capture agent is null, unable to push updates to remote server!  This is only a problem if you see this message repeating.");
     }

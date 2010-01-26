@@ -395,6 +395,7 @@ public class IngestRestService {
   @Path("addZippedMediaPackage")
   @Consumes("application/zip")
   public Response addZippedMediaPackage(InputStream mp) {
+    logger.debug("addZippedMediaPackage(InputStream) called.");
     try {
       service.addZippedMediaPackage(mp);
     } catch (Exception e) {
@@ -408,6 +409,7 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("ingest")
   public Response ingest(@FormParam("mediaPackage") MediaPackage mp) {
+    logger.debug("ingest(MediaPackage): {}", mp);
     try {
       service.ingest(mp);
       return Response.ok(mp).build();

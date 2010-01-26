@@ -144,6 +144,7 @@ public class SchedulerRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("addEvent")
   public Response addEvent (@FormParam("event") SchedulerEventJaxbImpl e) {
+    logger.debug("addEvent(e): {}", e);
     if (e == null) {
       logger.error("Event that should be added is null");
       return Response.status(Status.BAD_REQUEST).build();

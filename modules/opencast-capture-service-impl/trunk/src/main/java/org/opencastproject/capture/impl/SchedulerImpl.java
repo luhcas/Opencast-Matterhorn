@@ -366,7 +366,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @see org.opencastproject.capture.api.ScheduleService#setCaptureSchedule()
    */
   private synchronized void setCaptureSchedule(Calendar newCal) {
-
+    log.debug("setCaptureSchedule(newCal)");
     try {
       //Clear the existing jobs and reschedule everything
       captureScheduler.shutdown();
@@ -567,6 +567,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @see org.opencastproject.capture.api.Scheduler#stopScheduler()
    */
   public void stopScheduler() {
+    log.debug("stopScheduler()");
     try {
       if (captureScheduler != null) {
         captureScheduler.pauseAll();
@@ -581,6 +582,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @see org.opencastproject.capture.api.Scheduler#startScheduler()
    */
   public void startScheduler() {
+    log.debug("startScheduler()");
     try {
       if (captureScheduler != null) {
         captureScheduler.start();
@@ -597,6 +599,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @see org.opencastproject.capture.api.Scheduler#enablePolling(boolean)
    */
   public void enablePolling(boolean enable) {
+    log.debug("enablePolling(enable): {}", enable);
     try {
       if (enable) {
         if (pollScheduler != null) {
