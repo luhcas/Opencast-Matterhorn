@@ -116,7 +116,6 @@ public class DublinCoreTest {
       // Create a new catalog and fill it with a few fields
       DublinCoreCatalog dcNew = DublinCoreCatalogImpl.newInstance();
       File dcTempFile = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
-      dcNew.setURI(dcTempFile.toURI());
 
       // Add the required fields
       dcNew.add(PROPERTY_IDENTIFIER, dcSample.getFirst(PROPERTY_IDENTIFIER));
@@ -152,13 +151,13 @@ public class DublinCoreTest {
       Transformer trans = transfac.newTransformer();
       trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
       trans.setOutputProperty(OutputKeys.METHOD, "xml");
-      FileWriter sw = new FileWriter(new File(dcNew.getURI()));
+      FileWriter sw = new FileWriter(dcTempFile);
       StreamResult result = new StreamResult(sw);
       DOMSource source = new DOMSource(dcNew.toXml());
       trans.transform(source, result);
 
       // Re-read the saved catalog and test for its content
-      DublinCoreCatalog dcNewFromDisk = DublinCoreCatalogImpl.fromURI(dcNew.getURI());
+      DublinCoreCatalog dcNewFromDisk = DublinCoreCatalogImpl.fromURI(dcTempFile.toURI());
       assertEquals(dcSample.getFirst(PROPERTY_IDENTIFIER), dcNewFromDisk.getFirst(PROPERTY_IDENTIFIER));
       assertEquals(dcSample.getFirst(PROPERTY_TITLE, "en"), dcNewFromDisk.getFirst(PROPERTY_TITLE, "en"));
       assertEquals(dcSample.getFirst(PROPERTY_PUBLISHER), dcNewFromDisk.getFirst(PROPERTY_PUBLISHER));

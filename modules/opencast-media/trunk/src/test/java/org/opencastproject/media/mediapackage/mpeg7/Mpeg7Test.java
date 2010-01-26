@@ -87,7 +87,6 @@ public class Mpeg7Test {
       // Create a new catalog and fill it with a few fields
       Mpeg7Catalog mpeg7New = Mpeg7CatalogImpl.newInstance();
       File mpeg7TempFile = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
-      mpeg7New.setURI(mpeg7TempFile.toURI());
 
       // TODO: Add sample tracks to new catalog
       // TODO: Add sample video segments to new catalog
@@ -98,7 +97,7 @@ public class Mpeg7Test {
       Transformer trans = transfac.newTransformer();
       trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
       trans.setOutputProperty(OutputKeys.METHOD, "xml");
-      FileWriter sw = new FileWriter(new File(mpeg7New.getURI()));
+      FileWriter sw = new FileWriter(mpeg7TempFile);
       StreamResult result = new StreamResult(sw);
       DOMSource source = new DOMSource(mpeg7New.toXml());
       trans.transform(source, result);

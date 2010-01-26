@@ -16,6 +16,9 @@
 
 package org.opencastproject.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -24,16 +27,18 @@ import java.util.Map;
 
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * Checksum type represents the method used to generate a checksum.
- *
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: ChecksumType.java 678 2008-08-05 14:56:22Z wunden $
  */
-@XmlType(name="checksumtype", namespace="http://mediapackage.opencastproject.org")
+@XmlJavaTypeAdapter(ChecksumType.Adapter.class)
+@XmlType(name = "checksumtype", namespace = "http://mediapackage.opencastproject.org")
 public final class ChecksumType implements Serializable {
 
+  private static final Logger logger = LoggerFactory.getLogger(ChecksumType.class);
+  
   /** Serial version uid */
   private static final long serialVersionUID = 1L;
 
@@ -48,11 +53,12 @@ public final class ChecksumType implements Serializable {
   protected String type = null;
 
   /** Needed by JAXB */
-  public ChecksumType() {}
+  public ChecksumType() {
+  }
 
   /**
    * Creates a new checksum type with the given type name.
-   *
+   * 
    * @param type
    *          the type name
    */
@@ -63,7 +69,7 @@ public final class ChecksumType implements Serializable {
 
   /**
    * Returns the checksum value.
-   *
+   * 
    * @return the value
    */
   public String getName() {
@@ -73,7 +79,7 @@ public final class ChecksumType implements Serializable {
   /**
    * Returns a checksum type for the given string. <code>Type</code> is
    * considered to be the name of a checksum type.
-   *
+   * 
    * @param type
    *          the type name
    * @return the checksum type
@@ -81,7 +87,7 @@ public final class ChecksumType implements Serializable {
    *           if the digest is not supported by the java environment
    */
   public static ChecksumType fromString(String type)
-      throws NoSuchAlgorithmException {
+          throws NoSuchAlgorithmException {
     if (type == null)
       throw new IllegalArgumentException("Argument 'type' is null");
     type = type.toLowerCase();
@@ -96,7 +102,7 @@ public final class ChecksumType implements Serializable {
 
   /**
    * Returns the type of the checksum gathered from the provided value.
-   *
+   * 
    * @param value
    *          the checksum value
    * @return the type
@@ -130,4 +136,20 @@ public final class ChecksumType implements Serializable {
     return type;
   }
 
+  static class Adapter extends XmlAdapter<String, ChecksumType> {
+    @Override
+    public String marshal(ChecksumType checksumType) throws Exception {
+      return checksumType.type;
+    }
+
+    @Override
+    public ChecksumType unmarshal(String str) throws Exception {
+      try {
+        return ChecksumType.fromString(str);
+      } catch (NoSuchAlgorithmException e) {
+        logger.warn(e.getMessage());
+        throw e;
+      }
+    }
+  }
 }

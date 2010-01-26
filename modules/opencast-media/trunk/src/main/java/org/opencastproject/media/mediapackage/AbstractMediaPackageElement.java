@@ -35,25 +35,25 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * This class provides base functionality for media package elements.
  */
 @XmlTransient
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class AbstractMediaPackageElement implements MediaPackageElement, Serializable {
+public abstract class AbstractMediaPackageElement implements
+        MediaPackageElement, Serializable {
 
   /** Serial version uid */
   private static final long serialVersionUID = 1L;
 
   /** The element identifier */
   @XmlID
-  @XmlAttribute(name="id")
+  @XmlAttribute(name = "id")
   protected String id = null;
 
   /** The element's type whithin the manifest: Track, Catalog etc. */
@@ -63,38 +63,40 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   protected String description = null;
 
   /** The element's mime type, e. g. 'audio/mp3' */
-  @javax.xml.bind.annotation.XmlElement(name="mimetype")
+  @XmlElement(name = "mimetype")
   protected MimeType mimeType = null;
 
   /** The element's type, e. g. 'track/slide' */
-  @XmlAttribute(name="type")
-  @XmlJavaTypeAdapter(FlavorAdapter.class)
+  @XmlAttribute(name = "type")
   protected MediaPackageElementFlavor flavor = null;
 
   /** The tags */
-  @XmlElementWrapper(name="tags")
-  @javax.xml.bind.annotation.XmlElement(name="tag")
+  @XmlElementWrapper(name = "tags")
+  @XmlElement(name = "tag")
   protected SortedSet<String> tags = new TreeSet<String>();
 
   /** The element's location */
+  @XmlElement(name = "url")
   protected URI uri = null;
 
   /** Size in bytes */
   protected long size = -1L;
 
   /** The element's checksum */
+  @XmlElement(name = "checksum")
   protected Checksum checksum = null;
 
   /** The parent media package */
   protected MediaPackage mediaPackage = null;
 
   /** The optional reference to other elements or series */
-  @XmlAttribute(name="ref")
+  @XmlAttribute(name = "ref")
   protected MediaPackageReference reference = null;
 
   /** Needed by JAXB */
-  protected AbstractMediaPackageElement() {}
-  
+  protected AbstractMediaPackageElement() {
+  }
+
   /**
    * Creates a new media package element.
    * 
@@ -105,7 +107,8 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    * @param uri
    *          the elements location
    */
-  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, URI uri) {
+  protected AbstractMediaPackageElement(Type elementType,
+          MediaPackageElementFlavor flavor, URI uri) {
     this(null, elementType, flavor, uri, -1, null, null);
   }
 
@@ -125,7 +128,8 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    * @param mimeType
    *          the element mime type
    */
-  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, URI uri, long size,
+  protected AbstractMediaPackageElement(Type elementType,
+          MediaPackageElementFlavor flavor, URI uri, long size,
           Checksum checksum, MimeType mimeType) {
     this(null, elementType, flavor, uri, size, checksum, mimeType);
   }
@@ -148,8 +152,9 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
    * @param mimeType
    *          the element mime type
    */
-  protected AbstractMediaPackageElement(String id, Type elementType, MediaPackageElementFlavor flavor, URI uri,
-          long size, Checksum checksum, MimeType mimeType) {
+  protected AbstractMediaPackageElement(String id, Type elementType,
+          MediaPackageElementFlavor flavor, URI uri, long size,
+          Checksum checksum, MimeType mimeType) {
     if (elementType == null)
       throw new IllegalArgumentException("Argument 'elementType' is null");
     this.id = id;
@@ -199,9 +204,10 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
       return;
     tags.remove(tag);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.media.mediapackage.MediaPackageElement#containsTag(java.lang.String)
    */
   @Override
@@ -271,7 +277,6 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackageElement#getURI()
    */
-  @javax.xml.bind.annotation.XmlElement(name="url")
   public URI getURI() {
     return uri;
   }
@@ -279,7 +284,8 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   /**
    * Sets the url that is used to store the media package element.
    * <p>
-   * Make sure you know what you are doing, since usually, the media package will take care of the elements locations.
+   * Make sure you know what you are doing, since usually, the media package
+   * will take care of the elements locations.
    * 
    * @param uri
    *          the elements url
@@ -291,7 +297,6 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackageElement#getChecksum()
    */
-  @javax.xml.bind.annotation.XmlElement(name="checksum")
   public Checksum getChecksum() {
     return checksum;
   }
@@ -360,7 +365,8 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   /**
    * Sets the parent media package.
    * <p>
-   * <b>Note</b> This method is only used by the media package and should not be called from elsewhere.
+   * <b>Note</b> This method is only used by the media package and should not be
+   * called from elsewhere.
    * 
    * @param mediaPackage
    *          the parent media package
@@ -455,7 +461,9 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
 
     // Reference
     if (reference != null)
-      if (mediaPackage == null || !reference.matches(new MediaPackageReferenceImpl(mediaPackage)))
+      if (mediaPackage == null
+              || !reference
+                      .matches(new MediaPackageReferenceImpl(mediaPackage)))
         node.setAttribute("ref", reference.toString());
 
     // Description
@@ -464,7 +472,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
       descriptionNode.appendChild(document.createTextNode(description));
       node.appendChild(descriptionNode);
     }
-    
+
     // Tags
     if (tags.size() > 0) {
       Element tagsNode = document.createElement("tags");
@@ -478,7 +486,8 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
 
     // Url
     Element urlNode = document.createElement("url");
-    String urlValue = (serializer != null) ? serializer.encodeURI(uri) : uri.toString();
+    String urlValue = (serializer != null) ? serializer.encodeURI(uri) : uri
+            .toString();
     urlNode.appendChild(document.createTextNode(urlValue));
     node.appendChild(urlNode);
 
@@ -517,6 +526,11 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
     return s.toLowerCase();
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#clone()
+   */
   public Object clone() {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     try {
@@ -529,19 +543,5 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
       throw new RuntimeException(e);
     }
   }
-  
-  static class FlavorAdapter extends XmlAdapter<String, MediaPackageElementFlavor> {
-    @Override
-    public String marshal(MediaPackageElementFlavor flavor) throws Exception {
-      if(flavor == null) {
-        return null;
-      } else {
-        return flavor.toString();
-      }
-    }
-    @Override
-    public MediaPackageElementFlavor unmarshal(String str) throws Exception {
-      return MediaPackageElementFlavor.parseFlavor(str);
-    }
-  }
+
 }

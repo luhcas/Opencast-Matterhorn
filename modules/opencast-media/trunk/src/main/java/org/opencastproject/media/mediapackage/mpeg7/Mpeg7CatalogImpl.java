@@ -57,7 +57,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
   public static final String NS = "mpeg7";
 
   /** Flag used for lazy loading */
-  protected boolean isLoaded = true;
+  protected boolean isLoaded = false;
 
   /** the logging facility provided by log4j */
   final static Logger log_ = LoggerFactory.getLogger(Mpeg7CatalogImpl.class.getName());
@@ -137,7 +137,6 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
   public static Mpeg7Catalog fromURI(URI uri) {
     Mpeg7CatalogImpl doc = new Mpeg7CatalogImpl();
     doc.setURI(uri);
-    doc.isLoaded = false;
     return doc;
   }
 
@@ -165,8 +164,8 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
   private void loadCatalogData() throws IllegalStateException {
     Mpeg7Parser parser = new Mpeg7Parser(this);
     try {
-      isLoaded = true;
       log_.debug("Reading mpeg-7 catalog content from " + uri);
+      isLoaded = true;
       parser.parse(uri.toURL().openStream());
     } catch (Exception e) {
       isLoaded = false;
@@ -188,7 +187,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#multimediaContent()
    */
   public Iterator<MultimediaContent<? extends MultimediaContentType>> multimediaContent() {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     List<MultimediaContent<? extends MultimediaContentType>> result = new ArrayList<MultimediaContent<? extends MultimediaContentType>>();
     for (MultimediaContent<? extends MultimediaContentType> o : multimediaContent.values()) {
@@ -201,7 +200,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#getMultimediaContent(org.opencastproject.media.mediapackage.mpeg7.MultimediaContent.Type)
    */
   public MultimediaContent<? extends MultimediaContentType> getMultimediaContent(MultimediaContent.Type type) {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     return multimediaContent.get(type);
   }
@@ -217,7 +216,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    *           if an error with catalog file handling occurs
    */
   public Document toXml() throws ParserConfigurationException, TransformerException, IOException {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     Document doc = createDocument();
 
@@ -269,7 +268,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    */
   @SuppressWarnings("unchecked")
   public Audio addAudioContent(String id, MediaTime time, MediaLocator locator) {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContentImpl<Audio> content = (MultimediaContentImpl<Audio>) getMultimediaContent(MultimediaContent.Type.AudioType);
     if (content == null) {
@@ -287,7 +286,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#removeAudioContent(java.lang.String)
    */
   public Audio removeAudioContent(String id) {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContentType element = removeContentElement(id, MultimediaContent.Type.AudioType);
     if (element != null)
@@ -299,7 +298,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#hasAudioContent()
    */
   public boolean hasAudioContent() {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContent<?> content = getMultimediaContent(MultimediaContent.Type.AudioType);
     return content != null && content.size() > 0;
@@ -310,7 +309,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    */
   @SuppressWarnings("unchecked")
   public Iterator<Audio> audioContent() {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContent<Audio> content = (MultimediaContent<Audio>) getMultimediaContent(MultimediaContent.Type.AudioType);
     if (content != null)
@@ -325,7 +324,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    */
   @SuppressWarnings("unchecked")
   public Video addVideoContent(String id, MediaTime time, MediaLocator locator) {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContentImpl<Video> content = (MultimediaContentImpl<Video>) getMultimediaContent(MultimediaContent.Type.VideoType);
     if (content == null) {
@@ -343,7 +342,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#removeVideoContent(java.lang.String)
    */
   public Video removeVideoContent(String id) {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContentType element = removeContentElement(id, MultimediaContent.Type.VideoType);
     if (element != null)
@@ -355,7 +354,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#hasVideoContent()
    */
   public boolean hasVideoContent() {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContent<?> content = getMultimediaContent(MultimediaContent.Type.VideoType);
     return content != null && content.size() > 0;
@@ -366,7 +365,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    */
   @SuppressWarnings("unchecked")
   public Iterator<Video> videoContent() {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContent<Video> content = (MultimediaContent<Video>) getMultimediaContent(MultimediaContent.Type.VideoType);
     if (content != null)
@@ -381,7 +380,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    */
   @SuppressWarnings("unchecked")
   public AudioVisual addAudioVisualContent(String id, MediaTime time, MediaLocator locator) {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContentImpl<AudioVisual> content = (MultimediaContentImpl<AudioVisual>) getMultimediaContent(MultimediaContent.Type.AudioVisualType);
     if (content == null) {
@@ -399,7 +398,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#removeAudioVisualContent(java.lang.String)
    */
   public AudioVisual removeAudioVisualContent(String id) {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContentType element = removeContentElement(id, MultimediaContent.Type.AudioVisualType);
     if (element != null)
@@ -411,7 +410,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#hasAudioVisualContent()
    */
   public boolean hasAudioVisualContent() {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContent<?> content = getMultimediaContent(MultimediaContent.Type.AudioVisualType);
     return content != null && content.size() > 0;
@@ -422,7 +421,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    */
   @SuppressWarnings("unchecked")
   public Iterator<AudioVisual> audiovisualContent() {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContent<AudioVisual> content = (MultimediaContent<AudioVisual>) getMultimediaContent(MultimediaContent.Type.AudioVisualType);
     if (content != null)
@@ -435,7 +434,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    */
   @SuppressWarnings("unchecked")
   public Audio getAudioById(String id) {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContent<Audio> content = (MultimediaContent<Audio>) getMultimediaContent(MultimediaContent.Type.AudioType);
     if (content == null)
@@ -448,7 +447,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    */
   @SuppressWarnings("unchecked")
   public AudioVisual getAudioVisualById(String id) {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContent<AudioVisual> content = (MultimediaContent<AudioVisual>) getMultimediaContent(MultimediaContent.Type.AudioVisualType);
     if (content == null)
@@ -461,7 +460,7 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    */
   @SuppressWarnings("unchecked")
   public Video getVideoById(String id) {
-    if (!isLoaded)
+    if (!isLoaded())
       loadCatalogData();
     MultimediaContent<Video> content = (MultimediaContent<Video>) getMultimediaContent(MultimediaContent.Type.VideoType);
     if (content == null)
@@ -483,6 +482,16 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
     if (content != null)
       return content.remove(id);
     return null;
+  }
+
+  /**
+   * Returns <code>true</code> for catalogs that are loaded or that are
+   * in-memory only.
+   * 
+   * @return <code>true</code> if everything is loaded
+   */
+  private boolean isLoaded() {
+    return isLoaded || uri == null;
   }
 
   @SuppressWarnings("unchecked")

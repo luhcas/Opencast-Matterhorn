@@ -20,11 +20,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * ELement flavors describe {@link MediaPackageElement}s in a semantic way. They reveal or give at least a hint about
  * the meaning of an element.
  * 
  */
+@XmlJavaTypeAdapter(MediaPackageElementFlavor.FlavorAdapter.class)
 public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPackageElementFlavor>, Serializable {
 
   /**
@@ -307,6 +311,24 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
       return MediaPackageElementFlavor.this;
     }
 
+  }
+
+  /**
+   * JAXB adapter implementation.
+   */
+  static class FlavorAdapter extends XmlAdapter<String, MediaPackageElementFlavor> {
+    @Override
+    public String marshal(MediaPackageElementFlavor flavor) throws Exception {
+      if(flavor == null) {
+        return null;
+      } else {
+        return flavor.toString();
+      }
+    }
+    @Override
+    public MediaPackageElementFlavor unmarshal(String str) throws Exception {
+      return parseFlavor(str);
+    }
   }
 
   @Override

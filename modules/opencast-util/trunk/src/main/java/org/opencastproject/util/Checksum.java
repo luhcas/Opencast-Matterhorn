@@ -28,35 +28,34 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
 
 /**
  * This class stores value and type of a generated checksum.
- *
+ * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: Checksum.java 1639 2008-12-08 15:45:01Z wunden $
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name="checksum", namespace="http://mediapackage.opencastproject.org")
+@XmlType(name = "checksum", namespace = "http://mediapackage.opencastproject.org")
 public final class Checksum implements Serializable {
 
   /** Serial version uid */
   private static final long serialVersionUID = 1L;
 
   /** The checksum value */
-  @XmlValue
   protected String value_ = null;
 
   /** The checksum type */
-  @XmlAttribute(name="type")
+  @XmlAttribute(name = "type")
   protected ChecksumType type_ = null;
 
   /** Needed by JAXB */
-  public Checksum() {}
-  
+  public Checksum() {
+  }
+
   /**
    * Creates a new checksum object of the specified value and checksum type.
-   *
+   * 
    * @param value
    *          the value
    * @param type
@@ -73,7 +72,7 @@ public final class Checksum implements Serializable {
 
   /**
    * Returns the checksum type.
-   *
+   * 
    * @return the type
    */
   public ChecksumType getType() {
@@ -82,7 +81,7 @@ public final class Checksum implements Serializable {
 
   /**
    * Returns the checksum value.
-   *
+   * 
    * @return the value
    */
   public String getValue() {
@@ -91,7 +90,7 @@ public final class Checksum implements Serializable {
 
   /**
    * Converts the checksum to a hex string.
-   *
+   * 
    * @param data
    *          the digest
    * @return the digest hex representation
@@ -133,7 +132,7 @@ public final class Checksum implements Serializable {
 
   /**
    * Creates a checksum of type <code>type</code> and value <code>value</code>.
-   *
+   * 
    * @param type
    *          the checksum type name
    * @param value
@@ -143,14 +142,14 @@ public final class Checksum implements Serializable {
    *           if the checksum of the specified type cannot be created
    */
   public static Checksum create(String type, String value)
-      throws NoSuchAlgorithmException {
+          throws NoSuchAlgorithmException {
     ChecksumType t = ChecksumType.fromString(type);
     return new Checksum(value, t);
   }
 
   /**
    * Creates a checksum of type <code>type</code> and value <code>value</code>.
-   *
+   * 
    * @param type
    *          the checksum type
    * @param value
@@ -163,7 +162,7 @@ public final class Checksum implements Serializable {
 
   /**
    * Creates a checksum of type <code>type</code> from the given file.
-   *
+   * 
    * @param type
    *          the checksum type
    * @param file
@@ -175,7 +174,7 @@ public final class Checksum implements Serializable {
    *           if the file cannot be accessed
    */
   public static Checksum create(ChecksumType type, File file)
-      throws NoSuchAlgorithmException, IOException {
+          throws NoSuchAlgorithmException, IOException {
     MessageDigest checksum = MessageDigest.getInstance(type.getName());
     BufferedInputStream is = new BufferedInputStream(new FileInputStream(file));
     try {
@@ -185,10 +184,8 @@ public final class Checksum implements Serializable {
         checksum.update(bytes, 0, len);
       }
     } finally {
-      if (is != null)
-        is.close();
+      is.close();
     }
     return new Checksum(convertToHex(checksum.digest()), type);
   }
-
 }
