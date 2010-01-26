@@ -291,10 +291,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         
         // When we return the recording, the mock capture is completed so reset
         // the CaptureAgent state
-        setAgentState(AgentState.IDLE);
-        mockCapture = false;
-        currentRecID = null;
-        logger.debug("Mock capture completed successfully.");
         return recordingID;
       }
     }

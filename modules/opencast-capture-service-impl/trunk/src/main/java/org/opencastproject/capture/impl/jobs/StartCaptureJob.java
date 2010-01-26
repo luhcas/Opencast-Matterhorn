@@ -87,7 +87,7 @@ public class StartCaptureJob implements Job {
 
       // Schedules the stop event
       ctx.getScheduler().scheduleJob(job, trigger);
-      logger.info("stopCapture scheduled");
+      logger.info("stopCapture scheduled for: {}", trigger);
 
     } catch (SchedulerException e) {
       logger.error("Couldn't schedule task: {}", e.getMessage());
