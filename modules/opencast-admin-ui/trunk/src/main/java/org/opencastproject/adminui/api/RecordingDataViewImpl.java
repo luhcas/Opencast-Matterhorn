@@ -135,4 +135,17 @@ public class RecordingDataViewImpl implements RecordingDataView {
   public void setDistributionStatus(String status) {
     this.distribution_status = status;
   }
+
+  public String toString() {
+    StringBuffer sb = new StringBuffer();
+    sb.append("ID: " + this.getId() + "\n");
+    sb.append("Presenter: " + this.getPresenter() + "\n");
+    sb.append("Series: " + this.getSeries() + "\n");
+    sb.append("Agent: " + this.getCaptureAgent() + "\n");
+    sb.append("Time: " + this.getStartTime() + "\n");
+    sb.append("Proc state: " + this.getProcessingStatus() + "\n");
+    sb.append("Dist state: " + this.getDistributionStatus() + "\n");
+
+    return sb.toString();
+  }
 }

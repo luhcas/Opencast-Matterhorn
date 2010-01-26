@@ -9,37 +9,37 @@ popupHelp.helpTexts = {
 
     "presenter" : [
         "Presenter(s)",
-        "Enter the names of all presenters."
+        "Enter the name of the presenter."
     ],
     
     "license" : [
         "License",
-        "Select a license which is used for this recording."
+        "Enter the type of license with which you would like to distribute the recording."
     ],
     
     "series" : [
         "Series Identifier",
-        "Enter an identifier for a series to which this recording belongs."
+        "If the recording is part of series, enter the name of the series."
     ],
     
     "subject" : [
         "Subject",
-        "Enter the subject of the recording."
+        "Enter a category or topic for the recording."
     ],
     
     "language" : [
         "Content Language",
-        "Enter the primary language spoken in this recording."
+        "Enter the primary language spoken in the recording."
     ],
 
     "description" : [
         "Content description",
-        "Enter the description of this recordings content."
+        "Enter a description of the recording."
     ],
     
     "distribution" : [
         "Distribution channels",
-        "Specify the channels to which you would like this recording distributed."
+        "Specify the channel(s) to which you would like this recording distributed."
     ],
     
     "startdate" : [
@@ -69,6 +69,6 @@ popupHelp.helpTexts = {
     
     "contributor" : [
         "Sponsoring Department",
-        "Enter the sponsoring deparment."
+        "Enter the name of the department associated with the recording."
     ]
 };

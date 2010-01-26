@@ -91,13 +91,19 @@
             var items = $(this).text().split(';');
             for (key=0; key < items.length-1; key++) {
               var item = items[key];
+              if (state == 'finished') {
+                item = item.replace(/SUCCEEDED: /,'')
+                           .replace(/distribute_local/,'Distributed')
+                           .replace(/publish/,'Distributed');
+              }
               item = item.replace(/SUCCEEDED/,'Succeeded')
                          .replace(/FAILED/,'Failed')
-                         .replace(/inspect/,'inspect media')
-                         .replace(/compose/,'encode')
-                         .replace(/image/,'create cover image')
-                         .replace(/distribute_local/,'distribute')
-                         .replace(/publish/,'distribute');
+                         .replace(/RUNNING: /,'')
+                         .replace(/inspect/,'Inspecting media')
+                         .replace(/compose/,'Encoding media')
+                         .replace(/image/,'Creating cover image')
+                         .replace(/distribute_local/,'Distributing')
+                         .replace(/publish/,'Distributing');
               $(this).text(item);
               if ( items[key].match(/FAILED/) ) {
                 return;
