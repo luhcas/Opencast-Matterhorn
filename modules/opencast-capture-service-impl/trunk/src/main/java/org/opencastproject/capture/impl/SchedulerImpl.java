@@ -387,8 +387,6 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       for (String name : captureScheduler.getJobNames(Scheduler.DEFAULT_GROUP)) {
         captureScheduler.deleteJob(name, Scheduler.DEFAULT_GROUP);
       }
-      checkSchedules();
-      log.info("=====================");
 
       ComponentList list = newCal.getComponents(Component.VEVENT);
       for (Object item : list) {
