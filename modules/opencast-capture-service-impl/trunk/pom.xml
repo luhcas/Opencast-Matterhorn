@@ -126,6 +126,12 @@
       <artifactId>org.apache.felix.karaf.shell.console</artifactId>
       <version>1.0.0</version>
   	</dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-util</artifactId>
+        <version>0.6-SNAPSHOT</version>
+      <type>bundle</type>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

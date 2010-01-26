@@ -15,8 +15,13 @@
  */
 package org.opencastproject.capture.endpoint;
 
-import java.io.IOException;
-import java.io.InputStream;
+import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Status;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +32,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.io.IOUtils;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingStateUpdate;
 import org.opencastproject.capture.api.StateService;
@@ -76,23 +80,39 @@ public class StateRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
+    if (docs == null) { docs = generateDocs(); }
     return docs;
   }
 
-  protected final String docs;
+  protected String docs;
+  private String[] notes = {
+    "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+    "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
 
-  public StateRestService() {
-    String docsFromClassloader = null;
-    InputStream in = null;
-    try {
-      in = getClass().getResourceAsStream("/html/index.html");
-      docsFromClassloader = IOUtils.toString(in);
-    } catch (IOException e) {
-      logger.error("failed to read documentation", e);
-      docsFromClassloader = "unable to load documentation for " + StateRestService.class.getName();
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-    docs = docsFromClassloader;
+  private String generateDocs() {
+    DocRestData data = new DocRestData("stateservice", "State Service", "/status", notes);
+    
+    // getState
+    RestEndpoint endpoint = new RestEndpoint("getState", RestEndpoint.Method.GET,
+        "/GetState",
+        "Return the state of the capture agent");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addStatus(Status.OK(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+    
+    // getRecordings
+    endpoint = new RestEndpoint("getRecordings", RestEndpoint.Method.GET,
+        "/GetRecordings",
+        "Return a list of the capture agent's recordings");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addStatus(Status.OK(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+    
+    return DocUtil.generate(data);
   }
+
+  public StateRestService() {}
 }
