@@ -196,6 +196,9 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     if (metadata == null) {
       logger.warn("Unable to acquire media metadata for " + originalTrackUrl);
       return null;
+    } else if (metadata.getAudioStreamMetadata().size() == 0 && metadata.getVideoStreamMetadata().size() == 0) {
+      logger.warn("File at {} does not seem like a a/v media", originalTrackUrl);
+      return null;
     } else {
       TrackImpl track = null;
       try {
@@ -214,6 +217,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       track.setReference(originalTrack.getReference());
       track.setSize(originalTrack.getSize());
       track.setURI(originalTrackUrl);
+      
       // enrich the new track with basic info
       if (track.getDuration() == -1L || override)
         track.setDuration(metadata.getDuration());

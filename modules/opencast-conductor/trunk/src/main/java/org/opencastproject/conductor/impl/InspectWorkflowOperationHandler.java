@@ -61,6 +61,8 @@ public class InspectWorkflowOperationHandler implements
     for (Track track : mediaPackage.getTracks()) {
       logger.info("Inspecting track '{}' of {}", track.getIdentifier(), mediaPackage);
       Track inspectedTrack = inspectionService.enrich(track, false);
+      if (inspectedTrack == null)
+        throw new WorkflowOperationException("Track " + track + " could not be inspected");
       try {
         mediaPackage.remove(track);
         mediaPackage.add(inspectedTrack);

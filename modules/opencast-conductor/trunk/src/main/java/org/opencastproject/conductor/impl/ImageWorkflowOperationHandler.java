@@ -134,7 +134,7 @@ public class ImageWorkflowOperationHandler implements WorkflowOperationHandler {
     }
     
     if (videoTracks.size() == 0) {
-      logger.info("Mediapackage {} has no suitable tracks to extract images based on tags {} and flavor {}",
+      logger.debug("Mediapackage {} has no suitable tracks to extract images based on tags {} and flavor {}",
               new Object[] {mediaPackage, sourceTags, sourceVideoFlavor});
       return mediaPackage;
     } else {
@@ -163,7 +163,7 @@ public class ImageWorkflowOperationHandler implements WorkflowOperationHandler {
               // Add tags
               if (targetImageTags != null) {
                 for (String tag : targetImageTags.split("\\W")) {
-                  logger.debug("Tagging image with '{}'", tag);
+                  logger.trace("Tagging image with '{}'", tag);
                   if(StringUtils.trimToNull(tag) != null) composedImage.addTag(tag);
                 }
               }

@@ -148,7 +148,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
 
     // Did we get the set of tracks that we need?
     if (tracks.size() == 0) {
-      logger.info("Skipping encoding of media package to '{}': no suitable input tracks found", profile);
+      logger.debug("Skipping encoding of media package to '{}': no suitable input tracks found", profile);
       return mediaPackage;
     } else {
       for (Track t : tracks) {
@@ -179,7 +179,7 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     if (targetTrackTags != null) {
       for (String tag : targetTrackTags.split("\\W")) {
         if(StringUtils.trimToNull(tag) == null) continue;
-        logger.debug("Tagging composed track with '{}'", tag);
+        logger.trace("Tagging composed track with '{}'", tag);
         composedTrack.addTag(tag);
       }
     }
