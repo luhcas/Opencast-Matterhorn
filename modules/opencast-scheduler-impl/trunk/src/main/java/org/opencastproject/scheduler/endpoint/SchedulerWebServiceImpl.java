@@ -45,7 +45,7 @@ public class SchedulerWebServiceImpl implements SchedulerWebService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.scheduler.endpoint.SchedulerWebService#addEvent(org.opencastproject.scheduler.api.SchedulerEvent)
+   * @see org.opencastproject.scheduler.endpoint.SchedulerWebService#addEvent(org.opencastproject.scheduler.api.SchedulerEventJaxbImpl)
    */
   @WebMethod()
   @WebResult(name="scheduler-event")
@@ -75,7 +75,7 @@ public class SchedulerWebServiceImpl implements SchedulerWebService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.scheduler.endpoint.SchedulerWebService#getEvents(org.opencastproject.scheduler.api.SchedulerFilter)
+   * @see org.opencastproject.scheduler.endpoint.SchedulerWebService#getEvents(org.opencastproject.scheduler.api.SchedulerFilterJaxbImpl)
    */
   @WebMethod()
   @WebResult(name="array")
@@ -88,7 +88,7 @@ public class SchedulerWebServiceImpl implements SchedulerWebService {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.scheduler.endpoint.SchedulerWebService#getEvents(org.opencastproject.scheduler.api.SchedulerFilter)
+   * @see org.opencastproject.scheduler.endpoint.SchedulerWebService#getEvents(org.opencastproject.scheduler.api.SchedulerFilterJaxbImpl)
    */
   @WebMethod()
   @WebResult(name="array")
@@ -111,7 +111,7 @@ public class SchedulerWebServiceImpl implements SchedulerWebService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.scheduler.endpoint.SchedulerWebService#updateEvent(org.opencastproject.scheduler.api.SchedulerEvent)
+   * @see org.opencastproject.scheduler.endpoint.SchedulerWebService#updateEvent(org.opencastproject.scheduler.api.SchedulerEventJaxbImpl)
    */
   @WebMethod()
   @WebResult(name="boolean")

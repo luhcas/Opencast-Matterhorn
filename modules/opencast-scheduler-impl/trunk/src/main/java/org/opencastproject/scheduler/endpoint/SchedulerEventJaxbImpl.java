@@ -125,7 +125,7 @@ public class SchedulerEventJaxbImpl {
   /**
    * valueOf function is called by JAXB to bind values. This function calls the ScheduleEvent factory.
    *
-   *  @param    xml string representation of an event.
+   *  @param    xmlString string representation of an event.
    *  @return   instantiated event SchdeulerEventJaxbImpl.
    */
   public static SchedulerEventJaxbImpl valueOf(String xmlString) throws Exception {

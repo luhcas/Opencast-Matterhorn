@@ -40,7 +40,7 @@ public class SchedulerBuilder {
   }
   
   /**
-   * Returns an instance of the {@link ScheduleBuilder}
+   * Returns an instance of the {@link SchedulerBuilder}
    *
    * @return a factory
    */

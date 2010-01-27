@@ -57,7 +57,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   
   /**
    * Alternative constructor, used by Unit Test for example
-   * @param c A database connection (tested for derby and H2)
+   * @param ds A database connection (tested for derby and H2)
    */
   public SchedulerServiceImplDAO(DataSource ds) {
     try {
@@ -699,7 +699,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   
   /**
    * Sets the database connection, that this scheduler should work with. 
-   * @param con The connection to the database.
+   * @param ds The connection to the database.
    * @throws SQLException 
    */
   public void setDataSource (DataSource ds) throws SQLException{

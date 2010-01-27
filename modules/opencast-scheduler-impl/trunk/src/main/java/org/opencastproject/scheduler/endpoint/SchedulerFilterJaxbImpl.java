@@ -82,7 +82,7 @@ public class SchedulerFilterJaxbImpl {
   
   /**
    * Constructs a JaxB representations of a SchedulerFilter
-   * @param event
+   * @param filter
    */
   public SchedulerFilterJaxbImpl(SchedulerFilter filter) {
     logger.info("Creating a " + SchedulerFilterJaxbImpl.class.getName() + " from " + filter);
@@ -130,7 +130,7 @@ public class SchedulerFilterJaxbImpl {
   /**
    * valueOf function is called by JAXB to bind values. This function calls the Scheduler factory.
    *
-   *  @param    xml string representation of an event.
+   *  @param    xmlString string representation of an event.
    *  @return   instantiated event SchdeulerFilterJaxbImpl.
    */
   public static SchedulerFilterJaxbImpl valueOf(String xmlString) throws Exception {
