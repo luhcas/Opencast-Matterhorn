@@ -56,17 +56,25 @@ public class SearchRestService {
     this.searchService = searchService;
   }
 
-  protected String docs;
-  
-  public SearchRestService() {
-    this.docs = generateDocs();
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("docs")
+  public String getDocumentation() {
+    if (docs == null) { docs = generateDocs(); }
+    return docs;
   }
+
+  protected String docs;
+  private String[] notes = {
+    "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+    "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
   
   protected String generateDocs() {
-    DocRestData data = new DocRestData("Search", "Search Service", "/search/rest", new String[] {"$Rev$"});
+    DocRestData data = new DocRestData("Search", "Search Service", "/search/rest", notes);
     // episode
     RestEndpoint episodeEndpoint = new RestEndpoint("episode", RestEndpoint.Method.GET, "/episode", "Search for episodes matching the query parameters");
-    episodeEndpoint.addFormat(new Format("xml", null, null));
+    episodeEndpoint.addFormat(new Format("XML", null, null));
     episodeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results, expressed as xml"));
     episodeEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The ID of the single episode to be returned, if it exists"));
     episodeEndpoint.addOptionalParam(new Param("q", Type.STRING, null, "Any episode that matches this free-text query"));
@@ -77,7 +85,7 @@ public class SearchRestService {
 
     // series
     RestEndpoint seriesEndpoint = new RestEndpoint("series", RestEndpoint.Method.GET, "/series", "Search for series matching the query parameters");
-    seriesEndpoint.addFormat(new Format("xml", null, null));
+    seriesEndpoint.addFormat(new Format("XML", null, null));
     seriesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results, expressed as xml"));
     seriesEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The series ID. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
     seriesEndpoint.addOptionalParam(new Param("q", Type.STRING, null, "Any series that matches this free-text query. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
@@ -91,7 +99,7 @@ public class SearchRestService {
     RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.POST, "/add", "Adds a mediapackage to the search index");
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containing the search results"));
     addEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(), "The media package to add to the search index"));
-    addEndpoint.addFormat(new Format("xml", null, null));
+    addEndpoint.addFormat(new Format("XML", null, null));
     addEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, addEndpoint);    
 
@@ -113,12 +121,6 @@ public class SearchRestService {
     "    </catalog>\n" +
     "  </metadata>\n" +
     "</ns2:mediapackage>";
-  }
-  
-  @GET
-  @Path("docs")
-  public String getDocs() {
-    return docs;
   }
   
   @POST
