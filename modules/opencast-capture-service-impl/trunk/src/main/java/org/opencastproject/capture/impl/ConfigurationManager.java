@@ -215,11 +215,17 @@ public class ConfigurationManager {
     if (properties == null) {
       properties = new Properties();
     }
+
     if (key == null) {
       return;
     }
-    // this will overwrite the previous value is there is a conflict
-    properties.setProperty(key, value);
+
+    if (value != null) {
+      // this will overwrite the previous value is there is a conflict
+      properties.setProperty(key, value);
+    } else {
+      properties.remove(key);
+    }
   }
   
   /**

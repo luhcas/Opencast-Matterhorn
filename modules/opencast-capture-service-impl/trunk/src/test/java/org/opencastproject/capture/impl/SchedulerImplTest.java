@@ -15,13 +15,18 @@
  */
 package org.opencastproject.capture.impl;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class SchedulerImplTest {
@@ -32,8 +37,8 @@ public class SchedulerImplTest {
   @Before
   public void setUp() {
     config = ConfigurationManager.getInstance();
+    config.setItem(CaptureParameters.AGENT_NAME, "");
     sched = new SchedulerImpl();
-    sched.activate(null);
   }
 
   @After
@@ -43,25 +48,65 @@ public class SchedulerImplTest {
     config = null;
   }
 
-  @Test @Ignore
-  public void testValidRemoteUTF8Calendar() {
-    //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
-    String knownGood = this.getClass().getClassLoader().getResource("calendars/Opencast.ics").toString();
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, knownGood);
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
-    String[] schedule = sched.getCaptureSchedule();
-    Assert.assertEquals(1, schedule.length);
-    Assert.assertEquals("20091005T090000", schedule[0]);
+  private String[] formatDate(Date d) {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+    String[] times = new String[2];
+    times[0] = sdf.format(d);
+    d.setTime(d.getTime() + 60000L);
+    times[1] = sdf.format(d);
+    return times;
   }
 
-  @Test @Ignore
-  public void testValidLocalUTF8Calendar() {
-    String knownGood = this.getClass().getClassLoader().getResource("calendars/Opencast.ics").getFile();
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, knownGood);
+  private String readFile(URL target) throws IOException {
+    StringBuilder sb = new StringBuilder();
+    DataInputStream in = new DataInputStream(target.openStream());
+    int c = 0;
+    while ((c = in.read()) != -1) {
+      sb.append((char) c);
+    }
+    return sb.toString();
+  }
+
+  private File setupTestCalendar(String calLocation, String[] times) throws IOException {
+    String source = readFile(this.getClass().getClassLoader().getResource(calLocation));
+
+    source = source.replace("@START@", times[0]);
+    source = source.replace("@END@", times[1]);
+    
+    File output = File.createTempFile("valid", ".ics");
+    FileWriter out = null;
+    out = new FileWriter(output);
+    out.write(source);
+    out.close();
+
+    return output;
+  }
+
+  @Test
+  public void testValidRemoteUTF8Calendar() throws IOException {
+    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    File testfile = setupTestCalendar("calendars/Opencast.ics", times);
+    //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, testfile.toURI().toURL().toString());
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
+    sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
-    Assert.assertEquals("20091005T090000", schedule[0]);
+    Assert.assertEquals(times[0], schedule[0]);
+    testfile.delete();
+  }
+
+  @Test
+  public void testValidLocalUTF8Calendar() throws IOException {
+    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    File testfile = setupTestCalendar("calendars/Opencast.ics", times);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
+    sched.activate(null);
+    String[] schedule = sched.getCaptureSchedule();
+    Assert.assertEquals(1, schedule.length);
+    Assert.assertEquals(times[0], schedule[0]);
+    testfile.delete();
   }
 
 /* Commented out due to problems getting the UTF16 file to read properly.
@@ -70,7 +115,7 @@ public class SchedulerImplTest {
     //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
     String knownGood = this.getClass().getClassLoader().getResource("calendars/Opencast-UTF16.ics").toString();
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, knownGood);
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("20091005T090000", schedule[0]);
@@ -79,7 +124,7 @@ public class SchedulerImplTest {
   @Test @Ignore
   public void testValidLocalUTF16Calendar() {
     String knownGood = this.getClass().getClassLoader().getResource("calendars/Opencast-UTF16.ics").getFile();
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, knownGood);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
@@ -87,87 +132,99 @@ public class SchedulerImplTest {
   }
 */
 
-  @Test @Ignore
+  @Test
   public void testBlankRemoteCalendar() {
     String cachedBlank = this.getClass().getClassLoader().getResource("calendars/Blank.ics").getFile();
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, cachedBlank);
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
+    sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
 
-  @Test @Ignore
+  @Test
   public void testBlankLocalCalendar() {
     String cachedBlank = this.getClass().getClassLoader().getResource("calendars/Blank.ics").getFile();
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, cachedBlank);
+    sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
 
-  @Test @Ignore
+  @Test
   public void testMalformedRemoteURLCalendar() {
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "blah!");
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
+    sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
 
-  @Test @Ignore
+  @Test
   public void testMalformedLocalURLCalendar() {
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "blah!");
+    sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
 
-  @Test @Ignore
+  @Test
+  public void testMalformedCalendars() {
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "blah!");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "blah!");
+    sched.activate(null);
+    String[] schedule = sched.getCaptureSchedule();
+    Assert.assertEquals(0, schedule.length);
+  }
+
+  @Test
   public void testNonExistantRemoteCalendar() {
     String nonExistant = this.getClass().getClassLoader().getResource("calendars/Blank.ics").getFile() + "nonExistantTest";
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, nonExistant);
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
+    sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
-    Assert.assertArrayEquals(null, schedule);
+    Assert.assertEquals(0, schedule.length);
   }
 
-  @Test @Ignore
+  @Test
   public void testNonExistantLocalCalendar() {
     String nonExistant = this.getClass().getClassLoader().getResource("calendars/Blank.ics").getFile() + "nonExistantTest";
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, nonExistant);
+    sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
-    Assert.assertArrayEquals(null, schedule);
+    Assert.assertEquals(0, schedule.length);
   }
   
-  @Test @Ignore
+  @Test
   public void testGarbageRemoteCalendar() {
     String garbage = this.getClass().getClassLoader().getResource("calendars/Garbage.ics").getFile();
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, garbage);
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
+    sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
 
-  @Test @Ignore
+  @Test
   public void testGarbageCalendar() {
     String garbage = this.getClass().getClassLoader().getResource("calendars/Garbage.ics").getFile();
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, garbage);
+    sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
 
-  @Test @Ignore
-  public void testEndpoit() {
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "");
+  @Test
+  public void testEndpoint() throws MalformedURLException {
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "http://www.example.com");
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
-    URL test;
-    try {
-      test = new URL("http://www.example.com");
-      sched.setScheduleEndpoint(test);
-      Assert.assertEquals(test, sched.getScheduleEndpoint());
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
-    }
+    URL test = new URL("http://www.example.com");
+    sched.setScheduleEndpoint(test);
+    Assert.assertEquals(test, sched.getScheduleEndpoint());
   }
 }

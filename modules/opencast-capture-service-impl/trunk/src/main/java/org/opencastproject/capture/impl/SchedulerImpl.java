@@ -19,6 +19,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,7 +42,6 @@ import net.fortuna.ical4j.model.property.Duration;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.PollCalendarJob;
@@ -127,10 +127,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       String remoteBase = StringUtils.trimToNull(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL));
       if (remoteBase != null && remoteBase.charAt(remoteBase.length()-1) != '/') {
         remoteBase = remoteBase + "/";
-      } else if (remoteBase == null) {
+      } else if (remoteBase == null && cc != null) {
         remoteBase = cc.getBundleContext().getProperty("serverUrl");
-        if (remoteBase == null)
-          throw new IllegalStateException("Base url is not configured, and neither is the server url");
+        if (remoteBase == null) {
+          log.warn("Base url is not configured, and neither is the server url");
+        }
       }
       remoteCalendarURL = new URL(new URL(remoteBase), config.getItem(CaptureParameters.AGENT_NAME));
 
@@ -173,7 +174,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     try {
       //Setup the factory to create the job scheduler
       Properties jobProperties = new Properties();
-      jobProperties.load(getClass().getClassLoader().getResourceAsStream("config/ingest_scheduler.properties"));
+      InputStream s = getClass().getClassLoader().getResourceAsStream("config/ingest_scheduler.properties");
+      if (s == null) {
+        throw new RuntimeException("Unable to load config/ingest_scheduler.properties");
+      }
+      jobProperties.load(s);
       sched_fact = new StdSchedulerFactory(jobProperties);
       //Create and start the scheduler
       jobScheduler = sched_fact.getScheduler();
@@ -181,7 +186,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
       //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
       Properties captureProperties = new Properties();
-      captureProperties.load(getClass().getClassLoader().getResourceAsStream("config/capture_scheduler.properties"));
+      s = getClass().getClassLoader().getResourceAsStream("config/capture_scheduler.properties");
+      if (s == null) {
+        throw new RuntimeException("Unable to load config/capture_scheduler.properties");
+      }
+      captureProperties.load(s);
       sched_fact = new StdSchedulerFactory(captureProperties);
       //Create and start the capture scheduler
       captureScheduler = sched_fact.getScheduler();
@@ -292,7 +301,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       return null;
     }
 
-    if (cal != null) {
+    if (cal != null && localCalendarCacheURL != null) {
       writeFile(localCalendarCacheURL, calendarString);
     }
 

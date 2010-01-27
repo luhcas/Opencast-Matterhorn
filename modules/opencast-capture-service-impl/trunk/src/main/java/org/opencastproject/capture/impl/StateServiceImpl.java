@@ -16,6 +16,7 @@
 package org.opencastproject.capture.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -113,7 +114,11 @@ public class StateServiceImpl implements StateService, ManagedService {
     try {
       long pollTime = Long.parseLong(ConfigurationManager.getInstance().getItem(CaptureParameters.AGENT_STATE_POLLING_INTERVAL)) * 1000L;
       Properties pollingProperties = new Properties();
-      pollingProperties.load(getClass().getClassLoader().getResourceAsStream("config/state_update_scheduler.properties"));
+      InputStream s = getClass().getClassLoader().getResourceAsStream("config/state_update_scheduler.properties");
+      if (s == null) {
+        throw new RuntimeException("Resource config/state_update_scheduler.properties was not found!");
+      }
+      pollingProperties.load(s);
       StdSchedulerFactory sched_fact = new StdSchedulerFactory(pollingProperties);
   
       //Create and start the scheduler
