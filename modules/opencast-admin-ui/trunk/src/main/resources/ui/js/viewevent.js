@@ -72,7 +72,7 @@ function handleWorkflow(workflowDoc){
  *  @param {XML Document}
  */
 function handleDCMetadata(metadataDoc){
-  var fields = ['title', 'creator', 'contributor', 'description', 'series', 'license', 'language', 'subject'];
+  var fields = ['title', 'creator', 'contributor', 'description', 'isPartOf', 'license', 'language', 'subject'];
   //TODO: This is a fast to code, but poor method of loading our values. Refactor.
   for( var i in fields ){
     var field = fields[i];

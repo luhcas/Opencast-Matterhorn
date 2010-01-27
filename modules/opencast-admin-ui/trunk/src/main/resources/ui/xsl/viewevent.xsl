@@ -42,7 +42,7 @@
             <li class="additionalMeta">
               <label class="fl-label">Series:</label>
               <!-- Series -->
-              <xsl:value-of select="series" />
+              <xsl:value-of select="isPartOf" />
             </li>
             <li class="additionalMeta">
               <label class="fl-label">Subject:</label>
