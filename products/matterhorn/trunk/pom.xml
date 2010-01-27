@@ -26,7 +26,6 @@
       </activation>
       <modules>
         <module>opencast-build-tools</module>
-        <module>opencast-maven-plugin</module>
         <module>opencast-runtime-tools</module>
         <!-- <module>opencast-authentication-api</module> -->
         <module>opencast-capture-service-api</module> 
@@ -185,12 +184,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <!-- Make the matterhorn plugin available to all subprojects -->
-      <plugin>
-        <groupId>org.opencastproject</groupId>
-        <artifactId>maven-oc-plugin</artifactId>
-        <version>1.0</version>
       </plugin>
     </plugins>
 
