@@ -445,7 +445,7 @@ public class IngestRestService {
     DocRestData data = new DocRestData("ingestservice", "Ingest Service", "/ingest", notes);
 
     // abstract
-    data.setAbstract("This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.");
+    data.setAbstract("This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments. Please see the <a href='https://wiki.opencastproject.org/confluence/display/open/IngestService'>service contract</a> for further information.");
 
     // createMediaPackage
     RestEndpoint endpoint = new RestEndpoint("createMediaPackage", RestEndpoint.Method.GET,
