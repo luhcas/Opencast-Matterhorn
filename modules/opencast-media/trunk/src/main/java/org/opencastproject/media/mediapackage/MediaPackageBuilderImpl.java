@@ -67,14 +67,14 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackagBuilder#createNew()
+   * @see org.opencastproject.media.mediapackage.MediaPackageBuilder#createNew()
    */
   public MediaPackage createNew() throws MediaPackageException {
     return new MediaPackageImpl();
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackagBuilder#createNew(org.opencastproject.org.opencastproject.media.mediapackage.identifier.Id)
+   * @see org.opencastproject.media.mediapackage.MediaPackageBuilder#createNew(org.opencastproject.org.opencastproject.media.mediapackage.identifier.Id)
    */
   public MediaPackage createNew(Id identifier) throws MediaPackageException {
     return new MediaPackageImpl(identifier);
@@ -111,7 +111,7 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackagBuilder#loadFromPackage(org.opencastproject.media.mediapackage.MediaPackagePackager,
+   * @see org.opencastproject.media.mediapackage.MediaPackageBuilder#loadFromPackage(org.opencastproject.media.mediapackage.MediaPackagePackager,
    *      java.io.InputStream)
    */
   public MediaPackage loadFromPackage(MediaPackagePackager packager, InputStream in) throws IOException,

@@ -30,7 +30,7 @@ import java.net.URI;
  * media package element representations for them.
  * <p>
  * A media package element is considered an attachment by this plugin if it is of type
- * {@link MediaPackageElement.Type#Attachment} and does not have any specializing flavor.
+ * {@link Attachment} and does not have any specializing flavor.
  */
 public class AttachmentBuilderPlugin extends AbstractAttachmentBuilderPlugin implements MediaPackageElementBuilder {
 

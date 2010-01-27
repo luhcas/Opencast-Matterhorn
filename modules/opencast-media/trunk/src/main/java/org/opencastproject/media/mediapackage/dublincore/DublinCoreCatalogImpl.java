@@ -124,8 +124,6 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements
    *          the catalog size in bytes
    * @param checksum
    *          the catalog checksum
-   * @param mimeType
-   *          the catalog mime type
    */
   protected DublinCoreCatalogImpl(String id, URI uri, long size,
           Checksum checksum) {
@@ -146,8 +144,6 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements
    *          the catalog size in bytes
    * @param checksum
    *          the catalog checksum
-   * @param mimeType
-   *          the catalog mime type
    */
   protected DublinCoreCatalogImpl(URI uri, long size, Checksum checksum) {
     this(null, uri, size, checksum);

@@ -397,7 +397,7 @@ public interface MediaPackage {
    * media package element out of the url. If the content cannot be recognized as being either a metadata catalog or
    * multimedia track, it is added as an attachment.
    * 
-   * @param url
+   * @param uri
    *          the element location
    * @throws UnsupportedElementException
    *           if the element is of an unsupported format
@@ -602,7 +602,6 @@ public interface MediaPackage {
    * 
    * @param out The output stream
    * @param format Whether to format the output for readability, or not (false gives better performance)
-   * @return
    */
   void toXmlStream(OutputStream out, boolean format);
   
@@ -621,7 +620,7 @@ public interface MediaPackage {
    * 
    * @param identifier
    *          the identifier
-   * @return <code>true</code> if the media package could be renamed
+   * TODO @return <code>true</code> if the media package could be renamed
    */
   void renameTo(Id identifier);
 

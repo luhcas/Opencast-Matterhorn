@@ -30,7 +30,7 @@ import org.opencastproject.media.mediapackage.attachment.CoverImpl;
 public class CoverBuilderPlugin extends AbstractAttachmentBuilderPlugin implements MediaPackageElementBuilderPlugin {
 
   /**
-   * Creates a new attachment builder that will accept attachments of type {@link Cover}.
+   * Creates a new attachment builder that will accept attachments of type {@link org.opencastproject.media.mediapackage.Cover}.
    */
   public CoverBuilderPlugin() {
     super(MediaPackageElements.COVER_FLAVOR);

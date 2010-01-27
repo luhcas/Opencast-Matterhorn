@@ -58,9 +58,9 @@ public class MediaPackageSupport {
    * package folder will be removed afterwards.
    * </p>
    * 
-   * @param targetPackage
+   * @param dest
    *          the target media package directory
-   * @param sourcePackage
+   * @param src
    *          the source media package directory
    * @param mode
    *          conflict resolution strategy in case of identical element identifier

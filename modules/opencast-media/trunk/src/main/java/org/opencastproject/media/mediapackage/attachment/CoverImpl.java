@@ -39,7 +39,7 @@ public class CoverImpl extends AttachmentImpl implements Cover {
   /**
    * Creates a cover attachment.
    * 
-   * @parm identifier the cover identifier
+   * @param identifier the cover identifier
    * @param uri
    *          the cover location
    * @param size
@@ -95,12 +95,6 @@ public class CoverImpl extends AttachmentImpl implements Cover {
    * 
    * @param uri
    *          the cover location
-   * @param size
-   *          the covers size in bytes
-   * @param checksum
-   *          the file checksum
-   * @param mimeType
-   *          the mime type
    * @return the cover object
    */
   public static CoverImpl fromURI(URI uri) {

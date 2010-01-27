@@ -108,7 +108,7 @@ public class EncodingSchemeUtils {
 
   /**
    * Encode a duration measured in milliseconds into a Dublin Core string using the
-   * {@linkplain ch.ethz.replay.core.api.common.metadata.dublincore.DublinCore#ENC_SCHEME_ISO8601 ISO8601} encoding
+   * {@linkplain org.opencastproject.media.mediapackage.dublincore.DublinCore#ENC_SCHEME_ISO8601 ISO8601} encoding
    * scheme <code>PTnHnMnS</code>.
    * <p/>
    * See <a href="http://en.wikipedia.org/wiki/ISO_8601#Durations"> ISO8601 Durations</a> for details.
@@ -209,7 +209,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodeDate(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
+   * Like {@link #decodeDate(org.opencastproject.media.mediapackage.dublincore.DublinCoreValue)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the date
@@ -224,7 +224,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodeDate(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
+   * Like {@link #decodeDate(org.opencastproject.media.mediapackage.dublincore.DublinCoreValue)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the date
@@ -303,7 +303,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodePeriod(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
+   * Like {@link #decodePeriod(org.opencastproject.media.mediapackage.dublincore.utils.DCMIPeriod, org.opencastproject.media.mediapackage.dublincore.utils.Precision)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the period
@@ -315,7 +315,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodePeriod(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
+   * Like {@link #decodePeriod(org.opencastproject.media.mediapackage.dublincore.utils.DCMIPeriod, org.opencastproject.media.mediapackage.dublincore.utils.Precision)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the period
@@ -353,7 +353,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodeTemporal(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
+   * Like {@link #decodeTemporal(org.opencastproject.media.mediapackage.dublincore.DublinCoreValue)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the temporal object of type {@link java.util.Date} or {@link DCMIPeriod}

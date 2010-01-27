@@ -72,7 +72,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#accept(URI,
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(URI,
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type ,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
@@ -83,7 +83,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
   /**
    * This implementation of <code>accept</code> tests for the element type (attachment).
    * 
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#accept(org.opencastproject.media.mediapackage.MediaPackageElement.Type
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.opencastproject.media.mediapackage.MediaPackageElement.Type
    *      , org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   public boolean accept(MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
@@ -95,7 +95,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
   /**
    * This implementation of <code>accept</code> tests for the correct node type (attachment).
    * 
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#accept(org.w3c.dom.Node)
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.w3c.dom.Node)
    */
   public boolean accept(Node elementNode) {
     try {

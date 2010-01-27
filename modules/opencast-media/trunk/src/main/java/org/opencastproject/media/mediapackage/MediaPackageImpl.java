@@ -614,7 +614,7 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#setCover(org.opencastproject.media.mediapackage.Cover)
+   * @see org.opencastproject.media.mediapackage.MediaPackage#setCover(org.opencastproject.media.mediapackage.Attachment)
    */
   public void setCover(Attachment cover) throws MediaPackageException, UnsupportedElementException {
     Attachment oldCover = getCover();
@@ -655,7 +655,7 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#add(java.io.File, boolean)
+   * @see org.opencastproject.media.mediapackage.MediaPackage#add(uri)
    */
   public MediaPackageElement add(URI url) throws UnsupportedElementException {
     if (url == null)
@@ -791,7 +791,7 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#renameTo(org.opencastproject.org.opencastproject.media.mediapackage.identifier.Id)
+   * @see org.opencastproject.media.mediapackage.MediaPackage#renameTo(org.opencastproject.media.mediapackage.identifier.Id)
    */
   public void renameTo(Id identifier) {
     manifest.setIdentifier(identifier);
@@ -901,7 +901,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @throws ParserConfigurationException
    * @throws TransformerException
-   * @see org.opencastproject.media.mediapackage.MediaPackage#save()
+   * @see org.opencastproject.media.mediapackage.MediaPackage#toXml()
    */
   public Document toXml() throws MediaPackageException {
     return toXml(null);
@@ -914,7 +914,7 @@ public final class MediaPackageImpl implements MediaPackage {
    *          the media package serializer
    * @throws ParserConfigurationException
    * @throws TransformerException
-   * @see org.opencastproject.media.mediapackage.MediaPackage#save()
+   * @see org.opencastproject.media.mediapackage.MediaPackage#toXml()
    */
   public Document toXml(MediaPackageSerializer serializer) throws MediaPackageException {
     try {
@@ -1014,7 +1014,7 @@ public final class MediaPackageImpl implements MediaPackage {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.media.mediapackage.MediaPackage#toXmlStream()
+   * @see org.opencastproject.media.mediapackage.MediaPackage#toXmlStream(OutputStream, boolean)
    */
   @Override
   public void toXmlStream(OutputStream out, boolean format) {

@@ -36,7 +36,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathException;
 
 /**
- * Implementation of {@link org.opencastproject.media.mediapackage.videoStream}.
+ * Implementation of {@link org.opencastproject.media.mediapackage.VideoStream}.
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlType(name="video", namespace="http://mediapackage.opencastproject.org")

@@ -38,7 +38,7 @@ public class IdImpl implements Id {
   public IdImpl() {}
 
   /**
-   * Creates a new serial identifier as created by {@link SerialBuilder}.
+   * Creates a new serial identifier as created by {@link SerialIdBuilder}.
    * 
    * @param id
    *          the identifier

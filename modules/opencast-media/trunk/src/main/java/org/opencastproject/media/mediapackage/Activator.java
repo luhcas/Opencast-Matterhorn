@@ -21,8 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Registers services related to {@link MediaPackage}s, including a JAX-RS {@link MessageBodyReader} and
- * {@link MessageBodyWriter}.
+ * Registers services related to {@link MediaPackage}s, including a JAX-RS {@link javax.ws.rs.ext.MessageBodyReader} and
+ * {@link javax.ws.rs.ext.MessageBodyWriter}.
  */
 public class Activator implements BundleActivator {
   private static final Logger logger = LoggerFactory.getLogger(Activator.class);

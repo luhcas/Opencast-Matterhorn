@@ -91,7 +91,7 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
   /**
    * Creates an attachment.
    * 
-   * @parm identifier the attachment identifier
+   * @param identifier the attachment identifier
    * @param uri
    *          the attachments location
    */
@@ -102,17 +102,8 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
   /**
    * Creates an attachment.
    * 
-   * @parm identifier the attachment identifier
-   * @param flavor
-   *          the attachment type
    * @param uri
    *          the attachments location
-   * @param size
-   *          the attachments size
-   * @param checksum
-   *          the attachments checksum
-   * @param mimeType
-   *          the attachments mime type
    */
   protected AttachmentImpl(URI uri) {
     this(null, null, uri, 0, null, null);

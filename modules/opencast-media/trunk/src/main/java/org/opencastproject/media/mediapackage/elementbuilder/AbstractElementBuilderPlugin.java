@@ -60,7 +60,7 @@ public abstract class AbstractElementBuilderPlugin implements MediaPackageElemen
   /**
    * This is a convenience implementation for subclasses doing nothing.
    * 
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#setup()
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#setup()
    */
   public void setup() throws Exception {
   }
@@ -68,7 +68,7 @@ public abstract class AbstractElementBuilderPlugin implements MediaPackageElemen
   /**
    * This is a convenience implementation for subclasses doing nothing.
    * 
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#cleanup()
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#cleanup()
    */
   public void cleanup() {
   }

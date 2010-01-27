@@ -183,7 +183,7 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toManifest(org.w3c.dom.Document)
+   * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toManifest(org.w3c.dom.Document, MediaPackageSerializer)
    */
   @Override
   public Node toManifest(Document document, MediaPackageSerializer serializer) {

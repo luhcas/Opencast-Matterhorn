@@ -63,12 +63,11 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
    *          the track id
    * @param uri
    *          the track location
-   * @return
    */
   protected abstract TrackImpl trackFromManifest(String id, URI uri);
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#newElement(org.opencastproject.media.mediapackage.MediaPackageElement.Type
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#newElement(org.opencastproject.media.mediapackage.MediaPackageElement.Type
    *      ,org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   public MediaPackageElement newElement(MediaPackageElement.Type type, MediaPackageElementFlavor flavor)

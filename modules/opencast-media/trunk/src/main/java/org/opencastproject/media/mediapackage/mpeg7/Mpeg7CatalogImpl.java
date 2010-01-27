@@ -73,8 +73,6 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    *          the catalog size in bytes
    * @param checksum
    *          the catalog checksum
-   * @param mimeType
-   *          the catalog mime type
    */
   protected Mpeg7CatalogImpl(String id, URI uri, long size, Checksum checksum) {
     super(id, Mpeg7Catalog.FLAVOR, uri, size, checksum, MimeTypes.XML);
@@ -90,8 +88,6 @@ public class Mpeg7CatalogImpl extends XMLCatalogImpl implements Mpeg7Catalog {
    *          the catalog size in bytes
    * @param checksum
    *          the catalog checksum
-   * @param mimeType
-   *          the catalog mime type
    */
   protected Mpeg7CatalogImpl(URI uri, long size, Checksum checksum) {
     this(null, uri, size, checksum);

@@ -87,7 +87,7 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#accept(org.opencastproject.media.mediapackage.MediaPackageElement.Type
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.opencastproject.media.mediapackage.MediaPackageElement.Type
    *      , org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   public boolean accept(MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
@@ -95,7 +95,7 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilderPlugin#accept(org.w3c.dom.Node)
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.w3c.dom.Node)
    */
   public boolean accept(Node elementNode) {
     try {

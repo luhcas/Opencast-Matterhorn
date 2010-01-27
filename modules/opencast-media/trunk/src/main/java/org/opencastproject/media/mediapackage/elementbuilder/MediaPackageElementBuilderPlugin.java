@@ -96,7 +96,7 @@ public interface MediaPackageElementBuilderPlugin {
    * given element definition.
    * </p>
    * <p>
-   * The element must then be constructed and returned in the call to {@link #elementFromManifest(Node, boolean)}.
+   * The element must then be constructed and returned in the call to {@link #elementFromManifest(Node, MediaPackageSerializer)}.
    * </p>
    * 
    * @param elementNode
