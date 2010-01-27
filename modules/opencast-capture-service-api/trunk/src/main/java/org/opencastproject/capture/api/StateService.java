@@ -28,7 +28,7 @@ public interface StateService {
   /**
    * Gets the internal Agent used to store this agent's state.
    * @return The Agent which represents this capture agent.
-   * @see org.opencastproject.capture.api.AgentState
+   * @see org.opencastproject.capture.admin.api.AgentState
    */
   public Agent getAgent();
 
@@ -36,14 +36,14 @@ public interface StateService {
   /**
    * Sets the state of the agent.  Note that this should not change the *actual* state of the agent, only update the StateService's record of its state.
    * @param state The state of the agent.  Should be defined in AgentState.
-   * @see org.opencastproject.capture.api.AgentState
+   * @see org.opencastproject.capture.admin.api.AgentState
    */
   public void setAgentState(String state);
 
   /**
    * Gets the state of the agent.
    * @return The state of the agent.  Should be defined in AgentState.
-   * @see org.opencastproject.capture.api.AgentState
+   * @see org.opencastproject.capture.admin.api.AgentState
    */
   public String getAgentState();
 
@@ -59,7 +59,7 @@ public interface StateService {
    * 
    * @param recordingID The ID of the recording.
    * @param state The state for the recording.  Defined in RecordingState.
-   * @see org.opencastproject.capture.api.RecordingState
+   * @see org.opencastproject.capture.admin.api.RecordingState
    */
   public void setRecordingState(String recordingID, String state);
   
@@ -68,7 +68,7 @@ public interface StateService {
    * 
    * @param recordingID The ID of the recording in question.
    * @return A state defined in RecordingState.
-   * @see org.opencastproject.capture.api.RecordingState
+   * @see org.opencastproject.capture.admin.api.RecordingState
    */
   public Recording getRecordingState(String recordingID);
 }

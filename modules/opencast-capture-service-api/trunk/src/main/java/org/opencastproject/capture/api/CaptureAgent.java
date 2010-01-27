@@ -68,7 +68,7 @@ public interface CaptureAgent {
   /**
    * Gets the machine's current state
    * @return A state (should be defined in AgentState)
-   * @see org.opencastproject.capture.api.AgentState
+   * @see org.opencastproject.capture.admin.api.AgentState
    */
   String getAgentState();
 }
