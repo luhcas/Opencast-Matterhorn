@@ -317,10 +317,15 @@ public class EngageuiRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
+    if (docs == null) { docs = generateDocs(); }
     return docs;
   }
 
   protected String docs;
+  private String[] notes = {
+    "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+    "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
 
   public EngageuiRestService() {
   }
@@ -331,9 +336,7 @@ public class EngageuiRestService {
    * @param cc
    *          The ComponentContext of this service
    */
-  public void activate(ComponentContext cc) {
-    docs = generateDocs();
-  }
+  public void activate(ComponentContext cc) {}
 
   /**
    * Generates the REST documentation
@@ -341,8 +344,11 @@ public class EngageuiRestService {
    * @return The HTML with the documentation
    */
   protected String generateDocs() {
-    DocRestData data = new DocRestData("Engage", "Engage UI", "/engageui/rest",
-            new String[] { "$Rev$" });
+    DocRestData data = new DocRestData("Engage", "Engage UI", "/engageui/rest", notes);
+
+    // abstract
+    data.setAbstract("This service queries available (distributed) episodes. It is designed to support the Engage UI.");
+    
     // Engage getEpisodeById
     RestEndpoint getEpisodeById = new RestEndpoint("getEpisodeById",
             RestEndpoint.Method.POST, "/getEpisodeById",
