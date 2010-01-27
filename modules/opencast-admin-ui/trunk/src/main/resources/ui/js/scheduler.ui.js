@@ -105,7 +105,6 @@ function handleAgentList(data){
          function(i, agent){
            $("#attendees").append($("<option></option>").val($(agent).text()).html($(agent).text())); 
          });
-  console.log(schedulerUI.getURLParams('eventID'));
   var eventID = schedulerUI.getURLParams('eventID');
   if(eventID && schedulerUI.getURLParams('edit')){
     $.get(SCHEDULER_URL + '/getEvent/' + eventID, schedulerUI.loadEvent, 'xml');
