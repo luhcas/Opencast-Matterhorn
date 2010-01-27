@@ -182,7 +182,7 @@ public class AdminuiRestService {
   /**
    * copied from WorkflowRestService
    * @param mediaPackage
-   * @return
+   * @return a Dublin Core metadata catalog
    */
   protected DublinCoreCatalog getDublinCore(MediaPackage mediaPackage) {
     Catalog[] dcCatalogs = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
@@ -194,7 +194,7 @@ public class AdminuiRestService {
    * copied from WorkflowRestService
    * @param catalog
    * @param property
-   * @return
+   * @return a Dublin Core metadata property
    */
   protected String getDublinCoreProperty(DublinCoreCatalog catalog, EName property) {
     if (catalog == null) return null;
@@ -202,7 +202,7 @@ public class AdminuiRestService {
   }
 
   /**
-   * Retruns simple statistics about "recordings" in the system
+   * Returns simple statistics about "recordings" in the system
    * @return simple statistics about "recordings" in the system
    */
   @SuppressWarnings("unchecked")
