@@ -181,7 +181,6 @@ public interface SchedulerFilter {
   /**
    * Sets the attribute by which the results should be ordered 
    * @param order eventID | seriesID | channelID | deviceID | location | creator | contributor | date
-   * @return
    */
   public boolean setOrderBy (String order);
   
