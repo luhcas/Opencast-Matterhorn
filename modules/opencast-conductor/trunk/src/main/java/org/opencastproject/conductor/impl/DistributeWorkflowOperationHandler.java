@@ -65,9 +65,10 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
     try {
 
       // Check which tags have been configured
-      String tags = workflowInstance.getCurrentOperation().getConfiguration("tags");
+      String sourceTags = workflowInstance.getCurrentOperation().getConfiguration("source-tags");
+      String targetTags = workflowInstance.getCurrentOperation().getConfiguration("target-tags");
       MediaPackage currentMediaPackage = workflowInstance.getCurrentMediaPackage();
-      if (StringUtils.trimToNull(tags) == null) {
+      if (StringUtils.trimToNull(sourceTags) == null) {
         logger.warn("No tags have been specified");
         return WorkflowBuilder.getInstance().buildWorkflowOperationResult(currentMediaPackage, null, false);
       }
@@ -77,7 +78,7 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
       
       // Look for elements matching any tag
       Set<String> elementIds = new HashSet<String>();
-      for (String tag : tags.split("\\W")) {
+      for (String tag : sourceTags.split("\\W")) {
         if(StringUtils.trimToNull(tag) == null) continue;
         MediaPackageElement[] elts = currentMediaPackage.getElementsByTag(tag);
         for (MediaPackageElement e : elts) {
@@ -85,10 +86,23 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
           logger.info("Distributing '{}' of {} to the local repository", e.getIdentifier(), currentMediaPackage);
         }
       }
-      // FIXME: We currently distribute all catalogs, regardless of tags, since there is no opportunity to tag catalogs
+
+      // Also distribute all of the metadata catalogs
       for(Catalog c : clone.getCatalogs()) elementIds.add(c.getIdentifier());
       
       resultingMediaPackage = distributionService.distribute(clone, elementIds.toArray(new String[elementIds.size()]));
+      
+      // Tag the distributed elements
+      String[] tags = targetTags.split("\\W");
+      for (MediaPackageElement element : resultingMediaPackage.getElements()) {
+        if (currentMediaPackage.getElementById(element.getIdentifier()) == null) {
+          for (String tag : tags) {
+            if(StringUtils.trimToNull(tag) == null) continue;
+            element.addTag(tag);
+          }
+        }
+      }
+ 
       logger.debug("Distribute operation completed");
     } catch (RuntimeException e) {
       e.printStackTrace();

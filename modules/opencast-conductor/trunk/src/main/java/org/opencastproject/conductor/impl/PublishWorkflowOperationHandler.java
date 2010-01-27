@@ -52,11 +52,12 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
    */
   public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     try {
-      MediaPackage mp = MediaPackageUtil.clone(workflowInstance.getCurrentMediaPackage());
+      MediaPackage current = workflowInstance.getCurrentMediaPackage();
+      MediaPackage mp = MediaPackageUtil.clone(current);
       logger.info("Publishing media package {} to search index", mp);
 
       // Check which tags have been configured
-      String tags = workflowInstance.getCurrentOperation().getConfiguration("tags");
+      String tags = workflowInstance.getCurrentOperation().getConfiguration("source-tags");
       if (StringUtils.trimToNull(tags) == null) {
         logger.warn("No tags have been specified");
         return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, null, false);
@@ -68,7 +69,7 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
         if(StringUtils.trimToNull(tag) == null) continue;
         keep.addAll(Arrays.asList(mp.getTracksByTag(tag)));
         keep.addAll(Arrays.asList(mp.getAttachmentsByTag(tag)));
-        keep.addAll(Arrays.asList(mp.getCatalogs()));
+        keep.addAll(Arrays.asList(mp.getCatalogsByTag(tag)));
       }
 
       // Remove what we don't want to publish (i. e. what is not tagged accordingly)
@@ -88,7 +89,7 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
       // adding media package to the search index
       searchService.add(mp);
       logger.debug("Publish operation complete");
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, null, false);
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(current, null, false);
     } catch (Throwable t) {
       throw new WorkflowOperationException(t);
     }

@@ -293,6 +293,12 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
             getFeedLink());
     f.setEncoding(ENCODING);
 
+    // Set iTunes tags
+    ITunesFeedExtension iTunesFeed = new ITunesFeedExtension();
+    // TODO: Set iTunes tags
+    f.addModule(iTunesFeed);
+
+    
     // TODO: Set feed icon and other metadata
 
     // Check if a default format has been specified
@@ -382,7 +388,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     // Add extension modules (itunes, dc, doi)
 
     // iTunes extension
-
+    
     ITunesFeedEntryExtension iTunesEntry = new ITunesFeedEntryExtension();
     iTunesEntry.setDuration(resultItem.getDcExtent());
     // Additional iTunes properties
@@ -467,6 +473,8 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
       coverUrl = resultItem.getCover();
       setImage(entry, coverUrl);
     }
+    
+    iTunesEntry.setAuthor("test");
 
     entry.addExtension(iTunesEntry);
     entry.addExtension(dcExtension);

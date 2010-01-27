@@ -185,7 +185,8 @@
       exception-handler-workflow="Default Error Handler"
       description="Distribute media to the local distribution channel">
       <configurations>
-        <configuration key="tags">engage,atom,rss</configuration>
+        <configuration key="source-tags">engage,atom,rss</configuration>
+        <configuration key="target-tags">publish</configuration>
       </configurations>
     </operation>
 
@@ -195,7 +196,7 @@
       exception-handler-workflow="Default Error Handler"
       description="Add metadata to the search index">
       <configurations>
-        <configuration key="tags">engage,atom,rss</configuration>
+        <configuration key="source-tags">publish</configuration>
       </configurations>
     </operation>
   </operations>

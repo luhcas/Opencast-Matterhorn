@@ -429,21 +429,31 @@ public abstract class AbstractMediaPackageElement implements
    */
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof MediaPackageElement) {
-      MediaPackageElement e = (MediaPackageElement) obj;
-      if (mediaPackage != null && !mediaPackage.equals(e.getMediaPackage()))
-        return false;
-      return uri.equals(e.getURI());
-    }
-    return false;
+    if (!(obj instanceof MediaPackageElement))
+      return false;
+    MediaPackageElement e = (MediaPackageElement) obj;
+    if (mediaPackage != null && !mediaPackage.equals(e.getMediaPackage()))
+      return false;
+    if (id != null && !id.equals(e.getIdentifier()))
+      return false;
+    if (uri != null && !uri.equals(e.getURI()))
+      return false;
+    return true;
   }
 
   /**
+   * {@inheritDoc}
    * @see java.lang.Object#hashCode()
    */
   @Override
   public int hashCode() {
-    return uri.hashCode();
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result
+            + ((mediaPackage == null) ? 0 : mediaPackage.hashCode());
+    result = prime * result + ((uri == null) ? 0 : uri.hashCode());
+    return result;
   }
 
   /**
