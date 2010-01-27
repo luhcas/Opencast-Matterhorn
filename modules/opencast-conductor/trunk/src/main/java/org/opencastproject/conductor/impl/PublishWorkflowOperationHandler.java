@@ -73,16 +73,28 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
       }
 
       // Remove what we don't want to publish (i. e. what is not tagged accordingly)
-      for(MediaPackageElement element : mp.getElements()) {
+      for (MediaPackageElement element : mp.getElements()) {
         if( ! keep.contains(element)) {
           mp.remove(element);
         }
       }
 
-      // Fix references
-      for(MediaPackageElement element : mp.getElements()) {
+      // Fix references and flavors
+      for (MediaPackageElement element : mp.getElements()) {
         MediaPackageReference reference = element.getReference();
         if (reference != null && mp.getElementByReference(reference) == null) {
+          
+          // Follow the references until we find a flavor
+          MediaPackageElement parent = null;
+          while ((parent = current.getElementByReference(reference)) != null) {
+            if (parent.getFlavor() != null) {
+              element.setFlavor(parent.getFlavor());
+              break;
+            }
+            reference = parent.getReference();
+          }
+          
+          // Done. Let's cut the path
           element.clearReference();
         }
       }

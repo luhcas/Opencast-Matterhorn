@@ -180,6 +180,8 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
             || message.startsWith("Stream mapping")
             || message.startsWith("Output #")
             || message.startsWith("video:")
+            || message.startsWith("Metadata")
+            || message.startsWith("Program")
             || message.startsWith("Last message repeated")
             || message
                     .startsWith("PIX_FMT_YUV420P will be used as an intermediate format for rescaling"))
