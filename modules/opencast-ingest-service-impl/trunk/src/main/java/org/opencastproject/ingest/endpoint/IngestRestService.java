@@ -16,7 +16,7 @@
 package org.opencastproject.ingest.endpoint;
 
 import org.opencastproject.ingest.api.IngestService;
-import org.opencastproject.ingest.impl.IngestServiceImpl;
+// import org.opencastproject.ingest.impl.IngestServiceImpl;
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -29,6 +29,14 @@ import org.opencastproject.media.mediapackage.dublincore.DublinCore;
 import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.media.mediapackage.identifier.Id;
 
+import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+// import org.opencastproject.util.doc.Status;
+
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -39,7 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URI;
@@ -66,6 +73,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 
 /**
  * Creates and augments Matterhorn MediaPackages using the api. Stores media into the Working File Repository.
@@ -423,25 +431,171 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
+    if (docs == null) { docs = generateDocs(); }
     return docs;
   }
-  protected final String docs;
 
-  public IngestRestService() {
-    service = new IngestServiceImpl();
-    String docsFromClassloader = null;
-    InputStream in = null;
-    try {
-      in = getClass().getResourceAsStream("/html/index.html");
-      docsFromClassloader = IOUtils.toString(in);
-    } catch (IOException e) {
-      logger.error("failed to read documentation", e);
-      docsFromClassloader = "unable to load documentation for " + IngestRestService.class.getName();
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-    docs = docsFromClassloader;
+  protected String docs;
+  private String[] notes = {
+    "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+    "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
+
+  // CHECKSTYLE:OFF
+  private String generateDocs() {
+    DocRestData data = new DocRestData("ingestservice", "Ingest Service", "/ingest", notes);
+
+    // createMediaPackage
+    RestEndpoint endpoint = new RestEndpoint("createMediaPackage", RestEndpoint.Method.GET,
+        "/createMediaPackage",
+        "Create an empty media package");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+
+    // addTrack (URL)
+    endpoint = new RestEndpoint("addTrackURL", RestEndpoint.Method.POST,
+        "/addTrack",
+        "Add a media track to a given media package using an URL");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addRequiredParam(new Param("url", Param.Type.STRING, null,
+        "The location of the media"));
+    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
+        "The kind of media"));
+    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
+        "The media package as XML"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // addTrack (InputStream)
+    endpoint = new RestEndpoint("addTrackInputStream", RestEndpoint.Method.POST,
+        "/addTrack",
+        "Add a media track to a given media package using an input stream");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addBodyParam(true, null, "Input stream of the media track");
+    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
+        "The kind of media track"));
+    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
+        "The media package as XML"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // addCatalog (URL)
+    endpoint = new RestEndpoint("addCatalogURL", RestEndpoint.Method.POST,
+        "/addCatalog",
+        "Add a metadata catalog to a given media package using an URL");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addRequiredParam(new Param("url", Param.Type.STRING, null,
+        "The location of the catalog"));
+    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
+        "The kind of catalog"));
+    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
+        "The media package as XML"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // addCatalog (InputStream)
+    endpoint = new RestEndpoint("addCatalogInputStream", RestEndpoint.Method.POST,
+        "/addCatalog",
+        "Add a metadata catalog to a given media package using an input stream");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addBodyParam(true, null, "Input stream of the metadata catalog");
+    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
+        "The kind of media catalog"));
+    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
+        "The media package as XML"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // TODO addTrackMonitored
+
+    // getUploadProgress
+    endpoint = new RestEndpoint("getUploadProgress", RestEndpoint.Method.GET,
+        "/getUploadProgress/{mpId}/{filename}",
+        "Get the progress of a file upload");
+    endpoint.addFormat(new Format("JSON", null, null));
+    endpoint.addPathParam(new Param("mpId", Param.Type.STRING, null,
+        "The media package ID"));
+    endpoint.addPathParam(new Param("filename", Param.Type.STRING, null,
+        "The name of the file"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the total and currently received number of bytes"));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+
+    // addAttachment (URL)
+    endpoint = new RestEndpoint("addAttachmentURL", RestEndpoint.Method.POST,
+        "/addAttachment",
+        "Add an attachment to a given media package using an URL");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addRequiredParam(new Param("url", Param.Type.STRING, null,
+        "The location of the attachment"));
+    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
+        "The kind of attachment"));
+    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
+        "The media package as XML"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // addAttachment (InputStream)
+    endpoint = new RestEndpoint("addAttachmentInputStream", RestEndpoint.Method.POST,
+        "/addAttachment",
+        "Add an attachment to a given media package using an input stream");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addBodyParam(true, null, "Input stream of the attachment");
+    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
+        "The kind of attachment"));
+    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
+        "The media package as XML"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // TODO addMediaPackage
+
+    // addZippedMediaPackage
+    endpoint = new RestEndpoint("addZippedMediaPackage", RestEndpoint.Method.POST,
+        "/addZippedMediaPackage",
+        "Create media package from a compressed file containing a manifest.xml document and all media tracks, metadata catalogs and attachments");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addBodyParam(true, null, "Input stream of the compressed (application/zip) media package");
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+    
+    // ingest
+    endpoint = new RestEndpoint("ingest", RestEndpoint.Method.POST,
+        "/ingest",
+        "Ingest the completed media package into the system, retrieving all URL-referenced files");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
+        "The ID of the given media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    return DocUtil.generate(data);
   }
+  // CHECKSTYLE:OFF
+
+  public IngestRestService() {}
 
   // method to convert Document to String
   private String getStringFromDocument(Document doc) throws Exception {
