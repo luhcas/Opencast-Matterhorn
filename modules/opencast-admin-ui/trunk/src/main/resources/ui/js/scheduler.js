@@ -30,14 +30,14 @@ function initPage() {
   
   $('.required > label').prepend('<span style="color: red;">*</span>');
   
-  $('.folder-head').click(
-                          function(){
+  $('.folder-head').click(function(){
                           $(this).children('.fl-icon').toggleClass('icon-arrow-right');
                           $(this).children('.fl-icon').toggleClass('icon-arrow-down');
                           $(this).next().toggle('fast');
                           return false;
-                          }
-                          );
+                          });
+  
+
   
   /**
    *  eventFields is an array of EventFields and EventFieldGroups, keyed on <item>'s key attribute described in scheduler
@@ -57,9 +57,9 @@ function initPage() {
     "channel-id":   new EventFieldGroup(new Array('distMatterhornMM'), true),
     "license":      new EventField('license'),
     "startdate":    new EventFieldGroup(new Array('startDate', 'startTimeHour', 'startTimeMin'), true, getStartDate, setStartDate, checkStartDate),
-    "duration":      new EventFieldGroup(new Array('durationHour', 'durationMin'), true, getDuration, setDuration, checkDuration), //returns a date incremented by duration.
+    "duration":     new EventFieldGroup(new Array('durationHour', 'durationMin'), true, getDuration, setDuration, checkDuration), //returns a date incremented by duration.
     "resources":    new EventFieldGroup(new Array('audio','audioVideo','audioScreen', 'audioVideoScreen'), true, getInputs, setInputs, checkInputs),
-    "attendees":    new EventField('attendees', true),
+    "attendees":    new EventField('attendees', true, getAgent, setAgent, checkAgent),
     "device":       new EventField('attendees')
   };
   
@@ -86,13 +86,16 @@ function initPage() {
   $('#submitButton').click(schedulerUI.submitForm);
   $('#resetButton').click(schedulerUI.cancelForm);
   
+  schedulerUI.loadKnownAgents(schedulerUI.getURLParams('edit'));
+  
   var eventID = schedulerUI.getURLParams('eventID');
   if(eventID && schedulerUI.getURLParams('edit')){
     $("#page-title").text("Edit Recording");
-    $.get(SCHEDULER_URL + '/getEvent/' + eventID, schedulerUI.loadEvent, 'xml');
+    $('#attendees').change(function(){ 
+                           $("#notice-container").hide();
+                           $.get(CAPTURE_ADMIN_URL + '/agents/' + $('#attendees option:selected').val(), checkAgentStatus);
+                           });
   }
-  
-  schedulerUI.loadKnownAgents();
 }
 
 $(document).ready(initPage);
@@ -138,7 +141,6 @@ function checkForm() {
   var missingFields = new Array();
   for(var i in this.fields){
     //if the field is required, and does not contain valid data notify user
-    $('#label-' + this.fields[i].id).css('color', 'black');
     if(this.fields[i].required && !this.fields[i].checkValue()){
       missingFields.push(i);
     }
@@ -222,9 +224,13 @@ EventManager.prototype.serialize = serialize;
  */
 function populateForm(document){
   for(var e in this.fields){
-    //Todo: select the agent field when loading an event.
-    if(e != "attendees" || e != "channel-id"){
+    console.log(e);
+    if(e != "channel-id"){
       switch(e){
+        case 'attendees':
+          console.log($("attendee", document).text());
+          this.fields[e].setValue($("attendee", document).text());
+          break;
         case 'startdate':
           this.fields[e].setValue(new Date(parseInt($("startdate", document).text())));
           break;
@@ -242,6 +248,7 @@ function populateForm(document){
       }
     }
   }
+  $('#attendees').change();
 }
 //Set EventManager populate form
 EventManager.prototype.populateForm = populateForm;
@@ -325,6 +332,50 @@ function getCheckboxValue() {
     return this.formElement.val();
   }
   return "";
+}
+
+/**
+ * Overrides getValue for EventField for agent field
+ * @return {String} agent id
+ */
+function getAgent() {
+  if(this.formElement){
+    this.value = this.formElement.val()
+  }
+  return this.value;
+}
+
+/**
+ * Overrides setValue for EventField for agent field
+ * @param {String} agent id
+ */
+function setAgent(agentId) {
+  var opts = this.formElement.children();
+  if(opts.length > 0){
+    var found = false;
+    for(var i = 0; i < opts.length; i++){
+      if(opts[i].value == agentId){
+        found = true;
+        break;
+      }
+    }
+    if(!found){ //Couldn't find the previsouly selected agent, add to list and notifiy user.
+      this.formElement.append($("<option>" + agentId + "</option>").val(agentId));
+      $('#attendees').change();
+    }
+    this.formElement.val(agentId);
+  }
+}
+
+/**
+ * Overrides getValue for EventField for agent field
+ * @return {Boolean} true if an agent is selected
+ */
+function checkAgent() {
+  if(this.getValue()){
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -503,16 +554,16 @@ function checkStartDate(){
       date &&
       this.groupElements['startTimeHour'] &&
       this.groupElements['startTimeMin']){
-    if(date.getDate() >= now.getDate() && 
-       date.getMonth() >= now.getMonth() &&
-       date.getYear() >= now.getYear()){
-      if((this.groupElements['startTimeHour'].val() == now.getHours() && this.groupElements['startTimeMin'].val() > now.getMinutes()) || 
-         this.groupElements['startTimeHour'].val() > now.getHours()){
-         return true;
-      }
+    var startdatetime = new Date(date.getFullYear(), 
+                             date.getMonth(), 
+                             date.getDate(), 
+                             this.groupElements['startTimeHour'].val(),
+                             this.groupElements['startTimeMin'].val());
+    if(startdatetime.getTime() >= now.getTime()){
+      return true;
     }
+    return false;
   }
-  return false;
 }
 
 /**
@@ -585,4 +636,11 @@ function checkInputs(){
     }
   }
   return checked;
+}
+
+function checkAgentStatus(doc){
+  var state = $("state", doc).text();
+  if(state == "unknown" || state == "offline"){
+    $("#notice-container").show();
+  }
 }
