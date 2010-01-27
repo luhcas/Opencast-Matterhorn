@@ -16,7 +16,7 @@
 package org.opencastproject.ingest.endpoint;
 
 import org.opencastproject.ingest.api.IngestService;
-// import org.opencastproject.ingest.impl.IngestServiceImpl;
+
 import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -35,7 +35,6 @@ import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-// import org.opencastproject.util.doc.Status;
 
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
