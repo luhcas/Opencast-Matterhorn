@@ -86,7 +86,7 @@ function initPage() {
   $('#submitButton').click(schedulerUI.submitForm);
   $('#resetButton').click(schedulerUI.cancelForm);
   
-  schedulerUI.loadKnownAgents(schedulerUI.getURLParams('edit'));
+  schedulerUI.loadKnownAgents();
   
   var eventID = schedulerUI.getURLParams('eventID');
   if(eventID && schedulerUI.getURLParams('edit')){
@@ -224,11 +224,9 @@ EventManager.prototype.serialize = serialize;
  */
 function populateForm(document){
   for(var e in this.fields){
-    console.log(e);
     if(e != "channel-id"){
       switch(e){
         case 'attendees':
-          console.log($("attendee", document).text());
           this.fields[e].setValue($("attendee", document).text());
           break;
         case 'startdate':
@@ -532,9 +530,7 @@ function getStartDate(){
 function setStartDate(date){
   if(this.groupElements['startDate'] && this.groupElements['startTimeHour'] && this.groupElements['startTimeMin']){
     var hour = date.getHours();
-    //console.log('Hours: ' + hour);
     
-    //console.log("Minutes: " + date.getMinutes());
     this.groupElements['startTimeHour'].val(hour);
     this.groupElements['startTimeMin'].val(date.getMinutes());
     
