@@ -341,6 +341,9 @@ public class AdminuiRestService {
   private String generateDocs() {
     DocRestData data = new DocRestData("adminuiservice", "Admin UI Service", "/admin/rest", notes);
 
+    // abstract
+    data.setAbstract("This service reports the number and state of available recordings. It is designed to support the Admin UI.");
+
     // getRecordings
     RestEndpoint endpoint = new RestEndpoint("getAgent", RestEndpoint.Method.GET,
         "/recordings/{state}",
