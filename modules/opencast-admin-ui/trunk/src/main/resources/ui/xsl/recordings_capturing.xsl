@@ -11,7 +11,7 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ns1="http://adminui.opencastproject.org/" version="1.0">
   <xsl:output method="html"/>
   <xsl:template match="ns1:recordingLists">
-    <center>Under development. When implemented will show a list of all recordings that are in the capture phase.</center>
+    <center><b>Under development. When implemented will show a list of all recordings that are in the capture phase. To see your active capture agents, go to <a href="agents_status.html">Capture Agents</a>.</b></center>
   </xsl:template>
 <!--
   <xsl:template match="ns1:recordingLists">

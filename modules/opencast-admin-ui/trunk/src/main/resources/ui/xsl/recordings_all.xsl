@@ -12,7 +12,7 @@
   <xsl:output method="html"/>
 
   <xsl:template match="ns1:recordingLists">
-    <center>Under development. When implemented will show all recordings in the system.</center>
+    <center><b>Under development. When implemented will show all recordings in the system.</b></center>
   </xsl:template>
 <!--
   <xsl:template match="ns1:recordingLists">
