@@ -119,5 +119,9 @@ public interface CaptureParameters {
   public static final String CAPTURE_INGESTED_FILE_NAME = "capture.ingested";
   
   /** Name of the zip file ingested by the capture agent, containing all the relevant files for a recording **/
-  public static final String ZIP_MEDIAPACKAGE_NAME = "media.zip";
+  public static final String ZIP_NAME = "media.zip";
+  
+  /** Default name for the manifest file */
+  public static final String MANIFEST_NAME = "manifest.xml";
+  
 }

@@ -48,18 +48,10 @@ public class RecordingImpl {
   /** The manifest associated with this recording */
   private File manifest = null;
   
-  /** The name that is assigned to the zip file that is ingested. Defaults to "media.zip" */
-  // TODO: Is it correct to have a default hard-coded name?
-  // At least, a method for overriding the default name should be provided. 
-  private String ZIP_NAME = "media.zip";
-  
-  /** The name assigned to the manifest file. Defaults to "manifest.xml" */
-  // TODO: At least, a method for overriding the default name should be provided. 
-  private String MANIFEST_NAME = "manifest.xml";
-  
   /** The name assigned to the metadata file created and attached by the capture agent */
+  // TODO: Necessary?
   // TODO: At least, a method for overriding the default name should be provided. 
-  private String AGENT_CATALOG_NAME = "agent_metadata.xml";
+  //private String AGENT_CATALOG_NAME = "agent_metadata.xml";
 
   /** 
    * Constructs a RecordingImpl object using the Properties and MediaPackage provided
@@ -206,7 +198,7 @@ public class RecordingImpl {
    * @return A {@code boolean} indicating success or failure
    */
   public boolean setManifest(File manifest) {
-    if (manifest != null && manifest.exists()) {
+    if (manifest != null && manifest.isFile()) {
       this.manifest = manifest;
       return true;
     }
@@ -214,27 +206,12 @@ public class RecordingImpl {
     return false;
   }
   
-  /**
-   * Gets the name assigned to the Zip File ingested
-   * @return A {@code String} with the name
-   */
-  public String getZipName() {
-   return ZIP_NAME; 
-  }
-  
-  /**
-   * Gets the name assigned to the manifest file.
-   * @return A {@code String} with the name
-   */
-  public String getManifestName() {
-    return MANIFEST_NAME;
-  }
-  
+  /*
   /**
    * Gets the name assigned to the capture metadata catalog
    * @return A {@code String} with the name
    */
-  public String getAgentCatalogName() {
+  /*public String getAgentCatalogName() {
     return AGENT_CATALOG_NAME;
-  }
+  }*/
 }

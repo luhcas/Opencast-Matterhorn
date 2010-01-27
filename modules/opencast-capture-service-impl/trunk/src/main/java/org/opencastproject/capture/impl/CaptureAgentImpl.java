@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Dictionary;
@@ -98,9 +99,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   /** Capturing files only? */
   private boolean mockCapture = false;
+  private boolean noPrefix = false;
 
   private static final String samplesDir = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "samples";
-  
+
   public CaptureAgentImpl() {
     logger.info("Starting CaptureAgentImpl.");
     setAgentState(AgentState.IDLE);
@@ -202,9 +204,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   @Override
   public String startCapture(MediaPackage mediaPackage, Properties properties) {
-    
+
     logger.debug("startCapture(mediaPackage, properties): {} {}", mediaPackage, properties);
-    
+
     if (currentRecID != null || !agentState.equals(AgentState.IDLE)) {
       logger.warn("Unable to start capture, a different capture is still in progress in {}.",
               pendingRecordings.get(currentRecID).getDir().getAbsolutePath());
@@ -245,6 +247,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     // Is this a "mock" capture?
     mockCapture = false;
+    // FIXME: (Rubencino) Source paths should be absolute or relative to some other property. This patch fixes it temporarily
+    noPrefix = false;
     if (properties != null && properties.get(CaptureParameters.CAPTURE_DEVICE_NAMES) != null) {
       String[] deviceList = ((String)properties.get(CaptureParameters.CAPTURE_DEVICE_NAMES)).split(",");
       boolean everythingOk = true;
@@ -253,10 +257,15 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
         String value = properties.getProperty(key);
         if (value == null || !(new File(f, value).isFile())) {
-          everythingOk = false;
-          logger.warn("Everything is not okay, (key, value) = ({}, {})", key, value);
-          logger.warn("Everything is not okay, (key, isFile?) = ({}, {})", key, new File(f, value).isFile());
-
+          // FIXME: Added by Rubencino: routes to source files should be absolute. Test doesn't work otherwise
+          if (value != null && new File(value).isFile()) {
+            noPrefix = true;
+            continue;
+          } else {
+            everythingOk = false;
+            logger.warn("Everything is not okay, (key, value) = ({}, {})", key, value);
+            logger.warn("Everything is not okay, (key, isFile?) = ({}, {})", key, new File(f, value).isFile());
+          }
         }
       }
       if (everythingOk) {
@@ -264,9 +273,14 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         mockCapture = true;
 
         for (String device : deviceList) {
-          String key = "capture.device." + device + ".src";
+          String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
           String value = (String)properties.get(key);
-          File src = new File(f, value);
+          // FIXME: Added by Rubencino to fix the CaptureAgentImpl test: routes to source files should be absolute
+          File src;
+          if (noPrefix)
+            src = new File(value);
+          else
+            src = new File(f, value);
           String destFileNameKey = CaptureParameters.CAPTURE_DEVICE_PREFIX  + device + CaptureParameters.CAPTURE_DEVICE_DEST;
           String destFileName = (String)properties.get(destFileNameKey);
           File dest = new File(newRec.getDir(), destFileName);
@@ -281,14 +295,16 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         }
 
         // Add the sample dublin core, otherwise the recording won't show up in search
-        File dcCatalog = new File(f, "dublincore.xml");
+        File dcCatalog = new File(newRec.getDir(),"dublincore.xml");
         try {
+          FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/dublincore.xml"),dcCatalog);
           MediaPackageElementBuilder eb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-          mediaPackage.add(eb.elementFromURI(dcCatalog.toURI(), Type.Catalog, DublinCoreCatalog.FLAVOR));
+          mediaPackage.add(eb.elementFromURI(newRec.getDir().toURI().relativize(dcCatalog.toURI()), Type.Catalog, DublinCoreCatalog.FLAVOR));
         } catch (UnsupportedElementException e) {
           throw new RuntimeException("Error adding " + dcCatalog + " to recording");
+        } catch (IOException e) {
+          throw new RuntimeException("Error copying " + dcCatalog + " to destination directory");
         }
-        
         // When we return the recording, the mock capture is completed so reset
         // the CaptureAgent state
         return recordingID;
@@ -335,7 +351,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     logger.info("{} started.", pipe.getName());
 
     setRecordingState(recordingID, RecordingState.CAPTURING);
-    //setAgentState(AgentState.CAPTURING);
     return recordingID;
   }
 
@@ -345,7 +360,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   @Override
   public boolean stopCapture() {
-    
+
     logger.debug("stopCapture() called.");
     // If pipe is null and no mock capture is on
     if (pipe == null && !mockCapture) {
@@ -407,6 +422,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   /**
    * Generates the manifest.xml file from the files specified in the properties
+   * @param recID The ID for the recording whose manifest will be created
    * @return A state boolean 
    */
   public boolean createManifest(String recID) {
@@ -425,6 +441,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       MediaPackageElementBuilder elemBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
       MediaPackageElementFlavor flavor = null; 
 
+      URI baseURI = recording.getDir().toURI();
+      
       // Adds the files present in the Properties
       for (String name : friendlyNames) {
         name = name.trim();
@@ -444,7 +462,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
         // Adds the file to the MediaPackage
         if (outputFile.exists())
-          recording.getMediaPackage().add(elemBuilder.elementFromURI(outputFile.toURI(),
+          recording.getMediaPackage().add(elemBuilder.elementFromURI(
+                  baseURI.relativize(outputFile.toURI()),
                   MediaPackageElement.Type.Track,
                   flavor));
         else 
@@ -468,22 +487,13 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
       // Initializes StreamResult with File object to save to file
-      File manifestFile = new File(recording.getDir(), recording.getManifestName());
+      File manifestFile = new File(recording.getDir(), CaptureParameters.MANIFEST_NAME);
       StreamResult stResult = new StreamResult(new FileOutputStream(manifestFile));
       DOMSource source = new DOMSource(doc);
       transformer.transform(source, stResult);
 
       // Closes the stream to make sure all the content is written to the file
       stResult.getOutputStream().close();
-
-      // TODO: Move this out to another method, together with the code block commented above this method
-      /*// Serializes the metadata catalog
-      stResult = new StreamResult(new FileOutputStream(new File(recording.getDir(), recording.getAgentCatalogName())));
-      source = new DOMSource(metaFile);
-      transformer.transform(source, stResult);
-
-      // Closes the stream to make sure all the content is written to the file
-      stResult.getOutputStream().close();*/
 
       // Stores the File reference to the MediaPackage in the corresponding recording
       recording.setManifest(manifestFile);
@@ -504,7 +514,11 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   /**
    * Compresses the files contained in the output directory
+<<<<<<< .mine
+   * @param recID The ID for the recording whose files are going to be zipped
+=======
    * @param recID The ID of the recording
+>>>>>>> .r2303
    * @return A File reference to the file zip created
    */
   public File zipFiles(String recID) {
@@ -524,10 +538,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     // Now adds the files from the MediaPackage
     for (MediaPackageElement item : mpElements) {
-      File tmpFile = new File(item.getURI().normalize());
+      File tmpFile = new File(recording.getDir(), item.getURI().getPath());
       // TODO: Is this really a warning or should we fail completely and return an error?
-      if (!tmpFile.exists())
-        logger.warn("Required file {} doesn't exist!", tmpFile.getName());
+      if (!tmpFile.isFile())
+        logger.warn("Required file {} doesn't exist!", tmpFile.getAbsolutePath());
       filesToZip.add(tmpFile);
     }
 
@@ -535,18 +549,22 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     for (File f : filesToZip)
       logger.info("--> {}", f.getName());
 
-    return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), recording.getDir().getAbsolutePath() + File.separator + recording.getZipName());
+    return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), new File(recording.getDir(), CaptureParameters.ZIP_NAME).getAbsolutePath());
   }
 
 
   /**
    * Sends a file to the REST ingestion service
+<<<<<<< .mine
+   * @param recID The ID for the recording to be ingested
+=======
    * @param recID The ID of the recording
+>>>>>>> .r2303
    */
   public int ingest(String recID) {
     logger.debug("Ingesting recording: {}", recID);
     RecordingImpl recording = pendingRecordings.get(recID);
-    
+
     if (recording == null) {
       logger.error("[ingest] Recording {} not found!", recID);
       return -1;
@@ -573,7 +591,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     HttpPost postMethod = new HttpPost(url.toString());
     int retValue = -1;
 
-    File fileDesc = new File(recording.getDir(), CaptureParameters.ZIP_MEDIAPACKAGE_NAME);
+    File fileDesc = new File(recording.getDir(), CaptureParameters.ZIP_NAME);
 
     try {
       // Sets the file as the body of the request
@@ -589,10 +607,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       HttpResponse response = client.execute(postMethod);
 
       retValue = response.getStatusLine().getStatusCode();
-      
-      logger.debug("Called ingest, got return value of {}", retValue);
 
       setRecordingState(recID, RecordingState.UPLOAD_FINISHED);
+    
     } catch (ClientProtocolException e) {
       logger.error("Failed to submit the data: {}.", e.getMessage());
       setRecordingState(recID, RecordingState.UPLOAD_ERROR);

@@ -46,7 +46,7 @@ import javax.ws.rs.core.Response;
 public class CaptureRestService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureRestService.class);
   private CaptureAgent service;
-  protected final String docs;
+  protected String docs = null;
 
 
   protected String generateDocs() {
@@ -155,6 +155,9 @@ public class CaptureRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
+    if (docs == null)
+      docs = generateDocs();
+    
     return docs;
   }
 
@@ -190,7 +193,4 @@ public class CaptureRestService {
     }
   }
 
-  public CaptureRestService() {
-    docs = generateDocs();
-  }
 }
