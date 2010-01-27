@@ -72,6 +72,9 @@ public class SearchRestService {
   
   protected String generateDocs() {
     DocRestData data = new DocRestData("Search", "Search Service", "/search/rest", notes);
+
+    // abstract
+    data.setAbstract("This service indexes and queries available (distributed) episodes.");
     // episode
     RestEndpoint episodeEndpoint = new RestEndpoint("episode", RestEndpoint.Method.GET, "/episode", "Search for episodes matching the query parameters");
     episodeEndpoint.addFormat(new Format("XML", null, null));
