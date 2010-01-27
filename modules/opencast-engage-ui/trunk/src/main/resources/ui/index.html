@@ -40,9 +40,7 @@
         $('#stage').xslt(restEndpoint, "xsl/episodes.xsl", function() {
           Opencast.pager.renderPager();
 
-          $('#title').append($('#oc-from-index').html());
-          $('#title').append("-"+ $('#oc-to-index').html());
-          $('#title').append(" of "+ $('#oc-episodes-max').html());
+          $('#title').html("Recordings "+ $('#oc-from-index').html() + "-"+ $('#oc-to-index').html() + " of "+ $('#oc-episodes-max').html());
         });
       });
 

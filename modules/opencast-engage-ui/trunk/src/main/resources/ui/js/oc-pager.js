@@ -36,6 +36,8 @@ Opencast.pager = ( function() {
     var spanBeforeSet = false;
     var spanAfterSet = false;
 
+    $('#navigation').empty();
+    
     if(getCurrentSearchQuery() != null)
       LINK_PREFIX = "index.html?q="+getCurrentSearchQuery()   +"&page=";
     else

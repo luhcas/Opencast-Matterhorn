@@ -22,6 +22,9 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
  * USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
+ * Modified by: Micah Sutton <msutton3@unl.edu> 12/23/09 - Fixed problem of
+ *    execution ending before both xslt and xml were loaded.
+ *
  */
  
 /**
@@ -45,7 +48,7 @@
                         window.setTimeout(function() {
                             target.html(xm.transformNode(xs.XMLDocument));
                             callback();
-                        }, 50);
+                        }, 500);
                 }
             };
 
