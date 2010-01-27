@@ -45,18 +45,20 @@ public interface EncoderEngine {
   /**
    * Encodes a file into the specified format.
    * 
-   * @param audio source
+   * @param audioSource
    *          the audio file to use in encoding
-   * @param video source
+   * @param videoSource
    *          the video file to use in encoding
    * @param format
    *          the media format definition
+   * @param properties
+   *          the encoder properties
    * @return the encoded file
    * 
    * @throws EncoderException
    *           if an error occurs during encoding
    */
-  File encode(File audioSource, File videoSource, EncodingProfile format,Map<String, String> properties) throws EncoderException;
+  File encode(File audioSource, File videoSource, EncodingProfile format, Map<String, String> properties) throws EncoderException;
 
   /**
    * Encodes a file into the specified format.

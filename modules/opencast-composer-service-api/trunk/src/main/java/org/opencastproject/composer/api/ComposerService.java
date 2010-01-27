@@ -41,7 +41,8 @@ public interface ComposerService {
    * Encode the video stream from one track and the audio stream from another, into a new {@link Track}.
    * 
    * @param mediaPackage The media package containing the source track
-   * @param sourceTrackId The ID of the source track within the media package
+   * @param sourceVideoTrackId The ID of the source video track within the media package
+   * @param sourceAudioTrackId The ID of the source audio track within the media package
    * @param profileId The profile to use for encoding
    * @return The track that results from the encoding
    * @throws EncoderException
