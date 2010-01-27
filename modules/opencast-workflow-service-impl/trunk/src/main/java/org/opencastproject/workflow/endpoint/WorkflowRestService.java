@@ -102,11 +102,13 @@ public class WorkflowRestService {
         serverUrl = ccServerUrl;
       }
     }
-    docs = generateDocs();
   }
 
   protected String generateDocs() {
     DocRestData data = new DocRestData("Workflow", "Workflow Service", "/workflow/rest", new String[] {"$Rev$"});
+
+    // abstract
+    data.setAbstract("This service lists available workflows and starts, stops, suspends and resumes workflow instances.");
     // Workflow Definitions
     RestEndpoint defsEndpoint = new RestEndpoint("defs", RestEndpoint.Method.GET, "/definitions.{format}", "Returns all available workflow definitions");
     defsEndpoint.addFormat(new Format("xml", null, null));
@@ -437,7 +439,7 @@ public class WorkflowRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if(docs == null) return "documentation not available";
+    if (docs == null) { docs = generateDocs(); }
     return docs;
   }
 }
