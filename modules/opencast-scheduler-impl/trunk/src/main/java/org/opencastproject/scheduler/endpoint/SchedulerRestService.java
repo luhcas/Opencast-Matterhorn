@@ -52,7 +52,6 @@ public class SchedulerRestService {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerRestService.class);
   private SchedulerService service;
   
-  protected String docs = null;
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
   
   /**
@@ -88,8 +87,6 @@ public class SchedulerRestService {
         serverUrl = ccServerUrl;
       }
     }
-
-    docs = generateDocs();
   }  
   
   /**
@@ -299,17 +296,26 @@ public class SchedulerRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) return "No documetation available.";
+    if (docs == null) { docs = generateDocs(); }
     return docs;
   }
   
+  protected String docs;
+  private String[] notes = {
+    "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+    "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
   
   /**
    * Generates the REST documentation
    * @return The HTML with the documentation
    */
   protected String generateDocs() {
-    DocRestData data = new DocRestData("Scheduler", "Scheduler Service", "/scheduler/rest", new String[] {"$Rev: 1505 $"});
+    DocRestData data = new DocRestData("Scheduler", "Scheduler Service", "/scheduler/rest", notes);
+
+    // abstract
+    data.setAbstract("This service creates, edits and retrieves and helps manage scheduled capture events."); 
+ 
     // Scheduler addEvent
     RestEndpoint addEventEndpoint = new RestEndpoint("addEvent", RestEndpoint.Method.POST, "/addEvent", "Stores a new event in the database. As a result the event will be returned, but some fields especially the event-id may have been updated.\nWithin the metadata section it is possible to add any additional metadata as a key-value pair. The information will be stored even if the key is yet unknown.");
     addEventEndpoint.addFormat(new Format("xml", null, null));
