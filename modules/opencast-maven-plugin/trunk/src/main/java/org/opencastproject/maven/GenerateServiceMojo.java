@@ -39,13 +39,13 @@ import java.util.zip.ZipFile;
 
 /**
  * Generates service api and impl projects
- * @goal generate
+ * Maven goal is generate
  */
 public class GenerateServiceMojo extends AbstractMojo {
   private static final Logger logger = LoggerFactory.getLogger(GenerateServiceMojo.class);
 
   /**
-   * @parameter expression="${serviceName}" default-value="my"
+   * @param serviceName defaults to "my"
    */
   protected String serviceName = null;
   public void setServiceName(String serviceName) {
