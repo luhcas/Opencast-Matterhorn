@@ -445,7 +445,7 @@ public class IngestRestService {
     DocRestData data = new DocRestData("ingestservice", "Ingest Service", "/ingest", notes);
 
     // abstract
-    // data.setAbstract("This service creates and augments Matterhorn MediaPackages");
+    data.setAbstract("This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.");
 
     // createMediaPackage
     RestEndpoint endpoint = new RestEndpoint("createMediaPackage", RestEndpoint.Method.GET,
