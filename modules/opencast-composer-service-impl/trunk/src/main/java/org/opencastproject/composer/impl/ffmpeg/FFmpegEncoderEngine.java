@@ -168,7 +168,8 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
     // Others go to trace logging
     if (message.startsWith("FFmpeg version")
             || message.startsWith("configuration") || message.startsWith("lib")
-            || message.startsWith("frame=") || message.startsWith("built on"))
+            || message.startsWith("size=") || message.startsWith("frame=") 
+            || message.startsWith("built on"))
 
       log_.trace(message);
 
@@ -179,6 +180,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
             || message.startsWith("Stream mapping")
             || message.startsWith("Output #")
             || message.startsWith("video:")
+            || message.startsWith("Last message repeated")
             || message
                     .startsWith("PIX_FMT_YUV420P will be used as an intermediate format for rescaling"))
 

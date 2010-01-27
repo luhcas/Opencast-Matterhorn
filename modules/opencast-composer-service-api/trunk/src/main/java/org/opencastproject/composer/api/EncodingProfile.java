@@ -21,8 +21,8 @@ import java.util.Map;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * An encoding format encapsulates all the relevant configuration data for encoding a media file to a certain encoding
- * formats.
+ * An encoding format encapsulates all the relevant configuration data for
+ * encoding a media file to a certain encoding formats.
  */
 public interface EncodingProfile {
 
@@ -35,7 +35,8 @@ public interface EncodingProfile {
     Audio, Visual, AudioVisual, EnhancedAudio, Image, ImageSequence, Cover;
 
     /**
-     * Try to parse the argument <code>type</code> and produce a {@link MediaType} out of it.
+     * Try to parse the argument <code>type</code> and produce a
+     * {@link MediaType} out of it.
      * 
      * @param type
      *          the type string representation
@@ -43,7 +44,8 @@ public interface EncodingProfile {
      */
     public static MediaType parseString(String type) {
       if (type == null || type.length() == 0)
-        throw new IllegalArgumentException(type + " is not a valid track type definition");
+        throw new IllegalArgumentException(type
+                + " is not a valid track type definition");
       if ("audiovisual".equalsIgnoreCase(type))
         return AudioVisual;
       else if ("enhancedaudio".equalsIgnoreCase(type))
@@ -51,7 +53,8 @@ public interface EncodingProfile {
       else if ("imagesequence".equalsIgnoreCase(type))
         return ImageSequence;
       else {
-        type = type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
+        type = type.substring(0, 1).toUpperCase()
+                + type.substring(1).toLowerCase();
       }
       return MediaType.valueOf(type.trim());
     }
@@ -73,11 +76,12 @@ public interface EncodingProfile {
   String getName();
 
   /**
-   * Returns the encoding format's media type, which is either video (plus audio) or audio only.
+   * Returns the encoding format's media type, which is either video (plus
+   * audio) or audio only.
    * 
    * @return the format type
    */
-  MediaType getType();
+  MediaType getOutputType();
 
   /**
    * Returns a suffix of the files.
@@ -94,14 +98,15 @@ public interface EncodingProfile {
   String getMimeType();
 
   /**
-   * Returns a list of track classes this media format is applicable to.
+   * Returns the media format that can be used with this encoding profile.
    * 
-   * @return the applicable formats
+   * @return the applicable input format
    */
-  MediaType[] getApplicableMediaTypes();
+  MediaType getApplicableMediaType();
 
   /**
-   * Returns <code>true</code> if the profile is applicable for the given track type.
+   * Returns <code>true</code> if the profile is applicable for the given track
+   * type.
    * 
    * @param type
    *          the track type
@@ -117,10 +122,12 @@ public interface EncodingProfile {
   boolean hasExtensions();
 
   /**
-   * Returns the extension specified by <code>key</code> or <code>null</code> if no such key was defined.
+   * Returns the extension specified by <code>key</code> or <code>null</code> if
+   * no such key was defined.
    * <p>
-   * Note that <code>key</code> must not contain the media format prefix, so if the configured entry was
-   * <tt>mediaformat.format.xyz.test</tt>, then the key to access the value must simply be <code>test</code>.
+   * Note that <code>key</code> must not contain the media format prefix, so if
+   * the configured entry was <tt>mediaformat.format.xyz.test</tt>, then the key
+   * to access the value must simply be <code>test</code>.
    * </p>
    * 
    * @param key
@@ -130,7 +137,8 @@ public interface EncodingProfile {
   String getExtension(String key);
 
   /**
-   * Returns a map containing the additional properties or an empty map if no additional properties were found.
+   * Returns a map containing the additional properties or an empty map if no
+   * additional properties were found.
    * 
    * @return the additional properties
    */

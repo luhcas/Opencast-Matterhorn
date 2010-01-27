@@ -23,9 +23,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.selector.AudioElementSelector;
 import org.opencastproject.media.mediapackage.selector.AudioVisualElementSelector;
-import org.opencastproject.media.mediapackage.selector.VideoElementSelector;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -104,32 +102,53 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
     String sourceAudioFlavor = StringUtils.trimToNull(operation.getConfiguration("source-audio-flavor"));
     String targetTrackTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
     String targetTrackFlavor = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));
-    String encodingProfile = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
+    String encodingProfileName = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
 
-    // Select the tracks based on the flavors
-    
-    Collection<Track> tracks = null;
-    if (sourceAudioFlavor != null && sourceVideoFlavor != null) {
-      AudioVisualElementSelector avselector = new AudioVisualElementSelector();
-      avselector.setVideoFlavor(sourceVideoFlavor);
-      avselector.setAudioFlavor(sourceAudioFlavor);
-      tracks = avselector.select(mediaPackage);
-    } else if (sourceAudioFlavor != null) {
-      AudioElementSelector aselector = new AudioElementSelector();
-      aselector.setAudioFlavor(sourceAudioFlavor);
-      tracks = aselector.select(mediaPackage);
-    } else if(sourceVideoFlavor != null) {
-      VideoElementSelector vselector = new VideoElementSelector();
-      vselector.setVideoFlavor(sourceVideoFlavor);
-    } else {
+    if (sourceAudioFlavor == null && sourceVideoFlavor == null)
       throw new IllegalStateException("either source audio flavor or source video flavor or both must be specified");
+
+    // Find the encoding profile
+    EncodingProfile profile = null;
+    for (EncodingProfile p : composerService.listProfiles()) {
+      if (p.getIdentifier().equals(encodingProfileName)) {
+        profile = p;
+        break;
+      }
     }
+    if (profile == null) {
+      throw new IllegalStateException("Encoding profile '" + encodingProfileName + "' was not found");
+    }
+    
+    // Depending on the input type of the profile and the configured flavors and tags,
+    // make sure we have the required tracks:
+    AudioVisualElementSelector avSelector = new AudioVisualElementSelector();
+    avSelector.setVideoFlavor(sourceVideoFlavor);
+    avSelector.setAudioFlavor(sourceAudioFlavor);
+    switch (profile.getApplicableMediaType()) {
+      case AudioVisual:
+        avSelector.setRequireVideoTrack(true);
+        avSelector.setRequireAudioTrack(true);
+        break;
+      case Visual:
+        avSelector.setRequireVideoTrack(true);
+        avSelector.setRequireAudioTrack(false);
+        break;
+      case Audio:
+        avSelector.setRequireVideoTrack(false);
+        avSelector.setRequireAudioTrack(true);
+        break;
+      default:
+        logger.warn("Don't know if the current track is applicable to encoding profile '" + profile + "' based on type " + profile.getApplicableMediaType());
+        return mediaPackage;
+    }
+    Collection<Track> tracks = avSelector.select(mediaPackage);
     
     String videoSourceTrackId = null;
     String audioSourceTrackId = null;
-    
+
+    // Did we get the set of tracks that we need?
     if (tracks.size() == 0) {
-      logger.info("Mediapackage {} has no suitable tracks to encode based on flavor {}", mediaPackage, sourceVideoFlavor);
+      logger.info("Skipping encoding of media package to '{}': no suitable input tracks found", profile);
       return mediaPackage;
     } else {
       for (Track t : tracks) {
@@ -140,45 +159,36 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
         }
       }
     }
+
+    // Start encoding and wait for the result
+    Future<Track> futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, profile.getIdentifier());
+    Track composedTrack = futureTrack.get();
+    if (composedTrack == null)
+      throw new RuntimeException("unable to retrieve composed track");
+
+    // Add the flavor, either from the operation configuration or from the composer
+    if (targetTrackFlavor != null)
+      composedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(targetTrackFlavor));
+    logger.debug("Composed track has flavor '{}'", composedTrack.getFlavor());
+
+    // Set the mimetype
+    if (profile.getMimeType() != null)
+      composedTrack.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
     
-    // TODO profile retrieval, matching for media type (Audio, Visual, AudioVisual, EnhancedAudio, Image,
-    // ImageSequence, Cover)
-    // String[] profiles = ((String)properties.get("encode")).split(" ");
-    EncodingProfile[] profileList = composerService.listProfiles();
-    for (EncodingProfile profile : profileList) {
-      if (profile.getIdentifier().equals(encodingProfile)) {
-        Future<Track> futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, profile.getIdentifier());
-        // is there anything we can be doing while we wait for the track to be composed?
-        Track composedTrack = futureTrack.get();
-        if (composedTrack == null)
-          throw new RuntimeException("unable to retrieve composed track");
-
-        // Add the flavor, either from the operation configuration or from the composer
-        if (targetTrackFlavor != null)
-          composedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(targetTrackFlavor));
-        logger.debug("Composed track has flavor '{}'", composedTrack.getFlavor());
-
-        // Set the mimetype
-        if (profile.getMimeType() != null)
-          composedTrack.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
-        
-        // Add tags
-        if (targetTrackTags != null) {
-          for (String tag : targetTrackTags.split("\\W")) {
-            if(StringUtils.trimToNull(tag) == null) continue;
-            logger.debug("Tagging composed track with '{}'", tag);
-            composedTrack.addTag(tag);
-          }
-        }
-
-        // store new tracks to mediaPackage
-        // FIXME derived media comes from multiple sources, so how do we choose which is the "parent" of the derived
-        // media?
-        String parentId = videoSourceTrackId == null ? audioSourceTrackId : videoSourceTrackId; 
-        mediaPackage.addDerived(composedTrack, mediaPackage.getElementById(parentId));
-        break;
+    // Add tags
+    if (targetTrackTags != null) {
+      for (String tag : targetTrackTags.split("\\W")) {
+        if(StringUtils.trimToNull(tag) == null) continue;
+        logger.debug("Tagging composed track with '{}'", tag);
+        composedTrack.addTag(tag);
       }
     }
+
+    // store new tracks to mediaPackage
+    // FIXME derived media comes from multiple sources, so how do we choose which is the "parent" of the derived
+    // media?
+    String parentId = videoSourceTrackId == null ? audioSourceTrackId : videoSourceTrackId; 
+    mediaPackage.addDerived(composedTrack, mediaPackage.getElementById(parentId));
 
     return mediaPackage;
   }

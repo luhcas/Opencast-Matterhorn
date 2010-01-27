@@ -120,6 +120,32 @@
       </configurations>
     </operation>
  
+     <!-- encode to m4a download -->
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) to m4a/aac download">
+      <configurations>
+        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
+        <configuration key="encoding-profile">m4a.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to m4a/aac download">
+      <configurations>
+        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="source-audio-flavor">presentation/source</configuration>
+        <configuration key="target-tags">atom</configuration>
+        <configuration key="encoding-profile">m4a.http</configuration>
+      </configurations>
+    </operation>
+ 
     <!-- encode to cover image -->
     <operation
       name="image"

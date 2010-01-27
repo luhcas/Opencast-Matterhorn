@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 /**
  * This manager class tries to read encoding profiles from the classpath.
@@ -202,15 +201,8 @@ public class EncodingProfileManager {
     // Applicable to the following track categories
     Object applicableObj = getDefaultProperty(profile, PROP_APPLICABLE, properties, defaultProperties);
     if (applicableObj == null || "".equals(applicableObj.toString().trim()))
-      df.applicableTypes = new MediaType[] {};
-    else {
-      StringTokenizer tok = new StringTokenizer(applicableObj.toString(), " ,;");
-      List<MediaType> applicable = new ArrayList<MediaType>();
-      while (tok.hasMoreTokens()) {
-        applicable.add(MediaType.parseString(tok.nextToken().trim()));
-      }
-      df.applicableTypes = applicable.toArray(new MediaType[applicable.size()]);
-    }
+      throw new ConfigurationException("Input type of profile '" + profile + "' is missing");
+    df.applicableType = MediaType.parseString(applicableObj.toString().trim());
 
     // Look for extensions
     String extensionKey = PROP_PREFIX + profile + ".";

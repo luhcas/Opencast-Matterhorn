@@ -106,12 +106,12 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getType()}.
+   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getOutputType()}.
    */
   @Test
   public void testGetType() {
     EncodingProfile profile = profiles.get(h264ProfileId);
-    assertEquals(MediaType.Visual, profile.getType());
+    assertEquals(MediaType.Visual, profile.getOutputType());
   }
 
   /**
@@ -129,10 +129,9 @@ public class EncodingProfileTest {
   @Test
   public void testGetApplicableMediaTypes() {
     EncodingProfile profile = profiles.get(h264ProfileId);
-    MediaType[] types = profile.getApplicableMediaTypes();
-    assertNotNull(types);
-    assertEquals(1, types.length);
-    assertEquals(MediaType.Visual, types[0]);
+    MediaType type = profile.getApplicableMediaType();
+    assertNotNull(type);
+    assertEquals(MediaType.Visual, type);
   }
 
   /**
@@ -175,7 +174,6 @@ public class EncodingProfileTest {
   public void testGetExtensions() {
     EncodingProfile profile = profiles.get(h264ProfileId);
     profile.isApplicableTo(MediaType.Visual);
-    profile.getApplicableMediaTypes();
     assertEquals(Collections.emptyMap(), profile.getExtensions());
     
     // Test profile with existing extension

@@ -48,7 +48,7 @@ public class EncodingProfileImpl implements EncodingProfile {
   protected String name = null;
 
   /** Format type */
-  @XmlElement(name = "mediatype")
+  @XmlElement(name = "outputmediatype")
   protected MediaType outputType = null;
 
   /** Suffix */
@@ -59,16 +59,17 @@ public class EncodingProfileImpl implements EncodingProfile {
   @XmlElement(name = "mimetype")
   protected String mimeType = null;
 
-  /** The track types that this profile may be applied to */
-  @XmlElement(name = "mediatype")
-  protected MediaType[] applicableTypes = null;
+  /** The track type that this profile may be applied to */
+  @XmlElement(name = "inputmediatype")
+  protected MediaType applicableType = null;
 
   /** Installation-specific properties */
   @XmlElement(name = "extension")
   protected HashMap<String, String> extension = null;
 
   /**
-   * Private, since the profile should be created using the static factory method.
+   * Private, since the profile should be created using the static factory
+   * method.
    * 
    * @param identifier
    *          the profile identifier
@@ -108,16 +109,16 @@ public class EncodingProfileImpl implements EncodingProfile {
    * @param type
    *          the output type
    */
-  void setType(MediaType type) {
+  void setOutputType(MediaType type) {
     this.outputType = type;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.EncodingProfile#getType()
+   * @see org.opencastproject.composer.api.EncodingProfile#getOutputType()
    */
-  public MediaType getType() {
+  public MediaType getOutputType() {
     return outputType;
   }
 
@@ -150,23 +151,23 @@ public class EncodingProfileImpl implements EncodingProfile {
   }
 
   /**
-   * Sets the types that are applicable for that profile. For example, an audio only-track hardly be applicable to a
-   * jpeg-slide extraction.
+   * Sets the types that are applicable for that profile. For example, an audio
+   * only-track hardly be applicable to a jpeg-slide extraction.
    * 
    * @param types
    *          applicable track types
    */
-  void setApplicableTo(MediaType[] types) {
-    this.applicableTypes = types;
+  void setApplicableTo(MediaType type) {
+    this.applicableType = type;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.EncodingProfile#getApplicableMediaTypes()
+   * @see org.opencastproject.composer.api.EncodingProfile#getApplicableMediaType()
    */
-  public MediaType[] getApplicableMediaTypes() {
-    return applicableTypes;
+  public MediaType getApplicableMediaType() {
+    return applicableType;
   }
 
   /**
@@ -175,17 +176,16 @@ public class EncodingProfileImpl implements EncodingProfile {
    * @see org.opencastproject.composer.api.EncodingProfile#isApplicableTo(org.opencastproject.composer.api.EncodingProfile.MediaType)
    */
   public boolean isApplicableTo(MediaType type) {
-    if (applicableTypes == null)
+    if (type == null)
+      throw new IllegalArgumentException("Type must not be null");
+    if (applicableType == null)
       return false;
-    for (MediaType t : applicableTypes) {
-      if (t.equals(type))
-        return true;
-    }
-    return false;
+    return applicableType.equals(type);
   }
 
   /**
-   * Sets the extension properties for that profile. These properties may be intepreted by the encoder engine.
+   * Sets the extension properties for that profile. These properties may be
+   * intepreted by the encoder engine.
    * 
    * @param extension
    *          the extension properties
@@ -226,7 +226,8 @@ public class EncodingProfileImpl implements EncodingProfile {
   }
 
   /**
-   * Adds the given key-value pair to the extended configuration space of this media profile.
+   * Adds the given key-value pair to the extended configuration space of this
+   * media profile.
    * 
    * @param key
    *          the property key
@@ -244,8 +245,9 @@ public class EncodingProfileImpl implements EncodingProfile {
   }
 
   /**
-   * Removes the specified property from the extended configuation space and returns either the property value or
-   * <code>null</code> if no property was found.
+   * Removes the specified property from the extended configuation space and
+   * returns either the property value or <code>null</code> if no property was
+   * found.
    * 
    * @param key
    *          the property key
@@ -291,28 +293,22 @@ public class EncodingProfileImpl implements EncodingProfile {
     return identifier;
   }
 
-  public MediaType getOutputType() {
-    return outputType;
-  }
-
-  public void setOutputType(MediaType outputType) {
-    this.outputType = outputType;
-  }
-
-  public MediaType[] getApplicableTypes() {
-    return applicableTypes;
-  }
-
-  public void setApplicableTypes(MediaType[] applicableTypes) {
-    this.applicableTypes = applicableTypes;
-  }
-
+  /**
+   * Returns the extended profile definitions.
+   * 
+   * @return the profile extensions
+   */
   public HashMap<String, String> getExtension() {
     return extension;
   }
 
-  public void setExtension(HashMap<String, String> extension) {
-    this.extension = extension;
+  /**
+   * Sets the profile extensions.
+   * 
+   * @param extensions the extensions
+   */
+  public void setExtension(HashMap<String, String> extensions) {
+    this.extension = extensions;
   }
 
   public void setIdentifier(String identifier) {

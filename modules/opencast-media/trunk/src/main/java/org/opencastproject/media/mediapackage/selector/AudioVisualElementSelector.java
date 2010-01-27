@@ -40,6 +40,12 @@ public class AudioVisualElementSelector extends
   /** Explicit audio flavor */
   protected MediaPackageElementFlavor audioFlavor = null;
 
+  /** Make this selector require an audio track */
+  protected boolean requireAudio = true;
+
+  /** Make this selector require a video track */
+  protected boolean requireVideo = true;
+
   /**
    * Creates a new selector.
    */
@@ -92,6 +98,29 @@ public class AudioVisualElementSelector extends
     if (flavor != null)
       addFlavor(flavor);
     audioFlavor = flavor;
+  }
+
+  /**
+   * If set to <code>true</code>, this selector requires an audio track to be
+   * part of the result set, or a video track containing at least one audio
+   * stream.
+   * 
+   * @param require
+   *          <code>true</code> to require an audio track
+   */
+  public void setRequireAudioTrack(boolean require) {
+    requireAudio = require;
+  }
+
+  /**
+   * If set to <code>true</code>, this selector requires a video track to be
+   * part of the result set.
+   * 
+   * @param require
+   *          <code>true</code> to require a video track
+   */
+  public void setRequireVideoTrack(boolean require) {
+    requireVideo = require;
   }
 
   /**
@@ -150,7 +179,7 @@ public class AudioVisualElementSelector extends
   @Override
   public Collection<Track> select(MediaPackage mediaPackage) {
     // instead of relying on the broken superclass, we'll inspect every track
-    //  Collection<Track> candidates = super.select(mediaPackage);
+    // Collection<Track> candidates = super.select(mediaPackage);
     Collection<Track> candidates = Arrays.asList(mediaPackage.getTracks());
     Set<Track> result = new HashSet<Track>();
 
@@ -160,21 +189,24 @@ public class AudioVisualElementSelector extends
     // Try to look for the perfect match: a track containing audio and video
     for (Track t : candidates) {
       if (TrackSupport.byType(t.getStreams(), AudioStream.class).length > 0) {
-        if (!foundAudio && (audioFlavor == null || audioFlavor.equals(t.getFlavor()))) {
+        if (!foundAudio
+                && (audioFlavor == null || audioFlavor.equals(t.getFlavor()))) {
           result.add(t);
           foundAudio = true;
         }
       }
-      // TODO: Fix! byType is not working, let's audio streams pass as video streams
+      // TODO: Fix! byType is not working, let's audio streams pass as video
+      // streams
       if (TrackSupport.byType(t.getStreams(), VideoStream.class).length > 0) {
-        if (!foundVideo  && (videoFlavor == null || videoFlavor.equals(t.getFlavor()))) {
+        if (!foundVideo
+                && (videoFlavor == null || videoFlavor.equals(t.getFlavor()))) {
           result.add(t);
           foundVideo = true;
         }
       }
     }
-    
-    if (!foundAudio || !foundVideo)
+
+    if ((!foundAudio && requireAudio) || (!foundVideo && requireVideo))
       result.clear();
 
     // We were lucky, a combination was found!
