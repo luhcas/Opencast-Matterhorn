@@ -20,10 +20,8 @@ import org.opencastproject.engageui.api.EpisodeViewImpl;
 import org.opencastproject.engageui.api.EpisodeViewListImpl;
 import org.opencastproject.engageui.api.EpisodeViewListResultImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageReference;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
@@ -58,7 +56,8 @@ import javax.ws.rs.core.Response.Status;
  */
 @Path("/")
 public class EngageuiRestService {
-  private static final Logger logger = LoggerFactory.getLogger(EngageuiRestService.class);
+  private static final Logger logger = LoggerFactory
+          .getLogger(EngageuiRestService.class);
 
   private SearchService searchService;
 
@@ -90,7 +89,8 @@ public class EngageuiRestService {
     result = searchService.getEpisodeById(episodeId);
 
     // Get a DateFormat
-    format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+    format = DateFormat
+            .getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 
     searchResultItems = result.getItems();
 
@@ -148,7 +148,8 @@ public class EngageuiRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("search")
-  public Response getEpisodesByDate(@QueryParam("q") String text, @QueryParam("page") int page) {
+  public Response getEpisodesByDate(@QueryParam("q") String text,
+          @QueryParam("page") int page) {
     // Variables
     int pagemax, fromIndex, toIndex;
     long episodesMax;
@@ -211,13 +212,15 @@ public class EngageuiRestService {
     }
 
     // Calculate toIndex
-    toIndex = Math.min(fromIndex + 10, (page - 1) * 10 + searchResultItems.length);
+    toIndex = Math.min(fromIndex + 10, (page - 1) * 10
+            + searchResultItems.length);
 
     // Set the toIndex
     episodeViewListResult.setToIndex(toIndex);
 
     // Get a DateFormat
-    DateFormat format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+    DateFormat format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+            DateFormat.SHORT);
 
     for (int i = 0; i < searchResultItems.length; i++) {
       // Get the the sarchResultItem on position i in the array
@@ -228,7 +231,8 @@ public class EngageuiRestService {
       cover = searchResultItem.getCover();
 
       if (searchResultItem.getDcTitle().length() > TITLE_MAX_LENGTH)
-        dcTitle = searchResultItem.getDcTitle().substring(0, TITLE_MAX_LENGTH) + "...";
+        dcTitle = searchResultItem.getDcTitle().substring(0, TITLE_MAX_LENGTH)
+                + "...";
       else
         dcTitle = searchResultItem.getDcTitle();
 
@@ -236,7 +240,9 @@ public class EngageuiRestService {
 
       dcContributor = searchResultItem.getDcContributor();
       if (searchResultItem.getDcAbstract().length() > ABSTRACT_MAX_LENGTH)
-        dcAbstract = searchResultItem.getDcAbstract().substring(0, ABSTRACT_MAX_LENGTH) + "...";
+        dcAbstract = searchResultItem.getDcAbstract().substring(0,
+                ABSTRACT_MAX_LENGTH)
+                + "...";
       else
         dcAbstract = searchResultItem.getDcAbstract();
       dcRightsHolder = searchResultItem.getDcRightsHolder();
@@ -280,14 +286,15 @@ public class EngageuiRestService {
   }
 
   /**
-   * Iterates through the tracks of a mediaPackage and returns the video url of the track with the flavor "presentation"
-   * or "presenter"
+   * Iterates through the tracks of a mediaPackage and returns the video url of
+   * the track with the flavor "presentation" or "presenter"
    * 
    * @param mediaPackage
    * @return String the video url
    */
   private String getVideoUrl(MediaPackage mediaPackage) {
-    // FlavorPrioritySelector<Track> selector = new FlavorPrioritySelector<Track>();
+    // FlavorPrioritySelector<Track> selector = new
+    // FlavorPrioritySelector<Track>();
     // selector.includeTag("engage");
     // selector.addFlavor(MediaPackageElements.PRESENTATION_TRACK);
     // selector.addFlavor(MediaPackageElements.PRESENTER_TRACK);
@@ -295,17 +302,9 @@ public class EngageuiRestService {
     // if(c.isEmpty()) return DEFAULT_VIDEO_URL;
     // return c.iterator().next().getURI().toString();
     for (Track track : mediaPackage.getTracks()) {
-      MediaPackageReference ref = track.getReference();
-      if (ref != null) {
-        MediaPackageElement parent = mediaPackage.getElementById(ref.getIdentifier());
-        if (parent != null) {
-          MediaPackageElementFlavor parentFlavor = parent.getFlavor();
-          if (parentFlavor != null
-                  && (parentFlavor.equals(MediaPackageElements.PRESENTATION_TRACK) || parentFlavor
-                          .equals(MediaPackageElements.PRESENTER_TRACK))) {
-            return track.getURI().toString();
-          }
-        }
+      MediaPackageElementFlavor flavor = track.getFlavor();
+      if (MediaPackageElements.PRESENTATION_TRACK.equals(flavor) || MediaPackageElements.PRESENTER_TRACK.equals(flavor)) {
+        return track.getURI().toString();
       }
     }
     return null;
@@ -342,24 +341,31 @@ public class EngageuiRestService {
    * @return The HTML with the documentation
    */
   protected String generateDocs() {
-    DocRestData data = new DocRestData("Engage", "Engage UI", "/engageui/rest", new String[] { "$Rev$" });
+    DocRestData data = new DocRestData("Engage", "Engage UI", "/engageui/rest",
+            new String[] { "$Rev$" });
     // Engage getEpisodeById
-    RestEndpoint getEpisodeById = new RestEndpoint("getEpisodeById", RestEndpoint.Method.POST, "/getEpisodeById",
+    RestEndpoint getEpisodeById = new RestEndpoint("getEpisodeById",
+            RestEndpoint.Method.POST, "/getEpisodeById",
             "Gets the episode with the given episode id.");
     getEpisodeById.addFormat(new Format("xml", null, null));
-    getEpisodeById.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, result returned"));
-    getEpisodeById
-            .addRequiredParam(new Param("episodeId", Type.TEXT, "123456", "The episode that should be requested"));
+    getEpisodeById.addStatus(org.opencastproject.util.doc.Status
+            .OK("OK, valid request, result returned"));
+    getEpisodeById.addRequiredParam(new Param("episodeId", Type.TEXT, "123456",
+            "The episode that should be requested"));
     getEpisodeById.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getEpisodeById);
 
     // Engage getEpisodesByDate
-    RestEndpoint getEpisodesByDate = new RestEndpoint("getEpisodesByDate", RestEndpoint.Method.POST,
-            "/getEpisodesByDate", "Search for episodes matching the query parameter");
+    RestEndpoint getEpisodesByDate = new RestEndpoint("getEpisodesByDate",
+            RestEndpoint.Method.POST, "/getEpisodesByDate",
+            "Search for episodes matching the query parameter");
     getEpisodesByDate.addFormat(new Format("xml", null, null));
-    getEpisodesByDate.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, result returned"));
-    getEpisodesByDate.addRequiredParam(new Param("q", Type.TEXT, "", "Any episode that matches this free-text query"));
-    getEpisodesByDate.addRequiredParam(new Param("page", Type.TEXT, "1", "The page number"));
+    getEpisodesByDate.addStatus(org.opencastproject.util.doc.Status
+            .OK("OK, valid request, result returned"));
+    getEpisodesByDate.addRequiredParam(new Param("q", Type.TEXT, "",
+            "Any episode that matches this free-text query"));
+    getEpisodesByDate.addRequiredParam(new Param("page", Type.TEXT, "1",
+            "The page number"));
     getEpisodesByDate.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getEpisodesByDate);
 
