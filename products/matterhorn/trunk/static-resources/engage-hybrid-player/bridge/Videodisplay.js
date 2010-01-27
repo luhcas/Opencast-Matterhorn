@@ -91,4 +91,11 @@ function VideodisplayReady() {
 		b_Videodisplay_root.setccBool(ccBool);
 	};
 
+	Videodisplay.setMediaURL = function(argString) {
+		b_Videodisplay_root.setMediaURL(argString);
+	};
+	
+	Videodisplay.setCaptionsURL = function(argString) {
+		b_Videodisplay_root.setCaptionsURL(argString);
+	};
 }

@@ -551,6 +551,26 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
+        @description Set the media URL.
+        @param String mediaURL
+    */
+    function setMediaURL(mediaURL)
+    {
+        Videodisplay.setMediaURL(mediaURL);
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the captions URL.
+        @param String captionsURL
+    */
+    function setCaptionsURL(captionsURL)
+    {
+        Videodisplay.setCaptionsURL(captionsURL);
+    }
+    
+    /**
+        @memberOf Opencast.Player
         @description Keylistener.
      */
     $(document).keyup(function (e) 
@@ -854,6 +874,8 @@ Opencast.Player = (function () {
         setPlayPauseState : setPlayPauseState,
         setDoMute : setDoMute,
         setCaptions : setCaptions,
-        hearTimeInfo : hearTimeInfo
+        hearTimeInfo : hearTimeInfo,
+        setMediaURL : setMediaURL,
+        setCaptionsURL : setCaptionsURL
     };
 }());
