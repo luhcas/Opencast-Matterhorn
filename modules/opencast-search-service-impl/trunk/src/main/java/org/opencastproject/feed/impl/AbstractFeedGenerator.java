@@ -294,9 +294,9 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     f.setEncoding(ENCODING);
 
     // Set iTunes tags
-    ITunesFeedExtension iTunesFeed = new ITunesFeedExtension();
+    // ITunesFeedExtension iTunesFeed = new ITunesFeedExtension();
     // TODO: Set iTunes tags
-    f.addModule(iTunesFeed);
+    // f.addModule(iTunesFeed);
 
     
     // TODO: Set feed icon and other metadata

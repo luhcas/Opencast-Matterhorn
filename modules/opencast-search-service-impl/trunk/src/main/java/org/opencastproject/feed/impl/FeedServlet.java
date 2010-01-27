@@ -111,6 +111,7 @@ public class FeedServlet extends HttpServlet {
     try {
       output.output(new RomeFeed(feed, feedInfo), responseWriter);
     } catch (Exception e) {
+      log_.error("Error serializing feed", e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
