@@ -133,7 +133,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.recorder.api.CaptureAgent#startCapture()
+   * @see org.opencastproject.capture.api.CaptureAgent#startCapture()
    */
   @Override
   public String startCapture() {
@@ -158,7 +158,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.recorder.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.capture.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage)
    */
   @Override
   public String startCapture(MediaPackage mediaPackage) {
@@ -172,7 +172,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.recorder.api.CaptureAgent#startCapture(java.util.HashMap)
+   * @see org.opencastproject.capture.api.CaptureAgent#startCapture(java.util.HashMap)
    */
   @Override
   public String startCapture(Properties properties) {
@@ -197,7 +197,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * {@inheritDoc}
    * 
    * @see 
-   *      org.opencastproject.recorder.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage,
+   *      org.opencastproject.capture.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage,
    *      HashMap properties)
    */
   @Override
@@ -504,7 +504,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   /**
    * Compresses the files contained in the output directory
-   * @param ZIP_NAME - The name of the zip file created
+   * @param recID The ID of the recording
    * @return A File reference to the file zip created
    */
   public File zipFiles(String recID) {
@@ -541,8 +541,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   /**
    * Sends a file to the REST ingestion service
-   * @param url : The service URL
-   * @param fileDesc : The descriptor for the media package
+   * @param recID The ID of the recording
    */
   public int ingest(String recID) {
     logger.debug("Ingesting recording: {}", recID);

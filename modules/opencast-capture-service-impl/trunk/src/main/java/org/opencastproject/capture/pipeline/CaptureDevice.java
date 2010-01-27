@@ -39,12 +39,11 @@ public class CaptureDevice {
    * 
    * @param loc
    *          The location of the device on the system
-   * @param ct
-   *          The CaptureType of the device
    * @param name
    *          The name of the device
+   * @param output
+   *          The output path
    */
-  //TODO:  This javadoc is out of date
   public CaptureDevice(String loc, DeviceName name, String output) {
     this.location = loc;
     this.name = name;
