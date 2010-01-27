@@ -261,29 +261,29 @@
             <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
               <ul class="no-bullets formField-list">
                 <!-- field: Media file content -->
+                <!--
                 <li class="ui-helper-clearfix">
                   <span class="formField-label"><span class="color-red">* </span>Media file content:</span>
                   <select name="flavor" id="flavor" class="requiredField" style="float:left;margin:3px;">
                     <option value="">Choose one:</option>
-                    <!-- <option value="audio">Audio</option> -->
+                    <option value="audio">Audio</option>
                     <option value="presenter/source">presenter</option>
                     <option value="audience/source">audience</option>
                     <option value="presentation/source">presentation slides</option>
                     <option value="documents/source">other</option>
-                    <!-- <option value="indefinite/source">other (video)</option> -->
+                    <option value="indefinite/source">other (video)</option>
                   </select>
                   <span class="helpIcon" title="click for help">&nbsp;</span>
                   <br>
-                  <!-- <input type="hidden" name="flavor" id="flavor" value="presentation/source"> -->
-                </li>
+                </li> -->
                 <li class="ui-helper-clearfix">
                   <span class="formField-label">&nbsp;</span>
-                  <span class="formField"style="float:left;">File must contain video.</span>
+                  <span style="float:left;">File must contain video.</span>
                 </li>
                 <!-- field: Media File -->
                 <li class="ui-helper-clearfix">
                   <span class="formField-label"><span class="color-red">* </span>Media File:</span>
-                  <input type="file" id="track" name="track" class="requiredField" style="float:left;">
+                  <input type="file" id="track" name="track" class="requiredField formField" style="float:left;">
                   <span class="helpIcon"  title="click for help">&nbsp;</span>
                 </li>
                 <li class="ui-helper-clearfix">
@@ -301,6 +301,7 @@
                 <!-- submit / cancal button -->
                 <li class="ui-helper-clearfix">
                   <span class="formField-label">&nbsp;</span>
+                  <input type="hidden" class="formField" name="flavor" id="flavor" value="presentation/source">
                   <button type="button" id="BtnSubmit">Submit</button>
                   <button id="btnCancle" type="button" onclick="history.back();">Cancel</button>
                   <!-- <a href="index.html" style="float:right;">Switch to AJAX upload form</a> -->
