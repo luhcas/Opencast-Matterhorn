@@ -15,20 +15,21 @@
  */
 package org.opencast.engage.videodisplay.business
 {
-	import mx.rpc.AsyncToken;
-	import mx.rpc.remoting.RemoteObject;
-	/**
-    *   VideodisplayDelegate
-    * 
-    */
-	public class VideodisplayDelegate
-	{
-		
-		/** Constructor */
-		public function VideodisplayDelegate()
-		{
-		}
-		[Autowire]
-		public var service : RemoteObject;
-	}
+    import mx.rpc.AsyncToken;
+    import mx.rpc.remoting.RemoteObject;
+
+    /**
+     *   VideodisplayDelegate
+     *
+     */
+    public class VideodisplayDelegate
+    {
+
+        /** Constructor */
+        public function VideodisplayDelegate()
+        {
+        }
+        [Autowire]
+        public var service:RemoteObject;
+    }
 }

@@ -42,7 +42,11 @@ package bridge
         
         public static const TOGGLEINFO:String           = 'Opencast.Player.toggleInfo';
         
-        public static const OPENCASTVOLUME:String       = 'Opencast.Player.setOpencastVolume'; 
+        public static const OPENCASTVOLUME:String       = 'Opencast.Player.setOpencastVolume';
+        
+        public static const ONPLAYERREADY:String       = 'onPlayerReady'; 
+        
+        
         
     }
 }

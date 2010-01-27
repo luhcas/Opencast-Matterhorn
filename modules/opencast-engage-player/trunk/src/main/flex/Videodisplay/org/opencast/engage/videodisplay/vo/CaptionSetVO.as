@@ -15,40 +15,42 @@
  */
 package org.opencast.engage.videodisplay.vo
 {
-	import mx.collections.ArrayCollection;
-	/**
-	* 	CaptionSetVO
-	* 
-	*/
-	[Bindable]
-	public class CaptionSetVO
-	{
-		/** Constructor */
-		public function CaptionSetVO()
-		{
-			super();
-			this.captions = new ArrayCollection();
-		}
+    import mx.collections.ArrayCollection;
 
-		public var captions : ArrayCollection;
-		public var lang : String;
-		public var style : String;
-		
-		/** 
-		 * toString
-		 * 
-		 * return the captions of the video
-		 * 
-		 *  */
-		public function toString() : String
-		{
-			var result : String = "";
-			for(var i : int = 0;i < captions.length; i++)
-			{
-				result += lang + " " + captions.getItemAt(i).toString();
-			}
+    /**
+     * 	CaptionSetVO
+     *
+     */
+    [Bindable]
+    public class CaptionSetVO
+    {
+        /** Constructor */
+        public function CaptionSetVO()
+        {
+            super();
+            this.captions = new ArrayCollection();
+        }
 
-			return result;
-		}
-	}
+        public var captions:ArrayCollection;
+        public var lang:String;
+        public var style:String;
+
+        /**
+         * toString
+         *
+         * return the captions of the video
+         *
+         *  */
+        public function toString():String
+        {
+            var result:String = "";
+
+            for ( var i:int = 0; i < captions.length; i++ )
+            {
+                result += lang + " " + captions.getItemAt( i ).toString();
+            }
+
+            return result;
+        }
+    }
 }

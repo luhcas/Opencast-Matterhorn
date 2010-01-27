@@ -6,31 +6,6 @@
 */
 var Opencast = Opencast || {};
 
-$(document).ready(function () {
-  
-	Opencast.ariaSlider.init();
-    
-    var simpleEdit = fluid.inlineEdit("#simpleEdit", {
-        selectors : {
-            text: ".editableText",
-            editContainer: "#editorContainer",
-            edit: "#editField"
-        },
-        useTooltip : true,
-        tooltipDelay : 500
-    });
-    
-    $("#btn_cc").attr('role', 'button');
-    $("#btn_cc").attr('aria-pressed', 'false'); 
-
-    $("#btn_volume").attr('role', 'button');
-    $("#btn_volume").attr('aria-pressed', 'false');
-
-    $("#btn_play_pause").attr('role', 'button');
-    $("#btn_play_pause").attr('aria-pressed', 'false');
-
-});
-
 /**
     @namespace Opencast namespace Player
 */
@@ -268,7 +243,7 @@ Opencast.Player = (function () {
         var newAlert = document.createElement("div");
         newAlert.setAttribute("role", "alert");
         newAlert.setAttribute("id", "alert");
-        newAlert.setAttribute("class", "fl-offScreen-hidden");
+        newAlert.setAttribute("class", "oc-offScreen-hidden");
         var msg = document.createTextNode(alertMessage);
         newAlert.appendChild(msg);
         document.body.appendChild(newAlert);
@@ -576,6 +551,26 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
+        @description Set the media URL.
+        @param String mediaURL
+    */
+    function setMediaURL(mediaURL)
+    {
+        Videodisplay.setMediaURL(mediaURL);
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the captions URL.
+        @param String captionsURL
+    */
+    function setCaptionsURL(captionsURL)
+    {
+        Videodisplay.setCaptionsURL(captionsURL);
+    }
+    
+    /**
+        @memberOf Opencast.Player
         @description Keylistener.
      */
     $(document).keyup(function (e) 
@@ -879,6 +874,8 @@ Opencast.Player = (function () {
         setPlayPauseState : setPlayPauseState,
         setDoMute : setDoMute,
         setCaptions : setCaptions,
-        hearTimeInfo : hearTimeInfo
+        hearTimeInfo : hearTimeInfo,
+        setMediaURL : setMediaURL,
+        setCaptionsURL : setCaptionsURL
     };
 }());

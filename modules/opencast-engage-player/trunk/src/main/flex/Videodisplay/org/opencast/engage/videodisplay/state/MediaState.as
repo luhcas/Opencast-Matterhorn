@@ -15,14 +15,15 @@
  */
 package org.opencast.engage.videodisplay.state
 {
-	/**
-    *   PlayerState
-    * 
-    */
-	public class MediaState
-	{
-		public static const AUDIO : String = 'audio';
-		public static const ERROR : String = 'error';
-		public static const VIDEO : String = 'video';
-	}
+
+    /**
+     *   PlayerState
+     *
+     */
+    public class MediaState
+    {
+        public static const AUDIO:String = 'audio';
+        public static const ERROR:String = 'error';
+        public static const VIDEO:String = 'video';
+    }
 }

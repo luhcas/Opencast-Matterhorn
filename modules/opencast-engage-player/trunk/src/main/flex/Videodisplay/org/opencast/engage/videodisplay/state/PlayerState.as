@@ -15,13 +15,14 @@
  */
 package org.opencast.engage.videodisplay.state
 {
-	/**
-    *   PlayerState
-    * 
-    */
-	public class PlayerState
-	{
-		public static const PAUSING : String = 'pausing';
-		public static const PLAYING : String = 'playing';
-	}
+
+    /**
+     *   PlayerState
+     *
+     */
+    public class PlayerState
+    {
+        public static const PAUSING:String = 'pausing';
+        public static const PLAYING:String = 'playing';
+    }
 }
