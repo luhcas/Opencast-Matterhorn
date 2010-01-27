@@ -83,8 +83,6 @@ public class StreamHelper extends Thread {
    *          the input stream to read from
    * @param logger
    *          the logger to append to
-   * @param level
-   *          the log level
    * @param contentBuffer
    *          the buffer to write the captured output to
    */
@@ -121,8 +119,6 @@ public class StreamHelper extends Thread {
    *          a stream to also redirect the captured output to
    * @param logger
    *          the logger to append to
-   * @param level
-   *          the log level
    * @param contentBuffer
    *          the buffer to write the captured output to
    */
