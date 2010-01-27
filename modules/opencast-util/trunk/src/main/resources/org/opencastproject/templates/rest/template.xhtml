@@ -109,7 +109,10 @@
 </head>
 <body>
 <h1>${meta.title} REST Documentation</h1>
-<span>${meta.url}</span>
+<span class="meta_url">${meta.url}</span>
+<#if meta.abstract??>
+<div class="meta_abstract">${meta.abstract}</div>
+</#if>
 
 <#list endpointHolders as endpointHolder>
 <fieldset id="endpoint_holder_${endpointHolder.name}">

@@ -161,6 +161,18 @@ public class DocRestData extends DocData {
   }
 
   /**
+   * Creates an abstract section which is displayed at the top of the doc
+   * @param abstractText any text to place at the top of the document, can be html markup but must be valid
+   */
+  public void setAbstract(String abstractText) {
+    if (isBlank(abstractText)) {
+      this.meta.remove("abstract");
+    } else {
+      this.meta.put("abstract", abstractText);
+    }
+  }
+  
+  /**
    * Validates paths:
    * VALID: /sample , /sample/{thing} , /{my}/{path}.xml , /my/fancy_path/is/{awesome}.{FORMAT}
    * INVALID: sample, /sample/, /sa#$%mple/path
