@@ -103,5 +103,15 @@ public class CaptureRestEndpointTest {
     // Default capture simply runs a mock capture
     assertEquals(getResponse, HttpStatus.SC_OK);
   }
+  
+  @Test
+  public void printTestingInfo() {
+    System.out.println("Instructions to test capture agent:");
+    System.out.println("The capture agents can be tested by setting the appropriate\n" +
+        "properties for the JVM. They properties right now are: testHauppauge, testEpiphan, testBt878, testAlsa.\n" +
+        "Each property should be assigned to its location instead of setting a boolean. An example test could be:" +
+        "mvn test -DargLine=\"-DtestHauppauge=/dev/video0 -DtestAlsa=hw:0\"");
+  }
+  
 
 }
