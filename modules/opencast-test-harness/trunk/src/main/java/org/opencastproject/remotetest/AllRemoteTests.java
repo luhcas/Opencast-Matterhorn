@@ -33,6 +33,7 @@ import org.junit.runners.Suite.SuiteClasses;
   IngestZipTest.class,
   ComposerRestEndpointTest.class,
   CaptureRestEndpointTest.class,
+  CaptureAdminRestEndpointTest.class,
   EngageRestProxyTest.class
 })
 public class AllRemoteTests {
