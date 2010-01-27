@@ -31,10 +31,6 @@ import java.util.regex.Pattern;
  * Default implementation of a handle builder. Note that this implementation is for your convenience only, since all it
  * does is creating unique identifiers wrapped into the handle syntax using a globally invalid value of
  * <code>00000</code> for the naming authority and cannot update, resolve or delete these handles.
- * <p>
- * To really use the benefits of handles, you need to either use the soap based implementation {@link SOAPHandleBuilder}
- * which connects to a real handle server, or provide your own solution, e. g. an embedded handle server or the like.
- * </p>
  * 
  * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
  * @version $Id: HandleBuilderImpl.java 238 2009-07-29 09:53:32Z jholtzman $
