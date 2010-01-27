@@ -154,6 +154,9 @@ public class CaptureAgentStateRestService {
   private String generateDocs() {
     DocRestData data = new DocRestData("captureadminservice", "Capture Admin Service", "/capture-admin/rest", notes);
 
+    // abstract
+    data.setAbstract("This service is a registry of capture agents and their recordings. Please see the <a href='http://wiki.opencastproject.org/confluence/display/open/Capture+Admin+Service'>service contract</a> for further information.");
+    
     // getAgent
     RestEndpoint endpoint = new RestEndpoint("getAgent", RestEndpoint.Method.GET,
         "/agents/{name}",
