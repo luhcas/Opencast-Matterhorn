@@ -76,7 +76,6 @@ public class DistributionRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) { docs = generateDocs(); }
     return docs;
   }
 
@@ -91,7 +90,7 @@ public class DistributionRestService {
             "  <media>\n"+
             "    <track id=\"track-1\" type=\"presentation/source\">\n"+
             "      <mimetype>video/quicktime</mimetype>\n"+
-            "      <url>"+serverURL+"/workflow/samples/camera.mpg</url>\n"+
+            "      <url>"+serverUrl+"/workflow/samples/camera.mpg</url>\n"+
             "      <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n"+
             "      <duration>1004400000</duration>\n"+
             "      <video>\n"+
@@ -107,7 +106,7 @@ public class DistributionRestService {
             "  <metadata>\n"+
             "    <catalog id=\"catalog-1\" type=\"metadata/dublincore\">\n"+
             "      <mimetype>text/xml</mimetype>\n"+
-            "      <url>"+serverURL+"/workflow/samples/dc-1.xml</url>\n"+
+            "      <url>"+serverUrl+"/workflow/samples/dc-1.xml</url>\n"+
             "      <checksum type=\"md5\">20e466615251074e127a1627fd0dae3e</checksum>\n"+
             "    </catalog>\n"+
             "  </metadata>\n"+
@@ -151,5 +150,6 @@ public class DistributionRestService {
         serverUrl = ccServerUrl;
       }
     }
+    docs = generateDocs();
   }
 }
