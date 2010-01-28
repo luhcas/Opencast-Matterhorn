@@ -1,0 +1,215 @@
+<workflow-definition>
+  <title>Transcode, Distribute and Publish</title>
+  <description>
+    A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
+    along with their associated metadata, to the distribution channels.
+  </description>
+  <operations>
+  
+    <!-- inspect the media -->
+    <operation
+      name="inspect"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Inspect the media package">
+    </operation>
+ 
+    <!-- encode to flash download -->
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) video to Flash download">
+      <configurations>
+        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">flash.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to Flash download">
+      <configurations>
+        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">flash.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter audio to Flash download">
+      <configurations>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">flash.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation audio to Flash download">
+      <configurations>
+        <configuration key="source-audio-flavor">presentation/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">flash.http</configuration>
+      </configurations>
+    </operation>
+
+    <!-- encode to quicktime download -->
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) to quicktime/mp4 download">
+      <configurations>
+        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="target-tags">atom, captioning</configuration>
+        <configuration key="encoding-profile">mov-low.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to quicktime/mpeg4 download">
+      <configurations>
+        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="target-tags">rss, atom, captioning</configuration>
+        <configuration key="encoding-profile">mov-low.http</configuration>
+      </configurations>
+    </operation>
+    
+    <!-- encode to avi download -->
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) to avi/mpeg4 download">
+      <configurations>
+        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="target-tags">atom</configuration>
+        <configuration key="encoding-profile">avi-low.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to avi/mpeg4 download">
+      <configurations>
+        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
+        <configuration key="encoding-profile">avi-low.http</configuration>
+      </configurations>
+    </operation>
+ 
+     <!-- encode to m4a download -->
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) to m4a/aac download">
+      <configurations>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
+        <configuration key="encoding-profile">m4a.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="compose"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to m4a/aac download">
+      <configurations>
+        <configuration key="source-audio-flavor">presentation/source</configuration>
+        <configuration key="target-tags">atom</configuration>
+        <configuration key="encoding-profile">m4a.http</configuration>
+      </configurations>
+    </operation>
+ 
+    <!-- encode to cover image -->
+    <operation
+      name="image"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) to cover image">
+      <configurations>
+        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">cover/source</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
+        <configuration key="encoding-profile">feed-image.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="image"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to cover image">
+      <configurations>
+        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">cover/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">engage-image.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      name="image"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) to cover image">
+      <configurations>
+        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">cover/source</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
+        <configuration key="encoding-profile">feed-image.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="image"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to cover image">
+      <configurations>
+        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">cover/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">engage-image.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      name="distribute_local"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Distribute media to the local distribution channel">
+      <configurations>
+        <configuration key="source-tags">engage,atom,rss</configuration>
+        <configuration key="target-tags">publish</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      name="publish"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Add metadata to the search index">
+      <configurations>
+        <configuration key="source-tags">publish</configuration>
+      </configurations>
+    </operation>
+  </operations>
+</workflow-definition>
