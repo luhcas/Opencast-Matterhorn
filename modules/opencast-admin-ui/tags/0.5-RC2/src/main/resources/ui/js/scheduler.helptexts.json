@@ -1,0 +1,74 @@
+popupHelp = popupHelp || {};
+
+popupHelp.helpTexts = {
+
+    "title" : [
+        "Title",
+        "Enter the title of the recording."
+    ],
+
+    "presenter" : [
+        "Presenter(s)",
+        "Enter the name of the presenter."
+    ],
+    
+    "license" : [
+        "License",
+        "Enter the type of license with which you would like to distribute the recording."
+    ],
+    
+    "series" : [
+        "Series Identifier",
+        "If the recording is part of series, enter the name of the series."
+    ],
+    
+    "subject" : [
+        "Subject",
+        "Enter a category or topic for the recording."
+    ],
+    
+    "language" : [
+        "Content Language",
+        "Enter the primary language spoken in the recording."
+    ],
+
+    "description" : [
+        "Content description",
+        "Enter a description of the recording."
+    ],
+    
+    "distribution" : [
+        "Distribution channels",
+        "Specify the channel(s) to which you would like this recording distributed."
+    ],
+    
+    "startdate" : [
+        "Start Date",
+        "Select the start date for this recording."
+    ],
+    
+    "starttime" : [
+        "Start Time",
+        "Select a start time for this recording. Note: 24h time"
+    ],
+    
+    "duration" : [
+        "Duration",
+        "Select a duration for this recording. Must be larger than 0 hours and 0 minutes."
+    ],
+    
+    "agent" : [
+        "Capture Agent",
+        "Select the agent identifier that this recording will be using."
+    ],
+    
+    "input" : [
+        "Recording Inputs",
+        "Select the inputs that this recording will capture."
+    ],
+    
+    "contributor" : [
+        "Sponsoring Department",
+        "Enter the name of the department associated with the recording."
+    ]
+};
