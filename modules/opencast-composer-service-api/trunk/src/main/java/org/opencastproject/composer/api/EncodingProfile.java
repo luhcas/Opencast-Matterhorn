@@ -32,7 +32,7 @@ public interface EncodingProfile {
   @XmlType(name = "media-type", namespace = "http://composer.opencastproject.org/")
   public enum MediaType {
 
-    Audio, Visual, AudioVisual, EnhancedAudio, Image, ImageSequence, Cover;
+    Audio, Visual, AudioVisual, Stream, EnhancedAudio, Image, ImageSequence, Cover;
 
     /**
      * Try to parse the argument <code>type</code> and produce a

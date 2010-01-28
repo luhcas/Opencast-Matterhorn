@@ -82,8 +82,9 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
         if(StringUtils.trimToNull(tag) == null) continue;
         MediaPackageElement[] elts = currentMediaPackage.getElementsByTag(tag);
         for (MediaPackageElement e : elts) {
-          elementIds.add(e.getIdentifier());
-          logger.info("Distributing '{}' of {} to the local repository", e.getIdentifier(), currentMediaPackage);
+          if (elementIds.add(e.getIdentifier())) {
+            logger.info("Distributing '{}'to the local repository", e.getIdentifier(), currentMediaPackage);
+          }
         }
       }
 

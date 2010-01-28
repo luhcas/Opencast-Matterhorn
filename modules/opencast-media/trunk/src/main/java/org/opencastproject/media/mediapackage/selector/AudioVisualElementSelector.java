@@ -15,12 +15,9 @@
  */
 package org.opencastproject.media.mediapackage.selector;
 
-import org.opencastproject.media.mediapackage.AudioStream;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.media.mediapackage.TrackSupport;
-import org.opencastproject.media.mediapackage.VideoStream;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -188,20 +185,18 @@ public class AudioVisualElementSelector extends
 
     // Try to look for the perfect match: a track containing audio and video
     for (Track t : candidates) {
-      if (TrackSupport.byType(t.getStreams(), AudioStream.class).length > 0) {
-        if (!foundAudio
-                && (audioFlavor == null || audioFlavor.equals(t.getFlavor()))) {
-          result.add(t);
+      if (audioFlavor == null && videoFlavor == null) {
+        foundAudio |= t.hasAudio();
+        foundVideo |= t.hasVideo();
+        result.add(t);
+      } else {
+        if (audioFlavor != null && t.hasAudio() && audioFlavor.equals(t.getFlavor())) {
           foundAudio = true;
-        }
-      }
-      // TODO: Fix! byType is not working, let's audio streams pass as video
-      // streams
-      if (TrackSupport.byType(t.getStreams(), VideoStream.class).length > 0) {
-        if (!foundVideo
-                && (videoFlavor == null || videoFlavor.equals(t.getFlavor()))) {
           result.add(t);
+        }
+        if (videoFlavor != null && t.hasVideo() && videoFlavor.equals(t.getFlavor())) {
           foundVideo = true;
+          result.add(t);
         }
       }
     }

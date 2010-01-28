@@ -43,10 +43,12 @@ import java.util.concurrent.Future;
 /**
  * The workflow definition for handling "compose" operations
  */
-public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler {
-  
+public class ComposeWorkflowOperationHandler implements
+        WorkflowOperationHandler {
+
   /** The logging facility */
-  private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowOperationHandler.class);
+  private static final Logger logger = LoggerFactory
+          .getLogger(ComposeWorkflowOperationHandler.class);
 
   /** The composer service */
   private ComposerService composerService = null;
@@ -66,26 +68,32 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
    * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
    */
-  public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    logger.debug("Running compose workflow operation on workflow {}", workflowInstance.getId());
+  public WorkflowOperationResult run(final WorkflowInstance workflowInstance)
+          throws WorkflowOperationException {
+    logger.debug("Running compose workflow operation on workflow {}",
+            workflowInstance.getId());
 
     // Encode the media package
     MediaPackage resultingMediaPackage = null;
     try {
-      resultingMediaPackage = encode(workflowInstance.getCurrentMediaPackage(), workflowInstance.getCurrentOperation());
+      resultingMediaPackage = encode(workflowInstance.getCurrentMediaPackage(),
+              workflowInstance.getCurrentOperation());
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
     }
 
     logger.debug("Compose operation completed");
 
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, null, false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(
+            resultingMediaPackage, null, false);
   }
 
   /**
-   * Encode tracks from MediaPackage using profiles stored in properties and updates current MediaPackage.
+   * Encode tracks from MediaPackage using profiles stored in properties and
+   * updates current MediaPackage.
    * 
-   * @param src The source media package
+   * @param src
+   *          The source media package
    * @param properties
    * @return
    * @throws EncoderException
@@ -94,18 +102,26 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
    * @throws ExecutionException
    * @throws InterruptedException
    */
-  private MediaPackage encode(MediaPackage src, WorkflowOperationInstance operation) throws EncoderException,
-          MediaPackageException, UnsupportedElementException, InterruptedException, ExecutionException {
+  private MediaPackage encode(MediaPackage src,
+          WorkflowOperationInstance operation) throws EncoderException,
+          MediaPackageException, UnsupportedElementException,
+          InterruptedException, ExecutionException {
     MediaPackage mediaPackage = MediaPackageUtil.clone(src);
     // Read the configuration properties
-    String sourceVideoFlavor = StringUtils.trimToNull(operation.getConfiguration("source-video-flavor"));
-    String sourceAudioFlavor = StringUtils.trimToNull(operation.getConfiguration("source-audio-flavor"));
-    String targetTrackTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
-    String targetTrackFlavor = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));
-    String encodingProfileName = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
+    String sourceVideoFlavor = StringUtils.trimToNull(operation
+            .getConfiguration("source-video-flavor"));
+    String sourceAudioFlavor = StringUtils.trimToNull(operation
+            .getConfiguration("source-audio-flavor"));
+    String targetTrackTags = StringUtils.trimToNull(operation
+            .getConfiguration("target-tags"));
+    String targetTrackFlavor = StringUtils.trimToNull(operation
+            .getConfiguration("target-flavor"));
+    String encodingProfileName = StringUtils.trimToNull(operation
+            .getConfiguration("encoding-profile"));
 
     if (sourceAudioFlavor == null && sourceVideoFlavor == null)
-      throw new IllegalStateException("either source audio flavor or source video flavor or both must be specified");
+      throw new IllegalStateException(
+              "either source audio flavor or source video flavor or both must be specified");
 
     // Find the encoding profile
     EncodingProfile profile = null;
@@ -116,35 +132,44 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
       }
     }
     if (profile == null) {
-      throw new IllegalStateException("Encoding profile '" + encodingProfileName + "' was not found");
+      throw new IllegalStateException("Encoding profile '"
+              + encodingProfileName + "' was not found");
     }
-    
-    // Depending on the input type of the profile and the configured flavors and tags,
+
+    // Depending on the input type of the profile and the configured flavors and
+    // tags,
     // make sure we have the required tracks:
     AudioVisualElementSelector avSelector = new AudioVisualElementSelector();
     avSelector.setVideoFlavor(sourceVideoFlavor);
     avSelector.setAudioFlavor(sourceAudioFlavor);
     switch (profile.getApplicableMediaType()) {
-      case AudioVisual:
-        avSelector.setRequireVideoTrack(true);
-        avSelector.setRequireAudioTrack(true);
-        break;
-      case Visual:
-        avSelector.setRequireVideoTrack(true);
-        avSelector.setRequireAudioTrack(false);
-        break;
-      case Audio:
-        avSelector.setRequireVideoTrack(false);
-        avSelector.setRequireAudioTrack(true);
-        break;
-      default:
-        logger.warn("Don't know if the current track is applicable to encoding profile '" + profile + "' based on type " + profile.getApplicableMediaType());
-        return mediaPackage;
+    case Stream:
+      avSelector.setRequireVideoTrack(false);
+      avSelector.setRequireAudioTrack(false);
+      break;
+    case AudioVisual:
+      avSelector.setRequireVideoTrack(true);
+      avSelector.setRequireAudioTrack(true);
+      break;
+    case Visual:
+      avSelector.setRequireVideoTrack(true);
+      avSelector.setRequireAudioTrack(false);
+      break;
+    case Audio:
+      avSelector.setRequireVideoTrack(false);
+      avSelector.setRequireAudioTrack(true);
+      break;
+    default:
+      logger.warn("Don't know if the current track is applicable to encoding profile '"
+                      + profile
+                      + "' based on type "
+                      + profile.getApplicableMediaType());
+      return mediaPackage;
     }
     Collection<Track> tracks = avSelector.select(mediaPackage);
-    
-    String videoSourceTrackId = null;
-    String audioSourceTrackId = null;
+
+    String sourceVideoTrackId = null;
+    String sourceAudioTrackId = null;
 
     // Did we get the set of tracks that we need?
     if (tracks.size() == 0) {
@@ -152,43 +177,72 @@ public class ComposeWorkflowOperationHandler implements WorkflowOperationHandler
       return mediaPackage;
     } else {
       for (Track t : tracks) {
-        if (t.hasVideo()) {
-          videoSourceTrackId = t.getIdentifier();
-        } else if (t.hasAudio()) {
-          audioSourceTrackId = t.getIdentifier();
+        if (sourceVideoTrackId == null && t.hasVideo()) {
+          sourceVideoTrackId = t.getIdentifier();
+        }
+        if (sourceAudioTrackId == null && t.hasAudio()) {
+          sourceAudioTrackId = t.getIdentifier();
         }
       }
     }
 
+    // Don't pass the same track as audio *and* video
+    if (sourceVideoTrackId != null && sourceVideoTrackId.equals(sourceAudioTrackId)) {
+      switch (profile.getOutputType()) {
+        case Audio:
+          sourceVideoTrackId = null;
+          break;
+        default:
+          sourceAudioTrackId = null;
+          break;
+      }
+    }
+
+    // Make sure we get audio and video for audio and video flavors
+    if (sourceVideoFlavor != null && sourceVideoTrackId == null) {
+      logger.debug("Skipping encoding of media package to '{}': no video with flavor {} found", profile, sourceVideoFlavor);
+      return mediaPackage;
+    } else if (sourceAudioFlavor != null && sourceAudioTrackId == null) {
+      logger.debug("Skipping encoding of media package to '{}': no audio with flavor {} found", profile, sourceAudioFlavor);
+      return mediaPackage;
+    }
+
     // Start encoding and wait for the result
-    Future<Track> futureTrack = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, profile.getIdentifier());
+    Future<Track> futureTrack = composerService.encode(mediaPackage,
+            sourceVideoTrackId, sourceAudioTrackId, profile.getIdentifier());
     Track composedTrack = futureTrack.get();
     if (composedTrack == null)
       throw new RuntimeException("unable to retrieve composed track");
 
-    // Add the flavor, either from the operation configuration or from the composer
+    // Add the flavor, either from the operation configuration or from the
+    // composer
     if (targetTrackFlavor != null)
-      composedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(targetTrackFlavor));
+      composedTrack.setFlavor(MediaPackageElementFlavor
+              .parseFlavor(targetTrackFlavor));
     logger.debug("Composed track has flavor '{}'", composedTrack.getFlavor());
 
     // Set the mimetype
     if (profile.getMimeType() != null)
       composedTrack.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
-    
+
     // Add tags
     if (targetTrackTags != null) {
       for (String tag : targetTrackTags.split("\\W")) {
-        if(StringUtils.trimToNull(tag) == null) continue;
+        if (StringUtils.trimToNull(tag) == null)
+          continue;
         logger.trace("Tagging composed track with '{}'", tag);
         composedTrack.addTag(tag);
       }
     }
 
     // store new tracks to mediaPackage
-    // FIXME derived media comes from multiple sources, so how do we choose which is the "parent" of the derived
+    // FIXME derived media comes from multiple sources, so how do we choose
+    // which is the "parent" of the derived
     // media?
-    String parentId = videoSourceTrackId == null ? audioSourceTrackId : videoSourceTrackId; 
-    mediaPackage.addDerived(composedTrack, mediaPackage.getElementById(parentId));
+    String parentId = sourceVideoTrackId == null ? sourceAudioTrackId
+            : sourceVideoTrackId;
+    mediaPackage.addDerived(composedTrack, mediaPackage
+            .getElementById(parentId));
 
     return mediaPackage;
   }

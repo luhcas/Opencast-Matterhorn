@@ -21,7 +21,6 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElementSelector;
 
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -50,8 +49,8 @@ public class SimpleMediaPackageElementSelector<T extends MediaPackageElement>
    */
   @SuppressWarnings("unchecked")
   public Collection<T> select(MediaPackage mediaPackage) {
-    Set<T> result = new HashSet<T>();    
-    Class type = getParametrizedType();
+    Set<T> result = new HashSet<T>();
+    Class type = getParametrizedType(result);
     for (MediaPackageElement e : mediaPackage.getElements()) {
 
       // Does the type match?
@@ -84,30 +83,71 @@ public class SimpleMediaPackageElementSelector<T extends MediaPackageElement>
   /**
    * This constructor tries to determine the entity type from the type argument
    * used by a concrete implementation of <code>GenericHibernateDao</code>.
+   * <p>
+   * Note: This code will only work for immediate specialization, and especially not
+   * for subclasses.
+   */
+  @SuppressWarnings("unchecked")
+  private Class getParametrizedType(Object object) {
+    Class<T> c = (Class<T>)this.getClass();
+    ParameterizedType type = ((ParameterizedType) c.getGenericSuperclass());
+    Class<T> actualType = (Class<T>)type.getActualTypeArguments()[0];
+    return actualType;
+
+    // Class current = getClass();
+    // Type superclass;
+    // Class<? extends T> entityClass = null;
+    // while ((superclass = current.getGenericSuperclass()) != null) {
+    // if (superclass instanceof ParameterizedType) {
+    // entityClass = (Class<T>) ((ParameterizedType) superclass)
+    // .getActualTypeArguments()[0];
+    // break;
+    // } else if (superclass instanceof Class) {
+    // current = (Class) superclass;
+    // } else {
+    // break;
+    // }
+    // }
+    // if (entityClass == null) {
+    // throw new IllegalStateException("Cannot determine entity type because "
+    // + getClass().getName() + " does not specify any type parameter.");
+    // }
+    // return entityClass;
+  }
+
+  /**
+   * This constructor tries to determine the entity type from the type argument
+   * used by a concrete implementation of <code>GenericHibernateDao</code>.
+   * <p>
+   * Note: This code will only work for immediate specialization, and especially not
+   * for subclasses.
    */
   @SuppressWarnings("unchecked")
   private Class getParametrizedType() {
-    Class current = getClass();
-    Type superclass;
-    Class<? extends T> entityClass = null;
-    while ((superclass = current.getGenericSuperclass()) != null) {
-      if (superclass instanceof ParameterizedType) {
-        entityClass = (Class<T>) ((ParameterizedType) superclass)
-                .getActualTypeArguments()[0];
-        break;
-      } else if (superclass instanceof Class) {
-        current = (Class) superclass;
-      } else {
-        break;
-      }
-    }
-    if (entityClass == null) {
-      throw new IllegalStateException(
-              "DAO creation exception: Cannot determine entity type because "
-                      + getClass().getName()
-                      + " does not specify any type parameter.");
-    }
-    return entityClass;
+    Class c = getClass();
+    ParameterizedType type = ((ParameterizedType) c.getGenericSuperclass());
+    Class<T> actualType = (Class<T>)type.getActualTypeArguments()[0];
+    return actualType;
+
+    // Class current = getClass();
+    // Type superclass;
+    // Class<? extends T> entityClass = null;
+    // while ((superclass = current.getGenericSuperclass()) != null) {
+    // if (superclass instanceof ParameterizedType) {
+    // entityClass = (Class<T>) ((ParameterizedType) superclass)
+    // .getActualTypeArguments()[0];
+    // break;
+    // } else if (superclass instanceof Class) {
+    // current = (Class) superclass;
+    // } else {
+    // break;
+    // }
+    // }
+    // if (entityClass == null) {
+    // throw new IllegalStateException("Cannot determine entity type because "
+    // + getClass().getName() + " does not specify any type parameter.");
+    // }
+    // return entityClass;
   }
 
   /**

@@ -350,25 +350,16 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
       return false;
     MediaPackageElementFlavor other = (MediaPackageElementFlavor) obj;
     if (subtype == null) {
-      if (other.subtype != null)
+      if (other.subtype != null && !"*".equals(other.subtype))
         return false;
-    } else if (!subtype.equals(other.subtype))
+    } else if (!subtype.equals(other.subtype) && (!"*".equals(subtype) && !"*".equals(other.subtype)))
       return false;
     if (type == null) {
-      if (other.type != null)
+      if (other.type != null && !"*".equals(other.type))
         return false;
-    } else if (!type.equals(other.type))
+    } else if (!type.equals(other.type) && (!"*".equals(type) && !"*".equals(other.type)))
       return false;
     return true;
   }
-
-//  @Override
-//  public boolean equals(Object o) {
-//    if (o instanceof MediaPackageElementFlavor) {
-//      MediaPackageElementFlavor m = (MediaPackageElementFlavor) o;
-//      return type.equals(m.getType()) && subtype.equals(m.getSubtype());
-//    }
-//    return super.equals(o);
-//  }
 
 }
