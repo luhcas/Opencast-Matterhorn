@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.ingest.api.IngestService" immediate="true">
+  <implementation class="org.opencastproject.ingest.impl.IngestServiceImpl" />
+  <property name="service.description" value="Ingest Service" />
+  <property name="event.topics" value="org/opencastproject/conductor/ACK" />
+  <service>
+    <provide interface="org.opencastproject.ingest.api.IngestService" />
+    <provide interface="org.osgi.service.cm.ManagedService" />
+    <provide interface="org.osgi.service.event.EventHandler" />
+  </service>
+  <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
+    cardinality="1..1" policy="static" bind="setWorkspace" />
+  <reference name="eventadmin" interface="org.osgi.service.event.EventAdmin"
+    cardinality="0..1" policy="dynamic" bind="setEventAdmin" unbind="unsetEventAdmin" />
+</component>
