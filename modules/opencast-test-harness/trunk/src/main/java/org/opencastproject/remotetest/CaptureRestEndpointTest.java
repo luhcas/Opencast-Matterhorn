@@ -15,6 +15,8 @@
  */
 package org.opencastproject.remotetest;
 
+import static org.junit.Assert.assertTrue;
+
 import static org.junit.Assert.assertEquals;
 
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
@@ -60,7 +62,7 @@ public class CaptureRestEndpointTest {
     int getResponse = httpClient.execute(get).getStatusLine().getStatusCode();
     
     // when no capture is started, expect internal server error
-    assertEquals(getResponse, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    assertTrue(getResponse == HttpStatus.SC_OK || getResponse == HttpStatus.SC_INTERNAL_SERVER_ERROR);
   }
   
   @Test
@@ -106,11 +108,12 @@ public class CaptureRestEndpointTest {
   
   @Test
   public void printTestingInfo() {
-    System.out.println("Instructions to test capture agent:");
+    System.out.println("\n\nInstructions to test capture agent\n==================================");
     System.out.println("The capture agents can be tested by setting the appropriate\n" +
-        "properties for the JVM. They properties right now are: testHauppauge, testEpiphan, testBt878, testAlsa.\n" +
-        "Each property should be assigned to its location instead of setting a boolean. An example test could be:" +
-        "mvn test -DargLine=\"-DtestHauppauge=/dev/video0 -DtestAlsa=hw:0\"");
+        "properties for the JVM. They properties right now are: testHauppauge, " +
+        "testEpiphan, testBt878, testAlsa.\n" +
+        "Each property should be assigned to its location instead of setting a boolean.\n" +
+        "An example test could be: mvn test -DargLine=\"-DtestHauppauge=/dev/video0 -DtestAlsa=hw:0\"\n\n");
   }
   
 
