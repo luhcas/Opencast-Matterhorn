@@ -115,6 +115,76 @@ public class SchedulerImplTest {
     testfile.delete();
   }
 
+  @Test
+  public void test0LengthRemoteUTF8Calendar() throws IOException {
+    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    times[1] = times[0];
+    File testfile = setupTestCalendar("calendars/Opencast.ics", times);
+    //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, testfile.toURI().toURL().toString());
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
+    sched.activate(null);
+    //TODO:  Figure out why this fails 1/3 times on some machines without the sleep() here.
+    try {
+      Thread.sleep(200);
+    } catch (InterruptedException e) {
+      Assert.fail();
+    }
+    String[] schedule = sched.getCaptureSchedule();
+    Assert.assertEquals(0, schedule.length);
+    testfile.delete();
+  }
+
+  @Test
+  public void test0LengthLocalUTF8Calendar() throws IOException {
+    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    times[1] = times[0];
+    File testfile = setupTestCalendar("calendars/Opencast.ics", times);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
+    sched.activate(null);
+    String[] schedule = sched.getCaptureSchedule();
+    Assert.assertEquals(0, schedule.length);
+    testfile.delete();
+  }
+
+  @Test
+  public void testNegativeLengthRemoteUTF8Calendar() throws IOException {
+    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String temp = times[0];
+    times[0] = times[1];
+    times[1] = temp;
+    File testfile = setupTestCalendar("calendars/Opencast.ics", times);
+    //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, testfile.toURI().toURL().toString());
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
+    sched.activate(null);
+    //TODO:  Figure out why this fails 1/3 times on some machines without the sleep() here.
+    try {
+      Thread.sleep(200);
+    } catch (InterruptedException e) {
+      Assert.fail();
+    }
+    String[] schedule = sched.getCaptureSchedule();
+    Assert.assertEquals(0, schedule.length);
+    testfile.delete();
+  }
+
+  @Test
+  public void testNegativeLengthLocalUTF8Calendar() throws IOException {
+    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String temp = times[0];
+    times[0] = times[1];
+    times[1] = temp;
+    File testfile = setupTestCalendar("calendars/Opencast.ics", times);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
+    sched.activate(null);
+    String[] schedule = sched.getCaptureSchedule();
+    Assert.assertEquals(0, schedule.length);
+    testfile.delete();
+  }
+
 /* Commented out due to problems getting the UTF16 file to read properly.
   @Test @Ignore
   public void testValidRemoteUTF16Calendar() {

@@ -34,6 +34,7 @@ import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VEvent;
@@ -423,10 +424,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         if (duration != null && duration.getDuration().isNegative()) {
           log.warn("Event {} has a negative duration, skipping.", start.toString());
           continue;
-        }
-
-        if (start.before(new Date())) {
+        } else if (start.before(new Date())) {
           log.warn("Event {} is scheduled for a time that has already passed, skipping.", start.toString());
+          continue;
+        } else if (duration.getDuration().compareTo(new Dur(0,0,0,0)) == 0) {
+          log.warn("Event {} has a duration of 0, skipping.", start.toString());
           continue;
         }
 
