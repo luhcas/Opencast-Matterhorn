@@ -59,6 +59,8 @@ public class EngageuiRestService {
   private static final Logger logger = LoggerFactory
           .getLogger(EngageuiRestService.class);
 
+  public final static String ENGAGE_TAG = "engage";
+  
   private SearchService searchService;
 
   public static final int TITLE_MAX_LENGTH = 60;
@@ -303,7 +305,8 @@ public class EngageuiRestService {
     // return c.iterator().next().getURI().toString();
     for (Track track : mediaPackage.getTracks()) {
       MediaPackageElementFlavor flavor = track.getFlavor();
-      if (MediaPackageElements.PRESENTATION_TRACK.equals(flavor) || MediaPackageElements.PRESENTER_TRACK.equals(flavor)) {
+      // TODO: Make this tag configurable! Even better: the whole selection process
+      if (track.containsTag(ENGAGE_TAG) && (MediaPackageElements.PRESENTATION_TRACK.equals(flavor) || MediaPackageElements.PRESENTER_TRACK.equals(flavor))) {
         return track.getURI().toString();
       }
     }
