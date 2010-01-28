@@ -70,6 +70,9 @@ public class WorkingFileRepositoryRestEndpoint {
   private String generateDocs() {
     DocRestData data = new DocRestData("workingfilerepository", "Working file repository", "/files", notes);
 
+    // abstract
+    data.setAbstract("This service provides local file access and storage for processes such as encoding.");
+
     // put
     RestEndpoint endpoint = new RestEndpoint("put", RestEndpoint.Method.POST,
             "/{mediaPackageID}/{mediaPackageElementID}",
