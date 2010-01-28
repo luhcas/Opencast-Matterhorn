@@ -91,7 +91,7 @@ public class DistributionRestService {
             "  <media>\n"+
             "    <track id=\"track-1\" type=\"presentation/source\">\n"+
             "      <mimetype>video/quicktime</mimetype>\n"+
-            "      <url>http://localhost:8080/workflow/samples/camera.mpg</url>\n"+
+            "      <url>"+serverURL+"/workflow/samples/camera.mpg</url>\n"+
             "      <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n"+
             "      <duration>1004400000</duration>\n"+
             "      <video>\n"+
@@ -107,7 +107,7 @@ public class DistributionRestService {
             "  <metadata>\n"+
             "    <catalog id=\"catalog-1\" type=\"metadata/dublincore\">\n"+
             "      <mimetype>text/xml</mimetype>\n"+
-            "      <url>http://localhost:8080/workflow/samples/dc-1.xml</url>\n"+
+            "      <url>"+serverURL+"/workflow/samples/dc-1.xml</url>\n"+
             "      <checksum type=\"md5\">20e466615251074e127a1627fd0dae3e</checksum>\n"+
             "    </catalog>\n"+
             "  </metadata>\n"+
@@ -127,7 +127,7 @@ public class DistributionRestService {
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, generateMediaPackage(),
         "The media package as XML"));
-    endpoint.addRequiredParam(new Param("elementId", Param.Type.STRING, "videoTrack1",
+    endpoint.addRequiredParam(new Param("elementId", Param.Type.STRING, "track-1",
         "A media package element ID"));
     endpoint.addNote("Accepts additional elementId fields");
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
