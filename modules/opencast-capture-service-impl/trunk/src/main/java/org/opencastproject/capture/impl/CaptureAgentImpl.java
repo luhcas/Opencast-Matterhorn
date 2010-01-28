@@ -538,7 +538,14 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     // Now adds the files from the MediaPackage
     for (MediaPackageElement item : mpElements) {
-      File tmpFile = new File(recording.getDir(), item.getURI().getPath());
+      File tmpFile = null;
+      String elementPath = item.getURI().getPath();
+      
+      // Relative and aboslute paths are mixed
+      if (elementPath.startsWith("file:") || elementPath.startsWith(File.separator))
+        tmpFile = new File(elementPath);
+      else
+        tmpFile = new File(recording.getDir(), elementPath);
       // TODO: Is this really a warning or should we fail completely and return an error?
       if (!tmpFile.isFile())
         logger.warn("Required file {} doesn't exist!", tmpFile.getAbsolutePath());
