@@ -31,6 +31,7 @@ import org.opencastproject.util.ConfigurationException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.quartz.TriggerUtils;
 import org.slf4j.Logger;
@@ -43,6 +44,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Properties;
 
+@Ignore
 public class CaptureAgentImplTest {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);
 
