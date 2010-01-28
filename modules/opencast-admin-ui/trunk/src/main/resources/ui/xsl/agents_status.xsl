@@ -34,7 +34,7 @@
                             <span>
                                 <xsl:attribute name="class">icon icon-<xsl:value-of select="state" /></xsl:attribute>
                             </span>
-                            <span style="margin-left:3px;"><xsl:value-of select="state" /></span>
+                            <span style="margin-left:20px;"><xsl:value-of select="state" /></span>
                         </td>
                     </tr>
                 </xsl:for-each>
