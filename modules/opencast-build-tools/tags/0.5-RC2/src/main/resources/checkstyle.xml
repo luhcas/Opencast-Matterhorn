@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+    "-//Puppy Crawl//DTD Check Configuration 1.2//EN"
+    "http://www.puppycrawl.com/dtds/configuration_1_2.dtd">
+<module name="Checker">
+
+<!--
+Do not include any modules with severity lower than error, since these don't break the build and just pollute the
+checkstyle-results.xml file, making it difficult to figure out why checkstyle is failing.
+-->
+
+  <module name="NewlineAtEndOfFile" /> 
+  <module name="SuppressionCommentFilter"/>
+  <module name="TreeWalker">
+    <module name="FileContentsHolder"/>
+    <module name="Header">
+      <property name="headerFile" value="${checkstyle.header.file}" />
+    </module>
+    <module name="TabCharacter" />
+    <module name="AvoidStarImport" />
+    <module name="UnusedImports" />
+    <module name="IllegalImport" />
+    <module name="MethodLength" />
+    <module name="ParameterNumber" />
+    <module name="DoubleCheckedLocking" />
+    <module name="EqualsHashCode" />
+    <module name="IllegalInstantiation" />
+  </module>
+
+</module>
