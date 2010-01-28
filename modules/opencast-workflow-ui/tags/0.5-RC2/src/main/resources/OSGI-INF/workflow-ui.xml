@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="workflowcontroler.ui" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.http.StaticResource" />
+  <property name="service.description" value="Workflow Controller" />
+  <property name="alias" value="/workflow/ui" />
+  <property name="classpath" value="/ui" />
+  <property name="welcome.file" value="index.html" />
+  <service>
+    <provide interface="org.opencastproject.http.StaticResource" />
+  </service>
+  <reference name="http-service" interface="org.osgi.service.http.HttpService"
+    cardinality="1..1" policy="static" bind="setHttpService" />
+</component>
+
