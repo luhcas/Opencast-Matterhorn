@@ -1,0 +1,12 @@
+  ul#navigation {
+    margin: 0; 
+    padding: 0.2em;
+    text-align: center;
+  }
+  
+  ul#navigation li {
+    list-style: none;
+    display: inline;
+    margin: 0.4em; 
+    padding: 0;
+  }
