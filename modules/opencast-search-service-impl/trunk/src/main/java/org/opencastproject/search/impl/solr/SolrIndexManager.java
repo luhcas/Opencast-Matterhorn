@@ -243,6 +243,7 @@ public class SolrIndexManager {
     // Set common fields
     solrEpisodeDocument.setField(SolrFields.ID, mediaPackageId);
     solrEpisodeDocument.setField(SolrFields.OC_MEDIATYPE, SearchResultItemType.AudioVisual);
+    solrEpisodeDocument.setField(SolrFields.OC_MODIFIED, dateFormat.format((new Date()).getTime()));
     addStandardDublincCoreFields(solrEpisodeDocument, dublinCore);
 
     // Add media package
@@ -340,6 +341,7 @@ public class SolrIndexManager {
     // Set common fields
     solrSeriesDocument.setField(SolrFields.ID, seriesId);
     solrSeriesDocument.setField(SolrFields.OC_MEDIATYPE, SearchResultItemType.Series);
+    solrSeriesDocument.setField(SolrFields.OC_MODIFIED, dateFormat.format((new Date()).getTime()));
     addStandardDublincCoreFields(solrSeriesDocument, dublinCore);
 
     return solrSeriesDocument;
@@ -357,6 +359,7 @@ public class SolrIndexManager {
     if (!dc.hasValue(DublinCore.PROPERTY_TITLE))
       throw new IllegalStateException("Found dublin core catalog withouth title");
 
+    // dc:title
     solrInput.addField(SolrFields.DC_TITLE, dc.getFirst(DublinCore.PROPERTY_TITLE));
 
     // dc:subject
@@ -367,6 +370,12 @@ public class SolrIndexManager {
     // dc:creator
     if (dc.hasValue(DublinCore.PROPERTY_CREATOR)) {
       solrInput.addField(SolrFields.DC_CREATOR, dc.getFirst(DublinCore.PROPERTY_CREATOR));
+    }
+
+    // dc:extent
+    if (dc.hasValue(DublinCore.PROPERTY_EXTENT)) {
+      long duration = EncodingSchemeUtils.decodeDuration(dc.get(DublinCore.PROPERTY_EXTENT).get(0));
+      solrInput.addField(SolrFields.DC_EXTENT, duration);
     }
 
     // dc:publisher
@@ -578,9 +587,6 @@ public class SolrIndexManager {
       StringBuffer buf = importantKeywordsString(sortedAnnotations);
       solrInput.addField(SolrFields.OC_KEYWORDS, buf.toString().trim());
     }
-
-    // dont forget the current time in milliseconds
-    solrInput.addField(SolrFields.OC_MODIFIED, dateFormat.format((new Date()).getTime()));
   }
 
   /**

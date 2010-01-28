@@ -8,4 +8,6 @@
   </service>
   <reference cardinality="1..1" interface="org.opencastproject.inspection.api.MediaInspectionService"
   name="InspectionService" policy="static" bind="setInspectionService"/>
+  <reference cardinality="1..1" interface="org.opencastproject.workspace.api.Workspace"
+  name="Workspace" policy="static" bind="setWorkspace"/>
 </component>

@@ -39,8 +39,16 @@ import java.util.Set;
 public class PublishWorkflowOperationHandler implements WorkflowOperationHandler {
   private static final Logger logger = LoggerFactory.getLogger(PublishWorkflowOperationHandler.class);
 
-  private SearchService searchService;
+  /** The search service */
+  private SearchService searchService = null;
 
+  /**
+   * Callback for declarative services configuration that will introduce us to the search service.
+   * Implementation assumes that the reference is configured as being static.
+   * 
+   * @param searchService
+   *          an instance of the search service
+   */
   protected void setSearchService(SearchService searchService) {
     this.searchService = searchService;
   }
@@ -106,4 +114,5 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
       throw new WorkflowOperationException(t);
     }
   }
+
 }

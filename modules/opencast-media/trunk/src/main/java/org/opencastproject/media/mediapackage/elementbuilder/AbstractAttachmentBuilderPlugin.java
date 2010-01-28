@@ -161,11 +161,9 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       uri = serializer.resolvePath(xpath.evaluate("url/text()", elementNode).trim());
 
       // size
-      try {
-        size = Long.parseLong(xpath.evaluate("size/text()", elementNode).trim());
-      } catch (Exception e) {
-        // size may not be present
-      }
+      String attachmentSize = xpath.evaluate("size/text()", elementNode).trim();
+      if (!"".equals(attachmentSize))
+        size = Long.parseLong(attachmentSize);
 
       // checksum
       String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);

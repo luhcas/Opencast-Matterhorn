@@ -72,14 +72,6 @@ public class SolrRequester {
     SearchQueryImpl q1 = new SearchQueryImpl();
     q1.withText(text).withLimit(limit).withOffset(offset).includeSeries(true);
     return getByQuery(q1);
-//    String uq = SolrUtils.clean(text);
-//    StringBuffer sb = boost(uq);
-//    SolrQuery query = new SolrQuery(sb.toString());
-//    query.setStart(offset);
-//    if (limit > 0)
-//      query.setRows(limit);
-//    query.setFields("* score");
-//    return createSearchResult(query);
   }
 
   /**
@@ -90,12 +82,8 @@ public class SolrRequester {
   public SearchResult getEpisodesBySeries(String seriesId) throws SolrServerException {
     SearchQueryImpl q1 = new SearchQueryImpl();
     q1.withId(seriesId).includeSeries(false).includeEpisodes(true);
+    
     return getByQuery(q1);
-//    String q = SolrFields.DC_IS_PART_OF + ":" + SolrUtils.clean(seriesId);
-//    SolrQuery query = new SolrQuery(q);
-//    query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
-//    query.setFields("* score");
-//    return createSearchResult(query);
   }
 
   /**
@@ -106,15 +94,8 @@ public class SolrRequester {
   public SearchResult getSeriesByDate(int limit, int offset) throws SolrServerException {
     SearchQueryImpl q1 = new SearchQueryImpl();
     q1.withLimit(limit).withOffset(offset).includeSeries(true).includeEpisodes(false);
+    q1.withCreationDateSort(true);
     return getByQuery(q1);
-//    String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series;
-//    SolrQuery query = new SolrQuery(q);
-//    query.setStart(offset);
-//    query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
-//    if (limit > 0)
-//      query.setRows(limit);
-//    query.setFields("* score");
-//    return createSearchResult(query);
   }
 
   /**
@@ -126,10 +107,6 @@ public class SolrRequester {
     SearchQueryImpl q1 = new SearchQueryImpl();
     q1.withId(seriesId).includeSeries(true).includeEpisodes(false);
     return getByQuery(q1);
-//    String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series + " AND " + SolrFields.ID + ":" + seriesId;
-//    SolrQuery query = new SolrQuery(q);
-//    query.setFields("* score");
-//    return createSearchResult(query);
   }
 
   /**
@@ -141,15 +118,6 @@ public class SolrRequester {
     SearchQueryImpl q1 = new SearchQueryImpl();
     q1.withText(text).withLimit(limit).withOffset(offset).includeSeries(true).includeEpisodes(false);
     return getByQuery(q1);
-
-    //    StringBuffer sb = boost(SolrUtils.clean(text));
-//    SolrQuery query = new SolrQuery(sb.toString());
-//    query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series);
-//    query.setStart(offset);
-//    if (limit > 0)
-//      query.setRows(limit);
-//    query.setFields("* score");
-//    return createSearchResult(query);
   }
 
   /**
@@ -161,14 +129,6 @@ public class SolrRequester {
     SearchQueryImpl q1 = new SearchQueryImpl();
     q1.withId(seriesId).includeEpisodes(true).includeSeries(true);
     return getByQuery(q1);
-
-    //    seriesId = SolrUtils.clean(seriesId);
-//    String q = SolrFields.ID + ":" + seriesId + " OR " + SolrFields.DC_IS_PART_OF + ":" + seriesId;
-//    SolrQuery query = new SolrQuery(q);
-//    query.setSortField(SolrFields.OC_MEDIATYPE, SolrQuery.ORDER.asc);
-//    query.setSortField(SolrFields.DC_CREATED, SolrQuery.ORDER.desc);
-//    query.setFields("* score");
-//    return createSearchResult(query);
   }
 
   /**
@@ -180,11 +140,6 @@ public class SolrRequester {
     SearchQueryImpl q1 = new SearchQueryImpl();
     q1.withId(episodeId).includeEpisodes(true);
     return getByQuery(q1);
-//    String q = SolrFields.ID + ":" + episodeId;
-//    SolrQuery query = new SolrQuery(q);
-//    query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
-//    query.setFields("* score");
-//    return createSearchResult(query);
   }
 
   /**
@@ -195,16 +150,8 @@ public class SolrRequester {
   public SearchResult getEpisodesByDate(int limit, int offset) throws SolrServerException {
     SearchQueryImpl q1 = new SearchQueryImpl();
     q1.withLimit(limit).withOffset(offset);
+    q1.withCreationDateSort(true);
     return getByQuery(q1);
-
-//    String q = SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual;
-//    SolrQuery query = new SolrQuery(q);
-//    query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
-//    query.setStart(offset);
-//    if (limit > 0)
-//      query.setRows(limit);
-//    query.setFields("* score");
-//    return createSearchResult(query);
   }
 
   /**
@@ -216,15 +163,6 @@ public class SolrRequester {
     SearchQueryImpl q1 = new SearchQueryImpl();
     q1.withText(text).withLimit(limit).withOffset(offset);
     return getByQuery(q1);
-
-    //    StringBuffer sb = boost(SolrUtils.clean(text));
-//    SolrQuery query = new SolrQuery(sb.toString());
-//    query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
-//    query.setStart(offset);
-//    if (limit > 0)
-//      query.setRows(limit);
-//    query.setFields("* score");
-//    return createSearchResult(query);
   }
 
   /**
@@ -236,14 +174,6 @@ public class SolrRequester {
     SearchQueryImpl q1 = new SearchQueryImpl();
     q1.withQuery(q).withLimit(limit).withOffset(offset);
     return getByQuery(q1);
-//    
-//    SolrQuery query = new SolrQuery(q);
-//    query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
-//    query.setStart(offset);
-//    if (limit > 0)
-//      query.setRows(limit);
-//    query.setFields("* score");
-//    return createSearchResult(query);
   }
 
   /**
@@ -322,7 +252,7 @@ public class SolrRequester {
       item.setScore(Double.parseDouble(toString(doc.getFieldValue(SolrFields.SCORE))));
 
       // the last modified datetime
-      item.setModified((Date) doc.getFieldValue(SolrFields.DC_CREATED));
+      item.setModified((Date) doc.getFieldValue(SolrFields.OC_MODIFIED));
 
       // if it is a video or audio episode
       if (item.getType().equals(SearchResultItemType.AudioVisual)) {
@@ -538,11 +468,11 @@ public class SolrRequester {
       query.setStart(q.getOffset());
     
     if(q.isSortByCreationDate()) {
-      query.setFields("*");
       query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
-    } else {
-      query.setFields("* score");
+      query.addSortField(SolrFields.OC_MODIFIED, ORDER.desc);
     }
+
+    query.setFields("* score");
     return createSearchResult(query);
   }
 

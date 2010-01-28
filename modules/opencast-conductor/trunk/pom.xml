@@ -61,7 +61,11 @@
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-distribution-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
-      <type>bundle</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-workspace-api</artifactId>
+      <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>

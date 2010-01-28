@@ -100,11 +100,9 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
       reference = (String) xpath.evaluate("@ref", elementNode, XPathConstants.STRING);
 
       // size
-      try {
-        size = Long.parseLong(xpath.evaluate("size/text()", elementNode).trim());
-      } catch (Exception e) {
-        // size may not be present
-      }
+      String trackSize = xpath.evaluate("size/text()", elementNode).trim();
+      if (!"".equals(trackSize))
+        size = Long.parseLong(trackSize);
 
       // checksum
       String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);

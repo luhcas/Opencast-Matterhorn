@@ -133,11 +133,9 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
       reference = (String) xpath.evaluate("@ref", elementNode, XPathConstants.STRING);
 
       // size
-      try {
-        size = Long.parseLong(xpath.evaluate("size/text()", elementNode).trim());
-      } catch (Exception e) {
-        // size may not be present
-      }
+      String documentSize = xpath.evaluate("size/text()", elementNode).trim();
+      if (!"".equals(documentSize))
+        size = Long.parseLong(documentSize);
 
       // checksum
       String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
