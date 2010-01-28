@@ -173,7 +173,7 @@ body {
   list-style-type: none;
 }
 
-#category-selector-container {float:left;width:auto;}
+#category-selector-container {float:left;width:600px;margin-top:10px;}
 .category-selector {}
 .category-selector li {float:left;list-style:none;}
 .category-selector-item {}
@@ -185,6 +185,7 @@ body {
 
 #add-buttons-container {
     float:right;
+    margin-bottom: 20px;
 }
 
 #recordings-table-container {
