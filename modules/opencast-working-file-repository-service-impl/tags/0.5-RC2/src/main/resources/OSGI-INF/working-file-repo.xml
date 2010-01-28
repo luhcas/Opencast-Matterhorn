@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.workingfilerepository.api.WorkingFileRepository" immediate="true" activate="activate">
+  <implementation class="org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryImpl" />
+  <property name="service.description" value="Working File Repository" />
+  <service>
+    <provide interface="org.osgi.service.cm.ManagedService" />
+    <provide interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository" />
+  </service>
+</component>
