@@ -1,31 +1,17 @@
 #! /bin/sh
 # Configure capture agent for use with Matterhorn
 
-setup_vga2usb()
-{
-  mkdir /tmp/vga2usb
-  cd /tmp/vga2usb
-  wget http://www.epiphan.com/downloads/linux/vga2usb-3.23.7.2-2.6.31-16-generic-i386.tbz
-  tar jxf vga2usb-3.23.7.2-2.6.31-16-generic-i386.tbz
-  make load
-  cd ..
-  rm -rf vga2usb
-}
+mkdir /tmp/vga2usb
+cd /tmp/vga2usb
+wget http://www.epiphan.com/downloads/linux/vga2usb-3.23.7.2-2.6.31-16-generic-i386.tbz
+tar jxf vga2usb-3.23.7.2-2.6.31-16-generic-i386.tbz
+make load
 
 sudo echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse" >> sources.list
 sudo echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse" >> sources.list
 sudo echo "deb http://security.ubuntu.com/ubuntu karmic-security main restricted universe multiverse" >> sources.list
 
 sudo mv sources.list /etc/apt/sources.list
-
-while getopts "vga2usb" OPTION
-do
-  case $OPTION in 
-    vga2usb)
-      setup_vga2usb
-      ;;
-  esac
-done
 
 sudo debconf-set-selections <<\EOF
 postfix postfix/mailname string fax
@@ -45,10 +31,8 @@ export FELIX_URL=http://apache.mirror.iweb.ca/felix/felix-framework-2.0.1.tar.gz
 export FELIX_HOME=$HOME/felix-framework-2.0.1
 export M2_REPO=$HOME/.m2/repository
 
-
 curl $FELIX_URL | tar xz
 mkdir ${FELIX_HOME}/load
-
 
 echo "Installing jv4linfo..."
 mkdir /tmp/jv4linfo
@@ -58,17 +42,20 @@ jar xf jv4linfo-0.2.1-src.jar
 cd jv4linfo/src
 # The ant build script has a hardcoded path to the openjdk, this sed line will
 # switch it to be whatever is defined in JAVA_HOME
+sed -i '74i\\t<arg value="-fPIC"/>' build.xml
 sed -i "s#\"\/usr\/lib\/jvm\/java-6-openjdk\/include\"#\"$JAVA_HOME\/include\"#g" build.xml
+
 ant
 sudo cp ../lib/libjv4linfo.so /usr/lib
-cd /tmp
-rm -rf jv4linfo
 
 # configure users/directories
 if [ -d /opencast ]; then
  sudo mkdir /opencast
  sudo chown opencast:opencast /opencast
 fi
+
+# setup properties
+source config.sh
  
 # get the necessary matterhorn source code
 svn co http://source.opencastproject.org/svn/products/matterhorn/trunk/ $HOME/capture-agent --depth empty
@@ -102,7 +89,4 @@ mvn clean install -Pcapture -DskipTests -DdeployTo=$FELIX_HOME/load
 echo "alias matterhorn=$FELIX_HOME/bin/start_matterhorn.sh" >> ~/.bashrc
 chmod 755 $FELIX_HOME/bin/start_matterhorn.sh
 $FELIX_HOME/bin/start_matterhorn.sh
-
-
-
 
