@@ -84,10 +84,13 @@ public class MediaInspectionRestEndpoint {
 
     DocRestData data = new DocRestData("inspection", "Media inspection", "/inspection/rest", notes);
 
+    // abstract
+    data.setAbstract("This service extracts technical metadata from media files.");
+
     // getTrack
     RestEndpoint endpoint = new RestEndpoint("getTrack", RestEndpoint.Method.GET, "/",
-            "Analyzing media file provided by url");
-    endpoint.addOptionalParam(new Param("url", Param.Type.STRING, null, "URL to the media that will be analyzed"));
+            "Analyze a given media file");
+    endpoint.addOptionalParam(new Param("url", Param.Type.STRING, null, "Location of the media file"));
     endpoint.addFormat(Format.xml());
     endpoint.addStatus(Status.OK("Result is returned"));
     endpoint.addStatus(new Status(400, "Problem retrieving media file or invalid media file"));
