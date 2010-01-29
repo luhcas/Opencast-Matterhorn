@@ -145,17 +145,14 @@ public class AdminuiRestService {
       //WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery()).getItems();
       for (int i = 0; i < workflows.length; i++) {
         RecordingDataView item = new RecordingDataViewImpl();
-        MediaPackage mp = workflows[i].getCurrentMediaPackage();
         item.setId(workflows[i].getId());
-        logger.info("MediaPackage startTime: " + mp.getStartDateAsString());
-        item.setStartTime(mp.getStartDateAsString());
-
-        DublinCoreCatalog dcCatalog = getDublinCore(mp);
+        DublinCoreCatalog dcCatalog = getDublinCore(workflows[i].getCurrentMediaPackage());
         if (dcCatalog != null) {
           logger.info("DC Title: " + dcCatalog.getFirst(DublinCoreCatalog.PROPERTY_TITLE, DublinCoreCatalog.LANGUAGE_ANY));
           item.setTitle(dcCatalog.getFirst(DublinCoreCatalog.PROPERTY_TITLE, DublinCoreCatalog.LANGUAGE_ANY));
           item.setPresenter(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_CREATOR));
           item.setSeries(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_IS_PART_OF));
+          item.setStartTime(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_DATE));  // FIXME get timestamp
           item.setCaptureAgent(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_CREATOR)); //FIXME get capture agent from where...?
           WorkflowOperationInstance operation = null;
           ListIterator<WorkflowOperationInstance> instances = workflows[i].getWorkflowOperationInstanceList().getOperationInstance().listIterator();
@@ -166,10 +163,10 @@ public class AdminuiRestService {
           }
           item.setProcessingStatus(sb.toString());
           /*if (operation != null) {
-            item.setProcessingStatus(operation.getState().toString() + " : " + operation.getName());
-          } else {
-            logger.warn("Could not get any WorkflowOperationInstance from WorkflowInstance.");
-          }*/
+           item.setProcessingStatus(operation.getState().toString() + " : " + operation.getName());
+           } else {
+           logger.warn("Could not get any WorkflowOperationInstance from WorkflowInstance.");
+           }*/
           // TODO get distribution status #openquestion is there a way to find out if a workflowOperation does distribution?
           out.add(item);
         } else {
