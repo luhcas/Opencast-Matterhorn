@@ -157,6 +157,9 @@ else
   if [ ${#proxsrv} -gt 7 ]; then
     echo "http_proxy=$proxsrv" | sudo tee /etc/profile.d/httpproxy.sh
     echo "export http_proxy" | sudo tee -a /etc/profile.d/httpproxy.sh
+    sudo chown matterhorn /etc/profile.d/httpproxy.sh
+    sudo chgrp matterhorn /etc/profile.d/httpproxy.sh
+    sudo chmod 755 /etc/profile.d/httpproxy.sh
     export http_proxy=$proxsrv
   else
     echo "No proxy server specified."
