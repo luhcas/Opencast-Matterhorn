@@ -64,8 +64,14 @@
             document.title = "Opencast Matterhorn - Media Player - " + $('#oc-title').html();
             
             // set the title on the top of the player
-            $('#stage-title').html("<h2>"+ $('#oc-title').html() + " by " + $('#oc-creator').html() + "</h2>");
-
+            if($('#oc-creator').html() === ""){
+              
+            $('#stage-title').html("<h2>"+ $('#oc-title').html()+ "</h2>");
+            }
+            else{
+              $('#stage-title').html("<h2>"+ $('#oc-title').html() + " by " + $('#oc-creator').html() + "</h2>");
+            }
+            
             // set the abstract
             $('#abstract').html($('#oc-abstract').html());
 
