@@ -12,6 +12,11 @@
   <xsl:output method="html"/>
 
   <xsl:template match="ns1:recordingLists">
+    <center style="margin:20px;">
+      <span>
+        All recordings scheduled for the future appear below. (Future versions of Matterhorn will allow you to filter this list to show specific days.)
+      </span>
+    </center>
     <table id="recordingsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
       <thead>
         <tr>
