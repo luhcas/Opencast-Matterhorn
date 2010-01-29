@@ -66,21 +66,17 @@ function initPage() {
   
   eventsManager = new EventManager(eventFields);
   
-  $('.icon-help').click(
-                        function(event) {
-                        popupHelp.displayHelp($(this), event);
-                        return false;
-                        }
-                        );
+  $('.icon-help').click(function(event) {
+                          popupHelp.displayHelp($(this), event);
+                          return false;
+                        });
   
-  $('body').click(
-                  function() {
-                  if ($('#helpbox').css('display') != 'none') {
-                  popupHelp.resetHelp();
-                  }
-                  return true;
-                  }
-                  );
+  $('body').click(function() {
+                    if ($('#helpbox').css('display') != 'none') {
+                      popupHelp.resetHelp();
+                    }
+                    return true;
+                  });
   
   $('#submitButton').click(schedulerUI.submitForm);
   $('#resetButton').click(schedulerUI.cancelForm);

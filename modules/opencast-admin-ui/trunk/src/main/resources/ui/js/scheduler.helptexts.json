@@ -14,12 +14,12 @@ popupHelp.helpTexts = {
     
     "license" : [
         "License",
-        "Enter the type of license with which you would like to distribute the recording."
+        "Enter the type of license under which you would like to distribute the recording. This data does not currently impact processing or distribution."
     ],
     
     "series" : [
-        "Series Identifier",
-        "If the recording is part of series, enter the name of the series."
+        "Series",
+        "If the recording is part of series, enter the name of the series. This is a single piece of metadata and has no other implications in the system."
     ],
     
     "subject" : [
@@ -28,17 +28,17 @@ popupHelp.helpTexts = {
     ],
     
     "language" : [
-        "Content Language",
+        "Language",
         "Enter the primary language spoken in the recording."
     ],
 
     "description" : [
-        "Content description",
+        "Description",
         "Enter a description of the recording."
     ],
     
     "distribution" : [
-        "Distribution channels",
+        "Distribution channel(s)",
         "Specify the channel(s) to which you would like this recording distributed."
     ],
     
@@ -49,7 +49,7 @@ popupHelp.helpTexts = {
     
     "starttime" : [
         "Start Time",
-        "Select a start time for this recording. Note: 24h time"
+        "Select a start time for this recording, using 24-hour time. This is the precise time that recording will start; there is no buffer."
     ],
     
     "duration" : [
@@ -59,7 +59,7 @@ popupHelp.helpTexts = {
     
     "agent" : [
         "Capture Agent",
-        "Select the agent identifier that this recording will be using."
+        "Select the capture agent for this recording. If you do not have a working capture agent and you'd still like to test the scheduling of a recording, select \"demo_capture_agent\" and the system will simulate \"capture\" from a pre-loaded media file at the time and for the duration that you specify on this form."
     ],
     
     "input" : [
