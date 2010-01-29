@@ -21,12 +21,11 @@ var WORKFLOW_URL      = BASE_URL + '/workflow/rest';
 var CAPTURE_ADMIN_URL = BASE_URL + '/capture-admin/rest';
 
 function initPage() {
+  var d = new Date();
+  d.setHours(d.getHours() + 1); //increment an hour.
+  $('#startTimeHour').val(d.getHours());
   $('#startDate').datepicker({showOn: 'both', buttonImage: 'img/calendar.gif', buttonImageOnly: true});
-  $('#startDate').datepicker('setDate', new Date());
-  
-  var now = new Date();
-  now.setHours(now.getHours() + 1);
-  $('#startTimeHour').val(now.getHours());
+  $('#startDate').datepicker('setDate', d);
   
   $('.required > label').prepend('<span style="color: red;">*</span>');
   
