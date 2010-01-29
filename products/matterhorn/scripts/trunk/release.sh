@@ -3,8 +3,8 @@
 #
 # Define some constants
 #
-MH_VERSION=0.4
-JIRA_TKT=MH-1991
+MH_VERSION=0.5-RC2
+JIRA_TKT=MH-2359
 FELIX_VER=felix-framework-2.0.1
 
 WORKING_DIR=/Users/mtrehan/Matterhorn
@@ -13,6 +13,7 @@ TEMPLATE_DIR=$WORKING_DIR/template
 
 MATTERHORN_DIR=$WORKING_DIR/$JIRA_TKT
 
+MATTERHORN_OC_DIR=$MATTERHORN_DIR/opencast
 MATTERHORN_BIN_DIR=$MATTERHORN_DIR/bin
 MATTERHORN_LIB_DIR=$MATTERHORN_DIR/lib
 MATTERHORN_BUNDLE_DIR=$MATTERHORN_DIR/bundles
@@ -23,13 +24,17 @@ MATTERHORN_FELIX_DIR=$MATTERHORN_DIR/$FELIX_VER
 
 FELIX_CONF=$MATTERHORN_DIR/conf/config.properties
 
-#SVN_URL=http://source.opencastproject.org/svn/products/matterhorn/branches/$JIRA_TKT
-SVN_URL=http://source.opencastproject.org/svn/products/matterhorn/trunk
+#SVN_URL=http://source.opencastproject.org/svn/products/matterhorn/branches/$MH_VERSION
+#SVN_URL=http://source.opencastproject.org/svn/products/matterhorn/trunk
+#SVN_URL=http://source.opencastproject.org/svn/products/matterhorn/branches/0.5-SNAPSHOT
+
+SVN_URL=http://source.opencastproject.org/svn/products/matterhorn/tags/$MH_VERSION
 
 EXPORT_DIR=$WORKING_DIR/svn
 EXPORT_NAME=$JIRA_TKT
 
 SVN_DIR=$EXPORT_DIR/$EXPORT_NAME
+VERSION_FILE=$SVN_DIR/opencast-runtime-info-ui/src/main/resources/ui/version.txt
 
 #
 # Check for maven repository configuration
@@ -68,10 +73,13 @@ fi
 cd $WORKING_DIR
 mkdir $JIRA_TKT $MATTERHORN_LIB_DIR $MATTERHORN_BUNDLE_DIR $MATTERHORN_CONF_DIR
 
+cp -R $TEMPLATE_DIR/opencast $MATTERHORN_OC_DIR
+
 cp -R $TEMPLATE_DIR/bin $MATTERHORN_BIN_DIR
 cp -R $TEMPLATE_DIR/licenses $MATTERHORN_LICENSE_DIR
 cp -R $TEMPLATE_DIR/install $MATTERHORN_INSTALL_DIR
 cp -R $TEMPLATE_DIR/$FELIX_VER $MATTERHORN_FELIX_DIR
+cp -R $TEMPLATE_DIR/bin $MATTERHORN_BIN_DIR
 
 cp $TEMPLATE_DIR/README $MATTERHORN_DIR/.
 cp $TEMPLATE_DIR/LICENSE $MATTERHORN_DIR/.
@@ -86,7 +94,17 @@ if [ ! -d "$EXPORT_DIR" ]; then
 fi
 cd $EXPORT_DIR
 rm -rf $EXPORT_NAME
-svn export $SVN_URL $EXPORT_NAME
+svn co $SVN_URL $EXPORT_NAME
+
+#
+# record version info
+#
+cd $EXPORT_DIR/$EXPORT_NAME
+echo "------------------ Revision --------------------" > $VERSION_FILE
+svnversion >> $VERSION_FILE
+echo "------------------ Built on --------------------" >> $VERSION_FILE
+date >> $VERSION_FILE
+echo "------------------------------------------------" >> $VERSION_FILE
 
 #
 # Change file ownership/group to tomcat
@@ -100,7 +118,7 @@ chgrp -R staff $MATTERHORN_DIR
 
 cd $SVN_DIR
 
-sed '1,$s/\>0.1-SNAPSHOT\</\>0.5-RC\</' $SVN_DIR/pom.xml >/tmp/branch-pom.xml
+sed '1,$s/\>0.6-SNAPSHOT\</\>0.5-RC2\</' $SVN_DIR/pom.xml >/tmp/branch-pom.xml
 cp /tmp/branch-pom.xml $SVN_DIR/pom.xml
 
 for i in opencast-*
@@ -109,7 +127,7 @@ do
 
   if [ -f $SVN_DIR/$i/pom.xml ]; then
     echo " 0.5-RC: $i"
-    sed '1,$s/\>0.1-SNAPSHOT\</\>0.5-RC\</' $SVN_DIR/$i/pom.xml >/tmp/branch-pom.xml
+    sed '1,$s/\>0.6-SNAPSHOT\</\>0.5-RC2\</' $SVN_DIR/$i/pom.xml >/tmp/branch-pom.xml
     cp /tmp/branch-pom.xml $SVN_DIR/$i/pom.xml
     sleep 1
   fi
@@ -149,6 +167,7 @@ do
 done
 
 cp $SVN_DIR/opencast-test-harness/target/*.jar $MATTERHORN_BUNDLE_DIR/.
+cp $SVN_DIR/opencast-demo/target/*.jar $MATTERHORN_BUNDLE_DIR/.
 
 
 MH_DIR=matterhorn-$MH_VERSION

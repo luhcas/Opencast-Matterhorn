@@ -38,6 +38,7 @@ install_3p ()
   echo "Installing 3rd party tools.  This process will take several minutes..."
 
   cd $INST_DIR
+  sudo apt-get -y --force-yes install curl
   sudo apt-get -y --force-yes install openssh-server openssh-client
   sudo apt-get -y --force-yes install build-essential zlib1g-dev patch byacc
 
@@ -154,8 +155,8 @@ else
 
   # proxy server?
   if [ ${#proxsrv} -gt 7 ]; then
-    sudo echo "http_proxy=$proxsrv" > /etc/profile.d/httpproxy.sh
-    sudo echo "export http_proxy" >> /etc/profile.d/httpproxy.sh
+    echo "http_proxy=$proxsrv" > sudo tee /etc/profile.d/httpproxy.sh
+    echo "export http_proxy" >> sudo tee -a /etc/profile.d/httpproxy.sh
     export http_proxy=$proxsrv
   else
     echo "No proxy server specified."
