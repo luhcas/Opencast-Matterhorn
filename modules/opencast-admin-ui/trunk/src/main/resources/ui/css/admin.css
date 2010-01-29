@@ -6,6 +6,7 @@
 body {
     padding-left: 30px;
     padding-right:30px;
+    font-size: 1.3em;
 }
 
 .wu-tab-content {
@@ -173,24 +174,24 @@ body {
   list-style-type: none;
 }
 
-#category-selector-container {float:left;width:600px;margin-top:10px;}
+#category-selector-container {float:left;width:700px;margin-top:10px;margin-bottom:10px;}
 .category-selector {}
 .category-selector li {float:left;list-style:none;}
 .category-selector-item {}
 .category-selector-spacer {margin-left:5px; margin-right:5px;}
 .category-selector-item-disabled {color:gray;}
 
-.state-selector {color:blue;text-decoration:underline;cursor:pointer;}
+.state-selector {color:blue;}
 .state-selector-active {color:black;text-decoration:none !important;font-weight:bold;cursor:default;}
 
 #add-buttons-container {
     float:right;
-    margin-bottom: 20px;
+    /*margin-bottom: 20px;*/
 }
 
 #recordings-table-container {
     background:white;
-    margin-top:50px;
+    /*margin-top:50px;*/
 }
 
 #stage {
@@ -244,6 +245,16 @@ body {
   background-image:url(../img/desc.gif);
   background-position: center right;
   background-repeat:no-repeat;
+}
+
+.clickable {
+  cursor:pointer;
+  text-decoration: none;
+}
+
+.clickable:hover {
+  cursor:pointer;
+  text-decoration:underline;
 }
 
 /* Fluid Skinning System Overrides */

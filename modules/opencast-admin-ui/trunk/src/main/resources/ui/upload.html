@@ -22,8 +22,8 @@
       .formField {width:440px !important;float:left;}
       .no-bullets li {list-style-type: none;}
       .collapse-control {padding-left:18px;cursor:pointer;background:silver;}
-      .collapse-control-closed {background-image:url(img/arrow-right.png);background-position:top left !important; background-repeat:no-repeat;}
-      .collapse-control-open {background-image:url(img/arrow-down.png);background-position:top left !important; background-repeat:no-repeat;}
+      .collapse-control-closed {background-image:url(img/arrow-right.png);background-position:center left !important; background-repeat:no-repeat;}
+      .collapse-control-open {background-image:url(img/arrow-down.png);background-position:center left !important; background-repeat:no-repeat;}
       .titlebar {background-color:silver !important; padding-left:8px;}
       .helpIcon {display:block;float:left;margin-left:5px;width:16px;height:16px;background-image:url(img/help.png);background-position:center center;background-repeat:no-repeat;cursor:pointer;}
     </style>
@@ -108,7 +108,9 @@
           $('.requiredField').each( function() {
             if (!$(this).val()) {
               $('#notification-' + $(this).attr('id')).show();
-              $(this).prev('.formField-label').css('color','red');
+              if ($('#container-missingFields').is(':visible')) {
+                $(this).prev('.formField-label').css('color','red');
+              }
               missing = true;
             } else {
               $('#notification-' + $(this).attr('id')).hide();
@@ -144,7 +146,7 @@
     <div class="fl-container-850 fl-theme-coal">
       <div style="margin-top: .5em"><a href="../../welcome.html"><img src="img/opencast_logo.gif" alt="Opencast" width="128" height="30"></a></div>
       <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-        <li class="fl-activeTab"><a href="/admin/recordings.html">Recordings</a></li>
+        <li class="fl-activeTab"><a href="javascript:history.back();">Recordings</a></li>
         <li class=""><a href="/admin/agents_status.html">Capture Agents</a></li>
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
@@ -158,7 +160,10 @@
           <div id="content-missingFields" class="fl-widget-content warnbox-content">
             <ul>
               <li id="notification-title" class="missing-fields-item">
-                <span class="fl-icon inline-icon icon-bullet"></span>Please enter a <a href="javascript:document.uploadForm.title.focus();">title</a> for the recording.
+                <!-- <span class="fl-icon inline-icon icon-bullet"></span> -->
+                <span style="width:600px;">
+                  Please enter a <a href="javascript:document.uploadForm.title.focus();">title</a> for the recording.
+                </span>
               </li>
               <!--
               <li id="notification-flavor" class="missing-fields-item">
@@ -166,7 +171,10 @@
               </li>
               -->
               <li id="notification-track" class="missing-fields-item">
-                <span class="fl-icon inline-icon icon-bullet"></span>Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload. The file must be a video file (avi,mp4,mov,mpg,mkv,flv or wmv).
+                <!-- <span class="fl-icon inline-icon icon-bullet"></span> -->
+                <span>
+                  Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload. The file must be a video file (.avi, .mp4, .mov, .mpg, .mkv, .flv or .wmv).
+                </span>
               </li>
             </ul>
           </div>
@@ -278,15 +286,15 @@
                   <span class="helpIcon" title="Click for help">&nbsp;</span>
                   <br>
                 </li> -->
-                <li class="ui-helper-clearfix">
+                <!--<li class="ui-helper-clearfix">
                   <span class="formField-label">&nbsp;</span>
                   <span style="float:left;">File must contain video.</span>
-                </li>
+                </li>-->
                 <!-- field: Media File -->
                 <li class="ui-helper-clearfix">
                   <input type="hidden" class="formField" name="flavor" id="flavor" value="presentation/source">
                   <span class="formField-label"><span class="color-red">* </span>Media File:</span>
-                  <input type="file" id="track" name="track" class="requiredField formField" style="float:left;">
+                  <input type="file" id="track" name="track" class="requiredField" style="float:left;">
                   <span class="helpIcon"  title="Click for help">&nbsp;</span>
                 </li>
                 <li class="ui-helper-clearfix">
@@ -302,6 +310,10 @@
             <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
               <ul class="no-bullets formField-list">
                 <!-- submit / cancal button -->
+                <li class="ui-helper-clearfix">
+                  <span class="formField-label" style="float:left;">&nbsp;</span>
+                  <span style="float:left;width:600px;margin-bottom:10px;">NOTE: Recording information cannot be edited after it is submitted in this version of Matterhorn.</span>
+                </li>
                 <li class="ui-helper-clearfix">
                   <span class="formField-label">&nbsp;</span>
                   <button type="button" id="BtnSubmit">Submit</button>
