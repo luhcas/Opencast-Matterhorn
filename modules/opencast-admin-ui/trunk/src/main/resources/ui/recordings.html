@@ -63,6 +63,8 @@
           show='upcoming';
         }
         displayRecordings(show);
+        $("button").hover(function(){$(this).css({'background-color': 'white', 'border-top': '1px solid #ccc', 'border-left': '1px solid #ccc'});}, 
+                          function(){$(this).css({'background-color': '', 'border-top': '', 'border-left': ''})});
       });
 
       /**
@@ -162,6 +164,9 @@
           } else {  // if no date/time column is present, init tablesorter the default way
             $('#recordingsTable').tablesorter({cssAsc: 'sortable-asc', cssDesc: 'sortable-desc'});
           }
+          
+          //header underline
+          $(".header").hover(function(){$(this).css('text-decoration', 'underline');}, function(){$(this).css('text-decoration', 'none')});
         });
       }
 
@@ -209,13 +214,13 @@
 
         <!-- Add/Schedule Buttons -->
         <div id="add-buttons-container">
-          <button type="button" id="button_schedule" style="height:3em;">
+          <button type="button" id="button_schedule" style="height:3em;cursor:pointer;margin-right:1em;">
             <span class="icon icon-add">&nbsp;</span>
-            <span><b>Schedule Recording</b></span>
+            <span style="font-weight: bold;">Schedule Recording</span>
           </button>
-          <button type="button" id="button_upload" style="height:3em;">
+          <button type="button" id="button_upload" style="height:3em;cursor:pointer;">
             <span class="icon icon-add">&nbsp;</span>
-            <span><b>Upload Recording</b></span>
+            <span style="font-weight: bold;">Upload Recording</span>
           </button>
         </div>
 

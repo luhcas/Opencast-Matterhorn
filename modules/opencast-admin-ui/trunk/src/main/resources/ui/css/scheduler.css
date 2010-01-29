@@ -26,6 +26,22 @@
   margin-left: 15em;
 }
 
+.form-radio-group {
+
+}
+
+.form-radio-group label {
+  float: left;
+  margin-left: .5em;
+}
+
+.form-radio-group input {
+  clear: both;
+  float: left;
+  margin-top: 3px;
+  margin-bottom: .5em;
+}
+
 /* Bring the first item of each column 
  back up to the level of item 1.
  Vertical return = items * height.

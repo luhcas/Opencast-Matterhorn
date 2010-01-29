@@ -6,7 +6,15 @@
 body {
     padding-left: 30px;
     padding-right:30px;
-    font-size: 1.3em;
+    font-size: 1.15em;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 .wu-tab-content {
@@ -274,6 +282,11 @@ body {
 .fl-activeTab a {
   background-color: white !important;
   border-bottom-color: white !important;
+}
+
+.fl-activeTab a:hover {
+  background-color: #ddd !important;
+  border-bottom-color: #ddd !important;
 }
 
 .fl-theme-coal .fl-widget {

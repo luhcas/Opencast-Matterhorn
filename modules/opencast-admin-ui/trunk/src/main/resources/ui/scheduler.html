@@ -27,7 +27,7 @@
     <div class="fl-container-850 fl-theme-coal">
       <div style="margin-top: .5em"><a href="../../welcome.html"><img src="img/opencast_logo.gif" alt="Opencast" width="128" height="30"></a></div>
       <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-        <li class="fl-activeTab"><a href="javascript:history.back();">Recordings</a></li>
+        <li class="fl-activeTab"><a href="/admin/">Recordings</a></li>
         <li><a href="/admin/agents_status.html">Capture Agents</a></li>
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
@@ -275,15 +275,15 @@
                     <label class="fl-label" id="label-input">Input(s):</label>
                     <div class="form-radio-group" style="float: left; top: 3px; position: relative;">
                       <input type="radio" id="audio" name="inputs" value="1" checked="checked">
-                      <label for="audio">Audio Only</label>
+                      <label for="audio">Audio only</label>
+                      <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
                       <input type="radio" id="audioVideo" name="inputs" value="3">
-                      <label for="audioVideo">Audio,Video</label>
+                      <label for="audioVideo">Audio, Video</label>
                       <input type="radio" id="audioScreen" name="inputs" value="5">
-                      <label for="audioScreen">Audio,Screen</label>
+                      <label for="audioScreen">Audio, Screen</label>
                       <input type="radio" id="audioVideoScreen" name="inputs" value="7">
-                      <label for="audioVideoScreen">Audio,Video,Screen</label>
+                      <label for="audioVideoScreen">Audio, Video, Screen</label>
                     </div>
-                    <span class="fl-icon icon-help" id="help_input" title="Click for help"></span>
                   </li>
                 </ul>
               </form>
