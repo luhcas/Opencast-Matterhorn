@@ -12,11 +12,9 @@
   <xsl:output method="html"/>
 
   <xsl:template match="ns1:recordingLists">
-    <center style="margin:20px;">
-      <span>
-        All media files on this page should appear in the Matterhorn Media Module.
-      </span>
-    </center>
+    <div style="border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:600px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
+      All media files on this page should appear in the Matterhorn Media Module.
+    </div>
     <table id="recordingsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
       <thead>
         <tr>
