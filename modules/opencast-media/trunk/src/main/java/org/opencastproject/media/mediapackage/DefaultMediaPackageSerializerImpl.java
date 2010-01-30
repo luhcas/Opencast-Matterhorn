@@ -15,7 +15,7 @@
  */
 package org.opencastproject.media.mediapackage;
 
-import org.opencastproject.util.PathSupport;
+import org.opencastproject.util.UrlSupport;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -144,7 +144,7 @@ public class DefaultMediaPackageSerializerImpl implements MediaPackageSerializer
 
     // This is a relative path
     if (isRelative && packageRoot != null) {
-      uri = new URI(PathSupport.concat(packageRoot.toExternalForm(), path));
+      uri = new URI(UrlSupport.concat(packageRoot.toExternalForm(), path));
       return uri;
     }
     
