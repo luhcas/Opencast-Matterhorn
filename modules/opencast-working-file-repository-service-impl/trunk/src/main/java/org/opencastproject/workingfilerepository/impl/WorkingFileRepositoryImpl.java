@@ -139,6 +139,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       throw new RuntimeException(e1);
     }
     logger.debug("Attempting to write a file to {}", f.getAbsolutePath());
+    FileOutputStream out = null;
     try {
       if( ! f.exists()) {
         logger.debug("Attempting to create a new file at {}", f.getAbsolutePath());
@@ -156,10 +157,13 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       } else {
         logger.info("Attempting to overwrite the file at {}", f.getAbsolutePath());
       }
-      IOUtils.copy(in, new FileOutputStream(f));
+      out = new FileOutputStream(f);
+      IOUtils.copy(in, out);
       return getURI(mediaPackageID, mediaPackageElementID);
     } catch (IOException e) {
       throw new RuntimeException(e);
+    } finally {
+      if (out != null) {try {out.close();} catch (IOException e) {logger.error(e.getMessage());}}
     }
   }
 

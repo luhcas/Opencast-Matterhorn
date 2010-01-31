@@ -118,6 +118,7 @@ public class ZipUtil {
       } finally {
         if(in != null) {try {in.close();} catch (IOException e) {logger.error(e.getMessage());}}
         if(out != null) {try {out.close();} catch (IOException e) {logger.error(e.getMessage());}}
+        try {File.umount();} catch (ArchiveException e) {logger.error(e.getMessage());}
       }
     }
   }

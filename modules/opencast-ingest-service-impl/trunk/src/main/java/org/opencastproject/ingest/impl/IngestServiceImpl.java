@@ -124,7 +124,9 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
     MediaPackage mp;
     try {
       builder.setSerializer(new DefaultMediaPackageSerializerImpl(manifest.getParentFile()));
-      mp = builder.loadFromManifest(manifest.toURI().toURL().openStream());
+      InputStream manifestStream = manifest.toURI().toURL().openStream();
+      mp = builder.loadFromManifest(manifestStream);
+      try {manifestStream.close();} catch (IOException e) {logger.error(e.getMessage());}
 //      mp.renameTo(handleBuilder.createNew());
 //      builder.createNew();
       for (MediaPackageElement element : mp.elements()) {
@@ -135,7 +137,9 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
         }
         String filename = element.getURI().toURL().getFile();
         filename = filename.substring(filename.lastIndexOf("/"));
-        URI newUrl = addContentToRepo(mp, elId, filename, element.getURI().toURL().openStream());
+        InputStream elementStream = element.getURI().toURL().openStream();
+        URI newUrl = addContentToRepo(mp, elId, filename, elementStream);
+        try {elementStream.close();} catch (IOException e) {logger.error(e.getMessage());}
         element.setURI(newUrl);
       }
     } catch (Exception e) {
@@ -260,6 +264,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       mp.toXmlStream(out, false);
       properties.put("mediaPackage", out.toString("UTF-8"));
+      try {out.close();} catch (IOException e) {logger.error(e.getMessage());}
       Event event = new Event("org/opencastproject/ingest/INGEST_DONE", properties);
 
       // waiting 3000 ms for confirmation from Conductor service
@@ -345,7 +350,10 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
 
   private URI addContentToRepo(MediaPackage mp, String elementId, URI uri) throws IOException, MediaPackageException,
           UnsupportedElementException {
-    return workspace.put(mp.getIdentifier().compact(), elementId, FilenameUtils.getName(uri.toURL().toString()), uri.toURL().openStream());
+    InputStream uriStream = uri.toURL().openStream();
+    URI returnedUri = workspace.put(mp.getIdentifier().compact(), elementId, FilenameUtils.getName(uri.toURL().toString()), uriStream);
+    try {uriStream.close();} catch (IOException e) {logger.error(e.getMessage());}
+    return returnedUri;
     // return addContentToMediaPackage(mp, elementId, newUrl, type, flavor);
   }
 

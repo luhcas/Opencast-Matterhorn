@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.event.EventAdmin;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
@@ -104,7 +105,9 @@ public class IngestServiceImplTest {
 
   @Test
   public void testThickClient() throws Exception {
-    mediaPackage = service.addZippedMediaPackage(urlPackage.toURL().openStream());
+    InputStream packageStream = urlPackage.toURL().openStream();
+    mediaPackage = service.addZippedMediaPackage(packageStream);
+    try {packageStream.close();} catch (IOException e) {}
   }
 
 }

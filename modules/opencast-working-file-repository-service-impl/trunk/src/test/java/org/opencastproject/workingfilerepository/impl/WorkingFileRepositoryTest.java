@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 public class WorkingFileRepositoryTest {
@@ -23,6 +24,7 @@ public class WorkingFileRepositoryTest {
     InputStream in = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
     logger.info("Working with input stream " + in);
     repo.put(mediaPackageID, mediaPackageElementID, in);
+    try {in.close();} catch (IOException e) {logger.error(e.getMessage());}
   }
   
   @Test
@@ -31,6 +33,7 @@ public class WorkingFileRepositoryTest {
     InputStream fromRepo = repo.get(mediaPackageID, mediaPackageElementID);
     byte[] bytesFromRepo = IOUtils.toByteArray(fromRepo);
     byte[] bytesFromClasspath = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("opencast_header.gif"));
+    try {fromRepo.close();} catch (IOException e) {logger.error(e.getMessage());}
     
     Assert.assertEquals(bytesFromClasspath.length, bytesFromRepo.length);
   }
@@ -55,7 +58,10 @@ public class WorkingFileRepositoryTest {
     try {
       repo.put(badId, mediaPackageElementID, in);
       Assert.fail();
-    } catch (Exception e) {}
+    } catch (Exception e) {
+    } finally {
+      try {in.close();} catch (IOException e) {logger.error(e.getMessage());}
+    }
   }
 
   @Test
