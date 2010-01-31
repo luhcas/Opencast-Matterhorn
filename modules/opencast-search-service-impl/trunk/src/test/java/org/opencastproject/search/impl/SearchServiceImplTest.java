@@ -57,6 +57,7 @@ public class SearchServiceImplTest {
 
   @After
   public void teardown() {
+    service.deactivate();
     try {
       FileUtils.deleteDirectory(new File(solrRoot));
     } catch (IOException e) {

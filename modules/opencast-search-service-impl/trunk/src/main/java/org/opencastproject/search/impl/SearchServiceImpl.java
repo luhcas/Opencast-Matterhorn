@@ -105,6 +105,9 @@ public class SearchServiceImpl implements SearchService {
   public void deactivate() {
     try {
       solrConnection.destroy();
+      // Needs some time to close properly
+      // FIXME Not ideal solution
+      Thread.sleep(3000);
     } catch (Throwable t) {
       log_.error("Error closing the solr connection");
     }
@@ -154,8 +157,13 @@ public class SearchServiceImpl implements SearchService {
       solrConnection = new SolrConnection(solrRoot, PathSupport.concat(solrRoot, "data"));
       solrRequester = new SolrRequester(solrConnection);
       solrIndexManager = new SolrIndexManager(solrConnection);
+      // The solr index needs some time to setup
+      // FIXME Not ideal solution
+      Thread.sleep(3000);
     } catch (IOException e) {
       throw new RuntimeException("Error setting up solr index at " + solrRoot, e);
+    } catch (InterruptedException e) {
+      log_.error("Interupted while setting up solr index");
     }
   }
 
