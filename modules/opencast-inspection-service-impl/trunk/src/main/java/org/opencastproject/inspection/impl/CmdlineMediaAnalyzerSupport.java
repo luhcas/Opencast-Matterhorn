@@ -113,7 +113,8 @@ public abstract class CmdlineMediaAnalyzerSupport implements MediaAnalyzer {
   }
 
   protected void onFinished(int exitCode) {
-    if (exitCode != 0 && exitCode != 255) {
+    // Windows binary will return -1 when queried for options
+    if (exitCode != -1 && exitCode != 0 && exitCode != 255) {
       throw new MediaAnalyzerException("Cmdline tool " + binary + " exited with exit code " + exitCode);
     }
   }
