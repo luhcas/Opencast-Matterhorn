@@ -1,0 +1,87 @@
+diff -ur m4-1.4.12/build-aux/config.guess m4-1.4.12-MSYS/build-aux/config.guess
+--- m4-1.4.12/build-aux/config.guess	Sat Oct 11 00:03:10 2008
++++ m4-1.4.12-MSYS/build-aux/config.guess	Sat Nov 29 00:56:09 2008
+@@ -778,6 +778,9 @@
+ 		echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'` ;;
+ 	esac
+ 	exit ;;
++    i*:MSYS*:*)
++       echo ${UNAME_MACHINE}-pc-msys
++       exit ;;
+     i*:CYGWIN*:*)
+ 	echo ${UNAME_MACHINE}-pc-cygwin
+ 	exit ;;
+diff -ur m4-1.4.12/build-aux/config.sub m4-1.4.12-MSYS/build-aux/config.sub
+--- m4-1.4.12/build-aux/config.sub	Sat Oct 11 00:03:10 2008
++++ m4-1.4.12-MSYS/build-aux/config.sub	Sat Nov 29 00:56:09 2008
+@@ -711,6 +711,10 @@
+ 		basic_machine=ns32k-utek
+ 		os=-sysv
+ 		;;
++	msys)
++		basic_machine=i686-pc
++		os=-msys
++		;;
+ 	mingw32)
+ 		basic_machine=i386-pc
+ 		os=-mingw32
+@@ -1263,7 +1267,7 @@
+ 	      | -ekkobsd* | -kfreebsd* | -freebsd* | -riscix* | -lynxos* \
+ 	      | -bosx* | -nextstep* | -cxux* | -aout* | -elf* | -oabi* \
+ 	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
+-	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* \
++	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* | -msys* \
+ 	      | -chorusos* | -chorusrdb* | -cegcc* \
+ 	      | -cygwin* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
+ 	      | -mingw32* | -linux-gnu* | -linux-newlib* | -linux-uclibc* \
+diff -ur m4-1.4.12/src/freeze.c m4-1.4.12-MSYS/src/freeze.c
+--- m4-1.4.12/src/freeze.c	Thu Sep 25 22:33:03 2008
++++ m4-1.4.12-MSYS/src/freeze.c	Sat Nov 29 00:56:10 2008
+@@ -244,6 +244,18 @@
+     }								\
+   while (character == '\n')
+ 
++#ifdef __MSYS__
++# define SKIP_CARRIAGE_RETURNS					\
++  do								\
++    {								\
++      while (character == '\r')					\
++	GET_CHARACTER;						\
++    }								\
++  while (0)
++#else /* ! __MSYS__ */
++# define SKIP_CARRIAGE_RETURNS do { } while (0)
++#endif /* ! __MSYS__ */ 
++
+ #define GET_STRING(i)							\
+   do									\
+     {									\
+@@ -291,6 +303,7 @@
+   else if (number[0] < 1)
+     M4ERROR ((EXIT_FAILURE, 0,
+ 	      "ill-formed frozen file, version directive expected"));
++   SKIP_CARRIAGE_RETURNS;
+   VALIDATE ('\n');
+ 
+   GET_DIRECTIVE;
+@@ -322,12 +335,14 @@
+ 	  VALIDATE (',');
+ 	  GET_CHARACTER;
+ 	  GET_NUMBER (number[1], false);
++	  SKIP_CARRIAGE_RETURNS;
+ 	  VALIDATE ('\n');
+ 
+ 	  if (operation != 'D')
+ 	    GET_STRING (0);
+ 	  GET_STRING (1);
+ 	  GET_CHARACTER;
++	  SKIP_CARRIAGE_RETURNS;
+ 	  VALIDATE ('\n');
+ 
+ 	  /* Act according to operation letter.  */
+@@ -396,4 +411,5 @@
+ #undef GET_NUMBER
+ #undef VALIDATE
+ #undef GET_STRING
++#undef SKIP_CARRIAGE_RETURNS
+ }
