@@ -129,7 +129,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/skipbackward.png) no-repeat center top;
-  text-indent:          -1000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -142,7 +141,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/skipbackwardover.png) no-repeat center top;
-  text-indent:          -1000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -155,7 +153,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/skipbackward.png) no-repeat center top;
-  text-indent:          -5000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -168,7 +165,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/rewind.png) no-repeat center top;
-  text-indent:          -1000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -181,7 +177,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/rewindover.png) no-repeat center top;
-  text-indent:          -1000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -194,7 +189,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/rewind.png) no-repeat center top;
-  text-indent:          -5000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -207,7 +201,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/play.png) no-repeat center top;
-  text-indent:          -1000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -220,7 +213,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/playover.png) no-repeat center top;
-  text-indent:          -1000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -233,7 +225,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/play.png) no-repeat center top;
-  text-indent:          -5000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -246,7 +237,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/pause.png) no-repeat center top;
-  text-indent:          -1000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -259,7 +249,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/pauseover.png) no-repeat center top;
-  text-indent:          -1000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -272,7 +261,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/pause.png) no-repeat center top;
-  text-indent:          -5000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -285,7 +273,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/fastforward.png) no-repeat center top;
-  text-indent:          -1000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -298,7 +285,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/fastforwardover.png) no-repeat center top;
-  text-indent:          -1000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -311,7 +297,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/fastforward.png) no-repeat center top;
-  text-indent:          -5000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -324,7 +309,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/skipforward.png) no-repeat center top;
-  text-indent:          -5000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -337,7 +321,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/skipforwardover.png) no-repeat center top;
-  text-indent:          -5000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -350,7 +333,6 @@
   margin:               0;
   border:               0;
   background:           transparent url(../icons/skipforward.png) no-repeat center top;
-  text-indent:          -5000em;
   cursor:               pointer; /* hand-shaped cursor */
   cursor:               hand; /* for IE 5.x */
 }
@@ -363,7 +345,6 @@
     border:             0;
     margin:             0;
     background:         transparent url(../icons/volumehigh.png) no-repeat center top;
-    text-indent:        -1000em;
     cursor:             pointer; /* hand-shaped cursor */
     cursor:             hand; /* for IE 5.x */
 }
@@ -376,7 +357,6 @@
     border:             0;
     margin:             0;
     background:         transparent url(../icons/volumemute.png) no-repeat center top;
-    text-indent:        -1000em;
     cursor:             pointer; /* hand-shaped cursor */
     cursor:             hand; /* for IE 5.x */
 }
@@ -417,7 +397,6 @@
     margin:             0;
     border:             0;
     background:         transparent url(../icons/cc_off.png) no-repeat center top;
-    text-indent:        -1000em;
     cursor:             pointer; /* hand-shaped cursor */
     cursor:             hand; /* for IE 5.x */
 }
@@ -430,7 +409,6 @@
     margin:             0;
     border:             0;
     background:         transparent url(../icons/cc_on.png) no-repeat center top;
-    text-indent:        -1000em;
     cursor:             pointer; /* hand-shaped cursor */
     cursor:             hand; /* for IE 5.x */
 }
