@@ -20,8 +20,8 @@ Opencast.Player = (function () {
     PAUSING               = "pausing",
     PLAY                  = "Play: Control + Alt + P",
     PAUSE                 = "Pause: Control + Alt + P",
-    UNMUTE                = "Unmute",
-    MUTE                  = "Mute",
+    UNMUTE                = "Unmute: Control + Alt + M",
+    MUTE                  = "Mute: Control + Alt + M",
     CCON                  = "Closed Caption On: Control + Alt + C",
     CCOFF                 = "Closed Caption Off: Control + Alt + C",
     SLIDERVOLUME          = "slider_volume_Thumb",
@@ -306,9 +306,8 @@ Opencast.Player = (function () {
         @description Do unmute the volume of the video.
      */
     function doUnmute() {
-        if ($("#btn_volume").attr("value") === UNMUTE) {  
+        if ($("#btn_volume").attr("title") === UNMUTE) {  
             $("#btn_volume").attr({ 
-                value: MUTE,
                 alt: MUTE,
                 title: MUTE
             });
@@ -457,7 +456,6 @@ Opencast.Player = (function () {
     {
         doClosedCaptions(true);
         $("#btn_cc").attr({ 
-            value: CCON,
             alt: CCON,
             title: CCON
         });
@@ -474,7 +472,6 @@ Opencast.Player = (function () {
     {
         doClosedCaptions(false);
         $("#btn_cc").attr({ 
-            value: CCOFF,
             alt: CCOFF,
             title: CCOFF
         });
@@ -491,7 +488,7 @@ Opencast.Player = (function () {
     function doToogleClosedCaptions() 
     {
         // Checking if btn_cc is "CC off"
-        if ($("#btn_cc").attr("value") === CCOFF) 
+        if ($("#btn_cc").attr("title") === CCOFF) 
         {
             setccBool(true);
             Videodisplay.setccBool(true);
@@ -512,10 +509,9 @@ Opencast.Player = (function () {
     function doToggleVolume() 
     {
         // Checking if btn_volume is "mute"
-        if ($("#btn_volume").attr('value') === UNMUTE) 
+        if ($("#btn_volume").attr('title') === UNMUTE) 
         {
             $("#btn_volume").attr({ 
-                value: MUTE,
                 alt: MUTE,
                 title: MUTE
             });
@@ -533,7 +529,6 @@ Opencast.Player = (function () {
         else 
         {
             $("#btn_volume").attr({ 
-                value: UNMUTE,
                 alt: UNMUTE,
                 title: UNMUTE
             });
@@ -638,10 +633,9 @@ Opencast.Player = (function () {
      */
     function setDoUnmute() 
     {
-        if ($("#btn_volume").attr("value") === MUTE) 
+        if ($("#btn_volume").attr("title") === MUTE) 
         {  
             $("#btn_volume").attr({ 
-                value: UNMUTE,
                 alt: UNMUTE,
                 title: UNMUTE
             });
@@ -682,7 +676,6 @@ Opencast.Player = (function () {
     function setCurrentTime(text) 
     {
         $("#time-current").text(text);
-        $("#time-current").attr("value", text);
         $("#slider_seek_Rail").attr("title", "Time " + text);
     }
     
@@ -727,7 +720,6 @@ Opencast.Player = (function () {
         if (bool === true)
         {
             $("#btn_cc").attr({ 
-                value: CCON,
                 alt: CCON,
                 title: CCON
             });
@@ -738,7 +730,6 @@ Opencast.Player = (function () {
         else
         {
             $("#btn_cc").attr({ 
-                value: CCOFF,
                 alt: CCOFF,
                 title: CCOFF
             });
@@ -757,7 +748,6 @@ Opencast.Player = (function () {
     function setPlayPauseState(state) {
         if (state === PLAYING) {
             $("#btn_play_pause").attr({ 
-                value: PLAY,
                 alt: PLAY,
                 title: PLAY
             });
@@ -773,7 +763,6 @@ Opencast.Player = (function () {
         } 
         else {
             $("#btn_play_pause").attr({ 
-                value: PAUSE,
                 alt: PAUSE,
                 title: PAUSE
             });

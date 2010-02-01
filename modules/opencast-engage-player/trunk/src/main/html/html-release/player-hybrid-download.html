@@ -125,15 +125,15 @@
         </td>
          
         <td align="center" valign="middle" style="padding-left:0" >      
-          <button id="btn_skip_backward" class="btn_skip_backward" onmouseover="this.className='btn_skip_backward_over'" onmouseout="this.className='btn_skip_backward_out'" type="submit" onclick="Opencast.Player.doSkipBackward();" name="Skip Backward" value="Skip Backward" alt="Skip Backward" title="Skip Backward"></button>
-          <button id="btn_rewind" class="btn_rewind" onmouseover="this.className='btn_rewind_over'" onmouseout="this.className='btn_rewind_out'" type="submit" onclick="Opencast.Player.doRewind();" name="Rewind: Control + Alt + R" value="Rewind: Control + Alt + R" alt="Rewind: Control + Alt + R" title="Rewind: Control + Alt + R"></button>
-          <button id="btn_play_pause" class="btn_play" onmouseover="Opencast.Player.PlayPauseMouseOver();" onmouseout="Opencast.Player.PlayPauseMouseOut();" type="submit" onclick="Opencast.Player.doTogglePlayPause();" name="Play" value="Play" alt="Play: Control + Alt + P" title="Play: Control + Alt + P" ></button>
-          <button id="btn_fast_forward" class="btn_fast_forward" onmouseover="this.className='btn_fastForward_over'" onmouseout="this.className='btn_fastForward_out'" type="submit" onclick="Opencast.Player.doFastForward();" name="Fast Forward: Control + Alt + F" value="Fast Forward: Control + Alt + F" alt="Fast Forward: Control + Alt + F" title="Fast Forward: Control + Alt + F"></button>
-          <button id="btn_skip_forward" class="btn_skip_forward" onmouseover="this.className='btn_skip_forward_over'" onmouseout="this.className='btn_skip_forward_out'" type="submit" onclick="Opencast.Player.doSkipForward();" name="Skip Forward" value="Skip Forward" alt="Skip Forward" title="Skip Forward" ></button>
+          <button id="btn_skip_backward" class="btn_skip_backward" onmouseover="this.className='btn_skip_backward_over'" onmouseout="this.className='btn_skip_backward_out'" type="submit" onclick="Opencast.Player.doSkipBackward();" name="Skip Backward" alt="Skip Backward" title="Skip Backward"></button>
+          <button id="btn_rewind" class="btn_rewind" onmouseover="this.className='btn_rewind_over'" onmouseout="this.className='btn_rewind_out'" type="submit" onclick="Opencast.Player.doRewind();" name="Rewind: Control + Alt + R"  alt="Rewind: Control + Alt + R" title="Rewind: Control + Alt + R"></button>
+          <button id="btn_play_pause" class="btn_play" onmouseover="Opencast.Player.PlayPauseMouseOver();" onmouseout="Opencast.Player.PlayPauseMouseOut();" type="submit" onclick="Opencast.Player.doTogglePlayPause();" name="Play: Control + Alt + P"  alt="Play: Control + Alt + P" title="Play: Control + Alt + P" ></button>
+          <button id="btn_fast_forward" class="btn_fast_forward" onmouseover="this.className='btn_fastForward_over'" onmouseout="this.className='btn_fastForward_out'" type="submit" onclick="Opencast.Player.doFastForward();" name="Fast Forward: Control + Alt + F" alt="Fast Forward: Control + Alt + F" title="Fast Forward: Control + Alt + F"></button>
+          <button id="btn_skip_forward" class="btn_skip_forward" onmouseover="this.className='btn_skip_forward_over'" onmouseout="this.className='btn_skip_forward_out'" type="submit" onclick="Opencast.Player.doSkipForward();" name="Skip Forward"  alt="Skip Forward" title="Skip Forward" ></button>
         </td>
            
         <td align=center valign="middle" style="padding-right:0" >  
-          <button id="btn_volume" class="oc-btn-volume-high" type="submit" onclick="Opencast.Player.doToggleVolume();" name="Unmute" value="Unmute" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M"></button>
+          <button id="btn_volume" class="oc-btn-volume-high" type="submit" onclick="Opencast.Player.doToggleVolume();" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M"></button>
         </td>
         
         <td align="center" valign="middle" style="padding-right:0">
@@ -205,7 +205,7 @@
       // -->
     </script>
     <div id="info" >
-      <button id="btn_info" class="oc_btn_info" onClick="Opencast.Player.toggleInfo();" type="submit" name="Keyboard Shortcuts Information"  value="Keyboard Shortcuts Information"   alt="Keyboard Shortcuts Information"  title="Keyboard Shortcuts Information" >Keyboard Shortcuts Information</button>
+      <button id="btn_info" class="oc_btn_info" onClick="Opencast.Player.toggleInfo();" type="submit" name="Keyboard Shortcuts Information: Control + Alt + I"  value="Keyboard Shortcuts Information: Control + Alt + I"   alt="Keyboard Shortcuts Information: Control + Alt + I"  title="Keyboard Shortcuts Information:  Control + Alt + I" >Keyboard Shortcuts Information</button>
       <div id="infoBlock" class="oc_infoDisplayNone" >
           Press Control + Alt + I   = Toggle the keyboard shortcuts information between visible or unvisible.<br>
           Press Control + Alt + P   = Toggle the video between pause or play.<br>
@@ -225,11 +225,11 @@
       </div>
     </div>
     
-    <button id="test" class=" type="submit" onclick="Opencast.Player.setMediaURL('http://downloads.opencastproject.org/media/matterhorn.mp4');" name="Closed Caption Off" value="Closed Caption Off" alt="Closed Caption Off" title="Closed Caption Off">Laod Video</button>
-    <button id="test" class=" type="submit" onclick="Opencast.Player.setCaptionsURL('dfxp/matterhorn.dfxp.xml');" name="Closed Caption Off" value="Closed Caption Off" alt="Closed Caption Off" title="Closed Caption Off">Laod Captions</button>
+    <button id="loadmedia" onClick="Opencast.Player.setMediaURL('http://downloads.opencastproject.org/media/matterhorn.mp4');" type="submit" >Load Video</button>
+    <button id="loadcaptions"  onClick="Opencast.Player.setCaptionsURL('dfxp/matterhorn.dfxp.xml');" type="submit">Load Captions</button>
     
     <ul id="captions" aria-channel="main" aria-relevant="additions" aria-atomic="true" aria-live="polite" role="log" class="oc-offScreen-hidden">
     </ul>
-    
+
   </body>
 </html>
