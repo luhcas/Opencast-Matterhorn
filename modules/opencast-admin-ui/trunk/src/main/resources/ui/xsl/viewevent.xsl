@@ -122,7 +122,7 @@
       </div>
     </div>
     <div style="margin-left: 30%">
-      <a href="/admin/">&lt;&lt; Back to Recordings</a>
+      <a href="javascript:history.back();">&lt;&lt; Back to Recordings</a>
     </div>
   </xsl:template>
 </xsl:stylesheet>
