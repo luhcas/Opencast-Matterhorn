@@ -121,7 +121,10 @@
           if ($('#track').val() != '') {
             var ext = $('#track').val();
             ext = ext.substr(ext.length-3).toLowerCase();
-            var right = (ext == 'avi') || (ext == 'mpg') || (ext == 'mp4') || (ext == 'mkv') || (ext == 'flv') || (ext == 'mov') || (ext == 'wmv');
+            var right = (ext == 'avi') || (ext == 'mpg') || 
+                        (ext == 'mp4') || (ext == 'mkv') ||
+                        (ext == 'flv') || (ext == 'mov') ||
+                        (ext == 'wmv') || (ext == 'mp3');
             if (!right) {
               $('#notification-track').show();
               wrongtype = true;
