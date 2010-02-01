@@ -16,18 +16,19 @@ REM ##
 REM # Only change the lines below if you know what you are doing
 REM ##
 
+SET MAVEN_ARG=-DM2_REPO=%M2_REPO%
 SET FELIX_FILEINSTALL_OPTS=-Dfelix.fileinstall.dir=%FELIX_HOME%\load
 SET PAX_CONFMAN_OPTS=-Dbundles.configuration.location=%FELIX_HOME%\conf
 SET PAX_LOGGING_OPTS=-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopencast.logdir=%OPENCAST_LOGDIR%
-SET CXF_OPTS=-Djava.util.logging.config.file=%FELIX_HOME%\conf\cxf.properties
+SET UTIL_LOGGING_OPTS=-Djava.util.logging.config.file=%FELIX_HOME%\conf\services\java.util.logging.properties
 SET FELIX_CACHE=%FELIX_HOME%\felix-cache
 
 REM # Clear felix cache dir
-del /FQ %FELIX_CACHE%
+del /F /Q %FELIX_CACHE%
 
 REM # Create the debug config
 SET DEBUG_OPTS=-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=%DEBUG_PORT%,server=y,suspend=%DEBUG_SUSPEND%
 
 REM # Finally start felix
-java %DEBUG_OPTS% -DM2_REPO=%M2_REPO% %FELIX_FILEINSTALL_OPTS% %PAX_CONFMAN_OPTS% %PAX_LOGGING_OPTS% %CXF_OPTS% -jar %FELIX_HOME%\bin\felix.jar %FELIX_CACHE%  
+java %DEBUG_OPTS% %MAVEN_ARG% %FELIX_FILEINSTALL_OPTS% %PAX_CONFMAN_OPTS% %PAX_LOGGING_OPTS% %UTIL_LOGGING_OPTS% -jar %FELIX_HOME%\bin\felix.jar %FELIX_CACHE%  
 ENDLOCAL
