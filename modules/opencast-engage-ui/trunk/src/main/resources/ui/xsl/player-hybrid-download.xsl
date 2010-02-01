@@ -12,11 +12,7 @@
       </xsl:when>
 
       <xsl:otherwise>
-       <b>NO APPROPRIATE TRACK COULD BE FOUND</b><br/>There is no track of type <i>"presentation/source"</i> or <i>"presenter/source"</i>.<br/>However, 
-       <a>
-         <xsl:attribute name="href">../../search/rest/episode?id=<xsl:value-of select="ns2:episode/mediaPackageId" /></xsl:attribute>
-         there
-       </a> might be tracks of other types, i.e.<i>"indefinite/source"</i>.
+       <b>Error: No appropriate track could be found.</b>
 		</xsl:otherwise>
 
 </xsl:choose>
