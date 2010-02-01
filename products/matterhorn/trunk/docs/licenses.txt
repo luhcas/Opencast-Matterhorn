@@ -1,4 +1,4 @@
-Copyright 2009-2010 The Opencast Project. All rights reserved.
+﻿Copyright 2009-2010 The Opencast Project. All rights reserved.
 
 Opencast Matterhorn ("Matterhorn") is licensed for use pursuant to the Educational Community License v. 2.0. Portions of Matterhorn are copyrighted by other parties, including the parties listed below. Please refer to the links below for complete copyright and licensing information.
 
@@ -27,3 +27,5 @@ This product includes software developed by TMate Software (http://www.TmAteSoft
 This product includes software developed by the Swiz Team, (http://swizframework.org), licensed under the terms of the Apache Software License 2.0.
 This product includes software developed by The Fluid Project (http://www.fluidproject.org), licensed under the terms of the Educational Community License 2.0.
 This product includes software developed by John Resig (http://jquery.com), licensed under the terms of the MIT License.
+This product includes software developed by jv4linfo (http://luniks.net), licensed under the terms of the Lesser General Public License (GPL).
+This product includes software developed by Paul Bakaus and the jQuery UI Team (http://jqueryui.com/), licensed under the terms MIT License.
