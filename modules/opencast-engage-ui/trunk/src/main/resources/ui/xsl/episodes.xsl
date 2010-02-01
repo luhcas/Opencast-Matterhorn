@@ -16,7 +16,6 @@
 					</div>
 					<div class="left-container23">
 
-
 						<xsl:choose>
 							<xsl:when test="videoUrl">
 								<b>
@@ -26,8 +25,12 @@
 										<xsl:value-of select="dcTitle" />
 									</a>
 								</b>
-								by
-								<xsl:value-of select="dcCreator" />
+				        
+				        <xsl:if test="dcCreator!=''">
+                by
+                <xsl:value-of select="dcCreator" />
+                </xsl:if>				
+								
 								<br />
 								<i>
 									<xsl:value-of select="dcCreated" />
@@ -40,8 +43,12 @@
 								<b>
 									<xsl:value-of select="dcTitle" />
 								</b>
-								by
-								<xsl:value-of select="dcCreator" />
+								
+                <xsl:if test="dcCreator!=''">
+                by
+                <xsl:value-of select="dcCreator" />
+                </xsl:if>       
+								
 								<br />
 								<b>NO APPROPRIATE TRACK COULD BE FOUND</b>
 								<br />
