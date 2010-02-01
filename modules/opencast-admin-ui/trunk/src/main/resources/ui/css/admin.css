@@ -267,6 +267,10 @@ a:hover {
   background-repeat:no-repeat;
 }
 
+.highlightable:hover{
+  background-color: #f8eee8;
+}
+
 .clickable {
   cursor:pointer;
   text-decoration: none;

@@ -23,7 +23,7 @@
             </thead>
             <tbody>
                 <xsl:for-each select="ns1:agent-state-updates/ns1:agent-state-update">
-                    <tr>
+                    <tr class="highlightable">
                         <td>
                             <xsl:value-of select="name" />
                         </td>

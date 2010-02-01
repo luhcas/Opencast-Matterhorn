@@ -33,7 +33,7 @@
   </xsl:template>
 
   <xsl:template match="ns1:recording">
-    <tr>
+    <tr class="highlightable">
       <td>
         <a title="View Recording Info">
           <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
