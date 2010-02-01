@@ -136,7 +136,7 @@
           if (!missing && !wrongtype) {
             $('#container-missingFields').hide('fast');
           }
-          return !missing;
+          return !missing && right;
         }
       });
     </script>
@@ -176,7 +176,7 @@
               <li id="notification-track" class="missing-fields-item">
                 <!-- <span class="fl-icon inline-icon icon-bullet"></span> -->
                 <span>
-                  Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload. The file must be a video file (.avi, .mp4, .mov, .mpg, .mkv, .flv or .wmv).
+                  Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload. Supported file formats are: .avi, .mp3, .mp4, .mov, .mpg, .mkv, .flv or .wmv.
                 </span>
               </li>
             </ul>
@@ -297,7 +297,7 @@
                 <li class="ui-helper-clearfix">
                   <input type="hidden" class="formField" name="flavor" id="flavor" value="presentation/source">
                   <span class="formField-label"><span class="color-red">* </span>Media File:</span>
-                  <input type="file" id="track" name="track" class="requiredField" style="float:left;">
+                  <input type="file" id="track" name="track" class="requiredField mouseover-pointer" style="float:left;">
                   <span class="helpIcon"  title="Click for help">&nbsp;</span>
                 </li>
                 <li class="ui-helper-clearfix">
@@ -319,8 +319,8 @@
                 </li>
                 <li class="ui-helper-clearfix">
                   <span class="formField-label">&nbsp;</span>
-                  <button type="button" id="BtnSubmit">Submit</button>
-                  <button id="btnCancle" type="button" onclick="history.back();">Cancel</button>
+                  <button type="button" id="BtnSubmit" class="mouseover-pointer">Submit</button>
+                  <button id="btnCancle" type="button" onclick="history.back();" class="mouseover-pointer">Cancel</button>
                   <!-- <a href="index.html" style="float:right;">Switch to AJAX upload form</a> -->
                 </li>
                 <!-- * = required -->

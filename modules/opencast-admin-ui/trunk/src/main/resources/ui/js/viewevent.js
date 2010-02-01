@@ -53,6 +53,15 @@ function handleWorkflow(workflowDoc){
     duration.appendChild(eventDoc.createTextNode(parseDuration(parseInt(rootEl.find('mediapackage').attr('duration')))));
     eventDoc.documentElement.appendChild(duration);
 
+    var track = rootEl.find("media>track[type='presentation/source']");
+    if (track) {
+      var filename = track.find("url").text().split(/\//);
+      filename = filename[filename.length - 1];
+      var elm = eventDoc.createElement('filename');
+      elm.appendChild(eventDoc.createTextNode(filename));
+      eventDoc.documentElement.appendChild(elm);
+    }
+
     if(dcURL){
       $.get(dcURL, handleDCMetadata);
     }else{

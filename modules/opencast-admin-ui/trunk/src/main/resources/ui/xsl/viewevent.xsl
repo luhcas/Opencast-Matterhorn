@@ -112,6 +112,11 @@
               <!-- license -->
               <xsl:value-of select="license" />
             </li>
+            <li>
+              <label class="fl-label">Media File:</label>
+              <!-- filename -->
+              <xsl:value-of select="filename" />
+            </li>
           </ul>
         </div>
       </div>

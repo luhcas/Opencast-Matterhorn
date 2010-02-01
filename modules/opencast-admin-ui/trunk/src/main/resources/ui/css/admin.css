@@ -134,6 +134,10 @@ a:hover {
 
 /* Form Fields */
 
+.mouseover-pointer {
+  cursor: pointer;
+}
+
 .disable-label {
   color: gray;
 }
