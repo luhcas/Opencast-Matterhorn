@@ -1,16 +1,80 @@
-#! /bin/sh
+#! /bin/bash
 # Configure capture agent for use with Matterhorn
 
-SETUP_PROPS=$PWD/config.sh
-EPIPHAN=vga2usb-3.23.6.0000-2.6.31-14-generic-i386.tbz
 
-mkdir drivers
-wget http://www.epiphan.com/downloads/linux/$EPIPHAN
-mv $EPIPHAN drivers/
-cd drivers/
-tar jxf $EPIPHAN
-make load
-cd ..
+
+# setup opencast user
+export USERNAME=matterhorn
+echo -n "Input desired opencast username (matterhorn): "
+read input
+if [ "$input" != "" ];
+  then
+  USERNAME=$input
+fi
+echo "Username: $USERNAME"
+
+sudo useradd -m -s /bin/bash $USERNAME
+echo "Enter $USERNAME's new password"
+sudo passwd $USERNAME
+sudo usermod -aG admin $USERNAME
+
+# list of common drivers
+drivers[0]="vga2usb-3.23.7.2-2.6.31-16-generic-i386.tbz"
+drivers[1]="vga2usb-3.23.7.2-2.6.31-14-generic-pae.tbz"
+drivers[2]="vga2usb-3.23.6.0000-2.6.31-14-generic-i386.tbz"
+drivers[3]="vga2usb-3.23.6.0000-2.6.31-14-generic-x86_64.tbz"
+drivers[4]="vga2usb-3.22.2.0000-2.6.28-15-generic_i386.tbz"
+drivers[5]="vga2usb-3.22.2.0000-2.6.28-13-server_i386.tbz"
+drivers[6]="vga2usb-3.22.2.0000-2.6.28-13-server_amd64.tbz"
+drivers[7]="vga2usb-3.22.2.0000-2.6.28-13-generic_i386.tbz"
+drivers[8]="vga2usb-3.22.2.0000-2.6.28-13-generic_amd64.tbz"
+drivers[9]="Not listed here"
+drivers[10]="Do not need driver"
+
+# determine which vga2usb driver to load for this kernel
+# if this variable remains 0, we attempt to load the driver
+LOAD_DRIVER=0
+EPIPHAN=""
+echo "Here is a list of supported Epiphan VGA2USB drivers:"
+for ((i = 0; i < ${#drivers[@]}; i++ ))
+do
+  echo -e "\t($i)\t${drivers[$i]}"
+done
+echo -n "Choose an option: "
+read opt
+if [[ "$opt >= 0" && "$opt < 9" ]]; then
+  DRIVER_URL="http://www.epiphan.com/downloads/linux/${drivers[$opt]}"
+  EPIPHAN="${drivers[$opt]}"
+elif [ $opt -eq 9 ]; then
+  echo -n "Please input the URL of the driver you would like to load: "
+  read url
+  DRIVER_URL="$url"
+else
+  echo "Not loading Epiphan VGA2USB driver."
+  LOAD_DRIVER=1
+fi
+
+# attempt to load the vga2usb driver
+SUCCESS=0
+if [ $LOAD_DRIVER -eq 0 ]; then
+  mkdir drivers
+  wget $DRIVER_URL
+  if [ $? -ne 0 ]; then
+    SUCCESS=1
+  fi
+  mv $EPIPHAN drivers/
+  cd drivers/
+  tar jxf $EPIPHAN
+  make load
+  if [ $? -ne 0 ]; then
+    SUCCESS=1
+  fi
+  cd ..
+fi
+
+if [ $SUCCESS -ne 0 ]; then
+  echo "Failed to load Epiphan driver. Try to do it manually."
+fi
 
 sudo echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse" >> sources.list
 sudo echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse" >> sources.list
@@ -29,7 +93,7 @@ EOF
 
 echo "Installing third party packages from Ubuntu repository..."
 sudo apt-get update
-sudo apt-get -y --force-yes install v4l-conf ivtv-utils maven2 sun-java6-jdk subversion wget curl figlet
+sudo apt-get -y --force-yes install v4l-conf ivtv-utils maven2 sun-java6-jdk subversion wget curl openssh-server
 
 export JAVA_HOME=/usr/lib/jvm/java-6-sun-1.6.0.15
 export FELIX_FILENAME=felix-framework-2.0.1.tar.gz
@@ -87,7 +151,7 @@ cp -r docs/felix/conf/* $FELIX_HOME/conf
 # build matterhorn using Maven
 cd opencast-runtime-tools
 mvn clean install
-cd ,,/opencast-build-tools
+cd ../opencast-build-tools
 mvn clean install
 cd ../opencast-capture-admin-service-impl
 mvn clean install
