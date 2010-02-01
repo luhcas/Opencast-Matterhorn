@@ -134,6 +134,10 @@ a:hover {
 
 /* Form Fields */
 
+.instruction-text {
+  font-size:0.9em;
+}
+
 .mouseover-pointer {
   cursor: pointer;
 }

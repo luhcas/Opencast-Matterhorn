@@ -188,22 +188,22 @@
           <!-- basic metadata -->
           <div id="container-basicData" class="container fl-widget">
             <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
-              <ul class="no-bullets formField-list">
+              <ul class="no-bullets formField-list fl-controls-right">
                 <!-- field: Title -->
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label"><span class="color-red">* </span>Title:</span>
+                  <label class="fl-label"><span class="color-red">* </span>Title:</label>
                   <input type="text" class="formField requiredField" id="title" name="title">
                   <span class="helpIcon" title="Click for help">&nbsp;</span>
                 </li>
                 <!-- field: Presenter -->
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label">Presenter:</span>
+                  <label class="fl-label">Presenter:</label>
                   <input type="text" class="formField" id="creator" name="creator">
                   <span class="helpIcon" title="Click for help">&nbsp;</span>
                 </li>
                 <!-- field: Sponsoring Department -->
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label">Sponsoring Department:</span>
+                  <label class="fl-label">Sponsoring Department:</label>
                   <input type="text" class="formField" id="contributor" name="contributor">
                   <span class="helpIcon" title="Click for help">&nbsp;</span>
                 </li>
@@ -215,28 +215,28 @@
           <div id="container-additionalData" class="container fl-widget">
             <div id="heading-additionalData" class="fl-widget-titlebar collapse-control collapse-control-closed">Additional Description</div>
             <div id="content-basicData" class="fl-widget-content ui-helper-clearfix collapsable" style="display:none;">
-              <ul class="no-bullets formField-list">
+              <ul class="no-bullets formField-list fl-controls-right">
                 <!-- field: Series -->
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label">Series:</span>
+                  <label class="fl-label">Series:</label>
                   <input type="text" class="formField" id="isPartOf" name="isPartOf">
                   <span class="helpIcon" title="Click for help">&nbsp;</span>
                 </li>
                 <!-- field: Subject -->
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label">Subject:</span>
+                  <label class="fl-label">Subject:</label>
                   <input type="text" class="formField" id="subject" name="subject">
                   <span class="helpIcon" title="Click for help">&nbsp;</span>
                 </li>
                 <!-- field: Language -->
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label">Language:</span>
+                  <label class="fl-label">Language:</label>
                   <input type="text" class="formField" id="language" name="language">
                   <span class="helpIcon" title="Click for help">&nbsp;</span>
                 </li>
                 <!-- field: Description -->
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label">Description:</span>
+                  <label class="fl-label">Description:</label>
                   <textarea class="formField" id="description" name="description" rows="5"></textarea>
                   <span class="helpIcon" title="Click for help">&nbsp;</span>
                 </li>
@@ -248,10 +248,10 @@
           <div id="container-additionalData" class="container fl-widget">
             <div id="heading-additionalData" class="fl-widget-header  titlebar">Distribution</div>
             <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
-              <ul class="no-bullets formField-list">
+              <ul class="no-bullets formField-list fl-controls-right">
                 <!-- field: License -->
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label"><span class="color-red">* </span>Distribution Channel(s):</span>
+                  <label class="fl-label"><span class="color-red">* </span>Distribution Channel(s):</label>
                   <span id="dist" style="float:left;">
                     <input id="distribution" type="checkbox" checked="checked" disabled="disabled" class="formField" value="Matterhorn media module" style="width: inherit !important;">
                     &nbsp;Matterhorn media module
@@ -260,7 +260,7 @@
                 </li>
                 <!-- field: License -->
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label">License:</span>
+                  <label class="fl-label">License:</label>
                   <input type="text" class="formField" id="license" name="license">
                   <span class="helpIcon" title="Click for help">&nbsp;</span>
                 </li>
@@ -272,7 +272,7 @@
           <div id="container-additionalData" class="container fl-widget">
             <div id="heading-additionalData" class="fl-widget-titlebar titlebar">File Upload</div>
             <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
-              <ul class="no-bullets formField-list">
+              <ul class="no-bullets formField-list fl-controls-right">
                 <!-- field: Media file content -->
                 <!--
                 <li class="ui-helper-clearfix">
@@ -296,13 +296,13 @@
                 <!-- field: Media File -->
                 <li class="ui-helper-clearfix">
                   <input type="hidden" class="formField" name="flavor" id="flavor" value="presentation/source">
-                  <span class="formField-label"><span class="color-red">* </span>Media File:</span>
+                  <label class="fl-label"><span class="color-red">* </span>Media File:</label>
                   <input type="file" id="track" name="track" class="requiredField mouseover-pointer" style="float:left;">
                   <span class="helpIcon"  title="Click for help">&nbsp;</span>
                 </li>
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label">&nbsp;</span>
-                  <span style="float:left;" title="Click for help">File must be 2GB or less</span>
+                  <label class="fl-label">&nbsp;</label>
+                  <span style="float:left;" title="Click for help" class="instruction-text">File must be 2GB or less</span>
                 </li>
               </ul>
             </div>
@@ -311,21 +311,21 @@
           <!-- submit/cancel controls -->
           <div id="container-additionalData" class="container fl-widget">
             <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
-              <ul class="no-bullets formField-list">
+              <ul class="no-bullets formField-list fl-controls-right">
                 <!-- submit / cancal button -->
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label" style="float:left;">&nbsp;</span>
-                  <span style="float:left;width:600px;margin-bottom:10px;font-size:0.9em;">NOTE: Information entered here (for an Uploaded Recording) cannot be edited after it is submitted in this version of Matterhorn.</span>
+                  <label class="fl-label" style="float:left;">&nbsp;</label>
+                  <span class="fl-fix instruction-text" style="float:right; width:560px;margin-bottom:10px;">NOTE: Information entered here (for an Uploaded Recording) cannot be edited after it is submitted in this version of Matterhorn.</span>
                 </li>
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label">&nbsp;</span>
+                  <label class="fl-label">&nbsp;</label>
                   <button type="button" id="BtnSubmit" class="mouseover-pointer">Submit</button>
                   <button id="btnCancle" type="button" onclick="history.back();" class="mouseover-pointer">Cancel</button>
                   <!-- <a href="index.html" style="float:right;">Switch to AJAX upload form</a> -->
                 </li>
                 <!-- * = required -->
                 <li class="ui-helper-clearfix">
-                  <span class="formField-label">&nbsp;</span>
+                  <label class="fl-label">&nbsp;</label>
                   <span class="color-red">* </span>required
                 </li>
               </ul>
