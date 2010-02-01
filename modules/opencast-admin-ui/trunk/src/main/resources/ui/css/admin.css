@@ -49,6 +49,10 @@ a:hover {
     background-image: url(../img/exclamation.png);
 }
 
+.icon-info {
+    background-image: url(../img/information.png);
+}
+
 .icon-running {
     background-image: url(../img/cog.png);
 }

@@ -13,8 +13,6 @@
 
   <xsl:template match="ns1:recordingLists">
     <center>
-      <!-- take a look at the fluid documentation in firebug... -->
-      <!-- I do not see why I should not do table layout if they do on their own page and in their uploader, sorry -->
       <div  style="width:600px;padding-top:30px;">
         <table style="border:1px solid black;">
           <tr>
@@ -22,7 +20,8 @@
               <img src="img/under_construction.gif" alt="Under construction" title="Under construction"></img>
             </td>
             <td style="border:none;" align="left">
-              <b>Under development.</b>
+              <img src="img/information.png" alt="Information" title="Information"></img>
+              <b> Under development.</b>
               <br />
               <span>
               When implemented will show a list of all recordings in the system.
