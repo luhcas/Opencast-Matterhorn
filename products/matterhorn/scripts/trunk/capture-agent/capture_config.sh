@@ -35,6 +35,7 @@ drivers[10]="Do not need driver"
 # if this variable remains 0, we attempt to load the driver
 LOAD_DRIVER=0
 EPIPHAN=""
+echo "System information: `uname -a`"
 echo "Here is a list of supported Epiphan VGA2USB drivers:"
 for ((i = 0; i < ${#drivers[@]}; i++ ))
 do
@@ -42,13 +43,14 @@ do
 done
 echo -n "Choose an option: "
 read opt
-if [[ "$opt >= 0" && "$opt < 9" ]]; then
+if [[ $opt -ge 0 && $opt -lt 9 ]]; then
   DRIVER_URL="http://www.epiphan.com/downloads/linux/${drivers[$opt]}"
   EPIPHAN="${drivers[$opt]}"
 elif [ $opt -eq 9 ]; then
   echo -n "Please input the URL of the driver you would like to load: "
   read url
   DRIVER_URL="$url"
+  EPIPHAN=${DRIVER_URL##*/}
 else
   echo "Not loading Epiphan VGA2USB driver."
   LOAD_DRIVER=1
@@ -57,7 +59,7 @@ fi
 # attempt to load the vga2usb driver
 SUCCESS=0
 if [ $LOAD_DRIVER -eq 0 ]; then
-  mkdir drivers
+  mkdir -p drivers
   wget $DRIVER_URL
   if [ $? -ne 0 ]; then
     SUCCESS=1
@@ -75,6 +77,7 @@ fi
 if [ $SUCCESS -ne 0 ]; then
   echo "Failed to load Epiphan driver. Try to do it manually."
 fi
+exit
 
 sudo echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse" >> sources.list
 sudo echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse" >> sources.list
@@ -161,5 +164,7 @@ mvn clean install -Pcapture -DskipTests -DdeployTo=$FELIX_HOME/load
 # start felix
 echo "alias matterhorn=$FELIX_HOME/bin/start_matterhorn.sh" >> ~/.bashrc
 chmod 755 $FELIX_HOME/bin/start_matterhorn.sh
+sudo sed -i 's/exit 0//g' /etc/rc.local
+sudo echo "$FELIX_HOME/bin/start_matterhorn.sh" >> /etc/rc.local
 $FELIX_HOME/bin/start_matterhorn.sh
 
