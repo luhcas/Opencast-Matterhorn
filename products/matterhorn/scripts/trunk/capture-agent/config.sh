@@ -24,6 +24,7 @@ while read line
 done < /tmp/devlist.txt
 
 
+
 let devAryLen=${#devices[@]}-1
 for dev in $(seq 0 1 $devAryLen)
  do
@@ -39,16 +40,21 @@ for dev in $(seq 0 1 $devAryLen)
 	fi
 	echo "capture.device.$cleanName.src=$device" >> capture.properties
 	echo "capture.device.$cleanName.outputfile=$cleanName" >> capture.properties
-  if [ "$name" == "${supportedDevices[1]}" ];
+  if [ "$name" != "${supportedDevices[2]}" ];
     then
-      echo -n "Would you like device $name to use the NTSC standard? (Y/n) "
+      echo -n "Would you like device $name to be (N)TSC or (P)AL? (N/p) "
       read mode
-      if [ "$mode" == "Y" ];
+      v4l2-ctl -s NTSC-M -d $device
+      if [[ "$mode" == "p" || "$mode" == "P" ]];
         then
-          v4l2-ctl -s NTSC-M -d $device
-      fi
+          v4l2-ctl -s 255 -d $device # set to PAL mode
+          sudo echo "v4l2-ctl -s 255 -d $device" >> $HOME/matterhorn_capture.sh
+      else
+        v4l2-ctl -s NTSC-M -d $device
+        sudo echo "v4l2-ctl -s NTSC-M -d $device" >> $HOME/matterhorn_capture.sh
+    fi
   fi
- done
+done
 
 audioDevice=hw:$(sudo arecord -l | grep Analog | cut -c 6)
 cleanAudioDevice=`echo $audioDevice | sed s/\://g`
