@@ -5,11 +5,11 @@
   <artifactId>opencast-db</artifactId>
   <packaging>bundle</packaging>
   <name>opencast-db</name>
-  <version>0.6-SNAPSHOT</version>
+  <version>0.5-RC3</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.6-SNAPSHOT</version>
+    <version>0.5-RC3</version>
   </parent>
   <dependencies>
     <dependency>
