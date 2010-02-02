@@ -15,10 +15,9 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import java.util.Date;
-
 import org.opencastproject.capture.impl.CaptureAgentImpl;
 import org.opencastproject.capture.impl.CaptureParameters;
+
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -28,6 +27,8 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Date;
 
 /**
  * The class responsible for stopping a capture.
@@ -55,19 +56,30 @@ public class StopCaptureJob implements Job {
       //This needs to specify which job to stop - otherwise we could end up stopping something else if the expected job failed earlier.
       ca.stopCapture(recordingID);
 
+      String postfix = ctx.getMergedJobDataMap().getString(JobParameters.JOB_POSTFIX);
       // Create job and trigger
-      JobDetail job = new JobDetail("SerializeJob", Scheduler.DEFAULT_GROUP, SerializeJob.class);
+      JobDetail job = new JobDetail("SerializeJob-" + postfix, Scheduler.DEFAULT_GROUP, SerializeJob.class);
       // TODO: Should we need a cron trigger in case the serialization fails? 
       // Or do we assume that is an unrecoverable error?
-      SimpleTrigger trigger = new SimpleTrigger("SerializeJobTrigger", Scheduler.DEFAULT_GROUP, new Date());
+      SimpleTrigger trigger = new SimpleTrigger("SerializeJobTrigger-" + postfix, Scheduler.DEFAULT_GROUP, new Date());
       trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
       trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, ca);
+      trigger.getJobDataMap().put(JobParameters.JOB_POSTFIX, postfix);
 
       //Schedule the serializeJob
       ctx.getScheduler().scheduleJob(job, trigger);
       
       logger.info("stopCaptureJob complete");
-      
+
+      //Remove this job from the system
+      JobDetail mine = ctx.getJobDetail();
+      try {
+        ctx.getScheduler().deleteJob(mine.getName(), mine.getGroup());
+      } catch (SchedulerException e) {
+        logger.warn("Unable to delete stop capture job {}!", mine.getName());
+        e.printStackTrace();
+      }
+
     } catch (SchedulerException e) {
       logger.error("Couldn't schedule task: {}", e.getMessage());
       e.printStackTrace();

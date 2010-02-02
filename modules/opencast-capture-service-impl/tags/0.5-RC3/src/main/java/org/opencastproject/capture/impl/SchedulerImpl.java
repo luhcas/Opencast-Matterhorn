@@ -443,6 +443,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         boolean hasProperties = false;
         Properties props = new Properties();
         props.put(CaptureParameters.RECORDING_ID, start.toString());
+        props.put(JobParameters.JOB_POSTFIX, start.toString());
         props.put(CaptureParameters.RECORDING_END, getCronString(duration.getDuration().getTime(start)).toString());
 
         //Create the directory we'll be capturing into

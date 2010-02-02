@@ -17,9 +17,10 @@ package org.opencastproject.capture.impl.jobs;
 
 import org.opencastproject.capture.impl.CaptureAgentImpl;
 import org.opencastproject.capture.impl.CaptureParameters;
+
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.StatefulJob;
 import org.slf4j.Logger;
@@ -55,13 +56,15 @@ public class IngestJob implements StatefulJob {
       logger.error("Ingestion failed with a value of {}", result);
     } else { 
       logger.info("Ingestion finished");
-      try {
-        ctx.getScheduler().unscheduleJob("IngestJobTrigger", Scheduler.DEFAULT_GROUP);
-      } catch (SchedulerException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } 
 
+      //Remove this job from the system
+      JobDetail mine = ctx.getJobDetail();
+      try {
+        ctx.getScheduler().deleteJob(mine.getName(), mine.getGroup());
+      } catch (SchedulerException e) {
+        logger.warn("Unable to delete ingest job {}!", mine.getName());
+        e.printStackTrace();
+      }
     }
   }
 }
