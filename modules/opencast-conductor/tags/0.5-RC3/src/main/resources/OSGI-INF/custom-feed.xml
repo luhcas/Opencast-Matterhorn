@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.feed.impl.CustomFeedService" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.feed.impl.CustomFeedService" />
+  <property name="service.description" value="Latest Episodes Feed" />
+  <property name="feed.uri" value="custom" />
+  <property name="feed.selector" value="custom" />
+  <property name="feed.query" value="*:{0}" />
+  <property name="feed.name" value="Special episodes" />
+  <property name="feed.description" value="Special collection of episodes" />
+  <property name="feed.copyright" value="All rights reserved by The Opencast Project" />
+  <property name="feed.home" value="/engage/ui" />
+  <property name="feed.entry" value="/engage/ui/watch.html?id={0}" />
+  <property name="feed.cover" value="/engage/feed-cover.png" />
+  <!--
+  <property name="feed.rssflavor" value="engage/rss" />
+  <property name="feed.atomflavors" value="engage/atom" />
+  -->
+  <property name="feed.rsstags" value="rss" />
+  <property name="feed.atomtags" value="atom" />
+  <service>
+    <provide interface="org.opencastproject.feed.api.FeedGenerator" />
+  </service>
+  <reference name="service-impl" interface="org.opencastproject.search.api.SearchService" cardinality="1..1" policy="static" bind="setSearchService" />
+</component>
