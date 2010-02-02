@@ -735,9 +735,17 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     } catch (SchedulerException e) {
       log.warn("Finalize for captureScheduler did not execute cleanly: {}.", e.getMessage());
     }
+    try {
+      if (jobScheduler != null) {
+        jobScheduler.shutdown(true);
+      }
+    } catch (SchedulerException e) {
+      log.warn("Finalize for jobScheduler did not execute cleanly: {}.", e.getMessage());
+    }
   }
 
   public void updated(Dictionary properties) throws ConfigurationException {
     // TODO Auto-generated method stub
   }
+
 }

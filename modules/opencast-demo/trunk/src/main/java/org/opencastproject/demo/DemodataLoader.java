@@ -50,8 +50,6 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -63,11 +61,6 @@ import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
@@ -170,7 +163,7 @@ public class DemodataLoader {
 
       mpBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(packageDir));
       File manifestFile = new File(packageDir, "index.xml");
-      MediaPackage mediaPackage = mpBuilder.loadFromManifest(new FileInputStream(manifestFile));
+      MediaPackage mediaPackage = mpBuilder.loadFromXml(new FileInputStream(manifestFile));
       Id mediapackageId = mediaPackage.getIdentifier();
   
       if (verbose) {
@@ -191,24 +184,12 @@ public class DemodataLoader {
         catalog.setURI(uploadedCatalogUrl);
       }
   
-      // Do the xml serialization
-      String serializedMediaPackage = null;
-      Writer out = new StringWriter();
-      DOMSource domSource = new DOMSource(mediaPackage.toXml());
-      StreamResult streamResult = new StreamResult(out);
-      TransformerFactory tf = TransformerFactory.newInstance();
-      Transformer serializer = tf.newTransformer();
-      serializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-      serializer.setOutputProperty(OutputKeys.INDENT, "yes");
-      serializer.transform(domSource, streamResult);
-      serializedMediaPackage = out.toString();
-  
       // Start a workflow instance via the rest endpoint
       HttpPost postStart = new HttpPost(host + "/workflow/rest/start");
       List<NameValuePair> formParams = new ArrayList<NameValuePair>();
   
       formParams.add(new BasicNameValuePair("definition", loadDemoDataWorkflow));
-      formParams.add(new BasicNameValuePair("mediapackage", serializedMediaPackage));
+      formParams.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
       formParams.add(new BasicNameValuePair("properties", "mediapackage=" + packageDir));
       postStart.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
   

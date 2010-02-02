@@ -22,6 +22,7 @@ import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -291,6 +292,8 @@ public class XMLCatalogImpl extends AbstractMediaPackageElement implements XMLCa
    *          the element
    */
   private void addElement(CatalogEntry element) {
+    if (element == null || StringUtils.trimToNull(element.getValue()) == null)
+      return;
     List<CatalogEntry> values = data.get(element.getEName());
     if (values == null) {
       values = new ArrayList<CatalogEntry>();

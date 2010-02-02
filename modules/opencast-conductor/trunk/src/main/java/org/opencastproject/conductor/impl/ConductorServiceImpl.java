@@ -87,7 +87,7 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
     } else {
       logger.debug("Received mediapackage ingest event: {}", property);
       try {
-        MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromManifest(
+        MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(
                 IOUtils.toInputStream((String) property));
 
         logger.info("Received media package {}", mp.getIdentifier());

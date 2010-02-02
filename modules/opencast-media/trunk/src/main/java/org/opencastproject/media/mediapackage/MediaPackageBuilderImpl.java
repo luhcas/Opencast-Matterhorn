@@ -16,18 +16,27 @@
 
 package org.opencastproject.media.mediapackage;
 
-import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.media.mediapackage.identifier.Id;
-import org.opencastproject.util.ConfigurationException;
 
-import org.xml.sax.SAXException;
+import org.apache.commons.io.IOUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
 /**
  * This class provides factory methods for the creation of media packages from manifest files, directories or from
@@ -48,7 +57,6 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
    *           if the temporary directory cannot be created or is not accessible
    */
   public MediaPackageBuilderImpl() {
-    this(new DefaultMediaPackageSerializerImpl());
   }
 
   /**
@@ -83,31 +91,34 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.media.mediapackage.MediaPackageBuilder#loadFromManifest(java.io.InputStream)
+   * @see org.opencastproject.media.mediapackage.MediaPackageBuilder#loadFromXml(java.io.InputStream)
    */
-  public MediaPackage loadFromManifest(InputStream is) throws MediaPackageException {
-    ManifestImpl manifest = null;
+  public MediaPackage loadFromXml(InputStream is) throws MediaPackageException {
+    if (serializer != null) {
+      try {
+        String xmlString = IOUtils.toString(is);
+        DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document xml = docBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()));
 
-    // Read the manifest
-    try {
-      manifest = ManifestImpl.fromStream(is, serializer, false);
-    } catch (IOException e) {
-      throw new MediaPackageException("I/O error while accessing manifest", e);
-    } catch (ParserConfigurationException e) {
-      throw new MediaPackageException("Media package manifest cannot be parsed", e);
-    } catch (SAXException e) {
-      throw new MediaPackageException("Error while parsing media package manifest", e);
-    } catch (XPathExpressionException e) {
-      throw new MediaPackageException("Media package manifest cannot be parsed", e);
-    } catch (ConfigurationException e) {
-      throw new MediaPackageException("Configuration error while accessing manifest", e);
-    } catch (HandleException e) {
-      throw new MediaPackageException("Handle system error while accessing manifest", e);
-    } catch (ParseException e) {
-      throw new MediaPackageException("Error while parsing invalid media package start date", e);
+        XPath xPath = XPathFactory.newInstance().newXPath();
+        NodeList nodes = (NodeList)xPath.evaluate("//url", xml, XPathConstants.NODESET);
+        for (int i=0; i < nodes.getLength(); i++) {
+          Node uri = nodes.item(i).getFirstChild();
+          if (uri != null)
+            uri.setNodeValue(serializer.resolvePath(uri.getNodeValue()).toString());
+        }
+
+        // Serialize the media package
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.transform(new DOMSource(xml), new StreamResult(os));
+        is = new ByteArrayInputStream(os.toByteArray());
+        
+      } catch (Exception e) {
+        throw new MediaPackageException("Error deserializing paths in media package", e);
+      }
     }
-
-    return new MediaPackageImpl(manifest);
+    return MediaPackageImpl.valueOf(is);
   }
 
   /**

@@ -106,7 +106,7 @@ public class ComposeWorkflowOperationHandler implements
           WorkflowOperationInstance operation) throws EncoderException,
           MediaPackageException, UnsupportedElementException,
           InterruptedException, ExecutionException {
-    MediaPackage mediaPackage = MediaPackageUtil.clone(src);
+    MediaPackage mediaPackage = (MediaPackage)src.clone();
     // Read the configuration properties
     String sourceVideoFlavor = StringUtils.trimToNull(operation
             .getConfiguration("source-video-flavor"));

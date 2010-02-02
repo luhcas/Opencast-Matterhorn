@@ -109,7 +109,7 @@ public class MediaPackageMergeTest {
 
     // Test the media package
     mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(manifestFile.getParentFile()));
-    sourcePackage = mediaPackageBuilder.loadFromManifest(new FileInputStream(manifestFile));
+    sourcePackage = mediaPackageBuilder.loadFromXml(new FileInputStream(manifestFile));
     sourcePackage.verify();
   }
 
@@ -153,7 +153,7 @@ public class MediaPackageMergeTest {
 
     // Test the media package
     mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(manifestFile.getParentFile()));
-    targetPackage = mediaPackageBuilder.loadFromManifest(new FileInputStream(manifestFile));
+    targetPackage = mediaPackageBuilder.loadFromXml(new FileInputStream(manifestFile));
     targetPackage.verify();
   }
 

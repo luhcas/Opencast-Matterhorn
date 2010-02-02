@@ -56,7 +56,7 @@ public class MediaPackageJaxbSerializationTest {
     // Load the simple media package
     MediaPackage mediaPackage = null;
     InputStream is = getClass().getResourceAsStream("/manifest-simple.xml");
-    mediaPackage = mediaPackageBuilder.loadFromManifest(is);
+    mediaPackage = mediaPackageBuilder.loadFromXml(is);
     
     Assert.assertEquals(0, mediaPackage.getTracks().length);
     Assert.assertEquals(1, mediaPackage.getCatalogs().length);

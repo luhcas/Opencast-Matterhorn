@@ -87,7 +87,7 @@ public class SearchServiceImplTest {
     // Load the simple media package
     MediaPackage mediaPackage = null;
     InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-simple.xml");
-    mediaPackage = mediaPackageBuilder.loadFromManifest(is);
+    mediaPackage = mediaPackageBuilder.loadFromXml(is);
 
     // Add the media package to the search index
     service.add(mediaPackage);
@@ -118,7 +118,7 @@ public class SearchServiceImplTest {
     MediaPackage mediaPackage = null;
     try {
       InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-full.xml");
-      mediaPackage = mediaPackageBuilder.loadFromManifest(is);
+      mediaPackage = mediaPackageBuilder.loadFromXml(is);
     } catch (MediaPackageException e) {
       fail("Error loading full media package");
     }
@@ -145,7 +145,7 @@ public class SearchServiceImplTest {
     MediaPackage mediaPackage = null;
     try {
       InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-simple.xml");
-      mediaPackage = mediaPackageBuilder.loadFromManifest(is);
+      mediaPackage = mediaPackageBuilder.loadFromXml(is);
     } catch (MediaPackageException e) {
       fail("Error loading simple media package");
     }

@@ -103,12 +103,10 @@ public class ZipUtil {
       try {
         File inFile = new File(zip, path);
         if( ! inFile.exists()) {
-          logger.warn("skipping non-existent zip entry {}", path);
-          continue;
+          throw new IllegalStateException("Found non-existent zip entry " + path);
         }
         if(inFile.isDirectory()) {
-          logger.info("zipped directories are not yet supported {}", path);
-          continue;
+          throw new IllegalStateException("Zipped directories are not yet supported");
         }
         in = new FileInputStream(inFile);
         out = new FileOutputStream(new File(destination, path));

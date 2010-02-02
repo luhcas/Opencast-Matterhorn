@@ -57,14 +57,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 /**
  * Utility class used to manage the search index.
  */
@@ -81,8 +73,8 @@ public class SolrIndexManager {
   private static final float CONFIDENCE_THRESHOLD = 0.0f;
 
   /**
-   * Factor multiplied to fine tune relevance and confidence impact on important keyword decision. importance =
-   * RELEVANCE_BOOST * relevance + confidence
+   * Factor multiplied to fine tune relevance and confidence impact on important
+   * keyword decision. importance = RELEVANCE_BOOST * relevance + confidence
    ***/
   private static final double RELEVANCE_BOOST = 2.0;
 
@@ -93,7 +85,8 @@ public class SolrIndexManager {
   private static final int MAX_IMPORTANT_COUNT = 10;
 
   /** The solr supported date format. **/
-  private DateFormat dateFormat = new SimpleDateFormat(SolrFields.SOLR_DATE_FORMAT);
+  private DateFormat dateFormat = new SimpleDateFormat(
+          SolrFields.SOLR_DATE_FORMAT);
 
   /**
    * Creates a new management instance for the search index.
@@ -103,7 +96,8 @@ public class SolrIndexManager {
    */
   public SolrIndexManager(SolrConnection connection) {
     if (connection == null)
-      throw new IllegalArgumentException("Unable to manage solr with null connection");
+      throw new IllegalArgumentException(
+              "Unable to manage solr with null connection");
     this.solrConnection = connection;
   }
 
@@ -125,7 +119,8 @@ public class SolrIndexManager {
   }
 
   /**
-   * Removes the entry with the given <code>id</code> from the database. The entry can either be a series or an episode.
+   * Removes the entry with the given <code>id</code> from the database. The
+   * entry can either be a series or an episode.
    * 
    * @param id
    *          identifier of the series or episode to delete
@@ -146,44 +141,58 @@ public class SolrIndexManager {
   }
 
   /**
-   * Posts the media package to solr. Depending on what is referenced in the media package, the method might create one
-   * or two entries: one for the episode and one for the series that the episode belongs to.
+   * Posts the media package to solr. Depending on what is referenced in the
+   * media package, the method might create one or two entries: one for the
+   * episode and one for the series that the episode belongs to.
    * 
-   * This implementation of the search service removes all references to non "engage/download" media tracks
+   * This implementation of the search service removes all references to non
+   * "engage/download" media tracks
    * 
    * @param mediaPackage
    *          the media package to post
    * @throws SolrServerException
    *           if an errors occurs while talking to solr
    */
-  public boolean add(MediaPackage sourceMediaPackage) throws SolrServerException {
-    // TODO: Cleanup should happen outside of this manager, it's too specialized to
+  public boolean add(MediaPackage sourceMediaPackage)
+          throws SolrServerException {
+    // TODO: Cleanup should happen outside of this manager, it's too specialized
+    // to
     // filter on some flavor that is not part of the system knowledge
-//    try {
-//      for(Track track : mp.getTracks()) {
-//        if( ! MediaPackageElements.ENGAGE_TRACK.equals(track.getFlavor())) {
-//            log_.debug("Removing {} from the mediapackage to be indexed, since its flavor is {}, not {}",
-//                    new Object[] {track.getIdentifier(), track.getFlavor(), MediaPackageElements.ENGAGE_TRACK});
-//            mp.remove(track);
-//        }
-//      }
-//    } catch (MediaPackageException e) {
-//      throw new RuntimeException(e);
-//    }
+    // try {
+    // for(Track track : mp.getTracks()) {
+    // if( ! MediaPackageElements.ENGAGE_TRACK.equals(track.getFlavor())) {
+    // log_.debug("Removing {} from the mediapackage to be indexed, since its flavor is {}, not {}",
+    // new Object[] {track.getIdentifier(), track.getFlavor(),
+    // MediaPackageElements.ENGAGE_TRACK});
+    // mp.remove(track);
+    // }
+    // }
+    // } catch (MediaPackageException e) {
+    // throw new RuntimeException(e);
+    // }
     UpdateRequest solrRequest = new UpdateRequest();
     solrRequest.setAction(ACTION.COMMIT, true, true);
-    SolrUpdateableInputDocument episodeDocument = createEpisodeInputDocument(sourceMediaPackage);
-    // FIXME: SolrUpdateableInputDocument seriesDocument = createSeriesInputDocument(sourceMediaPackage);
-    SolrUpdateableInputDocument seriesDocument = null;
     
-    // If neither an episode nor a series was contained, there is no point in trying to update
+    SolrUpdateableInputDocument episodeDocument = null;
+    SolrUpdateableInputDocument seriesDocument = null;
+    try {
+      episodeDocument = createEpisodeInputDocument(sourceMediaPackage);
+      // FIXME: SolrUpdateableInputDocument seriesDocument =
+      // createSeriesInputDocument(sourceMediaPackage);
+    } catch (MediaPackageException e) {
+      throw new SolrServerException(e);
+    }
+
+    // If neither an episode nor a series was contained, there is no point in
+    // trying to update
     if (episodeDocument == null && seriesDocument == null)
       return false;
 
     // Add the episode metadata
     if (episodeDocument != null) {
       if (seriesDocument != null)
-        episodeDocument.setField(SolrFields.DC_IS_PART_OF, seriesDocument.getField(SolrFields.ID));
+        episodeDocument.setField(SolrFields.DC_IS_PART_OF, seriesDocument
+                .getField(SolrFields.ID));
       solrRequest.add(episodeDocument);
     }
 
@@ -200,38 +209,48 @@ public class SolrIndexManager {
       return false;
     }
   }
-  
+
   /**
-   * Creates a solr input document for the episode metadata of the media package.
+   * Creates a solr input document for the episode metadata of the media
+   * package.
    * 
    * @param mediaPackage
    *          the media package
    * @return an input document ready to be posted to solr
+   * @throws MediaPackageException
+   *           if serialization of the media package fails
    */
-  private SolrUpdateableInputDocument createEpisodeInputDocument(MediaPackage mediaPackage) {
+  private SolrUpdateableInputDocument createEpisodeInputDocument(
+          MediaPackage mediaPackage) throws MediaPackageException {
     SolrUpdateableInputDocument solrEpisodeDocument = new SolrUpdateableInputDocument();
     String mediaPackageId = mediaPackage.getIdentifier().toString();
 
     // Populate document with existing data
     try {
       StringBuffer query = new StringBuffer("q=");
-      query = query.append(SolrFields.ID).append(":").append(SolrUtils.clean(mediaPackageId));
+      query = query.append(SolrFields.ID).append(":").append(
+              SolrUtils.clean(mediaPackageId));
       QueryResponse solrResponse = solrConnection.request(query.toString());
       if (solrResponse.getResults().size() > 0) {
         SolrDocument existingsolrDocument = solrResponse.getResults().get(0);
         for (String fieldName : existingsolrDocument.getFieldNames()) {
-          solrEpisodeDocument.addField(fieldName, existingsolrDocument.getFieldValue(fieldName));
+          solrEpisodeDocument.addField(fieldName, existingsolrDocument
+                  .getFieldValue(fieldName));
         }
       }
     } catch (Exception e) {
       log_.error("Error trying to load series " + mediaPackageId, e);
     }
 
-    for(Catalog c : mediaPackage.getCatalogs()) log_.debug("Found catalog {}, flavor={}", c.getIdentifier(), c.getFlavor());
-    
+    for (Catalog c : mediaPackage.getCatalogs())
+      log_.debug("Found catalog {}, flavor={}", c.getIdentifier(), c
+              .getFlavor());
+
     // Add dublin core
-    if (!mediaPackage.hasCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE)) {
-      log_.debug("No episode dublincore metadata found in media package " + mediaPackage);
+    if (!mediaPackage.hasCatalogs(DublinCoreCatalog.FLAVOR,
+            MediaPackageReferenceImpl.ANY_MEDIAPACKAGE)) {
+      log_.debug("No episode dublincore metadata found in media package "
+              + mediaPackage);
       return null;
     }
 
@@ -242,28 +261,17 @@ public class SolrIndexManager {
 
     // Set common fields
     solrEpisodeDocument.setField(SolrFields.ID, mediaPackageId);
-    solrEpisodeDocument.setField(SolrFields.OC_MEDIATYPE, SearchResultItemType.AudioVisual);
-    solrEpisodeDocument.setField(SolrFields.OC_MODIFIED, dateFormat.format((new Date()).getTime()));
+    solrEpisodeDocument.setField(SolrFields.OC_MEDIATYPE,
+            SearchResultItemType.AudioVisual);
+    solrEpisodeDocument.setField(SolrFields.OC_MODIFIED, dateFormat
+            .format((new Date()).getTime()));
     addStandardDublincCoreFields(solrEpisodeDocument, dublinCore);
 
     // Add media package
-    try {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      DOMSource domSource = new DOMSource(mediaPackage.toXml());
-      StreamResult streamResult = new StreamResult(out);
-      TransformerFactory tf = TransformerFactory.newInstance();
-      Transformer serializer = tf.newTransformer();
-      serializer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
-      serializer.transform(domSource, streamResult);
-      solrEpisodeDocument.setField(SolrFields.OC_MEDIAPACKAGE, out);
-    } catch (MediaPackageException e) {
-      throw new IllegalStateException("Error serializing media package to search index", e);
-    } catch (TransformerConfigurationException e) {
-      throw new IllegalStateException("Error serializing media package to search index", e);
-    } catch (TransformerException e) {
-      throw new IllegalStateException("Error serializing media package to search index", e);
-    }
-    
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    mediaPackage.toXml(out, false);
+    solrEpisodeDocument.setField(SolrFields.OC_MEDIAPACKAGE, out);
+
     // Add tags
     StringBuilder sb = new StringBuilder();
     for (MediaPackageElement element : mediaPackage.getElements()) {
@@ -277,7 +285,7 @@ public class SolrIndexManager {
     // Add flavors
     sb = new StringBuilder();
     for (MediaPackageElement element : mediaPackage.getElements()) {
-      if(element.getFlavor() != null) {
+      if (element.getFlavor() != null) {
         sb.append(element.getFlavor().toString());
         sb.append(" ");
       }
@@ -287,17 +295,17 @@ public class SolrIndexManager {
     // Add cover
     Attachment cover = mediaPackage.getCover();
     if (cover != null) {
-      solrEpisodeDocument.addField(SolrFields.OC_COVER, cover.getURI().toString());
+      solrEpisodeDocument.addField(SolrFields.OC_COVER, cover.getURI()
+              .toString());
     }
 
     // Add mpeg-7
     // TODO: Merge mpeg-7 catalogs prior to adding them to solr
     /*
-    Catalog[] mpeg7Catalogs = mediaPackage.getCatalogs(Mpeg7Catalog.FLAVOR);
-    for (Catalog mpeg7Catalog : mpeg7Catalogs) {
-      addMpeg7Metadata(solrEpisodeDocument, (Mpeg7Catalog) mpeg7Catalog);
-    }
-    */
+     * Catalog[] mpeg7Catalogs = mediaPackage.getCatalogs(Mpeg7Catalog.FLAVOR);
+     * for (Catalog mpeg7Catalog : mpeg7Catalogs) {
+     * addMpeg7Metadata(solrEpisodeDocument, (Mpeg7Catalog) mpeg7Catalog); }
+     */
 
     return solrEpisodeDocument;
   }
@@ -309,29 +317,34 @@ public class SolrIndexManager {
    *          the media package
    * @return an input document ready to be posted to solr
    */
-  private SolrUpdateableInputDocument createSeriesInputDocument(MediaPackage mediaPackage) {
+  private SolrUpdateableInputDocument createSeriesInputDocument(
+          MediaPackage mediaPackage) {
     SolrUpdateableInputDocument solrSeriesDocument = new SolrUpdateableInputDocument();
 
     // Check if there is a dublin core for series
-    if (!mediaPackage.hasCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_SERIES)) {
+    if (!mediaPackage.hasCatalogs(DublinCoreCatalog.FLAVOR,
+            MediaPackageReferenceImpl.ANY_SERIES)) {
       log_.debug("No series dublincore found in media package " + mediaPackage);
       return null;
     }
 
     // If this is the case, try to get a hold on it
-    Catalog dcCatalogs[] = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_SERIES);
+    Catalog dcCatalogs[] = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR,
+            MediaPackageReferenceImpl.ANY_SERIES);
     DublinCoreCatalog dublinCore = (DublinCoreCatalog) dcCatalogs[0];
     String seriesId = dublinCore.getFirst(DublinCore.PROPERTY_IDENTIFIER);
 
     // Populate document with existing data
     try {
       StringBuffer query = new StringBuffer("q=");
-      query = query.append(SolrFields.ID).append(":").append(SolrUtils.clean(seriesId));
+      query = query.append(SolrFields.ID).append(":").append(
+              SolrUtils.clean(seriesId));
       QueryResponse solrResponse = solrConnection.request(query.toString());
       if (solrResponse.getResults().size() > 0) {
         SolrDocument existingsolrDocument = solrResponse.getResults().get(0);
         for (String fieldName : existingsolrDocument.getFieldNames()) {
-          solrSeriesDocument.addField(fieldName, existingsolrDocument.getFieldValue(fieldName));
+          solrSeriesDocument.addField(fieldName, existingsolrDocument
+                  .getFieldValue(fieldName));
         }
       }
     } catch (Exception e) {
@@ -340,8 +353,10 @@ public class SolrIndexManager {
 
     // Set common fields
     solrSeriesDocument.setField(SolrFields.ID, seriesId);
-    solrSeriesDocument.setField(SolrFields.OC_MEDIATYPE, SearchResultItemType.Series);
-    solrSeriesDocument.setField(SolrFields.OC_MODIFIED, dateFormat.format((new Date()).getTime()));
+    solrSeriesDocument.setField(SolrFields.OC_MEDIATYPE,
+            SearchResultItemType.Series);
+    solrSeriesDocument.setField(SolrFields.OC_MODIFIED, dateFormat
+            .format((new Date()).getTime()));
     addStandardDublincCoreFields(solrSeriesDocument, dublinCore);
 
     return solrSeriesDocument;
@@ -355,42 +370,51 @@ public class SolrIndexManager {
    * @param dc
    *          the dublin core catalog
    */
-  private void addStandardDublincCoreFields(SolrUpdateableInputDocument solrInput, DublinCoreCatalog dc) {
+  private void addStandardDublincCoreFields(
+          SolrUpdateableInputDocument solrInput, DublinCoreCatalog dc) {
     if (!dc.hasValue(DublinCore.PROPERTY_TITLE))
-      throw new IllegalStateException("Found dublin core catalog withouth title");
+      throw new IllegalStateException(
+              "Found dublin core catalog withouth title");
 
     // dc:title
-    solrInput.addField(SolrFields.DC_TITLE, dc.getFirst(DublinCore.PROPERTY_TITLE));
+    solrInput.addField(SolrFields.DC_TITLE, dc
+            .getFirst(DublinCore.PROPERTY_TITLE));
 
     // dc:subject
     if (dc.hasValue(DublinCore.PROPERTY_SUBJECT)) {
-      solrInput.addField(SolrFields.DC_SUBJECT, dc.getFirst(DublinCore.PROPERTY_SUBJECT));
+      solrInput.addField(SolrFields.DC_SUBJECT, dc
+              .getFirst(DublinCore.PROPERTY_SUBJECT));
     }
 
     // dc:creator
     if (dc.hasValue(DublinCore.PROPERTY_CREATOR)) {
-      solrInput.addField(SolrFields.DC_CREATOR, dc.getFirst(DublinCore.PROPERTY_CREATOR));
+      solrInput.addField(SolrFields.DC_CREATOR, dc
+              .getFirst(DublinCore.PROPERTY_CREATOR));
     }
 
     // dc:extent
     if (dc.hasValue(DublinCore.PROPERTY_EXTENT)) {
-      long duration = EncodingSchemeUtils.decodeDuration(dc.get(DublinCore.PROPERTY_EXTENT).get(0));
+      long duration = EncodingSchemeUtils.decodeDuration(dc.get(
+              DublinCore.PROPERTY_EXTENT).get(0));
       solrInput.addField(SolrFields.DC_EXTENT, duration);
     }
 
     // dc:publisher
     if (dc.hasValue(DublinCore.PROPERTY_PUBLISHER)) {
-      solrInput.addField(SolrFields.DC_PUBLISHER, dc.getFirst(DublinCore.PROPERTY_PUBLISHER));
+      solrInput.addField(SolrFields.DC_PUBLISHER, dc
+              .getFirst(DublinCore.PROPERTY_PUBLISHER));
     }
 
     // dc:contributor
     if (dc.hasValue(DublinCore.PROPERTY_CONTRIBUTOR)) {
-      solrInput.addField(SolrFields.DC_CONTRIBUTOR, dc.getFirst(DublinCore.PROPERTY_CONTRIBUTOR));
+      solrInput.addField(SolrFields.DC_CONTRIBUTOR, dc
+              .getFirst(DublinCore.PROPERTY_CONTRIBUTOR));
     }
 
     // dc:abstract
     if (dc.hasValue(DublinCore.PROPERTY_ABSTRACT)) {
-      solrInput.addField(SolrFields.DC_ABSTRACT, dc.getFirst(DublinCore.PROPERTY_ABSTRACT));
+      solrInput.addField(SolrFields.DC_ABSTRACT, dc
+              .getFirst(DublinCore.PROPERTY_ABSTRACT));
     }
 
     // dc:created
@@ -399,60 +423,71 @@ public class SolrIndexManager {
       Date date = null;
       // TODO: Is there a (more performing) way to do this without try/catch?
       try {
-        date = EncodingSchemeUtils.decodeMandatoryDate(dc.get(DublinCore.PROPERTY_CREATED).get(0));
+        date = EncodingSchemeUtils.decodeMandatoryDate(dc.get(
+                DublinCore.PROPERTY_CREATED).get(0));
       } catch (IllegalArgumentException e) {
         DCMIPeriod period = EncodingSchemeUtils.decodeMandatoryPeriod(created);
         if (period != null)
           date = period.getStart();
         else
-          throw new IllegalArgumentException("Created date is neither a date nor a period");
+          throw new IllegalArgumentException(
+                  "Created date is neither a date nor a period");
       }
       solrInput.addField(SolrFields.DC_CREATED, date);
     }
 
     // dc:language
     if (dc.hasValue(DublinCore.PROPERTY_LANGUAGE)) {
-      solrInput.addField(SolrFields.DC_LANGUAGE, dc.getFirst(DublinCore.PROPERTY_LANGUAGE));
+      solrInput.addField(SolrFields.DC_LANGUAGE, dc
+              .getFirst(DublinCore.PROPERTY_LANGUAGE));
     }
 
     // dc:rightsholder
     if (dc.hasValue(DublinCore.PROPERTY_RIGHTS_HOLDER)) {
-      solrInput.addField(SolrFields.DC_RIGHTS_HOLDER, dc.getFirst(DublinCore.PROPERTY_RIGHTS_HOLDER));
+      solrInput.addField(SolrFields.DC_RIGHTS_HOLDER, dc
+              .getFirst(DublinCore.PROPERTY_RIGHTS_HOLDER));
     }
 
     // dc:spatial
     if (dc.hasValue(DublinCore.PROPERTY_SPATIAL)) {
-      solrInput.addField(SolrFields.DC_SPATIAL, dc.getFirst(DublinCore.PROPERTY_SPATIAL));
+      solrInput.addField(SolrFields.DC_SPATIAL, dc
+              .getFirst(DublinCore.PROPERTY_SPATIAL));
     }
 
     // dc:temporal
     if (dc.hasValue(DublinCore.PROPERTY_TEMPORAL)) {
-      solrInput.addField(SolrFields.DC_TEMPORAL, dc.getFirst(DublinCore.PROPERTY_TEMPORAL));
+      solrInput.addField(SolrFields.DC_TEMPORAL, dc
+              .getFirst(DublinCore.PROPERTY_TEMPORAL));
     }
 
     // dc:replaces
     if (dc.hasValue(DublinCore.PROPERTY_REPLACES)) {
-      solrInput.addField(SolrFields.DC_REPLACES, dc.getFirst(DublinCore.PROPERTY_REPLACES));
+      solrInput.addField(SolrFields.DC_REPLACES, dc
+              .getFirst(DublinCore.PROPERTY_REPLACES));
     }
 
     // dc:type
     if (dc.hasValue(DublinCore.PROPERTY_TYPE)) {
-      solrInput.addField(SolrFields.DC_TYPE, dc.getFirst(DublinCore.PROPERTY_TYPE));
+      solrInput.addField(SolrFields.DC_TYPE, dc
+              .getFirst(DublinCore.PROPERTY_TYPE));
     }
 
     // dc: accessrights
     if (dc.hasValue(DublinCore.PROPERTY_ACCESS_RIGHTS)) {
-      solrInput.addField(SolrFields.DC_ACCESS_RIGHTS, dc.getFirst(DublinCore.PROPERTY_ACCESS_RIGHTS));
+      solrInput.addField(SolrFields.DC_ACCESS_RIGHTS, dc
+              .getFirst(DublinCore.PROPERTY_ACCESS_RIGHTS));
     }
 
     // dc:license
     if (dc.hasValue(DublinCore.PROPERTY_LICENSE)) {
-      solrInput.addField(SolrFields.DC_LICENSE, dc.getFirst(DublinCore.PROPERTY_LICENSE));
+      solrInput.addField(SolrFields.DC_LICENSE, dc
+              .getFirst(DublinCore.PROPERTY_LICENSE));
     }
 
     // dc:available
     if (dc.hasValue(DublinCore.PROPERTY_AVAILABLE)) {
-      Object temporal = EncodingSchemeUtils.decodeTemporal(dc.get(DublinCore.PROPERTY_AVAILABLE).get(0));
+      Object temporal = EncodingSchemeUtils.decodeTemporal(dc.get(
+              DublinCore.PROPERTY_AVAILABLE).get(0));
       // FIXME a Temporal will never be a Date
       if (temporal instanceof Date) {
         solrInput.addField(SolrFields.DC_AVAILABLE_FROM, temporal);
@@ -479,7 +514,8 @@ public class SolrIndexManager {
    *          the mpeg7 catalog
    */
   @SuppressWarnings("unused")
-  private void addMpeg7Metadata(SolrUpdateableInputDocument solrInput, Mpeg7Catalog mpeg7) {
+  private void addMpeg7Metadata(SolrUpdateableInputDocument solrInput,
+          Mpeg7Catalog mpeg7) {
 
     // Check for multimedia content
     if (!mpeg7.multimediaContent().hasNext()) {
@@ -489,41 +525,48 @@ public class SolrIndexManager {
 
     // Get the content duration by looking at the first content track. This
     // of course assumes that all tracks are equally long.
-    MultimediaContent<? extends MultimediaContentType> mc = mpeg7.multimediaContent().next();
+    MultimediaContent<? extends MultimediaContentType> mc = mpeg7
+            .multimediaContent().next();
     MediaTime mediaTime = mc.elements().next().getMediaTime();
-    solrInput.addField(SolrFields.DC_EXTENT, mediaTime.getMediaDuration().getDurationInMilliseconds());
+    solrInput.addField(SolrFields.DC_EXTENT, mediaTime.getMediaDuration()
+            .getDurationInMilliseconds());
 
     // Check if the keywords have been filled by (manually) added dublin
     // core data. If not, look for the most relevant fields in mpeg-7.
     SortedSet<TextAnnotation> sortedAnnotations = null;
     if (solrInput.getFieldValue(SolrFields.OC_KEYWORDS) == null) {
-      sortedAnnotations = new TreeSet<TextAnnotation>(new Comparator<TextAnnotation>() {
-        public int compare(TextAnnotation a1, TextAnnotation a2) {
-          if ((RELEVANCE_BOOST * a1.getRelevance() + a1.getConfidence()) > (RELEVANCE_BOOST * a2.getRelevance() + a2
-                  .getConfidence()))
-            return -1;
-          else if ((RELEVANCE_BOOST * a1.getRelevance() + a1.getConfidence()) < (RELEVANCE_BOOST * a2.getRelevance() + a2
-                  .getConfidence()))
-            return 1;
-          return 0;
-        }
-      });
+      sortedAnnotations = new TreeSet<TextAnnotation>(
+              new Comparator<TextAnnotation>() {
+                public int compare(TextAnnotation a1, TextAnnotation a2) {
+                  if ((RELEVANCE_BOOST * a1.getRelevance() + a1.getConfidence()) > (RELEVANCE_BOOST
+                          * a2.getRelevance() + a2.getConfidence()))
+                    return -1;
+                  else if ((RELEVANCE_BOOST * a1.getRelevance() + a1
+                          .getConfidence()) < (RELEVANCE_BOOST
+                          * a2.getRelevance() + a2.getConfidence()))
+                    return 1;
+                  return 0;
+                }
+              });
     }
 
     // Iterate over the tracks and extract keywords and hints
-    Iterator<MultimediaContent<? extends MultimediaContentType>> mmIter = mpeg7.multimediaContent();
+    Iterator<MultimediaContent<? extends MultimediaContentType>> mmIter = mpeg7
+            .multimediaContent();
     int segmentCount = 0;
 
     while (mmIter.hasNext()) {
       MultimediaContent<?> multimediaContent = mmIter.next();
 
       // for every multimedia content track
-      for (Iterator<?> iterator = multimediaContent.elements(); iterator.hasNext();) {
+      for (Iterator<?> iterator = multimediaContent.elements(); iterator
+              .hasNext();) {
         MultimediaContentType type = (MultimediaContentType) iterator.next();
 
         // for every segment in the current multimedia content track
 
-        Iterator<? extends ContentSegment> ctIter = type.getTemporalDecomposition().segments();
+        Iterator<? extends ContentSegment> ctIter = type
+                .getTemporalDecomposition().segments();
         while (ctIter.hasNext()) {
           ContentSegment contentSegment = ctIter.next();
 
@@ -531,7 +574,8 @@ public class SolrIndexManager {
           StringBuffer segmentText = new StringBuffer();
 
           // Iterate over all text annotations
-          Iterator<TextAnnotation> textAnnotations = contentSegment.textAnnotations();
+          Iterator<TextAnnotation> textAnnotations = contentSegment
+                  .textAnnotations();
           while (textAnnotations.hasNext()) {
             TextAnnotation textAnnotation = textAnnotations.next();
 
@@ -546,7 +590,8 @@ public class SolrIndexManager {
             // for every keyword annotation
             Iterator<?> kwIter = textAnnotation.keywordAnnotations();
             while (kwIter.hasNext()) {
-              KeywordAnnotation keywordAnnotation = (KeywordAnnotation) kwIter.next();
+              KeywordAnnotation keywordAnnotation = (KeywordAnnotation) kwIter
+                      .next();
               segmentText.append(keywordAnnotation.getKeyword());
               segmentText.append(" ");
             }
@@ -555,26 +600,31 @@ public class SolrIndexManager {
           }
 
           // add segment text to solr document
-          solrInput.addField(SolrFields.SEGMENT_TEXT + segmentCount, segmentText.toString());
+          solrInput.addField(SolrFields.SEGMENT_TEXT + segmentCount,
+                  segmentText.toString());
 
           // get the segments time point
-          MediaTimePoint timepoint = contentSegment.getMediaTime().getMediaTimePoint();
+          MediaTimePoint timepoint = contentSegment.getMediaTime()
+                  .getMediaTimePoint();
           // System.out.println("MediaTimePoint: "+timepoint.getTimeInMilliseconds());
           // dont forget: hints are stores as properties
           StringBuffer hintField = new StringBuffer();
 
           // TODO: define a class with hint field constants
           hintField.append("time=" + timepoint.getTimeInMilliseconds() + "\n");
-          // hintField.append("relevance="+timepoint.getTimeInMilliseconds() + "\n");
+          // hintField.append("relevance="+timepoint.getTimeInMilliseconds() +
+          // "\n");
 
           log_.trace("Adding segment: " + timepoint.getTimeInMilliseconds());
           // add freetext annotation to solr document
-          // Iterator<TextAnnotation> freeIter = contentSegment.textAnnotations();
+          // Iterator<TextAnnotation> freeIter =
+          // contentSegment.textAnnotations();
           // if (freeIter.hasNext()) {
           // FreeTextAnnotation freeTextAnnotation = freeIter.next();
           // hintField.append(freeTextAnnotation.getText() + "\n");
           // }
-          solrInput.addField(SolrFields.SEGMENT_HINTS + segmentCount, hintField.toString());
+          solrInput.addField(SolrFields.SEGMENT_HINTS + segmentCount, hintField
+                  .toString());
 
           // increase segment counter
           segmentCount++;
@@ -590,12 +640,14 @@ public class SolrIndexManager {
   }
 
   /**
-   * Generates a string with the most important kewords from the text annotation.
+   * Generates a string with the most important kewords from the text
+   * annotation.
    * 
    * @param sortedAnnotations
    * @return The keyword string.
    */
-  private StringBuffer importantKeywordsString(SortedSet<TextAnnotation> sortedAnnotations) {
+  private StringBuffer importantKeywordsString(
+          SortedSet<TextAnnotation> sortedAnnotations) {
 
     // important keyword:
     // - high relevance
@@ -615,7 +667,8 @@ public class SolrIndexManager {
     double imp;
     while (textAnnotations.hasNext()) {
       textAnnotation = textAnnotations.next();
-      Iterator<KeywordAnnotation> keywordAnnotations = textAnnotation.keywordAnnotations();
+      Iterator<KeywordAnnotation> keywordAnnotations = textAnnotation
+              .keywordAnnotations();
       while (keywordAnnotations.hasNext()) {
         KeywordAnnotation annotation = keywordAnnotations.next();
         keyword = annotation.getKeyword().toLowerCase();
@@ -628,8 +681,8 @@ public class SolrIndexManager {
 
           // here the importance value is calculated
           // from relevance, confidence and frequency of occurence.
-          imp = (RELEVANCE_BOOST * getMaxRelevance(keyword, sortedAnnotations) + getMaxConfidence(keyword,
-                  sortedAnnotations))
+          imp = (RELEVANCE_BOOST * getMaxRelevance(keyword, sortedAnnotations) + getMaxConfidence(
+                  keyword, sortedAnnotations))
                   * (occ + 1);
           importance.put(keyword, imp);
         }
@@ -644,7 +697,7 @@ public class SolrIndexManager {
       String maxKeyword = null;
 
       // get maximum from importance list
-      for(Entry<String, Double> entry : importance.entrySet()) {
+      for (Entry<String, Double> entry : importance.entrySet()) {
         keyword = entry.getKey();
         if (max < entry.getValue()) {
           max = entry.getValue();
@@ -671,14 +724,16 @@ public class SolrIndexManager {
    * @param sortedAnnotations
    * @return The maximum confidence value.
    */
-  private double getMaxConfidence(String keyword, SortedSet<TextAnnotation> sortedAnnotations) {
+  private double getMaxConfidence(String keyword,
+          SortedSet<TextAnnotation> sortedAnnotations) {
     double max = 0.0;
     String needle = null;
     TextAnnotation textAnnotation = null;
     Iterator<TextAnnotation> textAnnotations = sortedAnnotations.iterator();
     while (textAnnotations.hasNext()) {
       textAnnotation = textAnnotations.next();
-      Iterator<KeywordAnnotation> keywordAnnotations = textAnnotation.keywordAnnotations();
+      Iterator<KeywordAnnotation> keywordAnnotations = textAnnotation
+              .keywordAnnotations();
       while (keywordAnnotations.hasNext()) {
         KeywordAnnotation ann = keywordAnnotations.next();
         needle = ann.getKeyword().toLowerCase();
@@ -699,14 +754,16 @@ public class SolrIndexManager {
    * @param sortedAnnotations
    * @return The maximum relevance value.
    */
-  private double getMaxRelevance(String keyword, SortedSet<TextAnnotation> sortedAnnotations) {
+  private double getMaxRelevance(String keyword,
+          SortedSet<TextAnnotation> sortedAnnotations) {
     double max = 0.0;
     String needle = null;
     TextAnnotation textAnnotation = null;
     Iterator<TextAnnotation> textAnnotations = sortedAnnotations.iterator();
     while (textAnnotations.hasNext()) {
       textAnnotation = textAnnotations.next();
-      Iterator<KeywordAnnotation> keywordAnnotations = textAnnotation.keywordAnnotations();
+      Iterator<KeywordAnnotation> keywordAnnotations = textAnnotation
+              .keywordAnnotations();
       while (keywordAnnotations.hasNext()) {
         KeywordAnnotation ann = keywordAnnotations.next();
         needle = ann.getKeyword().toLowerCase();

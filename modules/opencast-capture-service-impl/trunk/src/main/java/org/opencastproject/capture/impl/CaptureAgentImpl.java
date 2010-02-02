@@ -15,38 +15,6 @@
  */
 package org.opencastproject.capture.impl;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.Vector;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.FileEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.gstreamer.Bus;
-import org.gstreamer.GstObject;
-import org.gstreamer.Pipeline;
-import org.gstreamer.State;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureAgent;
@@ -64,13 +32,38 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.util.ZipUtil;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.gstreamer.Bus;
+import org.gstreamer.GstObject;
+import org.gstreamer.Pipeline;
+import org.gstreamer.State;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.Vector;
 
 /**
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines
@@ -477,23 +470,14 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     }
 
     // Serialize the metadata file and the MediaPackage
+    FileOutputStream fos = null;
     try {
       logger.debug("Serializing metadata and MediaPackage...");
       // Gets the manifest.xml as a Document object
-      Document doc = recording.getMediaPackage().toXml();
 
-      // Defines a transformer to convert the object in a xml file
-      Transformer transformer = TransformerFactory.newInstance().newTransformer();
-      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
-      // Initializes StreamResult with File object to save to file
       File manifestFile = new File(recording.getDir(), CaptureParameters.MANIFEST_NAME);
-      StreamResult stResult = new StreamResult(new FileOutputStream(manifestFile));
-      DOMSource source = new DOMSource(doc);
-      transformer.transform(source, stResult);
-
-      // Closes the stream to make sure all the content is written to the file
-      stResult.getOutputStream().close();
+      fos = new FileOutputStream(manifestFile);
+      recording.getMediaPackage().toXml(fos, false);
 
       // Stores the File reference to the MediaPackage in the corresponding recording
       recording.setManifest(manifestFile);
@@ -501,12 +485,16 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     } catch (MediaPackageException e) {
       logger.error("MediaPackage Exception: {}.", e.getMessage());
       return false;
-    } catch (TransformerException e) {
-      logger.error("Transformer Exception: {}.", e.getMessage());
-      return false;
     } catch (IOException e) {
       logger.error("I/O Exception: {}.", e.getMessage());
       return false;
+    } finally {
+      if (fos != null)
+        try {
+          fos.close();
+        } catch (IOException e) {
+          logger.error("Error serializing mediapackage to file", e);
+        }
     }
 
     return true;
@@ -514,11 +502,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   /**
    * Compresses the files contained in the output directory
-<<<<<<< .mine
-   * @param recID The ID for the recording whose files are going to be zipped
-=======
-   * @param recID The ID of the recording
->>>>>>> .r2303
+   * 
+   * @param recID 
+   *      The ID for the recording whose files are going to be zipped
    * @return A File reference to the file zip created
    */
   public File zipFiles(String recID) {
@@ -561,12 +547,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
 
   /**
-   * Sends a file to the REST ingestion service
-<<<<<<< .mine
-   * @param recID The ID for the recording to be ingested
-=======
-   * @param recID The ID of the recording
->>>>>>> .r2303
+   * Sends a file to the REST ingestion service.
+   * 
+   * @param recID
+   *      The ID for the recording to be ingested
    */
   public int ingest(String recID) {
     logger.debug("Ingesting recording: {}", recID);

@@ -58,6 +58,6 @@ public class IdImpl implements Id {
 
   @Override
   public String toString() {
-    return compact();
+    return id;
   }
 }

@@ -79,9 +79,22 @@ public class IngestServiceImplTest {
     EasyMock.expect(
             workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
                     .anyObject())).andReturn(urlCatalog);
+    
     EasyMock.expect(
             workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
-                    (InputStream) EasyMock.anyObject())).andReturn(urlCatalog).anyTimes();
+                    (InputStream) EasyMock.anyObject())).andReturn(urlTrack1);
+    EasyMock.expect(
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(urlTrack2);
+    EasyMock.expect(
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(urlCatalog1);
+    EasyMock.expect(
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(urlCatalog2);
+    EasyMock.expect(
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(urlCatalog);
     EasyMock.replay(workspace);
     service = new IngestServiceImpl();
     service.setEventAdmin(EasyMock.createNiceMock(EventAdmin.class));

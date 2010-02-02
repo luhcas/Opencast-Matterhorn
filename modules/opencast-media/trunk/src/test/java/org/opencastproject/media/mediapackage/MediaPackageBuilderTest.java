@@ -50,12 +50,12 @@ public class MediaPackageBuilderTest extends AbstractMediaPackageTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.MediaPackageBuilderImpl#loadFromManifest(File)}.
+   * Test method for {@link org.opencastproject.media.mediapackage.MediaPackageBuilderImpl#loadFromXml(File)}.
    */
   @Test
   public void testLoadFromManifest() {
     try {
-      MediaPackage mediaPackage = mediaPackageBuilder.loadFromManifest(new FileInputStream(manifestFile));
+      MediaPackage mediaPackage = mediaPackageBuilder.loadFromXml(new FileInputStream(manifestFile));
 
       // Test presence of tracks
       assertEquals(2, mediaPackage.getTracks().length);

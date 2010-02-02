@@ -202,7 +202,7 @@ public class IngestRestService {
         for (FileItemIterator iter = upload.getItemIterator(request); iter.hasNext();) {
           FileItemStream item = iter.next();
           if (item.getFieldName().equals("mediaPackage")) {
-            mp = builder.loadFromManifest(item.openStream());
+            mp = builder.loadFromXml(item.openStream());
             Id mpID = mp.getIdentifier();
             listener.setMediaPackageID(mpID.compact());
           } else if (item.getFieldName().equals("track")) {
@@ -331,7 +331,7 @@ public class IngestRestService {
               String flavorString = Streams.asString(item.openStream());
               if(flavorString != null) flavor = MediaPackageElementFlavor.parseFlavor(flavorString);
             } else if ("mediaPackage".equals(fieldName)) {
-              mp = builder.loadFromManifest(item.openStream());
+              mp = builder.loadFromXml(item.openStream());
             }
           } else {
             fileName = item.getName();
@@ -352,7 +352,7 @@ public class IngestRestService {
           throw new IllegalStateException("Type must be one of track, catalog, or attachment");
         }
         service.ingest(mp);
-        return Response.ok(getStringFromDocument(mp.toXml())).build();
+        return Response.ok(mp.toXml()).build();
       }
       return Response.serverError().status(Status.BAD_REQUEST).build();
     } catch (Exception e) {
@@ -393,7 +393,7 @@ public class IngestRestService {
       }
       return Response.serverError().status(Status.BAD_REQUEST).build();
     } catch (Exception e) {
-      logger.warn(e.getMessage());
+      logger.warn(e.getMessage(), e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }

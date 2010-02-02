@@ -235,7 +235,7 @@ public class SolrRequester {
         try {
           MediaPackage mediaPackage = null;
           mediaPackage = builder
-                  .loadFromManifest(new ByteArrayInputStream(mediaPackageFieldValue.toString().getBytes()));
+                  .loadFromXml(new ByteArrayInputStream(mediaPackageFieldValue.toString().getBytes()));
           item.setMediaPackage(mediaPackage);
         } catch (Exception e) {
           log_.warn("Unable to read media package from search result", e);

@@ -64,7 +64,7 @@ public interface MediaPackageBuilder {
    * @throws MediaPackageException
    *           if loading of the media package fails
    */
-  MediaPackage loadFromManifest(InputStream is) throws MediaPackageException;
+  MediaPackage loadFromXml(InputStream is) throws MediaPackageException;
 
   /**
    * Loads a media package from the input stream, using the provided packager to decode the stream.

@@ -74,7 +74,7 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
       }
 
       // Send a mediapackage clone to the distribution service so we don't manipulate mediapackages associated with previous workflow operations
-      MediaPackage clone = MediaPackageUtil.clone(currentMediaPackage);
+      MediaPackage clone = (MediaPackage)currentMediaPackage.clone();
       
       // Look for elements matching any tag
       Set<String> elementIds = new HashSet<String>();

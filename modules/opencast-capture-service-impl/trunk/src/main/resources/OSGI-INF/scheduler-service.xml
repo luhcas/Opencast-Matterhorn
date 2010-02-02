@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.capture.api.Scheduler" immediate="true">
+<component name="org.opencastproject.capture.api.Scheduler" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.capture.impl.SchedulerImpl" />
   <property name="service.description" value="Capture Scheduling Service" />
   <service>

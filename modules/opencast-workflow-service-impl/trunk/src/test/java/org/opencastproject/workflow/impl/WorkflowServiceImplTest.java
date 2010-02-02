@@ -106,9 +106,9 @@ public class WorkflowServiceImplTest {
       service.registerWorkflowDefinition(failingDefinitionWithErrorHandler);
       MediaPackageBuilder mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
       mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
-      mediapackage1 = mediaPackageBuilder.loadFromManifest(WorkflowServiceImplTest.class
+      mediapackage1 = mediaPackageBuilder.loadFromXml(WorkflowServiceImplTest.class
               .getResourceAsStream("/mediapackage-1.xml"));
-      mediapackage2 = mediaPackageBuilder.loadFromManifest(WorkflowServiceImplTest.class
+      mediapackage2 = mediaPackageBuilder.loadFromXml(WorkflowServiceImplTest.class
               .getResourceAsStream("/mediapackage-2.xml"));
     } catch (Exception e) {
       Assert.fail(e.getMessage());

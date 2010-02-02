@@ -43,7 +43,7 @@ public class DistributionServiceImplTest {
     File mediaPackageRoot = new File("./target/test-classes");
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     builder.setSerializer(new DefaultMediaPackageSerializerImpl(mediaPackageRoot));
-    mp = builder.loadFromManifest(this.getClass().getResourceAsStream("/mediapackage.xml"));
+    mp = builder.loadFromXml(this.getClass().getResourceAsStream("/mediapackage.xml"));
     
     distributionRoot = new File("./target/static");
     service = new DistributionServiceImpl(distributionRoot);

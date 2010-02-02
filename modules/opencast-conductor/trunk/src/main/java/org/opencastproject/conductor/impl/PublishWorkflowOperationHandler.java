@@ -61,7 +61,7 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
   public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     try {
       MediaPackage current = workflowInstance.getCurrentMediaPackage();
-      MediaPackage mp = MediaPackageUtil.clone(current);
+      MediaPackage mp = (MediaPackage)current.clone();
       logger.info("Publishing media package {} to search index", mp);
 
       // Check which tags have been configured

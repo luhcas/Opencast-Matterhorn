@@ -71,7 +71,7 @@ public class ImageWorkflowOperationHandler implements WorkflowOperationHandler {
   public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.debug("Running image workflow operation on {}", workflowInstance);
 
-    MediaPackage src = MediaPackageUtil.clone(workflowInstance.getCurrentMediaPackage());
+    MediaPackage src = (MediaPackage)workflowInstance.getCurrentMediaPackage().clone();
 
     // Create the image
     MediaPackage resultingMediaPackage = null;

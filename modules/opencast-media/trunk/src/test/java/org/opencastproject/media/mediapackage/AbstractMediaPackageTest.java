@@ -137,7 +137,7 @@ public abstract class AbstractMediaPackageTest {
 
     // Create a media package
     mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(packageDir));
-    mediaPackage = mediaPackageBuilder.loadFromManifest(new FileInputStream(manifestFile));
+    mediaPackage = mediaPackageBuilder.loadFromXml(new FileInputStream(manifestFile));
   }
 
   /**

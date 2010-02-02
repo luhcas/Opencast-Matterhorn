@@ -24,9 +24,15 @@ import org.opencastproject.util.ConfigurationException;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
@@ -49,7 +55,7 @@ public class MediaPackageTest extends AbstractMediaPackageTest {
   }
 
   @Test
-  public void testElementUrls() {
+  public void testElementUrls() throws ParserConfigurationException, SAXException, IOException {
     try {
       XPath xPath = XPathFactory.newInstance().newXPath();
 
@@ -58,7 +64,9 @@ public class MediaPackageTest extends AbstractMediaPackageTest {
       mediaPackage.add(dcFile.toURI());
 
       // Test url
-      Document xml = mediaPackage.toXml();
+      String xmlString = mediaPackage.toXml();
+      DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      Document xml = docBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()));
       String expected = dcFile.toURI().toURL().toExternalForm();
       assertEquals(expected, xPath.evaluate("//url", xml));
 
