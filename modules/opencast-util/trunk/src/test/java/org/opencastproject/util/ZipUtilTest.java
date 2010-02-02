@@ -34,7 +34,7 @@ public class ZipUtilTest {
    * WARNING: Changes in the files to zip would change the resulting zip size.
    * If such changes are made, change also this constant accordingly
    */
-  private static final long ZIPSIZE = 870532;
+  private static final long ZIPSIZE = 870531;
   
   @Before
   public void setup() throws Exception {

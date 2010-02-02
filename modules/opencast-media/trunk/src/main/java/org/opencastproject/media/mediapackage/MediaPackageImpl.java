@@ -20,6 +20,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.media.mediapackage.identifier.Id;
 import org.opencastproject.util.DateTimeSupport;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -973,6 +974,21 @@ public final class MediaPackageImpl implements MediaPackage {
     for (MediaPackageElement e : manifest.getEntries()) {
       e.verify();
     }
+  }
+
+  /**
+   * Public constructor for JAXB deserialization. Do not use this constructor
+   * directly, instead use a {@link MediaPackageBuilderFactory}.
+   * 
+   * @param xml
+   *          the serialized xml string
+   * @return the deserialized media package
+   * @throws JAXBException
+   *           if deserialization fails
+   */
+  public static MediaPackageImpl valueOf(String xml) throws JAXBException {
+    return (MediaPackageImpl) context.createUnmarshaller().unmarshal(
+            IOUtils.toInputStream(xml));
   }
 
   /**
