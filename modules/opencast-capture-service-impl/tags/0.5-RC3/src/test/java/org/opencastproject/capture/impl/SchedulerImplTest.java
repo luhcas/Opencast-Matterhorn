@@ -27,10 +27,8 @@ import java.util.Date;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
 public class SchedulerImplTest {
 
   SchedulerImpl sched = null;
@@ -92,6 +90,12 @@ public class SchedulerImplTest {
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, testfile.toURI().toURL().toString());
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
     sched.activate(null);
+    //TODO:  Figure out why this fails 1/3 times on some machines without the sleep() here.
+    try {
+      Thread.sleep(200);
+    } catch (InterruptedException e) {
+      Assert.fail();
+    }
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals(times[0], schedule[0]);
