@@ -5,17 +5,17 @@
   <artifactId>opencast-workflow-service-impl</artifactId>
   <packaging>bundle</packaging>
   <name>opencast-workflow-service-impl</name>
-  <version>0.6-SNAPSHOT</version>
+  <version>0.5-RC3</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.6-SNAPSHOT</version>
+    <version>0.5-RC3</version>
   </parent>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-workflow-service-api</artifactId>
-      <version>0.6-SNAPSHOT</version>
+      <version>0.5-RC3</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
