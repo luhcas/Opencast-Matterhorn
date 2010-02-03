@@ -51,7 +51,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamSource;
 
 /**
  * Default implementation for a media media package.
@@ -977,18 +979,15 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Public constructor for JAXB deserialization. Do not use this constructor
-   * directly, instead use a {@link MediaPackageBuilderFactory}.
+   * Unmarshals XML representation of a MediaPackage via JAXB.
    * 
    * @param xml
    *          the serialized xml string
    * @return the deserialized media package
-   * @throws JAXBException
-   *           if deserialization fails
+   * @throws MediaPackageException 
    */
-  public static MediaPackageImpl valueOf(String xml) throws JAXBException {
-    return (MediaPackageImpl) context.createUnmarshaller().unmarshal(
-            IOUtils.toInputStream(xml));
+  public static MediaPackageImpl valueOf(String xml) throws MediaPackageException {
+    return MediaPackageImpl.valueOf(IOUtils.toInputStream(xml));
   }
 
   /**
@@ -1068,7 +1067,7 @@ public final class MediaPackageImpl implements MediaPackage {
       return "Unknown media package";
   }
 
-  // TODO: Comment me!
+  /** A JAXB adapter that allows the {@link MediaPackage} interface to be un/marshalled */
   static class Adapter extends XmlAdapter<MediaPackageImpl, MediaPackage> {
     public MediaPackageImpl marshal(MediaPackage mp) throws Exception {
       return (MediaPackageImpl) mp;
@@ -1108,7 +1107,8 @@ public final class MediaPackageImpl implements MediaPackage {
           throws MediaPackageException {
     try {
       Unmarshaller unmarshaller = context.createUnmarshaller();
-      return (MediaPackageImpl) unmarshaller.unmarshal(xml);
+      Source source = new StreamSource(xml);
+      return (MediaPackageImpl) unmarshaller.unmarshal(source, MediaPackageImpl.class).getValue();
     } catch (JAXBException e) {
       throw new MediaPackageException(e);
     }
