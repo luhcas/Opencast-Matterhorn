@@ -223,6 +223,9 @@ public class IngestServiceImpl implements IngestService, ManagedService,
         mp.setLanguage(dc.getFirst(DublinCore.PROPERTY_LANGUAGE));
 
         break;
+      } else {
+        // Series Title
+        mp.setSeriesTitle(dc.getFirst(DublinCore.PROPERTY_TITLE));
       }
     }
   }

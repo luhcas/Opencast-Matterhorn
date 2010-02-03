@@ -1,5 +1,6 @@
 <mediapackage id="10.0000/1" start="2007-12-05T13:40:00" duration="1004400000">
   <title>t1</title>
+  <seriestitle>s1</seriestitle>
   <creators>
     <creator>p1</creator>
   </creators>

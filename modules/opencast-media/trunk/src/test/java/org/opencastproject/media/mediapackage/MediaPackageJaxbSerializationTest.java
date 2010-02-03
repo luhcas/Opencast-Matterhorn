@@ -119,9 +119,11 @@ public class MediaPackageJaxbSerializationTest {
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     MediaPackage original = builder.createNew();
     original.setTitle(title);
+    original.setSeriesTitle("s1");
     String xml = original.toXml();
     Assert.assertTrue(xml.indexOf(title) > 0);
     MediaPackage unmarshalled = builder.loadFromXml(xml);
     Assert.assertEquals(title, unmarshalled.getTitle());
+    Assert.assertEquals("s1", unmarshalled.getSeriesTitle());
   }
 }

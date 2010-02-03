@@ -35,25 +35,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public interface MediaPackage extends Cloneable {
 
   /**
-   * This enumeration lists locations where media packages may reside.
-   */
-  enum Repository {
-    Archive, Inbox, Quarantine;
-
-    public static Repository parseString(String value) {
-      if (Archive.toString().equalsIgnoreCase(value))
-        return Archive;
-      else if (Inbox.toString().equalsIgnoreCase(value))
-        return Inbox;
-      else if (Quarantine.toString().equalsIgnoreCase(value))
-        return Quarantine;
-      else
-        throw new IllegalArgumentException("Repository type '" + value
-                + "' is unkown");
-    }
-  }
-
-  /**
    * Returns the media package identifier.
    * 
    * @return the identifier
@@ -63,9 +44,18 @@ public interface MediaPackage extends Cloneable {
   void setTitle(String title);
 
   /**
-   * TODO: Comment me
+   * Returns the title for the associated series, if any.
    * 
-   * @return
+   * @return The series title
+   */
+  String getSeriesTitle();
+  
+  void setSeriesTitle(String seriesTitle);
+
+  /**
+   * Returns the title of the episode that this mediapackage represents.
+   * 
+   * @return The episode title
    */
   String getTitle();
 

@@ -59,16 +59,14 @@ import javax.xml.transform.stream.StreamSource;
  * 
  * TODO: Finish code documentation
  */
-@XmlType(name = "mediapackage", namespace = "http://mediapackage.opencastproject.org", propOrder = {
-        "title", "series", "creators", "contributors", "subjects", "license",
-        "language", "tracks", "catalogs", "attachments" })
+@XmlType(name = "mediapackage", namespace = "http://mediapackage.opencastproject.org", propOrder = { "title", "series",
+        "seriesTitle", "creators", "contributors", "subjects", "license", "language", "tracks", "catalogs", "attachments" })
 @XmlRootElement(name = "mediapackage", namespace = "http://mediapackage.opencastproject.org")
 @XmlAccessorType(XmlAccessType.NONE)
 public final class MediaPackageImpl implements MediaPackage {
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory
-          .getLogger(MediaPackageImpl.class.getName());
+  private final static Logger log_ = LoggerFactory.getLogger(MediaPackageImpl.class.getName());
 
   /** Context for serializing and deserializing */
   static JAXBContext context;
@@ -84,6 +82,9 @@ public final class MediaPackageImpl implements MediaPackage {
 
   @XmlElement(name = "title")
   String title = null;
+
+  @XmlElement(name = "seriestitle")
+  String seriesTitle = null;
 
   @XmlElement(name = "language")
   String language = null;
@@ -108,9 +109,8 @@ public final class MediaPackageImpl implements MediaPackage {
 
   static {
     try {
-      context = JAXBContext.newInstance(
-              "org.opencastproject.media.mediapackage", MediaPackageImpl.class
-                      .getClassLoader());
+      context = JAXBContext.newInstance("org.opencastproject.media.mediapackage", MediaPackageImpl.class
+              .getClassLoader());
     } catch (JAXBException e) {
       throw new RuntimeException(e);
     }
@@ -134,8 +134,7 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Creates a new media media package derived from the given media media
-   * package catalog document.
+   * Creates a new media media package derived from the given media media package catalog document.
    * 
    * @param manifest
    *          the manifest
@@ -218,8 +217,7 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#getElementByReference(org.opencastproject.media.mediapackage.MediaPackageReference)
    */
-  public MediaPackageElement getElementByReference(
-          MediaPackageReference reference) {
+  public MediaPackageElement getElementByReference(MediaPackageReference reference) {
     if (reference == null)
       throw new IllegalArgumentException("Argument reference is null");
     for (MediaPackageElement element : manifest.getEntries()) {
@@ -262,8 +260,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @see org.opencastproject.media.mediapackage.MediaPackage#getElementsByFlavor(org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement[] getElementsByFlavor(
-          MediaPackageElementFlavor flavor) {
+  public MediaPackageElement[] getElementsByFlavor(MediaPackageElementFlavor flavor) {
     if (flavor == null)
       throw new IllegalArgumentException("Flavor cannot be null");
 
@@ -283,13 +280,11 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Returns <code>true</code> if the media package contains an element with the
-   * specified identifier.
+   * Returns <code>true</code> if the media package contains an element with the specified identifier.
    * 
    * @param identifier
    *          the identifier
-   * @return <code>true</code> if the media package contains an element with
-   *         this identifier
+   * @return <code>true</code> if the media package contains an element with this identifier
    */
   boolean contains(String identifier) {
     for (MediaPackageElement element : manifest.getEntries()) {
@@ -308,8 +303,7 @@ public final class MediaPackageImpl implements MediaPackage {
       manifest.add(catalog);
       fireElementAdded(catalog);
     } catch (IOException e) {
-      throw new UnsupportedElementException("Error integrating " + catalog
-              + " into media package: " + e.getMessage());
+      throw new UnsupportedElementException("Error integrating " + catalog + " into media package: " + e.getMessage());
     }
   }
 
@@ -322,8 +316,7 @@ public final class MediaPackageImpl implements MediaPackage {
       manifest.add(track);
       fireElementAdded(track);
     } catch (IOException e) {
-      throw new UnsupportedElementException("Error integrating " + track
-              + " into media package: " + e.getMessage());
+      throw new UnsupportedElementException("Error integrating " + track + " into media package: " + e.getMessage());
     }
   }
 
@@ -336,8 +329,8 @@ public final class MediaPackageImpl implements MediaPackage {
       manifest.add(attachment);
       fireElementAdded(attachment);
     } catch (IOException e) {
-      throw new UnsupportedElementException("Error integrating " + attachment
-              + " into media package: " + e.getMessage());
+      throw new UnsupportedElementException("Error integrating " + attachment + " into media package: "
+              + e.getMessage());
     }
   }
 
@@ -400,8 +393,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#getCatalogs(org.opencastproject.media.mediapackage.MediaPackageElementFlavor,
    *      org.opencastproject.media.mediapackage.MediaPackageReference)
    */
-  public Catalog[] getCatalogs(MediaPackageElementFlavor flavor,
-          MediaPackageReference reference) {
+  public Catalog[] getCatalogs(MediaPackageElementFlavor flavor, MediaPackageReference reference) {
     return manifest.getCatalogs(flavor, reference);
   }
 
@@ -415,8 +407,7 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#hasCatalogs(MediaPackageElementFlavor)
    */
-  public boolean hasCatalogs(MediaPackageElementFlavor type,
-          MediaPackageReference reference) {
+  public boolean hasCatalogs(MediaPackageElementFlavor type, MediaPackageReference reference) {
     return manifest.hasCatalogs(type, reference);
   }
 
@@ -486,8 +477,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#getTracks(org.opencastproject.media.mediapackage.MediaPackageElementFlavor,
    *      org.opencastproject.media.mediapackage.MediaPackageReference)
    */
-  public Track[] getTracks(MediaPackageElementFlavor flavor,
-          MediaPackageReference reference) {
+  public Track[] getTracks(MediaPackageElementFlavor flavor, MediaPackageReference reference) {
     return manifest.getTracks(flavor, reference);
   }
 
@@ -515,8 +505,7 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#getUnclassifiedElements(org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement[] getUnclassifiedElements(
-          MediaPackageElementFlavor type) {
+  public MediaPackageElement[] getUnclassifiedElements(MediaPackageElementFlavor type) {
     return manifest.getUnclassifiedElements(type);
   }
 
@@ -602,8 +591,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#getAttachments(org.opencastproject.media.mediapackage.MediaPackageElementFlavor,
    *      org.opencastproject.media.mediapackage.MediaPackageReference)
    */
-  public Attachment[] getAttachments(MediaPackageElementFlavor flavor,
-          MediaPackageReference reference) {
+  public Attachment[] getAttachments(MediaPackageElementFlavor flavor, MediaPackageReference reference) {
     return manifest.getAttachments(flavor, reference);
   }
 
@@ -676,8 +664,7 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.media.mediapackage.MediaPackage#setCover(org.opencastproject.media.mediapackage.Attachment)
    */
-  public void setCover(Attachment cover) throws MediaPackageException,
-          UnsupportedElementException {
+  public void setCover(Attachment cover) throws MediaPackageException, UnsupportedElementException {
     Attachment oldCover = getCover();
     if (oldCover != null)
       remove(oldCover);
@@ -707,8 +694,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#pack(org.opencastproject.media.mediapackage.MediaPackagePackager,
    *      java.io.OutputStream)
    */
-  public void pack(MediaPackagePackager packager, OutputStream out)
-          throws IOException, MediaPackageException {
+  public void pack(MediaPackagePackager packager, OutputStream out) throws IOException, MediaPackageException {
     if (packager == null)
       throw new IllegalArgumentException("The packager must not be null");
     if (out == null)
@@ -724,11 +710,9 @@ public final class MediaPackageImpl implements MediaPackage {
       throw new IllegalArgumentException("Argument 'url' may not be null");
 
     if (mediaPackageElementBuilder == null) {
-      mediaPackageElementBuilder = MediaPackageElementBuilderFactory
-              .newInstance().newElementBuilder();
+      mediaPackageElementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
     }
-    MediaPackageElement element = mediaPackageElementBuilder
-            .elementFromURI(url);
+    MediaPackageElement element = mediaPackageElementBuilder.elementFromURI(url);
     add(element);
     return element;
   }
@@ -738,19 +722,17 @@ public final class MediaPackageImpl implements MediaPackage {
    *      org.opencastproject.media.mediapackage.MediaPackageElement.Type,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement add(URI uri, Type type,
-          MediaPackageElementFlavor flavor) throws UnsupportedElementException {
+  public MediaPackageElement add(URI uri, Type type, MediaPackageElementFlavor flavor)
+          throws UnsupportedElementException {
     if (uri == null)
       throw new IllegalArgumentException("Argument 'url' may not be null");
     if (type == null)
       throw new IllegalArgumentException("Argument 'type' may not be null");
 
     if (mediaPackageElementBuilder == null) {
-      mediaPackageElementBuilder = MediaPackageElementBuilderFactory
-              .newInstance().newElementBuilder();
+      mediaPackageElementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
     }
-    MediaPackageElement element = mediaPackageElementBuilder.elementFromURI(
-            uri, type, flavor);
+    MediaPackageElement element = mediaPackageElementBuilder.elementFromURI(uri, type, flavor);
     add(element);
     return element;
   }
@@ -760,19 +742,13 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @see org.opencastproject.media.mediapackage.MediaPackage#add(org.opencastproject.media.mediapackage.MediaPackageElement)
    */
-  public void add(MediaPackageElement element)
-          throws UnsupportedElementException {
+  public void add(MediaPackageElement element) throws UnsupportedElementException {
     try {
-      if (element.getElementType().equals(MediaPackageElement.Type.Track)
-              && element instanceof Track) {
+      if (element.getElementType().equals(MediaPackageElement.Type.Track) && element instanceof Track) {
         integrateTrack((Track) element);
-      } else if (element.getElementType().equals(
-              MediaPackageElement.Type.Catalog)
-              && element instanceof Catalog) {
+      } else if (element.getElementType().equals(MediaPackageElement.Type.Catalog) && element instanceof Catalog) {
         integrateCatalog((Catalog) element);
-      } else if (element.getElementType().equals(
-              MediaPackageElement.Type.Attachment)
-              && element instanceof Attachment) {
+      } else if (element.getElementType().equals(MediaPackageElement.Type.Attachment) && element instanceof Attachment) {
         integrateAttachment((Attachment) element);
       } else {
         integrate(element);
@@ -780,8 +756,7 @@ public final class MediaPackageImpl implements MediaPackage {
       manifest.add(element);
       fireElementAdded(element);
     } catch (IOException e) {
-      throw new UnsupportedElementException("Error integrating " + element
-              + " into media package: " + e.getMessage());
+      throw new UnsupportedElementException("Error integrating " + element + " into media package: " + e.getMessage());
     }
   }
 
@@ -793,15 +768,14 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#addDerived(org.opencastproject.media.mediapackage.MediaPackageElement,
    *      org.opencastproject.media.mediapackage.MediaPackageElement)
    */
-  public void addDerived(MediaPackageElement derivedElement,
-          MediaPackageElement sourceElement) throws UnsupportedElementException {
+  public void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement)
+          throws UnsupportedElementException {
     if (derivedElement == null)
       throw new IllegalArgumentException("The derived element is null");
     if (sourceElement == null)
       throw new IllegalArgumentException("The source element is null");
     if (!manifest.contains(sourceElement))
-      throw new IllegalStateException(
-              "The sourceElement needs to be part of the media package");
+      throw new IllegalStateException("The sourceElement needs to be part of the media package");
 
     derivedElement.referTo(sourceElement);
     add(derivedElement);
@@ -813,19 +787,16 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#getDerived(org.opencastproject.media.mediapackage.MediaPackageElement,
    *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement[] getDerived(MediaPackageElement sourceElement,
-          MediaPackageElementFlavor derivateFlavor) {
+  public MediaPackageElement[] getDerived(MediaPackageElement sourceElement, MediaPackageElementFlavor derivateFlavor) {
     if (sourceElement == null)
       throw new IllegalArgumentException("Source element cannot be null");
     if (derivateFlavor == null)
       throw new IllegalArgumentException("Derivate flavor cannot be null");
 
-    MediaPackageReference reference = new MediaPackageReferenceImpl(
-            sourceElement);
+    MediaPackageReference reference = new MediaPackageReferenceImpl(sourceElement);
     List<MediaPackageElement> elements = new ArrayList<MediaPackageElement>();
     for (MediaPackageElement element : manifest.getEntries()) {
-      if (derivateFlavor.equals(element.getFlavor())
-              && reference.equals(element.getReference()))
+      if (derivateFlavor.equals(element.getFlavor()) && reference.equals(element.getReference()))
         elements.add(element);
     }
     return elements.toArray(new MediaPackageElement[elements.size()]);
@@ -843,8 +814,7 @@ public final class MediaPackageImpl implements MediaPackage {
         try {
           o.elementAdded(element);
         } catch (Throwable th) {
-          log_.error("MediaPackageOberserver " + o
-                  + " throw exception while processing callback", th);
+          log_.error("MediaPackageOberserver " + o + " throw exception while processing callback", th);
         }
       }
     }
@@ -862,8 +832,7 @@ public final class MediaPackageImpl implements MediaPackage {
         try {
           o.elementRemoved(element);
         } catch (Throwable th) {
-          log_.error("MediaPackageObserver " + o
-                  + " threw exception while processing callback", th);
+          log_.error("MediaPackageObserver " + o + " threw exception while processing callback", th);
         }
       }
     }
@@ -877,8 +846,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Integrates the element into the media package. This mainly involves moving
-   * the element into the media package file structure.
+   * Integrates the element into the media package. This mainly involves moving the element into the media package file
+   * structure.
    * 
    * @param element
    *          the element to integrate
@@ -891,8 +860,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Integrates the catalog into the media package. This mainly involves moving
-   * the catalog into the media package file structure.
+   * Integrates the catalog into the media package. This mainly involves moving the catalog into the media package file
+   * structure.
    * 
    * @param catalog
    *          the catalog to integrate
@@ -910,8 +879,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Integrates the track into the media package. This mainly involves moving
-   * the track into the media package file structure.
+   * Integrates the track into the media package. This mainly involves moving the track into the media package file
+   * structure.
    * 
    * @param track
    *          the track to integrate
@@ -929,8 +898,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Integrates the attachment into the media package. This mainly involves
-   * moving the attachment into the media package file structure.
+   * Integrates the attachment into the media package. This mainly involves moving the attachment into the media package
+   * file structure.
    * 
    * @param attachment
    *          the attachment to integrate
@@ -941,17 +910,15 @@ public final class MediaPackageImpl implements MediaPackage {
     // Check (uniqueness of) attachment identifier
     String id = attachment.getIdentifier();
     if (id == null || contains(id)) {
-      id = createElementIdentifier("attachment",
-              manifest.getAttachments().length + 1);
+      id = createElementIdentifier("attachment", manifest.getAttachments().length + 1);
       attachment.setIdentifier(id.toString());
     }
     integrate(attachment);
   }
 
   /**
-   * Returns a media package element identifier with the given prefix and the
-   * given number or a higher one as the suffix. The identifier will be unique
-   * within the media package.
+   * Returns a media package element identifier with the given prefix and the given number or a higher one as the
+   * suffix. The identifier will be unique within the media package.
    * 
    * @param prefix
    *          the identifier prefix
@@ -983,7 +950,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * @param xml
    *          the serialized xml string
    * @return the deserialized media package
-   * @throws MediaPackageException 
+   * @throws MediaPackageException
    */
   public static MediaPackageImpl valueOf(String xml) throws MediaPackageException {
     return MediaPackageImpl.valueOf(IOUtils.toInputStream(xml));
@@ -1015,8 +982,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * @throws TransformerException
    * @see org.opencastproject.media.mediapackage.MediaPackage#toXml()
    */
-  public Document toXml(MediaPackageSerializer serializer)
-          throws MediaPackageException {
+  public Document toXml(MediaPackageSerializer serializer) throws MediaPackageException {
     try {
       return manifest.toXml(serializer);
     } catch (TransformerException e) {
@@ -1084,12 +1050,10 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.media.mediapackage.MediaPackage#toXml(OutputStream,
-   *      boolean)
+   * @see org.opencastproject.media.mediapackage.MediaPackage#toXml(OutputStream, boolean)
    */
   @Override
-  public void toXml(OutputStream out, boolean format)
-          throws MediaPackageException {
+  public void toXml(OutputStream out, boolean format) throws MediaPackageException {
     try {
       Marshaller marshaller = context.createMarshaller();
       marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, format);
@@ -1106,8 +1070,7 @@ public final class MediaPackageImpl implements MediaPackage {
    *          the input stream
    * @return the deserialized media package
    */
-  public static MediaPackageImpl valueOf(InputStream xml)
-          throws MediaPackageException {
+  public static MediaPackageImpl valueOf(InputStream xml) throws MediaPackageException {
     try {
       Unmarshaller unmarshaller = context.createUnmarshaller();
       Source source = new StreamSource(xml);
@@ -1191,6 +1154,24 @@ public final class MediaPackageImpl implements MediaPackage {
   @Override
   public String getTitle() {
     return title;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getSeriesTitle()
+   */
+  public String getSeriesTitle() {
+    return seriesTitle;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#setSeriesTitle(java.lang.String)
+   */
+  public void setSeriesTitle(String seriesTitle) {
+    this.seriesTitle = seriesTitle;
   }
 
   /**
