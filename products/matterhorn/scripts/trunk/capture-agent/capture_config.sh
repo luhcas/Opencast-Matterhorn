@@ -3,16 +3,18 @@
 
 SETUP_PROPS=$PWD/config.sh
 
-# setup opencast user
-export USERNAME=matterhorn
+# prompt for user name
+USERNAME=matterhorn
 echo -n "Input desired opencast username (matterhorn): "
 read input
 if [ "$input" != "" ];
   then
   USERNAME=$input
 fi
+export $USERNAME
 echo "Username: $USERNAME"
 
+# add user and give sudo priveleges
 sudo useradd -m -s /bin/bash $USERNAME
 echo "Enter $USERNAME's new password"
 sudo passwd $USERNAME
@@ -32,6 +34,8 @@ drivers[8]="vga2usb-3.22.2.0000-2.6.28-13-generic_amd64.tbz"
 drivers[9]="Not listed here"
 drivers[10]="Do not need driver"
 
+# list of kernel versions using `uname -r`;`uname -m`
+# these are mapped to drivers above
 kernels[0]="2.6.31-16-generic;i686|2.6.31-16-generic;i386"
 kernels[1]=""
 kernels[2]="2.6.31-14-generic;i686|2.6.31-14-generic;i386"
@@ -44,8 +48,9 @@ EPIPHAN=""
 KERNEL=`uname -r`
 ARCH=`uname -m`
 EPIPHAN_HW="$KERNEL;$ARCH"
-EPIPHAN_DEFAULT=0
+EPIPHAN_DEFAULT=9
 
+# if current kernel matches common driver, suggest it
 for ((i = 0; i < ${#kernels[@]}; i++ ))
   do
     test="$(echo "${kernels[$i]}" | grep $EPIPHAN_HW)"
@@ -55,6 +60,7 @@ for ((i = 0; i < ${#kernels[@]}; i++ ))
     fi
 done
 
+# let user choose driver
 echo "System information: `uname -a`"
 echo "Here is a list of supported Epiphan VGA2USB drivers:"
 for ((i = 0; i < ${#drivers[@]}; i++ ))
@@ -86,7 +92,7 @@ if [ $LOAD_DRIVER -eq 0 ]; then
   if [ $? -ne 0 ]; then
     SUCCESS=1
   fi
-  mv $EPIPHAN drivers/
+  sudo -u $USERNAME mv $EPIPHAN drivers/
   cd drivers/
   sudo -u $USERNAME tar jxf $EPIPHAN
   sudo make load
@@ -100,12 +106,13 @@ if [ $SUCCESS -ne 0 ]; then
   echo "Failed to load Epiphan driver. Try to do it manually."
 fi
 
-sudo echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse" >> sources.list
-sudo echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse" >> sources.list
-sudo echo "deb http://security.ubuntu.com/ubuntu karmic-security main restricted universe multiverse" >> sources.list
+sudo echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse" >> $HOME/sources.list
+sudo echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse" >> $HOME/sources.list
+sudo echo "deb http://security.ubuntu.com/ubuntu karmic-security main restricted universe multiverse" >> $HOME/sources.list
 
-sudo mv sources.list /etc/apt/sources.list
+sudo mv $HOME/sources.list /etc/apt/sources.list
 
+# auto set selections when installing postfix and jdk packages
 sudo debconf-set-selections <<\EOF
 postfix postfix/mailname string fax
 postfix postfix/main_mailer_type select Internet Site
@@ -122,16 +129,23 @@ sudo apt-get -y --force-yes install v4l-conf ivtv-utils maven2 sun-java6-jdk sub
 export JAVA_HOME=/usr/lib/jvm/java-6-sun-1.6.0.15
 export FELIX_FILENAME=felix-framework-2.0.1.tar.gz
 export FELIX_URL=http://apache.mirror.iweb.ca/felix/$FELIX_FILENAME
-export FELIX_HOME=$HOME/felix-framework-2.0.1
-export M2_REPO=$HOME/.m2/repository
+export FELIX_HOME=/home/$USERNAME/felix-framework-2.0.1
+export M2_REPO=/home/$USERNAME/.m2/repository
 
-cd
+sudo chmod o+w /home/$USERNAME/.bashrc
+sudo -u $USERNAME echo "export M2_REPO=$M2_REPO" >> /home/$USERNAME/.bashrc
+sudo -u $USERNAME echo "export FELIX_HOME=$FELIX_HOME" >> /home/$USERNAME/.bashrc
+exit
+
+# setup felix
+cd /home/$USERNAME
 if [ -d $FELIX_HOME ]; then
-  rm -rf $FELIX_HOME
+  sudo -u $USERNAME rm -rf $FELIX_HOME
 fi
-curl $FELIX_URL | tar xz 
+sudo -u $USERNAME curl $FELIX_URL | sudo -u $USERNAME tar xz 
 sudo -u $USERNAME mkdir ${FELIX_HOME}/load
 
+# setup jv4linfo
 echo "Installing jv4linfo..."
 sudo -u $USERNAME wget http://luniks.net/luniksnet/download/java/jv4linfo/jv4linfo-0.2.1-src.jar
 sudo -u $USERNAME jar xf jv4linfo-0.2.1-src.jar
@@ -141,29 +155,28 @@ cd jv4linfo/src
 sudo -u $USERNAME sed -i '74i\\t<arg value="-fPIC"/>' build.xml
 sudo -u $USERNAME sed -i "s#\"\/usr\/lib\/jvm\/java-6-openjdk\/include\"#\"$JAVA_HOME\/include\"#g" build.xml
 
-sudo -u $USERNAME ant
+sudo -u $USERNAME ant -lib $JAVA_HOME/lib
 sudo cp ../lib/libjv4linfo.so /usr/lib
 
 cd ../..
 
 # setup properties by calling config.sh
-sudo -u $USERNAME cp $SETUP_PROPS .
-sudo chown $USERNAME:$USERNAME ./config.sh
-sudo -u $USERNAME ./config.sh
+sudo  cp $SETUP_PROPS /home/$USERNAME
+sudo chown $USERNAME:$USERNAME /home/$USERNAME/config.sh
+sudo -u $USERNAME /home/$USERNAME/config.sh
 
 # build properties
-sudo -u $USERNAME cp $HOME/build_matterhorn .
-sudo chown $USERNAME:$USERNAME ./build_matterhorn.sh
-sudo -u $USERNAME ./build_matterhorn.sh
+sudo cp $HOME/build_matterhorn.sh /home/$USERNAME
+sudo chown $USERNAME:$USERNAME /home/$USERNAME/build_matterhorn.sh
+sudo -u $USERNAME /home/$USERNAME/build_matterhorn.sh $FELIX_HOME
 
 # set matterhorn to start on boot
-sudo -u $USERNAME echo "alias matterhorn=$FELIX_HOME/bin/start_matterhorn.sh" >> .bashrc
-chmod 755 $FELIX_HOME/bin/start_matterhorn.sh
+sudo -u $USERNAME chmod 755 $FELIX_HOME/bin/start_matterhorn.sh
 sudo echo "$FELIX_HOME/bin/start_matterhorn.sh" >> $HOME/matterhorn_capture.sh
 sudo chown root:root $HOME/matterhorn_capture.sh
 sudo chmod 777 $HOME/matterhorn_capture.sh
 sudo mv $HOME/matterhorn_capture.sh /etc/init.d
-sudo ln -s /etc/init.d/matterhorn_capture.sh /etc/rc2.d/S99matterhorn_capture
+sudo ln -sf /etc/init.d/matterhorn_capture.sh /etc/rc2.d/S99matterhorn_capture
 sudo chown root:root /etc/rc2.d/S99matterhorn_capture
 sudo chmod 777 /etc/rc2.d/S99matterhorn_capture
 
