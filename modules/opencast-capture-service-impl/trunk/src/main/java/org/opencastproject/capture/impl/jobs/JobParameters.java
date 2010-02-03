@@ -36,4 +36,7 @@ public interface JobParameters {
 
   /** Constant used to define the scheduler which should be used to schedule post-capture jobs in the appropriate classes. */
   public static final String JOB_SCHEDULER = "job_scheduler";
+
+  /** Constant used to define the postfix applied to all job names */
+  public static final String JOB_POSTFIX = "job_postfix";
 }
