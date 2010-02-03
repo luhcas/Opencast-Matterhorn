@@ -45,7 +45,6 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
@@ -351,14 +350,8 @@ public class IngestServiceImpl implements IngestService, ManagedService,
     if (eventAdmin != null) {
       logger.info("Broadcasting event...");
       Dictionary<String, String> properties = new Hashtable<String, String>();
-
       populateMediaPackageMetadata(mp);
-
-      // converting media package to String presentation
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      mp.toXml(out, false);
-      properties.put("mediaPackage", out.toString("UTF-8"));
-      try {out.close();} catch (IOException e) {logger.error(e.getMessage());}
+      properties.put("mediaPackage", mp.toXml());
       Event event = new Event("org/opencastproject/ingest/INGEST_DONE", properties);
 
       // waiting 3000 ms for confirmation from Conductor service

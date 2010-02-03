@@ -25,11 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -996,9 +995,15 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#toXml()
    */
   public String toXml() throws MediaPackageException {
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    toXml(os, false);
-    return os.toString();
+    try {
+      Marshaller marshaller = context.createMarshaller();
+      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, false);
+      StringWriter writer = new StringWriter();
+      marshaller.marshal(this, writer);
+      return writer.toString();
+    } catch (JAXBException e) {
+      throw new MediaPackageException(e);
+    }
   }
 
   /**
@@ -1047,10 +1052,8 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public Object clone() {
     try {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      this.toXml(out, false);
-      return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder()
-              .loadFromXml(new ByteArrayInputStream(out.toByteArray()));
+      String xml = this.toXml();
+      return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(xml);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

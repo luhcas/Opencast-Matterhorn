@@ -24,9 +24,6 @@ import java.io.InputStream;
 /**
  * A media package builder provides factory methods for the creation of media packages from manifest files, packages,
  * directories or from sratch.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageBuilder.java 2700 2009-03-18 15:49:02Z wunden $
  */
 public interface MediaPackageBuilder {
 
@@ -65,6 +62,17 @@ public interface MediaPackageBuilder {
    *           if loading of the media package fails
    */
   MediaPackage loadFromXml(InputStream is) throws MediaPackageException;
+
+  /**
+   * Loads a media package from the manifest.
+   * 
+   * @param xml
+   *          the media package manifest as an xml string
+   * @return the media package
+   * @throws MediaPackageException
+   *           if loading of the media package fails
+   */
+  MediaPackage loadFromXml(String xml) throws MediaPackageException;
 
   /**
    * Loads a media package from the input stream, using the provided packager to decode the stream.

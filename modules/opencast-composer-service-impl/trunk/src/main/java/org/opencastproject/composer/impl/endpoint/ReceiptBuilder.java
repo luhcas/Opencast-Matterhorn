@@ -85,7 +85,13 @@ public class ReceiptBuilder {
    *           if creating the receipt fails
    */
   public Receipt parseReceipt(String in) throws Exception {
-    return parseReceipt(IOUtils.toInputStream(in, "UTF8"));
+    InputStream is = null;
+    try {
+      is = IOUtils.toInputStream(in, "UTF-8");
+      return parseReceipt(is);
+    } finally {
+      IOUtils.closeQuietly(is);
+    }
   }
 
   /**

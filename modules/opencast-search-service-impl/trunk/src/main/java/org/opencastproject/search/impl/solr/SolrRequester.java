@@ -234,8 +234,7 @@ public class SolrRequester {
       if (mediaPackageFieldValue != null) {
         try {
           MediaPackage mediaPackage = null;
-          mediaPackage = builder
-                  .loadFromXml(new ByteArrayInputStream(mediaPackageFieldValue.toString().getBytes()));
+          mediaPackage = builder.loadFromXml(mediaPackageFieldValue.toString());
           item.setMediaPackage(mediaPackage);
         } catch (Exception e) {
           log_.warn("Unable to read media package from search result", e);

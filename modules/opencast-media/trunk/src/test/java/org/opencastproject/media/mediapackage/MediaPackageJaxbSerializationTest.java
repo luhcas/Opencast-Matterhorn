@@ -25,26 +25,13 @@ import org.opencastproject.util.ChecksumType;
 import junit.framework.Assert;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.net.URI;
 import java.net.URL;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-
 public class MediaPackageJaxbSerializationTest {
-  static JAXBContext context;
-  
-  @BeforeClass
-  public static void setup() throws Exception {
-    context = JAXBContext.newInstance("org.opencastproject.media.mediapackage", MediaPackageJaxbSerializationTest.class.getClassLoader());
-  }
   
   @Test
   public void testManifestSerialization() throws Exception {
@@ -88,17 +75,11 @@ public class MediaPackageJaxbSerializationTest {
     mp.add(track);
     
     // Serialize the media package
-    Marshaller marshaller = context.createMarshaller();
-    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-
-    Writer writer = new StringWriter();
-    marshaller.marshal(mp, writer);
-    String xml = writer.toString();
+    String xml = mp.toXml();
     Assert.assertNotNull(xml);
     
     // Deserialize the media package
-    Unmarshaller unmarshaller = context.createUnmarshaller();
-    MediaPackage deserialized = (MediaPackage)unmarshaller.unmarshal(IOUtils.toInputStream(xml));
+    MediaPackage deserialized = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(IOUtils.toInputStream(xml));
     
     // Ensure that the deserialized mediapackage is correct
     Assert.assertEquals(2, deserialized.getCatalogs().length);
@@ -115,19 +96,14 @@ public class MediaPackageJaxbSerializationTest {
   @Test
   public void testJaxbWithoutXsi() throws Exception {
     String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><ns2:mediapackage start=\"0\" id=\"123\" duration=\"0\" xmlns:ns2=\"http://mediapackage.opencastproject.org\"><metadata><catalog type=\"metadata/dublincore\"><mimetype>text/xml</mimetype><tags/><checksum type=\"md5\">7891011abcd</checksum><url>http://opencastproject.org/index.html</url></catalog></metadata><attachments><attachment id=\"attachment-1\"><tags/><checksum type=\"md5\">123456abcd</checksum><url>http://opencastproject.org/index.html</url></attachment></attachments></ns2:mediapackage>";
-    Unmarshaller unmarshaller = context.createUnmarshaller();
-    MediaPackage mp = (MediaPackage)unmarshaller.unmarshal(IOUtils.toInputStream(xml));
-    Marshaller marshaller = context.createMarshaller();
-    Writer writer = new StringWriter();
-    marshaller.marshal(mp, writer);
-    Assert.assertEquals(2, mp.getElements().length);
+    MediaPackage deserialized = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(IOUtils.toInputStream(xml));
+    Assert.assertEquals(2, deserialized.getElements().length);
   }
   
   @Test
   public void testJaxbUnmarshallingFromFile() throws Exception {
-    Unmarshaller unmarshaller = context.createUnmarshaller();
     InputStream in = this.getClass().getResourceAsStream("/manifest.xml");
-    MediaPackage mp = (MediaPackage)unmarshaller.unmarshal(in);
+    MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(in);
     Assert.assertEquals(2, mp.getTracks().length);
     Assert.assertTrue(mp.getTracks()[0].hasVideo());
     Assert.assertTrue( ! mp.getTracks()[0].hasAudio());
@@ -135,5 +111,17 @@ public class MediaPackageJaxbSerializationTest {
     Assert.assertTrue( ! mp.getTracks()[1].hasVideo());
     Assert.assertEquals(3, mp.getCatalogs().length);
     Assert.assertEquals(2, mp.getAttachments().length);
+  }
+  
+  @Test
+  public void testUmlaut() throws Exception {
+    String title = "Ökologie";
+    MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
+    MediaPackage original = builder.createNew();
+    original.setTitle(title);
+    String xml = original.toXml();
+    Assert.assertTrue(xml.indexOf(title) > 0);
+    MediaPackage unmarshalled = builder.loadFromXml(xml);
+    Assert.assertEquals(title, unmarshalled.getTitle());
   }
 }

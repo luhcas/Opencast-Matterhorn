@@ -22,7 +22,6 @@ import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowService;
 
-import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -87,8 +86,7 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
     } else {
       logger.debug("Received mediapackage ingest event: {}", property);
       try {
-        MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(
-                IOUtils.toInputStream((String) property));
+        MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml((String)property);
 
         logger.info("Received media package {}", mp.getIdentifier());
         

@@ -41,9 +41,6 @@ import javax.xml.xpath.XPathFactory;
 /**
  * This class provides factory methods for the creation of media packages from manifest files, directories or from
  * scratch.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageBuilderImpl.java 2908 2009-07-17 16:51:07Z ced $
  */
 public class MediaPackageBuilderImpl implements MediaPackageBuilder {
 
@@ -88,6 +85,7 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
     return new MediaPackageImpl(identifier);
   }
 
+  
   /**
    * {@inheritDoc}
    * 
@@ -95,10 +93,10 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
    */
   public MediaPackage loadFromXml(InputStream is) throws MediaPackageException {
     if (serializer != null) {
+      // FIXME This code runs if *any* serializer is present, regardless of the serializer implementation
       try {
-        String xmlString = IOUtils.toString(is);
         DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document xml = docBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()));
+        Document xml = docBuilder.parse(is);
 
         XPath xPath = XPathFactory.newInstance().newXPath();
         NodeList nodes = (NodeList)xPath.evaluate("//url", xml, XPathConstants.NODESET);
@@ -109,16 +107,19 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
         }
 
         // Serialize the media package
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        DOMSource domSource = new DOMSource(xml);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        StreamResult result = new StreamResult(out);
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        transformer.transform(new DOMSource(xml), new StreamResult(os));
-        is = new ByteArrayInputStream(os.toByteArray());
-        
+        transformer.transform(domSource, result);
+        InputStream in = new ByteArrayInputStream(out.toByteArray());
+        return MediaPackageImpl.valueOf(in);
       } catch (Exception e) {
         throw new MediaPackageException("Error deserializing paths in media package", e);
       }
+    } else {
+      return MediaPackageImpl.valueOf(is);
     }
-    return MediaPackageImpl.valueOf(is);
   }
 
   /**
@@ -146,6 +147,23 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
    */
   public void setSerializer(MediaPackageSerializer serializer) {
     this.serializer = serializer;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.media.mediapackage.MediaPackageBuilder#loadFromXml(java.lang.String)
+   */
+  @Override
+  public MediaPackage loadFromXml(String xml) throws MediaPackageException {
+    InputStream in = null;
+    try {
+      in = IOUtils.toInputStream(xml, "UTF-8");
+      return loadFromXml(in);
+    } catch (IOException e) {
+      throw new MediaPackageException(e);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
 
 }

@@ -45,7 +45,6 @@ import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -268,9 +267,7 @@ public class SolrIndexManager {
     addStandardDublincCoreFields(solrEpisodeDocument, dublinCore);
 
     // Add media package
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    mediaPackage.toXml(out, false);
-    solrEpisodeDocument.setField(SolrFields.OC_MEDIAPACKAGE, out);
+    solrEpisodeDocument.setField(SolrFields.OC_MEDIAPACKAGE, mediaPackage.toXml());
 
     // Add tags
     StringBuilder sb = new StringBuilder();

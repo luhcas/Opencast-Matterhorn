@@ -26,9 +26,6 @@ import org.opencastproject.util.ConfigurationException;
  * The factory can be configured by specifying the concrete implementation class through the system property
  * <code>org.opencastproject.mediapackage.builder</code>.
  * </p>
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageBuilderFactory.java 1642 2008-12-08 15:46:38Z wunden $
  */
 public final class MediaPackageBuilderFactory {
 
@@ -43,9 +40,6 @@ public final class MediaPackageBuilderFactory {
 
   /** The singleton instance of this factory */
   private static final MediaPackageBuilderFactory factory = new MediaPackageBuilderFactory();
-
-  /** The default builder implementation */
-  private MediaPackageBuilder builder = null;
 
   /**
    * Private method to create a new media package builder factory.
@@ -83,18 +77,17 @@ public final class MediaPackageBuilderFactory {
    *           If the builder cannot be instantiated
    */
   public MediaPackageBuilder newMediaPackageBuilder() throws ConfigurationException {
-    if (builder == null) {
-      try {
-        Class<?> builderClass = Class.forName(builderClassName);
-        builder = (MediaPackageBuilder) builderClass.newInstance();
-      } catch (ClassNotFoundException e) {
-        throw new ConfigurationException("Class not found while creating media package builder: " + e.getMessage(), e);
-      } catch (InstantiationException e) {
-        throw new ConfigurationException("Instantiation exception while creating media package builder: "
-                + e.getMessage(), e);
-      } catch (IllegalAccessException e) {
-        throw new ConfigurationException("Access exception while creating media package builder: " + e.getMessage(), e);
-      }
+    MediaPackageBuilder builder = null;
+    try {
+      Class<?> builderClass = Class.forName(builderClassName);
+      builder = (MediaPackageBuilder) builderClass.newInstance();
+    } catch (ClassNotFoundException e) {
+      throw new ConfigurationException("Class not found while creating media package builder: " + e.getMessage(), e);
+    } catch (InstantiationException e) {
+      throw new ConfigurationException("Instantiation exception while creating media package builder: "
+              + e.getMessage(), e);
+    } catch (IllegalAccessException e) {
+      throw new ConfigurationException("Access exception while creating media package builder: " + e.getMessage(), e);
     }
     return builder;
   }
