@@ -14,7 +14,7 @@
  *
  */
 
-package org.opencastproject.inspection.impl;
+package org.opencastproject.inspection.impl.api;
 
 import java.net.URL;
 import java.util.Date;

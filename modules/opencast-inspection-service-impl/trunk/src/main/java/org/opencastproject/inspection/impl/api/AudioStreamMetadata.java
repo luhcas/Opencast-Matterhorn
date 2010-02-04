@@ -14,7 +14,8 @@
  *
  */
 
-package org.opencastproject.inspection.impl;
+package org.opencastproject.inspection.impl.api;
+
 
 /**
  * This class bundles technical information about an audio stream.

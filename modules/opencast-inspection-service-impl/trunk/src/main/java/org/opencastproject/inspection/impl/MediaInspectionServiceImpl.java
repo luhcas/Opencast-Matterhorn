@@ -16,6 +16,10 @@
 package org.opencastproject.inspection.impl;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.inspection.impl.api.AudioStreamMetadata;
+import org.opencastproject.inspection.impl.api.MediaAnalyzer;
+import org.opencastproject.inspection.impl.api.MediaContainerMetadata;
+import org.opencastproject.inspection.impl.api.VideoStreamMetadata;
 import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;

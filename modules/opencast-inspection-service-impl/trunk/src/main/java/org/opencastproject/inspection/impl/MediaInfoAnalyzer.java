@@ -16,6 +16,8 @@
 
 package org.opencastproject.inspection.impl;
 
+import org.opencastproject.inspection.impl.api.AudioStreamMetadata;
+import org.opencastproject.inspection.impl.api.VideoStreamMetadata;
 import org.opencastproject.media.mediapackage.track.BitRateMode;
 import org.opencastproject.media.mediapackage.track.FrameRateMode;
 import org.opencastproject.media.mediapackage.track.ScanType;
@@ -106,7 +108,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
   /**
    * Allows configuration
    * {@inheritDoc}
-   * @see org.opencastproject.inspection.impl.MediaAnalyzer#setConfig(java.util.Map)
+   * @see org.opencastproject.inspection.impl.api.MediaAnalyzer#setConfig(java.util.Map)
    */
   public void setConfig(Map<String, Object> config) {
     if (config != null) {

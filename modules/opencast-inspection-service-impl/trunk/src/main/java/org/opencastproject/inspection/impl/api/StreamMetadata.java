@@ -14,7 +14,8 @@
  *
  */
 
-package org.opencastproject.inspection.impl;
+package org.opencastproject.inspection.impl.api;
+
 
 /**
  * Common metadata for all kind of embedded media streams.

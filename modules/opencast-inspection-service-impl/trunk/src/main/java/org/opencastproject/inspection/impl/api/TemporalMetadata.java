@@ -14,7 +14,7 @@
  *
  */
 
-package org.opencastproject.inspection.impl;
+package org.opencastproject.inspection.impl.api;
 
 import org.opencastproject.media.mediapackage.track.BitRateMode;
 

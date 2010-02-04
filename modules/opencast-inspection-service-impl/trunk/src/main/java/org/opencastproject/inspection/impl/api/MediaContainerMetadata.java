@@ -14,7 +14,8 @@
  *
  */
 
-package org.opencastproject.inspection.impl;
+package org.opencastproject.inspection.impl.api;
+
 
 import java.util.ArrayList;
 import java.util.List;

@@ -16,12 +16,15 @@
 
 package org.opencastproject.inspection.impl;
 
+import org.opencastproject.inspection.impl.api.MediaAnalyzer;
+import org.opencastproject.inspection.impl.api.MediaAnalyzerException;
+import org.opencastproject.inspection.impl.api.MediaContainerMetadata;
 import org.opencastproject.util.ProcessExecutor;
 
 import java.io.File;
 
 /**
- * Support class for {@link org.opencastproject.inspection.impl.MediaAnalyzer} implementations that use an external
+ * Support class for {@link org.opencastproject.inspection.impl.api.MediaAnalyzer} implementations that use an external
  * program for analysis.
  * 
  * @author Christoph E. Driessen <ced@neopoly.de>
@@ -120,7 +123,7 @@ public abstract class CmdlineMediaAnalyzerSupport implements MediaAnalyzer {
   }
 
   /**
-   * Exception handler callback. Any occuring {@link org.opencastproject.inspection.impl.MediaAnalyzerException} will
+   * Exception handler callback. Any occuring {@link org.opencastproject.inspection.impl.api.MediaAnalyzerException} will
    * <em>not</em> be passed to this handler.
    */
   protected void onError(Exception e) {

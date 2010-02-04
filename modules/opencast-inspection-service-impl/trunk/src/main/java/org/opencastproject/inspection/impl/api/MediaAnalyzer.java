@@ -14,18 +14,28 @@
  *
  */
 
-package org.opencastproject.inspection.impl;
+package org.opencastproject.inspection.impl.api;
+
 
 import java.io.File;
 import java.util.Map;
 
 /**
  * Interface for tools that analyze media files.
+ * Implement this and register it as a service
  * 
  * @author Christoph E. Driessen <ced@neopoly.de>
+ * @author azeckoski@vt.edu
  */
 public interface MediaAnalyzer {
 
+  /**
+   * Analyze a media file and return the metadata that is found
+   * 
+   * @param media any media file
+   * @return the metadata that is found
+   * @throws MediaAnalyzerException if the analyzer fails
+   */
   MediaContainerMetadata analyze(File media) throws MediaAnalyzerException;
 
   /*
