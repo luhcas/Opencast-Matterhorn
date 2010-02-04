@@ -46,7 +46,7 @@ install_3p ()
   sudo apt-get -y --force-yes install libcv1 libcv-dev opencv-doc
 
   #install media info
-  wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
+  #wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   #sudo dpkg -i libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   #rm -f libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   #wget http://downloads.sourceforge.net/mediainfo/libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
@@ -178,7 +178,7 @@ else
   sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" $CONF_DIR/config.properties
 
   # update capture properties
-  sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opencast/config/capture.properties
+  ##sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opencast/config/capture.properties
 
   # Reconfigure Keyboard?
   if [ $kbresp = "y" ] || [ $kbresp = "Y" ]; then
@@ -186,7 +186,10 @@ else
   else
     echo "Keeping default keybord configuration."
   fi
-  
+
+  # Use host system clock
+  sudo hwclock --hctosys
+
   echo "Installation wget, subversion and git."
   sudo apt-get -y --force-yes install wget subversion git-core
 
