@@ -39,8 +39,11 @@ public class RecordingDataViewImpl implements RecordingDataView {
   @XmlElement(name="presenter")
   private String presenter;
 
-  @XmlElement(name="series")
-  private String series;
+  @XmlElement(name="seriesid")
+  private String seriesId;
+
+  @XmlElement(name="seriestitle")
+  private String seriesTitle;
 
   @XmlElement(name="startTime")
   private String startTime;
@@ -88,12 +91,20 @@ public class RecordingDataViewImpl implements RecordingDataView {
     this.presenter = presenter;
   }
 
-  public String getSeries() {
-    return series;
+  public String getSeriesId() {
+    return seriesId;
   }
 
-  public void setSeries(String series) {
-    this.series = series;
+  public void setSeriesId(String seriesId) {
+    this.seriesId = seriesId;
+  }
+
+  public String getSeriesTitle() {
+    return seriesTitle;
+  }
+
+  public void setSeriesTitle(String seriesTitle) {
+    this.seriesTitle = seriesTitle;
   }
 
   public String getStartTime() {
@@ -140,7 +151,8 @@ public class RecordingDataViewImpl implements RecordingDataView {
     StringBuffer sb = new StringBuffer();
     sb.append("ID: " + this.getId() + "\n");
     sb.append("Presenter: " + this.getPresenter() + "\n");
-    sb.append("Series: " + this.getSeries() + "\n");
+    sb.append("Series ID: " + this.getSeriesId() + "\n");
+    sb.append("Series Title: " + this.getSeriesTitle() + "\n");
     sb.append("Agent: " + this.getCaptureAgent() + "\n");
     sb.append("Time: " + this.getStartTime() + "\n");
     sb.append("Proc state: " + this.getProcessingStatus() + "\n");

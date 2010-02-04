@@ -64,7 +64,7 @@
         <xsl:value-of select="presenter" />
       </td>
       <td>
-        <xsl:value-of select="series" />
+        <xsl:value-of select="seriestitle" />
       </td>
       <td class="td-TimeDate">
         <span class="date-start">

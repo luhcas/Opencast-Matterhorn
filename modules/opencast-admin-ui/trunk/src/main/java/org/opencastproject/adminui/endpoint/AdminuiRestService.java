@@ -15,14 +15,6 @@
  */
 package org.opencastproject.adminui.endpoint;
 
-import org.opencastproject.util.DocUtil;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Status;
-
 import org.opencastproject.adminui.api.RecordingDataView;
 import org.opencastproject.adminui.api.RecordingDataViewImpl;
 import org.opencastproject.adminui.api.RecordingDataViewList;
@@ -30,13 +22,17 @@ import org.opencastproject.adminui.api.RecordingDataViewListImpl;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.DublinCoreCatalog;
-import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
+import org.opencastproject.media.mediapackage.identifier.Id;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
+import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Status;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -46,6 +42,8 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ListIterator;
@@ -137,6 +135,7 @@ public class AdminuiRestService {
    * @return RecordingDataViewList list of upcoming recordings
    */
   private RecordingDataViewList getRecordingsFromWorkflowService(State state) {
+    SimpleDateFormat sdf = new SimpleDateFormat();
     RecordingDataViewList out = new RecordingDataViewListImpl();
     if (workflowService != null) {
       logger.info("getting recordings from workflowService");
@@ -144,34 +143,38 @@ public class AdminuiRestService {
       // next line is for debuging: return all workflowInstaces
       //WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery()).getItems();
       for (int i = 0; i < workflows.length; i++) {
+        MediaPackage mediapackage = workflows[i].getCurrentMediaPackage();
         RecordingDataView item = new RecordingDataViewImpl();
         item.setId(workflows[i].getId());
-        DublinCoreCatalog dcCatalog = getDublinCore(workflows[i].getCurrentMediaPackage());
-        if (dcCatalog != null) {
-          logger.info("DC Title: " + dcCatalog.getFirst(DublinCoreCatalog.PROPERTY_TITLE, DublinCoreCatalog.LANGUAGE_ANY));
-          item.setTitle(dcCatalog.getFirst(DublinCoreCatalog.PROPERTY_TITLE, DublinCoreCatalog.LANGUAGE_ANY));
-          item.setPresenter(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_CREATOR));
-          item.setSeries(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_IS_PART_OF));
-          item.setStartTime(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_DATE));  // FIXME get timestamp
-          item.setCaptureAgent(getDublinCoreProperty(dcCatalog, DublinCoreCatalog.PROPERTY_CREATOR)); //FIXME get capture agent from where...?
-          WorkflowOperationInstance operation = null;
-          ListIterator<WorkflowOperationInstance> instances = workflows[i].getWorkflowOperationInstanceList().getOperationInstance().listIterator();
-          StringBuffer sb = new StringBuffer();
-          while (instances.hasNext()) {
-            operation = instances.next();
-            sb.append(operation.getState().toString() + ": " + operation.getName() + ";");
-          }
-          item.setProcessingStatus(sb.toString());
-          /*if (operation != null) {
-           item.setProcessingStatus(operation.getState().toString() + " : " + operation.getName());
-           } else {
-           logger.warn("Could not get any WorkflowOperationInstance from WorkflowInstance.");
-           }*/
-          // TODO get distribution status #openquestion is there a way to find out if a workflowOperation does distribution?
-          out.add(item);
-        } else {
-          logger.warn("MediaPackage has no Catalog");
+        logger.info("DC Title: {}", mediapackage.getTitle());
+        item.setTitle(mediapackage.getTitle());
+        item.setPresenter(formatMultipleString(mediapackage.getContributors()));
+        item.setSeriesTitle(mediapackage.getSeriesTitle());
+        Id seriesId = mediapackage.getSeries();
+        if(seriesId != null) {
+          item.setSeriesId(seriesId.toString());
         }
+        item.setSeriesTitle(mediapackage.getSeriesTitle());
+        Date date = mediapackage.getDate();
+        if(date != null) {
+          item.setStartTime(sdf.format(date));
+        }
+        item.setCaptureAgent(null); //FIXME get capture agent from where...?
+        WorkflowOperationInstance operation = null;
+        ListIterator<WorkflowOperationInstance> instances = workflows[i].getWorkflowOperationInstanceList().getOperationInstance().listIterator();
+        StringBuffer sb = new StringBuffer();
+        while (instances.hasNext()) {
+          operation = instances.next();
+          sb.append(operation.getState().toString() + ": " + operation.getName() + ";");
+        }
+        item.setProcessingStatus(sb.toString());
+        /*if (operation != null) {
+         item.setProcessingStatus(operation.getState().toString() + " : " + operation.getName());
+         } else {
+         logger.warn("Could not get any WorkflowOperationInstance from WorkflowInstance.");
+         }*/
+        // TODO get distribution status #openquestion is there a way to find out if a workflowOperation does distribution?
+        out.add(item);
       }
     } else {
       logger.warn("WorkflowService not present, returning empty list");
@@ -180,25 +183,21 @@ public class AdminuiRestService {
   }
 
   /**
-   * copied from WorkflowRestService
-   * @param mediaPackage
-   * @return a Dublin Core metadata catalog
+   * Formats an array of values to a single string for display
+   * 
+   * @param values The array of values to concatenate
+   * @return A formated string containing each of the values
    */
-  protected DublinCoreCatalog getDublinCore(MediaPackage mediaPackage) {
-    Catalog[] dcCatalogs = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
-    if(dcCatalogs.length == 0) return null;
-    return (DublinCoreCatalog)dcCatalogs[0];
-  }
-
-  /**
-   * copied from WorkflowRestService
-   * @param catalog
-   * @param property
-   * @return a Dublin Core metadata property
-   */
-  protected String getDublinCoreProperty(DublinCoreCatalog catalog, EName property) {
-    if (catalog == null) return null;
-    return catalog.getFirst(property, DublinCoreCatalog.LANGUAGE_ANY);
+  private String formatMultipleString(String[] values) {
+    if(values == null || values.length == 0) return "";
+    StringBuilder sb = new StringBuilder();
+    for(int i=0; i<values.length; i++) {
+      if(sb.length() > 0) {
+        sb.append(", ");
+      }
+      sb.append(values[i]);
+    }
+    return sb.toString();
   }
 
   /**
@@ -307,7 +306,8 @@ public class AdminuiRestService {
         item.setId(events[i].getID());
         item.setTitle(events[i].getTitle());
         item.setPresenter(events[i].getCreator());
-        item.setSeries(events[i].getSeriesID());    // actually it's the series title
+        item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
+        // FIXME Add the series ID too
         item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
         item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
         item.setCaptureAgent(events[i].getDevice());

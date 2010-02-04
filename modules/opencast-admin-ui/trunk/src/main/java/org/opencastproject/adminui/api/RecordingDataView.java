@@ -63,16 +63,28 @@ public interface RecordingDataView {
   void setPresenter(String presenter);
 
   /**
-   * returns the series this recording belongs to
+   * returns the series title this recording belongs to
    * @return String Series this recording belongs to
    */
-  String getSeries();
+  String getSeriesTitle();
 
   /**
-   * sets the series this recording belongs to
-   * @param series
+   * sets the series title for this recording
+   * @param seriesTitle
    */
-  void setSeries(String series);
+  void setSeriesTitle(String seriesTitle);
+
+  /**
+   * returns the series id this recording belongs to
+   * @return String Series this recording belongs to
+   */
+  String getSeriesId();
+
+  /**
+   * sets the series id for this recording
+   * @param seriesTitle
+   */
+  void setSeriesId(String seriesId);
 
   /**
    * returns date and time the recording was captured as *nix timestamp
