@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.5-RC3</version>
+    <version>0.5</version>
   </parent>
   <dependencies>
     <dependency>
@@ -30,42 +30,42 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-conductor-api</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-workflow-service-api</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-inspection-service-api</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-composer-service-api</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-search-service-api</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-search-service-impl</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-distribution-service-api</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-workspace-api</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
