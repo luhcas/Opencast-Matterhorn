@@ -5,27 +5,27 @@
   <artifactId>opencast-workspace-impl</artifactId>
   <packaging>bundle</packaging>
   <name>opencast-workspace-impl</name>
-  <version>0.5-RC3</version>
+  <version>0.5</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.5-RC3</version>
+    <version>0.5</version>
   </parent>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-workspace-api</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-working-file-repository-service-api</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-util</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
