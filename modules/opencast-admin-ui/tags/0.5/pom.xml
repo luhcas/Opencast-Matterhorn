@@ -5,27 +5,27 @@
   <artifactId>opencast-admin-ui</artifactId>
   <packaging>bundle</packaging>
   <name>opencast-admin-ui</name>
-  <version>0.5-RC3</version>
+  <version>0.5</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.5-RC3</version>
+    <version>0.5</version>
   </parent>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-scheduler-api</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-workflow-service-api</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-capture-admin-service-api</artifactId>
-      <version>0.5-RC3</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -86,7 +86,7 @@
     <dependency>
     	<groupId>org.opencastproject</groupId>
     	<artifactId>opencast-util</artifactId>
-        <version>0.5-RC3</version>
+        <version>0.5</version>
     	<type>bundle</type>
     </dependency>
   </dependencies>
