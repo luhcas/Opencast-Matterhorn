@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.captions.CaptionsRestService" immediate="true">
+  <implementation class="org.opencastproject.captions.endpoint.CaptionsRestService" />
+  <property name="service.description" value="Captions REST Endpoint" />
+  <property name="service.exported.interfaces" value="org.opencastproject.captions.endpoint.CaptionsRestService" />
+  <property name="service.exported.configs" value="org.apache.cxf.rs" />
+  <property name="org.apache.cxf.rs.httpservice.context" value="/captions/rest" />
+  <service>
+    <provide interface="org.opencastproject.captions.endpoint.CaptionsRestService" />
+  </service>
+  <!-- dynamic and 0..1 to allow the endpoint to work without the service, continue to serve up 503 and docs -->
+  <reference name="service-impl" interface="org.opencastproject.captions.api.CaptionsService"
+    cardinality="0..1" policy="dynamic" bind="setService" unbind="unsetService" />
+</component>
