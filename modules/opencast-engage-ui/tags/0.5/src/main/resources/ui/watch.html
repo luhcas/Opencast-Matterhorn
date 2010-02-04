@@ -1,0 +1,290 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Opencast Matterhorn - Media Player</title>
+       
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        
+            <!-- styles -->
+        <link rel="stylesheet" type="text/css" href="css/watch.css" />
+        <link rel="stylesheet" type="text/css" href="css/oc.search.browse.css" />
+    
+        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-reset.css" />
+        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-layout.css" />
+        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-text.css" />
+        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-theme-mist.css" />
+        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-theme-hc.css" />
+        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-states.css" />
+        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/jquery/ui/css/base/ui.all.css" />
+        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/oc.player.css" />
+        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/player-hybrid-download.css" />
+        
+        <!-- scripts -->
+        <script type="text/javascript" src="engage-hybrid-player/jquery/js/jquery-1.3.2.js"></script>
+        <script type="text/javascript" src="js/jquery.xslt.js"></script>
+        <script type="text/javascript" src="js/engage-ui.js"></script>
+        
+        <script type="text/javascript" src="engage-hybrid-player/ACFLRunContent/AC_OETags.js"></script>
+        <script type="text/javascript" src="engage-hybrid-player/bridge/lib/FABridge.js"></script>
+        <script type="text/javascript" src="engage-hybrid-player/bridge/Videodisplay.js"></script>
+        <script type="text/javascript" src="engage-hybrid-player/jquery/js/jARIA.js"></script>
+        <script type="text/javascript" src="engage-hybrid-player/jquery/js/jquery.keyboard-a11y.js"></script>
+        <script type="text/javascript" src="engage-hybrid-player/jquery/js/jquery.tooltip.js"></script>
+        <script type="text/javascript" src="engage-hybrid-player/fluid/js/Fluid.js"></script>
+        <script type="text/javascript" src="engage-hybrid-player/fluid/js/InlineEdit.js"></script>
+        <script type="text/javascript" src="engage-hybrid-player/jquery/ui/ui.core.js"></script>
+        <script type="text/javascript" src="engage-hybrid-player/jquery/ui/ui.slider.js"></script>
+        <script type="text/javascript" src="engage-hybrid-player/player-hybrid-download.js"></script>        
+        <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSlider.js"></script>
+        
+        <script language="JavaScript" type="text/javascript">
+            <!--
+            // -----------------------------------------------------------------------------
+            // Globals
+            // Major version of Flash required
+            var requiredMajorVersion = 10;
+            // Minor version of Flash required
+            var requiredMinorVersion = 0;
+            // Minor version of Flash required
+            var requiredRevision = 0;
+            // -----------------------------------------------------------------------------
+            // -->
+        </script>
+        
+        <script language="JavaScript" type="text/javascript">
+
+        function onPlayerReady() {
+          var mediaPackageId = Opencast.engage.getMediaPackageId();
+          var restEndpoint = "../../engageui/rest/episode?episodeId=" + mediaPackageId;
+
+          $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function() {
+            // some code to run after the mapping
+            // set the title of the page
+            document.title = "Opencast Matterhorn - Media Player - " + $('#oc-title').html();
+            
+            // set the title on the top of the player
+            $('#stage-title').html("<h2>"+ $('#oc-title').html() + " by " + $('#oc-creator').html() + "</h2>");
+
+            // set the abstract
+            $('#abstract').html($('#oc-abstract').html());
+
+            // Get the video url
+            var videoUrl = $('#oc-video-url').html();
+            Opencast.Player.setMediaURL(videoUrl);
+
+            // Set the caption
+            Opencast.Player.setCaptionsURL('dfxp/matterhorn.dfxp.xml');
+            
+            // set embed field
+            var watchUrl = window.location.href;
+            var embedUrl = watchUrl.replace(/watch.html/g, "embed.html")
+            var embed = $('#oc-embed').val().replace(/src_url/g, embedUrl);
+            $('#oc-embed').val(embed);
+            
+          });
+
+          
+          Opencast.ariaSlider.init();
+          $(document).ariaParse();
+          var simpleEdit = fluid.inlineEdit("#simpleEdit", {
+            selectors : {
+              text: ".editableText",
+              editContainer: "#editorContainer",
+              edit: "#editField"
+            },
+            useTooltip : true,
+            tooltipDelay : 500
+          });
+    
+          $("#editorContainer").attr("className", "oc_editTime");
+          $("#editField").attr("className", "oc_editTime");
+          
+          $("#btn_cc").attr('role', 'button');
+          $("#btn_cc").attr('aria-pressed', 'false'); 
+      
+          $("#btn_volume").attr('role', 'button');
+          $("#btn_volume").attr('aria-pressed', 'false');
+      
+          $("#btn_play_pause").attr('role', 'button');
+          $("#btn_play_pause").attr('aria-pressed', 'false');
+
+          $("#btn_skip_backward").attr('role', 'button');
+          $("#btn_skip_backward").attr('aria-labelledby', 'Skip Backward');
+
+          $("#btn_rewind").attr('role', 'button');
+          $("#btn_rewind").attr('aria-labelledby', 'Rewind');
+
+          $("#btn_fast_forward").attr('role', 'button');
+          $("#btn_fast_forward").attr('aria-labelledby', 'Fast Forward');
+
+          $("#btn_skip_forward").attr('role', 'button');
+          $("#btn_skip_forward").attr('aria-labelledby', 'Skip Forward');
+        }
+        </script>
+        
+    </head>
+
+    <body>
+    
+    <div class="oc-holder">
+      <a href="../../welcome.html"><img src="img/opencast_logo.gif" alt="Opencast" width="128" height="30" border="0" /></a>
+      <div class="oc-search-bar-holder fl-helper-clearfix">
+        &nbsp;
+        <div class="oc-search-bar">
+          <form action="index.html">
+            <input id="searchField" type="text" name="q" value="" />
+            <input type="submit" value="Search" />
+          </form>
+        </div>
+      </div>
+      <div class="oc-search-result-header">
+          
+    
+      </div>
+      <div id="stage-title">
+    
+      </div>
+
+      
+    <div id="stage">
+    <div id="controls" class="oc-controls" >
+       
+      <div id="oc-slider" >
+        <div class="matterhorn-progress-bar-background"></div>
+          <div class="matterhorn-progress-bar"></div>
+          <label id="seekLabel" for="slider_seek_Rail" class="oc-offScreen-hidden">Time</label>
+          <div id="slider_seek_Rail" class="oc-slider-seek-Rail" title="Time 00:00:00" name="Time" value="Time" alt="Time" >
+            <button id="slider_seek_Thumb" class="oc-slider-seek-Thumb"></button> 
+         </div>
+      </div>
+      <table id="videocontrols-holder" class="oc-videocontrols-holder" cellspacing="0" cellpadding="0"><tr>
+        <td align="left" valign="middle">
+         <div id="simpleEdit">    
+           <span id="time-current" role="timer" class="editableText" name="Current Time" title="Current Time" value="00:00:00" >00:00:00</span> 
+             <span id="editorContainer" class ="oc_editTime-hidden" name="Edit Current Time" title="Edit Current Time" value="Edit Current Time">
+               <input id="editField" class ="oc_editTime-hidden" type="text" maxlength="9" size="9" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="Edit Current Time HH:MM:SS" onKeyPress="Opencast.Player.editTimeKeyListener(event);" onchange="Opencast.Player.editTime();" onFocus="Opencast.Player.doPause();" onBlur="Opencast.Player.doPlay();" />
+             </span>
+             of
+             <span id="time-total" role="timer" name="Total Time" title="Total Time" tabIndex="0">00:00:00</span>
+         </div>
+        </td>
+         
+        <td align="center" valign="middle" style="padding-left:0" >      
+          <button id="btn_skip_backward" class="btn_skip_backward" onmouseover="this.className='btn_skip_backward_over'" onmouseout="this.className='btn_skip_backward_out'" type="submit" onclick="Opencast.Player.doSkipBackward();" name="Skip Backward" value="Skip Backward" alt="Skip Backward" title="Skip Backward"></button>
+          <button id="btn_rewind" class="btn_rewind" onmouseover="this.className='btn_rewind_over'" onmouseout="this.className='btn_rewind_out'" type="submit" onclick="Opencast.Player.doRewind();" name="Rewind" value="Rewind" alt="Rewind" title="Rewind"></button>
+          <button id="btn_play_pause" class="btn_play" onmouseover="Opencast.Player.PlayPauseMouseOver();" onmouseout="Opencast.Player.PlayPauseMouseOut();" type="submit" onclick="Opencast.Player.doTogglePlayPause();" name="Play" value="Play" alt="Play" title="Play" ></button>
+          <button id="btn_fast_forward" class="btn_fast_forward" onmouseover="this.className='btn_fastForward_over'" onmouseout="this.className='btn_fastForward_out'" type="submit" onclick="Opencast.Player.doFastForward();" name="Fast Forward" value="Fast Forward" alt="Fast Forward" title="Fast Forward"></button>
+          <button id="btn_skip_forward" class="btn_skip_forward" onmouseover="this.className='btn_skip_forward_over'" onmouseout="this.className='btn_skip_forward_out'" type="submit" onclick="Opencast.Player.doSkipForward();" name="Skip Forward" value="Skip Forward" alt="Skip Forward" title="Skip Forward" ></button>
+        </td>
+           
+        <td align="center" valign="middle" style="padding-right:0" >  
+          <button id="btn_volume" class="oc-btn-volume-high" type="submit" onclick="Opencast.Player.doToggleVolume();" name="Unmute" value="Unmute" alt="Unmute" title="Unmute"></button>
+        </td>
+        
+        <td align="center" valign="middle" style="padding-right:0">
+          <label id="volumeLabel" for="slider_volume_Rail" class="oc-offScreen-hidden">Volume</label>
+          <div id="slider_volume_Rail" class="oc-slider-volume-Rail" title="Volume">
+            <button id="slider_volume_Thumb" class="oc-slider-volume-Thumb"></button>
+          </div>
+        </td>
+       
+        <td align="center" valign="middle" style="padding-right:5">       
+          <button id="btn_cc" class="oc-btn-cc-off" type="submit" onclick="Opencast.Player.doToogleClosedCaptions();" name="Closed Caption Off" value="Closed Caption Off" alt="Closed Caption Off" title="Closed Caption Off">CC</button>
+        </td>
+      </tr></table>
+    </div>   
+    <div>
+
+    <script language="JavaScript" type="text/javascript">
+      <!--
+      // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
+      var hasProductInstall = DetectFlashVer(6, 0, 65);
+      
+      // Version check based upon the values defined in globals
+      var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
+      
+      if ( hasProductInstall && !hasRequestedVersion ) {
+        // DO NOT MODIFY THE FOLLOWING FOUR LINES
+        // Location visited after installation is complete if installation is required
+        var MMPlayerType = (isIE == true) ? "ActiveX" : "PlugIn";
+        var MMredirectURL = window.location;
+        document.title = document.title.slice(0, 47) + " - Flash Player Installation";
+        var MMdoctitle = document.title;
+      
+        AC_FL_RunContent(
+          "src", "engage-hybrid-player/playerProductInstall",
+          "FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
+          "width", "400",
+          "height", "320",
+          "align", "middle",
+          "id", "oc_Videodisplay",
+          "quality", "high",
+          "bgcolor", "#FFFFFF",
+          "name", "Videodisplay",
+          "allowScriptAccess","sameDomain",
+          "type", "application/x-shockwave-flash",
+          "pluginspage", "http://www.adobe.com/go/getflashplayer"
+        );
+      } else if (hasRequestedVersion) {
+        // if we've detected an acceptable version
+        // embed the Flash Content SWF when all tests are passed
+        AC_FL_RunContent(
+            "src", "engage-hybrid-player/Videodisplay",
+            "width", "400",
+            "height", "320",
+            "id", "oc_Videodisplay",
+            "quality", "high",
+            "bgcolor", "#FFFFFF",
+            "name", "Videodisplay",
+            "allowfullscreen", "true",
+            "flashvars", "bridgeName=b_Videodisplay&amp;autoplay=false",
+            "allowScriptAccess","sameDomain",
+            "type", "application/x-shockwave-flash",
+            "pluginspage", "http://www.adobe.com/go/getflashplayer"
+        );
+        } else {  // flash is too old or we can't detect the plugin
+          var alternateContent = 'Alternate HTML content should be placed here.'
+          + 'This content requires the Adobe Flash Player. '
+          + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
+          document.write(alternateContent);  // insert non-flash content
+        }
+      // -->
+    </script>
+    </div>
+    <div id="info" >
+      <button id="btn_info" class="oc_btn_info" onClick="Opencast.Player.toggleInfo();" type="submit" name="Keyboard Shortcuts Information"  value="Keyboard Shortcuts Information"   alt="Keyboard Shortcuts Information"  title="Keyboard Shortcuts Information" >Keyboard Shortcuts Information</button>
+      <div id="infoBlock" class="oc_infoDisplayNone" >
+          Press Control + Alt + I   = Toggle the keyboard shortcuts information between visible or unvisible<br>
+          Press Control + Alt + P   = Toggle the video between pause or play<br>
+          Press Control + Alt + S   = Stop the video<br>
+          Press Control + Alt + M   = Toggle between mute or unmute the video<br>
+          Press Control + Alt + U   = Volume up<br>
+          Press Control + Alt + D   = Volume down<br>
+          Press Control + Alt 0 - 9 = Seek time slider<br>
+          Press Control + Alt + C   = Toggle between captions on or off<br>
+          Press Control + Alt + F   = Forward the video<br>
+          Press Control + Alt + R   = Rewind the video<br>
+          Press Control + Alt + T   = The current time for the screen reader<br>
+          Press on Mac cmd + = player zoom in<br>
+          Press on Mac cmd - = player zoom out<br>
+          Press on Windows strg + = player zoom in<br>
+          Press on Windows strg - = player zoom out<br>
+      </div>   
+   
+    <ul id="captions" aria-channel="main" aria-relevant="additions" aria-atomic="true" aria-live="polite" role="log" class="oc-offScreen-hidden">
+    </ul>
+    
+     <div id="abstract">
+    </div>
+      <br>
+      Embed this recording:<br>
+        <textarea wrap="virtual" rows="5" cols="50" id="oc-embed" class="oc-embed" >&lt;iframe src="src_url" style="border:0px #FFFFFF none;" name="Opencast Matterhorn - Media Player" scrolling="no" frameborder="1" marginheight="0px" marginwidth="0px" height="400" width="420"&gt;&lt;/iframe&gt;</textarea>
+    
+    </div>
+  </div>
+  <div id="data"></div>
+</div>
+    
+  </body>
+</html>
