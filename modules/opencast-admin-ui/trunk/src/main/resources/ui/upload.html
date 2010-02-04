@@ -34,10 +34,11 @@
     <script type="text/javascript" src="js/jquery-ui-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.form.js"></script>
     <script type="text/javascript" src="js/upload.helptexts.json"></script>
+    <script type="text/javascript" src="js/version.js"></script>
     <script type="text/javascript">
       var metadata = {};
 
-      $(function() {
+      $(document).ready(function() {
         // Event: Submit button, submit form if no missing inputs
         $('#BtnSubmit').click( function() {
           if (checkRequiredFields()) {
@@ -145,6 +146,10 @@
 
   <!-- BODY -->
   <body>
+    <div id="pageHeader">
+      <div id="currentVersion"></div>
+      <div id="newestVersion" style="text-align: right; float: right;"></div>
+    </div>
     <!-- BEGIN of stage -->
     <!-- fl-centered doesn't work in winXP-IE8 -->
     <div class="fl-container-850 fl-theme-coal">

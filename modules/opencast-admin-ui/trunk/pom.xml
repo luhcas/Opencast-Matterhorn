@@ -134,7 +134,8 @@
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/adminui-service-rest.xml,
-              OSGI-INF/opencast-admin-ui.xml
+              OSGI-INF/opencast-admin-ui.xml,
+              OSGI-INF/version-service-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

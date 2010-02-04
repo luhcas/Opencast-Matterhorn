@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.adminui.endpoint.VersionRestService" immediate="true">
+  <implementation class="org.opencastproject.adminui.endpoint.VersionRestService" />
+  <property name="service.description" value="Versioning Service" />
+  <property name="service.exported.interfaces" value="org.opencastproject.adminui.endpoint.VersionRestService" />
+  <property name="service.exported.configs" value="org.apache.cxf.rs" />
+  <property name="org.apache.cxf.rs.httpservice.context" value="/version/rest" />
+  <service>
+    <provide interface="org.opencastproject.adminui.endpoint.VersionRestService" />
+  </service>
+</component>

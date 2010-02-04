@@ -25,7 +25,7 @@ var helpTexts = {
 ["Distribution Channels", "Specify the channel(s) to which you would like this recording distributed."],
  
 "license" : 
-["License", "Enter the type of license with which you would like to distribute the recording."],
+["License", "Enter the type of license under which you would like to distribute the recording. This data does not currently impact processing or distribution."],
 
 "flavor" :
   ["Media file content", "Specify the main type of content that is contained in the media file. Select 'other' if your answer isn't listed."],

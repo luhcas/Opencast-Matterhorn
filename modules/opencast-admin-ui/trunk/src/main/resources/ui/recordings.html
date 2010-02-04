@@ -15,12 +15,17 @@
     <script type="text/javascript" src="jquery/jquery-1.4.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
+    <script type="text/javascript" src="js/version.js"></script>
     <script type="text/javascript" src="js/recordings.js"></script>
     <script type="text/javascript">
       $(document).ready(function(){Recordings.init();})
     </script>
   </head>
   <body>
+    <div id="pageHeader">
+      <div id="currentVersion"></div>
+      <div id="newestVersion" style="text-align: right; float: right;"></div>
+    </div>
     <!-- fl-centered doesn't work in winXP-IE8 -->
     <div class="fl-container-flex fl-centered fl-theme-coal">
       <div style="margin-top: .5em"><a href="../../welcome.html"><img src="img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn"></a></div>

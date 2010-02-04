@@ -6,6 +6,7 @@
 body {
     padding-left: 30px;
     padding-right:30px;
+    padding-top: 20px;
     font-size: 1.15em;
 }
 
@@ -167,6 +168,24 @@ a:hover {
 
 .form-list label {
   font-weight: normal;
+}
+
+#pageHeader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  line-height: 20px;
+  font-size: 0.8em;
+  color: #FFF;
+  background-color: #F6921E;
+}
+
+#pageHeader div {
+  display: inline-block;
+  width: 200px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
 /* Notifications */

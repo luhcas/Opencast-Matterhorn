@@ -36,8 +36,6 @@ function initPage() {
                           return false;
                           });
   
-
-  
   /**
    *  eventFields is an array of EventFields and EventFieldGroups, keyed on <item>'s key attribute described in scheduler
    *  service contract for the addEvent rest endpoint.
@@ -85,7 +83,7 @@ function initPage() {
   
   var eventID = schedulerUI.getURLParams('eventID');
   if(eventID && schedulerUI.getURLParams('edit')){
-    $("#page-title").text("Edit Recording");
+    $("#page-title").text("Opencast Matterhorn - Edit Recording");
     $('#attendees').change(function(){ 
                            $("#notice-container").hide();
                            $.get(CAPTURE_ADMIN_URL + '/agents/' + $('#attendees option:selected').val(), checkAgentStatus);
