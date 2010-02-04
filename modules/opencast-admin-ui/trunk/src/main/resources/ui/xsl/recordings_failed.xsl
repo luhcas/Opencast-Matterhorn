@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Document   : recordings_finished.xsl
+    Document   : recordings_failed.xsl
     Created on : November 19, 2009, 9:18 PM
     Author     : wulff
     Description:

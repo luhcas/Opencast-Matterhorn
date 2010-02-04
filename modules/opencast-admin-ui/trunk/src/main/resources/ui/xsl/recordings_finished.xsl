@@ -48,6 +48,7 @@
       </td>
       <td class="td-TimeDate">
         <span class="date-start">
+          <xsl:value-of select="startTime" />
           <span class="time-raw" style="display:none;"><xsl:value-of select="startTime" /></span>
         </span>
         <!-- <span class="date-end">

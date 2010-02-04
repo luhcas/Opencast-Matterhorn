@@ -5,7 +5,9 @@
    otherwise it tries to evaluate hyphen-minus as a subtraction operator in firefox. -->
   <xsl:template match="event">
     <div class="fl-container-800">
-      <center><h2>View Recording</h2></center>
+      <center>
+        <h2>View Recording</h2>
+      </center>
     </div>
     <div class="fl-container-800">
       <div class="fl-widget">
@@ -63,42 +65,66 @@
         </div>
       </div>
     </div>
-    
-    <xsl:if test="string-length(startdate) &gt; 0"> 
-      <div class="fl-container-800" id="captureform">
-        <div class="fl-widget">
-          <div class="fl-widget-titlebar form-box-title"><b>Capture</b></div>
-          <div class="fl-widget-content form-box-container">
-            <ul class="fl-controls-right form-list">
-              <li>
-                <label class="fl-label">Recording Start Time:</label>
+
+    <xsl:choose>
+      <xsl:when test="string-length(startdate) &gt; 0">
+        <div class="fl-container-800" id="captureform">
+          <div class="fl-widget">
+            <div class="fl-widget-titlebar form-box-title">
+              <b>Capture</b>
+            </div>
+            <div class="fl-widget-content form-box-container">
+              <ul class="fl-controls-right form-list">
+                <li>
+                  <label class="fl-label">Recording Start Time:</label>
                 <!-- Recording Date/Time -->
-                <xsl:value-of select="startdate" />
-              </li>
-              <li>
-                <label class="fl-label">Duration:</label>
+                  <xsl:value-of select="startdate" />
+                </li>
+                <li>
+                  <label class="fl-label">Duration:</label>
                 <!-- Duration -->
-                <xsl:value-of select="duration" />
-              </li>
-              <li>
-                <label class="fl-label">Capture Agent:</label>
+                  <xsl:value-of select="duration" />
+                </li>
+                <li>
+                  <label class="fl-label">Capture Agent:</label>
                 <!-- Capture Agent -->
-                <xsl:value-of select="agent" />
-              </li>
-              <li>
-                <label class="fl-label">Input(s):</label>
+                  <xsl:value-of select="agent" />
+                </li>
+                <li>
+                  <label class="fl-label">Input(s):</label>
                 <!-- Inputs -->
-                <xsl:value-of select="inputs" />
-              </li>
-            </ul>
+                  <xsl:value-of select="inputs" />
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
-    </xsl:if>
+      </xsl:when>
+      <xsl:otherwise>
+        <div class="fl-container-800">
+          <div class="fl-widget">
+            <div class="fl-widget-titlebar form-box-title">
+              <b>File Upload</b>
+            </div>
+            <div class="fl-widget-content form-box-container">
+              <ul class="fl-controls-right form-list">
+                <li>
+                  <label class="fl-label">File Uploaded:</label>
+              <!-- filename -->
+                  <xsl:value-of select="filename" />
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </xsl:otherwise>
+    </xsl:choose>
     
     <div class="fl-container-800">
       <div class="fl-widget">
-        <div class="fl-widget-titlebar form-box-title"><b>Distribution</b></div>
+        <div class="fl-widget-titlebar form-box-title">
+          <b>Distribution</b>
+        </div>
         <div class="fl-widget-content form-box-container">
           <ul class="fl-controls-right form-list">
             <li>

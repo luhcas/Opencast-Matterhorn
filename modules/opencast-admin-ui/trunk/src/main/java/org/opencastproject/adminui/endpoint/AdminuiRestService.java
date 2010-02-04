@@ -148,7 +148,8 @@ public class AdminuiRestService {
         item.setId(workflows[i].getId());
         logger.info("DC Title: {}", mediapackage.getTitle());
         item.setTitle(mediapackage.getTitle());
-        item.setPresenter(formatMultipleString(mediapackage.getContributors()));
+        //item.setPresenter(formatMultipleString(mediapackage.getContributors()));
+        item.setPresenter(formatMultipleString(mediapackage.getCreators()));
         item.setSeriesTitle(mediapackage.getSeriesTitle());
         Id seriesId = mediapackage.getSeries();
         if(seriesId != null) {
@@ -157,7 +158,8 @@ public class AdminuiRestService {
         item.setSeriesTitle(mediapackage.getSeriesTitle());
         Date date = mediapackage.getDate();
         if(date != null) {
-          item.setStartTime(sdf.format(date));
+          //item.setStartTime(sdf.format(date));
+          item.setStartTime(Long.toString(date.getTime()));
         }
         item.setCaptureAgent(null); //FIXME get capture agent from where...?
         WorkflowOperationInstance operation = null;
