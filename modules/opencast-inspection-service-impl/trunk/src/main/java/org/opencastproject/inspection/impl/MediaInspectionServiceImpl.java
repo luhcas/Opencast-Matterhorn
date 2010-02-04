@@ -69,6 +69,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   }
 
   public void unsetWorkspace(Workspace workspace) {
+    this.workspace = null;
     logger.debug("unsetting " + workspace);
   }
 

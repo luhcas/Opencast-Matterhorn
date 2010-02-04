@@ -24,6 +24,15 @@ import java.net.URI;
  * Anayzes media to determine its technical metadata.
  */
 public interface MediaInspectionService {
+
+  /**
+   * Inspect a track based on a given uri to the track and put the gathered data into the track
+   * 
+   * @param uri the uri to a track in a media package
+   * @return the updated track OR null if no metadata can be found
+   * @throws IllegalStateException if the analyzer cannot be loaded
+   * @throws RuntimeException if there is a failure during media package update
+   */
   Track inspect(URI uri);
 
   /**
@@ -34,7 +43,9 @@ public interface MediaInspectionService {
    * @param override
    *          In case of conflict between existing and automatically obtained metadata this switch selects preference.
    *          False..The original metadata will be kept, True..The new metadata will be used.
-   * @return
+   * @return the updated track OR null if no metadata found
+   * @throws IllegalStateException if the analyzer cannot be loaded
+   * @throws RuntimeException if there is a failure during media package update
    */
   Track enrich(Track originalTrack, Boolean override);
 
@@ -46,7 +57,9 @@ public interface MediaInspectionService {
    * @param override
    *          In case of conflict between existing and automatically obtained metadata this switch selects preference.
    *          False..The original metadata will be kept, True..The new metadata will be used.
-   * @return
+   * @return the updated element
+   * @throws RuntimeException if element cannot be updated
    */
   AbstractMediaPackageElement enrich(AbstractMediaPackageElement element, Boolean override);
+
 }
