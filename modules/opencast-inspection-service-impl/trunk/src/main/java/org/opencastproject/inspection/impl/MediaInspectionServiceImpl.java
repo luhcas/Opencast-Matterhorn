@@ -59,8 +59,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Inspects media via the 3rd party MediaInfo tool by default, and can be configured to use other media analyzers.
  */
 public class MediaInspectionServiceImpl implements MediaInspectionService, ManagedService {
-  public static final String CONFIG_ANALYZER_CLASS = "inspection.analyzerclass";
-  public static final String CONFIG_ANALYZER_MEDIAINFOPATH = "inspection.mediainfopath";
+  // FIXME move this to media info analyzer service
+  public static final String CONFIG_ANALYZER_MEDIAINFOPATH = "inspection.analyzer.mediainfopath";
 
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImpl.class);
 
@@ -80,16 +80,13 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   @SuppressWarnings("unchecked")
   public void updated(Dictionary properties) throws ConfigurationException {
     logger.info("TODO Updating configuration on {}", this.getClass().getName());
-    // TODO this is doing nothing
+    // FIXME this is doing nothing
   }
+
+  MediaAnalyzer analyzer = null;
 
   public void activate(ComponentContext cc) {
     if (cc != null) {
-      if (cc.getBundleContext().getProperty(CONFIG_ANALYZER_CLASS) != null) {
-        // use analyzerclass from CONFIG
-        MediaAnalyzerFactory.analyzerClassName = cc.getBundleContext().getProperty(CONFIG_ANALYZER_CLASS);
-        logger.info("CONFIG "+CONFIG_ANALYZER_CLASS+": " + MediaAnalyzerFactory.analyzerClassName);
-      }
       if (cc.getBundleContext().getProperty(CONFIG_ANALYZER_MEDIAINFOPATH) != null) {
         // use binary path from CONFIG
         String path = cc.getBundleContext().getProperty(CONFIG_ANALYZER_MEDIAINFOPATH);
@@ -97,24 +94,17 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         logger.info("CONFIG "+CONFIG_ANALYZER_MEDIAINFOPATH+": " + path);
       }
     }
+    // FIXME just doing this to get rid of the factory for now -AZ
+    analyzer = new MediaInfoAnalyzer();
+    analyzer.setConfig(analyzerConfig);
   }
 
   public Track inspect(URI uri) {
     logger.debug("inspect(" + uri + ") called, using workspace " + workspace);
 
-    // Get the file from the URL
+    // Get the file from the URL (runtime exception if invalid)
     File file = workspace.get(uri);
-
-    MediaContainerMetadata metadata = null;
-    try {
-      MediaAnalyzerFactory analyzerFactory = MediaAnalyzerFactory.newInstance();
-      MediaAnalyzer mediaAnalyzer = analyzerFactory.newMediaAnalyzer();
-      mediaAnalyzer.setConfig(analyzerConfig);
-      metadata = mediaAnalyzer.analyze(file);
-    } catch (Throwable t) {
-      throw new IllegalStateException("Unable to create media analyzer", t);
-    }
-
+    MediaContainerMetadata metadata = getFileMetadata(file);
     if (metadata == null) {
       logger.warn("Unable to acquire media metadata for " + uri);
       return null;  // TODO: does the contract for this service define what to do if the file isn't valid media?
@@ -188,16 +178,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
     // Get the file from the URL
     File file = workspace.get(originalTrackUrl);
-
-    MediaContainerMetadata metadata = null;
-    try {
-      MediaAnalyzerFactory analyzerFactory = MediaAnalyzerFactory.newInstance();
-      MediaAnalyzer mediaAnalyzer = analyzerFactory.newMediaAnalyzer();
-      metadata = mediaAnalyzer.analyze(file);
-    } catch (Throwable t) {
-      throw new IllegalStateException("Unable to create media analyzer", t);
-    }
-
+    MediaContainerMetadata metadata = getFileMetadata(file);
     if (metadata == null) {
       logger.warn("Unable to acquire media metadata for " + originalTrackUrl);
       return null;
@@ -303,6 +284,19 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         throw new RuntimeException(e);
       }
     return element;
+  }
+
+  private MediaContainerMetadata getFileMetadata(File file) {
+    if (file == null) {
+      throw new IllegalArgumentException("file to analyze cannot be null");
+    }
+    MediaContainerMetadata metadata = null;
+    try {
+      metadata = analyzer.analyze(file);
+    } catch (Exception e) {
+      throw new IllegalStateException("Unable to create media analyzer", e);
+    }
+    return metadata;
   }
 
 }
