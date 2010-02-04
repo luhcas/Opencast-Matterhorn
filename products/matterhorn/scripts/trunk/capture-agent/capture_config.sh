@@ -95,6 +95,7 @@ if [ $LOAD_DRIVER -eq 0 ]; then
   sudo -u $USERNAME mv $EPIPHAN drivers/
   cd drivers/
   sudo -u $USERNAME tar jxf $EPIPHAN
+  sed -i '/sudo \/sbin\/insmod/s|$| num_frame_buffers=2|' Makefile
   sudo make load
   if [ $? -ne 0 ]; then
     SUCCESS=1
@@ -135,12 +136,11 @@ export M2_REPO=/home/$USERNAME/.m2/repository
 sudo chmod o+w /home/$USERNAME/.bashrc
 sudo -u $USERNAME echo "export M2_REPO=$M2_REPO" >> /home/$USERNAME/.bashrc
 sudo -u $USERNAME echo "export FELIX_HOME=$FELIX_HOME" >> /home/$USERNAME/.bashrc
-exit
 
 # setup felix
 cd /home/$USERNAME
 if [ -d $FELIX_HOME ]; then
-  sudo -u $USERNAME rm -rf $FELIX_HOME
+  sudo rm -rf $FELIX_HOME
 fi
 sudo -u $USERNAME curl $FELIX_URL | sudo -u $USERNAME tar xz 
 sudo -u $USERNAME mkdir ${FELIX_HOME}/load
@@ -171,13 +171,16 @@ sudo chown $USERNAME:$USERNAME /home/$USERNAME/build_matterhorn.sh
 sudo -u $USERNAME /home/$USERNAME/build_matterhorn.sh $FELIX_HOME
 
 # set matterhorn to start on boot
-sudo -u $USERNAME chmod 755 $FELIX_HOME/bin/start_matterhorn.sh
-sudo echo "$FELIX_HOME/bin/start_matterhorn.sh" >> $HOME/matterhorn_capture.sh
-sudo chown root:root $HOME/matterhorn_capture.sh
-sudo chmod 777 $HOME/matterhorn_capture.sh
-sudo mv $HOME/matterhorn_capture.sh /etc/init.d
-sudo ln -sf /etc/init.d/matterhorn_capture.sh /etc/rc2.d/S99matterhorn_capture
-sudo chown root:root /etc/rc2.d/S99matterhorn_capture
-sudo chmod 777 /etc/rc2.d/S99matterhorn_capture
+cd $HOME
+echo "# start the matterhorn capture agent" >> matterhorn.conf
+echo "env FELIX_HOME=${FELIX_HOME}" >> matterhorn.conf
+echo "env M2_REPO=${M2_REPO}" >> matterhorn.conf
+echo "start on runlevel [2345]" >> matterhorn.conf
+echo "stop on runlevel [!2345]" >> matterhorn.conf
+echo "expect fork" >> matterhorn.conf
+echo "script" >> matterhorn.conf
+echo "exec /bin/bash ${FELIX_HOME}/bin/start_matterhorn.sh &" >> matterhorn.conf
+echo "end script" >> matterhorn.conf
+sudo mv matterhorn.conf /etc/init
 
 

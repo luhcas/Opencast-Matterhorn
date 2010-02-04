@@ -59,8 +59,8 @@ echo "capture.device.$cleanAudioDevice.src=$audioDevice" >> capture.properties
 echo "capture.device.$cleanAudioDevice.outputfile=$cleanAudioDevice" >> capture.properties
 
 # setup opencast directories
-OC_DIR=$PWD
-echo -n "Where you like the opencast configuration to be stored (Leave blank for `echo $PWD`)? "
+OC_DIR=/opencast
+echo -n "Where you like the opencast configuration to be stored (Leave blank for /opencast)? "
 read directory
 if [ "$directory" != "" ];
   then
