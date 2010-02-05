@@ -16,11 +16,11 @@
       <thead>
         <tr>
           <th width="30%" class="sortable">Title</th>
-          <th width="17%" class="sortable">Presenter</th>
+          <th width="15%" class="sortable">Presenter</th>
           <th width="20%" class="sortable">Course/Series</th>
           <th width="20%" class="sortable date-column">Recording Date &amp; Time</th>
           <!-- <th width="10%" class="sortable">Capture Agent</th> -->
-          <th width="13%" class="sortable">Status</th>
+          <th width="15%" class="sortable">Status</th>
         </tr>
       </thead>
       <tbody>
