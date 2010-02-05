@@ -20,6 +20,14 @@
 
         $('#stage').xslt("../../capture-admin/rest/agents", "xsl/agents_status.xsl", function() {
           $('#agentsTable').tablesorter({cssAsc: 'sortable-asc', cssDesc: 'sortable-desc'});
+          
+          //header underline
+          $(".header").hover(function(){
+            $(this).css('text-decoration', 'underline');
+          }, function(){
+            $(this).css('text-decoration', 'none')
+          });
+          
         });
 
       });
