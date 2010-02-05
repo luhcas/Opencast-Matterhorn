@@ -55,7 +55,7 @@
 
         function onPlayerReady() {
           var mediaPackageId = Opencast.engage.getMediaPackageId();
-          var restEndpoint = "../../engageui/rest/episode?episodeId=" + mediaPackageId;
+          var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
 
           $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function() {
             // some code to run after the mapping

@@ -22,8 +22,8 @@ Opencast.pager = ( function() {
    */
   function renderPager() {
     // constants
-    var PREVIOUS_TEXT = "prev";
-    var NEXT_TEXT = "next";
+    var PREVIOUS_TEXT = "Previous";
+    var NEXT_TEXT = "Next";
     var OFFSET = 2;
 
     // variables
@@ -62,7 +62,7 @@ Opencast.pager = ( function() {
 
     // Pipe before page numbers
     li = document.createElement('li');
-    li.innerHTML = "<span>" + "|" + "</span>";
+    li.innerHTML = "<span>" + "| </span>&nbsp;<span><b>Page:</b>" + "</span>";
     $('#navigation').append(li);
     
     // take care for the page buttons
@@ -91,7 +91,7 @@ Opencast.pager = ( function() {
       } else {
         link = LINK_PREFIX + i;
         if (i == currentPageId) {
-          text = "<span>" + i + "</span>";
+          text = "<span><b>" + i + "</b></span>";
         } else {
           text = "<a href='" + link + "'>" + i + "</a>";
         }
@@ -159,7 +159,11 @@ Opencast.pager = ( function() {
    * @description Gets the max page ID
    */
   function getMaxPageID() {
-    return $('#oc-maxpage').html();
+    
+    var total =  $('#oc-episodes-total').html()
+    var maxPage = parseInt(total / 10) + 1;
+    
+    return maxPage;
   }
 
   /**

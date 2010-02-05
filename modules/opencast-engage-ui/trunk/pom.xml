@@ -109,7 +109,6 @@
             <Export-Package> org.opencastproject.engageui.* </Export-Package>
             <Private-Package>ui.*</Private-Package>
             <Service-Component>
-              OSGI-INF/engage-ui-service-rest.xml,
               OSGI-INF/engage-ui.xml
             </Service-Component>
           </instructions>
