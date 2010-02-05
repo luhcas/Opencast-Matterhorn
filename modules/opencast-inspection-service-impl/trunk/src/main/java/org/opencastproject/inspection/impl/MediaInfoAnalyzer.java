@@ -18,6 +18,7 @@ package org.opencastproject.inspection.impl;
 
 import org.opencastproject.inspection.impl.api.AudioStreamMetadata;
 import org.opencastproject.inspection.impl.api.VideoStreamMetadata;
+import org.opencastproject.inspection.impl.api.util.CmdlineMediaAnalyzerSupport;
 import org.opencastproject.media.mediapackage.track.BitRateMode;
 import org.opencastproject.media.mediapackage.track.FrameRateMode;
 import org.opencastproject.media.mediapackage.track.ScanType;

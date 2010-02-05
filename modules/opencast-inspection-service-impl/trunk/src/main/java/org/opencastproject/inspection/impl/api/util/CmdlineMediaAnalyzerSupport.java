@@ -14,7 +14,7 @@
  *
  */
 
-package org.opencastproject.inspection.impl;
+package org.opencastproject.inspection.impl.api.util;
 
 import org.opencastproject.inspection.impl.api.MediaAnalyzer;
 import org.opencastproject.inspection.impl.api.MediaAnalyzerException;
