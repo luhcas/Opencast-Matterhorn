@@ -147,7 +147,7 @@
         </div>
       </div>
     </div>
-    <div style="margin-left: 30%">
+    <div style="margin-left: 31%">
       <a href="javascript:history.back();">&lt;&lt; Back to Recordings</a>
     </div>
   </xsl:template>
