@@ -87,6 +87,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   /** A pointer to the state service.  This is where all of the recording state information should be kept. */
   private StateService stateService = null;
 
+  /** The configuration manager for the agent */ 
+  private ConfigurationManager configService = null;
+
   /** Indicates the ID of the recording currently being recorded **/
   private String currentRecID = null;
 
@@ -95,11 +98,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   private boolean noPrefix = false;
 
   private static final String samplesDir = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "samples";
-
-  public CaptureAgentImpl() {
-    logger.info("Starting CaptureAgentImpl.");
-    setAgentState(AgentState.IDLE);
-  }
 
   /**
    * Gets the state service this capture agent is pushing its state to
@@ -111,7 +109,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   /**
    * Sets the state service this capture agent should push its state to.
-   * @param service The service to push the state information to
+   * @param service The service to push the state information to.
    */
   public void setStateService(StateService service) {
     stateService = service;
@@ -123,6 +121,21 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   public void unsetStateService() {
     stateService = null;
+  }
+
+  /**
+   * Sets the configuration service form which this capture agent should draw its configuration data.
+   * @param service The configuration service.
+   */
+  public void setConfigService(ConfigurationManager cfg) {
+    configService = cfg;
+  }
+
+  /**
+   * Unsets the config service from which this capture agent draws its configuration.
+   */
+  public void unsetConfigService() {
+    configService = null;
   }
 
   /**
@@ -147,7 +160,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return null;
     }
 
-    return startCapture(pack, ConfigurationManager.getInstance().getAllProperties());
+    return startCapture(pack, configService.getAllProperties());
   }
 
   /**
@@ -160,7 +173,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     logger.debug("startCapture(mediaPackage): {}", mediaPackage);
 
-    return startCapture(mediaPackage, ConfigurationManager.getInstance().getAllProperties());
+    return startCapture(mediaPackage, configService.getAllProperties());
 
   }
 
@@ -211,7 +224,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     // Creates a new recording object, checking if it was correctly initialized
     RecordingImpl newRec = null;
     try {
-      newRec = new RecordingImpl(mediaPackage, properties);
+      newRec = new RecordingImpl(mediaPackage, properties, configService);
     } catch (IllegalArgumentException e) {
       logger.error("Recording not created: {}", e.getMessage());
       setAgentState(AgentState.IDLE);
@@ -672,12 +685,14 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    *          the component context
    */
   public void activate(ComponentContext ctx) {
+    logger.info("Starting CaptureAgentImpl.");
     Dictionary<String, Object> commands = new Hashtable<String, Object>();
     commands.put(CommandProcessor.COMMAND_SCOPE, "capture");
     commands.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "status", "start", "stop", "ingest", "reset", "capture" });
     logger.info("Registering capture agent osgi shell commands");
     ctx.getBundleContext().registerService(CaptureAgentShellCommands.class.getName(), new CaptureAgentShellCommands(this), commands);
     copyMediaToFiles();
+    setAgentState(AgentState.IDLE);
   }
 
   /**

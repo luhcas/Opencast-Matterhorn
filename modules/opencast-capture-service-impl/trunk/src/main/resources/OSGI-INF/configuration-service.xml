@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.capture.impl.ConfigurationManager" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.capture.impl.ConfigurationManager" />
+  <property name="service.description" value="Capture Agent Configuration Service" />
+  <property name="service.pid" value="org.opencastproject.capture.impl.ConfigurationManager" />  
+  <service>
+    <provide interface="org.opencastproject.capture.impl.ConfigurationManager" />
+    <provide interface="org.osgi.service.cm.ManagedService" />
+  </service>
+</component>

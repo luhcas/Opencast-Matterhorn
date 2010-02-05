@@ -28,6 +28,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.service.cm.ConfigurationException;
 
 public class SchedulerImplTest {
 
@@ -35,10 +36,13 @@ public class SchedulerImplTest {
   ConfigurationManager config = null;
 
   @Before
-  public void setUp() {
-    config = ConfigurationManager.getInstance();
+  public void setUp() throws ConfigurationException {
+    config = new ConfigurationManager();
+    config.activate(null);
     config.setItem(CaptureParameters.AGENT_NAME, "");
+    config.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, System.getProperty("java.io.tmpdir"));
     sched = new SchedulerImpl();
+    sched.setConfigService(config);
   }
 
   @After
@@ -87,7 +91,7 @@ public class SchedulerImplTest {
     String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
     File testfile = setupTestCalendar("calendars/Opencast.ics", times);
     //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, testfile.toURI().toURL().toString());
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL().toString());
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
     sched.activate(null);
     //TODO:  Figure out why this fails 1/3 times on some machines without the sleep() here.
@@ -106,7 +110,7 @@ public class SchedulerImplTest {
   public void testValidLocalUTF8Calendar() throws IOException {
     String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
     File testfile = setupTestCalendar("calendars/Opencast.ics", times);
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
     sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
@@ -121,7 +125,7 @@ public class SchedulerImplTest {
     times[1] = times[0];
     File testfile = setupTestCalendar("calendars/Opencast.ics", times);
     //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, testfile.toURI().toURL().toString());
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL().toString());
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
     sched.activate(null);
     //TODO:  Figure out why this fails 1/3 times on some machines without the sleep() here.
@@ -140,7 +144,7 @@ public class SchedulerImplTest {
     String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
     times[1] = times[0];
     File testfile = setupTestCalendar("calendars/Opencast.ics", times);
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
     sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
@@ -156,7 +160,7 @@ public class SchedulerImplTest {
     times[1] = temp;
     File testfile = setupTestCalendar("calendars/Opencast.ics", times);
     //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, testfile.toURI().toURL().toString());
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL().toString());
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
     sched.activate(null);
     //TODO:  Figure out why this fails 1/3 times on some machines without the sleep() here.
@@ -177,7 +181,7 @@ public class SchedulerImplTest {
     times[0] = times[1];
     times[1] = temp;
     File testfile = setupTestCalendar("calendars/Opencast.ics", times);
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
     sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
@@ -211,7 +215,7 @@ public class SchedulerImplTest {
   @Test
   public void testBlankRemoteCalendar() {
     String cachedBlank = this.getClass().getClassLoader().getResource("calendars/Blank.ics").getFile();
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, cachedBlank);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, cachedBlank);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
     sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
@@ -221,7 +225,7 @@ public class SchedulerImplTest {
   @Test
   public void testBlankLocalCalendar() {
     String cachedBlank = this.getClass().getClassLoader().getResource("calendars/Blank.ics").getFile();
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, cachedBlank);
     sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
@@ -230,7 +234,7 @@ public class SchedulerImplTest {
 
   @Test
   public void testMalformedRemoteURLCalendar() {
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "blah!");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, "blah!");
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
     sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
@@ -239,7 +243,7 @@ public class SchedulerImplTest {
 
   @Test
   public void testMalformedLocalURLCalendar() {
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "blah!");
     sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
@@ -248,7 +252,7 @@ public class SchedulerImplTest {
 
   @Test
   public void testMalformedCalendars() {
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "blah!");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, "blah!");
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "blah!");
     sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
@@ -258,7 +262,7 @@ public class SchedulerImplTest {
   @Test
   public void testNonExistantRemoteCalendar() {
     String nonExistant = this.getClass().getClassLoader().getResource("calendars/Blank.ics").getFile() + "nonExistantTest";
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, nonExistant);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, nonExistant);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
     sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
@@ -268,7 +272,7 @@ public class SchedulerImplTest {
   @Test
   public void testNonExistantLocalCalendar() {
     String nonExistant = this.getClass().getClassLoader().getResource("calendars/Blank.ics").getFile() + "nonExistantTest";
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, nonExistant);
     sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
@@ -278,7 +282,7 @@ public class SchedulerImplTest {
   @Test
   public void testGarbageRemoteCalendar() {
     String garbage = this.getClass().getClassLoader().getResource("calendars/Garbage.ics").getFile();
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, garbage);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, garbage);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
     sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
@@ -288,7 +292,7 @@ public class SchedulerImplTest {
   @Test
   public void testGarbageCalendar() {
     String garbage = this.getClass().getClassLoader().getResource("calendars/Garbage.ics").getFile();
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, garbage);
     sched.activate(null);
     String[] schedule = sched.getCaptureSchedule();
@@ -297,7 +301,7 @@ public class SchedulerImplTest {
 
   @Test
   public void testEndpoint() throws MalformedURLException {
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, "http://www.example.com");
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, "http://www.example.com");
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "");
     URL test = new URL("http://www.example.com");
     sched.setScheduleEndpoint(test);

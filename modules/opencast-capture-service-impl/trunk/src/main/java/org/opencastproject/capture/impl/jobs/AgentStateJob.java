@@ -44,7 +44,7 @@ public class AgentStateJob implements Job {
 
   private static final Logger logger = LoggerFactory.getLogger(AgentStateJob.class);
 
-  private ConfigurationManager config = ConfigurationManager.getInstance();
+  private ConfigurationManager config = null;
   private StateService state = null;
 
   /**
@@ -53,6 +53,7 @@ public class AgentStateJob implements Job {
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
+    config = (ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE);
     state = (StateService) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE);
     sendAgentState();
     sendRecordingState();
@@ -64,9 +65,9 @@ public class AgentStateJob implements Job {
   private void sendAgentState() {
 
     //Figure out where we're sending the data
-    String url = config.getItem(CaptureParameters.AGENT_STATE_ENDPOINT_URL);
+    String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
     if (url == null) {
-      logger.warn("URL for {} is invalid, unable to push state to remote server.", CaptureParameters.AGENT_STATE_ENDPOINT_URL);
+      logger.warn("URL for {} is invalid, unable to push state to remote server.", CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
       return;
     }
     try {
@@ -96,9 +97,9 @@ public class AgentStateJob implements Job {
   private void sendRecordingState() {
 
     //Figure out where we're sending the data
-    String url = config.getItem(CaptureParameters.RECORDING_STATE_ENDPOINT_URL);
+    String url = config.getItem(CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
     if (url == null) {
-      logger.warn("URL for {} is invalid, unable to push recording state to remote server.", CaptureParameters.RECORDING_STATE_ENDPOINT_URL);
+      logger.warn("URL for {} is invalid, unable to push recording state to remote server.", CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
       return;
     }
     try {

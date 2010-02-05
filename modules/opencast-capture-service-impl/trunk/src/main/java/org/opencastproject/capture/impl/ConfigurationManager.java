@@ -15,122 +15,103 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class for retrieving, storing and accessing both local and centralised 
  * configuration files for the CaptureAgent. Uses java.util.Properties to store
  * configuration file which can read/write INI style config files.
  */
-public class ConfigurationManager {
+public class ConfigurationManager implements ManagedService {
   
   /** slf4j logging */
   private static final Logger logger = 
     LoggerFactory.getLogger(ConfigurationManager.class);
   
-  /** The singleton instance for this class */
-  private static ConfigurationManager manager;
-
   /** Hashtable that represents config file in memory */
   private Properties properties;
   
   /** should point to a centralised config file */
   private URL url; 
   
-  /** the local copy of the configuration */
-  private File localConfig;
-
-  /** The machine-written copy of the configuration data.  Not to be edited by hand */
-  private File cachedConfig;
-  
   /** Timer that will every at a specified interval to retrieve the centralised
    * configuration file from a server */
   private Timer timer;
-  
-  /**
-   * Private constructor to enforce the singleton object. Should only be called
-   * if manager field is null.
-   */
-  private ConfigurationManager() {
+
+  public void activate(ComponentContext cc) throws ConfigurationException {
     properties = new Properties();
     
-    // TODO: Do not rely on config file in resource bundle
-    // Load the configuration packed with the bundle
-    URL bundleConfig = getClass().getClassLoader().getResource("config/capture.properties");
-    try {
-      properties.load(bundleConfig.openStream());
-    } catch (MalformedURLException e) {
-      logger.warn("Malformed URL, cannot load bundle config file: {}.", e.getMessage());
-    } catch (FileNotFoundException e) {
-      logger.error("Bundle configuration file not found: {}.", e.getMessage());
-    } catch (IOException e) {
-      logger.error("Unable to load bundle config file: {}.", e.getMessage());
+    //Load the local config from Felix's config directory
+    properties = new Properties();
+    if (cc != null) {
+      updated(cc.getProperties());
     }
+  }
 
-    createCoreDirectories();
-
-    //Setup the cached copy of the config and load it
-    try {
-      cachedConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
-      if (!cachedConfig.isFile()) {
-        cachedConfig.getParentFile().mkdirs();
-        cachedConfig.createNewFile();
-      }
-      if (!cachedConfig.isFile()) {
-        logger.warn("Unable to create cache for config file.");
-      } else {
-        properties.load(new FileInputStream(cachedConfig));
-      }
-    } catch (NullPointerException e) {
-      logger.warn("Malformed URL for {}: {}.", CaptureParameters.CAPTURE_CONFIG_CACHE_URL, properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
-    } catch (IOException e) {
-      logger.warn("IOException creating cached config file.");
+  public void deactivate() {
+    if (timer != null) {
+      timer.cancel();
     }
-
-    // Checking the filesystem for configuration file.
-    //Note that we check the remote source at the bottom of this function using a timer and an UpdateConfig class
-    try {
-      localConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_FILESYSTEM_URL));
-      properties.load(new FileInputStream(localConfig));
-    } catch (NullPointerException e) {
-      logger.warn("Malformed URL for " + CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL);
-    } catch (IOException e) {
-      logger.warn("Could not load local configuration: " + e.getMessage());
+  }
+  
+  @Override
+  public void updated(Dictionary props) throws ConfigurationException {
+    if (properties == null) {
+      logger.info("Null properties in updated!");
+      return;
+    }
+    Enumeration<String> keys = props.keys();
+    while (keys.hasMoreElements()) {
+      String key = keys.nextElement();
+      properties.put(key, props.get(key));
+      //logger.info(key + "=" + properties.getProperty(key));
     }
 
     // Attempt to parse the location of the configuration server
     try {
-      url = new URL(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_ENDPOINT_URL));
+      url = new URL(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_REMOTE_ENDPOINT_URL));
     } catch (MalformedURLException e) {
-      logger.warn("Malformed URL for {}, disabling polling.", CaptureParameters.CAPTURE_CONFIG_ENDPOINT_URL);
+      logger.warn("Malformed URL for {}, disabling polling.", CaptureParameters.CAPTURE_CONFIG_REMOTE_ENDPOINT_URL);
     }
 
     // If this is the case capture there will be no capture devices specified
-    if (url == null && localConfig == null && cachedConfig == null) {
-      logger.error("No configuration data was found, this is very bad!");
-      throw new RuntimeException("No configuration data found for ConfigurationManager!");
+    if (url == null) {
+      logger.info("No remote configuration endpoint was found, relying on local config.");
     }
 
-    retrieveConfigFromDisk();
-    retrieveConfigFromServer();
-    writeConfigFileToDisk();
+    createCoreDirectories();
+
+    Properties server = retrieveConfigFromServer();
+    if (server != null) {
+      writeConfigFileToDisk(server);
+      merge(server, true);
+    }
     
+    //Shut down the old timer if it exists
+    if (timer != null) {
+      timer.cancel();
+    }
+
     // if reload property specified, query server for update at that interval
-    String reload = getItem(CaptureParameters.CAPTURE_CONFIG_POLLING_INTERVAL);
+    String reload = getItem(CaptureParameters.CAPTURE_CONFIG_REMOTE_POLLING_INTERVAL);
     if (url != null && reload != null) {
       timer = new Timer();
       long delay = 0;
@@ -142,19 +123,18 @@ public class ConfigurationManager {
           return;
         }
       } catch (NumberFormatException e) {
-        logger.warn("Invalid polling time for parameter {}.", CaptureParameters.CAPTURE_CONFIG_POLLING_INTERVAL);
+        logger.warn("Invalid polling time for parameter {}.", CaptureParameters.CAPTURE_CONFIG_REMOTE_POLLING_INTERVAL);
         // If the polling time value is invalid, don't poll
         return;
       }
       timer.schedule(new UpdateConfig(), delay, delay);
     }
   }
-
+  
   /**
    * Creates the core Opencast directories.
    */
   private void createCoreDirectories() {
-    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CONFIG_URL, this);
     createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CACHE_URL, this);
     createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_VOLATILE_URL, this);
   }
@@ -178,16 +158,6 @@ public class ConfigurationManager {
     } catch (NullPointerException e) {
       logger.error("No value found for key {}.", key);
     }
-  }
-  
-  /**
-   * Gets the configuration manager instance.
-   * @return the singleton ConfigurationManager.
-   */
-  public static synchronized ConfigurationManager getInstance() {
-    if (manager == null)
-      manager = new ConfigurationManager();
-    return manager;
   }
   
   /**
@@ -230,59 +200,52 @@ public class ConfigurationManager {
   
   /**
    * Read a remote properties file and load it into memory.
-   * This call merges whatever updated configuration settings it gets with the currently existing ones.
-   * Note that this means to *clear* a setting on the capture agent one must set it to *blank* on the server.
+   * The URL it attempts to read from is defined by CaptureParameters.CAPTURE_CONFIG_ENDPOINT_URL
+   * 
+   * @return The properties (if any) fetched from the server
+   * @see org.opencastproject.capture.impl.CaptureParameters#CAPTURE_CONFIG_REMOTE_ENDPOINT_URL
    */
-  private void retrieveConfigFromServer() {
+  private Properties retrieveConfigFromServer() {
     if (url == null) {
-      return;
+      return null;
     }
 
+    Properties p = new Properties();
     try {
       URLConnection urlc = url.openConnection();
-      Properties temp = new Properties();
-      temp.load(urlc.getInputStream());
-      merge(temp, true);
+      p.load(urlc.getInputStream());
     } catch (Exception e) {
       logger.warn("Could not get config file from server: {}.", e.getMessage());
     }
+    return p;
   }
 
-  /**
-   * Fetches the user-editable local copy of the configuration settings.
-   * This call merges whatever updated configuration settings it gets with the currently existing ones.
-   * Note that this means to *clear* a setting on the capture agent one must set it to *blank* in the configuration file.
-   */
-  private void retrieveConfigFromDisk() {
-    if (localConfig == null) {
-      return;
-    }
-
-    try {
-      Properties t = new Properties();
-      t.load(new FileInputStream(localConfig));
-      merge(t, true);
-    } catch (Exception e) {
-      logger.warn("Exception reading {}:  {}.", localConfig.getAbsolutePath(), e.getMessage());
-    }
-  }
-  
   /**
    * Stores a local copy of the properties on disk.
+   * 
+   * @param p The properties object you wish to store.  It will be saved at CaptureParameters.CAPTURE_CONFIG_FILESYSTEM_URL
+   * @see org.opencastproject.capture.impl.CaptureParameters#CAPTURE_CONFIG_CACHE_URL
    */
-  private void writeConfigFileToDisk() {
-    if (properties == null || cachedConfig == null) {
+  private void writeConfigFileToDisk(Properties p) {
+    File cachedConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
+
+    if (p == null) {
+      logger.warn("Unable to write config to disk because parameter was null");
       return;
     }
 
+    FileOutputStream fout = null;
     try {
       if (!cachedConfig.isFile()) {
         cachedConfig.getParentFile().mkdirs();
         cachedConfig.createNewFile();
-      }  
-      properties.store(new FileOutputStream(cachedConfig), "Autogenerated config file, do not edit.");
+      }
+      fout = new FileOutputStream(cachedConfig);
+      p.store(fout, "Autogenerated config file, do not edit.");
     } catch (Exception e) {
       logger.warn("Could not write config file to disk: {}.", e.getMessage());
+    } finally {
+      IOUtils.closeQuietly(fout);
     }
   }
   
@@ -317,9 +280,12 @@ public class ConfigurationManager {
     // do not overwrite the ConfigurationManager, but merge the properties
     else {
       Properties merged = getAllProperties();
+      logger.info("Start");
       for (Object key : p.keySet()) {
-        merged.setProperty((String) key, (String) p.get(key));
+        logger.info("GDLGDL " + key + "=" + p.get(key).toString());
+        merged.setProperty(key.toString(), p.get(key).toString());
       }
+      logger.info("");
       return merged;
     }
 
@@ -333,9 +299,11 @@ public class ConfigurationManager {
 
     @Override
     public void run() {
-      retrieveConfigFromDisk();
-      retrieveConfigFromServer();
-      writeConfigFileToDisk();
+      Properties server = retrieveConfigFromServer();
+      if (server != null) {
+        writeConfigFileToDisk(server);
+        merge(server, true);
+      }
     }
   }
 }

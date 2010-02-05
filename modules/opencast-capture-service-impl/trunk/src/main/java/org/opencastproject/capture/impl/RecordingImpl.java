@@ -59,14 +59,12 @@ public class RecordingImpl {
    * @param mp    The {@code MediaPackage} with this recording files
    * @throws IOException If the base directory could not be fetched
    */
-  RecordingImpl(MediaPackage mp, Properties properties) throws IOException, IllegalArgumentException {
+  RecordingImpl(MediaPackage mp, Properties properties, ConfigurationManager service) throws IOException, IllegalArgumentException {
     // Stores the MediaPackage
     this.mPkg = mp;
 
-    ConfigurationManager config = ConfigurationManager.getInstance();
-
     // Merges properties without overwriting the system's configuration
-    props = config.merge(properties, false);
+    props = service.merge(properties, false);
     
     //Figures out where captureDir lives
     if (this.props.containsKey(CaptureParameters.RECORDING_ROOT_URL)) {

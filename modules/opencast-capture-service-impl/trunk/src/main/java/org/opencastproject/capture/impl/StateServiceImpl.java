@@ -31,6 +31,7 @@ import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -47,15 +48,31 @@ public class StateServiceImpl implements StateService, ManagedService {
 
   private Agent agent = null;
   private Hashtable<String, Recording> recordings = null;
-  ConfigurationManager config = ConfigurationManager.getInstance();
+  private ConfigurationManager configService = null;
+  private Scheduler pollScheduler = null;
 
-  /**
-   * Constructor, sets up the class to keep track of an arbitrary number of recordings.
-   */
-  public StateServiceImpl() {
+  public void setConfigService(ConfigurationManager svc) {
+    configService = svc;
+  }
+
+  public void unsetConfigService() {
+    configService = null;
+  }
+
+  public void activate(ComponentContext ctx) {
     recordings = new Hashtable<String, Recording>();
-    agent = new Agent(config.getItem(CaptureParameters.AGENT_NAME), AgentState.UNKNOWN);
+    agent = new Agent(configService.getItem(CaptureParameters.AGENT_NAME), AgentState.UNKNOWN);
     createPollingTask();
+  }
+  
+  public void deactivate() {
+    try {
+      if (pollScheduler != null) {
+          pollScheduler.shutdown(true);
+      }
+    } catch (SchedulerException e) {
+      logger.warn("Finalize for pollScheduler did not execute cleanly: {}.", e.getMessage());
+    }
   }
 
   /**
@@ -112,7 +129,7 @@ public class StateServiceImpl implements StateService, ManagedService {
    */
   private void createPollingTask() {
     try {
-      long pollTime = Long.parseLong(ConfigurationManager.getInstance().getItem(CaptureParameters.AGENT_STATE_POLLING_INTERVAL)) * 1000L;
+      long pollTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL)) * 1000L;
       Properties pollingProperties = new Properties();
       InputStream s = getClass().getClassLoader().getResourceAsStream("config/state_update_scheduler.properties");
       if (s == null) {
@@ -122,7 +139,7 @@ public class StateServiceImpl implements StateService, ManagedService {
       StdSchedulerFactory sched_fact = new StdSchedulerFactory(pollingProperties);
   
       //Create and start the scheduler
-      Scheduler pollScheduler = sched_fact.getScheduler();
+      pollScheduler = sched_fact.getScheduler();
       if (pollScheduler.getJobGroupNames().length > 0) {
         logger.info("Duplicate attempt to create agent status task detected, ignoring...");
         return;
@@ -133,6 +150,7 @@ public class StateServiceImpl implements StateService, ManagedService {
       JobDetail job = new JobDetail("agentStateUpdate", Scheduler.DEFAULT_GROUP, AgentStateJob.class);
 
       job.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
+      job.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
 
       //TODO:  Support changing the polling interval
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
@@ -141,7 +159,7 @@ public class StateServiceImpl implements StateService, ManagedService {
       //Schedule the update
       pollScheduler.scheduleJob(job, trigger);
     } catch (NumberFormatException e) {
-      logger.error("Invalid time specified in the {} value, unable to push state to remote server!", CaptureParameters.AGENT_STATE_POLLING_INTERVAL);
+      logger.error("Invalid time specified in the {} value, unable to push state to remote server!", CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL);
     } catch (IOException e) {
       logger.error("IOException caught in StateServiceImpl: {}.", e.getMessage());
     } catch (SchedulerException e) {

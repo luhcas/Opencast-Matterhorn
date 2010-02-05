@@ -173,7 +173,8 @@
               OSGI-INF/capture-service-rest.xml,
               OSGI-INF/state-service.xml,
               OSGI-INF/state-service-rest.xml,
-              OSGI-INF/scheduler-service.xml
+              OSGI-INF/scheduler-service.xml,
+              OSGI-INF/configuration-service.xml
             </Service-Component>
           </instructions>
         </configuration>

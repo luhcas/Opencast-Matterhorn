@@ -22,6 +22,9 @@ public interface JobParameters {
   /** Constant used to define the key for the pointer to the state service. */
   public static final String STATE_SERVICE = "state_service";
 
+  /** Constant used to define the key for the pointer to the configuration service. */
+  public static final String CONFIG_SERVICE = "config_service";
+
   /** Constant used to define the key for the properties object which is pulled out of the execution context. */
   public static final String CAPTURE_PROPS = "capture_props";
 

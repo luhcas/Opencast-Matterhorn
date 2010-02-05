@@ -22,20 +22,22 @@ package org.opencastproject.capture.impl;
  */
 public interface CaptureParameters {
 
+  /**
+   * Settings which control the configuration service
+   */
+
   /** Location of the centralised configuration file */
-  public static final String CAPTURE_CONFIG_ENDPOINT_URL = "capture.config.endpoint.url";
+  public static final String CAPTURE_CONFIG_REMOTE_ENDPOINT_URL = "capture.config.remote.endpoint.url";
   
   /** The time to wait between updating the local copy of the configuration */
-  public static final String CAPTURE_CONFIG_POLLING_INTERVAL = "capture.config.polling.interval";
+  public static final String CAPTURE_CONFIG_REMOTE_POLLING_INTERVAL = "capture.config.remote.polling.interval";
 
-  /** The URL to store the cached config file in */
+  /** The full path to the cached server config */
   public static final String CAPTURE_CONFIG_CACHE_URL = "capture.config.cache.url";
-  
-  /** The URL to store the main config file */
-  public static final String CAPTURE_CONFIG_FILESYSTEM_URL = "capture.config.filesystem.url";
 
-  /** The URL of the config directory under the root directory */
-  public static final String CAPTURE_FILESYSTEM_CONFIG_URL = "capture.filesystem.config.url";
+  /**
+   * Settings which control the filesystem
+   */
 
   /** The URL of the caching directory under the root directory */
   public static final String CAPTURE_FILESYSTEM_CACHE_URL = "capture.filesystem.cache.url";
@@ -45,27 +47,39 @@ public interface CaptureParameters {
 
   /** The root URL where the captures should be stored prior to ingest */
   public static final String CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL = "capture.filesystem.cache.capture.url";
-  
+
+  /**
+   * Settings which control the scheduler
+   */
+
   /** The remote URL where the capture schedule should be retrieved */
-  public static final String CAPTURE_SCHEDULE_URL = "capture.schedule.url";
+  public static final String CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL = "capture.schedule.remote.endpoint.url";
   
   /** The time between attempts to fetch updated calendar data */
-  public static final String CAPTURE_SCHEDULE_POLLING_INTERVAL = "capture.schedule.polling.interval";
+  public static final String CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL = "capture.schedule.remote.polling.interval";
 
   /** The local URL of the cached copy of the capture schedule */
   public static final String CAPTURE_SCHEDULE_CACHE_URL = "capture.schedule.cache.url";
+
+  /**
+   * Settings which control the agent state service
+   */
 
   /** The name of the agent */ 
   public static final String AGENT_NAME = "capture.agent.name";
   
   /** The URL of the remote state service */
-  public static final String AGENT_STATE_ENDPOINT_URL = "capture.agent.state.endpoint.url";
+  public static final String AGENT_STATE_REMOTE_ENDPOINT_URL = "capture.agent.state.remote.endpoint.url";
 
   /** The time between attempts to push the agent's state to the state service */
-  public static final String AGENT_STATE_POLLING_INTERVAL = "capture.agent.state.polling.interval";
+  public static final String AGENT_STATE_REMOTE_POLLING_INTERVAL = "capture.agent.state.remote.polling.interval";
+
+  /**
+   * Settings which control the recording state service
+   */
 
   /** The URL of the remote recording state service */
-  public static final String RECORDING_STATE_ENDPOINT_URL = "capture.recording.state.endpoint.url";
+  public static final String RECORDING_STATE_REMOTE_ENDPOINT_URL = "capture.recording.state.remote.endpoint.url";
 
   /** The ID of a capture */
   public static final String RECORDING_ID = "capture.recording.id";
@@ -76,11 +90,19 @@ public interface CaptureParameters {
   /** Duration to specify for the capture client */
   public static final String RECORDING_END = "capture.recording.end";
 
+  /**
+   * Settings which control the ingest jobs
+   */
+
   /** The URL to send the capture data to during ingest */
   public static final String INGEST_ENDPOINT_URL = "capture.ingest.endpoint.url";
 
   /** The retry interval for attempting ingest */
   public static final String INGEST_RETRY_INTERVAL = "capture.ingest.retry.interval";
+
+  /**
+   * Settings which control the capture hardware and outputs
+   */
 
   /** A comma delimited list of the friendly names for capturing devices */
   public static final String CAPTURE_DEVICE_NAMES = "capture.device.names";

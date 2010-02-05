@@ -8,4 +8,6 @@
   </service>
   <reference name="captureAgent" interface="org.opencastproject.capture.api.CaptureAgent"
     cardinality="1..1" policy="static" bind="setCaptureAgent" />
+  <reference name="configService" interface="org.opencastproject.capture.impl.ConfigurationManager"
+    cardinality="1..1" policy="static" bind="setConfigService" />
 </component>

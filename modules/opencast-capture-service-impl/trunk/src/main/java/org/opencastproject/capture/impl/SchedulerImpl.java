@@ -97,10 +97,18 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   private Calendar calendar = null;
 
   /** The configuration for this service */
-  private ConfigurationManager config = null;
+  private ConfigurationManager configService = null;
 
   private CaptureAgent captureAgent = null;
 
+  public void setConfigService(ConfigurationManager svc) {
+    configService = svc;
+  }
+
+  public void unsetConfigService() {
+    configService = null;
+  }
+  
   /**
    * Called when the bundle is deactivated.  This function shuts down all of the schedulers.
    */
@@ -113,11 +121,10 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @param cc The component context.
    */
   public void activate(ComponentContext cc) {
-    config = ConfigurationManager.getInstance();
     SchedulerFactory sched_fact = null;
 
     try {
-      localCalendarCacheURL = new File(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL)).toURI().toURL();
+      localCalendarCacheURL = new File(configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL)).toURI().toURL();
     } catch (NullPointerException e) {
       log.warn("Invalid location specified for {} unable to cache scheduling data.", CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL);
     } catch (MalformedURLException e) {
@@ -125,7 +132,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     }
 
     try {
-      String remoteBase = StringUtils.trimToNull(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL));
+      String remoteBase = StringUtils.trimToNull(configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL));
       if (remoteBase != null && remoteBase.charAt(remoteBase.length()-1) != '/') {
         remoteBase = remoteBase + "/";
       } else if (remoteBase == null && cc != null) {
@@ -134,10 +141,10 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           log.warn("Base url is not configured, and neither is the server url");
         }
       }
-      remoteCalendarURL = new URL(new URL(remoteBase), config.getItem(CaptureParameters.AGENT_NAME));
+      remoteCalendarURL = new URL(new URL(remoteBase), configService.getItem(CaptureParameters.AGENT_NAME));
 
       //Times are in seconds in the config file, so multiply by 1000
-      pollTime = Long.parseLong(config.getItem(CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL)) * 1000L;
+      pollTime = Long.parseLong(configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL)) * 1000L;
       if (pollTime > 1) {
         //Load the properties for this scheduler.  Each scheduler requires its own unique properties file.
         Properties pollingProperties = new Properties();
@@ -158,14 +165,14 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         //Schedule the update
         pollScheduler.scheduleJob(job, trigger);
       } else {
-        log.info("{} has been set to less than 1, calendar updates disabled.", CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL);
+        log.info("{} has been set to less than 1, calendar updates disabled.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL);
       }
     } catch (StringIndexOutOfBoundsException e) {
-      log.warn("Unable to build valid scheduling data endpoint from key {}: {}.  Value must end in a / character.", CaptureParameters.CAPTURE_SCHEDULE_URL, config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL));
+      log.warn("Unable to build valid scheduling data endpoint from key {}: {}.  Value must end in a / character.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL));
     } catch (MalformedURLException e) {
-      log.warn("Invalid location specified for {} unable to retrieve new scheduling data: {}.", CaptureParameters.CAPTURE_SCHEDULE_URL, config.getItem(CaptureParameters.CAPTURE_SCHEDULE_URL));
+      log.warn("Invalid location specified for {} unable to retrieve new scheduling data: {}.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL));
     } catch (NumberFormatException e) {
-      log.warn("Invalid polling interval for {} unable to retrieve new scheduling data: {}.", CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL, config.getItem(CaptureParameters.CAPTURE_SCHEDULE_POLLING_INTERVAL));
+      log.warn("Invalid polling interval for {} unable to retrieve new scheduling data: {}.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL));
     } catch (IOException e) {
       throw new RuntimeException("IOException, unable to load bundled Quartz properties file for calendar polling.", e);
     } catch (SchedulerException e) {
@@ -242,7 +249,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     } else if (calendar == null && localCalendarCacheURL == null) {
       log.warn("Unable to update calendar from either local or remote sources.");
     } else {
-      log.info("Calendar already exists, and {} is invalid, skipping update.", CaptureParameters.CAPTURE_SCHEDULE_URL);
+      log.info("Calendar already exists, and {} is invalid, skipping update.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL);
       return;
     }
 
@@ -250,7 +257,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     if (calendar != null) {
       setCaptureSchedule(calendar);
     } else {
-      log.warn("Calendar parsing routine returned null, skipping update of capture schedule.");
+      log.debug("Calendar parsing routine returned null, skipping update of capture schedule.");
     }
   }
 
@@ -265,18 +272,18 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     try {
       calendarString = readCalendar(url);
     } catch (Exception e) {
-      log.warn("Parsing exception, keeping current scheduling data: {}.", e.toString());
+      log.warn("Parsing exception: {}.", e.toString());
       //If the calendar is null, which only happens when the machine has *just* been powered on.
       //This case handles not having a network connection by just reading from the cached copy of the calendar 
       if (calendar == null) {
         try {
           calendarString = readCalendar(localCalendarCacheURL);
         } catch (IOException e1) {
-          log.warn("Unable to read from cached schedule: {}.", e.getMessage());
+          log.warn("Unable to read from cached schedule: {}.", e1.getMessage());
           return null;
         }
       } else {
-        log.info("Calendar already exists, and {} is invalid, skipping update.", CaptureParameters.CAPTURE_SCHEDULE_URL);
+        log.info("Calendar already exists, and {} is invalid, skipping update.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL);
         return null;
       }
     }
@@ -372,15 +379,15 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    */
   private void checkSchedules() throws SchedulerException {
     if (captureScheduler != null) {
-      log.info("Currently scheduled jobs for capture schedule:");
+      log.debug("Currently scheduled jobs for capture schedule:");
       for (String name : captureScheduler.getJobNames(Scheduler.DEFAULT_GROUP)) {
-        log.info("{}.", name);  
+        log.debug("{}.", name);  
       }
     }
     if (pollScheduler != null) {
-      log.info("Currently scheduled jobs for poll schedule:");
+      log.debug("Currently scheduled jobs for poll schedule:");
       for (String name : pollScheduler.getJobNames(Scheduler.DEFAULT_GROUP)) {
-        log.info("{}.", name);
+        log.debug("{}.", name);
       }
     }
   }
@@ -449,7 +456,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         props.put(CaptureParameters.RECORDING_END, getCronString(duration.getDuration().getTime(start)).toString());
 
         //Create the directory we'll be capturing into
-        File captureDir = new File(config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),
+        File captureDir = new File(configService.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),
                                     props.getProperty(CaptureParameters.RECORDING_ID));
         if (!captureDir.exists()) {
           try {
@@ -481,7 +488,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
             Properties jobProps = new Properties();
             jobProps.load(new StringReader(contents));
             jobProps.putAll(props);
-            jobProps = config.merge(jobProps, false);
+            jobProps = configService.merge(jobProps, false);
             job.getJobDataMap().put(JobParameters.CAPTURE_PROPS, jobProps);
             hasProperties = true;
           } else if (filename.equals("metadata.xml")) {

@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.osgi.service.cm.ConfigurationException;
 
 import java.util.Properties;
 
@@ -33,8 +34,9 @@ public class ConfigurationManagerTest {
   private ConfigurationManager configManager;
 
   @Before
-  public void setUp() {
-    configManager = ConfigurationManager.getInstance();
+  public void setUp() throws ConfigurationException {
+    configManager = new ConfigurationManager();
+    configManager.activate(null);
     Assert.assertNotNull(configManager);
   }
 

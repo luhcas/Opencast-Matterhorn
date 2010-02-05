@@ -8,4 +8,6 @@
   </service>
   <reference name="stateService" interface="org.opencastproject.capture.api.StateService"
     cardinality="1..1" policy="static" bind="setStateService" unbind="unsetStateService" />
+  <reference name="configService" interface="org.opencastproject.capture.impl.ConfigurationManager"
+    cardinality="1..1" policy="static" bind="setConfigService" />
 </component>
