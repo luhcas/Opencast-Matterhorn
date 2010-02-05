@@ -280,12 +280,9 @@ public class ConfigurationManager implements ManagedService {
     // do not overwrite the ConfigurationManager, but merge the properties
     else {
       Properties merged = getAllProperties();
-      logger.info("Start");
       for (Object key : p.keySet()) {
-        logger.info("GDLGDL " + key + "=" + p.get(key).toString());
         merged.setProperty(key.toString(), p.get(key).toString());
       }
-      logger.info("");
       return merged;
     }
 

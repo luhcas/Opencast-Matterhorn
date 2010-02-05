@@ -99,6 +99,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   private static final String samplesDir = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "samples";
 
+  public CaptureAgentImpl() {
+    setAgentState(AgentState.IDLE);
+  }
+
   /**
    * Gets the state service this capture agent is pushing its state to
    * @return The service this agent pushes its state to.

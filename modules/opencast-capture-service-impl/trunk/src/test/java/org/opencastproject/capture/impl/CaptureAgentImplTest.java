@@ -16,6 +16,7 @@
 package org.opencastproject.capture.impl;
 
 import org.opencastproject.capture.admin.api.AgentState;
+import org.osgi.service.cm.ConfigurationException;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -34,6 +35,9 @@ public class CaptureAgentImplTest {
   
   /** The single instance of CaptureAgentImpl needed */
   private static CaptureAgentImpl agent = null;
+
+  /** The configuration manager for these tests */
+  private static ConfigurationManager config = null;
   
   /** Properties specifically designed for unit testing */
   private static Properties properties = null;
@@ -45,9 +49,12 @@ public class CaptureAgentImplTest {
   private static URL outputDir = null;
   
   @Before
-  public void setup() {
+  public void setup() throws ConfigurationException {
+    config = new ConfigurationManager();
+    config.activate(null);
     // creates agent, initially idle
     agent = new CaptureAgentImpl();
+    agent.setConfigService(config);
     Assert.assertEquals(agent.getAgentState(), AgentState.IDLE);
     
     // setup test media
