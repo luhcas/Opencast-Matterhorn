@@ -67,8 +67,9 @@ public class SearchServiceImpl implements SearchService {
 
   private DublinCoreCatalogService dcService;
   
-  public void setDcService(DublinCoreCatalogService dcService) {
+  public void setDublincoreService(DublinCoreCatalogService dcService) {
     this.dcService = dcService;
+    if(solrIndexManager != null) solrIndexManager.setDcService(dcService); // In case the dc service is updated
   }
 
   /**

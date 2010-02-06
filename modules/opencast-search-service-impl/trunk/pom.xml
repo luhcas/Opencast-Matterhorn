@@ -201,6 +201,7 @@
               itunes;inline=true
             </Embed-Dependency>
             <Service-Component>
+              OSGI-INF/search-service.xml,
               OSGI-INF/search-service-rest.xml,
               OSGI-INF/feed-service.xml
             </Service-Component>

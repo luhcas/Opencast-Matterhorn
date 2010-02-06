@@ -53,7 +53,7 @@ public class SearchServiceImplTest {
   @Before
   public void setup() {
     service = new SearchServiceImpl(solrRoot);
-    service.setDcService(new DublinCoreCatalogService());
+    service.setDublincoreService(new DublinCoreCatalogService());
     service.activate(null);
   }
 
