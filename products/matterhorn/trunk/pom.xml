@@ -84,6 +84,40 @@
         <module>opencast-capture-service-impl</module> 
       </modules>
     </profile>
+    <profile>
+      <id>core</id>
+      <modules>
+        <module>opencast-build-tools</module>
+        <module>opencast-maven-plugin</module>
+        <module>opencast-runtime-tools</module>
+        <!-- <module>opencast-authentication-api</module> -->
+        <module>opencast-composer-service-api</module>
+        <module>opencast-composer-service-impl</module>
+        <module>opencast-conductor-api</module>
+        <module>opencast-conductor</module>
+        <module>opencast-distribution-service-api</module>
+        <module>opencast-distribution-service-local-impl</module>
+        <module>opencast-http</module>
+        <module>opencast-ingest-service-api</module>
+        <module>opencast-ingest-service-impl</module>
+        <module>opencast-inspection-service-api</module>
+        <module>opencast-inspection-service-impl</module>
+        <module>opencast-media</module>
+        <module>opencast-notification-service-api</module>
+        <module>opencast-runtime-info-ui</module>
+        <module>opencast-search-service-api</module>
+        <module>opencast-search-service-impl</module>
+        <module>opencast-util</module>
+        <module>opencast-workflow-service-api</module>
+        <module>opencast-workflow-service-impl</module>
+        <module>opencast-workflow-ui</module>
+        <module>opencast-working-file-repository-service-api</module>
+        <module>opencast-working-file-repository-service-impl</module>
+        <module>opencast-workspace-api</module>
+        <module>opencast-workspace-impl</module>
+        <module>opencast-db</module>
+      </modules>
+    </profile>
   </profiles>
 
   <build>
