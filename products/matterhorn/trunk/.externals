@@ -10,7 +10,7 @@
 ../../../modules/opencast-conductor-api/trunk	opencast-conductor-api
 ../../../modules/opencast-conductor/trunk	opencast-conductor
 ../../../modules/opencast-media/trunk	opencast-media
-../../../modules/opencast-metadata/trunk	opencast-metadata
+../../../modules/opencast-metadata-api/trunk	opencast-metadata-api
 ../../../modules/opencast-dublincore/trunk	opencast-dublincore
 ../../../modules/opencast-mpeg7/trunk	opencast-mpeg7
 ../../../modules/opencast-util/trunk	opencast-util
