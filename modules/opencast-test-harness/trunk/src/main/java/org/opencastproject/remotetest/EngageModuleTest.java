@@ -31,6 +31,21 @@ import org.junit.Test;
  * Tests the functionality of the Engage module
  * Tests if all media player components are available
  * 
+ * This needs to be improved by 
+ * String[] EngageGFXuri = {
+ *   "/engage-hybrid-player/icons/cc_off.png",
+ *	  "/engage-hybrid-player/icons/cc_on.png",
+ * ....
+ * }
+ * 
+ * String[] EngageJSuri = {
+ * ...
+ * }
+ * 
+ * to remove many Testcases
+ * 
+ * The DefaultHttpClient needs to be threadsafe - included in org.apache.httpcomponents version 4-1alpha 
+ * 
  */
 public class EngageModuleTest {
   HttpClient client;
@@ -47,13 +62,6 @@ public class EngageModuleTest {
     client.getConnectionManager().shutdown();
   }
 
- /* @Test
-  public void testSearch() throws Exception {
-    HttpGet get = new HttpGet(BASE_URL + "/engageui/rest/search");
-    HttpResponse response = client.execute(get);
-    // Ensure we get a 200 OK
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }*/
 
   @Test
   public void testJQuery() throws Exception {
