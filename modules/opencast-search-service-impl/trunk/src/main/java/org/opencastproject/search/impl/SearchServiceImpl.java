@@ -17,6 +17,7 @@
 package org.opencastproject.search.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
@@ -63,6 +64,12 @@ public class SearchServiceImpl implements SearchService {
 
   /** The solr root directory */
   private String solrRoot = null;
+
+  private DublinCoreCatalogService dcService;
+  
+  public void setDcService(DublinCoreCatalogService dcService) {
+    this.dcService = dcService;
+  }
 
   /**
    * Creates a search service that places solr into a subdirectory of <code>java.io.tmpdir</code> called
@@ -157,6 +164,7 @@ public class SearchServiceImpl implements SearchService {
       solrConnection = new SolrConnection(solrRoot, PathSupport.concat(solrRoot, "data"));
       solrRequester = new SolrRequester(solrConnection);
       solrIndexManager = new SolrIndexManager(solrConnection);
+      solrIndexManager.setDcService(dcService);
       // The solr index needs some time to setup
       // FIXME Not ideal solution
       Thread.sleep(3000);

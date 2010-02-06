@@ -23,6 +23,11 @@
       <version>0.6-SNAPSHOT</version>
     </dependency>    
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-dublincore</artifactId>
+      <version>0.6-SNAPSHOT</version>
+    </dependency>    
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
@@ -106,7 +111,8 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.scheduler.* </Export-Package>
       			<Import-Package>
-      				org.opencastproject.http, 
+      				org.opencastproject.http,
+              org.opencastproject.metadata.dublincore,
       				*;resolution:=optional
       			</Import-Package>
             <Private-Package>

@@ -25,6 +25,7 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
 
@@ -52,6 +53,7 @@ public class SearchServiceImplTest {
   @Before
   public void setup() {
     service = new SearchServiceImpl(solrRoot);
+    service.setDcService(new DublinCoreCatalogService());
     service.activate(null);
   }
 

@@ -18,10 +18,7 @@ package org.opencastproject.media.mediapackage;
 
 import org.opencastproject.media.mediapackage.elementbuilder.AttachmentBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.CoverBuilderPlugin;
-import org.opencastproject.media.mediapackage.elementbuilder.DublinCoreBuilderPlugin;
-import org.opencastproject.media.mediapackage.elementbuilder.EngageDownloadTrackBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.IndefiniteTrackBuilderPlugin;
-import org.opencastproject.media.mediapackage.elementbuilder.MPEG7BuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.PresentationTrackBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.PresenterTrackBuilderPlugin;
@@ -77,10 +74,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
       log_.warn("Unable to find element builder plugins via classloader.  Manually loading the default set.");
       plugins.add(AttachmentBuilderPlugin.class);
       plugins.add(CoverBuilderPlugin.class);
-      plugins.add(DublinCoreBuilderPlugin.class);
       plugins.add(IndefiniteTrackBuilderPlugin.class);
-      plugins.add(EngageDownloadTrackBuilderPlugin.class);
-      plugins.add(MPEG7BuilderPlugin.class);
       plugins.add(PresentationTrackBuilderPlugin.class);
       plugins.add(PresenterTrackBuilderPlugin.class);
     } else {
@@ -137,6 +131,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     Collections.sort(candidates, PriorityComparator.INSTANCE);
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
     MediaPackageElement element = builderPlugin.elementFromURI(uri);
+    element.setFlavor(flavor);
     builderPlugin.cleanup();
     return element;
   }

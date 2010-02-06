@@ -16,12 +16,22 @@
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-ingest-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
-    </dependency>   
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-metadata-api</artifactId>
+      <version>0.6-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-dublincore</artifactId>
+      <version>0.6-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>opencast-workspace-api</artifactId>
       <version>0.6-SNAPSHOT</version>
-    </dependency>   
+    </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>

@@ -16,8 +16,6 @@
 package org.opencastproject.ingest.endpoint;
 
 import org.opencastproject.ingest.api.IngestService;
-
-import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
@@ -25,10 +23,10 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.dublincore.DublinCore;
-import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.media.mediapackage.identifier.Id;
-
+import org.opencastproject.metadata.dublincore.DublinCore;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -40,14 +38,13 @@ import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
-import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -68,10 +65,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 
 /**
@@ -83,12 +76,20 @@ public class IngestRestService {
   private static final Logger logger = LoggerFactory.getLogger(IngestRestService.class);
   private MediaPackageBuilderFactory factory = null;
   private MediaPackageBuilder builder = null;
-  private IngestService service = null;
+  private IngestService ingestService = null;
+  private DublinCoreCatalogService dcService;
+  
+  public IngestRestService() {
+  }
 
-  public void setService(IngestService service) {
-    this.service = service;
+  public void setIngestService(IngestService ingestService) {
+    this.ingestService = ingestService;
     factory = MediaPackageBuilderFactory.newInstance();
     builder = factory.newMediaPackageBuilder();
+  }
+
+  public void setDcService(DublinCoreCatalogService dcService) {
+    this.dcService = dcService;
   }
 
   @GET
@@ -97,7 +98,7 @@ public class IngestRestService {
   public Response createMediaPackage() {
     MediaPackage mp;
     try {
-      mp = service.createMediaPackage();
+      mp = ingestService.createMediaPackage();
       return Response.ok(mp).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
@@ -124,7 +125,7 @@ public class IngestRestService {
   public Response addMediaPackageTrack(@FormParam("url") String url, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") MediaPackage mp) {
     try {
-      mp = service.addTrack(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      mp = ingestService.addTrack(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
       return Response.ok(mp).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
@@ -147,7 +148,7 @@ public class IngestRestService {
   public Response addMediaPackageCatalog(@FormParam("url") String url, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") MediaPackage mp) {
     try {
-      MediaPackage resultingMediaPackage = service.addCatalog(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      MediaPackage resultingMediaPackage = ingestService.addCatalog(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
       return Response.ok(resultingMediaPackage).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
@@ -212,10 +213,10 @@ public class IngestRestService {
             String filename = fullname.substring(startIndex + 1, fullname.length());
             listener.setFilename(filename);
             /* This will only work if the mediaPackage is received before the track. */
-            service.addTrack(item.openStream(), item.getName(), null, mp);
+            ingestService.addTrack(item.openStream(), item.getName(), null, mp);
           }
         }
-        service.ingest(mp);
+        ingestService.ingest(mp);
         return Response.ok(mp).build();
       }
       return Response.serverError().status(Status.BAD_REQUEST).build();
@@ -299,7 +300,7 @@ public class IngestRestService {
   public Response addMediaPackageAttachment(@FormParam("url") String url, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") MediaPackage mp) {
     try {
-      mp = service.addAttachment(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      mp = ingestService.addAttachment(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
       return Response.ok(mp).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
@@ -340,18 +341,18 @@ public class IngestRestService {
         }
         switch(type) {
         case Attachment:
-          service.addAttachment(in, fileName, flavor, mp);
+          ingestService.addAttachment(in, fileName, flavor, mp);
           break;
         case Catalog:
-          service.addCatalog(in, fileName, flavor, mp);
+          ingestService.addCatalog(in, fileName, flavor, mp);
           break;
         case Track:
-          service.addTrack(in, fileName, flavor, mp);
+          ingestService.addTrack(in, fileName, flavor, mp);
           break;
         default:
           throw new IllegalStateException("Type must be one of track, catalog, or attachment");
         }
-        service.ingest(mp);
+        ingestService.ingest(mp);
         return Response.ok(mp.toXml()).build();
       }
       return Response.serverError().status(Status.BAD_REQUEST).build();
@@ -368,8 +369,8 @@ public class IngestRestService {
   public Response addMediaPackage(@Context HttpServletRequest request) {
     MediaPackageElementFlavor flavor = null;
     try {
-      MediaPackage mp = service.createMediaPackage();
-      DublinCoreCatalog dcc = DublinCoreCatalogImpl.newInstance();
+      MediaPackage mp = ingestService.createMediaPackage();
+      DublinCoreCatalog dcc = dcService.newInstance();
       if (ServletFileUpload.isMultipartContent(request)) {
         for (FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
           FileItemStream item = iter.next();
@@ -383,12 +384,14 @@ public class IngestRestService {
               dcc.add(en, Streams.asString(item.openStream()));
             }
           } else {
-            service.addTrack(item.openStream(), item.getName(), flavor, mp);
+            ingestService.addTrack(item.openStream(), item.getName(), flavor, mp);
           }
         }
-        String xml = getStringFromDocument(dcc.toXml());
-        service.addCatalog(IOUtils.toInputStream(xml), "dublincore.xml", MediaPackageElements.DUBLINCORE_CATALOG, mp);
-        service.ingest(mp);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        dcc.toXml(out, true);
+        InputStream in = new ByteArrayInputStream(out.toByteArray());
+        ingestService.addCatalog(in, "dublincore.xml", MediaPackageElements.DUBLINCORE_CATALOG, mp);
+        ingestService.ingest(mp);
         return Response.ok(mp).build();
       }
       return Response.serverError().status(Status.BAD_REQUEST).build();
@@ -404,7 +407,7 @@ public class IngestRestService {
   public Response addZippedMediaPackage(InputStream mp) {
     logger.debug("addZippedMediaPackage(InputStream) called.");
     try {
-      service.addZippedMediaPackage(mp);
+      ingestService.addZippedMediaPackage(mp);
     } catch (Exception e) {
       logger.warn(e.getMessage());
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -418,7 +421,7 @@ public class IngestRestService {
   public Response ingest(@FormParam("mediaPackage") MediaPackage mp) {
     logger.debug("ingest(MediaPackage): {}", mp);
     try {
-      service.ingest(mp);
+      ingestService.ingest(mp);
       return Response.ok(mp).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
@@ -677,21 +680,4 @@ public class IngestRestService {
   }
   // CHECKSTYLE:ON
 
-  public IngestRestService() {}
-
-  // method to convert Document to String
-  private String getStringFromDocument(Document doc) throws Exception {
-    try {
-      DOMSource domSource = new DOMSource(doc);
-      StringWriter writer = new StringWriter();
-      StreamResult result = new StreamResult(writer);
-      TransformerFactory tf = TransformerFactory.newInstance();
-      Transformer transformer = tf.newTransformer();
-      transformer.transform(domSource, result);
-      return writer.toString();
-    } catch (Exception e) {
-      logger.error("Failed transforming xml to string");
-      throw e;
-    }
-  }
 }

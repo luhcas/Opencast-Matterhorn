@@ -23,6 +23,11 @@
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>opencast-dublincore</artifactId>
+      <version>0.6-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>net.luniks.linux.jv4linfo</groupId>
       <artifactId>libjv4linfo</artifactId>
       <version>0.2.1</version>
@@ -145,6 +150,8 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package>
               org.opencastproject.capture.api.*,
+              org.opencastproject.media.mediapackage.*,
+              org.opencastproject.metadata.dublincore,
               *;resolution:=optional
             </Import-Package>
             <Private-Package>

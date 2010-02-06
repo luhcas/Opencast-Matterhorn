@@ -17,13 +17,11 @@ package org.opencastproject.workflow.impl;
 
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.DublinCoreCatalog;
-import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.identifier.Id;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -32,6 +30,7 @@ import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowSetImpl;
 import org.opencastproject.workflow.impl.WorkflowQueryImpl.ElementTuple;
 
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -442,7 +441,6 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       MediaPackage mp = instance.getCurrentMediaPackage();
       String mediaPackageId = null;
       String episodeId = null;
-      String seriesId = null;
       String text = null;
       String currentOperation = null;
       if (mp != null) {
@@ -461,9 +459,12 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
         updateStatment.setString(4, instance.getId());
         updateStatment.execute();
       } else {
-        episodeId = findEpisodeId(instance.getSourceMediaPackage());
-        seriesId = findSeriesId(instance.getSourceMediaPackage());
-        text = getDublinCoreText(instance.getSourceMediaPackage());
+        MediaPackage mediapackage = instance.getSourceMediaPackage();
+        episodeId = mediapackage.getIdentifier().toString();
+        String seriesId = null;
+        Id seriesIdentifier = mediapackage.getSeries();
+        if(seriesIdentifier != null) seriesId = seriesIdentifier.toString();
+        text = getMetadataText(instance.getSourceMediaPackage());
         // Add it
         updateStatment = conn.prepareStatement("insert into oc_workflow values(?, ?, ?, ?, ?, ?, ?, ?, ?)");
         updateStatment.setString(1, instance.getId());
@@ -539,6 +540,31 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     }
   }
   
+  /**
+   * @param sourceMediaPackage
+   * @return
+   */
+  private String getMetadataText(MediaPackage sourceMediaPackage) {
+    StringBuilder sb = new StringBuilder("|");
+    sb.append(StringUtils.trimToEmpty(sourceMediaPackage.getTitle()));
+    sb.append("|");
+    sb.append(StringUtils.trimToEmpty(sourceMediaPackage.getSeriesTitle()));
+    sb.append("|");
+    for(String creator : sourceMediaPackage.getCreators()) {
+      sb.append(StringUtils.trimToEmpty(creator));
+      sb.append("|");
+    }
+    for(String contributor : sourceMediaPackage.getContributors()) {
+      sb.append(StringUtils.trimToEmpty(contributor));
+      sb.append("|");
+    }
+    sb.append(sourceMediaPackage.getIdentifier().toString());
+    sb.append("|");
+    Id series = sourceMediaPackage.getSeries();
+    if(series != null) sb.append(StringUtils.trimToEmpty(series.toString()));
+    return sb.toString().toLowerCase();
+  }
+
   protected String getFlavor(MediaPackageElement element) {
     MediaPackageElementFlavor flavor = element.getFlavor();
     String flavorAsString = null;
@@ -546,67 +572,6 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       flavorAsString = flavor.toString();
     }
     return flavorAsString;
-  }
-  /**
-   * Gets a string representation of the dublin core metadata, which is useful for a quasi- full text search
-   * 
-   * @param mediaPackage
-   *          The mediapackage to use in generating the text representation
-   * @return The text representation
-   */
-  private String getDublinCoreText(MediaPackage mediaPackage) {
-    Catalog[] dcCatalogs = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR,
-            MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
-    if (dcCatalogs.length == 0)
-      return null;
-    StringBuilder sb = new StringBuilder();
-    DublinCoreCatalog dc = (DublinCoreCatalog) dcCatalogs[0];
-    List<EName> props = new ArrayList<EName>(dc.getProperties());
-    for (int i = 0; i < props.size(); i++) {
-      String value = dc.getFirst(props.get(i));
-      if (value == null)
-        continue;
-      sb.append(value);
-      if (i < props.size() - 1)
-        sb.append("|");
-    }
-    return sb.toString();
-  }
-
-  /**
-   * Finds the series ID for a media package.
-   * 
-   * @param sourceMediaPackage
-   *          The media package to inspect
-   * @return The series ID, as identified in the dublin core catalog, if it exists
-   */
-  private String findSeriesId(MediaPackage sourceMediaPackage) {
-    Catalog[] dcCatalogs = sourceMediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR,
-            MediaPackageReferenceImpl.ANY_SERIES);
-    if (dcCatalogs.length == 0)
-      return null;
-    String seriesId = ((DublinCoreCatalog) dcCatalogs[0]).getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER,
-            DublinCoreCatalog.LANGUAGE_UNDEFINED);
-    logger.debug("Found series ID=" + seriesId + " in media package " + sourceMediaPackage.getIdentifier());
-    return seriesId;
-  }
-
-  /**
-   * Finds the episode ID for a media package.
-   * 
-   * @param sourceMediaPackage
-   *          The media package to inspect
-   * @return The episode ID, as identified in the dublin core catalog, if it exists
-   */
-  private String findEpisodeId(MediaPackage sourceMediaPackage) {
-    Catalog[] dcCatalogs = sourceMediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR,
-            MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
-    if (dcCatalogs.length == 0)
-      return null;
-    String episodeId = ((DublinCoreCatalog) dcCatalogs[0]).getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER,
-            DublinCoreCatalog.LANGUAGE_UNDEFINED);
-    logger.debug("Found episode ID=" + episodeId + " in media package " + sourceMediaPackage.getIdentifier());
-    return episodeId;
   }
 
   /**

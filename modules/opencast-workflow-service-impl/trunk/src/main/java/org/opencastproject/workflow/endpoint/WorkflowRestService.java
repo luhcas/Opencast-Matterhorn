@@ -15,12 +15,8 @@
  */
 package org.opencastproject.workflow.endpoint;
 
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.DublinCoreCatalog;
-import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageImpl;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -366,13 +362,6 @@ public class WorkflowRestService {
   @SuppressWarnings("unchecked")
   protected JSONObject getWorkflowInstanceAsJson(WorkflowInstance workflow, boolean includeDublinCoreFields) throws Exception {
     MediaPackage mp = workflow.getCurrentMediaPackage();
-    DublinCoreCatalog dc = getDublinCore(mp);
-    String mediaPackageTitle = null;
-    if(dc == null) {
-      mediaPackageTitle = mp.getIdentifier() + "(unknown)";
-    } else {
-      mediaPackageTitle = getDublinCoreProperty(dc, DublinCoreCatalog.PROPERTY_TITLE);
-    }
 
     JSONObject jsInstance = new JSONObject();
     jsInstance.put("workflow_id", workflow.getId());
@@ -386,14 +375,8 @@ public class WorkflowRestService {
     jsInstance.put("configuration", getConfigsAsJson(configs));
     WorkflowOperationInstanceList operations = workflow.getWorkflowOperationInstanceList();
     jsInstance.put("operations", getOperationsAsJson(operations));
-    if(includeDublinCoreFields && dc != null) {
-      List<EName> props = new ArrayList<EName>(dc.getProperties());
-      for(int i=0; i<props.size(); i++) {
-        jsInstance.put("mediapackage_" + props.get(i).getLocalName().toLowerCase(), dc.getFirst(props.get(i)));
-      }
-    } else {
-      jsInstance.put("mediapackage_title", mediaPackageTitle);
-    }
+    jsInstance.put("mediapackage_title", mp.getTitle());
+    // TODO: do we need more metadata here?
     return jsInstance;
   }
 
@@ -422,17 +405,6 @@ public class WorkflowRestService {
       }
     }
     return json;
-  }
-
-  protected DublinCoreCatalog getDublinCore(MediaPackage mediaPackage) {
-    Catalog[] dcCatalogs = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
-    if(dcCatalogs.length == 0) return null;
-    return (DublinCoreCatalog)dcCatalogs[0];
-  }
-
-  protected String getDublinCoreProperty(DublinCoreCatalog catalog, EName property) {
-    if(catalog == null) return null;
-    return catalog.getFirst(property, DublinCoreCatalog.LANGUAGE_ANY);
   }
 
   @GET

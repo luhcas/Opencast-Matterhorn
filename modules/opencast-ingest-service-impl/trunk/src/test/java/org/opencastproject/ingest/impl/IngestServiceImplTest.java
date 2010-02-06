@@ -17,7 +17,7 @@ package org.opencastproject.ingest.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.Mpeg7Catalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.easymock.EasyMock;
@@ -111,9 +111,10 @@ public class IngestServiceImplTest {
   public void testThinClient() throws Exception {
     mediaPackage = service.createMediaPackage();
     service.addTrack(urlTrack, null, mediaPackage);
-    service.addCatalog(urlCatalog, Mpeg7Catalog.FLAVOR, mediaPackage);
+    service.addCatalog(urlCatalog, DublinCoreCatalog.FLAVOR, mediaPackage);
     service.addAttachment(urlAttachment, MediaPackageElements.COVER_FLAVOR, mediaPackage);
     service.ingest(mediaPackage);
+    // FIXME Add assertions here
   }
 
   @Test
@@ -121,6 +122,7 @@ public class IngestServiceImplTest {
     InputStream packageStream = urlPackage.toURL().openStream();
     mediaPackage = service.addZippedMediaPackage(packageStream);
     try {packageStream.close();} catch (IOException e) {}
+    // FIXME Add assertions here
   }
 
 }

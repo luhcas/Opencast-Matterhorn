@@ -1,4 +1,5 @@
 <oc:mediapackage xmlns:oc="http://mediapackage.opencastproject.org" start="2007-12-05T13:40:00" duration="1004400000">
+  <title>Climate</title>
   <metadata>
     <catalog id="catalog-1" type="metadata/dublincore">
       <mimetype>text/xml</mimetype>

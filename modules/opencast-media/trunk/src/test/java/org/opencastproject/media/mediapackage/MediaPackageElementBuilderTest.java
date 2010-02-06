@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
-import org.opencastproject.media.mediapackage.dublincore.DublinCoreTest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,10 +56,9 @@ public class MediaPackageElementBuilderTest {
   @Test
   public void testElementFromFile() {
     try {
-      catalogFile = DublinCoreTest.class.getResource("/dublincore.xml").toURI();
-      MediaPackageElement element = mediaPackageElementBuilder.elementFromURI(catalogFile, Type.Catalog, DublinCoreCatalog.FLAVOR);
+      catalogFile = getClass().getResource("/dublincore.xml").toURI();
+      MediaPackageElement element = mediaPackageElementBuilder.elementFromURI(catalogFile, Type.Catalog, null);
       assertEquals(Catalog.TYPE, element.getElementType());
-      assertEquals(MediaPackageElements.DUBLINCORE_CATALOG, element.getFlavor());
     } catch (UnsupportedElementException e) {
       fail(e.getMessage());
     } catch (URISyntaxException e) {

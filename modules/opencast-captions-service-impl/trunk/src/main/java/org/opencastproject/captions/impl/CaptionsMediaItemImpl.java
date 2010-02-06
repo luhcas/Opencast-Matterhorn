@@ -19,11 +19,8 @@ package org.opencastproject.captions.impl;
 import org.opencastproject.captions.api.CaptionsMediaItem;
 import org.opencastproject.captions.api.CaptionsService;
 import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -75,14 +72,7 @@ public class CaptionsMediaItemImpl implements CaptionsMediaItem {
     return url;
   }
   public String getTitle() {
-    // get the title of the media package
-    String title = null;
-    Catalog[] dcCatalogs = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
-    if (dcCatalogs != null && dcCatalogs.length > 0) {
-      DublinCoreCatalog dc = (DublinCoreCatalog) dcCatalogs[0];
-      title = dc.getFirst(DublinCoreCatalog.PROPERTY_TITLE);
-    }
-    return title;
+    return mediaPackage.getTitle();
   }
   public URI getCaptionsURI(String captionType) {
     URI url = null;

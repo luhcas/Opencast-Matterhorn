@@ -20,7 +20,6 @@ import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.pipeline.PipelineFactory;
-import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
@@ -31,6 +30,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.util.ZipUtil;
 
 import org.apache.commons.io.FileUtils;

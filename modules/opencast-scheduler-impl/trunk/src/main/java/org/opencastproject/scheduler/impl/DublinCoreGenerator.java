@@ -15,6 +15,16 @@
  */
 package org.opencastproject.scheduler.impl;
 
+import org.opencastproject.media.mediapackage.EName;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
+import org.opencastproject.metadata.dublincore.DublinCoreValue;
+import org.opencastproject.scheduler.api.SchedulerEvent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,15 +42,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.opencastproject.media.mediapackage.DublinCoreCatalog;
-import org.opencastproject.media.mediapackage.EName;
-import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
-import org.opencastproject.media.mediapackage.dublincore.DublinCoreValue;
-import org.opencastproject.scheduler.api.SchedulerEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 
 /**

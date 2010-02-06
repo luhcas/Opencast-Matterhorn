@@ -47,6 +47,9 @@
         <module>opencast-inspection-service-api</module>
         <module>opencast-inspection-service-impl</module>
         <module>opencast-media</module>
+        <module>opencast-metadata-api</module>
+        <module>opencast-dublincore</module>
+        <module>opencast-mpeg7</module>
         <module>opencast-notification-service-api</module>
         <module>opencast-runtime-info-ui</module>
         <module>opencast-search-service-api</module>

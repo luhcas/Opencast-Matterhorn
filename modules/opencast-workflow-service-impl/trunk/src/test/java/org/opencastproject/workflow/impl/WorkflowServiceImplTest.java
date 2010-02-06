@@ -15,13 +15,10 @@
  */
 package org.opencastproject.workflow.impl;
 
-import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -184,12 +181,7 @@ public class WorkflowServiceImplTest {
 
   @Test
   public void testGetWorkflowByEpisodeId() {
-    Catalog[] dcCatalogs = mediapackage1.getCatalogs(DublinCoreCatalog.FLAVOR,
-            MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
-    if (dcCatalogs.length == 0)
-      Assert.fail("Unable to find a dublin core catalog in the test media package");
-    String episodeId = ((DublinCoreCatalog) dcCatalogs[0]).getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER,
-            DublinCoreCatalog.LANGUAGE_UNDEFINED);
+    String episodeId = mediapackage1.getIdentifier().toString();
 
     // Ensure that the database doesn't have a workflow instance with this episode
     Assert.assertEquals(0, service.countWorkflowInstances());

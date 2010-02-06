@@ -17,15 +17,16 @@ package org.opencastproject.conductor.impl;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.dublincore.DublinCore;
-import org.opencastproject.media.mediapackage.dublincore.DublinCoreValue;
-import org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils;
-import org.opencastproject.media.mediapackage.dublincore.utils.Precision;
+import org.opencastproject.metadata.dublincore.DublinCore;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.metadata.dublincore.DublinCoreValue;
+import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
+import org.opencastproject.metadata.dublincore.Precision;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -40,11 +41,6 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Date;
-
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  * Workflow operation used to inspect all tracks of a media package.
@@ -61,6 +57,13 @@ public class InspectWorkflowOperationHandler implements
   /** The local workspace */
   private Workspace workspace = null;
 
+  /** The dublin core catalog service */
+  private DublinCoreCatalogService dcService;
+
+  public void setDublincoreService(DublinCoreCatalogService dcService) {
+    this.dcService = dcService;
+  }
+  
   /**
    * Callback for the OSGi declarative services configuration.
    * 
@@ -129,7 +132,7 @@ public class InspectWorkflowOperationHandler implements
     // Complete dublin core (if available)
     Catalog dcCatalogs[] = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
     if (dcCatalogs.length > 0) {
-      DublinCoreCatalog dublinCore = (DublinCoreCatalog) dcCatalogs[0];
+      DublinCoreCatalog dublinCore = dcService.load(dcCatalogs[0]);
       Date today = new Date();
       
       // Extent
@@ -148,14 +151,11 @@ public class InspectWorkflowOperationHandler implements
       
       // Serialize changed dublin core
       // TODO: this is too complicated!
-      DOMSource source = new DOMSource(dublinCore.toXml());
-      Transformer transformer = TransformerFactory.newInstance().newTransformer();
-      ByteArrayOutputStream os = new ByteArrayOutputStream();
-      StreamResult result = new StreamResult(os);
-      transformer.transform(source, result);
-      InputStream is = new ByteArrayInputStream(os.toByteArray());
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      dublinCore.toXml(out, true);
+      InputStream in = new ByteArrayInputStream(out.toByteArray());
       workspace.delete(mediaPackage.getIdentifier().toString(), dublinCore.getIdentifier());
-      workspace.put(mediaPackage.getIdentifier().toString(), dublinCore.getIdentifier(), is);
+      workspace.put(mediaPackage.getIdentifier().toString(), dublinCore.getIdentifier(), in);
     }
   }
 

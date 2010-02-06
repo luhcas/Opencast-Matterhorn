@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * General definition for metadata catalogs.
  * 
  */
-@XmlJavaTypeAdapter(XMLCatalogImpl.Adapter.class)
+@XmlJavaTypeAdapter(CatalogImpl.Adapter.class)
 public interface Catalog extends MediaPackageElement, Serializable {
 
   /** Media package element type */

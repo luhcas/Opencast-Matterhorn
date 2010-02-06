@@ -16,11 +16,8 @@
 
 package org.opencastproject.media.mediapackage;
 
-import org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl;
-import org.opencastproject.media.mediapackage.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
-import org.opencastproject.util.MimeTypes;
 
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
@@ -28,6 +25,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.Attributes;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -40,9 +38,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -81,9 +76,7 @@ import javax.xml.transform.stream.StreamResult;
  * 
  * However, reading of those documents is supported.
  */
-@XmlRootElement(name="catalog", namespace="http://mediapackage.opencastproject.org")
-@XmlType(name="catalog", namespace="http://mediapackage.opencastproject.org")
-public class XMLCatalogImpl extends AbstractMediaPackageElement implements XMLCatalog {
+public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
 
   /** Serial version UID */
   private static final long serialVersionUID = -908525367616L;
@@ -116,8 +109,7 @@ public class XMLCatalogImpl extends AbstractMediaPackageElement implements XMLCa
 
   /** Needed by JAXB */
   protected XMLCatalogImpl() {
-    // default to text/xml mimetype
-    super(Type.Catalog, null, null, -1, null, MimeTypes.parseMimeType("text/xml"));
+    super();
   }
   
   /**
@@ -138,7 +130,7 @@ public class XMLCatalogImpl extends AbstractMediaPackageElement implements XMLCa
    */
   protected XMLCatalogImpl(String id, MediaPackageElementFlavor flavor, URI uri, long size, Checksum checksum,
           MimeType mimeType) {
-    super(Type.Catalog, flavor, uri, size, checksum, mimeType);
+    super(id, flavor, uri, size, checksum, mimeType);
     bindPrefix(XMLConstants.XML_NS_PREFIX, XMLConstants.XML_NS_URI);
     bindPrefix(XMLConstants.XMLNS_ATTRIBUTE, XMLConstants.XMLNS_ATTRIBUTE_NS_URI);
     bindPrefix(XSI_NS_PREFIX, XSI_NS_URI);
@@ -891,33 +883,41 @@ public class XMLCatalogImpl extends AbstractMediaPackageElement implements XMLCa
     }
   }
 
-  public static class Adapter extends XmlAdapter<XMLCatalogImpl, Catalog> {
-    public XMLCatalogImpl marshal(Catalog cat) throws Exception {
-      if(cat.getFlavor() == null) throw new IllegalArgumentException("catalog flavor must be set");
-      if(Mpeg7Catalog.FLAVOR.equals(cat.getFlavor())) {
-        return new Mpeg7CatalogImpl(cat);
-      } else {
-        return new DublinCoreCatalogImpl(cat);
-      }
-    }
-    // FIXME: Do not hard code the catalog subclasses.  See the MediaPackageElementBuilderPlugins for a means to achieve this.
-    public Catalog unmarshal(XMLCatalogImpl cat) throws Exception {
-      if(cat.getFlavor() == null) throw new IllegalArgumentException("catalog flavor must be set");
-      if(Mpeg7Catalog.FLAVOR.equals(cat.getFlavor())) {
-        return new Mpeg7CatalogImpl(cat);
-      } else {
-        return new DublinCoreCatalogImpl(cat);
-      }
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.media.mediapackage.metadata.xml.metadata.xml.XMLCatalog#toXml()
+   */
+  @Override
+  public abstract Document toXml() throws ParserConfigurationException, TransformerException, IOException;
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.media.mediapackage.XMLCatalog#toXml(java.io.OutputStream, boolean)
+   */
+  @Override
+  public void toXml(OutputStream out, boolean format) throws IOException {
+    try {
+      Document doc = this.toXml();
+      DOMSource domSource = new DOMSource(doc);
+      StreamResult result = new StreamResult(out);
+      Transformer transformer = TransformerFactory.newInstance().newTransformer();
+      transformer.transform(domSource, result);
+    } catch (ParserConfigurationException e) {
+      throw new IOException("unable to parse document");
+    } catch (TransformerException e) {
+      throw new IOException("unable to transform dom to a stream");
     }
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.media.mediapackage.XMLCatalog#toXml()
+   * @see org.opencastproject.media.mediapackage.XMLCatalog#toXmlString()
    */
   @Override
-  public Document toXml() throws ParserConfigurationException, TransformerException, IOException {
-    throw new RuntimeException("can not serialize " + this);
+  public String toXmlString() throws IOException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    toXml(out, true);
+    return new String(out.toByteArray(), "UTF-8");
   }
 
 }

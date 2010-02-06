@@ -18,23 +18,24 @@ package org.opencastproject.search.impl.solr;
 
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
-import org.opencastproject.media.mediapackage.Mpeg7Catalog;
-import org.opencastproject.media.mediapackage.dublincore.DublinCore;
-import org.opencastproject.media.mediapackage.dublincore.DublinCoreValue;
-import org.opencastproject.media.mediapackage.dublincore.utils.DCMIPeriod;
-import org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils;
-import org.opencastproject.media.mediapackage.mpeg7.ContentSegment;
-import org.opencastproject.media.mediapackage.mpeg7.KeywordAnnotation;
-import org.opencastproject.media.mediapackage.mpeg7.MediaTime;
-import org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint;
-import org.opencastproject.media.mediapackage.mpeg7.MultimediaContent;
-import org.opencastproject.media.mediapackage.mpeg7.MultimediaContentType;
-import org.opencastproject.media.mediapackage.mpeg7.TextAnnotation;
+import org.opencastproject.metadata.dublincore.DCMIPeriod;
+import org.opencastproject.metadata.dublincore.DublinCore;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.metadata.dublincore.DublinCoreValue;
+import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
+import org.opencastproject.metadata.mpeg7.ContentSegment;
+import org.opencastproject.metadata.mpeg7.KeywordAnnotation;
+import org.opencastproject.metadata.mpeg7.MediaTime;
+import org.opencastproject.metadata.mpeg7.MediaTimePoint;
+import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
+import org.opencastproject.metadata.mpeg7.MultimediaContent;
+import org.opencastproject.metadata.mpeg7.MultimediaContentType;
+import org.opencastproject.metadata.mpeg7.TextAnnotation;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
 
 import org.apache.solr.client.solrj.SolrServerException;
@@ -86,6 +87,12 @@ public class SolrIndexManager {
   /** The solr supported date format. **/
   private DateFormat dateFormat = new SimpleDateFormat(
           SolrFields.SOLR_DATE_FORMAT);
+
+  private DublinCoreCatalogService dcService;
+  
+  public void setDcService(DublinCoreCatalogService dcService) {
+    this.dcService = dcService;
+  }
 
   /**
    * Creates a new management instance for the search index.
@@ -256,7 +263,8 @@ public class SolrIndexManager {
     // If this is the case, try to get a hold on it
     Catalog dcCatalogs[] = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR,
             MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
-    DublinCoreCatalog dublinCore = (DublinCoreCatalog) dcCatalogs[0];
+    
+    DublinCoreCatalog dublinCore =  dcService.load(dcCatalogs[0]);
 
     // Set common fields
     solrEpisodeDocument.setField(SolrFields.ID, mediaPackageId);

@@ -189,6 +189,13 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
   long getSize();
 
   /**
+   * Sets the file size in bytes
+   * 
+   * @param size
+   */
+  void setSize(long size);
+
+  /**
    * Verifies the integrity of the media package element.
    * 
    * @throws MediaPackageException
@@ -237,6 +244,7 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
 
   /**
    * Create a deep copy of this object.
+   * 
    * @return The copy
    */
   public Object clone();

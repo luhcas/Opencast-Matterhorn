@@ -16,22 +16,20 @@
 package org.opencastproject.ingest.impl;
 
 import org.opencastproject.ingest.api.IngestService;
-import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.media.mediapackage.DublinCoreCatalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.MediaPackageMetadata;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.dublincore.DublinCore;
-import org.opencastproject.media.mediapackage.dublincore.DublinCoreValue;
-import org.opencastproject.media.mediapackage.dublincore.utils.EncodingSchemeUtils;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
+import org.opencastproject.media.mediapackage.identifier.Id;
 import org.opencastproject.media.mediapackage.identifier.IdBuilder;
 import org.opencastproject.media.mediapackage.identifier.IdBuilderFactory;
+import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.util.ZipUtil;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -52,8 +50,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 
 /**
@@ -69,9 +70,9 @@ public class IngestServiceImpl implements IngestService, ManagedService,
   private MediaPackageBuilder builder = null;
   private Workspace workspace;
   private String tempFolder;
-
   private String fs;
-
+  private SortedSet<MediaPackageMetadataService> metadataServices;
+  
   public IngestServiceImpl() {
     logger.info("Ingest Service started.");
     builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
@@ -80,6 +81,12 @@ public class IngestServiceImpl implements IngestService, ManagedService,
     if (!tempFolder.endsWith(fs))
       tempFolder += fs;
     tempFolder += "opencast" + fs + "ingest-temp" + fs;
+    metadataServices = new TreeSet<MediaPackageMetadataService>(new Comparator<MediaPackageMetadataService>() {
+      @Override
+      public int compare(MediaPackageMetadataService o1, MediaPackageMetadataService o2) {
+        return o1.getPriority() - o2.getPriority();
+      }
+    });
   }
 
   @SuppressWarnings("unchecked")
@@ -173,59 +180,25 @@ public class IngestServiceImpl implements IngestService, ManagedService,
    *          the media package
    */
   private void populateMediaPackageMetadata(MediaPackage mp) {
-    // Update media package metadata with whatever was found in dublin core
-    Catalog[] dcs = mp.getCatalogs(DublinCoreCatalog.FLAVOR);
+    if(metadataServices.size() == 0) {
+      logger.debug("No metadata services are registered with the ingest service, so no mediapackage metadata can be extracted from catalogs");
+      return;
+    }
     IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
-    for (Catalog catalog : dcs) {
-      DublinCoreCatalog dc = (DublinCoreCatalog)catalog;
-      
-      if (dc.getReference() == null) {
-
-        // Title
-        mp.setTitle(dc.getFirst(DublinCore.PROPERTY_TITLE));
-
-        // Created date
-        if (dc.hasValue(DublinCore.PROPERTY_CREATED))
-          mp.setDate(EncodingSchemeUtils.decodeDate(dc.get(
-                  DublinCore.PROPERTY_CREATED).get(0)));
-
-        // Series id
-        if (dc.hasValue(DublinCore.PROPERTY_IS_PART_OF))
-          mp.setSeries(idBuilder.fromString(dc.get(
-                  DublinCore.PROPERTY_IS_PART_OF).get(0).getValue()));
-
-        // Creator
-        if (dc.hasValue(DublinCore.PROPERTY_CREATOR)) {
-          for (DublinCoreValue creator : dc.get(DublinCore.PROPERTY_CREATOR)) {
-            mp.addCreator(creator.getValue());
-          }
+    for(MediaPackageMetadataService metadataService : metadataServices) {
+      MediaPackageMetadata metadata = metadataService.getMetadata(mp);
+      if(metadata != null) {
+        mp.setDate(metadata.getDate());
+        mp.setLanguage(metadata.getLanguage());
+        mp.setLicense(metadata.getLanguage());
+        try {
+          Id id = idBuilder.fromString(metadata.getSeriesIdentifier());
+          mp.setSeries(id);
+        } catch(IllegalArgumentException e) {
+          logger.warn("Illegal series ID specified: '{}'.  Not setting the series identifier.", metadata.getSeriesIdentifier());
         }
-
-        // Contributor
-        if (dc.hasValue(DublinCore.PROPERTY_CONTRIBUTOR)) {
-          for (DublinCoreValue contributor : dc
-                  .get(DublinCore.PROPERTY_CONTRIBUTOR)) {
-            mp.addContributor(contributor.getValue());
-          }
-        }
-
-        // Subject
-        if (dc.hasValue(DublinCore.PROPERTY_SUBJECT)) {
-          for (DublinCoreValue subject : dc.get(DublinCore.PROPERTY_SUBJECT)) {
-            mp.addSubject(subject.getValue());
-          }
-        }
-
-        // License
-        mp.setLicense(dc.getFirst(DublinCore.PROPERTY_LICENSE));
-
-        // Language
-        mp.setLanguage(dc.getFirst(DublinCore.PROPERTY_LANGUAGE));
-
-        break;
-      } else {
-        // Series Title
-        mp.setSeriesTitle(dc.getFirst(DublinCore.PROPERTY_TITLE));
+        mp.setSeriesTitle(metadata.getSeriesTitle());
+        mp.setTitle(metadata.getTitle());
       }
     }
   }
@@ -513,4 +486,11 @@ public class IngestServiceImpl implements IngestService, ManagedService,
     this.eventAdmin = null;
   }
 
+  public void addMetadataService(MediaPackageMetadataService service) {
+    metadataServices.add(service);
+  }
+
+  public void removeMetadataService(MediaPackageMetadataService service) {
+    metadataServices.remove(service);
+  }
 }

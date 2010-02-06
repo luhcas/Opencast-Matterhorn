@@ -12,4 +12,6 @@
     cardinality="1..1" policy="static" bind="setWorkspace" />
   <reference name="eventadmin" interface="org.osgi.service.event.EventAdmin"
     cardinality="0..1" policy="dynamic" bind="setEventAdmin" unbind="unsetEventAdmin" />
+  <reference name="metadata" interface="org.opencastproject.metadata.api.mediapackage.MediaPackageMetadataService"
+    cardinality="0..n" bind="addMetadataService" unbind="removeMetadataService" />
 </component>

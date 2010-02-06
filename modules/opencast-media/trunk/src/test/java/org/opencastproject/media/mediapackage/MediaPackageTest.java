@@ -90,13 +90,13 @@ public class MediaPackageTest extends AbstractMediaPackageTest {
 
       // Create a media package and add an element
       MediaPackage mediaPackage = mediaPackageBuilder.createNew();
-      MediaPackageElement dcCatalog = mediaPackage.add(dcFile.toURI(), Type.Catalog, DublinCoreCatalog.FLAVOR);
+      MediaPackageElementFlavor sourceFlavor = new MediaPackageElementFlavor("some", "source");
+      MediaPackageElement dcCatalog = mediaPackage.add(dcFile.toURI(), Type.Catalog, sourceFlavor);
       
       // Add the "derived" catalog
       MediaPackageElementFlavor derivedFlavor = new MediaPackageElementFlavor("dublincore", "specialedition");
       MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-      MediaPackageElement derivedElement = elementBuilder.elementFromURI(dcFile.toURI(), Type.Catalog, DublinCoreCatalog.FLAVOR);
-      derivedElement.setFlavor(derivedFlavor);
+      MediaPackageElement derivedElement = elementBuilder.elementFromURI(dcFile.toURI(), Type.Catalog, derivedFlavor);
       mediaPackage.addDerived(derivedElement, dcCatalog);
       
       // Test the whole thing
