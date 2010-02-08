@@ -81,7 +81,7 @@ public class CaptureAgentStateRestService {
   @Path("agents/{name}")
   //TODO: removeAgent should return a boolean indicating if the agent existed.
   // This way this endpoint could return a 404 if the agent didn't exist, or OK otherwise
-  public Response removeAgent(@FormParam("agentName") String agentName) {
+  public Response removeAgent(@PathParam("name") String agentName) {
     service.removeAgent(agentName);
     return Response.ok(agentName + " removed").build();
   }
