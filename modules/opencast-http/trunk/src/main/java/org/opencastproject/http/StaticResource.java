@@ -135,15 +135,17 @@ public class StaticResource extends HttpServlet {
       if(url == null) {
         try {
           resp.sendError(404);
+          return;
         } catch (IOException e) {
           logger.warn(e.getMessage());
+          return;
         }
-        return;
       }
       logger.debug("opening url {} {}", new Object[] {classpathToResource, url});
-      
+      InputStream in = null;
       try {
-        String md5 = DigestUtils.md5Hex(url.openStream());
+        in = url.openStream();
+        String md5 = DigestUtils.md5Hex(in);
         if(md5.equals(req.getHeader("If-None-Match"))) {
           resp.setStatus(304);
           return;
@@ -151,12 +153,13 @@ public class StaticResource extends HttpServlet {
         resp.setHeader("ETag", md5);
       } catch (IOException e) {
         logger.warn("This system can not generate md5 hashes.");
+      } finally {
+        IOUtils.closeQuietly(in);
       }
       String contentType = mimeMap.getContentType(url.getFile());
       if( ! "application/octet-stream".equals(contentType)){
         resp.setHeader("Content-Type", contentType);
       }
-      InputStream in;
       try {
         in = url.openStream();
         IOUtils.copy(in, resp.getOutputStream());
@@ -164,9 +167,12 @@ public class StaticResource extends HttpServlet {
         logger.warn("could not open or copy streams");
         try {
           resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+          return;
         } catch (IOException e1) {
-          // We don't care
+          logger.warn("unable to send http 500 error: {}", e1);
         }
+      } finally {
+        IOUtils.closeQuietly(in);
       }
   }
 }

@@ -77,7 +77,7 @@ public class IngestRestService {
   private MediaPackageBuilderFactory factory = null;
   private MediaPackageBuilder builder = null;
   private IngestService ingestService = null;
-  private DublinCoreCatalogService dcService;
+  private DublinCoreCatalogService dublinCoreService;
   
   public IngestRestService() {
   }
@@ -88,8 +88,8 @@ public class IngestRestService {
     builder = factory.newMediaPackageBuilder();
   }
 
-  public void setDcService(DublinCoreCatalogService dcService) {
-    this.dcService = dcService;
+  public void setDublinCoreService(DublinCoreCatalogService dcService) {
+    this.dublinCoreService = dcService;
   }
 
   @GET
@@ -370,7 +370,7 @@ public class IngestRestService {
     MediaPackageElementFlavor flavor = null;
     try {
       MediaPackage mp = ingestService.createMediaPackage();
-      DublinCoreCatalog dcc = dcService.newInstance();
+      DublinCoreCatalog dcc = dublinCoreService.newInstance();
       if (ServletFileUpload.isMultipartContent(request)) {
         for (FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
           FileItemStream item = iter.next();

@@ -166,7 +166,6 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator> org.opencastproject.search.impl.Activator </Bundle-Activator>
             <Import-Package>
               org.opencastproject.search.api,
               org.opencastproject.media.mediapackage.*,
