@@ -1,7 +1,8 @@
 #! /bin/bash
 # Configure capture agent for use with Matterhorn
 
-SETUP_PROPS=$PWD/setup_devices.sh
+SETUP_DEVICES=$PWD/setup_devices.sh
+BUILD_MATTERHORN=$PWD/build_matterhorn.sh
 
 # prompt for user name
 USERNAME=matterhorn
@@ -161,12 +162,12 @@ sudo cp ../lib/libjv4linfo.so /usr/lib
 cd ../..
 
 # setup properties by calling setup_devices.sh
-sudo  cp $SETUP_PROPS /home/$USERNAME
+sudo cp $SETUP_DEVICES /home/$USERNAME
 sudo chown $USERNAME:$USERNAME /home/$USERNAME/setup_devices.sh
 sudo -u $USERNAME /home/$USERNAME/setup_devices.sh
 
 # build properties
-sudo cp $HOME/build_matterhorn.sh /home/$USERNAME
+sudo cp $BUILD_MATTERHORN /home/$USERNAME
 sudo chown $USERNAME:$USERNAME /home/$USERNAME/build_matterhorn.sh
 sudo -u $USERNAME /home/$USERNAME/build_matterhorn.sh $FELIX_HOME
 
