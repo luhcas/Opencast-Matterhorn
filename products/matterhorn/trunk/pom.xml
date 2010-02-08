@@ -77,6 +77,8 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
+        <module>opencast-metadata-api</module>
+        <module>opencast-dublincore</module>
         <module>opencast-util</module>
         <module>opencast-media</module>
         <module>opencast-capture-admin-service-api</module>
