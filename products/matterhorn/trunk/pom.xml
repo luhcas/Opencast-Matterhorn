@@ -77,6 +77,8 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
+        <module>opencast-build-tools</module>
+        <module>opencast-runtime-tools</module>
         <module>opencast-metadata-api</module>
         <module>opencast-dublincore</module>
         <module>opencast-util</module>
