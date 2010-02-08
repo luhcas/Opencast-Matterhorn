@@ -1,7 +1,7 @@
 #! /bin/bash
 # Configure capture agent for use with Matterhorn
 
-SETUP_PROPS=$PWD/config.sh
+SETUP_PROPS=$PWD/setup_devices.sh
 
 # prompt for user name
 USERNAME=matterhorn
@@ -95,7 +95,7 @@ if [ $LOAD_DRIVER -eq 0 ]; then
   sudo -u $USERNAME mv $EPIPHAN drivers/
   cd drivers/
   sudo -u $USERNAME tar jxf $EPIPHAN
-  sed -i '/sudo \/sbin\/insmod/s|$| num_frame_buffers=2|' Makefile
+  sudo -u $USERNAME sed -i '/sudo \/sbin\/insmod/s|$| num_frame_buffers=2|' Makefile
   sudo make load
   if [ $? -ne 0 ]; then
     SUCCESS=1
@@ -160,10 +160,10 @@ sudo cp ../lib/libjv4linfo.so /usr/lib
 
 cd ../..
 
-# setup properties by calling config.sh
+# setup properties by calling setup_devices.sh
 sudo  cp $SETUP_PROPS /home/$USERNAME
-sudo chown $USERNAME:$USERNAME /home/$USERNAME/config.sh
-sudo -u $USERNAME /home/$USERNAME/config.sh
+sudo chown $USERNAME:$USERNAME /home/$USERNAME/setup_devices.sh
+sudo -u $USERNAME /home/$USERNAME/setup_devices.sh
 
 # build properties
 sudo cp $HOME/build_matterhorn.sh /home/$USERNAME
@@ -179,8 +179,9 @@ echo "start on runlevel [2345]" >> matterhorn.conf
 echo "stop on runlevel [!2345]" >> matterhorn.conf
 echo "expect fork" >> matterhorn.conf
 echo "script" >> matterhorn.conf
+echo "make -C /home/$USERNAME/drivers reload" >> matterhorn.conf
+echo "/home/$USERNAME/matterhorn_capture.sh" >> matterhorn.conf
 echo "exec /bin/bash ${FELIX_HOME}/bin/start_matterhorn.sh &" >> matterhorn.conf
 echo "end script" >> matterhorn.conf
 sudo mv matterhorn.conf /etc/init
-
 
