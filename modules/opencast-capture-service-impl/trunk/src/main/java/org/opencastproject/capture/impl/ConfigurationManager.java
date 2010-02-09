@@ -74,7 +74,7 @@ public class ConfigurationManager implements ManagedService {
   
   @Override
   public void updated(Dictionary props) throws ConfigurationException {
-    if (properties == null) {
+    if (props == null) {
       logger.info("Null properties in updated!");
       return;
     }

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Date;
@@ -492,8 +493,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
             job.getJobDataMap().put(JobParameters.CAPTURE_PROPS, jobProps);
             hasProperties = true;
           } else if (filename.equals("metadata.xml")) {
-            pack.add(new File(captureDir, filename).toURI(), MediaPackageElement.Type.Attachment, MediaPackageElements.DUBLINCORE_CATALOG);
-
+            try {
+              pack.add(new URI(filename), MediaPackageElement.Type.Attachment, MediaPackageElements.DUBLINCORE_CATALOG);
+            } catch(Exception e) {};
             job.getJobDataMap().put(JobParameters.MEDIA_PACKAGE, pack);
           }
           URL u = new File(captureDir, filename).toURI().toURL();
