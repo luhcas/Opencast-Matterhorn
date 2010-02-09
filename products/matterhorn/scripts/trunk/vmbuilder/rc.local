@@ -1,0 +1,50 @@
+#!/bin/sh 
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+export OC=/home/opencast/opencast
+export FELIX_HOME=/usr/local/felix-framework-2.0.1
+export M2_REPO=/home/opencast/.m2/repository/
+export OC_URL=http://source.opencastproject.org/svn/products/matterhorn/trunk/
+export FELIX_URL=http://apache.mirror.iweb.ca/felix/felix-framework-2.0.1.tar.gz
+export JAVA_HOME=/usr/lib/jvm/java-6-sun
+export MAVEN_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m"
+
+echo "***********************************************************" > /dev/console
+
+if [ -f /etc/profile.d/matterhorn_setup.sh ]; then
+  echo "** In order to complete Matterhorn installation process, **" > /dev/console
+  echo "** please login as user 'opencast'                       **" > /dev/console
+else
+  for ntime in 1 2 3 4 5 6 7 8 9 10
+  do
+    MY_IP=`ifconfig | grep "inet addr:" | grep -v 127.0.0.1 | awk '{print $2}' | cut -d':' -f2`
+    if [ ! -z $MY_IP ]; then
+      break;
+    fi
+    echo "Waiting for network connection..." > /dev/console
+    sleep 5
+  done
+  if [ -z $MY_IP ]; then
+    echo "ERROR: Could not determine IP address of this VM." > /dev/console
+    echo "To start Matterhorn manually, run the following command" > /dev/console
+    echo "  /usr/local/matterhorn/bin/startup.sh" > /dev/console
+  else
+    echo "Starting Matterhorn..." > /dev/console
+    /usr/local/matterhorn/bin/startup.sh
+    echo "Matterhorn console is avilable at http://$MY_IP:8080" > /dev/console
+  fi
+fi
+
+echo "***********************************************************" > /dev/console
+
+exit 0
