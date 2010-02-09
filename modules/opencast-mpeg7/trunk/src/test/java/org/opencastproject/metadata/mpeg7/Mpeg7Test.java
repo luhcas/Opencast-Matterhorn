@@ -43,9 +43,6 @@ import javax.xml.transform.stream.StreamResult;
 
 /**
  * Test class for the dublin core implementation.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: Mpeg7Test.java 238 2009-07-29 09:53:32Z jholtzman $
  */
 public class Mpeg7Test {
 

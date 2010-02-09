@@ -20,9 +20,6 @@ import org.opencastproject.media.mediapackage.XmlElement;
 
 /**
  * Base interface for either of <code>AudioVisual</code>, <code>Audio</code> or <code>Video</code>.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MultimediaContentType.java 1254 2008-10-21 12:43:26Z wunden $
  */
 public interface MultimediaContentType extends XmlElement {
 

@@ -57,10 +57,6 @@ import javax.xml.transform.stream.StreamResult;
 
 /**
  * Test class for the dublin core implementation.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @author Christoph E. Driessen <ced@neopoly.de>
- * @version $Id: DublinCoreTest.java 238 2009-07-29 09:53:32Z jholtzman $
  */
 public class DublinCoreTest {
 

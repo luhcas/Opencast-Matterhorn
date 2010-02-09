@@ -18,8 +18,6 @@ package org.opencastproject.metadata.dublincore;
 
 /**
  * A duration measured in milliseconds.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class DurationTemporal extends Temporal<Long> {
 

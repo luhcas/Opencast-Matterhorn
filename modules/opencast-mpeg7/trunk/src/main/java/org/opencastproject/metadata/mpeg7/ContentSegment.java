@@ -68,9 +68,6 @@ import java.util.Iterator;
  *   &lt;/complexContent&gt;
  * &lt;/complexType&gt;
  * </pre>
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: ContentSegment.java 1400 2008-11-04 17:49:26Z wunden $
  */
 public interface ContentSegment extends XmlElement {
 

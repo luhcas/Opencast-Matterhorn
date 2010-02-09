@@ -21,8 +21,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: KeywordAnnotationImpl.java 1389 2008-11-03 18:07:54Z wunden $
+ * TODO: Comment me!
  */
 public class KeywordAnnotationImpl implements KeywordAnnotation {
 

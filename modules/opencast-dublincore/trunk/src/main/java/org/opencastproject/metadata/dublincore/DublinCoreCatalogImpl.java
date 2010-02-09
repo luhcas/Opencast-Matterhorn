@@ -692,8 +692,6 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
 
   /**
    * Class to parse a dublin core file.
-   * 
-   * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
    */
   static class DublinCoreParser extends DefaultHandler {
 

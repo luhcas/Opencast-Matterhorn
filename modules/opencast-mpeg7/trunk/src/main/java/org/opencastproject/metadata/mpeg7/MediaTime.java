@@ -20,9 +20,6 @@ import org.opencastproject.media.mediapackage.XmlElement;
 
 /**
  * This interface defines the time constraints (start and duration) of a multimedia content element or segment.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaTime.java 1108 2008-09-10 17:59:51Z wunden $
  */
 public interface MediaTime extends XmlElement {
 

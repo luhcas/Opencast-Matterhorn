@@ -23,7 +23,7 @@ import org.w3c.dom.Node;
 import java.net.URI;
 
 /**
- * @author Tobias Wunden
+ * TODO: Comment me!
  */
 public class MediaLocatorImpl implements MediaLocator {
 

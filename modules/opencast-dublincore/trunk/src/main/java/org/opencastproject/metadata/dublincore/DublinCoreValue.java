@@ -26,8 +26,6 @@ import java.io.Serializable;
  * See <a
  * href="http://dublincore.org/documents/dc-xml-guidelines/">http://dublincore.org/documents/dc-xml-guidelines/</a> for
  * further details.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class DublinCoreValue implements Serializable {
 

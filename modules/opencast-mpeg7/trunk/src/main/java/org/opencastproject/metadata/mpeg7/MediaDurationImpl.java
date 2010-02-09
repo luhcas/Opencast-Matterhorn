@@ -23,8 +23,7 @@ import org.w3c.dom.Node;
 import java.util.Formatter;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaDurationImpl.java 1411 2008-11-05 10:02:50Z wunden $
+ * TODO: Comment me!
  */
 public class MediaDurationImpl implements MediaDuration {
 

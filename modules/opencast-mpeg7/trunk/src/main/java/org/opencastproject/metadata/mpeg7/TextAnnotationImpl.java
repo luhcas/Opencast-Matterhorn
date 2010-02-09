@@ -27,8 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: TextAnnotationImpl.java 2618 2009-03-05 23:52:59Z ced $
+ * TODO: Comment me!
  */
 public class TextAnnotationImpl implements TextAnnotation {
 

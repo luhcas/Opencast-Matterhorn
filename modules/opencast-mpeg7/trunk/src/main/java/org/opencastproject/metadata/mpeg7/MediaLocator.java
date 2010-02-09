@@ -34,9 +34,6 @@ import java.net.URI;
  *   &lt;/sequence&gt;
  * &lt;/complexType&gt;
  * </pre>
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaLocator.java 1108 2008-09-10 17:59:51Z wunden $
  */
 public interface MediaLocator extends XmlElement {
 

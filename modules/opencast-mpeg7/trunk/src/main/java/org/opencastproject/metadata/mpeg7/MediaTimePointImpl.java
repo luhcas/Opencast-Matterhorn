@@ -24,8 +24,7 @@ import java.util.Calendar;
 import java.util.Formatter;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaTimePointImpl.java 1410 2008-11-05 10:02:29Z wunden $
+ * TODO: Comment me!
  */
 public class MediaTimePointImpl implements MediaTimePoint {
 

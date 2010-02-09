@@ -25,8 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: TemporalDecompositionImpl.java 1404 2008-11-04 17:50:38Z wunden $
+ * TODO: Comment me!
  */
 public class TemporalDecompositionImpl<T extends ContentSegment> implements TemporalDecomposition<T> {
 

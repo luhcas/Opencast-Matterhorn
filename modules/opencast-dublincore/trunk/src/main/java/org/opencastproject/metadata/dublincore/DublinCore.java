@@ -48,10 +48,6 @@ import java.util.Set;
  * this is not necessary.
  * <li>Encoding schemes aren't fully supported yet.
  * </ul>
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: DublinCore.java 2375 2009-02-14 10:52:08Z ced $
  */
 public interface DublinCore {
 

@@ -22,17 +22,11 @@ import java.util.Iterator;
 
 /**
  * This interface describes that basis for a temporal decomposition of an audio, video or audiovisual content element.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: TemporalDecomposition.java 1372 2008-11-02 18:03:37Z wunden $
  */
 public interface TemporalDecomposition<T extends ContentSegment> extends XmlElement {
 
   /**
    * Criteria of decomposition.
-   * 
-   * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
-   * @version $Id: TemporalDecomposition.java 1372 2008-11-02 18:03:37Z wunden $
    */
   enum DecompositionCriteria {
     Temporal

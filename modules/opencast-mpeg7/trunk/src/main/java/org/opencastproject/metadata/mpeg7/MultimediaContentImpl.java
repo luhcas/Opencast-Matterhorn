@@ -25,8 +25,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MultimediaContentImpl.java 1376 2008-11-02 18:04:31Z wunden $
+ * TODO: Comment me!
  */
 public class MultimediaContentImpl<T extends MultimediaContentType> implements MultimediaContent<T> {
 

@@ -21,8 +21,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaTimeImpl.java 1376 2008-11-02 18:04:31Z wunden $
+ * TODO: Comment me!
  */
 public class MediaTimeImpl implements MediaTime {
 

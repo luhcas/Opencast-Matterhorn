@@ -20,9 +20,6 @@ import org.opencastproject.media.mediapackage.XmlElement;
 
 /**
  * Models a keyword annotation with relevance, confidence and the text itself.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: FreeTextAnnotation.java 1108 2008-09-10 17:59:51Z wunden $
  */
 public interface FreeTextAnnotation extends XmlElement {
 

@@ -35,9 +35,6 @@ import java.util.Iterator;
  *   &lt;/complexType&gt;
  * &lt;/element&gt;
  * </pre>
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: Mpeg7.java 1351 2008-10-31 18:11:54Z wunden $
  */
 public interface Mpeg7 {
 

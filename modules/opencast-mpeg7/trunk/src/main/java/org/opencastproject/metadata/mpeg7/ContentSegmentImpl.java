@@ -28,8 +28,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: ContentSegmentImpl.java 1400 2008-11-04 17:49:26Z wunden $
+ * TODO: Comment me!
  */
 public class ContentSegmentImpl implements ContentSegment, AudioSegment, VideoSegment, AudioVisualSegment {
 

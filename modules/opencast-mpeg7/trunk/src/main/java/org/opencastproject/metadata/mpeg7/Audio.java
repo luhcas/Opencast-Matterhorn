@@ -18,9 +18,6 @@ package org.opencastproject.metadata.mpeg7;
 
 /**
  * This element encapsulates the information about a single audio track.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: Audio.java 1108 2008-09-10 17:59:51Z wunden $
  */
 public interface Audio extends MultimediaContentType {
 

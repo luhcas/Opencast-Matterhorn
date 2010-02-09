@@ -20,9 +20,6 @@ import org.opencastproject.media.mediapackage.XmlElement;
 
 /**
  * Media time point represents a time within the track, e. g. the starting time of a video segment.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaTimePoint.java 1381 2008-11-03 14:05:43Z wunden $
  */
 public interface MediaTimePoint extends XmlElement {
 

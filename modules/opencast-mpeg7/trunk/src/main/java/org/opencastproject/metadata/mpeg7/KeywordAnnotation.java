@@ -45,17 +45,11 @@ import org.opencastproject.media.mediapackage.XmlElement;
  *   &lt;attribute ref=&quot;xml:lang&quot; use=&quot;optional&quot;/&gt;
  * &lt;/complexType&gt;
  * </pre>
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: KeywordAnnotation.java 1108 2008-09-10 17:59:51Z wunden $
  */
 public interface KeywordAnnotation extends XmlElement {
 
   /**
    * Enumeration defining possible types for a keyword annotation.
-   * 
-   * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
-   * @version $Id: KeywordAnnotation.java 1108 2008-09-10 17:59:51Z wunden $
    */
   enum Type {
     main, secondary, other

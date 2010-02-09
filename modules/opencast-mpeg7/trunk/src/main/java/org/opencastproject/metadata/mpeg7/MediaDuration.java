@@ -28,9 +28,6 @@ import org.opencastproject.media.mediapackage.XmlElement;
  *   &lt;/restriction&gt;
  * &lt;/simpleType&gt;
  * </pre>
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaDuration.java 1396 2008-11-04 13:35:02Z wunden $
  */
 public interface MediaDuration extends XmlElement {
 

@@ -21,8 +21,7 @@ import org.opencastproject.media.mediapackage.XmlElement;
 import java.util.Iterator;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MultimediaContent.java 1352 2008-10-31 18:12:17Z wunden $
+ * TODO: Comment me!
  */
 public interface MultimediaContent<T extends MultimediaContentType> extends XmlElement {
 

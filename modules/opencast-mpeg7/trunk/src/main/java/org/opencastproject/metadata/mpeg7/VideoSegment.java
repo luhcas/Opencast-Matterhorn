@@ -47,9 +47,6 @@ package org.opencastproject.metadata.mpeg7;
  *   &lt;/complexContent&gt;
  * &lt;/complexType&gt;
  * </pre>
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: VideoSegment.java 1108 2008-09-10 17:59:51Z wunden $
  */
 public interface VideoSegment extends ContentSegment {
 

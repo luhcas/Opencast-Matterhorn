@@ -17,8 +17,7 @@
 package org.opencastproject.metadata.mpeg7;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaRelTimeImpl.java 1402 2008-11-04 17:49:49Z wunden $
+ * TODO: Comment me!
  */
 public class MediaRelTimeImpl extends MediaTimeImpl {
 

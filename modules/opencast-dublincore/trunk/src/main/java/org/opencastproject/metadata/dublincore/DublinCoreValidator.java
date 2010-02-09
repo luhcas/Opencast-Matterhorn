@@ -22,9 +22,6 @@ package org.opencastproject.metadata.dublincore;
  * <p>
  * For example, one institution will want to specify that the subject field is mandatory while another inistitution
  * won't.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: DublinCoreValidator.java 1218 2008-10-08 15:23:16Z wunden $
  */
 public class DublinCoreValidator {
 

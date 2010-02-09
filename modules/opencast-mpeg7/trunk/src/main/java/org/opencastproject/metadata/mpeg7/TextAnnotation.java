@@ -38,9 +38,6 @@ import java.util.Iterator;
  * </pre>
  * 
  * TODO: How to encode source and version? Maybe use MediaInformation in VideoSegment
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: TextAnnotation.java 1337 2008-10-30 14:33:50Z wunden $
  */
 public interface TextAnnotation extends XmlElement {
 
