@@ -23,6 +23,10 @@ while read line
 	done
 done < /tmp/devlist.txt
 
+CAPTURE_PROPS=$1/conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties
+cp /home/$USERNAME/capture-agent/opencast-capture-service-impl/src/test/resources/config/capture.properties $CAPTURE_PROPS
+
+allDevices=""
 let devAryLen=${#devices[@]}-1
 for dev in $(seq 0 1 $devAryLen)
  do
@@ -33,8 +37,8 @@ for dev in $(seq 0 1 $devAryLen)
   # setup device info using udevadm info
   realpath=/sys$(udevadm info --query=path --name=$device)
   symlinkName=$(echo $cleanName | cut -b -5 | tr "[:upper:]" "[:lower:]")
-  vendor=$(cat $realpath/../../vendor)
-  sysdevice=$(cat $realpath/../../device)
+  vendor=$(cat $realpath/../../vendor 2> /dev/null)
+  sysdevice=$(cat $realpath/../../device 2> /dev/null)
   if [ $? -eq 0 ]; then
     echo "KERNEL==\"video[0-9]\", SYSFS{vendor}==\"$vendor\", SYSFS{device}==\"$sysdevice\", SYMLINK+=\"$symlinkName\"" >> /home/$USERNAME/95-perso.rules
     device="/dev/$symlinkName"
@@ -47,8 +51,9 @@ for dev in $(seq 0 1 $devAryLen)
 		echo -n "Please enter the new name: "
 		read cleanName
 	fi
-	echo "capture.device.$cleanName.src=$device" >> /home/$USERNAME/capture.properties
-	echo "capture.device.$cleanName.outputfile=$cleanName" >> /home/$USERNAME/capture.properties
+	echo "capture.device.$cleanName.src=$device" >> $CAPTURE_PROPS
+	echo "capture.device.$cleanName.outputfile=$cleanName" >> $CAPTURE_PROPS
+  allDevices="${allDevices}${cleanName},"
   if [ "$name" != "${supportedDevices[2]}" ];
     then
       echo -n "Would you like device $name to be (N)TSC or (P)AL? (N/p) "
@@ -81,8 +86,11 @@ chmod 755 /home/$USERNAME/matterhorn_capture.sh
 
 audioDevice=hw:$(sudo arecord -l | grep Analog | cut -c 6)
 cleanAudioDevice=`echo $audioDevice | sed s/\://g`
-echo "capture.device.$cleanAudioDevice.src=$audioDevice" >> /home/$USERNAME/capture.properties
-echo "capture.device.$cleanAudioDevice.outputfile=$cleanAudioDevice" >> /home/$USERNAME/capture.properties
+echo "capture.device.$cleanAudioDevice.src=$audioDevice" >> $CAPTURE_PROPS
+echo "capture.device.$cleanAudioDevice.outputfile=$cleanAudioDevice" >> $CAPTURE_PROPS
+
+allDevices="${allDevices}${cleanAudioDevice}"
+echo "capture.device.names=${allDevices}" >> $CAPTURE_PROPS
 
 # setup opencast directories
 OC_DIR="/opencast"
@@ -94,15 +102,16 @@ if [ "$directory" != "" ];
 fi
 sudo mkdir -p $OC_DIR
 sudo mkdir -p $OC_DIR/cache
-echo "capture.filesystem.cache.url=$OC_DIR/cache" >> /home/$USERNAME/capture.properties
 sudo mkdir -p $OC_DIR/config
-echo "capture.filesystem.config.url=$OC_DIR/config" >> /home/$USERNAME/capture.properties
 sudo mkdir -p $OC_DIR/volatile
-echo "capture.filesystem.volatile.url=$OC_DIR/volatile" >> /home/$USERNAME/capture.properties
 sudo mkdir -p $OC_DIR/cache/captures
-echo "capture.filesystem.cache.capture.url=$OC_DIR/cache/captures" >> /home/$USERNAME/capture.properties
 
 # define capture agent name by using the hostname
-echo "capture.agent.name=`hostname`" >> capture.properties
+echo "capture.agent.name=`hostname`" >> $CAPTURE_PROPS
 
-sudo mv /home/$USERNAME/capture.properties $OC_DIR/cache/capture.properties
+# Prompt for core hostname. default to localhost:8080
+echo -n "Please enter Matterhorn Core hostname (default: http://localhost:8080) "
+read core
+if [ "$core" != "" ]; then
+  sed -i "s#http:\/\/localhost:8080#$core#g" $CAPTURE_PROPS
+fi

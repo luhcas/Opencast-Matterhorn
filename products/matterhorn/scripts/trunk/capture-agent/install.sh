@@ -161,15 +161,15 @@ sudo cp ../lib/libjv4linfo.so /usr/lib
 
 cd ../..
 
-# setup properties by calling setup_devices.sh
-sudo cp $SETUP_DEVICES /home/$USERNAME
-sudo chown $USERNAME:$USERNAME /home/$USERNAME/setup_devices.sh
-sudo -u $USERNAME /home/$USERNAME/setup_devices.sh
-
 # build properties
 sudo cp $BUILD_MATTERHORN /home/$USERNAME
 sudo chown $USERNAME:$USERNAME /home/$USERNAME/build_matterhorn.sh
 sudo -u $USERNAME /home/$USERNAME/build_matterhorn.sh $FELIX_HOME
+
+# setup properties by calling setup_devices.sh
+sudo cp $SETUP_DEVICES /home/$USERNAME
+sudo chown $USERNAME:$USERNAME /home/$USERNAME/setup_devices.sh
+sudo -u $USERNAME /home/$USERNAME/setup_devices.sh ${FELIX_HOME}
 
 # set matterhorn to start on boot
 cd $HOME
