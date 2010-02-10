@@ -107,7 +107,7 @@ start_mh ()
 
   cd $INST_DIR
 
-  sudo -u opencast /home/opencast/startup.sh
+  /home/opencast/startup.sh
 
   echo "" | sudo tee -a $MOTD_FILE
   echo "********************************************" | sudo tee -a $MOTD_FILE
@@ -206,6 +206,7 @@ else
   
   # doing some additional setups
   sudo update-java-alternatives -s java-6-sun
+  sudo chown -R 1000:1000 /home/opencast
 
   start_mh
 

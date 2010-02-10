@@ -89,6 +89,8 @@ sudo cp startup.sh mnt/home/opencast/startup.sh
 sudo chmod 755 mnt/home/opencast/startup.sh
 sudo cp shutdown.sh mnt/home/opencast/shutdown.sh
 sudo chmod 755 mnt/home/opencast/shutdown.sh
+sudo cp update-matterhorn.sh mnt/home/opencast/update-matterhorn.sh
+sudo chmod 755 mnt/home/opencast/update-matterhorn.sh
 sudo cp rc.local mnt/etc/rc.local
 sudo chmod 755 mnt/etc/rc.local
 
@@ -181,7 +183,6 @@ echo "=========================="
 sudo cp mediainfo mnt/usr/local/bin/
 sudo cp libmediainfo.a mnt/usr/local/lib/
 sudo cp libmediainfo.la mnt/usr/local/lib/
-sudo cp libzen0_0.4.8-1_i386.Debian_4.deb mnt/home/opencast
 
 #create directory for log files
 sudo mkdir mnt/var/log/matterhorn
@@ -203,6 +204,8 @@ echo "export MAVEN_OPTS=\"-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128
 
 #lets set opencast to own her files
 sudo chown -R 1000:1000 mnt/home/opencast/*
+sudo chmod -R 777 mnt/home/opencast/*
+sudo chmod -R 777 mnt/home/opencast/.m2/
 
 #unmount the vm disk image and cleanup
 sudo vmware-mount -d mnt

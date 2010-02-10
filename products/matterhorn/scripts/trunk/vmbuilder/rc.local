@@ -37,10 +37,10 @@ else
   if [ -z $MY_IP ]; then
     echo "ERROR: Could not determine IP address of this VM." > /dev/console
     echo "To start Matterhorn manually, run the following command" > /dev/console
-    echo "  /usr/local/matterhorn/bin/startup.sh" > /dev/console
+    echo "  /home/opencast/startup.sh" > /dev/console
   else
     echo "Starting Matterhorn..." > /dev/console
-    /usr/local/matterhorn/bin/startup.sh
+    /home/opencast/startup.sh
     echo "Matterhorn console is avilable at http://$MY_IP:8080" > /dev/console
   fi
 fi
