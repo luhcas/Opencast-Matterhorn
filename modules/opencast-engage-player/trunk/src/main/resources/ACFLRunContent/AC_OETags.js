@@ -180,25 +180,27 @@ function AC_Generateobj(objAttrs, params, embedAttrs)
     var str = '';
     if (isIE && isWin && !isOpera)
     {
-  		str += '<div id="oc-video-display-container"><object ';
+  		str += '<span id="oc-video-left"><object ';
   		for (var i in objAttrs)
   			str += i + '="' + objAttrs[i] + '" ';
   		str += '>';
   		for (var i in params)
   			str += '<param name="' + i + '" value="' + params[i] + '" /> ';
-  		str += '</object></div>';
+  		str += '</object></span>';
     } else {
-    	str += '<div id="oc-video-display-container">';
-		  str += '<object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="400" height="320" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">';
-		  str += '<param name ="movie" value="Videodisplay.swf" >';
-		  str += '<param name="quality"value="high">';
-		  str += '<param name="bgcolor" value="#000000" />';
+    	str += '<span id="oc-video-left">';
+			str += '<object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="400" height="320" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">';
+			str += '<param name ="movie" value="Videodisplay.swf" >';
+			str += '<param name="quality"value="high">';
 			str += '<param name="allowScriptAccess" value="sameDomain" />';
+			str += '<param name="bgcolor" value="#000000" />';
+			str += '<param name="allowFullScreen" value="true" />';
+			str += '<param name="flashvars" value="bridgeName=b_Videodisplay&amp;autoplay=false&playerId=firstPlayer"/>';
     	
     	str += '<embed ';
   		for (var i in embedAttrs)
   			str += i + '="' + embedAttrs[i] + '" ';
-  		str += '> </embed></object></div>';
+  		str += '> </embed></object></span>';
     }
 
     document.write(str);
@@ -211,6 +213,47 @@ function AC_FL_RunContent(){
      , "application/x-shockwave-flash"
     );
   AC_Generateobj(ret.objAttrs, ret.params, ret.embedAttrs);
+}
+
+
+function AC_GenerateobjSecond(objAttrs, params, embedAttrs) 
+{ 
+    var str = '';
+    if (isIE && isWin && !isOpera)
+    {
+  		str += '<span id="oc_video-right"><object ';
+  		for (var i in objAttrs)
+  			str += i + '="' + objAttrs[i] + '" ';
+  		str += '>';
+  		for (var i in params)
+  			str += '<param name="' + i + '" value="' + params[i] + '" /> ';
+  		str += '</object></span>';
+  		
+    } else {
+    	str += '<span id="oc_video-right">';
+    	str += '<object id="oc_VideodisplaySecond" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="400" height="320" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">';
+		str += '<param name ="movie" value="Videodisplay.swf" >';
+		str += '<param name="quality"value="high">';
+		str += '<param name="allowScriptAccess" value="sameDomain" />';
+		str += '<param name="bgcolor" value="#000000" />';
+		str += '<param name="allowFullScreen" value="true" />';
+		str += '<param name="flashvars" value="bridgeName=b_VideodisplaySecond&amp;autoplay=false&playerId=secondPlayer"/>';
+		str += '<embed ';
+  		for (var i in embedAttrs)
+  			str += i + '="' + embedAttrs[i] + '" ';
+  		str += '> </embed></object></span>';
+    }
+
+    document.write(str);
+}
+
+function AC_FL_RunContentSecond(){
+  var ret = 
+    AC_GetArgs
+    (  arguments, ".swf", "movie", "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+     , "application/x-shockwave-flash"
+    );
+  AC_GenerateobjSecond(ret.objAttrs, ret.params, ret.embedAttrs);
 }
 
 function AC_GetArgs(args, ext, srcParamName, classid, mimeType){

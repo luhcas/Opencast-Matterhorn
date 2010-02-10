@@ -14,6 +14,17 @@
  *
  */
 
+#body
+{
+  frameborder:          0px; 
+  framespacing:         0px ;
+}
+
+#body:focus
+{
+  border:               0px solid #999999;
+}
+
 #info
 {
     margin-left:        0px; 
@@ -50,8 +61,9 @@
 
 #oc-slider
 {
-    width:              399px;
+    width:              400px;
     margin-left:        0px;
+    margin-right:       0px;
     margin-bottom:      10px;
     position:           relative; 
     text-align:         left;
@@ -88,7 +100,7 @@
 
 .oc-videocontrols-holder
 {
-    width:              401px;
+    width:              400px;
     height:             30px;
     background:         transparent url(../background/title.png) repeat-x center top;
     margin-left:        0px;
@@ -397,6 +409,8 @@
     margin:             0;
     border:             0;
     background:         transparent url(../icons/cc_off.png) no-repeat center top;
+    background-color:   #ffffff;
+    
     cursor:             pointer; /* hand-shaped cursor */
     cursor:             hand; /* for IE 5.x */
 }
@@ -409,16 +423,26 @@
     margin:             0;
     border:             0;
     background:         transparent url(../icons/cc_on.png) no-repeat center top;
+    background-color:   #ffffff;
     cursor:             pointer; /* hand-shaped cursor */
     cursor:             hand; /* for IE 5.x */
 }
 
 #oc-video-display-container
 {
-    margin-bottom:      0px;
-    margin-left:        0px;
+    width:              920px;
     margin-top:         -50px;
+}
+
+#oc_video-left
+{
+    float:              left;
     
+}
+
+#oc_video-right
+{
+    margin-left:        20px;
 }
 
 .overflow-hidden 
@@ -451,13 +475,12 @@
 
 .oc_editTime-hidden
 {
-    display: none;
-
+    display:            none;
 }
 
 .oc_editTime
 {
-    display: block;
-    float: left;
+    display:            block;
+    float:              left;
 }
 

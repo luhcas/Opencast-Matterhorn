@@ -27,7 +27,7 @@ function VideodisplayReady() {
 
 	// Initialize the "root" object. This represents the actual 
 	// "Videodisplay.mxml" flex application.
-	b_Videodisplay_root = FABridge["b_Videodisplay"].root();
+	b_Videodisplay_root = FABridge["b_Videodisplay"].root().getFlexAjaxBridge();
 	
 	// Global functions in the "Videodisplay.mxml" application
 
@@ -57,10 +57,6 @@ function VideodisplayReady() {
 	
 	Videodisplay.skipForward = function() {
 		b_Videodisplay_root.skipForward();
-	};
-	
-	Videodisplay.passCharCode = function(argInt){
-		b_Videodisplay_root.passCharCode(argInt);
 	};
 	
 	Videodisplay.passCharCode = function(argInt){
@@ -97,5 +93,9 @@ function VideodisplayReady() {
 	
 	Videodisplay.setCaptionsURL = function(argString) {
 		b_Videodisplay_root.setCaptionsURL(argString);
+	};
+	
+	Videodisplay.setPlayerId = function(argString) {
+		b_Videodisplay_root.setPlayerId(argString);
 	};
 }

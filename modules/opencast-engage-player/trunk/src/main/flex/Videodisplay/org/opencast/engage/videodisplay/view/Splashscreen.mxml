@@ -27,6 +27,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import bridge.ExternalFunction;
             import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
             import org.opencast.engage.videodisplay.state.PlayerState;
             import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
@@ -184,7 +185,7 @@
 
     <mx:Button 
         id = "playButton_up"
-        click = "Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY));"
+        click = "{ ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' ) }"
         width = "{this.width/5}"
         height = "{playButton_up.width}"
         styleName = "PlayBig"
@@ -199,7 +200,7 @@
 
     <mx:Button 
         id = "pauseButton_up"
-        click = "Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE));"
+        click = "{ ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' ) }"
         width = "{this.width/5}"
         height = "{pauseButton_up.width}"
         styleName = "PauseBig"

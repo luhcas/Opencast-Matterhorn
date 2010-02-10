@@ -44,9 +44,7 @@ package bridge
         
         public static const OPENCASTVOLUME:String       = 'Opencast.Player.setOpencastVolume';
         
-        public static const ONPLAYERREADY:String       = 'onPlayerReady'; 
-        
-        
+        public static const PLAYPAUSE:String            = 'Opencast.Player.doTogglePlayPause';
         
     }
 }

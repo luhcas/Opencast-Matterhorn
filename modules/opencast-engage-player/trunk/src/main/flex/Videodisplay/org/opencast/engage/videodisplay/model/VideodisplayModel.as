@@ -120,5 +120,8 @@ package org.opencast.engage.videodisplay.model
 
         // captionsURL
         public var captionsURL:String = '';
+        
+        // playerId
+        public var playerId:String = '';
     }
 }

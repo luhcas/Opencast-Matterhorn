@@ -85,8 +85,8 @@
             private function onVolume():void
             {
                 model.player.volume = volumeSlider.value;
-                ExternalInterface.call( ExternalFunction.SETVOLUME, volumeSlider.value * 100 );
-                ExternalInterface.call( ExternalFunction.OPENCASTVOLUME, volumeSlider.value );
+                ExternalInterface.call( ExternalFunction.SETVOLUME, volumeSlider.value * 100, model.playerId );
+                ExternalInterface.call( ExternalFunction.OPENCASTVOLUME, volumeSlider.value, model.playerId );
             }
 
             /**
