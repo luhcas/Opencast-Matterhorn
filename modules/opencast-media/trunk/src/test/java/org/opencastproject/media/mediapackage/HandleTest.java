@@ -36,9 +36,6 @@ import java.util.List;
 
 /**
  * Test case for the handle class implementation.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: HandleTest.java 238 2009-07-29 09:53:32Z jholtzman $
  */
 public class HandleTest {
 
@@ -67,7 +64,7 @@ public class HandleTest {
   public void setUp() throws Exception {
     handleBuilder = new HandleBuilderImpl();
     url = new URL(handleValue);
-    handle = handleBuilder.fromValue(defaultHandle);
+    handle = handleBuilder.fromString(defaultHandle);
   }
 
   /**
@@ -151,13 +148,9 @@ public class HandleTest {
    */
   @Test
   public void testCompact() {
-    try {
-      String hdlValue = "10.0001/abcde/test";
-      Handle handle = handleBuilder.fromValue(hdlValue);
-      assertEquals("10.0001-abcde-test", handle.compact());
-    } catch (HandleException e) {
-      fail("Error creating handle: " + e.getMessage());
-    }
+    String hdlValue = "10.0001/abcde/test";
+    Handle handle = handleBuilder.fromString(hdlValue);
+    assertEquals("10.0001-abcde-test", handle.compact());
   }
 
 }

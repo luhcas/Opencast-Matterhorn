@@ -978,7 +978,7 @@ final class ManifestImpl {
         manifest.identifier = IdBuilderFactory.newInstance().newIdBuilder().fromString(id);
       } catch (Exception e) {
         // The default ID builder didn't work? Try the handle builder.
-        manifest.identifier = HandleBuilderFactory.newInstance().newHandleBuilder().fromValue(id);
+        manifest.identifier = HandleBuilderFactory.newInstance().newHandleBuilder().fromString(id);
       }
     } else {
       manifest.identifier = IdBuilderFactory.newInstance().newIdBuilder().createNew();

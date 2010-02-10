@@ -40,6 +40,8 @@ public interface MediaPackage extends Cloneable {
    * @return the identifier
    */
   Id getIdentifier();
+  
+  void setIdentifier(Id id);
 
   void setTitle(String title);
 
@@ -70,14 +72,14 @@ public interface MediaPackage extends Cloneable {
    */
   String[] getCreators();
 
-  void setSeries(Id identifier);
+  void setSeries(String identifier);
 
   /**
    * TODO: Comment me
    * 
    * @return
    */
-  Id getSeries();
+  String getSeries();
 
   void setLicense(String license);
 

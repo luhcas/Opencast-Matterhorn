@@ -39,9 +39,6 @@ import java.util.List;
 
 /**
  * Test case to make sure creation of handle is working as expected.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: HandleBuilderTest.java 238 2009-07-29 09:53:32Z jholtzman $
  */
 public class HandleBuilderTest {
 
@@ -120,38 +117,34 @@ public class HandleBuilderTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleBuilderImpl#fromValue(java.lang.String)}
+   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleBuilderImpl#fromString(java.lang.String)}
    * .
    */
   @Test
   public void testFromValueOK() {
     String[] testsOK = new String[] { namingAuthority + "/5636213123", namingAuthority + "/mnvmnmvxvx",
             "hdl://" + namingAuthority + "/mnvmnmvxvx", };
-    try {
-      for (String t : testsOK) {
-        Handle handle = handleBuilder.fromValue(t);
-        assertNotNull(handle);
-        assertEquals(namingAuthority, handle.getNamingAuthority());
-        assertEquals(10, handle.getLocalName().length());
-      }
-    } catch (HandleException e) {
-      fail("Error creating handle: " + e.getMessage());
+    for (String t : testsOK) {
+      Handle handle = handleBuilder.fromString(t);
+      assertNotNull(handle);
+      assertEquals(namingAuthority, handle.getNamingAuthority());
+      assertEquals(10, handle.getLocalName().length());
     }
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleBuilderImpl#fromValue(java.lang.String)}
+   * Test method for {@link org.opencastproject.media.mediapackage.identifier.HandleBuilderImpl#fromString(java.lang.String)}
    * .
    */
   @Test
-  public void testFromValueFail() throws HandleException {
+  public void testFromValueFail() {
     String[] testsFail = new String[] { "10.12324/5636213123", "11.1221/mnvmnmvxvx", "101221/mnvmnmvxvx", "10.1221/",
             "hdl://10.12313/mnvmnmvxvx" };
     int failCount = testsFail.length;
     for (String t : testsFail) {
       try {
-        handleBuilder.fromValue(t);
-      } catch (HandleException e) {
+        handleBuilder.fromString(t);
+      } catch (Exception e) {
         failCount -= 1;
       }
     }

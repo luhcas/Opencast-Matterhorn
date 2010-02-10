@@ -23,7 +23,6 @@ import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.identifier.Id;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.util.DocUtil;
@@ -151,10 +150,7 @@ public class AdminuiRestService {
         //item.setPresenter(formatMultipleString(mediapackage.getContributors()));
         item.setPresenter(formatMultipleString(mediapackage.getCreators()));
         item.setSeriesTitle(mediapackage.getSeriesTitle());
-        Id seriesId = mediapackage.getSeries();
-        if(seriesId != null) {
-          item.setSeriesId(seriesId.toString());
-        }
+        item.setSeriesId(mediapackage.getSeries());
         item.setSeriesTitle(mediapackage.getSeriesTitle());
         Date date = mediapackage.getDate();
         if(date != null) {

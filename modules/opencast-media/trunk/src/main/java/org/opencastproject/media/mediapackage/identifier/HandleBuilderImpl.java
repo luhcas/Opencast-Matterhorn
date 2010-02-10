@@ -31,9 +31,6 @@ import java.util.regex.Pattern;
  * Default implementation of a handle builder. Note that this implementation is for your convenience only, since all it
  * does is creating unique identifiers wrapped into the handle syntax using a globally invalid value of
  * <code>00000</code> for the naming authority and cannot update, resolve or delete these handles.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: HandleBuilderImpl.java 238 2009-07-29 09:53:32Z jholtzman $
  */
 public class HandleBuilderImpl implements HandleBuilder {
 
@@ -94,16 +91,16 @@ public class HandleBuilderImpl implements HandleBuilder {
   /**
    * @see org.opencastproject.media.mediapackage.identifier.HandleBuilder#createNew()
    */
-  public Handle createNew() throws HandleException {
+  public Handle createNew() {
     if (defaultURL == null)
-      throw new HandleException("Default url is malformed");
+      throw new IllegalStateException("Default url is malformed");
     return createNew(defaultURL);
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.identifier.HandleBuilder#createNew(java.net.URL)
    */
-  public Handle createNew(URL url) throws HandleException {
+  public Handle createNew(URL url) throws IllegalStateException {
     if (url == null)
       throw new IllegalArgumentException("Argument url must not be null");
     String localName = UUID.randomUUID().toString();
@@ -118,15 +115,15 @@ public class HandleBuilderImpl implements HandleBuilder {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.identifier.HandleBuilder#fromValue(java.lang.String)
+   * @see org.opencastproject.media.mediapackage.identifier.HandleBuilder#fromString(java.lang.String)
    */
-  public Handle fromValue(String value) throws HandleException {
+  public Handle fromString(String value) throws IllegalStateException {
     if (value == null)
       throw new IllegalArgumentException("Unable to create handle from null string");
 
     Matcher m = HANDLE_PATTERN.matcher(value);
     if (!m.matches())
-      throw new HandleException("Handle " + value + " is malformed");
+      throw new IllegalStateException("Handle " + value + " is malformed");
     return new HandleImpl(m.group(1), m.group(2), this);
   }
 
@@ -151,7 +148,7 @@ public class HandleBuilderImpl implements HandleBuilder {
   public boolean update(Handle handle, URL url) throws HandleException {
     if (handle == null)
       throw new IllegalArgumentException("Cannot update null handle");
-    if (handle == null)
+    if (url == null)
       throw new IllegalArgumentException("Cannot update handle to null");
     return true;
   }

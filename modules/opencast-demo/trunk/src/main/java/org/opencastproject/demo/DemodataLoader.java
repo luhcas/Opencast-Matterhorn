@@ -15,12 +15,23 @@
  */
 package org.opencastproject.demo;
 
+import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.identifier.Id;
+import org.opencastproject.media.mediapackage.identifier.IdBuilder;
+import org.opencastproject.media.mediapackage.identifier.IdBuilderFactory;
+import org.opencastproject.media.mediapackage.identifier.UUIDIdBuilderImpl;
+import org.opencastproject.metadata.dublincore.DublinCore;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
+import org.opencastproject.metadata.dublincore.DublinCoreValue;
+import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -30,6 +41,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -50,6 +62,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -126,6 +139,7 @@ public class DemodataLoader {
     
     // Load the data
     try {
+      System.setProperty("opencast.idbuilder", UUIDIdBuilderImpl.class.getCanonicalName());
       File[] packages = unzipDemoData("/demo-data.zip");
       if (!random) {
         for (File packageDir : packages) {
@@ -158,32 +172,58 @@ public class DemodataLoader {
     HttpClient client = new DefaultHttpClient();
     String loadDemoDataWorkflow = loadWorkflow("/demo-workflow.xml");
     MediaPackageBuilder mpBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
-
+    IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
     try {
 
       mpBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(packageDir));
       File manifestFile = new File(packageDir, "index.xml");
       MediaPackage mediaPackage = mpBuilder.loadFromXml(new FileInputStream(manifestFile));
-      Id mediapackageId = mediaPackage.getIdentifier();
+      addMediaPackageMetadata(mediaPackage);
+      Id mediapackageId = idBuilder.createNew();
+      mediaPackage.setIdentifier(mediapackageId);
   
       if (verbose) {
-        System.out.println("Ingesting media package " + mediapackageId);
+        System.out.println("Ingesting media package " + packageDir.getName());
+      }
+      
+      // Copying sample tracks into place
+      File trackDir = new File(packageDir, "tracks");
+      trackDir.mkdir();
+      for (Track track : mediaPackage.getTracks()) {
+        String filename = FilenameUtils.getName(track.getURI().toString());
+        File outFile = new File(trackDir, filename);
+        InputStream is = DemodataLoader.class.getResourceAsStream("/tracks/" + filename);
+        OutputStream os = new FileOutputStream(outFile);
+        IOUtils.copy(is, os);
+        IOUtils.closeQuietly(os);
+      }
+      
+      // Copying sample attachments into place
+      File attachmentDir = new File(packageDir, "attachments");
+      attachmentDir.mkdir();
+      for (Attachment attachment : mediaPackage.getAttachments()) {
+        String filename = FilenameUtils.getName(attachment.getURI().toString());
+        File outFile = new File(attachmentDir, filename);
+        InputStream is = DemodataLoader.class.getResourceAsStream("/attachments/" + filename);
+        OutputStream os = new FileOutputStream(outFile);
+        IOUtils.copy(is, os);
+        IOUtils.closeQuietly(os);
       }
 
-      // Upload metadata catalogs to working file repository
-      for (Catalog catalog : mediaPackage.getCatalogs()) {
+      // Upload media package elements to working file repository
+      for (MediaPackageElement element : mediaPackage.getElements()) {
         client = new DefaultHttpClient();
         MultipartEntity postEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-        URI catalogUrl = catalog.getURI();
-        String filename = catalogUrl.getPath().substring(catalogUrl.getPath().lastIndexOf('/') + 1);
-        URI uploadedCatalogUrl = new URI(host + "/files/" + mediapackageId.compact() + "/" + catalog.getIdentifier());
-        postEntity.addPart("file", new InputStreamBody(catalog.getURI().toURL().openStream(), filename));
-        HttpPost post = new HttpPost(uploadedCatalogUrl);
+        URI elementUrl = element.getURI();
+        String filename = FilenameUtils.getName(elementUrl.toString());
+        URI uploadedElementUrl = new URI(host + "/files/" + mediapackageId.compact() + "/" + element.getIdentifier());
+        postEntity.addPart("file", new InputStreamBody(element.getURI().toURL().openStream(), filename));
+        HttpPost post = new HttpPost(uploadedElementUrl);
         post.setEntity(postEntity);
         client.execute(post);
-        catalog.setURI(uploadedCatalogUrl);
+        element.setURI(uploadedElementUrl);
       }
-  
+      
       // Start a workflow instance via the rest endpoint
       HttpPost postStart = new HttpPost(host + "/workflow/rest/start");
       List<NameValuePair> formParams = new ArrayList<NameValuePair>();
@@ -232,6 +272,69 @@ public class DemodataLoader {
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp("demoloader [url]", cmdOptions);
       throw e;
+    }
+  }
+
+  /**
+   * Reads the available metadata from the dublin core catalog (if there is
+   * one).
+   * 
+   * @param mediapackage
+   *          the media package
+   */
+  private static void addMediaPackageMetadata(MediaPackage mediapackage) {    
+    Catalog[] dcs = mediapackage.getCatalogs(DublinCoreCatalog.FLAVOR);
+    for (Catalog catalog : dcs) {
+      DublinCoreCatalog dc = new DublinCoreCatalogImpl(catalog);
+      
+      if (dc.getReference() == null) {
+  
+        // Title
+        mediapackage.setTitle(dc.getFirst(DublinCore.PROPERTY_TITLE));
+  
+        // Created date
+        if (dc.hasValue(DublinCore.PROPERTY_CREATED))
+          mediapackage.setDate(EncodingSchemeUtils.decodeDate(dc.get(
+                  DublinCore.PROPERTY_CREATED).get(0)));
+  
+        // Series id
+        if (dc.hasValue(DublinCore.PROPERTY_IS_PART_OF)) {
+          mediapackage.setSeries(dc.get(DublinCore.PROPERTY_IS_PART_OF).get(0).getValue());
+        }
+  
+        // Creator
+        if (dc.hasValue(DublinCore.PROPERTY_CREATOR)) {
+          for (DublinCoreValue creator : dc.get(DublinCore.PROPERTY_CREATOR)) {
+            mediapackage.addCreator(creator.getValue());
+          }
+        }
+  
+        // Contributor
+        if (dc.hasValue(DublinCore.PROPERTY_CONTRIBUTOR)) {
+          for (DublinCoreValue contributor : dc
+                  .get(DublinCore.PROPERTY_CONTRIBUTOR)) {
+            mediapackage.addContributor(contributor.getValue());
+          }
+        }
+  
+        // Subject
+        if (dc.hasValue(DublinCore.PROPERTY_SUBJECT)) {
+          for (DublinCoreValue subject : dc.get(DublinCore.PROPERTY_SUBJECT)) {
+            mediapackage.addSubject(subject.getValue());
+          }
+        }
+  
+        // License
+        mediapackage.setLicense(dc.getFirst(DublinCore.PROPERTY_LICENSE));
+  
+        // Language
+        mediapackage.setLanguage(dc.getFirst(DublinCore.PROPERTY_LANGUAGE));
+  
+        break;
+      } else {
+        // Series Title
+        mediapackage.setSeriesTitle(dc.getFirst(DublinCore.PROPERTY_TITLE));
+      }
     }
   }
 

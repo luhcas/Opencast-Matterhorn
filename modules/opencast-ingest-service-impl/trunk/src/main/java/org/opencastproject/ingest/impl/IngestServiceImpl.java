@@ -26,9 +26,6 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageMetadata;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
-import org.opencastproject.media.mediapackage.identifier.Id;
-import org.opencastproject.media.mediapackage.identifier.IdBuilder;
-import org.opencastproject.media.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.util.ZipUtil;
 import org.opencastproject.workspace.api.Workspace;
@@ -184,19 +181,13 @@ public class IngestServiceImpl implements IngestService, ManagedService,
       logger.debug("No metadata services are registered with the ingest service, so no mediapackage metadata can be extracted from catalogs");
       return;
     }
-    IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
     for(MediaPackageMetadataService metadataService : metadataServices) {
       MediaPackageMetadata metadata = metadataService.getMetadata(mp);
       if(metadata != null) {
         mp.setDate(metadata.getDate());
         mp.setLanguage(metadata.getLanguage());
         mp.setLicense(metadata.getLanguage());
-        try {
-          Id id = idBuilder.fromString(metadata.getSeriesIdentifier());
-          mp.setSeries(id);
-        } catch(IllegalArgumentException e) {
-          logger.warn("Illegal series ID specified: '{}'.  Not setting the series identifier.", metadata.getSeriesIdentifier());
-        }
+        mp.setSeries(metadata.getSeriesIdentifier());
         mp.setSeriesTitle(metadata.getSeriesTitle());
         mp.setTitle(metadata.getTitle());
       }

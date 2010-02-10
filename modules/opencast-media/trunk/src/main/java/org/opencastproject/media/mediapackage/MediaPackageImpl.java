@@ -90,7 +90,7 @@ public final class MediaPackageImpl implements MediaPackage {
   String language = null;
 
   @XmlElement(name = "series")
-  Id series = null;
+  String series = null;
 
   @XmlElement(name = "license")
   String license = null;
@@ -1074,7 +1074,7 @@ public final class MediaPackageImpl implements MediaPackage {
     try {
       Unmarshaller unmarshaller = context.createUnmarshaller();
       Source source = new StreamSource(xml);
-      return (MediaPackageImpl) unmarshaller.unmarshal(source, MediaPackageImpl.class).getValue();
+      return unmarshaller.unmarshal(source, MediaPackageImpl.class).getValue();
     } catch (JAXBException e) {
       throw new MediaPackageException(e);
     }
@@ -1130,7 +1130,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#getSeries()
    */
   @Override
-  public Id getSeries() {
+  public String getSeries() {
     return series;
   }
 
@@ -1279,10 +1279,10 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.media.mediapackage.MediaPackage#setSeries(org.opencastproject.media.mediapackage.identifier.Id)
+   * @see org.opencastproject.media.mediapackage.MediaPackage#setSeries(java.lang.String)
    */
   @Override
-  public void setSeries(Id identifier) {
+  public void setSeries(String identifier) {
     this.series = identifier;
   }
 

@@ -23,17 +23,15 @@ import java.net.URL;
  * Interface for a facility that is able to create CNRI handles as described in more detail on the <a
  * href="http://www.handle.net/">handle system page</a>.
  */
-public interface HandleBuilder {
+public interface HandleBuilder extends IdBuilder {
 
   /**
    * Creates a new handle by connecting to the handle server and asking it to hand over a new instance for the default
    * url. Do not forget to update the handle once the final url is known.
    * 
    * @return the new handle
-   * @throws HandleException
-   *           if the handle cannot be created
    */
-  Handle createNew() throws HandleException;
+  Handle createNew();
 
   /**
    * Creates a new handle by connecting to the handle server and asking it to hand over a new instance for the specified
@@ -57,7 +55,7 @@ public interface HandleBuilder {
    * @throws HandleException
    *           if the value is malformatted
    */
-  Handle fromValue(String value) throws HandleException;
+  Handle fromString(String value) throws IllegalArgumentException;
 
   /**
    * Updates the handle to point to the new url.

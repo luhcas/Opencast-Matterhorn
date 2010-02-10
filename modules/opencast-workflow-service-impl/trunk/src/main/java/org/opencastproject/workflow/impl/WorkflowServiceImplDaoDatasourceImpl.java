@@ -21,7 +21,6 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.media.mediapackage.identifier.Id;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -461,9 +460,7 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       } else {
         MediaPackage mediapackage = instance.getSourceMediaPackage();
         episodeId = mediapackage.getIdentifier().toString();
-        String seriesId = null;
-        Id seriesIdentifier = mediapackage.getSeries();
-        if(seriesIdentifier != null) seriesId = seriesIdentifier.toString();
+        String seriesId = mediapackage.getSeries();
         text = getMetadataText(instance.getSourceMediaPackage());
         // Add it
         updateStatment = conn.prepareStatement("insert into oc_workflow values(?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -560,8 +557,7 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     }
     sb.append(sourceMediaPackage.getIdentifier().toString());
     sb.append("|");
-    Id series = sourceMediaPackage.getSeries();
-    if(series != null) sb.append(StringUtils.trimToEmpty(series.toString()));
+    sb.append(StringUtils.trimToEmpty(sourceMediaPackage.getSeries()));
     return sb.toString().toLowerCase();
   }
 
