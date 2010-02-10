@@ -59,7 +59,7 @@
     </catalog>
   </metadata>
   <attachments>
-    <attachment id="cover" type="attachment/cover">
+    <attachment id="cover" type="cover/source">
       <mimetype>image/png</mimetype>
       <url>attachments/cover.png</url>
       <checksum type="md5">6d535f61a1b31a3edeb01be0951a2b4e</checksum>

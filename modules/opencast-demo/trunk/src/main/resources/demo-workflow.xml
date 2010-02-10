@@ -6,6 +6,12 @@
   </description>
   <operations>
     <operation
+      name="inspect"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Inspect the media package">
+    </operation>
+    <operation
       name="distribute_local"
       fail-on-error="true"
       exception-handler-workflow="Default Error Handler"

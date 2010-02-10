@@ -221,7 +221,7 @@ public class DemodataLoader {
         HttpPost post = new HttpPost(uploadedElementUrl);
         post.setEntity(postEntity);
         client.execute(post);
-        element.setURI(uploadedElementUrl);
+        element.setURI(new URI(uploadedElementUrl.toString() + "/" + filename ));
       }
       
       // Start a workflow instance via the rest endpoint

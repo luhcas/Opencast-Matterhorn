@@ -120,7 +120,7 @@
               OSGI-INF/workflow-definition-scanner.xml,
               OSGI-INF/operations/compose.xml,
               OSGI-INF/operations/image.xml,
-              OSGI-INF/operations/distribute.xml,
+              OSGI-INF/operations/distribute-local.xml,
               OSGI-INF/operations/error-handler.xml,
               OSGI-INF/operations/inspect.xml,
               OSGI-INF/operations/publish.xml,

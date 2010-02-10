@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="org.opencastproject.conductor.impl.DistributeWorkflowOperationHandler" immediate="true">
   <implementation class="org.opencastproject.conductor.impl.DistributeWorkflowOperationHandler" />
-  <property name="service.description" value="Distribute Workflow Handler" />
+  <property name="service.description" value="Local Distribution Workflow Handler" />
   <property name="workflow.operation" value="distribute_local" />
   <service>
     <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
   </service>
   <reference cardinality="1..1" interface="org.opencastproject.distribution.api.DistributionService"
-  name="DistributionService" policy="static" bind="setDistributionService"/>
+  name="DistributionService" policy="static" target="(distribution.channel=local)" bind="setDistributionService"/>
 </component>

@@ -203,6 +203,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       track.setReference(originalTrack.getReference());
       track.setSize(originalTrack.getSize());
       track.setURI(originalTrackUrl);
+      for(String tag : originalTrack.getTags()) track.addTag(tag);
       
       // enrich the new track with basic info
       if (track.getDuration() == -1L || override)

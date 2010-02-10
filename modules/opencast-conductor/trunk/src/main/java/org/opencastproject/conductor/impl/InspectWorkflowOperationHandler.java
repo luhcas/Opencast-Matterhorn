@@ -155,7 +155,7 @@ public class InspectWorkflowOperationHandler implements
       dublinCore.toXml(out, true);
       InputStream in = new ByteArrayInputStream(out.toByteArray());
       workspace.delete(mediaPackage.getIdentifier().toString(), dublinCore.getIdentifier());
-      workspace.put(mediaPackage.getIdentifier().toString(), dublinCore.getIdentifier(), in);
+      workspace.put(mediaPackage.getIdentifier().toString(), dublinCore.getIdentifier(), "dublincore.xml", in);
     }
   }
 
