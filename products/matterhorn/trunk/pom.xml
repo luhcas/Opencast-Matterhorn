@@ -38,7 +38,8 @@
         <module>opencast-conductor</module>
         <module>opencast-demo</module>
         <module>opencast-distribution-service-api</module>
-        <module>opencast-distribution-service-local-impl</module>
+        <module>opencast-distribution-service-local</module>
+        <module>opencast-distribution-service-youtube</module>
         <!-- module>opencast-engage-player</module -->
         <module>opencast-engage-ui</module>
         <module>opencast-http</module>
@@ -536,6 +537,12 @@
         <groupId>org.springframework</groupId>
         <artifactId>org.springframework.web</artifactId>
         <version>2.5.6.A</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jdom</groupId>
+        <artifactId>com.springsource.org.jdom</artifactId>
+        <version>1.0.0</version>
       </dependency>
 
       <!-- logging -->
