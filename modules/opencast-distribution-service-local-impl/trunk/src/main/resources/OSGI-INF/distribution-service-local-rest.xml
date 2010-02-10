@@ -8,6 +8,6 @@
   <service>
     <provide interface="org.opencastproject.distribution.local.endpoint.DistributionRestService" />
   </service>
-  <reference name="service-impl" interface="org.opencastproject.distribution.api.DistributionService"
+  <reference name="service-impl" interface="org.opencastproject.distribution.local.LocalDistributionService"
     cardinality="0..1" policy="dynamic" bind="setService" unbind="unsetService" />
 </component>

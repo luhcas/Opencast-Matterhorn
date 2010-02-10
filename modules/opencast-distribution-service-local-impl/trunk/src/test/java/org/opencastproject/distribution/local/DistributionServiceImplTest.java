@@ -34,7 +34,7 @@ import java.net.URI;
 
 public class DistributionServiceImplTest {
   
-  private DistributionServiceImpl service = null;
+  private LocalDistributionService service = null;
   private MediaPackage mp = null;
   private File distributionRoot = null;
 
@@ -46,7 +46,7 @@ public class DistributionServiceImplTest {
     mp = builder.loadFromXml(this.getClass().getResourceAsStream("/mediapackage.xml"));
     
     distributionRoot = new File("./target/static");
-    service = new DistributionServiceImpl(distributionRoot);
+    service = new LocalDistributionService(distributionRoot);
     service.activate(null);
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     service.setWorkspace(workspace);

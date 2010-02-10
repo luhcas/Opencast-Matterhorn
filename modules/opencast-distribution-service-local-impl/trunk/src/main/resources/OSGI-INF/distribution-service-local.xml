@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="org.opencastproject.distribution.local.DistributionService" immediate="true" activate="activate">
-  <implementation class="org.opencastproject.distribution.local.DistributionServiceImpl" />
+  <implementation class="org.opencastproject.distribution.local.LocalDistributionService" />
   <property name="service.description" value="Distribution Service (Local)" />
   <service>
     <provide interface="org.opencastproject.distribution.api.DistributionService" />
+    <provide interface="org.opencastproject.distribution.local.LocalDistributionService" />
     <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
   <reference name="WORKSPACE" interface="org.opencastproject.workspace.api.Workspace"

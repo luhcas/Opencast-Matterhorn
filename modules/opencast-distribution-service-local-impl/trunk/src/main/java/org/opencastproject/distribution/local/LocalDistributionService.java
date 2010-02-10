@@ -37,9 +37,9 @@ import java.util.Dictionary;
 /**
  * Distributes media to the local media delivery directory. TODO: Add metadata to the search service.
  */
-public class DistributionServiceImpl implements DistributionService, ManagedService {
+public class LocalDistributionService implements DistributionService, ManagedService {
 
-  private static final Logger logger = LoggerFactory.getLogger(DistributionServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(LocalDistributionService.class);
   public static final String DEFAULT_DISTRIBUTION_DIR = "opencast" + File.separator + "static";
   protected Workspace workspace = null;
   protected File distributionDirectory = null;
@@ -49,7 +49,7 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
    * Creates a local distribution service publishing to the default directory {@link #DEFAULT_DISTRIBUTION_DIR} located
    * in <code>java.io.tmmpdir</code>.
    */
-  public DistributionServiceImpl() {
+  public LocalDistributionService() {
     this(new File(System.getProperty("java.io.tmpdir") + File.separator + DEFAULT_DISTRIBUTION_DIR));
   }
 
@@ -59,7 +59,7 @@ public class DistributionServiceImpl implements DistributionService, ManagedServ
    * @param distributionRoot
    *          the distribution directory
    */
-  public DistributionServiceImpl(File distributionRoot) {
+  public LocalDistributionService(File distributionRoot) {
     this.distributionDirectory = distributionRoot;
   }
 
