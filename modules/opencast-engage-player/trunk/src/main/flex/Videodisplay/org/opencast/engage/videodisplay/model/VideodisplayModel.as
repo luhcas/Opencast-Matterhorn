@@ -123,5 +123,7 @@ package org.opencast.engage.videodisplay.model
         
         // playerId
         public var playerId:String = '';
+        
+      
     }
 }

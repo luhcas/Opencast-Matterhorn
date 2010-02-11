@@ -70,10 +70,7 @@
              * */
             private function onSeek():void
             {
-                if ( model.player.seekable )
-                {
-                    model.player.seek( seekBar.value );
-                }
+                ExternalInterface.call( ExternalFunction.SETPLAYHEADFULLSCREEN, seekBar.value );
             }
 
             /**
@@ -85,8 +82,8 @@
             private function onVolume():void
             {
                 model.player.volume = volumeSlider.value;
-                ExternalInterface.call( ExternalFunction.SETVOLUME, volumeSlider.value * 100, model.playerId );
-                ExternalInterface.call( ExternalFunction.OPENCASTVOLUME, volumeSlider.value, model.playerId );
+                ExternalInterface.call( ExternalFunction.DOSETVOLUME, volumeSlider.value );
+                ExternalInterface.call( ExternalFunction.SETPLAYERVOLUME, volumeSlider.value );
             }
 
             /**
@@ -193,7 +190,7 @@
             height = "40"
             toolTip = "{ model.currentPlayerState == PlayerState.PAUSING ? 'Play Button' : 'Pause Button' }"
             styleName = "{ model.currentPlayerState == PlayerState.PAUSING ? 'Play' : 'Pause' }"
-            click = "{ model.currentPlayerState == PlayerState.PLAYING ? Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PAUSE)) : Swiz.dispatchEvent( new VideoControlEvent(VideoControlEvent.PLAY)); }"
+            click = "{ ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' ) }"
             />
 
         <mx:Button 

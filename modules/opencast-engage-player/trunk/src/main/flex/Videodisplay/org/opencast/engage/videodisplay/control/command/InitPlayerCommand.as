@@ -270,7 +270,6 @@ package org.opencast.engage.videodisplay.control.command
          * */
         private function onCurrentTimeChange( event:TimeEvent ):void
         {
-
             var newPositionString:String = _time.getTC( event.time );
 
             if ( newPositionString != lastNewPositionString )
@@ -283,14 +282,13 @@ package org.opencast.engage.videodisplay.control.command
             {
                 ExternalInterface.call( ExternalFunction.SETPLAYHEAD, event.time, model.playerId );
             }
-
+            
             if ( model.captionsURL != null )
             {
                 Swiz.dispatchEvent( new DisplayCaptionEvent( event.time ) );
             }
 
             model.currentPlayhead = event.time;
-
         }
 
         /**
