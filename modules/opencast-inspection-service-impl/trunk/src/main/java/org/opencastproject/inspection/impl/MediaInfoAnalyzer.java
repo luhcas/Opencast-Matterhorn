@@ -152,7 +152,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
           metadata.getAudioStreamMetadata().add((AudioStreamMetadata) currentMetadata);
           break;
         default:
-          throw new RuntimeException("Bug: Unknown stream section " + streamSection);
+          log_.warn("Bug: Unknown stream section {}", streamSection);
         }
         return; // LEAVE
       }

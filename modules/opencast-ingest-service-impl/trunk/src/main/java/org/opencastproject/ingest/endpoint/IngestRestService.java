@@ -403,7 +403,7 @@ public class IngestRestService {
 
   @POST
   @Path("addZippedMediaPackage")
-  @Consumes("application/zip")
+//  @Consumes("application/zip")
   public Response addZippedMediaPackage(InputStream mp) {
     logger.debug("addZippedMediaPackage(InputStream) called.");
     try {
@@ -445,7 +445,7 @@ public class IngestRestService {
 
   // CHECKSTYLE:OFF
   private String generateDocs() {
-    DocRestData data = new DocRestData("ingestservice", "Ingest Service", "/ingest", notes);
+    DocRestData data = new DocRestData("ingestservice", "Ingest Service", "/ingest/rest", notes);
 
     // abstract
     data.setAbstract("This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.");

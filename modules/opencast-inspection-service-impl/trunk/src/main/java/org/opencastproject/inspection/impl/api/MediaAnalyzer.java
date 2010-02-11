@@ -22,10 +22,9 @@ import java.util.Map;
 
 /**
  * Interface for tools that analyze media files.
- * Implement this and register it as a service
+ * Implement this and register it as a factory service.
  * 
- * @author Christoph E. Driessen <ced@neopoly.de>
- * @author azeckoski@vt.edu
+ * MediaAnalyzers are not guaranteed to be thread safe.
  */
 public interface MediaAnalyzer {
 

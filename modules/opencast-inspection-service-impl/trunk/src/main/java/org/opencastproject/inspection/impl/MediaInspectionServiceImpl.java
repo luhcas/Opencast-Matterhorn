@@ -83,8 +83,6 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     // FIXME this is doing nothing
   }
 
-  MediaAnalyzer analyzer = null;
-
   public void activate(ComponentContext cc) {
     if (cc != null) {
       if (cc.getBundleContext().getProperty(CONFIG_ANALYZER_MEDIAINFOPATH) != null) {
@@ -94,9 +92,6 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         logger.info("CONFIG "+CONFIG_ANALYZER_MEDIAINFOPATH+": " + path);
       }
     }
-    // FIXME just doing this to get rid of the factory for now -AZ
-    analyzer = new MediaInfoAnalyzer();
-    analyzer.setConfig(analyzerConfig);
   }
 
   public Track inspect(URI uri) {
@@ -293,6 +288,8 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     }
     MediaContainerMetadata metadata = null;
     try {
+      MediaAnalyzer analyzer = new MediaInfoAnalyzer();
+      analyzer.setConfig(analyzerConfig);
       metadata = analyzer.analyze(file);
     } catch (Exception e) {
       throw new IllegalStateException("Unable to create media analyzer", e);
