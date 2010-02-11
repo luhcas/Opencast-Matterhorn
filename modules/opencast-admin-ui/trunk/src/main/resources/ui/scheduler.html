@@ -21,8 +21,10 @@
     <script type="text/javascript" src="js/popuphelp.js"></script>
     <script type="text/javascript" src="js/scheduler.helptexts.json"></script>
     <script type="text/javascript" src="js/scheduler.js"></script>
-    <script type="text/javascript" src="js/scheduler.ui.js"></script>
     <script type="text/javascript" src="js/version.js"></script>
+    <script type="text/javascript">
+      $(document).ready(init);
+    </script>
   </head>
   <body>
     <div id="pageHeader">
@@ -43,14 +45,14 @@
         <div class="fl-container-800" id="missingFields-container" style="display:none;">
           <div class="fl-widget">
             <div class="fl-widget-titlebar warnbox-title">
-              <b>Missing Inputs</b>
+              <b>Missing or invalid input</b>
             </div>
             <div class="fl-widget-content warnbox-content">
               <ul>
                 <li id="missing-title" class="missing-fields-item">
                   <span class="fl-icon inline-icon icon-bullet"></span>Please enter a <a href="javascript:$('#title')[0].focus();">title</a> for the recording.
                 </li>
-                <li id="missing-distibution" class="missing-fields-item">
+                <li id="missing-distribution" class="missing-fields-item">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose at least one <a href="javascript:document.getElementById('distITunesU').focus();">distribution channel</a>.
                 </li>
                 <li id="missing-startdate" class="missing-fields-item">
@@ -62,7 +64,7 @@
                 <li id="missing-attendees" class="missing-fields-item">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose a <a href="javascript:document.getElementById('attendees').focus();">capture agent</a> to record the event.
                 </li>
-                <li id="notice-offline" class="missing-fields-item">
+                <li id="notice-offline" class="missing-fields-item" style="display:none;">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>The <a href="javascript:document.getElementById('attendees').focus();">capture agent</a> you previously selected is currently offline. You may want to select a different capture agent.
                 </li>
               </ul>
@@ -186,7 +188,7 @@
               <form action="">
                 <ul class="fl-controls-right form-list">
                   <li class="required">
-                    <label class="fl-label form-box-label" id="label-stardate">Start Date:</label>
+                    <label class="fl-label form-box-label" id="label-startdate">Start Date:</label>
                     <input type="text" size="10" name="startDate" id="startDate" style="margin-right:5px;">
                     <span class="fl-icon icon-help" id="help_startdate" title="Click for help"></span>
                   </li>
@@ -281,14 +283,14 @@
                   <li class="required">
                     <label class="fl-label" id="label-input">Input(s):</label>
                     <div class="form-radio-group" style="float: left; width: 300px;">
-                      <input type="radio" id="audio" name="inputs" value="1" checked="checked">
+                      <input type="radio" id="audio" name="inputs" value="AUDIO" checked="checked">
                       <label for="audio">Audio only</label>
                       <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
-                      <input type="radio" id="audioVideo" name="inputs" value="3">
+                      <input type="radio" id="audioVideo" name="inputs" value="AUDIO,VIDEO">
                       <label for="audioVideo">Audio, Video</label>
-                      <input type="radio" id="audioScreen" name="inputs" value="5">
+                      <input type="radio" id="audioScreen" name="inputs" value="AUDIO,SCREEN">
                       <label for="audioScreen">Audio, Screen</label>
-                      <input type="radio" id="audioVideoScreen" name="inputs" value="7">
+                      <input type="radio" id="audioVideoScreen" name="inputs" value="AUDIO,VIDEO,SCREEN">
                       <label for="audioVideoScreen">Audio, Video, Screen</label>
                     </div>
                   </li>
@@ -306,7 +308,7 @@
                   <li>
                     <label class="fl-label">&nbsp;</label>
                     <input type="button" value="Submit" id="submitButton" class="mouseover-pointer">
-                    <input type="reset" value="Cancel" id="resetButton"  class="mouseover-pointer">
+                    <input type="button" value="Cancel" id="cancelButton" class="mouseover-pointer">
                     <input type="hidden" id="eventID">
                   </li>
                   <li style="margin-top: 0.6em;">

@@ -15,12 +15,14 @@
  */
 
 // Configurable Page Variables
-var BASE_URL          = '';
-var SCHEDULER_URL     = BASE_URL + '/scheduler/rest';
-var WORKFLOW_URL      = BASE_URL + '/workflow/rest';
-var CAPTURE_ADMIN_URL = BASE_URL + '/capture-admin/rest';
+var SCHEDULER_URL     = '/scheduler/rest';
+var WORKFLOW_URL      = '/workflow/rest';
+var CAPTURE_ADMIN_URL = '/capture-admin/rest';
 
-function initPage() {
+var SchedulerForm     = SchedulerForm || {};
+var SchedulerUI       = SchedulerUI || {};
+
+function init() {
   var d = new Date();
   d.setHours(d.getHours() + 1); //increment an hour.
   $('#startTimeHour').val(d.getHours());
@@ -29,12 +31,13 @@ function initPage() {
   
   $('.required > label').prepend('<span style="color: red;">*</span>');
   
-  $('.folder-head').click(function(){
-                          $(this).children('.fl-icon').toggleClass('icon-arrow-right');
-                          $(this).children('.fl-icon').toggleClass('icon-arrow-down');
-                          $(this).next().toggle('fast');
-                          return false;
-                          });
+  $('.folder-head').click(
+    function() {
+      $(this).children('.fl-icon').toggleClass('icon-arrow-right');
+      $(this).children('.fl-icon').toggleClass('icon-arrow-down');
+      $(this).next().toggle('fast');
+      return false;
+    });
   
   /**
    *  eventFields is an array of EventFields and EventFieldGroups, keyed on <item>'s key attribute described in scheduler
@@ -42,584 +45,594 @@ function initPage() {
    *  @see https://wiki.opencastproject.org/confluence/display/open/Scheduler+Service
    */
   
-  var eventFields = {
-    "id":           new EventField('eventID'),
-    "title":        new EventField('title', true),
-    "creator":      new EventField('creator'),
-    "contributor":  new EventField('contributor'),
-    "series-id":    new EventField('series'),
-    "subject":      new EventField('subject'),
-    "language":     new EventField('language'),
-    "abstract":     new EventField('description'),
-    "channel-id":   new EventFieldGroup(new Array('distMatterhornMM'), true),
-    "license":      new EventField('license'),
-    "startdate":    new EventFieldGroup(new Array('startDate', 'startTimeHour', 'startTimeMin'), true, getStartDate, setStartDate, checkStartDate),
-    "duration":     new EventFieldGroup(new Array('durationHour', 'durationMin'), true, getDuration, setDuration, checkDuration), //returns a date incremented by duration.
-    "resources":    new EventFieldGroup(new Array('audio','audioVideo','audioScreen', 'audioVideoScreen'), true, getInputs, setInputs, checkInputs),
-    "attendees":    new EventField('attendees', true, getAgent, setAgent, checkAgent),
-    "device":       new EventField('attendees')
+  var fields = {
+    'id':           new FormField('eventID'),
+    'title':        new FormField('title', true),
+    'creator':      new FormField('creator'),
+    'contributor':  new FormField('contributor'),
+    'series-id':    new FormField('series'),
+    'subject':      new FormField('subject'),
+    'language':     new FormField('language'),
+    'abstract':     new FormField('description'),
+    'channel-id':   new FormField('distMatterhornMM', true, {label:'label-distribution',errorField:'missing-distribution'}),
+    'license':      new FormField('license'),
+    'startdate':    new FormField(['startDate', 'startTimeHour', 'startTimeMin'], true, {'getValue':getStartDate,'setValue':setStartDate,'checkValue':checkStartDate,'dispValue':getStartDateDisplay,label:'label-startdate',errorField:'missing-startdate'}),
+    'duration':     new FormField(['durationHour', 'durationMin'], true, {'getValue':getDuration,'setValue':setDuration,'checkValue':checkDuration,'dispValue':getDurationDisplay,'label':'label-duration','errorField':'missing-duration'}), //returns a date incremented by duration.
+    'resources':    new FormField(['audio','audioVideo','audioScreen', 'audioVideoScreen'], true, {'getValue':getInputs,'setValue':setInputs,'checkValue':checkInputs}),
+    'attendees':    new FormField('attendees', true, {'getValue':getAgent,'setValue':setAgent,'checkValue':checkAgent}),
+    'device':       new FormField('attendees')
   };
   
   //Form Manager, handles saving, loading, de/serialization, and validation
+  SchedulerForm.setFormFields(fields);
   
-  eventsManager = new EventManager(eventFields);
+  $('.icon-help').click(
+    function(event) {
+      popupHelp.displayHelp($(this), event);
+      return false;
+    });
   
-  $('.icon-help').click(function(event) {
-                          popupHelp.displayHelp($(this), event);
-                          return false;
-                        });
+  $('body').click(
+    function() {
+      if ($('#helpbox').css('display') != 'none') {
+        popupHelp.resetHelp();
+      }
+      return true;
+    });
   
-  $('body').click(function() {
-                    if ($('#helpbox').css('display') != 'none') {
-                      popupHelp.resetHelp();
-                    }
-                    return true;
-                  });
+  $('#submitButton').click(SchedulerUI.submitForm);
+  $('#cancelButton').click(SchedulerUI.cancelForm);
   
-  $('#submitButton').click(schedulerUI.submitForm);
-  $('#resetButton').click(schedulerUI.cancelForm);
+  SchedulerUI.loadKnownAgents();
   
-  schedulerUI.loadKnownAgents();
-  
-  var eventID = schedulerUI.getURLParams('eventID');
-  if(eventID && schedulerUI.getURLParams('edit')){
-    $("#page-title").text("Opencast Matterhorn - Edit Recording");
-    $('#attendees').change(function(){ 
-                           $("#notice-container").hide();
-                           $.get(CAPTURE_ADMIN_URL + '/agents/' + $('#attendees option:selected').val(), checkAgentStatus);
-                           });
+  var eventID = SchedulerUI.getURLParams('eventID');
+  if(eventID && SchedulerUI.getURLParams('edit')){
+    $('#page-title').text('Opencast Matterhorn - Edit Recording');
+    $('#attendees').change(
+      function() {
+        $('#notice-container').hide();
+        $.get(CAPTURE_ADMIN_URL + '/agents/' + $('#attendees option:selected').val(), SchedulerUI.checkAgentStatus);
+      });
   }
 }
 
-$(document).ready(initPage);
+/* ======================== SchedulerUI ======================== */
 
 /**
- *  EventManager Object
- *  Handles form validation, serialization, and form value population
- *  @class
+ *  clearForm resets all the form values to defaults.
  */
-function EventManager(eventFields){
-  //Contains an array of eventFields
-  this.fields         = eventFields || new Array();
-  //Defines the root namespace for scheduler service
-  this.rootNS         = 'http://scheduler.opencastproject.org';
-  //Defines the root element of xml document used for scheudler service
-  this.rootEl         = 'scheduler-event';
-}
+SchedulerUI.cancelForm = function() {
+  document.location = 'recordings.html';
+};
+
+/**
+ *  submitForm sends the scheduler form to the appropriate rest point based on
+ *  URL param "edit". updating an event requires an EventID. calls
+ *  eventSubmitComplete when finished.
+ */
+SchedulerUI.submitForm = function() {
+  var eventXML = null;
+  try{
+    eventXML = SchedulerForm.serialize();
+  }catch(e){
+    console.log(e);
+  }
+  if(eventXML){
+    var method  = SchedulerUI.getURLParams('edit') ? '/updateEvent' : '/addEvent';
+    $.post( SCHEDULER_URL + method, {event: eventXML}, SchedulerUI.eventSubmitComplete );
+  }
+  return true;
+};
+
+/**
+ * if the submission is successful, this function displays the complete screen.
+ */
+SchedulerUI.eventSubmitComplete = function(data) {
+  $('#stage').load('schedulerform_complete.html', SchedulerUI.loadCompleteValues);
+};
+
+/**
+ *  loadCompleteValues fills in the completed fields with form data.
+ *
+ */
+SchedulerUI.loadCompleteValues = function() {
+  for(var field in SchedulerForm.formFields) {
+    if(SchedulerForm.formFields[field].dispValue() != '') {
+      if(field == 'abstract') {
+        var val = SchedulerForm.formFields[field].dispValue();
+        if(val.length > 200) {
+          $('#detail-switch').css('display', 'inline-block');
+        }
+        $('#' + field).empty().append(val);
+        $('#data-' + field).toggle();
+      } else {
+        $('#data-' + field + ' > .data-value').empty().append(SchedulerForm.formFields[field].dispValue());
+        $('#data-' + field).toggle();
+      }
+    }
+  }
+  $('#links').css('display', 'block');
+};
+
+SchedulerUI.showNotificationBox = function() {
+  $('#');
+};
+
+/**
+ *  loadKnownAgents calls the capture-admin service to get a list of known agents.
+ *  Calls handleAgentList to populate the dropdown.
+ */
+SchedulerUI.loadKnownAgents = function() {
+  $.get(CAPTURE_ADMIN_URL + '/agents', SchedulerUI.handleAgentList, 'xml');
+};
+
+/**
+ *  Popluates dropdown with known agents
+ *
+ *  @param {XML Document}
+ */
+SchedulerUI.handleAgentList = function(data) {
+  $.each($('name', data),
+    function(i, agent) {
+      $('#attendees').append($('<option></option>').val($(agent).text()).html($(agent).text())); 
+    });
+  var eventID = SchedulerUI.getURLParams('eventID');
+  if(eventID && SchedulerUI.getURLParams('edit')) {
+    $.get(SCHEDULER_URL + '/getEvent/' + eventID, SchedulerUI.loadEvent, 'xml');
+  }
+};
+
+/**
+ *  Function parses the URL for parameters.
+ *  @param {String} Optional. If a name is passed, that parameter's value is returned.
+ *  @return {String|Boolean|Array} If optional parameter is left empty, an array of all params are returned.
+ */
+SchedulerUI.getURLParams = function(param) {
+  var urlParams = {};
+  if(document.location.search) {
+    params = document.location.search.substr(1).split('&');
+    for(var p in params) {
+      eq = params[p].indexOf('=');
+      if(eq != -1) {
+        urlParams[params[p].substr(0, eq)] = params[p].substr(eq+1);
+      } else {
+        urlParams[params[p]] = true;
+      }
+    }
+  }
+  
+  if(param && urlParams[param]) {
+    return urlParams[param];
+  } else if(urlParams.length > 0) {
+    return urlParams;
+  }
+  return null;
+};
+
+/**
+ *  loadEvent files out the event form fields from an exist event.
+ *  @param {XML Document} Returned form /scheduler/rest/getEvent.
+ */
+SchedulerUI.loadEvent = function(doc) {
+  SchedulerForm.populate(doc);
+};
+
+SchedulerUI.toggleDetails = function(elSwitch, el) {
+  if(el.hasClass('detail-hide')) {
+    el.removeClass('detail-hide');
+    el.addClass('detail-show');
+    elSwitch.style.verticalAlign = 'bottom';
+    $(elSwitch).text('[less]');
+  } else {
+    el.removeClass('detail-show');
+    el.addClass('detail-hide');
+    elSwitch.style.verticalAlign = 'top';
+    $(elSwitch).text('[more]');
+  }
+};
+
+SchedulerUI.checkAgentStatus = function(doc) {
+  var state = $('state', doc).text();
+  if(state == 'unknown' || state == 'offline') {
+    $('#notice-container').show();
+  }
+};
+
+/* ======================== SchedulerForm ======================== */
+
+SchedulerForm.formFields    = {};
+SchedulerForm.rootEl        = 'scheduler-event';
+SchedulerForm.rootNS        = 'http://scheduler.opencastproject.org';
+
+/**
+ *  Specify the set of form fields that make up our scheduler form.
+ *  @param {Object} key/value set of FormField objects
+ */
+SchedulerForm.setFormFields = function(fields) {
+  if(fields && typeof fields == 'object') {
+    this.formFields = fields;
+  } else {
+    throw 'Invalid FormFields';
+  }
+};
+
+/** 
+ *  Serialize the form into an XML file for consumption by the
+ *  scheduler service: addEvent
+ *  @return {document object}
+ */
+SchedulerForm.serialize = function() {
+  if(this.validate()) {
+    var doc = this.createDoc();
+    var metadata = doc.createElement('metadata');
+    for(var e in this.formFields) {
+      if(e == 'startdate' || e == 'duration') {
+        el = doc.createElement(e);
+        el.appendChild(doc.createTextNode(this.formFields[e].getValue()));
+        doc.documentElement.appendChild(el);
+      } else if (e == 'resources') {
+        el = doc.createElement('resource');
+        el.appendChild(doc.createTextNode(this.formFields[e].getValue()));
+        p = doc.createElement('resources');
+        p.appendChild(el);
+        doc.documentElement.appendChild(p);
+      } else if (e == 'attendees'){
+        el = doc.createElement('attendee');
+        el.appendChild(doc.createTextNode(this.formFields[e].getValue()));
+        p = doc.createElement('attendees');
+        p.appendChild(el);
+        doc.documentElement.appendChild(p);
+      } else {
+        var val = doc.createElement('value');
+        val.appendChild(doc.createTextNode(this.formFields[e].getValue()));
+        var item = doc.createElement('item');
+        item.setAttribute('key', e);
+        item.appendChild(val);
+        metadata.appendChild(item);
+      }
+    }
+    doc.documentElement.appendChild(metadata);
+    if(typeof XMLSerializer != 'undefined') {
+      return (new XMLSerializer()).serializeToString(doc);
+    } else if(doc.xml) {
+      return doc.xml;
+    } else { 
+      throw 'Unable to serialize SchedulerEvent.';
+    }
+  }
+};
+
+/**
+ *  Validate the form values.
+ *  @return {boolean} True if form is valid.
+ */
+SchedulerForm.validate = function() {
+  var error = false;
+  $('#missingFields-container').hide();
+  for(var el in this.formFields) {
+    var e = this.formFields[el];
+    if(e.required){
+      if(!e.checkValue()){
+        error = true;
+        $('#' + e.errorField).show();
+        $('#' + e.label).addClass('error');
+      } else {
+        $('#' + e.errorField).hide();
+        $('#' + e.label).removeClass('error');
+      }
+    }
+  }
+  if(error){
+    $('#missingFields-container').show('fast');
+  }
+  return !error;
+};
+
+/**
+ *  Take an XML document and from that populate the form fields
+ *  @param {document object} XML doc
+ */
+SchedulerForm.populate = function(doc) {
+  for(var e in this.formFields){
+    if(e == 'startdate' || e == 'duration' || e == 'resources'){
+      selector = e;
+    } else if (e == 'attendees') {
+      selector = 'attendee';
+    } else {
+      selector = 'item[key="' + e + '"] > value';
+    }
+    var value = {};
+    value[e] = $(selector, doc).text();
+    this.formFields[e].setValue(value);
+  }
+};
 
 /**
  *  Create new rest document
  *  @return {DOM Object} Empty DOM document
  */
-function createDoc(){
+SchedulerForm.createDoc = function() {
   var doc = null;
   //Create a DOM Document, methods vary between browsers, e.g. IE and Firefox
-  if(document.implementation && document.implementation.createDocument){ //Firefox, Opera, Safari, Chrome, etc.
+  if(document.implementation && document.implementation.createDocument) { //Firefox, Opera, Safari, Chrome, etc.
     doc = document.implementation.createDocument(this.rootNS, this.rootEl, null);
-  }else{ // IE
+  } else { // IE
     doc = new ActiveXObject('MSXML2.DOMDocument');
     doc.loadXML('<' + this.rootEl + ' xmlns="' + this.rootNS + '"></' + this.rootEl + '>');
   }
   return doc;
-}
-//Set EventManager createDoc function
-EventManager.prototype.createDoc = createDoc;
-
-/** 
- *  Validate the event form and display the notifcations box
- *  @returns {boolean} True if the form value's are valid, otherwise false;
- */
-function checkForm() {
-  //Todo: create some functions in schedulerUI to manipulate the notification box.
-  var missingFields = new Array();
-  for(var i in this.fields){
-    //if the field is required, and does not contain valid data notify user
-    if(this.fields[i].required && !this.fields[i].checkValue()){
-      missingFields.push(i);
-    }
-  }
-  if(missingFields.length > 0){
-    $('#missingFields-container li').hide();
-    
-    $('#missingFields-container').show('fast');
-    for(var f in missingFields){
-      $('#missing-' + missingFields[f]).show();
-      $('#label-' + missingFields[f]).css('color', 'red');
-    }
-    return false;
-  }else{
-    $('#missingFields-container').hide('fast');
-    return true;
-  }
-}
-//Set EventManager checkForm function
-EventManager.prototype.checkForm = checkForm;
-
-/** 
- *  Serialize the form into an XML file for consumption by the
- *  scheduler service: addEvent
- */
-function serialize() {
-  //Todo: EventField/Group should know how to render themselves. this is bad, refactor
-  if(this.checkForm()){
-    var doc = this.createDoc();
-    var metadata = doc.createElement('metadata');
-    for(var i in this.fields){
-      if(this.fields[i].getValue()){
-        el = doc.createElement(i);
-        if(i == "startdate"){
-          el.appendChild(doc.createTextNode(this.fields[i].getValue().getTime()));
-          doc.documentElement.appendChild(el);
-        }else if(i == "duration"){
-          el.appendChild(doc.createTextNode(this.fields[i].getValue()));
-          doc.documentElement.appendChild(el);
-        }else if(i == "attendees"){
-          var attendee = doc.createElement("attendee");
-          attendee.appendChild(doc.createTextNode(this.fields[i].getValue()));
-          el.appendChild(attendee);
-          doc.documentElement.appendChild(el);
-        }else if(i == "id"){
-          el.appendChild(doc.createTextNode(this.fields[i].getValue()));
-          doc.documentElement.appendChild(el);
-        }else if(i == "resources"){
-          var resource = doc.createElement("resource");
-          resource.appendChild(doc.createTextNode(this.fields[i].getValue()));
-          el.appendChild(resource);
-          doc.documentElement.appendChild(el);
-        }else{
-          var item = doc.createElement('item');
-          var val = doc.createElement('value');
-          val.appendChild(doc.createTextNode(this.fields[i].getValue()));
-          item.setAttribute('key', i);
-          item.appendChild(val);
-          metadata.appendChild(item);
-        }
-      }
-    }
-    doc.documentElement.appendChild(metadata);
-    if(typeof XMLSerializer != 'undefined'){
-      return (new XMLSerializer()).serializeToString(doc);
-    }else if(doc.xml){ return doc.xml; }
-    else{ throw "Unable to serialize SchedulerEvent."; }
-  }else{
-    //error handle
-  }
-}
-//Set EventManager serialize function
-EventManager.prototype.serialize = serialize;
+};
 
 /**
- *  Populate form with values from an existing event.
- *  @param {DOM Object}
- *  
- *  This approach needs more work. Probably need custom deserializing and
- *  serilizing functions for each EventField/Group.
+ *  FormField class contains the data and methods for a single or group of form elements.
+ *  The first parameter is either a string (single element) or an array of strings (multiple elements)
+ *  that are the form element id. The second parameter indicates if the formfield is required
+ *  for form validation. The last field is a key/value set of options.
+ *  Options -
+ *    getValue    : function which overrides default
+ *    setValue    : function which overrides default
+ *    dispValue   : function which overrides default
+ *    checkValue  : function which overrides default
+ *    label       : element id for a field label
+ *    errorField  : element id for an error field
+ *
+ *  @param {String | Object} string or array of strings of element id.
+ *  @param {Boolean} required
+ *  @param {Object} key/value set of options, override functions, label and error field ids.
+ *  @constructor
  */
-function populateForm(document){
-  for(var e in this.fields){
-    if(e != "channel-id"){
-      switch(e){
-        case 'attendees':
-          this.fields[e].setValue($("attendee", document).text());
-          break;
-        case 'startdate':
-          this.fields[e].setValue(new Date(parseInt($("startdate", document).text())));
-          break;
-        case 'duration': //we have to know the start date before we can use the enddate to sort out duration. This is dumb, talk to rudiger about switching to just use duration.
-          this.fields[e].setValue(parseInt($("duration", document).text()));
-          break;
-        case 'id':
-          this.fields[e].setValue($("id", document).text());
-          break;
-        case 'resources':
-          this.fields[e].setValue($("resource", document).text());
-          break;
-        default:
-          this.fields[e].setValue($("item[key='" + e + "'] > value", document).text());
+
+function FormField(elm, req, opts) {
+  if(!elm){
+    throw 'FormField must be initialized with at least one element';
+  }
+  if(typeof elm == 'string') { //If a single field is specified, wrap in an array.
+    elm = [elm];
+  }
+  this.fields = [];
+  for(var k in elm) {
+    var e = $('#' + elm[k]);
+    if(e[0]){
+      if(k == 0){
+        var id = e[0].id;
       }
+      this.fields[elm[k]] = e;
+    } else {
+      throw 'Form element ' + k + ' not found.';
     }
   }
-  $('#attendees').change();
-}
-//Set EventManager populate form
-EventManager.prototype.populateForm = populateForm;
-
-/**
- *  EventField Object
- *  Encapsulates form fields, provides validation, get/set value,
- *  and indicating if the field is required or optional.
- *  @class
- */
-function EventField(id, required, getValue, setValue, checkValue){
-  if(id != "" && $('#' + id)[0]){
-    this.id = id;
-    this.formElement = $('#' + id);
-  }else{
-    throw "Unable to find field " + id;
+  this.required = req || false;
+  if(typeof opts == 'object') {
+    for(var f in opts) {
+      this[f] = opts[f];
+    }
   }
-  this.required   = required || false;
   this.value      = null;
-
-  // If getValue is specified, override the default getValue.
-  if($.isFunction(getValue)){
-    this.getValue = getValue;
-  }
-  
-  // If setValue is specified, override the default setValue.
-  if($.isFunction(setValue)){
-    this.setValue = setValue;
-  }
-  
-  // If checkValue is specified, override the default checkValue.
-  if($.isFunction(checkValue)){
-    this.checkValue = checkValue;
-  }
+  this.label      = this.label      || 'label-' + id;
+  this.errorField = this.errorField || 'missing-' + id;
 }
 
 /**
- *  get the value of an event form field
- *  @return {string} 
+ *  Default FormField getValue function.
+ *  @returns {String} Concatinated value of all elements
+ *  @member FormField
  */
-function getEventFieldValue() {
-  if(this.formElement){
-    this.value = this.formElement.val()
+function getFormFieldValue() {
+  var values = [];
+  for(var el in this.fields) {
+    var e = this.fields[el];
+    if(e) {
+      values.push(e.val());
+    }
+    this.value = values.join(',');
   }
   return this.value;
 }
-//Set EventField getValue function
-EventField.prototype.getValue = getEventFieldValue;
+FormField.prototype.getValue = getFormFieldValue;
 
 /**
- *  set the value of an event form field
- *  @param {string}
+ *  Default FormField dispValue function.
+ *  @returns {String} Concatinated value of all elements
+ *  @member FormField
  */
-function setEventFieldValue(val) {
-  this.value = val;
-  this.formElement.val(val);
+function dispFormFieldValue() {
+  return this.getValue();
 }
-//Set EventField setValue function
-EventField.prototype.setValue = setEventFieldValue;
+FormField.prototype.dispValue = dispFormFieldValue;
 
 /**
- *  validate the value of an event form field
- *  @return {boolean} True if the field is valid, otherwise false.
+ *  Default FormField setValue function.
+ *  @param {Object} key/value set of values to be set on fields.
+ *  @member FormField
  */
-function checkEventFieldValue() {
-  if(this.getValue()){
+function setFormFieldValue(values) {
+  for(var e in values) {
+    if(values[e] && this.fields[e]) {
+      switch(this.fields[e][0].type) {
+        case 'checkbox':
+        case 'radio':
+          this.fields[e][0].checked = true;
+          break;
+        default:
+          this.fields[e].val(values[e]);
+      }
+    }
+  }
+}
+FormField.prototype.setValue = setFormFieldValue;
+
+/**
+ *  Default FormField checkValue function.
+ *  @returns {Boolean} True if field is requried and filled in.
+ *  @member FormField
+ */
+function checkFormFieldValue() {
+  if(this.required) {
+    var oneIsValid = false;
+    for(var e in this.fields) {
+      if(this.fields[e][0].type == 'checkbox' || this.fields[e][0].type == 'radio') {
+        if(this.fields[e][0].checked) {
+          oneIsValid = true;
+          break;
+        }
+      } else {
+        if(this.fields[e].val()) {
+          oneIsValid = true;
+          break;
+        }
+      }
+    }
+    if(oneIsValid) {
+      return true;
+    }
+  } else {
     return true;
   }
   return false;
 }
-//Set EventField checkValue function
-EventField.prototype.checkValue = checkEventFieldValue;
+FormField.prototype.checkValue = checkFormFieldValue;
 
-
-/**
- *  Overrides the default getValue function of EventField for checkboxes
- *  @return {string} Value of a checkbox that is checked.
- */
-function getCheckboxValue() {
-  if(this.formElement[0].checked){
-    return this.formElement.val();
-  }
-  return "";
-}
+// ===== Custom get/set/check functions for FormFields =====
 
 /**
- * Overrides getValue for EventField for agent field
+ * Overrides getValue for FormFields for agent field
  * @return {String} agent id
  */
 function getAgent() {
-  if(this.formElement){
-    this.value = this.formElement.val()
+  if(this.fields.attendees) {
+    this.value = this.fields.attendees.val();
   }
   return this.value;
 }
 
 /**
- * Overrides setValue for EventField for agent field
+ * Overrides setValue for FormFields for agent field
  * @param {String} agent id
  */
-function setAgent(agentId) {
-  var opts = this.formElement.children();
-  if(opts.length > 0){
+function setAgent(value) {
+  var opts = this.fields.attendees.children();
+  if(opts.length > 0) {
     var found = false;
-    for(var i = 0; i < opts.length; i++){
-      if(opts[i].value == agentId){
+    for(var i = 0; i < opts.length; i++) {
+      if(opts[i].value == value.attendees) {
         found = true;
+        opts[i].selected = true;
         break;
       }
     }
     if(!found){ //Couldn't find the previsouly selected agent, add to list and notifiy user.
-      this.formElement.append($("<option>" + agentId + "</option>").val(agentId));
+      this.fields.attendees.append($('<option>' + agentId + '</option>').val(agentId));
       $('#attendees').change();
     }
-    this.formElement.val(agentId);
+    this.fields.attendees.val(agentId);
   }
 }
 
 /**
- * Overrides getValue for EventField for agent field
+ * Overrides getValue for FormFields for agent field
  * @return {Boolean} true if an agent is selected
  */
 function checkAgent() {
-  if(this.getValue()){
+  if(this.getValue()) {
     return true;
   }
   return false;
 }
 
 /**
- *  EventFieldGroup Object
- *  Container for a group of EventFields that need to be evaluated
- *  together.
- *  @class
- */
-function EventFieldGroup(idArray, required, getValue, setValue, checkValue) {
-  this.groupElements = new Array();
-  if($.isArray(idArray)){
-    for(var i in idArray){
-      if(!$('#' + idArray)[0]){
-        throw "Unable to find field " + idArray[i];
-      }
-      this.groupElements[idArray[i]] = $('#' + idArray[i]);
-    }
-  }else{
-    throw "EventFieldGroup idArray must not be empty.";
-  }
-  
-  // Is this field required for form validation?
-  this.required = required || false;
-  
-  // If getValue is specified, override the default getValue.
-  if($.isFunction(getValue)){
-    this.getValue = getValue;
-  }
-  
-  // If setValue is specified, override the default setValue.
-  if($.isFunction(setValue)){
-    this.setValue = setValue;
-  }
-  
-  // If checkValue is specified, override the default checkValue.
-  if($.isFunction(checkValue)){
-    this.checkValue = checkValue;
-  }
-}
-
-/**
- *  get an string of each field's value.
- *  @return {string} a string of values, seperated by ','
- */
-function getEventFieldGroupValue() {
-  
-  values = new Array();
-  for(var el in this.groupElements){
-    if(this.groupElements[el][0].checked){
-      values.push(this.groupElements[el].val());
-    }
-  }
-  if(values.length > 0){
-    this.value = values.toString();
-  }
-  return this.value;
-}
-//Set EventFieldGroup getValue function
-EventFieldGroup.prototype.getValue = getEventFieldGroupValue;
-
-/**
- *  set the values of each field in the group
- *  @param {Object} Object of key/value pairs, where the key is the id of an EventFieldGroup groupElement
- */
-function setEventFieldGroupValue(values) {
-  for(var el in values){
-    if(this.groupElements[el]){
-      this.groupElements[el][0].checked = values[el];
-    }
-  }
-  
-}//Set EventFieldGroup setValue function
-EventFieldGroup.prototype.setValue = setEventFieldGroupValue;
-
-/**
- *  validate an EventFieldGroup
- *  @return {boolean} True if EventFieldGroup valid, otherwise false
- */
-function checkEventFieldGroupValue() {
-  oneIsChecked = false;
-  for(var el in this.groupElements){
-    oneIsChecked = this.groupElements[el][0].checked || oneIsChecked;
-  }
-  if(this.required && oneIsChecked){
-    return true;
-  }
-  return false;
-}
-//Set EventFieldGroup checkValue function
-EventFieldGroup.prototype.checkValue = checkEventFieldGroupValue;
-
-// ===== Custom get/set/check functions for EventFieldGroup =====
-
-/**
- *  Overrides getValue of EventFieldGroup for duration fields
+ *  Overrides getValue of FormFields for duration fields
  *  @return {Date Object} Date object, start date, incremented by duration.
  */
 function getDuration() {
   if(this.checkValue()){
-    duration = this.groupElements['durationHour'].val() * 3600; // seconds per hour
-    duration += this.groupElements['durationMin'].val() * 60; // seconds per min
+    duration = this.fields.durationHour.val() * 3600; // seconds per hour
+    duration += this.fields.durationMin.val() * 60; // seconds per min
     this.value = (duration * 1000);
   }
   return this.value;
 }
 
 /**
- *  Overrides setValue for EventFieldGroup for duration fields
+ *  Overrides dispValue of FormFields for duration fields
+ *  @return {string} hours and minutes of duration
+ */
+function getDurationDisplay() {
+  var dur = this.getValue() / 1000;
+  var hours = Math.floor(dur / 3600);
+  var min   = Math.floor( ( dur /60 ) % 60 );
+  return hours + ' hours, ' + min + ' minutes';
+}
+
+/**
+ *  Overrides setValue for FormFields for duration fields
  *  @param {integer} Duration in milliseconds
  */
-function setDuration(val) {
-  if(this.groupElements['durationHour'] && this.groupElements['durationMin']){
+function setDuration(value) {
+  var val = parseInt(value.duration);
+  if(val == "NaN") {
+    throw "Could not parse duration.";
+  }
+  if(this.fields.durationHour && this.fields.durationMin){
     val = val/1000; //milliseconds -> seconds
     var hour  = Math.floor(val/3600);
     var min   = Math.floor((val/60) % 60);
-    this.groupElements['durationHour'].val(hour);
-    this.groupElements['durationMin'].val(min);
+    this.fields.durationHour.val(hour);
+    this.fields.durationMin.val(min);
   }
 }
 
 /**
- *  Overrides checkValue for EventFieldGroup for duration fields
+ *  Overrides checkValue for FormFields for duration fields
  *  @return {boolean} True if the duration is valid, otherwise false.
  */
 function checkDuration(){
-  if(this.groupElements['durationHour'] && this.groupElements['durationMin'] &&
-     (this.groupElements['durationHour'].val() !== "0" || this.groupElements['durationMin'].val() !== "0")){
+  if(this.fields.durationHour && this.fields.durationMin &&
+     (this.fields.durationHour.val() !== '0' || this.fields.durationMin.val() !== '0')){
     return true;
   }
   return false;
 }
 
 /**
- *  Overrides getValue for EventFieldGroup for startDate fields
- *  @return {Date Object}
- */
-function getStartDate(){
-  var date = 0;
-  if(this.checkValue()){
-    date = this.groupElements['startDate'].datepicker('getDate').getTime() / 1000; // Get date in milliseconds, convert to seconds.
-    date += this.groupElements['startTimeHour'].val() * 3600; // convert hour to seconds, add to date.
-    date += this.groupElements['startTimeMin'].val() * 60; //convert minutes to seconds, add to date.
-    date = date * 1000; //back to milliseconds
-    this.value = new Date(date);
-  }
-  
-  return this.value; //TODO: set seconds/milliseconds to 0.
-}
-
-/**
- *  Overrides setValue for EventFieldGroup for startDate fields
- *  @param {Date Object}
- */
-function setStartDate(date){
-  if(this.groupElements['startDate'] && this.groupElements['startTimeHour'] && this.groupElements['startTimeMin']){
-    var hour = date.getHours();
-    
-    this.groupElements['startTimeHour'].val(hour);
-    this.groupElements['startTimeMin'].val(date.getMinutes());
-    
-    //datepicker modifies the date object removing the time.
-    this.groupElements['startDate'].datepicker('setDate', date);
-  }
-}
-
-/**
- *  Overrides checkValue for EventFieldGroup for startDate fields
- *  @return {boolean} True if the startDate is valid, otherwise false.
- */
-function checkStartDate(){
-  var date = this.groupElements['startDate'].datepicker('getDate');
-  var now = new Date();
-  if( this.groupElements['startDate'] &&
-      date &&
-      this.groupElements['startTimeHour'] &&
-      this.groupElements['startTimeMin']){
-    var startdatetime = new Date(date.getFullYear(), 
-                             date.getMonth(), 
-                             date.getDate(), 
-                             this.groupElements['startTimeHour'].val(),
-                             this.groupElements['startTimeMin'].val());
-    if(startdatetime.getTime() >= now.getTime()){
-      return true;
-    }
-    return false;
-  }
-}
-
-/**
- *  Overrides getValue for EventFieldGroup for input field
+ *  Overrides getValue for FormFields for input field
  *  @return {string} Comma seperated string of inputs
  */
 function getInputs(){
   var selected = false;
-  for(var el in this.groupElements){
-    if($("#" + el)[0] && $("#" + el)[0].checked){
-      selected = $("#" + el);
+  for(var el in this.fields){
+    var e = this.fields[el];
+    if(e[0] && e[0].checked){
+      selected = e;
       break;
     }
   }
   if(selected){
-    switch(selected.val()){
-      case "1":
-        this.value = "AUDIO";
-        break;
-      case "3":
-        this.value = "AUDIO,VIDEO";
-        break;
-      case "5":
-        this.value = "AUDIO,SCREEN";
-        break;
-      case "7":
-        this.value = "AUDIO,VIDEO,SCREEN";
-        break;
-      default:
-        throw "Unable to get selected input.";
-    }
+    this.value = selected.val();
   }
   return this.value;
 }
 
 /**
- *  Overrides setValue for EventFieldGroup for input field
+ *  Overrides setValue for FormFields for input field
  *  @param {string} Comma seperated string of inputs
  */
-function setInputs(inputs){
-  //TODO: modify to be id independent.
-  switch(inputs){
-    case "AUDIO":
-      $("#audio")[0].checked = true;
-      break;
-    case "AUDIO,VIDEO":
-      $("#audioVideo")[0].checked = true;
-      break;
-    case "AUDIO,SCREEN":
-      $("#audioScreen")[0].checked = true;
-      break;
-    case "AUDIO,VIDEO,SCREEN":
-      $("#audioVideoScreen")[0].checked = true;
-      break;
-    default:
-      throw "Unable to set selected input.";
+function setInputs(value){
+  for(var el in this.fields){
+    var e = this.fields[el];
+    if(e[0] && e.val() == value.resources){
+      e[0].checked = true;
+    }
   }
 }
 
 /**
- *  Overrides checkValue for EventFieldGroup for input field
+ *  Overrides checkValue for FormFields for input field
  *  @return {boolean} True if one of the radios are checked
  */
 function checkInputs(){
   var checked = false;
-  for(var el in this.groupElements){
-    if($("#" + el)[0].checked){
+  for(var el in this.fields){
+    if(this.fields[el][0].checked){
       checked = true;
       break;
     }
@@ -627,9 +640,71 @@ function checkInputs(){
   return checked;
 }
 
-function checkAgentStatus(doc){
-  var state = $("state", doc).text();
-  if(state == "unknown" || state == "offline"){
-    $("#notice-container").show();
+/**
+ *  Overrides getValue for FormFields for startDate fields
+ *  @return {integer} milliseconds from epoch
+ */
+function getStartDate(){
+  var date = 0;
+  if(this.checkValue()){
+    date = this.fields.startDate.datepicker('getDate').getTime() / 1000; // Get date in milliseconds, convert to seconds.
+    date += this.fields.startTimeHour.val() * 3600; // convert hour to seconds, add to date.
+    date += this.fields.startTimeMin.val() * 60; //convert minutes to seconds, add to date.
+    date = date * 1000; //back to milliseconds
+    this.value = (new Date(date)).getTime();
+  }
+  return this.value;
+}
+
+/**
+ *  Overrides dispValue for FormFields for startDate fields
+ *  @return {string} localized date/time string.
+ */
+function getStartDateDisplay(){
+  return (new Date(this.getValue())).toLocaleString();
+}
+
+/**
+ *  Overrides setValue for FormFields for startDate fields
+ *  @param {Date Object}
+ */
+function setStartDate(value){
+  var date = parseInt(value.startdate);
+  if(date != 'NaN') {
+    date = new Date(date);
+  } else {
+    throw 'Could not parse date.';
+  }
+  if(this.fields.startDate && this.fields.startTimeHour && this.fields.startTimeMin){
+    var hour = date.getHours();
+    
+    this.fields.startTimeHour.val(hour);
+    this.fields.startTimeMin.val(date.getMinutes());
+    
+    //datepicker modifies the date object removing the time.
+    this.fields.startDate.datepicker('setDate', date);
+  }
+}
+
+/**
+ *  Overrides checkValue for FormFields for startDate fields
+ *  @return {boolean} True if the startDate is valid, otherwise false.
+ */
+function checkStartDate(){
+  var date = this.fields.startDate.datepicker('getDate');
+  var now = new Date();
+  if(this.fields.startDate &&
+    date &&
+    this.fields.startTimeHour &&
+    this.fields.startTimeMin) {
+      var startdatetime = new Date(date.getFullYear(), 
+                                 date.getMonth(), 
+                                 date.getDate(), 
+                                 this.fields.startTimeHour.val(),
+                                 this.fields.startTimeMin.val());
+    if(startdatetime.getTime() >= now.getTime()) {
+      return true;
+    }
+    return false;
   }
 }

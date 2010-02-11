@@ -213,6 +213,10 @@ a:hover {
   list-style-type: none;
 }
 
+.error {
+  color: red;
+}
+
 #category-selector-container {float:left;width:700px;margin-top:10px;margin-bottom:10px;}
 .category-selector {margin:0px;margin-bottom:10px;}
 .category-selector li {float:left;list-style:none;}
