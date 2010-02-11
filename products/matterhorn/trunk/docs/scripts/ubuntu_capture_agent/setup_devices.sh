@@ -31,7 +31,7 @@ let devAryLen=${#devices[@]}-1
 for dev in $(seq 0 1 $devAryLen)
  do
 	name="$(echo ${devices[$dev]} | grep -o '.*|' | sed s/\|//g)"
-	cleanName="$(echo $name | sed s/\ //g)"
+	cleanName="$(echo $name | sed s/\ //g | sed s/\(/_/g | sed s/\)/_/g)"
 	device="$(echo ${devices[$dev]} | grep -o '|.*' | sed s/\|//g)"
   
   # setup device info using udevadm info
