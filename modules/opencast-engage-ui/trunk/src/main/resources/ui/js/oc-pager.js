@@ -62,7 +62,12 @@ Opencast.pager = ( function() {
 
     // Pipe before page numbers
     li = document.createElement('li');
-    li.innerHTML = "<span>" + "| </span>&nbsp;<span><b>Page:</b>" + "</span>";
+    li.innerHTML = "<span>" + "|" + "</span>";
+    $('#navigation').append(li);
+    
+    // "Page:
+    li = document.createElement('li');
+    li.innerHTML = "<span>" + "<b>Page:</b>" + "</span>";
     $('#navigation').append(li);
     
     // take care for the page buttons
