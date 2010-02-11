@@ -1,12 +1,26 @@
 #!/bin/sh
+# To set variables before calling this script just include them directly on the command line.
+# e.g. to override the mirror to use, you could do something like:
+#    UBUNTU_MIRROR=http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ ./buildvm.sh
 
 HOME=`pwd`
-UBUNTU_MIRROR=http://de.archive.ubuntu.com/ubuntu/
+
+#check for existance of mirror URL
+if [ "$UBUNTU_MIRROR" = "" ];
+  then
+	UBUNTU_MIRROR=http://ubuntu.mirrors.tds.net/ubuntu/
+fi
+echo "Using ubuntu mirror at: $UBUNTU_MIRROR"
+
 export M2=`pwd`/m2/
+
+#todo: overwrite parameters with passed in values
+#for each param in $# evaluate $i as an item
 
 #install extras that we need if running this script
 sudo apt-get -y install ubuntu-vm-builder subversion zip git-core maven2
 
+#check to see if the vmware disk mounting tool is there
 if which vmware-mount >/dev/null; then
 	echo "VMware Mounter is installed."
 else
