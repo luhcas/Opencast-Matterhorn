@@ -210,8 +210,9 @@ public class CatalogBuilderPlugin implements MediaPackageElementBuilderPlugin {
    */
   @Override
   public MediaPackageElement newElement(Type type, MediaPackageElementFlavor flavor) throws IOException {
-    // TODO Auto-generated method stub
-    return CatalogImpl.newInstance();
+    Catalog cat = CatalogImpl.newInstance();
+    cat.setFlavor(flavor);
+    return cat;
   }
 
   /**

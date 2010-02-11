@@ -17,6 +17,7 @@
 package org.opencastproject.media.mediapackage;
 
 import org.opencastproject.media.mediapackage.elementbuilder.AttachmentBuilderPlugin;
+import org.opencastproject.media.mediapackage.elementbuilder.CatalogBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.CoverBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.IndefiniteTrackBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin;
@@ -73,6 +74,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
       // Manually add the plugins
       log_.warn("Unable to find element builder plugins via classloader.  Manually loading the default set.");
       plugins.add(AttachmentBuilderPlugin.class);
+      plugins.add(CatalogBuilderPlugin.class);
       plugins.add(CoverBuilderPlugin.class);
       plugins.add(IndefiniteTrackBuilderPlugin.class);
       plugins.add(PresentationTrackBuilderPlugin.class);
