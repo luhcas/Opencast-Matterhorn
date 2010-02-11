@@ -126,7 +126,7 @@ EOF
 
 echo "Installing third party packages from Ubuntu repository..."
 sudo apt-get update
-sudo apt-get -y --force-yes install v4l-conf ivtv-utils maven2 sun-java6-jdk subversion wget curl openssh-server
+sudo apt-get -y --force-yes install v4l-conf ivtv-utils maven2 sun-java6-jdk subversion wget curl openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg
 
 export JAVA_HOME=/usr/lib/jvm/java-6-sun-1.6.0.15
 export FELIX_FILENAME=felix-framework-2.0.1.tar.gz
