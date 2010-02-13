@@ -107,7 +107,7 @@
               <outputDirectory>${basedir}/target/classes/ui/</outputDirectory>
               <resources>
                 <resource>
-                  <directory>../../static-resources/</directory>
+                  <directory>../../shared-resources/</directory>
                   <includes>
                     <include> **/* </include>
                   </includes>                  
