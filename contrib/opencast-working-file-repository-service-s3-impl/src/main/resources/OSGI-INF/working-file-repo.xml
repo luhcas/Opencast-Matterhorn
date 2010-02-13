@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.workingfilerepository.api.WorkingFileS3Repository" immediate="true" activate="activate">
-  <implementation class="org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryS3Impl" />
-  <property name="service.description" value="Working File Repository on Amazon S3 Service" />
-  <service>
-    <provide interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository" />
-  </service>
-</component>

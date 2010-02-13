@@ -1,9 +1,0 @@
-Add this to the end of your externals file:
-http://source.opencastproject.org/svn/contrib/captions/trunk/opencast-captions-service-impl     opencast-captions-service-impl
-
-Update the modules in the pom.xml as indicated at https://wiki.opencastproject.org/confluence/display/open/Create+a+New+Service:
-add these to the modules listing:
-    <module>opencast-captions-service-impl</module>
-
-Do a normal rebuild and redeploy and restart sequence and the captions handler service endpoints should appear at matterhorn root url (http://{server}/).
--Aaron Zeckoski (azeckoski at vt.edu) (azeckoski at gmail.com)
