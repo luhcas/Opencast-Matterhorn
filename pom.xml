@@ -94,23 +94,6 @@
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
-      <!-- Setup pax-runner -->
-      <plugin>
-        <groupId>org.ops4j</groupId>
-        <artifactId>maven-pax-plugin</artifactId>
-        <version>1.4</version>
-        <configuration>
-          <!-- including profiles for http (web), dosgi, DS, Config, Prefs spring -->
-          <!-- NOTE: cxf.dosgi profile is currently failing -AZ -->
-          <!-- NOTE: I could have included the felix.webconsole here but I probably should not -AZ -->
-          <profiles>cxf.dosgi/1.2,web,ds,config,prefs,spring.dm,spring</profiles>
-          <provision>
-            <param>scan-pom:file:${basedir}/runner.xml</param>
-            <param>--repositories=+http://scm.ops4j.org/repos/ops4j/projects/pax/runner-repository/</param>
-            <param>--vmOptions=-server -Xmx512M</param>
-          </provision>
-        </configuration>
-      </plugin>
       <!-- Require Java 5 or higher for building -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
