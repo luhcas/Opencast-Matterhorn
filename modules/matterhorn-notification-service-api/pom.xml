@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-notification-service-api</artifactId>
+  <artifactId>matterhorn-notification-service-api</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-notification-service-api</name>
+  <name>matterhorn-notification-service-api</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>

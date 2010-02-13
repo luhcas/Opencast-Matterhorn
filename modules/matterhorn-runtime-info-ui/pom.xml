@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-runtime-info-ui</artifactId>
+  <artifactId>matterhorn-runtime-info-ui</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-runtime-info-ui</name>
+  <name>matterhorn-runtime-info-ui</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -13,7 +13,7 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-http</artifactId>
+      <artifactId>matterhorn-http</artifactId>
       <version>0.6-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
@@ -59,7 +59,7 @@
               <outputDirectory>${basedir}/target/classes/ui/</outputDirectory>
               <resources>
                 <resource>
-                  <directory>../static-resources</directory>
+                  <directory>../../static-resources</directory>
                   <filtering>false</filtering>
                 </resource>
               </resources>

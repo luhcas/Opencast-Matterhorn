@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-conductor-api</artifactId>
+  <artifactId>matterhorn-conductor-api</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-conductor-api</name>
+  <name>matterhorn-conductor-api</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -18,7 +18,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-workflow-service-api</artifactId>
+      <artifactId>matterhorn-workflow-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
   </dependencies>

@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-workspace-impl</artifactId>
+  <artifactId>matterhorn-workspace-impl</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-workspace-impl</name>
+  <name>matterhorn-workspace-impl</name>
   <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -14,17 +14,17 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-workspace-api</artifactId>
+      <artifactId>matterhorn-workspace-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-working-file-repository-service-api</artifactId>
+      <artifactId>matterhorn-working-file-repository-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-util</artifactId>
+      <artifactId>matterhorn-util</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>

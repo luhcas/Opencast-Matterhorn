@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-metadata-api</artifactId>
+  <artifactId>matterhorn-metadata-api</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-metadata-api</name>
+  <name>matterhorn-metadata-api</name>
   <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -14,7 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-media</artifactId>
+      <artifactId>matterhorn-media</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
   </dependencies>

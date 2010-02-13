@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-conductor</artifactId>
+  <artifactId>matterhorn-conductor</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-conductor</name>
+  <name>matterhorn-conductor</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -29,42 +29,42 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-conductor-api</artifactId>
+      <artifactId>matterhorn-conductor-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-workflow-service-api</artifactId>
+      <artifactId>matterhorn-workflow-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-inspection-service-api</artifactId>
+      <artifactId>matterhorn-inspection-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-composer-service-api</artifactId>
+      <artifactId>matterhorn-composer-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-search-service-api</artifactId>
+      <artifactId>matterhorn-search-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-search-service-impl</artifactId>
+    <artifactId>matterhorn-search-service-impl</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-distribution-service-api</artifactId>
+  <artifactId>matterhorn-distribution-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-workspace-api</artifactId>
+<artifactId>matterhorn-workspace-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>

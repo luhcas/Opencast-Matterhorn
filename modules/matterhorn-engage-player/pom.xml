@@ -4,10 +4,10 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.opencastproject</groupId>
-	<artifactId>opencast-engage-player</artifactId>
+	<artifactId>matterhorn-engage-player</artifactId>
 	<version>0.6-SNAPSHOT</version>
 	<packaging>swf</packaging>
-	<name>opencast-engage-player</name>
+	<name>matterhorn-engage-player</name>
 
 
 	<parent>

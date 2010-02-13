@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-runtime-tools</artifactId>
+  <artifactId>matterhorn-runtime-tools</artifactId>
   <packaging>pom</packaging>
-  <name>opencast-runtime-tools</name>
+  <name>matterhorn-runtime-tools</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>

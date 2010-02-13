@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-ingest-service-impl</artifactId>
+  <artifactId>matterhorn-ingest-service-impl</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-ingest-service-impl</name>
+  <name>matterhorn-ingest-service-impl</name>
   <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -14,22 +14,22 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-ingest-service-api</artifactId>
+      <artifactId>matterhorn-ingest-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-metadata-api</artifactId>
+      <artifactId>matterhorn-metadata-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-dublincore</artifactId>
+      <artifactId>matterhorn-dublincore</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-workspace-api</artifactId>
+      <artifactId>matterhorn-workspace-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -91,17 +91,17 @@
     </dependency>
     <dependency>
     	<groupId>org.opencastproject</groupId>
-    	<artifactId>opencast-workspace-api</artifactId>
+    	<artifactId>matterhorn-workspace-api</artifactId>
     	<version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
     	<groupId>org.opencastproject</groupId>
-    	<artifactId>opencast-media</artifactId>
+   <artifactId>matterhorn-media</artifactId>
     	<version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
     	<groupId>org.opencastproject</groupId>
-    	<artifactId>opencast-util</artifactId>
+ <artifactId>matterhorn-util</artifactId>
     	<version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -126,7 +126,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-db</artifactId>
+<artifactId>matterhorn-db</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -136,7 +136,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-util</artifactId>
+      <artifactId>matterhorn-util</artifactId>
         <version>0.6-SNAPSHOT</version>
       <type>bundle</type>
     </dependency>

@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-captions-service-impl</artifactId>
+  <artifactId>matterhorn-captions-service-impl</artifactId>
   <packaging>bundle</packaging>
   <version>0.6-SNAPSHOT</version>
   <parent>
@@ -12,7 +12,7 @@
   </parent>
 
   <!-- module specific stuff for the site -->
-  <name>opencast-captions-service-impl</name>
+  <name>matterhorn-captions-service-impl</name>
   <developers>
     <developer>
       <id>azeckoski</id>
@@ -27,9 +27,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:svn:http://source.opencastproject.org/svn/modules/opencast-captions-service-impl/trunk</connection>
-    <developerConnection>scm:svn:https://source.opencastproject.org/svn/modules/opencast-captions-service-impl/trunk</developerConnection>
-    <url>http://source.opencastproject.org/svn/modules/opencast-captions-service-impl/trunk</url>
+    <connection>scm:svn:http://source.opencastproject.org/svn/modumatterhorn-rhorn-captions-service-impl/trunk</connection>
+    <developerConnection>scm:svn:https://source.opencastproject.org/svn/momatterhorn-terhorn-captions-service-impl/trunk</developerConnection>
+    <url>http://source.opencastproject.org/svn/matterhorn-atterhorn-captions-service-impl/trunk</url>
   </scm>
   <!-- END site stuff -->
 
@@ -37,26 +37,26 @@
     <!-- matterhorn -->
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-media</artifactId>
+      <artifactId>matterhorn-media</artifactId>
       <version>0.6-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-workspace-api</artifactId>
+      <artifactId>matterhorn-workspace-api</artifactId>
       <version>0.6-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-workflow-service-api</artifactId>
+      <artifactId>matterhorn-workflow-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <!-- needed for rest docs utils -->
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-util</artifactId>
+      <artifactId>matterhorn-util</artifactId>
       <version>0.6-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>

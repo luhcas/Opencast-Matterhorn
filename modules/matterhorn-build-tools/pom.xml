@@ -2,10 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-build-tools</artifactId>
+  <artifactId>matterhorn-build-tools</artifactId>
   <version>0.6-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>opencast-build-tools</name>
+  <name>matterhorn-build-tools</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

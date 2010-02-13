@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-workflow-ui</artifactId>
+  <artifactId>matterhorn-workflow-ui</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-workflow-ui</name>
+  <name>matterhorn-workflow-ui</name>
   <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -22,7 +22,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-util</artifactId>
+      <artifactId>matterhorn-util</artifactId>
       <version>0.6-SNAPSHOT</version>
       <type>bundle</type>
     </dependency>
@@ -43,7 +43,7 @@
               <outputDirectory>${basedir}/target/classes/ui/</outputDirectory>
               <resources>
                 <resource>
-                  <directory>../static-resources</directory>
+                  <directory>../../static-resources</directory>
                   <filtering>false</filtering>
                 </resource>
               </resources>

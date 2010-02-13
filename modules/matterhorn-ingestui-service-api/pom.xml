@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-ingestui-service-api</artifactId>
+  <artifactId>matterhorn-ingestui-service-api</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-ingestui-service-api</name>
+  <name>matterhorn-ingestui-service-api</name>
   <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>

@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-capture-service-impl</artifactId>
+  <artifactId>matterhorn-capture-service-impl</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-capture-service-impl</name>
+  <name>matterhorn-capture-service-impl</name>
   <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -14,17 +14,17 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-capture-service-api</artifactId>
+      <artifactId>matterhorn-capture-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-capture-admin-service-api</artifactId>
+      <artifactId>matterhorn-capture-admin-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-dublincore</artifactId>
+      <artifactId>matterhorn-dublincore</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -133,7 +133,7 @@
   	</dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-util</artifactId>
+      <artifactId>matterhorn-util</artifactId>
         <version>0.6-SNAPSHOT</version>
       <type>bundle</type>
     </dependency>

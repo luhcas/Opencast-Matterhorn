@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-util</artifactId>
+  <artifactId>matterhorn-util</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-util</name>
+  <name>matterhorn-util</name>
   <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -67,9 +67,9 @@
   </dependencies>
 
   <scm>
-    <connection>scm:svn:http://source.opencastproject.org/svn/modules/opencast-util/trunk</connection>
-    <developerConnection>scm:svn:https://source.opencastproject.org/svn/modules/opencast-util/trunk</developerConnection>
-    <url>https://source.opencastproject.org/svn/modules/opencast-util/trunk</url>
+    <connection>scm:svn:http://source.opencastproject.org/svn/momatterhorn-terhorn-util/trunk</connection>
+    <developerConnection>scm:svn:https://source.opencastproject.org/svn/matterhorn-atterhorn-util/trunk</developerConnection>
+    <url>https://source.opencastproject.org/svmatterhorn-/matterhorn-util/trunk</url>
   </scm>
 
   <build>

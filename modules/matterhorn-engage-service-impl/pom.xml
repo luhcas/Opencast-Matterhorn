@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>opencast-engage-service-impl</artifactId>
+  <artifactId>matterhorn-engage-service-impl</artifactId>
   <packaging>bundle</packaging>
-  <name>opencast-engage-service-impl</name>
+  <name>matterhorn-engage-service-impl</name>
   <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -14,7 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-engage-service-api</artifactId>
+      <artifactId>matterhorn-engage-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -57,7 +57,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-http</artifactId>
+      <artifactId>matterhorn-http</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
   </dependencies>
