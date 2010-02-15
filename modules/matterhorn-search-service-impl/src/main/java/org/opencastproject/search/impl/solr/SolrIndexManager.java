@@ -29,10 +29,12 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.metadata.mpeg7.ContentSegment;
+import org.opencastproject.metadata.mpeg7.FreeTextAnnotation;
 import org.opencastproject.metadata.mpeg7.KeywordAnnotation;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.MediaTimePoint;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
+import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.MultimediaContent;
 import org.opencastproject.metadata.mpeg7.MultimediaContentType;
 import org.opencastproject.metadata.mpeg7.TextAnnotation;
@@ -89,9 +91,15 @@ public class SolrIndexManager {
           SolrFields.SOLR_DATE_FORMAT);
 
   private DublinCoreCatalogService dcService;
-  
+
+  private Mpeg7CatalogService mpeg7Service;
+
   public void setDcService(DublinCoreCatalogService dcService) {
     this.dcService = dcService;
+  }
+
+  public void setMpeg7Service(Mpeg7CatalogService mpeg7Service) {
+    this.mpeg7Service = mpeg7Service;
   }
 
   /**
@@ -304,13 +312,12 @@ public class SolrIndexManager {
               .toString());
     }
 
-    // Add mpeg-7
-    // TODO: Merge mpeg-7 catalogs prior to adding them to solr
-    /*
-     * Catalog[] mpeg7Catalogs = mediaPackage.getCatalogs(Mpeg7Catalog.FLAVOR);
-     * for (Catalog mpeg7Catalog : mpeg7Catalogs) {
-     * addMpeg7Metadata(solrEpisodeDocument, (Mpeg7Catalog) mpeg7Catalog); }
-     */
+    // Add mpeg7
+    Catalog mpeg7Catalogs[] = mediaPackage.getCatalogs(Mpeg7Catalog.SLIDES_FLAVOR);
+    if (mpeg7Catalogs.length > 0) {
+      Mpeg7Catalog mpeg7Catalog =  mpeg7Service.load(mpeg7Catalogs[0]);
+      addMpeg7Metadata(solrEpisodeDocument, mpeg7Catalog);
+    }
 
     return solrEpisodeDocument;
   }
@@ -518,7 +525,6 @@ public class SolrIndexManager {
    * @param mpeg7
    *          the mpeg7 catalog
    */
-  @SuppressWarnings("unused")
   private void addMpeg7Metadata(SolrUpdateableInputDocument solrInput,
           Mpeg7Catalog mpeg7) {
 
@@ -532,7 +538,8 @@ public class SolrIndexManager {
     // of course assumes that all tracks are equally long.
     MultimediaContent<? extends MultimediaContentType> mc = mpeg7
             .multimediaContent().next();
-    MediaTime mediaTime = mc.elements().next().getMediaTime();
+    MultimediaContentType mct = mc.elements().next();
+    MediaTime mediaTime = mct.getMediaTime();
     solrInput.addField(SolrFields.DC_EXTENT, mediaTime.getMediaDuration()
             .getDurationInMilliseconds());
 
@@ -622,12 +629,15 @@ public class SolrIndexManager {
 
           log_.trace("Adding segment: " + timepoint.getTimeInMilliseconds());
           // add freetext annotation to solr document
-          // Iterator<TextAnnotation> freeIter =
-          // contentSegment.textAnnotations();
-          // if (freeIter.hasNext()) {
-          // FreeTextAnnotation freeTextAnnotation = freeIter.next();
-          // hintField.append(freeTextAnnotation.getText() + "\n");
-          // }
+           Iterator<TextAnnotation> freeIter =
+           contentSegment.textAnnotations();
+           if (freeIter.hasNext()) {
+             Iterator<FreeTextAnnotation> freeTextIter = freeIter.next().freeTextAnnotations();
+             while (freeTextIter.hasNext()) {
+               FreeTextAnnotation freeTextAnnotation = freeTextIter.next();
+               hintField.append(freeTextAnnotation.getText() + "\n");
+             }
+           }
           solrInput.addField(SolrFields.SEGMENT_HINTS + segmentCount, hintField
                   .toString());
 

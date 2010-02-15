@@ -226,7 +226,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * Create a DOM representation of the DublinCore.
+   * Create a DOM representation of the Mpeg-7.
    */
   private Document createDocument() throws ParserConfigurationException {
     Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();

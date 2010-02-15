@@ -42,7 +42,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 /**
- * Test class for the dublin core implementation.
+ * Test class for the Mpeg-7 catalog implementation.
  */
 public class Mpeg7Test {
 

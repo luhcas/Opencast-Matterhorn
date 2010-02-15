@@ -4,7 +4,7 @@
   <groupId>org.opencastproject</groupId>
   <artifactId>matterhorn-mpeg7</artifactId>
   <packaging>bundle</packaging>
-  <name>matterhorn-dublincore</name>
+  <name>matterhorn-mpeg7</name>
   <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>

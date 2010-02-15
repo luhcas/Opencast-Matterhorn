@@ -18,6 +18,7 @@ package org.opencastproject.search.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
@@ -66,10 +67,17 @@ public class SearchServiceImpl implements SearchService {
   private String solrRoot = null;
 
   private DublinCoreCatalogService dcService;
-  
+
+  private Mpeg7CatalogService mpeg7Service;
+
   public void setDublincoreService(DublinCoreCatalogService dcService) {
     this.dcService = dcService;
     if(solrIndexManager != null) solrIndexManager.setDcService(dcService); // In case the dc service is updated
+  }
+
+  public void setMpeg7Service(Mpeg7CatalogService mpeg7Service) {
+    this.mpeg7Service = mpeg7Service;
+    if(solrIndexManager != null) solrIndexManager.setMpeg7Service(mpeg7Service); // In case the dc service is updated
   }
 
   /**
@@ -166,6 +174,7 @@ public class SearchServiceImpl implements SearchService {
       solrRequester = new SolrRequester(solrConnection);
       solrIndexManager = new SolrIndexManager(solrConnection);
       solrIndexManager.setDcService(dcService);
+      solrIndexManager.setMpeg7Service(mpeg7Service);
       // The solr index needs some time to setup
       // FIXME Not ideal solution
       Thread.sleep(3000);

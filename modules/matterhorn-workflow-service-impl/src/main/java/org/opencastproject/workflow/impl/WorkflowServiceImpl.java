@@ -381,7 +381,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     List<WorkflowOperationHandler> handlerList = new ArrayList<WorkflowOperationHandler>();
     for (HandlerRegistration handlerReg : getRegisteredHandlers()) {
       if (handlerReg.operationName != null && handlerReg.operationName.equals(operation.getName())) {
-        handlerList.add((WorkflowOperationHandler) handlerReg.handler);
+        handlerList.add(handlerReg.handler);
       }
     }
 
@@ -391,7 +391,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       return handlerList.get(index);
     }
 
-    log_.info("No workflow operation handlers found for operation {}", operation.getName());
+    log_.warn("No workflow operation handlers found for operation {}", operation.getName());
     return null;
   }
 

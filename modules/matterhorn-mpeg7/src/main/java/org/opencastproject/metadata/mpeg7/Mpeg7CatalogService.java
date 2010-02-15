@@ -19,29 +19,28 @@ import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.metadata.api.CatalogService;
 
 /**
- * Parses {@link Mpeg7Catalog}s
- *
+ * Loads {@link Mpeg7Catalog}s
  */
 public class Mpeg7CatalogService implements CatalogService<Mpeg7Catalog> {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.api.CatalogService#load(org.opencastproject.media.mediapackage.Catalog)
    */
   @Override
   public Mpeg7Catalog load(Catalog catalog) {
-    // TODO Auto-generated method stub
-    return null;
+    return Mpeg7CatalogImpl.fromURI(catalog.getURI());
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.api.CatalogService#newInstance()
    */
   @Override
   public Mpeg7Catalog newInstance() {
-    // TODO Auto-generated method stub
-    return null;
+    return Mpeg7CatalogImpl.newInstance();
   }
 
 }
