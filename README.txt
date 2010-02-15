@@ -14,4 +14,3 @@
 + 
 + Questions should go to the Matterhorn list (matterhorn@opencastproject.org)
 
-
