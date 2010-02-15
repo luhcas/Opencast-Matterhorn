@@ -29,9 +29,9 @@ import javax.xml.bind.annotation.XmlType;
  * Part of a search result that models a video segment.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="media-segment", namespace="http://search.opencastproject.org/")
-@XmlRootElement(name="media-segment", namespace="http://search.opencastproject.org/")
-public class MediaSegmentImpl implements MediaSegment {
+@XmlType(name="segment", namespace="http://search.opencastproject.org/")
+@XmlRootElement(name="segment", namespace="http://search.opencastproject.org/")
+public class MediaSegmentImpl implements MediaSegment, Comparable<MediaSegmentImpl> {
 
   /** The segment number **/
   @XmlAttribute(name="index")
@@ -197,6 +197,15 @@ public class MediaSegmentImpl implements MediaSegment {
    */
   public void setRelevance(int relevance) {
     this.relevance = relevance;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see java.lang.Comparable#compareTo(java.lang.Object)
+   */
+  @Override
+  public int compareTo(MediaSegmentImpl o) {
+    return this.getIndex() - o.getIndex();
   }
 
 }

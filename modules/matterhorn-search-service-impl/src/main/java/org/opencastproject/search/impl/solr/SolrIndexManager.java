@@ -31,6 +31,7 @@ import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.metadata.mpeg7.ContentSegment;
 import org.opencastproject.metadata.mpeg7.FreeTextAnnotation;
 import org.opencastproject.metadata.mpeg7.KeywordAnnotation;
+import org.opencastproject.metadata.mpeg7.MediaDuration;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.MediaTimePoint;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
@@ -615,17 +616,18 @@ public class SolrIndexManager {
           solrInput.addField(SolrFields.SEGMENT_TEXT + segmentCount,
                   segmentText.toString());
 
-          // get the segments time point
+          // get the segments time properties
           MediaTimePoint timepoint = contentSegment.getMediaTime()
-                  .getMediaTimePoint();
+                  .getMediaTimePoint();          
+          MediaDuration duration = contentSegment.getMediaTime().getMediaDuration();
+          
           // System.out.println("MediaTimePoint: "+timepoint.getTimeInMilliseconds());
           // dont forget: hints are stores as properties
           StringBuffer hintField = new StringBuffer();
 
           // TODO: define a class with hint field constants
           hintField.append("time=" + timepoint.getTimeInMilliseconds() + "\n");
-          // hintField.append("relevance="+timepoint.getTimeInMilliseconds() +
-          // "\n");
+          hintField.append("duration=" + duration.getDurationInMilliseconds() + "\n");
 
           log_.trace("Adding segment: " + timepoint.getTimeInMilliseconds());
           // add freetext annotation to solr document

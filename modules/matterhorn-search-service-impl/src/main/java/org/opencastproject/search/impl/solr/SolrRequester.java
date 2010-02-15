@@ -297,8 +297,16 @@ public class SolrRequester {
               throw new IllegalStateException("Found segment without time hint");
             segment.setTime(Long.parseLong(segmentTime));
 
+            // get segment duration
+            String segmentDuration = segmentHints.getProperty("duration");
+            if (segmentDuration == null)
+              throw new IllegalStateException("Found segment without duration hint");
+            segment.setDuration(Long.parseLong(segmentDuration));
+
             // the relevance
+            // TODO: Add real relevance
             segment.setRelevance((int) Math.round(Math.random() * 4));
+
             item.addSegment(segment);
           }
         }

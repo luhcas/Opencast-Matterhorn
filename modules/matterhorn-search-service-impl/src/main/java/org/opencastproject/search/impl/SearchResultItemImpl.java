@@ -21,7 +21,6 @@ import org.opencastproject.search.api.MediaSegment;
 import org.opencastproject.search.api.SearchResultItem;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
@@ -153,7 +152,7 @@ public class SearchResultItemImpl implements SearchResultItem {
   private double score = -1;
 
   /** Media segment list **/
-  @XmlElementWrapper(name = "media-segments")
+  @XmlElementWrapper(name = "segments")
   private SortedSet<MediaSegmentImpl> mediaSegments = null;
 
   /**
@@ -622,35 +621,8 @@ public class SearchResultItemImpl implements SearchResultItem {
    */
   public void addSegment(MediaSegment segment) {
     if (mediaSegments == null)
-      mediaSegments = new TreeSet<MediaSegmentImpl>(MediaSegmentComparator.getInstance());
+      mediaSegments = new TreeSet<MediaSegmentImpl>();
     mediaSegments.add((MediaSegmentImpl) segment); // TODO: assuming this
   }
 
-  /**
-   * Comparator used to sort media segments.
-   */
-  private static class MediaSegmentComparator implements Comparator<MediaSegment> {
-
-    /** The singleton instance */
-    static MediaSegmentComparator instance = new MediaSegmentComparator();
-
-    /**
-     * Returns the singleton instance
-     * 
-     * @return the comparator
-     */
-    static MediaSegmentComparator getInstance() {
-      return instance;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-     */
-    public int compare(MediaSegment o1, MediaSegment o2) {
-      return o2.getIndex() - o1.getIndex();
-    }
-
-  }
 }
