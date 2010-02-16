@@ -75,7 +75,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     checkId(mediaPackageID);
     checkId(mediaPackageElementID);
     File f = getFile(mediaPackageID, mediaPackageElementID);
-    logger.info("Attempting to delete file {}", f.getAbsolutePath());
+    logger.debug("Attempting to delete file {}", f.getAbsolutePath());
     if(f.canWrite()) {
       f.delete();
     } else {
@@ -83,7 +83,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
               mediaPackageID + "/" + mediaPackageElementID);
     }
     File d = getDirectory(mediaPackageID, mediaPackageElementID);
-    logger.info("Attempting to delete directory {}", d.getAbsolutePath());
+    logger.debug("Attempting to delete directory {}", d.getAbsolutePath());
     if(d.canWrite()){
       d.delete();
     }
@@ -155,7 +155,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
         }
         f.createNewFile();
       } else {
-        logger.info("Attempting to overwrite the file at {}", f.getAbsolutePath());
+        logger.debug("Attempting to overwrite the file at {}", f.getAbsolutePath());
       }
       out = new FileOutputStream(f);
       IOUtils.copy(in, out);
