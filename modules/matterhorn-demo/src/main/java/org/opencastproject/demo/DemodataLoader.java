@@ -52,6 +52,8 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -85,6 +87,9 @@ public class DemodataLoader {
 
   /** Default hostname and port */
   public static final String DEFAULT_HOST = "http://localhost:8080";
+
+  /** Logging facility */
+  private static final Logger logger = LoggerFactory.getLogger(DemodataLoader.class);
 
   /**
    * Main method that will populate the matterhorn installation running at either localhost or the ip passed in as the
@@ -175,6 +180,8 @@ public class DemodataLoader {
     IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
     try {
 
+      logger.info("Loading sample mediapackage from {}", packageDir);
+      
       mpBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(packageDir));
       File manifestFile = new File(packageDir, "index.xml");
       MediaPackage mediaPackage = mpBuilder.loadFromXml(new FileInputStream(manifestFile));
