@@ -29,6 +29,8 @@ import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -42,29 +44,53 @@ import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpressionException;
 
 /**
- * Abstract base class for the various track builders.
+ * This implementation of the {@link MediaPackageElementBuilderPlugin} recognizes video tracks and provides the
+ * functionality of reading it on behalf of the media package.
  */
-public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderPlugin {
+public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
 
   /**
-   * Creates a new instance of an abstract track builder plugin.
-   * 
-   * @throws IllegalStateException
-   *           in case of not being able to initialize
+   * the logging facility provided by log4j
    */
-  protected AbstractTrackBuilderPlugin() throws IllegalStateException {
+  private final static Logger log_ = LoggerFactory.getLogger(TrackBuilderPlugin.class);
+
+  public TrackBuilderPlugin() throws IllegalStateException {
+    setPriority(0);
   }
 
   /**
-   * Creates a track object from the given url. The method is called when the plugin reads the track information from
-   * the manifest.
-   * 
-   * @param id
-   *          the track id
-   * @param uri
-   *          the track location
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.opencastproject.media.mediapackage.MediaPackageElement.Type,
+   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
-  protected abstract TrackImpl trackFromManifest(String id, URI uri);
+  public boolean accept(MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
+    return type.equals(MediaPackageElement.Type.Track);
+  }
+
+  /**
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.w3c.dom.Node)
+   */
+  public boolean accept(Node elementNode) {
+    String name = elementNode.getNodeName();
+    return name.equalsIgnoreCase(MediaPackageElement.Type.Track.toString());
+  }
+
+  /**
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(URI,
+   *      org.opencastproject.media.mediapackage.MediaPackageElement.Type,
+   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
+   */
+  public boolean accept(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
+    return MediaPackageElement.Type.Track.equals(type);
+  }
+
+  /**
+   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURI(URI)
+   */
+  public MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException {
+    log_.trace("Creating track from " + uri);
+    Track track = TrackImpl.fromURI(uri);
+    return track;
+  }
 
   /**
    * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#newElement(org.opencastproject.media.mediapackage.MediaPackageElement.Type
@@ -118,7 +144,9 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
       //
       // Build the track
 
-      TrackImpl track = trackFromManifest(id, url);
+      TrackImpl track = TrackImpl.fromURI(url);
+      track.setIdentifier(id);
+
       if (id != null && !id.equals(""))
         track.setIdentifier(id);
 
@@ -203,6 +231,11 @@ public abstract class AbstractTrackBuilderPlugin extends AbstractElementBuilderP
 
   private String createStreamID(Track track) {
     return "stream-" + (track.getStreams().length + 1);
+  }
+
+  @Override
+  public String toString() {
+    return "Track Builder Plugin";
   }
 
 }

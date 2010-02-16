@@ -19,11 +19,8 @@ package org.opencastproject.media.mediapackage;
 import org.opencastproject.media.mediapackage.elementbuilder.AttachmentBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.CatalogBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.CoverBuilderPlugin;
-import org.opencastproject.media.mediapackage.elementbuilder.IndefiniteTrackBuilderPlugin;
+import org.opencastproject.media.mediapackage.elementbuilder.TrackBuilderPlugin;
 import org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin;
-import org.opencastproject.media.mediapackage.elementbuilder.PresentationTrackBuilderPlugin;
-import org.opencastproject.media.mediapackage.elementbuilder.PresenterTrackBuilderPlugin;
-import org.opencastproject.util.PluginLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,17 +39,8 @@ import javax.xml.xpath.XPathFactory;
 
 /**
  * Default implementation for a media package element builder.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageElementBuilderImpl.java 2905 2009-07-15 16:16:05Z ced $
  */
 public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilder {
-
-  /** Package to search for plugins */
-  private static final String PLUGIN_PKG = "org.opencastproject.media.mediapackage.elementbuilder";
-
-  /** Name of the plugin interface */
-  private static final Class<?> PLUGIN_INTERFACE = MediaPackageElementBuilderPlugin.class;
 
   /** The list of plugins */
   private List<Class<? extends MediaPackageElementBuilderPlugin>> plugins = null;
@@ -61,32 +49,12 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
   private final static Logger log_ = LoggerFactory.getLogger(MediaPackageElementBuilderImpl.class.getName());
 
   // Create the list of available element builder pugins
-  @SuppressWarnings("unchecked")
   public MediaPackageElementBuilderImpl() {
     plugins = new ArrayList<Class<? extends MediaPackageElementBuilderPlugin>>();
-    ClassLoader cl = MediaPackageElementBuilderImpl.class.getClassLoader();
-    Class<?>[] pluginClasses = PluginLoader.findPlugins(PLUGIN_PKG, null, new String[] { PLUGIN_INTERFACE.getName() },
-            cl);
-    log_.debug("Found " + pluginClasses.length + " possible plugins");
-
-    // FIXME -- either remove the classloading based plugin system, or fix it for OSGi (jmh)
-    if (pluginClasses.length == 0) {
-      // Manually add the plugins
-      log_.warn("Unable to find element builder plugins via classloader.  Manually loading the default set.");
-      plugins.add(AttachmentBuilderPlugin.class);
-      plugins.add(CatalogBuilderPlugin.class);
-      plugins.add(CoverBuilderPlugin.class);
-      plugins.add(IndefiniteTrackBuilderPlugin.class);
-      plugins.add(PresentationTrackBuilderPlugin.class);
-      plugins.add(PresenterTrackBuilderPlugin.class);
-    } else {
-      for (Class<?> c : pluginClasses) {
-        log_.debug("Inspecting plugin " + c.getName());
-        if (PLUGIN_INTERFACE.isAssignableFrom(c)) {
-          plugins.add((Class<? extends MediaPackageElementBuilderPlugin>) c);
-        }
-      }
-    }
+    plugins.add(AttachmentBuilderPlugin.class);
+    plugins.add(CatalogBuilderPlugin.class);
+    plugins.add(CoverBuilderPlugin.class);
+    plugins.add(TrackBuilderPlugin.class);
   }
 
   /**

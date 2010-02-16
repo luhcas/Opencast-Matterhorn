@@ -550,7 +550,7 @@ public abstract class AbstractMediaPackageElement implements
       ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
       return unmarshaller.unmarshal(in);
     } catch (JAXBException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(e.getLinkedException() != null ? e.getLinkedException() : e);
     }
   }
 

@@ -995,7 +995,7 @@ public final class MediaPackageImpl implements MediaPackage {
       marshaller.marshal(this, writer);
       return writer.toString();
     } catch (JAXBException e) {
-      throw new MediaPackageException(e);
+      throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
     }
   }
 
@@ -1089,7 +1089,7 @@ public final class MediaPackageImpl implements MediaPackage {
       marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, format);
       marshaller.marshal(this, out);
     } catch (JAXBException e) {
-      throw new MediaPackageException(e);
+      throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
     }
   }
 
@@ -1106,7 +1106,7 @@ public final class MediaPackageImpl implements MediaPackage {
       Source source = new StreamSource(xml);
       return unmarshaller.unmarshal(source, MediaPackageImpl.class).getValue();
     } catch (JAXBException e) {
-      throw new MediaPackageException(e);
+      throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
     }
   }
 
