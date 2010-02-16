@@ -39,6 +39,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
+import java.util.Map.Entry;
 
 /**
  * Class implementing <code>LookupRequester</code> to provide connection to solr indexing facility.
@@ -272,7 +273,7 @@ public class SolrRequester {
           item.addKeyword(keyword);
         }
 
-        // Loop over
+        // Loop over the segments
         for (String fieldName : doc.getFieldNames()) {
           if (fieldName.startsWith(SolrFields.SEGMENT_TEXT)) {
 
@@ -302,6 +303,14 @@ public class SolrRequester {
             if (segmentDuration == null)
               throw new IllegalStateException("Found segment without duration hint");
             segment.setDuration(Long.parseLong(segmentDuration));
+            
+            // get preview urls
+            for (Entry<Object, Object> entry : segmentHints.entrySet()) {
+              if (entry.getKey().toString().startsWith("preview.")) {
+                String parts[] = entry.getKey().toString().split("\\.");
+                segment.addPreview(entry.getValue().toString(), parts[1]);
+              }
+            }
 
             // the relevance
             // TODO: Add real relevance

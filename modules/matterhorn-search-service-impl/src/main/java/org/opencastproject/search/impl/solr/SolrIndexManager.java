@@ -20,7 +20,10 @@ import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.MediaPackageReference;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.metadata.dublincore.DCMIPeriod;
 import org.opencastproject.metadata.dublincore.DublinCore;
@@ -317,7 +320,7 @@ public class SolrIndexManager {
     Catalog mpeg7Catalogs[] = mediaPackage.getCatalogs(Mpeg7Catalog.SLIDES_FLAVOR);
     if (mpeg7Catalogs.length > 0) {
       Mpeg7Catalog mpeg7Catalog =  mpeg7Service.load(mpeg7Catalogs[0]);
-      addMpeg7Metadata(solrEpisodeDocument, mpeg7Catalog);
+      addMpeg7Metadata(solrEpisodeDocument, mediaPackage, mpeg7Catalog);
     }
 
     return solrEpisodeDocument;
@@ -527,6 +530,7 @@ public class SolrIndexManager {
    *          the mpeg7 catalog
    */
   private void addMpeg7Metadata(SolrUpdateableInputDocument solrInput,
+          MediaPackage mediaPackage,
           Mpeg7Catalog mpeg7) {
 
     // Check for multimedia content
@@ -628,7 +632,29 @@ public class SolrIndexManager {
           // TODO: define a class with hint field constants
           hintField.append("time=" + timepoint.getTimeInMilliseconds() + "\n");
           hintField.append("duration=" + duration.getDurationInMilliseconds() + "\n");
+          
+          // Look for preview images. Their characteristics are that they are
+          // attached as attachments with a flavor of preview/<something>.
+          String timeInMillis = Long.toString(timepoint.getTimeInMilliseconds());
+          for (Attachment t : mediaPackage.getAttachments()) {
+            MediaPackageElementFlavor flavor = t.getFlavor();
+            if (flavor == null || !flavor.getType().equals(MediaPackageElements.SLIDE_PREVIEW_FLAVOR.getType()))
+              continue;
 
+            // Found one!
+            MediaPackageReference ref = t.getReference();
+            if (ref != null && timeInMillis.equals(ref.getProperty("time"))) {
+              if (t.getFlavor() == null)
+                throw new IllegalStateException("Can't process a slide preview without a flavor");
+              hintField.append("preview");
+              hintField.append(".");
+              hintField.append(t.getFlavor().getSubtype());
+              hintField.append("=");
+              hintField.append(t.getURI().toString());
+              hintField.append("\n");
+            }
+          }
+          
           log_.trace("Adding segment: " + timepoint.getTimeInMilliseconds());
           // add freetext annotation to solr document
            Iterator<TextAnnotation> freeIter =

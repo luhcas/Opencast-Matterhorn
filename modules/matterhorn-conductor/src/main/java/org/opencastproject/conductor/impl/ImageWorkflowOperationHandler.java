@@ -106,8 +106,19 @@ public class ImageWorkflowOperationHandler implements WorkflowOperationHandler {
     String sourceTags = StringUtils.trimToNull(operation.getConfiguration("source-tags"));
     String targetImageTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
     String targetImageFlavor = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));
-    String encodingProfile = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
+    String encodingProfileName = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
     String timeConfiguration = StringUtils.trimToNull(operation.getConfiguration("time"));
+
+    // Find the encoding profile
+    EncodingProfile profile = null;
+    for (EncodingProfile p : composerService.listProfiles()) {
+      if (p.getIdentifier().equals(encodingProfileName)) {
+        profile = p;
+        break;
+      }
+    }
+    if (profile == null)
+      throw new IllegalStateException("Encoding profile '" + encodingProfileName + "' was not found");
 
     Set<String> sourceTagSet = null;
     if(StringUtils.trimToNull(sourceTags) != null) {
@@ -141,36 +152,32 @@ public class ImageWorkflowOperationHandler implements WorkflowOperationHandler {
       for (Track t : videoTracks) {
         if (t.hasVideo()) {
           // take the minimum of the specified time and the video track duration
-          long time = Math.min(Long.parseLong(timeConfiguration), t.getDuration());
+          long time = Math.min(Long.parseLong(timeConfiguration), t.getDuration()/1000L);
           
-          for (EncodingProfile profile : composerService.listProfiles()) {
-            if (profile.getIdentifier().equals(encodingProfile)) {
-              Future<Attachment> futureAttachment = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), time);
-              // is there anything we can be doing while we wait for the track to be composed?
-              Attachment composedImage = futureAttachment.get();
-              if (composedImage == null)
-                throw new RuntimeException("unable to compose image");
+          Future<Attachment> futureAttachment = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), time);
+          // is there anything we can be doing while we wait for the track to be composed?
+          Attachment composedImage = futureAttachment.get();
+          if (composedImage == null)
+            throw new RuntimeException("unable to compose image");
 
-              // Add the flavor, either from the operation configuration or from the composer
-              if (targetImageFlavor != null)
-                composedImage.setFlavor(MediaPackageElementFlavor.parseFlavor(targetImageFlavor));
-              logger.debug("image has flavor '{}'", composedImage.getFlavor());
+          // Add the flavor, either from the operation configuration or from the composer
+          if (targetImageFlavor != null)
+            composedImage.setFlavor(MediaPackageElementFlavor.parseFlavor(targetImageFlavor));
+          logger.debug("image has flavor '{}'", composedImage.getFlavor());
 
-              // Set the mimetype
-              if (profile.getMimeType() != null)
-                composedImage.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
-              
-              // Add tags
-              if (targetImageTags != null) {
-                for (String tag : targetImageTags.split("\\W")) {
-                  logger.trace("Tagging image with '{}'", tag);
-                  if(StringUtils.trimToNull(tag) != null) composedImage.addTag(tag);
-                }
-              }
-              // store new image in the mediaPackage
-              mediaPackage.addDerived(composedImage, t);
+          // Set the mimetype
+          if (profile.getMimeType() != null)
+            composedImage.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
+          
+          // Add tags
+          if (targetImageTags != null) {
+            for (String tag : targetImageTags.split("\\W")) {
+              logger.trace("Tagging image with '{}'", tag);
+              if(StringUtils.trimToNull(tag) != null) composedImage.addTag(tag);
             }
           }
+          // store new image in the mediaPackage
+          mediaPackage.addDerived(composedImage, t);
         }
       }
     }

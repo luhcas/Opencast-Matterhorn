@@ -70,4 +70,14 @@ public interface MediaSegment {
    */
   public abstract int getRelevance();
 
+  /**
+   * Adds a preview url.
+   * 
+   * @param url
+   *          url to the preview image
+   * @param flavor
+   *          flavor of the preview's source track
+   */
+  void addPreview(String url, String flavor);
+
 }

@@ -18,10 +18,14 @@ package org.opencastproject.search.impl;
 
 import org.opencastproject.search.api.MediaSegment;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -60,6 +64,11 @@ public class MediaSegmentImpl implements MediaSegment, Comparable<MediaSegmentIm
   /** The 'segment is a hit' flag **/
   @XmlAttribute(name="hit")
   private boolean hit = false;
+  
+  /** The preview urls */
+  @XmlElementWrapper(name="previews")
+  @XmlElement(name = "preview")
+  private List<MediaSegmentPreviewImpl> previewUrls = new ArrayList<MediaSegmentPreviewImpl>();
 
   /**
    * A no-arg constructor, which is needed for JAXB serialization.
@@ -199,6 +208,15 @@ public class MediaSegmentImpl implements MediaSegment, Comparable<MediaSegmentIm
     this.relevance = relevance;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.search.api.MediaSegment#addPreview(java.lang.String, java.lang.String)
+   */
+  @Override
+  public void addPreview(String url, String flavor) {
+    previewUrls.add(new MediaSegmentPreviewImpl(url, flavor));
+  }
+  
   /**
    * {@inheritDoc}
    * @see java.lang.Comparable#compareTo(java.lang.Object)

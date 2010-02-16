@@ -11,6 +11,52 @@
       exception-handler-workflow="Default Error Handler"
       description="Inspect the media package">
     </operation>
+    
+    <!-- encode to cover image -->
+    <operation
+      name="image"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presenter (camera) to cover image">
+      <configurations>
+        <configuration key="source-flavor">presentation/engage</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">cover/source</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
+        <configuration key="encoding-profile">feed-cover.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+    <operation
+      name="image"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to cover image">
+      <configurations>
+        <configuration key="source-flavor">presentation/engage</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">cover/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">engage-cover.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+    
+	<!-- Generate slide previews -->
+    <operation
+      name="slide-previews"
+      fail-on-error="true"
+      exception-handler-workflow="Default Error Handler"
+      description="Encode presentation (screen) to cover image">
+      <configurations>
+        <configuration key="source-flavor">presentation/engage</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">engage-slides.http</configuration>
+      </configurations>
+    </operation>
+
+	<!--  Distribute to local (engage) distribution channel -->
     <operation
       name="distribute_local"
       fail-on-error="true"
@@ -21,6 +67,8 @@
         <configuration key="target-tags">publish</configuration>
       </configurations>
     </operation>
+    
+    <!-- Publish to search (and engage) -->
     <operation
       name="publish"
       fail-on-error="true"
@@ -30,5 +78,6 @@
         <configuration key="source-tags">publish</configuration>
       </configurations>
     </operation>
+
   </operations>
 </workflow-definition>

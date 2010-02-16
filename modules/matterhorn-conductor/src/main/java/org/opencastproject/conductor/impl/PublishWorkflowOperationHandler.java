@@ -82,7 +82,7 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
 
       // Remove what we don't want to publish (i. e. what is not tagged accordingly)
       for (MediaPackageElement element : mp.getElements()) {
-        if( ! keep.contains(element)) {
+        if(!keep.contains(element)) {
           mp.remove(element);
         }
       }
@@ -90,20 +90,24 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
       // Fix references and flavors
       for (MediaPackageElement element : mp.getElements()) {
         MediaPackageReference reference = element.getReference();
-        if (reference != null && mp.getElementByReference(reference) == null) {
+        if (reference != null && !reference.getType().equals(MediaPackageReference.TYPE_MEDIAPACKAGE) && mp.getElementByReference(reference) == null) {
           
           // Follow the references until we find a flavor
           MediaPackageElement parent = null;
           while ((parent = current.getElementByReference(reference)) != null) {
-            if (parent.getFlavor() != null) {
+            if (parent.getFlavor() != null && element.getFlavor() == null) {
               element.setFlavor(parent.getFlavor());
-              break;
             }
+            if (parent.getReference() == null)
+              break;
             reference = parent.getReference();
           }
           
-          // Done. Let's cut the path
-          element.clearReference();
+          // Done. Let's cut the path but keep references to the mediapackage itself
+          if (reference != null && reference.getType().equals(MediaPackageReference.TYPE_MEDIAPACKAGE))
+            element.setReference(reference);
+          else
+            element.clearReference();
         }
       }
       // adding media package to the search index

@@ -22,38 +22,65 @@ import org.opencastproject.media.mediapackage.Track;
 import java.util.concurrent.Future;
 
 /**
- * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this encoding job.
+ * Encodes media and (optionally) periodically alerts a statusService endpoint
+ * of the status of this encoding job.
  */
 public interface ComposerService {
 
   /**
    * Encode one track, using that track's audio and video streams.
    * 
-   * @param mediaPackage The media package containing the source track
-   * @param sourceTrackId The ID of the source track within the media package
-   * @param profileId The profile to use for encoding
+   * @param mediaPackage
+   *          The media package containing the source track
+   * @param sourceTrackId
+   *          The ID of the source track within the media package
+   * @param profileId
+   *          The profile to use for encoding
    * @return The track that results from the encoding
    * @throws EncoderException
    */
   Future<Track> encode(MediaPackage mediaPackage, String sourceTrackId, String profileId) throws EncoderException;
 
   /**
-   * Encode the video stream from one track and the audio stream from another, into a new {@link Track}.
+   * Encode the video stream from one track and the audio stream from another,
+   * into a new {@link Track}.
    * 
-   * @param mediaPackage The media package containing the source track
-   * @param sourceVideoTrackId The ID of the source video track within the media package
-   * @param sourceAudioTrackId The ID of the source audio track within the media package
-   * @param profileId The profile to use for encoding
+   * @param mediaPackage
+   *          The media package containing the source track
+   * @param sourceVideoTrackId
+   *          The ID of the source video track within the media package
+   * @param sourceAudioTrackId
+   *          The ID of the source audio track within the media package
+   * @param profileId
+   *          The profile to use for encoding
    * @return The track that results from the encoding
    * @throws EncoderException
    */
-  Future<Track> encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId, String profileId) throws EncoderException;
+  Future<Track> encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId, String profileId)
+          throws EncoderException;
 
-  Future<Attachment> image(MediaPackage mediaPackage, String sourceVideoTrackId, String profileId, long time) throws EncoderException;
+  /**
+   * Extracts an image from the media package element identified by
+   * <code>sourceVideoTrackId</code>. The image is taken at the timepoint
+   * <code>time</code> seconds into the movie.
+   * 
+   * @param mediaPackage
+   *          the media package
+   * @param sourceVideoTrackId
+   *          element identifier of the source video track
+   * @param profileId
+   *          identifier of the encoding profile
+   * @param time
+   *          number of seconds into the video
+   * @return the extracted image as an attachment
+   * @throws EncoderException
+   */
+  Future<Attachment> image(MediaPackage mediaPackage, String sourceVideoTrackId, String profileId, long time)
+          throws EncoderException;
 
   /**
    * @return All registered {@link EncodingProfile}s.
    */
   EncodingProfile[] listProfiles();
-  
+
 }

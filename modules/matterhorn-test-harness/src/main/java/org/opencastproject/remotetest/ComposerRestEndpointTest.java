@@ -95,7 +95,7 @@ public class ComposerRestEndpointTest {
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("sourceTrackId", "track-2"));
     formParams.add(new BasicNameValuePair("time", "1"));
-    formParams.add(new BasicNameValuePair("profileId", "feed-image.http"));
+    formParams.add(new BasicNameValuePair("profileId", "feed-cover.http"));
     formParams.add(new BasicNameValuePair("mediapackage", getSampleMediaPackage()));
     postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 

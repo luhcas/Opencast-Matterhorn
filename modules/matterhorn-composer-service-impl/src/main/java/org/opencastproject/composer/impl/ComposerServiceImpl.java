@@ -248,12 +248,15 @@ public class ComposerServiceImpl implements ComposerService {
         String timeAsString = Long.toString(time);
         properties.put("time", timeAsString);
         // Do the work
-        File encodingOutput;
+        File encodingOutput = null;
         try {
           encodingOutput = engine.encode(videoFile, profile, properties);
         } catch (EncoderException e) {
           throw new RuntimeException(e);
         }
+     
+        if (encodingOutput == null || !encodingOutput.isFile())
+          throw new RuntimeException("Encoding output doesn't exist: " + encodingOutput);
         
         // Put the file in the workspace
         URI returnURL = null;
@@ -264,8 +267,7 @@ public class ComposerServiceImpl implements ComposerService {
                   .put(mediaPackage.getIdentifier().compact(), targetAttachmentId, encodingOutput.getName(), in);
           log_.debug("Copied the encoded file to the workspace at {}", returnURL);
         } catch (Exception e) {
-          log_.error("unable to put the encoded file into the workspace");
-          e.printStackTrace();
+          throw new RuntimeException("unable to put the encoded file into the workspace", e);
         } finally {
           IOUtils.closeQuietly(in);
         }

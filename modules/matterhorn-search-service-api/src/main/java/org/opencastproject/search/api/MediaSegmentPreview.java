@@ -13,24 +13,28 @@
  *  permissions and limitations under the License.
  *
  */
-
-package org.opencastproject.media.mediapackage;
-
-import org.opencastproject.media.mediapackage.attachment.AttachmentImpl;
-
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+package org.opencastproject.search.api;
 
 /**
- * This interface describes methods and fields for attachments as part of a
- * media package.
+ * This object models a preview url for time segments, which consist of a url
+ * and a url type.
  */
-@XmlJavaTypeAdapter(AttachmentImpl.Adapter.class)
-public interface Attachment extends MediaPackageElement {
+public interface MediaSegmentPreview {
 
-  /** Media package element type */
-  Type TYPE = Type.Attachment;
+  /**
+   * Returns the url to the preview image.
+   * 
+   * @return the url
+   */
+  String getUrl();
 
-  /** Element flavor definition */
-  MediaPackageElementFlavor FLAVOR = new MediaPackageElementFlavor("attachment", "(unkown)", "Unspecified attachment");
+  /**
+   * Returns the type of preview, which will usually be set to the type of the
+   * original track, e. g. <code>presentation</code> if the original track
+   * flavor was <code>presentation/source</code>.
+   * 
+   * @return the preview type
+   */
+  String getType();
 
 }

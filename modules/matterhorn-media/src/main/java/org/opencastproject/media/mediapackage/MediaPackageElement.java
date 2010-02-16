@@ -116,6 +116,14 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
    * @return the reference
    */
   MediaPackageReference getReference();
+  
+  /**
+   * Sets the element reference.
+   * 
+   * @param reference
+   *          the reference
+   */
+  void setReference(MediaPackageReference reference);
 
   /**
    * Returns a reference to the element location.

@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -60,7 +61,8 @@ import javax.xml.transform.stream.StreamSource;
  * TODO: Finish code documentation
  */
 @XmlType(name = "mediapackage", namespace = "http://mediapackage.opencastproject.org", propOrder = { "title", "series",
-        "seriesTitle", "creators", "contributors", "subjects", "license", "language", "tracks", "catalogs", "attachments" })
+        "seriesTitle", "creators", "contributors", "subjects", "license", "language", "tracks", "catalogs",
+        "attachments" })
 @XmlRootElement(name = "mediapackage", namespace = "http://mediapackage.opencastproject.org")
 @XmlAccessorType(XmlAccessType.NONE)
 public final class MediaPackageImpl implements MediaPackage {
@@ -134,7 +136,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Creates a new media media package derived from the given media media package catalog document.
+   * Creates a new media media package derived from the given media media
+   * package catalog document.
    * 
    * @param manifest
    *          the manifest
@@ -280,11 +283,13 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Returns <code>true</code> if the media package contains an element with the specified identifier.
+   * Returns <code>true</code> if the media package contains an element with the
+   * specified identifier.
    * 
    * @param identifier
    *          the identifier
-   * @return <code>true</code> if the media package contains an element with this identifier
+   * @return <code>true</code> if the media package contains an element with
+   *         this identifier
    */
   boolean contains(String identifier) {
     for (MediaPackageElement element : manifest.getEntries()) {
@@ -770,6 +775,19 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement)
           throws UnsupportedElementException {
+    addDerived(derivedElement, sourceElement, null);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#addDerived(org.opencastproject.media.mediapackage.MediaPackageElement,
+   *      org.opencastproject.media.mediapackage.MediaPackageElement,
+   *      java.util.Map)
+   */
+  @Override
+  public void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement,
+          Map<String, String> properties) throws UnsupportedElementException {
     if (derivedElement == null)
       throw new IllegalArgumentException("The derived element is null");
     if (sourceElement == null)
@@ -779,6 +797,13 @@ public final class MediaPackageImpl implements MediaPackage {
 
     derivedElement.referTo(sourceElement);
     add(derivedElement);
+
+    if (properties != null) {
+      MediaPackageReference ref = derivedElement.getReference();
+      for (Map.Entry<String, String> entry : properties.entrySet()) {
+        ref.setProperty(entry.getKey(), entry.getValue());
+      }
+    }
   }
 
   /**
@@ -846,8 +871,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Integrates the element into the media package. This mainly involves moving the element into the media package file
-   * structure.
+   * Integrates the element into the media package. This mainly involves moving
+   * the element into the media package file structure.
    * 
    * @param element
    *          the element to integrate
@@ -860,8 +885,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Integrates the catalog into the media package. This mainly involves moving the catalog into the media package file
-   * structure.
+   * Integrates the catalog into the media package. This mainly involves moving
+   * the catalog into the media package file structure.
    * 
    * @param catalog
    *          the catalog to integrate
@@ -879,8 +904,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Integrates the track into the media package. This mainly involves moving the track into the media package file
-   * structure.
+   * Integrates the track into the media package. This mainly involves moving
+   * the track into the media package file structure.
    * 
    * @param track
    *          the track to integrate
@@ -898,8 +923,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Integrates the attachment into the media package. This mainly involves moving the attachment into the media package
-   * file structure.
+   * Integrates the attachment into the media package. This mainly involves
+   * moving the attachment into the media package file structure.
    * 
    * @param attachment
    *          the attachment to integrate
@@ -917,8 +942,9 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Returns a media package element identifier with the given prefix and the given number or a higher one as the
-   * suffix. The identifier will be unique within the media package.
+   * Returns a media package element identifier with the given prefix and the
+   * given number or a higher one as the suffix. The identifier will be unique
+   * within the media package.
    * 
    * @param prefix
    *          the identifier prefix
@@ -1036,7 +1062,10 @@ public final class MediaPackageImpl implements MediaPackage {
       return "Unknown media package";
   }
 
-  /** A JAXB adapter that allows the {@link MediaPackage} interface to be un/marshalled */
+  /**
+   * A JAXB adapter that allows the {@link MediaPackage} interface to be
+   * un/marshalled
+   */
   static class Adapter extends XmlAdapter<MediaPackageImpl, MediaPackage> {
     public MediaPackageImpl marshal(MediaPackage mp) throws Exception {
       return (MediaPackageImpl) mp;
@@ -1050,7 +1079,8 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.media.mediapackage.MediaPackage#toXml(OutputStream, boolean)
+   * @see org.opencastproject.media.mediapackage.MediaPackage#toXml(OutputStream,
+   *      boolean)
    */
   @Override
   public void toXml(OutputStream out, boolean format) throws MediaPackageException {

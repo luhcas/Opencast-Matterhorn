@@ -59,11 +59,11 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
     logger.info("init() loading default workflow definitions");
     try {
       InputStream errorHandler = ConductorServiceImpl.class.getClassLoader().getResourceAsStream(
-              "/workflows/default-error-handler.xml");
+              "/OSGI-INF/workflows/default-error-handler.xml");
       workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(errorHandler));
       
       InputStream composeDistPublish = ConductorServiceImpl.class.getClassLoader().getResourceAsStream(
-              "/workflows/compose-distribute-publish.xml");
+              "/OSGI-INF/workflows/compose-distribute-publish.xml");
       workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(composeDistPublish));
     } catch (Exception e) {
       throw new RuntimeException(e);

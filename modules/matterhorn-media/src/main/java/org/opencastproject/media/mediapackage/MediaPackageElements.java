@@ -51,11 +51,10 @@ public interface MediaPackageElements {
   /** Track without any known semantics */
   MediaPackageElementFlavor INDEFINITE_TRACK = new MediaPackageElementFlavor("indefinite", "source");
 
-  /** Track that has been distributed for use by the engage tools */
-  // TODO: Get rid of this
-  MediaPackageElementFlavor ENGAGE_TRACK = new MediaPackageElementFlavor("engage", "download");
-
-  /** Element flavor definition */
+  /** Cover art flavor */
   MediaPackageElementFlavor COVER_FLAVOR = new MediaPackageElementFlavor("cover", "source", "Cover art");
+
+  /** Slide preview attachment flavor */
+  MediaPackageElementFlavor SLIDE_PREVIEW_FLAVOR = new MediaPackageElementFlavor("preview", "source", "Slide previw image");
 
 }

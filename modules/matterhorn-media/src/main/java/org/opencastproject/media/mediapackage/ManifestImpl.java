@@ -68,7 +68,7 @@ final class ManifestImpl {
   private long startTime = 0L;
 
   /** The media package duration */
-  private long duration = 0L;
+  private long duration = -1L;
 
   /** The media package's other (uncategorized) files */
   private List<MediaPackageElement> elements = new ArrayList<MediaPackageElement>();
@@ -173,7 +173,7 @@ final class ManifestImpl {
         // +
         // " instead of " + this.duration +")");
         // else
-        if (this.duration == 0)
+        if (this.duration < 0)
           this.duration = duration;
       } else if (element instanceof Attachment) {
         attachments++;
@@ -184,16 +184,6 @@ final class ManifestImpl {
       } else {
         others++;
         id = "unknown-" + others;
-      }
-
-      // Adjust media package reference
-      MediaPackageReference reference = element.getReference();
-      if (reference != null) {
-        if (reference.getType().equals(MediaPackageReference.TYPE_MEDIAPACKAGE)
-                && reference.getIdentifier().equals(MediaPackageReference.SELF) && identifier != null) {
-          element
-                  .referTo(new MediaPackageReferenceImpl(MediaPackageReference.TYPE_MEDIAPACKAGE, identifier.toString()));
-        }
       }
     }
 

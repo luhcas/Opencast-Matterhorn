@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Date;
+import java.util.Map;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -40,7 +41,7 @@ public interface MediaPackage extends Cloneable {
    * @return the identifier
    */
   Id getIdentifier();
-  
+
   void setIdentifier(Id id);
 
   void setTitle(String title);
@@ -51,7 +52,7 @@ public interface MediaPackage extends Cloneable {
    * @return The series title
    */
   String getSeriesTitle();
-  
+
   void setSeriesTitle(String seriesTitle);
 
   /**
@@ -256,8 +257,7 @@ public interface MediaPackage extends Cloneable {
    *          the reference
    * @return the tracks with the specified reference
    */
-  Track[] getTracks(MediaPackageElementFlavor flavor,
-          MediaPackageReference reference);
+  Track[] getTracks(MediaPackageElementFlavor flavor, MediaPackageReference reference);
 
   /**
    * Returns <code>true</code> if the media package contains media tracks of any
@@ -334,8 +334,7 @@ public interface MediaPackage extends Cloneable {
    *          the reference
    * @return the attachments with the specified reference
    */
-  Attachment[] getAttachments(MediaPackageElementFlavor flavor,
-          MediaPackageReference reference);
+  Attachment[] getAttachments(MediaPackageElementFlavor flavor, MediaPackageReference reference);
 
   /**
    * Returns <code>true</code> if the media package contains attachments of any
@@ -412,8 +411,7 @@ public interface MediaPackage extends Cloneable {
    *          the reference
    * @return the catalogs with the specified reference
    */
-  Catalog[] getCatalogs(MediaPackageElementFlavor flavor,
-          MediaPackageReference reference);
+  Catalog[] getCatalogs(MediaPackageElementFlavor flavor, MediaPackageReference reference);
 
   /**
    * Returns <code>true</code> if the media package contains catalogs of any
@@ -443,8 +441,7 @@ public interface MediaPackage extends Cloneable {
    *          the reference
    * @return <code>true</code> if the media package contains catalogs
    */
-  boolean hasCatalogs(MediaPackageElementFlavor flavor,
-          MediaPackageReference reference);
+  boolean hasCatalogs(MediaPackageElementFlavor flavor, MediaPackageReference reference);
 
   /**
    * Returns media package elements that are neither, attachments, catalogs nor
@@ -512,8 +509,8 @@ public interface MediaPackage extends Cloneable {
    * @throws UnsupportedElementException
    *           if the element is of an unsupported format
    */
-  MediaPackageElement add(URI uri, MediaPackageElement.Type type,
-          MediaPackageElementFlavor flavor) throws UnsupportedElementException;
+  MediaPackageElement add(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
+          throws UnsupportedElementException;
 
   /**
    * Adds an arbitrary {@link MediaPackageElement} to this media package.
@@ -612,8 +609,33 @@ public interface MediaPackage extends Cloneable {
    *           if for some reason <code>derivedElement</code> cannot be added to
    *           the media package
    */
-  void addDerived(MediaPackageElement derivedElement,
-          MediaPackageElement sourceElement) throws UnsupportedElementException;
+  void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement)
+          throws UnsupportedElementException;
+
+  /**
+   * Adds an element to this media package that represents a derived version of
+   * <code>sourceElement</code>. Examples of a derived element could be an
+   * encoded version of a track or a converted version of a time text captions
+   * file.
+   * <p>
+   * This method will add <code>derviedElement</code> to the media package and
+   * add a reference to the original element <code>sourceElement</code>. Make
+   * sure that <code>derivedElement</code> features the right flavor, so that
+   * you are later able to look up derived work using
+   * {@link #getDerived(MediaPackageElement, MediaPackageElementFlavor)}.
+   * 
+   * @param derivedElement
+   *          the derived element
+   * @param sourceElement
+   *          the source element
+   * @param properties
+   *          properties for the reference that is being created
+   * @throws UnsupportedElementException
+   *           if for some reason <code>derivedElement</code> cannot be added to
+   *           the media package
+   */
+  void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement, Map<String, String> properties)
+          throws UnsupportedElementException;
 
   /**
    * Returns those media package elements that are derivates of
@@ -628,8 +650,7 @@ public interface MediaPackage extends Cloneable {
    *          the derivate flavor you are looking for
    * @return the derivates
    */
-  MediaPackageElement[] getDerived(MediaPackageElement sourceElement,
-          MediaPackageElementFlavor derivateFlavor);
+  MediaPackageElement[] getDerived(MediaPackageElement sourceElement, MediaPackageElementFlavor derivateFlavor);
 
   /**
    * Returns the media package's cover or <code>null</code> if no cover is
@@ -649,8 +670,7 @@ public interface MediaPackage extends Cloneable {
    * @throws UnsupportedElementException
    *           if the cover is of an unsupported format
    */
-  void setCover(Attachment cover) throws MediaPackageException,
-          UnsupportedElementException;
+  void setCover(Attachment cover) throws MediaPackageException, UnsupportedElementException;
 
   /**
    * Removes the cover from the media package.
@@ -686,8 +706,7 @@ public interface MediaPackage extends Cloneable {
    * @throws MediaPackageException
    *           if errors occur while packaging the media package
    */
-  void pack(MediaPackagePackager packager, OutputStream out)
-          throws IOException, MediaPackageException;
+  void pack(MediaPackagePackager packager, OutputStream out) throws IOException, MediaPackageException;
 
   /**
    * Verifies the media package consistency by checking the media package
@@ -729,8 +748,7 @@ public interface MediaPackage extends Cloneable {
    * @throws MediaPackageException
    *           if saving the manifest failed
    */
-  Document toXml(MediaPackageSerializer serializer)
-          throws MediaPackageException;
+  Document toXml(MediaPackageSerializer serializer) throws MediaPackageException;
 
   /**
    * Renames the media package to the new identifier.

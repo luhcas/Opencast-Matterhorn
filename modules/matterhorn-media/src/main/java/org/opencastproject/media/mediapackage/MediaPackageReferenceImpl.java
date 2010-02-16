@@ -16,6 +16,9 @@
 
 package org.opencastproject.media.mediapackage;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
@@ -41,12 +44,14 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
   /** External representation */
   private String externalForm = null;
 
+  /** The properties that describe this reference */
+  Map<String, String> properties = null;
+
   /**
    * Creates a reference to the containing media package (<code>self</code>).
    */
   public MediaPackageReferenceImpl() {
-    type = TYPE_MEDIAPACKAGE;
-    identifier = SELF;
+    this(TYPE_MEDIAPACKAGE, SELF);
   }
 
   /**
@@ -63,14 +68,15 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
       identifier = mediaPackage.getIdentifier().toString();
     else
       identifier = SELF;
+    properties = new HashMap<String, String>();
   }
 
   /**
    * Creates a reference to the specified media package element.
    * <p>
-   * Note that the referenced element must already be part of the media package, otherwise a
-   * <code>MediaPackageException</code> will be thrown as the object holding this reference is added to the media
-   * package.
+   * Note that the referenced element must already be part of the media package,
+   * otherwise a <code>MediaPackageException</code> will be thrown as the object
+   * holding this reference is added to the media package.
    * 
    * @param mediaPackageElement
    *          the media package element to refer to
@@ -78,12 +84,14 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
   public MediaPackageReferenceImpl(MediaPackageElement mediaPackageElement) {
     if (mediaPackageElement == null)
       throw new IllegalArgumentException("Parameter media package element must not be null");
-    type = mediaPackageElement.getElementType().toString().toLowerCase();
-    identifier = mediaPackageElement.getIdentifier();
+    this.type = mediaPackageElement.getElementType().toString().toLowerCase();
+    this.identifier = mediaPackageElement.getIdentifier();
+    this.properties = new HashMap<String, String>();
   }
 
   /**
-   * Creates a reference to the entity identified by <code>type</code> and <code>identifier</code>.
+   * Creates a reference to the entity identified by <code>type</code> and
+   * <code>identifier</code>.
    * 
    * @param type
    *          the reference type
@@ -97,6 +105,7 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
       throw new IllegalArgumentException("Parameter identifier must not be null");
     this.type = type;
     this.identifier = identifier;
+    this.properties = new HashMap<String, String>();
   }
 
   /**
@@ -110,16 +119,32 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
     if (reference == null)
       throw new IllegalArgumentException("Reference is null");
 
+    MediaPackageReference ref = null;
+
+    String[] parts = reference.split(";");
+    String elementReference = parts[0];
+
     // Check for special reference
-    if ("self".equals(reference))
-      return new MediaPackageReferenceImpl(MediaPackageReference.TYPE_MEDIAPACKAGE, "self");
+    if ("self".equals(elementReference))
+      ref = new MediaPackageReferenceImpl(MediaPackageReference.TYPE_MEDIAPACKAGE, "self");
+    else {
+      String[] elementReferenceParts = elementReference.split(":");
+      if (elementReferenceParts.length != 2)
+        throw new IllegalArgumentException("Reference " + reference + " is malformed");
+      ref = new MediaPackageReferenceImpl(elementReferenceParts[0], elementReferenceParts[1]);
+    }
 
-    // Check syntax
-    String[] parts = reference.split(":");
-    if (parts.length != 2)
-      throw new IllegalArgumentException("Reference " + reference + " is malformed");
+    // Process the reference properties
+    for (int i = 1; i < parts.length; i++) {
+      String[] propertyParts = parts[i].split("=");
+      if (propertyParts.length != 2)
+        throw new IllegalStateException("malformatted reference properties");
+      String key = propertyParts[0];
+      String value = propertyParts[1];
+      ref.setProperty(key, value);
+    }
 
-    return new MediaPackageReferenceImpl(parts[0], parts[1]);
+    return ref;
   }
 
   /**
@@ -134,6 +159,44 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
    */
   public String getType() {
     return type;
+  }
+
+  /**
+   * @return the properties
+   */
+  public Map<String, String> getProperties() {
+    return properties;
+  }
+
+  /**
+   * @param properties
+   *          the properties to set
+   */
+  public void setProperties(Map<String, String> properties) {
+    this.properties = properties;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackageReference#getProperty(java.lang.String)
+   */
+  @Override
+  public String getProperty(String key) {
+    return properties.get(key);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackageReference#setProperty(java.lang.String,
+   *      java.lang.String)
+   */
+  @Override
+  public void setProperty(String key, String value) {
+    if (value == null)
+      this.properties.remove(key);
+    this.properties.put(key, value);
   }
 
   /**
@@ -186,6 +249,14 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
         buf.append(":");
         buf.append(identifier);
       }
+      if (properties.size() > 0) {
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+          buf.append(";");
+          buf.append(entry.getKey());
+          buf.append("=");
+          buf.append(entry.getValue());
+        }
+      }
       externalForm = buf.toString();
     }
     return externalForm;
@@ -194,12 +265,15 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
   public static class Adapter extends XmlAdapter<String, MediaPackageReference> {
     @Override
     public String marshal(MediaPackageReference ref) throws Exception {
-      if(ref == null) return null;
+      if (ref == null)
+        return null;
       return ref.toString();
     }
+
     @Override
     public MediaPackageReference unmarshal(String ref) throws Exception {
-      if(ref == null) return null;
+      if (ref == null)
+        return null;
       return MediaPackageReferenceImpl.fromString(ref);
     }
   }
