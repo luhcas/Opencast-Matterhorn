@@ -23,7 +23,7 @@
     layout = "absolute"
     backgroundColor = "#000000"
     preinitialize = "{ onPreinitialize(); }"
-    applicationComplete = "init(event)"
+    applicationComplete = "{ onApplicationComplete(event) }"
     addedToStage = "onAddedToStage()"
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
     xmlns:br = "bridge.*"
@@ -65,10 +65,16 @@
              *
              * initialization
              * */
-            private function init( evt:Event ):void
+            private function onApplicationComplete( evt:Event ):void
             {
                 /* Set up full screen handler. */
                 Application.application.stage.addEventListener( FullScreenEvent.FULL_SCREEN, fullScreenHandler );
+                
+                if ( Application.application.parameters.playerId != undefined )
+                {
+                    model.playerId = Application.application.parameters.playerId;
+                
+                }
             }
 
             /**

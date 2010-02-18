@@ -54,6 +54,10 @@ package org.opencast.engage.videodisplay.control.command
                     if ( !model.player.playing )
                     {
                        model.player.play();
+                       if( model.SECONDPLAYER == model.playerId )
+                       {
+                          model.player.volume = 0;
+                       }
                     }
                     model.currentPlayerState = PlayerState.PLAYING;
                     currentPlayPauseState = PlayerState.PAUSING;

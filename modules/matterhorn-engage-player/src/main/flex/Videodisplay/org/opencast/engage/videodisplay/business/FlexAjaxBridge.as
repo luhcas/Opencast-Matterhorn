@@ -1,6 +1,9 @@
 package org.opencast.engage.videodisplay.business
 {
+    import bridge.ExternalFunction;
+    
     import flash.events.KeyboardEvent;
+    import flash.external.ExternalInterface;
     
     import mx.controls.Alert;
     
@@ -347,6 +350,20 @@ package org.opencast.engage.videodisplay.business
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.INFORMATION ) );
             }
         }
-
+        
+        /**
+         * onBridgeReady
+         *
+         * Set player Id.
+         */
+        public function onBridgeReady():void
+        {
+            ExternalInterface.call( ExternalFunction.ONPLAYERREADY, model.playerId );
+            
+            if( model.SECONDPLAYER == model.playerId )
+            {
+                model.player.volume = 0;
+            }
+        }
     }
 }

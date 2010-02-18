@@ -16,10 +16,10 @@
 package org.opencast.engage.videodisplay.model
 {
     import com.adobe.strobe.players.MediaPlayerWrapper;
-
+    
     import mx.collections.ArrayCollection;
     import mx.controls.ProgressBar;
-
+    
     import org.opencast.engage.videodisplay.control.util.TimeCode;
     import org.opencast.engage.videodisplay.state.MediaState;
     import org.opencast.engage.videodisplay.vo.LanguageVO;
@@ -124,6 +124,10 @@ package org.opencast.engage.videodisplay.model
         // playerId
         public var playerId:String = '';
         
-      
+        // firstPlayer
+        public var FIRSTPLAYER:String = 'firstPlayer';
+        
+        // secondPlayer
+        public var SECONDPLAYER:String = 'secondPlayer';
     }
 }

@@ -75,10 +75,6 @@ function VideodisplayReady() {
 		b_Videodisplay_root.seek(argNumber);
 	};
 	
-	Videodisplay.setLanguage = function(argString) {
-		b_Videodisplay_root.setLanguage(argString);
-	};
-	
 	Videodisplay.closedCaptions = function(argBool) {
 		b_Videodisplay_root.closedCaptions(argBool);
 	};
@@ -98,4 +94,6 @@ function VideodisplayReady() {
 	Videodisplay.setPlayerId = function(argString) {
 		b_Videodisplay_root.setPlayerId(argString);
 	};
+	
+	b_Videodisplay_root.onBridgeReady();
 }

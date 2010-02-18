@@ -51,5 +51,7 @@ package bridge
         public static const DOSETVOLUME:String            = 'Opencast.Player.doSetVolume';
         
         public static const SETPLAYERVOLUME:String        = 'Opencast.Player.setPlayerVolume';
+        
+        public static const ONPLAYERREADY:String          = 'Opencast.Watch.onPlayerReady'; 
     }
 }

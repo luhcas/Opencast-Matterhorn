@@ -84,6 +84,18 @@ mvn site
 creates the 'site' folder in the /target directory
 
 
+------
+
+CODE FORMATING:
+FlexCode Formater
+
+------
+
+RUN JavaScript Tests:
+
+mvn -P jstests test
+
+
 
 
 

@@ -100,6 +100,46 @@
 		</plugins>
 	</build>
 
+<!-- run JsTestDriver to test js; mvn -P jstests test -->
+      <profiles>
+        <profile>
+            <id>jstests</id>
+            <build>
+                <plugins>
+			<plugin>
+             <groupId>org.codehaus.mojo</groupId>
+             <artifactId>exec-maven-plugin</artifactId>
+             <version>1.1.1</version>
+             <executions>
+                 <execution>
+                     <phase>test-compile</phase>
+                     <configuration>
+                         <executable>java</executable>
+                         <cleanupDaemonThreads>true</cleanupDaemonThreads>
+                         <arguments>
+                             <argument>-jar</argument>
+                             <argument>src/test/resources/jstestdriver-1.2.jar</argument>
+                             <argument>--port</argument>
+                             <argument>4224</argument>
+                             <argument>--config</argument>
+                             <argument>src/test/resources/jsTestDriver.conf</argument>
+                             <argument>--browser</argument>
+                             <argument>open</argument>
+                             <argument>--tests</argument>
+                             <argument>all</argument>
+                             <argument>--reset</argument>
+                         </arguments>
+                     </configuration>
+                     <goals>
+                         <goal>exec</goal>
+                     </goals>
+                 </execution>
+             </executions>
+         </plugin>
+         </plugins>
+            </build>
+        </profile>
+        </profiles>
 
 	<reporting>
 		<plugins>

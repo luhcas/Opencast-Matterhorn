@@ -15,9 +15,6 @@
 
  */
 
-
-
-
 /*
  * The Bridge class, responsible for navigating JS instances
  */

@@ -16,13 +16,14 @@
 package org.opencast.engage.videodisplay.control.command
 {
     import bridge.ExternalFunction;
-
+    
     import flash.events.TimerEvent;
     import flash.external.ExternalInterface;
     import flash.utils.Timer;
-
+    
+    import mx.controls.Alert;
     import mx.core.Application;
-
+    
     import org.opencast.engage.videodisplay.control.event.DisplayCaptionEvent;
     import org.opencast.engage.videodisplay.control.event.InitPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
@@ -42,7 +43,6 @@ package org.opencast.engage.videodisplay.control.command
     import org.osmf.net.NetLoader;
     import org.osmf.traits.LoadTrait;
     import org.osmf.traits.MediaTraitType;
-    import org.osmf.utils.FMSURL;
     import org.osmf.utils.URL;
     import org.osmf.video.VideoElement;
     import org.swizframework.Swiz;
@@ -118,11 +118,6 @@ package org.opencast.engage.videodisplay.control.command
                 errorMessage( "Error", "TRACK COULD NOT BE FOUND" );
             }
 
-            if ( Application.application.parameters.playerId != undefined )
-            {
-                model.playerId = Application.application.parameters.playerId;
-            }
-
             // When the flash vars autoplay ist not undifined
             if ( Application.application.parameters.autoplay != undefined )
             {
@@ -145,13 +140,14 @@ package org.opencast.engage.videodisplay.control.command
                 model.player.volume = 0.0;
                 model.mediaPlayerWrapper.visible = false;
             }
-
+            
             // Set up the MediaPlayer.
             model.player.autoRewind = true;
 
             model.mediaPlayerWrapper.scaleMode = ScaleMode.LETTERBOX;
             model.mediaPlayerWrapper.addEventListener( TimeEvent.DURATION_CHANGE, onDurationChange );
             model.mediaPlayerWrapper.addEventListener( AudioEvent.VOLUME_CHANGE, volumeChange );
+            model.mediaPlayerWrapper.addEventListener( AudioEvent.MUTED_CHANGE, muteChange );
             model.mediaPlayerWrapper.addEventListener( TimeEvent.CURRENT_TIME_CHANGE, onCurrentTimeChange );
             model.mediaPlayerWrapper.addEventListener( TimeEvent.DURATION_REACHED, onDurationReached );
             model.mediaPlayerWrapper.addEventListener( MediaErrorEvent.MEDIA_ERROR, onMediaError );
@@ -258,10 +254,24 @@ package org.opencast.engage.videodisplay.control.command
          * */
         private function volumeChange( event:AudioEvent ):void
         {
-            ExternalInterface.call( ExternalFunction.SETVOLUME, event.volume * 100, model.playerId );
-            model.videoVolume = event.volume;
+            if( model.FIRSTPLAYER == model.playerId )
+            {
+                ExternalInterface.call( ExternalFunction.SETVOLUME, event.volume * 100, model.playerId );
+                model.videoVolume = event.volume;
+            }
         }
-
+        
+        /**
+         * muteChange
+         *
+         * When the player is mute or unmute
+         *
+         * */
+        private function muteChange( event:AudioEvent ):void
+        {
+            Alert.show(event.muted.toString());
+        }
+        
         /**
          * onCurrentTimeChange
          *
