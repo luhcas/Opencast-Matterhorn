@@ -29,7 +29,7 @@ public class AgentTest {
 
   @Before
   public void setup() {
-    agent = new Agent("test", AgentState.IDLE);
+    agent = new Agent("test", AgentState.IDLE, null);
     Assert.assertNotNull(agent);
     time = agent.getLastCheckinTime();
   }

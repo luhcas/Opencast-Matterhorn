@@ -15,9 +15,12 @@
  */
 package org.opencastproject.capture.admin.api;
 
+import java.util.Properties;
+
 /**
  * An in-memory construct to represent the state of a capture agent, and when it was last heard from.
  */
+// FIXME: This should be cleaned to conform a real API style and move the implementation to other file
 public class Agent {
 
   /**
@@ -38,16 +41,26 @@ public class Agent {
   protected Long lastHeardFrom;
 
   /**
+   * The capabilities the agent has
+   * Capabilities are the devices this agent can record from, with a friendly name associated
+   * to determine their nature (e.g. PRESENTER --> dev/video0)
+   */
+  protected Properties capabilities;
+
+  /**
    * Builds a representation of the agent.
    *
    * @param agentName The name of the agent.
    * @param agentState The state of the agent.  This should be defined from the constants in {@link org.opencastproject.capture.admin.api.AgentState}.
    * @see AgentState
    */
-  public Agent(String agentName, String agentState) {
+  public Agent(String agentName, String agentState, Properties capabilities) {
     name = agentName;
     this.setState(agentState);
+    // TODO: agents with no capabilities are allowed? (i.e. with capabilities == null)
+    this.capabilities = capabilities;
   }
+
 
   /**
    * Gets the name of the agent.
@@ -86,5 +99,13 @@ public class Agent {
    */
   public Long getLastCheckinTime() {
     return lastHeardFrom;
+  }
+
+  public Properties getCapabilities() {
+    return capabilities;
+  }
+
+  public void setCapabilities(Properties capabilities) {
+    this.capabilities = capabilities;
   }
 }

@@ -85,7 +85,7 @@ public class AgentStateJob implements Job {
 
     Agent a = state.getAgent();
 
-    formParams.add(new BasicNameValuePair("agentName", a.getName()));
+    //formParams.add(new BasicNameValuePair("agentName", a.getName()));
     formParams.add(new BasicNameValuePair("state", a.getState()));
 
     send(formParams, url);

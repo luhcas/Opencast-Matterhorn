@@ -61,7 +61,7 @@ public class StateServiceImpl implements StateService, ManagedService {
 
   public void activate(ComponentContext ctx) {
     recordings = new Hashtable<String, Recording>();
-    agent = new Agent(configService.getItem(CaptureParameters.AGENT_NAME), AgentState.UNKNOWN);
+    agent = new Agent(configService.getItem(CaptureParameters.AGENT_NAME), AgentState.UNKNOWN,  null);
     createPollingTask();
   }
   

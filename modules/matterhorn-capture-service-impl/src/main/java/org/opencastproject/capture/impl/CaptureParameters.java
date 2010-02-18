@@ -74,6 +74,10 @@ public interface CaptureParameters {
   /** The time between attempts to push the agent's state to the state service */
   public static final String AGENT_STATE_REMOTE_POLLING_INTERVAL = "capture.agent.state.remote.polling.interval";
 
+  /** The time between attempts to push the agent's capabilities to the state service */                                                                            
+  public static final String AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL = "capture.agent.capabilities.remote.polling.interval";
+
+  
   /**
    * Settings which control the recording state service
    */

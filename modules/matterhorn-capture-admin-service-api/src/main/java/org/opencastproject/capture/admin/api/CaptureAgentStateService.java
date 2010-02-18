@@ -16,12 +16,23 @@
 package org.opencastproject.capture.admin.api;
 
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * API for the capture-admin service (MH-1336, MH-1394, MH-1457, MH-1475 and MH-1476).
  */
 public interface CaptureAgentStateService {
 
+  /** Return value for successful operations */
+  public static final int OK = 0;
+  
+  /** Return value for methods where an non-existent agent is specified */
+  public static final int NO_SUCH_AGENT = -1;
+  
+  /** Return value for methods where an incorrect parameter is specified */
+  public static final int BAD_PARAMETER = -2;
+  
+  
   /**
    * Returns the last known state of a given agent.
    *
@@ -38,14 +49,15 @@ public interface CaptureAgentStateService {
    * @param state The current state of the agent.
    * @see AgentState
    */
-  public void setAgentState(String agentName, String state);
+  public int setAgentState(String agentName, String state);
 
   /**
    * Remove an agent from the system, if the agent exists.
    *
    * @param agentName The name of the agent.
+   * 
    */
-  public void removeAgent(String agentName);
+  public int removeAgent(String agentName);
 
   /**
    * Returns the list of known agents.
@@ -57,10 +69,18 @@ public interface CaptureAgentStateService {
   /**
    * Returns the list of known agent capabilities.
    *
-   * @return A {@link java.util.Map} of name-agent capability pairs.
+   * @return A {@link java.util.Properties} of name-value capability pairs.
    */
-  public Map<String, String> getAgentCapabilities();
+  public Properties getAgentCapabilities(String agentName);
 
+  /**
+   * Sets the capabilities for the specified agent
+   * @param agentName
+   * @param capabilities
+   * @return
+   */
+  public int setAgentCapabilities(String agentName, Properties capabilities);
+  
   /**
    * Gets the state of a recording, if it exists.
    *
