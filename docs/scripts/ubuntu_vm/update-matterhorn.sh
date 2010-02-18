@@ -2,15 +2,15 @@
 
 #stop felix
 sudo /home/opencast/shutdown.sh
-cd /home/opencast/opencast
+cd /opt/matterhorn/matterhorn_trunk
 # update from svn
 svn update
 # build matterhorn
-mvn clean install -DdeployTo=/usr/local/felix-framework-2.0.1/load
+mvn clean install -DdeployTo=/opt/matterhorn/felix/load
 # creating backup of configuration
-tar -czf /home/opencast/felix-config-backup.tar.gz /usr/local/felix-framework-2.0.1/conf/ 
+tar -czf /home/opencast/felix-config-backup.tar.gz /opt/matterhorn/felix/conf/ 
 # update felix configuration
-sudo p -rf docs/felix/config/ /usr/local/felix-framework-2.0.1/conf/
-cd /home/opnecast
+sudo p -rf docs/felix/config/ /opt/matterhorn/felix/conf/
+cd /home/opencast
 # restart felix
 /home/opencast/startup.sh

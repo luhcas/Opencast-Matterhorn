@@ -4,7 +4,7 @@
 #    UBUNTU_MIRROR=http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ ./buildvm.sh
 
 HOME=`pwd`
-
+MATTERHORN_SVN="https://opencast.jira.com/svn/MH/trunk/"
 #check for existance of mirror URL
 if [ "$UBUNTU_MIRROR" = "" ];
   then
@@ -112,33 +112,38 @@ echo "============================"
 echo "==Installing Apache Felix==="
 echo "============================"
 
+sudo mkdir mnt/opt/matterhorn
+sudo cp -r matterhorn_trunk mnt/opt/matterhorn/
+
 if [ ! -e felix-framework-2.0.1 ]; then
   wget http://apache.linux-mirror.org/felix/felix-framework-2.0.1.tar.gz
   tar -xzf felix-framework-2.0.1.tar.gz
 fi 
 
 #copy felix files to vm
-sudo cp -r felix-framework-2.0.1 mnt/usr/local/felix-framework-2.0.1
+sudo cp -r felix-framework-2.0.1 mnt/opt/matterhorn/felix
 #create needed dirs
-sudo mkdir mnt/usr/local/felix-framework-2.0.1/load
-sudo chown -R 1000:1000 mnt/usr/local/felix-framework-2.0.1/
-sudo chmod -R 777 mnt/usr/local/felix-framework-2.0.1/
+sudo mkdir mnt/opt/matterhorn/felix/load
+sudo chown -R 1000:1000 mnt/opt/matterhorn/felix/
+sudo chmod -R 777 mnt/opt/matterhorn/felix/
 
 echo "=========================="/
 echo "=====Fetching Opencast===="
 echo "=========================="
 
 #check out svn
-if [ -e opencast ]; then
-  cd opencast
+if [ -e matterhorn_trunk ]; then
+  cd matterhorn_trunk
   svn up
   cd ..
 else
-  svn co http://source.opencastproject.org/svn/products/matterhorn/trunk/ opencast
+  svn co $MATTERHORN_SVN matterhorn_trunk
 fi
-sudo cp -r opencast mnt/home/opencast/
-sudo cp -rf opencast/docs/felix/conf/* mnt/usr/local/felix-framework-2.0.1/conf
-export OC_REV=`svn info opencast | awk /Revision/ | cut -d " " -f 2`
+
+sudo cp -rf matterhorn_trunk/docs/felix/conf/* mnt/opt/matterhorn/felix/conf/
+
+
+export OC_REV=`svn info matterhorn_trunk | awk /Revision/ | cut -d " " -f 2`
 
 #echo "=========================="
 #echo "=====Fetching FFMpeg======"
@@ -180,9 +185,9 @@ echo "=========================="
 
 #get maven to update whatever dependancies we might have for opencast
 pwd
-cd opencast
+cd matterhorn_trunk
 export MAVEN_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m"
-mvn install -fn -DskipTests -Dmaven.repo.local=$M2/repository -DdeployTo=$HOME/mnt/usr/local/felix-framework-2.0.1/load
+mvn install -fn -DskipTests -Dmaven.repo.local=$M2/repository -DdeployTo=$HOME/mnt/opt/matterhorn/felix/load
 cd ..
 
 #copy the maven repo across
@@ -199,19 +204,24 @@ sudo cp libmediainfo.a mnt/usr/local/lib/
 sudo cp libmediainfo.la mnt/usr/local/lib/
 
 #create directory for log files
-sudo mkdir mnt/var/log/matterhorn
-sudo chown -R 1000:1000 mnt/var/log/matterhorn
+sudo mkdir mnt/opt/matterhorn/log
+sudo chown -R 1000:1000 mnt/opt/matterhorn/log
 
 #create directory for capture agent
 sudo mkdir mnt/opencast
 sudo chown -R 1000:1000 mnt/opencast
 sudo chmod 777 mnt/opencast
 
+#give opencast user rights for /opt/matterhorn
+sudo chown -R 1000:1000 mnt/opt/matterhorn
+sudo chmod -R 777 mnt/opt/matterhorn
+
+
 #write environment variables to login file
-echo "export OC=/home/opencast/opencast" >> mnt/home/opencast/.bashrc
-echo "export FELIX_HOME=/usr/local/felix-framework-2.0.1" >> mnt/home/opencast/.bashrc
+echo "export OC=/opt/matterhorn" >> mnt/home/opencast/.bashrc
+echo "export FELIX_HOME=/opt/matterhorn/felix" >> mnt/home/opencast/.bashrc
 echo "export M2_REPO=/home/opencast/.m2/repository" >> mnt/home/opencast/.bashrc
-echo "export OC_URL=http://source.opencastproject.org/svn/products/matterhorn/trunk/" >> mnt/home/opencast/.bashrc
+echo "export OC_URL=http://opencast.jira.com/svn/MH/trunk/" >> mnt/home/opencast/.bashrc
 echo "export FELIX_URL=http://apache.mirror.iweb.ca/felix/felix-framework-2.0.1.tar.gz" >> mnt/home/opencast/.bashrc
 echo "export JAVA_HOME=/usr/lib/jvm/java-6-sun" >> mnt/home/opencast/.bashrc
 echo "export MAVEN_OPTS=\"-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m\"" >> mnt/home/opencast/.bashrc

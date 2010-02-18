@@ -3,7 +3,7 @@
 if [ -n "${FELIX_HOME:-x}" ]; then
   FELIX=$FELIX_HOME
 else
-  FELIX="/usr/local/felix-framework-2.0.1"
+  FELIX="/opt/matterhorn/felix"
 fi
 
 
@@ -14,11 +14,11 @@ else
 fi
 
 
-MATTERHORN_HOME=/usr/local/matterhorn
-MATTERHORN_CONF=/usr/local/felix-framework-2.0.1/conf
-MATTERHORN_LIB=/usr/local/felix-framework-2.0.1
-MATTERHORN_LOG=/var/log/matterhorn
-FELIX_HOME=/usr/local/felix-framework-2.0.1
+MATTERHORN_HOME=/opt/matterhorn
+MATTERHORN_CONF=/opt/matterhorn/felix/conf
+MATTERHORN_LIB=/opt/matterhorn/felix
+MATTERHORN_LOG=/opt/matterhorn/log
+FELIX_HOME=/opt/matterhorn/felix
 
 #
 # Define Constants
@@ -27,7 +27,7 @@ MAVEN_ARG="-DM2_REPO=$M2_REPO"
 MATTERHORN_BUNDLE_DIR=$MATTERHORN_LIB/load
 MATTERHORN_WORK_DIR=$MATTERHORN_LIB/work
 MATTERHORN_CACHE_DIR=$MATTERHORN_LIB/felix-cache
-MATTERHORN_LOG_FILE=/var/log/matterhorn/felix.log
+MATTERHORN_LOG_FILE=/opt/matterhorn/log/felix.log
 
 #
 # Check if nightly is already running

@@ -2,7 +2,7 @@
 
 # Initialization
 INST_DIR=/home/opencast
-CONF_DIR=/usr/local/felix-framework-2.0.1/conf
+CONF_DIR=/opt/matterhorn/felix/conf
 MOTD_FILE=/etc/motd.tail
 MY_OS=`uname -sr`
 
@@ -49,12 +49,6 @@ install_3p ()
   wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   sudo dpkg -i libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   rm -f libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
-  #wget http://downloads.sourceforge.net/mediainfo/libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
-  #sudo dpkg -i libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
-  #rm -f libmediainfo0_0.7.24-1_i386.Ubuntu_9.04.deb
-  #wget http://downloads.sourceforge.net/mediainfo/mediainfo_0.7.24-1_i386.Debian_5.deb
-  #sudo dpkg -i mediainfo_0.7.24-1_i386.Debian_5.deb
-  #rm -f mediainfo_0.7.24-1_i386.Debian_5.deb
 
   #ocr support
   echo "ocr support"
@@ -66,7 +60,6 @@ install_3p ()
   cd tessdata
   sudo chmod 755 *
   
-  #sudo cp /usr/bin/mediainfo /usr/local/bin/mediainfo
 }
 
 install_ffmpeg ()
@@ -102,8 +95,17 @@ start_mh ()
 {
   echo "Starting Matterhorn..."
 
-  FELIX=felix-framework-2.0.1
-  FELIX_DIR=/usr/local/$FELIX
+  FELIX=felix
+  FELIX_DIR=/opt/matterhorn/$FELIX
+
+  export OC=/opt/matterhorn
+  export FELIX_HOME=/opt/matterhorn/felix
+  export M2_REPO=/home/opencast/.m2/repository
+  export OC_URL=http://opencast.jira.com/svn/MH/trunk/
+  export FELIX_URL=http://apache.mirror.iweb.ca/felix/felix-framework-2.0.1.tar.gz
+  export JAVA_HOME=/usr/lib/jvm/java-6-sun
+  export MAVEN_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m"
+
 
   cd $INST_DIR
 

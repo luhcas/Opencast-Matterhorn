@@ -11,14 +11,6 @@
 #
 # By default this script does nothing.
 
-export OC=/home/opencast/opencast
-export FELIX_HOME=/usr/local/felix-framework-2.0.1
-export M2_REPO=/home/opencast/.m2/repository/
-export OC_URL=http://source.opencastproject.org/svn/products/matterhorn/trunk/
-export FELIX_URL=http://apache.mirror.iweb.ca/felix/felix-framework-2.0.1.tar.gz
-export JAVA_HOME=/usr/lib/jvm/java-6-sun
-export MAVEN_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m"
-
 echo "***********************************************************" > /dev/console
 
 if [ -f /etc/profile.d/matterhorn_setup.sh ]; then
