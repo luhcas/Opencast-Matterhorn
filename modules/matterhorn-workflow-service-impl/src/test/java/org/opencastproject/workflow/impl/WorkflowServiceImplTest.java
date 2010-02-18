@@ -19,6 +19,7 @@ import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -28,6 +29,7 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import junit.framework.Assert;
 
@@ -473,13 +475,13 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(100, service.countWorkflowInstances());
   }
 
-  static class SucceedingWorkflowOperationHandler implements WorkflowOperationHandler {
+  static class SucceedingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
     public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediapackage1, null, false);
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediapackage1, Action.CONTINUE);
     }
   }
 
-  static class FailingWorkflowOperationHandler implements WorkflowOperationHandler {
+  static class FailingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
     public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
       throw new WorkflowOperationException("this operation handler always fails.  that's the point.");
     }

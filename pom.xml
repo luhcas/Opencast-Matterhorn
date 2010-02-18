@@ -27,7 +27,7 @@
       <modules>
         <module>modules/matterhorn-build-tools</module>
         <module>modules/matterhorn-runtime-tools</module>
-        <!-- <module>modules/matterhorn-authentication-api</module> -->
+        <module>modules/matterhorn-authentication-api</module>
         <module>modules/matterhorn-capture-service-api</module> 
         <module>modules/matterhorn-capture-service-impl</module>
         <module>modules/matterhorn-capture-admin-service-api</module>
@@ -558,8 +558,14 @@
 
       <dependency>
         <groupId>org.ops4j.pax.web</groupId>
-        <artifactId>pax-web-service</artifactId>
-        <version>0.6.0</version>
+        <artifactId>pax-web-jetty-bundle</artifactId>
+        <version>0.7.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.ops4j.pax.web</groupId>
+        <artifactId>pax-web-extender-whiteboard</artifactId>
+        <version>0.7.1</version>
       </dependency>
 
       <!-- testing -->

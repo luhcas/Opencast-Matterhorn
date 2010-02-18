@@ -19,11 +19,12 @@ import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
-import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ import java.util.Set;
 /**
  * The workflow definition for handling "distribute" operations
  */
-public class DistributeWorkflowOperationHandler implements WorkflowOperationHandler {
+public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(DistributeWorkflowOperationHandler.class);
@@ -70,7 +71,7 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
       MediaPackage currentMediaPackage = workflowInstance.getCurrentMediaPackage();
       if (StringUtils.trimToNull(sourceTags) == null) {
         logger.warn("No tags have been specified");
-        return WorkflowBuilder.getInstance().buildWorkflowOperationResult(currentMediaPackage, null, false);
+        return WorkflowBuilder.getInstance().buildWorkflowOperationResult(currentMediaPackage, Action.CONTINUE);
       }
 
       // Send a mediapackage clone to the distribution service so we don't manipulate mediapackages associated with previous workflow operations
@@ -109,7 +110,7 @@ public class DistributeWorkflowOperationHandler implements WorkflowOperationHand
       e.printStackTrace();
       throw new WorkflowOperationException(e);
     }
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, null, false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, Action.CONTINUE);
   }
 
 }

@@ -33,6 +33,7 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.cm.ConfigurationException;
@@ -46,6 +47,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The captions handler service <br/>
@@ -208,8 +210,20 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
    */
   public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(
-            workflowInstance.getSourceMediaPackage(), null, true);
+    // TODO Only pause if there are no captions in the current media package
+    logger.warn("Waiting for captions to be provided");
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), Action.PAUSE);
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance, java.util.Map)
+   */
+  @Override
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
+          throws WorkflowOperationException {
+    // TODO Read the properties and apply them to the mediapackage
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), Action.CONTINUE);
   }
 
 }

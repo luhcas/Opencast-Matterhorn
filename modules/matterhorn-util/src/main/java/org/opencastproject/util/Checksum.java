@@ -28,6 +28,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
  * This class stores value and type of a generated checksum.
@@ -43,6 +44,7 @@ public final class Checksum implements Serializable {
   private static final long serialVersionUID = 1L;
 
   /** The checksum value */
+  @XmlValue
   protected String value_ = null;
 
   /** The checksum type */

@@ -35,12 +35,13 @@ import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.MultimediaContent;
 import org.opencastproject.metadata.mpeg7.MultimediaContentType;
 import org.opencastproject.util.MimeTypes;
+import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
-import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -57,7 +58,7 @@ import java.util.concurrent.Future;
  * This workflow operation will look for MPEG-7 catalogs and create a preview
  * image for every time segment it finds by calling to the composer service.
  */
-public class SlidePreviewsWorkflowOperationHandler implements WorkflowOperationHandler {
+public class SlidePreviewsWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(SlidePreviewsWorkflowOperationHandler.class);
@@ -101,7 +102,7 @@ public class SlidePreviewsWorkflowOperationHandler implements WorkflowOperationH
 
     logger.debug("Compose operation completed");
 
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, null, false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, Action.CONTINUE);
   }
 
   /**

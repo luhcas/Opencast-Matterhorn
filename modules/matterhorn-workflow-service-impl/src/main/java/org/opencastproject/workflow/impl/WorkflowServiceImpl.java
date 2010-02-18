@@ -35,6 +35,7 @@ import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.State;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -483,7 +484,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
               }
             }
             update(wfi); // Update the workflow instance again, since its new operation instance has completed
-            if (opInstance.getResult().isWait()) { // suspend the workflow if the operation handler asked us to do so
+            if (Action.PAUSE.equals(opInstance.getResult().getAction())) { // suspend the workflow if the operation handler asked us to do so
               suspend(wfi.getId());
             }
             runFromOperation = -1;

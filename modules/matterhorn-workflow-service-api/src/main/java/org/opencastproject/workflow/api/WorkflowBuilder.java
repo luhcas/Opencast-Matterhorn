@@ -16,14 +16,13 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -149,14 +148,8 @@ public class WorkflowBuilder {
     return writer.toString();
   }
   
-  public WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage, Map<String, String> properties, boolean wait) {
-    try {
-      HashMap<String, String> map = new HashMap<String, String>();
-      if(properties != null) map.putAll(properties);
-      return new WorkflowOperationResultImpl(mediaPackage, map, wait);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+  public WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage, Action action) {
+    return new WorkflowOperationResultImpl(mediaPackage, action);
   }
 
 }

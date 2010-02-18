@@ -19,11 +19,12 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageReference;
 import org.opencastproject.search.api.SearchService;
+import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
-import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ import java.util.Set;
 /**
  * Workflow operation for handling "publish" operations
  */
-public class PublishWorkflowOperationHandler implements WorkflowOperationHandler {
+public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
   private static final Logger logger = LoggerFactory.getLogger(PublishWorkflowOperationHandler.class);
 
   /** The search service */
@@ -68,7 +69,7 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
       String tags = workflowInstance.getCurrentOperation().getConfiguration("source-tags");
       if (StringUtils.trimToNull(tags) == null) {
         logger.warn("No tags have been specified");
-        return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, null, false);
+        return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, Action.CONTINUE);
       }
 
       // Look for elements matching any tag
@@ -113,7 +114,7 @@ public class PublishWorkflowOperationHandler implements WorkflowOperationHandler
       // adding media package to the search index
       searchService.add(mp);
       logger.debug("Publish operation complete");
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(current, null, false);
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(current, Action.CONTINUE);
     } catch (Throwable t) {
       throw new WorkflowOperationException(t);
     }

@@ -27,11 +27,12 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.metadata.dublincore.Precision;
+import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
-import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -45,8 +46,7 @@ import java.util.Date;
 /**
  * Workflow operation used to inspect all tracks of a media package.
  */
-public class InspectWorkflowOperationHandler implements
-        WorkflowOperationHandler {
+public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowOperationHandler.class);
@@ -118,7 +118,7 @@ public class InspectWorkflowOperationHandler implements
       }
       
     }
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, null, false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
 
   }
   

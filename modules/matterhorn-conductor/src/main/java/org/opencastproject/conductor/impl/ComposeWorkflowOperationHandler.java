@@ -25,12 +25,13 @@ import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.selector.AudioVisualElementSelector;
 import org.opencastproject.util.MimeTypes;
+import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
-import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -43,8 +44,7 @@ import java.util.concurrent.Future;
 /**
  * The workflow definition for handling "compose" operations
  */
-public class ComposeWorkflowOperationHandler implements
-        WorkflowOperationHandler {
+public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory
@@ -84,8 +84,7 @@ public class ComposeWorkflowOperationHandler implements
 
     logger.debug("Compose operation completed");
 
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(
-            resultingMediaPackage, null, false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, Action.CONTINUE);
   }
 
   /**
@@ -246,5 +245,4 @@ public class ComposeWorkflowOperationHandler implements
 
     return mediaPackage;
   }
-
 }

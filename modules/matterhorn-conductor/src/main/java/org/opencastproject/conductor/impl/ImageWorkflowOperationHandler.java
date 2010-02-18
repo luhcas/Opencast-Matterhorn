@@ -25,12 +25,13 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.util.MimeTypes;
+import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
-import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ import java.util.concurrent.Future;
 /**
  * The workflow definition for handling "image" operations
  */
-public class ImageWorkflowOperationHandler implements WorkflowOperationHandler {
+public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
   
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(ImageWorkflowOperationHandler.class);
@@ -83,7 +84,7 @@ public class ImageWorkflowOperationHandler implements WorkflowOperationHandler {
 
     logger.debug("Image operation completed");
 
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, null, false);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, Action.CONTINUE);
   }
 
   /**

@@ -24,18 +24,16 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import java.net.URLEncoder;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -44,7 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Lists all service endpoints currently registered with the system.
  */
-public class InfoServlet extends HttpServlet implements BundleActivator {
+public class InfoServlet implements BundleActivator {
   private static final long serialVersionUID = 1L;
   private static final Logger logger = LoggerFactory.getLogger(InfoServlet.class);
   private static final String WS_CONTEXT = "org.apache.cxf.ws.httpservice.context";
@@ -55,22 +53,7 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
   private BundleContext bundleContext;
 
   /**
-   * {@inheritDoc}
-   * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-   */
-  @SuppressWarnings("unchecked")
-  public void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws IOException, ServletException{
-    response.setContentType("application/json");
-    JSONObject json = new JSONObject();
-    json.put("rest", getRestAsJson());
-    json.put("soap", getSoapAsJson());
-    json.put("ui", getUserInterfacesAsJson());
-    json.writeJSONString(response.getWriter());
-  }
-
-  /**
-   * Gets the server yrl including protocol and port as a string.  Returns null if the server url has not been
+   * Gets the server url including protocol and port as a string.  Returns null if the server url has not been
    * explicitly identified in the container.
    *
    * @return A URL or null if the server has not been set   
@@ -92,131 +75,136 @@ public class InfoServlet extends HttpServlet implements BundleActivator {
     return bundleContext.getAllServiceReferences(StaticResource.class.getName(), "(&(alias=*)(classpath=*))");
   }
 
-  @SuppressWarnings("unchecked")
-  protected JSONArray getSoapAsJson() {
-    JSONArray json = new JSONArray();
-    ServiceReference[] serviceRefs = null;
-    try {
-      serviceRefs = getSoapServiceReferences();
-    } catch (InvalidSyntaxException e) {
-      e.printStackTrace();
-    }
-    if (serviceRefs == null) return json;
-    String serverUrl = getServerUrl();
-    //check for relative paths
-    if (serverUrl == null){
-        serverUrl="";
-    }
-    for (ServiceReference ref : serviceRefs) {
-      String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
-      String servletContextPath = (String)ref.getProperty(WS_CONTEXT);
-      JSONObject endpoint = new JSONObject();
-      endpoint.put("description", description);
-      endpoint.put("url", serverUrl + servletContextPath);
-      endpoint.put("wsdl", serverUrl + servletContextPath + "/?wsdl");
-      json.add(endpoint);
-    }
-    return json;
-  }
-
-  @SuppressWarnings("unchecked")
-  protected JSONArray getRestAsJson() {
-    JSONArray json = new JSONArray();
-    ServiceReference[] serviceRefs = null;
-    try {
-      serviceRefs = getRestServiceReferences();
-    } catch (InvalidSyntaxException e) {
-      e.printStackTrace();
-    }
-    if (serviceRefs == null) return json;
-    String serverUrl = getServerUrl();
-    //check for relative paths
-    if (serverUrl == null){
-        serverUrl="";
-    }
-    for (ServiceReference jaxRsRef : serviceRefs) {
-      String description = (String)jaxRsRef.getProperty(Constants.SERVICE_DESCRIPTION);
-      String servletContextPath = (String)jaxRsRef.getProperty(RS_CONTEXT);
-      JSONObject endpoint = new JSONObject();
-      endpoint.put("description", description);
-      endpoint.put("docs", serverUrl + servletContextPath + "/docs");
-      endpoint.put("wadl", serverUrl + servletContextPath + "/?_wadl&type=xml");
-      json.add(endpoint);
-    }
-    return json;
-  }
-  
-  @SuppressWarnings("unchecked")
-  protected JSONArray getUserInterfacesAsJson() {
-    JSONArray json = new JSONArray();
-    ServiceReference[] serviceRefs = null;
-    try {
-      serviceRefs = getUserInterfaceServiceReferences();
-    } catch (InvalidSyntaxException e) {
-      e.printStackTrace();
-    }
-    if (serviceRefs == null) return json;
-    String serverUrl = getServerUrl();
-    //check for relative paths
-    if (serverUrl == null){
-        serverUrl="";
-    }
-    for (ServiceReference ref : serviceRefs) {
-      String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
-      String alias = (String)ref.getProperty("alias");
-      String welcomeFile = (String)ref.getProperty("welcome.file");
-      String welcomePath = "/".equals(alias) ? alias + welcomeFile : alias + "/" + welcomeFile;
-      String testSuite = (String)ref.getProperty("test.suite");
-      JSONObject endpoint = new JSONObject();
-      endpoint.put("description", description);
-      endpoint.put("welcomepage", serverUrl + welcomePath);
-      if(testSuite != null && isTestMode()) {
-        String testSuitePath = "/".equals(alias) ? alias + testSuite : alias + "/" + testSuite;
-        endpoint.put("testsuite", serverUrl + testSuitePath);
-      }
-      json.add(endpoint);
-    }
-    return json;
-  }
   
   protected boolean isTestMode() {
     return "true".equalsIgnoreCase(bundleContext.getProperty("testMode"));
   }
   
-  private ServiceTracker httpTracker;
-  
+  @SuppressWarnings("unchecked")
   public void start(BundleContext context) throws Exception {
     logger.debug("start()");
     this.bundleContext = context;
-    final HttpServlet servlet = this;
-    final HttpServlet testSuite = new TestSuiteServlet();
     
-    httpTracker = new ServiceTracker(context, HttpService.class
-        .getName(), null) {
-      @Override
-      public Object addingService(ServiceReference reference) {
-        HttpService httpService = (HttpService) context.getService(reference);
-        try {
-          HttpContext httpContext = httpService.createDefaultHttpContext();
-          httpService.registerServlet("/info.json", servlet, null, httpContext);
-          if(isTestMode()) {
-            httpService.registerServlet("/TestSuites.html", testSuite, null, httpContext);
-          }
-        } catch (ServletException e) {
-          e.printStackTrace();
-        } catch (NamespaceException e) {
-          e.printStackTrace();
-        }
-        return super.addingService(reference);
-      }
-    };
-    httpTracker.open();
+    // Register the info servlet
+    Dictionary servletProps = new Hashtable();
+    servletProps.put("alias", "/info.json");
+    servletProps.put("servlet-name", "Info Servlet");
+    context.registerService(Servlet.class.getName(), new Info(), servletProps);
+
+    // Register the UI test harness
+    if(isTestMode()) {
+      Dictionary testServletProps = new Hashtable();
+      testServletProps.put("alias", "/TestSuites.html");
+      testServletProps.put("servlet-name", "Test Suite Servlet");
+      context.registerService(Servlet.class.getName(), new TestSuiteServlet(), testServletProps);
+    }
   }
   
   public void stop(BundleContext context) throws Exception {
-    logger.debug("stop()");
-    if(httpTracker != null) {
-      httpTracker.close();
+  }
+  
+  class Info extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    /**
+     * {@inheritDoc}
+     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    @SuppressWarnings("unchecked")
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+      throws IOException, ServletException{
+      response.setContentType("application/json");
+      JSONObject json = new JSONObject();
+      json.put("rest", getRestAsJson());
+      json.put("soap", getSoapAsJson());
+      json.put("ui", getUserInterfacesAsJson());
+      json.writeJSONString(response.getWriter());
+    }
+
+    @SuppressWarnings("unchecked")
+    protected JSONArray getSoapAsJson() {
+      JSONArray json = new JSONArray();
+      ServiceReference[] serviceRefs = null;
+      try {
+        serviceRefs = getSoapServiceReferences();
+      } catch (InvalidSyntaxException e) {
+        e.printStackTrace();
+      }
+      if (serviceRefs == null) return json;
+      String serverUrl = getServerUrl();
+      //check for relative paths
+      if (serverUrl == null){
+          serverUrl="";
+      }
+      for (ServiceReference ref : serviceRefs) {
+        String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
+        String servletContextPath = (String)ref.getProperty(WS_CONTEXT);
+        JSONObject endpoint = new JSONObject();
+        endpoint.put("description", description);
+        endpoint.put("url", serverUrl + servletContextPath);
+        endpoint.put("wsdl", serverUrl + servletContextPath + "/?wsdl");
+        json.add(endpoint);
+      }
+      return json;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected JSONArray getRestAsJson() {
+      JSONArray json = new JSONArray();
+      ServiceReference[] serviceRefs = null;
+      try {
+        serviceRefs = getRestServiceReferences();
+      } catch (InvalidSyntaxException e) {
+        e.printStackTrace();
+      }
+      if (serviceRefs == null) return json;
+      String serverUrl = getServerUrl();
+      //check for relative paths
+      if (serverUrl == null){
+          serverUrl="";
+      }
+      for (ServiceReference jaxRsRef : serviceRefs) {
+        String description = (String)jaxRsRef.getProperty(Constants.SERVICE_DESCRIPTION);
+        String servletContextPath = (String)jaxRsRef.getProperty(RS_CONTEXT);
+        JSONObject endpoint = new JSONObject();
+        endpoint.put("description", description);
+        endpoint.put("docs", serverUrl + servletContextPath + "/docs");
+        endpoint.put("wadl", serverUrl + servletContextPath + "/?_wadl&type=xml");
+        json.add(endpoint);
+      }
+      return json;
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected JSONArray getUserInterfacesAsJson() {
+      JSONArray json = new JSONArray();
+      ServiceReference[] serviceRefs = null;
+      try {
+        serviceRefs = getUserInterfaceServiceReferences();
+      } catch (InvalidSyntaxException e) {
+        e.printStackTrace();
+      }
+      if (serviceRefs == null) return json;
+      String serverUrl = getServerUrl();
+      //check for relative paths
+      if (serverUrl == null){
+          serverUrl="";
+      }
+      for (ServiceReference ref : serviceRefs) {
+        String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
+        String alias = (String)ref.getProperty("alias");
+        String welcomeFile = (String)ref.getProperty("welcome.file");
+        String welcomePath = "/".equals(alias) ? alias + welcomeFile : alias + "/" + welcomeFile;
+        String testSuite = (String)ref.getProperty("test.suite");
+        JSONObject endpoint = new JSONObject();
+        endpoint.put("description", description);
+        endpoint.put("welcomepage", serverUrl + welcomePath);
+        if(testSuite != null && isTestMode()) {
+          String testSuitePath = "/".equals(alias) ? alias + testSuite : alias + "/" + testSuite;
+          endpoint.put("testsuite", serverUrl + testSuitePath);
+        }
+        json.add(endpoint);
+      }
+      return json;
     }
   }
   

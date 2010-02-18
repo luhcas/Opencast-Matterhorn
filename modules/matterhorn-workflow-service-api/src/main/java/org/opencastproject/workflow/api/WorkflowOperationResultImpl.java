@@ -17,14 +17,10 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
@@ -39,18 +35,30 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
   @XmlElement(name="mediapackage")
   protected MediaPackage resultingMediaPackage;
   
-  @XmlElementWrapper(name="properties")
-  protected HashMap<String, String> resultingProperties;
+  @XmlAttribute(name="action")
+  protected Action action;
 
   @XmlAttribute(name="wait")
   protected boolean wait;
 
+  /**
+   * No arg constructor needed by JAXB
+   */
   public WorkflowOperationResultImpl() {}
-  
-  public WorkflowOperationResultImpl(MediaPackage resultingMediaPackage, HashMap<String, String> resultingProperties, boolean wait) {
+
+  /**
+   * Constructs a new WorkflowOperationResultImpl from a mediapackage and an action.
+   * 
+   * @param resultingMediaPackage
+   * @param action
+   */
+  public WorkflowOperationResultImpl(MediaPackage resultingMediaPackage, Action action) {
     this.resultingMediaPackage = resultingMediaPackage;
-    this.resultingProperties = resultingProperties;
-    this.wait = wait;
+    if(action == null) {
+      throw new IllegalArgumentException("action must not be null.");
+    } else {
+      this.action = action;
+    }
   }
   
   /**
@@ -60,28 +68,31 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
   public MediaPackage getResultingMediaPackage() {
     return resultingMediaPackage;
   }
+
   /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationResult#getResultingProperties()
+   * Sets the resulting media package.
+   * @param resultingMediaPackage
    */
-  public Map<String, String> getResultingProperties() {
-    return resultingProperties;
-  }
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationResult#isWait()
-   */
-  public boolean isWait() {
-    return wait;
-  }
   public void setResultingMediaPackage(MediaPackage resultingMediaPackage) {
     this.resultingMediaPackage = resultingMediaPackage;
   }
-  public void setResultingProperties(HashMap<String, String> resultingProperties) {
-    this.resultingProperties = resultingProperties;
+
+  /**
+   * 
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationResult#getAction()
+   */
+  public Action getAction() {
+    return action;
   }
-  public void setWait(boolean wait) {
-    this.wait = wait;
+
+  /**
+   * Sets the action that the workflow service should take on the workflow instance
+   * @param action
+   */
+  public void setAction(Action action) {
+    if(action == null) throw new IllegalArgumentException("action must not be null.");
+    this.action = action;
   }
 
   /**
