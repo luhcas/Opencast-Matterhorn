@@ -26,7 +26,6 @@
         <script type="text/javascript" src="js/engage-ui.js"></script>
 
         
-        <script type="text/javascript" src="engage-hybrid-player/ACFLRunContent/AC_OETags.js"></script>
         <script type="text/javascript" src="engage-hybrid-player/bridge/lib/FABridge.js"></script>
         <script type="text/javascript" src="engage-hybrid-player/bridge/Videodisplay.js"></script>
         <script type="text/javascript" src="engage-hybrid-player/bridge/VideodisplaySecond.js"></script>
@@ -40,26 +39,6 @@
         <script type="text/javascript" src="engage-hybrid-player/player-hybrid-second.js"></script>        
         <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSliderSecond.js"></script>
         <script type="text/javascript" src="js/multi.js"></script>
-        
-        
-        <script language="JavaScript" type="text/javascript">
-            <!--
-            // -----------------------------------------------------------------------------
-            // Globals
-            // Major version of Flash required
-            var requiredMajorVersion = 10;
-            // Minor version of Flash required
-            var requiredMinorVersion = 0;
-            // Minor version of Flash required
-            var requiredRevision = 0;
-            // -----------------------------------------------------------------------------
-            // -->
-        </script>
-        
-        <script language="JavaScript" type="text/javascript">
-
-        
-        </script>
         
     </head>
 
@@ -141,79 +120,8 @@
     </div>   
     <div>
 
-    <script language="JavaScript" type="text/javascript">
-      <!--
-      // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
-      var hasProductInstall = DetectFlashVer(6, 0, 65);
-      
-      // Version check based upon the values defined in globals
-      var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
-      
-      if ( hasProductInstall && !hasRequestedVersion ) {
-        // DO NOT MODIFY THE FOLLOWING FOUR LINES
-        // Location visited after installation is complete if installation is required
-        var MMPlayerType = (isIE == true) ? "ActiveX" : "PlugIn";
-        var MMredirectURL = window.location;
-        document.title = document.title.slice(0, 47) + " - Flash Player Installation";
-        var MMdoctitle = document.title;
-      
-        AC_FL_RunContent(
-          "src", "engage-hybrid-player/playerProductInstall",
-          "FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
-          "width", "400",
-          "height", "320",
-          "align", "middle",
-          "id", "oc_Videodisplay",
-          "quality", "high",
-          "bgcolor", "#FFFFFF",
-          "name", "Videodisplay",
-          "allowScriptAccess","sameDomain",
-          "type", "application/x-shockwave-flash",
-          "pluginspage", "http://www.adobe.com/go/getflashplayer"
-        );
-      } else if (hasRequestedVersion) {
-        // if we've detected an acceptable version
-        // embed the Flash Content SWF when all tests are passed
-        var strGo = '<div id="oc-video-display-container">';
-        document.write(strGo);
-        AC_FL_RunContent(
-            "src", "engage-hybrid-player/Videodisplay.swf",
-            "width", "400",
-            "height", "320",
-            "id", "oc_Videodisplay",
-            "quality", "high",
-            "bgcolor", "#FFFFFF",
-            "name", "Videodisplay",
-            "allowfullscreen", "true",
-            "flashvars", "bridgeName=b_Videodisplay&amp;autoplay=false&amp;playerId=firstPlayer",
-            "allowScriptAccess","sameDomain",
-            "type", "application/x-shockwave-flash",
-            "pluginspage", "http://www.adobe.com/go/getflashplayer"
-        );
-        AC_FL_RunContentSecond(
-             "src", "engage-hybrid-player/Videodisplay.swf",
-             "width", "400",
-             "height", "320",
-             "id", "oc_VideodisplaySecond",
-             "quality", "high",
-             "bgcolor", "#FFFFFF",
-             "name", "Videodisplay",
-             "allowfullscreen", "true",
-             "flashvars", "bridgeName=b_VideodisplaySecond&amp;autoplay=false&amp;playerId=secondPlayer",
-             "allowScriptAccess","sameDomain",
-             "type", "application/x-shockwave-flash",
-             "pluginspage", "http://www.adobe.com/go/getflashplayer"
-            );
-        var strEnd = '</div>';
-        document.write(strEnd);
-        } else {  // flash is too old or we can't detect the plugin
-          var alternateContent = 'Alternate HTML content should be placed here.'
-          + 'This content requires the Adobe Flash Player. '
-          + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
-          document.write(alternateContent);  // insert non-flash content
-        }
-      // -->
-    </script>
+        <script type="text/javascript" src="engage-hybrid-player/player-hybrid-flash-second.js"></script>
+        
     </div>
     <div id="info" >
       <button id="btn_info" class="oc_btn_info" onClick="Opencast.Player.toggleInfo();" type="submit" name="Keyboard Shortcuts Information"  value="Keyboard Shortcuts Information"   alt="Keyboard Shortcuts Information"  title="Keyboard Shortcuts Information" >Keyboard Shortcuts Information</button>

@@ -56,19 +56,15 @@
 									by
 									<xsl:value-of select="ns2:dcCreator" />
 								</xsl:if>
-
 								<br />
-								<b>NO APPROPRIATE TRACK COULD BE FOUND</b>
-								<br />
-								However,
-								<a>
-									<xsl:attribute name="href">../../search/rest/episode?id=<xsl:value-of
-										select="ns2:mediapackage/@id" /></xsl:attribute>
-									there
-								</a>
-								might be tracks of other types, i.e.
-								<i>"indefinite/source"</i>
-								.
+							  <b>The Matterhorn Media Player cannot play this media file.</b>
+                <br />
+                 Alternate media files that may be playable on other players may be listed in this
+                <a>
+                  <xsl:attribute name="href">../../search/rest/episode?id=<xsl:value-of
+                    select="ns2:mediapackage/@id" /></xsl:attribute>
+                  XML file
+                </a>.
 							</xsl:otherwise>
 						</xsl:choose>
 					</div>

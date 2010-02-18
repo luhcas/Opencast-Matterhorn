@@ -43,7 +43,10 @@ Opencast.Watch = (function () {
       $('#oc-embed').val(embed);
       
       
+      $('#info').append("<a href=" + restEndpoint + ">XML</a>&nbsp;");
+      
       $('#info').append("<a href=" + watchUrl.replace(/watch.html/g, "multi.html") + ">Multi</a>");
+
       
     });
 
