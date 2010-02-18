@@ -304,6 +304,13 @@ a:hover {
   text-decoration:underline;
 }
 
+.control-button {
+  padding-top:3px;
+  padding-bottom:3px;
+  padding-left:5px;
+  padding-right:5px;
+}
+
 /* Fluid Skinning System Overrides */
 
 .fl-widget .fl-widget-content {
