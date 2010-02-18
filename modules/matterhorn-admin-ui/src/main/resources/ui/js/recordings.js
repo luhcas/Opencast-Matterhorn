@@ -100,10 +100,10 @@ Recordings.displayRecordingStats = function() {
         Recordings.updateRequested = false;
         for (key in data) {
           if (Recordings.currentState == key) {
-            if ((Recordings.lastCount != null) && (Recordings.lastCount != data[key])) {
+            if ((Recordings.lastCount !== null) && (Recordings.lastCount !== data[key])) {
               Recordings.displayRecordings(Recordings.currentState, true);
             }
-            lastCount = data[key];
+            Recordings.lastCount = data[key];
           }
           var elm = $('#count-' + key);
           if (elm) {

@@ -53,7 +53,8 @@
                 $('#gray-out').fadeIn('slow');
                 $('#upload-notification').fadeIn('fast');
               },
-              success : function(responseXML) {
+              success : function(responseXML, statusText) {
+                alert(statusText);
                 $('#gray-out').fadeOut('fast');
                 $('#upload-notification').fadeOut('fast');
                 var media = responseXML.documentElement.getElementsByTagName('media');
