@@ -23,10 +23,8 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.MediaPackageMetadata;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
-import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.util.ZipUtil;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -47,11 +45,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.UUID;
 
 /**
@@ -68,7 +63,6 @@ public class IngestServiceImpl implements IngestService, ManagedService,
   private Workspace workspace;
   private String tempFolder;
   private String fs;
-  private SortedSet<MediaPackageMetadataService> metadataServices;
   
   public IngestServiceImpl() {
     logger.info("Ingest Service started.");
@@ -78,12 +72,6 @@ public class IngestServiceImpl implements IngestService, ManagedService,
     if (!tempFolder.endsWith(fs))
       tempFolder += fs;
     tempFolder += "opencast" + fs + "ingest-temp" + fs;
-    metadataServices = new TreeSet<MediaPackageMetadataService>(new Comparator<MediaPackageMetadataService>() {
-      @Override
-      public int compare(MediaPackageMetadataService o1, MediaPackageMetadataService o2) {
-        return o1.getPriority() - o2.getPriority();
-      }
-    });
   }
 
   @SuppressWarnings("unchecked")
@@ -169,30 +157,6 @@ public class IngestServiceImpl implements IngestService, ManagedService,
     return mp;
   }
 
-  /**
-   * Reads the available metadata from the dublin core catalog (if there is
-   * one).
-   * 
-   * @param mp
-   *          the media package
-   */
-  private void populateMediaPackageMetadata(MediaPackage mp) {
-    if(metadataServices.size() == 0) {
-      logger.debug("No metadata services are registered with the ingest service, so no mediapackage metadata can be extracted from catalogs");
-      return;
-    }
-    for(MediaPackageMetadataService metadataService : metadataServices) {
-      MediaPackageMetadata metadata = metadataService.getMetadata(mp);
-      if(metadata != null) {
-        mp.setDate(metadata.getDate());
-        mp.setLanguage(metadata.getLanguage());
-        mp.setLicense(metadata.getLanguage());
-        mp.setSeries(metadata.getSeriesIdentifier());
-        mp.setSeriesTitle(metadata.getSeriesTitle());
-        mp.setTitle(metadata.getTitle());
-      }
-    }
-  }
 
   /**
    * {@inheritDoc}
@@ -317,7 +281,6 @@ public class IngestServiceImpl implements IngestService, ManagedService,
     if (eventAdmin != null) {
       logger.info("Broadcasting event...");
       Dictionary<String, String> properties = new Hashtable<String, String>();
-      populateMediaPackageMetadata(mp);
       properties.put("mediaPackage", mp.toXml());
       Event event = new Event("org/opencastproject/ingest/INGEST_DONE", properties);
 
@@ -475,13 +438,5 @@ public class IngestServiceImpl implements IngestService, ManagedService,
 
   public void unsetEventAdmin(EventAdmin eventAdmin) {
     this.eventAdmin = null;
-  }
-
-  public void addMetadataService(MediaPackageMetadataService service) {
-    metadataServices.add(service);
-  }
-
-  public void removeMetadataService(MediaPackageMetadataService service) {
-    metadataServices.remove(service);
   }
 }

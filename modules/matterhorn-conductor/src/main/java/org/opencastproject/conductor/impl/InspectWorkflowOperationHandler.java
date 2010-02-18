@@ -18,9 +18,11 @@ package org.opencastproject.conductor.impl;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageMetadata;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
@@ -41,7 +43,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Workflow operation used to inspect all tracks of a media package.
@@ -60,8 +65,27 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /** The dublin core catalog service */
   private DublinCoreCatalogService dcService;
 
+  private SortedSet<MediaPackageMetadataService> metadataServices;
+
+  public InspectWorkflowOperationHandler () {
+    metadataServices = new TreeSet<MediaPackageMetadataService>(new Comparator<MediaPackageMetadataService>() {
+      @Override
+      public int compare(MediaPackageMetadataService o1, MediaPackageMetadataService o2) {
+        return o1.getPriority() - o2.getPriority();
+      }
+    });
+  }
+
   public void setDublincoreService(DublinCoreCatalogService dcService) {
     this.dcService = dcService;
+  }
+  
+  public void addMetadataService(MediaPackageMetadataService service) {
+    metadataServices.add(service);
+  }
+
+  public void removeMetadataService(MediaPackageMetadataService service) {
+    metadataServices.remove(service);
   }
   
   /**
@@ -94,6 +118,9 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
           throws WorkflowOperationException {
     MediaPackage mediaPackage = (MediaPackage)workflowInstance.getCurrentMediaPackage().clone();
 
+    // Populate the mediapackage with any metadata found in its catalogs
+    populateMediaPackageMetadata(mediaPackage);
+
     // Inspect the tracks
     for (Track track : mediaPackage.getTracks()) {
       
@@ -116,7 +143,6 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       } catch (Exception e) {
         logger.warn("Unable to update dublin core data: {}", e.getMessage(), e);
       }
-      
     }
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
 
@@ -159,4 +185,28 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
     }
   }
 
+  /**
+   * Reads the available metadata from the dublin core catalog (if there is
+   * one).
+   * 
+   * @param mp
+   *          the media package
+   */
+  private void populateMediaPackageMetadata(MediaPackage mp) {
+    if(metadataServices.size() == 0) {
+      logger.debug("No metadata services are registered with the ingest service, so no mediapackage metadata can be extracted from catalogs");
+      return;
+    }
+    for(MediaPackageMetadataService metadataService : metadataServices) {
+      MediaPackageMetadata metadata = metadataService.getMetadata(mp);
+      if(metadata != null) {
+        mp.setDate(metadata.getDate());
+        mp.setLanguage(metadata.getLanguage());
+        mp.setLicense(metadata.getLanguage());
+        mp.setSeries(metadata.getSeriesIdentifier());
+        mp.setSeriesTitle(metadata.getSeriesTitle());
+        mp.setTitle(metadata.getTitle());
+      }
+    }
+  }
 }

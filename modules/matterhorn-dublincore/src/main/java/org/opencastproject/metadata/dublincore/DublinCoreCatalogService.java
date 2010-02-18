@@ -62,10 +62,8 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
     
     Catalog[] dcs = mp.getCatalogs(DublinCoreCatalog.FLAVOR);
     for (Catalog catalog : dcs) {
-      DublinCoreCatalog dc = (DublinCoreCatalog)catalog;
-      
-      if (dc.getReference() == null) {
-
+      DublinCoreCatalog dc = load(catalog);
+      if (catalog.getReference() == null) {
         // Title
         metadata.setTitle(dc.getFirst(DublinCore.PROPERTY_TITLE));
 
