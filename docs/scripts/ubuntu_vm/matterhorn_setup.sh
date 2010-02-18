@@ -73,11 +73,12 @@ install_ffmpeg ()
   sudo apt-get -y --force-yes install libtheora-dev
 
   cd
-  git clone git://git.videolan.org/x264.git
-  cd x264
-  ./configure
-  make
-  sudo checkinstall --pkgname=x264 --pkgversion "1:0.svn`date +%Y%m%d`" --backup=no --default
+  wget ftp://ftp.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20100214-2245.tar.bz2
+  tar xvf x264-snapshot-20100214-2245.tar.bz2
+  cd x264-snapshot-20100214-2245/
+  sudo ./configure
+  sudo make
+  sudo make install
   
   cd
   svn checkout -r 20641 svn://svn.ffmpeg.org/ffmpeg/trunk ffmpeg
@@ -105,7 +106,6 @@ start_mh ()
   export FELIX_URL=http://apache.mirror.iweb.ca/felix/felix-framework-2.0.1.tar.gz
   export JAVA_HOME=/usr/lib/jvm/java-6-sun
   export MAVEN_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m"
-
 
   cd $INST_DIR
 
