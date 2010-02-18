@@ -17,7 +17,6 @@
         <link rel="stylesheet" type="text/css" href="css/player-hybrid.css" />
         
         <script type="text/javascript" src="jquery/js/jquery-1.3.2.js"></script>
-        <script type="text/javascript" src="ACFLRunContent/AC_OETags.js"></script>
         <script type="text/javascript" src="bridge/lib/FABridge.js"></script>
         <script type="text/javascript" src="bridge/Videodisplay.js"></script>
         <script type="text/javascript" src="jquery/js/jARIA.js"></script>
@@ -29,71 +28,9 @@
         <script type="text/javascript" src="jquery/ui/ui.slider.js"></script>
         <script type="text/javascript" src="player-hybrid.js"></script>        
         <script type="text/javascript" src="aria/js/ariaSlider.js"></script>     
-     
-        <script language="JavaScript" type="text/javascript">
-            <!--
-            // -----------------------------------------------------------------------------
-            // Globals
-            // Major version of Flash required
-            var requiredMajorVersion = 10;
-            // Minor version of Flash required
-            var requiredMinorVersion = 0;
-            // Minor version of Flash required
-            var requiredRevision = 0;
-            // -----------------------------------------------------------------------------
-            // -->
-        </script>
-        
-        
-        <script language="JavaScript" type="text/javascript">
-        
-        $(document).ready(function () {
-  
-          Opencast.ariaSlider.init();
-          $(document).ariaParse();
-          var simpleEdit = fluid.inlineEdit("#simpleEdit", {
-            selectors : {
-              text: ".editableText",
-              editContainer: "#editorContainer",
-              edit: "#editField"
-            },
-            useTooltip : true,
-            tooltipDelay : 500
-          });
-    
-          $("#editorContainer").attr("className", "oc_editTime");
-          $("#editField").attr("className", "oc_editTime");
-          
-          $("#btn_cc").attr('role', 'button');
-          $("#btn_cc").attr('aria-pressed', 'false'); 
-      
-          $("#btn_volume").attr('role', 'button');
-          $("#btn_volume").attr('aria-pressed', 'false');
-      
-          $("#btn_play_pause").attr('role', 'button');
-          $("#btn_play_pause").attr('aria-pressed', 'false');
-
-          $("#btn_skip_backward").attr('role', 'button');
-          $("#btn_skip_backward").attr('aria-labelledby', 'Skip Backward');
-
-          $("#btn_rewind").attr('role', 'button');
-          $("#btn_rewind").attr('aria-labelledby', 'Rewind');
-
-          $("#btn_fast_forward").attr('role', 'button');
-          $("#btn_fast_forward").attr('aria-labelledby', 'Fast Forward');
-
-          $("#btn_skip_forward").attr('role', 'button');
-          $("#btn_skip_forward").attr('aria-labelledby', 'Skip Forward');
-
-          $("#time-current").attr('role', 'timer');
-          $("#time-total").attr('role', 'timer');
-
-        });
-        </script>
-        
-    </head>
-
-    <body>
+        <script type="text/javascript" src="player-hybrid-initialize.js"></script>  
+     </head>
+   <body>
     
     <noscript>
        <p style="color:red;">JavaScript is turned off in your web browser. So this site wouldn't work properly! <br />
@@ -152,64 +89,8 @@
       </tr></table>
     </div>
     
-    <script language="JavaScript" type="text/javascript">
-      <!--
-      // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
-      var hasProductInstall = DetectFlashVer(6, 0, 65);
-      
-      // Version check based upon the values defined in globals
-      var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
-      
-      if ( hasProductInstall && !hasRequestedVersion ) {
-        // DO NOT MODIFY THE FOLLOWING FOUR LINES
-        // Location visited after installation is complete if installation is required
-        var MMPlayerType = (isIE == true) ? "ActiveX" : "PlugIn";
-        var MMredirectURL = window.location;
-        document.title = document.title.slice(0, 47) + " - Flash Player Installation";
-        var MMdoctitle = document.title;
-        AC_FL_RunContent(
-          "src", "playerProductInstall",
-          "FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
-          "width", "400",
-          "height", "320",
-          "align", "middle",
-          "id", "oc_Videodisplay",
-          "quality", "high",
-          "bgcolor", "#FFFFFF",
-          "name", "Videodisplay",
-          "allowScriptAccess","sameDomain",
-          "type", "application/x-shockwave-flash",
-          "pluginspage", "http://www.adobe.com/go/getflashplayer"
-        );
-      } else if (hasRequestedVersion) {
-        // if we've detected an acceptable version
-        // embed the Flash Content SWF when all tests are passed
-        var strGo = '<div id="oc-video-display-container">';
-        document.write(strGo);
-        AC_FL_RunContent(
-            "src", "Videodisplay.swf",
-            "width", "400",
-            "height", "320",
-            "id", "oc_Videodisplay",
-            "quality", "high",
-            "bgcolor", "#FFFFFF",
-            "name", "Videodisplay",
-            "allowfullscreen", "true",
-            "flashvars", "bridgeName=b_Videodisplay&amp;autoplay=false&playerId=firstPlayer",
-            "allowScriptAccess","sameDomain",
-            "type", "application/x-shockwave-flash",
-            "pluginspage", "http://www.adobe.com/go/getflashplayer"
-        );
-        var strEnd = '</div>';
-        document.write(strEnd);
-        } else {  // flash is too old or we can't detect the plugin
-          var alternateContent = 'Alternate HTML content should be placed here.'
-          + 'This content requires the Adobe Flash Player. '
-          + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
-          document.write(alternateContent);  // insert non-flash content
-        }
-      // -->
-    </script>
+    <script type="text/javascript" src="player-hybrid-flash.js"></script>    
+    
     <div id="info" >
       <button id="btn_info" class="oc_btn_info" onClick="Opencast.Player.toggleInfo('firstPlayer');" type="submit" name="Keyboard Shortcuts Information: Control + Alt + I"  value="Keyboard Shortcuts Information: Control + Alt + I"   alt="Keyboard Shortcuts Information: Control + Alt + I"  title="Keyboard Shortcuts Information:  Control + Alt + I" >Keyboard Shortcuts Information</button>
       <div id="infoBlock" class="oc_infoDisplayNone" >

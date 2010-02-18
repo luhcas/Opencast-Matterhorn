@@ -195,7 +195,7 @@ function AC_Generateobj(objAttrs, params, embedAttrs)
 			str += '<param name="allowScriptAccess" value="sameDomain" />';
 			str += '<param name="bgcolor" value="#000000" />';
 			str += '<param name="allowFullScreen" value="true" />';
-			str += '<param name="flashvars" value="bridgeName=b_Videodisplay&amp;autoplay=false&playerId=firstPlayer"/>';
+			str += '<param name="flashvars" value="bridgeName=b_Videodisplay&amp;autoplay=false&amp;playerId=firstPlayer"/>';
     	
     	str += '<embed ';
   		for (var i in embedAttrs)
@@ -237,7 +237,7 @@ function AC_GenerateobjSecond(objAttrs, params, embedAttrs)
 		str += '<param name="allowScriptAccess" value="sameDomain" />';
 		str += '<param name="bgcolor" value="#000000" />';
 		str += '<param name="allowFullScreen" value="true" />';
-		str += '<param name="flashvars" value="bridgeName=b_VideodisplaySecond&amp;autoplay=false&playerId=secondPlayer"/>';
+		str += '<param name="flashvars" value="bridgeName=b_VideodisplaySecond&amp;autoplay=false&amp;playerId=secondPlayer"/>';
 		str += '<embed ';
   		for (var i in embedAttrs)
   			str += i + '="' + embedAttrs[i] + '" ';

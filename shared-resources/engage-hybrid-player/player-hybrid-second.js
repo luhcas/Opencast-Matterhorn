@@ -30,10 +30,7 @@ Opencast.Player = (function () {
     SECONDPLAYER          = "secondPlayer",
     infoBool              = false,
     ccBool                = false,
-    pressKey              = false,
     mouseOverBool         = false,
-    isCtrl                = false,
-    isAlt                 = false,
     captionsBool          = false,
     currentPlayPauseState = PAUSING,
     volume                = 1.0;
@@ -98,25 +95,6 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description Get the pressKey.
-      */
-    function getPressKey()
-    {
-        return pressKey;
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Set the pressKey.
-        @param Booelan bool
-     */
-    function setPressKey(bool)
-    {
-        pressKey = bool;
-    }
-    
-    /**
-        @memberOf Opencast.Player
         @description Get the mouseOverBool.
      */
     function getMouseOverBool()
@@ -132,44 +110,6 @@ Opencast.Player = (function () {
     function setMouseOverBool(bool)
     {
         mouseOverBool = bool;
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Get the isCtrl.
-     */
-    function getIsCtrl()
-    {
-        return isCtrl;
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Set the isCtrl.
-        @param Booelan bool
-     */
-    function setIsCtrl(bool)
-    {
-        isCtrl = bool;
-    }
-    
-    /**
-        @memberOf Opencast.Player
-        @description Get the isAlt.
-     */
-    function getIsAlt()
-    {
-        return isAlt;
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Set the isAlt.
-        @param Booelan bool
-     */
-    function setIsAlt(bool)
-    {
-        isAlt = bool;
     }
 
     /**
@@ -462,7 +402,6 @@ Opencast.Player = (function () {
     function doSetVolume(value) 
     {
         Videodisplay.setVolume(value);
-        VideodisplaySecond.setVolume(value);
     }
     
     /**
@@ -656,53 +595,7 @@ Opencast.Player = (function () {
         VideodisplaySecond.setPlayerId(playerId);
     }
     
-    /**
-        @memberOf Opencast.Player
-        @description Keylistener.
-     */
-    $(document).keyup(function (e) 
-    { 
-        if (e.which === 17) 
-        {
-            setIsCtrl(false); 
-        }
-        if (e.which === 18) 
-        {
-            setIsAlt(false); 
-        }
-        setPressKey(false);
-    }).keydown(function (e) 
-    { 
-        if (e.which === 17)
-        {
-            setIsCtrl(true);
-        }
-        if (e.which === 18)
-        {
-            setIsAlt(true);
-        }
-        if (getIsCtrl() === true && getIsAlt() === true) 
-        {
-            setPressKey(true);
-        
-            if (e.which === 77 || e.which === 109) // press m or M
-            {
-                doToggleVolume();
-            }
-            if (e.which === 80 || e.which === 112 || e.which === 83 || e.which === 84 || e.which === 116 || e.which === 115 || e.which === 77 || e.which === 109 || e.which === 85 || e.which === 117  || e.which === 68 || e.which === 100 || e.which === 48 || e.which === 49 || e.which === 50 || e.which === 51 || e.which === 52 || e.which === 53 || e.which === 54  || e.which === 55 || e.which === 56 || e.which === 57 || e.which === 67 || e.which === 99 || e.which === 82 || e.which === 114 || e.which === 70 || e.which === 102 || e.which === 83 || e.which === 115 || e.which === 73 || e.which === 105)
-            {
-                Videodisplay.passCharCode(e.which);
-                VideodisplaySecond.passCharCode(e.which);
-            }
-            if (e.which === 85 || e.which === 68) // press arrow up or down
-            {
-                setPlayerVolume(Videodisplay.getVolume());
-            }
-        
-            return false;
-        }
     
-    }); 
 
     /**
      * 
@@ -958,14 +851,8 @@ Opencast.Player = (function () {
         setInfoBool : setInfoBool,
         getccBool : getccBool,
         setccBool : setccBool,
-        getPressKey : getPressKey,
-        setPressKey : setPressKey,
         getMouseOverBool : getMouseOverBool,
         setMouseOverBool : setMouseOverBool,
-        getIsCtrl : getIsCtrl,
-        setIsCtrl : setIsCtrl,
-        getIsAlt : getIsAlt,
-        setIsAlt : setIsAlt,
         getCaptionsBool : getCaptionsBool,
         setCaptionsBool : setCaptionsBool,
         getPlayerVolume : getPlayerVolume,
