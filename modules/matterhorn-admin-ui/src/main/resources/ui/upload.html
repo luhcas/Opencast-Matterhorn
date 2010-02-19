@@ -41,7 +41,7 @@
       $(document).ready(function() {
         // Event: Submit button, submit form if no missing inputs
         $('#BtnSubmit').click( function() {
-          if (checkRequiredFields()) {
+          if (checkRequiredFields(true))  {
             $('.formField').each( function() {
               metadata[$(this).attr('id')] = $(this).val();
             });
@@ -105,19 +105,19 @@
         });
 
         // check if data for required fields is missing
-        function checkRequiredFields() {
+        function checkRequiredFields(submit) {
           var missing = false;
           var wrongtype = false;
           $('.requiredField').each( function() {
             if (!$(this).val()) {
               $('#notification-' + $(this).attr('id')).show();
-              if ($('#container-missingFields').is(':visible')) {
-                $(this).prev('.formField-label').css('color','red');
+              if ((submit) || ($('#container-missingFields').is(':visible'))) {
+                $(this).prev('.fl-label').css('color','red');
               }
               missing = true;
             } else {
               $('#notification-' + $(this).attr('id')).hide();
-              $(this).prev('.formField-label').css('color','black');
+              $(this).prev('.fl-label').css('color','black');
             }
           });
           // check for right file extension

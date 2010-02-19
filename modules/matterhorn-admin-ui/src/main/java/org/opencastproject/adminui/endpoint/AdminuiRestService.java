@@ -45,7 +45,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -159,7 +158,7 @@ public class AdminuiRestService {
         }
         item.setCaptureAgent(null); //FIXME get capture agent from where...?
         WorkflowOperationInstance operation = null;
-        ListIterator<WorkflowOperationInstance> instances = workflows[i].getWorkflowOperationInstances().listIterator();
+        Iterator<WorkflowOperationInstance> instances = workflows[i].getWorkflowOperationInstanceList().iterator();
         StringBuffer sb = new StringBuffer();
         while (instances.hasNext()) {
           operation = instances.next();
