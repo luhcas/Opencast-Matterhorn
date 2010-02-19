@@ -19,10 +19,14 @@ package org.opencastproject.workflow.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
@@ -37,8 +41,9 @@ public class WorkflowSetImpl implements WorkflowSet {
   static Logger log_ = LoggerFactory.getLogger(WorkflowSetImpl.class);
 
   /** A list of search items. */
+  @XmlElementWrapper(name="workflow-instances")
   @XmlElement(name="workflow-instance")
-  private WorkflowInstanceListImpl resultSet = null;
+  private List<WorkflowInstance> resultSet = null;
 
   /** The pagination offset. */
   @XmlAttribute(name="startPage")
@@ -82,7 +87,7 @@ public class WorkflowSetImpl implements WorkflowSet {
     if (item == null)
       throw new IllegalArgumentException("Parameter item cannot be null");
     if (resultSet == null)
-      resultSet = new WorkflowInstanceListImpl();
+      resultSet = new ArrayList<WorkflowInstance>();
     resultSet.add((WorkflowInstanceImpl)item);
   }
 

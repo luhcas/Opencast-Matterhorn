@@ -26,7 +26,7 @@ import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowOperationDefinitionListImpl;
+import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -150,7 +150,7 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
         workflowDefinition.setTitle("Captions Added");
         workflowDefinition.setDescription("Captions added workflow for media: " + workflowId);
         // TODO what is this and what do I do with it?
-        workflowDefinition.setOperations(new WorkflowOperationDefinitionListImpl());
+        workflowDefinition.setOperations(new ArrayList<WorkflowOperationDefinition>());
         workflowService.start(workflowDefinition, mp, null);
       } else if (WorkflowInstance.State.PAUSED.equals(workflow.getState())) {
         MediaPackage mediaPackage = workflow.getSourceMediaPackage();

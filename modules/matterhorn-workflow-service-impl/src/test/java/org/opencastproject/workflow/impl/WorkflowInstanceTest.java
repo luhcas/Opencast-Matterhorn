@@ -24,16 +24,17 @@ import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageImpl;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
-import org.opencastproject.workflow.api.WorkflowOperationInstanceListImpl;
 import org.opencastproject.workflow.api.WorkflowOperationResultImpl;
 
 import junit.framework.Assert;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WorkflowInstanceTest {
   @Test
@@ -61,7 +62,7 @@ public class WorkflowInstanceTest {
     WorkflowOperationResultImpl result = new WorkflowOperationResultImpl();
     result.setResultingMediaPackage(mp);
     opInstance.setResult(result);
-    WorkflowOperationInstanceListImpl ops = new WorkflowOperationInstanceListImpl();
+    List<WorkflowOperationInstance> ops = new ArrayList<WorkflowOperationInstance>();
     ops.add(opInstance);
 
     workflow.setWorkflowOperationInstanceList(ops);

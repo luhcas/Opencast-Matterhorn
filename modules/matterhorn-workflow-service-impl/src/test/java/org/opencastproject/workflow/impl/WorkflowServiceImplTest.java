@@ -421,7 +421,7 @@ public class WorkflowServiceImplTest {
     }
     Assert.assertEquals(State.FAILED, service.getWorkflowById(instance.getId()).getState());
     // The second operation should have failed
-    Assert.assertEquals(State.FAILED, service.getWorkflowById(instance.getId()).getWorkflowOperationInstanceList().get(1).getState());
+    Assert.assertEquals(State.FAILED, service.getWorkflowById(instance.getId()).getWorkflowOperationInstances().get(1).getState());
     
     // cleanup the database
     service.removeFromDatabase(instance.getId());

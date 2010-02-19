@@ -17,6 +17,7 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -105,7 +106,7 @@ public interface WorkflowService {
    * 
    * @return The list of currently available workflow definitions, sorted by title
    */
-  WorkflowDefinitionList listAvailableWorkflowDefinitions();
+  List<WorkflowDefinition> listAvailableWorkflowDefinitions();
 
   /**
    * Whether a workflow definition may be run at this moment. Every {@link WorkflowOperationDefinition} returned by

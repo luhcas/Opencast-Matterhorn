@@ -17,6 +17,7 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -48,14 +49,14 @@ public interface WorkflowInstance {
    * belonging to this WorkflowInstance
    * was created.
    */
-  WorkflowOperationDefinitionList getWorkflowOperationDefinitionList();
+  List<WorkflowOperationDefinition> getWorkflowOperationDefinitions();
 
   /**
    * Returns the {@link WorkflowOperation}s that make up this workflow.
    * 
    * @return the workflow operations
    */
-  public WorkflowOperationInstanceList getWorkflowOperationInstanceList();
+  public List<WorkflowOperationInstance> getWorkflowOperationInstances();
 
   /**
    * Returns the {@link WorkflowOperation} that is currently being executed.
@@ -89,7 +90,7 @@ public interface WorkflowInstance {
    * @param operations
    *          the operations to append
    */
-  public void addWorkflowOperationDefinitions(WorkflowOperationDefinitionList operations);
+  public void addWorkflowOperationDefinitions(List<WorkflowOperationDefinition> operations);
 
   /**
    * Inserts the contents of a {@link WorkflowOperationDefinitionList} at index <code>location</code> into the list of
@@ -100,7 +101,7 @@ public interface WorkflowInstance {
    * @param operations
    *          the operations to append
    */
-  public void addWorkflowOperationDefinitions(int location, WorkflowOperationDefinitionList operations);
+  public void addWorkflowOperationDefinitions(int location, List<WorkflowOperationDefinition> operations);
 
   /**
    * The current {@link State} of this {@link WorkflowInstance}

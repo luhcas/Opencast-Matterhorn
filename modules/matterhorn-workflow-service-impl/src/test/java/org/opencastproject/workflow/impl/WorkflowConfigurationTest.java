@@ -16,16 +16,18 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.workflow.api.WorkflowBuilder;
-import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowConfigurationImpl;
+import org.opencastproject.workflow.api.WorkflowInstanceImpl;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
-import org.opencastproject.workflow.api.WorkflowOperationInstanceListImpl;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class WorkflowConfigurationTest {
@@ -36,7 +38,7 @@ public class WorkflowConfigurationTest {
     config.add(new WorkflowConfigurationImpl("this", "that"));
     op.setConfiguration(config);
     WorkflowInstanceImpl instance = new WorkflowInstanceImpl();
-    WorkflowOperationInstanceListImpl ops = new WorkflowOperationInstanceListImpl();
+    List<WorkflowOperationInstance> ops = new ArrayList<WorkflowOperationInstance>();
     ops.add(op);
     instance.setWorkflowOperationInstanceList(ops);
     String xml = WorkflowBuilder.getInstance().toXml(instance);

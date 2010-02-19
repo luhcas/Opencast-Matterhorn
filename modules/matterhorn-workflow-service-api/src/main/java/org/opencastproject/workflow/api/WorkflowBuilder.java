@@ -23,6 +23,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -134,7 +135,7 @@ public class WorkflowBuilder {
     return writer.toString();
   }
 
-  public String toXml(WorkflowDefinitionList list) throws Exception {
+  public String toXml(List<WorkflowDefinition> list) throws Exception {
     Marshaller marshaller = jaxbContext.createMarshaller();
     Writer writer = new StringWriter();
     marshaller.marshal(list, writer);

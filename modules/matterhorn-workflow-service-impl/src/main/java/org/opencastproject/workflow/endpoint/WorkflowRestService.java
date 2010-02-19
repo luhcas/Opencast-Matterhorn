@@ -29,12 +29,10 @@ import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
-import org.opencastproject.workflow.api.WorkflowDefinitionList;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
-import org.opencastproject.workflow.api.WorkflowOperationInstanceList;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
@@ -229,7 +227,7 @@ public class WorkflowRestService {
   @GET
   @Path("definitions.{output:.*}")
   public Response getWorkflowDefinitions(@PathParam("output") String output) throws Exception {
-    WorkflowDefinitionList list = service.listAvailableWorkflowDefinitions();
+    List<WorkflowDefinition> list = service.listAvailableWorkflowDefinitions();
     if("json".equals(output)) {
       List<JSONObject> jsonDefs = new ArrayList<JSONObject>();
       for(WorkflowDefinition definition : list) {
@@ -373,7 +371,7 @@ public class WorkflowRestService {
     jsInstance.put("workflow_state", workflow.getState().name().toLowerCase());
     Set<WorkflowConfiguration> configs = workflow.getConfigurations();
     jsInstance.put("configuration", getConfigsAsJson(configs));
-    WorkflowOperationInstanceList operations = workflow.getWorkflowOperationInstanceList();
+    List<WorkflowOperationInstance> operations = workflow.getWorkflowOperationInstances();
     jsInstance.put("operations", getOperationsAsJson(operations));
     jsInstance.put("mediapackage_title", mp.getTitle());
     // TODO: do we need more metadata here?
@@ -381,7 +379,7 @@ public class WorkflowRestService {
   }
 
   @SuppressWarnings("unchecked")
-  protected JSONArray getOperationsAsJson(WorkflowOperationInstanceList operations) {
+  protected JSONArray getOperationsAsJson(List<WorkflowOperationInstance> operations) {
     JSONArray jsonArray = new JSONArray();
     for(WorkflowOperationInstance op : operations) {
       JSONObject jsOp = new JSONObject();

@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.api;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
@@ -35,6 +37,6 @@ public interface WorkflowDefinition {
   /**
    * The operations, listed in order, that this workflow definition includes.
    */
-  WorkflowOperationDefinitionList getOperations();
+  List<WorkflowOperationDefinition> getOperations();
 }
 

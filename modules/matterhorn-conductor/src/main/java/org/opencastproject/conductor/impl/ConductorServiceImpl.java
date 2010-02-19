@@ -122,7 +122,7 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
   // *
   // * @see org.opencastproject.conductor.api.ConductorService#getWorkflowDefinitions()
   // */
-  // public WorkflowDefinitionList getWorkflowDefinitions() {
+  // public List<WorkflowDefinition> getWorkflowDefinitions() {
   // WorkflowDefinitionListImpl list = new WorkflowDefinitionListImpl();
   // for(WorkflowDefinition def : defs.values()) {
   // if(allOperationsAvailable(def)) {

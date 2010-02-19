@@ -19,14 +19,11 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowConfigurationImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
-import org.opencastproject.workflow.api.WorkflowDefinitionList;
-import org.opencastproject.workflow.api.WorkflowDefinitionListImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationConfigurations;
 import org.opencastproject.workflow.api.WorkflowOperationConfigurationsImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
-import org.opencastproject.workflow.api.WorkflowOperationDefinitionListImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -180,8 +177,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * 
    * @see org.opencastproject.workflow.api.WorkflowService#listAvailableWorkflowDefinitions()
    */
-  public WorkflowDefinitionList listAvailableWorkflowDefinitions() {
-    WorkflowDefinitionList list = new WorkflowDefinitionListImpl();
+  public List<WorkflowDefinition> listAvailableWorkflowDefinitions() {
+    List<WorkflowDefinition> list = new ArrayList<WorkflowDefinition>();
     for (Entry<String, WorkflowDefinition> entry : workflowDefinitions.entrySet()) {
       list.add((WorkflowDefinition) entry.getValue());
     }
@@ -401,10 +398,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       public void run() {
         boolean failed = false;
         int runFromOperation = 0;
-        List<WorkflowOperationDefinition> operationDefinitions = wfi.getWorkflowOperationDefinitionList();
+        List<WorkflowOperationDefinition> operationDefinitions = wfi.getWorkflowOperationDefinitions();
         while (runFromOperation >= 0 && runFromOperation < operationDefinitions.size()) {
           // Get all of the available handlers for each operation (in the order of operations)
-          operationDefinitions = wfi.getWorkflowOperationDefinitionList();
+          operationDefinitions = wfi.getWorkflowOperationDefinitions();
           for (int i = runFromOperation; i < operationDefinitions.size(); i++) {
             WorkflowOperationDefinition operationDefinition = operationDefinitions.get(i);
             WorkflowOperationHandler operationHandler = selectOperationHandler(operationDefinition);
@@ -425,7 +422,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
             for(WorkflowConfiguration config : wfi.getConfigurations()) {
               opInstance.setConfiguration(config.getKey(), config.getValue());
             }
-            wfi.getWorkflowOperationInstanceList().add(opInstance);
+            wfi.getWorkflowOperationInstances().add(opInstance);
             update(wfi); // Update the workflow instance, since it has a new operation instance
             try {
               opInstance.setResult(operationHandler.run(wfi));
@@ -452,8 +449,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
                 }
 
                 // Find the position of the current operation and compile the new operation list
-                int operationIndex = wfi.getWorkflowOperationInstanceList().size();
-                WorkflowOperationDefinitionListImpl updatedOperationDefinitions = new WorkflowOperationDefinitionListImpl();
+                int operationIndex = wfi.getWorkflowOperationInstances().size();
+                List<WorkflowOperationDefinition> updatedOperationDefinitions = new ArrayList<WorkflowOperationDefinition>();
                 for (int j = 0; j < operationIndex; j++)
                   updatedOperationDefinitions.add(operationDefinitions.get(j));
                 updatedOperationDefinitions.addAll(catchWorkflowDefinition.getOperations());
@@ -471,8 +468,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
                 }
 
                 // Find the position of the current operation and compile the new operation list
-                int operationIndex = wfi.getWorkflowOperationInstanceList().size();
-                WorkflowOperationDefinitionListImpl updatedOperationDefinitions = new WorkflowOperationDefinitionListImpl();
+                int operationIndex = wfi.getWorkflowOperationInstances().size();
+                List<WorkflowOperationDefinition> updatedOperationDefinitions = new ArrayList<WorkflowOperationDefinition>();
                 for (int j = 0; j < operationIndex; j++)
                   updatedOperationDefinitions.add(operationDefinitions.get(j));
                 updatedOperationDefinitions.addAll(catchWorkflowDefinition.getOperations());
@@ -495,7 +492,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         if (failed) {
           wfi.setState(State.FAILED.name());
           // set any "FAILING" operations to "FAILED"
-          for(WorkflowOperationInstance op : wfi.getWorkflowOperationInstanceList()) {
+          for(WorkflowOperationInstance op : wfi.getWorkflowOperationInstances()) {
             if(State.FAILING.equals(op.getState())) ((WorkflowOperationInstanceImpl)op).setState(State.FAILED.name());
           }
         } else {

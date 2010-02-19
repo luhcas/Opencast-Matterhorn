@@ -1,11 +1,7 @@
 WorkflowConfigurationImpl
 WorkflowDefinitionImpl
-WorkflowDefinitionListImpl
 WorkflowInstanceImpl
-WorkflowInstanceListImpl
 WorkflowOperationDefinitionImpl
-WorkflowOperationDefinitionListImpl
 WorkflowOperationInstanceImpl
-WorkflowOperationInstanceListImpl
 WorkflowOperationResultImpl
 WorkflowSetImpl

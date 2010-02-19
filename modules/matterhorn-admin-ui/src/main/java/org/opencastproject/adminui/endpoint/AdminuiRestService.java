@@ -159,7 +159,7 @@ public class AdminuiRestService {
         }
         item.setCaptureAgent(null); //FIXME get capture agent from where...?
         WorkflowOperationInstance operation = null;
-        ListIterator<WorkflowOperationInstance> instances = workflows[i].getWorkflowOperationInstanceList().getOperationInstance().listIterator();
+        ListIterator<WorkflowOperationInstance> instances = workflows[i].getWorkflowOperationInstances().listIterator();
         StringBuffer sb = new StringBuffer();
         while (instances.hasNext()) {
           operation = instances.next();

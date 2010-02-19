@@ -18,16 +18,19 @@ package org.opencastproject.workflow.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- * A JAXB-anotated implementation of {@link WorkflowDefinition}
+ * A JAXB-annotated implementation of {@link WorkflowDefinition}
  */
 @XmlType(name="workflow-definition", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="workflow-definition", namespace="http://workflow.opencastproject.org/")
@@ -44,8 +47,9 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   @XmlElement(name="description")
   private String description;
 
-  @XmlElement(name="operations")
-  private WorkflowOperationDefinitionList operations;
+  @XmlElement(name="operation")
+  @XmlElementWrapper(name="operations")
+  private List<WorkflowOperationDefinition> operations;
   
   public String getTitle() {
     return title;
@@ -62,11 +66,11 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   public void setDescription(String description) {
     this.description = description;
   }
-  public WorkflowOperationDefinitionList getOperations() {
+  public List<WorkflowOperationDefinition> getOperations() {
     return operations;
   }
 
-  public void setOperations(WorkflowOperationDefinitionList operations) {
+  public void setOperations(List<WorkflowOperationDefinition> operations) {
     this.operations = operations;
   }
 

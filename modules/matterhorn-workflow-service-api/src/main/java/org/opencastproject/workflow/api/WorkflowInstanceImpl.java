@@ -21,6 +21,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -70,11 +71,13 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @XmlElement(name="mediapackage")
   private MediaPackage sourceMediaPackage;
   
-  @XmlElement(name="operation-definitions")
-  private WorkflowOperationDefinitionList workflowOperationDefinitionList;
+  @XmlElement(name="operation-definition")
+  @XmlElementWrapper(name="operation-definitions")
+  private List<WorkflowOperationDefinition> workflowOperationDefinitionList;
 
-  @XmlElement(name="operation-instances")
-  public WorkflowOperationInstanceList workflowOperationInstanceList;
+  @XmlElement(name="operation-instance")
+  @XmlElementWrapper(name="operation-instances")
+  public List<WorkflowOperationInstance> workflowOperationInstanceList;
 
   public String getId() {
     return id;
@@ -120,22 +123,20 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   public WorkflowOperationInstance getCurrentOperation() {
     // Since we add operation instances only once they start, we can just return the last one in the list.
-    if(workflowOperationInstanceList == null) return null;
-    List<WorkflowOperationInstance> list = workflowOperationInstanceList.getOperationInstance();
-    if(list.isEmpty()) return null;
-    return list.get(list.size()-1);
+    if(workflowOperationInstanceList == null || workflowOperationInstanceList.isEmpty()) return null;
+    return workflowOperationInstanceList.get(workflowOperationInstanceList.size()-1);
   }
 
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowInstance#getWorkflowOperations()
    */
-  public WorkflowOperationInstanceList getWorkflowOperationInstanceList() {
-    if(workflowOperationInstanceList == null) workflowOperationInstanceList = new WorkflowOperationInstanceListImpl();
+  public List<WorkflowOperationInstance> getWorkflowOperationInstances() {
+    if(workflowOperationInstanceList == null) workflowOperationInstanceList = new ArrayList<WorkflowOperationInstance>();
     return workflowOperationInstanceList;
   }
 
-  public void setWorkflowOperationInstanceList(WorkflowOperationInstanceList workflowOperationInstanceList) {
+  public void setWorkflowOperationInstanceList(List<WorkflowOperationInstance> workflowOperationInstanceList) {
     this.workflowOperationInstanceList = workflowOperationInstanceList;
   }
 
@@ -143,45 +144,45 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowInstance#addWorkflowOperationDefinition(org.opencastproject.workflow.api.WorkflowOperationDefinition)
    */
-  public void addWorkflowOperationDefinition(WorkflowOperationDefinition operation) {
-    // TODO Auto-generated method stub
-    
+  public void addWorkflowOperationDefinition(WorkflowOperationDefinition operationDefinition) {
+    if(workflowOperationDefinitionList == null) workflowOperationDefinitionList = new ArrayList<WorkflowOperationDefinition>();
+    workflowOperationDefinitionList.add(operationDefinition);
   }
 
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowInstance#addWorkflowOperationDefinition(int, org.opencastproject.workflow.api.WorkflowOperationDefinition)
    */
-  public void addWorkflowOperationDefinition(int location, WorkflowOperationDefinition operation) {
-    // TODO Auto-generated method stub
-    
+  public void addWorkflowOperationDefinition(int location, WorkflowOperationDefinition operationDefinition) {
+    if(workflowOperationDefinitionList == null) workflowOperationDefinitionList = new ArrayList<WorkflowOperationDefinition>();
+    workflowOperationDefinitionList.add(location, operationDefinition);
   }
 
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowInstance#addWorkflowOperationDefinitions(org.opencastproject.workflow.api.WorkflowOperationDefinitionList)
    */
-  public void addWorkflowOperationDefinitions(WorkflowOperationDefinitionList operations) {
-    getWorkflowOperationDefinitionList().getOperation().addAll(operations.getOperation());
+  public void addWorkflowOperationDefinitions(List<WorkflowOperationDefinition> operations) {
+    getWorkflowOperationDefinitions().addAll(operations);
   }
 
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowInstance#addWorkflowOperationDefinitions(int, org.opencastproject.workflow.api.WorkflowOperationDefinitionList)
    */
-  public void addWorkflowOperationDefinitions(int location, WorkflowOperationDefinitionList operations) {
-    getWorkflowOperationDefinitionList().getOperation().addAll(location, operations.getOperation());
+  public void addWorkflowOperationDefinitions(int location, List<WorkflowOperationDefinition> operations) {
+    getWorkflowOperationDefinitions().addAll(location, operations);
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#getWorkflowOperationDefinitionList()
+   * @see org.opencastproject.workflow.api.WorkflowInstance#getWorkflowOperationDefinitions()
    */
-  public WorkflowOperationDefinitionList getWorkflowOperationDefinitionList() {
+  public List<WorkflowOperationDefinition> getWorkflowOperationDefinitions() {
     return workflowOperationDefinitionList;
   }
   
-  public void setWorkflowOperationDefinitionList(WorkflowOperationDefinitionList workflowOperationDefinitionList) {
+  public void setWorkflowOperationDefinitionList(List<WorkflowOperationDefinition> workflowOperationDefinitionList) {
     this.workflowOperationDefinitionList = workflowOperationDefinitionList;
   }
 
