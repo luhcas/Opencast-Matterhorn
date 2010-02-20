@@ -91,7 +91,7 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
         logger.info("Received media package {}", mp.getIdentifier());
         
         // execute 'Transcode, Distribute and Publish workflow'
-        WorkflowDefinition def = workflowService.getWorkflowDefinitionByName("Transcode, Distribute and Publish");
+        WorkflowDefinition def = workflowService.getWorkflowDefinitionById("default");
         workflowService.start(def, mp, null);
 
         // execute 'review' workflow

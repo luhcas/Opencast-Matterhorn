@@ -66,7 +66,7 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
     try {
       stream = new FileInputStream(artifact);
       WorkflowDefinition def = WorkflowBuilder.getInstance().parseWorkflowDefinition(stream);
-      workflowService.unregisterWorkflowDefinition(def.getTitle());
+      workflowService.unregisterWorkflowDefinition(def.getId());
     } finally {
       IOUtils.closeQuietly(stream);
     }

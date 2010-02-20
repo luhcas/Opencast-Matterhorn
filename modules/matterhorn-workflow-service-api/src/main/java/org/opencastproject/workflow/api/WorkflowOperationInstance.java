@@ -15,65 +15,28 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.opencastproject.workflow.api.WorkflowInstance.State;
-
-import java.util.Set;
-
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * An instance of a {@link WorkflowOperationInstance}.  Instances maintain the {@link MediaPackage} resulting from
- * the execution of {@link WorkflowOperationRunner#run(WorkflowInstance)}.
+ * the execution of {@link WorkflowOperationRunner#start(WorkflowInstance)}.
  */
 @XmlJavaTypeAdapter(WorkflowOperationInstanceImpl.Adapter.class)
-public interface WorkflowOperationInstance {
+public interface WorkflowOperationInstance extends Configurable {
+  public enum OperationState { INSTANTIATED, RUNNING, PAUSED, SUCCEEDED, FAILED }
 
-  String getName();
+  String getId();
   
   String getDescription();
 
   /**
    * The state of this operation.
    */
-  State getState();
+  OperationState getState();
   
   /**
-   * Gets the resulting media package from the execution of {@link WorkflowOperationHandler#run(WorkflowInstance)}.
-   * @return The media package, as produced from the execution of a workflow operation runner.
+   * Sets the state of this operation
+   * @param state
    */
-  WorkflowOperationResult getResult();
-  
-  /**
-   * Gets the configuration elements for this workflow operation.
-   */
-  Set<WorkflowConfiguration> getConfigurations();
-  
-  /**
-   * Returns the value of property <code>name</code> or <code>null</code> if no such property has been set.
-   * 
-   * @param key
-   *          the configuration key
-   * @return the configuration value
-   */
-  public String getConfiguration(String key);
-
-  /**
-   * Sets the configuration with name <code>key</code> to value <code>value</code>, or adds it if it doesn't already
-   * exist.
-   * 
-   * @param key
-   *          the configuration key
-   * @param value
-   *          the configuration value
-   */
-  public void setConfiguration(String key, String value);
-
-  /**
-   * Removes the <code>key</code> configuration.
-   * 
-   * @param key
-   *          the configuration key
-   */
-  public void removeConfiguration(String key);
-
+  void setState(OperationState state);
 }

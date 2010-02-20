@@ -67,12 +67,12 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
-  public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.debug("Running image workflow operation on {}", workflowInstance);
 
-    MediaPackage src = (MediaPackage)workflowInstance.getCurrentMediaPackage().clone();
+    MediaPackage src = (MediaPackage)workflowInstance.getMediaPackage().clone();
 
     // Create the image
     MediaPackage resultingMediaPackage = null;

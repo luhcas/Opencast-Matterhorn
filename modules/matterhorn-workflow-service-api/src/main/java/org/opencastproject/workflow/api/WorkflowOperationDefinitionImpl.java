@@ -17,6 +17,7 @@ package org.opencastproject.workflow.api;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -35,8 +36,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinition {
 
-  @XmlAttribute(name="name")
-  protected String name;
+  @XmlAttribute(name="id")
+  protected String id;
 
   @XmlAttribute(name="description")
   protected String description;
@@ -55,23 +56,23 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
   public WorkflowOperationDefinitionImpl() {}
   
   /**
-   * @param name The unique name of this operation
+   * @param id The unique name of this operation
    * @param description The description of what this operation does
    * @param failOnError Whether an exception thrown by this operation should fail the entire {@link WorkflowInstance}
    */
-  public WorkflowOperationDefinitionImpl(String name, String description, String exceptionHandlingWorkflow, boolean failWorkflowOnException) {
+  public WorkflowOperationDefinitionImpl(String id, String description, String exceptionHandlingWorkflow, boolean failWorkflowOnException) {
     super();
-    this.name = name;
+    this.id = id;
     this.description = description;
     this.exceptionHandlingWorkflow = exceptionHandlingWorkflow;
     this.failWorkflowOnException = failWorkflowOnException;
   }
 
-  public String getName() {
-    return name;
+  public String getId() {
+    return id;
   }
-  public void setName(String name) {
-    this.name = name;
+  public void setId(String id) {
+    this.id = id;
   }
   public String getDescription() {
     return description;
@@ -110,14 +111,6 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
   static class Adapter extends XmlAdapter<WorkflowOperationDefinitionImpl, WorkflowOperationDefinition> {
     public WorkflowOperationDefinitionImpl marshal(WorkflowOperationDefinition op) throws Exception {return (WorkflowOperationDefinitionImpl)op;}
     public WorkflowOperationDefinition unmarshal(WorkflowOperationDefinitionImpl op) throws Exception {return op;}
-  }
-
-  public Set<WorkflowConfiguration> getConfigurations() {
-    return configurations;
-  }
-
-  public void setConfigurations(Set<WorkflowConfiguration> configurations) {
-    this.configurations = configurations;
   }
 
   /**
@@ -162,4 +155,20 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
     // No configurations were found, so add a new one
     configurations.add(new WorkflowConfigurationImpl(key, value));
   }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationDefinition#getConfigurationKeys()
+   */
+  @Override
+  public Set<String> getConfigurationKeys() {
+    Set<String> set = new TreeSet<String>();
+    if(configurations != null) {
+      for(WorkflowConfiguration config : configurations) {
+        set.add(config.getKey());
+      }
+    }
+    return set;
+  }
+
 }

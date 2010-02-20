@@ -26,7 +26,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
@@ -34,15 +33,14 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  * The search result represents a set of result items that has been compiled as a result for a search operation.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="workflow-instances", namespace="http://workflow.opencastproject.org/")
+@XmlRootElement(name="workflows", namespace="http://workflow.opencastproject.org/")
 public class WorkflowSetImpl implements WorkflowSet {
 
   /** Logging facility */
   static Logger log_ = LoggerFactory.getLogger(WorkflowSetImpl.class);
 
   /** A list of search items. */
-  @XmlElementWrapper(name="workflow-instances")
-  @XmlElement(name="workflow-instance")
+  @XmlElement(name="workflow")
   private List<WorkflowInstance> resultSet = null;
 
   /** The pagination offset. */

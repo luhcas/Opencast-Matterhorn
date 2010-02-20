@@ -33,7 +33,7 @@ public interface WorkflowService {
    *          the workflow definition name
    * @return the workflow
    */
-  WorkflowDefinition getWorkflowDefinitionByName(String name);
+  WorkflowDefinition getWorkflowDefinitionById(String name);
 
   /**
    * Gets a {@link WorkflowInstace} by its ID.

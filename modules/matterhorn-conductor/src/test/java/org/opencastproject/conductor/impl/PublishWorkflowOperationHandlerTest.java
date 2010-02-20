@@ -26,7 +26,7 @@ import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
-import org.opencastproject.workflow.api.WorkflowInstance.State;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -50,13 +50,13 @@ public class PublishWorkflowOperationHandlerTest {
     // Add the mediapackage to a workflow instance
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
     workflowInstance.setId("workflow-1");
-    workflowInstance.setState(State.RUNNING.toString());
-    workflowInstance.setSourceMediaPackage(mp);
+    workflowInstance.setState(WorkflowState.RUNNING);
+    workflowInstance.setMediaPackage(mp);
     WorkflowOperationInstanceImpl operationInstance = new WorkflowOperationInstanceImpl();
-    operationInstance.setState(State.RUNNING.toString());
     List<WorkflowOperationInstance> operationsList = new ArrayList<WorkflowOperationInstance>();
     operationsList.add(operationInstance);
-    workflowInstance.setWorkflowOperationInstanceList(operationsList);
+    workflowInstance.setOperations(operationsList);
+    workflowInstance.next(); // Simulate starting the workflow
     
     // Set up the operation handler using mock collaborators
     PublishWorkflowOperationHandler operationHandler = new PublishWorkflowOperationHandler();
@@ -65,8 +65,8 @@ public class PublishWorkflowOperationHandlerTest {
     operationHandler.setSearchService(searchService);
     
     // Run the media package through the operation handler, ensuring that the flavors are retained
-    WorkflowOperationResult result = operationHandler.run(workflowInstance);
-    for(Track t : result.getResultingMediaPackage().getTracks()) {
+    WorkflowOperationResult result = operationHandler.start(workflowInstance);
+    for(Track t : result.getMediaPackage().getTracks()) {
       Assert.assertNotNull(t.getFlavor());
     }
   }

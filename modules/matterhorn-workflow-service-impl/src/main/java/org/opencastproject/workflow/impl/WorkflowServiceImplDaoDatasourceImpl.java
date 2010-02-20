@@ -437,7 +437,7 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       String xml = WorkflowBuilder.getInstance().toXml(instance);
       
       // Get the field values to store
-      MediaPackage mp = instance.getCurrentMediaPackage();
+      MediaPackage mp = instance.getMediaPackage();
       String mediaPackageId = null;
       String episodeId = null;
       String text = null;
@@ -445,7 +445,7 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       if (mp != null) {
         mediaPackageId = mp.getIdentifier().toString();
         WorkflowOperationInstance op = instance.getCurrentOperation();
-        if(op != null) currentOperation = op.getName();
+        if(op != null) currentOperation = op.getId();
       }
       
       if (exists(instance.getId(), conn)) {
@@ -458,10 +458,10 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
         updateStatment.setString(4, instance.getId());
         updateStatment.execute();
       } else {
-        MediaPackage mediapackage = instance.getSourceMediaPackage();
+        MediaPackage mediapackage = instance.getMediaPackage();
         episodeId = mediapackage.getIdentifier().toString();
         String seriesId = mediapackage.getSeries();
-        text = getMetadataText(instance.getSourceMediaPackage());
+        text = getMetadataText(instance.getMediaPackage());
         // Add it
         updateStatment = conn.prepareStatement("insert into oc_workflow values(?, ?, ?, ?, ?, ?, ?, ?, ?)");
         updateStatment.setString(1, instance.getId());

@@ -25,8 +25,8 @@ import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Param.Type;
+import org.opencastproject.workflow.api.Configurable;
 import org.opencastproject.workflow.api.WorkflowBuilder;
-import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -36,7 +36,7 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
-import org.opencastproject.workflow.api.WorkflowInstance.State;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
@@ -247,12 +247,12 @@ public class WorkflowRestService {
   @SuppressWarnings("unchecked")
   protected JSONObject getWorkflowDefinitionAsJson(WorkflowDefinition definition) {
     JSONObject json = new JSONObject();
-    json.put("title", definition.getTitle());
+    json.put("title", definition.getId());
     json.put("description", definition.getDescription());
     List<JSONObject> opList = new ArrayList<JSONObject>();
     for(WorkflowOperationDefinition operationDefinition : definition.getOperations()) {
       JSONObject op = new JSONObject();
-      op.put("name",operationDefinition.getName());
+      op.put("name",operationDefinition.getId());
       op.put("description",operationDefinition.getDescription());
       op.put("exception_handler_workflow",operationDefinition.getExceptionHandlingWorkflow());
       op.put("fail_on_error",operationDefinition.isFailWorkflowOnException());
@@ -283,7 +283,7 @@ public class WorkflowRestService {
     WorkflowQuery q = service.newWorkflowQuery();
     q.withCount(count);
     q.withStartPage(startPage);
-    if(state != null) q.withState(State.valueOf(state.toUpperCase()));
+    if(state != null) q.withState(WorkflowState.valueOf(state.toUpperCase()));
     if(text != null) q.withText(text);
     if(episodeId != null) q.withEpisode(episodeId);
     if(seriesId != null) q.withSeries(seriesId);
@@ -359,19 +359,18 @@ public class WorkflowRestService {
 
   @SuppressWarnings("unchecked")
   protected JSONObject getWorkflowInstanceAsJson(WorkflowInstance workflow, boolean includeDublinCoreFields) throws Exception {
-    MediaPackage mp = workflow.getCurrentMediaPackage();
+    MediaPackage mp = workflow.getMediaPackage();
 
     JSONObject jsInstance = new JSONObject();
     jsInstance.put("workflow_id", workflow.getId());
     jsInstance.put("workflow_title", workflow.getTitle());
     WorkflowOperationInstance opInstance = workflow.getCurrentOperation();
     if(opInstance != null) {
-      jsInstance.put("workflow_current_operation", opInstance.getName());
+      jsInstance.put("workflow_current_operation", opInstance.getId());
     }
     jsInstance.put("workflow_state", workflow.getState().name().toLowerCase());
-    Set<WorkflowConfiguration> configs = workflow.getConfigurations();
-    jsInstance.put("configuration", getConfigsAsJson(configs));
-    List<WorkflowOperationInstance> operations = workflow.getWorkflowOperationInstances();
+    jsInstance.put("configuration", getConfigsAsJson(workflow));
+    List<WorkflowOperationInstance> operations = workflow.getOperations();
     jsInstance.put("operations", getOperationsAsJson(operations));
     jsInstance.put("mediapackage_title", mp.getTitle());
     // TODO: do we need more metadata here?
@@ -383,22 +382,23 @@ public class WorkflowRestService {
     JSONArray jsonArray = new JSONArray();
     for(WorkflowOperationInstance op : operations) {
       JSONObject jsOp = new JSONObject();
-      jsOp.put("name", op.getName());
+      jsOp.put("name", op.getId());
       jsOp.put("description", op.getDescription());
       jsOp.put("state", op.getState().name().toLowerCase());
-      jsOp.put("configurations", getConfigsAsJson(op.getConfigurations()));
+      jsOp.put("configurations", getConfigsAsJson(op));
       jsonArray.add(jsOp);
     }
     return jsonArray;
   }
 
   @SuppressWarnings("unchecked")
-  protected JSONArray getConfigsAsJson(Set<WorkflowConfiguration> configs) {
+  protected JSONArray getConfigsAsJson(Configurable entity) {
     JSONArray json = new JSONArray();
-    if(configs != null) {
-      for(WorkflowConfiguration config : configs) {
+    Set<String> keys = entity.getConfigurationKeys();
+    if(keys != null) {
+      for(String key : keys) {
         JSONObject jsConfig = new JSONObject();
-        jsConfig.put(config.getKey(), config.getValue());
+        jsConfig.put(key, entity.getConfiguration(key));
         json.add(jsConfig);
       }
     }

@@ -63,18 +63,18 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationResult#getResultingMediaPackage()
+   * @see org.opencastproject.workflow.api.WorkflowOperationResult#getMediaPackage()
    */
-  public MediaPackage getResultingMediaPackage() {
+  public MediaPackage getMediaPackage() {
     return resultingMediaPackage;
   }
 
   /**
    * Sets the resulting media package.
-   * @param resultingMediaPackage
+   * @param mediaPackage
    */
-  public void setResultingMediaPackage(MediaPackage resultingMediaPackage) {
-    this.resultingMediaPackage = resultingMediaPackage;
+  public void setMediaPackage(MediaPackage mediaPackage) {
+    this.resultingMediaPackage = mediaPackage;
   }
 
   /**

@@ -66,9 +66,9 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
-  public WorkflowOperationResult run(final WorkflowInstance workflowInstance)
+  public WorkflowOperationResult start(final WorkflowInstance workflowInstance)
           throws WorkflowOperationException {
     logger.debug("Running compose workflow operation on workflow {}",
             workflowInstance.getId());
@@ -76,7 +76,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
     // Encode the media package
     MediaPackage resultingMediaPackage = null;
     try {
-      resultingMediaPackage = encode(workflowInstance.getCurrentMediaPackage(),
+      resultingMediaPackage = encode(workflowInstance.getMediaPackage(),
               workflowInstance.getCurrentOperation());
     } catch (Exception e) {
       throw new WorkflowOperationException(e);

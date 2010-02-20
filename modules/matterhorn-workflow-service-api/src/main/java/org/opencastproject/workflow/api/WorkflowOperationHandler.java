@@ -33,7 +33,7 @@ public interface WorkflowOperationHandler {
    * @throws WorkflowOperationException If the workflow operation fails to execute properly, and the default error
    * handling should be invoked.
    */
-  WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException;  
+  WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException;  
   
   /**
    * Continues a suspended {@link WorkflowInstance}.  If the execution fails for some reason, this must
@@ -49,4 +49,10 @@ public interface WorkflowOperationHandler {
    */
   WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties) throws WorkflowOperationException;  
 
+  /**
+   * Clean up after a workflow operation finishes
+   * @param workflowInstance The workflow instance
+   * @throws WorkflowOperationException If the workflow operation fails to clean up properly.
+   */
+  void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException;
 }

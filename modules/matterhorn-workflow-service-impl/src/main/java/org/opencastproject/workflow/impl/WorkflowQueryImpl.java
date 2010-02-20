@@ -16,7 +16,7 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.workflow.api.WorkflowQuery;
-import org.opencastproject.workflow.api.WorkflowInstance.State;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 /**
  * A fluent API for issuing {@link WorkflowInstance} queries.
@@ -25,7 +25,7 @@ public class WorkflowQueryImpl implements WorkflowQuery {
   protected long count;
   protected long startPage;
   protected String text;
-  protected State state;
+  protected WorkflowState state;
   protected String episodeId;
   protected String seriesId;
   protected String mediaPackageId;
@@ -60,9 +60,9 @@ public class WorkflowQueryImpl implements WorkflowQuery {
   }
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowQuery#withState(org.opencastproject.workflow.api.WorkflowInstance.State)
+   * @see org.opencastproject.workflow.api.WorkflowQuery#withState(org.opencastproject.workflow.api.WorkflowInstance.WorkflowState)
    */
-  public WorkflowQuery withState(State state) {
+  public WorkflowQuery withState(WorkflowState state) {
     this.state = state;
     return this;
   }
@@ -119,7 +119,7 @@ public class WorkflowQueryImpl implements WorkflowQuery {
     return text;
   }
 
-  public State getState() {
+  public WorkflowState getState() {
     return state;
   }
 

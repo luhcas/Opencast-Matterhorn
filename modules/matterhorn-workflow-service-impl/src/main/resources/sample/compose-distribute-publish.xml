@@ -1,5 +1,5 @@
-<workflow-definition>
-  <title>Transcode, Distribute and Publish</title>
+<definition>
+  <id>workflow-service-sample</id>
   <description>
     A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
     along with their associated metadata, to the distribution channels.
@@ -8,17 +8,17 @@
   
     <!-- inspect the media -->
     <operation
-      name="inspect"
+      id="inspect"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Inspect the media package">
     </operation>
  
   <!-- encode to flash download -->
     <operation
-      name="compose"
+      id="compose"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presenter (camera) video to Flash download">
       <configurations>
         <configuration key="source-video-flavor">presenter/source</configuration>
@@ -28,9 +28,9 @@
       </configurations>
     </operation>
     <operation
-      name="compose"
+      id="compose"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presentation (screen) to Flash download">
       <configurations>
         <configuration key="source-video-flavor">presentation/source</configuration>
@@ -43,9 +43,9 @@
   <!-- encode to flash streaming -->
   <!-- 
     <operation
-      name="compose"
+      id="compose"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presenter (camera) to Flash streaming">
       <configurations>
         <configuration key="source-video-flavor">presenter/source</configuration>
@@ -55,9 +55,9 @@
       </configurations>
     </operation>
     <operation
-      name="compose"
+      id="compose"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presentation (screen) to Flash streaming">
       <configurations>
         <configuration key="source-video-flavor">presentation/source</configuration>
@@ -70,9 +70,9 @@
 
   <!-- encode to quicktime download -->
     <operation
-      name="compose"
+      id="compose"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presenter (camera) to quicktime/mp4 download">
       <configurations>
         <configuration key="source-video-flavor">presenter/source</configuration>
@@ -82,9 +82,9 @@
       </configurations>
     </operation>
     <operation
-      name="compose"
+      id="compose"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presentation (screen) to quicktime/mpeg4 download">
       <configurations>
         <configuration key="source-video-flavor">presentation/source</configuration>
@@ -96,9 +96,9 @@
     
     <!-- encode to avi download -->
     <operation
-      name="compose"
+      id="compose"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presenter (camera) to avi/mpeg4 download">
       <configurations>
         <configuration key="source-video-flavor">presenter/source</configuration>
@@ -108,9 +108,9 @@
       </configurations>
     </operation>
     <operation
-      name="compose"
+      id="compose"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presentation (screen) to avi/mpeg4 download">
       <configurations>
         <configuration key="source-video-flavor">presentation/source</configuration>
@@ -122,9 +122,9 @@
  
      <!-- encode to m4a download -->
     <operation
-      name="compose"
+      id="compose"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presenter (camera) to m4a/aac download">
       <configurations>
         <configuration key="source-video-flavor">presenter/source</configuration>
@@ -134,9 +134,9 @@
       </configurations>
     </operation>
     <operation
-      name="compose"
+      id="compose"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presentation (screen) to m4a/aac download">
       <configurations>
         <configuration key="source-video-flavor">presentation/source</configuration>
@@ -148,9 +148,9 @@
  
     <!-- encode to cover image -->
     <operation
-      name="image"
+      id="image"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presenter (camera) to cover image">
       <configurations>
         <configuration key="source-flavor">presenter/source</configuration>
@@ -162,9 +162,9 @@
       </configurations>
     </operation>
     <operation
-      name="image"
+      id="image"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presentation (screen) to cover image">
       <configurations>
         <configuration key="source-flavor">presenter/source</configuration>
@@ -177,9 +177,9 @@
     </operation>
 
     <operation
-      name="image"
+      id="image"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presenter (camera) to cover image">
       <configurations>
         <configuration key="source-flavor">presentation/source</configuration>
@@ -191,9 +191,9 @@
       </configurations>
     </operation>
     <operation
-      name="image"
+      id="image"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presentation (screen) to cover image">
       <configurations>
         <configuration key="source-flavor">presentation/source</configuration>
@@ -206,9 +206,9 @@
     </operation>
 
     <operation
-      name="distribute_local"
+      id="distribute_local"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Distribute media to the local distribution channel">
       <configurations>
         <configuration key="source-tags">engage,atom,rss</configuration>
@@ -217,13 +217,13 @@
     </operation>
 
     <operation
-      name="publish"
+      id="publish"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Add metadata to the search index">
       <configurations>
         <configuration key="source-tags">publish</configuration>
       </configurations>
     </operation>
   </operations>
-</workflow-definition>
+</definition>

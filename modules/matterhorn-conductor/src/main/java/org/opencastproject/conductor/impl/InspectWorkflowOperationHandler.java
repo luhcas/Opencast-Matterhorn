@@ -111,12 +111,12 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
-  public WorkflowOperationResult run(WorkflowInstance workflowInstance)
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance)
           throws WorkflowOperationException {
-    MediaPackage mediaPackage = (MediaPackage)workflowInstance.getCurrentMediaPackage().clone();
+    MediaPackage mediaPackage = (MediaPackage)workflowInstance.getMediaPackage().clone();
 
     // Populate the mediapackage with any metadata found in its catalogs
     populateMediaPackageMetadata(mediaPackage);

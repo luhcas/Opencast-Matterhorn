@@ -15,61 +15,28 @@
  */
 package org.opencastproject.workflow.impl;
 
-import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageImpl;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
-import org.opencastproject.workflow.api.WorkflowOperationInstance;
-import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
-import org.opencastproject.workflow.api.WorkflowOperationResultImpl;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 public class WorkflowInstanceTest {
   @Test
   public void testWorkflowWithoutOperations() throws Exception {
     WorkflowInstanceImpl workflow = new WorkflowInstanceImpl();
     MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-    workflow.setSourceMediaPackage(mp);
-    Assert.assertEquals(mp.getIdentifier(), workflow.getCurrentMediaPackage().getIdentifier());
+    workflow.setMediaPackage(mp);
+    Assert.assertEquals(mp.getIdentifier(), workflow.getMediaPackage().getIdentifier());
   }
 
-  @Test
-  public void testWorkflowWithOperationsWithResults() throws Exception {
-    WorkflowInstanceImpl workflow = new WorkflowInstanceImpl();
-    MediaPackage src = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-    workflow.setSourceMediaPackage(src);
-    
-    MediaPackageElementBuilder eb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-    Attachment attachment = (Attachment)eb.elementFromURI(new URI("http://test/attachment.txt"), Attachment.TYPE, null);
-    
-    MediaPackageImpl mp = (MediaPackageImpl)MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-    mp.setIdentifier(src.getIdentifier());
-    mp.add(attachment);
-    
-    WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl();
-    WorkflowOperationResultImpl result = new WorkflowOperationResultImpl();
-    result.setResultingMediaPackage(mp);
-    opInstance.setResult(result);
-    List<WorkflowOperationInstance> ops = new ArrayList<WorkflowOperationInstance>();
-    ops.add(opInstance);
-
-    workflow.setWorkflowOperationInstanceList(ops);
-    
-    Assert.assertEquals(1, workflow.getCurrentMediaPackage().getAttachments().length);
-  }
- 
   @Test
   public void testMediaPackageSerializationInWorkflowInstance() throws Exception {
     WorkflowInstanceImpl workflow = new WorkflowInstanceImpl();
@@ -78,8 +45,8 @@ public class WorkflowInstanceTest {
       new URI("http://sample"), Track.TYPE, MediaPackageElements.PRESENTER_TRACK);
     src.add(track);
     MediaPackage deserialized = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(src.toXml());
-    workflow.setSourceMediaPackage(deserialized);
-    Assert.assertEquals(1, workflow.getSourceMediaPackage().getTracks().length);
+    workflow.setMediaPackage(deserialized);
+    Assert.assertEquals(1, workflow.getMediaPackage().getTracks().length);
   }
   
   @Test
@@ -87,7 +54,7 @@ public class WorkflowInstanceTest {
     WorkflowInstanceImpl workflow = new WorkflowInstanceImpl();
     String xml = "<ns2:mediapackage xmlns:ns2=\"http://mediapackage.opencastproject.org\" start=\"2007-12-05T13:40:00\" duration=\"1004400000\"><media><track id=\"track-1\" type=\"presenter/source\"><mimetype>audio/mp3</mimetype><url>http://localhost:8080/workflow/samples/audio.mp3</url><checksum type=\"md5\">950f9fa49caa8f1c5bbc36892f6fd062</checksum><duration>10472</duration><audio><channels>2</channels><bitdepth>0</bitdepth><bitrate>128004.0</bitrate><samplingrate>44100</samplingrate></audio></track><track id=\"track-2\" type=\"presenter/source\"><mimetype>video/quicktime</mimetype><url>http://localhost:8080/workflow/samples/camera.mpg</url><checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum><duration>14546</duration><video><device type=\"UFG03\" version=\"30112007\" vendor=\"Unigraf\" /><encoder type=\"H.264\" version=\"7.4\" vendor=\"Apple Inc\" /><resolution>640x480</resolution><scanType type=\"progressive\" /><bitrate>540520</bitrate><frameRate>2</frameRate></video></track></media><metadata><catalog id=\"catalog-1\" type=\"metadata/dublincore\"><mimetype>text/xml</mimetype><url>http://localhost:8080/workflow/samples/dc-1.xml</url><checksum type=\"md5\">20e466615251074e127a1627fd0dae3e</checksum></catalog></metadata></ns2:mediapackage>";
     MediaPackage src = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(xml);
-    workflow.setSourceMediaPackage(src);
-    Assert.assertEquals(2, workflow.getSourceMediaPackage().getTracks().length);
+    workflow.setMediaPackage(src);
+    Assert.assertEquals(2, workflow.getMediaPackage().getTracks().length);
   }
 }

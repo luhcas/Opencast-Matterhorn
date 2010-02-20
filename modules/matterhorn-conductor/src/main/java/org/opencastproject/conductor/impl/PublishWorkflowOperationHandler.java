@@ -57,11 +57,11 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
-  public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     try {
-      MediaPackage current = workflowInstance.getCurrentMediaPackage();
+      MediaPackage current = workflowInstance.getMediaPackage();
       MediaPackage mp = (MediaPackage)current.clone();
       logger.info("Publishing media package {} to search index", mp);
 

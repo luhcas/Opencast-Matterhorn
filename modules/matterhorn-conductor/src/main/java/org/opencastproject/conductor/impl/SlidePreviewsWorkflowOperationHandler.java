@@ -86,15 +86,15 @@ public class SlidePreviewsWorkflowOperationHandler extends AbstractWorkflowOpera
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
-  public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.debug("Running compose workflow operation on workflow {}", workflowInstance.getId());
 
     // Encode the media package
     MediaPackage resultingMediaPackage = null;
     try {
-      resultingMediaPackage = createSlidePreview(workflowInstance.getCurrentMediaPackage(), workflowInstance
+      resultingMediaPackage = createSlidePreview(workflowInstance.getMediaPackage(), workflowInstance
               .getCurrentOperation());
     } catch (Exception e) {
       throw new WorkflowOperationException(e);

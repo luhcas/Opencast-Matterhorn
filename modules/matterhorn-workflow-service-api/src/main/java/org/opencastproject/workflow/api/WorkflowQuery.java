@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.opencastproject.workflow.api.WorkflowInstance.State;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 /**
  * A query used for finding workflow instances.  See {@link WorkflowService#getWorkflowInstances(WorkflowQuery)}
@@ -32,7 +32,7 @@ public interface WorkflowQuery {
   WorkflowQuery withText(String text);
 
   /** Limit results to workflow instances in a specific state */
-  WorkflowQuery withState(State state);
+  WorkflowQuery withState(WorkflowState state);
 
   /** Limit results to workflow instances for a specific episode */
   WorkflowQuery withEpisode(String episodeId);

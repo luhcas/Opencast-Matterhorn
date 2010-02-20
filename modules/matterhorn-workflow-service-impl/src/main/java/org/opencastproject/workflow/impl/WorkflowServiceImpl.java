@@ -16,23 +16,18 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.workflow.api.WorkflowConfiguration;
-import org.opencastproject.workflow.api.WorkflowConfigurationImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
-import org.opencastproject.workflow.api.WorkflowOperationConfigurations;
-import org.opencastproject.workflow.api.WorkflowOperationConfigurationsImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
-import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
+import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
-import org.opencastproject.workflow.api.WorkflowInstance.State;
-import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -53,7 +48,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Implements {@link WorkflowService} with in-memory data structures to hold {@link WorkflowOperation}s and
@@ -138,8 +134,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   /** The data access object responsible for storing and retrieving workflow instances */
   protected WorkflowServiceImplDao dao;
   
-  /** A collection of the running workflow threads */
-  protected Map<String, Thread> threadMap = new ConcurrentHashMap<String, Thread>();
+//  /** A collection of the running workflow threads */
+//  protected Map<String, Thread> threadMap = new ConcurrentHashMap<String, Thread>();
 
   /**
    * Sets the DAO implementation to use in this service.
@@ -184,7 +180,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     }
     Collections.sort(list, new Comparator<WorkflowDefinition>() {
       public int compare(WorkflowDefinition o1, WorkflowDefinition o2) {
-        return o1.getTitle().compareTo(o2.getTitle());
+        return o1.getId().compareTo(o2.getId());
       }
     });
     return list;
@@ -226,13 +222,13 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
     // Test availability of operation handler and catch workflows
     for (WorkflowOperationDefinition op : workflowDefinition.getOperations()) {
-      if (!availableOperations.contains(op.getName())) {
+      if (!availableOperations.contains(op.getId())) {
         log_.info("{} is not runnable due to missing operation {}", workflowDefinition, op);
         return false;
       }
       String catchWorkflow = op.getExceptionHandlingWorkflow();
       if (catchWorkflow != null) {
-        WorkflowDefinition catchWorkflowDefinition = getWorkflowDefinitionByName(catchWorkflow);
+        WorkflowDefinition catchWorkflowDefinition = getWorkflowDefinitionById(catchWorkflow);
         if (catchWorkflowDefinition == null) {
           log_.info("{} is not runnable due to missing catch workflow {} on operation {}",
                   new Object[] {workflowDefinition, catchWorkflow, op});
@@ -290,7 +286,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#registerWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
    */
   public void registerWorkflowDefinition(WorkflowDefinition workflow) {
-    workflowDefinitions.put(workflow.getTitle(), workflow);
+    workflowDefinitions.put(workflow.getId(), workflow);
   }
 
   /**
@@ -319,55 +315,20 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
           Map<String, String> properties) {
-    
-    Set<WorkflowOperationConfigurations> configurations = new HashSet<WorkflowOperationConfigurations>();
-    if(properties != null){
-      configurations = proccessProperties(properties);
-    }
-    
     String id = UUID.randomUUID().toString();
     log_.info("Starting a new workflow instance with ID={}", id);
-    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition);
+    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage, properties);
     workflowInstance.setId(id);
-    workflowInstance.setSourceMediaPackage(mediaPackage);
-    workflowInstance.setConfigurations(configurations);
-    workflowInstance.setState(WorkflowInstance.State.RUNNING.name());
+    if(properties != null) {
+      for(Entry<String, String> prop : properties.entrySet())
+        workflowInstance.setConfiguration(prop.getKey(), prop.getValue());
+    }
+    workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
     dao.update(workflowInstance);
     run(workflowInstance);
     return workflowInstance;
   }
   
-  /**
-   * Divides properties based to prefix to local (specific for workflow operation) or global
-   * 
-   * @param properties
-   * @return
-   */
-  protected Set<WorkflowOperationConfigurations> proccessProperties(Map<String, String> properties){
-    
-    HashMap<String, Set<WorkflowConfiguration>> configurations = new HashMap<String, Set<WorkflowConfiguration>>();
-    configurations.put("global", new HashSet<WorkflowConfiguration>());
-    
-    for(Entry<String, String> entry : properties.entrySet()){
-      if(entry.getKey().contains("/")){
-        String[] key = entry.getKey().split("/", 2);
-        if(!configurations.containsKey(key[0])){
-          configurations.put(key[0], new HashSet<WorkflowConfiguration>());
-        }
-        configurations.get(key[0]).add(new WorkflowConfigurationImpl(key[1], entry.getValue()));
-      } else {
-        configurations.get("global").add(new WorkflowConfigurationImpl(entry.getKey(), entry.getValue()));
-      }
-    }
-    
-    Set<WorkflowOperationConfigurations> confs = new HashSet<WorkflowOperationConfigurations>();
-    for(Entry<String, Set<WorkflowConfiguration>> entry : configurations.entrySet()) {
-      confs.add(new WorkflowOperationConfigurationsImpl(entry.getKey(), entry.getValue()));
-    }
-    
-    return confs;
-  }
-
   /**
    * Does a lookup of available operation handlers for the given workflow operation.
    * 
@@ -375,134 +336,34 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    *          the operation definition
    * @return the handler or <code>null</code>
    */
-  protected WorkflowOperationHandler selectOperationHandler(WorkflowOperationDefinition operation) {
+  protected WorkflowOperationHandler selectOperationHandler(WorkflowOperationInstance operation) {
     List<WorkflowOperationHandler> handlerList = new ArrayList<WorkflowOperationHandler>();
     for (HandlerRegistration handlerReg : getRegisteredHandlers()) {
-      if (handlerReg.operationName != null && handlerReg.operationName.equals(operation.getName())) {
+      if (handlerReg.operationName != null && handlerReg.operationName.equals(operation.getId())) {
         handlerList.add(handlerReg.handler);
       }
     }
-
     // Select one of the possibly multiple operation handlers. TODO Allow for a pluggable strategy for this mechanism
     if (handlerList.size() > 0) {
       int index = (int) Math.round((handlerList.size() - 1) * Math.random());
       return handlerList.get(index);
     }
-
-    log_.warn("No workflow operation handlers found for operation {}", operation.getName());
+    log_.warn("No workflow operation handlers found for operation {}", operation.getId());
     return null;
   }
 
+  Executor ex = Executors.newCachedThreadPool();
+  
   protected void run(final WorkflowInstanceImpl wfi) {
-    Thread t = new Thread(new Runnable() {
-      public void run() {
-        boolean failed = false;
-        int runFromOperation = 0;
-        List<WorkflowOperationDefinition> operationDefinitions = wfi.getWorkflowOperationDefinitions();
-        while (runFromOperation >= 0 && runFromOperation < operationDefinitions.size()) {
-          // Get all of the available handlers for each operation (in the order of operations)
-          operationDefinitions = wfi.getWorkflowOperationDefinitions();
-          for (int i = runFromOperation; i < operationDefinitions.size(); i++) {
-            WorkflowOperationDefinition operationDefinition = operationDefinitions.get(i);
-            WorkflowOperationHandler operationHandler = selectOperationHandler(operationDefinition);
-            // If there is no handler for the operation, mark this workflow as failed
-            if (operationHandler == null) {
-              log_.warn("No handler available to execute operation " + operationDefinition);
-              failed = true;
-              break;
-            }
-            // Add an operation instance with the resulting media package to the workflow instance
-            WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(operationDefinition);
-            // Merge in local configurations
-            for(WorkflowConfiguration config : wfi.getLocalConfigurations(opInstance.getName())){
-              opInstance.setConfiguration(config.getKey(), config.getValue());
-            }
-            
-            // Merge in the workflow instance's configurations, which override any operation-specific config
-            for(WorkflowConfiguration config : wfi.getConfigurations()) {
-              opInstance.setConfiguration(config.getKey(), config.getValue());
-            }
-            wfi.getWorkflowOperationInstances().add(opInstance);
-            update(wfi); // Update the workflow instance, since it has a new operation instance
-            try {
-              opInstance.setResult(operationHandler.run(wfi));
-              opInstance.setState(State.SUCCEEDED.name());
-            } catch (WorkflowOperationException e) {
-              log_.warn("Operation " + operationDefinition + " failed:" + e.getMessage());
-              e.printStackTrace();
-              // If the operation is set to fail on error, set the workflow to "failed" and run the exception handling
-              // workflow operations if specified
-              if (operationDefinition.isFailWorkflowOnException()) {
-                opInstance.setState(State.FAILING.name());
-                wfi.setState(State.FAILING.name());
-                failed = true;
-
-                // Replace the next operations with those from the failure handling workflow
-                String catchWorkflowName = operationDefinition.getExceptionHandlingWorkflow();
-                WorkflowDefinition catchWorkflowDefinition = getWorkflowDefinitionByName(catchWorkflowName);
-                if (catchWorkflowName == null || catchWorkflowDefinition == null) {
-                  log_.warn("Unable to execute catch workflow {} for operation {}.", catchWorkflowName, operationDefinition);
-                  opInstance.setState(State.FAILED.name());
-                  wfi.setState(State.FAILED.name());
-                  update(wfi); // Save the instance, since we've set the workflow instance and operation instance states
-                  return;
-                }
-
-                // Find the position of the current operation and compile the new operation list
-                int operationIndex = wfi.getWorkflowOperationInstances().size();
-                List<WorkflowOperationDefinition> updatedOperationDefinitions = new ArrayList<WorkflowOperationDefinition>();
-                for (int j = 0; j < operationIndex; j++)
-                  updatedOperationDefinitions.add(operationDefinitions.get(j));
-                updatedOperationDefinitions.addAll(catchWorkflowDefinition.getOperations());
-                wfi.setWorkflowOperationDefinitionList(updatedOperationDefinitions);
-                runFromOperation = operationIndex;
-                break;
-              } else {
-                // Replace the next operations with those from the failure handling workflow
-                String catchWorkflowName = operationDefinition.getExceptionHandlingWorkflow();
-                WorkflowDefinition catchWorkflowDefinition = getWorkflowDefinitionByName(catchWorkflowName);
-                if (catchWorkflowDefinition == null) {
-                  log_.warn("Unable to execute catch workflow " + catchWorkflowName + " for operation "
-                          + operationDefinition);
-                  return;
-                }
-
-                // Find the position of the current operation and compile the new operation list
-                int operationIndex = wfi.getWorkflowOperationInstances().size();
-                List<WorkflowOperationDefinition> updatedOperationDefinitions = new ArrayList<WorkflowOperationDefinition>();
-                for (int j = 0; j < operationIndex; j++)
-                  updatedOperationDefinitions.add(operationDefinitions.get(j));
-                updatedOperationDefinitions.addAll(catchWorkflowDefinition.getOperations());
-                for (int j = operationIndex; j < operationDefinitions.size(); j++)
-                  updatedOperationDefinitions.add(operationDefinitions.get(j));
-                wfi.setWorkflowOperationDefinitionList(updatedOperationDefinitions);
-                runFromOperation = operationIndex;
-                break;
-              }
-            }
-            update(wfi); // Update the workflow instance again, since its new operation instance has completed
-            if (Action.PAUSE.equals(opInstance.getResult().getAction())) { // suspend the workflow if the operation handler asked us to do so
-              suspend(wfi.getId());
-            }
-            runFromOperation = -1;
-          }
-        }
-
-        // All of the workflow operation definitions have run, so set the state and save it.
-        if (failed) {
-          wfi.setState(State.FAILED.name());
-          // set any "FAILING" operations to "FAILED"
-          for(WorkflowOperationInstance op : wfi.getWorkflowOperationInstances()) {
-            if(State.FAILING.equals(op.getState())) ((WorkflowOperationInstanceImpl)op).setState(State.FAILED.name());
-          }
-        } else {
-          wfi.setState(State.SUCCEEDED.name());
-        }
-        update(wfi);
-      }
-    });
-    threadMap.put(wfi.getId(), t);
-    t.start();
+    WorkflowOperationInstance operation = wfi.getCurrentOperation();
+    if(operation == null) operation = wfi.next();
+    WorkflowOperationHandler operationHandler = selectOperationHandler(operation);
+    // If there is no handler for the operation, mark this workflow as failed
+    if (operationHandler == null) {
+      log_.warn("No handler available to execute operation {}", operation);
+      throw new IllegalStateException("Unable to find a workflow handler for " + operation);
+    }
+    ex.execute(new WorkflowOperationWorker(operationHandler, wfi, this, null));
   }
 
   /**
@@ -512,7 +373,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    *          the workflow definition name
    * @return the workflow
    */
-  public WorkflowDefinition getWorkflowDefinitionByName(String name) {
+  public WorkflowDefinition getWorkflowDefinitionById(String name) {
     return workflowDefinitions.get(name);
   }
 
@@ -523,11 +384,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public void stop(String workflowInstanceId) {
     WorkflowInstanceImpl instance = (WorkflowInstanceImpl) getWorkflowById(workflowInstanceId);
-    Thread t = threadMap.get(workflowInstanceId);
-    if (t != null) {
-      t.interrupt();
-    }
-    instance.setState(State.STOPPED.name());
+    instance.setState(WorkflowState.STOPPED);
     update(instance);
   }
 
@@ -538,11 +395,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public void suspend(String workflowInstanceId) {
     WorkflowInstanceImpl instance = (WorkflowInstanceImpl) getWorkflowById(workflowInstanceId);
-    Thread t = threadMap.get(workflowInstanceId);
-    if (t != null) {
-      t.interrupt();
-    }
-    instance.setState(State.PAUSED.name());
+    instance.setState(WorkflowState.PAUSED);
     update(instance);
   }
 
@@ -553,12 +406,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public void resume(String workflowInstanceId) {
     WorkflowInstanceImpl workflowInstance = (WorkflowInstanceImpl) getWorkflowById(workflowInstanceId);
+    workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
+    dao.update(workflowInstance);
     run(workflowInstance);
-    workflowInstance.setState(State.RUNNING.name());
-
-    // TODO restart the workflow from the operation where it was paused
-
-    update(workflowInstance);
   }
 
   /**
@@ -598,5 +448,28 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public WorkflowQuery newWorkflowQuery() {
     return new WorkflowQueryImpl();
+  }
+  
+  public void handleOperationException(WorkflowInstanceImpl workflow, WorkflowOperationException e) {
+    workflow.setState(WorkflowState.FAILED);
+    dao.update(workflow);
+  }
+  
+  /**
+   */
+  void handleOperationResult(WorkflowInstanceImpl workflow, WorkflowOperationResult result) {
+    if(result != null) {
+      MediaPackage mp = result.getMediaPackage();
+      if(mp != null) {
+        workflow.setMediaPackage(mp);
+      }
+    }
+    if(workflow.next() == null) {
+      workflow.setState(WorkflowState.SUCCEEDED);
+      dao.update(workflow);
+    } else {
+      dao.update(workflow);
+      this.run(workflow);
+    }
   }
 }

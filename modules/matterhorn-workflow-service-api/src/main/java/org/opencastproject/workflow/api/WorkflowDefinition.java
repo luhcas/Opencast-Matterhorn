@@ -27,7 +27,7 @@ public interface WorkflowDefinition {
   /**
    * The short title of this workflow definition
    */
-  String getTitle();
+  String getId();
 
   /**
    * A longer description of this workflow definition

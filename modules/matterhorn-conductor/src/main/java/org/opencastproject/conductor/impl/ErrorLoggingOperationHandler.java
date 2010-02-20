@@ -33,10 +33,10 @@ public class ErrorLoggingOperationHandler extends AbstractWorkflowOperationHandl
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
-  public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.warn("Workflow instance failed: " + workflowInstance);
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), Action.CONTINUE);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.CONTINUE);
   }
 }

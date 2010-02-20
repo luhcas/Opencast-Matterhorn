@@ -1,22 +1,22 @@
-<workflow-definition>
-  <title>Transcode, Distribute and Publish</title>
+<definition>
+  <id>demo</id>
   <description>
     A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
     along with their associated metadata, to the distribution channels.
   </description>
   <operations>
     <operation
-      name="inspect"
+      id="inspect"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Inspect the media package">
     </operation>
     
     <!-- encode to cover image -->
     <operation
-      name="image"
+      id="image"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presenter (camera) to cover image">
       <configurations>
         <configuration key="source-flavor">presentation/engage</configuration>
@@ -28,9 +28,9 @@
       </configurations>
     </operation>
     <operation
-      name="image"
+      id="image"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presentation (screen) to cover image">
       <configurations>
         <configuration key="source-flavor">presentation/engage</configuration>
@@ -44,9 +44,9 @@
     
 	<!-- Generate slide previews -->
     <operation
-      name="slide-previews"
+      id="slide-previews"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Encode presentation (screen) to cover image">
       <configurations>
         <configuration key="source-flavor">presentation/engage</configuration>
@@ -58,9 +58,9 @@
 
 	<!--  Distribute to local (engage) distribution channel -->
     <operation
-      name="distribute_local"
+      id="distribute_local"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Distribute media to the local distribution channel">
       <configurations>
         <configuration key="source-tags">engage,atom,rss</configuration>
@@ -70,9 +70,9 @@
     
     <!-- Publish to search (and engage) -->
     <operation
-      name="publish"
+      id="publish"
       fail-on-error="true"
-      exception-handler-workflow="Default Error Handler"
+      exception-handler-workflow="error"
       description="Add metadata to the search index">
       <configurations>
         <configuration key="source-tags">publish</configuration>
@@ -80,4 +80,4 @@
     </operation>
 
   </operations>
-</workflow-definition>
+</definition>

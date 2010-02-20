@@ -35,16 +35,16 @@ import org.opencastproject.util.doc.Status;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowService;
-import org.opencastproject.workflow.api.WorkflowInstance.State;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -115,14 +115,14 @@ public class AdminuiRestService {
       out.addAll(getUpcomingRecordings());
     }
     if ( (state.toUpperCase().equals("PROCESSING")) || (state.toUpperCase().equals("ALL")) ) {
-      out.addAll(getRecordingsFromWorkflowService(State.RUNNING));
+      out.addAll(getRecordingsFromWorkflowService(WorkflowState.RUNNING));
     }
     if ( (state.toUpperCase().equals("FINISHED")) || (state.toUpperCase().equals("ALL")) ) {
-      out.addAll(getRecordingsFromWorkflowService(State.SUCCEEDED));
+      out.addAll(getRecordingsFromWorkflowService(WorkflowState.SUCCEEDED));
     }
     if ( (state.toUpperCase().equals("FAILED")) || (state.toUpperCase().equals("ALL")) ) {
-      out.addAll(getRecordingsFromWorkflowService(State.FAILED));
-      out.addAll(getRecordingsFromWorkflowService(State.FAILING));
+      out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILED));
+      out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILING));
     }
     return out;
   }
@@ -132,8 +132,7 @@ public class AdminuiRestService {
    * If the WorkflowService is not present an empty list is returned.
    * @return RecordingDataViewList list of upcoming recordings
    */
-  private RecordingDataViewList getRecordingsFromWorkflowService(State state) {
-    SimpleDateFormat sdf = new SimpleDateFormat();
+  private RecordingDataViewList getRecordingsFromWorkflowService(WorkflowState state) {
     RecordingDataViewList out = new RecordingDataViewListImpl();
     if (workflowService != null) {
       logger.info("getting recordings from workflowService");
@@ -141,7 +140,7 @@ public class AdminuiRestService {
       // next line is for debuging: return all workflowInstaces
       //WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery()).getItems();
       for (int i = 0; i < workflows.length; i++) {
-        MediaPackage mediapackage = workflows[i].getCurrentMediaPackage();
+        MediaPackage mediapackage = workflows[i].getMediaPackage();
         RecordingDataView item = new RecordingDataViewImpl();
         item.setId(workflows[i].getId());
         logger.info("DC Title: {}", mediapackage.getTitle());
@@ -158,11 +157,11 @@ public class AdminuiRestService {
         }
         item.setCaptureAgent(null); //FIXME get capture agent from where...?
         WorkflowOperationInstance operation = null;
-        Iterator<WorkflowOperationInstance> instances = workflows[i].getWorkflowOperationInstanceList().iterator();
+        ListIterator<WorkflowOperationInstance> instances = workflows[i].getOperations().listIterator();
         StringBuffer sb = new StringBuffer();
         while (instances.hasNext()) {
           operation = instances.next();
-          sb.append(operation.getState().toString() + ": " + operation.getName() + ";");
+          sb.append(operation.getState().toString() + ": " + operation.getId() + ";");
         }
         item.setProcessingStatus(sb.toString());
         /*if (operation != null) {

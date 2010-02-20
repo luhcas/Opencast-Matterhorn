@@ -57,9 +57,9 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
-  public WorkflowOperationResult run(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.debug("Running distribution workflow operation");
 
     MediaPackage resultingMediaPackage = null;
@@ -68,7 +68,7 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
       // Check which tags have been configured
       String sourceTags = workflowInstance.getCurrentOperation().getConfiguration("source-tags");
       String targetTags = workflowInstance.getCurrentOperation().getConfiguration("target-tags");
-      MediaPackage currentMediaPackage = workflowInstance.getCurrentMediaPackage();
+      MediaPackage currentMediaPackage = workflowInstance.getMediaPackage();
       if (StringUtils.trimToNull(sourceTags) == null) {
         logger.warn("No tags have been specified");
         return WorkflowBuilder.getInstance().buildWorkflowOperationResult(currentMediaPackage, Action.CONTINUE);

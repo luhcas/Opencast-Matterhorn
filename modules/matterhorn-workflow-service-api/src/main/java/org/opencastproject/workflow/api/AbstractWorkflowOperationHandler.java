@@ -29,7 +29,13 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
   @Override
   public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
           throws WorkflowOperationException {
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), Action.CONTINUE);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.CONTINUE);
   }
 
+/**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#destroy(org.opencastproject.workflow.api.WorkflowInstance)
+   */
+  @Override
+  public void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException {}  
 }

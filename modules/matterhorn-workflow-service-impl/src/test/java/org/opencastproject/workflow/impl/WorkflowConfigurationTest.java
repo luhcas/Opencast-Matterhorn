@@ -40,7 +40,7 @@ public class WorkflowConfigurationTest {
     WorkflowInstanceImpl instance = new WorkflowInstanceImpl();
     List<WorkflowOperationInstance> ops = new ArrayList<WorkflowOperationInstance>();
     ops.add(op);
-    instance.setWorkflowOperationInstanceList(ops);
+    instance.setOperations(ops);
     String xml = WorkflowBuilder.getInstance().toXml(instance);
     System.out.println(xml);
     Assert.assertTrue(xml.contains("<configurations><configuration key=\"this\">that</configuration></configurations>"));

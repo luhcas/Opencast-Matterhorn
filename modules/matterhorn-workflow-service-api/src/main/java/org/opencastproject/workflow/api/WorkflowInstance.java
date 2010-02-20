@@ -18,16 +18,16 @@ package org.opencastproject.workflow.api;
 import org.opencastproject.media.mediapackage.MediaPackage;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
- * An single instance of a running, paused, or stopped workflow.
+ * An single instance of a running, paused, or stopped workflow. WorkflowInstance objects are snapshots in time for a 
+ * particular workflow.  They are not threadsafe, and will not be updated by other threads.
  */
 @XmlJavaTypeAdapter(WorkflowInstanceImpl.Adapter.class)
-public interface WorkflowInstance {
-  public enum State { INSTANTIATED, RUNNING, STOPPED, PAUSED, SUCCEEDED, FAILED, FAILING }
+public interface WorkflowInstance extends Configurable {
+  public enum WorkflowState { INSTANTIATED, RUNNING, STOPPED, PAUSED, SUCCEEDED, FAILED, FAILING }
 
   /**
    * The unique ID of this {@link WorkflowInstance}
@@ -45,121 +45,44 @@ public interface WorkflowInstance {
   String getDescription();
 
   /**
-   * The {@link WorkflowOperationDefinitionList} that serves as a template for this {@link WorkflowOperationInstanceList}
-   * belonging to this WorkflowInstance
-   * was created.
-   */
-  List<WorkflowOperationDefinition> getWorkflowOperationDefinitions();
-
-  /**
-   * Returns the {@link WorkflowOperation}s that make up this workflow.
+   * Returns the {@link WorkflowOperationInstance}s that make up this workflow.
    * 
    * @return the workflow operations
    */
-  public List<WorkflowOperationInstance> getWorkflowOperationInstances();
+  public List<WorkflowOperationInstance> getOperations();
 
   /**
-   * Returns the {@link WorkflowOperation} that is currently being executed.
+   * Returns the {@link WorkflowOperationInstance} that is currently either in {@link WorkflowState#RUNNING} or {@link WorkflowState#PAUSED}.
    * 
    * @return the current operation
    */
   public WorkflowOperationInstance getCurrentOperation();
 
   /**
-   * Appends a {@link WorkflowOperationDefinition} to the end of the list of operations to perform.
-   * 
-   * @param operation
-   *          the operation to append
+   * The current {@link WorkflowState} of this {@link WorkflowInstance}
    */
-  public void addWorkflowOperationDefinition(WorkflowOperationDefinition operation);
+  WorkflowState getState();
 
   /**
-   * Inserts a {@link WorkflowOperationDefinition} at index <code>location</code> into the list of workflow operations
-   * to perform.
-   * 
-   * @param location
-   *          index into the list of operations
-   * @param operation
-   *          the operation to append
+   * Set the state of the workflow
+   * @param state
    */
-  public void addWorkflowOperationDefinition(int location, WorkflowOperationDefinition operation);
-
-  /**
-   * Appends a {@link WorkflowOperationDefinitionList} to the end of the list of operations to perform.
-   * 
-   * @param operations
-   *          the operations to append
-   */
-  public void addWorkflowOperationDefinitions(List<WorkflowOperationDefinition> operations);
-
-  /**
-   * Inserts the contents of a {@link WorkflowOperationDefinitionList} at index <code>location</code> into the list of
-   * workflow operations to be performed.
-   * 
-   * @param location
-   *          index into the list of operations
-   * @param operations
-   *          the operations to append
-   */
-  public void addWorkflowOperationDefinitions(int location, List<WorkflowOperationDefinition> operations);
-
-  /**
-   * The current {@link State} of this {@link WorkflowInstance}
-   */
-  State getState();
-
-  /**
-   * The {@link MediaPackage} associated with this {@link WorkflowInstance}
-   */
-  MediaPackage getSourceMediaPackage();
-
-  /**
-   * The {@link MediaPackage} from the latest {@link WorkflowOperationResult}, or the source mediapackage if no
-   * operations have successfully executed.
-   */
-  MediaPackage getCurrentMediaPackage();
-
-  /**
-   * The global configurations associated with this workflow instance. Configurations can be used to affect how
-   * {@link WorkflowDefinition#getOperations()} are eventually run.
-   */
-  // FIXME change name to getGlobalConfigurations
-  Set<WorkflowConfiguration> getConfigurations();
-
-  /**
-   * The local configurations associated with the operations in this workflow instance. 
-   * @param operation
-   *          operation name for witch configurations will be retrieved
-   * @return configurations for specified operation
-   */
-  Set<WorkflowConfiguration> getLocalConfigurations(String operation);
+  void setState(WorkflowState state);
   
   /**
-   * Returns the value of property <code>name</code> or <code>null</code> if no such property has been set.
-   * 
-   * @param key
-   *          the configuration key
-   * @return the configuration value
+   * The {@link MediaPackage} being worked on by this workflow instance.
    */
-  public String getConfiguration(String key);
+  MediaPackage getMediaPackage();
+  
+  /**
+   * Returns the next operation, and marks it as current.  If there is no next operation, this method will return null.
+   * 
+   * @return The next operation
+   */
+  public WorkflowOperationInstance next();
 
   /**
-   * Sets the configuration with name <code>key</code> to value <code>value</code>, or adds it if it doesn't already
-   * exist.
-   * 
-   * @param key
-   *          the configuration key
-   * @param value
-   *          the configuration value
+   * @param mp
    */
-  public void setConfiguration(String key, String value);
-
-  /**
-   * Removes the <code>key</code> configuration.
-   * 
-   * @param key
-   *          the configuration key
-   */
-  public void removeConfiguration(String key);
-
+  void setMediaPackage(MediaPackage mp);
 }

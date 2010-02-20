@@ -16,11 +16,10 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.workflow.api.WorkflowInstance.State;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -36,20 +35,17 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  */
 @XmlType(name="operation-instance", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="operation-instance", namespace="http://workflow.opencastproject.org/")
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlAccessorType(XmlAccessType.NONE)
 public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance {
-  
-  @XmlAttribute(name="name")
-  protected String name;
+
+  @XmlAttribute(name="id")
+  protected String id;
 
   @XmlAttribute(name="state")
-  protected String state;
+  protected OperationState state;
 
   @XmlAttribute(name="description")
   protected String description;
-
-  @XmlElement(name="result")
-  protected WorkflowOperationResult result;
   
   @XmlElement(name="configuration")
   @XmlElementWrapper(name="configurations")
@@ -64,20 +60,24 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    * Builds a new workflow operation instance based on another workflow operation.
    */
   public WorkflowOperationInstanceImpl(WorkflowOperationDefinition def) {
-    this.name = def.getName();
-    this.state = State.RUNNING.name();
+    this.id = def.getId();
+    this.state = OperationState.INSTANTIATED;
     this.description = def.getDescription();
-    Set<WorkflowConfiguration> defConfigs = def.getConfigurations();
-    this.configurations = defConfigs == null ?
-            new HashSet<WorkflowConfiguration>() : new HashSet<WorkflowConfiguration>(defConfigs);      
+    Set<String> defConfigs = def.getConfigurationKeys();
+    this.configurations = new TreeSet<WorkflowConfiguration>();
+    if(defConfigs != null) {
+      for(String key : defConfigs) {
+        configurations.add(new WorkflowConfigurationImpl(key, def.getConfiguration(key)));
+      }
+    }
   }
   
-  public String getName() {
-    return name;
+  public String getId() {
+    return id;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setId(String id) {
+    this.id = id;
   }
 
   public String getDescription() {
@@ -106,20 +106,12 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getState()
    */
-  public State getState() {
-    return State.valueOf(state);
+  public OperationState getState() {
+    return state;
   }
   
-  public void setState(String state) {
+  public void setState(OperationState state) {
     this.state = state;
-  }
-
-  public void setResult(WorkflowOperationResult result) {
-    this.result = result;
-  }
-
-  public WorkflowOperationResult getResult() {
-    return result;
   }
 
   public Set<WorkflowConfiguration> getConfigurations() {
@@ -173,4 +165,18 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
     configurations.add(new WorkflowConfigurationImpl(key, value));
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getConfigurationKeys()
+   */
+  @Override
+  public Set<String> getConfigurationKeys() {
+    Set<String> keys = new TreeSet<String>();
+    if(configurations != null && ! configurations.isEmpty()) {
+      for(WorkflowConfiguration config : configurations) {
+        keys.add(config.getKey());
+      }
+    }
+    return keys;
+  }
 }

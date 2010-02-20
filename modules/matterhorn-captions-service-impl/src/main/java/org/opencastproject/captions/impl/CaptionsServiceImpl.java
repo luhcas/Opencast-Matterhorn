@@ -113,7 +113,7 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
     for (WorkflowInstance workflow : workflows) {
       //WorkflowOperationInstance operation = workflow.getCurrentOperation(); // MH-1743
       //if ( CAPTIONS_OPERATION_NAME.equals(operation.getName()) ) { // MH-1743
-        MediaPackage mp = workflow.getCurrentMediaPackage();
+        MediaPackage mp = workflow.getMediaPackage();
         l.add( new CaptionsMediaItemImpl(workflow.getId(), mp) );
       //} // MH-1743
     }
@@ -138,22 +138,22 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
     WorkflowInstance workflow = workflowService.getWorkflowById(workflowId);
     CaptionsMediaItem cmi;
     if (workflow != null) {
-      MediaPackage mp = workflow.getCurrentMediaPackage(); // TODO change to current media package
+      MediaPackage mp = workflow.getMediaPackage(); // TODO change to current media package
       // get the MP and update it
       String mediaPackageElementID = CAPTIONS_ELEMENT+captionType;
       URI uri = workspace.put(mp.getIdentifier().compact(), mediaPackageElementID, data);
 
-      if (WorkflowInstance.State.SUCCEEDED.equals(workflow.getState())) {
+      if (WorkflowInstance.WorkflowState.SUCCEEDED.equals(workflow.getState())) {
         // TODO for now this is not really doing anything
         addCaptionToMediaPackage(mp, uri, mediaPackageElementID, captionType);
         WorkflowDefinitionImpl workflowDefinition = new WorkflowDefinitionImpl();
-        workflowDefinition.setTitle("Captions Added");
+        workflowDefinition.setId("Captions Added");
         workflowDefinition.setDescription("Captions added workflow for media: " + workflowId);
         // TODO what is this and what do I do with it?
         workflowDefinition.setOperations(new ArrayList<WorkflowOperationDefinition>());
         workflowService.start(workflowDefinition, mp, null);
-      } else if (WorkflowInstance.State.PAUSED.equals(workflow.getState())) {
-        MediaPackage mediaPackage = workflow.getSourceMediaPackage();
+      } else if (WorkflowInstance.WorkflowState.PAUSED.equals(workflow.getState())) {
+        MediaPackage mediaPackage = workflow.getMediaPackage();
         addCaptionToMediaPackage(mediaPackage, uri, mediaPackageElementID, captionType);
         workflowService.update(workflow);
         workflowService.resume(workflow.getId());
@@ -179,7 +179,7 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
     WorkflowInstance workflow = workflowService.getWorkflowById(workflowId);
     CaptionsMediaItem cmi;
     if (workflow != null) {
-      MediaPackage mp = workflow.getSourceMediaPackage(); // TODO change to current media package
+      MediaPackage mp = workflow.getMediaPackage();
       cmi = new CaptionsMediaItemImpl(workflowId, mp);
     } else {
       cmi = null;
@@ -207,12 +207,12 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#run(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
-  public WorkflowOperationResult run(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     // TODO Only pause if there are no captions in the current media package
     logger.warn("Waiting for captions to be provided");
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), Action.PAUSE);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.PAUSE);
   }
 
   /**
@@ -223,7 +223,16 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
   public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
           throws WorkflowOperationException {
     // TODO Read the properties and apply them to the mediapackage
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getCurrentMediaPackage(), Action.CONTINUE);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.CONTINUE);
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#destroy(org.opencastproject.workflow.api.WorkflowInstance)
+   */
+  @Override
+  public void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    logger.debug("cleaning up after handling a caption operation on {}", workflowInstance);
   }
 
 }

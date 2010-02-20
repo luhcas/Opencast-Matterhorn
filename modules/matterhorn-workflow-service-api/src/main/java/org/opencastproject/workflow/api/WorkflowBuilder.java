@@ -104,8 +104,10 @@ public class WorkflowBuilder {
    */
   public WorkflowInstance parseWorkflowInstance(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-    return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
+    WorkflowInstanceImpl workflow = unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
             WorkflowInstanceImpl.class).getValue();
+    workflow.init();
+    return workflow;
   }
 
   /**
@@ -138,7 +140,7 @@ public class WorkflowBuilder {
   public String toXml(List<WorkflowDefinition> list) throws Exception {
     Marshaller marshaller = jaxbContext.createMarshaller();
     Writer writer = new StringWriter();
-    marshaller.marshal(list, writer);
+    marshaller.marshal(new WorkflowDefinitionSet(list), writer);
     return writer.toString();
   }
 

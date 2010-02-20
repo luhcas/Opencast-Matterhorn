@@ -29,7 +29,7 @@ public interface WorkflowOperationResult {
   /**
    * @return The media package that results from the execution of a workflow operation.
    */
-  MediaPackage getResultingMediaPackage();
+  MediaPackage getMediaPackage();
 
   /**
    * Operations may optionally request that the workflow be placed in a certain state.

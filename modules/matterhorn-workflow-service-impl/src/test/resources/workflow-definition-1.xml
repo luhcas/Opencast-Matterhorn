@@ -1,15 +1,15 @@
-<workflow-definition>
-  <title>workflow-definition-1</title>
+<definition>
+  <id>definition-1</id>
   <description>Unit testing workflow</description>
   <operations>
     <operation
-      name="op1"
+      id="op1"
       fail-on-error="true"
       description="operation 1"/>
 
     <operation
-      name="op2"
+      id="op2"
       fail-on-error="false"
       description="operation 2"/>
   </operations>
-</workflow-definition>
+</definition>

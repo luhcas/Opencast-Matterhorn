@@ -15,17 +15,15 @@
  */
 package org.opencastproject.workflow.api;
 
-import java.util.Set;
-
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * Describes an operation or action to be performed as part of a workflow.
  */
 @XmlJavaTypeAdapter(WorkflowOperationDefinitionImpl.Adapter.class)
-public interface WorkflowOperationDefinition {
+public interface WorkflowOperationDefinition extends Configurable {
   
-  String getName();
+  String getId();
   
   String getDescription();
 
@@ -37,36 +35,4 @@ public interface WorkflowOperationDefinition {
    * when exceptions are thrown during an operation.
    */
   boolean isFailWorkflowOnException();
-
-  /** Gets the configuration elements for this workflow operation. */
-  Set<WorkflowConfiguration> getConfigurations();
-  
-  /**
-   * Returns the value of property <code>name</code> or <code>null</code> if no such property has been set.
-   * 
-   * @param key
-   *          the configuration key
-   * @return the configuration value
-   */
-  public String getConfiguration(String key);
-
-  /**
-   * Sets the configuration with name <code>key</code> to value <code>value</code>, or adds it if it doesn't already
-   * exist.
-   * 
-   * @param key
-   *          the configuration key
-   * @param value
-   *          the configuration value
-   */
-  public void setConfiguration(String key, String value);
-
-  /**
-   * Removes the <code>key</code> configuration.
-   * 
-   * @param key
-   *          the configuration key
-   */
-  public void removeConfiguration(String key);
-
 }
