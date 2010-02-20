@@ -17,7 +17,7 @@ package org.opencastproject.composer.api;
 
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.MediaPackageException;
 
 import java.util.concurrent.Future;
 
@@ -38,8 +38,10 @@ public interface ComposerService {
    *          The profile to use for encoding
    * @return The track that results from the encoding
    * @throws EncoderException
+   * @throws MediaPackageException
    */
-  Future<Track> encode(MediaPackage mediaPackage, String sourceTrackId, String profileId) throws EncoderException;
+  String encode(String mediaPackage, String sourceTrackId, String profileId) throws EncoderException,
+          MediaPackageException;
 
   /**
    * Encode the video stream from one track and the audio stream from another,
@@ -55,9 +57,9 @@ public interface ComposerService {
    *          The profile to use for encoding
    * @return The track that results from the encoding
    * @throws EncoderException
+   * @throws MediaPackageException
    */
-  Future<Track> encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId, String profileId)
-          throws EncoderException;
+  String encode(String mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId, String profileId) throws EncoderException, MediaPackageException;
 
   /**
    * Extracts an image from the media package element identified by
@@ -82,5 +84,19 @@ public interface ComposerService {
    * @return All registered {@link EncodingProfile}s.
    */
   EncodingProfile[] listProfiles();
+  
+  /**
+   * Get a {@link Receipt} of the submitted encoding jobs. 
+   * @param id The id of a Receipt as returned by the encode method
+   * @return Serialized Receipt
+   * @throws Exception
+   */
+  String getReceipt(String id) throws Exception;
 
+  /**
+   * Get a number of encoding jobs currently running on the service.
+   * 
+   * @return Number or current running jobs
+   */
+  int getNumRunningJobs();
 }

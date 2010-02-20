@@ -19,11 +19,18 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderEngine;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
+import org.opencastproject.composer.impl.endpoint.ComposerServiceDao;
+import org.opencastproject.composer.impl.endpoint.Receipt;
+import org.opencastproject.composer.impl.endpoint.ReceiptBuilder;
+import org.opencastproject.composer.impl.endpoint.Receipt.STATUS;
 import org.opencastproject.composer.impl.ffmpeg.FFmpegEncoderEngine;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilder;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.workspace.api.Workspace;
@@ -39,7 +46,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -52,7 +61,7 @@ import java.util.concurrent.Future;
 public class ComposerServiceImpl implements ComposerService {
 
   /** The logging instance */
-  private static final Logger log_ = LoggerFactory.getLogger(ComposerServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(ComposerServiceImpl.class);
 
   /** Encoding profile manager */
   private EncodingProfileManager profileManager = null;
@@ -63,11 +72,19 @@ public class ComposerServiceImpl implements ComposerService {
   /** Reference to the workspace service */
   private Workspace workspace = null;
 
+  /** Reference to the database service */
+  private ComposerServiceDao dao;
+
+  private MediaPackageBuilder builder;
+
   /**  */
   ExecutorService executor = null;
 
   private Map<String, Object> encoderEngineConfig = new ConcurrentHashMap<String, Object>();
   public static final String CONFIG_FFMPEG_PATH = "composer.ffmpegpath";
+  protected Map<String, Future<Track>> futuresMap = null;
+  protected Thread pollingThread = null;
+  protected boolean poll;
 
   /**
    * Callback for declarative services configuration that will introduce us to the media inspection service.
@@ -92,10 +109,26 @@ public class ComposerServiceImpl implements ComposerService {
   }
 
   /**
+   * Callback for declarative services configuration that will introduce us to the database service. Implementation
+   * assumes that the reference is configured as being static.
+   * 
+   * @param workspace
+   *          an instance of the workspace
+   */
+  public void setDao(ComposerServiceDao dao) {
+    this.dao = dao;
+  }
+
+  /**
    * Activator that will make sure the encoding profiles are loaded.
    */
   @SuppressWarnings("unchecked")
   protected void activate(Map map) {
+
+    // set up builder
+    builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
+
+    // set up threading
     try {
       profileManager = new EncodingProfileManager();
       executor = Executors.newFixedThreadPool(4);
@@ -106,26 +139,75 @@ public class ComposerServiceImpl implements ComposerService {
     }
 
     // Configure ffmpeg
-    String path = (String)map.get(CONFIG_FFMPEG_PATH);
+    String path = (String) map.get(CONFIG_FFMPEG_PATH);
     if (path == null) {
       // DEFAULT - https://issues.opencastproject.org/jira/browse/MH-2158
-      log_.info("DEFAULT "+CONFIG_FFMPEG_PATH+": "+FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
+      logger.info("DEFAULT " + CONFIG_FFMPEG_PATH + ": " + FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
     } else {
       // use CONFIG
       encoderEngineConfig.put(FFmpegEncoderEngine.CONFIG_FFMPEG_BINARY, path);
-      log_.info("CONFIG "+CONFIG_FFMPEG_PATH+": " + path);
+      logger.info("CONFIG " + CONFIG_FFMPEG_PATH + ": " + path);
     }
+
+    // Set up polling to persist the state of running encoding jobs
+    futuresMap = new ConcurrentHashMap<String, Future<Track>>();
+    poll = true;
+    pollingThread = new Thread(new Runnable() {
+      public void run() {
+        while (poll) {
+          logger.debug("polling for completed encoding tasks");
+          for (Iterator<Entry<String, Future<Track>>> entryIter = futuresMap.entrySet().iterator(); entryIter.hasNext();) {
+            Entry<String, Future<Track>> entry = entryIter.next();
+            Future<Track> futureTrack = entry.getValue();
+            String id = entry.getKey();
+            logger.debug("found receipt {} while polling", id);
+            if (futureTrack.isDone()) {
+              logger.debug("encoding task with receipt {} is done", id);
+              // update the database
+              Receipt receipt = dao.getReceipt(id);
+              if (receipt == null)
+                throw new RuntimeException("Could not find the receipt for encoding job " + id);
+              try {
+                Track t = futureTrack.get();
+                if (t == null) {
+                  // this was a failed encoding job
+                  receipt.setStatus(STATUS.FAILED.toString());
+                } else {
+                  receipt.setStatus(STATUS.FINISHED.toString());
+                  receipt.setTrack(t);
+                }
+                dao.updateReceipt(receipt);
+                entryIter.remove();
+              } catch (Exception e) {
+                e.printStackTrace();
+                logger.error(e.getMessage());
+                receipt.setStatus(STATUS.FAILED.toString());
+                dao.updateReceipt(receipt);
+              }
+            } else {
+              logger.debug("encoding task for receipt {} is still running", id);
+            }
+          }
+          try {
+            Thread.sleep(10 * 1000); // check again in 10 seconds
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
+          }
+        }
+      }
+    });
+    pollingThread.start();
 
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.media.mediapackage.MediaPackage,
-   *      java.lang.String, java.lang.String)
+   * @see org.opencastproject.composer.api.ComposerService#encode(java.lang.String, java.lang.String, java.lang.String)
    */
-  public Future<Track> encode(MediaPackage mediaPackage, String sourceTrackId, String profileId)
-          throws EncoderException {
+  public String encode(String mediaPackage, String sourceTrackId, String profileId) throws EncoderException,
+          MediaPackageException {
     return encode(mediaPackage, sourceTrackId, sourceTrackId, profileId);
   }
 
@@ -135,23 +217,24 @@ public class ComposerServiceImpl implements ComposerService {
    * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.media.mediapackage.MediaPackage,
    *      java.lang.String, java.lang.String, java.lang.String, java.lang.String)
    */
-  public Future<Track> encode(final MediaPackage mediaPackage, final String sourceVideoTrackId,
-          final String sourceAudioTrackId, final String profileId) throws EncoderException {
-    final String targetTrackId = "track-" + (mediaPackage.getTracks().length + 1);
+  public String encode(final String mediaPackage, final String sourceVideoTrackId, final String sourceAudioTrackId,
+          final String profileId) throws EncoderException, MediaPackageException {
+
+    final MediaPackage mp = builder.loadFromXml(mediaPackage);
+    final String targetTrackId = "track-" + (mp.getTracks().length + 1);
     Callable<Track> callable = new Callable<Track>() {
       public Track call() {
-        log_.info("encoding track {} for media package {} using source audio track {} and source video track {}",
-                new String[] { targetTrackId, mediaPackage.getIdentifier().toString(), sourceAudioTrackId,
-                        sourceVideoTrackId });
+        logger.info("encoding track {} for media package {} using source audio track {} and source video track {}",
+                new String[] { targetTrackId, mp.getIdentifier().toString(), sourceAudioTrackId, sourceVideoTrackId });
 
         // Get the tracks and make sure they exist
-        Track audioTrack = mediaPackage.getTrack(sourceAudioTrackId);
+        Track audioTrack = mp.getTrack(sourceAudioTrackId);
         File audioFile = null;
         if (audioTrack != null)
           audioFile = workspace.get(audioTrack.getURI());
 
         File videoFile = null;
-        Track videoTrack = mediaPackage.getTrack(sourceVideoTrackId);
+        Track videoTrack = mp.getTrack(sourceVideoTrackId);
         if (videoTrack != null)
           videoFile = workspace.get(videoTrack.getURI());
 
@@ -170,24 +253,24 @@ public class ComposerServiceImpl implements ComposerService {
         } catch (EncoderException e) {
           throw new RuntimeException(e);
         }
-        
+
         // Put the file in the workspace
         URI returnURL = null;
         InputStream in = null;
         try {
           in = new FileInputStream(encodingOutput);
-          returnURL = workspace
-                  .put(mediaPackage.getIdentifier().compact(), targetTrackId, encodingOutput.getName(), in);
-          log_.debug("Copied the encoded file to the workspace at {}", returnURL);
+          returnURL = workspace.put(mp.getIdentifier().compact(), targetTrackId, encodingOutput.getName(), in);
+          logger.debug("Copied the encoded file to the workspace at {}", returnURL);
           // encodingOutput.delete();
-          // log_.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
+          // logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
         } catch (Exception e) {
-          log_.error("unable to put the encoded file into the workspace");
+          logger.error("unable to put the encoded file into the workspace");
           e.printStackTrace();
         } finally {
           IOUtils.closeQuietly(in);
         }
-        if(encodingOutput != null) encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
+        if (encodingOutput != null)
+          encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
 
         // Have the encoded track inspected and return the result
         Track inspectedTrack = inspectionService.inspect(returnURL);
@@ -195,7 +278,14 @@ public class ComposerServiceImpl implements ComposerService {
         return inspectedTrack;
       }
     };
-    return executor.submit(callable);
+    Future<Track> ft = executor.submit(callable);
+
+    // Prepair receit to return
+    Receipt receipt = dao.createReceipt();
+    receipt.setStatus(STATUS.RUNNING.toString());
+    logger.debug("created receipt {}", receipt.getId());
+    futuresMap.put(receipt.getId(), ft);
+    return receipt.getId();
   }
 
   /**
@@ -210,38 +300,40 @@ public class ComposerServiceImpl implements ComposerService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.media.mediapackage.MediaPackage, java.lang.String, long)
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.media.mediapackage.MediaPackage,
+   *      java.lang.String, long)
    */
-  public Future<Attachment> image(final MediaPackage mediaPackage, final String sourceVideoTrackId, final String profileId, final long time)
-          throws EncoderException {
+  public Future<Attachment> image(final MediaPackage mediaPackage, final String sourceVideoTrackId,
+          final String profileId, final long time) throws EncoderException {
     final String targetAttachmentId = "attachment-" + (mediaPackage.getAttachments().length + 1);
     Callable<Attachment> callable = new Callable<Attachment>() {
       public Attachment call() {
-        log_.info("creating an image for media package {} using video track {}",
-                new String[] {mediaPackage.getIdentifier().toString(), sourceVideoTrackId });
+        logger.info("creating an image for media package {} using video track {}", new String[] {
+                mediaPackage.getIdentifier().toString(), sourceVideoTrackId });
 
         // Get the video track and make sure it exists
         File videoFile = null;
         Track videoTrack = mediaPackage.getTrack(sourceVideoTrackId);
         if (videoTrack != null) {
           videoFile = workspace.get(videoTrack.getURI());
-          if( ! videoTrack.hasVideo()) {
+          if (!videoTrack.hasVideo()) {
             throw new RuntimeException("can not extract an image without a video stream");
           }
         } else {
           throw new RuntimeException("videoTrack cannot be null");
         }
-          
+
         // Create the engine
         EncoderEngine engine = EncoderEngineFactory.newInstance().newEngineByProfile(profileId);
-        
+
         EncodingProfile profile = profileManager.getProfile(profileId);
         if (profile == null) {
           throw new RuntimeException("Profile '" + profileId + " is unkown");
         }
-        if(time < 0 || time > videoTrack.getDuration()) {
-          throw new IllegalArgumentException("Can not extract an image at time " + Long.valueOf(time) +
-                  " from a video track with duration " + Long.valueOf(videoTrack.getDuration()));
+        if (time < 0 || time > videoTrack.getDuration()) {
+          throw new IllegalArgumentException("Can not extract an image at time " + Long.valueOf(time)
+                  + " from a video track with duration " + Long.valueOf(videoTrack.getDuration()));
         }
 
         Map<String, String> properties = new HashMap<String, String>();
@@ -254,28 +346,50 @@ public class ComposerServiceImpl implements ComposerService {
         } catch (EncoderException e) {
           throw new RuntimeException(e);
         }
-     
+
         if (encodingOutput == null || !encodingOutput.isFile())
           throw new RuntimeException("Encoding output doesn't exist: " + encodingOutput);
-        
+
         // Put the file in the workspace
         URI returnURL = null;
         InputStream in = null;
         try {
           in = new FileInputStream(encodingOutput);
-          returnURL = workspace
-                  .put(mediaPackage.getIdentifier().compact(), targetAttachmentId, encodingOutput.getName(), in);
-          log_.debug("Copied the encoded file to the workspace at {}", returnURL);
+          returnURL = workspace.put(mediaPackage.getIdentifier().compact(), targetAttachmentId, encodingOutput
+                  .getName(), in);
+          logger.debug("Copied the encoded file to the workspace at {}", returnURL);
         } catch (Exception e) {
+
           throw new RuntimeException("unable to put the encoded file into the workspace", e);
         } finally {
           IOUtils.closeQuietly(in);
         }
-        if(encodingOutput != null) encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
+        if (encodingOutput != null)
+          encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
         return (Attachment) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
                 returnURL, Attachment.TYPE, null);
       }
     };
     return executor.submit(callable);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#getReceipt(java.lang.String)
+   */
+  public String getReceipt(String id) throws Exception {
+    Receipt r = dao.getReceipt(id);
+    return ReceiptBuilder.getInstance().toXml(r);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#getNumRunningJobs()
+   */
+  @Override
+  public int getNumRunningJobs() {
+    return futuresMap.size();
   }
 }
