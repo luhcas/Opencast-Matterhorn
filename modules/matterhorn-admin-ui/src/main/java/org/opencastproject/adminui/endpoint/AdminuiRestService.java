@@ -114,6 +114,9 @@ public class AdminuiRestService {
     if ( (state.toUpperCase().equals("UPCOMING")) || (state.toUpperCase().equals("ALL")) ) {
       out.addAll(getUpcomingRecordings());
     }
+    if ( (state.toUpperCase().equals("CAPTURING")) || (state.toUpperCase().equals("ALL")) ) {
+      out.addAll(getCapturingRecordings());
+    }
     if ( (state.toUpperCase().equals("PROCESSING")) || (state.toUpperCase().equals("ALL")) ) {
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.RUNNING));
     }
@@ -299,7 +302,6 @@ public class AdminuiRestService {
       for (int i = 0; i < events.length; i++) {
         RecordingDataView item = new RecordingDataViewImpl();
         item.setId(events[i].getID());
-        item.setId(events[i].getID());
         item.setTitle(events[i].getTitle());
         item.setPresenter(events[i].getCreator());
         item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
@@ -313,6 +315,32 @@ public class AdminuiRestService {
       }
     } else {
       logger.warn("scheduler not present, returning empty list");
+    }
+    return out;
+  }
+  
+  private RecordingDataViewList getCapturingRecordings() {
+    RecordingDataViewList out = new RecordingDataViewListImpl();
+    if (schedulerService != null && captureAdminService != null) {
+      logger.info("getting capturing recordings from scheduler");
+      SchedulerEvent[] events = schedulerService.getCapturingEvents();
+      for (int i = 0; i < events.length; i++) {
+        RecordingDataView item = new RecordingDataViewImpl();
+        item.setId(events[i].getID());
+        item.setTitle(events[i].getTitle());
+        item.setPresenter(events[i].getCreator());
+        item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
+        // FIXME Add the series ID too
+        item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
+        item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
+        item.setCaptureAgent(events[i].getDevice());
+        item.setRecordingStatus(captureAdminService.getRecordingState(events[i].getID()).getState());
+        item.setProcessingStatus("scheduled");
+        item.setDistributionStatus("not distributed");
+        out.add(item);
+      }
+    } else {
+      logger.warn("scheduler or capture admin service not present, returning empty list");
     }
     return out;
   }

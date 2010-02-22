@@ -17,6 +17,7 @@
     
     <!-- scripts -->
     <script type="text/javascript" src="jquery/jquery-1.4.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-1.0.4.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="js/popuphelp.js"></script>
     <script type="text/javascript" src="js/scheduler.helptexts.json"></script>
@@ -53,12 +54,12 @@
     <div class="fl-container-850 fl-theme-coal">
       <div style="margin-top: .5em"><a href="../../welcome.html"><img src="img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn"></a></div>
       <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-        <li class="fl-activeTab"><a href="/admin/">Recordings</a></li>
-        <li><a href="/admin/agents_status.html">Capture Agents</a></li>
+        <li class="fl-activeTab"><a href="/admin/" id="i18n_tab_recording"></a></li>
+        <li><a href="/admin/agents_status.html" id="i18n_tab_agent"></a></li>
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
         <div class="fl-container-800" style="text-align: center;">
-          <h2 id="page-title">Schedule Recording</h2>
+          <h2 id="page-title"><div id="i18n_page_title"></div></h2>
         </div>
         <!-- missing fields notification -->
         <div class="fl-container-800" id="missingFields-container" style="display:none;">
@@ -294,7 +295,7 @@
                     <label class="fl-label"  id="label-attendees">Capture Agent:</label>
                     <div>
                       <select id="attendees" name="attendees">
-                        <option value="">choose agent</option>
+                        <option value="">Choose one:</option>
                       </select>
                       <span class="fl-icon icon-help"  id="help_agent" title="Click for help"></span>
                     </div>

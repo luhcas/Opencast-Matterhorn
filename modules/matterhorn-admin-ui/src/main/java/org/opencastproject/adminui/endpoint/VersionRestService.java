@@ -73,7 +73,7 @@ public class VersionRestService {
   public Response getNewestVersion() {
     String etag = "";
     try {
-      URL url = new URL("http://source.opencastproject.org/svn/products/matterhorn/");
+      URL url = new URL("http://opencast.jira.com/svn/MH/trunk/");
       URLConnection conn = url.openConnection();
       etag = conn.getHeaderField("etag");
     } catch (Exception e) {

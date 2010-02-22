@@ -23,6 +23,11 @@ var SchedulerForm     = SchedulerForm || {};
 var SchedulerUI       = SchedulerUI || {};
 
 function init() {
+  //Do internationalization of text
+  jQuery.i18n.properties({name:'scheduler',path:'i18n/'});
+  $("#i18n_tab_recording").text(i18n.tab.recording);
+  $("#i18n_tab_agent").text(i18n.tab.agent);
+  
   var d = new Date();
   d.setHours(d.getHours() + 1); //increment an hour.
   $('#startTimeHour').val(d.getHours());
@@ -233,7 +238,8 @@ SchedulerUI.toggleDetails = function(elSwitch, el) {
 
 SchedulerUI.checkAgentStatus = function(doc) {
   var state = $('state', doc).text();
-  if(state == 'unknown' || state == 'offline') {
+  console.log(state);
+  if(state == '' || state == 'unknown' || state == 'offline') {
     $('#notice-container').show();
   }
 };
@@ -511,10 +517,11 @@ function getAgent() {
  */
 function setAgent(value) {
   var opts = this.fields.attendees.children();
+  var agentId = value.attendees;
   if(opts.length > 0) {
     var found = false;
     for(var i = 0; i < opts.length; i++) {
-      if(opts[i].value == value.attendees) {
+      if(opts[i].value == agentId) {
         found = true;
         opts[i].selected = true;
         break;

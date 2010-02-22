@@ -53,6 +53,9 @@ public class RecordingDataViewImpl implements RecordingDataView {
 
   @XmlElement(name="captureAgent")
   private String agent;
+  
+  @XmlElement(name="recordingStatus")
+  private String recordingStatus;
 
   @XmlElement(name="processingStatus")
   private String processing_status;
@@ -130,7 +133,15 @@ public class RecordingDataViewImpl implements RecordingDataView {
   public void setCaptureAgent(String agent) {
     this.agent = agent;
   }
+  
+  public String getRecordingStatus() {
+    return recordingStatus;
+  }
 
+  public void setRecordingStatus(String status) {
+    this.recordingStatus = status;
+  }
+  
   public String getProcessingStatus() {
     return processing_status;
   }

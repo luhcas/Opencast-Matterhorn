@@ -141,6 +141,14 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
   
   /**
    * {@inheritDoc}
+   * @see org.opencastproject.scheduler.api.SchedulerService#getRecordingEvents()
+   */
+  public SchedulerEvent [] getCapturingEvents() {
+    return getCapturingEvents();
+  }
+  
+  /**
+   * {@inheritDoc}
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
   public void updated(Dictionary properties) throws ConfigurationException {

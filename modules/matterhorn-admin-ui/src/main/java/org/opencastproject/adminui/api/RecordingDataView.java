@@ -124,7 +124,20 @@ public interface RecordingDataView {
    * @param agent
    */
   void setCaptureAgent(String agent);
-
+  
+  /**
+   * returns the recording status
+   * @return String recording status
+   */
+  String getRecordingStatus();
+  
+  /**
+   * sets the Recording's status 
+   * @see org.opencastproject.capture.admin.api.RecordingState
+   * @param agent
+   */
+  void setRecordingStatus(String agent);
+  
   /**
    * returns the status of the recording processing (workflow)
    * @return String status of recordings processing

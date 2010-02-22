@@ -425,6 +425,47 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   }
 
   /**
+   * {@inheritDoc}
+   * @see org.opencastproject.scheduler.api.SchedulerService#getCapturingEvents()
+   * TODO Adapt filter to new database structure
+   */
+  public SchedulerEvent[] getCapturingEvents() {
+    String query = "SELECT DISTINCT EVENT.eventid as eventid, startdate, enddate FROM EVENT JOIN EVENTMETADATA ON EVENT.eventid = EVENTMETADATA.eventid ";
+    String where = "WHERE";
+    where += " EVENT.startdate <= "+(new Date()).getTime()+" AND";
+    where += " EVENT.enddate >= "+(new Date()).getTime();
+    
+    LinkedList<SchedulerEvent> events = new LinkedList<SchedulerEvent>();
+    Connection con = null;
+    PreparedStatement s = null;
+    try {
+      con = getConnection();
+      s = con.prepareStatement(query+where); // TODO use PreparedStatement more in the intended way
+      logger.debug("Query for Events: "+s);
+      ResultSet rs = s.executeQuery();
+      while (rs.next()) {
+        SchedulerEvent e = getEvent(rs.getString("eventid"));
+        events.add(e);
+      }
+    } catch (SQLException e) {
+      logger.error("Could not read events from database" + e.getMessage());
+    }
+    if (s != null)
+      try {
+        s.close();
+      } catch (SQLException e) {
+        logger.error("Statement could not be closed: "+e.getMessage());
+      }
+    if (con != null)
+      try {
+        closeConnection(con);
+      } catch (SQLException e) {
+        logger.error("Connection could not be closed: "+e.getMessage());
+      }
+    return events.toArray(new SchedulerEvent[0]);
+  }
+  
+  /**
    * Looks for events that are conflicting with the given event, because they use the same recorder at the same time
    * @param e The event that should be checked
    * @return All events that are in conflict.

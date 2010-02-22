@@ -69,6 +69,12 @@ public interface SchedulerService {
   public SchedulerEvent [] getUpcomingEvents (); 
   
   /**
+   * return a list of all events that should currently be recording.
+   * @return The List of events.
+   */
+  public SchedulerEvent [] getCapturingEvents ();
+  
+  /**
    * generates the Dublin Core metadata set for the event specified by the ID
    * @param eventID The ID of the demanded event 
    * @return A XML with the Dublin Core metadata
