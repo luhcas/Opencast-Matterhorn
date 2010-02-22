@@ -62,7 +62,7 @@ public class DublinCoreGenerator {
    * @throws IOException
    */
   public DublinCoreGenerator (InputStream dcMappingFile) throws FileNotFoundException, IOException {
-    logger.info("Initialising Dublin Core Generator");
+    logger.debug("Initialising Dublin Core Generator");
     mapper = new MetadataMapper(dcMappingFile);   
   }
   
@@ -72,7 +72,7 @@ public class DublinCoreGenerator {
    * @return The DublinCoreCatalog
    */
   public DublinCoreCatalog generate (SchedulerEvent event) {
-    logger.info("creating Dublin Core  information for event " + event.getID());
+    logger.debug("creating Dublin Core  information for event {}", event.getID());
     Hashtable<String, String> dcMetadata =  mapper.convert(event.getMetadata());
     
     DublinCoreCatalog dcCatalog = DublinCoreCatalogImpl.newInstance();
@@ -87,7 +87,7 @@ public class DublinCoreGenerator {
         EName property = new EName("http://purl.org/dc/terms/", key);
         dcCatalog.add(property, value);
       } else {
-        logger.info("Key "+key+" is not a valid Dublin Core identifier" );
+        logger.debug("Key {} is not a valid Dublin Core identifier", key );
       }
     }   
     return dcCatalog;
@@ -110,11 +110,11 @@ public class DublinCoreGenerator {
       transformer.transform(source, result);
       return stringWriter.getBuffer().toString().trim(); 
     } catch (ParserConfigurationException e) {
-      logger.error("Could not parse DublinCoreCatalog: "+ e.getMessage());
+      logger.error("Could not parse DublinCoreCatalog: {}", e.getMessage());
     } catch (IOException e) {
-      logger.error("Could not open DublinCoreCatalog to parse it: "+ e.getMessage());
+      logger.error("Could not open DublinCoreCatalog to parse it: {}", e.getMessage());
     } catch (TransformerException e) {
-      logger.error("Could not transform DublinCoreCatalog: "+e.getMessage());
+      logger.error("Could not transform DublinCoreCatalog: {}", e.getMessage());
     }
     return null;
   }

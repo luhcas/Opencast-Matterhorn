@@ -109,7 +109,7 @@ public class SchedulerServiceImplTest {
     Assert.assertNotNull(eventUpdated);
     Assert.assertNotNull(eventUpdated.getID());
     SchedulerEvent loadedEvent = service.getEvent(eventUpdated.getID());
-    logger.debug("loaded: "+loadedEvent);
+    logger.debug("loaded: {} ",loadedEvent);
     Assert.assertEquals(loadedEvent.getLocation(), event.getLocation());
     CalendarBuilder calBuilder = new CalendarBuilder();
     Calendar cal;
@@ -131,7 +131,7 @@ public class SchedulerServiceImplTest {
             Assert.assertTrue(attached.contains(event.getLocation()));
             Assert.assertTrue(attached.contains(event.getTitle()));
           }
-          logger.info("iCal attachment checked: "+filename);
+          logger.info("iCal attachment checked: {}", filename);
         }
       }
     } catch (IOException e) {

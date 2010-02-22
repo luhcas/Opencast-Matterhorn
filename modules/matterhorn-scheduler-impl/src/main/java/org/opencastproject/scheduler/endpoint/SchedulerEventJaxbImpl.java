@@ -76,7 +76,7 @@ public class SchedulerEventJaxbImpl {
    * @param event
    */
   public SchedulerEventJaxbImpl(SchedulerEvent event) {
-    logger.info("Creating a " + SchedulerEventJaxbImpl.class.getName() + " from " + event);
+    logger.info("Creating a {} from {}", SchedulerEventJaxbImpl.class.getName(), event);
     id = event.getID();
     metadata = event.getMetadata();
     start = event.getStartdate().getTime();
@@ -118,7 +118,7 @@ public class SchedulerEventJaxbImpl {
     }
     event.setResources(resources.toArray(new String [0]));
     event.setAttendees(attendees.toArray(new String [0]));
-    logger.info("Event created "+event.toString());
+    logger.info("Event created {} ", event.toString());
     return event;
   }
   

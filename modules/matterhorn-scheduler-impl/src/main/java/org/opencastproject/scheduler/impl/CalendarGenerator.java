@@ -90,7 +90,7 @@ public class CalendarGenerator {
    * @return true if the event could be added. 
    */
   public boolean addEvent (SchedulerEvent e) {
-    logger.debug("creating iCal VEvent from SchedulerEvent: "+e.toString());
+    logger.debug("creating iCal VEvent from SchedulerEvent: {}", e.toString());
     VEvent event = new VEvent(new DateTime(e.getStartdate()), new DateTime(e.getEnddate()), e.getTitle());
     try {
       ParameterList pl = new ParameterList();
@@ -133,16 +133,16 @@ public class CalendarGenerator {
         Attach agentsAttachment = new Attach(caParameters, caGenerator.generateAsString(e).getBytes("UTF-8"));
         event.getProperties().add(agentsAttachment);
     } catch (Exception e1) {
-      logger.error("could not create Calendar entry for Event "+ e.toString()+". Reason : "+e1.getMessage());
+      logger.error("could not create Calendar entry for Event {}. Reason : {} ", e.toString(), e1.getMessage());
       return false;
     }
     cal.getComponents().add(event);
     try {
       cal.validate();
     } catch (ValidationException e1) {
-      logger.error("Could not validate Calendar, after event "+ e.getID()+" was added");
+      logger.error("Could not validate Calendar, after event {} was added.", e.getID());
     }
-    logger.debug("new VEvent = "+event.toString() );
+    logger.debug("new VEvent = {} ", event.toString() );
     return true;
   }
 }

@@ -47,7 +47,7 @@ public class CaptureAgentMetadataGenerator {
    * @throws IOException
    */
   public CaptureAgentMetadataGenerator (InputStream caMappingFile) throws FileNotFoundException, IOException {
-    logger.info("Initialising Capture Agent Metadata Generator");
+    logger.debug("Initialising Capture Agent Metadata Generator");
     mapper = new MetadataMapper(caMappingFile);  
   }
   
@@ -57,7 +57,7 @@ public class CaptureAgentMetadataGenerator {
    * @return A  Properties List with Capture Agent specific Data
    */
   public Properties generate (SchedulerEvent event) {
-    logger.info("generating Capture Agent metadata");
+    logger.debug("generating Capture Agent metadata");
     
     Hashtable<String, String> caMetadata =  mapper.convert(event.getMetadata());
     

@@ -98,7 +98,7 @@ public class SchedulerRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("getEvent/{eventID}")
   public Response getEvent(@PathParam("eventID") String eventID) {
-    logger.info("Event Lookup: " + eventID);
+    logger.info("Event Lookup: {}", eventID);
     SchedulerEvent event = service.getEvent(eventID);
     if (event == null) return Response.status(Status.BAD_REQUEST).build();
     return Response.ok(new SchedulerEventJaxbImpl(event)).build();
@@ -151,7 +151,7 @@ public class SchedulerRestService {
       logger.info("Event was null.");
     }
     SchedulerEvent j = service.addEvent(i);
-    logger.info("Adding event "+j.getID()+" to scheduler");
+    logger.info("Adding event {} to scheduler",j.getID());
     return Response.ok(new SchedulerEventJaxbImpl(j)).build();
   }
   
@@ -197,15 +197,15 @@ public class SchedulerRestService {
       logger.error("Filter is null");
       return new SchedulerEventJaxbImpl [0];
     }
-    logger.info("Filter: "+ filter);
+    logger.debug("Filter: {} ", filter);
     SchedulerFilterJaxbImpl filterJaxB = null;
     try {
       JAXBContext jaxbContext = JAXBContext.newInstance(SchedulerFilterJaxbImpl.class);
-      logger.info("context created");
+      logger.debug("context created");
       Unmarshaller m = jaxbContext.createUnmarshaller();
-      logger.info("unmarshaler ready");
+      logger.debug("unmarshaler ready");
       filterJaxB =  (SchedulerFilterJaxbImpl) m.unmarshal(new StringReader(filter));      
-      logger.info("unmarshaler read");      
+      logger.debug("unmarshaler read");      
     } catch (JAXBException e) {
       logger.error(e.getMessage());
       e.printStackTrace();
@@ -254,7 +254,7 @@ public class SchedulerRestService {
     SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
     for (int i = 0; i < events.length; i++) { 
       jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
-      logger.info("JaxB version of event "+events[i]+ "created");
+      logger.debug("JaxB version of event {} created", events[i]);
     }
     return jaxbEvents;
   }  

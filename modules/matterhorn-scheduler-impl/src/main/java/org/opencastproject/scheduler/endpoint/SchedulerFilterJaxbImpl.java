@@ -85,7 +85,7 @@ public class SchedulerFilterJaxbImpl {
    * @param filter
    */
   public SchedulerFilterJaxbImpl(SchedulerFilter filter) {
-    logger.info("Creating a " + SchedulerFilterJaxbImpl.class.getName() + " from " + filter);
+    logger.info("Creating a {} from {}", SchedulerFilterJaxbImpl.class.getName(), filter);
     eventID = filter.getEventIDFilter();
     device = filter.getDeviceFilter();
     title = filter.getTitleFilter();

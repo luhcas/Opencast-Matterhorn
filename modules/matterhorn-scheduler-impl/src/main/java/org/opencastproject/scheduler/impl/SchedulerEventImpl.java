@@ -231,7 +231,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setEnddate(java.util.Date)
    */
   public void setEnddate(Date end) throws IllegalArgumentException {
-    logger.debug("Event "+id+" set enddate "+start.getTime());
+    logger.debug("Event {} set enddate {}", id, start.getTime());
     if (start.getTime() > 0 && end.getTime() > 0 && end.before(start)) throw new IllegalArgumentException ("End "+ end + " before start-date "+start);
     this.end = end;
   }
@@ -274,7 +274,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#setStartdate(java.util.Date)
    */
   public void setStartdate(Date start) throws IllegalArgumentException{
-    logger.debug("Event "+id+" set startdate "+start.getTime()); 
+    logger.debug("Event {} set startdate {}", id, start.getTime()); 
     if (end.getTime() > 0 && start.getTime() > 0 && end.before(start)) throw new IllegalArgumentException("Start "+start+" before end-date "+end);
     this.start = start;
   }
@@ -380,8 +380,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    */ 
   private String trimText (String text, int length) {
     if (text.length() > length) {
-    //todo: this should be logged as a warning because it is a recoverable error
-      logger.error("Value for "+text+" to long. Only "+length+" characters allowed.");
+      logger.warn("Value for {} to long. Only {} characters allowed.", text, length);
       return text.substring(0, length-1);
     }
     return text;
@@ -393,8 +392,11 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @param key Keys longer than 255 chars will be shortened
    * @param value Values longer than 4096 chars will be shortened
    */
-  //todo: what if key or value is null?
   private void put (String key, String value) {
+    if (key == null || value == null ) {
+      logger.error("Could not store value {} under key {}.",value,key);
+      return;
+    }
     metadata.put(trimText(key, 255), trimText(value, 4096));
   }
 

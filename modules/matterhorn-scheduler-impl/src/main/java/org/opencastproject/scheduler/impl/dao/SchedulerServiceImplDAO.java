@@ -64,7 +64,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     setDataSource(ds);
     } catch (SQLException e) {
       //TODO: does not use specified logging method
-      logger.error("could not init database for scheduler. "+e.getMessage());
+      logger.error("could not init database for scheduler: {} ", e.getMessage());
       throw new RuntimeException(e);
     }
   }
@@ -76,22 +76,22 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   public SchedulerEvent addEvent(SchedulerEvent e) {
     logger.debug("Adding new event");
     if (e == null || ! e.valid()) {
-      logger.info("Event that was added is not valid.");
+      logger.warn("Event that was added is not valid.");
       return null;
     }
     if (e.getMetadata().get("ingest-url") == null) {
       String ingestUrl = null;
       if(componentContext == null) {
-        logger.info("No Component Context available, constructing default ingest URL.");
+        logger.debug("No Component Context available, constructing default ingest URL.");
         ingestUrl = UrlSupport.DEFAULT_BASE_URL+"/ingest/rest/addZippedMediaPackage";
       } else {
         String ccIngestUrl = componentContext.getBundleContext().getProperty("capture.ingest.endpoint.url");
-        logger.info("configured ingest url is {}", ccIngestUrl);
+        logger.debug("configured ingest url is {}", ccIngestUrl);
         if(ccIngestUrl == null) {
-          logger.info("ingest URL not found in config file, constructing default based on server URL");
+          logger.debug("ingest URL not found in config file, constructing default based on server URL");
           ccIngestUrl = componentContext.getBundleContext().getProperty("serverURL")+"/ingest/rest/addZippedMediaPackage";
           if(ccIngestUrl == null) {
-            logger.info("ingest URL not found in config file, constructing default");
+            logger.debug("ingest URL not found in config file, constructing default");
             ingestUrl = UrlSupport.DEFAULT_BASE_URL+"/ingest/rest/addZippedMediaPackage";
           } else {
             ingestUrl = ccIngestUrl;
@@ -109,7 +109,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       while (dbIDExists(e.getID(), con)) {
         e.setID(e.createID());
       }
-      logger.debug("adding event "+e.toString());
+      logger.debug("adding event {}.", e.toString());
       s = con.prepareStatement("INSERT INTO EVENT ( eventid , startdate , enddate ) VALUES (?, ?, ?)");
       s.setString(1, e.getID());
       s.setLong(2, e.getStartdate().getTime());
@@ -121,7 +121,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       saveMetadata(e.getID(), e.getMetadata(), con);
       con.commit();
     } catch (SQLException e1) {
-      logger.error("Could not insert event. "+ e1.getMessage());
+      logger.error("Could not insert event: {}", e1.getMessage());
       try {
         if (con != null) con.rollback();
       } catch (SQLException e2) {
@@ -133,17 +133,17 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
         try {
           s.close();
         } catch (SQLException e1) {
-          logger.error("Could not close statement: "+e1.getMessage());
+          logger.error("Could not close statement: {}", e1.getMessage());
         }
       }
       if (con != null)
         try {
           closeConnection(con);
         } catch (SQLException e1) {
-          logger.error("Could not close connection: "+e1.getMessage());
+          logger.error("Could not close connection: {}", e1.getMessage());
         }
     }
-    logger.debug("added event "+e.getID());
+    logger.debug("added event {}",e.getID());
     return e; 
   }
   
@@ -212,7 +212,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @return true is the ID is already in the database, or ID is null
    */
   private boolean dbIDExists (String eventID, Connection con) {
-    logger.debug("Checking if ID "+eventID+" exists.");
+    logger.debug("Checking if ID {} exists.",eventID);
     if (eventID == null) return true; //make sure an new ID is created, if no ID is present
     try {
       PreparedStatement s = con.prepareStatement("SELECT eventid FROM EVENT WHERE eventid = ?");
@@ -220,7 +220,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       ResultSet rs = s.executeQuery();
       if (rs.next()) return true;
     } catch (SQLException e) {
-      logger.error("could not check if eventID "+eventID+" exists. "+  e.getMessage());
+      logger.error("could not check if eventID {} exists: {} ", eventID,  e.getMessage());
     }
     return false;
   }
@@ -241,20 +241,20 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       if (! rs.next()) return null;      
       e = buildEvent(rs, con);
     } catch (SQLException e1) {
-      logger.error("Could not read SchedulerEvent "+eventID+" from database. "+e1.getMessage());
+      logger.error("Could not read SchedulerEvent {} from database: {} ", eventID, e1.getMessage());
       return null;
     }
     if (s!= null)
       try {
         s.close();
       } catch (SQLException e1) {
-        logger.error("Could not close Statement: "+e1.getMessage());
+        logger.error("Could not close Statement: {}",e1.getMessage());
       }
     if (con != null)
       try {
         closeConnection(con);
       } catch (SQLException e2) {
-        logger.error("Connection could not be closed: "+e2.getMessage());
+        logger.error("Connection could not be closed: {}", e2.getMessage());
       }
     return e;
   }
@@ -275,7 +275,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       e.setResources(getResources(e.getID(), con));
       e.setMetadata(getMetadata(e.getID(), con));
     } catch (SQLException e1) {
-      logger.error("\tCould not read SchedulerEvent from database. "+e1.getMessage());
+      logger.error("\tCould not read SchedulerEvent from database: {}", e1.getMessage());
       return null;
     }
     return e;    
@@ -369,7 +369,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   public SchedulerEvent[] getEvents(SchedulerFilter filter) {
     String query = "SELECT DISTINCT EVENT.eventid as eventid, startdate, enddate FROM EVENT JOIN EVENTMETADATA ON EVENT.eventid = EVENTMETADATA.eventid ";
     String where = ""; 
-    logger.debug ("Filter = "+ filter);
+    logger.debug ("Filter = {}", filter);
     if (filter != null) {
       query += " WHERE ";
       if (filter.getDeviceFilter() != null) {
@@ -400,26 +400,26 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     try {
       con = getConnection();
       s = con.prepareStatement(query+where); // TODO use PreparedStatement more in the intended way
-      logger.debug("Query for Events: "+s);
+      logger.debug("Query for Events: {}", s);
       ResultSet rs = s.executeQuery();
       while (rs.next()) {
         SchedulerEvent e = getEvent(rs.getString("eventid"));
         events.add(e);
       }
     } catch (SQLException e) {
-      logger.error("Could not read events from database" + e.getMessage());
+      logger.error("Could not read events from database: {}", e.getMessage());
     }
     if (s != null)
       try {
         s.close();
       } catch (SQLException e) {
-        logger.error("Statement could not be closed: "+e.getMessage());
+        logger.error("Statement could not be closed: {}", e.getMessage());
       }
     if (con != null)
       try {
         closeConnection(con);
       } catch (SQLException e) {
-        logger.error("Connection could not be closed: "+e.getMessage());
+        logger.error("Connection could not be closed: {}", e.getMessage());
       }
     return events.toArray(new SchedulerEvent[0]);
   }
@@ -449,19 +449,19 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
         events.add(event);
       }
     } catch (SQLException e1) {
-      logger.error("Could not read events from database" + e1.getMessage());
+      logger.error("Could not read events from database: {}", e1.getMessage());
     }
     if (s != null)
       try {
         s.close();
       } catch (SQLException e1) {
-        logger.error("Statement could not be closed: "+e1.getMessage());
+        logger.error("Statement could not be closed: {}", e1.getMessage());
       }
     if (con != null)
       try {
         closeConnection(con);
       } catch (SQLException e1) {
-        logger.error("Connection could not be closed: "+e1.getMessage());
+        logger.error("Connection could not be closed: {}", e1.getMessage());
       }
     return events.toArray(new SchedulerEvent[0]);
   }  
@@ -471,7 +471,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @see org.opencastproject.scheduler.api.SchedulerService#removeEvent(java.lang.String)
    */
   public boolean removeEvent(String eventID) {
-    logger.debug("removing event "+eventID);
+    logger.debug("removing event {}.",eventID);
     Connection con = null;
     PreparedStatement s = null;
     try {
@@ -494,11 +494,11 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       s.close();
       con.commit();
     } catch (SQLException e) {
-      logger.error("Could not delete event "+eventID+": "+e.getMessage());
+      logger.error("Could not delete event {}: {}",eventID, e.getMessage());
       try {
         con.rollback();
       } catch (SQLException e1) {
-        logger.error("could not rollback after error in deleting event "+eventID+": "+e1.getMessage());
+        logger.error("could not rollback after error in deleting event {}: {}", eventID, e1.getMessage());
       }
       return false;
     } finally {
@@ -506,16 +506,16 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
         try {
           s.close();
         } catch (SQLException e) {
-          logger.error("Statement could not be closed: "+e.getMessage());
+          logger.error("Statement could not be closed: {}", e.getMessage());
         }
       if (con != null)
         try {
           closeConnection(con);
         } catch (SQLException e) {
-          logger.error("Connection could not be closed: "+e.getMessage());
+          logger.error("Connection could not be closed: {}", e.getMessage());
         }
     }
-    logger.debug("Event "+eventID+" deleted");
+    logger.debug("Event {} deleted", eventID);
     return true;
   }
   
@@ -524,13 +524,13 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @see org.opencastproject.scheduler.api.SchedulerService#updateEvent(org.opencastproject.scheduler.api.SchedulerEvent)
    */
   public boolean updateEvent(SchedulerEvent e) {
-    logger.debug("Updating Event "+ e.getID());
+    logger.debug("Updating Event {}", e.getID());
     Connection con = null;
     PreparedStatement s = null;
     try {
       con = getConnection();
       if (! dbIDExists(e.getID(), con)) {
-        logger.error("Could not update, ID "+e.getID()+" does not exist");
+        logger.error("Could not update, ID {} does not exist.", e.getID());
         return false;
       }
       s = con.prepareStatement("UPDATE EVENT SET startdate = ?, enddate = ? WHERE eventid = ?");
@@ -544,11 +544,11 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       updateMetadata(e.getID(), e.getMetadata(), con);
       con.commit();
     } catch (SQLException e1) {
-      logger.error("could not update event "+ e.getID()+": "+e1.getMessage());
+      logger.error("could not update event {}: {}", e.getID(), e1.getMessage());
       try {
         con.rollback();
       } catch (SQLException e2) {
-        logger.error("could not rollback after error in updating event "+e.getID()+": "+e2.getMessage());
+        logger.error("could not rollback after error in updating event {}: {}", e.getID(), e2.getMessage());
       }
       return false;
     } finally {
@@ -556,16 +556,16 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
         try {
           s.close();
         } catch (SQLException e1) {
-          logger.error("Statement could not be closed: "+e1.getMessage());
+          logger.error("Statement could not be closed: {}", e1.getMessage());
         }
       if (con != null)
         try {
           closeConnection(con);
         } catch (SQLException e1) {
-          logger.error("Connection could not be closed: "+e1.getMessage());
+          logger.error("Connection could not be closed: {}", e1.getMessage());
         }
     }
-    logger.debug("Event Updated "+e.getID());
+    logger.debug("Event Updated {}", e.getID());
     return true;
   }
    
@@ -625,13 +625,13 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
   private Connection getConnection () throws SQLException {
     if (dataSource == null) throw new RuntimeException("No DataSource available");
     Connection con = dataSource.getConnection();
-    logger.debug("creating connection "+con);
+    logger.debug("creating connection {}", con);
     con.setAutoCommit(false);
     return con;
   }
   
   private void closeConnection (Connection con) throws SQLException {
-    logger.debug("Connection closed "+con);
+    logger.debug("Connection closed {}", con);
     if (con != null) con.close();
   }
   
@@ -641,7 +641,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    */
   public boolean dbCheck (Connection con) {
     StringBuilder tables = new StringBuilder();;
-    logger.info("checking if scheduler-db is available." );
+    logger.debug("checking if scheduler-db is available." );
     
     try {
       if (con == null) throw new SQLException("No database connected");
@@ -653,7 +653,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
         tables.append(" ");
       }
     } catch (SQLException e) {
-      logger.error("Problem checking if event database is present and complete "+e.getMessage());
+      logger.error("Problem checking if event database is present and complete: {}", e.getMessage());
     }
 
     String tablesString = tables.toString();
@@ -662,7 +662,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     if (! tablesString.contains("EVENT")) return false;
     if (! tablesString.contains("RESOURCESSERIES")) return false;
     if (! tablesString.contains("RESOURCES")) return false;
-    logger.info("scheduler-db is available. Tables: " + tables);
+    logger.info("scheduler-db is available. Tables: {}", tables);
     return true;
   }
   
@@ -687,7 +687,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
       s.executeUpdate();
       con.commit();
     } catch (SQLException e) {
-      logger.error("Could not create new database structure. "+e.getMessage());
+      logger.error("Could not create new database structure. {}", e.getMessage());
       con.rollback();
       throw new SQLException(e);
     } finally {
@@ -703,7 +703,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
    * @throws SQLException 
    */
   public void setDataSource (DataSource ds) throws SQLException{
-    logger.info("Setting DataSource "+ds);
+    logger.debug("Setting DataSource {}", ds);
     if (ds == null) {
       logger.error("no valid DataSource was set");
       throw new SQLException ("SQL-Connection is not vaild"); 

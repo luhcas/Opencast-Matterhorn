@@ -152,14 +152,14 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
    * @param componentContext The ComponetnContext of the OSGI bundle
    */
   public void activate(ComponentContext componentContext) {
-    logger.info("activation started.");
+    logger.info("SchedulerService activated.");
     if (componentContext == null) {
       logger.error("Could not activate because of missing ComponentContext");
       return;
     }
     this.componentContext = componentContext;
     URL dcMappingURL = componentContext.getBundleContext().getBundle().getResource("config/dublincoremapping.properties");
-    logger.info("Using Dublin Core Mapping from "+dcMappingURL);
+    logger.debug("Using Dublin Core Mapping from {}.",dcMappingURL);
     try {
       if (dcMappingURL != null)  {
         URLConnection con = dcMappingURL.openConnection();
@@ -170,7 +170,7 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
     }
     
     URL caMappingURL = componentContext.getBundleContext().getBundle().getResource("config/captureagentmetadatamapping.properties");
-    logger.info("Using Capture Agent Metadata Mapping from "+caMappingURL);
+    logger.debug("Using Capture Agent Metadata Mapping from {}.", caMappingURL);
     try {
       if (caMappingURL != null) {
         URLConnection con = caMappingURL.openConnection();
