@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.persistence.Service" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.persistence.Service" />
+  <property name="service.description" value="Persistence Example Service" />
+  <property name="service.pid" value="org.opencastproject.persistence.Service" />  
+  <service>
+    <provide interface="org.opencastproject.persistence.Service" />
+    <provide interface="org.osgi.service.cm.ManagedService" />
+  </service>
+</component>
