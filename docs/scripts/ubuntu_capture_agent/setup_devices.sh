@@ -3,6 +3,8 @@
 supportedDevices[0]="Hauppauge WinTV PVR-350"
 supportedDevices[1]="BT878 video (ProVideo PV143)"
 supportedDevices[2]="Epiphan VGA2USB"
+supportedDevices[3]="Hauppauge HVR-1600"
+supportedDevices[4]="Hauppauge WinTV PVR-150"
 
 #ls the dev directory, then grep for video devices with *only* one number and dump the result to a file
 ls /dev/video* | grep '/dev/video[0-9]$' > /tmp/devlist.txt
