@@ -20,7 +20,6 @@
               <img src="img/under_construction.gif" alt="Under construction" title="Under construction"></img>
             </td>
             <td style="border:none;" align="left">
-              <img src="img/information.png" alt="Information" title="Information"></img>
               <b> Under development.</b>
               <br />
               <span>
