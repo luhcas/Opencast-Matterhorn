@@ -28,8 +28,8 @@
         <module>modules/matterhorn-build-tools</module>
         <module>modules/matterhorn-runtime-tools</module>
         <module>modules/matterhorn-authentication-api</module>
-        <module>modules/matterhorn-capture-service-api</module> 
-        <module>modules/matterhorn-capture-service-impl</module>
+        <module>modules/matterhorn-capture-agent-api</module> 
+        <module>modules/matterhorn-capture-agent-impl</module>
         <module>modules/matterhorn-capture-admin-service-api</module>
         <module>modules/matterhorn-capture-admin-service-impl</module>
         <module>modules/matterhorn-composer-service-api</module>
@@ -85,8 +85,8 @@
         <module>modules/matterhorn-util</module>
         <module>modules/matterhorn-media</module>
         <module>modules/matterhorn-capture-admin-service-api</module>
-        <module>modules/matterhorn-capture-service-api</module> 
-        <module>modules/matterhorn-capture-service-impl</module> 
+        <module>modules/matterhorn-capture-agent-api</module> 
+        <module>modules/matterhorn-capture-agent-impl</module> 
       </modules>
     </profile>
   </profiles>
