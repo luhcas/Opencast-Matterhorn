@@ -18,6 +18,8 @@ a:hover {
   text-decoration: underline;
 }
 
+select { font-size:1.15em; }
+
 .wu-tab-content {
     border-left:1px solid black;
     border-right:1px solid black;
