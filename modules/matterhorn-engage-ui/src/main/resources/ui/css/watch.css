@@ -15,3 +15,25 @@
   height: 80px;
   "
 }
+
+.oc-segment-table { 
+  border-style:none;
+  border:0px;
+  margin:0px;
+}
+
+.oc-segment-td { 
+  border-style:none;
+}
+
+.oc-segments { 
+  position:relative; 
+}
+
+.oc-segments-holder
+ {
+  overflow-x:scroll;
+  overflow-y:hidden;
+  border:1px;
+  border-style:solid;
+ }

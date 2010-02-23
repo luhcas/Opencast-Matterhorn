@@ -54,39 +54,30 @@
 			</xsl:choose>
 		</div>
 		
-		<table>
-			<xsl:for-each select="ns2:search-results/ns2:result/ns2:segments/ns2:mediaSegments">
-			<tr>
-			   <td>
-	         <b><xsl:value-of select="./@index" /></b>
-	      </td>
-	      
-	      <td>
-	      <a>
-            <xsl:attribute name="href">javascript:Videodisplay.seek(<xsl:value-of
-              select="./@time div 1000" />)</xsl:attribute>
-           <img>
-             <xsl:attribute name="src"><xsl:value-of
-               select="./ns2:previews/ns2:preview[@type='presentation']" /></xsl:attribute>
-           </img>
-               
-          </a>
-        </td>
-        
-	      <td>
-	       <a>
-             <xsl:attribute name="href">javascript:Videodisplay.seek(<xsl:value-of
-               select="./@time div 1000" />)</xsl:attribute>
-               
-               <xsl:value-of select="round((./@time div 1000) div 3600)" />:<xsl:value-of select="floor(((./@time div 1000) - ((round((./@time div 1000) div 3600))*3600)) div 60)" />:<xsl:value-of select="(./@time div 1000) - ((round((./@time div 1000) div 3600))*3600) - ((floor(((./@time div 1000) - ((round((./@time div 1000) div 3600))*3600)) div 60))*60)" />
-          </a>
-	      </td>
-        <td>
-	       <xsl:value-of select="ns2:text" />
-	      </td>
-	    </tr>
-	    </xsl:for-each>
-		</table>
-		
+		<div id="segments-holder" class="oc-segments-holder">
+			<div class="oc-segments">
+				<table class="oc-segment-table">
+				      <tr>
+					<xsl:for-each select="ns2:search-results/ns2:result/ns2:segments/ns2:mediaSegments">
+			      <td class="oc-segment-td">
+			        <a>
+	              <xsl:attribute name="href">javascript:Videodisplay.seek(<xsl:value-of
+	                select="./@time div 1000" />)</xsl:attribute>
+	                <xsl:if test='10>floor((./@time div 1000) div 3600)'>0</xsl:if><xsl:value-of select="floor((./@time div 1000) div 3600)" />:<xsl:if test='10>floor(((./@time div 1000) - ((floor((./@time div 1000) div 3600))*3600)) div 60)'>0</xsl:if><xsl:value-of select="floor(((./@time div 1000) - ((floor((./@time div 1000) div 3600))*3600)) div 60)" />:<xsl:if test='10>(./@time div 1000) - ((floor((./@time div 1000) div 3600))*3600) - ((floor(((./@time div 1000) - ((floor((./@time div 1000) div 3600))*3600)) div 60))*60)'>0</xsl:if><xsl:value-of select="(./@time div 1000) - ((floor((./@time div 1000) div 3600))*3600) - ((floor(((./@time div 1000) - ((floor((./@time div 1000) div 3600))*3600)) div 60))*60)" />
+		          </a>
+			        <a>
+								<xsl:attribute name="href">javascript:Videodisplay.seek(<xsl:value-of
+								  select="./@time div 1000" />)</xsl:attribute>
+			          <img>
+			            <xsl:attribute name="src"><xsl:value-of
+			              select="./ns2:previews/ns2:preview[@type='presentation']" /></xsl:attribute>
+			          </img>
+		          </a>
+			      </td>
+			    </xsl:for-each>
+			    </tr>
+				</table>
+			</div>
+	  </div>
 	</xsl:template>
 </xsl:stylesheet>

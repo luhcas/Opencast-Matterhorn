@@ -86,6 +86,7 @@ Opencast.Watch = (function () {
 
     $("#btn_skip_forward").attr('role', 'button');
     $("#btn_skip_forward").attr('aria-labelledby', 'Skip Forward');
+    
   }
     
     return {
