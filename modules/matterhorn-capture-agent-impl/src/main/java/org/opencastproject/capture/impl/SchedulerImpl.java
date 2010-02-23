@@ -394,9 +394,10 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.capture.api.ScheduleService#setCaptureSchedule()
+   * Sets this machine's schedule based on the iCal data passed in as a parameter.
+   * Note that this call wipes all currently scheduled captures and then schedules based on the new data.
+   * Also note that any files which are in the way when this call tries to save the iCal attachments are overwritten without prompting.
+   * @param newCal The new calendar data
    */
   private synchronized void setCaptureSchedule(Calendar newCal) {
     log.debug("setCaptureSchedule(newCal)");
@@ -498,6 +499,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
             } catch(Exception e) {};
             job.getJobDataMap().put(JobParameters.MEDIA_PACKAGE, pack);
           }
+          //Note that we overwrite any pre-existing files with this.  In other words, if there is a file called foo.txt in the
+          //captureDir directory and there is an attachment called foo.txt then we will overwrite the one on disk with the one from the ical
           URL u = new File(captureDir, filename).toURI().toURL();
           writeFile(u, contents);
         }
