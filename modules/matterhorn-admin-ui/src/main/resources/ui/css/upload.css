@@ -12,7 +12,7 @@ a {color:blue;}*/
 .color-red {color:red;}
 .formField-list {margin-left:5px; margin-right:5px; padding:0px;}
 .formField-list li {margin-bottom: 4px;}
-.formField-label {width:150px !important; text-align:right; margin-right:1em; float:left;}
+.formField-label {width:165px !important; text-align:right; margin-right:1em; float:left;}
 .formField {width:440px !important;float:left;}
 .no-bullets {list-style-type: none;}
 .collapse-control {padding-left:18px;cursor:pointer;background:silver;}
