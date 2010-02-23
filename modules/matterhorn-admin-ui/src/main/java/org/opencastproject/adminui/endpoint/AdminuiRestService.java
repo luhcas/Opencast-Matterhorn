@@ -146,7 +146,6 @@ public class AdminuiRestService {
         MediaPackage mediapackage = workflows[i].getMediaPackage();
         RecordingDataView item = new RecordingDataViewImpl();
         item.setId(workflows[i].getId());
-        logger.info("DC Title: {}", mediapackage.getTitle());
         item.setTitle(mediapackage.getTitle());
         //item.setPresenter(formatMultipleString(mediapackage.getContributors()));
         item.setPresenter(formatMultipleString(mediapackage.getCreators()));

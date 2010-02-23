@@ -87,7 +87,6 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
       logger.debug("Received mediapackage ingest event: {}", property);
       try {
         MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml((String)property);
-
         logger.info("Received media package {}", mp.getIdentifier());
         
         // execute 'Transcode, Distribute and Publish workflow'

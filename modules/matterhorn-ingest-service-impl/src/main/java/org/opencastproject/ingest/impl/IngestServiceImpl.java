@@ -48,6 +48,7 @@ import java.net.URI;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.UUID;
+import java.util.Date;
 
 /**
  * Creates and augments Matterhorn MediaPackages. Stores media into the Working
@@ -173,6 +174,7 @@ public class IngestServiceImpl implements IngestService, ManagedService,
               + e.getLocalizedMessage());
       throw e;
     }
+    mediaPackage.setDate(new Date());
     return mediaPackage;
   }
 

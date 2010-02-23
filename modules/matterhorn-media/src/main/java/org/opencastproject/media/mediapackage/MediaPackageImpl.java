@@ -181,10 +181,9 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   @XmlAttribute(name = "start")
-  protected String startDate;
-
-  protected String getStartDateAsString(String startTime) {
+  public String getStartDateAsString() {
     long d = manifest.getStartDate();
+    String startDate = "";
     if (d > 0) {
       startDate = DateTimeSupport.toUTC(d);
     }

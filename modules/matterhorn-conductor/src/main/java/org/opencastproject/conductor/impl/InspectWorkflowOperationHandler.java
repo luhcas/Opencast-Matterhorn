@@ -117,10 +117,8 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
   public WorkflowOperationResult start(WorkflowInstance workflowInstance)
           throws WorkflowOperationException {
     MediaPackage mediaPackage = (MediaPackage)workflowInstance.getMediaPackage().clone();
-
     // Populate the mediapackage with any metadata found in its catalogs
     populateMediaPackageMetadata(mediaPackage);
-
     // Inspect the tracks
     for (Track track : mediaPackage.getTracks()) {
       
@@ -200,12 +198,30 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
     for(MediaPackageMetadataService metadataService : metadataServices) {
       MediaPackageMetadata metadata = metadataService.getMetadata(mp);
       if(metadata != null) {
-        mp.setDate(metadata.getDate());
-        mp.setLanguage(metadata.getLanguage());
-        mp.setLicense(metadata.getLanguage());
-        mp.setSeries(metadata.getSeriesIdentifier());
-        mp.setSeriesTitle(metadata.getSeriesTitle());
-        mp.setTitle(metadata.getTitle());
+        logger.info("start");
+        if(mp.getDate().getTime() == 0){
+          mp.setDate(metadata.getDate());
+        }
+        logger.info("lang");
+        if(mp.getLanguage() == null || mp.getLanguage().isEmpty()){
+          mp.setLanguage(metadata.getLanguage());
+        }
+        logger.info("license");
+        if(mp.getLicense() == null || mp.getLicense().isEmpty()){
+          mp.setLicense(metadata.getLicense());
+        }
+        logger.info("series");
+        if(mp.getSeries() == null || mp.getSeries().isEmpty()){
+          mp.setSeries(metadata.getSeriesIdentifier());
+        }
+        logger.info("series title");
+        if(mp.getSeriesTitle() == null || mp.getSeriesTitle().isEmpty()){
+          mp.setSeriesTitle(metadata.getSeriesTitle());
+        }
+        logger.info("title");
+        if(mp.getTitle() == null || mp.getTitle().isEmpty()){
+          mp.setTitle(metadata.getTitle());
+        }
       }
     }
   }
