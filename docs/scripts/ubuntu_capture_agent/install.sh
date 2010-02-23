@@ -17,9 +17,11 @@ echo "Username: $USERNAME"
 
 # add user and give sudo priveleges
 sudo useradd -m -s /bin/bash $USERNAME
-echo "Enter $USERNAME's new password"
-sudo passwd $USERNAME
-sudo usermod -aG admin $USERNAME
+if [ $? -ne 9 ]; then
+  echo "Enter $USERNAME's new password"
+  sudo passwd $USERNAME
+fi
+sudo usermod -aG admin,video,audio $USERNAME
 cd /home/$USERNAME
 
 # list of common drivers
@@ -108,10 +110,10 @@ if [ $SUCCESS -ne 0 ]; then
   echo "Failed to load Epiphan driver. Try to do it manually."
 fi
 
-sudo echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse" >> $HOME/sources.list
-sudo echo "deb http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse" >> $HOME/sources.list
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup
+sudo echo "deb http://us.archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse" >> $HOME/sources.list
+sudo echo "deb http://us.archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse" >> $HOME/sources.list
 sudo echo "deb http://security.ubuntu.com/ubuntu karmic-security main restricted universe multiverse" >> $HOME/sources.list
-
 sudo mv $HOME/sources.list /etc/apt/sources.list
 
 # auto set selections when installing postfix and jdk packages
@@ -129,9 +131,9 @@ sudo apt-get update
 sudo apt-get -y --force-yes install v4l-conf ivtv-utils maven2 sun-java6-jdk subversion wget curl openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg
 
 export JAVA_HOME=/usr/lib/jvm/java-6-sun-1.6.0.15
-export FELIX_FILENAME=felix-framework-2.0.1.tar.gz
+export FELIX_FILENAME=org.apache.felix.main.distribution-2.0.4.tar.gz
 export FELIX_URL=http://apache.mirror.iweb.ca/felix/$FELIX_FILENAME
-export FELIX_HOME=/home/$USERNAME/felix-framework-2.0.1
+export FELIX_HOME=/home/$USERNAME/felix-framework-2.0.4
 export M2_REPO=/home/$USERNAME/.m2/repository
 
 sudo chmod o+w /home/$USERNAME/.bashrc

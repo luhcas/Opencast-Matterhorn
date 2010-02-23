@@ -24,8 +24,10 @@ while read line
 done < /tmp/devlist.txt
 
 CAPTURE_PROPS=$1/conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties
-cp /home/$USERNAME/capture-agent/opencast-capture-service-impl/src/test/resources/config/capture.properties $CAPTURE_PROPS
+cp /home/$USERNAME/capture-agent/modules/matterhorn-capture-service-impl/src/test/resources/config/capture.properties $CAPTURE_PROPS
 
+touch /home/$USERNAME/95-perso.rules
+touch /home/$USERNAME/matterhorn_capture.sh
 allDevices=""
 let devAryLen=${#devices[@]}-1
 for dev in $(seq 0 1 $devAryLen)
@@ -80,7 +82,7 @@ for dev in $(seq 0 1 $devAryLen)
 done
 
 sudo mv /home/$USERNAME/95-perso.rules /etc/udev/rules.d
-sudo chown root:root /etc/udev/rules.d/95-perso.rules
+sudo chown root:video /etc/udev/rules.d/95-perso.rules
 
 chmod 755 /home/$USERNAME/matterhorn_capture.sh
 
