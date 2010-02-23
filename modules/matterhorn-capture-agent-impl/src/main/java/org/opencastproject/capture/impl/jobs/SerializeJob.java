@@ -46,7 +46,7 @@ public class SerializeJob implements Job {
   @Override
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
     
-    logger.info("Initiating serializeJob");
+    logger.debug("Initiating serializeJob");
     
     // Obtains the recordingID
     String recordingID = ctx.getMergedJobDataMap().getString(CaptureParameters.RECORDING_ID);

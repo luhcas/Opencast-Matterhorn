@@ -388,7 +388,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     // Checks there is a currentRecID defined --should always be
     if (currentRecID == null) { 
-      logger.warn("There is no currentRecID assigned, but the Pipeline is not null!!!");
+      logger.warn("There is no currentRecID assigned, but the Pipeline is not null!");
       setAgentState(AgentState.IDLE);
       return false;
     }
@@ -557,7 +557,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     logger.info("Zipping {} files:", filesToZip.size());
     for (File f : filesToZip)
-      logger.info("--> {}", f.getName());
+      logger.debug("--> {}", f.getName());
 
     return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), new File(recording.getDir(), CaptureParameters.ZIP_NAME).getAbsolutePath());
   }
@@ -570,7 +570,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    *      The ID for the recording to be ingested
    */
   public int ingest(String recID) {
-    logger.debug("Ingesting recording: {}", recID);
+    logger.info("Ingesting recording: {}", recID);
     RecordingImpl recording = pendingRecordings.get(recID);
 
     if (recording == null) {
@@ -580,7 +580,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     URL url = null;
     try {
-      logger.info("Ingest URL is " + recording.getProperty(CaptureParameters.INGEST_ENDPOINT_URL));
+      logger.debug("Ingest URL is " + recording.getProperty(CaptureParameters.INGEST_ENDPOINT_URL));
       url = new URL(recording.getProperty(CaptureParameters.INGEST_ENDPOINT_URL));
     } catch (NullPointerException e) {
       logger.warn("Nullpointer while parsing ingest target URL.");
@@ -605,7 +605,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       // Sets the file as the body of the request
       FileEntity myFileEntity = new FileEntity(fileDesc, URLConnection.getFileNameMap().getContentTypeFor(fileDesc.getName()));
 
-      logger.warn("Sending the file " + fileDesc.getAbsolutePath() + " with a size of "+ fileDesc.length());
+      logger.debug("Sending the file " + fileDesc.getAbsolutePath() + " with a size of "+ fileDesc.length());
 
       setRecordingState(recID, RecordingState.UPLOADING);
 

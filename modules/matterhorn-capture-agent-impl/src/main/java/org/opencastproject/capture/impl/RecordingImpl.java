@@ -73,7 +73,7 @@ public class RecordingImpl {
         recordingID = props.getProperty(CaptureParameters.RECORDING_ID);
       } else {
         //In this case they've set the root URL, but not the recording ID.  Get the id from that url instead then.
-        logger.warn("{} was set, but not {}.", CaptureParameters.RECORDING_ROOT_URL, CaptureParameters.RECORDING_ID);
+        logger.debug("{} was set, but not {}.", CaptureParameters.RECORDING_ROOT_URL, CaptureParameters.RECORDING_ID);
         recordingID = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL)).getName();
         props.put(CaptureParameters.RECORDING_ID, recordingID);
       }

@@ -141,7 +141,7 @@ public class StateServiceImpl implements StateService, ManagedService {
       //Create and start the scheduler
       pollScheduler = sched_fact.getScheduler();
       if (pollScheduler.getJobGroupNames().length > 0) {
-        logger.info("Duplicate attempt to create agent status task detected, ignoring...");
+        logger.debug("Duplicate attempt to create agent status task detected, ignoring...");
         return;
       }
       pollScheduler.start();

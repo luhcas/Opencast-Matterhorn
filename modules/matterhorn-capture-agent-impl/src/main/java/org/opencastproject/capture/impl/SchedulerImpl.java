@@ -250,7 +250,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     } else if (calendar == null && localCalendarCacheURL == null) {
       log.warn("Unable to update calendar from either local or remote sources.");
     } else {
-      log.info("Calendar already exists, and {} is invalid, skipping update.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL);
+      log.debug("Calendar already exists, and {} is invalid, skipping update.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL);
       return;
     }
 
@@ -273,7 +273,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     try {
       calendarString = readCalendar(url);
     } catch (Exception e) {
-      log.warn("Parsing exception: {}.", e.toString());
+      log.debug("Parsing exception: {}.", e.toString());
       //If the calendar is null, which only happens when the machine has *just* been powered on.
       //This case handles not having a network connection by just reading from the cached copy of the calendar 
       if (calendar == null) {
@@ -284,7 +284,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           return null;
         }
       } else {
-        log.info("Calendar already exists, and {} is invalid, skipping update.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL);
+        log.debug("Calendar already exists, and {} is invalid, skipping update.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL);
         return null;
       }
     }
@@ -464,11 +464,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           try {
             FileUtils.forceMkdir(captureDir);
           } catch (IOException e) {
-            log.error("IOException creating required directory {}.", captureDir.toString());
-          }
-          //Should have been created.  Let's make sure of that.
-          if (!captureDir.exists()) {
-            log.error("Could not create required directory {}.", captureDir.toString());
+            log.error("IOException creating required directory {}, skipping capture.", captureDir.toString());
+            continue;
           }
         }
 

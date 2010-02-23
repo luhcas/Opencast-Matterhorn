@@ -46,7 +46,7 @@ public class StartCaptureJob implements Job {
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
 
-    logger.debug("StartCaptureJob executed.");
+    logger.info("Initiating StartCaptureJob.");
     CaptureAgentImpl ca = null;
     MediaPackage mp = null;
     Properties props = null;
@@ -96,7 +96,7 @@ public class StartCaptureJob implements Job {
       // Schedules the stop event
       Scheduler jobScheduler = (Scheduler) ctx.getMergedJobDataMap().get(JobParameters.JOB_SCHEDULER);
       jobScheduler.scheduleJob(job, trigger);
-      logger.info("stopCapture scheduled for: {}", trigger);
+      logger.debug("stopCapture scheduled for: {}", trigger);
 
       //Remove this job from the system
       JobDetail mine = ctx.getJobDetail();

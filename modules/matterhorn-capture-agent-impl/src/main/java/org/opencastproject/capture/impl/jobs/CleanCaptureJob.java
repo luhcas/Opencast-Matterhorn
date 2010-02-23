@@ -114,7 +114,7 @@ public class CleanCaptureJob implements Job {
       }
     }
     
-    logger.info("Archive: {} not deleted.", dir.getAbsolutePath());
+    logger.debug("Archive: {} not deleted.", dir.getAbsolutePath());
     return false;
   }
 

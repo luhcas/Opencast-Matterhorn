@@ -75,14 +75,13 @@ public class ConfigurationManager implements ManagedService {
   @Override
   public void updated(Dictionary props) throws ConfigurationException {
     if (props == null) {
-      logger.info("Null properties in updated!");
+      logger.debug("Null properties in updated!");
       return;
     }
     Enumeration<String> keys = props.keys();
     while (keys.hasMoreElements()) {
       String key = keys.nextElement();
       properties.put(key, props.get(key));
-      //logger.info(key + "=" + properties.getProperty(key));
     }
 
     // Attempt to parse the location of the configuration server

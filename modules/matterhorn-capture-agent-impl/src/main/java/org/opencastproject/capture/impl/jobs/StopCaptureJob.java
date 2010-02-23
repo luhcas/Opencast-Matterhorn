@@ -44,7 +44,7 @@ public class StopCaptureJob implements Job {
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
     
-    logger.info ("Initiating stopCaptureJob");
+    logger.debug("Initiating stopCaptureJob");
     
     try {
       // Extract the Capture Agent to stop the capture ASAP

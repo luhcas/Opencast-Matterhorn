@@ -40,7 +40,7 @@ public class IngestJob implements StatefulJob {
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
 
-    logger.info("Initiating ingestJob");
+    logger.debug("Initiating ingestJob");
     
     // Obtains the recordingID
     String recordingID = ctx.getMergedJobDataMap().getString(CaptureParameters.RECORDING_ID);

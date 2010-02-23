@@ -127,7 +127,7 @@ public class PipelineFactory {
 
     logger.info("Successfully initialised {} devices.", devices.size());
     for (int i = 0; i < devices.size(); i++)
-      logger.info("Device #{}: {}.", i, devices.get(i));
+      logger.debug("Device #{}: {}.", i, devices.get(i));
 
     // setup gstreamer pipeline using capture devices 
     Gst.init(); // cannot using gst library without first initialising it
