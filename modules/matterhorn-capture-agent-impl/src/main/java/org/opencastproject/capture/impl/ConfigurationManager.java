@@ -134,21 +134,28 @@ public class ConfigurationManager implements ManagedService {
    * Creates the core Opencast directories.
    */
   private void createCoreDirectories() {
-    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CACHE_URL, this);
-    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_VOLATILE_URL, this);
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CACHE_URL, "cache/captures");
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_VOLATILE_URL, "volatile");
   }
 
   /**
    * Creates a file or directory.
-   * @param key    The key to set in the configuration manager.  Key is set equal to name.
-   * @param config The configuration manager to store the key-value pair.
+   * @param key    The key to set in this configuration manager.  Key is set equal to name.
+   * @param fallback The directory structure that should be created under java.io.tmpdir should the key not be found in the configuration data.
    */
-  private void createFileObj(String key, ConfigurationManager config) {
+  private void createFileObj(String key, String fallback) {
+    if (this.getItem(key) == null) {
+      File parent = new File(System.getProperty("java.io.tmpdir"));
+      File dir = new File(parent, fallback);
+      this.setItem(key, dir.getAbsolutePath());
+      logger.warn("Unable to find value for key {} defaulting to {}.", key, dir.getAbsolutePath());
+    }
+
     File target = null;
     try {
-      target = new File (config.getItem(key));
+      target = new File (this.getItem(key));
       FileUtils.forceMkdir(target);
-      config.setItem(key, target.toString());
+      this.setItem(key, target.toString());
       if (!target.exists()) {
         throw new RuntimeException("Unable to create directory " + target + ".");
       }
