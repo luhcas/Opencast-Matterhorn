@@ -24,6 +24,9 @@ public class CaptureAgentStateServiceImplTest {
     service = new CaptureAgentStateServiceImpl();
     Assert.assertNotNull(service);
     capabilities = new Properties();
+    capabilities.setProperty("CAMERA", "/dev/video0");
+    capabilities.setProperty("SCREEN", "/dev/video1");
+    capabilities.setProperty("AUDIO", "hw:0");
   }
 
   @After
@@ -52,30 +55,53 @@ public class CaptureAgentStateServiceImplTest {
     Assert.assertEquals(0, service.getKnownAgents().size());
   }
 
-  private void verifyAgent(String name, String state) {
+  private void verifyAgent(String name, String state, Properties caps) {
     Agent agent = service.getAgentState(name);
     
     if (agent != null) {
       Assert.assertEquals(name, agent.getName());
       Assert.assertEquals(state, agent.getState());
+      Assert.assertEquals(caps, agent.getCapabilities());
     } else if (state != null)
       Assert.fail();
   }
 
   @Test
-  public void oneAgent() {
-    service.setAgentCapabilities("agent1", capabilities);
+  public void oneAgentState() {
+    service.setAgentState("agent1", AgentState.IDLE);
     Assert.assertEquals(1, service.getKnownAgents().size());
 
-    verifyAgent("notAgent1", null);
-    verifyAgent("agent1", AgentState.IDLE);
+    verifyAgent("notAgent1", null, null);
+    verifyAgent("agent1", AgentState.IDLE, null);
 
     service.setAgentState("agent1", AgentState.CAPTURING);
     Assert.assertEquals(1, service.getKnownAgents().size());
 
-    verifyAgent("notAgent1",null);
-    verifyAgent("agent1", AgentState.CAPTURING);
+    verifyAgent("notAgent1",null, null);
+    verifyAgent("agent1", AgentState.CAPTURING, null);
   }
+  
+  @Test
+  public void oneAgentCapabilities() {
+    service.setAgentCapabilities("agent1", capabilities);
+    Assert.assertEquals(1, service.getKnownAgents().size());
+
+    verifyAgent("notAgent1", null, null);
+    verifyAgent("agent1", AgentState.UNKNOWN, capabilities);
+
+    service.setAgentState("agent1", AgentState.IDLE);
+    Assert.assertEquals(1, service.getKnownAgents().size());
+
+    verifyAgent("notAgent1",null, null);
+    verifyAgent("agent1", AgentState.IDLE, capabilities);
+    
+    service.setAgentCapabilities("agent1", new Properties());
+    Assert.assertEquals(1, service.getKnownAgents().size());
+    
+    verifyAgent("notAnAgent", null, null);
+    verifyAgent("agent1", AgentState.IDLE, new Properties());
+  }
+
 
   @Test
   public void removeAgent() {
@@ -84,15 +110,15 @@ public class CaptureAgentStateServiceImplTest {
     service.setAgentCapabilities("agent2", capabilities);
     service.setAgentState("agent2", AgentState.UPLOADING);
 
-    verifyAgent("notAnAgent", null);
-    verifyAgent("agent1", AgentState.IDLE);
-    verifyAgent("agent2", AgentState.UPLOADING);
+    verifyAgent("notAnAgent", null, capabilities);
+    verifyAgent("agent1", AgentState.UNKNOWN, capabilities);
+    verifyAgent("agent2", AgentState.UPLOADING, capabilities);
 
     service.removeAgent("agent1");
     Assert.assertEquals(1, service.getKnownAgents().size());
-    verifyAgent("notAnAgent", null);
-    verifyAgent("agent1", null);
-    verifyAgent("agent2", AgentState.UPLOADING);
+    verifyAgent("notAnAgent", null, capabilities);
+    verifyAgent("agent1", null, capabilities);
+    verifyAgent("agent2", AgentState.UPLOADING, capabilities);
   }
 
   @Test
