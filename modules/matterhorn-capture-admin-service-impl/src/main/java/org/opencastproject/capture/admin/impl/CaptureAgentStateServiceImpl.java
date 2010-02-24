@@ -80,9 +80,19 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     if (req != null) {
       logger.debug("Setting Agent {} to state {}.", agentName, state);
       req.setState(state);
-      return OK;
-    } else
-      return NO_SUCH_AGENT;     
+    } else {     
+      // If the agent doesn't exists, but the name is not null nor empty, create a new one.
+      if (agentName == null || agentName.equals("")) {
+        logger.debug("Unable to set agent state, agent name is blank or null.");
+        return BAD_PARAMETER;
+      }
+
+      logger.debug("Creating Agent {} with state {}.", agentName, state);
+      Agent a = new Agent(agentName, state, null);
+      agents.put(agentName, a);
+    }
+
+    return OK;
   }
 
   /**
@@ -131,18 +141,18 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     if (req != null) {
       logger.debug("Setting Agent {}'s capabilities", agentName);
       req.setCapabilities(capabilities);
-      return OK;
+    } else {
+      // If the agent doesn't exists, but the name is not null nor empty, create a new one.
+      if (agentName == null || agentName.equals("")) {
+        logger.debug("Unable to set agent state, agent name is blank or null.");
+        return BAD_PARAMETER;
+      }
+
+      logger.debug("Creating Agent {} with state {}.", agentName, AgentState.UNKNOWN);
+      Agent a = new Agent(agentName, AgentState.UNKNOWN, capabilities);
+      agents.put(agentName, a);
     }
-    
-    // If the agent doesn't exists, but the name is not null nor empty, create a new one.
-    if (agentName == null || agentName.equals("")) {
-      logger.debug("Unable to set agent state, agent name is blank or null.");
-      return BAD_PARAMETER;
-    }
-    
-    logger.debug("Creating Agent {} with state {}.", agentName, AgentState.IDLE);
-    Agent a = new Agent(agentName, AgentState.IDLE, capabilities);
-    agents.put(agentName, a);
+
     return OK;
 
   }

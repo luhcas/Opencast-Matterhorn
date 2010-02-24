@@ -28,10 +28,12 @@ import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Status;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -47,9 +49,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * FIXME -- Add javadocs
@@ -141,7 +140,7 @@ public class CaptureAgentStateRestService {
   @Path("agents/{name}/capabilities")
   public Response getCapabilities(@PathParam("name") String agentName) {
     Properties props = service.getAgentCapabilities(agentName);
-    OutputStream os = new ByteArrayOutputStream();
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
     try {
       props.storeToXML(os, "Capabilities for the agent " + agentName);
     } catch (IOException e) {
@@ -150,7 +149,7 @@ public class CaptureAgentStateRestService {
     }
     if (props != null) {
       logger.debug("Returning capabilities for the agent {}", agentName);
-      return Response.ok(os).build();
+      return Response.ok(os.toString()).build();
     } else {
       logger.debug("The agent {} is not registered in the system", agentName);
       return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();

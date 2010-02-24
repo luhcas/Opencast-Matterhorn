@@ -256,6 +256,29 @@ public class ConfigurationManager implements ManagedService {
     return (Properties) properties.clone();
   }
   
+  /** 
+   * Filters the capabilities (mappings between friendly names and recording devices) from this agent's properties
+   * @return A Properties object containing the capabilities --friendly names as keys and device locations as values
+   */
+  public Properties getCapabilities() {
+    Properties capabilities = new Properties();
+    
+    try {
+      String[] friendlyNames = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES).split(",");
+      
+      for (String name : friendlyNames) {
+        String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
+        capabilities.setProperty(name, properties.getProperty(key));
+      }
+      
+    } catch (NullPointerException e) {
+      logger.error("Wrong friendly names list in the agent's properties. Capabilities filtering aborted");
+      return null;
+    }
+    
+    return capabilities;
+  }
+  
   /**
    * Merges the given Properties with the ConfigurationManager's properties. Will
    * not overwrite the ConfigurationManager if specified.

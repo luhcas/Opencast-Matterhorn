@@ -27,6 +27,7 @@ import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.api.StateService;
+import org.opencastproject.capture.impl.jobs.AgentCapabilitiesJob;
 import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.osgi.service.cm.ConfigurationException;
@@ -61,7 +62,7 @@ public class StateServiceImpl implements StateService, ManagedService {
 
   public void activate(ComponentContext ctx) {
     recordings = new Hashtable<String, Recording>();
-    agent = new Agent(configService.getItem(CaptureParameters.AGENT_NAME), AgentState.UNKNOWN,  null);
+    agent = new Agent(configService.getItem(CaptureParameters.AGENT_NAME), AgentState.UNKNOWN,  configService.getCapabilities());
     createPollingTask();
   }
   
@@ -129,7 +130,9 @@ public class StateServiceImpl implements StateService, ManagedService {
    */
   private void createPollingTask() {
     try {
-      long pollTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL)) * 1000L;
+      long statePollTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL)) * 1000L;
+      long capbsPollTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL)) * 1000L;
+      
       Properties pollingProperties = new Properties();
       InputStream s = getClass().getClassLoader().getResourceAsStream("config/state_update_scheduler.properties");
       if (s == null) {
@@ -147,17 +150,24 @@ public class StateServiceImpl implements StateService, ManagedService {
       pollScheduler.start();
   
       //Setup the polling
-      JobDetail job = new JobDetail("agentStateUpdate", Scheduler.DEFAULT_GROUP, AgentStateJob.class);
+      JobDetail stateJob = new JobDetail("agentStateUpdate", Scheduler.DEFAULT_GROUP, AgentStateJob.class);
+      JobDetail capbsJob = new JobDetail("agentCapabilitiesUpdate", Scheduler.DEFAULT_GROUP, AgentCapabilitiesJob.class);
 
-      job.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
-      job.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
+      stateJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
+      stateJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
 
+      capbsJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
+      capbsJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);     
+      
       //TODO:  Support changing the polling interval
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
-      SimpleTrigger trigger = new SimpleTrigger("state_polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime);
-
+      SimpleTrigger stateTrigger = new SimpleTrigger("state_polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, statePollTime);
+      SimpleTrigger capbsTrigger = new SimpleTrigger("capabilities_polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, capbsPollTime);
+      
       //Schedule the update
-      pollScheduler.scheduleJob(job, trigger);
+      pollScheduler.scheduleJob(stateJob, stateTrigger);
+      pollScheduler.scheduleJob(capbsJob, capbsTrigger);
+      
     } catch (NumberFormatException e) {
       logger.error("Invalid time specified in the {} value, unable to push state to remote server!", CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL);
     } catch (IOException e) {
