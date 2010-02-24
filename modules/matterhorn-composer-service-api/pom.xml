@@ -25,14 +25,14 @@
       <artifactId>jsr311-api</artifactId>
     </dependency>
     <dependency>
-    	<groupId>org.opencastproject</groupId>
-    	<artifactId>matterhorn-media</artifactId>
-    	<version>0.6-SNAPSHOT</version>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-media</artifactId>
+      <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
-    	<groupId>org.opencastproject</groupId>
-    	<artifactId>matterhorn-util</artifactId>
-    	<version>0.6-SNAPSHOT</version>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-util</artifactId>
+      <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

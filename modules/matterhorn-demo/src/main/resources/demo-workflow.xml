@@ -42,7 +42,7 @@
       </configurations>
     </operation>
     
-	<!-- Generate slide previews -->
+  <!-- Generate slide previews -->
     <operation
       id="slide-previews"
       fail-on-error="true"
@@ -56,7 +56,7 @@
       </configurations>
     </operation>
 
-	<!--  Distribute to local (engage) distribution channel -->
+  <!--  Distribute to local (engage) distribution channel -->
     <operation
       id="distribute_local"
       fail-on-error="true"

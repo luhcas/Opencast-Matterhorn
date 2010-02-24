@@ -34,7 +34,7 @@ import org.junit.Test;
  * This needs to be improved by 
  * String[] EngageGFXuri = {
  *   "/engage-hybrid-player/icons/cc_off.png",
- *	  "/engage-hybrid-player/icons/cc_on.png",
+ *    "/engage-hybrid-player/icons/cc_on.png",
  * ....
  * }
  * 

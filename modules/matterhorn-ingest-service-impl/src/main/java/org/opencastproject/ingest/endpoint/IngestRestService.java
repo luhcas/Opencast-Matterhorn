@@ -584,74 +584,74 @@ public class IngestRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
     
     // addMediaPackage
-	endpoint = new RestEndpoint("addMediaPackage", RestEndpoint.Method.POST,
-	    "/addMediaPackage",
-	    "Create media package from a media tracks and optional Dublin Core metadata fields");
-	endpoint.addFormat(new Format("XML", null, null));
-	endpoint.addBodyParam(true, null, "The media track file");
-	endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
-	    "The kind of media track"));
-	endpoint.addOptionalParam(new Param("abstract", Param.Type.STRING, null, 
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("accessRights", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("available", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("contributor", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("coverage", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("created", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("creator", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("date", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("description", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("extent", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("format", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("identifier", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("isPartOf", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("isReferencedBy", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("isReplacedBy", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("language", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("license", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("publisher", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("relation", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("replaces", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("rights", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("rightsHolder", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("source", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("spatial", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("subject", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("temporal", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("title", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addOptionalParam(new Param("type", Param.Type.STRING, null,
-	    "Metadata value"));
-	endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
-	endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
-	endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
-	endpoint.setTestForm(RestTestForm.auto());
-	data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+  endpoint = new RestEndpoint("addMediaPackage", RestEndpoint.Method.POST,
+      "/addMediaPackage",
+      "Create media package from a media tracks and optional Dublin Core metadata fields");
+  endpoint.addFormat(new Format("XML", null, null));
+  endpoint.addBodyParam(true, null, "The media track file");
+  endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
+      "The kind of media track"));
+  endpoint.addOptionalParam(new Param("abstract", Param.Type.STRING, null, 
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("accessRights", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("available", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("contributor", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("coverage", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("created", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("creator", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("date", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("description", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("extent", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("format", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("identifier", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("isPartOf", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("isReferencedBy", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("isReplacedBy", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("language", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("license", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("publisher", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("relation", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("replaces", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("rights", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("rightsHolder", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("source", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("spatial", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("subject", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("temporal", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("title", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addOptionalParam(new Param("type", Param.Type.STRING, null,
+      "Metadata value"));
+  endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
+  endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
+  endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+  endpoint.setTestForm(RestTestForm.auto());
+  data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
     
     // addZippedMediaPackage
     endpoint = new RestEndpoint("addZippedMediaPackage", RestEndpoint.Method.POST,
