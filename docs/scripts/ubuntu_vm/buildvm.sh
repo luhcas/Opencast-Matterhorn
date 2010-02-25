@@ -116,7 +116,8 @@ sudo mkdir mnt/opt/matterhorn
 sudo cp -r matterhorn_trunk mnt/opt/matterhorn/
 
 if [ ! -e felix-framework-2.0.1 ]; then
-  wget http://apache.linux-mirror.org/felix/felix-framework-2.0.1.tar.gz
+  # This one failed ... wget http://apache.linux-mirror.org/felix/felix-framework-2.0.1.tar.gz
+  wget http://archive.apache.org/dist/felix/felix-framework-2.0.1.tar.gz
   tar -xzf felix-framework-2.0.1.tar.gz
 fi 
 
