@@ -100,7 +100,7 @@
         <executions>
           <execution>
             <id>exec-svnversion</id>
-            <phase>validate</phase>
+            <phase>generate-resources</phase>
             <goals>
               <goal>exec</goal>
             </goals>
@@ -109,7 +109,7 @@
         <configuration>
           <executable>svnversion</executable>
           <!-- optional -->
-          <outputFile>src/main/resources/version.txt</outputFile>
+          <outputFile>${basedir}/target/classes/ui/version.txt</outputFile>
         </configuration>
       </plugin>
       <plugin>

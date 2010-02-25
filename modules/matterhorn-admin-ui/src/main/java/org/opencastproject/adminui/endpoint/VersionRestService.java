@@ -54,7 +54,7 @@ public class VersionRestService {
   public Response getCurrentVersion() {
     String curr = "";
     StringWriter writer = new StringWriter();
-    InputStream stream = getClass().getClassLoader().getResourceAsStream("version.txt");
+    InputStream stream = getClass().getClassLoader().getResourceAsStream("/ui/version.txt");
     try {
       IOUtils.copy(stream, writer);
     } catch (Exception e) { 
