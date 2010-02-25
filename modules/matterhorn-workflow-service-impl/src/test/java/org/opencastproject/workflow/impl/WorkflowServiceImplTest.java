@@ -26,7 +26,6 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
-import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
@@ -322,65 +321,6 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
-  @Test
-  public void testGetWorkflowInstanceByMetadataCatalog() {
-    WorkflowQuery q = service.newWorkflowQuery().withElement("catalog", "metadata/dublincore", true);
-    // Ensure that the database doesn't have any workflow instances
-    Assert.assertEquals(0, service.countWorkflowInstances());
-    Assert.assertEquals(0, service.getWorkflowInstances(q).size());
-
-    WorkflowInstance instance = service.start(workingDefinition, mediapackage1, null);
-
-    // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
-    while (!service.getWorkflowById(instance.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
-      System.out.println("Waiting for workflow to complete...");
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-      }
-    }
-    // reuse our original query, which returned zero before we started a new workflow
-    WorkflowSet workflowsInDb = service.getWorkflowInstances(q);
-    Assert.assertEquals(1, workflowsInDb.getItems().length);
-
-    // cleanup the database
-    service.removeFromDatabase(instance.getId());
-
-    // And ensure that it's really gone
-    Assert.assertNull(service.getWorkflowById(instance.getId()));
-    Assert.assertEquals(0, service.countWorkflowInstances());
-  }
-
-  @Test
-  public void testGetWorkflowInstanceByMissingMetadataCatalog() {
-    WorkflowQuery q = service.newWorkflowQuery().withElement("catalog", "metadata/dublincore", false);
-    
-    // Ensure that the database doesn't have any workflow instances
-    Assert.assertEquals(0, service.countWorkflowInstances());
-    Assert.assertEquals(0, service.getWorkflowInstances(q).size());
-
-    WorkflowInstance instance = service.start(workingDefinition, mediapackage1, null);
-
-    // Even the sample workflows take time to complete. Let the workflow finish before verifying state in the DB
-    while (!service.getWorkflowById(instance.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
-      System.out.println("Waiting for workflow to complete...");
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-      }
-    }
-    WorkflowQuery queryUnmatched = service.newWorkflowQuery().withElement("catalog", "something/nonexistent", false);
-    WorkflowSet workflowsInDb = service.getWorkflowInstances(queryUnmatched);
-    Assert.assertEquals(1, workflowsInDb.getItems().length);
-
-    // cleanup the database
-    service.removeFromDatabase(instance.getId());
-
-    // And ensure that it's really gone
-    Assert.assertNull(service.getWorkflowById(instance.getId()));
-    Assert.assertEquals(0, service.countWorkflowInstances());
-  }
-  
   @Test
   public void testGetAllWorkflowInstances() {
     Assert.assertEquals(0, service.countWorkflowInstances());

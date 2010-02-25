@@ -67,23 +67,23 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
 
   @XmlID
   @XmlAttribute()
-  private String id;
+  protected String id;
   
   @XmlAttribute()
-  private WorkflowState state;
+  protected WorkflowState state;
 
   @XmlElement(name="template")
-  private String title;
+  protected String title;
 
   @XmlElement(name="description")
-  private String description;
+  protected String description;
 
   @XmlElement(name="configuration")
   @XmlElementWrapper(name="configurations")
   protected Set<WorkflowConfiguration> configurations;
   
   @XmlElement(name="mediapackage")
-  private MediaPackage mediaPackage;
+  protected MediaPackage mediaPackage;
   
   @XmlElement(name="operation")
   @XmlElementWrapper(name="operations")
@@ -243,6 +243,13 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       set.add(config.getKey());
     }
     return set;
+  }
+
+  /**
+   * @return the configurations
+   */
+  public Set<WorkflowConfiguration> getConfigurations() {
+    return configurations;
   }
 
   /**

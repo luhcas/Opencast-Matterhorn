@@ -30,7 +30,6 @@ public class WorkflowQueryImpl implements WorkflowQuery {
   protected String seriesId;
   protected String mediaPackageId;
   protected String currentOperation;
-  protected ElementTuple elementTuple;
 
   public WorkflowQueryImpl() {}
   
@@ -98,57 +97,76 @@ public class WorkflowQueryImpl implements WorkflowQuery {
     this.currentOperation = currentOperation;
     return this;
   }
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowQuery#withElement(java.lang.String, java.lang.String, boolean)
+   * @see org.opencastproject.workflow.api.WorkflowQuery#getCount()
    */
-  public WorkflowQuery withElement(String elementType, String elementFlavor, boolean exists) {
-    this.elementTuple = new ElementTuple(elementType, elementFlavor, exists);
-    return this;
-  }
-
+  @Override
   public long getCount() {
     return count;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowQuery#getStartPage()
+   */
+  @Override
   public long getStartPage() {
     return startPage;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowQuery#getText()
+   */
+  @Override
   public String getText() {
     return text;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowQuery#getState()
+   */
+  @Override
   public WorkflowState getState() {
     return state;
   }
 
-  public String getEpisodeId() {
-    return episodeId;
-  }
-
-  public String getSeriesId() {
-    return seriesId;
-  }
-
-  public String getMediaPackageId() {
-    return mediaPackageId;
-  }
-
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowQuery#getCurrentOperation()
+   */
+  @Override
   public String getCurrentOperation() {
     return currentOperation;
   }
 
-  public ElementTuple getElementTuple() {
-    return elementTuple;
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowQuery#getEpisode()
+   */
+  @Override
+  public String getEpisode() {
+    return episodeId;
   }
-  static class ElementTuple {
-    String elementType, elementFlavor;
-    boolean exists;
-    ElementTuple(String elementType, String elementFlavor, boolean exists) {
-      this.elementType = elementType;
-      this.elementFlavor = elementFlavor;
-      this.exists = exists;
-    }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowQuery#getMediaPackage()
+   */
+  @Override
+  public String getMediaPackage() {
+    return mediaPackageId;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowQuery#getSeries()
+   */
+  @Override
+  public String getSeries() {
+    return seriesId;
   }
 }

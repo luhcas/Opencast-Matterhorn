@@ -27,7 +27,6 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowSetImpl;
-import org.opencastproject.workflow.impl.WorkflowQueryImpl.ElementTuple;
 
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
@@ -63,11 +62,6 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     this.dataSource = dataSource;
   }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#activate()
-   */
   public void activate(ComponentContext cc) {
     logger.info("activate()");
     Connection conn = borrowConnection();
@@ -290,45 +284,22 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
 
     // If we need to count media package elements, use a join
     StringBuilder q, countQ;
-    ElementTuple elementTuple = queryImpl.getElementTuple();
-    if(elementTuple != null) {
-      if(elementTuple.exists) {
-        q = new StringBuilder("select wf.workflow_xml as wfi from oc_workflow as wf");
-        q.append(" join oc_workflow_element as el on wf.workflow_id = el.workflow_id where el.mp_element_type=?");
-        q.append(" and el.mp_element_flavor=?");
-
-        countQ = new StringBuilder("select count(wf.workflow_xml) as wfi from oc_workflow as wf");
-        countQ.append(" join oc_workflow_element as el on wf.workflow_id = el.workflow_id where el.mp_element_type=?");
-        countQ.append(" and el.mp_element_flavor=?");
-      } else {
-        q = new StringBuilder("select distinct wf.workflow_xml as wfi, wf.date_created from oc_workflow as wf");
-        q.append(" join oc_workflow_element as el on wf.workflow_id = el.workflow_id where");
-        q.append(" (el.mp_element_type <> ? or el.mp_element_flavor <> ?)");
-
-        countQ = new StringBuilder("select count(distinct wf.workflow_xml) as wfi from oc_workflow as wf");
-        countQ.append(" join oc_workflow_element as el on wf.workflow_id = el.workflow_id where");
-        countQ.append(" (el.mp_element_type <> ? or el.mp_element_flavor <> ?)");
-      }
-      params.add(elementTuple.elementType);
-      params.add(elementTuple.elementFlavor);
-    } else {
-      // always include a where clause to make the append logic simpler
-      q = new StringBuilder("select wf.workflow_xml from oc_workflow as wf where 1=1");
-      countQ = new StringBuilder("select count(wf.workflow_xml) from oc_workflow as wf where 1=1");
-    }
+    // always include a where clause to make the append logic simpler
+    q = new StringBuilder("select wf.workflow_xml from oc_workflow as wf where 1=1");
+    countQ = new StringBuilder("select count(wf.workflow_xml) from oc_workflow as wf where 1=1");
 
     // Add the rest of the where clauses
-    if(queryImpl.getEpisodeId() != null) {
+    if(queryImpl.getEpisode() != null) {
       whereClauseList.add(" and wf.episode_id=?");
-      params.add(queryImpl.getEpisodeId());
+      params.add(queryImpl.getEpisode());
     }
-    if(queryImpl.getMediaPackageId() != null) {
+    if(queryImpl.getMediaPackage() != null) {
       whereClauseList.add(" and wf.mp_id=?");
-      params.add(queryImpl.getMediaPackageId());
+      params.add(queryImpl.getMediaPackage());
     }
-    if(queryImpl.getSeriesId() != null) {
+    if(queryImpl.getSeries() != null) {
       whereClauseList.add(" and wf.series_id=?");
-      params.add(queryImpl.getSeriesId());
+      params.add(queryImpl.getSeries());
     }
     if(queryImpl.getState() != null) {
       whereClauseList.add(" and wf.workflow_state=?");
@@ -348,12 +319,6 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       String clause = iter.next();
       q.append(clause);
       countQ.append(clause);
-    }
-
-    // if using a join, add the "group by" and "having" clauses
-    if(elementTuple != null) {
-      q.append(" group by wfi having count(el.mp_element_id) > 0");
-      countQ.append(" having count(el.mp_element_id) > 0");
     }
 
     return getWorkflowSet(q.toString(), countQ.toString(), params.toArray(new String[params.size()]), queryImpl.getStartPage(), queryImpl.getCount());

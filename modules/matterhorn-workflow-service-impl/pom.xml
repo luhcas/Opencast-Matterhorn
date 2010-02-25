@@ -59,6 +59,10 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>javax.persistence</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
@@ -124,6 +128,9 @@
               OSGI-INF/workflow-service-rest.xml,
               OSGI-INF/workflow-samples.xml
             </Service-Component>
+            <JPA-PersistenceUnits>
+              workflow
+            </JPA-PersistenceUnits>
           </instructions>
         </configuration>
       </plugin>
