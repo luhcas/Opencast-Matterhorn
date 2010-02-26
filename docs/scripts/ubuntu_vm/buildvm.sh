@@ -132,6 +132,7 @@ echo "=========================="/
 echo "=====Fetching Opencast===="
 echo "=========================="
 
+#temporary fix for weird svn up issue, checkout instead
 #check out svn
 if [ -e matterhorn_trunk ]; then
   cd matterhorn_trunk
