@@ -4,7 +4,7 @@
 #    UBUNTU_MIRROR=http://aifile.usask.ca/apt-mirror/mirror/archive.ubuntu.com/ubuntu/ ./buildvm.sh
 
 HOME=`pwd`
-MATTERHORN_SVN="https://opencast.jira.com/svn/MH/trunk/"
+MATTERHORN_SVN="http://opencast.jira.com/svn/MH/trunk/"
 #check for existance of mirror URL
 if [ "$UBUNTU_MIRROR" = "" ];
   then
