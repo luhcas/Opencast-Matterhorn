@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.distribution.itunesu.DistributionService" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.distribution.itunesu.ITunesUDistributionService" />
+  <property name="service.description" value="Distribution Service (iTunes U)" />
+  <property name="distribution.channel" value="itunesu" />
+  <service>
+    <provide interface="org.opencastproject.distribution.itunesu.ITunesUDistributionService" />
+    <provide interface="org.opencastproject.distribution.api.DistributionService" />
+  </service>
+  <reference name="WORKSPACE" interface="org.opencastproject.workspace.api.Workspace"
+    cardinality="1..n" policy="static" bind="setWorkspace" />
+</component>

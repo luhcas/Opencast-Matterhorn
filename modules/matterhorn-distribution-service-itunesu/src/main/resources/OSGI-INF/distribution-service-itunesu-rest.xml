@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.distribution.itunesu.endpoint.ITunesUDistributionRestService" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.distribution.itunesu.endpoint.ITunesUDistributionRestService" />
+  <property name="service.description" value="Distribution (iTunes U) REST Endpoint" />
+  <property name="service.exported.interfaces" value="org.opencastproject.distribution.itunesu.endpoint.ITunesUDistributionRestService" />
+  <property name="service.exported.configs" value="org.apache.cxf.rs" />
+  <property name="org.apache.cxf.rs.httpservice.context" value="/distribution/itunesu/rest" />
+  <service>
+    <provide interface="org.opencastproject.distribution.itunesu.endpoint.ITunesUDistributionRestService" />
+  </service>
+  <reference name="service-impl" interface="org.opencastproject.distribution.itunesu.ITunesUDistributionService"
+    cardinality="1..1" policy="static" bind="setService" unbind="unsetService" />
+</component>

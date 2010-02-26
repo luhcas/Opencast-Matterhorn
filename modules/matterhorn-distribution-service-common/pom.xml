@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>matterhorn-distribution-service-youtube</artifactId>
+  <artifactId>matterhorn-distribution-service-common</artifactId>
   <packaging>bundle</packaging>
-  <name>matterhorn-distribution-service-youtube</name>
+  <name>matterhorn-distribution-service-common</name>
   <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -72,79 +72,12 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Youtube delivery dependencies -->
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-distribution-service-common</artifactId>
-      <version>0.6-SNAPSHOT</version>
-    </dependency>
-
+    <!-- Scheduler dependencies -->
     <dependency>
       <groupId>flexjson</groupId>
       <artifactId>flexjson</artifactId>
       <version>1.8</version>
     </dependency>
-
-    <dependency>
-      <groupId>gdata</groupId>
-      <artifactId>gdata-client</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>gdata</groupId>
-      <artifactId>gdata-core</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>gdata</groupId>
-      <artifactId>gdata-media</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>gdata</groupId>
-      <artifactId>gdata-youtube</artifactId>
-      <version>2.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>gdata</groupId>
-      <artifactId>gdata-youtube-meta</artifactId>
-      <version>2.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.collections</groupId>
-      <artifactId>google-collections</artifactId>
-      <version>1.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jdom</groupId>
-      <artifactId>com.springsource.org.jdom</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.javamail-api-1.4</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.activation-api-1.1</artifactId>
-    </dependency>
-
-	<!-- include activation library even though it is part of JRE 6 otherwise
-	class laading errors will occur in OSGi container.
-	See http://code.google.com/p/gdata-java-client/issues/detail?id=130 -->
-	<dependency>
-	  <groupId>javax.activation</groupId>
-	  <artifactId>activation</artifactId>
-	  <version>1.1.1</version>
-	</dependency>
-    <!-- end of Youtube delivery dependencies -->
 
   </dependencies>
   <build>
@@ -161,24 +94,8 @@
               *;resolution:=optional
       		</Import-Package>
             <Export-Package>
-              org.opencastproject.distribution.youtube.*,
-              org.opencastproject.deliver.youtube.*
+              org.opencastproject.deliver.*
             </Export-Package>
-            <Embed-Dependency>
-			  matterhorn-distribution-service-common,
-              flexjson,
-              gdata-client,
-              gdata-core,
-              gdata-media,
-              gdata-youtube,
-              google-collections,
-			  activation,
-			  org.apache.servicemix.specs.javamail-api-1.4
-            </Embed-Dependency>
-            <Service-Component>
-              OSGI-INF/distribution-service-youtube.xml,
-              OSGI-INF/distribution-service-youtube-rest.xml
-            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.distribution.youtube.DistributionService" immediate="true" activate="activate">
+<component name="org.opencastproject.distribution.youtube.DistributionService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.distribution.youtube.YoutubeDistributionService" />
   <property name="service.description" value="Distribution Service (Youtube)" />
   <property name="distribution.channel" value="youtube" />

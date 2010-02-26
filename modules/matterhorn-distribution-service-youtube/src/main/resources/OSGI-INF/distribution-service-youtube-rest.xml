@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.distribution.youtube.endpoint.YoutubeDistributionRestService" immediate="true" activate="activate">
+<component name="org.opencastproject.distribution.youtube.endpoint.YoutubeDistributionRestService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.distribution.youtube.endpoint.YoutubeDistributionRestService" />
   <property name="service.description" value="Distribution (Youtube) REST Endpoint" />
   <property name="service.exported.interfaces" value="org.opencastproject.distribution.youtube.endpoint.YoutubeDistributionRestService" />

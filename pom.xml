@@ -39,7 +39,9 @@
         <module>modules/matterhorn-demo</module>
         <module>modules/matterhorn-distribution-service-api</module>
         <module>modules/matterhorn-distribution-service-local</module>
+        <module>modules/matterhorn-distribution-service-common</module>
         <module>modules/matterhorn-distribution-service-youtube</module>
+        <module>modules/matterhorn-distribution-service-itunesu</module>
         <!-- module>modules/matterhorn-engage-player</module -->
         <module>modules/matterhorn-engage-ui</module>
         <module>modules/matterhorn-http</module>

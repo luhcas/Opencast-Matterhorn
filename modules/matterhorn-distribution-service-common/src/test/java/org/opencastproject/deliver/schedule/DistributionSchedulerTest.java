@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.distribution.youtube;
+package org.opencastproject.deliver.schedule;
 
 import org.junit.Test;
 import junit.framework.Assert;
@@ -27,7 +27,7 @@ import org.opencastproject.deliver.store.MemoryStore;
 import org.opencastproject.deliver.store.Store;
 import org.opencastproject.deliver.store.Serializer;
 
-public class DistributionServiceImplTest {
+public class DistributionSchedulerTest {
   @Test
   public void testSchedule() throws InterruptedException {
     Schedule s = new Schedule();

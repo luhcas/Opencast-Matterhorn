@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.distribution.youtube;
+package org.opencastproject.distribution.itunesu;
 
 import org.junit.Test;
 import junit.framework.Assert;
