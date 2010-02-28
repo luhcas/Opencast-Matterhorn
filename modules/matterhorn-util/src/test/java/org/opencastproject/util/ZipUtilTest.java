@@ -33,8 +33,11 @@ public class ZipUtilTest {
    * Added as part of the fix for MH-1809
    * WARNING: Changes in the files to zip would change the resulting zip size.
    * If such changes are made, change also this constant accordingly
+   * MH-2455: If files used in zip are checked out with native line endings,
+   * windows file size will differ.
    */
-  private static final long ZIPSIZE = 870531;
+  private static final long UNIX_ZIP_SIZE = 870531;
+  private static final long WINDOWS_ZIP_SIZE = 870533;
   
   @Before
   public void setup() throws Exception {
@@ -62,8 +65,14 @@ public class ZipUtilTest {
   public void testZip() throws Exception {
     File zip = ZipUtil.zip(new File[] {src1, src2}, destDir + File.separator + "testingZip.zip");
     Assert.assertTrue(zip.exists());
-    // Testing issue MH-1809
-    Assert.assertEquals(ZIPSIZE, zip.length());
+    // Added as part of MH-2455
+    String OSName = System.getProperty("os.name").toUpperCase();
+    if(OSName.contains("WINDOWS")){
+    	Assert.assertEquals(WINDOWS_ZIP_SIZE, zip.length());
+    } else {
+    	// Testing issue MH-1809
+    	Assert.assertEquals(UNIX_ZIP_SIZE, zip.length());
+    }
     // java 5 incompatible
     //Assert.assertTrue(zip.getTotalSpace() > 0);
   }
