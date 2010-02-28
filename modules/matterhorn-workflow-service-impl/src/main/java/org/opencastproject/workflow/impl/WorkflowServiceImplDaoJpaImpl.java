@@ -16,36 +16,30 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
+import org.opencastproject.workflow.api.WorkflowSetImpl;
 
 import org.osgi.service.component.ComponentContext;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.metamodel.Metamodel;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.persistence.spi.PersistenceProvider;
-import javax.sql.DataSource;
 
 /**
  * JPA implementation of the workflow service persistence layer.
  */
 public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
-
-  /** The DataSource to provide database connections */
-  protected DataSource dataSource;
-  
-  /**
-   * @param dataSource the dataSource to set
-   */
-  public void setDataSource(DataSource dataSource) {
-    this.dataSource = dataSource;
-  }
 
   /** The JPA provider */
   protected PersistenceProvider persistenceProvider;
@@ -56,6 +50,17 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
   public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
     this.persistenceProvider = persistenceProvider;
   }
+  
+  @SuppressWarnings("unchecked")
+  protected Map persistenceProperties;
+
+  /**
+   * @param persistenceProperties the persistenceProperties to set
+   */
+  @SuppressWarnings("unchecked")
+  public void setPersistenceProperties(Map persistenceProperties) {
+    this.persistenceProperties = persistenceProperties;
+  }
 
   /** The entity manager used for persisting entities. */
   protected EntityManager em = null;
@@ -63,11 +68,8 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
   /** The factory used to generate the entity manager */
   protected EntityManagerFactory emf = null;
   
-  @SuppressWarnings("unchecked")
   public void activate(ComponentContext cc) {
-    Map factoryProps = new HashMap();
-    factoryProps.put("javax.persistence.nonJtaDataSource", dataSource);
-    emf = persistenceProvider.createEntityManagerFactory("workflow", factoryProps);
+    emf = persistenceProvider.createEntityManagerFactory("workflow", persistenceProperties);
     em = emf.createEntityManager();
   }
 
@@ -104,39 +106,36 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
   public WorkflowSet getWorkflowInstances(WorkflowQuery query) {
     long start = System.currentTimeMillis();
     CriteriaBuilder cb = em.getCriteriaBuilder();
-    Metamodel mm = em.getMetamodel();
+
+    CriteriaQuery<WorkflowInstanceImpl> jpaQuery = cb.createQuery(WorkflowInstanceImpl.class);
     
-    return null;
-    
-//    CriteriaQuery<WorkflowInstanceJPAEntity> jpaQuery = cb.createQuery(WorkflowInstanceJPAEntity.class);
-//    Root<WorkflowInstanceJPAEntity> root = jpaQuery.from(WorkflowInstanceJPAEntity.class);
-//    EntityType<WorkflowInstanceJPAEntity> WorkflowInstanceJPAEntity_ = root.getModel();;
-//    if(query.getCurrentOperation() != null) {
-//      Predicate condition = cb.equal(root.get("currentOperation"), query.getCurrentOperation());
-//      jpaQuery.where(condition);
-//    }
-//    if(query.getEpisode() != null) {
-//      Predicate condition = cb.equal(root.get("episode"), query.getCurrentOperation());
-//      jpaQuery.where(condition);
-//    }
+    Root<WorkflowInstanceImpl> root = jpaQuery.from(WorkflowInstanceImpl.class);
+    if(query.getCurrentOperation() != null) {
+      Predicate condition = cb.equal(root.get("currentOperation"), query.getCurrentOperation());
+      jpaQuery.where(condition);
+    }
+    if(query.getEpisode() != null) {
+      Predicate condition = cb.equal(root.get("episode"), query.getCurrentOperation());
+      jpaQuery.where(condition);
+    }
 
     // TODO Add the rest of the criteria
     
-//    TypedQuery<WorkflowInstanceJPAEntity> typedQuery = em.createQuery(jpaQuery);
-//    List<WorkflowInstanceJPAEntity> list = typedQuery.getResultList();
-//    long searchTime = System.currentTimeMillis() - start;
-//    WorkflowSetImpl set = new WorkflowSetImpl();
+    TypedQuery<WorkflowInstanceImpl> typedQuery = em.createQuery(jpaQuery);
+    List<WorkflowInstanceImpl> list = typedQuery.getResultList();
+    long searchTime = System.currentTimeMillis() - start;
+    WorkflowSetImpl set = new WorkflowSetImpl();
     
     // TODO Enable paging
 
-//    set.setCount(Math.min(query.getCount(), totalCount));
-//    set.setStartPage(query.getStartPage());
-//    set.setSearchTime(searchTime);
-//    set.setTotalCount(totalCount);
-//    for(WorkflowInstance workflow : list) {
-//      set.addItem(workflow);
-//    }
-//    return set;
+    set.setCount(Math.min(query.getCount(), 0)); // FIXME: the last arg should be the total count
+    set.setStartPage(query.getStartPage());
+    set.setSearchTime(searchTime);
+    set.setTotalCount(0); // FIXME: Set this to the total count
+    for(WorkflowInstance workflow : list) {
+      set.addItem(workflow);
+    }
+    return set;
   }
 
   /**

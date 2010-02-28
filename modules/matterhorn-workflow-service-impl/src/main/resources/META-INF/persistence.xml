@@ -5,5 +5,7 @@
   xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
     <persistence-unit name="workflow" transaction-type="RESOURCE_LOCAL">
        <class>org.opencastproject.workflow.api.WorkflowInstanceImpl</class>
+       <class>org.opencastproject.workflow.api.WorkflowConfigurationImpl</class>
+       <class>org.opencastproject.workflow.api.WorkflowOperationInstanceImpl</class>
     </persistence-unit>
 </persistence>

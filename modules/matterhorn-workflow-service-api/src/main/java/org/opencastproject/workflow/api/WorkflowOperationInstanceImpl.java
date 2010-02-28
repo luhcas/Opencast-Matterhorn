@@ -15,12 +15,19 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -33,20 +40,37 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * A JAXB-annotated implementation of {@link WorkflowOperationInstance}
  */
+@Entity(name="operation")
+@Table(name="WF_OPERATION")
 @XmlType(name="operation-instance", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="operation-instance", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.NONE)
-public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance {
+public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance, Serializable {
+  private static final long serialVersionUID = 8251863773894471287L;
 
+  /**
+   * The identifier used for persistence
+   */
+  @Id
+  @GeneratedValue(strategy=GenerationType.AUTO)
+  protected long pk;
+  public long getPk() {return pk;}
+  public void setPk(long pk) {this.pk = pk;}
+
+  @Column(name="operation")
   @XmlAttribute(name="id")
   protected String id;
 
+  @Column(name="state")
   @XmlAttribute(name="state")
   protected OperationState state;
 
+  @Column(name="description")
   @XmlAttribute(name="description")
   protected String description;
   
+  @ElementCollection
+  @CollectionTable(name="WF_CONFIG")
   @XmlElement(name="configuration")
   @XmlElementWrapper(name="configurations")
   protected Set<WorkflowConfiguration> configurations;
@@ -91,15 +115,6 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   static class Adapter extends XmlAdapter<WorkflowOperationInstanceImpl, WorkflowOperationInstance> {
     public WorkflowOperationInstanceImpl marshal(WorkflowOperationInstance op) throws Exception {return (WorkflowOperationInstanceImpl)op;}
     public WorkflowOperationInstance unmarshal(WorkflowOperationInstanceImpl op) throws Exception {return op;}
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getOutput()
-   */
-  public MediaPackage getOutput() {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   /**
