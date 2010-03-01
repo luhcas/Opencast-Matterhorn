@@ -21,7 +21,7 @@ After checkout please run
 
 mvn org.sonatype.flexmojos:flexmojos-maven-plugin:3.3.0:flexbuilder
 
-in your opencast-engage-player folder.
+in your matterhorn-engage-player folder.
 
 
 After this you should be able to include the project in Eclipse.
@@ -94,6 +94,18 @@ FlexCode Formater
 RUN JavaScript Tests:
 
 mvn -P jstests test
+
+
+------
+
+CODECOVERAGE report for Javascript
+
+<config filename>-coverage.dat will be created inside the folder /src/test/resources
+
+html formated report can be created for example by LCOV (http://ltp.sourceforge.net/coverage/lcov.php)
+
+genhtml <config filename>-coverage.dat -o /home/yourchoice
+
 
 
 
