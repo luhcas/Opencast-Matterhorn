@@ -198,28 +198,22 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
     for(MediaPackageMetadataService metadataService : metadataServices) {
       MediaPackageMetadata metadata = metadataService.getMetadata(mp);
       if(metadata != null) {
-        logger.info("start");
-        if(mp.getDate().getTime() == 0){
+        if(mp.getDate().getTime() == 0) {
           mp.setDate(metadata.getDate());
         }
-        logger.info("lang");
-        if(mp.getLanguage() == null || mp.getLanguage().isEmpty()){
+        if(mp.getLanguage() == null || mp.getLanguage().isEmpty()) {
           mp.setLanguage(metadata.getLanguage());
         }
-        logger.info("license");
-        if(mp.getLicense() == null || mp.getLicense().isEmpty()){
+        if(mp.getLicense() == null || mp.getLicense().isEmpty()) {
           mp.setLicense(metadata.getLicense());
         }
-        logger.info("series");
-        if(mp.getSeries() == null || mp.getSeries().isEmpty()){
+        if(mp.getSeries() == null || mp.getSeries().isEmpty()) {
           mp.setSeries(metadata.getSeriesIdentifier());
         }
-        logger.info("series title");
-        if(mp.getSeriesTitle() == null || mp.getSeriesTitle().isEmpty()){
+        if(mp.getSeriesTitle() == null || mp.getSeriesTitle().isEmpty()) {
           mp.setSeriesTitle(metadata.getSeriesTitle());
         }
-        logger.info("title");
-        if(mp.getTitle() == null || mp.getTitle().isEmpty()){
+        if(mp.getTitle() == null || mp.getTitle().isEmpty()) {
           mp.setTitle(metadata.getTitle());
         }
       }
