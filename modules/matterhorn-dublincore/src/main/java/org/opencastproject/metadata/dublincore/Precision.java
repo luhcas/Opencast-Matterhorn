@@ -22,4 +22,5 @@ package org.opencastproject.metadata.dublincore;
 public enum Precision {
 
   Year, Month, Day, Minute, Second, Fraction
+
 }

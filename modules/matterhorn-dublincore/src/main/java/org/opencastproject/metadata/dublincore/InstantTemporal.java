@@ -26,5 +26,5 @@ public class InstantTemporal extends Temporal<Date> {
   public InstantTemporal(Date temporal) {
     super(temporal, Type.Instant);
   }
-  
+
 }

@@ -16,7 +16,6 @@
 
 package org.opencastproject.metadata.dublincore;
 
-
 import org.joda.time.Duration;
 import org.joda.time.format.ISODateTimeFormat;
 import org.joda.time.format.ISOPeriodFormat;
@@ -35,7 +34,7 @@ import java.util.regex.Pattern;
 public class EncodingSchemeUtils {
 
   private static final Map<Precision, String> formats = new HashMap<Precision, String>();
-
+  
   static {
     formats.put(Precision.Year, "yyyy");
     formats.put(Precision.Month, "yyyy-MM");
@@ -44,10 +43,15 @@ public class EncodingSchemeUtils {
     formats.put(Precision.Second, "yyyy-MM-dd'T'HH:mm:ss'Z'");
     formats.put(Precision.Fraction, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
   }
-
+  
   /**
-   * Encode a date with the given precision into a Dublin Core string value, using the recommended W3C-DTF scheme and
-   * the UTC timezone. The language of the returned value is set to undefined.
+   * Encode a date with the given precision into a Dublin Core string value, using the recommended W3C-DTF scheme. The
+   * UTC timezone is used for all precisions from {@link Precision#Minute} to {@link Precision#Fraction}. For years,
+   * months and days the local timezone is used instead to ensure that the given date enters the DublinCore as is. If
+   * UTC was used it may happen that you get the previous or next day, month or year respectively
+   * <p/>
+   * The language of the returned value is
+   * {@link ch.ethz.replay.core.api.common.metadata.dublincore.DublinCore#LANGUAGE_UNDEFINED}.
    * <p/>
    * See <a href="http://www.w3.org/TR/NOTE-datetime">http://www.w3.org/TR/NOTE-datetime</a> for more information about
    * W3C-DTF.
@@ -63,14 +67,26 @@ public class EncodingSchemeUtils {
     if (precision == null)
       throw new IllegalArgumentException("The precision must not be null");
 
+    return new DublinCoreValue(formatDate(date, precision), DublinCore.LANGUAGE_UNDEFINED, DublinCore.ENC_SCHEME_W3CDTF);
+  }
+
+  private static String formatDate(Date date, Precision precision) {
     SimpleDateFormat f = new SimpleDateFormat(formats.get(precision));
-    f.setTimeZone(TimeZone.getTimeZone("UTC"));
-    return new DublinCoreValue(f.format(date), DublinCore.LANGUAGE_UNDEFINED, DublinCore.ENC_SCHEME_W3CDTF);
+    if (precision == Precision.Minute || precision == Precision.Second || precision == Precision.Fraction)
+      f.setTimeZone(TimeZone.getTimeZone("UTC"));
+    return f.format(date);
   }
 
   /**
-   * Encode a period with the given precision into a Dublin Core string value using the recommended DCMI Period scheme
-   * and the UTC timezone. One of the dates may be null to create an open interval.
+   * Encode a period with the given precision into a Dublin Core string value using the recommended DCMI Period scheme.
+   * For the usage of the UTC timezone please refer to
+   * {@link #encodeDate(java.util.Date, ch.ethz.replay.core.common.bundle.dublincore.utils.Precision)} for further
+   * information.
+   * <p/>
+   * One of the dates may be null to create an open interval.
+   * <p/>
+   * The language of the returned value is
+   * {@link ch.ethz.replay.core.api.common.metadata.dublincore.DublinCore#LANGUAGE_UNDEFINED}.
    * <p/>
    * See <a href="http://dublincore.org/documents/dcmi-period/">http://dublincore.org/documents/dcmi-period/</a> for
    * more information about DCMI Period.
@@ -86,16 +102,14 @@ public class EncodingSchemeUtils {
     if (precision == null)
       throw new IllegalArgumentException("The precision must not be null");
 
-    SimpleDateFormat f = new SimpleDateFormat(formats.get(precision));
-    f.setTimeZone(TimeZone.getTimeZone("UTC"));
     StringBuilder b = new StringBuilder();
     if (period.hasStart()) {
-      b.append("start=").append(f.format(period.getStart())).append(";");
+      b.append("start=").append(formatDate(period.getStart(), precision)).append(";");
     }
     if (period.hasEnd()) {
       if (b.length() > 0)
         b.append(" ");
-      b.append("end=").append(f.format(period.getEnd())).append(";");
+      b.append("end=").append(formatDate(period.getEnd(), precision)).append(";");
     }
     if (period.hasName()) {
       b.append(" ").append("name=").append(period.getName().replace(";", "")).append(";");
@@ -106,8 +120,11 @@ public class EncodingSchemeUtils {
 
   /**
    * Encode a duration measured in milliseconds into a Dublin Core string using the
-   * {@linkplain org.opencastproject.media.mediapackage.dublincore.DublinCore#ENC_SCHEME_ISO8601 ISO8601} encoding
+   * {@linkplain ch.ethz.replay.core.api.common.metadata.dublincore.DublinCore#ENC_SCHEME_ISO8601 ISO8601} encoding
    * scheme <code>PTnHnMnS</code>.
+   * <p/>
+   * The language of the returned value is
+   * {@link ch.ethz.replay.core.api.common.metadata.dublincore.DublinCore#LANGUAGE_UNDEFINED}.
    * <p/>
    * See <a href="http://en.wikipedia.org/wiki/ISO_8601#Durations"> ISO8601 Durations</a> for details.
    * 
@@ -207,7 +224,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodeDate(org.opencastproject.media.mediapackage.dublincore.DublinCoreValue)}, but throws an
+   * Like {@link #decodeDate(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the date
@@ -222,7 +239,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodeDate(org.opencastproject.media.mediapackage.dublincore.DublinCoreValue)}, but throws an
+   * Like {@link #decodeDate(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the date
@@ -301,7 +318,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodePeriod(org.org.opencastproject.metadata.dublincore.DCMIPeriod, org.org.opencastproject.metadata.dublincore.Precision)}, but throws an
+   * Like {@link #decodePeriod(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the period
@@ -313,7 +330,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodePeriod(org.org.opencastproject.metadata.dublincore.DCMIPeriod, org.org.opencastproject.metadata.dublincore.Precision)}, but throws an
+   * Like {@link #decodePeriod(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the period
@@ -351,7 +368,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodeTemporal(org.opencastproject.media.mediapackage.dublincore.DublinCoreValue)}, but throws an
+   * Like {@link #decodeTemporal(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
    * {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the temporal object of type {@link java.util.Date} or {@link DCMIPeriod}
@@ -373,4 +390,5 @@ public class EncodingSchemeUtils {
   private static final Date parseW3CDTF(String value) {
     return ISODateTimeFormat.dateTimeParser().parseDateTime(value).toDate();
   }
+
 }
