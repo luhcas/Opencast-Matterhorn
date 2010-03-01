@@ -158,13 +158,13 @@ public class CaptureAgentStateServiceImplTest {
     service.setRecordingState("Recording1", RecordingState.UPLOAD_FINISHED);
     Assert.assertEquals(1, service.getKnownRecordings().size());
 
-    verifyRecording("notRecording1", RecordingState.UNKNOWN);
+    verifyRecording("notRecording1", null);
     verifyRecording("Recording1", RecordingState.UPLOAD_FINISHED);
 
     service.setRecordingState("Recording1", RecordingState.CAPTURING);
     Assert.assertEquals(1, service.getKnownRecordings().size());
 
-    verifyRecording("notRecording1", RecordingState.UNKNOWN);
+    verifyRecording("notRecording1", null);
     verifyRecording("Recording1", RecordingState.CAPTURING);
   }
 
@@ -175,14 +175,14 @@ public class CaptureAgentStateServiceImplTest {
     service.setRecordingState("Recording2", RecordingState.UPLOADING);
     Assert.assertEquals(2, service.getKnownRecordings().size());
 
-    verifyRecording("notAnRecording", RecordingState.UNKNOWN);
+    verifyRecording("notAnRecording", null);
     verifyRecording("Recording1", RecordingState.CAPTURING);
     verifyRecording("Recording2", RecordingState.UPLOADING);
 
     service.removeRecording("Recording1");
     Assert.assertEquals(1, service.getKnownRecordings().size());
-    verifyRecording("notAnRecording", RecordingState.UNKNOWN);
-    verifyRecording("Recording1", RecordingState.UNKNOWN);
+    verifyRecording("notAnRecording", null);
+    verifyRecording("Recording1", null);
     verifyRecording("Recording2", RecordingState.UPLOADING);
   }
 }
