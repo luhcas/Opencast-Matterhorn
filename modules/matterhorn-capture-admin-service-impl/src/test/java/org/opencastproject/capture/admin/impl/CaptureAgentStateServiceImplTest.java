@@ -124,8 +124,7 @@ public class CaptureAgentStateServiceImplTest {
   @Test
   public void nonExistantRecording() {
     Recording recording = service.getRecordingState("doesNotExist");
-    Assert.assertEquals("doesNotExist", recording.getID());
-    Assert.assertEquals(RecordingState.UNKNOWN, recording.getState());
+    Assert.assertNull(recording);
   }
 
   @Test
@@ -146,8 +145,12 @@ public class CaptureAgentStateServiceImplTest {
 
   private void verifyRecording(String id, String state) {
     Recording recording = service.getRecordingState(id);
-    Assert.assertEquals(id, recording.getID());
-    Assert.assertEquals(state, recording.getState());
+    
+    if (state != null) {
+      Assert.assertEquals(id, recording.getID());
+      Assert.assertEquals(state, recording.getState());
+    } else
+      Assert.assertNull(recording);
   }
 
   @Test
