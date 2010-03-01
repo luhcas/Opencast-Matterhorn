@@ -187,8 +187,17 @@ public class CaptureAgentStateRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("recordings/{id}")
-  public RecordingStateUpdate getRecordingState(@PathParam("id") String id) {
-    return new RecordingStateUpdate(service.getRecordingState(id));
+  public Response getRecordingState(@PathParam("id") String id) {
+    Recording rec = service.getRecordingState(id);
+    
+    if (rec != null) {
+      logger.debug("Submitting state for recording {}", id);
+      return Response.ok(new RecordingStateUpdate(rec)).build(); 
+    }
+    else {
+      logger.debug("No such recording: {}", id);
+      return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
+    }
   }
 
   @POST
@@ -325,6 +334,7 @@ public class CaptureAgentStateRestService {
     "The ID of a given recording"));
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addStatus(Status.OK(null));
+    endpoint.addStatus(Status.NOT_FOUND("The recording with the specified ID does not exist"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 

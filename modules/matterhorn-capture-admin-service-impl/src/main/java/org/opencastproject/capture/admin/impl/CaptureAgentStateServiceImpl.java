@@ -164,15 +164,13 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    */
   public Recording getRecordingState(String id) {
     Recording req = recordings.get(id);
-    //If that agent doesn't exist, return an unknown agent, else return the known agent
-    if (req == null) {
+    //If that recording doesn't exist, return null
+    if (req == null)
       logger.debug("Recording {} does not exist in the system.", id);
-      Recording r = new Recording(id, RecordingState.UNKNOWN);
-      return r;
-    } else {
+    else
       logger.debug("Recording {} found, returning state.", id);
-      return req;
-    }
+    
+    return req;
   }
 
   /**
