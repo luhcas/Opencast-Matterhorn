@@ -5,11 +5,14 @@ supportedDevices[1]="BT878 video (ProVideo PV143)"
 supportedDevices[2]="Epiphan VGA2USB"
 supportedDevices[3]="Hauppauge HVR-1600"
 supportedDevices[4]="Hauppauge WinTV PVR-150"
+supportedDevices[5]="Hauppauge WinTV-HVR1300 DVB-T/H"
 
 #ls the dev directory, then grep for video devices with *only* one number and dump the result to a file
 ls /dev/video* | grep '/dev/video[0-9]$' > /tmp/devlist.txt
 
 #Read each line in the file.  Note that if we move the call from above to this line the devices array gets all kinds of scoping problems.
+#FIXME: The Hauppage, as it is two devices, appears duplicated. Should only appear once
+i=0
 while read line
  do
 	let aryLen=${#supportedDevices[@]}-1
@@ -20,7 +23,8 @@ while read line
 	
 		if [ "$test" == "$device" ];
 		 then
-			devices[$item]="$device|$line"
+			devices[$i]="$device|$line"
+			i=$(($i+1))
 		fi
 	done
 done < /tmp/devlist.txt
@@ -71,7 +75,7 @@ for dev in $(seq 0 1 $devAryLen)
         sudo echo "v4l2-ctl -s NTSC-M -d $device" >> /home/$USERNAME/matterhorn_capture.sh
     fi
 
-    if [ "$name" == "${supportedDevices[0]}" ]; then
+    if [ "$name" == "${supportedDevices[0]}" -o "$name" == "${supportedDevices[5]}"]; then
       sudo v4l2-ctl -d $device -i 2
       echo "v4l2-ctl -d $device -i 2" >> /home/$USERNAME/matterhorn_capture.sh
       echo "Please use input 2 with the $name."
@@ -88,7 +92,7 @@ sudo chown root:video /etc/udev/rules.d/95-perso.rules
 
 chmod 755 /home/$USERNAME/matterhorn_capture.sh
 
-audioDevice=hw:$(sudo arecord -l | grep Analog | cut -c 6)
+audioDevice=hw:$(sudo arecord -l| grep Analog |  cut --delimiter=' ' -f 2 | sed  's/://g')
 cleanAudioDevice=`echo $audioDevice | sed s/\://g`
 echo "capture.device.$cleanAudioDevice.src=$audioDevice" >> $CAPTURE_PROPS
 echo "capture.device.$cleanAudioDevice.outputfile=$cleanAudioDevice" >> $CAPTURE_PROPS
