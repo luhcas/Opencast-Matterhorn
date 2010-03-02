@@ -31,7 +31,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,7 @@ public class ConfigurationManager implements ManagedService {
     LoggerFactory.getLogger(ConfigurationManager.class);
   
   /** Hashtable that represents config file in memory */
-  private Properties properties;
+  private Properties properties = new Properties();
   
   /** should point to a centralised config file */
   private URL url; 
@@ -55,16 +54,6 @@ public class ConfigurationManager implements ManagedService {
   /** Timer that will every at a specified interval to retrieve the centralised
    * configuration file from a server */
   private Timer timer;
-
-  public void activate(ComponentContext cc) throws ConfigurationException {
-    properties = new Properties();
-    
-    //Load the local config from Felix's config directory
-    properties = new Properties();
-    if (cc != null) {
-      updated(cc.getProperties());
-    }
-  }
 
   public void deactivate() {
     if (timer != null) {

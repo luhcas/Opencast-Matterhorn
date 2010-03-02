@@ -36,7 +36,6 @@ public class ConfigurationManagerTest {
   @Before
   public void setUp() throws ConfigurationException {
     configManager = new ConfigurationManager();
-    configManager.activate(null);
     Assert.assertNotNull(configManager);
   }
 

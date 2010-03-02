@@ -15,20 +15,18 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
+import java.text.ParseException;
+
 import org.opencastproject.capture.impl.CaptureAgentImpl;
 import org.opencastproject.capture.impl.CaptureParameters;
-
 import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.text.ParseException;
 
 /**
  * The class to schedule the task of serializing the MediaPackage (this means: obtaining an XML
@@ -67,10 +65,11 @@ public class SerializeJob implements Job {
     String postfix = ctx.getMergedJobDataMap().getString(JobParameters.JOB_POSTFIX);
 
     // Schedules Ingestion
-    JobDetail job = new JobDetail("IngestJob-" + postfix, Scheduler.DEFAULT_GROUP, IngestJob.class);
+    JobDetail job = new JobDetail("IngestJob-" + postfix, JobParameters.OTHER_TYPE, IngestJob.class);
     CronTrigger trigger;
     try {
       trigger = new CronTrigger();
+      trigger.setGroup(JobParameters.OTHER_TYPE);
       trigger.setName("IngestJobTrigger-" + postfix);
       //TODO:  Make this configurable.  Or at least slow it down a bit - hitting things every 20 seconds it too fast.
       trigger.setCronExpression("0/20 * * * * ?");

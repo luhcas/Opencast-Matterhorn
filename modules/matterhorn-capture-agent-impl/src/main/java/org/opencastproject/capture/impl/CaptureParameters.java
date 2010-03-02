@@ -108,6 +108,12 @@ public interface CaptureParameters {
    * Settings which control the capture hardware and outputs
    */
 
+  /**
+   * The maximum length, in seconds, which should be captured regardless of scheduled length.
+   * This is to catch user input errors in the scheduler, and also to stop infinite captures from an unscheduled capture.  
+   */
+  public static final String CAPTURE_MAX_LENGTH = "capture.max.length";
+
   /** A comma delimited list of the friendly names for capturing devices */
   public static final String CAPTURE_DEVICE_NAMES = "capture.device.names";
   

@@ -15,10 +15,9 @@
  */
 package org.opencastproject.capture.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
@@ -50,7 +49,7 @@ public class StateServiceImpl implements StateService, ManagedService {
   private Agent agent = null;
   private Hashtable<String, Recording> recordings = null;
   private ConfigurationManager configService = null;
-  private Scheduler pollScheduler = null;
+  private Scheduler scheduler = null;
 
   public void setConfigService(ConfigurationManager svc) {
     configService = svc;
@@ -63,13 +62,22 @@ public class StateServiceImpl implements StateService, ManagedService {
   public void activate(ComponentContext ctx) {
     recordings = new Hashtable<String, Recording>();
     agent = new Agent(configService.getItem(CaptureParameters.AGENT_NAME), AgentState.UNKNOWN,  configService.getCapabilities());
-    createPollingTask();
+  }
+  
+  public void updated(Dictionary properties) throws ConfigurationException {
+    Properties props = new Properties();
+    Enumeration<String> keys = properties.keys();
+    while (keys.hasMoreElements()) {
+      String key = keys.nextElement();
+      props.put(key, properties.get(key));
+    }
+    createPollingTask(props);
   }
   
   public void deactivate() {
     try {
-      if (pollScheduler != null) {
-          pollScheduler.shutdown(true);
+      if (scheduler != null) {
+          scheduler.shutdown(true);
       }
     } catch (SchedulerException e) {
       logger.warn("Finalize for pollScheduler did not execute cleanly: {}.", e.getMessage());
@@ -122,62 +130,77 @@ public class StateServiceImpl implements StateService, ManagedService {
    * @see org.opencastproject.capture.api.StateService#setAgentState(java.lang.String)
    */
   public void setAgentState(String state) {
-    agent.setState(state);
+    if (agent != null) {
+      agent.setState(state);
+    } else {
+      logger.warn("Unable to set agent state because agent was null.  This is only a problem if you see this message repeating!");
+    }
   }
 
   /**
    * Creates the Quartz task which pushes the agent's state to the state server.
+   * @param schedulerProps The properties for the Quartz scheduler
    */
-  private void createPollingTask() {
+  private void createPollingTask(Properties schedulerProps) {
+    //Either create the scheduler or empty out the existing one
+    try {
+      if (scheduler != null) {
+        //Clear the existing jobs and reschedule everything
+        for (String name : scheduler.getJobNames(JobParameters.POLLING_TYPE)) {
+          scheduler.deleteJob(name, JobParameters.POLLING_TYPE);
+        }
+      } else {
+        StdSchedulerFactory sched_fact = new StdSchedulerFactory(schedulerProps);
+
+        //Create and start the scheduler
+        scheduler = sched_fact.getScheduler();
+        scheduler.start();
+      }
+    } catch (SchedulerException e) {
+      logger.error("Scheduler exception in State Service: {}.", e.getMessage());
+      return;
+    }
+
+    //Setup the agent state polling
     try {
       long statePollTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL)) * 1000L;
-      long capbsPollTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL)) * 1000L;
       
-      Properties pollingProperties = new Properties();
-      InputStream s = getClass().getClassLoader().getResourceAsStream("config/state_update_scheduler.properties");
-      if (s == null) {
-        throw new RuntimeException("Resource config/state_update_scheduler.properties was not found!");
-      }
-      pollingProperties.load(s);
-      StdSchedulerFactory sched_fact = new StdSchedulerFactory(pollingProperties);
-  
-      //Create and start the scheduler
-      pollScheduler = sched_fact.getScheduler();
-      if (pollScheduler.getJobGroupNames().length > 0) {
-        logger.debug("Duplicate attempt to create agent status task detected, ignoring...");
-        return;
-      }
-      pollScheduler.start();
-  
       //Setup the polling
-      JobDetail stateJob = new JobDetail("agentStateUpdate", Scheduler.DEFAULT_GROUP, AgentStateJob.class);
-      JobDetail capbsJob = new JobDetail("agentCapabilitiesUpdate", Scheduler.DEFAULT_GROUP, AgentCapabilitiesJob.class);
+      JobDetail stateJob = new JobDetail("agentStateUpdate", JobParameters.POLLING_TYPE, AgentStateJob.class);
 
       stateJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
       stateJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
 
+      //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
+      SimpleTrigger stateTrigger = new SimpleTrigger("state_polling", JobParameters.POLLING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, statePollTime);
+      
+      //Schedule the update
+      scheduler.scheduleJob(stateJob, stateTrigger);
+    } catch (NumberFormatException e) {
+      logger.error("Invalid time specified in the {} value, unable to push state to remote server!", CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL);
+    } catch (SchedulerException e) {
+      logger.error("SchedulerException in StateServiceImpl while trying to schedule state polling: {}.", e.getMessage());
+    }
+
+    //Setup the agent capabilities polling
+    try {
+      long capbsPollTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL)) * 1000L;
+      
+      //Setup the polling
+      JobDetail capbsJob = new JobDetail("agentCapabilitiesUpdate", JobParameters.POLLING_TYPE, AgentCapabilitiesJob.class);
+
       capbsJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
       capbsJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);     
       
-      //TODO:  Support changing the polling interval
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
-      SimpleTrigger stateTrigger = new SimpleTrigger("state_polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, statePollTime);
-      SimpleTrigger capbsTrigger = new SimpleTrigger("capabilities_polling", Scheduler.DEFAULT_GROUP, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, capbsPollTime);
+      SimpleTrigger capbsTrigger = new SimpleTrigger("capabilities_polling", JobParameters.POLLING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, capbsPollTime);
       
       //Schedule the update
-      pollScheduler.scheduleJob(stateJob, stateTrigger);
-      pollScheduler.scheduleJob(capbsJob, capbsTrigger);
-      
+      scheduler.scheduleJob(capbsJob, capbsTrigger);
     } catch (NumberFormatException e) {
-      logger.error("Invalid time specified in the {} value, unable to push state to remote server!", CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL);
-    } catch (IOException e) {
-      logger.error("IOException caught in StateServiceImpl: {}.", e.getMessage());
+      logger.error("Invalid time specified in the {} value, unable to push state to remote server!", CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL);
     } catch (SchedulerException e) {
-      logger.error("SchedulerException in StateServiceImpl: {}.", e.getMessage());
+      logger.error("SchedulerException in StateServiceImpl while trying to schedule capability polling: {}.", e.getMessage());
     }
-  }
-
-  public void updated(Dictionary properties) throws ConfigurationException {
-    // TODO Auto-generated method stub
   }
 }

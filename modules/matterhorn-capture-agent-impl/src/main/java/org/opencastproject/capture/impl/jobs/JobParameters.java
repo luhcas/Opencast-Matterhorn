@@ -42,4 +42,13 @@ public interface JobParameters {
 
   /** Constant used to define the postfix applied to all job names */
   public static final String JOB_POSTFIX = "job_postfix";
+
+  /** Constant defining the job type for capture jobs. */
+  public static final String CAPTURE_TYPE = "captures";
+
+  /** Constant defining the job type for calendar polling jobs. */
+  public static final String POLLING_TYPE = "polling";
+
+  /** Constant defining the job type or jobs which do not fit in the above types. */
+  public static final String OTHER_TYPE = "other";
 }

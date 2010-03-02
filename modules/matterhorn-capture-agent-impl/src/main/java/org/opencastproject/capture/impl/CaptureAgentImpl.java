@@ -15,6 +15,31 @@
  */
 package org.opencastproject.capture.impl;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.Vector;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.gstreamer.Bus;
+import org.gstreamer.GstObject;
+import org.gstreamer.Pipeline;
+import org.gstreamer.State;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureAgent;
@@ -32,18 +57,6 @@ import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.util.ZipUtil;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.FileEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.gstreamer.Bus;
-import org.gstreamer.GstObject;
-import org.gstreamer.Pipeline;
-import org.gstreamer.State;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.command.CommandProcessor;
@@ -51,29 +64,16 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.Vector;
-
 /**
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines
  * to store several tracks from a certain recording.
  */
 public class CaptureAgentImpl implements CaptureAgent, ManagedService {
+
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
-  // TODO: move outside
-  //private static final long default_capture_length = 1 * 60 * 60 * 1000; //1 Hour
+  /** The default maximum length to capture, measured in seconds */
+  public static final long DEFAULT_MAX_CAPTURE_LENGTH = 8 * 60 * 60;
 
   /** The agent's pipeline **/
   private Pipeline pipe = null;
@@ -86,6 +86,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   /** A pointer to the state service.  This is where all of the recording state information should be kept. */
   private StateService stateService = null;
+
+  private SchedulerImpl scheduler = null;
 
   /** The configuration manager for the agent */ 
   private ConfigurationManager configService = null;
@@ -136,10 +138,50 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   }
 
   /**
+   * Unsets the scheduler service which this service uses to schedule stops for unscheduled captures.
+   */
+  public void unsetScheduler() {
+    scheduler = null;
+  }
+
+  /**
+   * Sets he scheduler service which this service uses to schedule stops for unscheduled captures.
+   * @param s The scheduler service.
+   */
+  public void setScheduler(SchedulerImpl s) {
+    scheduler = s;
+  }
+
+  /**
    * Unsets the config service from which this capture agent draws its configuration.
    */
   public void unsetConfigService() {
     configService = null;
+  }
+
+  /**
+   * Schedules a stopCapture call for unscheduled captures.
+   * @param recordingID The recordingID to stop.
+   * @return true if the stop was scheduled, false otherwise.
+   */
+  private boolean scheduleStop(String recordingID) {
+    if (scheduler != null && recordingID != null) {
+      String setLength = configService.getItem(CaptureParameters.CAPTURE_MAX_LENGTH);
+      long length = 0L;
+      if (setLength != null) {
+        length = Long.parseLong(setLength);
+      } else {
+        configService.setItem(CaptureParameters.CAPTURE_MAX_LENGTH, String.valueOf(CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH));
+        length = CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH;
+      }
+      return scheduler.scheduleUnscheduledStopCapture(recordingID, System.currentTimeMillis() + length);
+    } else if (recordingID == null) {
+      logger.warn("Capture appears to have failed, not scheduling stop.");
+      return false;
+    } else {
+      logger.warn("Unable to schedule stop for capture {} because scheduler pointer is null!", recordingID);
+      return false;
+    }
   }
 
   /**
@@ -164,7 +206,11 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return null;
     }
 
-    return startCapture(pack, configService.getAllProperties());
+    String recordingID =  startCapture(pack, configService.getAllProperties());
+    if (!scheduleStop(recordingID)) {
+      stopCapture(recordingID);
+    }
+    return recordingID;
   }
 
   /**
@@ -177,7 +223,11 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     logger.debug("startCapture(mediaPackage): {}", mediaPackage);
 
-    return startCapture(mediaPackage, configService.getAllProperties());
+    String recordingID = startCapture(mediaPackage, configService.getAllProperties());
+    if (!scheduleStop(recordingID)) {
+      stopCapture(recordingID);
+    }
+    return recordingID;
 
   }
 
@@ -202,7 +252,11 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return null;
     }
 
-    return startCapture(pack, properties);
+    String recordingID = startCapture(pack, properties);
+    if (!scheduleStop(recordingID)) {
+      stopCapture(recordingID);
+    }
+    return recordingID;
   }
 
   /**

@@ -42,12 +42,6 @@ public interface Scheduler {
   public void updateCalendar();
 
   /**
-   * Sets the time between refreshes of the scheduling data.
-   * @param pollingTime The time between polls, in seconds.
-   */
-  public void setPollingTime(int pollingTime);
-
-  /**
    * Gets the time between refreshes of the scheduling data.
    * @return The number of seconds between refreshes of the scheduling data.
    */

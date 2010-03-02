@@ -15,17 +15,18 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.admin.api.AgentState;
-import org.osgi.service.cm.ConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.net.URL;
-import java.util.Properties;
+import org.opencastproject.capture.admin.api.AgentState;
+import org.osgi.service.cm.ConfigurationException;
 
 /**
  * Test the implementation of the Capture Agent, which uses gstreamer to 
@@ -38,6 +39,8 @@ public class CaptureAgentImplTest {
 
   /** The configuration manager for these tests */
   private static ConfigurationManager config = null;
+
+  private static SchedulerImpl sched = null;
   
   /** Properties specifically designed for unit testing */
   private static Properties properties = null;
@@ -49,12 +52,33 @@ public class CaptureAgentImplTest {
   private static URL outputDir = null;
   
   @Before
-  public void setup() throws ConfigurationException {
+  public void setup() throws ConfigurationException, IOException {
+    //Craete the configuration manager
     config = new ConfigurationManager();
-    config.activate(null);
+    InputStream s = getClass().getClassLoader().getResourceAsStream("config/capture.properties");
+    if (s == null) {
+      throw new RuntimeException("Unable to load capture properties for test!");
+    }
+    Properties p = new Properties();
+    p.load(s);
+    config.updated(p);
+
+    sched = new SchedulerImpl();
+    sched.setConfigService(config);
+    Properties schedulerProps = new Properties();
+    s = getClass().getClassLoader().getResourceAsStream("config/scheduler.properties");
+    if (s == null) {
+      throw new RuntimeException("Unable to load configuration file for scheduler!");
+    }
+    schedulerProps.load(s);
+    sched.updated(schedulerProps);
+    
     // creates agent, initially idle
     agent = new CaptureAgentImpl();
     agent.setConfigService(config);
+    agent.setScheduler(sched);
+    sched.setCaptureAgent(agent);
+    
     Assert.assertEquals(agent.getAgentState(), AgentState.IDLE);
     
     // setup test media
