@@ -46,7 +46,7 @@ public class AgentStateUpdate {
    * The number of milliseconds since the last time the agent checked in.  Note that this is relative (ie, it's been 3000 ms) rather than absolute (milliseconds since 1970).
    */
   @XmlElement(name="time-since-last-update")
-  public Long time_delta;
+  public Long time_since_last_update;
 
   /**
    * Required 0-arg constructor.  Does nothing, do not use.
@@ -61,6 +61,6 @@ public class AgentStateUpdate {
   public AgentStateUpdate(Agent a) {
     name = a.getName();
     state = a.getState();
-    time_delta = System.currentTimeMillis() - a.getLastCheckinTime();
+    time_since_last_update = System.currentTimeMillis() - a.getLastHeardFrom();
   }
 }

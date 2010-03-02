@@ -31,7 +31,7 @@ public class AgentTest {
   public void setup() {
     agent = new Agent("test", AgentState.IDLE, null);
     Assert.assertNotNull(agent);
-    time = agent.getLastCheckinTime();
+    time = agent.getLastHeardFrom();
   }
 
   @After
@@ -50,7 +50,7 @@ public class AgentTest {
   public void changedInformation() throws InterruptedException {
     Assert.assertEquals("test", agent.getName());
     Assert.assertEquals(AgentState.IDLE, agent.getState());
-    Assert.assertEquals(time, agent.getLastCheckinTime());
+    Assert.assertEquals(time, agent.getLastHeardFrom());
 
     Thread.sleep(1);
     agent.setState(AgentState.CAPTURING);
@@ -58,7 +58,7 @@ public class AgentTest {
     Assert.assertEquals("test", agent.getName());
     Assert.assertEquals(AgentState.CAPTURING, agent.getState());
     Thread.sleep(1);
-    if (agent.getLastCheckinTime() <= time || agent.getLastCheckinTime() >= System.currentTimeMillis()) {
+    if (agent.getLastHeardFrom() <= time || agent.getLastHeardFrom() >= System.currentTimeMillis()) {
       Assert.fail("Invalid checkin time");
     }
   }  

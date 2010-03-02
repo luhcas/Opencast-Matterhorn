@@ -46,7 +46,7 @@ public class AgentStateUpdateTest {
   public void correctInformation() {
     Assert.assertEquals("test", asu.name);
     Assert.assertEquals(AgentState.IDLE, asu.state);
-    if (asu.time_delta <= 1) {
+    if (asu.time_since_last_update <= 1) {
       Assert.fail("Invalid update time in agent state update");
     }
   }

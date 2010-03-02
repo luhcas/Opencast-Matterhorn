@@ -97,7 +97,7 @@ public class Agent {
    *
    * @return The number of milliseconds since 1970 when the agent last checked in.
    */
-  public Long getLastCheckinTime() {
+  public Long getLastHeardFrom() {
     return lastHeardFrom;
   }
 
