@@ -15,6 +15,7 @@
  */
 package org.opencastproject.distribution.local;
 
+import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
@@ -83,7 +84,7 @@ public class LocalDistributionService implements DistributionService, ManagedSer
    * 
    * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage)
    */
-  public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) {
+  public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException {
     File mediaPackageDirectory = new File(distributionDirectory, mediaPackage.getIdentifier().compact());
     File mediaDirectory = new File(mediaPackageDirectory, "media");
     File metadataDirectory = new File(mediaPackageDirectory, "metadata");
@@ -124,8 +125,7 @@ public class LocalDistributionService implements DistributionService, ManagedSer
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
+      throw new DistributionException(e);
     }
     return mediaPackage;
   }
@@ -155,6 +155,15 @@ public class LocalDistributionService implements DistributionService, ManagedSer
 
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.distribution.api.DistributionService#retract(org.opencastproject.media.mediapackage.MediaPackage)
+   */
+  @Override
+  public void retract(MediaPackage mediaPackage) throws DistributionException {
+    throw new UnsupportedOperationException();
   }
 
 }

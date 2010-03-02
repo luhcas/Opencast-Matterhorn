@@ -15,27 +15,22 @@
  */
 package org.opencastproject.distribution.itunesu;
 
-import org.opencastproject.deliver.schedule.Schedule;
-import org.opencastproject.deliver.schedule.Task;
-
 import org.opencastproject.deliver.itunesu.ITunesConfiguration;
 import org.opencastproject.deliver.itunesu.ITunesDeliveryAction;
-
+import org.opencastproject.deliver.schedule.Schedule;
+import org.opencastproject.deliver.schedule.Task;
+import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
-
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
-
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.component.ComponentContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-
 import java.net.URI;
 
 
@@ -88,7 +83,7 @@ public class ITunesUDistributionService implements DistributionService {
    * 
    * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage)
    */
-  public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) {
+  public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException {
 
     try {
       String trackID = "";
@@ -161,8 +156,7 @@ public class ITunesUDistributionService implements DistributionService {
         }
       } // end of schedule loop
     } catch (Exception e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
+      throw new DistributionException(e);
     } finally {
     }
 
@@ -171,5 +165,14 @@ public class ITunesUDistributionService implements DistributionService {
 
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.distribution.api.DistributionService#retract(org.opencastproject.media.mediapackage.MediaPackage)
+   */
+  @Override
+  public void retract(MediaPackage mediaPackage) throws DistributionException {
+    throw new UnsupportedOperationException();
   }
 }

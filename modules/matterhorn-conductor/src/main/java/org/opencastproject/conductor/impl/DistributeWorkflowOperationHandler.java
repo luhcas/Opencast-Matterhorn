@@ -15,6 +15,7 @@
  */
 package org.opencastproject.conductor.impl;
 
+import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -91,8 +92,11 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
 
       // Also distribute all of the metadata catalogs
       for(Catalog c : clone.getCatalogs()) elementIds.add(c.getIdentifier());
-      
-      resultingMediaPackage = distributionService.distribute(clone, elementIds.toArray(new String[elementIds.size()]));
+      try {
+        resultingMediaPackage = distributionService.distribute(clone, elementIds.toArray(new String[elementIds.size()]));
+      } catch(DistributionException e) {
+        throw new WorkflowOperationException(e);
+      }
       
       // Tag the distributed elements
       String[] tags = targetTags.split("\\W");
@@ -107,7 +111,6 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
  
       logger.debug("Distribute operation completed");
     } catch (RuntimeException e) {
-      e.printStackTrace();
       throw new WorkflowOperationException(e);
     }
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, Action.CONTINUE);

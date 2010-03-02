@@ -28,7 +28,17 @@ public interface DistributionService {
    * @param elementIds The elements in the media package to include in this distribution
    * @return The augmented media package, typically including all of the source media package's elements along with new
    * elements pointing to the distributed media. 
+   * @throws DistributionException if there was a problem distributing the media
    */
-  MediaPackage distribute(MediaPackage mediaPackage, String... elementIds);
+  MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException;
+
+  /**
+   * Retract all media associated with this media package from the distribution channel.
+   * 
+   * @param mediaPackage The media package containing the media to retract
+   * @throws DistributionException if there was a problem retracting the media
+   */
+  void retract(MediaPackage mediaPackage) throws DistributionException;
+
 }
 
