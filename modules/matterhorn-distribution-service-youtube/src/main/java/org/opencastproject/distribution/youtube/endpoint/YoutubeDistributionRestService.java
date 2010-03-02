@@ -26,10 +26,12 @@ import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 
+import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.ws.rs.FormParam;
@@ -86,35 +88,18 @@ public class YoutubeDistributionRestService {
     "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
   
   private String generateMediaPackage() {
-    return  "<ns2:mediapackage xmlns:ns2=\"http://mediapackage.opencastproject.org\" id=\"10.0000/1\" start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n"+
-            "  <media>\n"+
-            "    <track id=\"track-1\" type=\"presentation/source\">\n"+
-            "      <mimetype>video/quicktime</mimetype>\n"+
-            "      <url>"+serverUrl+"/workflow/samples/camera.mpg</url>\n"+
-            "      <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n"+
-            "      <duration>1004400000</duration>\n"+
-            "      <video>\n"+
-            "        <device type=\"UFG03\" version=\"30112007\" vendor=\"Unigraf\" />\n"+
-            "        <encoder type=\"H.264\" version=\"7.4\" vendor=\"Apple Inc\" />\n"+
-            "        <resolution>640x480</resolution>\n"+
-            "        <scanType type=\"progressive\" />\n"+
-            "        <bitrate>540520</bitrate>\n"+
-            "        <frameRate>2</frameRate>\n"+
-            "      </video>\n"+
-            "    </track>\n"+
-            "  </media>\n"+
-            "  <metadata>\n"+
-            "    <catalog id=\"catalog-1\" type=\"metadata/dublincore\">\n"+
-            "      <mimetype>text/xml</mimetype>\n"+
-            "      <url>"+serverUrl+"/workflow/samples/dc-1.xml</url>\n"+
-            "      <checksum type=\"md5\">20e466615251074e127a1627fd0dae3e</checksum>\n"+
-            "    </catalog>\n"+
-            "  </metadata>\n"+
-            "</ns2:mediapackage>";
+    try {
+      String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("manifest.xml"));
+      return template.replaceAll("@SAMPLES_URL@", serverUrl + "/workflow/samples");
+    } catch(IOException e) {
+      logger.warn("Unable to load the sample mediapackage");
+      return null;
+    }
   }
 
+
   private String generateDocs() {
-    DocRestData data = new DocRestData("youtubedistributionservice", "Youtube Distribution Service", "/distribution/youtube", notes);
+    DocRestData data = new DocRestData("youtubedistributionservice", "Youtube Distribution Service", "/distribution/youtube/rest", notes);
 
     // abstract
     data.setAbstract("This service distributes media packages to the Matterhorn feed and engage services.");
@@ -124,7 +109,7 @@ public class YoutubeDistributionRestService {
         "/",
         "Distribute a media package");
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, generateMediaPackage(),
+    endpoint.addRequiredParam(new Param("mediapackage", Param.Type.TEXT, generateMediaPackage(),
         "The media package as XML"));
     endpoint.addRequiredParam(new Param("elementId", Param.Type.STRING, "track-1",
         "A media package element ID"));
