@@ -74,7 +74,6 @@ public class AgentCapabilitiesJob implements Job {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
       a.getCapabilities().storeToXML(baos, "Capabilities for the agent " + a.getName());
-      logger.info("Capabilities polling URL: {}", url);
       HttpPost remoteServer = new HttpPost(url);
       remoteServer.setEntity(new StringEntity(baos.toString()));
       HttpClient client = new DefaultHttpClient();

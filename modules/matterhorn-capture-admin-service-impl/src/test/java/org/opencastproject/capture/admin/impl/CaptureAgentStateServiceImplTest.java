@@ -46,7 +46,17 @@ public class CaptureAgentStateServiceImplTest {
   }
 
   @Test
-  public void badAgentData() {
+  public void badAgentStates() {
+    service.setAgentState(null, "something");
+    Assert.assertEquals(0, service.getKnownAgents().size());
+    service.setAgentState("", "something");
+    Assert.assertEquals(0, service.getKnownAgents().size());
+    service.setAgentState("something", null);
+    Assert.assertEquals(0, service.getKnownAgents().size());
+  }
+
+  @Test
+  public void badAgentCapabilities() {
     service.setAgentCapabilities(null, capabilities);
     Assert.assertEquals(0, service.getKnownAgents().size());
     service.setAgentCapabilities("", capabilities);
@@ -119,6 +129,21 @@ public class CaptureAgentStateServiceImplTest {
     verifyAgent("notAnAgent", null, capabilities);
     verifyAgent("agent1", null, capabilities);
     verifyAgent("agent2", AgentState.UPLOADING, capabilities);
+
+    service.removeAgent("notAnAgent");
+    Assert.assertEquals(1, service.getKnownAgents().size());
+    verifyAgent("notAnAgent", null, capabilities);
+    verifyAgent("agent1", null, capabilities);
+    verifyAgent("agent2", AgentState.UPLOADING, capabilities);
+  }
+
+  @Test
+  public void agentCapabilities() {
+    Assert.assertNull(service.getAgentCapabilities("agent"));
+    Assert.assertNull(service.getAgentCapabilities("NotAgent"));
+    service.setAgentCapabilities("agent", capabilities);
+    Assert.assertEquals(service.getAgentCapabilities("agent"), capabilities);
+    Assert.assertNull(service.getAgentCapabilities("NotAgent"));
   }
 
   @Test

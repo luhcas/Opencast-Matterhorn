@@ -49,11 +49,6 @@ public class AgentStateUpdate {
   public Long time_since_last_update;
 
   /**
-   * Required 0-arg constructor.  Does nothing, do not use.
-   */
-  public AgentStateUpdate() {}
-
-  /**
    * Builds an AgentStateUpdate object about the Agent a.  This calculates the time delta for you.
    *
    * @param a The agent you wish to know more information about.
