@@ -17,13 +17,13 @@ package org.opencastproject.persistence;
 
 import java.util.Dictionary;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceUnit;
 import javax.persistence.Query;
+import javax.persistence.spi.PersistenceProvider;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -31,11 +31,34 @@ import org.osgi.service.component.ComponentContext;
 
 public class Service implements ManagedService {
 
-  @PersistenceUnit(unitName = "test")
-  private EntityManagerFactory emf = Persistence.createEntityManagerFactory("test");
+  /** The JPA provider */
+  protected PersistenceProvider persistenceProvider;
 
-  public void activate(ComponentContext ctx) {
-    EntityManager em = emf.createEntityManager();
+  /**
+   * @param persistenceProvider the persistenceProvider to set
+   */
+  public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
+    this.persistenceProvider = persistenceProvider;
+  }
+  
+  protected Map persistenceProperties;
+
+  /**
+   * @param persistenceProperties the persistenceProperties to set
+   */
+  public void setPersistenceProperties(Map persistenceProperties) {
+    this.persistenceProperties = persistenceProperties;
+  }
+
+  /** The entity manager used for persisting Java objects. */
+  protected EntityManager em = null;
+
+  /** The factory used to generate the entity manager */
+  protected EntityManagerFactory emf = null;
+  
+  public void activate(ComponentContext cc) {
+    emf = persistenceProvider.createEntityManagerFactory("MyPersistenceUnit", persistenceProperties);
+    em = emf.createEntityManager();
 
     System.out.println("You may see exceptions above, they are (probably) safe to ignore and only occur when the persistence unit first connects.");
     System.out.println("They occur because the PU is trying to create the tables, which may already exist.");
@@ -107,10 +130,14 @@ public class Service implements ManagedService {
     }
   }
 
+  public void destroy() {
+    em.close();
+    emf.close();
+  }
+
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
     // TODO Auto-generated method stub
     
   }
-  
 }

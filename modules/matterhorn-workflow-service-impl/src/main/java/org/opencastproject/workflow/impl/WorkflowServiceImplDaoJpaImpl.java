@@ -29,7 +29,6 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -95,7 +94,7 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
    */
   @Override
   public WorkflowInstance getWorkflowById(String workflowId) {
-    return null;
+    return em.find(WorkflowInstanceImpl.class, workflowId);
   }
 
   /**
@@ -106,28 +105,30 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
   public WorkflowSet getWorkflowInstances(WorkflowQuery query) {
     long start = System.currentTimeMillis();
     CriteriaBuilder cb = em.getCriteriaBuilder();
+    CriteriaQuery<WorkflowInstanceImpl> c = cb.createQuery(WorkflowInstanceImpl.class);
+    Root<WorkflowInstanceImpl> root = c.from(WorkflowInstanceImpl.class);
 
-    CriteriaQuery<WorkflowInstanceImpl> jpaQuery = cb.createQuery(WorkflowInstanceImpl.class);
-    
-    Root<WorkflowInstanceImpl> root = jpaQuery.from(WorkflowInstanceImpl.class);
     if(query.getCurrentOperation() != null) {
       Predicate condition = cb.equal(root.get("currentOperation"), query.getCurrentOperation());
-      jpaQuery.where(condition);
+      c.where(condition);
+    }
+    if(query.getState() != null) {
+      Predicate condition = cb.equal(root.get("state"), query.getState());
+      c.where(condition);
     }
     if(query.getEpisode() != null) {
       Predicate condition = cb.equal(root.get("episode"), query.getCurrentOperation());
-      jpaQuery.where(condition);
+      c.where(condition);
     }
 
     // TODO Add the rest of the criteria
+    // TODO Enable paging
     
-    TypedQuery<WorkflowInstanceImpl> typedQuery = em.createQuery(jpaQuery);
-    List<WorkflowInstanceImpl> list = typedQuery.getResultList();
+    c.select(root);
+    List<WorkflowInstanceImpl> list = em.createQuery(c).getResultList();
     long searchTime = System.currentTimeMillis() - start;
     WorkflowSetImpl set = new WorkflowSetImpl();
     
-    // TODO Enable paging
-
     set.setCount(Math.min(query.getCount(), 0)); // FIXME: the last arg should be the total count
     set.setStartPage(query.getStartPage());
     set.setSearchTime(searchTime);
@@ -159,9 +160,9 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
     WorkflowInstance existingWorkflow = getWorkflowById(instance.getId());
     em.getTransaction().begin();
     if(existingWorkflow == null) {
-//      em.persist(new WorkflowInstanceJPAEntity((WorkflowInstanceImpl)instance));
-//    } else {
-//      em.merge(new WorkflowInstanceJPAEntity((WorkflowInstanceImpl)instance));
+      em.persist(instance);
+    } else {
+      em.merge(instance);
     }
     em.getTransaction().commit();
   }

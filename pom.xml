@@ -70,6 +70,8 @@
         <module>modules/matterhorn-scheduler-impl</module>
         <module>modules/matterhorn-test-harness</module>
         <module>modules/matterhorn-captions-service-impl</module>
+        <module>modules/matterhorn-caption-api</module>
+        <module>modules/matterhorn-caption-impl</module>
         <module>modules/matterhorn-admin-ui</module>
       </modules>
     </profile>
@@ -613,6 +615,18 @@
         <version>4.5</version>
         <scope>test</scope>
       </dependency>
+
+	    <dependency>
+	      <groupId>com.h2database</groupId>
+	      <artifactId>h2</artifactId>
+	      <version>1.2.123</version>
+	    </dependency>
+
+	    <dependency>
+	      <groupId>c3p0</groupId>
+	      <artifactId>c3p0</artifactId>
+        <version>0.9.1.2</version>
+	    </dependency>
       
     </dependencies>
   </dependencyManagement>
