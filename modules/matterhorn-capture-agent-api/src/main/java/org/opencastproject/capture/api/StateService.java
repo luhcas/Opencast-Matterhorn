@@ -42,7 +42,7 @@ public interface StateService {
 
   /**
    * Gets the state of the agent.
-   * @return The state of the agent.  Should be defined in AgentState.
+   * @return The state of the agent.  Should be defined in AgentState.  May be null in cases where the service implementation is not ready yet.
    * @see org.opencastproject.capture.admin.api.AgentState
    */
   public String getAgentState();
@@ -50,7 +50,7 @@ public interface StateService {
   //TODO: indicate the format of the string (is it an item defined in AgentState?  Maybe this whole interface needs an introduction as to why strings are being passed?)
   /**
    * Gets a map of recording ID and Recording pairs containing all of the recordings the system is aware of.
-   * @return A map of recording-state pairs
+   * @return A map of recording-state pairs.  May be null if the implementation is not active yet.
    */
   public Map<String,Recording> getKnownRecordings();
 
@@ -67,7 +67,7 @@ public interface StateService {
    * Gets the state of a recording.
    * 
    * @param recordingID The ID of the recording in question.
-   * @return A state defined in RecordingState.
+   * @return A state defined in RecordingState.  May return null if the implementation is not active.
    * @see org.opencastproject.capture.admin.api.RecordingState
    */
   public Recording getRecordingState(String recordingID);

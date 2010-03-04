@@ -44,9 +44,23 @@ public class ConfigurationManagerTest {
     configManager = null;
   }
   
-  @Test @Ignore
+  @Test
   public void testMerge() {
-    
+    configManager.setItem("test", "foo");
+    configManager.setItem("unchanged", "bar");
+    Assert.assertEquals(configManager.getItem("test"), "foo");
+    Assert.assertEquals(configManager.getItem("unchanged"), "bar");
+    Properties p = new Properties();
+    p.setProperty("test","value");
+    Properties t = configManager.merge(p, false);
+    Assert.assertEquals(t.getProperty("test"), "value");
+    Assert.assertEquals(t.getProperty("unchanged"), "bar");
+    t = null;
+    t = configManager.merge(p, true);
+    Assert.assertEquals(t.getProperty("test"), "value");
+    Assert.assertEquals(t.getProperty("unchanged"), "bar");
+    Assert.assertEquals(configManager.getItem("test"), "value");
+    Assert.assertEquals(configManager.getItem("unchanged"), "bar");
   }
   
   @Test @Ignore
@@ -63,10 +77,4 @@ public class ConfigurationManagerTest {
     Assert.assertEquals("3", properties.get("c"));
     
   }
-  
-  /* Tests will need to be implemented once the environment is setup properly
-   * otherwise we will not have local or centralised configuration files that
-   * are essential for the functionality of the ConfigurationManager class
-   */
-
 }

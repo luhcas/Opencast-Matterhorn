@@ -65,6 +65,10 @@ public class StateServiceImpl implements StateService, ManagedService {
   }
   
   public void updated(Dictionary properties) throws ConfigurationException {
+    if (properties == null) {
+      throw new ConfigurationException("null", "Null configuration in StateServiceImpl!");
+    }
+
     Properties props = new Properties();
     Enumeration<String> keys = properties.keys();
     while (keys.hasMoreElements()) {
@@ -89,7 +93,13 @@ public class StateServiceImpl implements StateService, ManagedService {
    * @see org.opencastproject.capture.api.StateService#setRecordingState(java.lang.String, java.lang.String)
    */
   public void setRecordingState(String recordingID, String state) {
-    recordings.put(recordingID, new Recording(recordingID, state));
+    if (recordings != null && recordingID != null && state != null) {
+      recordings.put(recordingID, new Recording(recordingID, state));
+    } else if (recordingID == null) {
+      logger.info("Unable to create recording because recordingID parameter was null!");
+    } else if (state == null) {
+      logger.info("Unable to create recording because state parameter was null!");
+    }
   }
 
   /**
@@ -97,7 +107,12 @@ public class StateServiceImpl implements StateService, ManagedService {
    * @see org.opencastproject.capture.api.StateService#getRecordingState(java.lang.String)
    */
   public Recording getRecordingState(String recordingID) {
-    return recordings.get(recordingID);
+    if (recordings != null) {
+      return recordings.get(recordingID);
+    } else {
+      logger.debug("Agent is not ready yet, returning null for getRecordingState call.");
+      return null;
+    }
   }
 
   /**
@@ -121,7 +136,12 @@ public class StateServiceImpl implements StateService, ManagedService {
    * @see org.opencastproject.capture.api.StateService#getAgentState()
    */
   public String getAgentState() {
-    return agent.getState();
+    if (agent != null) {
+      return agent.getState();
+    } else {
+      logger.debug("Agent is not ready yet, returning null for getAgentState call.");
+      return null;
+    }
   }
   
   /**

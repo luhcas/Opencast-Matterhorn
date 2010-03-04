@@ -15,58 +15,107 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.admin.api.AgentState;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.opencastproject.capture.admin.api.AgentState;
+import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.capture.admin.api.RecordingState;
+import org.osgi.service.cm.ConfigurationException;
 
 public class StateServiceImplTest {
-  private CaptureAgentImpl service = null;
+  private StateServiceImpl service = null;
+  private ConfigurationManager cfg = null;
 
   @Before
   public void setup() {
-    service = new CaptureAgentImpl();
-    service.activate(null);
+    service = new StateServiceImpl();
     Assert.assertNotNull(service);
+    cfg = new ConfigurationManager();
+    Assert.assertNotNull(cfg);
+    cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL, "1");
+    cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL, "http://localhost");
+    service.setConfigService(cfg);
   }
 
   @After
   public void teardown() {
+    service.deactivate();
     service = null;
   }
 
-  //TODO:  Roll all of these tests into the capture agent tests in the testing harness
-  @Test @Ignore
-  public void testStartup() {
-    Assert.assertEquals(AgentState.IDLE, service.getAgentState());
+  //Note:  This test is meant to test that the code handles weird cases in the polling, *not* the functionality itself 
+  @Test
+  public void testValidPolling() throws ConfigurationException {
+    InputStream s = getClass().getClassLoader().getResourceAsStream("config/scheduler.properties");
+    if (s == null) {
+      throw new RuntimeException("Unable to load configuration file for scheduler!");
+    }
+
+    Properties props = new Properties();
+    try {
+      props.load(s);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to read configuration data for scheduler!");
+    }
+
+    service.updated(props);
   }
 
-  @Test @Ignore
-  public void testStart() {
-    service.startCapture();
+  //Note:  This test is meant to test that the code handles weird cases in the polling, *not* the functionality itself 
+  @Test
+  public void testInvalidPolling() throws ConfigurationException {
+    Properties props = new Properties();
+    service.updated(props);
+
+    try {
+      service.updated(null);
+    } catch (ConfigurationException e) {
+      //Good, this is expected
+      return;
+    }
+    Assert.fail();
+  }
+
+  @Test
+  public void testUnpreparedImpl() {
+    Assert.assertNull(service.getAgentState());
+    Assert.assertNull(service.getAgent());
+    service.setAgentState("TEST");
+    Assert.assertNull(service.getAgentState());
+
+    service.activate(null);
+    Assert.assertEquals(AgentState.UNKNOWN, service.getAgentState());
+    service.setAgentState(AgentState.CAPTURING);
     Assert.assertEquals(AgentState.CAPTURING, service.getAgentState());
   }
 
-  @Test @Ignore
-  public void testStop() {
-    service.startCapture();
-    Assert.assertEquals(AgentState.CAPTURING, service.getAgentState());
-    service.stopCapture();
-    Assert.assertEquals(AgentState.UPLOADING, service.getAgentState());
+  @Test
+  public void testRecordings() {
+    Assert.assertNull(service.getKnownRecordings());
+    service.activate(null);
+    Assert.assertNotNull(service.getKnownRecordings());
+    Assert.assertEquals(0, service.getKnownRecordings().size());
+
+    Assert.assertNull(service.getRecordingState("abc"));
+    Assert.assertNull(service.getRecordingState("123"));
+    Assert.assertNull(service.getRecordingState("doesnotexist"));
+    service.setRecordingState("abc", RecordingState.CAPTURING);
+    service.setRecordingState("123", RecordingState.UPLOADING);
+    Assert.assertEquals(2, service.getKnownRecordings().size());
+    verifyRecording(service.getRecordingState("abc"), "abc", RecordingState.CAPTURING);
+    verifyRecording(service.getRecordingState("123"), "123", RecordingState.UPLOADING);
+    Assert.assertNull(service.getRecordingState("doesnotexist"));
   }
 
-  @Test @Ignore
-  public void testHalt() {
-    service.startCapture();
-    Assert.assertEquals(AgentState.CAPTURING, service.getAgentState());
-    service.stopCapture();
-    Assert.assertEquals(AgentState.UPLOADING, service.getAgentState());
-    service.stopCapture();
-    Assert.assertEquals(AgentState.IDLE, service.getAgentState());
+  private void verifyRecording(Recording r, String id, String state) {
+    Assert.assertEquals(id, r.id);
+    Assert.assertEquals(state, r.state);
   }
-
 }
