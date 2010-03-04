@@ -270,15 +270,12 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public String startCapture(MediaPackage mediaPackage, Properties properties) {
 
     logger.debug("startCapture(mediaPackage, properties): {} {}", mediaPackage, properties);
-
     if (currentRecID != null || !agentState.equals(AgentState.IDLE)) {
       logger.warn("Unable to start capture, a different capture is still in progress in {}.",
               pendingRecordings.get(currentRecID).getDir().getAbsolutePath());
       return null;
-    } else {
+    } else
       setAgentState(AgentState.CAPTURING);
-    }
-
     // Creates a new recording object, checking if it was correctly initialized
     RecordingImpl newRec = null;
     try {
@@ -294,10 +291,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       setAgentState(AgentState.IDLE);
       return null;
     }
-
     // Checks there is no duplicate ID
     String recordingID = newRec.getRecordingID();
-
     if (pendingRecordings.containsKey(recordingID)) {
       logger.error("There is already a recording with ID {}", recordingID);
       setAgentState(AgentState.IDLE);
@@ -325,58 +320,64 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
           if (value != null && new File(value).isFile()) {
             noPrefix = true;
             continue;
-          } else {
+          } else
             everythingOk = false;
-            logger.warn("Everything is not okay, (key, value) = ({}, {})", key, value);
-            logger.warn("Everything is not okay, (key, isFile?) = ({}, {})", key, new File(f, value).isFile());
-          }
         }
       }
       if (everythingOk) {
         logger.debug("Preparing for mock capture.");
         mockCapture = true;
-
-        for (String device : deviceList) {
-          String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
-          String value = (String)properties.get(key);
-          // FIXME: Added by Rubencino to fix the CaptureAgentImpl test: routes to source files should be absolute
-          File src;
-          if (noPrefix)
-            src = new File(value);
-          else
-            src = new File(f, value);
-          String destFileNameKey = CaptureParameters.CAPTURE_DEVICE_PREFIX  + device + CaptureParameters.CAPTURE_DEVICE_DEST;
-          String destFileName = (String)properties.get(destFileNameKey);
-          File dest = new File(newRec.getDir(), destFileName);
-          logger.debug("Copying mock file {} to {}", src, dest);
+        // if running on a Linux capture box it is preferable to use GStreamer
+        if (!System.getProperty("os.name").equalsIgnoreCase("Linux")) {
+          for (String device : deviceList) {
+            String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
+            String value = (String)properties.get(key);
+            // FIXME: Added by Rubencino to fix the CaptureAgentImpl test: routes to source files should be absolute
+            File src;
+            if (noPrefix)
+              src = new File(value);
+            else
+              src = new File(f, value);
+            String destFileNameKey = CaptureParameters.CAPTURE_DEVICE_PREFIX  + device + CaptureParameters.CAPTURE_DEVICE_DEST;
+            String destFileName = (String)properties.get(destFileNameKey);
+            File dest = new File(newRec.getDir(), destFileName);
+            logger.debug("Copying mock file {} to {}", src, dest);
+            try {
+              FileUtils.copyFile(src, dest);
+            } catch (FileNotFoundException e) {
+              throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
+            } catch (IOException e) {
+              throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
+            }
+          }
+  
+          // Add the sample dublin core, otherwise the recording won't show up in search
+          File dcCatalog = new File(newRec.getDir(),"dublincore.xml");
           try {
-            FileUtils.copyFile(src, dest);
-          } catch (FileNotFoundException e) {
-            throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
+            FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/dublincore.xml"),dcCatalog);
+            MediaPackageElementBuilder eb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+            mediaPackage.add(eb.elementFromURI(newRec.getDir().toURI().relativize(dcCatalog.toURI()), Type.Catalog, DublinCoreCatalog.FLAVOR));
+          } catch (UnsupportedElementException e) {
+            throw new RuntimeException("Error adding " + dcCatalog + " to recording");
           } catch (IOException e) {
-            throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
+            throw new RuntimeException("Error copying " + dcCatalog + " to destination directory");
+          }
+          // When we return the recording, the mock capture is completed so reset
+          // the CaptureAgent state
+          return recordingID;
+        }
+        else {
+          for (String device : deviceList) {
+            String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
+            String value = (String) newRec.getProperty(key);
+            if (! new File(value).exists())
+              newRec.setProperty(key, new File(samplesDir, value).getAbsolutePath());
           }
         }
-
-        // Add the sample dublin core, otherwise the recording won't show up in search
-        File dcCatalog = new File(newRec.getDir(),"dublincore.xml");
-        try {
-          FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/dublincore.xml"),dcCatalog);
-          MediaPackageElementBuilder eb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-          mediaPackage.add(eb.elementFromURI(newRec.getDir().toURI().relativize(dcCatalog.toURI()), Type.Catalog, DublinCoreCatalog.FLAVOR));
-        } catch (UnsupportedElementException e) {
-          throw new RuntimeException("Error adding " + dcCatalog + " to recording");
-        } catch (IOException e) {
-          throw new RuntimeException("Error copying " + dcCatalog + " to destination directory");
-        }
-        // When we return the recording, the mock capture is completed so reset
-        // the CaptureAgent state
-        return recordingID;
       }
     }
 
     pipe = PipelineFactory.create(newRec.getProperties());
-
     if (pipe == null) {
       logger.error("Capture {} could not start, pipeline was null!", recordingID);
       setAgentState(AgentState.IDLE);
@@ -410,7 +411,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     });
 
     pipe.play();
-
     while (pipe.getState() != State.PLAYING);
     logger.info("{} started.", pipe.getName());
 

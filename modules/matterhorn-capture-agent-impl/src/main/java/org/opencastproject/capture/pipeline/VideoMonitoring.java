@@ -15,12 +15,16 @@
  */
 package org.opencastproject.capture.pipeline;
 
+
 import com.sun.jna.Pointer;
 
 import org.gstreamer.Buffer;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
+import org.gstreamer.Pad;
+import org.gstreamer.PadDirection;
+import org.gstreamer.PadLinkReturn;
 import org.gstreamer.Pipeline;
 import org.gstreamer.Structure;
 import org.gstreamer.elements.AppSink;
@@ -43,47 +47,89 @@ public class VideoMonitoring {
    * @param interval how often to grab data from the pipeline
    * @return the pipeline with the video monitoring added, or null on failure
    */
-  public static Pipeline addVideoMonitor(Pipeline p, final long interval) {
+  public static boolean addVideoMonitor(Pipeline pipeline, Element src, Element sink, final long interval) {
     
-    Element tee, queue, jpegenc; 
-    AppSink appsink;
-    
-    // the items to be tee'd and added to the pipeline
-    tee = ElementFactory.make("tee", null);
-    queue = ElementFactory.make("queue", null);
-    jpegenc = ElementFactory.make("jpegenc", null);
-    appsink = (AppSink) ElementFactory.make("appsink", null);
-    
-    p.addMany(tee, queue, jpegenc, appsink);
-    
-    if (!queue.link(jpegenc) || !jpegenc.link(appsink)) {
-      return null;
-    }
-    
-    // using appsink, we can grab each new buffer from the pipeline and gather
-    // information from it, or even write data to disc
-    appsink.connect(new AppSink.NEW_BUFFER() {
-      long previous = -1;
-      
-      public void newBuffer(Element elem, Pointer data) {
-        AppSink appsink = (AppSink) elem;
-        long seconds = appsink.getClock().getTime().getSeconds();
-        Buffer buffer = appsink.pullBuffer();
-        if (seconds % interval == 0 && seconds != previous) {
-          previous = seconds;
-          Caps caps = buffer.getCaps();
-          Structure s = caps.getStructure(0);
-          int width = s.getInteger("width");
-          int height = s.getInteger("height");
-          logger.debug("Grabbed frame of size: {}, {}", width, height);
-        }
-        
+      // if it doesn't accept any caps, then it is not an appropriate video src
+      if (!src.getSrcPads().get(0).acceptCaps(Caps.anyCaps())) {
+        return false;
       }
       
-    });
-    
-    return null;
-    
+      Element tee, queue0, queue1, decodebin;
+      final Element jpegenc;
+      AppSink appsink;
+      
+      // the items to be tee'd and added to the pipeline
+      tee = ElementFactory.make("tee", null);
+      queue0 = ElementFactory.make("queue", null);
+      queue1 = ElementFactory.make("queue", null);
+      decodebin = ElementFactory.make("decodebin", null);
+      jpegenc = ElementFactory.make("jpegenc", null);
+      appsink = (AppSink) ElementFactory.make("appsink", null);
+      
+      tee.set("silent", "false");
+      appsink.set("emit-signals", "true");
+      
+      pipeline.addMany(tee, queue0, queue1, decodebin, jpegenc, appsink);
+      src.unlink(sink);
+      
+      if (!src.link(tee)) {
+        logger.error("Could not link {} with {}", src.toString(), tee.toString());
+        return false;
+      }
+      if (!tee.link(queue0)) {
+        logger.error("Could not link {} with {}", tee.toString(), queue0.toString());
+        return false;
+      }
+      if (!queue0.link(sink)) {
+        logger.error("Could not link {} with {}", queue0.toString(), sink.toString());
+        return false;
+      }
+      if (!tee.link(queue1)) {
+        logger.error("Could not link {} with {}", tee.toString(), queue1.toString());
+        return false;
+      }
+      if (!queue1.link(decodebin)) {
+        logger.error("Could not link {} with {}", queue1.toString(), decodebin.toString());
+        return false;
+      }
+      decodebin.connect(new Element.PAD_ADDED() {
+        public void padAdded(Element element, final Pad pad) {
+          PadLinkReturn ret = pad.link(jpegenc.getStaticPad("sink"));
+          if (ret != PadLinkReturn.OK) {
+            logger.error("Could not link decodebin: " + ret.toString());
+          }
+        }
+      });
+      Pad pad = new Pad(null, PadDirection.SRC);
+      decodebin.addPad(pad);
+      if (!jpegenc.link(appsink)) {
+        logger.error("Could not link {} with {}", jpegenc.toString(), appsink.toString());
+        return false;
+      }
+
+      
+      appsink.connect(new AppSink.NEW_BUFFER() {
+        
+        long previous = -1;
+        public void newBuffer(Element elem, Pointer userData) {
+          AppSink appsink = (AppSink) elem;
+          long seconds = appsink.getClock().getTime().getSeconds();
+          Buffer buffer = appsink.pullBuffer();
+          if (seconds % 30 == 0 && seconds != previous) {
+            previous = seconds;
+            Caps caps = buffer.getCaps();
+            Structure s = caps.getStructure(0);
+            int width = s.getInteger("width");
+            int height = s.getInteger("height");
+            logger.info("Grabbed buffer: {}, {}", width, height);
+            
+          }
+          buffer = null;
+        }
+        
+      });
+      
+      return true;
   }
 
 }
