@@ -143,14 +143,14 @@ public class CaptureAgentStateRestService {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     try {
       props.storeToXML(os, "Capabilities for the agent " + agentName);
+      logger.debug("Returning capabilities for the agent {}", agentName);
+      
+      return Response.ok(os.toString()).build();
+      
     } catch (IOException e) {
       logger.error("An IOException occurred when serializing the agent capabilities");
       return Response.serverError().build();
-    }
-    if (props != null) {
-      logger.debug("Returning capabilities for the agent {}", agentName);
-      return Response.ok(os.toString()).build();
-    } else {
+    } catch (NullPointerException e) {
       logger.debug("The agent {} is not registered in the system", agentName);
       return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
     }
@@ -158,38 +158,43 @@ public class CaptureAgentStateRestService {
 
   @POST
   //@Consumes(MediaType.TEXT_XML)
+  @Produces(MediaType.TEXT_XML)
   @Path("agents/{name}/capabilities")
   public Response setCapabilities(@PathParam("name") String agentName, InputStream reqBody) {
     Properties caps = new Properties();
     try {
       caps.loadFromXML(reqBody);
-    } catch (IOException e1) {
-      logger.debug("Incorrect XML format for the capabilities");
+      int result = service.setAgentCapabilities(agentName, caps);
+      
+      // Prepares the value to return
+      ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
+      caps.storeToXML(buffer, "Capabilities for the agent " + agentName);
+
+      switch (result) {
+      case CaptureAgentStateService.OK:
+        logger.debug("{}'s capabilities updated", agentName);
+        return Response.ok(buffer.toString()).build();
+      case CaptureAgentStateService.BAD_PARAMETER:
+        logger.debug("The agent name cannot be blank or null");
+        return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
+      default:
+        logger.error("Unexpected server error in setCapabilities endpoint");
+        return Response.serverError().build();
+      }
+      
+    } catch (IOException e) {
+      logger.debug("Unexpected I/O Exception when unmarshalling the capabilities: {}", e.getMessage());
       return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
     }
 
-    int result = service.setAgentCapabilities(agentName, caps);
-
-    switch (result) {
-    case CaptureAgentStateService.OK:
-      logger.debug("{}'s capabilities updated", agentName);
-      return Response.ok(agentName + "'s capabilities updated").build();
-    case CaptureAgentStateService.BAD_PARAMETER:
-      logger.debug("The agent name cannot be blank or null");
-      return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
-    default:
-      logger.error("Unexpected server error in setCapabilities endpoint");
-      return Response.serverError().build();
-    }
   }
-
 
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("recordings/{id}")
   public Response getRecordingState(@PathParam("id") String id) {
     Recording rec = service.getRecordingState(id);
-    
+
     if (rec != null) {
       logger.debug("Submitting state for recording {}", id);
       return Response.ok(new RecordingStateUpdate(rec)).build(); 
