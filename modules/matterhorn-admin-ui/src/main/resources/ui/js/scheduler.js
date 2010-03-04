@@ -25,9 +25,10 @@ var SchedulerUI       = SchedulerUI || {};
 function init() {
   //Do internationalization of text
   jQuery.i18n.properties({name:'scheduler',path:'i18n/'});
+  document.title = i18n.window.prefix + " " + i18n.window.schedule;
   $("#i18n_tab_recording").text(i18n.tab.recording);
   $("#i18n_tab_agent").text(i18n.tab.agent);
-  $("#i18n_page_title").text(i18n.page.title.schedule);
+  $("#i18n_page_title").text(i18n.page.title.sched);
   
   var d = new Date();
   d.setHours(d.getHours() + 1); //increment an hour.
@@ -95,6 +96,7 @@ function init() {
   var eventID = SchedulerUI.getURLParams('eventID');
   if(eventID && SchedulerUI.getURLParams('edit')){
     $('#page-title').text('Edit Recording');
+    document.title = i18n.window.prefix + " " + i18n.window.edit;
     $('#i18n_page_title').text(i18n.page.title.edit);
     $('#deleteButton').click(SchedulerUI.deleteForm);
     $('#delete-recording').show();
