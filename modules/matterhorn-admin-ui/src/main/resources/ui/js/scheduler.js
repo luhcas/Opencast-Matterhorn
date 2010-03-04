@@ -127,7 +127,7 @@ SchedulerUI.submitForm = function() {
   try{
     eventXML = SchedulerForm.serialize();
   }catch(e){
-    console.log(e);
+    //console.log(e);
   }
   if(eventXML){
     var method  = SchedulerUI.getURLParams('edit') ? '/updateEvent' : '/addEvent';
@@ -245,7 +245,6 @@ SchedulerUI.toggleDetails = function(elSwitch, el) {
 
 SchedulerUI.checkAgentStatus = function(doc) {
   var state = $('state', doc).text();
-  console.log(state);
   if(state == '' || state == 'unknown' || state == 'offline') {
     $('#notice-container').show();
   }
