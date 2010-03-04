@@ -128,6 +128,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     super(id, DublinCoreCatalog.FLAVOR, uri, size, checksum, MimeTypes.XML);
     bindings.bindPrefix(XMLConstants.DEFAULT_NS_PREFIX,
             OPENCASTPROJECT_DUBLIN_CORE_NS_URI);
+    bindings.bindPrefix("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI);
     bindings.bindPrefix("dc", ELEMENTS_1_1_NS_URI);
     bindings.bindPrefix("dcterms", TERMS_NS_URI);
     bindings.bindPrefix("oc", OC_NS_URI);

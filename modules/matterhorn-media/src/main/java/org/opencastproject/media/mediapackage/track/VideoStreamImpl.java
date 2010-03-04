@@ -64,6 +64,7 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
     protected ScanType type;
     @XmlAttribute(name="order")
     protected ScanOrder order;
+    public String toString() { return type.toString(); }
   }
 
   public VideoStreamImpl() {

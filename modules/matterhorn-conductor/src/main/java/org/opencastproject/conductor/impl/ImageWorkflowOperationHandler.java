@@ -131,6 +131,8 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
     Set<Track> videoTracks = new HashSet<Track>();
     for(Track track : mediaPackage.getTracks()) {
       if(sourceVideoFlavor == null || (track.getFlavor() != null && sourceVideoFlavor.equals(track.getFlavor().toString()))) {
+        if (!track.hasVideo())
+          continue;
         if(sourceTags == null) {
           videoTracks.add(track);
           continue;

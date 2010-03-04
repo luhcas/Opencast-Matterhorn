@@ -174,12 +174,15 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       }
       
       // Serialize changed dublin core
-      // TODO: this is too complicated!
+      // TODO: this is too complicated! Add update() method to metadata service
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       dublinCore.toXml(out, true);
       InputStream in = new ByteArrayInputStream(out.toByteArray());
-      workspace.delete(mediaPackage.getIdentifier().toString(), dublinCore.getIdentifier());
-      workspace.put(mediaPackage.getIdentifier().toString(), dublinCore.getIdentifier(), "dublincore.xml", in);
+      String mpId = mediaPackage.getIdentifier().toString();
+      String elementId = dublinCore.getIdentifier();
+      workspace.delete(mpId, elementId);
+      workspace.put(mpId, elementId, "dublincore.xml", in);
+      dcCatalogs[0].setURI(workspace.getURI(mpId, elementId));
     }
   }
 

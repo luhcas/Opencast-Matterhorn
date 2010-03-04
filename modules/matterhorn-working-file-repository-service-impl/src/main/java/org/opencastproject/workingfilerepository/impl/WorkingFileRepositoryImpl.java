@@ -75,6 +75,10 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     checkId(mediaPackageID);
     checkId(mediaPackageElementID);
     File f = getFile(mediaPackageID, mediaPackageElementID);
+    if (f == null) {
+      logger.info("Unable to delete non existing object {}/{}", mediaPackageID, mediaPackageElementID);
+      return;
+    }
     logger.debug("Attempting to delete file {}", f.getAbsolutePath());
     if(f.canWrite()) {
       f.delete();
@@ -97,6 +101,10 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     checkId(mediaPackageID);
     checkId(mediaPackageElementID);
     File f = getFile(mediaPackageID, mediaPackageElementID);
+    if (f == null) {
+      logger.warn("Tried to read from non existing object {}/{}", mediaPackageID, mediaPackageElementID);
+      return null;
+    }
     logger.debug("Attempting to read file {}", f.getAbsolutePath());
     try {
       return new FileInputStream(f);
@@ -109,6 +117,10 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     // FIXME Either make this configurable, try to determine it from the system, or refer to another service
     // FIXME URL encode the IDs
     File f = getFile(mediaPackageID, mediaPackageElementID);
+    if (f == null) {
+      logger.warn("Tried to look up uri for non existing object {}/{}", mediaPackageID, mediaPackageElementID);
+      return null;
+    }
     try {
       if(f.getName().equals(mediaPackageElementID)) {
         return new URI(serverUrl + "/files/" + mediaPackageID + "/" + mediaPackageElementID);
@@ -177,7 +189,10 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   private File getFile(String mediaPackageID, String mediaPackageElementID) {
     File directory = getDirectory(mediaPackageID, mediaPackageElementID);
     String[] files = directory.list();
-    if(files.length != 1){
+    if (files == null) {
+      logger.debug("Element directory {} does not exist", directory); 
+      return null;
+    } else if (files.length != 1) {
       logger.error("Integrity error: Element directory {} is empty or contains more than one element", 
               mediaPackageID + "/" + mediaPackageElementID);
       throw new RuntimeException("Directory " + mediaPackageID + "/" + mediaPackageElementID +

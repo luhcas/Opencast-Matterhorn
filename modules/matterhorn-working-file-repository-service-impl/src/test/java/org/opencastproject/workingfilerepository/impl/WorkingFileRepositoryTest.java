@@ -42,12 +42,7 @@ public class WorkingFileRepositoryTest {
   public void testDelete() throws Exception {
     // Delete the file and ensure that we can no longer get() it
     repo.delete(mediaPackageID, mediaPackageElementID);
-    try {
-      repo.get(mediaPackageID, mediaPackageElementID);
-      Assert.fail();
-    } catch (Exception e) {
-      // expect a thrown exception
-    }
+    Assert.assertTrue(repo.get(mediaPackageID, mediaPackageElementID) == null);
   }
   
   @Test
