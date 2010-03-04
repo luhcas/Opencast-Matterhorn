@@ -250,7 +250,9 @@ SchedulerUI.checkAgentStatus = function(doc) {
 };
 
 SchedulerUI.deleteForm = function(){
-  $.get(SCHEDULER_URL + '/removeEvent/' + $('#eventID').val(), SchedulerUI.handleDelete);
+  if(confirm(i18n.del.confirm)){
+    $.get(SCHEDULER_URL + '/removeEvent/' + $('#eventID').val(), SchedulerUI.handleDelete);
+  }
 }
 
 SchedulerUI.handleDelete = function(){
