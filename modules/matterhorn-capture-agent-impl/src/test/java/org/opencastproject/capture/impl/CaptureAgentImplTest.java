@@ -76,7 +76,6 @@ public class CaptureAgentImplTest {
     // creates agent, initially idle
     agent = new CaptureAgentImpl();
     agent.setConfigService(config);
-    agent.setScheduler(sched);
     sched.setCaptureAgent(agent);
     
     Assert.assertEquals(agent.getAgentState(), AgentState.IDLE);

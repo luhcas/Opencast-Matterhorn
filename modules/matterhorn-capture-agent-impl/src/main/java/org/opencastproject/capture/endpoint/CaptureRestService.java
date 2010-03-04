@@ -122,7 +122,11 @@ public class CaptureRestService {
     String out;
     try {
       out = service.startCapture();
-      return Response.ok("Start Capture OK. OUT: " + out).build();
+      if (out != null) {
+        return Response.ok("Start Capture OK. OUT: " + out).build();
+      } else {
+        return Response.serverError().status(500).build();
+      }
     } catch (Exception e) {
       return Response.serverError().status(500).build();
     }
@@ -145,7 +149,7 @@ public class CaptureRestService {
       if (out != null)
         return Response.ok("Started capture " + out).build();
       else
-        return Response.serverError().build();
+        return Response.serverError().status(500).build();
     } catch (Exception e) {
       return Response.serverError().status(500).build();
     }

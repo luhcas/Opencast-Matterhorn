@@ -3,13 +3,12 @@
   <implementation class="org.opencastproject.capture.impl.CaptureAgentImpl" />
   <property name="service.description" value="Capture Service" />
   <service>
+  <provide interface="org.opencastproject.capture.impl.CaptureAgentImpl" />
     <provide interface="org.opencastproject.capture.api.CaptureAgent" />
     <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
   <reference name="stateService" interface="org.opencastproject.capture.api.StateService"
-    cardinality="1..1" policy="dynamic" bind="setStateService" unbind="unsetStateService" />
+    cardinality="1..1" policy="static" bind="setStateService" unbind="unsetStateService" />
   <reference name="configService" interface="org.opencastproject.capture.impl.ConfigurationManager"
     cardinality="1..1" policy="static" bind="setConfigService" />
-  <reference name="scheduler" interface="org.opencastproject.capture.impl.SchedulerImpl"
-    cardinality="0..1" policy="dynamic" bind="setScheduler" />
 </component>

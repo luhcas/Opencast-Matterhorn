@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -160,31 +161,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   }
 
   /**
-   * Schedules a stopCapture call for unscheduled captures.
-   * @param recordingID The recordingID to stop.
-   * @return true if the stop was scheduled, false otherwise.
-   */
-  private boolean scheduleStop(String recordingID) {
-    if (scheduler != null && recordingID != null) {
-      String setLength = configService.getItem(CaptureParameters.CAPTURE_MAX_LENGTH);
-      long length = 0L;
-      if (setLength != null) {
-        length = Long.parseLong(setLength);
-      } else {
-        configService.setItem(CaptureParameters.CAPTURE_MAX_LENGTH, String.valueOf(CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH));
-        length = CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH;
-      }
-      return scheduler.scheduleUnscheduledStopCapture(recordingID, System.currentTimeMillis() + length);
-    } else if (recordingID == null) {
-      logger.warn("Capture appears to have failed, not scheduling stop.");
-      return false;
-    } else {
-      logger.warn("Unable to schedule stop for capture {} because scheduler pointer is null!", recordingID);
-      return false;
-    }
-  }
-
-  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.capture.api.CaptureAgent#startCapture()
@@ -206,11 +182,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return null;
     }
 
-    String recordingID =  startCapture(pack, configService.getAllProperties());
-    if (!scheduleStop(recordingID)) {
-      stopCapture(recordingID);
-    }
-    return recordingID;
+     return startCapture(pack, configService.getAllProperties());
   }
 
   /**
@@ -223,11 +195,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     logger.debug("startCapture(mediaPackage): {}", mediaPackage);
 
-    String recordingID = startCapture(mediaPackage, configService.getAllProperties());
-    if (!scheduleStop(recordingID)) {
-      stopCapture(recordingID);
-    }
-    return recordingID;
+    return startCapture(mediaPackage, configService.getAllProperties());
 
   }
 
@@ -252,11 +220,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return null;
     }
 
-    String recordingID = startCapture(pack, properties);
-    if (!scheduleStop(recordingID)) {
-      stopCapture(recordingID);
-    }
-    return recordingID;
+    return startCapture(pack, properties);
   }
 
   /**
@@ -309,22 +273,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     // FIXME: (Rubencino) Source paths should be absolute or relative to some other property. This patch fixes it temporarily
     noPrefix = false;
     if (properties != null && properties.get(CaptureParameters.CAPTURE_DEVICE_NAMES) != null) {
-      String[] deviceList = ((String)properties.get(CaptureParameters.CAPTURE_DEVICE_NAMES)).split(",");
-      boolean everythingOk = true;
       File f = new File(samplesDir);
-      for (String device : deviceList) {
-        String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
-        String value = properties.getProperty(key);
-        if (value == null || !(new File(f, value).isFile())) {
-          // FIXME: Added by Rubencino: routes to source files should be absolute. Test doesn't work otherwise
-          if (value != null && new File(value).isFile()) {
-            noPrefix = true;
-            continue;
-          } else
-            everythingOk = false;
-        }
-      }
-      if (everythingOk) {
+      String[] deviceList = ((String)properties.get(CaptureParameters.CAPTURE_DEVICE_NAMES)).split(",");
+      mockCapture = isMockCapture(properties, deviceList);
+      if (mockCapture) {
         logger.debug("Preparing for mock capture.");
         mockCapture = true;
         // if running on a Linux capture box it is preferable to use GStreamer
@@ -345,8 +297,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
             try {
               FileUtils.copyFile(src, dest);
             } catch (FileNotFoundException e) {
+              resetAgent(recordingID);
               throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
             } catch (IOException e) {
+              resetAgent(recordingID);
               throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
             }
           }
@@ -358,12 +312,15 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
             MediaPackageElementBuilder eb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
             mediaPackage.add(eb.elementFromURI(newRec.getDir().toURI().relativize(dcCatalog.toURI()), Type.Catalog, DublinCoreCatalog.FLAVOR));
           } catch (UnsupportedElementException e) {
+            resetAgent(recordingID);
             throw new RuntimeException("Error adding " + dcCatalog + " to recording");
           } catch (IOException e) {
+            resetAgent(recordingID);
             throw new RuntimeException("Error copying " + dcCatalog + " to destination directory");
           }
           // When we return the recording, the mock capture is completed so reset
           // the CaptureAgent state
+          setRecordingState(recordingID, RecordingState.CAPTURING);
           return recordingID;
         }
         else {
@@ -380,10 +337,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     pipe = PipelineFactory.create(newRec.getProperties());
     if (pipe == null) {
       logger.error("Capture {} could not start, pipeline was null!", recordingID);
-      setAgentState(AgentState.IDLE);
-      setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-      currentRecID = null;
-      pendingRecordings.remove(recordingID);
+      resetAgent(recordingID);
       return null;
     }
 
@@ -415,7 +369,66 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     logger.info("{} started.", pipe.getName());
 
     setRecordingState(recordingID, RecordingState.CAPTURING);
+    scheduleStop(recordingID);
     return recordingID;
+  }
+
+  private boolean isMockCapture(Properties properties, String[] deviceList) {
+    boolean isMockCapture = true;
+    File f = new File(samplesDir);
+    for (String device : deviceList) {
+      String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
+      String value = properties.getProperty(key);
+      if (value == null || !(new File(f, value).isFile())) {
+        // FIXME: Added by Rubencino: routes to source files should be absolute. Test doesn't work otherwise
+        if (value != null && new File(value).isFile()) {
+          noPrefix = true;
+          continue;
+        } else
+          isMockCapture = false;
+      }
+    }
+    return isMockCapture;
+  }
+
+  /**
+   * Convenience method to reset an agent when a capture fails to start.
+   * @param recordingID The recordingID of the capture which failed to start.
+   */
+  private void resetAgent(String recordingID) {
+    setAgentState(AgentState.IDLE);
+    setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+    currentRecID = null;
+    pendingRecordings.remove(recordingID);
+  }
+
+  /**
+   * Schedules a stopCapture call for unscheduled captures.
+   * @param recordingID The recordingID to stop.
+   * @return true if the stop was scheduled, false otherwise.
+   */
+   private void scheduleStop(String recordingID) {
+    String maxLength = configService.getItem(CaptureParameters.CAPTURE_MAX_LENGTH);
+    long length = 0L;
+    if (maxLength != null) {
+      //Try and parse the value found, falling back to the agent's hardcoded max on error
+      try {
+        length = Long.parseLong(maxLength);
+      } catch (NumberFormatException e) {
+        configService.setItem(CaptureParameters.CAPTURE_MAX_LENGTH, String.valueOf(CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH));
+        length = CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH; 
+      }
+    } else {
+      configService.setItem(CaptureParameters.CAPTURE_MAX_LENGTH, String.valueOf(CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH));
+      length = CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH;
+    }
+
+    //Convert from seconds to milliseconds
+    length = length * 1000L;
+    Date stop = new Date(length + System.currentTimeMillis());
+    if (scheduler != null) {
+      scheduler.scheduleUnscheduledStopCapture(recordingID, stop);
+    }
   }
 
   /**
@@ -670,8 +683,11 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
       retValue = response.getStatusLine().getStatusCode();
 
-      setRecordingState(recID, RecordingState.UPLOAD_FINISHED);
-    
+      if (retValue == 200) {
+        setRecordingState(recID, RecordingState.UPLOAD_FINISHED);
+      } else {
+        setRecordingState(recID, RecordingState.UPLOAD_ERROR);
+      }
     } catch (ClientProtocolException e) {
       logger.error("Failed to submit the data: {}.", e.getMessage());
       setRecordingState(recID, RecordingState.UPLOAD_ERROR);

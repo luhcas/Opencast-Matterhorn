@@ -44,7 +44,6 @@ import net.fortuna.ical4j.model.property.Duration;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.PollCalendarJob;
 import org.opencastproject.capture.impl.jobs.StartCaptureJob;
@@ -95,7 +94,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   private ConfigurationManager configService = null;
 
   /** The capture agent this scheduler is scheduling for */
-  private CaptureAgent captureAgent = null;
+  private CaptureAgentImpl captureAgent = null;
 
   /** The maximum duration to schedule something for */
   private Dur maxDuration = new Dur(new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis() + (CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH * 1000)));
@@ -212,8 +211,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * Sets the capture agent which this scheduler should be scheduling for.
    * @param agent The agent.
    */
-  public void setCaptureAgent(CaptureAgent agent) {
+  public void setCaptureAgent(CaptureAgentImpl agent) {
     captureAgent = agent;
+    if (agent != null) {
+      agent.setScheduler(this);
+    }
   }
 
   /**
@@ -611,8 +613,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     return null;*/
   }
 
-  public boolean scheduleUnscheduledStopCapture(String recordingID, long atTime) {
-    SimpleTrigger trig = new SimpleTrigger("StopCaptureTrigger-" + recordingID, JobParameters.OTHER_TYPE, new Date(atTime));
+  public boolean scheduleUnscheduledStopCapture(String recordingID, Date stop) {
+    SimpleTrigger trig = new SimpleTrigger("StopCaptureTrigger-" + recordingID, JobParameters.OTHER_TYPE, stop);
     JobDetail job = new JobDetail("StopCapture-" + recordingID, JobParameters.OTHER_TYPE, StopCaptureJob.class);
 
     job.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgent);
@@ -625,7 +627,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       log.error("Unable to schedule stop capture, failing capture attempt.");
       return false;
     }
-    return true;
+    return true; 
+  }
+
+  public boolean scheduleUnscheduledStopCapture(String recordingID, long atTime) {
+    return scheduleUnscheduledStopCapture(recordingID, new Date(atTime));
   }
 
   /**
