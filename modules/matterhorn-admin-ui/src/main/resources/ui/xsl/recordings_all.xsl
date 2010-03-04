@@ -17,7 +17,7 @@
         <table style="border:1px solid black;">
           <tr>
             <td style="border:none;">
-              <img src="img/under_construction.gif" alt="Under construction" title="Under construction"></img>
+              <img src="img/under_construction.gif" alt="Under construction" title="Under construction" style="vertical-align: bottom;"></img>
             </td>
             <td style="border:none;" align="left">
               <b> Under development.</b>
