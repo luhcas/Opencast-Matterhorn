@@ -27,6 +27,7 @@ function init() {
   jQuery.i18n.properties({name:'scheduler',path:'i18n/'});
   $("#i18n_tab_recording").text(i18n.tab.recording);
   $("#i18n_tab_agent").text(i18n.tab.agent);
+  $("#i18n_page_title").text(i18n.page.title.schedule);
   
   var d = new Date();
   d.setHours(d.getHours() + 1); //increment an hour.
@@ -87,12 +88,16 @@ function init() {
   
   $('#submitButton').click(SchedulerUI.submitForm);
   $('#cancelButton').click(SchedulerUI.cancelForm);
+
   
   SchedulerUI.loadKnownAgents();
   
   var eventID = SchedulerUI.getURLParams('eventID');
   if(eventID && SchedulerUI.getURLParams('edit')){
-    $('#page-title').text('Opencast Matterhorn - Edit Recording');
+    $('#page-title').text('Edit Recording');
+    $('#i18n_page_title').text(i18n.page.title.edit);
+    $('#deleteButton').click(SchedulerUI.deleteForm);
+    $('#delete-recording').show();
     $('#attendees').change(
       function() {
         $('#notice-container').hide();
@@ -244,6 +249,20 @@ SchedulerUI.checkAgentStatus = function(doc) {
   }
 };
 
+SchedulerUI.deleteForm = function(){
+  $.get(SCHEDULER_URL + '/removeEvent/' + $('#eventID').val(), SchedulerUI.handleDelete);
+}
+
+SchedulerUI.handleDelete = function(){
+  //make delete message
+  var title = SchedulerForm.formFields.title.dispValue() || 'No Title';
+  var series = SchedulerForm.formFields['series-id'].dispValue() || 'No Series';
+  var creator = SchedulerForm.formFields.creator.dispValue() || 'No Creator';
+  $('#i18n_del_msg').text(i18n.del.msg(title, series, '(' + creator + ')'));
+  $('#stage').hide();
+  $('#deleteBox').show();
+}
+
 /* ======================== SchedulerForm ======================== */
 
 SchedulerForm.formFields    = {};
@@ -272,7 +291,7 @@ SchedulerForm.serialize = function() {
     var doc = this.createDoc();
     var metadata = doc.createElement('metadata');
     for(var e in this.formFields) {
-      if(e == 'startdate' || e == 'duration') {
+      if(e == 'startdate' || e == 'duration' || (e == 'id' && this.formFields[e].getValue() != "") ) {
         el = doc.createElement(e);
         el.appendChild(doc.createTextNode(this.formFields[e].getValue()));
         doc.documentElement.appendChild(el);
@@ -340,16 +359,14 @@ SchedulerForm.validate = function() {
  */
 SchedulerForm.populate = function(doc) {
   for(var e in this.formFields){
-    if(e == 'startdate' || e == 'duration' || e == 'resources'){
+    if(e == 'startdate' || e == 'duration' || e == 'resources' || e == 'id'){
       selector = e;
     } else if (e == 'attendees') {
       selector = 'attendee';
     } else {
       selector = 'item[key="' + e + '"] > value';
     }
-    var value = {};
-    value[e] = $(selector, doc).text();
-    this.formFields[e].setValue(value);
+    this.formFields[e].setValue($(selector, doc).text());
   }
 };
 
@@ -452,16 +469,22 @@ FormField.prototype.dispValue = dispFormFieldValue;
  *  @member FormField
  */
 function setFormFieldValue(values) {
-  for(var e in values) {
-    if(values[e] && this.fields[e]) {
-      switch(this.fields[e][0].type) {
-        case 'checkbox':
-        case 'radio':
-          this.fields[e][0].checked = true;
-          break;
-        default:
-          this.fields[e].val(values[e]);
+  if(typeof values == 'object'){
+    for(var e in values) {
+      if(values[e] && this.fields[e]) {
+        switch(this.fields[e][0].type) {
+          case 'checkbox':
+          case 'radio':
+            this.fields[e][0].checked = true;
+            break;
+          default:
+            this.fields[e].val(values[e]);
+        }
       }
+    }
+  }else if(typeof values == 'string'){
+    for(var k in this.fields){
+      this.fields[k].val(values);
     }
   }
 }
@@ -516,6 +539,9 @@ function getAgent() {
  * @param {String} agent id
  */
 function setAgent(value) {
+  if(typeof value == 'string'){
+    value = { attendees: value };
+  }
   var opts = this.fields.attendees.children();
   var agentId = value.attendees;
   if(opts.length > 0) {
@@ -575,6 +601,9 @@ function getDurationDisplay() {
  *  @param {integer} Duration in milliseconds
  */
 function setDuration(value) {
+  if(typeof value == 'string'){
+    value = { duration: value };
+  }
   var val = parseInt(value.duration);
   if(val == "NaN") {
     throw "Could not parse duration.";
@@ -624,6 +653,9 @@ function getInputs(){
  *  @param {string} Comma seperated string of inputs
  */
 function setInputs(value){
+  if(typeof value == 'string'){
+    value = { resources: value };
+  }
   for(var el in this.fields){
     var e = this.fields[el];
     if(e[0] && e.val() == value.resources){
@@ -676,6 +708,9 @@ function getStartDateDisplay(){
  *  @param {Date Object}
  */
 function setStartDate(value){
+  if(typeof value == 'string'){
+    value = { startdate: value };
+  }
   var date = parseInt(value.startdate);
   if(date != 'NaN') {
     date = new Date(date);

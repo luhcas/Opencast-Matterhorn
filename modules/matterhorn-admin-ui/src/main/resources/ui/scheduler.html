@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html;charset=utf-8">
-    <title>Opencast Matterhorn - Schedule Recording</title>
+    <title id="window-title">Opencast Matterhorn - Schedule Recording</title>
     
     <!-- style -->
     <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css">
@@ -59,7 +59,7 @@
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
         <div class="fl-container-800" style="text-align: center;">
-          <h2 id="page-title"><div id="i18n_page_title"></div></h2>
+          <h2><div id="i18n_page_title"></div></h2>
         </div>
         <!-- missing fields notification -->
         <div class="fl-container-800" id="missingFields-container" style="display:none;">
@@ -329,6 +329,9 @@
                     <label class="fl-label">&nbsp;</label>
                     <input type="button" value="Submit" id="submitButton" class="mouseover-pointer control-button">
                     <input type="button" value="Cancel" id="cancelButton" class="mouseover-pointer control-button">
+                    <div id="delete-recording" style="float: right; margin-right: 160px; display: none;">
+                      <input type="button" value="Delete Recording" id="deleteButton" class="mouseover-pointer control-button">
+                    </div>
                     <input type="hidden" id="eventID">
                   </li>
                   <li style="margin-top: 0.6em;">
@@ -339,6 +342,13 @@
               </form>
             </div>
           </div>
+        </div>
+      </div>
+      
+      <div id="deleteBox" class="fl-tab-content wu-tab-content fl-fix" style="display:none;">
+        <!-- Delete Confirm Box -->
+        <div id="heading-metadata" style="background-color:#66FF66;font-weight:bold; margin-bottom:1em; margin-left:auto; margin-right:auto; padding:10px; text-align:center;">
+          <div id="i18n_del_msg"></div>
         </div>
       </div>
       
