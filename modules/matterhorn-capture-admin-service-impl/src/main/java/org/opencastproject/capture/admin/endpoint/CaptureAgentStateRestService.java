@@ -316,7 +316,7 @@ public class CaptureAgentStateRestService {
     endpoint.addBodyParam(false, null,
             "An XML representation of the capabilities, as specified in http://java.sun.com/dtd/properties.dtd " +
     "(friendly names as keys, device locations as their corresponding values)");
-    endpoint.addFormat(new Format("HTML", null, null));
+    endpoint.addFormat(new Format(Format.XML, "The capabilities that have just been set in the agent", "http://java.sun.com/dtd/properties.dtd"));
     endpoint.addStatus(Status.OK("{agentName} set to {state}"));
     endpoint.addStatus(Status.BAD_REQUEST("The capabilities format is incorrect OR the agent name is blank or null"));
     endpoint.setTestForm(RestTestForm.auto());
