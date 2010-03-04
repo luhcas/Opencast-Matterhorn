@@ -191,12 +191,14 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   public void setStartDateAsString(String startTime) {
-    if (startTime != null && !"0".equals(startTime)) {
+    if (startTime != null && !"0".equals(startTime) && !startTime.isEmpty()) {
       try {
         manifest.setStartDate(DateTimeSupport.fromUTC(startTime));
       } catch (Exception e) {
         log_.info("Unable to parse start time {}", startTime);
       }
+    }else{
+      manifest.setStartDate(0);
     }
   }
 
