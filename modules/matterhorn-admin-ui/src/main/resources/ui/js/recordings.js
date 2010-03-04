@@ -59,6 +59,20 @@ Recordings.init = function() {
     },
     type: 'numeric'
   });
+  
+  $.tablesorter.addParser({
+    id: 'lastname',
+    is: function(){ return false; },
+    format: function(s) {
+      var ln = s.split(' ');
+      if(ln.length != 0){
+        return ln[ln.length - 1];
+      }else{
+        return "";
+      }
+    },
+    type: 'text'
+  });
 
   // request and display statistics
   Recordings.displayRecordingStats();
@@ -182,15 +196,17 @@ Recordings.displayRecordings = function(state, reload) {
         cssDesc: 'sortable-desc',
         sortList: [[3,0]],
         headers: {
-          3: {
-            sorter: 'date'
-          }
+          1: { sorter: 'lastname' },
+          3: { sorter: 'date' }
         }
       });
     } else {  // if no date/time column is present, init tablesorter the default way
       $('#recordingsTable').tablesorter({
         cssAsc: 'sortable-asc',
-        cssDesc: 'sortable-desc'
+        cssDesc: 'sortable-desc',
+        headers: {
+          1: { sorter: 'lastname' }
+        }
       });
     }
 
