@@ -19,6 +19,8 @@ var eventDoc = null;
 //WorkflowID is parsed from the URL parameters and is the ID of the workflow used to gather the required metadata.
 var workflowID = null;
 
+var debug = null;
+
 /**
  *  handleWorkflow parses the workflow xml, grabs the URLs of the additional metadata catalogs
  *  and makes additional ajax calls to bring in the metadata.
@@ -26,6 +28,7 @@ var workflowID = null;
  *  @param {XML Document}
  */
 function handleWorkflow(workflowDoc){
+  debug = workflowDoc;
   eventDoc = createDoc();
   var dcURL = "";
   var rootEl = null;
@@ -35,7 +38,7 @@ function handleWorkflow(workflowDoc){
     rootEl = $("ns2\\:workflow-instance");
   }
   if(rootEl){
-    dcURL = rootEl.find("metadata:first > catalog[type='metadata/dublincore'] url").text();
+    dcURL = rootEl.find("metadata:first > catalog[type='metadata/dublincore'] url:first").text();
     //TODO: get extra metadata catalog URL
     //var caURL = $("ns2\\:workflow-instance", testDoc).find("metadata:first > catalog[type='metadata/extra'] url").text();
     
