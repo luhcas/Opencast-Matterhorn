@@ -49,6 +49,11 @@ public class RecordingStateUpdate {
   public Long time_delta;
 
   /**
+   * Required zero-arg. constructor. Do not use
+   */
+  public RecordingStateUpdate() {}
+  
+  /**
    * Builds an RecordingStateUpdate object about the Recording r.  This calculates the time delta for you.
    *
    * @param r The recording you wish to know more information about
