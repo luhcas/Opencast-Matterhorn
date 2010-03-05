@@ -333,8 +333,13 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         }
       }
     }
-
-    pipe = PipelineFactory.create(newRec.getProperties());
+    try {
+      pipe = PipelineFactory.create(newRec.getProperties());
+    } catch (UnsatisfiedLinkError e) {
+      logger.error(e.getMessage() + " : please add libjv4linfo.so to /usr/lib to correct this issue.");
+      return null;
+    }
+    
     if (pipe == null) {
       logger.error("Capture {} could not start, pipeline was null!", recordingID);
       resetAgent(recordingID);

@@ -27,12 +27,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.osgi.service.cm.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test the implementation of the Capture Agent, which uses gstreamer to 
  * generate pipelines that capture the media. 
  */
 public class CaptureAgentImplTest {
+  
+  private static Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);
   
   /** The single instance of CaptureAgentImpl needed */
   private static CaptureAgentImpl agent = null;
@@ -108,6 +112,11 @@ public class CaptureAgentImplTest {
   
   @Test
   public void testCaptureAgentImpl() {
+    if (!new File("/usr/lib/libjv4linfo.so").exists()) {
+      logger.error("Necessary libjv4linfo.so dependency not installed in /usr/lib: Tests not executing.");
+      return;
+    }
+    
     // start the capture, assert the recording id is correct
     String id = agent.startCapture(properties);
     Assert.assertEquals(id, recordingID);
