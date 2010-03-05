@@ -144,7 +144,7 @@
             <Embed-Dependency>
               c3p0;inline=true,
               h2;inline=true,
-              mysql;inline=true,
+              mysql-connector-java;inline=true,
               postgresql;inline=true
             </Embed-Dependency>
 						<Import-Package>
