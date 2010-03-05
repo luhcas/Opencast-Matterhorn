@@ -3,7 +3,7 @@
 
 
 FELIX_HOME=$1
-export JAVA_HOME=/usr/lib/jvm/java-6-sun-1.6.0.15
+JAVA_HOME=$2
 
 # get the necessary matterhorn source code
 mkdir -p /home/$USERNAME/capture-agent
