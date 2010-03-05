@@ -41,6 +41,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-conductor</artifactId>
+      <version>0.6-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>javax.persistence</artifactId>
     </dependency>
@@ -69,7 +75,7 @@
               OSGI-INF/example-service.xml
             </Service-Component>
             <JPA-PersistenceUnits>
-              MyPersistenceUnit
+              org.opencastproject.persistence
             </JPA-PersistenceUnits>
           </instructions>
         </configuration>

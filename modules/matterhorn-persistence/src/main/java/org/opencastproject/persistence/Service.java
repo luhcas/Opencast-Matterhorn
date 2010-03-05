@@ -57,7 +57,7 @@ public class Service implements ManagedService {
   protected EntityManagerFactory emf = null;
   
   public void activate(ComponentContext cc) {
-    emf = persistenceProvider.createEntityManagerFactory("MyPersistenceUnit", persistenceProperties);
+    emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.persistence", persistenceProperties);
     em = emf.createEntityManager();
 
     System.out.println("You may see exceptions above, they are (probably) safe to ignore and only occur when the persistence unit first connects.");
