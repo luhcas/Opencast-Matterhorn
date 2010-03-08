@@ -51,20 +51,17 @@ import java.util.UUID;
 import java.util.Date;
 
 /**
- * Creates and augments Matterhorn MediaPackages. Stores media into the Working
- * File Repository.
+ * Creates and augments Matterhorn MediaPackages. Stores media into the Working File Repository.
  */
-public class IngestServiceImpl implements IngestService, ManagedService,
-        EventHandler {
+public class IngestServiceImpl implements IngestService, ManagedService, EventHandler {
   // TODO CONFIGURATION (tempPath, BUFFER)
 
-  private static final Logger logger = LoggerFactory
-          .getLogger(IngestServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(IngestServiceImpl.class);
   private MediaPackageBuilder builder = null;
   private Workspace workspace;
   private String tempFolder;
   private String fs;
-  
+
   public IngestServiceImpl() {
     logger.info("Ingest Service started.");
     builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
@@ -85,8 +82,7 @@ public class IngestServiceImpl implements IngestService, ManagedService,
    * 
    * @see org.opencastproject.ingest.api.IngestService#addZippedMediaPackage(java.io.InputStream)
    */
-  public MediaPackage addZippedMediaPackage(InputStream zipStream)
-          throws Exception {
+  public MediaPackage addZippedMediaPackage(InputStream zipStream) throws Exception {
     // locally unpack the mediaPackage
     String tempPath = tempFolder + UUID.randomUUID().toString();
     // save inputStream to file
@@ -103,29 +99,22 @@ public class IngestServiceImpl implements IngestService, ManagedService,
     ZipUtil.unzip(f, tempDir);
     f.delete();
     // check media package and write data to file repo
-    File manifest = null;
-    // TODO: Instead of hardcoding the filename, take the first (if the only one) xml file
-    // in the toplevel directory
-    File topLevelManifest = new File(tempPath, "manifest.xml");
-    if (topLevelManifest.exists()) {
-      manifest = topLevelManifest;
-    } else {
-      // try to find the manifest in the first subdirectory, since the zip may
+    File manifest = getManifest(new File(tempPath));
+    if (manifest == null) {
+      // try to find the manifest in a subdirectory, since the zip may
       // have been constructed this way
       File[] subDirs = tempDir.listFiles(new FileFilter() {
         public boolean accept(File pathname) {
           return pathname.isDirectory();
         }
       });
-      if (subDirs.length == 1) {
-        File subDirManifest = new File(subDirs[0], "manifest.xml");
-        if (subDirManifest.exists()) {
-          manifest = subDirManifest;
-        } else {
-          throw new RuntimeException(
-                  "no manifest found in the root of this zip file or in the first directory");
-        }
+      for (File subdir : subDirs) {
+        manifest = getManifest(subdir);
+        if (manifest != null)
+          break;
       }
+      if (manifest == null)
+        throw new RuntimeException("no manifest found in this zip");
     }
 
     MediaPackage mp = null;
@@ -133,7 +122,11 @@ public class IngestServiceImpl implements IngestService, ManagedService,
       builder.setSerializer(new DefaultMediaPackageSerializerImpl(manifest.getParentFile()));
       InputStream manifestStream = manifest.toURI().toURL().openStream();
       mp = builder.loadFromXml(manifestStream);
-      try {manifestStream.close();} catch (IOException e) {logger.error(e.getMessage());}
+      try {
+        manifestStream.close();
+      } catch (IOException e) {
+        logger.error(e.getMessage());
+      }
       for (MediaPackageElement element : mp.elements()) {
         String elId = element.getIdentifier();
         if (elId == null) {
@@ -144,7 +137,11 @@ public class IngestServiceImpl implements IngestService, ManagedService,
         filename = filename.substring(filename.lastIndexOf("/"));
         InputStream elementStream = element.getURI().toURL().openStream();
         URI newUrl = addContentToRepo(mp, elId, filename, elementStream);
-        try {elementStream.close();} catch (IOException e) {logger.error(e.getMessage());}
+        try {
+          elementStream.close();
+        } catch (IOException e) {
+          logger.error(e.getMessage());
+        }
         element.setURI(newUrl);
       }
 
@@ -158,7 +155,6 @@ public class IngestServiceImpl implements IngestService, ManagedService,
     return mp;
   }
 
-
   /**
    * {@inheritDoc}
    * 
@@ -170,8 +166,7 @@ public class IngestServiceImpl implements IngestService, ManagedService,
     try {
       mediaPackage = builder.createNew();
     } catch (MediaPackageException e) {
-      logger.error("INGEST:Failed to create media package "
-              + e.getLocalizedMessage());
+      logger.error("INGEST:Failed to create media package " + e.getLocalizedMessage());
       throw e;
     }
     mediaPackage.setDate(new Date());
@@ -181,94 +176,79 @@ public class IngestServiceImpl implements IngestService, ManagedService,
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageTrack(URI,
-   *      MediaPackageElementFlavor, MediaPackage)
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageTrack(URI, MediaPackageElementFlavor,
+   *      MediaPackage)
    */
-  public MediaPackage addTrack(URI uri, MediaPackageElementFlavor flavor,
-          MediaPackage mediaPackage) throws MediaPackageException,
-          UnsupportedElementException, IOException {
+  public MediaPackage addTrack(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+          throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
     URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
-    return addContentToMediaPackage(mediaPackage, elementId, newUrl,
-            MediaPackageElement.Type.Track, flavor);
+    return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track, flavor);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageTrack(InputStream,
-   *      MediaPackageElementFlavor, MediaPackage)
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageTrack(InputStream, MediaPackageElementFlavor,
+   *      MediaPackage)
    */
-  public MediaPackage addTrack(InputStream in, String fileName,
-          MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException,
-          IOException {
+  public MediaPackage addTrack(InputStream in, String fileName, MediaPackageElementFlavor flavor,
+          MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
     URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
-    return addContentToMediaPackage(mediaPackage, elementId, newUrl,
-            MediaPackageElement.Type.Track, flavor);
+    return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track, flavor);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageCatalog(URI,
-   *      MediaPackageElementFlavor, MediaPackage)
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageCatalog(URI, MediaPackageElementFlavor,
+   *      MediaPackage)
    */
-  public MediaPackage addCatalog(URI uri, MediaPackageElementFlavor flavor,
-          MediaPackage mediaPackage) throws MediaPackageException,
-          UnsupportedElementException, IOException {
+  public MediaPackage addCatalog(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+          throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
     URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
-    return addContentToMediaPackage(mediaPackage, elementId, newUrl,
-            MediaPackageElement.Type.Catalog, flavor);
+    return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Catalog, flavor);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageCatalog(InputStream,
-   *      MediaPackageElementFlavor, MediaPackage)
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageCatalog(InputStream, MediaPackageElementFlavor,
+   *      MediaPackage)
    */
-  public MediaPackage addCatalog(InputStream in, String fileName,
-          MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException,
-          IOException {
+  public MediaPackage addCatalog(InputStream in, String fileName, MediaPackageElementFlavor flavor,
+          MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
     URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
-    return addContentToMediaPackage(mediaPackage, elementId, newUrl,
-            MediaPackageElement.Type.Catalog, flavor);
+    return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Catalog, flavor);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageAttachment(URI,
-   *      MediaPackageElementFlavor, MediaPackage)
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageAttachment(URI, MediaPackageElementFlavor,
+   *      MediaPackage)
    */
-  public MediaPackage addAttachment(URI uri, MediaPackageElementFlavor flavor,
-          MediaPackage mediaPackage) throws MediaPackageException,
-          UnsupportedElementException, IOException {
+  public MediaPackage addAttachment(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
+          throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
     URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
-    return addContentToMediaPackage(mediaPackage, elementId, newUrl,
-            MediaPackageElement.Type.Attachment, flavor);
+    return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment, flavor);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageAttachment(InputStream,
-   *      MediaPackageElementFlavor, MediaPackage)
+   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageAttachment(InputStream, MediaPackageElementFlavor,
+   *      MediaPackage)
    */
-  public MediaPackage addAttachment(InputStream in, String fileName,
-          MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException,
-          IOException {
+  public MediaPackage addAttachment(InputStream in, String fileName, MediaPackageElementFlavor flavor,
+          MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
     URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
-    return addContentToMediaPackage(mediaPackage, elementId, newUrl,
-            MediaPackageElement.Type.Attachment, flavor);
+    return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment, flavor);
   }
 
   /**
@@ -277,7 +257,7 @@ public class IngestServiceImpl implements IngestService, ManagedService,
    * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String,
    *      org.opencastproject.notification.api.NotificationService)
    */
-  public void ingest(MediaPackage mp) throws IllegalStateException, Exception {    
+  public void ingest(MediaPackage mp) throws IllegalStateException, Exception {
 
     // broadcast event
     if (eventAdmin != null) {
@@ -299,24 +279,18 @@ public class IngestServiceImpl implements IngestService, ManagedService,
 
       // processing of confirmation
       if (errorFlag) {
-        logger.error("Received exception from Conductor service: "
-                + error.getLocalizedMessage());
+        logger.error("Received exception from Conductor service: " + error.getLocalizedMessage());
         errorFlag = false;
-        throw new Exception(
-                "Exception durring media package processing in Conductor service: ",
-                error);
+        throw new Exception("Exception durring media package processing in Conductor service: ", error);
       } else if (ackFlag) {
-        logger
-                .info("Received ACK message: Conductor processed event succesfully");
+        logger.info("Received ACK message: Conductor processed event succesfully");
         ackFlag = false;
       } else {
-        logger
-                .warn("Timeout occured while waiting for ACK message from Conductor service");
+        logger.warn("Timeout occured while waiting for ACK message from Conductor service");
       }
     } else {
       // no EventAdmin available
-      logger
-              .error("Ingest service: Broadcasting event failed - Event admin not available");
+      logger.error("Ingest service: Broadcasting event failed - Event admin not available");
       throw new IllegalStateException("EventAdmin not available");
     }
   }
@@ -330,8 +304,8 @@ public class IngestServiceImpl implements IngestService, ManagedService,
   private Throwable error = null;
 
   /**
-   * {@inheritDoc} If event contains exception property, exception has occured
-   * during processing sent media package in Conductor service.
+   * {@inheritDoc} If event contains exception property, exception has occured during processing sent media package in
+   * Conductor service.
    * 
    * @see org.osgi.service.event.EventHandler#handleEvent(org.osgi.service.event.Event)
    */
@@ -373,28 +347,60 @@ public class IngestServiceImpl implements IngestService, ManagedService,
     }
   }
 
-  private URI addContentToRepo(MediaPackage mp, String elementId, URI uri)
-          throws IOException, UnsupportedElementException {
+  private URI addContentToRepo(MediaPackage mp, String elementId, URI uri) throws IOException,
+          UnsupportedElementException {
     InputStream uriStream = uri.toURL().openStream();
-    URI returnedUri = workspace.put(mp.getIdentifier().compact(), elementId, FilenameUtils.getName(uri.toURL().toString()), uriStream);
-    try {uriStream.close();} catch (IOException e) {logger.error(e.getMessage());}
+    URI returnedUri = workspace.put(mp.getIdentifier().compact(), elementId, FilenameUtils.getName(uri.toURL()
+            .toString()), uriStream);
+    try {
+      uriStream.close();
+    } catch (IOException e) {
+      logger.error(e.getMessage());
+    }
     return returnedUri;
     // return addContentToMediaPackage(mp, elementId, newUrl, type, flavor);
   }
 
-  private URI addContentToRepo(MediaPackage mp, String elementId,
-          String filename, InputStream file) throws UnsupportedElementException {
-    return workspace.put(mp.getIdentifier().compact(), elementId, filename,
-            file);
+  private URI addContentToRepo(MediaPackage mp, String elementId, String filename, InputStream file)
+          throws UnsupportedElementException {
+    return workspace.put(mp.getIdentifier().compact(), elementId, filename, file);
   }
 
-  private MediaPackage addContentToMediaPackage(MediaPackage mp,
-          String elementId, URI uri, MediaPackageElement.Type type,
-          MediaPackageElementFlavor flavor) throws UnsupportedElementException {
+  private MediaPackage addContentToMediaPackage(MediaPackage mp, String elementId, URI uri,
+          MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws UnsupportedElementException {
     MediaPackageElement mpe = mp.add(uri, type, flavor);
     mpe.setIdentifier(elementId);
     return mp;
+  }
 
+  /**
+   * Returns the manifest from a media package directory or <code>null</code> if no manifest was found. Manifests are
+   * expected to be named <code>index.xml</code> or <code>manifest.xml</code>.
+   * 
+   * @param mediapackageDir
+   *          the potential mediapackage directory
+   * @return the manifest file
+   */
+  private File getManifest(File mediapackageDir) {
+    File[] files = mediapackageDir.listFiles(new FileFilter() {
+      @Override
+      public boolean accept(File pathname) {
+        return pathname.getName().endsWith(".xml");
+      }
+    });
+    if (files == null)
+      return null;
+    else if (files.length == 0)
+      return null;
+    else if (files.length == 1)
+      return files[0];
+    else {
+      for (File f : files) {
+        if ("index.xml".equals(f.getName()) || "manifest.xml".equals(f.getName()))
+          return f;
+      }
+    }
+    return null;
   }
 
   private File createDirectory(String dir) {
