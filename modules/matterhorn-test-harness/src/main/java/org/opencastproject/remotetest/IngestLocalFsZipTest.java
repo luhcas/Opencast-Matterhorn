@@ -28,8 +28,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 /**
@@ -52,11 +50,9 @@ public class IngestLocalFsZipTest {
 
   @Test
   public void testIngestZip() throws Exception {
-    File f = new File("/Users/josh/Desktop/media.zip");
-    long length = f.length();
-    InputStream in = new FileInputStream(f);
+    InputStream in = IngestLocalFsZipTest.class.getResourceAsStream("/ingest.zip");
     HttpPost post = new HttpPost(BASE_URL + "/ingest/rest/addZippedMediaPackage");
-    post.setEntity(new InputStreamEntity(in, length));
+    post.setEntity(new InputStreamEntity(in, 869810));
     HttpResponse response = client.execute(post);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
     in.close();
