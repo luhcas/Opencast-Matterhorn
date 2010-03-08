@@ -386,6 +386,20 @@
       <artifactId>activemq-pool</artifactId>
       <version>5.2.0</version>
     </dependency>
+
+    <!-- R-OSGi -->
+    <dependency>
+      <groupId>asm</groupId>
+      <artifactId>asm</artifactId>
+      <version>3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.r-osgi</groupId>
+      <artifactId>remote</artifactId>
+      <version>1.0.0.RC4</version>
+    </dependency>
+    <!-- R-OSGi -->
+    
   </dependencies>
   <build>
     <plugins>
