@@ -201,27 +201,26 @@ Opencast.FlashVersion = (function ()
         var str = '';
         if (isIE && isWin && !isOpera)
         {
-      		str += '<span id="oc-video-left"><object ';
+      		str += '<object ';
       		for (var i in objAttrs)
       			str += i + '="' + objAttrs[i] + '" ';
       		str += '>';
       		for (var i in params)
       			str += '<param name="' + i + '" value="' + params[i] + '" /> ';
-      		str += '</object></span>';
+      		str += '</object>';
         } else {
-        	str += '<span id="oc-video-left">';
-    			str += '<object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="400" height="320" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">';
-    			str += '<param name ="movie" value="Videodisplay.swf" >';
+        	str += '<object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="100%" height="100%" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">';
+    			str += '<param name ="movie" value="engage-hybrid-player/Videodisplay.swf" >';
     			str += '<param name="quality"value="high">';
     			str += '<param name="allowScriptAccess" value="sameDomain" />';
     			str += '<param name="bgcolor" value="#000000" />';
     			str += '<param name="allowFullScreen" value="true" />';
-    			str += '<param name="flashvars" value="bridgeName=b_Videodisplay&amp;autoplay=false&amp;playerId=firstPlayer"/>';
+    			str += '<param name="flashvars" value="bridgeName=b_Videodisplay&amp;autoplay=false"/>';
         	
         	str += '<embed ';
       		for (var i in embedAttrs)
       			str += i + '="' + embedAttrs[i] + '" ';
-      		str += '> </embed></object></span>';
+      		str += '> </embed></object>';
         }
 
         document.write(str);
@@ -234,47 +233,6 @@ Opencast.FlashVersion = (function ()
          , "application/x-shockwave-flash"
         );
       AC_Generateobj(ret.objAttrs, ret.params, ret.embedAttrs);
-    }
-
-
-    function AC_GenerateobjSecond(objAttrs, params, embedAttrs) 
-    { 
-        var str = '';
-        if (isIE && isWin && !isOpera)
-        {
-      		str += '<span id="oc_video-right"><object ';
-      		for (var i in objAttrs)
-      			str += i + '="' + objAttrs[i] + '" ';
-      		str += '>';
-      		for (var i in params)
-      			str += '<param name="' + i + '" value="' + params[i] + '" /> ';
-      		str += '</object></span>';
-      		
-        } else {
-        	str += '<span id="oc_video-right">';
-        	str += '<object id="oc_VideodisplaySecond" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="400" height="320" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">';
-    		str += '<param name ="movie" value="Videodisplay.swf" >';
-    		str += '<param name="quality"value="high">';
-    		str += '<param name="allowScriptAccess" value="sameDomain" />';
-    		str += '<param name="bgcolor" value="#000000" />';
-    		str += '<param name="allowFullScreen" value="true" />';
-    		str += '<param name="flashvars" value="bridgeName=b_VideodisplaySecond&amp;autoplay=false&amp;playerId=secondPlayer"/>';
-    		str += '<embed ';
-      		for (var i in embedAttrs)
-      			str += i + '="' + embedAttrs[i] + '" ';
-      		str += '> </embed></object></span>';
-        }
-
-        document.write(str);
-    }
-
-    function AC_FL_RunContentSecond(){
-      var ret = 
-        AC_GetArgs
-        (  arguments, ".swf", "movie", "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
-         , "application/x-shockwave-flash"
-        );
-      AC_GenerateobjSecond(ret.objAttrs, ret.params, ret.embedAttrs);
     }
 
     function AC_GetArgs(args, ext, srcParamName, classid, mimeType){
@@ -372,12 +330,11 @@ Opencast.FlashVersion = (function ()
     
     
     
-    
-    
-    
 
     // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
     var hasProductInstall = DetectFlashVer(6, 0, 65);
+    
+    var testbreite = 233;
     
     // Version check based upon the values defined in globals
     var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
@@ -390,10 +347,10 @@ Opencast.FlashVersion = (function ()
         document.title = document.title.slice(0, 47) + " - Flash Player Installation";
         var MMdoctitle = document.title;
         AC_FL_RunContent(
-            "src", "playerProductInstall",
+            "src", "engage-hybrid-player/playerProductInstall",
             "FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
-            "width", "400",
-            "height", "320",
+            "width", "100%",
+            "height", "100%",
             "align", "middle",
             "id", "oc_Videodisplay",
             "quality", "high",
@@ -402,52 +359,47 @@ Opencast.FlashVersion = (function ()
             "allowScriptAccess", "sameDomain",
             "type", "application/x-shockwave-flash",
             "pluginspage", "http://www.adobe.com/go/getflashplayer"
-      );
+        );
     } 
     else if (hasRequestedVersion) {
         // if we've detected an acceptable version
         // embed the Flash Content SWF when all tests are passed
-        var strGo = '<div id="oc-video-display-container">';
-        document.write(strGo);
+        
         AC_FL_RunContent(
-            "src", "Videodisplay.swf",
-            "width", "400",
-            "height", "320",
+            "src", "engage-hybrid-player/Videodisplay.swf",
+            "width", "100%",
+            "height", "100%",
             "id", "oc_Videodisplay",
             "quality", "high",
             "bgcolor", "#FFFFFF",
             "name", "Videodisplay",
             "allowfullscreen", "true",
-            "flashvars", "bridgeName=b_Videodisplay&amp;autoplay=false&amp;playerId=firstPlayer",
+            "flashvars", "bridgeName=b_Videodisplay&amp;autoplay=false",
             "allowScriptAccess", "sameDomain",
             "type", "application/x-shockwave-flash",
             "pluginspage", "http://www.adobe.com/go/getflashplayer"
         );
-        AC_FL_RunContentSecond(
-            "src", "Videodisplay.swf",
-            "width", "400",
-            "height", "320",
-            "id", "oc_VideodisplaySecond",
-            "quality", "high",
-            "bgcolor", "#FFFFFF",
-            "name", "Videodisplay",
-            "allowfullscreen", "true",
-            "flashvars", "bridgeName=b_VideodisplaySecond&amp;autoplay=false&amp;playerId=secondPlayer",
-            "allowScriptAccess", "sameDomain",
-            "type", "application/x-shockwave-flash",
-            "pluginspage", "http://www.adobe.com/go/getflashplayer"
-        );
-        var strEnd = '</div>';
-        document.write(strEnd);
+       
+       
     } 
     else {  // flash is too old or we can't detect the plugin
         var alternateContent = 'Alternate HTML content should be placed here.'
         + 'This content requires the Adobe Flash Player. '
         + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
         document.write(alternateContent);  // insert non-flash content
-    }
+      }
+    
+   function getTest()
+   {
+	   return 400;
+	   
+   }
+    
     return {
        
     };
+    
+   
+    
 }());
 

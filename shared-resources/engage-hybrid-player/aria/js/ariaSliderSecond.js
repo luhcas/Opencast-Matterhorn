@@ -99,11 +99,18 @@ Opencast.ariaSlider = (function ()
         if (target.id === sliderVolume)
         {
             target.setAttribute('aria-valuetext', 'Volume: ' + Math.round(newValue) + '%');
-            Opencast.Player.doSetVolume(newValue / 100);
             Opencast.Player.setPlayerVolume(newValue / 100);
             if (value !== 0 && Opencast.Player.getccBool() === false)
             {
                 Opencast.Player.setClosedCaptionsOff();
+            }
+            if(newValue > 0 && $("#btn_volume").attr('title') === Opencast.Player.getMute())
+            {
+            	Opencast.Player.doToggleMute();
+            }
+            if(newValue === 0 && $("#btn_volume").attr('title') === Opencast.Player.getUnmute())
+            {
+            	Opencast.Player.doToggleMute();
             }
         }
         
@@ -136,6 +143,14 @@ Opencast.ariaSlider = (function ()
         {
             target.setAttribute('aria-valuetext', 'Volume: ' + Math.round(newValue) + '%');
             $("#slider_volume_Rail").attr("title", 'Volume ' + Math.round(newValue) + '%');
+            if(newValue > 0 && $("#btn_volume").attr('title') === Opencast.Player.getMute())
+            {
+            	Opencast.Player.doToggleMute();
+            }
+            if(newValue === 0 && $("#btn_volume").attr('title') === Opencast.Player.getUnmute())
+            {
+            	Opencast.Player.doToggleMute();
+            }
         }
         // if target is the seek slider
         if (target.id === sliderSeek)
@@ -149,8 +164,9 @@ Opencast.ariaSlider = (function ()
         @description Change the position of the slider.
         @param Target target, Number value 
     */
-    function increment(target, byChunk) {
-        var newValue = parseFloat(target.getAttribute('aria-valuenow')) + (byChunk ? 10 : 1); 
+    function increment(target, byChunk) 
+    {
+    	var newValue = parseFloat(target.getAttribute('aria-valuenow')) + (byChunk ? 10 : 1); 
         changeValue(target, newValue);
     }
 
@@ -159,8 +175,9 @@ Opencast.ariaSlider = (function ()
         @description Change the position of the slider.
         @param Target target, Number value 
     */
-    function decrement(target, byChunk) {
-        var newValue = parseFloat(target.getAttribute('aria-valuenow')) - (byChunk ? 10 : 1); 
+    function decrement(target, byChunk) 
+    {
+    	var newValue = parseFloat(target.getAttribute('aria-valuenow')) - (byChunk ? 10 : 1); 
         changeValue(target, newValue);	
     }
 

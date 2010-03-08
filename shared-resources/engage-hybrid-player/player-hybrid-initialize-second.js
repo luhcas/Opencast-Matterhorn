@@ -23,17 +23,13 @@ Opencast.Initialize = (function ()
             {
                 if (event.which === 77 || event.which === 109) // press m or M
                 {
-                    Opencast.Player.doToggleVolume();
+                    Opencast.Player.doToggleMute();
                 }
-                if (event.which === 80 || event.which === 112 || event.which === 83 || event.which === 84 || event.which === 116 || event.which === 115 || event.which === 77 || event.which === 109 || event.which === 85 || event.which === 117  || event.which === 68 || event.which === 100 || event.which === 48 || event.which === 49 || event.which === 50 || event.which === 51 || event.which === 52 || event.which === 53 || event.which === 54  || event.which === 55 || event.which === 56 || event.which === 57 || event.which === 67 || event.which === 99 || event.which === 82 || event.which === 114 || event.which === 70 || event.which === 102 || event.which === 83 || event.which === 115 || event.which === 73 || event.which === 105)
+                if (event.which === 80 || event.which === 112 || event.which === 83 || event.which === 84 || event.which === 116 || event.which === 115 || event.which === 85 || event.which === 117  || event.which === 68 || event.which === 100 || event.which === 48 || event.which === 49 || event.which === 50 || event.which === 51 || event.which === 52 || event.which === 53 || event.which === 54  || event.which === 55 || event.which === 56 || event.which === 57 || event.which === 67 || event.which === 99 || event.which === 82 || event.which === 114 || event.which === 70 || event.which === 102 || event.which === 83 || event.which === 115 || event.which === 73 || event.which === 105)
                 {
                     Videodisplay.passCharCode(event.which);
                     VideodisplaySecond.passCharCode(event.which);
                     
-                }
-                if (event.which === 85 || event.which === 68) // press arrow up or down
-                {
-                    Opencast.Player.setPlayerVolume(Videodisplay.getVolume(), Opencast.Player.FIRSTPLAYER);
                 }
                 event.preventDefault();
             }

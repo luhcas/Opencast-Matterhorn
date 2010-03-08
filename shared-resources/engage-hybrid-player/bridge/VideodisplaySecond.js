@@ -63,12 +63,16 @@ function VideodisplayReady() {
 		b_VideodisplaySecond_root.passCharCode(argInt);
 	};
 	
-	VideodisplaySecond.setVolume = function(argNumber) {
-		b_VideodisplaySecond_root.setVolume(argNumber);
+	VideodisplaySecond.mute = function () {
+		b_VideodisplaySecond_root.mute();
 	};
-
-	VideodisplaySecond.getVolume = function(){
-		return b_VideodisplaySecond_root.getVolume();
+	
+	VideodisplaySecond.setVolumeSlider = function (argNumber) {
+		b_VideodisplaySecond_root.setVolumeSlider(argNumber);
+	};
+	
+	VideodisplaySecond.setVolumePlayer = function (argNumber) {
+		b_VideodisplaySecond_root.setVolumePlayer(argNumber);
 	};
 	
 	VideodisplaySecond.seek = function(argNumber) {

@@ -1,4 +1,4 @@
-/*global $, Player, Videodisplay, VideodisplaySecond, fluid, ariaSliderSecond*/
+/*global, Player, Videodisplay, ariaSliderSecond*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
 /**
@@ -26,13 +26,16 @@ Opencast.Player = (function () {
     CCOFF                 = "Closed Caption Off: Control + Alt + C",
     SLIDERVOLUME          = "slider_volume_Thumb",
     SLIDERSEEK            = "slider_seek_Thumb",
-    FIRSTPLAYER           = "firstPlayer",
-    SECONDPLAYER          = "secondPlayer",
+    FIRSTPLAYER			  = "firstPlayer",
+    SECONDPLAYER		  = "secondPlayer",
     infoBool              = false,
     ccBool                = false,
     mouseOverBool         = false,
     captionsBool          = false,
-    currentPlayPauseState = PAUSING;
+    currentPlayPauseState = PAUSING,
+    duration = 0,
+    dragging = false,
+    volume                = 1.0;
     
         
     /**
@@ -53,6 +56,17 @@ Opencast.Player = (function () {
     {
         currentPlayPauseState = state;
     }
+    
+    function getDuration()
+    {
+        return duration;
+    }
+    
+    function setDragging(val)
+    {
+      dragging = val;
+    }
+    
     
     /**
         @memberOf Opencast.Player
@@ -92,24 +106,8 @@ Opencast.Player = (function () {
         ccBool = bool;
     } 
     
-    /**
-        @memberOf Opencast.Player
-        @description Get the string mute.
-     */
-    function getMute()
-    {
-        return MUTE; 
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Get the string unmute.
-     */
-    function getUnmute()
-    {
-        return UNMUTE;
-    } 
-  
+   
+    
     /**
         @memberOf Opencast.Player
         @description Get the mouseOverBool.
@@ -129,6 +127,8 @@ Opencast.Player = (function () {
         mouseOverBool = bool;
     }
 
+    
+
     /**
         @memberOf Opencast.Player
         @description Get the isAlt.
@@ -145,7 +145,26 @@ Opencast.Player = (function () {
      */
     function setCaptionsBool(bool)
     {
-        captionsBool = bool;
+	    captionsBool = bool;
+    }
+
+    /**
+        @memberOf Opencast.Player
+        @description Get the captionsBool.
+     */
+    function getPlayerVolume()
+    {
+        return volume;
+    }
+
+    /**
+        @memberOf Opencast.Player
+        @description Set the volume.
+        @param Number vol
+     */
+    function setPlayerVolume(vol)
+    {
+        volume = vol;
     }
 
     /**
@@ -235,7 +254,6 @@ Opencast.Player = (function () {
             {
                 var seek = (seekHour * 60 * 60) + (seekMinutes * 60) + (seekSeconds);
                 Videodisplay.seek(seek);
-                VideodisplaySecond.seek(seek);
             }
         }
         catch (exception) 
@@ -247,7 +265,7 @@ Opencast.Player = (function () {
     /**
         @memberOf Opencast.Player
         @description Toggle between Keyboard Shurtcuts visible or unvisible.
-        @param String playerId 
+        @param String playerId
      */
     function toggleInfo(playerId) 
     {
@@ -265,6 +283,21 @@ Opencast.Player = (function () {
                 setInfoBool(false);
             }
         }
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Do unmute the volume of the video.
+     */
+    function doUnmute() {
+        if ($("#btn_volume").attr("title") === UNMUTE) {  
+            $("#btn_volume").attr({ 
+                alt: MUTE,
+                title: MUTE
+            });
+            
+            $("#btn_volume").attr("className", "oc-btn-volume-high");
+        } 
     }
     
     /**
@@ -304,7 +337,6 @@ Opencast.Player = (function () {
     function doSkipBackward() 
     {
         Videodisplay.skipBackward();
-        VideodisplaySecond.skipBackward();
     }
 
     /**
@@ -314,7 +346,6 @@ Opencast.Player = (function () {
     function doRewind() 
     {
         Videodisplay.rewind();
-        VideodisplaySecond.rewind();
     }
 
     /**
@@ -324,7 +355,6 @@ Opencast.Player = (function () {
     function doPlay() 
     {
         Videodisplay.play();
-        VideodisplaySecond.play();
     }
 
     /**
@@ -334,7 +364,6 @@ Opencast.Player = (function () {
     function doPause() 
     {
         Videodisplay.pause();
-        VideodisplaySecond.pause();
     }
 
     /**
@@ -344,7 +373,6 @@ Opencast.Player = (function () {
     function doStop() 
     {
         Videodisplay.stop();
-        VideodisplaySecond.stop();
     }
     
     /**
@@ -354,7 +382,6 @@ Opencast.Player = (function () {
     function doFastForward() 
     {
         Videodisplay.fastForward();
-        VideodisplaySecond.fastForward();
     }
 
     /**
@@ -364,7 +391,6 @@ Opencast.Player = (function () {
     function doSkipForward() 
     {
         Videodisplay.skipForward();
-        VideodisplaySecond.skipForward();
     }
 
     /**
@@ -375,7 +401,15 @@ Opencast.Player = (function () {
     function doClosedCaptions(cc) 
     {
         Videodisplay.closedCaptions(cc);
-        VideodisplaySecond.closedCaptions(cc);
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Change the volume of the video.
+     */
+    function doSetVolume(value) 
+    {
+        Videodisplay.setVolume(value);
     }
     
     /**
@@ -443,14 +477,12 @@ Opencast.Player = (function () {
             {
                 setccBool(true);
                 Videodisplay.setccBool(true);
-                VideodisplaySecond.setccBool(true);
                 setClosedCaptionsOn();
             } 
             else 
             {
                 setccBool(false);
                 Videodisplay.setccBool(false);
-                VideodisplaySecond.setccBool(false);
                 setClosedCaptionsOff();
             }
         }
@@ -460,7 +492,7 @@ Opencast.Player = (function () {
         @memberOf Opencast.Player
         @description Toggle between mute an unmute.
      */
-    function doToggleMute() 
+    function doToggleVolume() 
     {
         // Checking if btn_volume is "mute"
         if ($("#btn_volume").attr('title') === UNMUTE) 
@@ -473,6 +505,8 @@ Opencast.Player = (function () {
             $("#btn_volume").attr('className', 'oc-btn-volume-mute');
             $("#btn_volume").attr('aria-pressed', 'true');
         
+            doSetVolume(0);
+            
             // When the Button cc is not press before
             if (getccBool() === false && getCaptionsBool() === true)
             {
@@ -488,37 +522,14 @@ Opencast.Player = (function () {
             $("#btn_volume").attr('className', 'oc-btn-volume-high');
             $("#btn_volume").attr('aria-pressed', 'false');
         
+            doSetVolume(getPlayerVolume());
             // When the Button cc is not press before
             if (getccBool() === false && getCaptionsBool() === true)
             {
                 setClosedCaptionsOff();
             }
         }
-        
-        // Bridge mute
-        Videodisplay.mute();
     }
-    
-    /**
-        @memberOf Opencast.Player
-        @description Set the volume slider
-        @param Number newVolume
-     */
-    function setVolumeSlider(newVolume) 
-    {
-	    Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(SLIDERVOLUME), newVolume);
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Set the volume slider
-        @param Number newVolume
-     */
-    function setPlayerVolume(newPlayerVolume) 
-    {
-	    Videodisplay.setVolumePlayer(newPlayerVolume);
-	    VideodisplaySecond.setVolumePlayer(newPlayerVolume);
-	}
     
     /**
         @memberOf Opencast.Player
@@ -555,41 +566,8 @@ Opencast.Player = (function () {
         Videodisplay.setPlayerId(playerId);
     }
     
-    /**
-        @memberOf Opencast.Player
-        @description Set the media URL.
-        @param String mediaURL
-     */
-    function setSecondMediaURL(mediaURL)
-    {
-        if (mediaURL[0] === 'h' || mediaURL[0] === 'H')
-        {
-            $("#oc-background-progress").attr('className', 'matterhorn-progress-bar-background');
-        }
-        VideodisplaySecond.setMediaURL(mediaURL);
-    }
+    
 
-    /**
-        @memberOf Opencast.Player
-        @description Set the captions URL.
-        @param String captionsURL
-     */
-    function setSecondCaptionsURL(captionsURL)
-    {
-        VideodisplaySecond.setCaptionsURL(captionsURL);
-        setCaptionsBool(true);
-    }
-    
-    /**
-        @memberOf Opencast.Player
-        @description Set the player Id.
-        @param String playerId
-     */
-    function setSecondPlayerId(playerId)
-    {
-        VideodisplaySecond.setPlayerId(playerId);
-    }
-    
     /**
      * 
      * 
@@ -603,6 +581,13 @@ Opencast.Player = (function () {
      */
     function setPlayhead(newPosition, playerId) 
     {
+      if(dragging === false)
+      {
+        var newPos = Math.round((newPosition / duration) *  $("#scubber-channel").width());
+        $("#draggable").css("left", newPos);
+        $("#scrubber").css("left", newPos);
+        $("#play-progress").css("width", newPos);
+       }
         if (playerId === FIRSTPLAYER)
         {
             Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(SLIDERSEEK), newPosition);
@@ -616,13 +601,60 @@ Opencast.Player = (function () {
      */
     function setPlayheadFullscreen(newPosition) 
     {
-	    Opencast.ariaSlider.changeValue(Opencast.ariaSlider.getElementId(SLIDERSEEK), newPosition);
+        Opencast.ariaSlider.changeValue(Opencast.ariaSlider.getElementId(SLIDERSEEK), newPosition);
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Change the css style of the mute/unmute button.
+     */
+    function setDoUnmute() 
+    {
+        if ($("#btn_volume").attr("title") === MUTE) 
+        {  
+            $("#btn_volume").attr({ 
+                alt: UNMUTE,
+                title: UNMUTE
+            });
+            
+            $("#btn_volume").attr("className", "oc-btn-volume-high");
+        }
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the new position of the volume slider.
+        @param Number newVolume, String playerId 
+     */
+    function setVolume(newVolume, playerId) 
+    {
+        if (playerId === FIRSTPLAYER)
+        {
+            if (newVolume !== 0)
+            {
+                setDoUnmute();
+            }
+            Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(SLIDERVOLUME), newVolume);
+        }
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the volume.
+        @param Number newVolume, String playerId 
+     */
+    function setOpencastVolume(newVolume, playerId) 
+    {
+        if (playerId === FIRSTPLAYER)
+        {
+            setPlayerVolume(newVolume); 
+        }
     }
     
     /**
         @memberOf Opencast.Player
         @description Set the current time of the video.
-        @param String text, String PlayerId 
+        @param String text, String playerId 
      */
     function setCurrentTime(text, playerId) 
     {
@@ -653,6 +685,8 @@ Opencast.Player = (function () {
      */
     function setDuration(time, playerId) 
     {
+      duration = time;
+      
         if (playerId === FIRSTPLAYER)
         {
             $('#slider').slider('option', 'max', time);
@@ -748,6 +782,23 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
+        @description Toggle the volume between mute or unmute.
+        @param String playerId 
+     */
+    function setDoMute(playerId) 
+    {
+        if (playerId === FIRSTPLAYER)
+        {
+            if (Videodisplay.getVolume() !== 0)
+            {
+                setPlayerVolume(Videodisplay.getVolume());
+            }
+            doToggleVolume();
+        }
+    }	
+    
+    /**
+        @memberOf Opencast.Player
         @description Set the captions in html
         @param Html text, String playerId 
      */
@@ -756,7 +807,7 @@ Opencast.Player = (function () {
         if (playerId === FIRSTPLAYER)
         {
             var elm = document.createElement('li');
-            elm.innerHTML = text;        
+            elm.innerHTML = text;
             $('#captions').empty().append(elm); 
         }
     }
@@ -780,18 +831,19 @@ Opencast.Player = (function () {
         setInfoBool : setInfoBool,
         getccBool : getccBool,
         setccBool : setccBool,
-        getMute : getMute,
-        getUnmute : getUnmute,
         getMouseOverBool : getMouseOverBool,
         setMouseOverBool : setMouseOverBool,
         getCaptionsBool : getCaptionsBool,
         setCaptionsBool : setCaptionsBool,
+        getPlayerVolume : getPlayerVolume,
+        setPlayerVolume : setPlayerVolume,
         PlayPauseMouseOver : PlayPauseMouseOver,
         PlayPauseMouseOut : PlayPauseMouseOut,
         removeOldAlert : removeOldAlert,
         addAlert : addAlert,
         editTime : editTime,
         toggleInfo : toggleInfo,
+        doUnmute : doUnmute,
         editTimeKeyListener : editTimeKeyListener,
         doSkipBackward : doSkipBackward,
         doRewind : doRewind,
@@ -801,28 +853,30 @@ Opencast.Player = (function () {
         doFastForward : doFastForward,
         doSkipForward : doSkipForward,
         doClosedCaptions : doClosedCaptions,
+        doSetVolume : doSetVolume,
         doTogglePlayPause : doTogglePlayPause,
         setClosedCaptionsOn : setClosedCaptionsOn,
         setClosedCaptionsOff : setClosedCaptionsOff,
         doToogleClosedCaptions : doToogleClosedCaptions,
-        doToggleMute : doToggleMute,
-        setVolumeSlider : setVolumeSlider,
-        setPlayerVolume : setPlayerVolume,
+        doToggleVolume : doToggleVolume,
         setPlayhead : setPlayhead,
         setPlayheadFullscreen : setPlayheadFullscreen,
+        setDoUnmute : setDoUnmute,
+        setVolume : setVolume,
+        setOpencastVolume : setOpencastVolume,
         setCurrentTime : setCurrentTime,
         setTotalTime : setTotalTime,
         setDuration : setDuration,
+        getDuration : getDuration,
+        setDragging : setDragging,
         setProgress : setProgress,
         setCaptionsButton : setCaptionsButton,
         setPlayPauseState : setPlayPauseState,
+        setDoMute : setDoMute,
         setCaptions : setCaptions,
         hearTimeInfo : hearTimeInfo,
         setMediaURL : setMediaURL,
         setCaptionsURL : setCaptionsURL,
-        setSecondMediaURL : setSecondMediaURL,
-        setSecondCaptionsURL : setSecondCaptionsURL,
-        setPlayerId : setPlayerId,
-        setSecondPlayerId : setSecondPlayerId
+        setPlayerId : setPlayerId
     };
 }());

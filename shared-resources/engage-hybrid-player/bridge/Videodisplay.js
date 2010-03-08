@@ -1,3 +1,6 @@
+/*FABridge*/
+/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+
 /**
  * Application "Videodisplay.mxml"
  */
@@ -7,7 +10,7 @@
  * have selected under the "Videodisplay.mxml" in the tree will be
  * available as static members of this namespace object.
  */
-Videodisplay = {};
+var Videodisplay = Videodisplay || {};
 
 
 /**
@@ -31,69 +34,65 @@ function VideodisplayReady() {
 	
 	// Global functions in the "Videodisplay.mxml" application
 
-	Videodisplay.play = function() {
+	Videodisplay.play = function () {
 		b_Videodisplay_root.play();
 	};
 
-	Videodisplay.stop = function() {
+	Videodisplay.stop = function () {
 		b_Videodisplay_root.stop();
 	};
 
-	Videodisplay.pause = function() {
+	Videodisplay.pause = function () {
 		b_Videodisplay_root.pause();
 	};
 	
-	Videodisplay.skipBackward = function() {
+	Videodisplay.skipBackward = function () {
 		b_Videodisplay_root.skipBackward();
 	};
 	
-	Videodisplay.rewind = function() {
+	Videodisplay.rewind = function () {
 		b_Videodisplay_root.rewind();
 	};
 	
-	Videodisplay.fastForward = function() {
+	Videodisplay.fastForward = function () {
 		b_Videodisplay_root.fastForward();
 	};
 	
-	Videodisplay.skipForward = function() {
+	Videodisplay.skipForward = function () {
 		b_Videodisplay_root.skipForward();
 	};
 	
-	Videodisplay.passCharCode = function(argInt){
+	Videodisplay.passCharCode = function (argInt) {
 		b_Videodisplay_root.passCharCode(argInt);
 	};
 	
-	Videodisplay.setVolume = function(argNumber) {
-		b_Videodisplay_root.setVolume(argNumber);
-	};
-
-	Videodisplay.getVolume = function(){
-		return b_Videodisplay_root.getVolume();
-	};
-	
-	Videodisplay.seek = function(argNumber) {
+	Videodisplay.seek = function (argNumber) {
 		b_Videodisplay_root.seek(argNumber);
 	};
 	
-	Videodisplay.closedCaptions = function(argBool) {
-		b_Videodisplay_root.closedCaptions(argBool);
+	Videodisplay.mute = function () {
+		b_Videodisplay_root.mute();
 	};
 	
-	Videodisplay.setccBool = function(ccBool) {
-		b_Videodisplay_root.setccBool(ccBool);
-	};
-
-	Videodisplay.setMediaURL = function(argString) {
-		b_Videodisplay_root.setMediaURL(argString);
+	Videodisplay.setVolumeSlider = function (argNumber) {
+		b_Videodisplay_root.setVolumeSlider(argNumber);
 	};
 	
-	Videodisplay.setCaptionsURL = function(argString) {
+	Videodisplay.setVolumePlayer = function (argNumber) {
+		b_Videodisplay_root.setVolumePlayer(argNumber);
+	};
+	
+	Videodisplay.closedCaptions = function () {
+		b_Videodisplay_root.closedCaptions();
+	};
+	
+	Videodisplay.setMediaURL = function (argStringOne, argStringTwo) {
+		b_Videodisplay_root.setMediaURL(argStringOne, argStringTwo );
+	};
+	
+	Videodisplay.setCaptionsURL = function (argString) {
 		b_Videodisplay_root.setCaptionsURL(argString);
 	};
-	
-	Videodisplay.setPlayerId = function(argString) {
-		b_Videodisplay_root.setPlayerId(argString);
-	};
-	
+		
 	b_Videodisplay_root.onBridgeReady();
 }

@@ -32,8 +32,7 @@ Opencast.Player = (function () {
     ccBool                = false,
     mouseOverBool         = false,
     captionsBool          = false,
-    currentPlayPauseState = PAUSING,
-    volume                = 1.0;
+    currentPlayPauseState = PAUSING;
     
         
     /**
@@ -93,7 +92,23 @@ Opencast.Player = (function () {
         ccBool = bool;
     } 
     
-   
+    /**
+        @memberOf Opencast.Player
+        @description Get the string mute.
+     */
+    function getMute()
+    {
+        return MUTE; 
+    }
+
+    /**
+        @memberOf Opencast.Player
+        @description Get the string unmute.
+     */
+    function getUnmute()
+    {
+        return UNMUTE;
+    } 
     
     /**
         @memberOf Opencast.Player
@@ -114,8 +129,6 @@ Opencast.Player = (function () {
         mouseOverBool = bool;
     }
 
-    
-
     /**
         @memberOf Opencast.Player
         @description Get the isAlt.
@@ -133,25 +146,6 @@ Opencast.Player = (function () {
     function setCaptionsBool(bool)
     {
 	    captionsBool = bool;
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Get the captionsBool.
-     */
-    function getPlayerVolume()
-    {
-        return volume;
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Set the volume.
-        @param Number vol
-     */
-    function setPlayerVolume(vol)
-    {
-        volume = vol;
     }
 
     /**
@@ -274,21 +268,6 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description Do unmute the volume of the video.
-     */
-    function doUnmute() {
-        if ($("#btn_volume").attr("title") === UNMUTE) {  
-            $("#btn_volume").attr({ 
-                alt: MUTE,
-                title: MUTE
-            });
-            
-            $("#btn_volume").attr("className", "oc-btn-volume-high");
-        } 
-    }
-    
-    /**
-        @memberOf Opencast.Player
         @description When the learner press a key.
         @param Event evt
      */
@@ -392,15 +371,6 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description Change the volume of the video.
-     */
-    function doSetVolume(value) 
-    {
-        Videodisplay.setVolume(value);
-    }
-    
-    /**
-        @memberOf Opencast.Player
          @description Toggle between play and pause the video.
      */
     function doTogglePlayPause() 
@@ -417,6 +387,80 @@ Opencast.Player = (function () {
             doPause();
         }
     }
+    
+    
+    /**
+        @memberOf Opencast.Player
+        @description Toggle between mute and unmute
+     */
+    function doToggleMute() 
+    {
+    	// Checking if btn_volume is "mute"
+        if ($("#btn_volume").attr('title') === UNMUTE) 
+        {
+            $("#btn_volume").attr({ 
+                alt: MUTE,
+                title: MUTE
+            });
+           
+            $("#btn_volume").attr('className', 'oc-btn-volume-mute');
+            $("#btn_volume").attr('aria-pressed', 'true');
+        
+            
+            
+            // When the Button cc is not press before
+            if (getccBool() === false && getCaptionsBool() === true)
+            {
+                setClosedCaptionsOn();
+            }
+        } 
+        else 
+        {
+            $("#btn_volume").attr({ 
+                alt: UNMUTE,
+                title: UNMUTE
+            });
+            $("#btn_volume").attr('className', 'oc-btn-volume-high');
+            $("#btn_volume").attr('aria-pressed', 'false');
+        
+            
+            
+            // When the Button cc is not press before
+            if (getccBool() === false && getCaptionsBool() === true)
+            {
+                setClosedCaptionsOff();
+            }
+        }
+    	
+    	// Bridge mute
+        Videodisplay.mute();
+        
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the volume slider
+        @param Number newVolume
+     */
+    function setVolumeSlider(newVolume) 
+    {
+    	Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(SLIDERVOLUME), newVolume);
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the volume slider
+        @param Number newVolume
+     */
+    function setPlayerVolume(newPlayerVolume) 
+    {
+    	Videodisplay.setVolumePlayer(newPlayerVolume);
+    }
+    
+    
+    
+    
+    
 
     /**
         @memberOf Opencast.Player
@@ -477,49 +521,6 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description Toggle between mute an unmute.
-     */
-    function doToggleVolume() 
-    {
-        // Checking if btn_volume is "mute"
-        if ($("#btn_volume").attr('title') === UNMUTE) 
-        {
-            $("#btn_volume").attr({ 
-                alt: MUTE,
-                title: MUTE
-            });
-           
-            $("#btn_volume").attr('className', 'oc-btn-volume-mute');
-            $("#btn_volume").attr('aria-pressed', 'true');
-        
-            doSetVolume(0);
-            
-            // When the Button cc is not press before
-            if (getccBool() === false && getCaptionsBool() === true)
-            {
-                setClosedCaptionsOn();
-            }
-        } 
-        else 
-        {
-            $("#btn_volume").attr({ 
-                alt: UNMUTE,
-                title: UNMUTE
-            });
-            $("#btn_volume").attr('className', 'oc-btn-volume-high');
-            $("#btn_volume").attr('aria-pressed', 'false');
-        
-            doSetVolume(getPlayerVolume());
-            // When the Button cc is not press before
-            if (getccBool() === false && getCaptionsBool() === true)
-            {
-                setClosedCaptionsOff();
-            }
-        }
-    }
-    
-    /**
-        @memberOf Opencast.Player
         @description Set the media URL.
         @param String mediaURL
      */
@@ -553,8 +554,6 @@ Opencast.Player = (function () {
         Videodisplay.setPlayerId(playerId);
     }
     
-    
-
     /**
      * 
      * 
@@ -582,53 +581,6 @@ Opencast.Player = (function () {
     function setPlayheadFullscreen(newPosition) 
     {
         Opencast.ariaSlider.changeValue(Opencast.ariaSlider.getElementId(SLIDERSEEK), newPosition);
-    }
-    
-    /**
-        @memberOf Opencast.Player
-        @description Change the css style of the mute/unmute button.
-     */
-    function setDoUnmute() 
-    {
-        if ($("#btn_volume").attr("title") === MUTE) 
-        {  
-            $("#btn_volume").attr({ 
-                alt: UNMUTE,
-                title: UNMUTE
-            });
-            
-            $("#btn_volume").attr("className", "oc-btn-volume-high");
-        }
-    }
-    
-    /**
-        @memberOf Opencast.Player
-        @description Set the new position of the volume slider.
-        @param Number newVolume, String playerId 
-     */
-    function setVolume(newVolume, playerId) 
-    {
-        if (playerId === FIRSTPLAYER)
-        {
-            if (newVolume !== 0)
-            {
-                setDoUnmute();
-            }
-            Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(SLIDERVOLUME), newVolume);
-        }
-    }
-    
-    /**
-        @memberOf Opencast.Player
-        @description Set the volume.
-        @param Number newVolume, String playerId 
-     */
-    function setOpencastVolume(newVolume, playerId) 
-    {
-        if (playerId === FIRSTPLAYER)
-        {
-            setPlayerVolume(newVolume); 
-        }
     }
     
     /**
@@ -717,7 +669,6 @@ Opencast.Player = (function () {
         }
     }
     
-    
     /**
         @memberOf Opencast.Player
         @description Set the play/pause state and change the css style of the play/pause button.
@@ -760,23 +711,6 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description Toggle the volume between mute or unmute.
-        @param String playerId 
-     */
-    function setDoMute(playerId) 
-    {
-        if (playerId === FIRSTPLAYER)
-        {
-            if (Videodisplay.getVolume() !== 0)
-            {
-                setPlayerVolume(Videodisplay.getVolume());
-            }
-            doToggleVolume();
-        }
-    }	
-    
-    /**
-        @memberOf Opencast.Player
         @description Set the captions in html
         @param Html text, String playerId 
      */
@@ -809,19 +743,18 @@ Opencast.Player = (function () {
         setInfoBool : setInfoBool,
         getccBool : getccBool,
         setccBool : setccBool,
+        getMute : getMute,
+        getUnmute : getUnmute,
         getMouseOverBool : getMouseOverBool,
         setMouseOverBool : setMouseOverBool,
         getCaptionsBool : getCaptionsBool,
         setCaptionsBool : setCaptionsBool,
-        getPlayerVolume : getPlayerVolume,
-        setPlayerVolume : setPlayerVolume,
         PlayPauseMouseOver : PlayPauseMouseOver,
         PlayPauseMouseOut : PlayPauseMouseOut,
         removeOldAlert : removeOldAlert,
         addAlert : addAlert,
         editTime : editTime,
         toggleInfo : toggleInfo,
-        doUnmute : doUnmute,
         editTimeKeyListener : editTimeKeyListener,
         doSkipBackward : doSkipBackward,
         doRewind : doRewind,
@@ -831,24 +764,21 @@ Opencast.Player = (function () {
         doFastForward : doFastForward,
         doSkipForward : doSkipForward,
         doClosedCaptions : doClosedCaptions,
-        doSetVolume : doSetVolume,
         doTogglePlayPause : doTogglePlayPause,
+        doToggleMute : doToggleMute,
+        setVolumeSlider : setVolumeSlider,
+        setPlayerVolume : setPlayerVolume,
         setClosedCaptionsOn : setClosedCaptionsOn,
         setClosedCaptionsOff : setClosedCaptionsOff,
         doToogleClosedCaptions : doToogleClosedCaptions,
-        doToggleVolume : doToggleVolume,
         setPlayhead : setPlayhead,
         setPlayheadFullscreen : setPlayheadFullscreen,
-        setDoUnmute : setDoUnmute,
-        setVolume : setVolume,
-        setOpencastVolume : setOpencastVolume,
         setCurrentTime : setCurrentTime,
         setTotalTime : setTotalTime,
         setDuration : setDuration,
         setProgress : setProgress,
         setCaptionsButton : setCaptionsButton,
         setPlayPauseState : setPlayPauseState,
-        setDoMute : setDoMute,
         setCaptions : setCaptions,
         hearTimeInfo : hearTimeInfo,
         setMediaURL : setMediaURL,

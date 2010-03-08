@@ -11,6 +11,7 @@ Opencast.Watch = (function () {
     var mediaPackageId = Opencast.engage.getMediaPackageId();
     
     var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
+   // restEndpoint = "http://video.lernfunk.de/REST/ws/episode?id="+mediaPackageId;
 
     $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function() {
       // some code to run after the mapping
@@ -18,20 +19,25 @@ Opencast.Watch = (function () {
       document.title = "Opencast Matterhorn - Media Player - " + $('#oc-title').html();
       
       // set the title on the top of the player
-      if($('#oc-creator').html() === ""){
-        
-      $('#stage-title').html("<h2>"+ $('#oc-title').html()+ "</h2>");
-      }
-      else{
-        $('#stage-title').html("<h2>"+ $('#oc-title').html() + " by " + $('#oc-creator').html() + "</h2>");
+      $('#oc_title').html($('#oc-title').html());
+      
+      // set date
+      if(!($('#oc-creator').html() === "")){
+        $('#oc_title_from').html(" by " + $('#oc-creator').html());
       }
       
+      if($('#oc-date').html() === ""){
+        $('#oc_title_from').html(" by " + $('#oc-creator').html());
+      }
+      else {
+        $('#oc_title_from').html(" by " + $('#oc-creator').html() + " ("+$('#oc-date').html()+")");
+      }
       // set the abstract
       $('#abstract').html($('#oc-abstract').html());
 
       // Get the video url
       var videoUrl = $('#oc-video-url').html();
-      Opencast.Player.setMediaURL(videoUrl);
+      Opencast.Player.setMediaURL(videoUrl,"");
 
       // Set the caption
       Opencast.Player.setCaptionsURL('dfxp/matterhorn.dfxp.xml');
@@ -39,57 +45,34 @@ Opencast.Watch = (function () {
       // set embed field
       var watchUrl = window.location.href;
       var embedUrl = watchUrl.replace(/watch.html/g, "embed.html")
-      var embed = $('#oc-embed').val().replace(/src_url/g, embedUrl);
-      $('#oc-embed').val(embed);
+//      var embed = $('#oc-embed').val().replace(/src_url/g, embedUrl);
+//      $('#oc-embed').val(embed);
       
+      Opencast.Scrubber.init();
       
-      $('#info').append("<a href=" + restEndpoint + ">XML</a>&nbsp;");
+ //     $('#info').append("<a href=" + restEndpoint + ">XML</a>&nbsp;");
       
-      $('#info').append("<a href=" + watchUrl.replace(/watch.html/g, "multi.html") + ">Multi</a>");
+ //     $('#info').append("<a href=" + watchUrl.replace(/watch.html/g, "multi.html") + ">Multi</a>");
 
       
     });
-
+  }
+  
+  function hoverSegment(segmentId){
     
-    Opencast.ariaSlider.init();
-    $(document).ariaParse();
-    var simpleEdit = fluid.inlineEdit("#simpleEdit", {
-      selectors : {
-        text: ".editableText",
-        editContainer: "#editorContainer",
-        edit: "#editField"
-      },
-      useTooltip : true,
-      tooltipDelay : 500
-    });
-
-    $("#editorContainer").attr("className", "oc_editTime");
-    $("#editField").attr("className", "oc_editTime");
-    
-    $("#btn_cc").attr('role', 'button');
-    $("#btn_cc").attr('aria-pressed', 'false'); 
-
-    $("#btn_volume").attr('role', 'button');
-    $("#btn_volume").attr('aria-pressed', 'false');
-
-    $("#btn_play_pause").attr('role', 'button');
-    $("#btn_play_pause").attr('aria-pressed', 'false');
-
-    $("#btn_skip_backward").attr('role', 'button');
-    $("#btn_skip_backward").attr('aria-labelledby', 'Skip Backward');
-
-    $("#btn_rewind").attr('role', 'button');
-    $("#btn_rewind").attr('aria-labelledby', 'Rewind');
-
-    $("#btn_fast_forward").attr('role', 'button');
-    $("#btn_fast_forward").attr('aria-labelledby', 'Fast Forward');
-
-    $("#btn_skip_forward").attr('role', 'button');
-    $("#btn_skip_forward").attr('aria-labelledby', 'Skip Forward');
+    $("#"+segmentId).toggleClass("segment-holder");
+    $("#"+segmentId).toggleClass("segment-holder-over");
     
   }
-    
-    return {
-      onPlayerReady : onPlayerReady
+  
+  function seekSegment(seconds){
+   // Opencast.Player.setPlayhead(seconds);
+    Videodisplay.seek(seconds);
+  }
+
+  return {
+      onPlayerReady : onPlayerReady,
+      hoverSegment : hoverSegment,
+      seekSegment : seekSegment
     };
 }());

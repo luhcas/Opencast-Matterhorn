@@ -5,6 +5,69 @@
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ns2="http://search.opencastproject.org/">
 	<xsl:template match="/">
 
+		<div id="oc_seek-slider" >
+		  <table width="100%">
+		    <tbody>
+		      <tr class="player-chrome">
+		        <td class="progress-segment" width="100%">
+		   <table class="segments" cellspacing="0" cellpadding="0">
+		     <tr>
+		       <xsl:for-each select="ns2:search-results/ns2:result/ns2:segments/ns2:mediaSegments">
+		       <xsl:if test="(../../ns2:mediapackage/@duration) > ./@time">
+		       <td 
+		         class="segment-holder" 
+		         style="width: 15px;" 
+		         >
+		         <xsl:attribute name="id">segment<xsl:value-of select="position()" /></xsl:attribute>
+		         <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
+		         <xsl:attribute name="onmouseout">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
+		         <xsl:attribute name="onclick">Opencast.Watch.seekSegment(<xsl:value-of select="floor(./@time div 1000)" />)</xsl:attribute>
+		         <xsl:attribute name="style">width: <xsl:value-of select="./@duration div (../../ns2:mediapackage/@duration) * 100" />%;</xsl:attribute>
+		       </td>
+		       </xsl:if>
+		       </xsl:for-each>
+		     </tr>
+		   </table>
+		   <div class="progress-list">
+		            <span class="load-progress" value="0"></span>
+		            <span id="play-progress" class="play-progress" value="0" style="width: 0%;"></span>
+		            <span id="scubber-channel" class="scrubber-channel">
+		              <button id="scrubber" class="scrubber-button" ></button>
+		              <div id="draggable" class="ui-widget-content" style="left: 0%;"></div>
+		            </span>
+		          </div>
+		        </td>
+		      </tr>
+		    </tbody>
+		  </table>
+		</div>
+		
+		
+		 <div id="oc_slides-sections" class="oc_slidesDisplayBlock">
+		    <div id="segments-holder" class="oc-segments-holder">
+		      <div class="oc-segments">
+		        <table class="oc-segment-table">
+		              <tr>
+		          <xsl:for-each select="ns2:search-results/ns2:result/ns2:segments/ns2:mediaSegments">
+		            <td class="oc-segment-td">
+		              <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
+		              <xsl:attribute name="onmouseout">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
+		              <a>
+		                <xsl:attribute name="href">javascript:Videodisplay.seek(<xsl:value-of
+		                  select="floor(./@time div 1000)" />)</xsl:attribute>
+		                <img height="83">
+		                  <xsl:attribute name="src"><xsl:value-of
+		                    select="./ns2:previews/ns2:preview[@type='presentation']" /></xsl:attribute>
+		                </img>
+		              </a>
+		            </td>
+		          </xsl:for-each>
+		          </tr>
+		        </table>
+		      </div>
+		    </div>
+      </div> 
+
 		<xsl:for-each
 			select="ns2:search-results/ns2:result/ns2:mediapackage/media/track">
 
@@ -16,7 +79,6 @@
 					</div>
 
 				</xsl:if>
-				<br />
 			</xsl:for-each>
 
 		</xsl:for-each>
@@ -42,6 +104,16 @@
 				</xsl:otherwise>
 			</xsl:choose>
 		</div>
+		
+		<div id="oc-date" style="display: none">
+      <xsl:choose>
+        <xsl:when test="ns2:search-results/ns2:result/ns2:dcCreated">
+          <xsl:value-of select="ns2:search-results/ns2:result/ns2:dcCreated" />
+        </xsl:when>
+        <xsl:otherwise>
+        </xsl:otherwise>
+      </xsl:choose>
+    </div>
 
 		<div id="oc-abstract" style="display: none">
 			<xsl:choose>
@@ -54,30 +126,5 @@
 			</xsl:choose>
 		</div>
 		
-		<div id="segments-holder" class="oc-segments-holder">
-			<div class="oc-segments">
-				<table class="oc-segment-table">
-				      <tr>
-					<xsl:for-each select="ns2:search-results/ns2:result/ns2:segments/ns2:mediaSegments">
-			      <td class="oc-segment-td">
-			        <a>
-	              <xsl:attribute name="href">javascript:Videodisplay.seek(<xsl:value-of
-	                select="./@time div 1000" />)</xsl:attribute>
-	                <xsl:if test='10>floor((./@time div 1000) div 3600)'>0</xsl:if><xsl:value-of select="floor((./@time div 1000) div 3600)" />:<xsl:if test='10>floor(((./@time div 1000) - ((floor((./@time div 1000) div 3600))*3600)) div 60)'>0</xsl:if><xsl:value-of select="floor(((./@time div 1000) - ((floor((./@time div 1000) div 3600))*3600)) div 60)" />:<xsl:if test='10>(./@time div 1000) - ((floor((./@time div 1000) div 3600))*3600) - ((floor(((./@time div 1000) - ((floor((./@time div 1000) div 3600))*3600)) div 60))*60)'>0</xsl:if><xsl:value-of select="(./@time div 1000) - ((floor((./@time div 1000) div 3600))*3600) - ((floor(((./@time div 1000) - ((floor((./@time div 1000) div 3600))*3600)) div 60))*60)" />
-		          </a>
-			        <a>
-								<xsl:attribute name="href">javascript:Videodisplay.seek(<xsl:value-of
-								  select="./@time div 1000" />)</xsl:attribute>
-			          <img>
-			            <xsl:attribute name="src"><xsl:value-of
-			              select="./ns2:previews/ns2:preview[@type='presentation']" /></xsl:attribute>
-			          </img>
-		          </a>
-			      </td>
-			    </xsl:for-each>
-			    </tr>
-				</table>
-			</div>
-	  </div>
-	</xsl:template>
+			</xsl:template>
 </xsl:stylesheet>

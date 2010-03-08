@@ -20,7 +20,9 @@ Opencast.Watch = (function () {
   function initialize() {
     var mediaPackageId = Opencast.engage.getMediaPackageId();
     
+     
      var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
+     restEndpoint = "http://video.lernfunk.de/REST/ws/episode?id="+mediaPackageId;
 
     $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function() {
       // some code to run after the mapping

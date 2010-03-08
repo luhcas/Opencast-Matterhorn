@@ -98,22 +98,11 @@ Opencast.ariaSlider = (function ()
         // if target is the volume slider
         if (target.id === sliderVolume)
         {
-            target.setAttribute('aria-valuetext', 'Volume: ' + Math.round(newValue) + '%');
-            Opencast.Player.doSetVolume(newValue / 100);
+        	target.setAttribute('aria-valuetext', 'Volume: ' + Math.round(newValue) + '%');
             Opencast.Player.setPlayerVolume(newValue / 100);
-            if (value !== 0 && Opencast.Player.getccBool() === false)
-            {
-                Opencast.Player.setClosedCaptionsOff();
-            }
         }
         
-        // if target is the seek slider
-        if (target.id === sliderSeek)
-        {
-            target.setAttribute('aria-valuetext', 'Time: ' + newValue);
-            $("#seekLabel").text('Seek: ' + newValue);
-            Videodisplay.seek(newValue);
-        }
+        
     }
     
     /**
@@ -122,6 +111,7 @@ Opencast.ariaSlider = (function ()
         @param Target target, Number value 
     */
     function changeValueFromVideodisplay(target, value) {
+    	
     	var ratio = calibrate(target);
         var min = parseFloat(target.getAttribute('aria-valuemin'));
         var max = parseFloat(target.getAttribute('aria-valuemax'));
@@ -133,14 +123,11 @@ Opencast.ariaSlider = (function ()
         // if target is the volume slider
         if (target.id === sliderVolume)
         {
-            target.setAttribute('aria-valuetext', 'Volume: ' + Math.round(newValue) + '%');
-            $("#slider_volume_Rail").attr("title", 'Volume ' + Math.round(newValue) + '%');
-        }
-        // if target is the seek slider
-        if (target.id === sliderSeek)
-        {
-            target.setAttribute('aria-valuetext', 'Time ' + newValue);
-        }
+        	
+        	target.setAttribute('aria-valuetext', 'Volume: ' + Math.round(newValue) + '%');
+           $("#slider_volume_Rail").attr("title", 'Volume ' + Math.round(newValue) + '%');
+         }
+        
     }
     
     /**
@@ -148,8 +135,9 @@ Opencast.ariaSlider = (function ()
         @description Change the position of the slider.
         @param Target target, Number value 
     */
-    function increment(target, byChunk) {
-        var newValue = parseFloat(target.getAttribute('aria-valuenow')) + (byChunk ? 10 : 1); 
+    function increment(target, byChunk) 
+    {
+    	var newValue = parseFloat(target.getAttribute('aria-valuenow')) + (byChunk ? 10 : 1); 
         changeValue(target, newValue);
     }
 
@@ -158,9 +146,10 @@ Opencast.ariaSlider = (function ()
         @description Change the position of the slider.
         @param Target target, Number value 
     */
-    function decrement(target, byChunk) {
-        var newValue = parseFloat(target.getAttribute('aria-valuenow')) - (byChunk ? 10 : 1); 
-        changeValue(target, newValue);	
+    function decrement(target, byChunk) 
+    {
+    	var newValue = parseFloat(target.getAttribute('aria-valuenow')) - (byChunk ? 10 : 1); 
+        changeValue(target, newValue);
     }
 
     /**
@@ -322,32 +311,7 @@ Opencast.ariaSlider = (function ()
         };
     }
     
-    /**
-        @memberOf Opencast.ariaSlider
-        @description Set the attributes of the seek slider.
-        @param Element slider 
-    */
-    function setSeekHandlers(slider) 
-    {
-        slider.setAttribute('aria-labelledby', 'seekLabel');
-        slider.setAttribute('aria-valuemin', '0');
-        slider.setAttribute('aria-valuenow', '0');
-        slider.setAttribute('aria-valuetext', '0');
-        slider.setAttribute('role', 'slider');
-        slider.parentNode.onmousedown = handleRailMouseDown;
-        slider.onmousedown = handleThumbMouseDown;
-        slider.onkeydown = handleKeyDown;
-        slider.parentNode.onfocus = 
-        function (event) { //temp IE fix
-            event = event || window.event;
-            var target = event.target || event.srcElement;
-            var thumb = getElementId(target.id.replace(/Rail/, 'Thumb'));
-            if (thumb)
-            {
-                thumb.focus();
-            }
-        };
-    }
+  
 
     /**
         @memberOf Opencast.ariaSlider
@@ -378,7 +342,6 @@ Opencast.ariaSlider = (function ()
     function init() 
     {
         setVolumeHandlers(getElementId(sliderVolume));
-        setSeekHandlers(getElementId(sliderSeek));
     }
 
     return {
@@ -398,7 +361,6 @@ Opencast.ariaSlider = (function ()
         changeValueFromVideodisplay : changeValueFromVideodisplay,
         updateValueIndicator: updateValueIndicator,
         setVolumeHandlers: setVolumeHandlers,
-        setSeekHandlers : setSeekHandlers,
         cancelEvent : cancelEvent,
         init : init
     };

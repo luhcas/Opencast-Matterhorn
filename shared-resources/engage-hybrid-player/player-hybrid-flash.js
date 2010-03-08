@@ -211,7 +211,7 @@ Opencast.FlashVersion = (function ()
         } else {
         	str += '<span id="oc-video-left">';
     			str += '<object id="oc_Videodisplay" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="400" height="320" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">';
-    			str += '<param name ="movie" value="engage-hybrid-player/Videodisplay.swf" >';
+    			str += '<param name ="movie" value="Videodisplay.swf" >';
     			str += '<param name="quality"value="high">';
     			str += '<param name="allowScriptAccess" value="sameDomain" />';
     			str += '<param name="bgcolor" value="#000000" />';
@@ -253,7 +253,7 @@ Opencast.FlashVersion = (function ()
         } else {
         	str += '<span id="oc_video-right">';
         	str += '<object id="oc_VideodisplaySecond" codeBase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab" width="400" height="320" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">';
-    		str += '<param name ="movie" value="engage-hybrid-player/Videodisplay.swf" >';
+    		str += '<param name ="movie" value="Videodisplay.swf" >';
     		str += '<param name="quality"value="high">';
     		str += '<param name="allowScriptAccess" value="sameDomain" />';
     		str += '<param name="bgcolor" value="#000000" />';
@@ -387,7 +387,7 @@ Opencast.FlashVersion = (function ()
         document.title = document.title.slice(0, 47) + " - Flash Player Installation";
         var MMdoctitle = document.title;
         AC_FL_RunContent(
-            "src", "engage-hybrid-player/playerProductInstall",
+            "src", "playerProductInstall",
             "FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
             "width", "400",
             "height", "320",
@@ -407,7 +407,7 @@ Opencast.FlashVersion = (function ()
         var strGo = '<div id="oc-video-display-container">';
         document.write(strGo);
         AC_FL_RunContent(
-            "src", "engage-hybrid-player/Videodisplay.swf",
+            "src", "Videodisplay.swf",
             "width", "400",
             "height", "320",
             "id", "oc_Videodisplay",
