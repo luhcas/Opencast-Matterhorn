@@ -21,13 +21,13 @@ if [ "$RESPONSE" != "y" ]; then
 fi
 
 # remove vga2usb driver
-lsmod | grep "^vga2usb"
+lsmod | grep "^vga2usb" &> /dev/null
 if [ "$?" -ne 0 ]; then
   sudo rmmod vga2usb
 fi
 
 # restore appropriate sources.list
-sudo mv /etc/apt/sources.list.backup /etc/apt/sources.list
+sudo mv /etc/apt/sources.list.backup /etc/apt/sources.list &> /dev/null
 
 # remove the configuration that starts matterhorn on boot
 sudo rm -f /etc/init/matterhorn.conf
@@ -42,6 +42,6 @@ sudo rm -rf /opencast
 sudo rm -f /usr/lib/libjv4linfo.so
 
 # remove the user, all with all the
-sudo userdel -rf $USERNAME
+sudo userdel -r -f $USER
 
 echo "Done uninstalling Matterhorn Capture Agent." 

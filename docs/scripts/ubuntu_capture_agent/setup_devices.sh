@@ -75,7 +75,7 @@ for dev in $(seq 0 1 $devAryLen)
         sudo echo "v4l2-ctl -s NTSC-M -d $device" >> /home/$USERNAME/matterhorn_capture.sh
     fi
 
-    if [ "$name" == "${supportedDevices[0]}" -o "$name" == "${supportedDevices[5]}"]; then
+    if [ "$name" == "${supportedDevices[0]}" -o "$name" == "${supportedDevices[5]}" ]; then
       sudo v4l2-ctl -d $device -i 2
       echo "v4l2-ctl -d $device -i 2" >> /home/$USERNAME/matterhorn_capture.sh
       echo "Please use input 2 with the $name."

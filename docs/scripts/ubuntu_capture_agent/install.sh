@@ -165,7 +165,7 @@ echo "done"
 echo -n "Setting up Felix..."
 cd /home/$USERNAME
 if [ -d ${FELIX_HOME} ]; then
-  sudo -u $USERNAME rm -rf ${FELIX_HOME}
+  sudo rm -rf ${FELIX_HOME}
 fi
 sudo -u $USERNAME curl -s ${FELIX_URL} | sudo -u $USERNAME tar xz
 sudo -u $USERNAME mkdir ${FELIX_HOME}/load
@@ -212,7 +212,7 @@ echo "expect fork" >> matterhorn.conf
 echo "script" >> matterhorn.conf
 echo "make -C /home/$USERNAME/drivers reload" >> matterhorn.conf
 echo "/home/$USERNAME/matterhorn_capture.sh" >> matterhorn.conf
-echo "exec /bin/bash ${FELIX_HOME}/bin/start_matterhorn.sh &" >> matterhorn.conf
+echo "su matterhorn -c \"/bin/bash /home/matterhorn/felix-framework-2.0.4/bin/start_matterhorn.sh\" &" >> matterhorn.conf
 echo "end script" >> matterhorn.conf
 sudo mv matterhorn.conf /etc/init
 
