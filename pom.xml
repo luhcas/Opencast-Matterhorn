@@ -792,7 +792,18 @@
       </roles>
       <timezone>+1</timezone>
     </developer>
-  </developers>
+    <developer>
+      <id>jemden</id>
+      <name>Johannes Emden</name>
+      <email>johannes.emden@uni-osnabrueck.de</email>
+      <organization>University of Osnabrueck</organization>
+      <organizationUrl>http://www.uni-osnabrueck.de/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+ </developers>
   
   <contributors><!-- TODO? --></contributors>
                  
