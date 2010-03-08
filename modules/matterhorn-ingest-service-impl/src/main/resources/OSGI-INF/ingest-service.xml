@@ -2,7 +2,9 @@
 <component name="org.opencastproject.ingest.api.IngestService" immediate="true">
   <implementation class="org.opencastproject.ingest.impl.IngestServiceImpl" />
   <property name="service.description" value="Ingest Service" />
-  <property name="event.topics" value="org/opencastproject/conductor/ACK" />
+  <property name="event.topics">
+  	org/opencastproject/conductor/ACK
+  </property>
   <service>
     <provide interface="org.opencastproject.ingest.api.IngestService" />
     <provide interface="org.osgi.service.cm.ManagedService" />

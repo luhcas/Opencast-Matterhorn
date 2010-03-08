@@ -6,7 +6,9 @@
     <provide interface="org.opencastproject.conductor.api.ConductorService" />
     <provide interface="org.osgi.service.event.EventHandler" />
   </service>
-  <property name="event.topics" type="String" value="org/opencastproject/ingest/INGEST_DONE" />
+  <property name="event.topics">
+  	org/opencastproject/ingest/INGEST_DONE
+  </property>
   <reference cardinality="1..1" interface="org.opencastproject.workflow.api.WorkflowService" name="WorkflowService" 
   policy="static" bind="setWorkflowService" />
   <reference name="EVENT" interface="org.osgi.service.event.EventAdmin" 
