@@ -22,9 +22,6 @@ import java.text.NumberFormat;
 /**
  * This serial id generator creates id's that are not unique across distributed
  * installations of a node but return padded representations.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: SerialIdBuilder.java 2641 2009-03-09 21:38:04Z ced $
  */
 public class SerialIdBuilder implements IdBuilder {
 

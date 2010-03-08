@@ -18,9 +18,6 @@ package org.opencastproject.media.mediapackage;
 
 /**
  * This exception is thrown along with problems concerning metadata.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MetadataException.java 678 2008-08-05 14:56:22Z wunden $
  */
 public class MetadataException extends Exception {
 

@@ -23,9 +23,6 @@ import java.io.OutputStream;
 /**
  * Interface describing a media package packager, that will, for example, pack a media package structure into a jar
  * file.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackagePackager.java 1644 2008-12-08 15:47:09Z wunden $
  */
 public interface MediaPackagePackager {
 

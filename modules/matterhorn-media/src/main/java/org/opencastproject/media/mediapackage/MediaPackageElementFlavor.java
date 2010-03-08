@@ -233,8 +233,6 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
 
   /**
    * Helper class to store type/subtype equivalents for a given element type.
-   * 
-   * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
    */
   private class ElementTypeEquivalent implements Serializable {
 

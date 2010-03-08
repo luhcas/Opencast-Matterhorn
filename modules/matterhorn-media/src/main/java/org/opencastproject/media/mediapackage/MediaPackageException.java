@@ -19,9 +19,6 @@ package org.opencastproject.media.mediapackage;
 /**
  * General exception that is raised when problems occur while manipulating media packages like adding or removing media
  * package elements, creating manifests or moving and copying the media package itself.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageException.java 678 2008-08-05 14:56:22Z wunden $
  */
 public class MediaPackageException extends Exception {
 

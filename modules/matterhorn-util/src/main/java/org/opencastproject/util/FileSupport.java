@@ -662,8 +662,6 @@ public class FileSupport {
   /**
    * Special implementation of the stream helper that will swallow some of the
    * videosegmenter's output erroneously written to stderr.
-   * 
-   * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
    */
   private static class LinkErrorStreamHelper extends StreamHelper {
 

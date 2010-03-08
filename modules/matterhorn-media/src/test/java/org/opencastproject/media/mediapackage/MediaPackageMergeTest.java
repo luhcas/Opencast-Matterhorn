@@ -36,9 +36,6 @@ import java.util.List;
 
 /**
  * Test case to make sure media package support works as expected.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageMergeTest.java 2905 2009-07-15 16:16:05Z ced $
  */
 public class MediaPackageMergeTest {
 

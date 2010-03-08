@@ -19,8 +19,6 @@ package org.opencastproject.inspection.impl.api;
 
 /**
  * This class bundles technical information about an audio stream.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class AudioStreamMetadata extends StreamMetadata {
 

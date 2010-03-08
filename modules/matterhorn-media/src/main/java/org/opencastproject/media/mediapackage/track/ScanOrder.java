@@ -20,8 +20,6 @@ import org.opencastproject.util.EnumSupport;
 
 /**
  * Defines the different types of scan order.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public enum ScanOrder {
 

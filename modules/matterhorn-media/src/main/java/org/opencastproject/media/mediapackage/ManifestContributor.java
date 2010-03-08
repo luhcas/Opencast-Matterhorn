@@ -21,8 +21,6 @@ import org.w3c.dom.Node;
 
 /**
  * To be implemented by everyone who wishes to contribute to the media package manifest.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public interface ManifestContributor {
 

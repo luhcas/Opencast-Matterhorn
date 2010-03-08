@@ -30,8 +30,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageElementBuilderTest.java 2905 2009-07-15 16:16:05Z ced $
+ * Test ccase for the {@link MediaPackageElementBuilderImpl}.
  */
 public class MediaPackageElementBuilderTest {
 

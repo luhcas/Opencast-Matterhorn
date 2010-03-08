@@ -18,9 +18,6 @@ package org.opencastproject.media.mediapackage.identifier;
 
 /**
  * General exception that is raised when problems occur while retreiving or dealing with handles.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: HandleException.java 238 2009-07-29 09:53:32Z jholtzman $
  */
 public class HandleException extends Exception {
 

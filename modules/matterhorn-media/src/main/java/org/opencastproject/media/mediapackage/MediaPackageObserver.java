@@ -18,9 +18,6 @@ package org.opencastproject.media.mediapackage;
 
 /**
  * Interface for classes that are observing a media package.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageObserver.java 678 2008-08-05 14:56:22Z wunden $
  */
 public interface MediaPackageObserver {
 

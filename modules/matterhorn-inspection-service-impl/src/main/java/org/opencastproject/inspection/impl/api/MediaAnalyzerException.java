@@ -16,11 +16,8 @@
 
 package org.opencastproject.inspection.impl.api;
 
-
 /**
  * Exception thrown by the {@link MediaAnalyzer}.
- * 
- * @author Christoph E. Drießen <ced@neopoly.de>
  */
 public class MediaAnalyzerException extends RuntimeException {
 

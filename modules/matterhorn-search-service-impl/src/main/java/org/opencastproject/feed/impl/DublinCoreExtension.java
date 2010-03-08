@@ -422,9 +422,6 @@ public class DublinCoreExtension implements FeedExtension {
 
   /**
    * Class used to module dublin core subjects.
-   * 
-   * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
-   * @version $Id: DublinCoreExtension.java 3108 2009-10-08 09:39:39Z wunden $
    */
   public class Subject {
 

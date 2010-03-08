@@ -18,8 +18,6 @@ package org.opencastproject.media.mediapackage.track;
 
 /**
  * Defines the different types of frame rate modes.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public enum FrameRateMode {
 

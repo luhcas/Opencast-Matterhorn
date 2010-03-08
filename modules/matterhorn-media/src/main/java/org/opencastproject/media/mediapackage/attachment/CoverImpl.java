@@ -26,11 +26,7 @@ import java.net.URI;
 
 /**
  * This is a specialized implementation for a media package cover.
- * 
- * @author Tobias Wunden
- * @version $Id
  */
-
 public class CoverImpl extends AttachmentImpl implements Cover {
 
   /** Serial Version UID */

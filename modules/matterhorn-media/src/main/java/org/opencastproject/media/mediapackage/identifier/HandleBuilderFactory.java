@@ -22,9 +22,6 @@ import org.opencastproject.util.ConfigurationException;
  * This class is used to create instances of a handle builder. To specify your own implementation of the handle builder,
  * you simply have to provide the class name of the desired implementation by setting the system property
  * <code>opencast.handlebuilder</code> accordingly.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: HandleBuilderFactory.java 238 2009-07-29 09:53:32Z jholtzman $
  */
 public class HandleBuilderFactory {
 

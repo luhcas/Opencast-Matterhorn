@@ -27,9 +27,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * A metadata catalog could for example contain a reference to the track that
  * was used to extract the data contained in it.
  * </p>
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageReference.java 1736 2008-12-19 11:19:43Z wunden $
  */
 @XmlJavaTypeAdapter(MediaPackageReferenceImpl.Adapter.class)
 public interface MediaPackageReference {

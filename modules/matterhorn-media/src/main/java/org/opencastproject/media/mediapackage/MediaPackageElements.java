@@ -19,11 +19,6 @@ package org.opencastproject.media.mediapackage;
 /**
  * Contains all well-known definitions, names and symbols REPLAY relies on as constants for an easy usage and as a
  * documentation.
- * <p/>
- * todo This class (not the definitions!) may be seen as an implementation detail and therefore should reside in the
- * common module. This issue is to be discussed.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public interface MediaPackageElements {
 

@@ -20,9 +20,6 @@ import org.opencastproject.util.ChecksumType;
 
 /**
  * Class description goes here.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageReader.java 678 2008-08-05 14:56:22Z wunden $
  */
 public interface MediaPackageReader {
 

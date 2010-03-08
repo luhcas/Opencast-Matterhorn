@@ -15,7 +15,6 @@
  */
 package org.opencastproject.media.mediapackage;
 
-
 import org.w3c.dom.Document;
 
 import java.io.IOException;
@@ -25,8 +24,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 /**
- * @author wunden
- * 
+ * Definition for a plain xml catalog.
  */
 public interface XMLCatalog extends Catalog {
 

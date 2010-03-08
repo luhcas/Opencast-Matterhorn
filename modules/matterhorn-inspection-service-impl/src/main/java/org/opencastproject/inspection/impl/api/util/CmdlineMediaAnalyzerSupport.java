@@ -26,8 +26,6 @@ import java.io.File;
 /**
  * Support class for {@link org.opencastproject.inspection.impl.api.MediaAnalyzer} implementations that use an external
  * program for analysis.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public abstract class CmdlineMediaAnalyzerSupport implements MediaAnalyzer {
 

@@ -18,8 +18,6 @@ package org.opencastproject.media.mediapackage.track;
 
 /**
  * Describes colorimetry.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class Colorimetry {
 

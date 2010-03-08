@@ -21,9 +21,6 @@ import org.w3c.dom.Node;
 
 /**
  * Interface for an arbitrary xml element.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: XmlElement.java 1106 2008-09-10 17:58:46Z wunden $
  */
 public interface XmlElement {
 

@@ -25,9 +25,6 @@ import java.io.File;
 
 /**
  * Utility class used for media package handling.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageSupport.java 1883 2009-01-21 17:54:57Z wunden $
  */
 public class MediaPackageSupport {
 
@@ -40,8 +37,6 @@ public class MediaPackageSupport {
    * <li><code>Skip</code> skips elements from the source media package with matching identifer</li>
    * <li><code>Fail</code> fail in case of conflicting identifier</li>
    * </ul>
-   * 
-   * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
    */
   public enum MergeMode {
     Merge, Replace, Skip, Fail

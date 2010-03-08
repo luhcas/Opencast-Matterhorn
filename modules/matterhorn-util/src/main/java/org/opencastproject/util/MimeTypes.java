@@ -306,8 +306,6 @@ public class MimeTypes {
   /**
    * Reads the mime type definitions from the xml file comming with this
    * distribution.
-   * 
-   * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
    */
   private static class MimeTypeParser extends DefaultHandler {
 

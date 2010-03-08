@@ -349,8 +349,6 @@ public final class MimeType implements Cloneable, Comparable<MimeType>, Serializ
 
   /**
    * Helper class to store type/subtype equivalents for a given mime type.
-   * 
-   * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
    */
   private class MIMEEquivalent {
 

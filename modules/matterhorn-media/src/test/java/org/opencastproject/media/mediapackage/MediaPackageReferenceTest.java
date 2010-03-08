@@ -30,9 +30,6 @@ import java.net.URISyntaxException;
 
 /**
  * Test case for media package references.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageReferenceTest.java 1769 2009-01-05 11:19:35Z wunden $
  */
 public class MediaPackageReferenceTest extends AbstractMediaPackageTest {
 

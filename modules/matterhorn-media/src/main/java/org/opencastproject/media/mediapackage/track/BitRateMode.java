@@ -20,8 +20,6 @@ import org.opencastproject.util.EnumSupport;
 
 /**
  * Contains the several bitrate modes.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public enum BitRateMode {
 

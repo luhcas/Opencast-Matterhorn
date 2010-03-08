@@ -23,9 +23,6 @@ import org.opencastproject.util.ConfigurationException;
  * implementation of the id builder, you simply have to provide the class name
  * of the desired implementation by setting the system property
  * <code>opencast.idbuilder</code> accordingly.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: IdBuilderFactory.java 2479 2009-02-20 18:34:46Z wunden $
  */
 public class IdBuilderFactory {
 

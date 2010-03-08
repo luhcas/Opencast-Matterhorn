@@ -23,8 +23,6 @@ import org.opencastproject.media.mediapackage.track.ScanType;
 
 /**
  * This class bundles technical information about a video stream.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class VideoStreamMetadata extends StreamMetadata {
 

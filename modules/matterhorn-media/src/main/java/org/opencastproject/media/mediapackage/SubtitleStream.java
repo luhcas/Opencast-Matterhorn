@@ -17,9 +17,7 @@
 package org.opencastproject.media.mediapackage;
 
 /**
- * A stream containing subtitles. todo at the moment for demonstration purposes only. define methods if needed
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
+ * A stream containing subtitles. todo at the moment for demonstration purposes only. define methods if needed.
  */
 public interface SubtitleStream extends Stream {
 

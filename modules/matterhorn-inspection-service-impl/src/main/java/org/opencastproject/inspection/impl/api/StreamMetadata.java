@@ -19,8 +19,6 @@ package org.opencastproject.inspection.impl.api;
 
 /**
  * Common metadata for all kind of embedded media streams.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class StreamMetadata extends TemporalMetadata {
 

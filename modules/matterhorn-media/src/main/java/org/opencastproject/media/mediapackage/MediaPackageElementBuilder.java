@@ -24,9 +24,6 @@ import java.net.URI;
 /**
  * A media package element builder provides factory methods for the creation and loading of media package elements from
  * files.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageElementBuilder.java 678 2008-08-05 14:56:22Z wunden $
  */
 public interface MediaPackageElementBuilder {
 

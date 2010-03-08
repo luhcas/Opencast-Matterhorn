@@ -26,9 +26,6 @@ import org.opencastproject.util.ConfigurationException;
  * The factory can be configured by specifying the concrete implementation class through the system property
  * <code>org.opencastproject.mediapackage.elementbuilder</code>.
  * </p>
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MediaPackageElementBuilderFactory.java 678 2008-08-05 14:56:22Z wunden $
  */
 public final class MediaPackageElementBuilderFactory {
 

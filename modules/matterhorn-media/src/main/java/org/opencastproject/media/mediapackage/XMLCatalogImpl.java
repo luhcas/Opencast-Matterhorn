@@ -604,8 +604,6 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
 
   /**
    * Element representation.
-   * 
-   * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
    */
   protected class CatalogEntry implements XmlElement, Comparable<CatalogEntry>, Serializable {
 
@@ -804,8 +802,6 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
 
   /**
    * Manages the prefix - namespace bindings.
-   * 
-   * @author Christoph E. Driessen <ced@neopoly.de>
    */
   protected static class Bindings implements Serializable {
 

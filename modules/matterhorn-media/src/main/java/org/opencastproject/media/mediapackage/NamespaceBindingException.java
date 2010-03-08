@@ -19,8 +19,6 @@ package org.opencastproject.media.mediapackage;
 
 /**
  * Exception thrown by {@link CatalogImpl} in case of any namespace binding errors.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class NamespaceBindingException extends RuntimeException {
 

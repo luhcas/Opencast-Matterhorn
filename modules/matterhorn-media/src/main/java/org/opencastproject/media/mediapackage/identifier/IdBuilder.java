@@ -18,9 +18,6 @@ package org.opencastproject.media.mediapackage.identifier;
 
 /**
  * Interface that describes the methods of an id builder.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: IdBuilder.java 2500 2009-02-22 14:31:25Z wunden $
  */
 public interface IdBuilder {
 

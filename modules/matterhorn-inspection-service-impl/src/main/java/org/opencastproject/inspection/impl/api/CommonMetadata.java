@@ -22,8 +22,6 @@ import java.util.Locale;
 
 /**
  * Common metadata for all kinds of media objects.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 class CommonMetadata {
 

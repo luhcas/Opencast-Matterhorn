@@ -20,8 +20,6 @@ import org.opencastproject.media.mediapackage.track.BitRateMode;
 
 /**
  * Common metadata for all kind of temporal media.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public abstract class TemporalMetadata extends CommonMetadata {
 
