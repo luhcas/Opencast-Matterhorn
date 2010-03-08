@@ -28,10 +28,6 @@ import java.io.OutputStream;
 
 /**
  * Utility class, dealing with files.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @author Christoph E. Drießen <ced@neopoly.de>
- * @version $Id: FileSupport.java 2681 2009-03-11 09:16:23Z wunden $
  */
 public class FileSupport {
 

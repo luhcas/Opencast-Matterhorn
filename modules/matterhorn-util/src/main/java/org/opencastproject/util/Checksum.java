@@ -32,9 +32,6 @@ import javax.xml.bind.annotation.XmlValue;
 
 /**
  * This class stores value and type of a generated checksum.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: Checksum.java 1639 2008-12-08 15:45:01Z wunden $
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlType(name = "checksum", namespace = "http://mediapackage.opencastproject.org")
@@ -190,4 +187,5 @@ public final class Checksum implements Serializable {
     }
     return new Checksum(convertToHex(checksum.digest()), type);
   }
+  
 }

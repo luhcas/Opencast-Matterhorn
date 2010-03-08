@@ -21,12 +21,6 @@ import java.lang.reflect.Method;
 
 /**
  * Enum utility methods.
- * 
- * todo The proper location for this class would be the Common module but that
- * will cause a cyclic module dependency.. Think about!
- * 
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class EnumSupport {
 
@@ -45,7 +39,8 @@ public class EnumSupport {
    *          the value to look up
    * @return the matching enum value or null if none matches
    */
-  public static <E extends Enum> E fromString(Class<E> enumClass, String value) {
+  @SuppressWarnings("unchecked")
+  public static <E extends Enum<?>> E fromString(Class<E> enumClass, String value) {
     if (value == null)
       return null;
     value = value.trim();

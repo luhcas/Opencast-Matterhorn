@@ -20,10 +20,6 @@ import java.io.File;
 
 /**
  * <code>PathSupport</code> is a helper class to deal with filesystem paths.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @author Christoph E. Drießen <ced@neopoly.de>
- * @version $Id: PathSupport.java 679 2008-08-05 15:00:37Z wunden $
  */
 
 public class PathSupport {

@@ -33,9 +33,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * This class implements the mime type. Note that mime types should not be
  * instantiated directly but be retreived from the mime type registry
  * {@link MimeTypes}.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MimeType.java 1086 2008-09-10 10:52:24Z wunden $
  */
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlType(name="mimetype", namespace="http://mediapackage.opencastproject.org")

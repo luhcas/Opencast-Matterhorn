@@ -27,8 +27,6 @@ import java.io.InputStreamReader;
 
 /**
  * Contains operations concerning IO.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
  */
 public class IoSupport {
 

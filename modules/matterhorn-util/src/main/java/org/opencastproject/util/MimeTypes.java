@@ -41,9 +41,6 @@ import javax.xml.parsers.SAXParserFactory;
  * providing resolving mime types through all system components.
  * <p>
  * The registry is initialized from the file <code>org.opencastproject.util.MimeTypes.xml</code>.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: MimeTypes.java 1637 2008-12-08 10:44:18Z ced $
  */
 public class MimeTypes {
 

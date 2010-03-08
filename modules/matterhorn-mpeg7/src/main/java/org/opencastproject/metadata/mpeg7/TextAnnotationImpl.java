@@ -16,20 +16,23 @@
 
 package org.opencastproject.metadata.mpeg7;
 
-import org.opencastproject.util.NumberSupport;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * TODO: Comment me!
+ * Implementation of text annotations.
  */
 public class TextAnnotationImpl implements TextAnnotation {
+
+  /** Number formatter, used to deal with relevance values in a locale independent way */
+  private static DecimalFormatSymbols standardSymbols = new DecimalFormatSymbols();
 
   /** Confidence value */
   protected float confidence = -1.0f;
@@ -45,6 +48,10 @@ public class TextAnnotationImpl implements TextAnnotation {
 
   /** Free text annotations */
   protected List<FreeTextAnnotation> freeTextAnnotations = null;
+  
+  static {
+    standardSymbols.setDecimalSeparator('.');
+  }
 
   /**
    * Creates a new text annotation.
@@ -149,11 +156,13 @@ public class TextAnnotationImpl implements TextAnnotation {
    * @see org.opencastproject.media.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
    */
   public Node toXml(Document document) {
+    DecimalFormat format = new DecimalFormat("0.0");
+    format.setDecimalFormatSymbols(standardSymbols);
     Element node = document.createElement("TextAnnotation");
     if (confidence >= 0.0)
-      node.setAttribute("confidence", NumberSupport.format(confidence, "0.0"));
+      node.setAttribute("confidence", format.format(confidence));
     if (relevance >= 0.0)
-      node.setAttribute("relevance", NumberSupport.format(relevance, "0.0"));
+      node.setAttribute("relevance", format.format(relevance));
     if (language != null)
       node.setAttribute("xml:lang", language);
 

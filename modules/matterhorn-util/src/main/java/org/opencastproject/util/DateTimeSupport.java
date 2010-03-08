@@ -22,8 +22,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 /**
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: DateTimeSupport.java 679 2008-08-05 15:00:37Z wunden $
+ * Utility class used to convert from and to <code>UTC</code> time.
  */
 public class DateTimeSupport {
 

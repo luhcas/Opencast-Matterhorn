@@ -29,8 +29,8 @@ import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
-import org.opencastproject.util.StringSupport;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -334,22 +334,22 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
   protected Feed addSeries(Feed feed, String[] query, SearchResultItem resultItem) {
     Date d = resultItem.getDcCreated();
 
-    if (!StringSupport.isEmpty(resultItem.getDcTitle()))
+    if (!StringUtils.isEmpty(resultItem.getDcTitle()))
       feed.setTitle(resultItem.getDcTitle());
 
-    if (!StringSupport.isEmpty(resultItem.getDcAbstract()))
+    if (!StringUtils.isEmpty(resultItem.getDcAbstract()))
       feed.setDescription(resultItem.getDcAbstract());
 
-    if (!StringSupport.isEmpty(resultItem.getDcCreator()))
+    if (!StringUtils.isEmpty(resultItem.getDcCreator()))
       feed.addAuthor(new PersonImpl(resultItem.getDcCreator()));
 
-    if (!StringSupport.isEmpty(resultItem.getDcContributor()))
+    if (!StringUtils.isEmpty(resultItem.getDcContributor()))
       feed.addContributor(new PersonImpl(resultItem.getDcContributor()));
 
-    if (!StringSupport.isEmpty(resultItem.getDcAccessRights()))
+    if (!StringUtils.isEmpty(resultItem.getDcAccessRights()))
       feed.setCopyright(resultItem.getDcAccessRights());
 
-    if (!StringSupport.isEmpty(resultItem.getDcLanguage()))
+    if (!StringUtils.isEmpty(resultItem.getDcLanguage()))
       feed.setLanguage(resultItem.getDcLanguage());
 
     feed.setUri(resultItem.getId());
@@ -360,7 +360,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
 
      //Set the cover image
      String coverUrl = null;
-     if (!StringSupport.isEmpty(resultItem.getCover())) {
+     if (!StringUtils.isEmpty(resultItem.getCover())) {
        coverUrl = resultItem.getCover();
        feed.setImage(new ImageImpl(coverUrl, resultItem.getDcTitle()));
      }
@@ -406,7 +406,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     dcExtension.setIdentifier(resultItem.getId());
 
     // Set contributor
-    if (!StringSupport.isEmpty(resultItem.getDcContributor())) {
+    if (!StringUtils.isEmpty(resultItem.getDcContributor())) {
       for (String contributor : resultItem.getDcContributor().split(";;")) {
         entry.addContributor(new PersonImpl(contributor));
         dcExtension.addContributor(contributor);
@@ -414,7 +414,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     }
 
     // Set creator
-    if (!StringSupport.isEmpty(resultItem.getDcCreator())) {
+    if (!StringUtils.isEmpty(resultItem.getDcCreator())) {
       for (String creator : resultItem.getDcCreator().split(";;")) {
         if (iTunesEntry.getAuthor() == null)
           iTunesEntry.setAuthor(creator);
@@ -424,17 +424,17 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     }
 
     // Set publisher
-    if (!StringSupport.isEmpty(resultItem.getDcPublisher())) {
+    if (!StringUtils.isEmpty(resultItem.getDcPublisher())) {
       dcExtension.addPublisher(resultItem.getDcPublisher());
     }
 
     // Set rights
-    if (!StringSupport.isEmpty(resultItem.getDcAccessRights())) {
+    if (!StringUtils.isEmpty(resultItem.getDcAccessRights())) {
       dcExtension.setRights(resultItem.getDcAccessRights());
     }
 
     // Set abstract
-    if (!StringSupport.isEmpty(resultItem.getDcAbstract())) {
+    if (!StringUtils.isEmpty(resultItem.getDcAbstract())) {
       String summary = resultItem.getDcAbstract();
       entry.setDescription(new ContentImpl(summary));
       iTunesEntry.setSummary(summary);
@@ -442,7 +442,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     }
 
     // Set the language
-    if (!StringSupport.isEmpty(resultItem.getDcLanguage())) {
+    if (!StringUtils.isEmpty(resultItem.getDcLanguage())) {
       dcExtension.setLanguage(resultItem.getDcLanguage());
     }
 
@@ -455,7 +455,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     // TODO: Finish dc support
 
     // Set format
-    // if (!StringSupport.isEmpty(resultItem.getMediaType())) {
+    // if (!StringUtils.isEmpty(resultItem.getMediaType())) {
     // dcExtension.setFormat(resultItem.getMediaType());
     // }
 
@@ -469,7 +469,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
 
     //Set the cover image
     String coverUrl = null;
-    if (!StringSupport.isEmpty(resultItem.getCover())) {
+    if (!StringUtils.isEmpty(resultItem.getCover())) {
       coverUrl = resultItem.getCover();
       setImage(entry, coverUrl);
     }

@@ -31,6 +31,7 @@ import de.schlichtherle.io.FileOutputStream;
  * Provides static methods for compressing and extracting zip files using zip64 extensions when necessary.
  */
 public class ZipUtil {
+  
   private static final Logger logger = LoggerFactory.getLogger(ZipUtil.class);
 
   /**

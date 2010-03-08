@@ -16,8 +16,6 @@
 
 package org.opencastproject.metadata.dublincore;
 
-import static org.opencastproject.util.Tool.cast;
-
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.XMLCatalogImpl;
@@ -270,6 +268,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     super.bindPrefix(prefix, namespaceName);
   }
 
+  @SuppressWarnings("unchecked")
   public List<String> get(EName property, final String language) {
     if (property == null)
       throw new IllegalArgumentException("Property name must not be null");
@@ -278,12 +277,12 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     if (!isLoaded())
       loadCatalogData();
     if (LANGUAGE_ANY.equals(language)) {
-      return cast(CollectionUtils.collect(getValuesAsList(property),
+      return (List<String>)CollectionUtils.collect(getValuesAsList(property),
               new Transformer() {
                 public Object transform(Object o) {
                   return ((CatalogEntry) o).getValue();
                 }
-              }));
+              });
     } else {
       final List<String> values = new ArrayList<String>();
       final boolean langUndef = LANGUAGE_UNDEFINED.equals(language);
@@ -299,12 +298,13 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     }
   }
 
+  @SuppressWarnings("unchecked")
   public List<DublinCoreValue> get(EName property) {
     if (property == null)
       throw new IllegalArgumentException("Property name must not be null");
     if (!isLoaded())
       loadCatalogData();
-    return cast(CollectionUtils.collect(getValuesAsList(property),
+    return (List<DublinCoreValue>)CollectionUtils.collect(getValuesAsList(property),
             new Transformer() {
               public Object transform(Object o) {
                 CatalogEntry entry = (CatalogEntry) o;
@@ -312,7 +312,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
                 return new DublinCoreValue(entry.getValue(),
                         lang != null ? lang : LANGUAGE_UNDEFINED);
               }
-            }));
+            });
   }
 
   public String getFirst(EName property, String language) {

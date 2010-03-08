@@ -27,9 +27,6 @@ import java.io.PrintWriter;
 
 /**
  * Helper class to handle Runtime.exec() output.
- * 
- * @author Joerg Waitelonis <joerg@yovisto.com>
- * @version $Id: StreamHelper.java 2681 2009-03-11 09:16:23Z wunden $
  */
 public class StreamHelper extends Thread {
 

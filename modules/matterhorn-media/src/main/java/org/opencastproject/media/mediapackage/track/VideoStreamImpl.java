@@ -18,8 +18,8 @@ package org.opencastproject.media.mediapackage.track;
 
 import org.opencastproject.media.mediapackage.MediaPackageSerializer;
 import org.opencastproject.media.mediapackage.VideoStream;
-import org.opencastproject.util.StringSupport;
 
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -99,7 +99,7 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
           XPathException {
     // Create stream
     String sid = (String) xpath.evaluate("@id", node, XPathConstants.STRING);
-    if (StringSupport.isEmpty(sid))
+    if (StringUtils.isEmpty(sid))
       sid = streamIdHint;
     VideoStreamImpl vs = new VideoStreamImpl(sid);
 

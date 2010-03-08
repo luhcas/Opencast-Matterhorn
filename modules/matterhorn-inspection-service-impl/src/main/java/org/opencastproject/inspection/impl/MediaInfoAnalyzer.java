@@ -22,10 +22,9 @@ import org.opencastproject.inspection.impl.api.util.CmdlineMediaAnalyzerSupport;
 import org.opencastproject.media.mediapackage.track.BitRateMode;
 import org.opencastproject.media.mediapackage.track.FrameRateMode;
 import org.opencastproject.media.mediapackage.track.ScanType;
-import org.opencastproject.util.MapBuilder;
-import org.opencastproject.util.ReflectionSupport;
-import org.opencastproject.util.StringSupport;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +36,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -47,10 +47,8 @@ import java.util.regex.Pattern;
  * <p/>
  * <strong>Please note</strong> that this implementation is stateful and cannot be shared or used multiple times.
  * <p/>
- * Also this implementation does not keep control-, text- or other non-audio or video streams and purposefully
- * ignores them during the <code>postProcess()</code> step.
- * 
- * @author Christoph E. Driessen <ced@neopoly.de>
+ * Also this implementation does not keep control-, text- or other non-audio or video streams and purposefully ignores
+ * them during the <code>postProcess()</code> step.
  */
 public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
@@ -59,45 +57,58 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
   private static final Logger log_ = LoggerFactory.getLogger(MediaInfoAnalyzer.class);
 
-  private static final Map<String, Setter> CommonStreamProperties = new MapBuilder<String, Setter>().put("Format",
-          new Setter("format", "string")).put("Format_Profile", new Setter("formatProfile", "string")).put(
-          "Format/Info", new Setter("formatInfo", "string")).put("Format/Url", new Setter("formatURL", "url")).put(
-          "Duration", new Setter("duration", "duration")).put("BitRate", new Setter("bitRate", "float")).put(
-          "BitRate_Mode", new Setter("bitRateMode", "bitRateMode")).put("BitRate_Minimum",
-          new Setter("bitRateMinimum", "float")).put("BitRate_Maximum", new Setter("bitRateMaximum", "float")).put(
-          "BitRate_Nominal", new Setter("bitRateNominal", "float")).put("Resolution", new Setter("resolution", "int"))
-          .put("Encoded_Date", new Setter("encodedDate", "date")).toMap();
+  private static final Map<String, Setter> CommonStreamProperties = new HashMap<String, Setter>();
 
-  private static final Map<StreamSection, Map<String, Setter>> Parser = new MapBuilder<StreamSection, Map<String, Setter>>()
-          .put(
-                  StreamSection.general,
-                  new MapBuilder<String, Setter>().put("FileName", new Setter("fileName", "string")).put(
-                          "FileExtension", new Setter("fileExtension", "string")).put("FileSize",
-                          new Setter("size", "long")).put("Duration", new Setter("duration", "duration")).put(
-                          "OverallBitRate", new Setter("bitRate", "float")).put("Encoded_Date",
-                          new Setter("encodedDate", "date")).toMap()).put(
-                  StreamSection.video,
-                  new MapBuilder<String, Setter>().putAll(CommonStreamProperties)
-                          //
-                          .put("Width", new Setter("frameWidth", "int"))
-                          .put("Height", new Setter("frameHeight", "int")).put("PixelAspectRatio",
-                                  new Setter("pixelAspectRatio", "float")).put("FrameRate",
-                                  new Setter("frameRate", "float")).put("FrameRate_Mode",
-                                  new Setter("frameRateMode", "frameRateMode")).put("ScanType",
-                                  new Setter("scanType", "scanType")).put("ScanOrder",
-                                  new Setter("scanOrder", "scanOrder")).toMap()).put(
-                  StreamSection.audio,
-                  new MapBuilder<String, Setter>().putAll(CommonStreamProperties)
-                  //
-                          .put("Channel(s)", new Setter("channels", "int")).put("ChannelPositions",
-                                  new Setter("channelPositions", "string")).put("SamplingRate",
-                                  new Setter("samplingRate", "int")).put("SamplingCount",
-                                  new Setter("samplingCount", "long")).toMap()).toMap();
+  private static final Map<StreamSection, Map<String, Setter>> Parser = new HashMap<StreamSection, Map<String, Setter>>();
 
   private StreamSection streamSection;
 
   /** Holds the current metadata set. */
   private Object currentMetadata;
+
+  static {
+    CommonStreamProperties.put("Format", new Setter("format", "string"));
+    CommonStreamProperties.put("Format_Profile", new Setter("formatProfile", "string"));
+    CommonStreamProperties.put("Format/Info", new Setter("formatInfo", "string"));
+    CommonStreamProperties.put("Format/Url", new Setter("formatURL", "url"));
+    CommonStreamProperties.put("Duration", new Setter("duration", "duration"));
+    CommonStreamProperties.put("BitRate", new Setter("bitRate", "float"));
+    CommonStreamProperties.put("BitRate_Mode", new Setter("bitRateMode", "bitRateMode"));
+    CommonStreamProperties.put("BitRate_Minimum", new Setter("bitRateMinimum", "float"));
+    CommonStreamProperties.put("BitRate_Maximum", new Setter("bitRateMaximum", "float"));
+    CommonStreamProperties.put("BitRate_Nominal", new Setter("bitRateNominal", "float"));
+    CommonStreamProperties.put("Resolution", new Setter("resolution", "int"));
+    CommonStreamProperties.put("Encoded_Date", new Setter("encodedDate", "date"));
+
+    Map<String, Setter> generalStreamSection = new HashMap<String, Setter>();
+    generalStreamSection.put("FileName", new Setter("fileName", "string"));
+    generalStreamSection.put("FileExtension", new Setter("fileExtension", "string"));
+    generalStreamSection.put("FileSize", new Setter("size", "long"));
+    generalStreamSection.put("Duration", new Setter("duration", "duration"));
+    generalStreamSection.put("OverallBitRate", new Setter("bitRate", "float"));
+    generalStreamSection.put("Encoded_Date", new Setter("encodedDate", "date"));
+
+    Map<String, Setter> videoStreamSection = new HashMap<String, Setter>();
+    videoStreamSection.putAll(CommonStreamProperties);
+    videoStreamSection.put("Width", new Setter("frameWidth", "int"));
+    videoStreamSection.put("Height", new Setter("frameHeight", "int"));
+    videoStreamSection.put("PixelAspectRatio", new Setter("pixelAspectRatio", "float"));
+    videoStreamSection.put("FrameRate", new Setter("frameRate", "float"));
+    videoStreamSection.put("FrameRate_Mode", new Setter("frameRateMode", "frameRateMode"));
+    videoStreamSection.put("ScanType", new Setter("scanType", "scanType"));
+    videoStreamSection.put("ScanOrder", new Setter("scanOrder", "scanOrder"));
+            
+    Map<String, Setter> audioStreamSection = new HashMap<String, Setter>();
+    audioStreamSection.putAll(CommonStreamProperties);
+    audioStreamSection.put("Channel(s)", new Setter("channels", "int"));
+    audioStreamSection.put("ChannelPositions", new Setter("channelPositions", "string"));
+    audioStreamSection.put("SamplingRate", new Setter("samplingRate", "int"));
+    audioStreamSection.put("SamplingCount", new Setter("samplingCount", "long"));
+    
+    Parser.put(StreamSection.general, generalStreamSection);
+    Parser.put(StreamSection.video, videoStreamSection);
+    Parser.put(StreamSection.audio, audioStreamSection);
+  }
 
   // --------------------------------------------------------------------------------------------
 
@@ -107,25 +118,23 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
   }
 
   /**
-   * Allows configuration
-   * {@inheritDoc}
+   * Allows configuration {@inheritDoc}
+   * 
    * @see org.opencastproject.inspection.impl.api.MediaAnalyzer#setConfig(java.util.Map)
    */
   public void setConfig(Map<String, Object> config) {
     if (config != null) {
       if (config.containsKey(CONFIG_MEDIAINFO_BINARY)) {
-        String binary = (String)config.get(CONFIG_MEDIAINFO_BINARY);
+        String binary = (String) config.get(CONFIG_MEDIAINFO_BINARY);
         setBinary(binary);
-        log_.info("MediaInfoAnalyzer config binary: "+binary);
+        log_.info("MediaInfoAnalyzer config binary: " + binary);
       }
     }
   }
 
-/* NOT used as far as I can see  -AZ
-  public MediaInfoAnalyzer(String binary) {
-    super(binary);
-  }
-*/
+  /*
+   * NOT used as far as I can see -AZ public MediaInfoAnalyzer(String binary) { super(binary); }
+   */
 
   /* Analysis */
 
@@ -174,7 +183,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
     // Match case insenstive (?i)
     return Pattern.compile("(?i)" + section.name() + "( \\#[\\d]+)?").matcher(line).matches();
   }
-  
+
   /**
    * Filter out any non-video or audio streams.
    */
@@ -182,13 +191,15 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
   protected void postProcess() {
     // Filter out "strange" streams. These can be e.g. media control streams.
     for (Iterator<VideoStreamMetadata> i = metadata.getVideoStreamMetadata().iterator(); i.hasNext();) {
-      if (i.next().getBitRate() == null) i.remove();
+      if (i.next().getBitRate() == null)
+        i.remove();
     }
     for (Iterator<AudioStreamMetadata> i = metadata.getAudioStreamMetadata().iterator(); i.hasNext();) {
-      if (i.next().getBitRate() == null) i.remove();
+      if (i.next().getBitRate() == null)
+        i.remove();
     }
- }
-  
+  }
+
   /* Version check */
 
   @Override
@@ -266,22 +277,23 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
     private Setter(String property, String type) {
       this.property = property;
-      this.converterMethodName = CONVERTER_METHOD_PREFIX + StringSupport.capitalize(type);
+      this.converterMethodName = CONVERTER_METHOD_PREFIX + StringUtils.capitalize(type);
     }
 
     public void set(Object target, String value) {
       try {
         Method converter = MediaInfoAnalyzer.class.getDeclaredMethod(converterMethodName, String.class);
         Object converted = converter.invoke(null, value);
-        ReflectionSupport.setProperty(property, target, converted);
+        BeanUtils.setProperty(target, property, converted);
       } catch (NoSuchMethodException e) {
-        //throw new RuntimeException(e);
+        // throw new RuntimeException(e);
       } catch (InvocationTargetException e) {
         throw new RuntimeException(e);
       } catch (IllegalAccessException e) {
         throw new RuntimeException(e);
       }
     }
+
   }
 
   private enum StreamSection {

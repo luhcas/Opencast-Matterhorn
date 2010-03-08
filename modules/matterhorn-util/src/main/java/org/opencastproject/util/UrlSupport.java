@@ -22,11 +22,7 @@ import java.util.TreeSet;
 
 /**
  * <code>UrlSupport</code> is a helper class to deal with urls.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: UrlSupport.java 679 2008-08-05 15:00:37Z wunden $
  */
-
 public class UrlSupport {
   public static final String DEFAULT_BASE_URL = "http://localhost:8080";
   

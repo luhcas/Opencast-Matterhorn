@@ -18,8 +18,14 @@ package org.opencastproject.util;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
-/** @author Christoph E. Driessen <ced@neopoly.de> */
+/**
+ * Helper class to execute processes on the host system and outside of the java vm. Since there are problems with
+ * reading stdin, stdout and stderr that need to be taken into account when running on various platforms, this helper
+ * class is used to deal with those.
+ */
 public abstract class ProcessExecutor {
 
   private boolean redirectErrorStream = true;
@@ -30,8 +36,11 @@ public abstract class ProcessExecutor {
   }
 
   protected ProcessExecutor(String command, String options) {
-    commandLine = new ArrayBuilder<String>(String.class).add(command).add(
-        options.split("\\s+")).toArray();
+    List<String> commandLineList = new ArrayList<String>();
+    commandLineList.add(command);
+    for (String s : options.split("\\s+"))
+      commandLineList.add(s);
+    commandLine = commandLineList.toArray(new String[commandLineList.size()]);
   }
 
   protected ProcessExecutor(String[] commandLine) {
@@ -48,8 +57,7 @@ public abstract class ProcessExecutor {
     this.redirectErrorStream = redirectErrorStream;
   }
 
-  protected ProcessExecutor(String command, String options,
-      boolean redirectErrorStream) {
+  protected ProcessExecutor(String command, String options, boolean redirectErrorStream) {
     this(command, options);
     this.redirectErrorStream = redirectErrorStream;
   }

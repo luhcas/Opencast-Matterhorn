@@ -20,9 +20,6 @@ import java.io.File;
 
 /**
  * Class description goes here.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: UnknownFileTypeException.java 678 2008-08-05 14:56:22Z wunden $
  */
 public class UnknownFileTypeException extends Exception {
 

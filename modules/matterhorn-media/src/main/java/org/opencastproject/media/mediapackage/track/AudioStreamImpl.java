@@ -18,7 +18,6 @@ package org.opencastproject.media.mediapackage.track;
 
 import org.opencastproject.media.mediapackage.AudioStream;
 import org.opencastproject.media.mediapackage.MediaPackageSerializer;
-import org.opencastproject.util.StringSupport;
 
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
@@ -163,7 +162,7 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
           XPathException {
     // Create stream
     String sid = (String) xpath.evaluate("@id", node, XPathConstants.STRING);
-    if (StringSupport.isEmpty(sid))
+    if (StringUtils.isEmpty(sid))
       sid = streamIdHint;
     AudioStreamImpl as = new AudioStreamImpl(sid);
 

@@ -25,7 +25,6 @@ import org.opencastproject.feed.api.FeedExtension;
 import org.opencastproject.feed.api.Image;
 import org.opencastproject.feed.api.Link;
 import org.opencastproject.feed.api.Person;
-import org.opencastproject.util.CollectionSupport;
 
 import com.sun.syndication.feed.module.DCModule;
 import com.sun.syndication.feed.module.DCModuleImpl;
@@ -126,7 +125,8 @@ public class RomeFeed extends SyndFeedImpl {
         List<SyndLink> links = toRomeLinks(entry.getLinks());
         e.setLinks(links);
         // todo this strategy seems to work but is unproven
-        e.setLink(CollectionSupport.first(links).getHref());
+        if (links.size() > 0)
+          e.setLink(links.get(0).getHref());
         romeEntries.add(e);
       }
       setEntries(romeEntries);

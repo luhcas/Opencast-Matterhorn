@@ -19,9 +19,6 @@ package org.opencastproject.util;
 /**
  * This exception is thrown on various occasions where the system detects a
  * state of malconfiguration.
- * 
- * @author Tobias Wunden <tobias.wunden@id.ethz.ch>
- * @version $Id: ConfigurationException.java 678 2008-08-05 14:56:22Z wunden $
  */
 public class ConfigurationException extends RuntimeException {
 
