@@ -74,7 +74,8 @@ public class ComposerRestEndpointTest {
     HttpResponse postResponse = client.execute(postEncode);
     Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
     String postResponseXml = EntityUtils.toString(postResponse.getEntity());
-    String receiptId = getReceiptId(postResponseXml);
+    //String receiptId = getReceiptId(postResponseXml);
+    String receiptId = postResponseXml;
     
     // Poll the service for the status of the receipt.
     String status = null;
