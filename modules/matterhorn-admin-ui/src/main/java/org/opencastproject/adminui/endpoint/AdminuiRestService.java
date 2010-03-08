@@ -22,6 +22,7 @@ import org.opencastproject.adminui.api.RecordingDataViewListImpl;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
@@ -333,7 +334,12 @@ public class AdminuiRestService {
         item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
         item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
         item.setCaptureAgent(events[i].getDevice());
-        item.setRecordingStatus(captureAdminService.getRecordingState(events[i].getID()).getState());
+        Recording r = captureAdminService.getRecordingState(events[i].getID());
+        String recordingState = RecordingState.UNKNOWN;
+        if(r != null){
+          recordingState = r.getState();
+        }
+        item.setRecordingStatus(recordingState);
         item.setProcessingStatus("scheduled");
         item.setDistributionStatus("not distributed");
         out.add(item);

@@ -65,7 +65,6 @@ function init() {
     'license':      new FormField('license'),
     'startdate':    new FormField(['startDate', 'startTimeHour', 'startTimeMin'], true, {'getValue':getStartDate,'setValue':setStartDate,'checkValue':checkStartDate,'dispValue':getStartDateDisplay,label:'label-startdate',errorField:'missing-startdate'}),
     'duration':     new FormField(['durationHour', 'durationMin'], true, {'getValue':getDuration,'setValue':setDuration,'checkValue':checkDuration,'dispValue':getDurationDisplay,'label':'label-duration','errorField':'missing-duration'}), //returns a date incremented by duration.
-    'resources':    new FormField(['audio','audioVideo','audioScreen', 'audioVideoScreen'], true, {'getValue':getInputs,'setValue':setInputs,'checkValue':checkInputs}),
     'attendees':    new FormField('attendees', true, {'getValue':getAgent,'setValue':setAgent,'checkValue':checkAgent}),
     'device':       new FormField('attendees')
   };
@@ -89,7 +88,8 @@ function init() {
   
   $('#submitButton').click(SchedulerUI.submitForm);
   $('#cancelButton').click(SchedulerUI.cancelForm);
-
+  
+  $('#attendees').change(SchedulerUI.handleAgentChange);
   
   SchedulerUI.loadKnownAgents();
   
@@ -227,6 +227,7 @@ SchedulerUI.getURLParams = function(param) {
  */
 SchedulerUI.loadEvent = function(doc) {
   SchedulerForm.populate(doc);
+  $('#attendees').change();
 };
 
 SchedulerUI.toggleDetails = function(elSwitch, el) {
@@ -264,6 +265,30 @@ SchedulerUI.handleDelete = function(){
   $('#i18n_del_msg').text(i18n.del.msg(title, series, '(' + creator + ')'));
   $('#stage').hide();
   $('#deleteBox').show();
+}
+
+SchedulerUI.handleAgentChange = function(elm){
+  var agent = elm.target.value;
+  $.get('/capture-admin/rest/agents/' + agent + '/capabilities',
+        function(d){
+          var capabilities = [];
+          $.each($('entry', d), function(a, i){
+            var s = $(i).attr('key').toLowerCase();
+            s = s.charAt(0).toUpperCase() + s.slice(1);
+            capabilities.push(s);
+          });
+          if(capabilities.length){
+            SchedulerUI.displayCapabilities(capabilities);
+          }
+        });
+}
+
+SchedulerUI.displayCapabilities = function(capa){
+  $('#input-list').empty();
+  $.each(capa, function(i, v){
+    $('#input-list').append('<input type="checkbox" id="' + v + '" value="' + v + '" checked="checked"><label for="audio">' + v + '</label>');
+  });
+  SchedulerForm.formFields.resources = new FormField(capa, true, {'getValue':getInputs,'setValue':setInputs,'checkValue':checkInputs, errorField:'missing-input'});
 }
 
 /* ======================== SchedulerForm ======================== */
@@ -637,17 +662,14 @@ function checkDuration(){
  *  @return {string} Comma seperated string of inputs
  */
 function getInputs(){
-  var selected = false;
+  var selected = [];
   for(var el in this.fields){
     var e = this.fields[el];
     if(e[0] && e[0].checked){
-      selected = e;
-      break;
+      selected.push(e.val());
     }
   }
-  if(selected){
-    this.value = selected.val();
-  }
+  this.value = selected.toString();
   return this.value;
 }
 
@@ -661,7 +683,7 @@ function setInputs(value){
   }
   for(var el in this.fields){
     var e = this.fields[el];
-    if(e[0] && e.val() == value.resources){
+    if(e[0] && value.resources.toLowerCase().indexOf(e.val().toLowerCase()) != -1){
       e[0].checked = true;
     }
   }

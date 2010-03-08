@@ -87,6 +87,9 @@
                 <li id="notice-offline" class="missing-fields-item" style="display:none;">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>The <a href="javascript:document.getElementById('attendees').focus();">capture agent</a> you previously selected is currently offline. You may want to select a different capture agent.
                 </li>
+                <li id="missing-input" class="missing-fields-item">
+                  <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose an <a href="javascript:document.getElementById('input-list').firstChild.focus();">input</a> to record from.
+                </li>
               </ul>
             </div>
           </div>
@@ -303,15 +306,8 @@
                   <li class="required">
                     <label class="fl-label" id="label-input">Input(s):</label>
                     <div class="form-radio-group" style="float: left; width: 300px;">
-                      <input type="radio" id="audio" name="inputs" value="AUDIO" checked="checked">
-                      <label for="audio">Audio only</label>
+                      <div id="input-list"></div>
                       <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
-                      <input type="radio" id="audioVideo" name="inputs" value="AUDIO,VIDEO">
-                      <label for="audioVideo">Audio, Video</label>
-                      <input type="radio" id="audioScreen" name="inputs" value="AUDIO,SCREEN">
-                      <label for="audioScreen">Audio, Screen</label>
-                      <input type="radio" id="audioVideoScreen" name="inputs" value="AUDIO,VIDEO,SCREEN">
-                      <label for="audioVideoScreen">Audio, Video, Screen</label>
                     </div>
                   </li>
                 </ul>
