@@ -33,7 +33,8 @@ CAPTURE_PROPS=$1/conf/services/org.opencastproject.capture.impl.ConfigurationMan
 cp /home/$USERNAME/capture-agent/modules/matterhorn-capture-agent-impl/src/test/resources/config/capture.properties $CAPTURE_PROPS
 
 touch /home/$USERNAME/95-perso.rules
-touch /home/$USERNAME/matterhorn_capture.sh
+rm -f /home/$USERNAME/device_config.sh
+touch /home/$USERNAME/device_config.sh
 allDevices=""
 let devAryLen=${#devices[@]}-1
 for dev in $(seq 0 1 $devAryLen)
@@ -69,19 +70,19 @@ for dev in $(seq 0 1 $devAryLen)
       if [[ "$mode" == "p" || "$mode" == "P" ]];
         then
           sudo v4l2-ctl -s 255 -d $device 2> /dev/null # set to PAL mode
-          echo "sudo v4l2-ctl -s 255 -d $device" >> /home/$USERNAME/matterhorn_capture.sh
+          echo "sudo v4l2-ctl -s 255 -d $device" >> /home/$USERNAME/device_config.sh
       else
         sudo v4l2-ctl -s NTSC-M -d $device 2> /dev/null
-        sudo echo "v4l2-ctl -s NTSC-M -d $device" >> /home/$USERNAME/matterhorn_capture.sh
+        sudo echo "v4l2-ctl -s NTSC-M -d $device" >> /home/$USERNAME/device_config.sh
     fi
 
     if [ "$name" == "${supportedDevices[0]}" -o "$name" == "${supportedDevices[5]}" ]; then
       sudo v4l2-ctl -d $device -i 2
-      echo "v4l2-ctl -d $device -i 2" >> /home/$USERNAME/matterhorn_capture.sh
+      echo "v4l2-ctl -d $device -i 2" >> /home/$USERNAME/device_config.sh
       echo "Please use input 2 with the $name."
     else
       sudo v4l2-ctl -d $device -i 0
-      echo "v4l2-ctl -d $device -i 0" >> /home/$USERNAME/matterhorn_capture.sh
+      echo "v4l2-ctl -d $device -i 0" >> /home/$USERNAME/device_config.sh
       echo "Please use input 0 with the $name."
     fi
   fi
@@ -90,7 +91,7 @@ done
 sudo mv /home/$USERNAME/95-perso.rules /etc/udev/rules.d
 sudo chown root:video /etc/udev/rules.d/95-perso.rules
 
-chmod 755 /home/$USERNAME/matterhorn_capture.sh
+chmod 755 /home/$USERNAME/device_config.sh
 
 audioDevice=hw:$(sudo arecord -l| grep Analog |  cut --delimiter=' ' -f 2 | sed  's/://g')
 cleanAudioDevice=`echo $audioDevice | sed s/\://g`
@@ -109,13 +110,14 @@ if [ "$directory" != "" ];
     OC_DIR="$directory"
 fi
 sudo mkdir -p $OC_DIR
-sudo mkdir -p $OC_DIR/cache
-sudo mkdir -p $OC_DIR/config
-sudo mkdir -p $OC_DIR/volatile
-sudo mkdir -p $OC_DIR/cache/captures
+sudo chown $USERNAME:$USERNAME /opencast
+sudo -u $USERNAME mkdir -p $OC_DIR/cache
+sudo -u $USERNAME mkdir -p $OC_DIR/config
+sudo -u $USERNAME mkdir -p $OC_DIR/volatile
+sudo -u $USERNAME mkdir -p $OC_DIR/cache/captures
 
 # define capture agent name by using the hostname
-echo "capture.agent.name=`hostname`" >> $CAPTURE_PROPS
+sed -i s/capture\.agent\.name.*/capture\.agent\.name=`hostname`/g $CAPTURE_PROPS
 
 # Prompt for core hostname. default to localhost:8080
 echo -n "Please enter Matterhorn Core hostname (default: http://localhost:8080) "

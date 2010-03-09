@@ -206,13 +206,15 @@ cd $HOME
 echo "# start the matterhorn capture agent" >> matterhorn.conf
 echo "env FELIX_HOME=${FELIX_HOME}" >> matterhorn.conf
 echo "env M2_REPO=${M2_REPO}" >> matterhorn.conf
+echo "env JAVA_HOME=${JAVA_HOME}" >> matterhorn.conf
 echo "start on runlevel [2345]" >> matterhorn.conf
 echo "stop on runlevel [!2345]" >> matterhorn.conf
 echo "expect fork" >> matterhorn.conf
 echo "script" >> matterhorn.conf
 echo "make -C /home/$USERNAME/drivers reload" >> matterhorn.conf
-echo "/home/$USERNAME/matterhorn_capture.sh" >> matterhorn.conf
-echo "su matterhorn -c \"/bin/bash /home/matterhorn/felix-framework-2.0.4/bin/start_matterhorn.sh\" &" >> matterhorn.conf
+echo "/home/$USERNAME/device_config.sh" >> matterhorn.conf
+echo "su matterhorn -c \"exec /bin/bash /home/matterhorn/felix-framework-2.0.4/bin/start_matterhorn.sh\" &" >> matterhorn.conf
 echo "end script" >> matterhorn.conf
 sudo mv matterhorn.conf /etc/init
+sudo chown root:root /etc/init/matterhorn.conf
 
