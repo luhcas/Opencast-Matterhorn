@@ -147,40 +147,6 @@ sudo cp -rf matterhorn_trunk/docs/felix/conf/* mnt/opt/matterhorn/felix/conf/
 
 export OC_REV=`svn info matterhorn_trunk | awk /Revision/ | cut -d " " -f 2`
 
-#echo "=========================="
-#echo "=====Fetching FFMpeg======"
-#echo "=========================="
-
-#check out ffmpeg
-#if [ -e ffmpeg ]; then
-#  cd ffmpeg
-#  svn up -r 20641
-#  cd libswscale
-#  svn up -r 30380
-#  cd ../..
-#else
-#  svn checkout -r 20641 svn://svn.ffmpeg.org/ffmpeg/trunk ffmpeg
-#  cd ffmpeg
-#  rm -rf libswscale
-#  svn checkout -r 30380 svn://svn.ffmpeg.org/mplayer/trunk/libswscale libswscale
-#  cd ..
-#fi
-#sudo cp -r ffmpeg mnt/home/opencast/
-
-#echo "=========================="
-#echo "=====Fetching x264========"
-#echo "=========================="
-
-#check out x264
-#if [ -e x264 ]; then
-#  cd x264
-#  git pull
-#  cd ..
-#else
-#  git clone -n git://git.videolan.org/x264.git
-#fi
-#sudo cp -r x264 mnt/home/opencast/
-
 echo "=========================="
 echo "=====Building Opencast===="
 echo "=========================="
@@ -244,7 +210,9 @@ echo "================================="
 
 #archive it all for download
 echo "Building archive opencast-$OC_REV.zip."
-zip -db -r -9 opencast-$OC_REV.zip ubuntu-vmw6
+mv ubuntu-vmw6 opencast-$OC_REV
+zip -db -r -9 opencast-$OC_REV.zip opencast-$OC_REV
+rm -rf opencast-$OC_REV
 
 #copy it to the web
 #scp opencast-$OC_REV.zip cab938@aries:/var/www/opencast/unofficial-vms/
