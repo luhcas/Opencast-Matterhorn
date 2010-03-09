@@ -15,20 +15,16 @@
  */
 package org.opencastproject.capture.impl;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringReader;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.ListIterator;
-import java.util.Properties;
+import org.opencastproject.capture.impl.jobs.CleanCaptureJob;
+import org.opencastproject.capture.impl.jobs.JobParameters;
+import org.opencastproject.capture.impl.jobs.PollCalendarJob;
+import org.opencastproject.capture.impl.jobs.StartCaptureJob;
+import org.opencastproject.capture.impl.jobs.StopCaptureJob;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.MediaPackageException;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
@@ -65,6 +61,21 @@ import org.quartz.SimpleTrigger;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.ListIterator;
+import java.util.Properties;
 
 /**
  * Scheduler implementation class.  This class is responsible for retrieving iCal
@@ -150,6 +161,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       scheduler = sched_fact.getScheduler();
       setupPolling();
       updateCalendar();
+      scheduleCleanJob();
       scheduler.start();
     } catch (SchedulerException e) {
       throw new RuntimeException("Internal error in scheduler, unable to start.", e);
@@ -634,6 +646,33 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     return scheduleUnscheduledStopCapture(recordingID, new Date(atTime));
   }
 
+  /**
+   * Schedules the job in charge of cleaning the old captures
+   */
+  private void scheduleCleanJob() {
+
+    try {
+      long cleanInterval = Long.parseLong(configService.getItem(CaptureParameters.CAPTURE_CLEANER_INTERVAL)) * 1000L;
+      
+      //Setup the polling
+      JobDetail cleanJob = new JobDetail("cleanCaptures", JobParameters.OTHER_TYPE, CleanCaptureJob.class);
+
+      cleanJob.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgent);
+      cleanJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
+      
+      //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
+      SimpleTrigger cleanTrigger = new SimpleTrigger("cleanCapture", JobParameters.POLLING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, cleanInterval);
+      
+      //Schedule the update
+      scheduler.scheduleJob(cleanJob, cleanTrigger);
+    } catch (NumberFormatException e) {
+      log.error("Invalid time specified in the {} value, unable to push capabilities to remote server!", CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL);
+    } catch (SchedulerException e) {
+      log.error("SchedulerException in StateServiceImpl while trying to schedule capability polling: {}.", e.getMessage());
+    }
+
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.Scheduler#stopScheduler()

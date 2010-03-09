@@ -138,6 +138,9 @@ public interface CaptureParameters {
   /** Property appended to CAPTURE_DEVICE_CODEC to specify that codec's bitrate */
   public static final String CAPTURE_DEVICE_BITRATE = ".properties.bitrate";
 
+  /** Time interval between executions of the capture cleaner */
+  public static final String CAPTURE_CLEANER_INTERVAL = "capture.cleaner.interval";
+  
   /** Threshold used for determining when deleting archived captures needs to happen */
   public static final String CAPTURE_CLEANER_MIN_DISK_SPACE = "capture.cleaner.mindiskspace";
   
@@ -148,7 +151,7 @@ public interface CaptureParameters {
   public static final String CAPTURE_STOPPED_FILE_NAME = "capture.stopped";
   
   /** Name of the file created after a recording has been successfuly ingested */
-  public static final String CAPTURE_INGESTED_FILE_NAME = "capture.ingested";
+  public static final String CAPTURE_INGESTED_FILE = "capture.ingested";
   
   /** Name of the zip file ingested by the capture agent, containing all the relevant files for a recording **/
   public static final String ZIP_NAME = "media.zip";

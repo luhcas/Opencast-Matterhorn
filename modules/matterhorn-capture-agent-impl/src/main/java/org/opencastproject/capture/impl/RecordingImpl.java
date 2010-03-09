@@ -37,7 +37,7 @@ public class RecordingImpl {
   private File baseDir = null;
  
   /** Unique identifier for this ID   */
-  private String recordingID = null;
+  private String id = null;
  
   /** Keeps the properties associated with this recording */
   private Properties props = null;
@@ -59,44 +59,41 @@ public class RecordingImpl {
    * @param mp    The {@code MediaPackage} with this recording files
    * @throws IOException If the base directory could not be fetched
    */
-  RecordingImpl(MediaPackage mp, Properties properties, ConfigurationManager service) throws IOException, IllegalArgumentException {
+  public RecordingImpl(MediaPackage mp, Properties properties) throws IOException, IllegalArgumentException {
     // Stores the MediaPackage
     this.mPkg = mp;
-
-    // Merges properties without overwriting the system's configuration
-    props = service.merge(properties, false);
+    this.props = (Properties)properties.clone();
     
     //Figures out where captureDir lives
     if (this.props.containsKey(CaptureParameters.RECORDING_ROOT_URL)) {
       baseDir = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL));
       if (props.containsKey(CaptureParameters.RECORDING_ID)) {
-        recordingID = props.getProperty(CaptureParameters.RECORDING_ID);
+        id = props.getProperty(CaptureParameters.RECORDING_ID);
       } else {
         //In this case they've set the root URL, but not the recording ID.  Get the id from that url instead then.
         logger.debug("{} was set, but not {}.", CaptureParameters.RECORDING_ROOT_URL, CaptureParameters.RECORDING_ID);
-        recordingID = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL)).getName();
-        props.put(CaptureParameters.RECORDING_ID, recordingID);
+        id = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL)).getName();
+        props.put(CaptureParameters.RECORDING_ID, id);
       }
     } else {
       //If there is a recording ID use it, otherwise it's unscheduled so just grab a timestamp
       if (props.containsKey(CaptureParameters.RECORDING_ID)) {
-        recordingID = props.getProperty(CaptureParameters.RECORDING_ID);
-        baseDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), recordingID);
+        id = props.getProperty(CaptureParameters.RECORDING_ID);
+        baseDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), id);
       } else {
         //Unscheduled capture, use a timestamp value instead
-        recordingID = "Unscheduled-" + System.currentTimeMillis();
-        props.setProperty(CaptureParameters.RECORDING_ID, recordingID);
-        baseDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), recordingID);
+        id = "Unscheduled-" + System.currentTimeMillis();
+        props.setProperty(CaptureParameters.RECORDING_ID, id);
+        baseDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), id);
       }
       props.put(CaptureParameters.RECORDING_ROOT_URL, baseDir.getAbsolutePath());
     }
     
     // Checks that recordingID is not null (can't be, otherwise we won't be able to identify the recording
-    if (recordingID == null) {
+    if (id == null) {
       logger.error("Couldn't get a proper recordingID from Properties");
       throw new IllegalArgumentException("Couldn't get a proper recordingID from Properties");
     }
-    
     //Setup the root capture dir, also make sure that it exists.
     if (!baseDir.exists()) {
       try {
@@ -149,8 +146,8 @@ public class RecordingImpl {
   /**
    * @return The ID for this recording
    */
-  public String getRecordingID() {
-    return recordingID;
+  public String getID() {
+    return id;
   }
   
   /**

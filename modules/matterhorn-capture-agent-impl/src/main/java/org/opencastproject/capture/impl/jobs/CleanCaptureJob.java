@@ -18,7 +18,10 @@ package org.opencastproject.capture.impl.jobs;
 import java.io.File;
 import java.util.Properties;
 
+import org.opencastproject.capture.impl.CaptureAgentImpl;
 import org.opencastproject.capture.impl.CaptureParameters;
+import org.opencastproject.capture.impl.ConfigurationManager;
+import org.opencastproject.capture.impl.RecordingImpl;
 import org.opencastproject.util.FileSupport;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -31,14 +34,20 @@ import org.slf4j.LoggerFactory;
  * remaining diskspace is below a minimum threshold or above a maximum archive days threshold.
  */
 public class CleanCaptureJob implements Job {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(CleanCaptureJob.class);
-  
+
   /** File signifying ingestion of media has been completed */
   public static final String CAPTURE_INGESTED = "captured.ingested";
-  
+
   /** The length of one day represented in milliseconds */
   public static final long DAY_LENGTH_MILLIS = 86400000;
+
+  long minDiskSpace = 0;
+  long maxArchivalDays = Long.MAX_VALUE;
+  boolean checkArchivalDays = true;
+  boolean checkDiskSpace = true;
+  boolean underMinSpace = false;
   
   /**
    * Cleans up lectures which no longer need to be stored on the capture agent itself.
@@ -46,76 +55,95 @@ public class CleanCaptureJob implements Job {
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    try {
-      Properties p = (Properties) ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_PROPS);
-      File rootDir = new File(p.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
-      
-      if (rootDir.isDirectory()) {
-        String[] children = rootDir.list();
-        for (String subDir : children) {
-          try {
-            attemptClean(new File(rootDir, subDir), p);
-          } catch (Exception e) {
-            logger.error("Error cleaning directory: {}. {}", subDir, e.getMessage());
-          }
-        }
-      }
-    } catch (Exception e) {
-      logger.error("Could not execute job. {}", e.getMessage());
-    }
+
+    ConfigurationManager cm = (ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE);
+    CaptureAgentImpl service = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
+    Properties p = cm.getAllProperties();
+
+    doCleaning(p, service.getRecordings());
+    
   }
   
   /**
-   * If the directory meets the appropriate criteria, recursively delete it.
-   * 
-   * @param dir
-   *          the candidate capture directory
-   * @param p
-   *          cleaning properties
-   *          
+   * This method is public to allow an easy testing without having to schedule anything
+   * @param p Properties including the keys for maximum archival days and minimum disk space
+   * @param service The capture agent
    */
-  public boolean attemptClean(File dir, Properties p) {
-    // if the capture.ingested file does not exist we cannot delete the data
-    File ingested = new File(dir, CAPTURE_INGESTED);
-    if (!ingested.exists()) {
-      logger.info("Skipped cleaning for {}. Ingestion has not been completed.", dir.getAbsolutePath());
-      return false;
-    }
+  public void doCleaning(Properties p , RecordingImpl[] recordings) {
+    // Parse the necessary values for minimum disk space and maximum archival days. 
+    // Note that if some of those is not specified, the corresponding cleaning is not done.
     
-    // clean up capture if its age of ingestion is higher than max archival days property
-    String maxDays = p.getProperty(CaptureParameters.CAPTURE_CLEANER_MAX_ARCHIVAL_DAYS);
-    if (maxDays != null) {
-      long age = ingested.lastModified();
-      long currentTime = System.currentTimeMillis();
-      long maxArchivalDays = Long.parseLong(maxDays);
-      if (currentTime - age > (maxArchivalDays * DAY_LENGTH_MILLIS)) {
-        logger.info("Removing capture archive: {}. Exceeded the maximum archival days.", dir.getAbsolutePath());
-        FileSupport.delete(dir, true);
-        return true;
-      }
-      else {
-        logger.debug("Archive: {} has not yet exceeded the maximum archival days, not deleting...", dir.getAbsolutePath());
-      }
+    try {
+      maxArchivalDays = Long.parseLong(p.getProperty(CaptureParameters.CAPTURE_CLEANER_MAX_ARCHIVAL_DAYS));
+      // If the value is < 0 (no matter if it's because of an overflow), it's invalid.
+      // MAX_VALUE is considered infinity, and therefore there is no limit for arquiving the recordings
+      if ((maxArchivalDays < 0) || (maxArchivalDays == Long.MAX_VALUE))
+        checkArchivalDays = false;
+    } catch (NumberFormatException e) {
+      logger.warn("No maximum archival days value specified in properties");
+      checkArchivalDays = false;
     }
-    
-    // clean up if we are running out of disk space 
-    // TODO: Support Java 1.5 (dir.getFreeSpace() is 1.6 only)
-    String minSpace = p.getProperty(CaptureParameters.CAPTURE_CLEANER_MIN_DISK_SPACE);
-    if (minSpace != null) {
-      long freeSpace = dir.getFreeSpace();
-      long minDiskSpace = Long.parseLong(minSpace);
-      if (freeSpace < minDiskSpace) {
-        logger.info("Removing capture archive: {}. Under minimum free disk space.", dir.getAbsolutePath());
-        FileSupport.delete(dir, true);
-        return true;
-      }
-      else {
-        logger.debug("Archive: {} not removed, enough disk space remains for archive.", dir.getAbsolutePath());
-      }
-    }
-    
-    logger.debug("Archive: {} not deleted.", dir.getAbsolutePath());
-    return false;
-  }
 
+    try {
+      minDiskSpace = Long.parseLong(p.getProperty(CaptureParameters.CAPTURE_CLEANER_MIN_DISK_SPACE));
+      if (minDiskSpace <= 0)
+        checkDiskSpace = false;
+    } catch (NumberFormatException e) {
+      logger.warn("No minimum disk space value specified in properties");
+      checkDiskSpace = false;
+    }
+
+    // If none of this parameters has been specified, the cleanup cannot be performed
+    if (!checkArchivalDays && !checkDiskSpace) {
+      logger.info("No capture cleaning was made, according to the parameters");
+      return;
+    }
+
+    // Gets all the recording IDs for this agent, and iterates over them
+    for (RecordingImpl theRec : recordings) {
+      File recDir = theRec.getDir();
+      File ingested = new File(recDir, CaptureParameters.CAPTURE_INGESTED_FILE);
+
+      // If the capture.ingested file does not exist we cannot delete the data
+      if (!ingested.exists()) {
+        logger.info("Skipped cleaning for {}. Ingestion has not been completed.", theRec.getID());
+        continue;
+      }
+
+      // Clean up if we are running out of disk space 
+      // TODO: Support Java 1.5 (dir.getFreeSpace() is 1.6 only)
+      if (checkDiskSpace) {
+        long freeSpace = recDir.getFreeSpace();
+        if (freeSpace < minDiskSpace) {
+          underMinSpace = true;
+          logger.info("Removing capture {} archives in {}. Under minimum free disk space.", theRec.getID(), recDir.getAbsolutePath());
+          FileSupport.delete(recDir, true);
+          continue;
+        }
+        else {
+          underMinSpace = false;
+          logger.debug("Archive: recording {} not removed, enough disk space remains for archive.", theRec.getID());
+        }
+      }
+
+      // Clean up capture if its age of ingestion is higher than max archival days property
+      if (checkArchivalDays) {
+        long age = ingested.lastModified();
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - age > maxArchivalDays * DAY_LENGTH_MILLIS) {
+          logger.info("Removing capture {} archives at {}.\nExceeded the maximum archival days.", theRec.getID(), recDir.getAbsolutePath());
+          FileSupport.delete(recDir, true);
+          continue;
+        }
+        else {
+          logger.debug("Recording {} has NOT yet exceeded the maximum archival days. Keeping {}", theRec.getID(), recDir.getAbsolutePath());
+        }
+      }
+      logger.debug("Recording {} ({}) not deleted.", theRec.getID(), recDir.getAbsolutePath());
+    }
+    
+    if (underMinSpace)
+      logger.warn("Free space is under the minimum disk space limit!");
+    
+  }
 }

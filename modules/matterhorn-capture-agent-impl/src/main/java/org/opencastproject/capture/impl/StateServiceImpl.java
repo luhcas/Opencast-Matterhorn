@@ -50,7 +50,7 @@ public class StateServiceImpl implements StateService, ManagedService {
   private Hashtable<String, Recording> recordings = null;
   private ConfigurationManager configService = null;
   private Scheduler scheduler = null;
-
+  
   public void setConfigService(ConfigurationManager svc) {
     configService = svc;
   }
@@ -58,7 +58,7 @@ public class StateServiceImpl implements StateService, ManagedService {
   public void unsetConfigService() {
     configService = null;
   }
-
+  
   public void activate(ComponentContext ctx) {
     recordings = new Hashtable<String, Recording>();
     agent = new Agent(configService.getItem(CaptureParameters.AGENT_NAME), AgentState.UNKNOWN,  configService.getCapabilities());
@@ -218,9 +218,10 @@ public class StateServiceImpl implements StateService, ManagedService {
       //Schedule the update
       scheduler.scheduleJob(capbsJob, capbsTrigger);
     } catch (NumberFormatException e) {
-      logger.error("Invalid time specified in the {} value, unable to push state to remote server!", CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL);
+      logger.error("Invalid time specified in the {} value, unable to push capabilities to remote server!", CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL);
     } catch (SchedulerException e) {
       logger.error("SchedulerException in StateServiceImpl while trying to schedule capability polling: {}.", e.getMessage());
     }
+    
   }
 }

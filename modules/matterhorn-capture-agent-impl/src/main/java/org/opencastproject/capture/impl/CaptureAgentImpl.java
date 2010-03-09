@@ -243,7 +243,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     // Creates a new recording object, checking if it was correctly initialized
     RecordingImpl newRec = null;
     try {
-      newRec = new RecordingImpl(mediaPackage, properties, configService);
+      newRec = new RecordingImpl(mediaPackage, configService.merge(properties, false));
     } catch (IllegalArgumentException e) {
       logger.error("Recording not created: {}", e.getMessage());
       setAgentState(AgentState.IDLE);
@@ -256,7 +256,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return null;
     }
     // Checks there is no duplicate ID
-    String recordingID = newRec.getRecordingID();
+    String recordingID = newRec.getID();
     if (pendingRecordings.containsKey(recordingID)) {
       logger.error("There is already a recording with ID {}", recordingID);
       setAgentState(AgentState.IDLE);
@@ -472,14 +472,14 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     currentRecID = null;
 
     //Update the states of everything.
-    setRecordingState(theRec.getRecordingID(), RecordingState.CAPTURE_FINISHED);
+    setRecordingState(theRec.getID(), RecordingState.CAPTURE_FINISHED);
     setAgentState(AgentState.IDLE);
 
     // Creates the file indicating the recording has been successfuly stopped
     try {
       new File(theRec.getDir(), CaptureParameters.CAPTURE_STOPPED_FILE_NAME).createNewFile();
     } catch (IOException e) {
-      setRecordingState(theRec.getRecordingID(), RecordingState.CAPTURE_ERROR);
+      setRecordingState(theRec.getID(), RecordingState.CAPTURE_ERROR);
       logger.error("IOException: Could not create \"{}\" file: {}.", CaptureParameters.CAPTURE_STOPPED_FILE_NAME, e.getMessage());
       return false; 
     }
@@ -753,6 +753,14 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     return pendingRecordings.get(recID);
   }
 
+  /**
+   * This method intends to facilitate the iterative operations over this agent's recordings, by providing a reference to all of them.
+   * @return A {@code String} array containing the recording IDs present in this agent
+   */
+  public RecordingImpl[] getRecordings() {
+    return pendingRecordings.values().toArray(new RecordingImpl[pendingRecordings.size()]);
+  }
+  
   public void updated(Dictionary props) throws ConfigurationException {
     // Update any configuration properties here
   }

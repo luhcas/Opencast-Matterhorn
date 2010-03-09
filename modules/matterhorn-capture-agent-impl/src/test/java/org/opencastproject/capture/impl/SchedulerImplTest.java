@@ -15,6 +15,10 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.opencastproject.capture.impl.CaptureParameters;
+import org.opencastproject.capture.impl.ConfigurationManager;
+import org.opencastproject.capture.impl.SchedulerImpl;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileWriter;

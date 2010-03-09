@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package jobs;
+package org.opencastproject.capture.impl.jobs;
 
 import java.io.File;
 import java.text.DateFormat;
