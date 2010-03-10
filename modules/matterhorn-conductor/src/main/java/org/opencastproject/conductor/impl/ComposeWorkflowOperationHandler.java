@@ -246,17 +246,6 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       }
     }
 
-    // Make sure we get audio and video for audio and video flavors
-    if (sourceVideoFlavor != null && sourceVideoTrackId == null) {
-      logger.debug("Skipping encoding of media package to '{}': no video with flavor {} found", profile,
-              sourceVideoFlavor);
-      return mediaPackage;
-    } else if (sourceAudioFlavor != null && sourceAudioTrackId == null) {
-      logger.debug("Skipping encoding of media package to '{}': no audio with flavor {} found", profile,
-              sourceAudioFlavor);
-      return mediaPackage;
-    }
-
     // choose composer service with least running jobs
 //    listAllComposerServices();
 //    ComposerService cs = allComposerServices[0];

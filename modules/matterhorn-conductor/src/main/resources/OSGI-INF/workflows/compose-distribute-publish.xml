@@ -21,7 +21,7 @@
       exception-handler-workflow="error"
       description="Encode presenter (camera) video to Flash download">
       <configurations>
-        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
@@ -33,7 +33,7 @@
       exception-handler-workflow="error"
       description="Encode presentation (screen) to Flash download">
       <configurations>
-        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
@@ -69,7 +69,7 @@
       exception-handler-workflow="error"
       description="Encode presenter (camera) to quicktime/mp4 download">
       <configurations>
-        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="target-tags">atom, captioning</configuration>
         <configuration key="encoding-profile">mov-low.http</configuration>
@@ -81,7 +81,7 @@
       exception-handler-workflow="error"
       description="Encode presentation (screen) to quicktime/mpeg4 download">
       <configurations>
-        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="target-tags">rss, atom, captioning</configuration>
         <configuration key="encoding-profile">mov-low.http</configuration>
@@ -95,7 +95,7 @@
       exception-handler-workflow="error"
       description="Encode presenter (camera) to avi/mpeg4 download">
       <configurations>
-        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="target-tags">atom</configuration>
         <configuration key="encoding-profile">avi-low.http</configuration>
@@ -107,7 +107,7 @@
       exception-handler-workflow="error"
       description="Encode presentation (screen) to avi/mpeg4 download">
       <configurations>
-        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">avi-low.http</configuration>

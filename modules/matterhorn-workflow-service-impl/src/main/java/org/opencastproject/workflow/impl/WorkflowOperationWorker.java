@@ -23,12 +23,18 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 
 /**
  * Handles execution of a workflow operation.
  */
 final class WorkflowOperationWorker implements Runnable {
+
+  private static final Logger logger = LoggerFactory.getLogger(WorkflowOperationWorker.class);
+  
   protected WorkflowOperationHandler handler = null;
   protected WorkflowInstanceImpl workflow = null;
   protected WorkflowServiceImpl service = null;
@@ -65,6 +71,7 @@ final class WorkflowOperationWorker implements Runnable {
       if(result == null || Action.CONTINUE.equals(result.getAction())) handler.destroy(workflow);
       service.handleOperationResult(workflow, result);
     } catch(WorkflowOperationException e) {
+      logger.error("Workflow operation '{}' failed with error: {}", new Object[] {handler, e.getMessage(), e});
       operation.setState(OperationState.FAILED);
       service.handleOperationException(workflow, e);
     }

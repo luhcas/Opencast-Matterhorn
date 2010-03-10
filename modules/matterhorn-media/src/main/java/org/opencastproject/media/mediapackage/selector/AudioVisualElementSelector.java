@@ -177,6 +177,45 @@ public class AudioVisualElementSelector extends
   public Collection<Track> select(MediaPackage mediaPackage) {
     // instead of relying on the broken superclass, we'll inspect every track
     // Collection<Track> candidates = super.select(mediaPackage);
+    Set<Track> result = new HashSet<Track>();
+
+    MediaPackageElementFlavor intermediaryAudioFlavor = audioFlavor;
+    MediaPackageElementFlavor intermediaryVideoFlavor = videoFlavor;
+    boolean intermediary = false;
+
+    boolean foundAudio = false;
+    boolean foundVideo = false;
+    
+    // special handling for */* flavors
+    if ("*".equals(audioFlavor.getType()) || "*".equals(audioFlavor.getSubtype())) {
+      intermediaryAudioFlavor = videoFlavor;
+      intermediary = true;
+    } else if ("*".equals(audioFlavor.getType()) || "*".equals(audioFlavor.getSubtype())) {
+      intermediaryVideoFlavor = audioFlavor;
+      intermediary = true;
+    }
+
+    // Try to look up the best match first. If it fails, try again with wildcard flavors (if defined)
+    result = select(mediaPackage, intermediaryAudioFlavor, intermediaryVideoFlavor);
+    if (intermediary && (!foundAudio && requireAudio) || (!foundVideo && requireVideo)) {
+      result = select(mediaPackage, audioFlavor, videoFlavor);
+    }
+
+    if ((!foundAudio && requireAudio) || (!foundVideo && requireVideo))
+      result.clear();
+
+    // We were lucky, a combination was found!
+    return result;
+  }
+
+  /**
+   * Returns a track or a number of tracks from the media package that together
+   * contain audio and video. If no such combination can be found, e. g. there
+   * is no audio or video at all, an empty array is returned.
+   * 
+   * @see org.opencastproject.media.mediapackage.selector.SimpleMediaPackageElementSelector#select(org.opencastproject.media.mediapackage.MediaPackage)
+   */
+  public Set<Track> select(MediaPackage mediaPackage, MediaPackageElementFlavor audioFlavor, MediaPackageElementFlavor videoFlavor) {
     Collection<Track> candidates = Arrays.asList(mediaPackage.getTracks());
     Set<Track> result = new HashSet<Track>();
 

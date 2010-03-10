@@ -182,14 +182,10 @@ public class ComposerServiceImpl implements ComposerService {
 
     // Get the tracks and make sure they exist
     Track audioTrack = mp.getTrack(sourceAudioTrackId);
-    if (audioTrack == null)
-      throw new IllegalArgumentException("audio track " + sourceAudioTrackId + " is not part of mediapackage " + mp);
-    final File audioFile = workspace.get(audioTrack.getURI());
+    final File audioFile = audioTrack != null ? workspace.get(audioTrack.getURI()) : null;
 
     Track videoTrack = mp.getTrack(sourceVideoTrackId);
-    if (videoTrack == null)
-      throw new IllegalArgumentException("video track " + sourceVideoTrackId + " is not part of mediapackage " + mp);
-    final File videoFile = workspace.get(videoTrack.getURI());
+    final File videoFile = videoTrack != null ? workspace.get(videoTrack.getURI()) : null;
 
     // Create the engine
     EncoderEngineFactory factory = EncoderEngineFactory.newInstance();

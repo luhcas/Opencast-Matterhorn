@@ -357,7 +357,7 @@ public class IngestRestService {
       }
       return Response.serverError().status(Status.BAD_REQUEST).build();
     } catch (Exception e) {
-      logger.warn(e.getMessage());
+      logger.warn(e.getMessage(), e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }

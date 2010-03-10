@@ -55,7 +55,7 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
   protected Integer frameHeight;
 
   @XmlElement(name="scantype")
-  protected Scan scanType = new Scan();
+  protected Scan scanType = null;
 
 
   @XmlType(name="scantype")
@@ -305,10 +305,14 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
   }
 
   public void setScanType(ScanType scanType) {
+    if (this.scanType == null)
+      this.scanType = new Scan();
     this.scanType.type = scanType;
   }
 
   public void setScanOrder(ScanOrder scanOrder) {
+    if (this.scanType == null)
+      this.scanType = new Scan();
     this.scanType.order = scanOrder;
   }
 }
