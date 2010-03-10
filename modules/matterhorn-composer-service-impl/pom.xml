@@ -40,14 +40,6 @@
       <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.geronimo.specs</groupId>
-      <artifactId>geronimo-ws-metadata_2.0_spec</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.jaxws-api-2.1</artifactId>
-    </dependency>
-    <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
     </dependency>
@@ -73,19 +65,51 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-bundle-minimal</artifactId>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <version>1.2.123</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>javax.persistence</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>org.eclipse.persistence.core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>org.eclipse.persistence.jpa</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>org.eclipse.persistence.asm</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>org.eclipse.persistence.antlr</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>c3p0</groupId>
+      <artifactId>c3p0</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -103,10 +127,13 @@
             <Export-Package>org.opencastproject.composer.impl.*</Export-Package>
             <Embed-Dependency>xmlrpc-client</Embed-Dependency>
             <Service-Component>
-              OSGI-INF/composer-service.xml,
+              OSGI-INF/composer-service-local.xml,
+              OSGI-INF/composer-service-remote.xml,
+              OSGI-INF/composer-service-delegating.xml,
               OSGI-INF/composer-service-dao.xml,
               OSGI-INF/composer-service-rest.xml
             </Service-Component>
+            <JPA-PersistenceUnits>org.opencastproject.composer</JPA-PersistenceUnits>
           </instructions>
         </configuration>
       </plugin>

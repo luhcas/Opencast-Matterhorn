@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-<component name="org.opencastproject.workflow.impl.WorkflowServiceImplDao" immediate="true" activate="activate">
+<component name="org.opencastproject.workflow.impl.WorkflowServiceImplDao" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.workflow.impl.WorkflowServiceImplDaoJpaImpl" />
   <property name="service.description" value="Workflow Service DAO" />
   <service>

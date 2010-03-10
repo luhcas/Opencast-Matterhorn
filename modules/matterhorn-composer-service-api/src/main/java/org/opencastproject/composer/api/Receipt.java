@@ -13,13 +13,29 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.composer.impl.endpoint;
+package org.opencastproject.composer.api;
+
+import org.opencastproject.media.mediapackage.MediaPackageElement;
 
 /**
- * Provides persistence support for {@link ComposerServiceImpl}
+ * A receipt for an encoding job.  A Receipt may be used to track an encoding job once it has been queued.
  */
-public interface ComposerServiceDao {
-  Receipt createReceipt();
-  void updateReceipt(Receipt receipt);
-  Receipt getReceipt(String id);
+public interface Receipt {
+  public static enum Status {QUEUED, RUNNING, FINISHED, FAILED}
+
+  public String getId();
+
+  public void setId(String id);
+
+  public Status getStatus();
+
+  public void setStatus(Status status);
+
+  public String getHost();
+
+  public void setHost(String host);
+
+  public MediaPackageElement getElement();
+
+  public void setElement(MediaPackageElement element);
 }

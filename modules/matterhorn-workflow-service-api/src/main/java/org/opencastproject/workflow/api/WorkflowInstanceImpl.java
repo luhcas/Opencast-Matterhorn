@@ -32,6 +32,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Basic;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -396,4 +398,16 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     }
   }
 
+  @Access(AccessType.PROPERTY)
+  @Column(name="series")
+  public String getSeries() {
+    return mediaPackage == null ? null : mediaPackage.getSeries();
+  }
+
+  @Access(AccessType.PROPERTY)
+  @Column(name="mediaPackageId")
+  public String getMediaPackageId() {
+    return mediaPackage == null ? null : mediaPackage.getIdentifier().toString();
+  }
+  public void setMediaPackageId(String mediaPackageId) {logger.debug("Setting mediapackage ID, which does nothing");}
 }

@@ -7,7 +7,9 @@
     <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
   </service>
   <reference cardinality="1..1" interface="org.opencastproject.composer.api.ComposerService"
-  name="ComposerService" policy="static" bind="setComposerService"/>
+    name="ComposerService" policy="static" bind="setComposerService"/>
+<!--
   <reference cardinality="1..1" interface="ch.ethz.iks.r_osgi.RemoteOSGiService"
   name="RemoteOSGiService" policy="static" bind="setRemoteServices"/>
+-->
 </component>

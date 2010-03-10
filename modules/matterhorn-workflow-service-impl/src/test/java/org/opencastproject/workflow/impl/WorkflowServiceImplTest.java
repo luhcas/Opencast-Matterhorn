@@ -31,10 +31,12 @@ import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
-import org.h2.jdbcx.JdbcConnectionPool;
+import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -43,10 +45,11 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 public class WorkflowServiceImplTest {
 
@@ -61,10 +64,11 @@ public class WorkflowServiceImplTest {
   private static MediaPackage mediapackage2 = null;
   private static WorkflowOperationHandler succeedingOperationHandler = null;
   private static WorkflowOperationHandler failingOperationHandler = null;
-  private static JdbcConnectionPool cp = null;
+  private static ComboPooledDataSource pooledDataSource = null;
+  private static WorkflowServiceImplDao dao = null;
 
   @BeforeClass
-  public static void setup() {
+  public static void setup() throws Exception {
     // always start with a fresh solr root directory
     try {
       FileUtils.deleteDirectory(new File(storageRoot));
@@ -86,10 +90,24 @@ public class WorkflowServiceImplTest {
         return set;
       }
     };
-    String randomId = UUID.randomUUID().toString();
-    cp = JdbcConnectionPool.create("jdbc:h2:target/" + randomId + ";LOCK_MODE=1;MVCC=TRUE", "sa", "sa");
-    WorkflowServiceImplDaoDatasourceImpl dao = new WorkflowServiceImplDaoDatasourceImpl(cp);
-    dao.activate(null);
+    // Create a database and a connection pool
+    pooledDataSource = new ComboPooledDataSource();
+    pooledDataSource.setDriverClass("org.h2.Driver");
+    pooledDataSource.setJdbcUrl("jdbc:h2:./target/db" + System.currentTimeMillis() + ";LOCK_MODE=1;MVCC=TRUE");
+    pooledDataSource.setUser("sa");
+    pooledDataSource.setPassword("sa");
+
+    // Collect the persistence properties
+    Map<String, Object> props = new HashMap<String, Object>();
+    props.put("javax.persistence.nonJtaDataSource", pooledDataSource);
+    props.put("eclipselink.ddl-generation", "create-tables");
+    props.put("eclipselink.ddl-generation.output-mode", "database");
+
+    dao = new WorkflowServiceImplDaoDatasourceImpl(pooledDataSource);
+//    dao = new WorkflowServiceImplDaoJpaImpl();
+//    dao.setPersistenceProvider(new PersistenceProvider());
+//    dao.setPersistenceProperties(props);
+    dao.activate();
     service.setDao(dao);
     service.activate(null);
 
@@ -115,11 +133,11 @@ public class WorkflowServiceImplTest {
   }
 
   @AfterClass
-  public static void teardown() {
+  public static void teardown() throws Exception {
     System.out.println("All tests finished... tearing down...");
     service.deactivate();
-    service = null;
-    succeedingOperationHandler = null;
+    dao.deactivate();
+    pooledDataSource.close();
   }
 
   @Test
@@ -183,11 +201,11 @@ public class WorkflowServiceImplTest {
 
   @Test
   public void testGetWorkflowByEpisodeId() {
-    String episodeId = mediapackage1.getIdentifier().toString();
+    String mediaPackageId = mediapackage1.getIdentifier().toString();
 
     // Ensure that the database doesn't have a workflow instance with this episode
     Assert.assertEquals(0, service.countWorkflowInstances());
-    Assert.assertEquals(0, service.getWorkflowInstances(service.newWorkflowQuery().withEpisode(episodeId)).size());
+    Assert.assertEquals(0, service.getWorkflowInstances(service.newWorkflowQuery().withMediaPackage(mediaPackageId)).size());
 
     WorkflowInstance instance = service.start(workingDefinition, mediapackage1, null);
 
@@ -200,7 +218,7 @@ public class WorkflowServiceImplTest {
       }
     }
 
-    WorkflowSet workflowsInDb = service.getWorkflowInstances(service.newWorkflowQuery().withEpisode(episodeId));
+    WorkflowSet workflowsInDb = service.getWorkflowInstances(service.newWorkflowQuery().withMediaPackage(mediaPackageId));
     Assert.assertEquals(1, workflowsInDb.getItems().length);
 
     // cleanup the database

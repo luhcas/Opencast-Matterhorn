@@ -26,7 +26,6 @@ public class WorkflowQueryImpl implements WorkflowQuery {
   protected long startPage;
   protected String text;
   protected WorkflowState state;
-  protected String episodeId;
   protected String seriesId;
   protected String mediaPackageId;
   protected String currentOperation;
@@ -63,14 +62,6 @@ public class WorkflowQueryImpl implements WorkflowQuery {
    */
   public WorkflowQuery withState(WorkflowState state) {
     this.state = state;
-    return this;
-  }
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowQuery#withEpisode(java.lang.String)
-   */
-  public WorkflowQuery withEpisode(String episodeId) {
-    this.episodeId = episodeId;
     return this;
   }
   /**
@@ -141,15 +132,6 @@ public class WorkflowQueryImpl implements WorkflowQuery {
   @Override
   public String getCurrentOperation() {
     return currentOperation;
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowQuery#getEpisode()
-   */
-  @Override
-  public String getEpisode() {
-    return episodeId;
   }
 
   /**

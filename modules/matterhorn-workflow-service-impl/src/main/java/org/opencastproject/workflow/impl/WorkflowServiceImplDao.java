@@ -23,6 +23,11 @@ import org.opencastproject.workflow.api.WorkflowSet;
  * Provides persistence services to the workflow service implementation.
  */
 public interface WorkflowServiceImplDao {
+  /** Initialize the DAO, if necessary */
+  void activate();
+
+  /** Destroy the DAO, if necessary */
+  void deactivate();
   
   /**
    * Update the workflow instance, or add it to persistence if it is not already stored.

@@ -74,8 +74,7 @@ public class ComposerRestEndpointTest {
     HttpResponse postResponse = client.execute(postEncode);
     Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
     String postResponseXml = EntityUtils.toString(postResponse.getEntity());
-    //String receiptId = getReceiptId(postResponseXml);
-    String receiptId = postResponseXml;
+    String receiptId = getReceiptId(postResponseXml);
     
     // Poll the service for the status of the receipt.
     String status = null;
@@ -100,11 +99,11 @@ public class ComposerRestEndpointTest {
     formParams.add(new BasicNameValuePair("mediapackage", getSampleMediaPackage()));
     postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
-    // Grab the attachment from the response
+    // Grab the receipt from the response
     HttpResponse postResponse = client.execute(postEncode);
     String postResponseXml = EntityUtils.toString(postResponse.getEntity());
-    System.out.println(postResponseXml);
     Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
+    Assert.assertTrue(postResponseXml.contains("receipt"));
   }
 
   protected String getSampleMediaPackage() throws Exception {

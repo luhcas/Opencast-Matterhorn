@@ -18,8 +18,7 @@ package org.opencastproject.conductor.impl;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.composer.impl.endpoint.Receipt;
-import org.opencastproject.composer.impl.endpoint.ReceiptBuilder;
+import org.opencastproject.composer.api.Receipt;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
@@ -35,16 +34,11 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
-import ch.ethz.iks.r_osgi.RemoteOSGiService;
-import ch.ethz.iks.r_osgi.RemoteServiceReference;
-import ch.ethz.iks.r_osgi.URI;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -58,13 +52,13 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
   private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowOperationHandler.class);
 
   /** The composer service */
-  private ComposerService localComposerService = null;
+  private ComposerService composerService = null;
 
   /** Remote services handle (R-OSGI) */
-  private RemoteOSGiService remote = null;
+//  private RemoteOSGiService remote = null;
 
-  /** Available composer services */
-  private ComposerService[] allComposerServices;
+//  /** Available composer services */
+//  private ComposerService[] allComposerServices;
 
   /** Configuration handle for remote servers */
   public static final String CONFIG_REMOTE_SERVERS = "remote.servers";
@@ -76,7 +70,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
    *          the local composer service
    */
   protected void setComposerService(ComposerService composerService) {
-    this.localComposerService = composerService;
+    this.composerService = composerService;
   }
 
   /**
@@ -85,17 +79,17 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
    * @param remote
    *          the R-OSGI wraper service for remote services
    */
-  protected void setRemoteServices(RemoteOSGiService remote) {
-    this.remote = remote;
-    listAllComposerServices();
-  }
+//  protected void setRemoteServices(RemoteOSGiService remote) {
+//    this.remote = remote;
+//    listAllComposerServices();
+//  }
 
   protected void listAllComposerServices() {
-    ArrayList<ComposerService> tempAllComposerServices = new ArrayList<ComposerService>();
+//    ArrayList<ComposerService> tempAllComposerServices = new ArrayList<ComposerService>();
 
     // add local composer service
-    tempAllComposerServices.add(localComposerService);
-    allComposerServices = new ComposerService[] { localComposerService };
+//    tempAllComposerServices.add(localComposerService);
+//    allComposerServices = new ComposerService[] { localComposerService };
 
     // get remote servers list from config
     Properties serversProperties = new Properties();
@@ -112,25 +106,25 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
     }
 
     // try to connect to remote servers and add remote services to list
-    String[] allServicesTxtArr = composerServicesList.split(",");
-    String s = "";
-    for (int i = 0; i < allServicesTxtArr.length; i++) {
-      try {
-        s = allServicesTxtArr[i];
-        URI uri = new URI(s);
-        remote.connect(uri);
-        RemoteServiceReference[] remoteServer = remote.getRemoteServiceReferences(uri, ComposerService.class.getName(),
-                null);
-        for (RemoteServiceReference r : remoteServer) {
-          tempAllComposerServices.add((ComposerService) remote.getRemoteService(r));
-        }
-      } catch (Exception e) {
-        logger.warn("Remote server:'" + s + "' could not be accessed!");
-      }
-    }
-
-    allComposerServices = (ComposerService[]) tempAllComposerServices
-            .toArray(new ComposerService[tempAllComposerServices.size()]);
+//    String[] allServicesTxtArr = composerServicesList.split(",");
+//    String s = "";
+//    for (int i = 0; i < allServicesTxtArr.length; i++) {
+//      try {
+//        s = allServicesTxtArr[i];
+//        URI uri = new URI(s);
+//        remote.connect(uri);
+//        RemoteServiceReference[] remoteServer = remote.getRemoteServiceReferences(uri, ComposerService.class.getName(),
+//                null);
+//        for (RemoteServiceReference r : remoteServer) {
+//          tempAllComposerServices.add((ComposerService) remote.getRemoteService(r));
+//        }
+//      } catch (Exception e) {
+//        logger.warn("Remote server:'" + s + "' could not be accessed!");
+//      }
+//    }
+//
+//    allComposerServices = (ComposerService[]) tempAllComposerServices
+//            .toArray(new ComposerService[tempAllComposerServices.size()]);
   }
 
   /**
@@ -182,7 +176,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
     // Find the encoding profile
     EncodingProfile profile = null;
-    for (EncodingProfile p : localComposerService.listProfiles()) {
+    for (EncodingProfile p : composerService.listProfiles()) {
       if (p.getIdentifier().equals(encodingProfileName)) {
         profile = p;
         break;
@@ -264,21 +258,20 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
     }
 
     // choose composer service with least running jobs
-    listAllComposerServices();
-    ComposerService cs = allComposerServices[0];
-    for (ComposerService c : allComposerServices) {
-      if (c.getNumRunningJobs() < cs.getNumRunningJobs()) {
-        cs = c;
-      }
-    }
-    logger.debug("Media will be encoded on {}", cs.toString());
+//    listAllComposerServices();
+//    ComposerService cs = allComposerServices[0];
+//    for (ComposerService c : allComposerServices) {
+//      if (c.countJobs() < cs.countJobs()) {
+//        cs = c;
+//      }
+//    }
+//    logger.debug("Media will be encoded on {}", cs.toString());
 
     // Start encoding and wait for the result
-    final String receiptId = cs.encode(mediaPackage.toXml(), sourceVideoTrackId, sourceAudioTrackId, profile
-            .getIdentifier());
-    Track composedTrack = null;
-    composedTrack = pollTrack(cs, receiptId);
-    composedTrack = updateTrack(composedTrack, operation, profile);
+    final Receipt receipt = composerService.encode(mediaPackage, sourceVideoTrackId, sourceAudioTrackId, profile
+            .getIdentifier(), true);
+    Track composedTrack = (Track)receipt.getElement();
+    updateTrack(composedTrack, operation, profile);
 
     // store new tracks to mediaPackage
     // FIXME derived media comes from multiple sources, so how do we choose
@@ -287,33 +280,20 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
     String parentId = sourceVideoTrackId == null ? sourceAudioTrackId : sourceVideoTrackId;
     mediaPackage.addDerived(composedTrack, mediaPackage.getElementById(parentId));
 
+    // Add the flavor and tags, if specified
+    if(targetTrackFlavor != null) {
+      MediaPackageElementFlavor targetFlavor = MediaPackageElementFlavor.parseFlavor(targetTrackFlavor);
+      composedTrack.setFlavor(targetFlavor);
+    }
+    if(targetTrackTags != null) {
+      String[] tags = targetTrackTags.split("\\W");
+      if(tags.length > 0) for(String tag : tags) composedTrack.addTag(tag);
+    }
     return mediaPackage;
   }
 
-  // Set up polling to retrieve a new composed track
-  synchronized private Track pollTrack(ComposerService cs, String receiptId) throws InterruptedException {
-    ReceiptBuilder rb = ReceiptBuilder.getInstance();
-    while (true) {
-      logger.debug("polling for completed encoding tasks");
-      Receipt r = null;
-      try {
-        r = rb.parseReceipt(cs.getReceipt(receiptId));
-      } catch (Exception e) {
-        throw new RuntimeException("Unable to parse Receipt");
-      }
-      Receipt.STATUS status = Receipt.STATUS.valueOf(r.getStatus());
-      if (status == Receipt.STATUS.FINISHED) {
-        return r.getTrack();
-      }
-      if (status == Receipt.STATUS.FAILED) {
-        throw new RuntimeException("unable to retrieve composed track");
-      }
-      wait(10 * 1000); // check again in 10 seconds
-    }
-  }
-
   // Update the newly composed track with metadata
-  private Track updateTrack(Track composedTrack, WorkflowOperationInstance operation, EncodingProfile profile) {
+  private void updateTrack(Track composedTrack, WorkflowOperationInstance operation, EncodingProfile profile) {
     // Read the configuration properties
     String targetTrackTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
     String targetTrackFlavor = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));
@@ -340,7 +320,5 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
         composedTrack.addTag(tag);
       }
     }
-    return composedTrack;
-
   }
 }

@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.XmlType;
  * A JAXB annotated collection wrapper for {@link EncodingProfileImpl}s.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="encoding-profiles", namespace="http://composer.opencastproject.org/")
-@XmlRootElement(name="encoding-profiles", namespace="http://composer.opencastproject.org/")
+@XmlType(name="profiles", namespace="http://composer.opencastproject.org/")
+@XmlRootElement(name="profiles", namespace="http://composer.opencastproject.org/")
 public class EncodingProfileList {
   public EncodingProfileList() {}
 
@@ -38,7 +38,7 @@ public class EncodingProfileList {
     this.profile = list;
   }
   
-  @XmlElement(name="encoding-profile")
+  @XmlElement(name="profile")
   protected List<EncodingProfileImpl> profile;
 
   public List<EncodingProfileImpl> getProfile() {

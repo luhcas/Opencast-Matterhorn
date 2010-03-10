@@ -44,7 +44,7 @@ public class WorkflowServiceJpaTest {
     pooledDataSource.setUser("sa");
     pooledDataSource.setPassword("sa");
 
-    // Collect the properties for oy
+    // Collect the persistence properties
     Map<String, Object> props = new HashMap<String, Object>();
     props.put("javax.persistence.nonJtaDataSource", pooledDataSource);
     props.put("eclipselink.ddl-generation", "create-tables");

@@ -5,15 +5,14 @@
   immediate="true"
   activate="activate">
     <implementation class="org.opencastproject.composer.impl.ComposerServiceImpl" />
-    <property name="service.description" value="Composer (Encoder) Service" />
-    <property name="service.remote.registration" value="1" />
+    <property name="service.description" value="Composer (Encoder) Local Service" />
     <service>
-      <provide interface="org.opencastproject.composer.api.ComposerService" />
+      <provide interface="org.opencastproject.composer.impl.ComposerServiceImpl" />
     </service>
     <reference name="inspection-service" interface="org.opencastproject.inspection.api.MediaInspectionService"
       cardinality="1..1" policy="static" bind="setMediaInspectionService" />
     <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
       cardinality="1..1" policy="static" bind="setWorkspace" />
-    <reference name="dao" interface="org.opencastproject.composer.impl.endpoint.ComposerServiceDao"
+    <reference name="dao" interface="org.opencastproject.composer.impl.dao.ComposerServiceDao"
       cardinality="1..1" policy="static" bind="setDao" />
 </scr:component>

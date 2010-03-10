@@ -62,7 +62,12 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     this.dataSource = dataSource;
   }
 
-  public void activate(ComponentContext cc) {
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#activate()
+   */
+  @Override
+  public void activate() {
     logger.info("activate()");
     Connection conn = borrowConnection();
     Statement s = null;
@@ -90,6 +95,10 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       }
       returnConnection(conn);
     }
+  }
+  
+  public void activate(ComponentContext cc) {
+    activate();
   }
 
   /**
@@ -289,10 +298,6 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
     countQ = new StringBuilder("select count(wf.workflow_xml) from oc_workflow as wf where 1=1");
 
     // Add the rest of the where clauses
-    if(queryImpl.getEpisode() != null) {
-      whereClauseList.add(" and wf.episode_id=?");
-      params.add(queryImpl.getEpisode());
-    }
     if(queryImpl.getMediaPackage() != null) {
       whereClauseList.add(" and wf.mp_id=?");
       params.add(queryImpl.getMediaPackage());

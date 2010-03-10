@@ -16,10 +16,11 @@
 package org.opencastproject.composer.impl.endpoint;
 
 import org.opencastproject.composer.api.ComposerService;
+import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
+import org.opencastproject.composer.api.Receipt;
+import org.opencastproject.composer.api.Receipt.Status;
 import org.opencastproject.composer.impl.EncodingProfileImpl;
-import org.opencastproject.composer.impl.endpoint.Receipt.STATUS;
-import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackageImpl;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
@@ -33,9 +34,7 @@ import org.opencastproject.util.doc.Param.Type;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,14 +44,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  * A REST endpoint delegating functionality to the {@link ComposerService}
@@ -63,14 +57,9 @@ public class ComposerRestService {
   protected String docs;
   protected String serverUrl;
   protected ComposerService composerService;
-  protected ComposerServiceDao dao;
 
   public void setComposerService(ComposerService composerService) {
     this.composerService = composerService;
-  }
-
-  public void setDao(ComposerServiceDao dao) {
-    this.dao = dao;
   }
 
   public void activate(ComponentContext cc) {
@@ -97,7 +86,7 @@ public class ComposerRestService {
    *          The ID of the video source track in the media package to be encoded
    * @param profileId
    *          The profile to use in encoding this track
-   * @return The JAXB version of {@link Track} {@link TrackType}
+   * @return A response containing the receipt for this encoding job in the response body.
    * @throws Exception
    */
   @POST
@@ -109,19 +98,19 @@ public class ComposerRestService {
           throws Exception {
     // Ensure that the POST parameters are present
     if (mediaPackage == null || audioSourceTrackId == null || videoSourceTrackId == null || profileId == null) {
-      return Response.status(Status.BAD_REQUEST).entity(
+      return Response.status(Response.Status.BAD_REQUEST).entity(
               "mediapackage, audioSourceTrackId, videoSourceTrackId, and profileId must not be null").build();
     }
 
     // Asynchronously encode the specified tracks
-    String receipt;
+    Receipt receipt;
     if (audioSourceTrackId == null) {
-      receipt = composerService.encode(mediaPackage.toXml(), videoSourceTrackId, profileId);
+      receipt = composerService.encode(mediaPackage, videoSourceTrackId, profileId);
     } else {
-      receipt = composerService.encode(mediaPackage.toXml(), videoSourceTrackId, audioSourceTrackId, profileId);
+      receipt = composerService.encode(mediaPackage, videoSourceTrackId, audioSourceTrackId, profileId);
     }
     if (receipt == null)
-      return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Encoding failed").build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Encoding failed").build();
     return Response.ok().entity(receipt).build();
   }
 
@@ -147,41 +136,15 @@ public class ComposerRestService {
           @FormParam("time") long time) throws Exception {
     // Ensure that the POST parameters are present
     if (mediaPackage == null || sourceTrackId == null || profileId == null) {
-      return Response.status(Status.BAD_REQUEST).entity("mediapackage, sourceTrackId, and profileId must not be null")
+      return Response.status(Response.Status.BAD_REQUEST).entity("mediapackage, sourceTrackId, and profileId must not be null")
               .build();
     }
-
-    // Asynchronously encode the specified tracks
-    Receipt receipt = dao.createReceipt();
-    receipt.setStatus(STATUS.RUNNING.toString());
-    logger.debug("created receipt {}", receipt.getId());
     try {
-      Attachment image = composerService.image(mediaPackage, sourceTrackId, profileId, time).get();
-      return Response.ok().entity(documentToString(image)).build();
-    } catch (Exception e) {
+      Receipt receipt = composerService.image(mediaPackage, sourceTrackId, profileId, time);
+      return Response.ok().entity(receipt).build();
+    } catch (EncoderException e) {
       logger.warn("Unable to extract image: " + e.getMessage());
-      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new Receipt(null, STATUS.FAILED.toString()))
-              .build();
-    }
-  }
-
-  /**
-   * @param image
-   * @return
-   */
-  private String documentToString(Attachment image) {
-    try {
-      Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-      image.toManifest(doc, null);
-      DOMSource domSource = new DOMSource();
-      StringWriter writer = new StringWriter();
-      StreamResult result = new StreamResult(writer);
-      TransformerFactory tf = TransformerFactory.newInstance();
-      Transformer transformer = tf.newTransformer();
-      transformer.transform(domSource, result);
-      return writer.toString();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -189,14 +152,14 @@ public class ComposerRestService {
   @Path("receipt/{id}.xml")
   @Produces(MediaType.TEXT_XML)
   public Response getReceipt(@PathParam("id") String id) {
-    Receipt r = dao.getReceipt(id);
+    Receipt r = composerService.getReceipt(id);
     if (r == null)
-      return Response.status(Status.NOT_FOUND).entity("no receipt found with id " + id).build();
+      return Response.status(Response.Status.NOT_FOUND).build();
     return Response.ok().entity(r).build();
   }
 
   @GET
-  @Path("profiles")
+  @Path("profiles.xml")
   @Produces(MediaType.TEXT_XML)
   public EncodingProfileList listProfiles() {
     List<EncodingProfileImpl> list = new ArrayList<EncodingProfileImpl>();
@@ -206,6 +169,24 @@ public class ComposerRestService {
     return new EncodingProfileList(list);
   }
 
+  @GET
+  @Path("profile/{id}.xml")
+  @Produces(MediaType.TEXT_XML)
+  public Response getProfile(@PathParam("id") String profileId) {
+    EncodingProfileImpl profile = (EncodingProfileImpl)composerService.getProfile(profileId);
+    if(profile == null) return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
+    return Response.ok(profile).build();
+  }
+  
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  @Path("count")
+  public Response count(@QueryParam("status") Status status, @QueryParam("host") String host) {
+    if(status == null) return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
+    if(host == null) return Response.ok(composerService.countJobs(status)).build();
+    return Response.ok(composerService.countJobs(status, host)).build();
+  }
+  
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
@@ -217,24 +198,42 @@ public class ComposerRestService {
     DocRestData data = new DocRestData("Composer", "Composer Service", "/composer/rest",
             new String[] { "$Rev$" });
     // profiles
-    RestEndpoint profilesEndpoint = new RestEndpoint("profiles", RestEndpoint.Method.GET, "/profiles",
+    RestEndpoint profilesEndpoint = new RestEndpoint("profiles", RestEndpoint.Method.GET, "/profiles.xml",
             "Retrieve the encoding profiles");
     profilesEndpoint.addStatus(org.opencastproject.util.doc.Status
             .OK("Results in an xml document describing the available encoding profiles"));
     profilesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, profilesEndpoint);
+    
+    RestEndpoint profileEndpoint = new RestEndpoint("profiles", RestEndpoint.Method.GET, "/profile/{id}.xml",
+      "Retrieve an encoding profile");
+    profileEndpoint.addStatus(org.opencastproject.util.doc.Status.OK(
+            "Results in an xml document describing the requested encoding profile"));
+    profileEndpoint.addPathParam(new Param("id", Param.Type.STRING, "mov-low.http", "the profile ID"));
+    profileEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, profileEndpoint);
 
     // receipt
     RestEndpoint receiptEndpoint = new RestEndpoint("receipt", RestEndpoint.Method.GET, "/receipt/{id}.xml",
             "Retrieve a receipt for an encoding task");
-    receiptEndpoint
-            .addStatus(org.opencastproject.util.doc.Status
-                    .OK("Results in an xml document containing the status of the encoding job, and the track produced by this encoding job if it the task is finished"));
+    receiptEndpoint.addStatus(org.opencastproject.util.doc.Status.OK(
+            "Results in an xml document containing the status of the encoding job, and the track produced by this " +
+            "encoding job if it the task is finished"));
     receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the receipt id"));
     receiptEndpoint.addFormat(new Format("xml", null, null));
     receiptEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, receiptEndpoint);
 
+    // count
+    RestEndpoint countEndpoint = new RestEndpoint("count", RestEndpoint.Method.GET, "/count",
+      "Count the number of receipts");
+    countEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .OK("Result body contains the number of receipts matching the query parameters"));
+    countEndpoint.addOptionalParam(new Param("status", Param.Type.STRING, "FINISHED", "the receipt status (QUEUED, RUNNING, FINISHED, FAILED)"));
+    countEndpoint.addOptionalParam(new Param("host", Param.Type.STRING, "localhost", "the host responsible for this encoding job"));
+    countEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, countEndpoint);
+    
     // encode
     RestEndpoint encodeEndpoint = new RestEndpoint(
             "encode",
@@ -267,7 +266,7 @@ public class ComposerRestService {
             "The number of seconds into the video to extract the image"));
     imageEndpoint.addRequiredParam(new Param("sourceTrackId", Type.STRING, "track-2",
             "The track ID containing the video stream"));
-    imageEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "engage-image.http",
+    imageEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "engage-cover.http",
             "The encoding profile to use"));
     imageEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, imageEndpoint);

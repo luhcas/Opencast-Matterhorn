@@ -18,6 +18,7 @@ package org.opencastproject.conductor.impl;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
+import org.opencastproject.composer.api.Receipt;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -52,7 +53,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 /**
  * This workflow operation will look for MPEG-7 catalogs and create a preview
@@ -142,13 +142,7 @@ public class SlidePreviewsWorkflowOperationHandler extends AbstractWorkflowOpera
     String encodingProfileName = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
 
     // Find the encoding profile
-    EncodingProfile profile = null;
-    for (EncodingProfile p : composerService.listProfiles()) {
-      if (p.getIdentifier().equals(encodingProfileName)) {
-        profile = p;
-        break;
-      }
-    }
+    EncodingProfile profile = composerService.getProfile(encodingProfileName);
     if (profile == null)
       throw new IllegalStateException("Encoding profile '" + encodingProfileName + "' was not found");
 
@@ -228,11 +222,8 @@ public class SlidePreviewsWorkflowOperationHandler extends AbstractWorkflowOpera
         // create an image for this timepoint
         for (Track t : videoTracks) {
           if (t.hasVideo()) {
-            Future<Attachment> futureAttachment = composerService.image(mediaPackage, t.getIdentifier(), profile
-                    .getIdentifier(), timeInSeconds);
-            // is there anything we can be doing while we wait for the track to
-            // be composed?
-            Attachment composedImage = futureAttachment.get();
+            Receipt receipt = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), timeInSeconds, true);
+            Attachment composedImage = (Attachment)receipt.getElement();
             if (composedImage == null)
               throw new RuntimeException("unable to compose image");
 

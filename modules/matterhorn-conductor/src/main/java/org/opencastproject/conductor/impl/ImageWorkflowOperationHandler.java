@@ -18,6 +18,7 @@ package org.opencastproject.conductor.impl;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
+import org.opencastproject.composer.api.Receipt;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
@@ -41,7 +42,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 /**
  * The workflow definition for handling "image" operations
@@ -99,7 +99,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
    * @throws ExecutionException
    * @throws InterruptedException
    */
-  private MediaPackage image(MediaPackage mediaPackage, WorkflowOperationInstance operation) throws EncoderException,
+  private MediaPackage image(final MediaPackage mediaPackage, WorkflowOperationInstance operation) throws EncoderException,
           MediaPackageException, UnsupportedElementException, InterruptedException, ExecutionException {
 
     // Read the configuration properties
@@ -111,13 +111,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
     String timeConfiguration = StringUtils.trimToNull(operation.getConfiguration("time"));
 
     // Find the encoding profile
-    EncodingProfile profile = null;
-    for (EncodingProfile p : composerService.listProfiles()) {
-      if (p.getIdentifier().equals(encodingProfileName)) {
-        profile = p;
-        break;
-      }
-    }
+    EncodingProfile profile = composerService.getProfile(encodingProfileName);
     if (profile == null)
       throw new IllegalStateException("Encoding profile '" + encodingProfileName + "' was not found");
 
@@ -157,9 +151,8 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
           // take the minimum of the specified time and the video track duration
           long time = Math.min(Long.parseLong(timeConfiguration), t.getDuration()/1000L);
           
-          Future<Attachment> futureAttachment = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), time);
-          // is there anything we can be doing while we wait for the track to be composed?
-          Attachment composedImage = futureAttachment.get();
+          Receipt receipt = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), time, true);
+          Attachment composedImage = (Attachment)receipt.getElement();
           if (composedImage == null)
             throw new RuntimeException("unable to compose image");
 
@@ -186,5 +179,4 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
     }
     return mediaPackage;
   }
-
 }

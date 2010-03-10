@@ -13,7 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.composer.impl.endpoint;
+package org.opencastproject.composer.impl;
+
+
+import org.opencastproject.composer.api.Receipt;
 
 import org.apache.commons.io.IOUtils;
 

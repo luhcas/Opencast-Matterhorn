@@ -29,6 +29,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -67,12 +68,21 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
   /** The factory used to generate the entity manager */
   protected EntityManagerFactory emf = null;
   
-  public void activate(ComponentContext cc) {
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#activate()
+   */
+  @Override
+  public void activate() {
     emf = persistenceProvider.createEntityManagerFactory("workflow", persistenceProperties);
     em = emf.createEntityManager();
   }
+  
+  public void activate(ComponentContext cc) {
+    activate();
+  }
 
-  public void destroy() {
+  public void deactivate() {
     em.close();
     emf.close();
   }
@@ -83,7 +93,7 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
    */
   @Override
   public long countWorkflowInstances() {
-    Query query = em.createQuery("SELECT COUNT(wf) FROM Workflow w");
+    Query query = em.createQuery("SELECT COUNT(w) FROM workflow w");
     Number countResult = (Number) query.getSingleResult();
     return countResult.longValue();
   }
@@ -116,16 +126,39 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
       Predicate condition = cb.equal(root.get("state"), query.getState());
       c.where(condition);
     }
-    if(query.getEpisode() != null) {
-      Predicate condition = cb.equal(root.get("episode"), query.getCurrentOperation());
+    if(query.getMediaPackage() != null) {
+      Predicate condition = cb.equal(root.get("mediaPackageId"), query.getMediaPackage());
       c.where(condition);
     }
-
+    if(query.getSeries() != null) {
+      Predicate condition = cb.equal(root.get("series"), query.getSeries());
+      c.where(condition);
+    }
+    if(query.getText() != null) {
+      Predicate condition = cb.equal(root.get("title"), query.getText()); // TODO: or the rest of the possible columns
+      c.where(condition);
+    }
+    if(query.getStartPage() > 0) {
+    }
+    
+        
     // TODO Add the rest of the criteria
     // TODO Enable paging
     
     c.select(root);
-    List<WorkflowInstanceImpl> list = em.createQuery(c).getResultList();
+    TypedQuery<WorkflowInstanceImpl> typedQuery = em.createQuery(c);
+
+    long startPage = query.getStartPage();
+    long count = query.getCount();
+    
+    if(startPage > 1 && count > 0) {
+      typedQuery.setFirstResult((int)((startPage - 1) * count));
+    }
+    
+    if (count > 0) {
+      typedQuery.setMaxResults((int)count);
+    }
+    List<WorkflowInstanceImpl> list = typedQuery.getResultList();
     long searchTime = System.currentTimeMillis() - start;
     WorkflowSetImpl set = new WorkflowSetImpl();
     

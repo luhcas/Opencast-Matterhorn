@@ -38,10 +38,6 @@ public interface WorkflowQuery {
   WorkflowQuery withState(WorkflowState state);
   WorkflowState getState();
 
-  /** Limit results to workflow instances for a specific episode */
-  WorkflowQuery withEpisode(String episodeId);
-  String getEpisode();
-
   /** Limit results to workflow instances for a specific series */
   WorkflowQuery withSeries(String seriesId);
   String getSeries();

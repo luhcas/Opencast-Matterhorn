@@ -269,7 +269,6 @@ public class WorkflowRestService {
   public Response getWorkflows(
           @QueryParam("state") String state,
           @QueryParam("q") String text,
-          @QueryParam("episode") String episodeId,
           @QueryParam("series") String seriesId,
           @QueryParam("mp") String mediapackageId,
           @QueryParam("op") String currentOperation,
@@ -285,7 +284,6 @@ public class WorkflowRestService {
     q.withStartPage(startPage);
     if(state != null) q.withState(WorkflowState.valueOf(state.toUpperCase()));
     if(text != null) q.withText(text);
-    if(episodeId != null) q.withEpisode(episodeId);
     if(seriesId != null) q.withSeries(seriesId);
     if(mediapackageId != null) q.withMediaPackage(mediapackageId);
     if(currentOperation != null) q.withCurrentOperation(currentOperation);
