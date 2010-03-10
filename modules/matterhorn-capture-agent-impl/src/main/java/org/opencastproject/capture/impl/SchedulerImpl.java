@@ -118,14 +118,14 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   public void unsetConfigService() {
     configService = null;
   }
-  
+
   /**
    * Called when the bundle is deactivated.  This function shuts down all of the schedulers.
    */
   public void deactivate() {
     shutdown();
   }
-  
+
   /**
    * Updates the scheduler with new configuration data.
    * @param properties The properties you want to use.
@@ -140,7 +140,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     } catch (MalformedURLException e) {
       log.warn("Invalid location specified for {} unable to cache scheduling data.", CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL);
     }
-    
+
     if (properties == null) {
       log.debug("Null properties in updated!");
       return;
@@ -200,9 +200,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         JobDetail job = new JobDetail("calendarUpdate", JobParameters.POLLING_TYPE, PollCalendarJob.class);
         //Create a new trigger                    Name       Group name               Start       End   # of times to repeat               Repeat interval
         SimpleTrigger trigger = new SimpleTrigger("polling", JobParameters.POLLING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime);
-  
+
         trigger.getJobDataMap().put(JobParameters.SCHEDULER, this);
-  
+
         //Schedule the update
         scheduler.scheduleJob(job, trigger);
       } else {
@@ -337,8 +337,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     //TODO:  Handle UTF16, etc
     FileWriter out = null;
     try {
-        out = new FileWriter(file.getFile());
-        out.write(contents);
+      out = new FileWriter(file.getFile());
+      out.write(contents);
     } catch (IOException e) {
       log.error("Unable to write to {}: {}.", file, e.getMessage());
     } finally {
@@ -485,7 +485,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
         //Create the directory we'll be capturing into
         File captureDir = new File(configService.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),
-                                    props.getProperty(CaptureParameters.RECORDING_ID));
+                props.getProperty(CaptureParameters.RECORDING_ID));
         if (!captureDir.exists()) {
           try {
             FileUtils.forceMkdir(captureDir);
@@ -509,19 +509,20 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
           //Handle any attachments
           //TODO:  Should this string be hardcoded?
-          if (filename.equals("agent.properties")) {
-            Properties jobProps = new Properties();
-            jobProps.load(new StringReader(contents));
-            jobProps.putAll(props);
-            jobProps = configService.merge(jobProps, false);
-            job.getJobDataMap().put(JobParameters.CAPTURE_PROPS, jobProps);
-            hasProperties = true;
-          } else if (filename.equals("metadata.xml")) {
-            try {
-              pack.add(new URI(filename), MediaPackageElement.Type.Attachment, MediaPackageElements.DUBLINCORE_CATALOG);
-            } catch(Exception e) {};
-            job.getJobDataMap().put(JobParameters.MEDIA_PACKAGE, pack);
-          }
+          try { 
+            if (filename.equals("agent.properties")) {
+              Properties jobProps = new Properties();
+              jobProps.load(new StringReader(contents));
+              jobProps.putAll(props);
+              jobProps = configService.merge(jobProps, false);
+              job.getJobDataMap().put(JobParameters.CAPTURE_PROPS, jobProps);
+              hasProperties = true;
+            } else if (filename.equals("metadata.xml"))
+              pack.add(new URI(filename), MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_CATALOG);
+            else
+              pack.add(new URI(filename));
+          } catch(Exception e) {};
+          job.getJobDataMap().put(JobParameters.MEDIA_PACKAGE, pack);
           //Note that we overwrite any pre-existing files with this.  In other words, if there is a file called foo.txt in the
           //captureDir directory and there is an attachment called foo.txt then we will overwrite the one on disk with the one from the ical
           URL u = new File(captureDir, filename).toURI().toURL();
@@ -534,7 +535,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         if (!hasProperties) {
           log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", start.toString());
         }
-        
+
         scheduler.scheduleJob(job, trig);
       }
 
@@ -608,19 +609,19 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
       String frequency = rrule.getFrequency();
       int interval = rrule.getInterval();
-    */
+     */
 
-      //Note:  Skipped above code because we no longer need to deal with recurring events.  Keeping it for now since they might come back.
-      //Note:  "?" means no particular setting.  Equivalent to "ignore me", rather than "I don't know what to put here"
-      //TODO:  Remove the deprecated calls here.
-      StringBuilder sb = new StringBuilder();
-      sb.append(date.getSeconds() + " ");
-      sb.append(date.getMinutes() + " ");
-      sb.append(date.getHours() + " ");
-      sb.append(date.getDate() + " ");
-      sb.append(date.getMonth() + 1 + " "); //Note:  Java numbers months from 0-11, Quartz uses 1-12.  Sigh.
-      sb.append("? ");
-      return new CronExpression(sb.toString());
+    //Note:  Skipped above code because we no longer need to deal with recurring events.  Keeping it for now since they might come back.
+    //Note:  "?" means no particular setting.  Equivalent to "ignore me", rather than "I don't know what to put here"
+    //TODO:  Remove the deprecated calls here.
+    StringBuilder sb = new StringBuilder();
+    sb.append(date.getSeconds() + " ");
+    sb.append(date.getMinutes() + " ");
+    sb.append(date.getHours() + " ");
+    sb.append(date.getDate() + " ");
+    sb.append(date.getMonth() + 1 + " "); //Note:  Java numbers months from 0-11, Quartz uses 1-12.  Sigh.
+    sb.append("? ");
+    return new CronExpression(sb.toString());
     /*}
     return null;*/
   }
@@ -634,7 +635,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     job.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
 
     try {
-     scheduler.scheduleJob(job, trig);
+      scheduler.scheduleJob(job, trig);
     } catch (SchedulerException e) {
       log.error("Unable to schedule stop capture, failing capture attempt.");
       return false;
@@ -653,16 +654,16 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
     try {
       long cleanInterval = Long.parseLong(configService.getItem(CaptureParameters.CAPTURE_CLEANER_INTERVAL)) * 1000L;
-      
+
       //Setup the polling
       JobDetail cleanJob = new JobDetail("cleanCaptures", JobParameters.OTHER_TYPE, CleanCaptureJob.class);
 
       cleanJob.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgent);
       cleanJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
-      
+
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
       SimpleTrigger cleanTrigger = new SimpleTrigger("cleanCapture", JobParameters.POLLING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, cleanInterval);
-      
+
       //Schedule the update
       scheduler.scheduleJob(cleanJob, cleanTrigger);
     } catch (NumberFormatException e) {
@@ -672,7 +673,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     }
 
   }
-  
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.Scheduler#stopScheduler()
@@ -794,7 +795,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   public void shutdown() {
     try {
       if (scheduler != null) {
-          scheduler.shutdown(true);
+        scheduler.shutdown(true);
       }
     } catch (SchedulerException e) {
       log.warn("Finalize for scheduler did not execute cleanly: {}.", e.getMessage());

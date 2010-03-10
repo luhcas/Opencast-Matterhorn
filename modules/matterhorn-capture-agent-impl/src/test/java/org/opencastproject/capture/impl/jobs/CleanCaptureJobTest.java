@@ -46,7 +46,7 @@ public class CleanCaptureJobTest {
 
   int numberOfRecordings = 5;
 
-  File baseDir = new File("cleanTest");
+  File baseDir = new File(getClass().getClassLoader().getResource(".").getPath(), "cleanTest");
 
   @Before
   public void setUp() {

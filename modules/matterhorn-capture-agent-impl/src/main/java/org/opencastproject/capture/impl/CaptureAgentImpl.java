@@ -46,6 +46,7 @@ import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.pipeline.PipelineFactory;
+import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
@@ -182,7 +183,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return null;
     }
 
-     return startCapture(pack, configService.getAllProperties());
+    return startCapture(pack, configService.getAllProperties());
   }
 
   /**
@@ -304,19 +305,23 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
               throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
             }
           }
-  
-          // Add the sample dublin core, otherwise the recording won't show up in search
-          File dcCatalog = new File(newRec.getDir(),"dublincore.xml");
-          try {
-            FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/dublincore.xml"),dcCatalog);
-            MediaPackageElementBuilder eb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-            mediaPackage.add(eb.elementFromURI(newRec.getDir().toURI().relativize(dcCatalog.toURI()), Type.Catalog, DublinCoreCatalog.FLAVOR));
-          } catch (UnsupportedElementException e) {
-            resetAgent(recordingID);
-            throw new RuntimeException("Error adding " + dcCatalog + " to recording");
-          } catch (IOException e) {
-            resetAgent(recordingID);
-            throw new RuntimeException("Error copying " + dcCatalog + " to destination directory");
+
+          Catalog[] packageCatalogs = mediaPackage.getCatalogs();
+
+          if ((packageCatalogs == null) || (packageCatalogs.length == 0)) {
+            // Add the sample dublin core, otherwise the recording won't show up in search
+            File dcCatalog = new File(newRec.getDir(),"dublincore.xml");
+            try {
+              FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/dublincore.xml"),dcCatalog);
+              MediaPackageElementBuilder eb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+              mediaPackage.add(eb.elementFromURI(newRec.getDir().toURI().relativize(dcCatalog.toURI()), Type.Catalog, DublinCoreCatalog.FLAVOR));
+            } catch (UnsupportedElementException e) {
+              resetAgent(recordingID);
+              throw new RuntimeException("Error adding " + dcCatalog + " to recording");
+            } catch (IOException e) {
+              resetAgent(recordingID);
+              throw new RuntimeException("Error copying " + dcCatalog + " to destination directory");
+            }
           }
           // When we return the recording, the mock capture is completed so reset
           // the CaptureAgent state
@@ -339,7 +344,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       logger.error(e.getMessage() + " : please add libjv4linfo.so to /usr/lib to correct this issue.");
       return null;
     }
-    
+
     if (pipe == null) {
       logger.error("Capture {} could not start, pipeline was null!", recordingID);
       resetAgent(recordingID);
@@ -374,7 +379,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     logger.info("{} started.", pipe.getName());
 
     setRecordingState(recordingID, RecordingState.CAPTURING);
-    scheduleStop(recordingID);
+    //scheduleStop(recordingID);
     return recordingID;
   }
 
@@ -412,7 +417,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * @param recordingID The recordingID to stop.
    * @return true if the stop was scheduled, false otherwise.
    */
-   private void scheduleStop(String recordingID) {
+  private void scheduleStop(String recordingID) {
     String maxLength = configService.getItem(CaptureParameters.CAPTURE_MAX_LENGTH);
     long length = 0L;
     if (maxLength != null) {
@@ -524,7 +529,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       MediaPackageElementFlavor flavor = null; 
 
       URI baseURI = recording.getDir().toURI();
-      
+
       // Adds the files present in the Properties
       for (String name : friendlyNames) {
         name = name.trim();
@@ -615,7 +620,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     for (MediaPackageElement item : mpElements) {
       File tmpFile = null;
       String elementPath = item.getURI().getPath();
-      
+
       // Relative and aboslute paths are mixed
       if (elementPath.startsWith("file:") || elementPath.startsWith(File.separator))
         tmpFile = new File(elementPath);
@@ -760,7 +765,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public RecordingImpl[] getRecordings() {
     return pendingRecordings.values().toArray(new RecordingImpl[pendingRecordings.size()]);
   }
-  
+
   public void updated(Dictionary props) throws ConfigurationException {
     // Update any configuration properties here
   }
