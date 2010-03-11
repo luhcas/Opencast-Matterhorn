@@ -118,19 +118,38 @@
         <version>2.4.1</version>
         <executions>
           <execution>
-            <id>copy-resources</id>
+            <id>copy-jquery</id>
             <phase>validate</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/classes/ui/</outputDirectory>
+              <outputDirectory>${basedir}/target/classes/ui/jquery</outputDirectory>
               <resources>
                 <resource>
-                  <directory>../../shared-resources/</directory>
+                  <directory>../../shared-resources/jquery/</directory>
                   <includes>
                     <include> **/* </include>
-                  </includes>                  
+                  </includes>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-infusion</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/ui/infusion-1.1.2</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../../shared-resources/infusion-1.1.2/</directory>
+                  <includes>
+                    <include> **/* </include>
+                  </includes>
                   <filtering>false</filtering>
                 </resource>
               </resources>
@@ -162,5 +181,48 @@
       </plugin>
     </plugins>
   </build>
+  
+  <!-- mvn -P uitests test, run JsTestDriver + FlexUnit  -->
+  <profiles>
+    <profile>
+      <id>uitests</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.1.1</version>
+            <executions>
+              <execution>
+                <phase>test-compile</phase>
+                <configuration>
+                  <executable>java</executable>
+                  <cleanupDaemonThreads>true</cleanupDaemonThreads>
+                  <arguments>
+                    <argument>-jar</argument>
+                    <argument>src/test/resources/JsTestDriver-1.2.jar</argument>
+                    <argument>--port</argument>
+                    <argument>4224</argument>
+                    <argument>--config</argument>
+                    <argument>src/test/resources/jsTestDriver.conf</argument>
+                    <argument>--testOutput</argument>
+                    <argument>.</argument>
+                    <argument>--browser</argument>
+                    <argument>open</argument>
+                    <argument>--tests</argument>
+                    <argument>all</argument>
+                    <argument>--reset</argument>
+                  </arguments>
+                </configuration>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
 

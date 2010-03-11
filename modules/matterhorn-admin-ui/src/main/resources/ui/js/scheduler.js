@@ -124,11 +124,7 @@ SchedulerUI.cancelForm = function() {
  */
 SchedulerUI.submitForm = function() {
   var eventXML = null;
-  try{
-    eventXML = SchedulerForm.serialize();
-  }catch(e){
-    //console.log(e);
-  }
+  eventXML = SchedulerForm.serialize();
   if(eventXML){
     var method  = SchedulerUI.getURLParams('edit') ? '/updateEvent' : '/addEvent';
     $.post( SCHEDULER_URL + method, {event: eventXML}, SchedulerUI.eventSubmitComplete );
@@ -305,7 +301,7 @@ SchedulerForm.setFormFields = function(fields) {
   if(fields && typeof fields == 'object') {
     this.formFields = fields;
   } else {
-    throw 'Invalid FormFields';
+    return false;
   }
 };
 
@@ -350,7 +346,7 @@ SchedulerForm.serialize = function() {
     } else if(doc.xml) {
       return doc.xml;
     } else { 
-      throw 'Unable to serialize SchedulerEvent.';
+      return false;
     }
   }
 };
@@ -434,13 +430,19 @@ SchedulerForm.createDoc = function() {
  */
 
 function FormField(elm, req, opts) {
-  if(!elm){
-    throw 'FormField must be initialized with at least one element';
-  }
+  this.fields = [];
+  this.required = req || false;
+  var id = this.setFormFields(elm);
+  this.setFormFieldOpts(opts);
+  this.value      = null;
+  this.label      = this.label      || 'label-' + id;
+  this.errorField = this.errorField || 'missing-' + id;
+}
+
+function setFormFields(elm){
   if(typeof elm == 'string') { //If a single field is specified, wrap in an array.
     elm = [elm];
   }
-  this.fields = [];
   for(var k in elm) {
     var e = $('#' + elm[k]);
     if(e[0]){
@@ -448,20 +450,20 @@ function FormField(elm, req, opts) {
         var id = e[0].id;
       }
       this.fields[elm[k]] = e;
-    } else {
-      throw 'Form element ' + k + ' not found.';
     }
   }
-  this.required = req || false;
+  return id;
+}
+FormField.prototype.setFormFields = setFormFields;
+
+function setFormFieldOpts(opts){
   if(typeof opts == 'object') {
     for(var f in opts) {
       this[f] = opts[f];
     }
   }
-  this.value      = null;
-  this.label      = this.label      || 'label-' + id;
-  this.errorField = this.errorField || 'missing-' + id;
 }
+FormField.prototype.setFormFieldOpts = setFormFieldOpts;
 
 /**
  *  Default FormField getValue function.
