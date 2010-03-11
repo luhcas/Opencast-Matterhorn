@@ -400,4 +400,24 @@ public class SchedulerEventImpl implements SchedulerEvent {
     metadata.put(trimText(key, 255), trimText(value, 4096));
   }
 
+  /**
+   * 
+   * {@inheritDoc}
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  public boolean equals (Object o) {
+    if (! (o instanceof SchedulerEvent)) return false;
+    SchedulerEvent e = (SchedulerEvent) o;
+    if (! getID().equals(e.getID())) return false;
+    return true;
+  }
+  
+  /**
+   * 
+   * {@inheritDoc}
+   * @see java.lang.Object#hashCode()
+   */
+  public int hashCode () {
+    return getID().toString().hashCode();
+  }
 }

@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -28,6 +29,11 @@ import java.util.Hashtable;
 import java.util.Properties;
 
 import javax.sql.DataSource;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
@@ -38,11 +44,13 @@ import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VEvent;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
+import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.scheduler.endpoint.SchedulerRestService;
 import org.opencastproject.scheduler.impl.dao.SchedulerServiceImplDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 import junit.framework.Assert;
 
@@ -60,6 +68,8 @@ public class SchedulerServiceImplTest {
   private SchedulerService service = null;
   private static final String storageRoot = "target" + File.separator + "scheduler-test-db";
   private static final String resourcesRoot = "src" + File.separator + "main" + File.separator + "resources";
+  
+  private SchedulerEvent event;
 
   private DataSource connectToDatabase(File storageDirectory) {
     if (storageDirectory == null) {
@@ -87,6 +97,18 @@ public class SchedulerServiceImplTest {
     } catch (IOException e) {
       Assert.fail(e.getMessage());
     }
+    event = new SchedulerEventImpl();
+    event.setID(event.createID()); 
+    event.setTitle("new recording");
+    event.setStartdate(new Date (System.currentTimeMillis())); 
+    event.setEnddate(new Date (System.currentTimeMillis()+5000000));
+    event.setLocation("testlocation");
+    event.setDevice("testrecorder");
+    event.setCreator("test lecturer");
+    event.addResource("vga");
+    event.setAbstract("a test description");
+    event.setChannelID("unittest");
+    event.setSeriesID("testevents");    
   }
 
   @After
@@ -96,21 +118,18 @@ public class SchedulerServiceImplTest {
   
   @Test
   public void testEventManagement() {
-    SchedulerEvent event = new SchedulerEventImpl();
-    event.setID(event.createID()); 
-    event.setTitle("new recording");
-    event.setStartdate(new Date (System.currentTimeMillis())); 
-    event.setEnddate(new Date (System.currentTimeMillis()+50000));
-    event.setLocation("42/201");
-    event.setDevice("testrecorder");
-    event.setCreator("secret lecturer");
-    event.addResource("vga");
+    
+    // add event
     SchedulerEvent eventUpdated = service.addEvent(event);
     Assert.assertNotNull(eventUpdated);
     Assert.assertNotNull(eventUpdated.getID());
+    
+    // retrive event
     SchedulerEvent loadedEvent = service.getEvent(eventUpdated.getID());
     logger.debug("loaded: {} ",loadedEvent);
     Assert.assertEquals(loadedEvent.getLocation(), event.getLocation());
+    
+    //test iCalender export
     CalendarBuilder calBuilder = new CalendarBuilder();
     Calendar cal;
     try {
@@ -140,11 +159,62 @@ public class SchedulerServiceImplTest {
       e.printStackTrace();
       Assert.fail(e.getMessage());
     }
-    eventUpdated.setStartdate(new Date(System.currentTimeMillis()+2000));
+    
+    try {
+      Thread.sleep(100);
+    } catch (InterruptedException e) {
+    }
+    
+    // test for upcoming events (it should not be in there)
+    SchedulerEvent[] upcoming = service.getUpcomingEvents();
+    boolean eventFound = false;
+    for (int i = 0; i < upcoming.length; i++ ) 
+      if (upcoming[i].equals(eventUpdated)) eventFound= true; 
+    Assert.assertFalse(eventFound);    
+    
+    // test if event is in list in general 
+    SchedulerEvent[] allEvents = service.getEvents(null);
+    eventFound = false;
+    Assert.assertTrue(allEvents.length > 0);
+    for (int i = 0; i < allEvents.length; i++ ) 
+      if (allEvents[i].equals(eventUpdated)) eventFound= true; 
+    Assert.assertTrue(eventFound); 
+    
+    //test event filter (positive test)
+    SchedulerFilter filter = new SchedulerFilterImpl();
+    filter.setDeviceFilter("testrecorder");
+    allEvents = service.getEvents(filter);
+    Assert.assertTrue(allEvents.length > 0);
+    eventFound = false;
+    for (int i = 0; i < allEvents.length; i++ ) 
+      if (allEvents[i].equals(eventUpdated)) eventFound= true; 
+    Assert.assertTrue(eventFound);    
+    
+    //test event filter (negative test)
+    filter = new SchedulerFilterImpl();
+    filter.setDeviceFilter("something");
+    allEvents = service.getEvents(filter);
+    eventFound = false;
+    for (int i = 0; i < allEvents.length; i++ ) 
+      if (allEvents[i].equals(eventUpdated)) eventFound= true; 
+    Assert.assertFalse(eventFound);    
+    
+    // update event
+    eventUpdated.setStartdate(new Date(System.currentTimeMillis()+20000));
     eventUpdated.setContributor("Matterhorn");
     Assert.assertTrue(service.updateEvent(eventUpdated));
     Assert.assertEquals(service.getEvent(eventUpdated.getID()).getContributor(), "Matterhorn");
     Assert.assertNotNull(service.getEvents(null));
+    
+    // test for upcoming events (now it should be there
+    upcoming = service.getUpcomingEvents();
+    Assert.assertTrue(upcoming.length > 0);
+    eventFound = false;
+    for (int i = 0; i < upcoming.length; i++ ) 
+      if (upcoming[i].equals(eventUpdated)) eventFound= true; 
+    Assert.assertTrue(eventFound);
+    
+    //delete event
     service.removeEvent(eventUpdated.getID());
     Assert.assertNull(service.getEvent(eventUpdated.getID()));   
   }
@@ -157,4 +227,40 @@ public class SchedulerServiceImplTest {
     
     Assert.assertNotNull(restService.getDocumentation());
   }
+  
+  @Test
+  public void testMetadataExport () {
+    service.addEvent(event);
+    String dc = service.getDublinCoreMetadata(event.getID());
+    System.out.println("DC-String: "+dc);
+    Assert.assertNotNull(dc);
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    DocumentBuilder builder;
+    try {
+      builder = factory.newDocumentBuilder();
+      Document doc =  builder.parse(IOUtils.toInputStream(dc));
+      XPath xPath = XPathFactory.newInstance().newXPath();
+      Assert.assertEquals(xPath.evaluate("/dublincore/creator", doc), "test lecturer");
+    } catch (Exception e1) {
+      e1.printStackTrace();
+      Assert.fail();
+    }
+    
+    
+    
+    String ca = service.getCaptureAgentMetadata(event.getID());
+    Assert.assertNotNull(ca);
+    Properties p = new Properties();
+    try {
+      p.load(new StringReader(ca));
+      Assert.assertTrue(p.get("event.title").equals("new recording"));
+      Assert.assertTrue(p.get("event.series").equals("testevents"));
+      Assert.assertTrue(p.get("event.source").equals("unittest"));
+      Assert.assertTrue(p.get("capture.device.location").equals("testlocation"));
+    } catch (IOException e) {
+      Assert.fail();
+    }
+    service.removeEvent(event.getID());
+  }
+  
 }
