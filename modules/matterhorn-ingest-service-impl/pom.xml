@@ -134,6 +134,10 @@
         <version>0.6-SNAPSHOT</version>
       <type>bundle</type>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>javax.persistence</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -158,10 +162,14 @@
               json_simple;inline=true
             </Embed-Dependency>
             <Import-Package> org.opencastproject.http, *;resolution:=optional </Import-Package>
+            <Import-Package> javax.persistence, *;resolution:=optional </Import-Package>
             <Service-Component>
               OSGI-INF/ingest-service.xml,
               OSGI-INF/ingest-service-rest.xml
             </Service-Component>
+            <JPA-PersistenceUnits>
+              org.opencastproject.ingest.endpoint
+            </JPA-PersistenceUnits>
           </instructions>
         </configuration>
       </plugin>

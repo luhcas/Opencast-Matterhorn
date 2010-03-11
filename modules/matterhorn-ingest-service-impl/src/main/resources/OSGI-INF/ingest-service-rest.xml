@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.ingest.endpoint.IngestRestService" immediate="true">
+<component name="org.opencastproject.ingest.endpoint.IngestRestService" immediate="true" activate="activate">
   <implementation class="org.opencastproject.ingest.endpoint.IngestRestService" />
   <property name="service.description" value="Ingest REST Endpoint" />
   <property name="service.exported.interfaces" value="org.opencastproject.ingest.endpoint.IngestRestService" />
@@ -15,7 +15,8 @@
   <reference name="dc" interface="org.opencastproject.metadata.dublincore.DublinCoreCatalogService"
     cardinality="1..1" policy="static" bind="setDublinCoreService" />
 
-  <reference name="dataSource"
-    interface="javax.sql.DataSource"
-    cardinality="1..1" policy="static" bind="setDataSource" />
+  <reference name="persistence" interface="javax.persistence.spi.PersistenceProvider"
+    cardinality="1..1" policy="static" bind="setPersistenceProvider" />
+  <reference name="props" interface="java.util.Map"
+    cardinality="1..1" policy="static" target="(type=persistence)" bind="setPersistenceProperties" />
 </component>

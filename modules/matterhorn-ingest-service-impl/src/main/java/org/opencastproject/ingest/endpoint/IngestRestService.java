@@ -15,6 +15,7 @@
  */
 package org.opencastproject.ingest.endpoint;
 
+import java.io.IOException;
 import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -23,7 +24,6 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.identifier.Id;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
@@ -38,7 +38,6 @@ import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,14 +45,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URI;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Map;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
+import javax.persistence.Query;
+import javax.persistence.spi.PersistenceProvider;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.sql.DataSource;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -65,7 +64,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
+import org.apache.commons.io.IOUtils;
+import org.osgi.service.component.ComponentContext;
 
 /**
  * Creates and augments Matterhorn MediaPackages using the api. Stores media into the Working File Repository.
@@ -78,7 +78,12 @@ public class IngestRestService {
   private MediaPackageBuilder builder = null;
   private IngestService ingestService = null;
   private DublinCoreCatalogService dublinCoreService;
-  
+  protected PersistenceProvider persistenceProvider;
+  protected Map persistenceProperties;
+  protected EntityManager em = null;
+  protected EntityManagerFactory emf = null;
+  private String serverURL = null;
+
   public IngestRestService() {
   }
 
@@ -90,6 +95,24 @@ public class IngestRestService {
 
   public void setDublinCoreService(DublinCoreCatalogService dcService) {
     this.dublinCoreService = dcService;
+  }
+
+  public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
+    this.persistenceProvider = persistenceProvider;
+  }
+
+  public void setPersistenceProperties(Map persistenceProperties) {
+    this.persistenceProperties = persistenceProperties;
+  }
+
+  public void activate(ComponentContext context) {
+    serverURL = context.getBundleContext().getProperty("serverURL");
+    try {
+      emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
+      em = emf.createEntityManager();
+    } catch (Exception e) {
+      logger.error("Unable to initialize JPA EntityManager: " + e.getMessage());
+    }
   }
 
   @GET
@@ -164,135 +187,6 @@ public class IngestRestService {
     return addMediaPackageElement(request, MediaPackageElement.Type.Catalog);
   }
 
-  /* -------------------- start of Benjamins weekend-fun -------------------- */
-
-  /* modifyed version of addCatalog */
-//  @POST
-//  @Produces(MediaType.TEXT_XML)
-//  @Consumes(MediaType.MULTIPART_FORM_DATA)
-//  @Path("addCatalogFromFile")
-//  public Response addMediaPackageCatalogFromFile(@FormParam("file") String file, @FormParam("flavor") String flavor,
-//          @FormParam("mediaPackage") MediapackageType mpt) {
-//    //logger.info("adding Catalog");
-//    try {
-//      MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-//      mp = service.addCatalog(IOUtils.toInputStream(file), MediaPackageElementFlavor.parseFlavor(flavor), mp);
-//      mpt = MediapackageType.fromXml(mp.toXml());
-//      return Response.ok(mpt).build();
-//    } catch (Exception e) {
-//      logger.warn(e.getMessage());
-//      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-//    }
-//  }
-
-  /* modifyed version of addTrack */
-  @POST
-  @Produces(MediaType.TEXT_XML)
-  @Consumes(MediaType.MULTIPART_FORM_DATA)
-  @Path("addTrackMonitored")
-  public Response addTrackMonitored(@Context HttpServletRequest request) {
-    //logger.info("adding Track monitored");
-    try {
-      if (ServletFileUpload.isMultipartContent(request)) {
-        ServletFileUpload upload = new ServletFileUpload();
-        FileUploadListener listener = new FileUploadListener();
-        MediaPackage mp = null;
-        listener.setConnection(getSQLConnection(myDataSource));
-        upload.setProgressListener(listener);
-        /* NOTE: mediaPackage MUST be send before track (see FileItemStream doc) */
-        for (FileItemIterator iter = upload.getItemIterator(request); iter.hasNext();) {
-          FileItemStream item = iter.next();
-          if (item.getFieldName().equals("mediaPackage")) {
-            mp = builder.loadFromXml(item.openStream());
-            Id mpID = mp.getIdentifier();
-            listener.setMediaPackageID(mpID.compact());
-          } else if (item.getFieldName().equals("track")) {
-            String fullname = item.getName();
-            String slashType = (fullname.lastIndexOf("\\") > 0) ? "\\" : "/";
-            int startIndex = fullname.lastIndexOf(slashType);
-            String filename = fullname.substring(startIndex + 1, fullname.length());
-            listener.setFilename(filename);
-            /* This will only work if the mediaPackage is received before the track. */
-            ingestService.addTrack(item.openStream(), item.getName(), null, mp);
-          }
-        }
-        ingestService.ingest(mp);
-        return Response.ok(mp).build();
-      }
-      return Response.serverError().status(Status.BAD_REQUEST).build();
-    } catch (Exception e) {
-      logger.warn(e.getMessage());
-      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  @GET
-  @Path("getUploadProgress/{mpId}/{filename}")
-  public Response getUploadProgress(@PathParam("mpId") String mediaPackageID, @PathParam("filename") String filename) {
-    JSONObject obj = new JSONObject();
-    obj.put("total", 0);
-    obj.put("received", 0);
-    try {
-      Connection con = getSQLConnection(myDataSource);
-      PreparedStatement s = con.prepareStatement("SELECT total, received FROM UPLOADPROGRESS WHERE mediapackageId = ? AND filename = ?");
-      s.setString(1, mediaPackageID);
-      s.setString(2, filename);
-      ResultSet rs = s.executeQuery();
-      if (rs.next()) {
-        obj.put("total", rs.getString("UPLOADPROGRESS.total"));
-        obj.put("received", rs.getString("UPLOADPROGRESS.received"));
-      }
-      con.close();
-    } catch (SQLException e) {
-      logger.warn(e.getMessage());
-    }
-    return Response.ok(obj.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
-  }
-  private DataSource myDataSource;    // this should be moved to head of file
-
-  /**
-   * method to connect with opencast-db
-   * @param ds Datasource object
-   */
-  public void setDataSource(DataSource ds) {
-    logger.info("registering DataSource");
-    myDataSource = ds;
-
-    // check for existence of UPLOADPROGRESS table, create it if not present
-    try {
-      boolean exists = false;
-      Connection con = getSQLConnection(myDataSource);
-      DatabaseMetaData meta = con.getMetaData();
-      ResultSet rs = meta.getTables(null, null, "UPLOADPROGRESS", null);
-      while (rs.next()) {                                                  // this could be done in a more elegant way
-        if (rs.getString("TABLE_NAME").equals("UPLOADPROGRESS")) {
-          exists = true;
-          break;
-        }
-      }
-      if (!exists) {
-        logger.info("table UPLOADPROGRESS not existing, creating it");
-        PreparedStatement s = con.prepareStatement("CREATE TABLE UPLOADPROGRESS (mediapackageId varchar(255), filename varchar(2048), total bigint, received bigint)");
-        s.executeUpdate();
-        con.commit();
-      }
-      con.close();
-    } catch (SQLException e) {
-      logger.warn(e.getMessage());
-    }
-  }
-
-  private Connection getSQLConnection(DataSource ds) throws SQLException {
-    Connection con = ds.getConnection();
-    if (con == null) {
-      throw new SQLException("Unable to get connection from DataSource");
-    } else {
-      return con;
-    }
-  }
-
-  /* --------------------- end of Benjamins weekend-fun --------------------- */
   @POST
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -316,7 +210,6 @@ public class IngestRestService {
     return addMediaPackageElement(request, MediaPackageElement.Type.Attachment);
   }
 
-  
   protected Response addMediaPackageElement(HttpServletRequest request, MediaPackageElement.Type type) {
     MediaPackageElementFlavor flavor = null;
     try {
@@ -328,9 +221,11 @@ public class IngestRestService {
           FileItemStream item = iter.next();
           String fieldName = item.getFieldName();
           if (item.isFormField()) {
-            if("flavor".equals(fieldName)) {
+            if ("flavor".equals(fieldName)) {
               String flavorString = Streams.asString(item.openStream());
-              if(flavorString != null) flavor = MediaPackageElementFlavor.parseFlavor(flavorString);
+              if (flavorString != null) {
+                flavor = MediaPackageElementFlavor.parseFlavor(flavorString);
+              }
             } else if ("mediaPackage".equals(fieldName)) {
               mp = builder.loadFromXml(item.openStream());
             }
@@ -339,18 +234,18 @@ public class IngestRestService {
             in = item.openStream();
           }
         }
-        switch(type) {
-        case Attachment:
-          ingestService.addAttachment(in, fileName, flavor, mp);
-          break;
-        case Catalog:
-          ingestService.addCatalog(in, fileName, flavor, mp);
-          break;
-        case Track:
-          ingestService.addTrack(in, fileName, flavor, mp);
-          break;
-        default:
-          throw new IllegalStateException("Type must be one of track, catalog, or attachment");
+        switch (type) {
+          case Attachment:
+            ingestService.addAttachment(in, fileName, flavor, mp);
+            break;
+          case Catalog:
+            ingestService.addCatalog(in, fileName, flavor, mp);
+            break;
+          case Track:
+            ingestService.addTrack(in, fileName, flavor, mp);
+            break;
+          default:
+            throw new IllegalStateException("Type must be one of track, catalog, or attachment");
         }
         ingestService.ingest(mp);
         return Response.ok(mp.toXml()).build();
@@ -376,11 +271,11 @@ public class IngestRestService {
           FileItemStream item = iter.next();
           if (item.isFormField()) {
             String fieldName = item.getFieldName();
-            if(fieldName.equals("flavor")) {
+            if (fieldName.equals("flavor")) {
               flavor = MediaPackageElementFlavor.parseFlavor(Streams.asString(item.openStream()));
             } else {
               // TODO not all form fields should be treated as dublin core fields
-              EName en = new EName(DublinCore.TERMS_NS_URI, fieldName);              
+              EName en = new EName(DublinCore.TERMS_NS_URI, fieldName);
               dcc.add(en, Streams.asString(item.openStream()));
             }
           } else {
@@ -429,19 +324,204 @@ public class IngestRestService {
     }
   }
 
+  // the method above yields an Exception when called via a POST from JQuery
+  /** Starts the ingest of a given MediaPackage.
+   * Returns 500 if something goes wrong unexpectedly
+   *
+   * @param mp MediaPackage to start Ingest on
+   * @return String "OK", 500 in case of error
+   */
+  @POST
+  @Produces(MediaType.TEXT_PLAIN)
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  @Path("startIngest")
+  public Response startIngest(@FormParam("mediaPackage") String mp) {
+    logger.debug("ingest(MediaPackage): {}", mp);
+    try {
+      MediaPackage mediaPackage = builder.loadFromXml(mp);      // @FormParam("mediaPackage") MediaPackage mp yields Exception
+      ingestService.ingest(mediaPackage);
+      return Response.ok("OK").build();
+    } catch (Exception e) {
+      logger.warn(e.getMessage());
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  /** Creates an upload job and returns an HTML form ready for uploading the file
+   *  to the newly created upload job.
+   * Returns 500 if something goes wrong unexpectedly
+   *
+   * @return HTML form ready for uploading the file
+   */
+  @GET
+  @Path("uploadform.html")
+  @Produces(MediaType.TEXT_HTML)
+  public Response createUploadJob() {
+    try {
+      UploadJob job = new UploadJob();
+      em.getTransaction().begin();
+      em.persist(job);
+      em.getTransaction().commit();
+      String html = IOUtils.toString(getClass().getResourceAsStream("/templates/uploadform.html"));
+      String uploadURL = serverURL + "/ingest/rest/addElementMonitored/" + job.getId();
+      html = html.replaceAll("\\{uploadURL\\}", uploadURL);
+      html = html.replaceAll("\\{jobId\\}", job.getId());
+      logger.info("New upload job created: " + job.getId());
+      return Response.ok(html).build();
+    } catch (Exception ex) {
+      logger.error(ex.getMessage());
+      ex.printStackTrace();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  /** Add an elements to a MediaPackage and keeps track of the progress of the upload.
+   *  Returns an HTML that triggers the host sites UploadListener.uploadComplete javascript event
+   *  Returns an HTML that triggers the host sites UploadListener.uplaodFailed javascript event in case of error
+   * @param jobId of the upload job
+   * @param request containing the file, the flavor and the MediaPackage to which it should be added
+   * @return HTML that calls the UploadListener.uploadComplete javascript handler
+   */
+  @POST
+  @Path("addElementMonitored/{jobId}")
+  @Produces(MediaType.TEXT_HTML)
+  public Response addElementMonitored(@PathParam("jobId") String jobId, @Context HttpServletRequest request) {
+    UploadJob job = null;
+    MediaPackage mp = null;
+    String fileName = null;
+    MediaPackageElementFlavor flavor = null;
+    try {
+      try {                                                   // try to get UploadJob, responde 404 if not successful
+        Query q = em.createNamedQuery("UploadJob.getByID");
+        q.setParameter("id", jobId);
+        job = (UploadJob) q.getSingleResult();
+      } catch (NoResultException e) {
+        logger.warn("UploadJob not found for Id: " + jobId);
+        return buildUploadFailedRepsonse();
+      }
+      if (ServletFileUpload.isMultipartContent(request)) {
+        ServletFileUpload upload = new ServletFileUpload();
+        UploadProgressListener listener = new UploadProgressListener(job, this.em);
+        upload.setProgressListener(listener);
+        for (FileItemIterator iter = upload.getItemIterator(request); iter.hasNext();) {
+          FileItemStream item = iter.next();
+          String fieldName = item.getFieldName();
+          if (fieldName.equals("mediaPackage")) {
+            mp = builder.loadFromXml(item.openStream());
+          } else if ("flavor".equals(fieldName)) {
+            String flavorString = Streams.asString(item.openStream());
+            if (flavorString != null) {
+              flavor = MediaPackageElementFlavor.parseFlavor(flavorString);
+            }
+          } else if (fieldName.equals("file")) {
+            fileName = item.getName();
+            logger.debug("receiving track");
+            job.setFilename(fileName);
+            if ((mp != null) && (flavor != null) && (fileName != null)) {
+
+              // TODO add ability to accept the other kinds of elements (Attachment etc..)
+
+              mp = ingestService.addTrack(item.openStream(), fileName, flavor, mp);
+              String html = IOUtils.toString(getClass().getResourceAsStream("/templates/complete.html"));
+              html = html.replaceAll("\\{mediaPackage\\}", mp.toXml());
+              return Response.ok(html).build();
+            }
+          }
+        }
+      } else {
+        logger.warn("Job " + job.getId() + ": message is not multipart/form-data encoded");
+      }
+      return buildUploadFailedRepsonse();
+    } catch (Exception ex) {
+      logger.error(ex.getMessage());
+      ex.printStackTrace();
+      return buildUploadFailedRepsonse();
+    }
+  }
+
+  /** Builds a Response containing an HTML that calls the UploadListener.uploadFailed
+   *  javascript handler.
+   *
+   * @return HTML that calls the UploadListener.uploadFailed js function
+   */
+  private Response buildUploadFailedRepsonse() {
+    try {
+      String html = IOUtils.toString(getClass().getResourceAsStream("/templates/error.html"));
+      return Response.ok(html).build();
+    } catch (IOException ex) {
+      logger.error("Unable to build upload failed Response");
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  /** Adds a dublinCore metadata catalog to the MediaPackage and returns the grown mediaPackage.
+   *  JQuery Ajax functions doesn't support multipart/form-data encoding.
+   *
+   * @param mp MediaPackage
+   * @param dc DublinCoreCatalog
+   * @return grown MediaPackage XML
+   */
+  @POST
+  @Produces(MediaType.TEXT_XML)
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  @Path("addDCCatalog")
+  public Response addDCCatalog(@FormParam("mediaPackage") String mp, @FormParam("dublinCore") String dc) {
+    try {
+      MediaPackage mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(mp);      // @FormParam("mediaPackage") MediaPackage mp yields Exception
+      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc), "dublinCore.xml", MediaPackageElementFlavor.parseFlavor("metadata/dublincore"), mediaPackage);
+      return Response.ok(mediaPackage).build();
+    } catch (Exception e) {
+      logger.error(e.getMessage());
+      e.printStackTrace();
+      return Response.serverError().build();
+    }
+  }
+
+  /** Returns information about the progress of a file upload as a JSON string.
+   *  Returns 404 if upload job id doesn't exists
+   *  Returns 500 if something goes wrong unexpectedly
+   *
+   * TODO cache UploadJobs because endpoint is asked periodically so that not each request yields a DB query operation
+   *
+   * @param jobId
+   * @return progress JSON string
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("getProgress/{JobId}")
+  public Response getProgress(@PathParam("JobId") String jobId) {
+    try {
+      UploadJob job = null;
+      try {                                                   // try to get UploadJob, responde 404 if not successful
+        Query q = em.createNamedQuery("UploadJob.getByID");
+        q.setParameter("id", jobId);
+        job = (UploadJob) q.getSingleResult();
+      } catch (NoResultException e) {
+        logger.warn("UploadJob not found for Id: " + jobId);
+        return Response.status(Status.NOT_FOUND).build();
+      }
+      String json = "{total:" + Long.toString(job.getBytesTotal()) + ", received:" + Long.toString(job.getBytesReceived()) + "}";
+      return Response.ok(json).build();
+    } catch (Exception ex) {
+      logger.error(ex.getMessage());
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) { docs = generateDocs(); }
+    if (docs == null) {
+      docs = generateDocs();
+    }
     return docs;
   }
-
   protected String docs;
   private String[] notes = {
     "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
     "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
+    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>",};
 
   // CHECKSTYLE:OFF
   private String generateDocs() {
@@ -452,8 +532,8 @@ public class IngestRestService {
 
     // createMediaPackage
     RestEndpoint endpoint = new RestEndpoint("createMediaPackage", RestEndpoint.Method.GET,
-        "/createMediaPackage",
-        "Create an empty media package");
+            "/createMediaPackage",
+            "Create an empty media package");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns media package"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
@@ -462,15 +542,15 @@ public class IngestRestService {
 
     // addTrack (URL)
     endpoint = new RestEndpoint("addTrackURL", RestEndpoint.Method.POST,
-        "/addTrack",
-        "Add a media track to a given media package using an URL");
+            "/addTrack",
+            "Add a media track to a given media package using an URL");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addRequiredParam(new Param("url", Param.Type.STRING, null,
-        "The location of the media"));
+            "The location of the media"));
     endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
-        "The kind of media"));
+            "The kind of media"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
-        "The media package as XML"));
+            "The media package as XML"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
     endpoint.setTestForm(RestTestForm.auto());
@@ -478,14 +558,14 @@ public class IngestRestService {
 
     // addTrack (InputStream)
     endpoint = new RestEndpoint("addTrackInputStream", RestEndpoint.Method.POST,
-        "/addTrack",
-        "Add a media track to a given media package using an input stream");
+            "/addTrack",
+            "Add a media track to a given media package using an input stream");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addBodyParam(true, null, "The media track file");
     endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
-        "The kind of media track"));
+            "The kind of media track"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
-        "The media package as XML"));
+            "The media package as XML"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
@@ -494,15 +574,15 @@ public class IngestRestService {
 
     // addCatalog (URL)
     endpoint = new RestEndpoint("addCatalogURL", RestEndpoint.Method.POST,
-        "/addCatalog",
-        "Add a metadata catalog to a given media package using an URL");
+            "/addCatalog",
+            "Add a metadata catalog to a given media package using an URL");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addRequiredParam(new Param("url", Param.Type.STRING, null,
-        "The location of the catalog"));
+            "The location of the catalog"));
     endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
-        "The kind of catalog"));
+            "The kind of catalog"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
-        "The media package as XML"));
+            "The media package as XML"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
     endpoint.setTestForm(RestTestForm.auto());
@@ -510,14 +590,14 @@ public class IngestRestService {
 
     // addCatalog (InputStream)
     endpoint = new RestEndpoint("addCatalogInputStream", RestEndpoint.Method.POST,
-        "/addCatalog",
-        "Add a metadata catalog to a given media package using an input stream");
+            "/addCatalog",
+            "Add a metadata catalog to a given media package using an input stream");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addBodyParam(true, null, "The metadata catalog file");
     endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
-        "The kind of media catalog"));
+            "The kind of media catalog"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
-        "The media package as XML"));
+            "The media package as XML"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
@@ -526,11 +606,11 @@ public class IngestRestService {
 
     // addTrackMonitored (InputStream)
     endpoint = new RestEndpoint("addTrackMonitored", RestEndpoint.Method.POST,
-        "/addTrackMonitored",
-        "Asynchronously add a media track to a given media package using an input stream. Upload progress can be polled with /getUploadProgress");
+            "/addTrackMonitored",
+            "Asynchronously add a media track to a given media package using an input stream. Upload progress can be polled with /getUploadProgress");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
-        "The media package as XML"));
+            "The media package as XML"));
     endpoint.addBodyParam(true, null, "The media track file");
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
@@ -540,28 +620,28 @@ public class IngestRestService {
 
     // getUploadProgress
     endpoint = new RestEndpoint("getUploadProgress", RestEndpoint.Method.GET,
-        "/getUploadProgress/{mpId}/{filename}",
-        "Get the progress of a file upload");
+            "/getUploadProgress/{mpId}/{filename}",
+            "Get the progress of a file upload");
     endpoint.addFormat(new Format("JSON", null, null));
     endpoint.addPathParam(new Param("mpId", Param.Type.STRING, null,
-        "The media package ID"));
+            "The media package ID"));
     endpoint.addPathParam(new Param("filename", Param.Type.STRING, null,
-        "The name of the file"));
+            "The name of the file"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the total and currently received number of bytes"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
     // addAttachment (URL)
     endpoint = new RestEndpoint("addAttachmentURL", RestEndpoint.Method.POST,
-        "/addAttachment",
-        "Add an attachment to a given media package using an URL");
+            "/addAttachment",
+            "Add an attachment to a given media package using an URL");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addRequiredParam(new Param("url", Param.Type.STRING, null,
-        "The location of the attachment"));
+            "The location of the attachment"));
     endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
-        "The kind of attachment"));
+            "The kind of attachment"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
-        "The media package as XML"));
+            "The media package as XML"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
     endpoint.setTestForm(RestTestForm.auto());
@@ -569,108 +649,108 @@ public class IngestRestService {
 
     // addAttachment (InputStream)
     endpoint = new RestEndpoint("addAttachmentInputStream", RestEndpoint.Method.POST,
-        "/addAttachment",
-        "Add an attachment to a given media package using an input stream");
+            "/addAttachment",
+            "Add an attachment to a given media package using an input stream");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addBodyParam(true, null, "The attachment file");
     endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
-        "The kind of attachment"));
+            "The kind of attachment"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
-        "The media package as XML"));
+            "The media package as XML"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-    
+
     // addMediaPackage
-  endpoint = new RestEndpoint("addMediaPackage", RestEndpoint.Method.POST,
-      "/addMediaPackage",
-      "Create media package from a media tracks and optional Dublin Core metadata fields");
-  endpoint.addFormat(new Format("XML", null, null));
-  endpoint.addBodyParam(true, null, "The media track file");
-  endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
-      "The kind of media track"));
-  endpoint.addOptionalParam(new Param("abstract", Param.Type.STRING, null, 
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("accessRights", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("available", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("contributor", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("coverage", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("created", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("creator", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("date", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("description", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("extent", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("format", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("identifier", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("isPartOf", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("isReferencedBy", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("isReplacedBy", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("language", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("license", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("publisher", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("relation", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("replaces", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("rights", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("rightsHolder", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("source", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("spatial", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("subject", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("temporal", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("title", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addOptionalParam(new Param("type", Param.Type.STRING, null,
-      "Metadata value"));
-  endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
-  endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
-  endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
-  endpoint.setTestForm(RestTestForm.auto());
-  data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-    
+    endpoint = new RestEndpoint("addMediaPackage", RestEndpoint.Method.POST,
+            "/addMediaPackage",
+            "Create media package from a media tracks and optional Dublin Core metadata fields");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addBodyParam(true, null, "The media track file");
+    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
+            "The kind of media track"));
+    endpoint.addOptionalParam(new Param("abstract", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("accessRights", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("available", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("contributor", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("coverage", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("created", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("creator", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("date", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("description", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("extent", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("format", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("identifier", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("isPartOf", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("isReferencedBy", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("isReplacedBy", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("language", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("license", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("publisher", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("relation", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("replaces", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("rights", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("rightsHolder", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("source", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("spatial", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("subject", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("temporal", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("title", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addOptionalParam(new Param("type", Param.Type.STRING, null,
+            "Metadata value"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
     // addZippedMediaPackage
     endpoint = new RestEndpoint("addZippedMediaPackage", RestEndpoint.Method.POST,
-        "/addZippedMediaPackage",
-        "Create media package from a compressed file containing a manifest.xml document and all media tracks, metadata catalogs and attachments");
+            "/addZippedMediaPackage",
+            "Create media package from a compressed file containing a manifest.xml document and all media tracks, metadata catalogs and attachments");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addBodyParam(true, null, "The compressed (application/zip) media package file");
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-    
+
     // ingest
     endpoint = new RestEndpoint("ingest", RestEndpoint.Method.POST,
-        "/ingest",
-        "Ingest the completed media package into the system, retrieving all URL-referenced files");
+            "/ingest",
+            "Ingest the completed media package into the system, retrieving all URL-referenced files");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
-        "The ID of the given media package"));
+            "The ID of the given media package"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the media package"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
     endpoint.setTestForm(RestTestForm.auto());
@@ -679,5 +759,4 @@ public class IngestRestService {
     return DocUtil.generate(data);
   }
   // CHECKSTYLE:ON
-
 }
