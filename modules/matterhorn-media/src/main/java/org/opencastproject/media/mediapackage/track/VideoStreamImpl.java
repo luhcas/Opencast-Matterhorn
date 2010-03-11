@@ -305,12 +305,16 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
   }
 
   public void setScanType(ScanType scanType) {
+    if (scanType == null)
+      return;
     if (this.scanType == null)
       this.scanType = new Scan();
     this.scanType.type = scanType;
   }
 
   public void setScanOrder(ScanOrder scanOrder) {
+    if (scanOrder == null)
+      return;
     if (this.scanType == null)
       this.scanType = new Scan();
     this.scanType.order = scanOrder;
