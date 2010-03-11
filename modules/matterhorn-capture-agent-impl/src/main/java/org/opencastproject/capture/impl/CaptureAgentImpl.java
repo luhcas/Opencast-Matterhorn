@@ -540,9 +540,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         // TODO: This should be modified to allow a more flexible way of detecting the track flavour.
         // Suggestions: a dedicated class or a/several field(s) in the properties indicating what type of track is each
         if (name.equals("PRESENTER") || name.equals("AUDIO"))
-          flavor = MediaPackageElements.PRESENTER_TRACK;
+          flavor = MediaPackageElements.PRESENTER_SOURCE;
         else if (name.equals("SCREEN"))
-          flavor = MediaPackageElements.PRESENTATION_TRACK;
+          flavor = MediaPackageElements.PRESENTATION_SOURCE;
 
         String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
         File outputFile = new File(recording.getDir(), recording.getProperty(outputProperty));
