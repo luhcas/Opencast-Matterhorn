@@ -14,6 +14,7 @@
     <link rel="stylesheet" type="text/css" href="css/admin.css">
     <link rel="stylesheet" type="text/css" href="css/popuphelp.css">
     <link type="text/css" rel="stylesheet" href="css/upload.css">
+    <link type="text/css" rel="stylesheet" href="css/progress.css">
     <style type="text/css">
       .container {margin-bottom: 10px;}
       .color-red {color:red;}
@@ -34,45 +35,33 @@
     <script type="text/javascript" src="js/jquery-ui-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.form.js"></script>
     <script type="text/javascript" src="js/upload.helptexts.json"></script>
-    <script type="text/javascript" src="js/version.js"></script>
+    <!-- <script type="text/javascript" src="js/version.js"></script> -->
+    <script type="text/javascript" src="js/uploadListener.js"></script>
+    <script type="text/javascript" src="js/oc.utils.js"></script>
+    <script type="text/javascript" src="js/oc.ingest.js"></script>
     <script type="text/javascript">
       var metadata = {};
 
       $(document).ready(function() {
+
+        // are we in debug mode?
+        if (getURLParam("debug")) {
+          $('#console').show();
+        }
+
         // Event: Submit button, submit form if no missing inputs
         $('#BtnSubmit').click( function() {
           if (checkRequiredFields(true))  {
+            log("Collecting metadata");
             $('.formField').each( function() {
-              metadata[$(this).attr('id')] = $(this).val();
-            });
-            $('#uploadForm').ajaxSubmit({
-              method: 'post',
-              iframe : true,
-              dataType : 'xml',
-              beforeSubmit: function() {
-                $('#gray-out').fadeIn('slow');
-                $('#upload-notification').fadeIn('fast');
-              },
-              success : function(responseXML, statusText) {
-                alert(statusText);
-                $('#gray-out').fadeOut('fast');
-                $('#upload-notification').fadeOut('fast');
-                var media = responseXML.documentElement.getElementsByTagName('media');
-                if (media.length > 0) {
-                  $('#stage').load('complete.html', function() {
-                    for (key in metadata) {
-                      if (metadata[key]) {
-                        var elm = $('#field-' + key);
-                        $(elm).css('display','block')
-                        $(elm).children('.fieldValue').text(metadata[key]);
-                      }
-                    }
-                  });
-                } else {
-                  $('#stage').load('error.html');
-                }
+              if (($(this).attr('id') != 'flavor') && ($(this).attr('id') != 'distribution')) {
+                //log("adding metadata " + $(this).attr('id') + ' ' + $(this).val());
+                metadata[$(this).attr('id')] = $(this).val();
               }
             });
+            UploadListener.uploadStarted();
+            ocIngest.metadata = metadata;
+            ocIngest.createMediaPackage();
           } else {
             $('#container-missingFields').show('fast');
           }
@@ -142,6 +131,60 @@
           return !missing && right;
         }
       });
+
+      function showProgressStage() {
+        $('#gray-out').fadeIn('fast');
+        $('#progress-stage').fadeIn('normal');
+      }
+
+      function hideProgressStage() {
+        $('#gray-out').fadeOut('fast');
+        $('#progress-stage').fadeOut('normal');
+      }
+
+      function setProgress(width, text, total, transfered) {
+        $('#progressbar-indicator').css('width',width);
+        $('#progressbar-label').text(text);
+        $('#label-filesize').text(total);
+        $('#label-bytestrasfered').text(transfered);
+      }
+
+      function showSuccessScreen() {
+        $('#stage').load('complete.html', function() {
+        for (key in metadata) {
+          if (metadata[key] != "") {
+            $('#field-'+key).css('display','block');
+            $('#field-'+key).children('.fieldValue').text(metadata[key]);
+          }
+        }
+        });
+      }
+
+      function showFailedScreen(message) {
+        hideProgressStage();
+        $('#stage').load('error.html', function() {
+          if (message) {
+            $('#error-message').text(message).show();
+          }
+        });
+      }
+
+      function log(message) {
+        var console = document.getElementById("console");
+        console.innerHTML += message + "\n";
+        console.scrollTop = console.scrollHeight;
+      }
+
+      function getURLParam(name) {
+        name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+        var regexS = "[\\?&]"+name+"=([^&#]*)";
+        var regex = new RegExp( regexS );
+        var results = regex.exec( window.location.href );
+        if( results == null )
+          return "";
+        else
+          return results[1];
+      }
     </script>
   </head>
 
@@ -318,7 +361,9 @@
                 <li class="ui-helper-clearfix">
                   <!--<input type="hidden" class="formField" name="flavor" id="flavor" value="presentation/source">-->
                   <label class="fl-label"><span class="color-red">* </span>Media File:</label>
-                  <input type="file" id="track" name="track" class="requiredField mouseover-pointer" style="float:left;">
+                  <input type="hidden" name="track" id="track" class="requiredField" value="">
+                  <iframe name="filechooserAjax" id="filechooser-ajax" src="../ingest/rest/uploadform.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
+                  </iframe>
                   <span class="helpIcon"  title="Click for help">&nbsp;</span>
                 </li>
                 <li class="ui-helper-clearfix">
@@ -358,12 +403,21 @@
       </div>
     </div>
 
+    <textarea id="console" style="width:500px;height:300px;display:none;"></textarea>
+
     <div id="gray-out">
       &nbsp;
     </div>
-    <div id="upload-notification" style="padding-top:10px;">
-      <center>Uploading...</center>
-      <div class="loadingAnimation">&nbsp;</div>
+    <div id="progress-stage" style="display:none;">
+      <div id="label-filename">
+        &nbsp;
+      </div>
+      <div id="progressbar">
+        <div id="progressbar-indicator" style="width:0%;">&nbsp;</div>
+        <div id="progressbar-label">Initializing upload...</div>
+      </div>
+      <div id="label-filesize">&nbsp</div>
+      <div id="label-bytestrasfered">&nbsp;</div>
     </div>
 
     <!-- template for the popup help box -->
