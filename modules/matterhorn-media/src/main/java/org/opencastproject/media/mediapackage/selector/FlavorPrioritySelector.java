@@ -33,7 +33,7 @@ import java.util.Set;
  * <li>The element is selected based on the order of flavors</li>
  * </ul>
  */
-public class FlavorPrioritySelector<T extends MediaPackageElement> extends SimpleMediaPackageElementSelector<T> {
+public class FlavorPrioritySelector<T extends MediaPackageElement> extends AbstractMediaPackageElementSelector<T> {
 
   /**
    * {@inheritDoc}

@@ -85,7 +85,7 @@ public class TrackTest {
    */
   @Test
   public void testPresenterTrackAccept() throws Exception {
-    assertTrue(new TrackBuilderPlugin().accept(new URI("uri"), Track.TYPE, MediaPackageElements.PRESENTER_TRACK));
+    assertTrue(new TrackBuilderPlugin().accept(new URI("uri"), Track.TYPE, MediaPackageElements.PRESENTER_SOURCE));
   }
   /**
    * Test method for {@link org.opencastproject.media.mediapackage.track.TrackImpl#getStreams()}.

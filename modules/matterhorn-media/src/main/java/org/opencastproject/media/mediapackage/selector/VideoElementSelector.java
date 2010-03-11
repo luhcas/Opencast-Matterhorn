@@ -31,7 +31,7 @@ import java.util.Set;
  * from a <code>MediaPackage</code> that contain video streams.
  */
 public class VideoElementSelector extends
-        SimpleMediaPackageElementSelector<Track> {
+        AbstractMediaPackageElementSelector<Track> {
 
   /** Explicit video flavor */
   protected MediaPackageElementFlavor videoFlavor = null;
@@ -105,7 +105,7 @@ public class VideoElementSelector extends
    * contain video and video. If no such combination can be found, e. g. there
    * is no video or video at all, an empty array is returned.
    * 
-   * @see org.opencastproject.media.mediapackage.selector.SimpleMediaPackageElementSelector#select(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.media.mediapackage.selector.AbstractMediaPackageElementSelector#select(org.opencastproject.media.mediapackage.MediaPackage)
    */
   @Override
   public Collection<Track> select(MediaPackage mediaPackage) {

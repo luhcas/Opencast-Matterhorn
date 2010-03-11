@@ -69,7 +69,7 @@ public class MediaPackageJaxbSerializationTest {
     cat2.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, "7891011abcd"));
     mp.addDerived(cat2, cat1);
     
-    TrackImpl track = (TrackImpl)elementBuilder.elementFromURI(new URI("http://opencastproject.org/video.mpg"), Track.TYPE, MediaPackageElements.PRESENTER_TRACK);
+    TrackImpl track = (TrackImpl)elementBuilder.elementFromURI(new URI("http://opencastproject.org/video.mpg"), Track.TYPE, MediaPackageElements.PRESENTER_SOURCE);
     track.addStream(new VideoStreamImpl("video-stream-1"));
     track.addStream(new VideoStreamImpl("video-stream-2"));
     mp.add(track);

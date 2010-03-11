@@ -32,19 +32,19 @@ public interface MediaPackageElements {
   MediaPackageElementFlavor DUBLINCORE_CATALOG = new MediaPackageElementFlavor("metadata", "dublincore");
 
   /** Track containing the presenter/s */
-  MediaPackageElementFlavor PRESENTER_TRACK = new MediaPackageElementFlavor("presenter", "source");
+  MediaPackageElementFlavor PRESENTER_SOURCE = new MediaPackageElementFlavor("presenter", "source");
 
   /** Track containing presentational material */
-  MediaPackageElementFlavor PRESENTATION_TRACK = new MediaPackageElementFlavor("presentation", "source");
+  MediaPackageElementFlavor PRESENTATION_SOURCE = new MediaPackageElementFlavor("presentation", "source");
 
   /** Track capturing the audience */
-  MediaPackageElementFlavor AUDIENCE_TRACK = new MediaPackageElementFlavor("audience", "source");
+  MediaPackageElementFlavor AUDIENCE_SOURCE = new MediaPackageElementFlavor("audience", "source");
 
   /** Track capturing the contents of a document camera */
-  MediaPackageElementFlavor DOCUMENTS_TRACK = new MediaPackageElementFlavor("documents", "source");
+  MediaPackageElementFlavor DOCUMENTS_SOURCE = new MediaPackageElementFlavor("documents", "source");
 
   /** Track without any known semantics */
-  MediaPackageElementFlavor INDEFINITE_TRACK = new MediaPackageElementFlavor("indefinite", "source");
+  MediaPackageElementFlavor INDEFINITE_SOURCE = new MediaPackageElementFlavor("indefinite", "source");
 
   /** Cover art flavor */
   MediaPackageElementFlavor COVER_FLAVOR = new MediaPackageElementFlavor("cover", "source", "Cover art");

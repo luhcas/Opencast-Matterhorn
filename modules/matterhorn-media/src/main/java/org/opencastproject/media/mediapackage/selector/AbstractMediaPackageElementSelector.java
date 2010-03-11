@@ -21,6 +21,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElementSelector;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -28,11 +29,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * This selector will return any <code>MediaPackageElement</code>s from a
- * <code>MediaPackage</code> that matches the tag and flavors.
+ * This selector will return any <code>MediaPackageElement</code>s from a <code>MediaPackage</code> that matches the tag
+ * and flavors.
  */
-public class SimpleMediaPackageElementSelector<T extends MediaPackageElement>
-        implements MediaPackageElementSelector<T> {
+public abstract class AbstractMediaPackageElementSelector<T extends MediaPackageElement> implements
+        MediaPackageElementSelector<T> {
 
   /** The tags */
   protected Set<String> tags = new HashSet<String>();
@@ -41,9 +42,8 @@ public class SimpleMediaPackageElementSelector<T extends MediaPackageElement>
   protected List<MediaPackageElementFlavor> flavors = new ArrayList<MediaPackageElementFlavor>();
 
   /**
-   * This base implementation will return those media package elements that
-   * match the type specified as the type parameter to the class and that flavor
-   * (if specified) and at least one of the tags (if specified) match.
+   * This base implementation will return those media package elements that match the type specified as the type
+   * parameter to the class and that flavor (if specified) and at least one of the tags (if specified) match.
    * 
    * @see org.opencastproject.media.mediapackage.MediaPackageElementSelector#select(org.opencastproject.media.mediapackage.MediaPackage)
    */
@@ -81,80 +81,42 @@ public class SimpleMediaPackageElementSelector<T extends MediaPackageElement>
   }
 
   /**
-   * This constructor tries to determine the entity type from the type argument
-   * used by a concrete implementation of <code>GenericHibernateDao</code>.
+   * This constructor tries to determine the entity type from the type argument used by a concrete implementation of
+   * <code>GenericHibernateDao</code>.
    * <p>
-   * Note: This code will only work for immediate specialization, and especially not
-   * for subclasses.
+   * Note: This code will only work for immediate specialization, and especially not for subclasses.
    */
   @SuppressWarnings("unchecked")
   private Class getParametrizedType(Object object) {
-    Class<T> c = (Class<T>)this.getClass();
-    ParameterizedType type = ((ParameterizedType) c.getGenericSuperclass());
-    Class<T> actualType = (Class<T>)type.getActualTypeArguments()[0];
-    return actualType;
+//    Class<T> c = (Class<T>) this.getClass();
+//    ParameterizedType type = ((ParameterizedType) c.getGenericSuperclass());
+//    Class<T> actualType = (Class<T>) type.getActualTypeArguments()[0];
+//    return actualType;
 
-    // Class current = getClass();
-    // Type superclass;
-    // Class<? extends T> entityClass = null;
-    // while ((superclass = current.getGenericSuperclass()) != null) {
-    // if (superclass instanceof ParameterizedType) {
-    // entityClass = (Class<T>) ((ParameterizedType) superclass)
-    // .getActualTypeArguments()[0];
-    // break;
-    // } else if (superclass instanceof Class) {
-    // current = (Class) superclass;
-    // } else {
-    // break;
-    // }
-    // }
-    // if (entityClass == null) {
-    // throw new IllegalStateException("Cannot determine entity type because "
-    // + getClass().getName() + " does not specify any type parameter.");
-    // }
-    // return entityClass;
-  }
-
-  /**
-   * This constructor tries to determine the entity type from the type argument
-   * used by a concrete implementation of <code>GenericHibernateDao</code>.
-   * <p>
-   * Note: This code will only work for immediate specialization, and especially not
-   * for subclasses.
-   */
-  @SuppressWarnings("unchecked")
-  private Class getParametrizedType() {
-    Class c = getClass();
-    ParameterizedType type = ((ParameterizedType) c.getGenericSuperclass());
-    Class<T> actualType = (Class<T>)type.getActualTypeArguments()[0];
-    return actualType;
-
-    // Class current = getClass();
-    // Type superclass;
-    // Class<? extends T> entityClass = null;
-    // while ((superclass = current.getGenericSuperclass()) != null) {
-    // if (superclass instanceof ParameterizedType) {
-    // entityClass = (Class<T>) ((ParameterizedType) superclass)
-    // .getActualTypeArguments()[0];
-    // break;
-    // } else if (superclass instanceof Class) {
-    // current = (Class) superclass;
-    // } else {
-    // break;
-    // }
-    // }
-    // if (entityClass == null) {
-    // throw new IllegalStateException("Cannot determine entity type because "
-    // + getClass().getName() + " does not specify any type parameter.");
-    // }
-    // return entityClass;
+    Class current = getClass();
+    Type superclass;
+    Class<? extends T> entityClass = null;
+    while ((superclass = current.getGenericSuperclass()) != null) {
+      if (superclass instanceof ParameterizedType) {
+        entityClass = (Class<T>) ((ParameterizedType) superclass).getActualTypeArguments()[0];
+        break;
+      } else if (superclass instanceof Class) {
+        current = (Class) superclass;
+      } else {
+        break;
+      }
+    }
+    if (entityClass == null) {
+      throw new IllegalStateException("Cannot determine entity type because " + getClass().getName()
+              + " does not specify any type parameter.");
+    }
+    return entityClass;
   }
 
   /**
    * Sets the flavors.
    * <p>
-   * Note that the order is relevant to the selection of the track returned by
-   * this selector.
+   * Note that the order is relevant to the selection of the track returned by this selector.
    * 
    * @param flavors
    *          the list of flavors
@@ -170,36 +132,36 @@ public class SimpleMediaPackageElementSelector<T extends MediaPackageElement>
   /**
    * Adds the given flavor to the list of flavors.
    * <p>
-   * Note that the order is relevant to the selection of the track returned by
-   * this selector.
+   * Note that the order is relevant to the selection of the track returned by this selector.
    * 
    * @param flavor
    */
   public void addFlavor(MediaPackageElementFlavor flavor) {
     if (flavor == null)
       throw new IllegalArgumentException("Flavor must not be null");
-    flavors.add(flavor);
+    if (!flavors.contains(flavor))
+      flavors.add(flavor);
   }
 
   /**
    * Adds the given flavor to the list of flavors.
    * <p>
-   * Note that the order is relevant to the selection of the track returned by
-   * this selector.
+   * Note that the order is relevant to the selection of the track returned by this selector.
    * 
    * @param flavor
    */
   public void addFlavor(String flavor) {
     if (flavor == null)
       throw new IllegalArgumentException("Flavor must not be null");
-    flavors.add(MediaPackageElementFlavor.parseFlavor(flavor));
+    MediaPackageElementFlavor f = MediaPackageElementFlavor.parseFlavor(flavor);
+    if (!flavors.contains(f))
+      flavors.add(f);
   }
 
   /**
    * Adds the given flavor to the list of flavors.
    * <p>
-   * Note that the order is relevant to the selection of the track returned by
-   * this selector.
+   * Note that the order is relevant to the selection of the track returned by this selector.
    * 
    * @param index
    *          the position in the list
@@ -210,13 +172,16 @@ public class SimpleMediaPackageElementSelector<T extends MediaPackageElement>
     if (flavor == null)
       throw new IllegalArgumentException("Flavor must not be null");
     flavors.add(index, flavor);
+    for (int i = index + 1; i < flavors.size(); i++) {
+      if (flavors.get(i).equals(flavor))
+        flavors.remove(i);
+    }
   }
 
   /**
    * Adds the given flavor to the list of flavors.
    * <p>
-   * Note that the order is relevant to the selection of the track returned by
-   * this selector.
+   * Note that the order is relevant to the selection of the track returned by this selector.
    * 
    * @param index
    *          the position in the list
@@ -226,7 +191,12 @@ public class SimpleMediaPackageElementSelector<T extends MediaPackageElement>
   public void addFlavorAt(int index, String flavor) {
     if (flavor == null)
       throw new IllegalArgumentException("Flavor must not be null");
-    flavors.add(index, MediaPackageElementFlavor.parseFlavor(flavor));
+    MediaPackageElementFlavor f = MediaPackageElementFlavor.parseFlavor(flavor);
+    flavors.add(index, f);
+    for (int i = index + 1; i < flavors.size(); i++) {
+      if (flavors.get(i).equals(f))
+        flavors.remove(i);
+    }
   }
 
   /**
@@ -264,25 +234,41 @@ public class SimpleMediaPackageElementSelector<T extends MediaPackageElement>
   }
 
   /**
-   * Adds <code>tag</code> to the list of tags that are used to select the
-   * media.
+   * Returns the list of flavors.
+   * 
+   * @return the flavors
+   */
+  public MediaPackageElementFlavor[] getFlavors() {
+    return flavors.toArray(new MediaPackageElementFlavor[flavors.size()]);
+  }
+
+  /**
+   * Adds <code>tag</code> to the list of tags that are used to select the media.
    * 
    * @param tag
    *          the tag to include
    */
-  public void includeTag(String tag) {
+  public void addTag(String tag) {
     tags.add(tag);
   }
 
   /**
-   * Adds <code>tag</code> to the list of tags that are used to select the
-   * media.
+   * Adds <code>tag</code> to the list of tags that are used to select the media.
    * 
    * @param tag
    *          the tag to include
    */
-  public void excludeTag(String tag) {
+  public void removeTag(String tag) {
     tags.remove(tag);
+  }
+
+  /**
+   * Returns the tags.
+   * 
+   * @return the tags
+   */
+  public String[] getTags() {
+    return tags.toArray(new String[tags.size()]);
   }
 
   /**

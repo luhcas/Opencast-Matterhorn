@@ -42,7 +42,7 @@ public class WorkflowInstanceTest {
     WorkflowInstanceImpl workflow = new WorkflowInstanceImpl();
     MediaPackage src = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     Track track = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
-      new URI("http://sample"), Track.TYPE, MediaPackageElements.PRESENTER_TRACK);
+      new URI("http://sample"), Track.TYPE, MediaPackageElements.PRESENTER_SOURCE);
     src.add(track);
     MediaPackage deserialized = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(src.toXml());
     workflow.setMediaPackage(deserialized);

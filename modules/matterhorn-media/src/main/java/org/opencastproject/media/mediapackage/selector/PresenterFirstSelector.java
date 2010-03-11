@@ -22,10 +22,10 @@ import org.opencastproject.media.mediapackage.Track;
  * This <code>MediaPackageElementSelector</code> will return zero or one track from the media package by looking at the
  * flavors and following this order:
  * <ul>
- * <li>{@link MediaPackageElements#PRESENTATION_TRACK}</li>
- * <li>{@link MediaPackageElements#PRESENTER_TRACK}</li>
- * <li>{@link MediaPackageElements#DOCUMENTS_TRACK}</li>
- * <li>{@link MediaPackageElements#AUDIENCE_TRACK}</li>
+ * <li>{@link MediaPackageElements#PRESENTATION_SOURCE}</li>
+ * <li>{@link MediaPackageElements#PRESENTER_SOURCE}</li>
+ * <li>{@link MediaPackageElements#DOCUMENTS_SOURCE}</li>
+ * <li>{@link MediaPackageElements#AUDIENCE_SOURCE}</li>
  * <li></li>
  * <ul>
  * 
@@ -38,10 +38,10 @@ public class PresenterFirstSelector extends FlavorPrioritySelector<Track> {
    * Creates a new presentation first selector.
    */
   public PresenterFirstSelector() {
-    addFlavor(MediaPackageElements.PRESENTATION_TRACK);
-    addFlavor(MediaPackageElements.PRESENTER_TRACK);
-    addFlavor(MediaPackageElements.DOCUMENTS_TRACK);
-    addFlavor(MediaPackageElements.AUDIENCE_TRACK);
+    addFlavor(MediaPackageElements.PRESENTATION_SOURCE);
+    addFlavor(MediaPackageElements.PRESENTER_SOURCE);
+    addFlavor(MediaPackageElements.DOCUMENTS_SOURCE);
+    addFlavor(MediaPackageElements.AUDIENCE_SOURCE);
   }
 
 }

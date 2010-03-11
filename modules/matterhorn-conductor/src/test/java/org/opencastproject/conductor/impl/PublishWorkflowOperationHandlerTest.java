@@ -42,8 +42,8 @@ public class PublishWorkflowOperationHandlerTest {
     // Set up a mediapackage to publish
     MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-    Track presentationTrack = (Track)elementBuilder.elementFromURI(new URI("http://foo.bar"), Track.TYPE, MediaPackageElements.PRESENTATION_TRACK);
-    Track presenterTrack = (Track)elementBuilder.elementFromURI(new URI("http://foo.bar"), Track.TYPE, MediaPackageElements.PRESENTER_TRACK);
+    Track presentationTrack = (Track)elementBuilder.elementFromURI(new URI("http://foo.bar"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
+    Track presenterTrack = (Track)elementBuilder.elementFromURI(new URI("http://foo.bar"), Track.TYPE, MediaPackageElements.PRESENTER_SOURCE);
     mp.add(presentationTrack);
     mp.add(presenterTrack);
     

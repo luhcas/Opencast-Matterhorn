@@ -33,7 +33,7 @@ import java.util.List;
  * optionally matching other requirements such as flavors and tags.
  */
 public class StreamElementSelector<S extends Stream> extends
-        SimpleMediaPackageElementSelector<Track> {
+        AbstractMediaPackageElementSelector<Track> {
 
   /**
    * Creates a new selector.
@@ -68,7 +68,7 @@ public class StreamElementSelector<S extends Stream> extends
    * other requirements such as flavors and tags. If no such combination can be
    * found, i. g. there is no audio or video at all, an empty array is returned.
    * 
-   * @see org.opencastproject.media.mediapackage.selector.SimpleMediaPackageElementSelector#select(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.media.mediapackage.selector.AbstractMediaPackageElementSelector#select(org.opencastproject.media.mediapackage.MediaPackage)
    */
   @SuppressWarnings("unchecked")
   @Override
