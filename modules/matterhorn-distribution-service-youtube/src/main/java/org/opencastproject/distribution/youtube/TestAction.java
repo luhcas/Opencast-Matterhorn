@@ -16,8 +16,8 @@
 package org.opencastproject.distribution.youtube;
 
 import org.opencastproject.deliver.schedule.Action;
-import org.opencastproject.deliver.schedule.RetryException;
-import org.opencastproject.deliver.schedule.FailedException;
+// import org.opencastproject.deliver.schedule.RetryException;
+// import org.opencastproject.deliver.schedule.FailedException;
 
 public class TestAction extends Action {
 
@@ -82,9 +82,9 @@ public class TestAction extends Action {
         if (execute_count < execute_limit)
             resumeAfter(1);
         else if (retries)
-            throw new RetryException("Retry task.", 1);
+            ; // throw new RetryException("Retry task.", 1);
         else if (fails)
-            throw new FailedException("oops!");
+            ; // throw new FailedException("oops!");
         else
             succeed();
     }

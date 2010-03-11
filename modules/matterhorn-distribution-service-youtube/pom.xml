@@ -165,20 +165,20 @@
               org.opencastproject.deliver.youtube.*
             </Export-Package>
             <Embed-Dependency>
-			  matterhorn-distribution-service-common,
-              flexjson,
-              gdata-client,
-              gdata-core,
-              gdata-media,
-              gdata-youtube,
-              google-collections,
-			  activation,
-			  org.apache.servicemix.specs.javamail-api-1.4
+              flexjson;inline=true,
+              gdata-client;inline=true,
+              gdata-core;inline=true,
+              gdata-media;inline=true,
+              gdata-youtube;inline=true,
+              google-collections;inline=true
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/distribution-service-youtube.xml,
               OSGI-INF/distribution-service-youtube-rest.xml
             </Service-Component>
+			<JPA-PersistenceUnits>
+			  YoutubeDistributionPersistenceUnit
+			</JPA-PersistenceUnits>
           </instructions>
         </configuration>
       </plugin>

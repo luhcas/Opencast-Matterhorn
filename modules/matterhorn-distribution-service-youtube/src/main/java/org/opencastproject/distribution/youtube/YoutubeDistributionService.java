@@ -15,10 +15,14 @@
  */
 package org.opencastproject.distribution.youtube;
 
+import org.opencastproject.deliver.store.JPAStore;
+import org.opencastproject.deliver.schedule.TaskSerializer;
+
 import org.opencastproject.deliver.schedule.Schedule;
 import org.opencastproject.deliver.schedule.Task;
 import org.opencastproject.deliver.youtube.YouTubeConfiguration;
 import org.opencastproject.deliver.youtube.YouTubeDeliveryAction;
+import org.opencastproject.deliver.youtube.YouTubeRemoveAction;
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -31,7 +35,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+
 import java.net.URI;
+
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.spi.PersistenceProvider;
 
 
 /**
@@ -59,7 +70,36 @@ public class YoutubeDistributionService implements DistributionService {
   /** only one scheduler instance for this service */
   private static Schedule schedule;
 
+  /** context strategy for the distribution service */
+  YoutubeDistributionContextStrategy contextStrategy;
+
+  /** The JPA provider */
+  protected PersistenceProvider persistenceProvider;
+
+  /**
+   * @param persistenceProvider the persistenceProvider to set
+   */
+  public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
+    this.persistenceProvider = persistenceProvider;
+  }
   
+  @SuppressWarnings("unchecked")
+  protected Map persistenceProperties;
+
+  /**
+   * @param persistenceProperties the persistenceProperties to set
+   */
+  @SuppressWarnings("unchecked")
+  public void setPersistenceProperties(Map persistenceProperties) {
+    this.persistenceProperties = persistenceProperties;
+  }
+
+  /** The entity manager used for persisting Java objects. */
+  protected EntityManager em = null;
+
+  /** The factory used to generate the entity manager */
+  protected EntityManagerFactory emf = null;
+
   /**
    * Called when service activates. Defined in OSGi resource file.
    */
@@ -69,7 +109,6 @@ public class YoutubeDistributionService implements DistributionService {
     String clientid = cc.getBundleContext().getProperty("youtube.clientid"); // "abcde"
     String developerkey = cc.getBundleContext().getProperty("youtube.developerkey");
     // "AI39si7bx2AbnOM6RM8J7mdrljfZCzisYzDkqvIqEjV3zjbqQIr6-u_bg3R0MLAVVXLqKjSsxu4ReytWFn7ylIlDk6OC7pdXpQ"
-    destination = cc.getBundleContext().getProperty("youtube.playlist"); // "B8B47104C2C1663B"
 
     config = YouTubeConfiguration.getInstance();
     // client ID may not be necessary
@@ -80,8 +119,21 @@ public class YoutubeDistributionService implements DistributionService {
     config.setPassword(password);
     config.setCategory(category);
 
-    // create the scheduler
-    schedule = new Schedule();
+    // create context strategy
+    contextStrategy = new YoutubeDistributionContextStrategy();
+    // default destination
+    destination = cc.getBundleContext().getProperty("youtube.playlist"); // "B8B47104C2C1663B"
+
+    // create JPA instances
+    emf = persistenceProvider.createEntityManagerFactory("YoutubeDistributionPersistenceUnit", 
+                                                         persistenceProperties);
+    em = emf.createEntityManager();
+
+    // create the scheduler using memory store
+    // schedule = new Schedule();
+    // create the scheduler using JPA store
+    schedule = new Schedule(new JPAStore<Task>(new TaskSerializer(), em, "YOUTUBE_ACTIVE"),
+                            new JPAStore<Task>(new TaskSerializer(), em, "YOUTUBE_COMPLETED"));
   }
 
   /**
@@ -90,6 +142,59 @@ public class YoutubeDistributionService implements DistributionService {
   public void deactivate() {
     // shutdown the scheduler
     schedule.shutdown();
+    // destroy JPA instances
+    em.close();
+    emf.close();
+  }
+
+  /**
+   * Gets task name given the media package ID and the track ID.
+   *
+   * @param mediaPackge ID of the package
+   * @param track ID of the track
+   * @return task identifier
+   */  
+  private String getTaskID(String mediaPackage, String track) {
+    // use "YOUTUBE" + media package identifier + track identifier as task identifier
+    return "YOUTUBE_" + mediaPackage + "_" + track;
+  }
+
+  /**
+   * Removes the media delivered by the given task.
+   *
+   * @param name task identifier
+   */  
+  private void remove(String name) throws DistributionException {
+     logger.info("Publish task: {}", name);
+     
+     YouTubeRemoveAction ract = new YouTubeRemoveAction();
+     ract.setName(name + "_r");
+     ract.setPublishTask(name);
+     schedule.start(ract);
+
+     while (true) {
+       Task rTask = schedule.getTask(name + "_r");
+       synchronized (rTask) {
+         Task.State state = rTask.getState();
+         if (state == Task.State.INITIAL || state == Task.State.ACTIVE) {
+           try {
+             Thread.sleep(1000L);
+           } catch (Exception e) {
+             throw new RuntimeException(e);
+           }
+           // still running
+           continue;
+         }
+         else if (state == Task.State.COMPLETE) {
+           logger.info("Succeeded retracting media");
+           break;
+         }
+         else if (state == Task.State.FAILED) {
+           // fail to remove
+           throw new DistributionException("Failed to remove media");
+         }
+      } // end of synchronized
+    } // end of schedule loop
   }
 
   /**
@@ -121,16 +226,34 @@ public class YoutubeDistributionService implements DistributionService {
       if( ! sourceFile.exists() || ! sourceFile.isFile()) {
         throw new IllegalStateException("Could not retrieve a file for element " + element.getIdentifier());
       }
+
+      // get task name
+      String name = getTaskID(mediaPackage.getIdentifier().compact(), trackID);
+
+      // check if the file has already been delivered
+      Task savedTask = schedule.getSavedTask(name);
+
+      if (savedTask != null && savedTask.getState() == Task.State.COMPLETE) {
+          // has been successfully delivered
+          // remove the media
+          remove(name);
+      }
       
       YouTubeDeliveryAction act = new YouTubeDeliveryAction();
-      // use media package identifier as action identifier
-      String name = mediaPackage.getIdentifier().compact();
       act.setName(name);
       act.setTitle(sourceFile.getName());
       // CHNAGE ME: set metadata elements here
       act.setTags(new String [] {"whatever"});
       act.setAbstract("Opencast Distribution Service - Youtube");
       act.setMediaPath(sourceFile.getAbsolutePath());
+
+      // get playlist ID from context strategy
+      String contextDestination = contextStrategy.getContextName(mediaPackage);
+      if (contextDestination != null) {
+        // use the destination from context strategy
+        destination = contextDestination;
+      }
+
       // deliver to a play list
       act.setDestination(destination); // FIXME: replace this with a playlist based on the episode's series
 
@@ -191,6 +314,35 @@ public class YoutubeDistributionService implements DistributionService {
    */
   @Override
   public void retract(MediaPackage mediaPackage) throws DistributionException {
-    throw new UnsupportedOperationException();
+    // throw new UnsupportedOperationException();
+    String trackID = "";
+  
+    for (MediaPackageElement element : mediaPackage.getElements()) {
+      switch (element.getElementType()) {
+      case Track:
+        trackID = element.getIdentifier();
+        break;
+      case Catalog:
+        continue;
+      case Attachment:
+        continue;
+      default:
+        throw new IllegalStateException("Someone is trying to distribute strange things here");
+      }
+    }
+  
+    // get task name
+    String name = getTaskID(mediaPackage.getIdentifier().compact(), trackID);
+
+    // check if the file has already been delivered
+    Task savedTask = schedule.getSavedTask(name);
+
+    if (savedTask == null || savedTask.getState() != Task.State.COMPLETE) {
+        // has not been successfully delivered
+         throw new DistributionException("Media has not been distributed!");
+    }
+
+    // remove the media
+    remove(name);
   }
 }

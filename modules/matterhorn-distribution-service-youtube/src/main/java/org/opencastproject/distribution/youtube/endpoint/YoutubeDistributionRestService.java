@@ -37,6 +37,7 @@ import java.util.List;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -72,6 +73,20 @@ public class YoutubeDistributionRestService {
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.ok(result).build();
+  }
+  
+  @DELETE
+  @Path("")
+  @Produces(MediaType.TEXT_XML)
+  public Response retract(@FormParam("mediapackage") MediaPackageImpl mediaPackage, @FormParam("elementId") List<String> elementIds) throws Exception {
+    String[] elements = elementIds == null ? new String[0] : elementIds.toArray(new String[elementIds.size()]);
+    try {
+      service.retract(mediaPackage);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+    return Response.ok(mediaPackage).build();
   }
   
   @GET
