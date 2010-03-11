@@ -22,9 +22,6 @@ import org.gstreamer.Buffer;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
-import org.gstreamer.Pad;
-import org.gstreamer.PadDirection;
-import org.gstreamer.PadLinkReturn;
 import org.gstreamer.Pipeline;
 import org.gstreamer.Structure;
 import org.gstreamer.elements.AppSink;
@@ -48,13 +45,8 @@ public class VideoMonitoring {
    * @return the pipeline with the video monitoring added, or null on failure
    */
   public static boolean addVideoMonitor(Pipeline pipeline, Element src, Element sink, final long interval) {
-    
-      // if it doesn't accept any caps, then it is not an appropriate video src
-      if (!src.getSrcPads().get(0).acceptCaps(Caps.anyCaps())) {
-        return false;
-      }
-      
-      Element tee, queue0, queue1, decodebin;
+          
+      Element tee, queue0, queue1, ffmpegcolorspace;
       final Element jpegenc;
       AppSink appsink;
       
@@ -62,14 +54,14 @@ public class VideoMonitoring {
       tee = ElementFactory.make("tee", null);
       queue0 = ElementFactory.make("queue", null);
       queue1 = ElementFactory.make("queue", null);
-      decodebin = ElementFactory.make("decodebin", null);
+      ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
       jpegenc = ElementFactory.make("jpegenc", null);
       appsink = (AppSink) ElementFactory.make("appsink", null);
       
       tee.set("silent", "false");
       appsink.set("emit-signals", "true");
       
-      pipeline.addMany(tee, queue0, queue1, decodebin, jpegenc, appsink);
+      pipeline.addMany(tee, queue0, queue1, ffmpegcolorspace, jpegenc, appsink);
       src.unlink(sink);
       
       if (!src.link(tee)) {
@@ -88,20 +80,15 @@ public class VideoMonitoring {
         logger.error("Could not link {} with {}", tee.toString(), queue1.toString());
         return false;
       }
-      if (!queue1.link(decodebin)) {
-        logger.error("Could not link {} with {}", queue1.toString(), decodebin.toString());
+      if (!queue1.link(ffmpegcolorspace)) {
+        logger.error("Could not link {} with {}", queue1.toString(), ffmpegcolorspace.toString());
+        System.out.println(queue1.getStaticPad("src").getCaps());
         return false;
       }
-      decodebin.connect(new Element.PAD_ADDED() {
-        public void padAdded(Element element, final Pad pad) {
-          PadLinkReturn ret = pad.link(jpegenc.getStaticPad("sink"));
-          if (ret != PadLinkReturn.OK) {
-            logger.error("Could not link decodebin: " + ret.toString());
-          }
-        }
-      });
-      Pad pad = new Pad(null, PadDirection.SRC);
-      decodebin.addPad(pad);
+      if (!ffmpegcolorspace.link(jpegenc)) {
+        logger.error("Could not link {} with {}", ffmpegcolorspace.toString(), jpegenc.toString());
+        return false;
+      }
       if (!jpegenc.link(appsink)) {
         logger.error("Could not link {} with {}", jpegenc.toString(), appsink.toString());
         return false;
@@ -115,13 +102,13 @@ public class VideoMonitoring {
           AppSink appsink = (AppSink) elem;
           long seconds = appsink.getClock().getTime().getSeconds();
           Buffer buffer = appsink.pullBuffer();
-          if (seconds % 30 == 0 && seconds != previous) {
+          if (seconds % interval == 0 && seconds != previous) {
             previous = seconds;
             Caps caps = buffer.getCaps();
             Structure s = caps.getStructure(0);
             int width = s.getInteger("width");
             int height = s.getInteger("height");
-            logger.info("Grabbed buffer: {}, {}", width, height);
+            logger.info("Saved buffer: {}, {}", width, height);
             
           }
           buffer = null;
@@ -131,5 +118,6 @@ public class VideoMonitoring {
       
       return true;
   }
+  
 
 }
