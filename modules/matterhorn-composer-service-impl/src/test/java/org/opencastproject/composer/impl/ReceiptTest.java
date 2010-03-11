@@ -67,6 +67,7 @@ public class ReceiptTest {
    */
   @After
   public void tearDownAfterClass() throws Exception {
+    dao.deactivate();
     pooledDataSource.close();
   }
   
@@ -88,6 +89,18 @@ public class ReceiptTest {
     dao.createReceipt();
     long queuedJobs = dao.count(Status.QUEUED);
     Assert.assertEquals(1, queuedJobs);
+  }
+  
+  @Test
+  public void testCount() throws Exception {
+    dao.createReceipt();
+    ReceiptImpl remote1 = (ReceiptImpl)dao.createReceipt();
+    ReceiptImpl remote2 = (ReceiptImpl)dao.createReceipt();
+    remote1.setHost("remote");
+    remote2.setHost("remote");
+    dao.updateReceipt(remote1);
+    dao.updateReceipt(remote2);
+    Assert.assertEquals(2, dao.count(Status.QUEUED, "remote"));
   }
 
 }
