@@ -64,7 +64,7 @@ public class ComposerRestService {
 
   public void activate(ComponentContext cc) {
     // Generate the docs, using the local server URL
-    if (cc.getBundleContext().getProperty("serverUrl") == null) {
+    if (cc == null || cc.getBundleContext().getProperty("serverUrl") == null) {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
       serverUrl = cc.getBundleContext().getProperty("serverUrl");
