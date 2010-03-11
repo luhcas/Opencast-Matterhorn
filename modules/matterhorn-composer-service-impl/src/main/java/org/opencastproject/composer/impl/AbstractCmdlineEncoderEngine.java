@@ -285,7 +285,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
    * 
    * @param file
    *          the file that is to be encoded
-   * @param profile
+   * @param profiles
    *          the encoding profile
    * @return the argument list
    * @throws EncoderException

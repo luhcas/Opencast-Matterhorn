@@ -103,7 +103,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
    * 
    * @param file
    *          the file that is to be encoded
-   * @param profile
+   * @param profiles
    *          the format
    * @return the argument list
    */

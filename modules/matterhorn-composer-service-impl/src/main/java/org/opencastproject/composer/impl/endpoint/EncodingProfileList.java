@@ -32,21 +32,47 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name="profiles", namespace="http://composer.opencastproject.org/")
 @XmlRootElement(name="profiles", namespace="http://composer.opencastproject.org/")
 public class EncodingProfileList {
+
   public EncodingProfileList() {}
 
   public EncodingProfileList(List<EncodingProfileImpl> list) {
-    this.profile = list;
+    this.profiles = list;
   }
   
   @XmlElement(name="profile")
-  protected List<EncodingProfileImpl> profile;
+  protected List<EncodingProfileImpl> profiles;
 
-  public List<EncodingProfileImpl> getProfile() {
-    return profile;
+  public List<EncodingProfileImpl> getProfiles() {
+    return profiles;
   }
 
-  public void setProfile(List<EncodingProfileImpl> profile) {
-    this.profile = profile;
+  public void setProfiles(List<EncodingProfileImpl> profiles) {
+    this.profiles = profiles;
+  }
+    
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((profiles == null) ? 0 : profiles.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    EncodingProfileList other = (EncodingProfileList) obj;
+    if (profiles == null) {
+      if (other.profiles != null)
+        return false;
+    } else if (!profiles.equals(other.profiles))
+      return false;
+    return true;
   }
 
 }

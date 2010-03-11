@@ -150,7 +150,7 @@ public class XmlRpcEngineController implements Runnable {
    * 
    * @param track
    *          the track that is being encoded
-   * @param profile
+   * @param profiles
    *          the encoding profile
    */
   void submitJob(File track, EncodingProfile format) throws EncoderException {

@@ -226,7 +226,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   public EncodingProfile[] listProfiles() {
     EncodingProfileList profileList = WebClient.create(remoteHost).path("/composer/rest/profiles.xml").accept(
             MediaType.TEXT_XML).get(EncodingProfileList.class);
-    List<EncodingProfileImpl> list = profileList.getProfile();
+    List<EncodingProfileImpl> list = profileList.getProfiles();
     return list.toArray(new EncodingProfile[list.size()]);
   }
 
