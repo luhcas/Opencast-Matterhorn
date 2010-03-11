@@ -265,6 +265,7 @@ SchedulerUI.handleDelete = function(){
 
 SchedulerUI.handleAgentChange = function(elm){
   var agent = elm.target.value;
+  $('#input-list').empty();
   $.get('/capture-admin/rest/agents/' + agent + '/capabilities',
         function(d){
           var capabilities = [];
@@ -275,16 +276,18 @@ SchedulerUI.handleAgentChange = function(elm){
           });
           if(capabilities.length){
             SchedulerUI.displayCapabilities(capabilities);
+          }else{
+            $('#input-list').append('<input type="checkbox" id="agentDefaults" value="default" disabled="disabled" checked="checked" style="display:none"><label for="agentDefaults">Agent defaults will be used.</label>');
+            SchedulerForm.formFields.resources = new FormField('agentDefaults', false, {getValue: getInputs, setValue: setInputs, checkValue: checkInputs});
           }
         });
 }
 
 SchedulerUI.displayCapabilities = function(capa){
-  $('#input-list').empty();
   $.each(capa, function(i, v){
-    $('#input-list').append('<input type="checkbox" id="' + v + '" value="' + v + '" checked="checked"><label for="audio">' + v + '</label>');
+    $('#input-list').append('<input type="checkbox" id="' + v + '" value="' + v + '" checked="checked"><label for="' + v +'">' + v + '</label>');
   });
-  SchedulerForm.formFields.resources = new FormField(capa, true, {'getValue':getInputs,'setValue':setInputs,'checkValue':checkInputs, errorField:'missing-input'});
+  SchedulerForm.formFields.resources = new FormField(capa, false, {getValue: getInputs, setValue: setInputs, checkValue: checkInputs});
 }
 
 /* ======================== SchedulerForm ======================== */

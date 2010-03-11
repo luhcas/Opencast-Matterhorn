@@ -1,7 +1,7 @@
 module( "FormField", {
         setup: function(){ 
           var doc = $(document.body);
-          doc.append('<input type="text" id="textbox" value="true" />');
+          doc.append('<input type="text" id="textbox" value="some text here" />');
           doc.append('<input type="checkbox" id="checkbox" checked="checked" value="true" />');
         },
         teardown: function(){
@@ -19,6 +19,6 @@ test("FormField creation", function(){
 });
 
 test("FormField get/set/disp", function(){
-     var field = new FormField('textbox', false, {getValue: function(){ return true; }});
-     ok(field.getValue(), "Run getValue");
+     var field = new FormField('textbox');
+     same(field.getValue(), 'some text here' , "Run getValue");
 });
