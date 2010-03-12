@@ -15,7 +15,6 @@
  */
 package org.opencastproject.integrationtest;
 
-import org.json.simple.JSONObject;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.w3c.dom.Document;
