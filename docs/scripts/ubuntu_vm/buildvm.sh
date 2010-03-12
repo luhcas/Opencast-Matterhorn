@@ -108,12 +108,11 @@ sudo chmod 755 mnt/home/opencast/update-matterhorn.sh
 sudo cp rc.local mnt/etc/rc.local
 sudo chmod 755 mnt/etc/rc.local
 
+sudo mkdir mnt/opt/matterhorn
+
 echo "============================"
 echo "==Installing Apache Felix==="
 echo "============================"
-
-sudo mkdir mnt/opt/matterhorn
-sudo cp -r matterhorn_trunk mnt/opt/matterhorn/
 
 if [ ! -e felix-framework-2.0.1 ]; then
   # This one failed ... wget http://apache.linux-mirror.org/felix/felix-framework-2.0.1.tar.gz
@@ -127,6 +126,24 @@ sudo cp -r felix-framework-2.0.1 mnt/opt/matterhorn/felix
 sudo mkdir mnt/opt/matterhorn/felix/load
 sudo chown -R 1000:1000 mnt/opt/matterhorn/felix/
 sudo chmod -R 777 mnt/opt/matterhorn/felix/
+
+echo "===================="
+echo "==Installing Red5==="
+echo "===================="
+
+if [ ! -e red5-0.9.0 ]; then
+wget http://www.red5.org/downloads/0_9/red5-0.9.0.tar.gz
+tar -xzf red5-0.9.0.tar.gz
+fi
+
+sudo cp -r red5-0.9.0 mnt/opt/matterhorn/red5
+sudo cp red5 mnt/etc/init.d/
+sudo ln -s /etc/init.d/red5 mnt/etc/rc0.d/S87red5
+sudo ln -s /etc/init.d/red5 mnt/etc/rc1.d/S87red5
+sudo ln -s /etc/init.d/red5 mnt/etc/rc2.d/S87red5
+sudo ln -s /etc/init.d/red5 mnt/etc/rc3.d/S87red5
+sudo ln -s /etc/init.d/red5 mnt/etc/rc4.d/S87red5
+sudo ln -s /etc/init.d/red5 mnt/etc/rc5.d/S87red5
 
 echo "=========================="/
 echo "=====Fetching Opencast===="
@@ -142,8 +159,9 @@ else
   svn co $MATTERHORN_SVN matterhorn_trunk
 fi
 
-sudo cp -rf matterhorn_trunk/docs/felix/conf/* mnt/opt/matterhorn/felix/conf/
+sudo cp -r matterhorn_trunk mnt/opt/matterhorn/
 
+sudo cp -rf matterhorn_trunk/docs/felix/conf/* mnt/opt/matterhorn/felix/conf/
 
 export OC_REV=`svn info matterhorn_trunk | awk /Revision/ | cut -d " " -f 2`
 
