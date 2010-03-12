@@ -27,16 +27,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-  WorkflowRestEndpointTest.class,
-  WorkingFileRepoRestEndpointTest.class,
-  DistributionLocalRestEndpointTest.class,
-  IngestZipTest.class,
-  ComposerRestEndpointTest.class,
-  CaptureRestEndpointTest.class,
-  CaptureAdminRestEndpointTest.class,
-  EngageModuleTest.class,
-  AdminProxyRestEndpointTest.class,
-  StateRestEndpointTest.class
+  CaptureRestEndpointTest.class
 })
 public class AllRemoteTests {
   public static String BASE_URL = "http://localhost:8080";

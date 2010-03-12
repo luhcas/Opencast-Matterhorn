@@ -31,8 +31,10 @@ public interface CaptureAgentStateService {
   
   /** Return value for methods where an incorrect parameter is specified */
   public static final int BAD_PARAMETER = -2;
-  
-  
+
+  /** Defines the name of the key in the properties file which is used to define the list of sticky agents */
+  public static final String STICKY_AGENTS = "capture.admin.sticky.agents";
+
   /**
    * Returns the last known state of a given agent.
    *

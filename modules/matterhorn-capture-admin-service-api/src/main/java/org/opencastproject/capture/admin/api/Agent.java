@@ -17,27 +17,42 @@ package org.opencastproject.capture.admin.api;
 
 import java.util.Properties;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+
 /**
  * An in-memory construct to represent the state of a capture agent, and when it was last heard from.
  */
 // FIXME: This should be cleaned to conform a real API style and move the implementation to other file
+@Entity
+@Table(name = "agents")
+@NamedQueries( {
+  @NamedQuery(name = "Agent.getAll", query = "SELECT a FROM Agent a")
+})
 public class Agent {
 
   /**
    * The name of the agent.
    */
+  @Id
   protected String name;
 
   /**
    * The state of the agent.  This should be defined from the constants in {@link org.opencastproject.capture.admin.api.AgentState}.
    * @see AgentState
    */
+  @Column(name = "state", nullable = false)
   protected String state;
 
   /**
    * The time at which the agent last checked in with this service.
    * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in). 
    */
+  @Column(name = "lastHeardFrom", nullable = false)
   protected Long lastHeardFrom;
 
   /**
@@ -45,7 +60,10 @@ public class Agent {
    * Capabilities are the devices this agent can record from, with a friendly name associated
    * to determine their nature (e.g. PRESENTER --> dev/video0)
    */
+  @Column(name = "capabilities", nullable = true)
   protected Properties capabilities;
+
+  public Agent() {};
 
   /**
    * Builds a representation of the agent.
@@ -79,7 +97,7 @@ public class Agent {
    */
   public void setState(String newState) {
     state = newState;
-    lastHeardFrom = System.currentTimeMillis();
+    setLastHeardFrom(System.currentTimeMillis());
   }
 
   /**
@@ -90,6 +108,15 @@ public class Agent {
    */
   public String getState() {
     return state;
+  }
+
+  /**
+   * Sets the time at which the agent last checked in.
+   *
+   * @param time The number of milliseconds since 1970 when the agent last checked in.
+   */
+  public void setLastHeardFrom(Long time) {
+    lastHeardFrom = time;
   }
 
   /**

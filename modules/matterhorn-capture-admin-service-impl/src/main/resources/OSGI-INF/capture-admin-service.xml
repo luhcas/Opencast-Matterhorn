@@ -2,8 +2,13 @@
 <component name="org.opencastproject.capture.admin.api.CaptureAgentStateService" immediate="true">
   <implementation class="org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl" />
   <property name="service.description" value="Capture-Admin Service" />
+  <property name="service.pid" value="org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl" />  
   <service>
     <provide interface="org.opencastproject.capture.admin.api.CaptureAgentStateService" />
     <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
+  <reference name="persistence" interface="javax.persistence.spi.PersistenceProvider"
+    cardinality="1..1" policy="static" bind="setPersistenceProvider" />
+  <reference name="props" interface="java.util.Map"
+    cardinality="1..1" policy="static" target="(type=persistence)" bind="setPersistenceProperties" />
 </component>

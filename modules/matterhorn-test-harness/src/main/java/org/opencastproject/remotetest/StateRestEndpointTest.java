@@ -1,37 +1,34 @@
 package org.opencastproject.remotetest;
 
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
-import org.opencastproject.remotetest.UniversalNamespaceResolver;
 
-import junit.framework.Assert;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
-
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import org.apache.commons.io.IOUtils;
-
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.Document;
+import junit.framework.Assert;
 
-import java.util.HashSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.w3c.dom.Document;
 
 
 public class StateRestEndpointTest {
@@ -68,7 +65,7 @@ public class StateRestEndpointTest {
     Assert.assertTrue(states.contains(responseString));
   }
   
-  @Test
+  @Test @Ignore
   public void testGetRecordingsNoneGet() throws Exception {
     HttpGet request = new HttpGet(BASE_URL + "/state/rest/GetRecordings");
     HttpResponse response = client.execute(request);
@@ -82,7 +79,7 @@ public class StateRestEndpointTest {
 
   }
   
-  @Test
+  @Test @Ignore
   public void testGetRecordingsPresentGet() throws Exception {
     String recordingId;
     

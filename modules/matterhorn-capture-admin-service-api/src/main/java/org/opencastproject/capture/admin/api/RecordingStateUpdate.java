@@ -46,7 +46,7 @@ public class RecordingStateUpdate {
    * The number of milliseconds since the last time the recording checked in.  Note that this is relative (ie, it's been 3000 ms) rather than absolute (milliseconds since 1970).
    */
   @XmlElement(name="time-since-last-update")
-  public Long time_delta;
+  public Long time_since_last_update;
 
   /**
    * Required zero-arg. constructor. Do not use
@@ -61,6 +61,6 @@ public class RecordingStateUpdate {
   public RecordingStateUpdate(Recording r) {
     id = r.getID();
     state = r.getState();
-    time_delta = System.currentTimeMillis() - r.getLastCheckinTime();
+    time_since_last_update = System.currentTimeMillis() - r.getLastCheckinTime();
   }
 }

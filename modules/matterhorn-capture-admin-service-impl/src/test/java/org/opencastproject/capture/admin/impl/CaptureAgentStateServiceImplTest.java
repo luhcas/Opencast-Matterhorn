@@ -82,13 +82,13 @@ public class CaptureAgentStateServiceImplTest {
     Assert.assertEquals(1, service.getKnownAgents().size());
 
     verifyAgent("notAgent1", null, null);
-    verifyAgent("agent1", AgentState.IDLE, null);
+    verifyAgent("agent1", AgentState.IDLE, new Properties());
 
     service.setAgentState("agent1", AgentState.CAPTURING);
     Assert.assertEquals(1, service.getKnownAgents().size());
 
     verifyAgent("notAgent1",null, null);
-    verifyAgent("agent1", AgentState.CAPTURING, null);
+    verifyAgent("agent1", AgentState.CAPTURING, new Properties());
   }
   
   @Test

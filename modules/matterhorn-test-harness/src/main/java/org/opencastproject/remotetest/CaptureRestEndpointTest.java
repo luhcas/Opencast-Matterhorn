@@ -17,7 +17,10 @@ package org.opencastproject.remotetest;
 
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
 
-import org.apache.commons.io.IOUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -29,10 +32,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /** 
  * Test the functionality of the capture endpoints. Does not assume capture
@@ -41,10 +42,22 @@ import java.util.List;
 public class CaptureRestEndpointTest {
   
   private HttpClient httpClient;
+  private ArrayList<NameValuePair> startParams = new ArrayList<NameValuePair>();
+  private ArrayList<NameValuePair> stopParams = new ArrayList<NameValuePair>();
   
   @Before
   public void setup() throws Exception {
     httpClient = new DefaultHttpClient();
+
+    // Test Properties from resources
+    Properties props = new Properties();
+    props.put("recordingID", "static-test");
+
+    startParams.add(new BasicNameValuePair("config", props.toString()));
+
+    stopParams = new ArrayList<NameValuePair>();
+    stopParams.add(new BasicNameValuePair("recordingID", "static-test"));
+
   }
   
   @After
@@ -53,47 +66,56 @@ public class CaptureRestEndpointTest {
   }
   
   @Test
-  public void testStartCaptureGet() throws Exception {
-    
-    HttpGet getStart = new HttpGet(BASE_URL + "/capture/rest/startCapture");
-    int getResponse = httpClient.execute(getStart).getStatusLine().getStatusCode();
-    Assert.assertTrue(getResponse == HttpStatus.SC_OK || getResponse == HttpStatus.SC_INTERNAL_SERVER_ERROR);
+  public void testUnscheduledCapture() throws Exception {
+    //Test using only unscheduled calls
+    sendGet(BASE_URL + "/capture/rest/startCapture", HttpStatus.SC_OK);
+    Thread.sleep(1000);
+    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_OK);
+    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
   }
   
   @Test
-  public void testStopCaptureGet() throws Exception {
+  public void testUnscheduledMix() throws Exception {
+    //Test using both scheduled and unscheduled calls
+    sendGet(BASE_URL + "/capture/rest/startCapture", HttpStatus.SC_OK);
+    Thread.sleep(1000);
+    sendPost(BASE_URL + "/capture/rest/stopCapture", stopParams, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_OK);
+    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+  }
 
-    HttpGet get = new HttpGet(BASE_URL + "/capture/rest/stopCapture");
+  @Test
+  public void testCapturePost() throws Exception {
+    //Test using only scheduled calls
+    sendPost(BASE_URL + "/capture/rest/startCapture", startParams, HttpStatus.SC_OK);
+    Thread.sleep(1000);
+    sendPost(BASE_URL + "/capture/rest/stopCapture", stopParams, HttpStatus.SC_OK);
+    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+  }
+
+  @Test @Ignore
+  public void testScheduledMix() throws Exception {
+    //Test using both scheduled and unscheduled calls
+    sendPost(BASE_URL + "/capture/rest/startCapture", startParams, HttpStatus.SC_OK);
+    Thread.sleep(1000);
+    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_OK);
+    sendPost(BASE_URL + "/capture/rest/stopCapture", stopParams, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+  }
+
+  private void sendGet(String URL, int returnCode) throws Exception {
+    HttpGet get = new HttpGet(URL);
     int getResponse = httpClient.execute(get).getStatusLine().getStatusCode();
-    Assert.assertTrue(getResponse == HttpStatus.SC_OK || getResponse == HttpStatus.SC_INTERNAL_SERVER_ERROR);
-
-  }
-  
-
-  
-  @Test
-  public void testStartCapturePost() throws Exception {
-    // Test Properties from resources
-    String props = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("capture.properties"));
-    
-    HttpPost postStart = new HttpPost(BASE_URL + "/capture/rest/startCapture");
-    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-    formParams.add(new BasicNameValuePair("config", props));
-    postStart.setEntity(new UrlEncodedFormEntity(formParams));
-    int postResponse = httpClient.execute(postStart).getStatusLine().getStatusCode();
-    Assert.assertTrue(postResponse == HttpStatus.SC_OK || postResponse == HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    Assert.assertTrue(getResponse == returnCode);
+    get.abort();
   }
 
-  @Test
-  public void testStopCapturePost() throws Exception {
-    
-    HttpPost postStop = new HttpPost(BASE_URL + "/capture/rest/stopCapture");
-    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-    formParams.add(new BasicNameValuePair("recordingID", "none"));
-    postStop.setEntity(new UrlEncodedFormEntity(formParams));
-    
-    int postResponse = httpClient.execute(postStop).getStatusLine().getStatusCode();
-    Assert.assertTrue(postResponse == HttpStatus.SC_OK || postResponse == HttpStatus.SC_INTERNAL_SERVER_ERROR);
+  private void sendPost(String URL, List<NameValuePair> params, int returnCode) throws Exception {
+    HttpPost post = new HttpPost(URL);
+    post.setEntity(new UrlEncodedFormEntity(params));
+    int postResponse = httpClient.execute(post).getStatusLine().getStatusCode();
+    Assert.assertTrue(postResponse == returnCode);
+    post.abort();
   }
   
   @Test

@@ -75,6 +75,10 @@
         <version>0.6-SNAPSHOT</version>
       <type>bundle</type>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>javax.persistence</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -86,11 +90,19 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Import-Package>
+              org.opencastproject.http,
+              javax.persistence,
+              *;resolution:=optional
+            </Import-Package>
             <Export-Package> org.opencastproject.capture.admin.* </Export-Package>
             <Service-Component>
               OSGI-INF/capture-admin-service.xml,
               OSGI-INF/capture-admin-service-rest.xml
             </Service-Component>
+            <JPA-PersistenceUnits>
+              org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl
+            </JPA-PersistenceUnits>
           </instructions>
         </configuration>
       </plugin>

@@ -141,6 +141,32 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.4.1</version>
+        <executions>
+          <execution>
+            <id>copy-jquery</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/ui/jquery</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../../shared-resources/jquery/</directory>
+                  <includes>
+                    <include> **/* </include>
+                  </includes>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <version>1.4.3</version>
@@ -152,6 +178,7 @@
               org.opencastproject.capture.api.*,
               org.opencastproject.media.mediapackage.*,
               org.opencastproject.metadata.dublincore,
+              org.opencastproject.http,
               *;resolution:=optional
             </Import-Package>
             <Private-Package>
@@ -159,7 +186,8 @@
               org.gstreamer,
               net.java.dev.jna,
               net.fortuna.ical4j.*,
-              org.apache.http.*;-split-package:=merge-first
+              org.apache.http.*;-split-package:=merge-first,
+              ui.*
             </Private-Package>
             <Embed-Dependency>
               jv4linfo;inline=true,
@@ -181,7 +209,8 @@
               OSGI-INF/state-service.xml,
               OSGI-INF/state-service-rest.xml,
               OSGI-INF/scheduler-service.xml,
-              OSGI-INF/configuration-service.xml
+              OSGI-INF/configuration-service.xml,
+              OSGI-INF/capture-ui.xml
             </Service-Component>
           </instructions>
         </configuration>

@@ -15,20 +15,29 @@
  */
 package org.opencastproject.capture.admin.impl;
 
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.Semaphore;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.RollbackException;
+import javax.persistence.spi.PersistenceProvider;
+
 import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
-
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * IMPL for the capture-admin service (MH-1336, MH-1394, MH-1457, MH-1475 and MH-1476).
@@ -36,13 +45,47 @@ import java.util.Properties;
 public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentStateServiceImpl.class);
 
+  /** The name of the persistence unit for this class */
+  public static final String PERSISTENCE_UNIT = "org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl";
+
+  /** The JPA provider */
+  protected PersistenceProvider persistenceProvider;
+
+  /** The persistence properties */
+  protected Map persistenceProperties;
+
+  /** The factory used to generate the entity manager */
+  protected EntityManagerFactory emf = null;
+
   private HashMap<String, Agent> agents;
   private HashMap<String, Recording> recordings;
+  private List<String> stickyAgents;
+  private Semaphore sem;
+
+  /**
+   * @param persistenceProvider the persistenceProvider to set
+   */
+  public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
+    this.persistenceProvider = persistenceProvider;
+  }
+
+  /**
+   * @param persistenceProperties the persistenceProperties to set
+   */
+  public void setPersistenceProperties(Map persistenceProperties) {
+    this.persistenceProperties = persistenceProperties;
+  }
 
   public CaptureAgentStateServiceImpl() {
     logger.info("CaptureAgentStateServiceImpl starting.");
     agents = new HashMap<String, Agent>();
     recordings = new HashMap<String, Recording>();
+    stickyAgents = new LinkedList<String>();
+  }
+
+  public void activate(ComponentContext cc) {
+    emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl", persistenceProperties);
+    sem = new Semaphore(1);
   }
 
   /**
@@ -53,6 +96,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     Agent req = agents.get(agentName);
     //If that agent doesn't exist, return an unknown agent, else return the known agent
     if (req == null) {
+      //TODO:  Check if the agent is in the DB, if it is return it and add it to the in-memory list
       logger.debug("Agent {} does not exist in the system.", agentName);
       //Agent a = new Agent(agentName, AgentState.UNKNOWN, null);
       //return a;
@@ -80,6 +124,8 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     if (req != null) {
       logger.debug("Setting Agent {} to state {}.", agentName, state);
       req.setState(state);
+      //TODO:  Is this the right thing to do here?
+      updateAgent(req);
     } else {     
       // If the agent doesn't exists, but the name is not null nor empty, create a new one.
       if (agentName == null || agentName.equals("")) {
@@ -88,8 +134,9 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       }
 
       logger.debug("Creating Agent {} with state {}.", agentName, state);
-      Agent a = new Agent(agentName, state, null);
+      Agent a = new Agent(agentName, state, new Properties());
       agents.put(agentName, a);
+      updateAgent(a);
     }
 
     return OK;
@@ -103,6 +150,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     if (agents.containsKey(agentName)) {
       logger.debug("Removing Agent {}.", agentName);
       agents.remove(agentName);
+      //TODO:  Remove the agent from the DB?
       return OK;
     }
     return NO_SUCH_AGENT;
@@ -126,7 +174,6 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     //if the agent is known set the state
     if (req != null) {
       Properties temp = agents.get(agentName).getCapabilities();
-      if (temp == null) temp = new Properties(); 
       return temp;
     }   
     return null;  
@@ -141,6 +188,8 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     if (req != null) {
       logger.debug("Setting Agent {}'s capabilities", agentName);
       req.setCapabilities(capabilities);
+      //TODO:  Is this the right thing to do here?
+      updateAgent(req);
     } else {
       // If the agent doesn't exists, but the name is not null nor empty, create a new one.
       if (agentName == null || agentName.equals("")) {
@@ -151,10 +200,39 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       logger.debug("Creating Agent {} with state {}.", agentName, AgentState.UNKNOWN);
       Agent a = new Agent(agentName, AgentState.UNKNOWN, capabilities);
       agents.put(agentName, a);
+      updateAgent(a);
     }
 
     return OK;
+  }
 
+  private void updateAgent(Agent a) {
+    if (stickyAgents.contains(a.getName())) {
+      EntityManager em = emf.createEntityManager();
+      EntityTransaction tx = null;
+      try {
+        sem.acquire();
+        tx = em.getTransaction();
+        tx.begin();
+        Agent existing = em.find(Agent.class, a.getName());
+        if (existing != null) {
+          existing.setCapabilities(a.getCapabilities());
+          existing.setLastHeardFrom(a.getLastHeardFrom());
+          existing.setState(a.getState());
+          em.merge(existing);
+        } else {
+          em.persist(a);
+        }
+        tx.commit();
+        sem.release();
+      } catch (RollbackException e) {
+        logger.warn("Unable to commit to DB in updateAgent.");
+      } catch (InterruptedException e) {
+        logger.warn("Semaphore broken in updateAgent, DB may be inconsistent.");
+      } finally {
+        em.close();
+      }
+    }
   }
 
 
@@ -214,6 +292,67 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   }
 
   public void updated(Dictionary props) throws ConfigurationException {
-    // Update any configuration properties here
+    logger.warn("GDLGDL updated");
+    String agentList = (String) props.get(CaptureAgentStateService.STICKY_AGENTS);
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = null;
+    try {
+      if (agentList != null) {
+        //Get the list of agents to keep
+       String[] splitList = agentList.split(",");
+       LinkedList<String> t = new LinkedList<String>();
+       for (String agentName : splitList) {
+         logger.warn("GDLGDL Adding " + agentName + " to sticky list");
+         t.add(agentName);
+       }
+       stickyAgents = t;
+
+       sem.acquire();
+
+       //Remove those who are not in the list
+       List<Agent> dbAgents = em.createNamedQuery("Agent.getAll").getResultList();
+       tx = em.getTransaction();
+       tx.begin();
+       for (Agent a : dbAgents) {
+         if (!stickyAgents.contains(a.getName())) {
+           logger.warn("GDLGDL Removing " + a.getName());
+           em.remove(a);
+         } else {
+           logger.warn("GDLGDL Skipping " + a.getName());
+         }
+       }
+       tx.commit();
+
+       //Add and update those who are in the list
+       tx = em.getTransaction();
+       tx.begin();
+       for (String name : stickyAgents) {
+         Agent a = agents.get(name);
+         if (a != null) {
+           logger.warn("GDLGDL Adding " + a.getName());
+           em.persist(a);
+         }
+       }
+       tx.commit();
+
+       sem.release();
+      } else {
+        sem.acquire();
+        //The agent list was blank, so remove all of the agents which are already in the db
+        List<Agent> dbAgents = em.createNamedQuery("Agent.getAll").getResultList();
+        tx = em.getTransaction();
+        tx.begin();
+        for (Agent a : dbAgents) {
+          logger.warn("GDLGDL Removing all: " + a.getName());
+          em.remove(a);
+        }
+        tx.commit();
+        sem.release();
+      }
+    } catch (RollbackException e) {
+      logger.warn("Unable to commit to DB in updated.");
+    } catch (InterruptedException e) {
+      logger.warn("Semaphore broken in updated, DB may be inconsistent.");
+    }
   }
 }
