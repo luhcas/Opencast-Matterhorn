@@ -5,8 +5,6 @@ package org.opencast.engage.videodisplay.business
     import flash.events.KeyboardEvent;
     import flash.external.ExternalInterface;
     
-    import mx.controls.Alert;
-    
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.control.event.InitPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
@@ -21,6 +19,8 @@ package org.opencast.engage.videodisplay.business
         [Autowire]
         [Bindable]
         public var model:VideodisplayModel;
+        
+        public var pressedKey:String = '';
 
         /** Constructor */
         public function FlexAjaxBridge()
@@ -107,7 +107,7 @@ package org.opencast.engage.videodisplay.business
         {
             model.player.seek( time );
         }
-
+        
         /**
          * setLanguage
          *
@@ -229,125 +229,147 @@ package org.opencast.engage.videodisplay.business
                 if ( model.player.playing )
                 {
                     Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.PAUSE ) );
+                	pressedKey = "PLAYPAUSE";
                 }
                 else
                 {
                     Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.PLAY ) );
+                	 pressedKey = "PLAYPAUSE";
                 }
+               
             }
 
-            // Mute the video
+            // Stop the video
             if ( charCode == 83 || charCode == 115 ) // S or s
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.STOP ) );
+            	pressedKey = "STOP";
             }
 
             // Mute the video
             if ( charCode == 77 || charCode == 109 ) // M or m
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.MUTE ) );
+            	pressedKey = "MUTE";
             }
 
             // Volume up
             if ( charCode == 85 || charCode == 117 ) // U or u
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.VOLUMEUP ) );
+            	pressedKey = "VOLUMEUP";
             }
 
             // Volume down
             if ( charCode == 68 || charCode == 100 ) // D or d
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.VOLUMEDOWN ) );
+            	pressedKey = "VOLUMEDOWN";
             }
 
             // Seek 0
             if ( charCode == 48 ) // 0
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKZERO ) );
+            	pressedKey = "SEEKZERO";
             }
 
             // Seek 1
             if ( charCode == 49 ) // 1
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKONE ) );
+            	pressedKey = "SEEKONE";
             }
 
             // Seek 2
             if ( charCode == 50 ) // 2
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKTWO ) );
+            	pressedKey = "SEEKTWO";
             }
 
             // Seek 3
             if ( charCode == 51 ) // 3
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKTHREE ) );
+            	pressedKey = "SEEKTHREE";
             }
 
             // Seek 4
             if ( charCode == 52 ) // 4
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKFOUR ) );
+            	pressedKey = "SEEKFOUR";
             }
 
             // Seek 5
             if ( charCode == 53 ) // 5
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKFIVE ) );
+            	pressedKey = "SEEKFIVE";
             }
 
             // Seek 6
             if ( charCode == 54 ) // 6
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKSIX ) );
+            	pressedKey = "SEEKSIX";
             }
 
             // Seek 7
             if ( charCode == 55 ) // 7
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKSEVEN ) );
+            	pressedKey = "SEEKSEVEN";
             }
 
             // Seek 8
             if ( charCode == 56 ) // 8
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKEIGHT ) );
+            	pressedKey = "SEEKEIGHT";
             }
 
             // Seek 9
             if ( charCode == 57 ) // 9
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKNINE ) );
+            	pressedKey = "SEEKNINE";
             }
 
             // Closed Caption
             if ( charCode == 67 || charCode == 99 ) // C or c
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.CLOSEDCAPTIONS ) );
+            	pressedKey = "CLOSEDCAPTIONS";
             }
 
             // rewind
             if ( charCode == 82 || charCode == 114 ) // R or r
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.REWIND ) );
+            	pressedKey = "REWIND";
             }
 
             // Fast forward
             if ( charCode == 70 || charCode == 102 ) // F or f
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.FASTFORWARD ) );
+            	pressedKey = "FASTFORWARD";
             }
 
             // time
             if ( charCode == 84 || charCode == 116 ) // T or t
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.HEARTIMEINFO ) );
+            	pressedKey = "HEARTIMEINFO";
             }
 
             // Information
             if ( charCode == 73 || charCode == 105 ) // I or i
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.INFORMATION ) );
+            	pressedKey = "INFORMATION";
             }
         }
         
