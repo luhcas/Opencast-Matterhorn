@@ -15,7 +15,8 @@
  */
 package org.opencastproject.integrationtest;
 
-import org.junit.Assert;
+import org.json.simple.JSONObject;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -28,33 +29,75 @@ import com.sun.jersey.api.client.ClientResponse;
  */
 
 public class UnscheduledCaptureTest {
+	public static String recordingId;
 
 	@Test
-	public void agentStateTest() throws Exception {
+	public void testAgentRegisteredAndIdle() throws Exception {
 		
-		// Agent Exists
+		// Agent Registered
 		ClientResponse response = CaptureAdminResources.agents();
 		
-		Assert.assertEquals("Response code (agents):", 200, response.getStatus());
+		assertEquals("Response code (agents):", 200, response.getStatus());
 		
 		Document xml = Utils.parseXml(response.getEntity(String.class));
 		
-		Assert.assertTrue("Agent included? (agents):", Utils.xPathExists(xml, "//ns1:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']" ));
+		assertTrue("Agent included? (agents):", Utils.xPathExists(xml, "//ns1:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']" ));
 		
 		response = CaptureAdminResources.agent(IntegrationTests.AGENT);
 		
-		Assert.assertEquals("Response code (agent):", 200, response.getStatus());
+		assertEquals("Response code (agent):", 200, response.getStatus());
 		
 		xml = Utils.parseXml(response.getEntity(String.class));
 		
-		Assert.assertTrue("Agent included? (agent):", Utils.xPathExists(xml, "//ns2:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']"));
+		assertTrue("Agent included? (agent):", Utils.xPathExists(xml, "//ns2:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']"));
 		
 		// Agent State: idle
 		response = StateResources.getState();
 		
-		Assert.assertEquals("Response code (getState):", 200, response.getStatus());
-		Assert.assertEquals("Agent idle?:", "idle", response.getEntity(String.class));
-		
-		
+		assertEquals("Response code (getState):", 200, response.getStatus());
+		assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
 	}
+	
+	@Test
+	public void testStartCapture() throws Exception {
+		
+		// Start capture
+		ClientResponse response = CaptureResources.startCaptureGet();
+		
+		assertEquals("Response code (startCapture):", 200, response.getStatus());
+		
+		// Get capture ID
+		recordingId = CaptureResources.captureId(response);
+	}
+	
+	@Test
+	public void testAgentCapturing() throws Exception {
+		
+		// Agent State: capturing
+		ClientResponse response = StateResources.getState();
+		
+		assertEquals("Response code (getState):", 200, response.getStatus());
+		assertEquals("Agent recording? (getState):", "capturing", response.getEntity(String.class));
+	}
+	
+	@Test
+	public void testStopCapture() throws Exception {
+		
+		// Stop capture
+		ClientResponse response = CaptureResources.stopCapturePost(recordingId);
+		
+		assertEquals("Response code (stopCapturePost):", 200, response.getStatus());
+	}
+	
+	@Test
+	public void testAgentIdleAfterStopped() throws Exception {
+		
+		// Agent State: idle
+		ClientResponse response = StateResources.getState();
+		
+		assertEquals("Response code (getState):", 200, response.getStatus());
+		assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
+	}
+	
+	
 }

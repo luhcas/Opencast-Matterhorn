@@ -25,6 +25,8 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.IOUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.w3c.dom.Document;
 
 /**
@@ -51,5 +53,10 @@ public class Utils {
 	
 	public static Boolean xPathExists(Document document, String path) throws Exception {
 	    return (Boolean) xPath(document, path, XPathConstants.BOOLEAN);
-	  }
+	}
+	
+	public static JSONObject parseJson(String doc) throws Exception {
+	    return (JSONObject) JSONValue.parse(doc);
+	}
+	
 }
