@@ -68,13 +68,14 @@ public class CaptureAgentShellCommands {
   }
 
   /**
-   * Tells the capture agent to 
+   * Tells the capture agent to send the recording to the ingest service.
    */
   public void ingest() {
     if (recordingId == null) {
       System.err.println("Nothing has been recorded");
       return;
     }
+    // FIXME: What if this method returns false?!!
     agent.createManifest(recordingId);
     System.out.println("Zipping recording (" + recordingId + ")");
     agent.zipFiles(recordingId);

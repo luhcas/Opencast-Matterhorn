@@ -15,32 +15,6 @@
  */
 package org.opencastproject.capture.impl;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Date;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.Vector;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.FileEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.gstreamer.Bus;
-import org.gstreamer.GstObject;
-import org.gstreamer.Pipeline;
-import org.gstreamer.State;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureAgent;
@@ -59,12 +33,40 @@ import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.util.ZipUtil;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.gstreamer.Bus;
+import org.gstreamer.GstObject;
+import org.gstreamer.Pipeline;
+import org.gstreamer.State;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Date;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Vector;
 
 /**
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines
@@ -81,7 +83,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   private Pipeline pipe = null;
 
   /** Keeps the recordings which have not been succesfully ingested yet **/
-  HashMap<String, RecordingImpl> pendingRecordings = new HashMap<String,RecordingImpl>();
+  private Map<String, RecordingImpl> pendingRecordings = new HashMap<String,RecordingImpl>();
 
   /** The agent's current state.  Used for logging */
   private String agentState = null;
@@ -107,6 +109,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     setAgentState(AgentState.IDLE);
   }
 
+  // FIXME: this method is not called.  Is it needed? (jt)
   /**
    * Gets the state service this capture agent is pushing its state to
    * @return The service this agent pushes its state to.
@@ -298,10 +301,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
             try {
               FileUtils.copyFile(src, dest);
             } catch (FileNotFoundException e) {
-              resetAgent(recordingID);
+              resetOnFailure(recordingID);
               throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
             } catch (IOException e) {
-              resetAgent(recordingID);
+              resetOnFailure(recordingID);
               throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
             }
           }
@@ -316,10 +319,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
               MediaPackageElementBuilder eb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
               mediaPackage.add(eb.elementFromURI(newRec.getDir().toURI().relativize(dcCatalog.toURI()), Type.Catalog, DublinCoreCatalog.FLAVOR));
             } catch (UnsupportedElementException e) {
-              resetAgent(recordingID);
+              resetOnFailure(recordingID);
               throw new RuntimeException("Error adding " + dcCatalog + " to recording");
             } catch (IOException e) {
-              resetAgent(recordingID);
+              resetOnFailure(recordingID);
               throw new RuntimeException("Error copying " + dcCatalog + " to destination directory");
             }
           }
@@ -347,7 +350,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     if (pipe == null) {
       logger.error("Capture {} could not start, pipeline was null!", recordingID);
-      resetAgent(recordingID);
+      resetOnFailure(recordingID);
       return null;
     }
 
@@ -383,6 +386,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     return recordingID;
   }
 
+  // FIXME: This is not exactly an efficient way to find out whether we are dealing with a mock capture. It requires
+  // copying the sample files in addition to having to do filesystem lookups. (jt)
+  
   private boolean isMockCapture(Properties properties, String[] deviceList) {
     boolean isMockCapture = true;
     File f = new File(samplesDir);
@@ -405,13 +411,14 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * Convenience method to reset an agent when a capture fails to start.
    * @param recordingID The recordingID of the capture which failed to start.
    */
-  private void resetAgent(String recordingID) {
+  private void resetOnFailure(String recordingID) {
     setAgentState(AgentState.IDLE);
     setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
     currentRecID = null;
     pendingRecordings.remove(recordingID);
   }
 
+  // FIXME: Is this method needed?  It isn't currently called from any code. (jt)
   /**
    * Schedules a stopCapture call for unscheduled captures.
    * @param recordingID The recordingID to stop.
@@ -506,7 +513,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     return false;
   }
 
-
+  // FIXME: Media package creation seems crucial. Instead of returning true/false, an exception might make more sense.
+  // If you look a the rest of the code, no one is actually checking the return value... (jt)
   /**
    * Generates the manifest.xml file from the files specified in the properties
    * @param recID The ID for the recording whose manifest will be created
@@ -533,12 +541,15 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       // Adds the files present in the Properties
       for (String name : friendlyNames) {
         name = name.trim();
-
-        if (name == "")
+        // FIXME: when and why does this happen?  is it an actual configuration error?  if so, throw something. (jt)
+        if ("".equals(name))
           continue;
 
         // TODO: This should be modified to allow a more flexible way of detecting the track flavour.
         // Suggestions: a dedicated class or a/several field(s) in the properties indicating what type of track is each
+        
+        // FIXME: These values should be actual flavors, allowing this code to be simply MediaPackageElementFlavor.parse(name)
+        // This may impact the scheduling service as well... don't let that stop you from fixing this, though! (jt)
         if (name.equals("PRESENTER") || name.equals("AUDIO"))
           flavor = MediaPackageElements.PRESENTER_SOURCE;
         else if (name.equals("SCREEN"))
@@ -555,6 +566,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
                   flavor));
         else 
           // TODO: Warning or error?
+          // FIXME: Is the admin reading the agent logs? (jt)
+          // FIXME: Who will find out why one of the tracks is missing from the media package? (jt)
+          // FIXME: Think about a notification scheme, this looks like an emergency to me (jt)
           logger.warn ("Required file {} not found", outputFile.getName());
       } 
 
@@ -639,7 +653,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), new File(recording.getDir(), CaptureParameters.ZIP_NAME).getAbsolutePath());
   }
 
-
+  // FIXME: Replace HTTP-based ingest with remote implementation of the Ingest Service. (jt)
+  // See the ComposerServiceRemoteImpl to get an idea of the approach
+  // The idea is to get the details of the HTTP interaction out of the client code
   /**
    * Sends a file to the REST ingestion service.
    * 
@@ -750,6 +766,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     }
   }
 
+  // FIXME: this method is not called anywhere (jt)
   /**
    * @param recID
    * @return A Recording with ID recID, or null if it doesn't exists
@@ -758,6 +775,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     return pendingRecordings.get(recID);
   }
 
+  // FIXME: Why is this not part of the API? (jt)
+  // Currently, the OSGi declarative services definition exposes both api and impl. This is probably why...
   /**
    * This method intends to facilitate the iterative operations over this agent's recordings, by providing a reference to all of them.
    * @return A {@code String} array containing the recording IDs present in this agent
@@ -783,6 +802,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     commands.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "status", "start", "stop", "ingest", "reset", "capture" });
     logger.info("Registering capture agent osgi shell commands");
     ctx.getBundleContext().registerService(CaptureAgentShellCommands.class.getName(), new CaptureAgentShellCommands(this), commands);
+    // FIXME: This should only be done in case of a mock capture, instead of just everytime the client starts
+    // FIXME: Also, register a deactivate() and do some cleanup
     copyMediaToFiles();
     setAgentState(AgentState.IDLE);
   }

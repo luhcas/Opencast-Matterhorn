@@ -53,6 +53,7 @@ public class SerializeJob implements Job {
     CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
     
     // Creates manifest
+    // FIXME: What if this method returns false?!!
     ca.createManifest(recordingID);
     
     logger.info("Manifest created");

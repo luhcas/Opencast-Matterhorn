@@ -3,7 +3,7 @@
   <implementation class="org.opencastproject.capture.impl.CaptureAgentImpl" />
   <property name="service.description" value="Capture Service" />
   <service>
-  <provide interface="org.opencastproject.capture.impl.CaptureAgentImpl" />
+  <provide interface="org.opencastproject.capture.impl.CaptureAgentImpl" /> <!-- This should not be necessary (jt) -->
     <provide interface="org.opencastproject.capture.api.CaptureAgent" />
     <provide interface="org.osgi.service.cm.ManagedService" />
   </service>

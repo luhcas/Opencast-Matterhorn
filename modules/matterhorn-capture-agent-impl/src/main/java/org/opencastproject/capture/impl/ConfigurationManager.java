@@ -38,6 +38,11 @@ import org.slf4j.LoggerFactory;
  * Class for retrieving, storing and accessing both local and centralised 
  * configuration files for the CaptureAgent. Uses java.util.Properties to store
  * configuration file which can read/write INI style config files.
+ * 
+ * FIXME: The OSGI declarative service configuration defines an activate method "activate()" which is not implemented
+ * anywhere. It should probably start the timer that is stopped in deactivate()? If not, it should then be removed from
+ * the ds configuration (jt)
+ * FIXME: Is this class thread safe (answer: currently, no)? Does it need to be? (jt)
  */
 public class ConfigurationManager implements ManagedService {
   
@@ -89,6 +94,7 @@ public class ConfigurationManager implements ManagedService {
 
     Properties server = retrieveConfigFromServer();
     if (server != null) {
+      // FIXME: is this order correct?  Should you merge then save to disk? We're not sure, but this appears to be backwards (jt)
       writeConfigFileToDisk(server);
       merge(server, true);
     }
@@ -101,7 +107,6 @@ public class ConfigurationManager implements ManagedService {
     // if reload property specified, query server for update at that interval
     String reload = getItem(CaptureParameters.CAPTURE_CONFIG_REMOTE_POLLING_INTERVAL);
     if (url != null && reload != null) {
-      timer = new Timer();
       long delay = 0;
       try {
         // Times in the config file are in seconds, so multiply by 1000
@@ -115,6 +120,7 @@ public class ConfigurationManager implements ManagedService {
         // If the polling time value is invalid, don't poll
         return;
       }
+      timer = new Timer();
       timer.schedule(new UpdateConfig(), delay, delay);
     }
   }
@@ -205,6 +211,8 @@ public class ConfigurationManager implements ManagedService {
       return null;
     }
 
+    // TODO: This URL might be protected.  In this case, the proper headers (e.g. X509) would need to be in place.
+    // This isn't something that needs to be fixed today, but it needs to be addressed project-wide at some point (soon!). (jt)
     Properties p = new Properties();
     try {
       URLConnection urlc = url.openConnection();
@@ -266,7 +274,7 @@ public class ConfigurationManager implements ManagedService {
         String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
         capabilities.setProperty(name, properties.getProperty(key));
       }
-      
+      // FIXME: Don't catch NPE here... check for nulls in the first place.  This was the first coding monkey of the week question! (jt)
     } catch (NullPointerException e) {
       logger.error("Wrong friendly names list in the agent's properties. Capabilities filtering aborted");
       return null;
@@ -284,7 +292,7 @@ public class ConfigurationManager implements ManagedService {
    * @return the merged properties.
    */
   public Properties merge(Properties p, boolean overwrite) {
-    // if no properties specified, just return current configuration
+    // if no properties are specified, just return current configuration
     if (p == null) {
       return getAllProperties();
     }

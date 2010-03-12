@@ -27,55 +27,55 @@ public interface CaptureParameters {
    */
 
   /** Location of the centralised configuration file */
-  public static final String CAPTURE_CONFIG_REMOTE_ENDPOINT_URL = "capture.config.remote.endpoint.url";
+  String CAPTURE_CONFIG_REMOTE_ENDPOINT_URL = "capture.config.remote.endpoint.url";
   
   /** The time to wait between updating the local copy of the configuration */
-  public static final String CAPTURE_CONFIG_REMOTE_POLLING_INTERVAL = "capture.config.remote.polling.interval";
+  String CAPTURE_CONFIG_REMOTE_POLLING_INTERVAL = "capture.config.remote.polling.interval";
 
   /** The full path to the cached server config */
-  public static final String CAPTURE_CONFIG_CACHE_URL = "capture.config.cache.url";
+  String CAPTURE_CONFIG_CACHE_URL = "capture.config.cache.url";
 
   /**
    * Settings which control the filesystem
    */
 
   /** The URL of the caching directory under the root directory */
-  public static final String CAPTURE_FILESYSTEM_CACHE_URL = "capture.filesystem.cache.url";
+  String CAPTURE_FILESYSTEM_CACHE_URL = "capture.filesystem.cache.url";
 
   /** The URL of the volatile directory under the root directory */
-  public static final String CAPTURE_FILESYSTEM_VOLATILE_URL = "capture.filesystem.volatile.url";
+  String CAPTURE_FILESYSTEM_VOLATILE_URL = "capture.filesystem.volatile.url";
 
   /** The root URL where the captures should be stored prior to ingest */
-  public static final String CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL = "capture.filesystem.cache.capture.url";
+  String CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL = "capture.filesystem.cache.capture.url";
 
   /**
    * Settings which control the scheduler
    */
 
   /** The remote URL where the capture schedule should be retrieved */
-  public static final String CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL = "capture.schedule.remote.endpoint.url";
+  String CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL = "capture.schedule.remote.endpoint.url";
   
   /** The time between attempts to fetch updated calendar data */
-  public static final String CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL = "capture.schedule.remote.polling.interval";
+  String CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL = "capture.schedule.remote.polling.interval";
 
   /** The local URL of the cached copy of the capture schedule */
-  public static final String CAPTURE_SCHEDULE_CACHE_URL = "capture.schedule.cache.url";
+  String CAPTURE_SCHEDULE_CACHE_URL = "capture.schedule.cache.url";
 
   /**
    * Settings which control the agent state service
    */
 
   /** The name of the agent */ 
-  public static final String AGENT_NAME = "capture.agent.name";
+  String AGENT_NAME = "capture.agent.name";
   
   /** The URL of the remote state service */
-  public static final String AGENT_STATE_REMOTE_ENDPOINT_URL = "capture.agent.state.remote.endpoint.url";
+  String AGENT_STATE_REMOTE_ENDPOINT_URL = "capture.agent.state.remote.endpoint.url";
 
   /** The time between attempts to push the agent's state to the state service */
-  public static final String AGENT_STATE_REMOTE_POLLING_INTERVAL = "capture.agent.state.remote.polling.interval";
+  String AGENT_STATE_REMOTE_POLLING_INTERVAL = "capture.agent.state.remote.polling.interval";
 
   /** The time between attempts to push the agent's capabilities to the state service */                                                                            
-  public static final String AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL = "capture.agent.capabilities.remote.polling.interval";
+  String AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL = "capture.agent.capabilities.remote.polling.interval";
 
   
   /**
@@ -83,26 +83,26 @@ public interface CaptureParameters {
    */
 
   /** The URL of the remote recording state service */
-  public static final String RECORDING_STATE_REMOTE_ENDPOINT_URL = "capture.recording.state.remote.endpoint.url";
+  String RECORDING_STATE_REMOTE_ENDPOINT_URL = "capture.recording.state.remote.endpoint.url";
 
   /** The ID of a capture */
-  public static final String RECORDING_ID = "capture.recording.id";
+  String RECORDING_ID = "capture.recording.id";
 
   /** A directory which contains a capture */
-  public static final String RECORDING_ROOT_URL = "capture.recording.root.url";
+  String RECORDING_ROOT_URL = "capture.recording.root.url";
 
   /** Duration to specify for the capture client */
-  public static final String RECORDING_END = "capture.recording.end";
+  String RECORDING_END = "capture.recording.end";
 
   /**
    * Settings which control the ingest jobs
    */
 
   /** The URL to send the capture data to during ingest */
-  public static final String INGEST_ENDPOINT_URL = "capture.ingest.endpoint.url";
+  String INGEST_ENDPOINT_URL = "capture.ingest.endpoint.url";
 
   /** The retry interval for attempting ingest */
-  public static final String INGEST_RETRY_INTERVAL = "capture.ingest.retry.interval";
+  String INGEST_RETRY_INTERVAL = "capture.ingest.retry.interval";
 
   /**
    * Settings which control the capture hardware and outputs
@@ -112,10 +112,10 @@ public interface CaptureParameters {
    * The maximum length, in seconds, which should be captured regardless of scheduled length.
    * This is to catch user input errors in the scheduler, and also to stop infinite captures from an unscheduled capture.  
    */
-  public static final String CAPTURE_MAX_LENGTH = "capture.max.length";
+  String CAPTURE_MAX_LENGTH = "capture.max.length";
 
   /** A comma delimited list of the friendly names for capturing devices */
-  public static final String CAPTURE_DEVICE_NAMES = "capture.device.names";
+  String CAPTURE_DEVICE_NAMES = "capture.device.names";
   
   /* Specification for configuration files are discussed in MH-1184. Properties for capture devices
    * are specified by CAPTURE_DEVICE_PREFIX + "$DEVICENAME" + CAPTURE_DEVICE_* where DEVICENAME is one of
@@ -124,39 +124,39 @@ public interface CaptureParameters {
    */
   
   /** String prefix used when specify capture device properties */
-  public static final String CAPTURE_DEVICE_PREFIX = "capture.device.";
+  String CAPTURE_DEVICE_PREFIX = "capture.device.";
   
   /** Property specifying the source location of the device e.g., /dev/video0 */
-  public static final String CAPTURE_DEVICE_SOURCE = ".src";
+  String CAPTURE_DEVICE_SOURCE = ".src";
   
   /** Property specifying the name of the file to output */
-  public static final String CAPTURE_DEVICE_DEST = ".outputfile";
+  String CAPTURE_DEVICE_DEST = ".outputfile";
   
   /** Property specifying a codec for the device */
-  public static final String CAPTURE_DEVICE_CODEC = ".codec";
+  String CAPTURE_DEVICE_CODEC = ".codec";
   
   /** Property appended to CAPTURE_DEVICE_CODEC to specify that codec's bitrate */
-  public static final String CAPTURE_DEVICE_BITRATE = ".properties.bitrate";
+  String CAPTURE_DEVICE_BITRATE = ".properties.bitrate";
 
   /** Time interval between executions of the capture cleaner */
-  public static final String CAPTURE_CLEANER_INTERVAL = "capture.cleaner.interval";
+  String CAPTURE_CLEANER_INTERVAL = "capture.cleaner.interval";
   
   /** Threshold used for determining when deleting archived captures needs to happen */
-  public static final String CAPTURE_CLEANER_MIN_DISK_SPACE = "capture.cleaner.mindiskspace";
+  String CAPTURE_CLEANER_MIN_DISK_SPACE = "capture.cleaner.mindiskspace";
   
   /** Maximum number of days to archive a capture after its been ingested before cleaning up */
-  public static final String CAPTURE_CLEANER_MAX_ARCHIVAL_DAYS = "capture.cleaner.maxarchivaldays";
+  String CAPTURE_CLEANER_MAX_ARCHIVAL_DAYS = "capture.cleaner.maxarchivaldays";
   
   /** Name of the file created after a recording has been successfuly stopped */
-  public static final String CAPTURE_STOPPED_FILE_NAME = "capture.stopped";
+  String CAPTURE_STOPPED_FILE_NAME = "capture.stopped";
   
   /** Name of the file created after a recording has been successfuly ingested */
-  public static final String CAPTURE_INGESTED_FILE = "capture.ingested";
+  String CAPTURE_INGESTED_FILE = "capture.ingested";
   
   /** Name of the zip file ingested by the capture agent, containing all the relevant files for a recording **/
-  public static final String ZIP_NAME = "media.zip";
+  String ZIP_NAME = "media.zip";
   
   /** Default name for the manifest file */
-  public static final String MANIFEST_NAME = "manifest.xml";
+  String MANIFEST_NAME = "manifest.xml";
   
 }

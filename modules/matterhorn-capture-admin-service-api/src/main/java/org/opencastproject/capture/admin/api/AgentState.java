@@ -17,6 +17,7 @@ package org.opencastproject.capture.admin.api;
 
 /**
  * A representation of the capture client's current state (MH-730).
+ * FIXME: this should be an enum, it's a closed set of constants
  */
 public interface AgentState {
   /** Constant <code>IDLE="idle"</code> */

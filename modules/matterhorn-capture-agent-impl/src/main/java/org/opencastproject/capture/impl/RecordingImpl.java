@@ -41,10 +41,12 @@ public class RecordingImpl {
  
   /** Keeps the properties associated with this recording */
   private Properties props = null;
-  
+
   /** The MediaPackage containing all the metadata/attachments/any file related with this recording */
   private MediaPackage mPkg = null;
   
+  // FIXME: Why do we need fields for both the manifest and the mediapackage?  Right now, we have two (possibly out-of-sync)
+  // versions of the same information.
   /** The manifest associated with this recording */
   private File manifest = null;
   
@@ -64,6 +66,7 @@ public class RecordingImpl {
     this.mPkg = mp;
     this.props = (Properties)properties.clone();
     
+    // FIXME: It would make sense to make this if ()...else () its own method. It would certainly ease testing. (jt)
     //Figures out where captureDir lives
     if (this.props.containsKey(CaptureParameters.RECORDING_ROOT_URL)) {
       baseDir = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL));
@@ -139,6 +142,7 @@ public class RecordingImpl {
    * @param mPkg the MediaPackage to set
    */
   // TODO: As one can get a copy of the local MediaPackage and modify it outside, this method may not be necessary
+  
   public void setMediaPackage(MediaPackage mPkg) {
     this.mPkg = mPkg;
   }
@@ -179,6 +183,8 @@ public class RecordingImpl {
     return (String)props.setProperty(key, value);
   }
   
+  // FIXME: Remove this method (see comment at the very top). The recording should hold a reference to the media
+  // package only.
   /**
    * Gets the manifest for this recording
    * @return A {@code File} object with the path of the manifest, or {@code null} if it has not been yet created
@@ -187,6 +193,8 @@ public class RecordingImpl {
     return manifest;
   }
   
+  // FIXME: Remove this method (see comment at the very top). The recording should hold a reference to the media
+  // package only.
   /**
    * Sets the manifest for this recording
    * @param manifest

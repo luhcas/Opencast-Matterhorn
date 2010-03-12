@@ -42,6 +42,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * State service implementation.  This service keeps track of the states for the agent, as well as its recording(s).
+ * 
+ * FIXME: This functionality should be moved to CaptureAgentImpl in order to prevent circular dependencies. Also, the
+ * state is actually determined by the client itself, so this is probably where it should be kept. If you really want
+ * to keep a separate interface, you can keep the StateService, but implement it in CaptureAgentImpl. (jt)
  */
 public class StateServiceImpl implements StateService, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(StateServiceImpl.class);

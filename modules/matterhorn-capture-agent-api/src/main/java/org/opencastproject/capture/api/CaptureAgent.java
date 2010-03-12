@@ -28,6 +28,10 @@ public interface CaptureAgent {
    */
   String startCapture();
 
+  // FIXME: What happens if there is an ongoing recording? Looking at the implementation, we can see that <code>null</code>
+  // is returned, which should be documented. Even better would be do throw a checked exception, since this looks like
+  // an illegal state to us.
+  // FIXME: The @return javadoc is missing.
   /**
    * Starting a simple capture.
    * 
@@ -35,6 +39,8 @@ public interface CaptureAgent {
    */
   String startCapture(MediaPackage mediaPackage);
 
+  // FIXME: What are these properties?  How do I know the valid keys?
+  // FIXME: See comments on #startCapture(MediaPackage)
   /**
    * Starting a simple capture.
    * 
@@ -43,6 +49,7 @@ public interface CaptureAgent {
   String startCapture(Properties configuration);
 
   //TODO: provide @see link for configuration properties, or at least an a href link to a configurations file in the repo
+  // FIXME: See comments on #startCapture(MediaPackage)
   /**
    * Starting a simple capture.
    * 
@@ -51,12 +58,17 @@ public interface CaptureAgent {
    */
   String startCapture(MediaPackage mediaPackage, Properties configuration);
   
+  // FIXME: Javadocs are talking about a string instead of boolean
+  // FIXME: What does "false" as a return value mean? Was the capture not stopped, or was there no capture running?
+  // Even better would be to return void, with checked exceptions indicating various problems.
   /**
    * Stops the capture
    * @return A string indicating the success or fail of the action
    */
   boolean stopCapture();
 
+  // FIXME: document why the recordingId is necessary.  There doesn't seem to be a need for this parameter, since there
+  // should only be one recording at a time.
   /**
    * Stops the capture
    * This version takes in a recording ID and only stops the recording if that ID matches the current recording's ID.
@@ -65,11 +77,17 @@ public interface CaptureAgent {
    */
   boolean stopCapture(String recordingID);
 
+  // FIXME: This method should return an instance of the class (or better: enum) AgentState rather than a string
   /**
-   * Gets the machine's current state
+   * Gets the machine's current state.
+   * 
    * @return A state (should be defined in AgentState)
    * @see org.opencastproject.capture.admin.api.AgentState
    */
   String getAgentState();
+
+  // FIXME: In this interface, we would expect to find information about the agent's capabilities as well. 
+  //String[] getAgentCapabilities();
+  
 }
 
