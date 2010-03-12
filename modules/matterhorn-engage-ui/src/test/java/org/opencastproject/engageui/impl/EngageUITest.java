@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -17,12 +18,10 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class EngageUITest {
 
-  private static final Logger logger = LoggerFactory.getLogger(EngageUITest.class);
+  private TransformerFactory transFact;
 
   public EngageUITest() {
     super();
@@ -30,7 +29,8 @@ public class EngageUITest {
 
   @Before
   public void setUp() throws Exception {
-
+    // create an instance of TransformerFactory
+    transFact = TransformerFactory.newInstance();
   }
 
   @After
@@ -38,7 +38,7 @@ public class EngageUITest {
   }
 
   @Test
-  public void testEpisodeXSL() throws Exception {
+  public void testPlayerXSL() throws Exception {
 
     File xsltFile = new File(this.getClass().getClassLoader().getResource(
             "ui" + File.separator + "xsl" + File.separator + "player-hybrid-download.xsl").getFile());
@@ -47,7 +47,7 @@ public class EngageUITest {
             .getFile());
 
     InputStream expectedStream = this.getClass().getClassLoader().getResourceAsStream(
-            "xml" + File.separator + "episode-target.xml");
+            "xml" + File.separator + "player-expected.xml");
     BufferedReader expectedReader = new BufferedReader(new InputStreamReader(expectedStream));
     String expected = expectedReader.readLine();
 
@@ -57,11 +57,48 @@ public class EngageUITest {
     OutputStream actualStream = new ByteArrayOutputStream();
     Result result = new StreamResult(actualStream);
 
-    // create an instance of TransformerFactory
-    TransformerFactory transFact = TransformerFactory.newInstance();
     Transformer trans = transFact.newTransformer(xsltSource);
     trans.transform(xmlSource, result);
     String actual = actualStream.toString();
+
+    expectedStream.close();
+    expectedReader.close();
+
+    Assert.assertTrue(expected.equals(actual));
+  }
+
+  @Test
+  public void testEpisodesXSL() throws Exception {
+    File xsltFile = new File(this.getClass().getClassLoader().getResource(
+            "ui" + File.separator + "xsl" + File.separator + "episodes.xsl").getFile());
+
+    File xmlFile = new File(this.getClass().getClassLoader().getResource("xml" + File.separator + "episodes.xml")
+            .getFile());
+
+    InputStream expectedStream = this.getClass().getClassLoader().getResourceAsStream(
+            "xml" + File.separator + "episodes-expected.xml");
+    BufferedReader expectedReader = new BufferedReader(new InputStreamReader(expectedStream));
+
+    String expected = "";
+
+    String lastLine = "";
+    while ((lastLine = expectedReader.readLine()) != null)
+      expected += lastLine;
+
+    expected = expected.replaceAll("\n", "").replaceAll("\\s+", " ");
+
+    Source xmlSource = new StreamSource(xmlFile);
+    Source xsltSource = new StreamSource(xsltFile);
+
+    OutputStream actualStream = new ByteArrayOutputStream();
+    Result result = new StreamResult(actualStream);
+
+    Transformer trans = transFact.newTransformer(xsltSource);
+    trans.transform(xmlSource, result);
+    String actual = actualStream.toString().replaceAll("\n", "").replaceAll("\\s+", " ");
+
+    expectedStream.close();
+    expectedReader.close();
 
     Assert.assertTrue(expected.equals(actual));
   }
