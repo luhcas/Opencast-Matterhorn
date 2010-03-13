@@ -21,7 +21,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 
 /**
- * Run all integration tests
+ * State REST resources
  * @author jamiehodge
  *
  */
