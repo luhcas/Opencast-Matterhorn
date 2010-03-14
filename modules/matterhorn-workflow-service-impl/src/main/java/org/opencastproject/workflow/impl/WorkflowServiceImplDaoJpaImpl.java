@@ -28,7 +28,9 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -62,9 +64,6 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
     this.persistenceProperties = persistenceProperties;
   }
 
-  /** The entity manager used for persisting entities. */
-  protected EntityManager em = null;
-
   /** The factory used to generate the entity manager */
   protected EntityManagerFactory emf = null;
   
@@ -75,7 +74,6 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
   @Override
   public void activate() {
     emf = persistenceProvider.createEntityManagerFactory("workflow", persistenceProperties);
-    em = emf.createEntityManager();
   }
   
   public void activate(ComponentContext cc) {
@@ -83,7 +81,6 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
   }
 
   public void deactivate() {
-    em.close();
     emf.close();
   }
 
@@ -93,9 +90,14 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
    */
   @Override
   public long countWorkflowInstances() {
-    Query query = em.createQuery("SELECT COUNT(w) FROM workflow w");
-    Number countResult = (Number) query.getSingleResult();
-    return countResult.longValue();
+    EntityManager em = emf.createEntityManager();
+    try {
+      Query query = em.createQuery("SELECT COUNT(w) FROM workflow w");
+      Number countResult = (Number) query.getSingleResult();
+      return countResult.longValue();
+    } finally {
+      em.close();
+    }
   }
 
   /**
@@ -104,7 +106,12 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
    */
   @Override
   public WorkflowInstance getWorkflowById(String workflowId) {
-    return em.find(WorkflowInstanceImpl.class, workflowId);
+    EntityManager em = emf.createEntityManager();
+    try {
+      return em.find(WorkflowInstanceImpl.class, workflowId);
+    } finally {
+      em.close();
+    }
   }
 
   /**
@@ -113,63 +120,68 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
    */
   @Override
   public WorkflowSet getWorkflowInstances(WorkflowQuery query) {
-    long start = System.currentTimeMillis();
-    CriteriaBuilder cb = em.getCriteriaBuilder();
-    CriteriaQuery<WorkflowInstanceImpl> c = cb.createQuery(WorkflowInstanceImpl.class);
-    Root<WorkflowInstanceImpl> root = c.from(WorkflowInstanceImpl.class);
+    EntityManager em = emf.createEntityManager();
+    try {
+      long start = System.currentTimeMillis();
+      CriteriaBuilder cb = em.getCriteriaBuilder();
+      CriteriaQuery<WorkflowInstanceImpl> c = cb.createQuery(WorkflowInstanceImpl.class);
+      Root<WorkflowInstanceImpl> root = c.from(WorkflowInstanceImpl.class);
 
-    if(query.getCurrentOperation() != null) {
-      Predicate condition = cb.equal(root.get("currentOperation"), query.getCurrentOperation());
-      c.where(condition);
-    }
-    if(query.getState() != null) {
-      Predicate condition = cb.equal(root.get("state"), query.getState());
-      c.where(condition);
-    }
-    if(query.getMediaPackage() != null) {
-      Predicate condition = cb.equal(root.get("mediaPackageId"), query.getMediaPackage());
-      c.where(condition);
-    }
-    if(query.getSeries() != null) {
-      Predicate condition = cb.equal(root.get("series"), query.getSeries());
-      c.where(condition);
-    }
-    if(query.getText() != null) {
-      Predicate condition = cb.equal(root.get("title"), query.getText()); // TODO: or the rest of the possible columns
-      c.where(condition);
-    }
-    if(query.getStartPage() > 0) {
-    }
-    
-        
-    // TODO Add the rest of the criteria
-    // TODO Enable paging
-    
-    c.select(root);
-    TypedQuery<WorkflowInstanceImpl> typedQuery = em.createQuery(c);
+      if(query.getCurrentOperation() != null) {
+        Predicate condition = cb.equal(root.get("currentOperation"), query.getCurrentOperation());
+        c.where(condition);
+      }
+      if(query.getState() != null) {
+        Predicate condition = cb.equal(root.get("state"), query.getState());
+        c.where(condition);
+      }
+      if(query.getMediaPackage() != null) {
+        Predicate condition = cb.equal(root.get("mediaPackageId"), query.getMediaPackage());
+        c.where(condition);
+      }
+      if(query.getSeries() != null) {
+        Predicate condition = cb.equal(root.get("series"), query.getSeries());
+        c.where(condition);
+      }
+      if(query.getText() != null) {
+        Predicate condition = cb.equal(root.get("title"), query.getText()); // TODO: or the rest of the possible columns
+        c.where(condition);
+      }
+      if(query.getStartPage() > 0) {
+      }
+      
+          
+      // TODO Add the rest of the criteria
+      // TODO Enable paging
+      
+      c.select(root);
+      TypedQuery<WorkflowInstanceImpl> typedQuery = em.createQuery(c);
 
-    long startPage = query.getStartPage();
-    long count = query.getCount();
-    
-    if(startPage > 1 && count > 0) {
-      typedQuery.setFirstResult((int)((startPage - 1) * count));
+      long startPage = query.getStartPage();
+      long count = query.getCount();
+      
+      if(startPage > 1 && count > 0) {
+        typedQuery.setFirstResult((int)((startPage - 1) * count));
+      }
+      
+      if (count > 0) {
+        typedQuery.setMaxResults((int)count);
+      }
+      List<WorkflowInstanceImpl> list = typedQuery.getResultList();
+      long searchTime = System.currentTimeMillis() - start;
+      WorkflowSetImpl set = new WorkflowSetImpl();
+      
+      set.setCount(Math.min(query.getCount(), 0)); // FIXME: the last arg should be the total count
+      set.setStartPage(query.getStartPage());
+      set.setSearchTime(searchTime);
+      set.setTotalCount(0); // FIXME: Set this to the total count
+      for(WorkflowInstance workflow : list) {
+        set.addItem(workflow);
+      }
+      return set;
+    } finally {
+      em.close();
     }
-    
-    if (count > 0) {
-      typedQuery.setMaxResults((int)count);
-    }
-    List<WorkflowInstanceImpl> list = typedQuery.getResultList();
-    long searchTime = System.currentTimeMillis() - start;
-    WorkflowSetImpl set = new WorkflowSetImpl();
-    
-    set.setCount(Math.min(query.getCount(), 0)); // FIXME: the last arg should be the total count
-    set.setStartPage(query.getStartPage());
-    set.setSearchTime(searchTime);
-    set.setTotalCount(0); // FIXME: Set this to the total count
-    for(WorkflowInstance workflow : list) {
-      set.addItem(workflow);
-    }
-    return set;
   }
 
   /**
@@ -178,10 +190,19 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
    */
   @Override
   public void remove(String id) {
-    WorkflowInstance workflow = getWorkflowById(id);
-    em.getTransaction().begin();
-    em.remove(workflow);
-    em.getTransaction().commit();
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    try {
+      WorkflowInstance workflow = getWorkflowById(id);
+      tx.begin();
+      em.remove(workflow);
+      tx.commit();
+    } catch(RollbackException e) {
+      tx.rollback();
+      throw e;
+    } finally {
+      em.close();
+    }
   }
 
   /**
@@ -190,13 +211,21 @@ public class WorkflowServiceImplDaoJpaImpl implements WorkflowServiceImplDao {
    */
   @Override
   public void update(WorkflowInstance instance) {
-    WorkflowInstance existingWorkflow = getWorkflowById(instance.getId());
-    em.getTransaction().begin();
-    if(existingWorkflow == null) {
-      em.persist(instance);
-    } else {
-      em.merge(instance);
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    try {
+      WorkflowInstance existingWorkflow = getWorkflowById(instance.getId());
+      tx.begin();
+      if(existingWorkflow == null) {
+        em.persist(instance);
+      } else {
+        em.merge(instance);
+      }
+      tx.commit();
+    } catch(RollbackException e) {
+      tx.rollback();
+    } finally {
+      em.close();
     }
-    em.getTransaction().commit();
   }
 }

@@ -76,6 +76,7 @@ public class ReceiptTest {
     ReceiptImpl receipt = (ReceiptImpl) dao.createReceipt();
     Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
             new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
+    t.setIdentifier("track-1");
     receipt.setElement(t);
     receipt.setStatus(Status.FINISHED);
     dao.updateReceipt(receipt);

@@ -15,11 +15,10 @@
  */
 package org.opencastproject.distribution.youtube;
 
-import org.opencastproject.deliver.store.JPAStore;
-import org.opencastproject.deliver.schedule.TaskSerializer;
-
 import org.opencastproject.deliver.schedule.Schedule;
 import org.opencastproject.deliver.schedule.Task;
+import org.opencastproject.deliver.schedule.TaskSerializer;
+import org.opencastproject.deliver.store.JPAStore;
 import org.opencastproject.deliver.youtube.YouTubeConfiguration;
 import org.opencastproject.deliver.youtube.YouTubeDeliveryAction;
 import org.opencastproject.deliver.youtube.YouTubeRemoveAction;
@@ -35,12 +34,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-
 import java.net.URI;
-
 import java.util.Map;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 
@@ -94,9 +90,6 @@ public class YoutubeDistributionService implements DistributionService {
     this.persistenceProperties = persistenceProperties;
   }
 
-  /** The entity manager used for persisting Java objects. */
-  protected EntityManager em = null;
-
   /** The factory used to generate the entity manager */
   protected EntityManagerFactory emf = null;
 
@@ -127,13 +120,11 @@ public class YoutubeDistributionService implements DistributionService {
     // create JPA instances
     emf = persistenceProvider.createEntityManagerFactory("YoutubeDistributionPersistenceUnit", 
                                                          persistenceProperties);
-    em = emf.createEntityManager();
-
     // create the scheduler using memory store
     // schedule = new Schedule();
     // create the scheduler using JPA store
-    schedule = new Schedule(new JPAStore<Task>(new TaskSerializer(), em, "YOUTUBE_ACTIVE"),
-                            new JPAStore<Task>(new TaskSerializer(), em, "YOUTUBE_COMPLETED"));
+    schedule = new Schedule(new JPAStore<Task>(new TaskSerializer(), emf, "YOUTUBE_ACTIVE"),
+                            new JPAStore<Task>(new TaskSerializer(), emf, "YOUTUBE_COMPLETED"));
   }
 
   /**
@@ -142,8 +133,7 @@ public class YoutubeDistributionService implements DistributionService {
   public void deactivate() {
     // shutdown the scheduler
     schedule.shutdown();
-    // destroy JPA instances
-    em.close();
+    // destroy JPA entity manager factory
     emf.close();
   }
 

@@ -15,8 +15,10 @@
  */
 package org.opencastproject.ingest.endpoint;
 
-import javax.persistence.EntityManager;
 import org.apache.commons.fileupload.ProgressListener;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -29,12 +31,12 @@ public class UploadProgressListener implements ProgressListener {
   private final static int SAVE_INTERVAL = 50 * 1024;
 
   private UploadJob job;
-  private EntityManager em;
+  private EntityManagerFactory emf;
   private long lastSaved = 0L;
 
-  public UploadProgressListener(UploadJob job, EntityManager em) {
+  public UploadProgressListener(UploadJob job, EntityManagerFactory emf) {
     this.job = job;
-    this.em = em;
+    this.emf = emf;
   }
 
   /** Called by ServeletFileUpload on upload progress. Updates the job object.
@@ -51,9 +53,13 @@ public class UploadProgressListener implements ProgressListener {
     if ( (rec == 0L) ||                           // persist job on upload start
          (rec - lastSaved >= SAVE_INTERVAL) ||    // after X Kb
          (rec == total) ) {                       // on upload complete
-      em.persist(job);
+      EntityManager em = emf.createEntityManager();
+      try {
+        em.persist(job);
+      } finally {
+        em.close();
+      }
       lastSaved = rec;
     }
   }
-
 }

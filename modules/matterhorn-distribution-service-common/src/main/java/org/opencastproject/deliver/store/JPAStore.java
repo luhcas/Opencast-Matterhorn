@@ -16,10 +16,11 @@
 package org.opencastproject.deliver.store;
 
 import java.util.HashSet;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
@@ -34,7 +35,7 @@ public class JPAStore<ValueClass> implements Store<ValueClass> {
   private Serializer<ValueClass> serializer;
 
   /** The entity manager used for persisting Java objects. */
-  protected EntityManager em = null;
+  protected EntityManagerFactory emf = null;
   
   /** Youtube/iTuensU */
   private String distributionChannel;
@@ -42,9 +43,9 @@ public class JPAStore<ValueClass> implements Store<ValueClass> {
   /**
    * Public constructor
    */
-  public JPAStore(Serializer serializer, EntityManager em, String distributionChannel) {
+  public JPAStore(Serializer serializer, EntityManagerFactory emf, String distributionChannel) {
     this.serializer = serializer;
-    this.em = em;
+    this.emf = emf;
     this.distributionChannel = distributionChannel;
   }
 
@@ -59,6 +60,7 @@ public class JPAStore<ValueClass> implements Store<ValueClass> {
 
     String representation = serializer.toString(value);
 
+    EntityManager em = emf.createEntityManager();
     EntityTransaction tx = null;
     try {
       tx = em.getTransaction();
@@ -82,6 +84,8 @@ public class JPAStore<ValueClass> implements Store<ValueClass> {
       if (tx != null) {
         tx.rollback();
       }
+    } finally {
+      em.close();
     }
   }
   
@@ -93,15 +97,19 @@ public class JPAStore<ValueClass> implements Store<ValueClass> {
    */
   private TaskEntity getEntryByKey(String id) {
     // for this distribution channel only    
-    Query q = em.createQuery("SELECT x FROM TaskEntity x WHERE x.distributionChannel = :channel AND x.id = :id");
-    q.setParameter("channel", distributionChannel);
-    q.setParameter("id", id);
-    List<TaskEntity> results = (List<TaskEntity>) q.getResultList();
-    for (TaskEntity task : results) {
-      return task;
+    EntityManager em = emf.createEntityManager();
+    try {
+      Query q = em.createQuery("SELECT x FROM TaskEntity x WHERE x.distributionChannel = :channel AND x.id = :id");
+      q.setParameter("channel", distributionChannel);
+      q.setParameter("id", id);
+      List<TaskEntity> results = (List<TaskEntity>) q.getResultList();
+      for (TaskEntity task : results) {
+        return task;
+      }
+      return null;
+    } finally {
+      em.close();
     }
-
-    return null;
   }
 
   /**
@@ -129,31 +137,29 @@ public class JPAStore<ValueClass> implements Store<ValueClass> {
    * @return value of the entry
    */
   public ValueClass remove(String key) {
-    // System.out.println("removing: " + key + "," + distributionChannel);
-
     String text = null;
     EntityTransaction tx = null;
     TaskEntity t = getEntryByKey(key);
-    
     if (t == null) {
       return null;
     }
-      
+    EntityManager em = emf.createEntityManager();
     try {
       tx = em.getTransaction();
       tx.begin();
-
       text = t.getSerializedTask();
       em.remove(t);
-
       tx.commit();
+      return serializer.fromString(text);    
     } catch (RollbackException e) {
       if (tx != null) {
         tx.rollback();
       }
+    } finally {
+      em.close();
     }
-
-    return serializer.fromString(text);    
+    // FIXME fix the exception handling here (jmh)
+    return null;
   }
 
   /**
@@ -197,16 +203,19 @@ public class JPAStore<ValueClass> implements Store<ValueClass> {
    */  
   public Set<String> keySet() {
     HashSet<String> keys = new HashSet<String>();
-
-    // for this distribution channel only    
-    Query q = em.createQuery("SELECT x FROM TaskEntity x WHERE x.distributionChannel = :channel");
-    q.setParameter("channel", distributionChannel);
-    List<TaskEntity> results = (List<TaskEntity>) q.getResultList();
-    for (TaskEntity task : results) {
-      String id = task.getId();
-      keys.add(id);
+    EntityManager em = emf.createEntityManager();
+    try {
+      // for this distribution channel only    
+      Query q = em.createQuery("SELECT x FROM TaskEntity x WHERE x.distributionChannel = :channel");
+      q.setParameter("channel", distributionChannel);
+      List<TaskEntity> results = (List<TaskEntity>) q.getResultList();
+      for (TaskEntity task : results) {
+        String id = task.getId();
+        keys.add(id);
+      }
+      return keys;
+    } finally {
+      em.close();
     }
-    
-    return keys;
   }
 }

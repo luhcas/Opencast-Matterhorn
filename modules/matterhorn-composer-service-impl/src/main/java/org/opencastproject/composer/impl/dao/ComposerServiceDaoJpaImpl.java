@@ -26,7 +26,10 @@ import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
 
 /**
@@ -54,19 +57,14 @@ public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
     this.persistenceProperties = persistenceProperties;
   }
 
-  /** The entity manager used for persisting entities. */
-  protected EntityManager em = null;
-
   /** The factory used to generate the entity manager */
   protected EntityManagerFactory emf = null;
   
   public void activate(ComponentContext cc) {
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.composer", persistenceProperties);
-    em = emf.createEntityManager();
   }
 
   public void deactivate() {
-    em.close();
     emf.close();
   }
 
@@ -76,23 +74,33 @@ public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
    */
   @Override
   public long count(Status status) {
-    Query query = em.createQuery("SELECT COUNT(r) FROM Receipt r where r.status = :status");
-    query.setParameter("status", status);
-    Number countResult = (Number) query.getSingleResult();
-    return countResult.longValue();
+    EntityManager em = emf.createEntityManager();
+    try {
+      Query query = em.createQuery("SELECT COUNT(r) FROM Receipt r where r.status = :status");
+      query.setParameter("status", status);
+      Number countResult = (Number) query.getSingleResult();
+      return countResult.longValue();
+    } finally {
+      em.close();
+    }
   }
-
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.composer.impl.dao.ComposerServiceDao#count(org.opencastproject.composer.api.Receipt.Status, java.lang.String)
    */
   @Override
   public long count(Status status, String host) {
-    Query query = em.createQuery("SELECT COUNT(r) FROM Receipt r where r.status = :status and r.host = :host");
-    query.setParameter("status", status);
-    query.setParameter("host", host);
-    Number countResult = (Number) query.getSingleResult();
-    return countResult.longValue();
+    EntityManager em = emf.createEntityManager();
+    try {
+      Query query = em.createQuery("SELECT COUNT(r) FROM Receipt r where r.status = :status and r.host = :host");
+      query.setParameter("status", status);
+      query.setParameter("host", host);
+      Number countResult = (Number) query.getSingleResult();
+      return countResult.longValue();
+    } finally {
+      em.close();
+    }
   }
 
   /**
@@ -103,10 +111,19 @@ public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
   public Receipt createReceipt() {
     String id = UUID.randomUUID().toString();
     Receipt receipt = new ReceiptImpl(id, Status.QUEUED, "localhost"); // FIXME Find host name from configuration?
-    em.getTransaction().begin();
-    em.persist(receipt);
-    em.getTransaction().commit();
-    return receipt;
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    try {
+      tx.begin();
+      em.persist(receipt);
+      tx.commit();
+      return receipt;
+    } catch(RollbackException e) {
+      tx.rollback();
+      throw e;
+    } finally {
+      em.close();
+    }
   }
 
   /**
@@ -115,7 +132,12 @@ public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
    */
   @Override
   public Receipt getReceipt(String id) {
-    return em.find(ReceiptImpl.class, id);
+    EntityManager em = emf.createEntityManager();
+    try {
+      return em.find(ReceiptImpl.class, id);
+    } finally {
+      em.close();
+    }
   }
 
   /**
@@ -124,13 +146,25 @@ public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
    */
   @Override
   public void updateReceipt(Receipt receipt) {
-    em.getTransaction().begin();
-    Receipt fromDb = getReceipt(receipt.getId());
-    if(fromDb == null) throw new IllegalArgumentException("receipt " + receipt + " is not a persistent object.");
-    fromDb.setElement(receipt.getElement());
-    fromDb.setStatus(receipt.getStatus());
-    fromDb.setHost(receipt.getHost());
-    em.getTransaction().commit();
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    try {
+      tx.begin();
+      Receipt fromDb;
+      try {
+        fromDb = em.find(ReceiptImpl.class, receipt.getId());
+      } catch (NoResultException e) {
+        throw new IllegalArgumentException("receipt " + receipt + " is not a persistent object.", e);
+      }
+      fromDb.setElement(receipt.getElement());
+      fromDb.setStatus(receipt.getStatus());
+      fromDb.setHost(receipt.getHost());
+      tx.commit();
+    } catch(RollbackException e) {
+      tx.rollback();
+      throw e;
+    } finally {
+      em.close();
+    }
   }
-
 }

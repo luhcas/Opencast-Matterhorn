@@ -15,7 +15,6 @@
  */
 package org.opencastproject.ingest.endpoint;
 
-import java.io.IOException;
 import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -38,20 +37,24 @@ import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
+import org.apache.commons.io.IOUtils;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -64,8 +67,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.apache.commons.io.IOUtils;
-import org.osgi.service.component.ComponentContext;
 
 /**
  * Creates and augments Matterhorn MediaPackages using the api. Stores media into the Working File Repository.
@@ -80,7 +81,6 @@ public class IngestRestService {
   private DublinCoreCatalogService dublinCoreService;
   protected PersistenceProvider persistenceProvider;
   protected Map persistenceProperties;
-  protected EntityManager em = null;
   protected EntityManagerFactory emf = null;
   private String serverURL = null;
 
@@ -109,7 +109,6 @@ public class IngestRestService {
     serverURL = context.getBundleContext().getProperty("serverURL");
     try {
       emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
-      em = emf.createEntityManager();
     } catch (Exception e) {
       logger.error("Unable to initialize JPA EntityManager: " + e.getMessage());
     }
@@ -357,11 +356,13 @@ public class IngestRestService {
   @Path("uploadform.html")
   @Produces(MediaType.TEXT_HTML)
   public Response createUploadJob() {
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
     try {
       UploadJob job = new UploadJob();
-      em.getTransaction().begin();
+      tx.begin();
       em.persist(job);
-      em.getTransaction().commit();
+      tx.commit();
       String html = IOUtils.toString(getClass().getResourceAsStream("/templates/uploadform.html"));
       String uploadURL = serverURL + "/ingest/rest/addElementMonitored/" + job.getId();
       html = html.replaceAll("\\{uploadURL\\}", uploadURL);
@@ -369,9 +370,11 @@ public class IngestRestService {
       logger.info("New upload job created: " + job.getId());
       return Response.ok(html).build();
     } catch (Exception ex) {
-      logger.error(ex.getMessage());
-      ex.printStackTrace();
+      logger.error(ex.getMessage(), ex);
+      tx.rollback();
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    } finally {
+      em.close();
     }
   }
 
@@ -390,6 +393,7 @@ public class IngestRestService {
     MediaPackage mp = null;
     String fileName = null;
     MediaPackageElementFlavor flavor = null;
+    EntityManager em = emf.createEntityManager();
     try {
       try {                                                   // try to get UploadJob, responde 404 if not successful
         Query q = em.createNamedQuery("UploadJob.getByID");
@@ -401,7 +405,7 @@ public class IngestRestService {
       }
       if (ServletFileUpload.isMultipartContent(request)) {
         ServletFileUpload upload = new ServletFileUpload();
-        UploadProgressListener listener = new UploadProgressListener(job, this.em);
+        UploadProgressListener listener = new UploadProgressListener(job, this.emf);
         upload.setProgressListener(listener);
         for (FileItemIterator iter = upload.getItemIterator(request); iter.hasNext();) {
           FileItemStream item = iter.next();
@@ -436,6 +440,8 @@ public class IngestRestService {
       logger.error(ex.getMessage());
       ex.printStackTrace();
       return buildUploadFailedRepsonse();
+    } finally {
+      em.close();
     }
   }
 
@@ -490,6 +496,7 @@ public class IngestRestService {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("getProgress/{JobId}")
   public Response getProgress(@PathParam("JobId") String jobId) {
+    EntityManager em = emf.createEntityManager();
     try {
       UploadJob job = null;
       try {                                                   // try to get UploadJob, responde 404 if not successful
@@ -505,6 +512,8 @@ public class IngestRestService {
     } catch (Exception ex) {
       logger.error(ex.getMessage());
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    } finally {
+      em.close();
     }
   }
 

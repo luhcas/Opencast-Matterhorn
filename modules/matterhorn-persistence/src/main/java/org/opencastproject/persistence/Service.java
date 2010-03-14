@@ -14,19 +14,20 @@
  */
 package org.opencastproject.persistence;
 
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
+
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
-
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
-import org.osgi.service.component.ComponentContext;
 
 public class Service implements ManagedService {
 
@@ -49,21 +50,28 @@ public class Service implements ManagedService {
     this.persistenceProperties = persistenceProperties;
   }
 
-  /** The entity manager used for persisting Java objects. */
-  protected EntityManager em = null;
-
   /** The factory used to generate the entity manager */
   protected EntityManagerFactory emf = null;
   
   public void activate(ComponentContext cc) {
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.persistence", persistenceProperties);
-    em = emf.createEntityManager();
 
     System.out.println("You may see exceptions above, they are (probably) safe to ignore and only occur when the persistence unit first connects.");
     System.out.println("They occur because the PU is trying to create the tables, which may already exist.");
     System.out.println("This behaviour can be disabled, but then the tables must already exist and be the same as what the code is expecting.");
     System.out.println("It will also always try and create the sequence table, this is a TODO.\n\n\n");
+    EntityManager em = emf.createEntityManager();
+    try {
+      load(em);
+    } finally {
+      em.close();
+    }
+  }
 
+  /**
+   * @param em
+   */
+  private void load(EntityManager em) {
     Query q = em.createNamedQuery("JPAList.getByID");
     q.setParameter("id", "myList");
     JPAList l;
@@ -71,11 +79,12 @@ public class Service implements ManagedService {
       l = (JPAList) q.getSingleResult();
       System.out.println("Found list of objects with id " + l.getId());
     } catch (NoResultException e) {
-      em.getTransaction().begin();
+      EntityTransaction tx = em.getTransaction();
+      tx.begin();
       l = new JPAList();
       l.setId("myList");
       em.persist(l);
-      em.getTransaction().commit();
+      tx.commit();
       System.out.println("Created list of objects " + l.getId());
     }
 
@@ -83,11 +92,12 @@ public class Service implements ManagedService {
     t.setString("Example");
     t.setInteger(4064);
 
-    em.getTransaction().begin();
+    EntityTransaction tx = em.getTransaction();
+    tx.begin();
     l.addObject(t);
     em.persist(t);
     em.persist(l);
-    em.getTransaction().commit();
+    tx.commit();
     Long id = t.getId();
 
     System.out.println("Created entity with id " + id);
@@ -99,10 +109,11 @@ public class Service implements ManagedService {
     System.out.println(id + ": " + t.getString() + ", " + t.getInteger());
 
     System.out.println("Modifying entity " + id);
-    em.getTransaction().begin();
+    tx = em.getTransaction();
+    tx.begin();
     t.setString("Other");
     t.setInteger(4);
-    em.getTransaction().commit();
+    tx.commit();
 
     t = null;
 
@@ -130,7 +141,6 @@ public class Service implements ManagedService {
   }
 
   public void destroy() {
-    em.close();
     emf.close();
   }
 
