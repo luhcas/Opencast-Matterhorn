@@ -17,10 +17,6 @@ package org.opencastproject.remotetest;
 
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -34,6 +30,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 /** 
  * Test the functionality of the capture endpoints. Does not assume capture
@@ -51,9 +52,11 @@ public class CaptureRestEndpointTest {
 
     // Test Properties from resources
     Properties props = new Properties();
-    props.put("recordingID", "static-test");
+    props.put("capture.recording.id", "static-test");
 
-    startParams.add(new BasicNameValuePair("config", props.toString()));
+    StringWriter writer = new StringWriter();
+    props.store(writer, null);
+    startParams.add(new BasicNameValuePair("config", writer.toString()));
 
     stopParams = new ArrayList<NameValuePair>();
     stopParams.add(new BasicNameValuePair("recordingID", "static-test"));
@@ -84,7 +87,9 @@ public class CaptureRestEndpointTest {
     sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
   }
 
-  @Test
+  //TODO:  Fix these post tests once the mock capture stuff is sorted out.
+  //Right now when you try and start via a post endpoints without a valid capture device it fails
+  @Test @Ignore
   public void testCapturePost() throws Exception {
     //Test using only scheduled calls
     sendPost(BASE_URL + "/capture/rest/startCapture", startParams, HttpStatus.SC_OK);

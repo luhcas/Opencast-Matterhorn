@@ -27,8 +27,8 @@ import org.opencastproject.util.doc.Param.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Properties;
 
 import javax.ws.rs.FormParam;
@@ -138,7 +138,7 @@ public class CaptureRestService {
   public Response startCapture(@FormParam("config") String config) {
     Properties configuration = new Properties();
     try {
-      configuration.load(new ByteArrayInputStream(config.getBytes()));
+      configuration.load(new StringReader(config));
     } catch (IOException e1) {
       logger.warn("Unable to parse configuration string into valid capture config.  Continuing with default settings.");
     }

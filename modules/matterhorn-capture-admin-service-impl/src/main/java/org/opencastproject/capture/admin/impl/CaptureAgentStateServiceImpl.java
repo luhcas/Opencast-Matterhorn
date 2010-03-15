@@ -302,7 +302,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
        String[] splitList = agentList.split(",");
        LinkedList<String> t = new LinkedList<String>();
        for (String agentName : splitList) {
-         logger.warn("GDLGDL Adding " + agentName + " to sticky list");
+         logger.debug("Adding " + agentName + " to sticky list");
          t.add(agentName);
        }
        stickyAgents = t;
@@ -315,10 +315,10 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
        tx.begin();
        for (Agent a : dbAgents) {
          if (!stickyAgents.contains(a.getName())) {
-           logger.warn("GDLGDL Removing " + a.getName());
+           logger.debug("Removing " + a.getName());
            em.remove(a);
          } else {
-           logger.warn("GDLGDL Skipping " + a.getName());
+           logger.debug("Skipping " + a.getName());
          }
        }
        tx.commit();
@@ -329,7 +329,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
        for (String name : stickyAgents) {
          Agent a = agents.get(name);
          if (a != null) {
-           logger.warn("GDLGDL Adding " + a.getName());
+           logger.debug("Adding " + a.getName());
            em.persist(a);
          }
        }
@@ -343,7 +343,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
         tx = em.getTransaction();
         tx.begin();
         for (Agent a : dbAgents) {
-          logger.warn("GDLGDL Removing all: " + a.getName());
+          logger.debug("Removing all: " + a.getName());
           em.remove(a);
         }
         tx.commit();
