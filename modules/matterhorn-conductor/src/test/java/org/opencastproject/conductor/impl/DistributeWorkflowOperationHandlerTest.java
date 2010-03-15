@@ -15,6 +15,7 @@
  */
 package org.opencastproject.conductor.impl;
 
+import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
@@ -40,58 +41,35 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InspectWorkflowOperationHandlerTest {
-  private InspectWorkflowOperationHandler operationHandler;
-  //private DublinCoreCatalogService dcService = null;
-  private Workspace workspace = null;
-  private MediaInspectionService inspectionService = null;
+public class DistributeWorkflowOperationHandlerTest {
+  private DistributeWorkflowOperationHandler operationHandler;
+  private DistributionService service = null;
 
-  private URI uriTrack;
   private URI uriMP;
-  private Track newTrack;
   private MediaPackage mp;
 
   @Before
   public void setup() throws Exception {
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     
-    uriTrack = InspectWorkflowOperationHandler.class.getResource("/av.mov").toURI();
-    uriMP = InspectWorkflowOperationHandler.class.getResource("/manifest.xml").toURI();
+    uriMP = InspectWorkflowOperationHandler.class.getResource("/distribute_mediapackage.xml").toURI();
     mp = builder.loadFromXml(uriMP.toURL().openStream());
-    newTrack = mp.getTracks()[0];
     
     // set up service
-    operationHandler = new InspectWorkflowOperationHandler();
+    operationHandler = new DistributeWorkflowOperationHandler();
     
     // set up mock inspect
-    inspectionService = EasyMock.createNiceMock(MediaInspectionService.class);
-    EasyMock.expect(inspectionService.enrich((Track)EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(newTrack);
-    EasyMock.replay(inspectionService);
-    operationHandler.setInspectionService(inspectionService);
-    
-    // set up mock workspace
-    workspace = EasyMock.createNiceMock(Workspace.class);
-    EasyMock.replay(workspace);
-    operationHandler.setWorkspace(workspace);
-    
-    // set up mock dcService
-    // DublinCoreCatalogService dcService = EasyMock.createNiceMock(DublinCoreCatalogService.class);
-    // EasyMock.replay(dcService);
-    // operationHandler.setDublincoreService(dcService);
+    service = EasyMock.createNiceMock(DistributionService.class);
+    EasyMock.expect(service.distribute((MediaPackage)EasyMock.anyObject(), (String[])EasyMock.anyObject())).andReturn(mp);
+    EasyMock.replay(service);
+    operationHandler.setDistributionService(service);
   }
 
   @Test
   public void testPublishOperation() throws Exception {
-    // Set up a mediapackage to publish
-    MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-    MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-    Track presentationTrack = (Track) elementBuilder.elementFromURI(uriTrack, Track.TYPE,
-            MediaPackageElements.PRESENTATION_SOURCE);
-    mp.add(presentationTrack);
-
     // Add the mediapackage to a workflow instance
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
-    workflowInstance.setId("workflow-inspect-test");
+    workflowInstance.setId("workflow-distribute-test");
     workflowInstance.setState(WorkflowState.RUNNING);
     workflowInstance.setMediaPackage(mp);
     WorkflowOperationInstanceImpl operationInstance = new WorkflowOperationInstanceImpl();
@@ -102,10 +80,9 @@ public class InspectWorkflowOperationHandlerTest {
 
     // Run the media package through the operation handler, ensuring that metadata gets added
     WorkflowOperationResult result = operationHandler.start(workflowInstance);
-    for (Track t : result.getMediaPackage().getTracks()) {
-      Assert.assertNotNull(t.getChecksum());
-      Assert.assertNotNull(t.getMimeType());
-      Assert.assertNotNull(t.getDuration());
-    }
+    MediaPackage mpNew = result.getMediaPackage();
+    // TODO: some test to perform
+    
+    
   }
 }
