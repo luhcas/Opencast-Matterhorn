@@ -3,7 +3,7 @@
 	id="597d0b42-5af6-450e-ac0b-c2cb619fc2bc" duration="14546"
 	xmlns:ns2="http://mediapackage.opencastproject.org">
 	<media>
-		<track id="track-1">
+		<track id="track-1" type="presentation/source">
 			<mimetype>video/quicktime</mimetype>
 			<tags />
 			<url>av.mov
