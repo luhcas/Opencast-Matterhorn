@@ -319,7 +319,7 @@ public class IngestRestService {
     try {
       MediaPackage mp = builder.loadFromXml(mpx);
       ingestService.ingest(mp);
-      return Response.ok(mp).build();
+      return Response.ok(mpx).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
