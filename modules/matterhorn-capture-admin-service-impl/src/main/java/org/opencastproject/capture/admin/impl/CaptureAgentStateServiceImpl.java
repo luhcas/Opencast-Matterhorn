@@ -292,7 +292,6 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   }
 
   public void updated(Dictionary props) throws ConfigurationException {
-    logger.warn("GDLGDL updated");
     String agentList = (String) props.get(CaptureAgentStateService.STICKY_AGENTS);
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = null;

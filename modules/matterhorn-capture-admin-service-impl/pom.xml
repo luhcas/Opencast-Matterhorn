@@ -91,7 +91,6 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package>
-              org.opencastproject.http,
               javax.persistence,
               *;resolution:=optional
             </Import-Package>
