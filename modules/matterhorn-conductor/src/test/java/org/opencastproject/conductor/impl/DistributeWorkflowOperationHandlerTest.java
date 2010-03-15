@@ -35,12 +35,14 @@ import org.opencastproject.workspace.api.Workspace;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+@Ignore
 public class DistributeWorkflowOperationHandlerTest {
   private DistributeWorkflowOperationHandler operationHandler;
   private DistributionService service = null;
