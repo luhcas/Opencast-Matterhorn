@@ -89,7 +89,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         // use binary path from CONFIG
         String path = cc.getBundleContext().getProperty(CONFIG_ANALYZER_MEDIAINFOPATH);
         analyzerConfig.put(MediaInfoAnalyzer.CONFIG_MEDIAINFO_BINARY, path);
-        logger.info("CONFIG "+CONFIG_ANALYZER_MEDIAINFOPATH+": " + path);
+        logger.info("CONFIG " + CONFIG_ANALYZER_MEDIAINFOPATH + ": " + path);
       }
     }
   }
@@ -102,61 +102,61 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     MediaContainerMetadata metadata = getFileMetadata(file);
     if (metadata == null) {
       logger.warn("Unable to acquire media metadata for " + uri);
-      return null;  // TODO: does the contract for this service define what to do if the file isn't valid media?
+      return null; // TODO: does the contract for this service define what to do if the file isn't valid media?
     } else {
       MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
       TrackImpl track;
-        MediaPackageElement element;
-        try {
-          element = elementBuilder.elementFromURI(uri, Type.Track, null);
-        } catch (UnsupportedElementException e) {
-          throw new RuntimeException(e);
+      MediaPackageElement element;
+      try {
+        element = elementBuilder.elementFromURI(uri, Type.Track, null);
+      } catch (UnsupportedElementException e) {
+        throw new RuntimeException(e);
+      }
+      track = (TrackImpl) element;
+      if (metadata.getDuration() != null)
+        track.setDuration(metadata.getDuration());
+      try {
+        track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+      } catch (NoSuchAlgorithmException e) {
+        throw new RuntimeException(e);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      try {
+        track.setMimeType(MimeTypes.fromURL(file.toURI().toURL()));
+      } catch (Exception e) {
+        logger.info("unable to find mimetype for {}", file.getAbsolutePath());
+      }
+      List<AudioStreamMetadata> audioList = metadata.getAudioStreamMetadata();
+      if (audioList != null && !audioList.isEmpty()) {
+        for (int i = 0; i < audioList.size(); i++) {
+          AudioStreamImpl audio = new AudioStreamImpl("audio-" + (i + 1));
+          AudioStreamMetadata a = audioList.get(i);
+          audio.setBitRate(a.getBitRate());
+          audio.setChannels(a.getChannels());
+          audio.setFormat(a.getFormat());
+          audio.setFormatVersion(a.getFormatVersion());
+          audio.setBitDepth(a.getResolution());
+          audio.setSamplingRate(a.getSamplingRate());
+          track.addStream(audio);
         }
-        track = (TrackImpl) element;
-        if (metadata.getDuration() != null)
-          track.setDuration(metadata.getDuration());
-        try {
-          track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
-        } catch (NoSuchAlgorithmException e) {
-          throw new RuntimeException(e);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
+      }
+      List<VideoStreamMetadata> videoList = metadata.getVideoStreamMetadata();
+      if (videoList != null && !videoList.isEmpty()) {
+        for (int i = 0; i < videoList.size(); i++) {
+          VideoStreamImpl video = new VideoStreamImpl("video-" + (i + 1));
+          VideoStreamMetadata v = videoList.get(i);
+          video.setBitRate(v.getBitRate());
+          video.setFormat(v.getFormat());
+          video.setFormatVersion(v.getFormatVersion());
+          video.setFrameHeight(v.getFrameHeight());
+          video.setFrameRate(v.getFrameRate());
+          video.setFrameWidth(v.getFrameWidth());
+          video.setScanOrder(v.getScanOrder());
+          video.setScanType(v.getScanType());
+          track.addStream(video);
         }
-        try {
-          track.setMimeType(MimeTypes.fromURL(file.toURI().toURL()));
-        } catch (Exception e) {
-          logger.info("unable to find mimetype for {}", file.getAbsolutePath());
-        }
-        List<AudioStreamMetadata> audioList = metadata.getAudioStreamMetadata();
-        if (audioList != null && !audioList.isEmpty()) {
-          for (int i = 0; i < audioList.size(); i++) {
-            AudioStreamImpl audio = new AudioStreamImpl("audio-" + (i + 1));
-            AudioStreamMetadata a = audioList.get(i);
-            audio.setBitRate(a.getBitRate());
-            audio.setChannels(a.getChannels());
-            audio.setFormat(a.getFormat());
-            audio.setFormatVersion(a.getFormatVersion());
-            audio.setBitDepth(a.getResolution());
-            audio.setSamplingRate(a.getSamplingRate());
-            track.addStream(audio);
-          }
-        }
-        List<VideoStreamMetadata> videoList = metadata.getVideoStreamMetadata();
-        if (videoList != null && !videoList.isEmpty()) {
-          for (int i = 0; i < videoList.size(); i++) {
-            VideoStreamImpl video = new VideoStreamImpl("video-" + (i + 1));
-            VideoStreamMetadata v = videoList.get(i);
-            video.setBitRate(v.getBitRate());
-            video.setFormat(v.getFormat());
-            video.setFormatVersion(v.getFormatVersion());
-            video.setFrameHeight(v.getFrameHeight());
-            video.setFrameRate(v.getFrameRate());
-            video.setFrameWidth(v.getFrameWidth());
-            video.setScanOrder(v.getScanOrder());
-            video.setScanType(v.getScanType());
-            track.addStream(video);
-          }
-        }
+      }
       return track;
     }
   }
@@ -183,8 +183,8 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     } else {
       TrackImpl track = null;
       try {
-        track = (TrackImpl) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-          .elementFromURI(originalTrackUrl, Type.Track, flavor);
+        track = (TrackImpl) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
+                originalTrackUrl, Type.Track, flavor);
       } catch (UnsupportedElementException e) {
         throw new RuntimeException(e);
       }
@@ -198,8 +198,9 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       track.setReference(originalTrack.getReference());
       track.setSize(originalTrack.getSize());
       track.setURI(originalTrackUrl);
-      for(String tag : originalTrack.getTags()) track.addTag(tag);
-      
+      for (String tag : originalTrack.getTags())
+        track.addTag(tag);
+
       // enrich the new track with basic info
       if (track.getDuration() == -1L || override)
         track.setDuration(metadata.getDuration());
@@ -211,9 +212,9 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
-        
+
       // Add the mime type if it's not already present
-      if(track.getMimeType() == null) {
+      if (track.getMimeType() == null || override) {
         try {
           track.setMimeType(MimeTypes.fromURL(track.getURI().toURL()));
         } catch (MalformedURLException e) {
