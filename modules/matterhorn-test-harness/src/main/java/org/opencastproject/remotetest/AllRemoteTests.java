@@ -31,6 +31,7 @@ import org.junit.runners.Suite.SuiteClasses;
   WorkingFileRepoRestEndpointTest.class,
   DistributionLocalRestEndpointTest.class,
   IngestZipTest.class,
+  IngestRestEndpointTest.class,
   ComposerRestEndpointTest.class,
   CaptureRestEndpointTest.class,
   CaptureAdminRestEndpointTest.class,
