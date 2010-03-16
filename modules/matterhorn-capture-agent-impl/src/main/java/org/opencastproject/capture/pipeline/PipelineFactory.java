@@ -150,7 +150,7 @@ public class PipelineFactory {
    *          The Pipeline bin to add it to
    * @return True, if successful
    */
-  private static boolean addPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
+  public static boolean addPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
     if (captureDevice.getName() == DeviceName.EPIPHAN_VGA2USB)
       return getVGA2USBPipeline(captureDevice, pipeline);
     else if (captureDevice.getName() == DeviceName.HAUPPAUGE_WINTV)

@@ -22,6 +22,8 @@ import org.gstreamer.Buffer;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
+import org.gstreamer.Pad;
+import org.gstreamer.PadDirection;
 import org.gstreamer.Pipeline;
 import org.gstreamer.Structure;
 import org.gstreamer.elements.AppSink;
@@ -41,19 +43,22 @@ public class VideoMonitoring {
    * teeing the raw data a pulling it to the appsink element.
    * 
    * @param p pipeline to add video monitoring to
+   * @param src the source element which will be tee'd
+   * @param sink the sink element which the src originally sent data to
    * @param interval how often to grab data from the pipeline
    * @return the pipeline with the video monitoring added, or null on failure
    */
   public static boolean addVideoMonitor(Pipeline pipeline, Element src, Element sink, final long interval) {
           
-      Element tee, queue0, queue1, ffmpegcolorspace;
-      final Element jpegenc;
+      Element tee, queue0, queue1, decodebin, jpegenc;
+      final Element ffmpegcolorspace;
       AppSink appsink;
       
       // the items to be tee'd and added to the pipeline
       tee = ElementFactory.make("tee", null);
       queue0 = ElementFactory.make("queue", null);
       queue1 = ElementFactory.make("queue", null);
+      decodebin = ElementFactory.make("decodebin", null);
       ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
       jpegenc = ElementFactory.make("jpegenc", null);
       appsink = (AppSink) ElementFactory.make("appsink", null);
@@ -61,8 +66,14 @@ public class VideoMonitoring {
       tee.set("silent", "false");
       appsink.set("emit-signals", "true");
       
-      pipeline.addMany(tee, queue0, queue1, ffmpegcolorspace, jpegenc, appsink);
+      pipeline.addMany(tee, queue0, queue1, decodebin, ffmpegcolorspace, jpegenc, appsink);
       src.unlink(sink);
+      
+      decodebin.connect(new Element.PAD_ADDED() {
+        public void padAdded(Element element, Pad pad) {
+          pad.link(ffmpegcolorspace.getStaticPad("sink"));
+        }
+      });
       
       if (!src.link(tee)) {
         logger.error("Could not link {} with {}", src.toString(), tee.toString());
@@ -80,11 +91,15 @@ public class VideoMonitoring {
         logger.error("Could not link {} with {}", tee.toString(), queue1.toString());
         return false;
       }
-      if (!queue1.link(ffmpegcolorspace)) {
+      if (!queue1.link(decodebin)) {
         logger.error("Could not link {} with {}", queue1.toString(), ffmpegcolorspace.toString());
         System.out.println(queue1.getStaticPad("src").getCaps());
         return false;
       }
+      
+      Pad p = new Pad(null, PadDirection.SRC);
+      decodebin.addPad(p);
+      
       if (!ffmpegcolorspace.link(jpegenc)) {
         logger.error("Could not link {} with {}", ffmpegcolorspace.toString(), jpegenc.toString());
         return false;
@@ -94,9 +109,10 @@ public class VideoMonitoring {
         return false;
       }
 
-      
+      // Callback that will be executed every time a new buffer is received
+      // from the pipeline capturing the video. For confidence monitoring
+      // it is not necessary to use every buffer
       appsink.connect(new AppSink.NEW_BUFFER() {
-        
         long previous = -1;
         public void newBuffer(Element elem, Pointer userData) {
           AppSink appsink = (AppSink) elem;
@@ -108,12 +124,10 @@ public class VideoMonitoring {
             Structure s = caps.getStructure(0);
             int width = s.getInteger("width");
             int height = s.getInteger("height");
-            logger.info("Saved buffer: {}, {}", width, height);
-            
+            logger.info("Grabbed frame: ({}, {})", width, height);
           }
           buffer = null;
         }
-        
       });
       
       return true;
