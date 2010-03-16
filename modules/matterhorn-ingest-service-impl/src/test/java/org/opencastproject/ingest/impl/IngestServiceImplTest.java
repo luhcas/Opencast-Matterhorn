@@ -56,28 +56,28 @@ public class IngestServiceImplTest {
     // set up service and mock workspace
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
                     .anyObject())).andReturn(urlTrack);
     EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
                     .anyObject())).andReturn(urlCatalog);
     EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
                     .anyObject())).andReturn(urlAttachment);
     EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
                     .anyObject())).andReturn(urlTrack1);
     EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
                     .anyObject())).andReturn(urlTrack2);
     EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
                     .anyObject())).andReturn(urlCatalog1);
     EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
                     .anyObject())).andReturn(urlCatalog2);
     EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
                     .anyObject())).andReturn(urlCatalog);
     
     EasyMock.expect(

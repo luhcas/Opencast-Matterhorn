@@ -29,25 +29,25 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
  */
 
 public class SearchResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/search/rest/");
-	
-	public static ClientResponse add(String mediapackage) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("mediapackage", mediapackage);
-		return r.path("add").post(ClientResponse.class, params);
-	}
-	
-	// TODO add remaining query parameters (episode and series)
-	public static ClientResponse episode(String query) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("q", query);
-		return r.path("episode").queryParams(params).get(ClientResponse.class);
-	}
-	
-	public static ClientResponse series(String query) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("q", query);
-		return r.path("series").queryParams(params).get(ClientResponse.class);
-	}
+  public static Client c = Client.create();
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/search/rest/");
+  
+  public static ClientResponse add(String mediapackage) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("mediapackage", mediapackage);
+    return r.path("add").post(ClientResponse.class, params);
+  }
+  
+  // TODO add remaining query parameters (episode and series)
+  public static ClientResponse episode(String query) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("q", query);
+    return r.path("episode").queryParams(params).get(ClientResponse.class);
+  }
+  
+  public static ClientResponse series(String query) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("q", query);
+    return r.path("series").queryParams(params).get(ClientResponse.class);
+  }
 }

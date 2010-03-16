@@ -28,14 +28,14 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	UnscheduledCaptureTest.class
+  UnscheduledCaptureTest.class
 })
 
 public class IntegrationTests {
-	public static String BASE_URL = "http://localhost:8080";
-	public static String AGENT = "demo_capture_agent";
-	
-	public static void main() {
-		JUnitCore.runClasses(IntegrationTests.class);
-	}
+  public static String BASE_URL = "http://localhost:8080";
+  public static String AGENT = "demo_capture_agent";
+  
+  public static void main() {
+    JUnitCore.runClasses(IntegrationTests.class);
+  }
 }

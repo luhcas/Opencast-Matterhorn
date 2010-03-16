@@ -35,37 +35,37 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
  */
 
 public class CaptureResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/capture/rest/");
-	
-	public static ClientResponse startCaptureGet() throws UniformInterfaceException {
-		return r.path("startCapture").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse stopCapture() throws UniformInterfaceException {
-		return r.path("stopCapture").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse startCapturePost() throws UniformInterfaceException, Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("config", captureProperties());
-		return r.path("startCapture").post(ClientResponse.class, params);
-	}
-	
-	public static ClientResponse stopCapturePost(String id) throws UniformInterfaceException {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("recordingID", id);
-		return r.path("stopCapture").post(ClientResponse.class, params);
-	}
-	
-	protected static String captureProperties() throws Exception {
-		return IOUtils.toString(CaptureResources.class.getClassLoader().getResourceAsStream("capture.properties"));
-	}
-	
-	protected static String captureId(ClientResponse response) throws Exception {
-		String pattern = "Unscheduled-\\d+";
-		Matcher matcher = Pattern.compile(pattern).matcher(response.getEntity(String.class));
-		matcher.find();
-		return matcher.group();
-	}
+  public static Client c = Client.create();
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/capture/rest/");
+  
+  public static ClientResponse startCaptureGet() throws UniformInterfaceException {
+    return r.path("startCapture").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse stopCapture() throws UniformInterfaceException {
+    return r.path("stopCapture").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse startCapturePost() throws UniformInterfaceException, Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("config", captureProperties());
+    return r.path("startCapture").post(ClientResponse.class, params);
+  }
+  
+  public static ClientResponse stopCapturePost(String id) throws UniformInterfaceException {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("recordingID", id);
+    return r.path("stopCapture").post(ClientResponse.class, params);
+  }
+  
+  protected static String captureProperties() throws Exception {
+    return IOUtils.toString(CaptureResources.class.getClassLoader().getResourceAsStream("capture.properties"));
+  }
+  
+  protected static String captureId(ClientResponse response) throws Exception {
+    String pattern = "Unscheduled-\\d+";
+    Matcher matcher = Pattern.compile(pattern).matcher(response.getEntity(String.class));
+    matcher.find();
+    return matcher.group();
+  }
 }

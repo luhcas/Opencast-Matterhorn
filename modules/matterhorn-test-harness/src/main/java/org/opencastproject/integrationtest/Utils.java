@@ -37,26 +37,26 @@ import org.w3c.dom.Document;
 
 public class Utils {
 
-	public static Document parseXml(String doc) throws Exception {
-	    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-	    factory.setNamespaceAware(true);
-	    DocumentBuilder builder = factory.newDocumentBuilder();
-	    return builder.parse(IOUtils.toInputStream(doc));
-	 }
-	
-	public static Object xPath(Document document, String path, QName returnType)
+  public static Document parseXml(String doc) throws Exception {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(true);
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      return builder.parse(IOUtils.toInputStream(doc));
+   }
+  
+  public static Object xPath(Document document, String path, QName returnType)
     throws XPathExpressionException, TransformerException {
-		XPath xPath = XPathFactory.newInstance().newXPath();
-		xPath.setNamespaceContext(new UniversalNamespaceResolver(document));
-		return xPath.compile(path).evaluate(document, returnType);
-	}
-	
-	public static Boolean xPathExists(Document document, String path) throws Exception {
-	    return (Boolean) xPath(document, path, XPathConstants.BOOLEAN);
-	}
-	
-	public static JSONObject parseJson(String doc) throws Exception {
-	    return (JSONObject) JSONValue.parse(doc);
-	}
-	
+    XPath xPath = XPathFactory.newInstance().newXPath();
+    xPath.setNamespaceContext(new UniversalNamespaceResolver(document));
+    return xPath.compile(path).evaluate(document, returnType);
+  }
+  
+  public static Boolean xPathExists(Document document, String path) throws Exception {
+      return (Boolean) xPath(document, path, XPathConstants.BOOLEAN);
+  }
+  
+  public static JSONObject parseJson(String doc) throws Exception {
+      return (JSONObject) JSONValue.parse(doc);
+  }
+  
 }

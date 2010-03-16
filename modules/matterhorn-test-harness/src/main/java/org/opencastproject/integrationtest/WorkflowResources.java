@@ -29,45 +29,45 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
  */
 
 public class WorkflowResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/workflow/rest/");
+  public static Client c = Client.create();
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/workflow/rest/");
 
-	/**
-	 * 
-	 * @param format Response format: xml or json
-	 * 
-	 */
-	public static ClientResponse definitions(String format) throws Exception {
-		return r.path("definitions." + format.toLowerCase()).get(ClientResponse.class);
-	}
-	
-	/**
-	 * 
-	 * @param format Response format: xml or json
-	 * 
-	 */
-	public static ClientResponse instances(String format) throws Exception {
-		return r.path("instances," + format.toLowerCase()).get(ClientResponse.class);
-	}
-	
-	public static ClientResponse start(String mediapackage, 
-			String workflowDefinition, String properties) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("mediapackage", mediapackage);
-		params.add("definition", workflowDefinition);
-		params.add("properties", properties);
-		return r.path("start").post(ClientResponse.class, params);
-	}
-	
-	public static ClientResponse suspend(String id) throws Exception {
-		return r.path("suspend/" + id).get(ClientResponse.class);
-	}
-	
-	public static ClientResponse resume(String id) throws Exception {
-		return r.path("resume/" + id).get(ClientResponse.class);
-	}
-	
-	public static ClientResponse stop(String id) throws Exception {
-		return r.path("stop/" + id).get(ClientResponse.class);
-	}
+  /**
+   * 
+   * @param format Response format: xml or json
+   * 
+   */
+  public static ClientResponse definitions(String format) throws Exception {
+    return r.path("definitions." + format.toLowerCase()).get(ClientResponse.class);
+  }
+  
+  /**
+   * 
+   * @param format Response format: xml or json
+   * 
+   */
+  public static ClientResponse instances(String format) throws Exception {
+    return r.path("instances," + format.toLowerCase()).get(ClientResponse.class);
+  }
+  
+  public static ClientResponse start(String mediapackage, 
+      String workflowDefinition, String properties) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("mediapackage", mediapackage);
+    params.add("definition", workflowDefinition);
+    params.add("properties", properties);
+    return r.path("start").post(ClientResponse.class, params);
+  }
+  
+  public static ClientResponse suspend(String id) throws Exception {
+    return r.path("suspend/" + id).get(ClientResponse.class);
+  }
+  
+  public static ClientResponse resume(String id) throws Exception {
+    return r.path("resume/" + id).get(ClientResponse.class);
+  }
+  
+  public static ClientResponse stop(String id) throws Exception {
+    return r.path("stop/" + id).get(ClientResponse.class);
+  }
 }

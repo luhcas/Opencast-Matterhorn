@@ -68,10 +68,10 @@ public class ZipUtilTest {
     // Added as part of MH-2455
     String OSName = System.getProperty("os.name").toUpperCase();
     if(OSName.contains("WINDOWS")){
-    	Assert.assertEquals(WINDOWS_ZIP_SIZE, zip.length());
+      Assert.assertEquals(WINDOWS_ZIP_SIZE, zip.length());
     } else {
-    	// Testing issue MH-1809
-    	Assert.assertEquals(UNIX_ZIP_SIZE, zip.length());
+      // Testing issue MH-1809
+      Assert.assertEquals(UNIX_ZIP_SIZE, zip.length());
     }
     // java 5 incompatible
     //Assert.assertTrue(zip.getTotalSpace() > 0);

@@ -36,6 +36,7 @@ import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.UnknownFileTypeException;
+import org.opencastproject.workspace.api.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.cm.ConfigurationException;
@@ -98,7 +99,12 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     logger.debug("inspect(" + uri + ") called, using workspace " + workspace);
 
     // Get the file from the URL (runtime exception if invalid)
-    File file = workspace.get(uri);
+    File file = null;
+    try {
+      file = workspace.get(uri);
+    } catch (NotFoundException e) {
+      throw new RuntimeException(e);
+    }
     MediaContainerMetadata metadata = getFileMetadata(file);
     if (metadata == null) {
       logger.warn("Unable to acquire media metadata for " + uri);
@@ -172,7 +178,12 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     logger.debug("enrych(" + originalTrackUrl + ") called");
 
     // Get the file from the URL
-    File file = workspace.get(originalTrackUrl);
+    File file = null;
+    try {
+      file = workspace.get(originalTrackUrl);
+    } catch (NotFoundException e) {
+      throw new RuntimeException(e);
+    }
     MediaContainerMetadata metadata = getFileMetadata(file);
     if (metadata == null) {
       logger.warn("Unable to acquire media metadata for " + originalTrackUrl);
@@ -273,7 +284,12 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
    * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(AbstractMediaPackageElement, Boolean)
    */
   public AbstractMediaPackageElement enrich(AbstractMediaPackageElement element, Boolean override) {
-    File file = workspace.get(element.getURI());
+    File file;
+    try {
+      file = workspace.get(element.getURI());
+    } catch (NotFoundException e) {
+      throw new RuntimeException(e);
+    }
     if (element.getChecksum() == null || override)
       try {
         element.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));

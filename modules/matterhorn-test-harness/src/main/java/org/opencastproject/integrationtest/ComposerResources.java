@@ -29,34 +29,34 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
  */
 
 public class ComposerResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/composer/rest/");
-	
-	public static ClientResponse profiles() throws Exception {
-		return r.path("profiles").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse encode(String mediapackage, 
-			String audioSourceTrackId, String videoSourceTrackId, String profileId) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("mediapackage", mediapackage);
-		params.add("audioSourceTrackId", audioSourceTrackId);
-		params.add("videoSourceTrackId", videoSourceTrackId);
-		params.add("profileId", profileId);
-		return r.path("encode").post(ClientResponse.class, params);
-	}
-	
-	public static ClientResponse receipt(String id) throws Exception {
-		return r.path("receipt/" + id).get(ClientResponse.class);
-	}
-	
-	public static ClientResponse image(String mediapackage, 
-			String time, String sourceTrackId, String profileId) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("mediapackage", mediapackage);
-		params.add("time", time);
-		params.add("sourceTrackId", sourceTrackId);
-		params.add("profileId", profileId);
-		return r.path("image").post(ClientResponse.class, params);
-	}
+  public static Client c = Client.create();
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/composer/rest/");
+  
+  public static ClientResponse profiles() throws Exception {
+    return r.path("profiles").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse encode(String mediapackage, 
+      String audioSourceTrackId, String videoSourceTrackId, String profileId) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("mediapackage", mediapackage);
+    params.add("audioSourceTrackId", audioSourceTrackId);
+    params.add("videoSourceTrackId", videoSourceTrackId);
+    params.add("profileId", profileId);
+    return r.path("encode").post(ClientResponse.class, params);
+  }
+  
+  public static ClientResponse receipt(String id) throws Exception {
+    return r.path("receipt/" + id).get(ClientResponse.class);
+  }
+  
+  public static ClientResponse image(String mediapackage, 
+      String time, String sourceTrackId, String profileId) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("mediapackage", mediapackage);
+    params.add("time", time);
+    params.add("sourceTrackId", sourceTrackId);
+    params.add("profileId", profileId);
+    return r.path("image").post(ClientResponse.class, params);
+  }
 }

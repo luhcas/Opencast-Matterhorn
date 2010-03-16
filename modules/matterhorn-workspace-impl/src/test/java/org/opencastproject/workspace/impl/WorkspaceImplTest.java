@@ -15,36 +15,44 @@
  */
 package org.opencastproject.workspace.impl;
 
-import static org.junit.Assert.fail;
+import org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryImpl;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.net.URL;
 
 public class WorkspaceImplTest {
   WorkspaceImpl workspace;
   
+  private static final String workspaceRoot = "target" + File.separator + "junit-workspace-rootdir";
+  private static final String repoRoot = "target" + File.separator + "junit-repo-rootdir";
+
   @Before
   public void setup() throws Exception {
-    workspace = new WorkspaceImpl("target/junit-workspace-rootdir");    
+    workspace = new WorkspaceImpl(workspaceRoot);    
     workspace.activate(null);
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+    FileUtils.deleteDirectory(new File(workspaceRoot));
+    FileUtils.deleteDirectory(new File(repoRoot));
   }
 
   @Test
-  public void testGetRemoteFile() {
+  public void testGetRemoteFile() throws Exception {
     URL fileURL = getClass().getClassLoader().getResource("opencast_header.gif");
     File f = null;
-    try {
-      f = workspace.get(fileURL.toURI());
-      Assert.assertTrue(f.exists());
-    } catch (URISyntaxException e) {
-      fail(e.getMessage());
-    }
+    f = workspace.get(fileURL.toURI());
+    Assert.assertTrue(f.exists());
   }
 
   @Test
@@ -62,5 +70,54 @@ public class WorkspaceImplTest {
     URL urlToSource = source.toURI().toURL();
     Assert.assertTrue(urlToSource.toString().length() > 255);
     Assert.assertNotNull(workspace.get(urlToSource.toURI()));
+  }
+  
+  // Calls to put() should put the file into the working file repository, but not in the local cache if there's a valid
+  // filesystem mapping present
+  @Test
+  public void testPutCachingWithFilesystemMapping() throws Exception {
+    // First, mock up the collaborating working file repository
+    WorkingFileRepositoryImpl repo = new WorkingFileRepositoryImpl(repoRoot, "http://localhost:8080");
+    workspace.setRepository(repo);
+    workspace.filesystemMappings.clear();
+    workspace.filesystemMappings.put("http://localhost:8080/files", repoRoot);
+
+    // Put a stream into the workspace (and hence, the repository)
+    InputStream in = getClass().getResourceAsStream("/opencast_header.gif");
+    Assert.assertNotNull(in);
+    workspace.put("foo", "bar", "header.gif", in);
+    IOUtils.closeQuietly(in);
+    
+    // Ensure that the file was put into the working file repository
+    File repoFile = new File(repoRoot + File.separator + "foo" + File.separator + "bar" + File.separator + "header.gif");
+    Assert.assertTrue(repoFile.exists());
+
+    // Ensure that the file was not cached in the workspace (since there is a configured filesystem mapping)
+    File file = new File(workspaceRoot, "httplocalhost8080filesfoobarheader.gif");
+    Assert.assertFalse(file.exists());
+  }
+
+  // Calls to put() should put the file into the working file repository and the local cache if there is no valid
+  // filesystem mapping present
+  @Test
+  public void testPutCachingWithoutFilesystemMapping() throws Exception {
+    // First, mock up the collaborating working file repository
+    WorkingFileRepositoryImpl repo = new WorkingFileRepositoryImpl(repoRoot, "http://localhost:8080");
+    workspace.setRepository(repo);
+    workspace.filesystemMappings.clear();
+
+    // Put a stream into the workspace (and hence, the repository)
+    InputStream in = getClass().getResourceAsStream("/opencast_header.gif");
+    Assert.assertNotNull(in);
+    workspace.put("foo", "bar", "header.gif", in);
+    IOUtils.closeQuietly(in);
+    
+    // Ensure that the file was put into the working file repository
+    File repoFile = new File(repoRoot + File.separator + "foo" + File.separator + "bar" + File.separator + "header.gif");
+    Assert.assertTrue(repoFile.exists());
+
+    // Ensure that the file was cached in the workspace (since there is no configured filesystem mapping)
+    File file = new File(workspaceRoot, "httplocalhost8080filesfoobarheader.gif");
+    Assert.assertTrue(file.exists());
   }
 }

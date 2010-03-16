@@ -17,7 +17,6 @@ package org.opencastproject.workspace.api;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 
 /**
@@ -34,17 +33,10 @@ public interface Workspace {
    * Gets a locally cached {@link File} for the given URI.
    * 
    * @param uri
-   * @return
+   * @return The locally cached file
+   * @throws NotFoundException if the file could not be cached locally
    */
-  File get(URI uri);
-
-  /**
-   * Store the data stream under the given media package and element IDs.
-   * @param mediaPackageID
-   * @param mediaPackageElementID
-   * @param in
-   */
-  URI put(String mediaPackageID, String mediaPackageElementID, InputStream in);
+  File get(URI uri) throws NotFoundException;
 
   /**
    * Store the data stream under the given media package and element IDs, specifying a filename.
@@ -56,27 +48,25 @@ public interface Workspace {
   URI put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in);
 
   /**
-   * Stream the file stored under the given media package and element IDs.
-   * @param mediaPackageID
-   * @param mediaPackageElementID
-   * @return
-   */
-  InputStream get(String mediaPackageID, String mediaPackageElementID);
-  
-  /**
    * Delete the file stored at the given media package and element IDs.
    * @param mediaPackageID
    * @param mediaPackageElementID
+   * @throws NotFoundException if there was not file stored under this combination of mediapackage and element IDs.
    */
-  void delete(String mediaPackageID, String mediaPackageElementID);
+  void delete(String mediaPackageID, String mediaPackageElementID) throws NotFoundException;
 
   /**
-   * Get the URL of the file stored under the given media package and element IDs.
+   * Get the URL of the file stored under the given media package and element IDs.  MediaPackages may reference elements
+   * that are not stored in the working file repository, so this method should not be relied upon to return a URI for
+   * every possible mediapackage.
+   * 
+   * FIXME: If this method isn't reliable, what good is it?
+   * 
    * @param mediaPackageID
    * @param mediaPackageElementID
    * @return
-   * @throws MalformedURLException 
+   * @throws NotFoundException If the mediapackage element can not be found in the working file repository.
    */
-  URI getURI(String mediaPackageID, String mediaPackageElementID) throws MalformedURLException;
+  URI getURI(String mediaPackageID, String mediaPackageElementID) throws NotFoundException;
 
 }

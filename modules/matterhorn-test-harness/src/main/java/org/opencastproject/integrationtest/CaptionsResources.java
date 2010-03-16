@@ -26,18 +26,18 @@ import com.sun.jersey.api.client.WebResource;
  */
 
 public class CaptionsResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/captions/rest/");
-	
-	public static ClientResponse search() throws Exception {
-		return r.path("search").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse episode(String id) throws Exception {
-		return r.path(id).get(ClientResponse.class);
-	}
-	
-	public static ClientResponse add(String id, String doc, String format) throws Exception {
-		return r.path(id + '/' + format).post(ClientResponse.class, doc);
-	}
+  public static Client c = Client.create();
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/captions/rest/");
+  
+  public static ClientResponse search() throws Exception {
+    return r.path("search").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse episode(String id) throws Exception {
+    return r.path(id).get(ClientResponse.class);
+  }
+  
+  public static ClientResponse add(String id, String doc, String format) throws Exception {
+    return r.path(id + '/' + format).post(ClientResponse.class, doc);
+  }
 }

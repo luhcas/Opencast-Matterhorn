@@ -26,6 +26,7 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.util.ZipUtil;
+import org.opencastproject.workspace.api.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
@@ -336,14 +337,12 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
    */
   public void discardMediaPackage(MediaPackage mp) {
     String mediaPackageId = mp.getIdentifier().compact();
-    for (MediaPackageElement element : mp.getAttachments()) {
-      workspace.delete(mediaPackageId, element.getIdentifier());
-    }
-    for (MediaPackageElement element : mp.getCatalogs()) {
-      workspace.delete(mediaPackageId, element.getIdentifier());
-    }
-    for (MediaPackageElement element : mp.getTracks()) {
-      workspace.delete(mediaPackageId, element.getIdentifier());
+    for (MediaPackageElement element : mp.getElements()) {
+      try {
+        workspace.delete(mediaPackageId, element.getIdentifier());
+      } catch (NotFoundException e) {
+        logger.warn("Unable to find (and hence, delete), this mediapackage element", e);
+      }
     }
   }
 

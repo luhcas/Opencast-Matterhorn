@@ -27,34 +27,34 @@ import com.sun.jersey.api.client.WebResource;
  */
 
 public class AdminResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource("/admin/rest/");
-	
-	public static ClientResponse recordingsInactive() throws UniformInterfaceException {
-		return r.path("recordings/inactive").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse recordingsUpcoming() throws UniformInterfaceException {
-		return r.path("recordings/upcoming").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse recordingsCapturing() throws UniformInterfaceException {
-		return r.path("recordings/capturing").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse recordingsProcessing() throws UniformInterfaceException {
-		return r.path("recordings/processing").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse recordingsFinished() throws UniformInterfaceException {
-		return r.path("recordings/finished").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse recordingsErrors() throws UniformInterfaceException {
-		return r.path("recordings/errors").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse countRecordings() throws UniformInterfaceException {
-		return r.path("countRecordings").get(ClientResponse.class);
-	}
+  public static Client c = Client.create();
+  public static WebResource r = c.resource("/admin/rest/");
+  
+  public static ClientResponse recordingsInactive() throws UniformInterfaceException {
+    return r.path("recordings/inactive").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse recordingsUpcoming() throws UniformInterfaceException {
+    return r.path("recordings/upcoming").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse recordingsCapturing() throws UniformInterfaceException {
+    return r.path("recordings/capturing").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse recordingsProcessing() throws UniformInterfaceException {
+    return r.path("recordings/processing").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse recordingsFinished() throws UniformInterfaceException {
+    return r.path("recordings/finished").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse recordingsErrors() throws UniformInterfaceException {
+    return r.path("recordings/errors").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse countRecordings() throws UniformInterfaceException {
+    return r.path("countRecordings").get(ClientResponse.class);
+  }
 }

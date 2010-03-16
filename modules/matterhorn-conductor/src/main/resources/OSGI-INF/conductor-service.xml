@@ -7,7 +7,7 @@
     <provide interface="org.osgi.service.event.EventHandler" />
   </service>
   <property name="event.topics">
-  	org/opencastproject/ingest/INGEST_DONE
+    org/opencastproject/ingest/INGEST_DONE
   </property>
   <reference cardinality="1..1" interface="org.opencastproject.workflow.api.WorkflowService" name="WorkflowService" 
   policy="static" bind="setWorkflowService" />

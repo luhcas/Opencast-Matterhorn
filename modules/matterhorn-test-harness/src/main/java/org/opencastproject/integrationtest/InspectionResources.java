@@ -29,12 +29,12 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
  */
 
 public class InspectionResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/inspection/rest/");
-	
-	public static ClientResponse inspect(String url) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("url", url);
-		return r.queryParams(params).get(ClientResponse.class);
-	}
+  public static Client c = Client.create();
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/inspection/rest/");
+  
+  public static ClientResponse inspect(String url) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("url", url);
+    return r.queryParams(params).get(ClientResponse.class);
+  }
 }

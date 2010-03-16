@@ -99,7 +99,7 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package>
               *;resolution:=optional
-        		</Import-Package>
+            </Import-Package>
             <Export-Package>
               org.opencastproject.distribution.itunesu.*,
               org.opencastproject.deliver.itunesu.*
@@ -111,9 +111,9 @@
               OSGI-INF/distribution-service-itunesu.xml,
               OSGI-INF/distribution-service-itunesu-rest.xml
             </Service-Component>
-			<JPA-PersistenceUnits>
-			  ITunesUDistributionPersistenceUnit
-			</JPA-PersistenceUnits>
+			      <JPA-PersistenceUnits>
+			        ITunesUDistributionPersistenceUnit
+			      </JPA-PersistenceUnits>
           </instructions>
         </configuration>
       </plugin>

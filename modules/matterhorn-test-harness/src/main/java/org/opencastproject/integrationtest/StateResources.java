@@ -27,14 +27,14 @@ import com.sun.jersey.api.client.WebResource;
  */
 
 public class StateResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/state/rest/");
-	
-	public static ClientResponse getState() throws UniformInterfaceException {
-		return r.path("GetState").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse recordings() throws UniformInterfaceException {
-		return r.path("GetRecordings").get(ClientResponse.class);
-	}
+  public static Client c = Client.create();
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/state/rest/");
+  
+  public static ClientResponse getState() throws UniformInterfaceException {
+    return r.path("GetState").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse recordings() throws UniformInterfaceException {
+    return r.path("GetRecordings").get(ClientResponse.class);
+  }
 }

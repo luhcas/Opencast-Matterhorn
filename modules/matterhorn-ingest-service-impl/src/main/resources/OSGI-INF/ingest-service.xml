@@ -3,7 +3,7 @@
   <implementation class="org.opencastproject.ingest.impl.IngestServiceImpl" />
   <property name="service.description" value="Ingest Service" />
   <property name="event.topics">
-  	org/opencastproject/conductor/ACK
+    org/opencastproject/conductor/ACK
   </property>
   <service>
     <provide interface="org.opencastproject.ingest.api.IngestService" />

@@ -57,6 +57,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   }
   
   public void activate(ComponentContext cc) {
+    if(rootDirectory != null) return; // If the root directory was set by the constructor, respect that setting
     if(cc == null || cc.getBundleContext().getProperty("serverUrl") == null) {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {

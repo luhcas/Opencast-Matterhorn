@@ -136,14 +136,14 @@
       <artifactId>org.apache.servicemix.specs.activation-api-1.1</artifactId>
     </dependency>
 
-	<!-- include activation library even though it is part of JRE 6 otherwise
-	class laading errors will occur in OSGi container.
-	See http://code.google.com/p/gdata-java-client/issues/detail?id=130 -->
-	<dependency>
-	  <groupId>javax.activation</groupId>
-	  <artifactId>activation</artifactId>
-	  <version>1.1.1</version>
-	</dependency>
+  <!-- include activation library even though it is part of JRE 6 otherwise
+  class laading errors will occur in OSGi container.
+  See http://code.google.com/p/gdata-java-client/issues/detail?id=130 -->
+  <dependency>
+    <groupId>javax.activation</groupId>
+    <artifactId>activation</artifactId>
+    <version>1.1.1</version>
+  </dependency>
     <!-- end of Youtube delivery dependencies -->
 
   </dependencies>
@@ -159,7 +159,7 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package>
               *;resolution:=optional
-      		</Import-Package>
+          </Import-Package>
             <Export-Package>
               org.opencastproject.distribution.youtube.*,
               org.opencastproject.deliver.youtube.*
@@ -176,9 +176,9 @@
               OSGI-INF/distribution-service-youtube.xml,
               OSGI-INF/distribution-service-youtube-rest.xml
             </Service-Component>
-			<JPA-PersistenceUnits>
-			  YoutubeDistributionPersistenceUnit
-			</JPA-PersistenceUnits>
+			      <JPA-PersistenceUnits>
+			        YoutubeDistributionPersistenceUnit
+			      </JPA-PersistenceUnits>
           </instructions>
         </configuration>
       </plugin>

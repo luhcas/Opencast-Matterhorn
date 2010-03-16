@@ -52,7 +52,7 @@ public interface WorkingFileRepository {
   InputStream get(String mediaPackageID, String mediaPackageElementID);
   
   /**
-   * Get the URL of the file stored under the given media package and element IDs.
+   * Get the URL of the file stored under the given media package and element IDs, or null if it does not exist.
    * @param mediaPackageID
    * @param mediaPackageElementID
    * @return

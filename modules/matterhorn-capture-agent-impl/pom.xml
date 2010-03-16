@@ -130,7 +130,7 @@
       <groupId>org.apache.felix.karaf.shell</groupId>
       <artifactId>org.apache.felix.karaf.shell.console</artifactId>
       <version>1.0.0</version>
-  	</dependency>
+    </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-util</artifactId>

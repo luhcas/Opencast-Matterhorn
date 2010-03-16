@@ -29,21 +29,21 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
  */
 
 public class DistributeResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/distribution/");
-	
-	/**
-	 * 
-	 * @param channel Distribution channel: local, youtube, itunesu
-	 *
-	 */
-	public static ClientResponse distribute(String channel, 
-			String mediapackage, String... elementId) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("mediapackage", mediapackage);
-		for (String id : elementId) {
-			params.add("elementId", id);
-		}
-		return r.path(channel.toLowerCase() + "/rest/").post(ClientResponse.class, params);
-	}
+  public static Client c = Client.create();
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/distribution/");
+  
+  /**
+   * 
+   * @param channel Distribution channel: local, youtube, itunesu
+   *
+   */
+  public static ClientResponse distribute(String channel, 
+      String mediapackage, String... elementId) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("mediapackage", mediapackage);
+    for (String id : elementId) {
+      params.add("elementId", id);
+    }
+    return r.path(channel.toLowerCase() + "/rest/").post(ClientResponse.class, params);
+  }
 }

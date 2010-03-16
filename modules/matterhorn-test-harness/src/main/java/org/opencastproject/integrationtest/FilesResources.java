@@ -29,39 +29,39 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
  */
 
 public class FilesResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/files/");
-	
-	public static ClientResponse getFile(String mediaPackageID, String mediaPackageElementID) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("mediaPackageID", mediaPackageID);
-		params.add("mediaPackageElementID", mediaPackageElementID);
-		return r.post(ClientResponse.class, params);
-	}
-	
-	public static ClientResponse getFile(String mediaPackageID, 
-			String mediaPackageElementID, String fileName) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("mediaPackageID", mediaPackageID);
-		params.add("mediaPackageElementID", mediaPackageElementID);
-		params.add("fileName", fileName);
-		return r.post(ClientResponse.class, params);
-	}
-	
-	// FIXME
-	public static ClientResponse postFile(String mediaPackageID,
-			String mediaPackageElementID, String media) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("mediaPackageID", mediaPackageID);
-		params.add("mediaPackageElementID", mediaPackageElementID);
-		return r.entity(media).post(ClientResponse.class, params);
-	}
-	
-	public static ClientResponse deleteFile(String mediaPackageID,
-			String mediaPackageElementID) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("mediaPackageID", mediaPackageID);
-		params.add("mediaPackageElementID", mediaPackageElementID);
-		return r.delete(ClientResponse.class, params);
-	}
+  public static Client c = Client.create();
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/files/");
+  
+  public static ClientResponse getFile(String mediaPackageID, String mediaPackageElementID) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("mediaPackageID", mediaPackageID);
+    params.add("mediaPackageElementID", mediaPackageElementID);
+    return r.post(ClientResponse.class, params);
+  }
+  
+  public static ClientResponse getFile(String mediaPackageID, 
+      String mediaPackageElementID, String fileName) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("mediaPackageID", mediaPackageID);
+    params.add("mediaPackageElementID", mediaPackageElementID);
+    params.add("fileName", fileName);
+    return r.post(ClientResponse.class, params);
+  }
+  
+  // FIXME
+  public static ClientResponse postFile(String mediaPackageID,
+      String mediaPackageElementID, String media) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("mediaPackageID", mediaPackageID);
+    params.add("mediaPackageElementID", mediaPackageElementID);
+    return r.entity(media).post(ClientResponse.class, params);
+  }
+  
+  public static ClientResponse deleteFile(String mediaPackageID,
+      String mediaPackageElementID) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("mediaPackageID", mediaPackageID);
+    params.add("mediaPackageElementID", mediaPackageElementID);
+    return r.delete(ClientResponse.class, params);
+  }
 }

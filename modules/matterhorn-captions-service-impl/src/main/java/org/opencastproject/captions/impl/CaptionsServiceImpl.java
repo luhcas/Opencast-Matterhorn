@@ -141,7 +141,7 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
       MediaPackage mp = workflow.getMediaPackage(); // TODO change to current media package
       // get the MP and update it
       String mediaPackageElementID = CAPTIONS_ELEMENT+captionType;
-      URI uri = workspace.put(mp.getIdentifier().compact(), mediaPackageElementID, data);
+      URI uri = workspace.put(mp.getIdentifier().compact(), mediaPackageElementID, "captions.xml", data);
 
       if (WorkflowInstance.WorkflowState.SUCCEEDED.equals(workflow.getState())) {
         // TODO for now this is not really doing anything

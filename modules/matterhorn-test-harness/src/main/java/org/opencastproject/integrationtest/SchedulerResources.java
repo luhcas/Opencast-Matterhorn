@@ -29,52 +29,52 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
  */
 
 public class SchedulerResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/scheduler/rest/");
-	
-	public static ClientResponse addEvent(String event) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("event", event);
-		return r.path("addEvent").post(ClientResponse.class, params);
-	}
-	
-	public static ClientResponse updateEvent(String event) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("event", event);
-		return r.path("updateEvent").post(ClientResponse.class, params);
-	}
-	
-	public static ClientResponse getEvent(String id) throws Exception {
-		return r.path("getEvent/" + id).get(ClientResponse.class);
-	}
-	
-	public static ClientResponse getDublinCoreMetadata(String id) throws Exception {
-		return r.path("getDublinCoreMetadata/" + id).get(ClientResponse.class);
-	}
-	
-	public static ClientResponse findConflictingEvents(String event) throws Exception {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("event", event);
-		return r.path("findConflictingEvents").post(ClientResponse.class, params);
-	}
-	
-	public static ClientResponse removeEvent(String id) throws Exception {
-		return r.path("removeEvent/" + id).get(ClientResponse.class);
-	}
-	
-	public static ClientResponse getEvents() throws Exception {
-		return r.path("getEvents").get(ClientResponse.class);
-	}
+  public static Client c = Client.create();
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/scheduler/rest/");
+  
+  public static ClientResponse addEvent(String event) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("event", event);
+    return r.path("addEvent").post(ClientResponse.class, params);
+  }
+  
+  public static ClientResponse updateEvent(String event) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("event", event);
+    return r.path("updateEvent").post(ClientResponse.class, params);
+  }
+  
+  public static ClientResponse getEvent(String id) throws Exception {
+    return r.path("getEvent/" + id).get(ClientResponse.class);
+  }
+  
+  public static ClientResponse getDublinCoreMetadata(String id) throws Exception {
+    return r.path("getDublinCoreMetadata/" + id).get(ClientResponse.class);
+  }
+  
+  public static ClientResponse findConflictingEvents(String event) throws Exception {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("event", event);
+    return r.path("findConflictingEvents").post(ClientResponse.class, params);
+  }
+  
+  public static ClientResponse removeEvent(String id) throws Exception {
+    return r.path("removeEvent/" + id).get(ClientResponse.class);
+  }
+  
+  public static ClientResponse getEvents() throws Exception {
+    return r.path("getEvents").get(ClientResponse.class);
+  }
 
-	public static ClientResponse getUpcomingEvents() throws Exception {
-		return r.path("getUpcomingEvents").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse getCalendarForCaptureAgent(String id) throws Exception {
-		return r.path("getCalendarForCaptureAgent/" + id).get(ClientResponse.class);
-	}
-	
-	public static ClientResponse getCaptureAgentMetadata(String id) throws Exception {
-		return r.path("getCaptureAgentMetadata/" + id).get(ClientResponse.class);
-	}
+  public static ClientResponse getUpcomingEvents() throws Exception {
+    return r.path("getUpcomingEvents").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse getCalendarForCaptureAgent(String id) throws Exception {
+    return r.path("getCalendarForCaptureAgent/" + id).get(ClientResponse.class);
+  }
+  
+  public static ClientResponse getCaptureAgentMetadata(String id) throws Exception {
+    return r.path("getCaptureAgentMetadata/" + id).get(ClientResponse.class);
+  }
 }

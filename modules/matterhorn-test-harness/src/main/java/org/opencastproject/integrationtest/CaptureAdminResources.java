@@ -27,22 +27,22 @@ import com.sun.jersey.api.client.WebResource;
  */
 
 public class CaptureAdminResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/capture-admin/rest/");
-	
-	public static ClientResponse agents() throws UniformInterfaceException {
-		return r.path("agents").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse agent(String id) throws UniformInterfaceException {
-		return r.path("agents/" + id).get(ClientResponse.class);
-	}
-	
-	public static ClientResponse recordings() throws UniformInterfaceException {
-		return r.path("recordings").get(ClientResponse.class);
-	}
-	
-	public static ClientResponse recording(String id) throws UniformInterfaceException {
-		return r.path("recordings/" + id).get(ClientResponse.class);
-	}
+  public static Client c = Client.create();
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/capture-admin/rest/");
+  
+  public static ClientResponse agents() throws UniformInterfaceException {
+    return r.path("agents").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse agent(String id) throws UniformInterfaceException {
+    return r.path("agents/" + id).get(ClientResponse.class);
+  }
+  
+  public static ClientResponse recordings() throws UniformInterfaceException {
+    return r.path("recordings").get(ClientResponse.class);
+  }
+  
+  public static ClientResponse recording(String id) throws UniformInterfaceException {
+    return r.path("recordings/" + id).get(ClientResponse.class);
+  }
 }
