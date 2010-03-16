@@ -179,9 +179,6 @@ public class CaptureAgentStateServiceImplTest {
 
   @Test
   public void stickyAgents() throws PropertyVetoException, ConfigurationException {
-    Properties p = new Properties();
-    p.put(CaptureAgentStateService.STICKY_AGENTS, "sticky1,sticky2,sticky3");
-    service.updated(p);
     Assert.assertEquals(0, service.getKnownAgents().size());
 
     Properties cap1 = new Properties();
@@ -190,8 +187,6 @@ public class CaptureAgentStateServiceImplTest {
     cap2.put("foo", "bar");
     Properties cap3 = new Properties();
     cap3.put("bam", "bam");
-    Properties cap4 = new Properties();
-    cap4.put("asdf", "test");
 
     //Setup the two agents and persist them
     service.setAgentState("sticky1", AgentState.IDLE);
@@ -200,8 +195,6 @@ public class CaptureAgentStateServiceImplTest {
     service.setAgentCapabilities("sticky2", cap2);
     service.setAgentState("sticky3", AgentState.UPLOADING);
     service.setAgentCapabilities("sticky3", cap3);
-    service.setAgentState("sticky4", "flying");
-    service.setAgentCapabilities("sticky4", cap4);    
 
     //Make sure they're set right
     Assert.assertEquals(cap1, service.getAgentCapabilities("sticky1"));
@@ -210,8 +203,8 @@ public class CaptureAgentStateServiceImplTest {
     Assert.assertEquals(AgentState.CAPTURING, service.getAgentState("sticky2").getState());
     Assert.assertEquals(cap3, service.getAgentCapabilities("sticky3"));
     Assert.assertEquals(AgentState.UPLOADING, service.getAgentState("sticky3").getState());
-    Assert.assertEquals(cap4, service.getAgentCapabilities("sticky4"));
-    Assert.assertEquals("flying", service.getAgentState("sticky4").getState());
+    Assert.assertNull(service.getAgentCapabilities("sticky4"));
+    Assert.assertNull(service.getAgentState("sticky4"));
 
     //Shut down the service completely
     service.deactivate();
@@ -219,35 +212,17 @@ public class CaptureAgentStateServiceImplTest {
 
     //Restart the service with the same configuration as before
     setupService();
-    service.updated(p);
 
-    //The agents should still be there, except for 4
+    Assert.assertEquals(3, service.getKnownAgents().size());
+
+    //The agents should still be there
     Assert.assertEquals(cap1, service.getAgentCapabilities("sticky1"));
     Assert.assertEquals(AgentState.IDLE, service.getAgentState("sticky1").getState());
     Assert.assertEquals(cap2, service.getAgentCapabilities("sticky2"));
     Assert.assertEquals(AgentState.CAPTURING, service.getAgentState("sticky2").getState());
     Assert.assertEquals(cap3, service.getAgentCapabilities("sticky3"));
     Assert.assertEquals(AgentState.UPLOADING, service.getAgentState("sticky3").getState());
-    Assert.assertEquals(null, service.getAgentCapabilities("sticky4"));
-    Assert.assertNull(service.getAgentState("sticky4"));
-
-    //Shut down the service completely
-    service.deactivate();
-    service = null;
-
-    //Restart the service with a different configuration
-    setupService();
-    p.put(CaptureAgentStateServiceImpl.STICKY_AGENTS, "sticky1,sticky3");
-    service.updated(p);
-
-    //The agents should still be there, except for 2 and 4
-    Assert.assertEquals(cap1, service.getAgentCapabilities("sticky1"));
-    Assert.assertEquals(AgentState.IDLE, service.getAgentState("sticky1").getState());
-    Assert.assertEquals(null, service.getAgentCapabilities("sticky2"));
-    Assert.assertNull(service.getAgentState("sticky2"));
-    Assert.assertEquals(cap3, service.getAgentCapabilities("sticky3"));
-    Assert.assertEquals(AgentState.UPLOADING, service.getAgentState("sticky3").getState());
-    Assert.assertEquals(null, service.getAgentCapabilities("sticky4"));
+    Assert.assertNull(service.getAgentCapabilities("sticky4"));
     Assert.assertNull(service.getAgentState("sticky4"));
   }
 

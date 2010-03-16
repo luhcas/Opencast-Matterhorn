@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -39,6 +38,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
 
@@ -62,7 +62,6 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   private HashMap<String, Agent> agents;
   private HashMap<String, Recording> recordings;
-  private List<String> stickyAgents;
   private Semaphore sem;
 
   /**
@@ -83,12 +82,32 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     logger.info("CaptureAgentStateServiceImpl starting.");
     agents = new HashMap<String, Agent>();
     recordings = new HashMap<String, Recording>();
-    stickyAgents = new LinkedList<String>();
   }
 
   public void activate(ComponentContext cc) {
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl", persistenceProperties);
     sem = new Semaphore(1);
+
+    //Pull all the existing agents into the in-memory structure
+    EntityManager em = emf.createEntityManager();
+    List<Agent> dbResults = null;
+    try {
+      sem.acquire();
+      Query q = em.createNamedQuery("Agent.getAll");
+      dbResults = q.getResultList();
+      sem.release();
+    } catch (InterruptedException e) {
+      logger.warn("Semaphore broken in getKnownAgents, DB may be inconsistent.");
+    } finally {
+      em.close();
+    }
+    if (dbResults != null) {
+      for (Agent a : dbResults) {
+        if (!agents.containsKey(a.getName())) {
+          agents.put(a.getName(), a);
+        }
+      }
+    }
   }
 
   public void deactivate() {
@@ -105,10 +124,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     Agent req = agents.get(agentName);
     //If that agent doesn't exist, return an unknown agent, else return the known agent
     if (req == null) {
-      req = findAgent(agentName);
-      if (req == null) {
-        logger.debug("Agent {} does not exist in the system.", agentName);
-      }
+      logger.debug("Agent {} does not exist in the system.", agentName);
     } else {
       logger.debug("Agent {} found, returning state.", agentName);
     }
@@ -132,7 +148,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     if (req != null) {
       logger.debug("Setting Agent {} to state {}.", agentName, state);
       req.setState(state);
-      updateAgent(req);
+      updateAgentInDatabase(req);
     } else {     
       // If the agent doesn't exists, but the name is not null nor empty, create a new one.
       if (agentName == null || agentName.equals("")) {
@@ -143,7 +159,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       logger.debug("Creating Agent {} with state {}.", agentName, state);
       Agent a = new Agent(agentName, state, new Properties());
       agents.put(agentName, a);
-      updateAgent(a);
+      updateAgentInDatabase(a);
     }
 
     return OK;
@@ -157,7 +173,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     if (agents.containsKey(agentName)) {
       logger.debug("Removing Agent {}.", agentName);
       agents.remove(agentName);
-      deleteAgent(agentName);
+      deleteAgentFromDatabase(agentName);
       return OK;
     }
     return NO_SUCH_AGENT;
@@ -183,12 +199,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       Properties temp = agents.get(agentName).getCapabilities();
       return temp;
     } else {
-      Agent a = findAgent(agentName);
-      if (a != null) {
-        return a.getCapabilities();
-      } else {
-        return null;
-      }
+      return null;
     }
   }
 
@@ -201,7 +212,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     if (req != null) {
       logger.debug("Setting Agent {}'s capabilities", agentName);
       req.setCapabilities(capabilities);
-      updateAgent(req);
+      updateAgentInDatabase(req);
     } else {
       // If the agent doesn't exists, but the name is not null nor empty, create a new one.
       if (agentName == null || agentName.equals("")) {
@@ -212,57 +223,40 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       logger.debug("Creating Agent {} with state {}.", agentName, AgentState.UNKNOWN);
       Agent a = new Agent(agentName, AgentState.UNKNOWN, capabilities);
       agents.put(agentName, a);
-      updateAgent(a);
+      updateAgentInDatabase(a);
     }
 
     return OK;
-  }
-
-  private Agent findAgent(String agentName) {
-    EntityManager em = emf.createEntityManager();
-    Agent a = null;
-    try {
-      a = em.find(Agent.class, agentName);
-    } catch (NoResultException e) {
-      logger.debug("Unable to find agent {} in database.", agentName);
-    } catch (NonUniqueResultException e) {
-      logger.warn("Found multiple agents named {} in the DB.  This should be fixed!", agentName);
-    } finally {
-      em.close();
-    }
-    return a;
   }
 
   /**
    * Updates or adds an agent to the database.
    * @param a The Agent you wish to modify or add in the database.
    */
-  private void updateAgent(Agent a) {
-    if (stickyAgents.contains(a.getName())) {
-      EntityManager em = emf.createEntityManager();
-      EntityTransaction tx = null;
-      try {
-        sem.acquire();
-        tx = em.getTransaction();
-        tx.begin();
-        Agent existing = em.find(Agent.class, a.getName());
-        if (existing != null) {
-          existing.setCapabilities(a.getCapabilities());
-          existing.setLastHeardFrom(a.getLastHeardFrom());
-          existing.setState(a.getState());
-          em.merge(existing);
-        } else {
-          em.persist(a);
-        }
-        tx.commit();
-        sem.release();
-      } catch (RollbackException e) {
-        logger.warn("Unable to commit to DB in updateAgent.");
-      } catch (InterruptedException e) {
-        logger.warn("Semaphore broken in updateAgent, DB may be inconsistent.");
-      } finally {
-        em.close();
+  private void updateAgentInDatabase(Agent a) {
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = null;
+    try {
+      sem.acquire();
+      tx = em.getTransaction();
+      tx.begin();
+      Agent existing = em.find(Agent.class, a.getName());
+      if (existing != null) {
+        existing.setCapabilities(a.getCapabilities());
+        existing.setLastHeardFrom(a.getLastHeardFrom());
+        existing.setState(a.getState());
+        em.merge(existing);
+      } else {
+        em.persist(a);
       }
+      tx.commit();
+      sem.release();
+    } catch (RollbackException e) {
+      logger.warn("Unable to commit to DB in updateAgent.");
+    } catch (InterruptedException e) {
+      logger.warn("Semaphore broken in updateAgent, DB may be inconsistent.");
+    } finally {
+      em.close();
     }
   }
 
@@ -270,7 +264,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * Removes an agent from the database.
    * @param agentName The name of the agent you wish to remove.
    */
-  private void deleteAgent(String agentName) {
+  private void deleteAgentFromDatabase(String agentName) {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = null;
     try {
@@ -348,66 +342,6 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   }
 
   public void updated(Dictionary props) throws ConfigurationException {
-    String agentList = (String) props.get(CaptureAgentStateService.STICKY_AGENTS);
-    EntityManager em = emf.createEntityManager();
-    EntityTransaction tx = null;
-    try {
-      if (agentList != null) {
-        //Get the list of agents to keep
-       String[] splitList = agentList.split(",");
-       LinkedList<String> t = new LinkedList<String>();
-       for (String agentName : splitList) {
-         logger.debug("Adding " + agentName + " to sticky list");
-         t.add(agentName);
-       }
-       stickyAgents = t;
 
-       sem.acquire();
-
-       //Remove those who are not in the list
-       List<Agent> dbAgents = em.createNamedQuery("Agent.getAll").getResultList();
-       tx = em.getTransaction();
-       tx.begin();
-       for (Agent a : dbAgents) {
-         if (!stickyAgents.contains(a.getName())) {
-           logger.debug("Removing " + a.getName());
-           em.remove(a);
-         } else {
-           logger.debug("Skipping " + a.getName());
-         }
-       }
-       tx.commit();
-
-       //Add and update those who are in the list
-       tx = em.getTransaction();
-       tx.begin();
-       for (String name : stickyAgents) {
-         Agent a = agents.get(name);
-         if (a != null) {
-           logger.debug("Adding " + a.getName());
-           em.persist(a);
-         }
-       }
-       tx.commit();
-
-       sem.release();
-      } else {
-        sem.acquire();
-        //The agent list was blank, so remove all of the agents which are already in the db
-        List<Agent> dbAgents = em.createNamedQuery("Agent.getAll").getResultList();
-        tx = em.getTransaction();
-        tx.begin();
-        for (Agent a : dbAgents) {
-          logger.debug("Removing all: " + a.getName());
-          em.remove(a);
-        }
-        tx.commit();
-        sem.release();
-      }
-    } catch (RollbackException e) {
-      logger.warn("Unable to commit to DB in updated.");
-    } catch (InterruptedException e) {
-      logger.warn("Semaphore broken in updated, DB may be inconsistent.");
-    }
   }
 }
