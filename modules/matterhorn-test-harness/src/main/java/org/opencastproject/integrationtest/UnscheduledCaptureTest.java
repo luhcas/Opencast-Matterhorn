@@ -16,6 +16,9 @@
 package org.opencastproject.integrationtest;
 
 import static org.junit.Assert.*;
+
+import javax.xml.xpath.XPathConstants;
+
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -96,6 +99,44 @@ public class UnscheduledCaptureTest {
 		
 		assertEquals("Response code (getState):", 200, response.getStatus());
 		assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
+		
+		// Capture Admin: idle
+		response = CaptureAdminResources.agent(IntegrationTests.AGENT);
+		
+		assertEquals("Response code (agent):", 200, response.getStatus());
+		
+		Document xml = Utils.parseXml(response.getEntity(String.class));
+		
+		assertEquals("Agent idle? (agent):", Utils.xPath(xml, "//ns2:agent-state-update/state", XPathConstants.STRING), "idle");
+		
+	}
+	
+	@Test
+	public void testRecordingFinished() throws Exception {
+		
+		// State, Recordings: id is finished
+		ClientResponse response = StateResources.recordings();
+		
+		assertEquals("Response code (recordings):", 200, response.getStatus());
+		
+		Document xml = Utils.parseXml(response.getEntity(String.class));
+		
+		assertTrue("Recording included? (recordings):", Utils.xPathExists(xml, "//ns1:recording-state-update[name=\'" + recordingId + "\']"));
+		assertEquals("Recording finished (recordings):", "capture_finished", Utils.xPath(xml, "//ns1:recording-state-update[name=\'" + recordingId + "\']/state", XPathConstants.STRING));
+		
+		Thread.sleep(4000);
+		
+		// Capture Admin, Recordings: id is finished
+		response = CaptureAdminResources.recording(recordingId);
+
+		Thread.sleep(4000);
+		
+		assertEquals("Response code (recording):", 200, response.getStatus());
+		
+		xml = Utils.parseXml(response.getEntity(String.class));
+		
+		assertTrue("Recording included? (recordings):", Utils.xPathExists(xml, "//ns2:recording-state-update[name=\'" + recordingId + "\']"));
+		assertEquals("Recording finished (recordings):", "capture_finished", Utils.xPath(xml, "//ns2:recording-state-update[name=\'" + recordingId + "\']/state", XPathConstants.STRING));
 	}
 	
 	

@@ -30,7 +30,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 public class FilesResources {
 	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/files/rest/");
+	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/files/");
 	
 	public static ClientResponse getFile(String mediaPackageID, String mediaPackageElementID) throws Exception {
 		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
