@@ -79,6 +79,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   /** The default maximum length to capture, measured in seconds */
   public static final long DEFAULT_MAX_CAPTURE_LENGTH = 8 * 60 * 60;
 
+  /** The number of nanoseconds in a second.  This is a borrowed constant from gStreamer and is used in the pipeline initialization routines */
+  public static final long GST_SECOND = 1000000000L;
+
   /** The agent's pipeline **/
   private Pipeline pipe = null;
 
@@ -244,32 +247,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return null;
     } else
       setAgentState(AgentState.CAPTURING);
-    // Creates a new recording object, checking if it was correctly initialized
-    RecordingImpl newRec = null;
-    try {
-      newRec = new RecordingImpl(mediaPackage, configService.merge(properties, false));
-    } catch (IllegalArgumentException e) {
-      logger.error("Recording not created: {}", e.getMessage());
-      setAgentState(AgentState.IDLE);
-      //TODO:  Heh, now what?  We can't set a capture error if the id doesn't exist...
-      //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+
+    RecordingImpl newRec = createRecording(mediaPackage, properties);
+    if (newRec == null) {
       return null;
-    } catch (IOException e) {
-      logger.error("Recording not created due to an I/O Exception: {}", e.getMessage());
-      setAgentState(AgentState.IDLE);
-      return null;
-    }
-    // Checks there is no duplicate ID
-    String recordingID = newRec.getID();
-    if (pendingRecordings.containsKey(recordingID)) {
-      logger.error("There is already a recording with ID {}", recordingID);
-      setAgentState(AgentState.IDLE);
-      //TODO:  Do we set the recording to an error state here?
-      //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-      return null;
-    } else {
-      pendingRecordings.put(recordingID, newRec);
-      currentRecID = recordingID;
     }
 
     // Is this a "mock" capture?
@@ -301,10 +282,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
             try {
               FileUtils.copyFile(src, dest);
             } catch (FileNotFoundException e) {
-              resetOnFailure(recordingID);
+              resetOnFailure(newRec.getID());
               throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
             } catch (IOException e) {
-              resetOnFailure(recordingID);
+              resetOnFailure(newRec.getID());
               throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
             }
           }
@@ -319,17 +300,17 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
               MediaPackageElementBuilder eb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
               mediaPackage.add(eb.elementFromURI(newRec.getDir().toURI().relativize(dcCatalog.toURI()), Type.Catalog, DublinCoreCatalog.FLAVOR));
             } catch (UnsupportedElementException e) {
-              resetOnFailure(recordingID);
+              resetOnFailure(newRec.getID());
               throw new RuntimeException("Error adding " + dcCatalog + " to recording");
             } catch (IOException e) {
-              resetOnFailure(recordingID);
+              resetOnFailure(newRec.getID());
               throw new RuntimeException("Error copying " + dcCatalog + " to destination directory");
             }
           }
           // When we return the recording, the mock capture is completed so reset
           // the CaptureAgent state
-          setRecordingState(recordingID, RecordingState.CAPTURING);
-          return recordingID;
+          setRecordingState(newRec.getID(), RecordingState.CAPTURING);
+          return newRec.getID();
         }
         else {
           for (String device : deviceList) {
@@ -341,6 +322,62 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         }
       }
     }
+
+    String recordingID = initPipeline(newRec);
+    if (recordingID == null) {
+      return null;
+    }
+
+    setRecordingState(recordingID, RecordingState.CAPTURING);
+    if (newRec.getProperty(CaptureParameters.RECORDING_END) == null) {
+      scheduleStop(newRec.getID());
+    }
+    return recordingID;
+  }
+
+  /**
+   * Creates the RecordingImpl instance used for this capture
+   * @param mediaPackage The media package to create the recording around
+   * @param properties The properties of the recording
+   * @return The RecordingImpl instance, or null in the case of an error
+   */
+  private RecordingImpl createRecording(MediaPackage mediaPackage, Properties properties) {
+    // Creates a new recording object, checking if it was correctly initialized
+    RecordingImpl newRec = null;
+    try {
+      newRec = new RecordingImpl(mediaPackage, configService.merge(properties, false));
+    } catch (IllegalArgumentException e) {
+      logger.error("Recording not created: {}", e.getMessage());
+      setAgentState(AgentState.IDLE);
+      //TODO:  Heh, now what?  We can't set a capture error if the id doesn't exist...
+      //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+      return null;
+    } catch (IOException e) {
+      logger.error("Recording not created due to an I/O Exception: {}", e.getMessage());
+      setAgentState(AgentState.IDLE);
+      return null;
+    }
+    // Checks there is no duplicate ID
+    String recordingID = newRec.getID();
+    if (pendingRecordings.containsKey(recordingID)) {
+      logger.error("There is already a recording with ID {}", recordingID);
+      setAgentState(AgentState.IDLE);
+      //TODO:  Do we set the recording to an error state here?
+      //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+      return null;
+    } else {
+      pendingRecordings.put(recordingID, newRec);
+      currentRecID = recordingID;
+      return newRec;
+    }
+  }
+
+  /**
+   * Creates the gStreamer pipeline and blocks until it starts successfully
+   * @param newRec The RecordingImpl of the capture we wish to perform.
+   * @return The recording ID (equal to newRec.getID()) or null in the case of an error
+   */
+  private String initPipeline(RecordingImpl newRec) {
     try {
       pipe = PipelineFactory.create(newRec.getProperties());
     } catch (UnsatisfiedLinkError e) {
@@ -349,8 +386,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     }
 
     if (pipe == null) {
-      logger.error("Capture {} could not start, pipeline was null!", recordingID);
-      resetOnFailure(recordingID);
+      logger.error("Capture {} could not start, pipeline was null!", newRec.getID());
+      resetOnFailure(newRec.getID());
       return null;
     }
 
@@ -378,12 +415,14 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     });
 
     pipe.play();
-    while (pipe.getState() != State.PLAYING);
+    //5 second timeout.  If it's longer than that then the pipeline is pooched according to the gStreamer devs
+    if (pipe.getState(5 * GST_SECOND) != State.PLAYING) {
+      logger.error("Unable to start pipeline after 5 seconds.  Aborting!");
+      return null;
+    }
     logger.info("{} started.", pipe.getName());
 
-    setRecordingState(recordingID, RecordingState.CAPTURING);
-    //scheduleStop(recordingID);
-    return recordingID;
+    return newRec.getID();
   }
 
   // FIXME: This is not exactly an efficient way to find out whether we are dealing with a mock capture. It requires
@@ -418,7 +457,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     pendingRecordings.remove(recordingID);
   }
 
-  // FIXME: Is this method needed?  It isn't currently called from any code. (jt)
   /**
    * Schedules a stopCapture call for unscheduled captures.
    * @param recordingID The recordingID to stop.
