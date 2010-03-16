@@ -182,8 +182,14 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     if (req != null) {
       Properties temp = agents.get(agentName).getCapabilities();
       return temp;
-    }   
-    return null;  
+    } else {
+      Agent a = findAgent(agentName);
+      if (a != null) {
+        return a.getCapabilities();
+      } else {
+        return null;
+      }
+    }
   }
 
   /**
