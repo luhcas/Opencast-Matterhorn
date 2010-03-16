@@ -23,11 +23,20 @@ import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 
 /**
- * Implement XML namespace resolver
- * @author jamiehodge
- *
+ * This is a helper class for parsing XML which has namespaces using Xpath,
+ * this is done a lot in tests
+ * 
+ * http://www.ibm.com/developerworks/library/x-javaxpathapi.html
+ * 
+ * http://java.sun.com/j2se/1.5.0/docs/api/javax/xml/xpath/package-summary.html
+ * 
+ * Example usage:
+<xmp>
+XPath xPath = XPathFactory.newInstance().newXPath();
+xPath.setNamespaceContext(new UniversalNamespaceResolver(document));
+NodeList nodes = xPath.compile(path).evaluate(document, XPathConstants.NODESET); 
+</xmp>
  */
-
 public class UniversalNamespaceResolver implements NamespaceContext {
   private Document sourceDocument;
 

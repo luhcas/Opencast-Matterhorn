@@ -1,5 +1,7 @@
 package org.opencastproject.remotetest;
 
+import org.opencastproject.integrationtest.UniversalNamespaceResolver;
+
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
 
 import java.util.HashSet;

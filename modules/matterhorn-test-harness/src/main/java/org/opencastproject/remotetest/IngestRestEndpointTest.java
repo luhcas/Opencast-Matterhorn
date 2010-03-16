@@ -19,7 +19,6 @@ import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
 
 import junit.framework.Assert;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -30,16 +29,16 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.JUnit4;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,12 +64,7 @@ public class IngestRestEndpointTest {
     HttpGet get = new HttpGet(BASE_URL + "/ingest/rest/createMediaPackage");
     HttpResponse response = client.execute(get);
     HttpEntity entity = response.getEntity();
-    String mp = "";
-    if (entity != null) {
-      InputStream instream = entity.getContent();
-      mp = convertStreamToString(instream);
-      // System.out.println(mp);
-    }
+    String mp = EntityUtils.toString(entity);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
 
     // Grow media package
@@ -79,7 +73,7 @@ public class IngestRestEndpointTest {
     mp = postCall("/ingest/rest/addAttachment", "cover.png", "cover/source", mp);
 
     // Ingest the new grown media package
-    mp = postCall("/ingest/rest/ingest", "", "", mp);
+    mp = postCall("/ingest/rest/ingest", null, null, mp);
   }
 
   protected String postCall(String method, String mediaFile, String flavor, String mediaPackage)
@@ -87,8 +81,13 @@ public class IngestRestEndpointTest {
     HttpPost post = new HttpPost(BASE_URL + method);
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams = new ArrayList<NameValuePair>();
-    formParams.add(new BasicNameValuePair("url", getClass().getClassLoader().getResource(mediaFile).toString()));
-    formParams.add(new BasicNameValuePair("flavor", flavor));
+    if(mediaFile != null) {
+      URL url = getClass().getClassLoader().getResource(mediaFile);
+      formParams.add(new BasicNameValuePair("url", url.toString()));
+    }
+    if(flavor != null) {
+      formParams.add(new BasicNameValuePair("flavor", flavor));
+    }
     formParams.add(new BasicNameValuePair("mediaPackage", mediaPackage));
     post.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
     HttpResponse response = client.execute(post);
