@@ -116,9 +116,9 @@ start_mh ()
   echo "** Matterhorn console is at http://$MY_IP:8080" | sudo tee -a $MOTD_FILE
   echo "**" | sudo tee -a $MOTD_FILE
   echo "** Matterhorn is installed in:" | sudo tee -a $MOTD_FILE
-  echo "**    Home:    /usr/local/felix-framework-2.0.1" | sudo tee -a $MOTD_FILE
-  echo "**    Bundles: /usr/local/felix-framework-2.0.1/load" | sudo tee -a $MOTD_FILE
-  echo "**    Config:  /usr/local/felix-framework-2.0.1/conf" | sudo tee -a $MOTD_FILE
+  echo "**    Home:    /opt/matterhorn/felix" | sudo tee -a $MOTD_FILE
+  echo "**    Bundles: /opt/matterhorn/felix/load" | sudo tee -a $MOTD_FILE
+  echo "**    Config:  /opt/matterhorn/felix/conf" | sudo tee -a $MOTD_FILE
   echo "********************************************" | sudo tee -a $MOTD_FILE
 
   # remove matterhorn setup script
