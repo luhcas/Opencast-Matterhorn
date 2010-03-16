@@ -34,8 +34,8 @@ public class FilesResources {
 	
 	public static ClientResponse getFile(String mediaPackageID, String mediaPackageElementID) throws Exception {
 		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add(mediaPackageID, mediaPackageID);
-		params.add(mediaPackageElementID, mediaPackageElementID);
+		params.add("mediaPackageID", mediaPackageID);
+		params.add("mediaPackageElementID", mediaPackageElementID);
 		return r.post(ClientResponse.class, params);
 	}
 	
@@ -48,5 +48,20 @@ public class FilesResources {
 		return r.post(ClientResponse.class, params);
 	}
 	
-	// TODO POST and DELETE
+	// FIXME
+	public static ClientResponse postFile(String mediaPackageID,
+			String mediaPackageElementID, String media) throws Exception {
+		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+		params.add("mediaPackageID", mediaPackageID);
+		params.add("mediaPackageElementID", mediaPackageElementID);
+		return r.entity(media).post(ClientResponse.class, params);
+	}
+	
+	public static ClientResponse deleteFile(String mediaPackageID,
+			String mediaPackageElementID) throws Exception {
+		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+		params.add("mediaPackageID", mediaPackageID);
+		params.add("mediaPackageElementID", mediaPackageElementID);
+		return r.delete(ClientResponse.class, params);
+	}
 }
