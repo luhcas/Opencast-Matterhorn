@@ -1,27 +1,48 @@
 package org.opencastproject.capture.admin.impl;
 
+import org.opencastproject.capture.admin.api.Agent;
+import org.opencastproject.capture.admin.api.AgentState;
+import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.capture.admin.api.RecordingState;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 import junit.framework.Assert;
 
+import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.beans.PropertyVetoException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
-import org.opencastproject.capture.admin.api.Agent;
-import org.opencastproject.capture.admin.api.AgentState;
-import org.opencastproject.capture.admin.api.CaptureAgentStateService;
-import org.opencastproject.capture.admin.api.Recording;
-import org.opencastproject.capture.admin.api.RecordingState;
-import org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl;
-
 public class CaptureAgentStateServiceImplTest {
-  private CaptureAgentStateService service = null;
+  private CaptureAgentStateServiceImpl service = null;
   private Properties capabilities;
-  
+  private ComboPooledDataSource pooledDataSource = null;
+
   @Before
-  public void setup() {
+  public void setup() throws PropertyVetoException {
+    pooledDataSource = new ComboPooledDataSource();
+    pooledDataSource.setDriverClass("org.h2.Driver");
+    pooledDataSource.setJdbcUrl("jdbc:h2:./target/db" + System.currentTimeMillis() + ";LOCK_MODE=1;MVCC=TRUE");
+    pooledDataSource.setUser("sa");
+    pooledDataSource.setPassword("sa");
+
+    // Collect the persistence properties
+    Map<String, Object> props = new HashMap<String, Object>();
+    props.put("javax.persistence.nonJtaDataSource", pooledDataSource);
+    props.put("eclipselink.ddl-generation", "create-tables");
+    props.put("eclipselink.ddl-generation.output-mode", "database");
+
     service = new CaptureAgentStateServiceImpl();
+    service.setPersistenceProvider(new PersistenceProvider());
+    service.setPersistenceProperties(props);
+    service.activate(null);
+
     Assert.assertNotNull(service);
     capabilities = new Properties();
     capabilities.setProperty("CAMERA", "/dev/video0");
@@ -32,6 +53,7 @@ public class CaptureAgentStateServiceImplTest {
   @After
   public void teardown() {
     service = null;
+    pooledDataSource.close();
   }
 
   @Test

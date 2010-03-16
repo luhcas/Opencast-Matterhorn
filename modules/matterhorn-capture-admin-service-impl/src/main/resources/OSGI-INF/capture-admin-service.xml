@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.capture.admin.api.CaptureAgentStateService" immediate="true">
+<component name="org.opencastproject.capture.admin.api.CaptureAgentStateService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl" />
   <property name="service.description" value="Capture-Admin Service" />
   <property name="service.pid" value="org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl" />  
