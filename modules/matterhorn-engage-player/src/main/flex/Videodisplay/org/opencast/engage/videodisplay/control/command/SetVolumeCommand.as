@@ -38,7 +38,8 @@ package org.opencast.engage.videodisplay.control.command
          * */
         public function execute( event:SetVolumeEvent ):void
         {
-            model.player.volume = event.volume;
+            model.mediaPlayer.volume = event.volume;
+            model.playerVolume = event.volume;
         }
     }
 }

@@ -23,10 +23,15 @@
     xmlns:mx = "http://www.adobe.com/2006/mxml"
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
     resize = "{ resizeVideodisplay() }"
-    >
+    xmlns:osmf="com.osmf.*">
 
     <mx:Script>
         <![CDATA[
+        	import mx.controls.Alert;
+        	import mx.core.Container;
+        	import org.osmf.layout.ScaleMode;
+        	import org.osmf.containers.MediaContainer;
+        	import org.osmf.media.MediaPlayer;
             import org.swizframework.Swiz;
             import org.opencast.engage.videodisplay.control.event.ResizeVideodisplayEvent;
             import org.opencast.engage.videodisplay.model.VideodisplayModel;
@@ -43,10 +48,19 @@
              *  */
             public function initPlayer():void
             {
-                model.player = this.wrapper.mediaPlayer;
-                model.mediaPlayerWrapper = this.wrapper;
-                model.mediaPlayerWrapper.visible = false;
-            }
+               	
+               	// Set up the media player
+               	model.mediaPlayer = new MediaPlayer();
+               	model.mediaPlayer.autoPlay = true;
+               	model.mediaPlayer.autoRewind = false;
+               
+               	// Set up the container
+			  	model.container = new MediaContainer();
+			  	model.container.layoutMetadata.scaleMode = ScaleMode.LETTERBOX;
+			  	
+				
+				this.mediaContainerUIComponent.container = model.container;
+			}
 
             /**
              * resizeVideodisplay
@@ -60,11 +74,12 @@
             }
         ]]>
     </mx:Script>
-
-    <players:MediaPlayerWrapper 
-        id = "wrapper"
-        width = "100%"
-        height = "100%"
-        addedToStage = "initPlayer()"
-        />
+   
+     <osmf:MediaContainerUIComponent
+     	id = "mediaContainerUIComponent"
+     	width="100%"
+     	height="100%"
+     	addedToStage = "initPlayer()"
+     	/>   
+        
 </mx:Canvas>

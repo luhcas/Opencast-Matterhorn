@@ -15,7 +15,8 @@
  */
 package org.opencast.engage.videodisplay.model
 {
-    import com.adobe.strobe.players.MediaPlayerWrapper;
+    
+    import com.osmf.MediaContainerUIComponent;
     
     import mx.collections.ArrayCollection;
     import mx.controls.ProgressBar;
@@ -23,6 +24,7 @@ package org.opencast.engage.videodisplay.model
     import org.opencast.engage.videodisplay.control.util.TimeCode;
     import org.opencast.engage.videodisplay.state.MediaState;
     import org.opencast.engage.videodisplay.vo.LanguageVO;
+    import org.osmf.containers.MediaContainer;
     import org.osmf.media.MediaPlayer;
 
     [Bindable]
@@ -45,6 +47,9 @@ package org.opencast.engage.videodisplay.model
 
         // Close Caption Boolean
         public var ccBoolean:Boolean = false;
+        
+        // Close Caption Button Boolean
+        public var ccButtonBoolean:Boolean = false;
 
         // CC Button
         public var ccButtonBool:Boolean = false;
@@ -88,11 +93,14 @@ package org.opencast.engage.videodisplay.model
         // The old Subtitle
         public var oldSubtitle:String = '';
 
-        // Media Player Wrapper
-        public var player:MediaPlayer;
-
-        // mediaPlayerWrapper
-        public var mediaPlayerWrapper:MediaPlayerWrapper;
+        // Media Player
+        public var mediaPlayer:MediaPlayer;
+        
+        // container
+        public var container:MediaContainer;
+        
+        // mediaContainerUIComponent
+        public var mediaContainerUIComponent:MediaContainerUIComponent;
 
         // player volume
         public var playerVolume:Number = 1.0;
@@ -129,5 +137,9 @@ package org.opencast.engage.videodisplay.model
         
         // secondPlayer
         public var SECONDPLAYER:String = 'secondPlayer';
+        
+        // bytesTotal
+        public var bytesTotal:Number = 0;
+        
     }
 }

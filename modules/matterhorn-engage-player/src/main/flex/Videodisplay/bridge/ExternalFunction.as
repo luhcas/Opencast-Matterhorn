@@ -32,13 +32,15 @@ package bridge
         
         public static const SETVOLUME:String              = 'Opencast.Player.setVolume';
         
+        public static const SETVOLUMESLIDER:String        = 'Opencast.Player.setVolumeSlider';
+        
+        public static const SETPLAYERVOLUME:String        = 'Opencast.Player.setPlayerVolume';
+        
         public static const SETPLAYPAUSESTATE:String      = 'Opencast.Player.setPlayPauseState';
         
         public static const SETCAPTIONS:String            = 'Opencast.Player.setCaptions';
         
-        public static const MUTE:String                   = 'Opencast.Player.setDoMute';
-        
-        public static const SETCAPTIONSBUTTON:String      = 'Opencast.Player.setCaptionsButton';
+        public static const MUTE:String                   = 'Opencast.Player.doToggleMute';
         
         public static const HEARTIMEINFO:String           = 'Opencast.Player.hearTimeInfo'; 
         
@@ -50,8 +52,18 @@ package bridge
         
         public static const DOSETVOLUME:String            = 'Opencast.Player.doSetVolume';
         
-        public static const SETPLAYERVOLUME:String        = 'Opencast.Player.setPlayerVolume';
-        
         public static const ONPLAYERREADY:String          = 'Opencast.Watch.onPlayerReady'; 
+        
+        public static const LOWSOUND:String               = 'Opencast.Player.lowSound'; 
+         
+        public static const NONESOUND:String              = 'Opencast.Player.noneSound'; 
+         
+        public static const HIGHSOUND:String              = 'Opencast.Player.highSound'; 
+          
+        public static const MUTESOUND:String              = 'Opencast.Player.muteSound'; 
+        
+        public static const SETCCICONON:String            = 'Opencast.Player.setCCIconOn'; 
+          
+        public static const SETCCICONOFF:String           = 'Opencast.Player.setCCIconOff'; 
     }
 }

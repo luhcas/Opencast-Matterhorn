@@ -26,27 +26,16 @@ package org.opencast.engage.videodisplay.control.event
         public static var EVENT_NAME:String = 'ClosedCaptionsEvent';
 
         /** Constructor */
-        public function ClosedCaptionsEvent( ccBoolean:Boolean, bubbles:Boolean = false, cancelable:Boolean = false )
+        public function ClosedCaptionsEvent( bubbles:Boolean = false, cancelable:Boolean = false )
         {
             super( EVENT_NAME, bubbles, cancelable );
-            _ccBoolean = ccBoolean;
+            
         }
-        private var _ccBoolean:Boolean;
-
-        /**
-         * ccBoolean
-         *
-         * Get the cc Boolean
-         *  */
-        public function get ccBoolean():Boolean
-        {
-            return _ccBoolean;
-        }
-
+        
         // Override the inherited clone() method.
         override public function clone():Event
         {
-            return new ClosedCaptionsEvent( ccBoolean, bubbles, cancelable );
+            return new ClosedCaptionsEvent( bubbles, cancelable );
         }
     }
 }

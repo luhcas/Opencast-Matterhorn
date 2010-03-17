@@ -17,9 +17,7 @@ package org.opencast.engage.videodisplay.control.command
 {
     import bridge.ExternalFunction;
     
-    import flash.events.TimerEvent;
     import flash.external.ExternalInterface;
-    import flash.utils.Timer;
     
     import mx.controls.Alert;
     import mx.core.Application;
@@ -31,20 +29,19 @@ package org.opencast.engage.videodisplay.control.command
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
     import org.opencast.engage.videodisplay.state.MediaState;
     import org.opencast.engage.videodisplay.state.PlayerState;
-    import org.osmf.audio.AudioElement;
-    import org.osmf.audio.SoundLoader;
     import org.osmf.display.ScaleMode;
+    import org.osmf.elements.AudioElement;
+    import org.osmf.elements.VideoElement;
     import org.osmf.events.AudioEvent;
+    import org.osmf.events.BufferEvent;
+    import org.osmf.events.LoadEvent;
     import org.osmf.events.MediaErrorEvent;
     import org.osmf.events.TimeEvent;
+    import org.osmf.layout.HorizontalAlign;
+    import org.osmf.layout.LayoutMetadata;
+    import org.osmf.layout.VerticalAlign;
     import org.osmf.media.MediaElement;
     import org.osmf.media.URLResource;
-    import org.osmf.net.NetLoadedContext;
-    import org.osmf.net.NetLoader;
-    import org.osmf.traits.LoadTrait;
-    import org.osmf.traits.MediaTraitType;
-    import org.osmf.utils.URL;
-    import org.osmf.video.VideoElement;
     import org.swizframework.Swiz;
 
     public class InitPlayerCommand
@@ -52,10 +49,9 @@ package org.opencast.engage.videodisplay.control.command
         [Autowire]
         public var model:VideodisplayModel;
 
-        private var bytesLoadedTimer:Timer;
+       
         private var mediaElement:MediaElement = new MediaElement();
         private var _time:TimeCode;
-        private const TIMER_INTERVAL_BYTES_LOADED:int = 250;
         private var currentDurationString:String = "00:00:00";
         private var lastNewPositionString:String = "00:00:00";
 
@@ -73,15 +69,9 @@ package org.opencast.engage.videodisplay.control.command
          * */
         public function execute( event:InitPlayerEvent ):void
         {
-            _time = new TimeCode();
+			 _time = new TimeCode();            
 
-            bytesLoadedTimer = new Timer( TIMER_INTERVAL_BYTES_LOADED );
-            bytesLoadedTimer.addEventListener( TimerEvent.TIMER, progress );
-            bytesLoadedTimer.start();
-
-            var stream:String = "rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen08_2008_11_11_13_59__131_173_10_32.flv";
-
-            if( model.mediaURL != '' )
+			if( model.mediaURL != '' )
             {
                 var pos:int = model.mediaURL.lastIndexOf( "." );
                 var fileType:String = model.mediaURL.substring( pos + 1 );
@@ -89,20 +79,15 @@ package org.opencast.engage.videodisplay.control.command
                 switch ( fileType )
                 {
                     case "flv":
-                        mediaElement = new VideoElement( new NetLoader(), new URLResource( new URL( model.mediaURL ) ) );
-                        ExternalInterface.call( ExternalFunction.SETVOLUME, 100, model.playerId );
-                        model.mediaState = MediaState.VIDEO;
-                        break;
-
                     case "mp4":
-                        mediaElement = new VideoElement( new NetLoader(), new URLResource( new URL( model.mediaURL ) ) );
-                        ExternalInterface.call( ExternalFunction.SETVOLUME, 100, model.playerId );
+                    	mediaElement =  new VideoElement ( new URLResource( model.mediaURL ) );
+                    	setMediaElement( mediaElement );
                         model.mediaState = MediaState.VIDEO;
-                        break;
+						break;
 
                     case "mp3":
-                        mediaElement = new AudioElement( new SoundLoader(), new URLResource( new URL( model.mediaURL ) ) );
-                        ExternalInterface.call( ExternalFunction.SETVOLUME, 100, model.playerId );
+                        mediaElement = new AudioElement( new URLResource( model.mediaURL ) );
+                        setMediaElement( mediaElement );
                         model.mediaState = MediaState.AUDIO;
                         var position:int = model.mediaURL.lastIndexOf( '/' );
                         model.audioURL = model.mediaURL.substring( position + 1 );
@@ -123,100 +108,89 @@ package org.opencast.engage.videodisplay.control.command
             {
                 if ( Application.application.parameters.autoplay == "true" )
                 {
-                    model.player.autoPlay = true;
+                    model.mediaPlayer.autoPlay = true;
                     model.currentPlayerState = PlayerState.PLAYING;
                     ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PAUSING );
                 }
                 else
                 {
-                    model.player.autoPlay = true;
-                    model.player.volume = 0.0;
-                    model.mediaPlayerWrapper.visible = false;
+                    model.mediaPlayer.autoPlay = true;
+                    model.mediaPlayer.volume = 1.0;
+                   
                 }
             }
             else
             {
-                model.player.autoPlay = true;
-                model.player.volume = 0.0;
-                model.mediaPlayerWrapper.visible = false;
+                model.mediaPlayer.autoPlay = true;
+                model.mediaPlayer.volume = 1.0;
+              
             }
             
             // Set up the MediaPlayer.
-            model.player.autoRewind = true;
-
-            model.mediaPlayerWrapper.scaleMode = ScaleMode.LETTERBOX;
-            model.mediaPlayerWrapper.addEventListener( TimeEvent.DURATION_CHANGE, onDurationChange );
-            model.mediaPlayerWrapper.addEventListener( AudioEvent.VOLUME_CHANGE, volumeChange );
-            model.mediaPlayerWrapper.addEventListener( AudioEvent.MUTED_CHANGE, muteChange );
-            model.mediaPlayerWrapper.addEventListener( TimeEvent.CURRENT_TIME_CHANGE, onCurrentTimeChange );
-            model.mediaPlayerWrapper.addEventListener( TimeEvent.DURATION_REACHED, onDurationReached );
-            model.mediaPlayerWrapper.addEventListener( MediaErrorEvent.MEDIA_ERROR, onMediaError );
-
-            model.mediaPlayerWrapper.element = mediaElement;
-        }
-
+            model.mediaPlayer.addEventListener( TimeEvent.DURATION_CHANGE, onDurationChange);
+            model.mediaPlayer.addEventListener( AudioEvent.MUTED_CHANGE, muteChange );
+			model.mediaPlayer.addEventListener( AudioEvent.VOLUME_CHANGE, volumeChange );
+            model.mediaPlayer.addEventListener( TimeEvent.CURRENT_TIME_CHANGE, onCurrentTimeChange );
+            model.mediaPlayer.addEventListener( TimeEvent.DURATION_CHANGE, onDurationReached);
+            model.mediaPlayer.addEventListener( MediaErrorEvent.MEDIA_ERROR, onMediaError);
+            
+            model.mediaPlayer.addEventListener( LoadEvent.BYTES_TOTAL_CHANGE, onBytesTotalChange );
+			model.mediaPlayer.addEventListener( LoadEvent.BYTES_LOADED_CHANGE, onBytesLoadedChange);
+			
+			model.mediaPlayer.addEventListener( BufferEvent.BUFFERING_CHANGE, onBufferingChange);
+		}
+        
         /**
-         * progress
+         * setMediaElement
+         * 
+         * Set the media element.
          *
-         * @eventType event:TimerEvent
+         * @eventType event:MediaElement
          *
          * */
-        private function progress( event:TimerEvent ):void
-        {
-            if ( model.mediaState == MediaState.VIDEO )
-            {
-                var loadableVideo:LoadTrait = mediaElement.getTrait( MediaTraitType.LOAD ) as LoadTrait;
-
-                if ( loadableVideo )
-                {
-                    var context:NetLoadedContext = NetLoadedContext( loadableVideo.loadedContext );
-                    var progressVideo:Number = 0;
-
-                    try
-                    {
-                        progressVideo = Math.round( context.stream.bytesLoaded / context.stream.bytesTotal * 100 );
-                        ExternalInterface.call( ExternalFunction.SETPROGRESS, progressVideo, model.playerId );
-                        model.progressBar.setProgress( progressVideo, 100 );
-                    }
-                    catch ( e:TypeError )
-                    {
-                        // ignore
-                    }
-
-                    if ( progressVideo >= 100 )
-                    {
-                        bytesLoadedTimer.stop();
-                    }
-                }
-            }
-            else
-            {
-                var loadableAudio:LoadTrait = mediaElement.getTrait( MediaTraitType.LOAD ) as LoadTrait;
-
-                if ( loadableAudio )
-                {
-                    var audioProgress:Number = 0;
-
-                    try
-                    {
-                        audioProgress = Math.round( loadableAudio.bytesLoaded / loadableAudio.bytesTotal * 100 );
-                        ExternalInterface.call( ExternalFunction.SETPROGRESS, audioProgress, model.playerId );
-                        model.progressBar.setProgress( audioProgress, 100 );
-                    }
-                    catch ( e:TypeError )
-                    {
-                        // ignore
-                    }
-
-                    if ( audioProgress >= 100 )
-                    {
-                        bytesLoadedTimer.stop();
-
-                    }
-                }
-            }
+        private function setMediaElement(value:MediaElement):void
+		{
+			if (value != null)
+			{
+				// If there's no explicit layout metadata, center the content. 
+				var layoutMetadata:LayoutMetadata = value.getMetadata(LayoutMetadata.LAYOUT_NAMESPACE) as LayoutMetadata;
+				if (layoutMetadata == null)
+				{
+					layoutMetadata = new LayoutMetadata();
+					layoutMetadata.scaleMode = ScaleMode.LETTERBOX;
+					layoutMetadata.horizontalAlign = HorizontalAlign.CENTER;
+					layoutMetadata.verticalAlign = VerticalAlign.MIDDLE;
+					layoutMetadata.bottom = 0;
+					layoutMetadata.top = 0;
+					layoutMetadata.right = 0;
+					layoutMetadata.left = 0;
+					
+					value.addMetadata(LayoutMetadata.LAYOUT_NAMESPACE, layoutMetadata);
+				}
+				
+				model.container.addMediaElement(value);
+			}
+			
+			model.mediaPlayer.media = value;
+			ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, 100 );
+		}
+        
+        /**
+         * onDurationChange
+         *
+         * @eventType event:TimeEvent
+         *
+         * */
+        private function onDurationChange(event:TimeEvent):void
+		{
+			// Store new duration as current duration in the videodisplay model
+            model.currentDuration = event.time;
+            currentDurationString = _time.getTC( event.time );
+            ExternalInterface.call( ExternalFunction.SETDURATION, event.time );
+            ExternalInterface.call( ExternalFunction.SETTOTALTIME, currentDurationString );
+            autoPlayOff();
         }
-
+        
         /**
          * autoPlayOff
          *
@@ -226,50 +200,94 @@ package org.opencast.engage.videodisplay.control.command
         private function autoPlayOff():void
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.STOP ) );
-            model.mediaPlayerWrapper.mediaPlayer.volume = 1.0;
-            model.mediaPlayerWrapper.visible = true;
+            model.mediaPlayer.volume = 1.0;
         }
-
-        /**
-         * onDurationChange
-         *
-         * @eventType event:TimeEvent
-         *
-         * */
-        private function onDurationChange( event:TimeEvent ):void
-        {
-            // Store new duration as current duration in the videodisplay model
-            model.currentDuration = event.time;
-            currentDurationString = _time.getTC( model.currentDuration );
-            ExternalInterface.call( ExternalFunction.SETDURATION, event.time, model.playerId );
-            ExternalInterface.call( ExternalFunction.SETTOTALTIME, currentDurationString, model.playerId );
-            autoPlayOff();
-        }
-
+        
         /**
          * volumeChange
          *
          * When the volume is change in the video
+         * 
+         * @eventType event:AudioEvent
          *
          * */
         private function volumeChange( event:AudioEvent ):void
         {
-            if( model.FIRSTPLAYER == model.playerId )
-            {
-                ExternalInterface.call( ExternalFunction.SETVOLUME, event.volume * 100, model.playerId );
-                model.videoVolume = event.volume;
-            }
+           if( model.mediaPlayer.muted == true )
+           {
+                model.mediaPlayer.muted = false;
+           }
+           if( model.mediaPlayer.volume > 0.50 )
+           {
+            	ExternalInterface.call( ExternalFunction.HIGHSOUND, '' );
+           }
+           
+           if( model.mediaPlayer.volume <= 0.50 )
+           {
+                ExternalInterface.call( ExternalFunction.LOWSOUND, '' );
+           }
+           
+           if( model.mediaPlayer.volume == 0 )
+           {
+                ExternalInterface.call( ExternalFunction.NONESOUND, '' );
+           }
+           
+           if( model.ccButtonBoolean == false && model.ccBoolean == true )
+           {
+                model.ccBoolean = false;
+                ExternalInterface.call( ExternalFunction.SETCCICONOFF, '' );
+           }
         }
         
         /**
          * muteChange
          *
          * When the player is mute or unmute
+         * 
+         * @eventType event:AudioEvent
          *
          * */
         private function muteChange( event:AudioEvent ):void
         {
-            Alert.show(event.muted.toString());
+           	if( event.muted )
+           	{
+           		ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, 0 );
+           		model.playerVolume = 0;
+           		ExternalInterface.call( ExternalFunction.MUTESOUND, '' );
+           		if( model.ccButtonBoolean == false )
+           		{
+           			model.ccBoolean = true;
+                    ExternalInterface.call( ExternalFunction.SETCCICONON, '' );
+           		}
+           		
+           	}
+           	else
+           	{
+           		ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, model.mediaPlayer.volume * 100 );	
+           		model.playerVolume = model.mediaPlayer.volume;
+           		
+           		if( model.mediaPlayer.volume > 0.50 )
+                {
+                    ExternalInterface.call( ExternalFunction.HIGHSOUND, '' );
+                }
+           
+                if( model.mediaPlayer.volume <= 0.50 )
+                {
+                    ExternalInterface.call( ExternalFunction.LOWSOUND, '' );
+                }
+           
+                if( model.mediaPlayer.volume == 0 )
+                {
+                    ExternalInterface.call( ExternalFunction.NONESOUND, '' );
+                }
+                
+                if( model.ccButtonBoolean == false )
+                {
+                    model.ccBoolean = false;
+                    ExternalInterface.call( ExternalFunction.SETCCICONOFF, '' );
+                }
+                
+           	}
         }
         
         /**
@@ -284,13 +302,13 @@ package org.opencast.engage.videodisplay.control.command
 
             if ( newPositionString != lastNewPositionString )
             {
-                ExternalInterface.call( ExternalFunction.SETCURRENTTIME, newPositionString, model.playerId );
+                ExternalInterface.call( ExternalFunction.SETCURRENTTIME, newPositionString );
                 lastNewPositionString = newPositionString;
             }
 
-            if ( !model.player.seeking )
+            if ( !model.mediaPlayer.seeking )
             {
-                ExternalInterface.call( ExternalFunction.SETPLAYHEAD, event.time, model.playerId );
+                ExternalInterface.call( ExternalFunction.SETPLAYHEAD, event.time );
             }
             
             if ( model.captionsURL != null )
@@ -300,7 +318,7 @@ package org.opencast.engage.videodisplay.control.command
 
             model.currentPlayhead = event.time;
         }
-
+        
         /**
          * onDurationReached
          *
@@ -310,21 +328,23 @@ package org.opencast.engage.videodisplay.control.command
 
         private function onDurationReached( event:TimeEvent ):void
         {
-            model.player.pause();
+            model.mediaPlayer.pause();
             model.currentPlayerState = PlayerState.PAUSING;
             ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PLAYING );
         }
-
+        
         /**
          * onMediaError
          *
          * When the media file ist nocht available.
+         * 
+         * @eventType event:MediaErrorEvent
          *
          * */
         private function onMediaError( event:MediaErrorEvent ):void
         {
             model.error = new Error();
-            model.error.name = event.error.description;
+            model.error.name = event.error.message;
             model.error.message = event.error.detail;
         }
 
@@ -332,6 +352,8 @@ package org.opencast.engage.videodisplay.control.command
          * errorMessage
          *
          * Set the error Message and switch the stage.
+         * 
+         * 
          *
          * */
         private function errorMessage( name:String, message:String ):void
@@ -341,5 +363,54 @@ package org.opencast.engage.videodisplay.control.command
             model.error.message = message;
             model.mediaState = MediaState.ERROR;
         }
+        
+        
+        /**
+         * onBytesTotalChange
+         *
+         * Save the total bytes of the video
+         * 
+         * @eventType event:LoadEvent
+         *
+         * */
+        private function onBytesTotalChange( event:LoadEvent ):void
+		{
+			model.bytesTotal = event.bytes;
+		}
+		
+		/**
+         * onBytesLoadedChange
+         *
+         * Set the progress bar.
+         * 
+         * @eventType event:LoadEvent
+         *
+         * */
+		private function onBytesLoadedChange( event:LoadEvent ):void
+		{
+			var progress:Number = 0;
+            
+            try
+            {
+            	progress = Math.round( event.bytes / model.bytesTotal * 100 );
+                ExternalInterface.call( ExternalFunction.SETPROGRESS, progress );
+                model.progressBar.setProgress( progress, 100 );
+            }
+            catch ( e:TypeError )
+            {
+                // ignore
+            }
+        }
+        
+        /**
+         * onBufferingChange
+         *
+		 * @eventType event:BufferEvent
+         *
+         * */
+        private function onBufferingChange( event:BufferEvent ):void
+		{
+			
+		}
     }
 }

@@ -81,9 +81,19 @@
              * */
             private function onVolume():void
             {
-                //model.player.volume = volumeSlider.value;
-                ExternalInterface.call( ExternalFunction.DOSETVOLUME, volumeSlider.value );
                 ExternalInterface.call( ExternalFunction.SETPLAYERVOLUME, volumeSlider.value );
+                ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, volumeSlider.value * 100 );
+            }
+            
+            /**
+             * toggleMute
+             *
+             * Toggle between mute or unmute
+             *
+             * */
+            private function toggleMute():void
+            {
+                ExternalInterface.call( ExternalFunction.MUTE, '' );
             }
 
             /**
@@ -243,9 +253,9 @@
         <mx:Button 
             width = "40"
             height = "40"
-            toolTip = "{ model.videoVolume == 0 ? 'Mute' : 'Unmute'}"
-            click = "{ Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.MUTE )) }"
-            styleName = "{ model.videoVolume == 0 ? 'volumeMuteBig' : 'volumeHighBig' }"
+            toolTip = "{ model.playerVolume == 0 ? 'Mute' : 'Unmute'}"
+            click = "{ toggleMute() }"
+            styleName = "{ model.playerVolume == 0 ? 'volumeMuteBig' : 'volumeHighBig' }"
             />
 
         <mx:Spacer 
@@ -257,8 +267,8 @@
             maximum = "1"
             id = "volumeSlider"
             change = "{ onVolume() }"
-            value = "{ model.videoVolume }"
-            toolTip = "Volume:  { (model.videoVolume * 100).toFixed(0) } %"
+            value = "{ model.playerVolume }"
+            toolTip = "Volume:  { (model.playerVolume * 100).toFixed(0) } %"
             styleName = "HSliderVolume"
             dataTipFormatFunction = "volumeDataTipFunc"
             />

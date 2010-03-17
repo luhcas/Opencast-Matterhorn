@@ -15,6 +15,10 @@
  */
 package org.opencast.engage.videodisplay.control.command
 {
+    import bridge.ExternalFunction;
+    
+    import flash.external.ExternalInterface;
+    
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
     import org.swizframework.Swiz;
@@ -38,7 +42,18 @@ package org.opencast.engage.videodisplay.control.command
          * */
         public function execute( event:ClosedCaptionsEvent ):void
         {
-            model.ccBoolean = event.ccBoolean;
+            if( model.ccBoolean == true )
+            {
+                model.ccBoolean = false;
+                model.ccButtonBoolean = false;
+                ExternalInterface.call( ExternalFunction.SETCCICONOFF, '' );
+            }
+            else
+            {
+            	model.ccBoolean = true;
+            	model.ccButtonBoolean = true;
+            	ExternalInterface.call( ExternalFunction.SETCCICONON, '' );
+            }
         }
     }
 }

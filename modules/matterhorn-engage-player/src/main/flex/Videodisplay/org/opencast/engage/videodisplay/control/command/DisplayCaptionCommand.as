@@ -16,9 +16,11 @@
 package org.opencast.engage.videodisplay.control.command
 {
     import bridge.ExternalFunction;
-
+    
     import flash.external.ExternalInterface;
-
+    
+    import mx.controls.Alert;
+    
     import org.opencast.engage.videodisplay.control.event.DisplayCaptionEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
     import org.opencast.engage.videodisplay.vo.CaptionVO;
@@ -73,7 +75,7 @@ package org.opencast.engage.videodisplay.control.command
                     if ( model.oldSubtitle != subtitle )
                     {
                         model.currentSubtitle = '';
-                        ExternalInterface.call( ExternalFunction.SETCAPTIONS, subtitle, model.playerId );
+                        ExternalInterface.call( ExternalFunction.SETCAPTIONS, subtitle );
                         model.currentSubtitle = subtitle;
                         model.oldSubtitle = subtitle;
 
@@ -83,7 +85,7 @@ package org.opencast.engage.videodisplay.control.command
                 {
                     model.currentSubtitle = '';
                     model.oldSubtitle = 'default';
-                    ExternalInterface.call( ExternalFunction.SETCAPTIONS, '', model.playerId );
+                    ExternalInterface.call( ExternalFunction.SETCAPTIONS, '');
                 }
             }
         }

@@ -186,7 +186,7 @@
     <mx:Button 
         id = "playButton_up"
         click = "{ ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' ) }"
-        width = "{this.width/5}"
+        width = "{this.width/10}"
         height = "{playButton_up.width}"
         styleName = "PlayBig"
         visible = "false"
@@ -201,7 +201,7 @@
     <mx:Button 
         id = "pauseButton_up"
         click = "{ ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' ) }"
-        width = "{this.width/5}"
+        width = "{this.width/10}"
         height = "{pauseButton_up.width}"
         styleName = "PauseBig"
         visible = "false"
@@ -212,6 +212,8 @@
         rollOut = "{ hideButton(); }"
         toolTip = "Pause"
         />
+
+	
 
     <mx:HBox 
         width = "100%"
