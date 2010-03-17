@@ -37,6 +37,7 @@ public class StateServiceImplTest {
   public void setup() {
     service = new StateServiceImpl();
     Assert.assertNotNull(service);
+    service.unsetConfigService();
     cfg = new ConfigurationManager();
     Assert.assertNotNull(cfg);
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL, "1");
@@ -66,6 +67,7 @@ public class StateServiceImplTest {
     }
 
     service.updated(props);
+
   }
 
   //Note:  This test is meant to test that the code handles weird cases in the polling, *not* the functionality itself 
@@ -83,12 +85,24 @@ public class StateServiceImplTest {
     Assert.fail();
   }
 
+  //Note:  This test combines its subtests to verify that the code to handle the update functionality is working.
+  @Test
+  public void testPollingChanges() throws ConfigurationException {
+    testValidPolling();
+    testInvalidPolling();
+  }
+
   @Test
   public void testUnpreparedImpl() {
     Assert.assertNull(service.getAgentState());
     Assert.assertNull(service.getAgent());
     service.setAgentState("TEST");
     Assert.assertNull(service.getAgentState());
+    service.setRecordingState(null, "won't work");
+    service.setRecordingState("somethign", null);
+    service.setRecordingState("works", "working");
+    Assert.assertNull(service.getKnownRecordings());
+    Assert.assertNull(service.getRecordingState("works"));
 
     service.activate(null);
     Assert.assertEquals(AgentState.UNKNOWN, service.getAgentState());
@@ -112,6 +126,18 @@ public class StateServiceImplTest {
     verifyRecording(service.getRecordingState("abc"), "abc", RecordingState.CAPTURING);
     verifyRecording(service.getRecordingState("123"), "123", RecordingState.UPLOADING);
     Assert.assertNull(service.getRecordingState("doesnotexist"));
+  }
+
+  @Test
+  public void testInvalidRecording() {
+    Assert.assertNull(service.getKnownRecordings());
+    service.activate(null);
+    Assert.assertNotNull(service.getKnownRecordings());
+    Assert.assertEquals(0, service.getKnownRecordings().size());
+
+    service.setRecordingState(null, "won't work");
+    service.setRecordingState("something", null);
+    Assert.assertEquals(0, service.getKnownRecordings().size());
   }
 
   private void verifyRecording(Recording r, String id, String state) {

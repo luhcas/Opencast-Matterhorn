@@ -15,9 +15,12 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.impl.CaptureParameters;
-import org.opencastproject.capture.impl.ConfigurationManager;
-import org.opencastproject.capture.impl.SchedulerImpl;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.osgi.service.cm.ConfigurationException;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -29,12 +32,6 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.osgi.service.cm.ConfigurationException;
 
 public class SchedulerImplTest {
 
@@ -64,9 +61,12 @@ public class SchedulerImplTest {
 
   @After
   public void tearDown() {
+    sched.unsetCaptureAgent();
+    sched.unsetConfigService();
     sched.shutdown();
     sched = null;
     config = null;
+    schedulerProps = null;
   }
 
   private String[] formatDate(Date d) {
@@ -206,28 +206,38 @@ public class SchedulerImplTest {
     testfile.delete();
   }
 
-/* Commented out due to problems getting the UTF16 file to read properly.
   @Test @Ignore
-  public void testValidRemoteUTF16Calendar() {
+  public void testValidRemoteUTF16Calendar() throws IOException, ConfigurationException {
+    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    times[1] = times[0];
+    File testfile = setupTestCalendar("calendars/Opencast-UTF16.ics", times);
     //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
-    String knownGood = this.getClass().getClassLoader().getResource("calendars/Opencast-UTF16.ics").toString();
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, knownGood);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL().toString());
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
+    sched.updated(schedulerProps);
+    //TODO:  Figure out why this fails 1/3 times on some machines without the sleep() here.
+    try {
+      Thread.sleep(200);
+    } catch (InterruptedException e) {
+      Assert.fail();
+    }
     String[] schedule = sched.getCaptureSchedule();
-    Assert.assertEquals(1, schedule.length);
-    Assert.assertEquals("20091005T090000", schedule[0]);
+    Assert.assertEquals(0, schedule.length);
+    testfile.delete();
   }
 
   @Test @Ignore
-  public void testValidLocalUTF16Calendar() {
-    String knownGood = this.getClass().getClassLoader().getResource("calendars/Opencast-UTF16.ics").getFile();
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_URL, null);
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, knownGood);
+  public void testValidLocalUTF16Calendar() throws IOException, ConfigurationException {
+    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    File testfile = setupTestCalendar("calendars/Opencast-UTF16.ics", times);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
+    sched.updated(schedulerProps);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
-    Assert.assertEquals("20091005T090000", schedule[0]);
+    Assert.assertEquals(times[0], schedule[0]);
+    testfile.delete();
   }
-*/
 
   @Test
   public void testBlankRemoteCalendar() throws ConfigurationException {
@@ -323,5 +333,46 @@ public class SchedulerImplTest {
     URL test = new URL("http://www.example.com");
     sched.setScheduleEndpoint(test);
     Assert.assertEquals(test, sched.getScheduleEndpoint());
+  }
+
+  @Test
+  public void testBrokenScheduler() {
+    boolean expectedException = false;
+
+    //Try it
+    try {
+      sched.updated(null);
+    } catch (ConfigurationException e) {
+      expectedException = true;
+    }
+
+    //Check it
+    if (!expectedException) {
+      Assert.fail();
+    } else {
+      expectedException = false;
+    }
+
+    //Try it with a different config
+    try {
+      sched.updated(new Properties());
+    } catch (ConfigurationException e) {
+      expectedException = true;
+    }
+
+    //Check it again
+    if (!expectedException) {
+      Assert.fail();
+    } else {
+      expectedException = false;
+    }
+  }
+
+  public void testBadPolling() throws ConfigurationException {
+    sched.updated(schedulerProps);
+    Assert.assertTrue(sched.isPollingEnabled());
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, "0");
+    sched.updated(schedulerProps);
+    Assert.assertFalse(sched.isPollingEnabled());
   }
 }

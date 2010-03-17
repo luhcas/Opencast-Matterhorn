@@ -39,9 +39,6 @@ import org.slf4j.LoggerFactory;
  * configuration files for the CaptureAgent. Uses java.util.Properties to store
  * configuration file which can read/write INI style config files.
  * 
- * FIXME: The OSGI declarative service configuration defines an activate method "activate()" which is not implemented
- * anywhere. It should probably start the timer that is stopped in deactivate()? If not, it should then be removed from
- * the ds configuration (jt)
  * FIXME: Is this class thread safe (answer: currently, no)? Does it need to be? (jt)
  */
 public class ConfigurationManager implements ManagedService {

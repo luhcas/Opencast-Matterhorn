@@ -143,8 +143,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
     if (properties == null) {
       log.debug("Null properties in updated!");
-      return;
+      throw new ConfigurationException("Null properties in updated!", "null");
     }
+
     try {
       //Load the required properties
       Properties props = new Properties();
@@ -164,7 +165,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       scheduleCleanJob();
       scheduler.start();
     } catch (SchedulerException e) {
-      throw new RuntimeException("Internal error in scheduler, unable to start.", e);
+      throw new ConfigurationException("Internal error in scheduler, unable to start.", e.getMessage());
     }
   }
 
