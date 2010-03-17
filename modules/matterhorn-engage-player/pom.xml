@@ -222,11 +222,11 @@
       <type>swc</type>
     </dependency>
     <dependency>
-      <groupId>com.adobe.osmf</groupId>
-      <artifactId>MediaFramework</artifactId>
-      <version>0.8</version>
-      <type>swc</type>
-    </dependency>
+		<groupId>com.adobe.osmf</groupId>
+		<artifactId>MediaFramework</artifactId>
+		<version>0.9.3</version>
+		<type>swc</type>
+	</dependency>
     <dependency>
       <groupId>com.adobe.swiz</groupId>
       <artifactId>swiz</artifactId>
