@@ -158,7 +158,9 @@ public class PipelineFactoryTest {
   
   @Test
   public void testAddPipeline() {
-    DeviceName[] deviceList = { DeviceName.EPIPHAN_VGA2USB, DeviceName.ALSASRC };
+    DeviceName[] deviceList = { DeviceName.EPIPHAN_VGA2USB, DeviceName.ALSASRC,
+                                DeviceName.BLUECHERRY_PROVIDEO, DeviceName.FILE,
+                                DeviceName.HAUPPAUGE_WINTV };
     String source = "source";
     String dest = "destination";
     boolean ret;
