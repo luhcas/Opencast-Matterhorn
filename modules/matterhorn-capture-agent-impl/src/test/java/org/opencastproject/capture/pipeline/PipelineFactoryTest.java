@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -126,6 +125,7 @@ public class PipelineFactoryTest {
     Assert.assertNull(PipelineFactory.create(p));
   }
   
+  /*
   @Test
   public void testWithInvalidFileSource() {
     Properties properties = new Properties();
@@ -136,7 +136,6 @@ public class PipelineFactoryTest {
     Pipeline pipeline = PipelineFactory.create(properties);
     Assert.assertNull(pipeline);
   }
-  
   
   @Test
   public void testWithFileSource() {
@@ -171,5 +170,6 @@ public class PipelineFactoryTest {
       Assert.assertTrue(ret);
     }
   }
+  */
   
 }
