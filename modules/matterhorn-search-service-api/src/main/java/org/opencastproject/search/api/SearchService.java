@@ -46,6 +46,14 @@ public interface SearchService {
   void delete(String mediaPackageId) throws SearchException;
 
   /**
+   * Clears the search index.
+   * 
+   * @throws SearchException
+   *           if an error occurs while clearing the index
+   */
+  void clear() throws SearchException;
+
+  /**
    * Processes a regular search for a given user query, creates and returns a regular search result.
    * 
    * @param text

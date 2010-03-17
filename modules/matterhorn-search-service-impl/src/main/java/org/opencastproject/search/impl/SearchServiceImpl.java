@@ -72,12 +72,14 @@ public class SearchServiceImpl implements SearchService {
 
   public void setDublincoreService(DublinCoreCatalogService dcService) {
     this.dcService = dcService;
-    if(solrIndexManager != null) solrIndexManager.setDcService(dcService); // In case the dc service is updated
+    if (solrIndexManager != null)
+      solrIndexManager.setDcService(dcService); // In case the dc service is updated
   }
 
   public void setMpeg7Service(Mpeg7CatalogService mpeg7Service) {
     this.mpeg7Service = mpeg7Service;
-    if(solrIndexManager != null) solrIndexManager.setMpeg7Service(mpeg7Service); // In case the dc service is updated
+    if (solrIndexManager != null)
+      solrIndexManager.setMpeg7Service(mpeg7Service); // In case the dc service is updated
   }
 
   /**
@@ -110,10 +112,10 @@ public class SearchServiceImpl implements SearchService {
     if (cc != null && cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT) != null) {
       // use CONFIG
       this.solrRoot = cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT);
-      log_.info("CONFIG "+CONFIG_SOLR_ROOT+": " + this.solrRoot);
+      log_.info("CONFIG " + CONFIG_SOLR_ROOT + ": " + this.solrRoot);
     } else {
       // DEFAULT
-      log_.info("DEFAULT "+CONFIG_SOLR_ROOT+": " + this.solrRoot);
+      log_.info("DEFAULT " + CONFIG_SOLR_ROOT + ": " + this.solrRoot);
     }
     setupSolr(this.solrRoot);
   }
@@ -365,6 +367,22 @@ public class SearchServiceImpl implements SearchService {
 
   /**
    * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#clear()
+   */
+  @Override
+  public void clear() throws SearchException {
+    try {
+      log_.info("Clearing the search index");
+      solrIndexManager.clear();
+    } catch (SolrServerException e) {
+      throw new SearchException(e);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchService#getByQuery(org.opencastproject.search.api.SearchQuery)
    */
   public SearchResult getByQuery(SearchQuery q) throws SearchException {
