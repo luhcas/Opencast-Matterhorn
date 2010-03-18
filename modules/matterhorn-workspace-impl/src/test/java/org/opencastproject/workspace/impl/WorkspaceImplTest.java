@@ -32,8 +32,8 @@ import java.net.URL;
 public class WorkspaceImplTest {
   WorkspaceImpl workspace;
   
-  private static final String workspaceRoot = "target" + File.separator + "junit-workspace-rootdir";
-  private static final String repoRoot = "target" + File.separator + "junit-repo-rootdir";
+  private static final String workspaceRoot = "." + File.separator + "target" + File.separator + "junit-workspace-rootdir";
+  private static final String repoRoot = "." + File.separator + "target" + File.separator + "junit-repo-rootdir";
 
   @Before
   public void setup() throws Exception {

@@ -191,7 +191,7 @@ public class WorkspaceImpl implements Workspace {
       // TODO uri can be null.  Fix this in the repo API.
       File newFile = new File(rootDirectory, toFilesystemSafeName(uri.toString()));
       boolean success = tempFile.renameTo(newFile);
-      if(!success) throw new IllegalStateException("could not cache " + uri + " at " + newFile);
+      if(!success) throw new IllegalStateException("could not cache " + uri + " at " + newFile.getAbsolutePath());
     } else {
       // remove the temp file
       tempFile.delete();
