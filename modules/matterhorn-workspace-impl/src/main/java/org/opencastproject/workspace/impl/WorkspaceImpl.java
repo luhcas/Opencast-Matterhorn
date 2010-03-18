@@ -64,7 +64,6 @@ public class WorkspaceImpl implements Workspace {
       rootDirectory = IoSupport.getSystemTmpDir() + "opencast" + File.separator + "workspace";
     }
     this.rootDirectory = rootDirectory;
-    createRootDirectory();
   }
 
   public void activate(ComponentContext cc) {
@@ -190,8 +189,9 @@ public class WorkspaceImpl implements Workspace {
     if(localFile == null) {
       // The working file repo isn't mounted locally, so cache the file for subsequent calls to get(URI)
       // TODO uri can be null.  Fix this in the repo API.
-      boolean success = tempFile.renameTo(new File(rootDirectory, toFilesystemSafeName(uri.toString())));
-      if(!success) throw new IllegalStateException("could not cache " + uri);
+      File newFile = new File(rootDirectory, toFilesystemSafeName(uri.toString()));
+      boolean success = tempFile.renameTo(newFile);
+      if(!success) throw new IllegalStateException("could not cache " + uri + " at " + newFile);
     } else {
       // remove the temp file
       tempFile.delete();
