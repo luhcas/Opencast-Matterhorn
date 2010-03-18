@@ -91,7 +91,6 @@ public class ConfigurationManager implements ManagedService {
 
     Properties server = retrieveConfigFromServer();
     if (server != null) {
-      // FIXME: is this order correct?  Should you merge then save to disk? We're not sure, but this appears to be backwards (jt)
       writeConfigFileToDisk(server);
       merge(server, true);
     }
@@ -164,14 +163,12 @@ public class ConfigurationManager implements ManagedService {
    * @return the value corresponding to the key.
    */
   public String getItem(String key) {
-    if (properties == null) {
-      logger.warn("No properties are loaded into memory.");
-      return null;
-    } else if (key == null) {
+    if (key == null) {
       return null;
     }
-    else
+    else {
       return properties.getProperty(key);
+    }
   }
   
   /**
@@ -180,10 +177,6 @@ public class ConfigurationManager implements ManagedService {
    * @param value the corresponding value.
    */
   public void setItem(String key, String value) {
-    if (properties == null) {
-      properties = new Properties();
-    }
-
     if (key == null) {
       return;
     }
@@ -264,19 +257,23 @@ public class ConfigurationManager implements ManagedService {
   public Properties getCapabilities() {
     Properties capabilities = new Properties();
     
-    try {
-      String[] friendlyNames = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES).split(",");
-      
-      for (String name : friendlyNames) {
-        String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
-        capabilities.setProperty(name, properties.getProperty(key));
-      }
-      // FIXME: Don't catch NPE here... check for nulls in the first place.  This was the first coding monkey of the week question! (jt)
-    } catch (NullPointerException e) {
-      logger.error("Wrong friendly names list in the agent's properties. Capabilities filtering aborted");
+    String names = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
+    if (names == null) {
+      logger.error("Null friendly name list.  Capabilities filtering aborted.");
       return null;
     }
+    String[] friendlyNames = names.split(",");
     
+    for (String name : friendlyNames) {
+      String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
+      if (properties.containsKey(key)) {
+        capabilities.setProperty(name, properties.getProperty(key));
+      } else {
+        logger.error("Invalid configuration, properties are missing for device {}", key);
+        return null;
+      }
+    }
+
     return capabilities;
   }
   

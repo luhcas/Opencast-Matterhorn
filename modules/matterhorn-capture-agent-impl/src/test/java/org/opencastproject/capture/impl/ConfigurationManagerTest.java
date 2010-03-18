@@ -16,13 +16,15 @@
 package org.opencastproject.capture.impl;
 
 
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -37,25 +39,50 @@ public class ConfigurationManagerTest {
   public void setUp() throws ConfigurationException {
     configManager = new ConfigurationManager();
     Assert.assertNotNull(configManager);
+
+    //Checks on the basic operations before updated() has been called
+    Assert.assertNull(configManager.getItem("nothing"));
+    Assert.assertNull(configManager.getItem(null));
+    configManager.setItem("anything", "nothing");
+    Assert.assertEquals("nothing", configManager.getItem("anything"));
+    configManager.setItem(null, "this should work, but not put anything in the props");
+    Assert.assertEquals(1, configManager.getAllProperties().size());
+
+    configManager.updated(null);
   }
 
   @After
   public void tearDown() {
+    configManager.deactivate();
     configManager = null;
   }
   
   @Test
   public void testMerge() {
+    //Setup the basic properties
     configManager.setItem("test", "foo");
     configManager.setItem("unchanged", "bar");
     Assert.assertEquals(configManager.getItem("test"), "foo");
     Assert.assertEquals(configManager.getItem("unchanged"), "bar");
+
+    //Setup the additions
     Properties p = new Properties();
     p.setProperty("test","value");
+
+    //Do some idiot checks to make sure that trying to merge a null properties object does nothing
+    Properties defaults = configManager.getAllProperties();
+    configManager.merge(null, true);
+    Assert.assertEquals(defaults, configManager.getAllProperties());
+    configManager.merge(null, false);
+    Assert.assertEquals(defaults, configManager.getAllProperties());
+
+    //Now test a basic merge
     Properties t = configManager.merge(p, false);
     Assert.assertEquals(t.getProperty("test"), "value");
     Assert.assertEquals(t.getProperty("unchanged"), "bar");
     t = null;
+
+    //Now overwrite the system settings
     t = configManager.merge(p, true);
     Assert.assertEquals(t.getProperty("test"), "value");
     Assert.assertEquals(t.getProperty("unchanged"), "bar");
@@ -63,7 +90,7 @@ public class ConfigurationManagerTest {
     Assert.assertEquals(configManager.getItem("unchanged"), "bar");
   }
   
-  @Test @Ignore
+  @Test
   public void testGetAllProperties() {
     Properties properties;
     
@@ -75,6 +102,60 @@ public class ConfigurationManagerTest {
     Assert.assertEquals("1", properties.get("a"));
     Assert.assertEquals("2", properties.get("b"));
     Assert.assertEquals("3", properties.get("c"));
-    
+  }
+
+  @Test
+  public void testUpdate() throws IOException, ConfigurationException {
+    Properties sourceProps = new Properties();
+    InputStream is = getClass().getClassLoader().getResourceAsStream("config/capture.properties");
+    if (is == null) {
+      Assert.fail();
+    }
+    sourceProps.load(is);
+    IOUtils.closeQuietly(is);
+
+    configManager.updated(sourceProps);
+
+    Properties configProps = configManager.getAllProperties();
+    for (Object key : sourceProps.keySet()) {
+      if (!configProps.containsKey(key)) {
+        Assert.fail();
+      }
+    }
+  }
+
+  @Test
+  public void testCapabilities() throws IOException, ConfigurationException {
+    Properties sourceProps = new Properties();
+    InputStream is = getClass().getClassLoader().getResourceAsStream("config/capture.properties");
+    if (is == null) {
+      Assert.fail();
+    }
+    sourceProps.load(is);
+    IOUtils.closeQuietly(is);
+
+    configManager.updated(sourceProps);
+
+    Properties caps = configManager.getCapabilities();
+    Assert.assertEquals("screen.mpg", caps.get("SCREEN"));
+    Assert.assertEquals("camera.mpg", caps.get("PRESENTER"));
+    Assert.assertEquals("audio.mp3", caps.get("MICROPHONE"));
+  }
+
+  @Test
+  public void testBrokenCapabilities() throws IOException, ConfigurationException {
+    Properties sourceProps = new Properties();
+    InputStream is = getClass().getClassLoader().getResourceAsStream("config/capture.properties");
+    if (is == null) {
+      Assert.fail();
+    }
+    sourceProps.load(is);
+    IOUtils.closeQuietly(is);
+
+    sourceProps.remove("capture.device.PRESENTER.src");
+    sourceProps.remove("capture.device.PRESENTER.outputfile");
+    configManager.updated(sourceProps);
+
+    Assert.assertNull(configManager.getCapabilities());
   }
 }
