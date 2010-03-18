@@ -36,12 +36,12 @@ public class IoSupport {
 
   public static String getSystemTmpDir() {
     String tmpdir = System.getProperty("java.io.tmpdir");
-    if (tmpdir != null) {
+    if (tmpdir == null) {
+      tmpdir = File.separator + "tmp" + File.separator;
+    } else {
       if (! tmpdir.endsWith(File.separator)) {
         tmpdir += File.separator;
       }
-    } else {
-      tmpdir = File.separator + "tmp";
     }
     return tmpdir;
   }
