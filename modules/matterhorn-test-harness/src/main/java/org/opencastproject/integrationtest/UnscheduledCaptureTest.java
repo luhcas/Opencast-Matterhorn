@@ -129,8 +129,6 @@ public class UnscheduledCaptureTest {
     
     // Capture Admin, Recordings: id is finished
     response = CaptureAdminResources.recording(recordingId);
-
-    Thread.sleep(4000);
     
     assertEquals("Response code (recording):", 200, response.getStatus());
     

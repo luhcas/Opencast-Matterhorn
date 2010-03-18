@@ -52,11 +52,21 @@ public class Utils {
   }
   
   public static Boolean xPathExists(Document document, String path) throws Exception {
-      return (Boolean) xPath(document, path, XPathConstants.BOOLEAN);
+    return (Boolean) xPath(document, path, XPathConstants.BOOLEAN);
   }
   
   public static JSONObject parseJson(String doc) throws Exception {
-      return (JSONObject) JSONValue.parse(doc);
+    return (JSONObject) JSONValue.parse(doc);
   }
+  
+  public static String schedulerEvent(Integer duration) throws Exception {
+	Long start = System.currentTimeMillis() + 60000;
+	Long end = start + duration;
+	String event = IOUtils.toString(Utils.class.getClassLoader().getResourceAsStream("scheduler-event.xml"));
+	return event
+		.replace("@@start@@", start.toString())
+		.replace("@@end@@", end.toString())
+		.replace("@@duration@@", duration.toString());
+	}
   
 }
