@@ -48,11 +48,9 @@
   <!-- ===== Set properties for ffmpeg ===================== -->
 
   <property name="ffmpeg.url" value="svn://svn.ffmpeg.org/ffmpeg/trunk"/>
-  <!--
-  <property name="ffmpeg.url" value="${thirdparty.repository}/ffmpeg${ffmpeg.revision}.tar.bz2"/>
-  -->
   <property name="build.ffmpeg" value="${build.thirdparty}/ffmpeg"/>
-  <property name="ffmpeg.workdir" value="${build.ffmpeg}/ffmpeg-${ffmpeg.revision}"/>
+  <property name="ffmpeg.workdir" value="${build.ffmpeg}/ffmpeg"/>
+  <property name="libswscale.url" value="svn://svn.ffmpeg.org/mplayer/trunk/libswscale"/>
   <available file="${ffmpeg.workdir}/version.sh" property="ffmpeg.downloaded"/>
   <available file="${ffmpeg.workdir}/ffmpeg" property="ffmpeg.built"/>
 
@@ -400,6 +398,8 @@
   -->
   <target name="ffmpeg.download" depends="setup,svnkit" unless="ffmpeg.downloaded">
     <mkdir dir="${build.ffmpeg}"/>
+    
+    <!-- check out ffmpeg -->
     <java classname="org.tmatesoft.svn.cli.SVN" dir="${build.ffmpeg}" fork="true">
         <arg value="co" />
         <arg value="${ffmpeg.url}@${ffmpeg.revision}" />
@@ -408,19 +408,37 @@
             <pathelement location="${svnkit.jar}" />
             <pathelement location="${svnkit-cli.jar}" />
         </classpath>
-    </java>    
-    <move file="${build.ffmpeg}/ffmpeg" tofile="${ffmpeg.workdir}"/>
+    </java> 
+    
+    <!-- Update libswscale to a compatible version -->
+    <java classname="org.tmatesoft.svn.cli.SVN" dir="${ffmpeg.workdir}" fork="true">
+        <arg value="propset" />
+        <arg value="svn:externals" />
+        <arg value="libswscale -r ${libswscale.revision} ${libswscale.url}" />
+        <arg value="." />
+        <classpath>
+            <pathelement location="${svnkit.jar}" />
+            <pathelement location="${svnkit-cli.jar}" />
+        </classpath>
+    </java>
+    <java classname="org.tmatesoft.svn.cli.SVN" dir="${ffmpeg.workdir}" fork="true">
+        <arg value="update" />
+        <classpath>
+            <pathelement location="${svnkit.jar}" />
+            <pathelement location="${svnkit-cli.jar}" />
+        </classpath>
+    </java>
     
     <!-- patch configure script to correctly handle source-path -->
     <echo message="Patching ${ffmpeg.workdir}/configure with ${pwd}/patches/ffmpeg/configure.patch"/>
     <exec executable="patch" searchpath="true">
-      <arg line="--verbose"/>
       <arg line="-p0"/>
       <arg line="-N"/>
       <arg line="${ffmpeg.workdir}/configure"/>
       <arg line="./patches/ffmpeg/configure.patch"/>      
     </exec>
-    <echo message="Patched ffmpeg"/>
+    
+    <echo message="Patched ffmpeg configure script"/>
 
     <chmod perm="755" file="${ffmpeg.workdir}/configure"/>
     <chmod perm="755" file="${ffmpeg.workdir}/doc/texi2pod.pl"/>
