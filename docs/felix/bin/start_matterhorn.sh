@@ -38,7 +38,7 @@ FELIX_CACHE="$FELIX/felix-cache"
 rm -rf $FELIX_CACHE
 
 # Create the debug config
-DEBUG_OPTS="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=$DEBUG_PORT,server=y,suspend=$DEBUG_SUSPEND"
+#DEBUG_OPTS="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=$DEBUG_PORT,server=y,suspend=$DEBUG_SUSPEND"
 
 # For Java 6, you need some minor xml facility configuration
 # No longer needed for CXF 2.3.0 after 01 Oct
