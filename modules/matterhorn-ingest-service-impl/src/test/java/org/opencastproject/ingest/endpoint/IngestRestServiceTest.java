@@ -15,22 +15,27 @@
  */
 package org.opencastproject.ingest.endpoint;
 
+import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import junit.framework.Assert;
 
 import org.apache.commons.fileupload.MockHttpServletRequest;
+import org.easymock.EasyMock;
 import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -55,6 +60,23 @@ public class IngestRestServiceTest {
     restService = new IngestRestService();
     restService.setPersistenceProvider(new PersistenceProvider());
     restService.setPersistenceProperties(props);
+    
+    // Create a mock ingest service
+    IngestService ingestService = EasyMock.createNiceMock(IngestService.class);
+    EasyMock.expect(ingestService.createMediaPackage()).andReturn(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
+    EasyMock.expect(ingestService.addAttachment(
+            (URI)EasyMock.anyObject(), (MediaPackageElementFlavor)EasyMock.anyObject(), (MediaPackage)EasyMock.anyObject()))
+            .andReturn(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
+    EasyMock.expect(ingestService.addCatalog(
+            (URI)EasyMock.anyObject(), (MediaPackageElementFlavor)EasyMock.anyObject(), (MediaPackage)EasyMock.anyObject()))
+            .andReturn(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
+    EasyMock.expect(ingestService.addTrack(
+            (URI)EasyMock.anyObject(), (MediaPackageElementFlavor)EasyMock.anyObject(), (MediaPackage)EasyMock.anyObject()))
+            .andReturn(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
+    EasyMock.replay(ingestService);
+
+    // Set the service, and activate the rest endpoint
+    restService.setIngestService(ingestService);
     restService.activate(null);
   }
 
@@ -64,8 +86,75 @@ public class IngestRestServiceTest {
   }
 
   @Test
+  public void testCreateMediaPackage() throws Exception {
+    Response response = restService.createMediaPackage();
+    Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+    MediaPackage mp = (MediaPackage)response.getEntity();
+    Assert.assertNotNull(mp);
+  }
+
+  @Test
+  public void testAddMediaPackageTrack() throws Exception {
+    Response response = restService.addMediaPackageTrack("http://foo/av.mov", "presenter/source",
+            ((MediaPackage)restService.createMediaPackage().getEntity()).toXml());
+    Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testAddMediaPackageCatalog() throws Exception {
+    Response response = restService.addMediaPackageCatalog("http://foo/dc.xml", "metadata/dublincore",
+            ((MediaPackage)restService.createMediaPackage().getEntity()).toXml());
+    Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testAddMediaPackageAttachment() throws Exception {
+    Response response = restService.addMediaPackageAttachment("http://foo/cover.png", "image/cover",
+            ((MediaPackage)restService.createMediaPackage().getEntity()).toXml());
+    Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void testAddMediaPackageAttachmentFromRequest() throws Exception {
+    // Upload the mediapackage with its new element
+    Response postResponse = restService.addMediaPackageAttachment(newMockRequest());
+    Assert.assertEquals(Status.OK.getStatusCode(), postResponse.getStatus());
+  }
+
+  @Test
+  public void testAddMediaPackageCatalogFromRequest() throws Exception {
+    // Upload the mediapackage with its new element
+    Response postResponse = restService.addMediaPackageCatalog(newMockRequest());
+    Assert.assertEquals(Status.OK.getStatusCode(), postResponse.getStatus());
+  }
+
+  @Test
+  public void testAddMediaPackageTrackFromRequest() throws Exception {
+    // Upload the mediapackage with its new element
+    Response postResponse = restService.addMediaPackageTrack(newMockRequest());
+    Assert.assertEquals(Status.OK.getStatusCode(), postResponse.getStatus());
+  }
+
+  @Test
   public void testUploadJobPersistence() throws Exception {
-    // Mock up the HTTP request
+    // Create the job (this is done in a browser on the initial page load)
+    UploadJob job = restService.createUploadJob();
+
+    // Upload the mediapackage with its new element
+    Response postResponse = restService.addElementMonitored(job.getId(), newMockRequest());
+    Assert.assertEquals(Status.OK.getStatusCode(), postResponse.getStatus());
+
+    // Check on the job status
+    Response progressResponse = restService.getProgress(job.getId());
+    Assert.assertEquals(Status.OK.getStatusCode(), progressResponse.getStatus());
+    Assert.assertTrue(progressResponse.getEntity().toString().startsWith("{total:"));
+    
+    // Check on a job that doesn't exist
+    Response invalidResponse = restService.getProgress("This ID does not exist");
+    Assert.assertEquals(Status.NOT_FOUND.getStatusCode(), invalidResponse.getStatus());
+  }
+  
+  private HttpServletRequest newMockRequest() throws Exception {
     MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     StringBuilder requestBody = new StringBuilder();
     requestBody.append("-----1234\r\n");
@@ -83,23 +172,6 @@ public class IngestRestServiceTest {
     requestBody.append(mp.toXml());
     requestBody.append("\r\n");
     requestBody.append("-----1234");
-    MockHttpServletRequest request = new MockHttpServletRequest(requestBody.toString().getBytes("UTF-8"),
-            "multipart/form-data; boundary=---1234");
-
-    // Create the job (this is done in a browser on the initial page load)
-    UploadJob job = restService.createUploadJob();
-
-    // Upload the mediapackage with its new element
-    Response postResponse = restService.addElementMonitored(job.getId(), request);
-    Assert.assertEquals(Status.OK.getStatusCode(), postResponse.getStatus());
-
-    // Check on the job status
-    Response progressResponse = restService.getProgress(job.getId());
-    Assert.assertEquals(Status.OK.getStatusCode(), progressResponse.getStatus());
-    Assert.assertTrue(progressResponse.getEntity().toString().startsWith("{total:"));
-    
-    // Check on a job that doesn't exist
-    Response invalidResponse = restService.getProgress("This ID does not exist");
-    Assert.assertEquals(Status.NOT_FOUND.getStatusCode(), invalidResponse.getStatus());
+    return new MockHttpServletRequest(requestBody.toString().getBytes("UTF-8"),"multipart/form-data; boundary=---1234");
   }
 }
