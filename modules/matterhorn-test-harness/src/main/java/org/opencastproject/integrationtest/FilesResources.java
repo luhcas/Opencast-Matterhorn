@@ -33,19 +33,12 @@ public class FilesResources {
   public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/files/");
   
   public static ClientResponse getFile(String mediaPackageID, String mediaPackageElementID) throws Exception {
-    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-    params.add("mediaPackageID", mediaPackageID);
-    params.add("mediaPackageElementID", mediaPackageElementID);
-    return r.post(ClientResponse.class, params);
+    return r.path(mediaPackageID + '/' + mediaPackageElementID).get(ClientResponse.class);
   }
   
   public static ClientResponse getFile(String mediaPackageID, 
       String mediaPackageElementID, String fileName) throws Exception {
-    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-    params.add("mediaPackageID", mediaPackageID);
-    params.add("mediaPackageElementID", mediaPackageElementID);
-    params.add("fileName", fileName);
-    return r.post(ClientResponse.class, params);
+    return r.path(mediaPackageID + '/' + mediaPackageElementID + '/' + fileName).get(ClientResponse.class);
   }
   
   // FIXME

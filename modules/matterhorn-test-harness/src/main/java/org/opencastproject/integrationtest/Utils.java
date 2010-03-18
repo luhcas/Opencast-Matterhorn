@@ -15,6 +15,8 @@
  */
 package org.opencastproject.integrationtest;
 
+import java.io.File;
+
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,6 +30,9 @@ import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.w3c.dom.Document;
+
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
 
 /**
  * Test utilities
@@ -67,6 +72,12 @@ public class Utils {
 		.replace("@@start@@", start.toString())
 		.replace("@@end@@", end.toString())
 		.replace("@@duration@@", duration.toString());
-	}
+  }
+
+  public static File getFile(String url) throws Exception {
+	  Client c = Client.create();
+	  WebResource r = c.resource(url);
+	  return r.get(File.class);
+  }
   
 }

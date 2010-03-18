@@ -63,6 +63,21 @@
       <artifactId>jersey-client</artifactId>
       <version>1.1.5</version>
     </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-util</artifactId>
+      <version>0.6-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.5.8</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.5.6</version>
+    </dependency>
   </dependencies>
   <build>
     <defaultGoal>test</defaultGoal>

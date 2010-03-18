@@ -39,15 +39,15 @@ public class SearchResources {
   }
   
   // TODO add remaining query parameters (episode and series)
-  public static ClientResponse episode(String query) throws Exception {
+  public static ClientResponse episode(String id) throws Exception {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-    params.add("q", query);
+    params.add("id", id);
     return r.path("episode").queryParams(params).get(ClientResponse.class);
   }
   
-  public static ClientResponse series(String query) throws Exception {
+  public static ClientResponse series(String id) throws Exception {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-    params.add("q", query);
+    params.add("id", id);
     return r.path("series").queryParams(params).get(ClientResponse.class);
   }
 }

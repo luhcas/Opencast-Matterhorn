@@ -28,8 +28,9 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-  UnscheduledCaptureTest.class,
-  ScheduledCaptureTest.class
+  // UnscheduledCaptureTest.class,
+  // ScheduledCaptureTest.class,
+  UploadTest.class
 })
 
 public class IntegrationTests {
