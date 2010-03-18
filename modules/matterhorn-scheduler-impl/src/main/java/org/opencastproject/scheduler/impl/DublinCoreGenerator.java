@@ -19,6 +19,8 @@ import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
+import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
+import org.opencastproject.metadata.dublincore.Precision;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 
 import org.slf4j.Logger;
@@ -29,10 +31,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
@@ -54,6 +60,15 @@ public class DublinCoreGenerator {
   
   MetadataMapper mapper;
 
+  
+  public static String formatW3CDTF(Date date) {
+    SimpleDateFormat dateFormater = new SimpleDateFormat(
+            "yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+    //dateFormater.setTimeZone(Calendar.getInstance().getTimeZone());
+    dateFormater.setTimeZone(TimeZone.getTimeZone("GMT"));
+    return dateFormater.format(date);
+  }
+  
   
   /**
    * Constructor needs the reference to the metadata mapping information. 
@@ -78,7 +93,7 @@ public class DublinCoreGenerator {
     DublinCoreCatalog dcCatalog = DublinCoreCatalogImpl.newInstance();
 
     dcCatalog.add(DublinCoreCatalog.PROPERTY_IDENTIFIER, new DublinCoreValue(event.getID()));
-    dcCatalog.add(DublinCoreCatalog.PROPERTY_CREATED, new DublinCoreValue(event.getStartdate().toString()));
+    dcCatalog.add(DublinCoreCatalog.PROPERTY_CREATED, EncodingSchemeUtils.encodeDate(event.getStartdate(), Precision.Second));
     Enumeration<String> keys = dcMetadata.keys();
     while (keys.hasMoreElements()) {
       String key = keys.nextElement();
