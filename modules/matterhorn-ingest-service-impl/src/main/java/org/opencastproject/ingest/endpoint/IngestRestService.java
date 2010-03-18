@@ -27,6 +27,7 @@ import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
@@ -54,6 +55,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
+import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -80,17 +82,17 @@ public class IngestRestService {
   private IngestService ingestService = null;
   private DublinCoreCatalogService dublinCoreService;
   protected PersistenceProvider persistenceProvider;
-  protected Map persistenceProperties;
+  protected Map<String, Object> persistenceProperties;
   protected EntityManagerFactory emf = null;
   private String serverURL = null;
 
   public IngestRestService() {
+    factory = MediaPackageBuilderFactory.newInstance();
+    builder = factory.newMediaPackageBuilder();
   }
 
   public void setIngestService(IngestService ingestService) {
     this.ingestService = ingestService;
-    factory = MediaPackageBuilderFactory.newInstance();
-    builder = factory.newMediaPackageBuilder();
   }
 
   public void setDublinCoreService(DublinCoreCatalogService dcService) {
@@ -101,12 +103,17 @@ public class IngestRestService {
     this.persistenceProvider = persistenceProvider;
   }
 
+  @SuppressWarnings("unchecked")
   public void setPersistenceProperties(Map persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
   }
 
   public void activate(ComponentContext context) {
-    serverURL = context.getBundleContext().getProperty("serverURL");
+    if(context == null || context.getBundleContext().getProperty("serverURL") == null) {
+      serverURL = UrlSupport.DEFAULT_BASE_URL;
+    } else {
+      serverURL = context.getBundleContext().getProperty("serverURL");
+    }
     try {
       emf = persistenceProvider
               .createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
@@ -351,6 +358,24 @@ public class IngestRestService {
     }
   }
 
+  protected UploadJob createUploadJob() throws RuntimeException {
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    try {
+      UploadJob job = new UploadJob();
+      tx.begin();
+      em.persist(job);
+      tx.commit();
+      return job;
+    } catch (RollbackException ex) {
+      logger.error(ex.getMessage(), ex);
+      tx.rollback();
+      throw new RuntimeException(ex);
+    } finally {
+      em.close();
+    }
+  }
+
   /**
    * Creates an upload job and returns an HTML form ready for uploading the file to the newly created upload job.
    * Returns 500 if something goes wrong unexpectedly
@@ -360,14 +385,9 @@ public class IngestRestService {
   @GET
   @Path("uploadform.html")
   @Produces(MediaType.TEXT_HTML)
-  public Response createUploadJob() {
-    EntityManager em = emf.createEntityManager();
-    EntityTransaction tx = em.getTransaction();
+  public Response createUploadJobHtml() {
     try {
-      UploadJob job = new UploadJob();
-      tx.begin();
-      em.persist(job);
-      tx.commit();
+      UploadJob job = createUploadJob();
       String html = IOUtils.toString(getClass().getResourceAsStream("/templates/uploadform.html"));
       String uploadURL = serverURL + "/ingest/rest/addElementMonitored/" + job.getId();
       html = html.replaceAll("\\{uploadURL\\}", uploadURL);
@@ -375,11 +395,8 @@ public class IngestRestService {
       logger.info("New upload job created: " + job.getId());
       return Response.ok(html).build();
     } catch (Exception ex) {
-      logger.error(ex.getMessage(), ex);
-      tx.rollback();
+      logger.warn(ex.getMessage(), ex);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-    } finally {
-      em.close();
     }
   }
 
@@ -405,9 +422,7 @@ public class IngestRestService {
     EntityManager em = emf.createEntityManager();
     try {
       try { // try to get UploadJob, responde 404 if not successful
-        Query q = em.createNamedQuery("UploadJob.getByID");
-        q.setParameter("id", jobId);
-        job = (UploadJob) q.getSingleResult();
+        job = em.find(UploadJob.class, jobId);
       } catch (NoResultException e) {
         logger.warn("UploadJob not found for Id: " + jobId);
         return buildUploadFailedRepsonse();

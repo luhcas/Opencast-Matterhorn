@@ -1,0 +1,105 @@
+/**
+ *  Copyright 2009, 2010 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+package org.opencastproject.ingest.endpoint;
+
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
+import junit.framework.Assert;
+
+import org.apache.commons.fileupload.MockHttpServletRequest;
+import org.eclipse.persistence.jpa.PersistenceProvider;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+public class IngestRestServiceTest {
+  protected IngestRestService restService;
+  private ComboPooledDataSource pooledDataSource = null;
+
+  @Before
+  public void setup() throws Exception {
+    pooledDataSource = new ComboPooledDataSource();
+    pooledDataSource.setDriverClass("org.h2.Driver");
+    pooledDataSource.setJdbcUrl("jdbc:h2:./target/db" + System.currentTimeMillis() + ";LOCK_MODE=1;MVCC=TRUE");
+    pooledDataSource.setUser("sa");
+    pooledDataSource.setPassword("sa");
+
+    // Collect the persistence properties
+    Map<String, Object> props = new HashMap<String, Object>();
+    props.put("javax.persistence.nonJtaDataSource", pooledDataSource);
+    props.put("eclipselink.ddl-generation", "create-tables");
+    props.put("eclipselink.ddl-generation.output-mode", "database");
+
+    restService = new IngestRestService();
+    restService.setPersistenceProvider(new PersistenceProvider());
+    restService.setPersistenceProperties(props);
+    restService.activate(null);
+  }
+
+  @After
+  public void teardown() throws Exception {
+    pooledDataSource.close();
+  }
+
+  @Test
+  public void testUploadJobPersistence() throws Exception {
+    // Mock up the HTTP request
+    MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
+    StringBuilder requestBody = new StringBuilder();
+    requestBody.append("-----1234\r\n");
+    requestBody.append("Content-Disposition: form-data; name=\"file\"; filename=\"catalog.txt\"\r\n");
+    requestBody.append("Content-Type: text/whatever\r\n");
+    requestBody.append("\r\n");
+    requestBody.append("This is the content of the file\n");
+    requestBody.append("\r\n");
+    requestBody.append("-----1234\r\n");
+    requestBody.append("Content-Disposition: form-data; name=\"flavor\"\r\n");
+    requestBody.append("\r\ntest/flavor\r\n");
+    requestBody.append("-----1234\r\n");
+    requestBody.append("Content-Disposition: form-data; name=\"mediaPackage\"\r\n");
+    requestBody.append("\r\n");
+    requestBody.append(mp.toXml());
+    requestBody.append("\r\n");
+    requestBody.append("-----1234");
+    MockHttpServletRequest request = new MockHttpServletRequest(requestBody.toString().getBytes("UTF-8"),
+            "multipart/form-data; boundary=---1234");
+
+    // Create the job (this is done in a browser on the initial page load)
+    UploadJob job = restService.createUploadJob();
+
+    // Upload the mediapackage with its new element
+    Response postResponse = restService.addElementMonitored(job.getId(), request);
+    Assert.assertEquals(Status.OK.getStatusCode(), postResponse.getStatus());
+
+    // Check on the job status
+    Response progressResponse = restService.getProgress(job.getId());
+    Assert.assertEquals(Status.OK.getStatusCode(), progressResponse.getStatus());
+    Assert.assertTrue(progressResponse.getEntity().toString().startsWith("{total:"));
+    
+    // Check on a job that doesn't exist
+    Response invalidResponse = restService.getProgress("This ID does not exist");
+    Assert.assertEquals(Status.NOT_FOUND.getStatusCode(), invalidResponse.getStatus());
+  }
+}
