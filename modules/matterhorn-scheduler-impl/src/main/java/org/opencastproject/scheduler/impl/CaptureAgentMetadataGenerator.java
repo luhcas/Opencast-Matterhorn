@@ -69,7 +69,7 @@ public class CaptureAgentMetadataGenerator {
       if (i > 0) resList.append(","); //skip "," in front of first value
       resList.append(res[i]);
     }
-    caCatalog.setProperty("capture.devices.names", resList.toString());
+    caCatalog.setProperty("capture.device.names", resList.toString());
     for (Entry<String, String> e : caMetadata.entrySet()) {
       caCatalog.put (e.getKey(), e.getValue());
     }       

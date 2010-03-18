@@ -42,7 +42,7 @@ import java.util.Properties;
 public class PipelineFactory {
 
   private static final Logger logger = LoggerFactory.getLogger(PipelineFactory.class);
-  
+
   public enum Codec { MPEG2, H264, AAC, MP3 };
 
   /**
@@ -55,72 +55,72 @@ public class PipelineFactory {
    */
   public static Pipeline create(Properties props) {
     ArrayList<CaptureDevice> devices = new ArrayList<CaptureDevice>();
-    
-     // Setup pipeline for all the devices specified
+
+    // Setup pipeline for all the devices specified
     String deviceNames = props.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
     if (deviceNames == null) {
       logger.error("No capture devices specified in {}.", CaptureParameters.CAPTURE_DEVICE_NAMES);
       return null;
     }
-    
+
     String[] friendlyNames = deviceNames.split(",");
     String outputDirectory = props.getProperty(CaptureParameters.RECORDING_ROOT_URL);
-    
+
     for (String name : friendlyNames) {
 
       name = name.trim();
       DeviceName devName;
-     
+
       // Get properties from 
       String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
       String srcLoc = props.getProperty(srcProperty);
       String outputLoc = new File(outputDirectory, props.getProperty(outputProperty)).getAbsolutePath();
-      
-      // Attempt to determine what the device is using the JV4LInfo library 
-      try {
-        // ALSA source
-        if (srcLoc.contains("hw:"))
-          devName = DeviceName.ALSASRC;
-        // V4L devices
-        else {
-          V4LInfo v4linfo = JV4LInfo.getV4LInfo(srcLoc);
-          String deviceString = v4linfo.toString();
-          if (deviceString.contains("Epiphan VGA2USB"))
-            devName = DeviceName.EPIPHAN_VGA2USB;
-          else if (deviceString.contains("Hauppauge") || deviceString.contains("WinTV"))
-            devName = DeviceName.HAUPPAUGE_WINTV;
-          else if (deviceString.contains("BT878"))
-            devName = DeviceName.BLUECHERRY_PROVIDEO;
-          else {
-            logger.error("Do not recognized device: {}.", srcLoc);
-            return null;
-          }
-        }
-      } catch (JV4LInfoException e) {
+
+      if (new File(srcLoc).isFile()) {
         // Non-V4L file. If it exists, assume it is ingestable
         // TODO: Fix security risk. Any file on CaptureAgent filesytem could be ingested
-        if (new File(srcLoc).isFile()) {
-          devName = DeviceName.FILE;
-        }
-        else {
-          logger.error("No such file: {}.", srcLoc);
+        devName = DeviceName.FILE;
+      } else {
+        // Attempt to determine what the device is using the JV4LInfo library 
+        try {
+          // ALSA source
+          if (srcLoc.contains("hw:"))
+            devName = DeviceName.ALSASRC;
+          // V4L devices
+          else {
+            V4LInfo v4linfo = JV4LInfo.getV4LInfo(srcLoc);
+            String deviceString = v4linfo.toString();
+            if (deviceString.contains("Epiphan VGA2USB"))
+              devName = DeviceName.EPIPHAN_VGA2USB;
+            else if (deviceString.contains("Hauppauge") || deviceString.contains("WinTV"))
+              devName = DeviceName.HAUPPAUGE_WINTV;
+            else if (deviceString.contains("BT878"))
+              devName = DeviceName.BLUECHERRY_PROVIDEO;
+            else {
+              logger.error("Do not recognized device: {}.", srcLoc);
+              return null;
+            }
+          }
+        } catch (JV4LInfoException e) {
+          // The v4l device caused an exception
+          logger.error("Unexpected jv4linfo exception: {}.", e.getMessage());
           return null;
         }
       }
-      
+
       // devices will store the CaptureDevice list arbitrary order
       CaptureDevice capdev = new CaptureDevice(srcLoc, devName, outputLoc);
       String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_CODEC;
       String bitrateProperty = codecProperty + CaptureParameters.CAPTURE_DEVICE_BITRATE;
       String codec = props.getProperty(codecProperty);
       String bitrate = props.getProperty(bitrateProperty);
-      
+
       if (codec != null)
         capdev.properties.setProperty("codec", codec);
       if (bitrate != null)
         capdev.properties.setProperty("bitrate", bitrate);
-  
+
       if (!devices.add(capdev))
         logger.error("Unable to add device: {}.", capdev);
     }
@@ -178,7 +178,7 @@ public class PipelineFactory {
   private static String formatPipelineError(CaptureDevice device, Element src, Element sink) {
     return device.getLocation() + ": " + "(" + src.toString() + ", " + sink.toString() + ")";
   }
-  
+
   /**
    * Adds a pipeline specifically designed to captured from the Hauppauge WinTv cards to the main pipeline
    * 
@@ -245,10 +245,10 @@ public class PipelineFactory {
       logger.error(error);
       return false;
     }
-    
+
     return true;
   }
-  
+
   /**
    * Adds a pipeline specifically designed to captured from the Epiphan VGA2USB cards to the main pipeline
    * 
@@ -307,10 +307,10 @@ public class PipelineFactory {
       logger.error(error);
       return false;
     }
-    
+
     return true;
   }
-  
+
   /**
    * Adds a pipeline specifically designed to captured from an ALSA source to the main pipeline
    * 
@@ -325,7 +325,7 @@ public class PipelineFactory {
     String codec = captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
     Element enc, mux;
-    
+
     Element alsasrc = ElementFactory.make("alsasrc", null);
     Element queue = ElementFactory.make("queue", null);
     if (codec != null) {
@@ -340,13 +340,13 @@ public class PipelineFactory {
       mux = ElementFactory.make("capsfilter", null);
     }
     Element filesink = ElementFactory.make("filesink", null);
-    
+
 
     alsasrc.set("device", captureDevice.getLocation());
     filesink.set("location", captureDevice.getOutputPath());
     if (bitrate != null)
       enc.set("bitrate", bitrate);
-    
+
     pipeline.addMany(alsasrc, queue, enc, mux, filesink);
 
     if (!alsasrc.link(queue))
@@ -363,10 +363,10 @@ public class PipelineFactory {
       logger.error(error);
       return false;
     }
-    
+
     return true;
   }
-  
+
   /**
    * Adds a pipeline specifically designed to captured from the Bluecherry Provideo cards to the main pipeline
    * 
@@ -389,14 +389,14 @@ public class PipelineFactory {
       enc = ElementFactory.make("ffenc_mpeg2video", null);
     Element mpegtsmux = ElementFactory.make("mpegtsmux", null);
     Element filesink = ElementFactory.make("filesink", null);
-    
+
     v4l2src.set("device", captureDevice.getLocation());
     filesink.set("location", captureDevice.getOutputPath());
     if (bitrate != null)
       enc.set("bitrate", bitrate);
-    
+
     pipeline.addMany(v4l2src, queue, enc, mpegtsmux, filesink);
-    
+
     if (!v4l2src.link(queue))
       error = formatPipelineError(captureDevice, v4l2src, queue);
     else if (!queue.link(enc))
@@ -405,7 +405,7 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, enc, mpegtsmux);
     else if (!mpegtsmux.link(filesink))
       error = formatPipelineError(captureDevice, mpegtsmux, filesink);
-    
+
     if (error != null) {
       pipeline.removeMany(v4l2src, queue, enc, mpegtsmux, filesink);
       logger.error(error);
@@ -413,7 +413,7 @@ public class PipelineFactory {
     }
     return true;
   }
-  
+
   /**
    * Adds a pipeline for a media file that just copies it to a new location
    * 
@@ -426,12 +426,12 @@ public class PipelineFactory {
   private static boolean getFilePipeline(CaptureDevice captureDevice, Pipeline pipeline) {
     Element filesrc = ElementFactory.make("filesrc", null);
     Element filesink = ElementFactory.make("filesink", null);
-    
+
     filesrc.set("location", captureDevice.getLocation());
     filesink.set("location", captureDevice.getOutputPath());
-    
+
     pipeline.addMany(filesrc, filesink);
-    
+
     if (!filesrc.link(filesink)) {
       pipeline.removeMany(filesrc, filesink);
       logger.error(formatPipelineError(captureDevice, filesrc, filesink));
