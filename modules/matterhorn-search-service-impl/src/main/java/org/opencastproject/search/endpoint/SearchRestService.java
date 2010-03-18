@@ -138,6 +138,12 @@ public class SearchRestService {
     searchService.delete(mediaPackageId);
   }
 
+  @POST
+  @Path("clear")
+  public void clear() throws SearchException {
+    searchService.clear();
+  }
+  
   @GET
   @Path("series")
   @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_JSON})
