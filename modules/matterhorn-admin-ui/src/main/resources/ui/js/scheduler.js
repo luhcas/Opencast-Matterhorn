@@ -270,8 +270,7 @@ SchedulerUI.handleAgentChange = function(elm){
         function(d){
           var capabilities = [];
           $.each($('entry', d), function(a, i){
-            var s = $(i).attr('key').toLowerCase();
-            s = s.charAt(0).toUpperCase() + s.slice(1);
+            var s = $(i).attr('key');
             capabilities.push(s);
           });
           if(capabilities.length){
@@ -285,7 +284,7 @@ SchedulerUI.handleAgentChange = function(elm){
 
 SchedulerUI.displayCapabilities = function(capa){
   $.each(capa, function(i, v){
-    $('#input-list').append('<input type="checkbox" id="' + v + '" value="' + v + '" checked="checked"><label for="' + v +'">' + v + '</label>');
+    $('#input-list').append('<input type="checkbox" id="' + v + '" value="' + v + '" checked="checked"><label for="' + v +'">' + v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() + '</label>');
   });
   SchedulerForm.formFields.resources = new FormField(capa, false, {getValue: getInputs, setValue: setInputs, checkValue: checkInputs});
 }
