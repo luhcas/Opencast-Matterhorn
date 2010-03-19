@@ -1,0 +1,219 @@
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+ 
+ input
+{
+  margin:0;
+  padding:0;
+  border:0;
+  border:none;
+  onfocus:none;
+}
+
+input:hover
+{
+  cursor:pointer;
+  cursor:hand;
+}
+.oc_btn-skip-backward
+{
+  background-image:url("../img/icons.png");
+  background-position:0 -36px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-skip-backward-over
+{
+  background-image:url("../img/icons.png");
+  background-position:-31px -36px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-skip-backward-clicked
+{
+  background-image:url("../img/icons.png");
+  background-position:0px -36px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+
+.oc_btn-rewind
+{
+  background-image:url("../img/icons.png");
+  background-position:0 -72px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-rewind-over
+{
+  background-image:url("../img/icons.png");
+  background-position:-31px -72px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-rewind-clicked
+{
+  background-image:url("../img/icons.png");
+  background-position:-31px -36px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-play
+{
+  background-image:url("../img/icons.png");
+  background-position:0px -252px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-play-over
+{
+  background-image:url("../img/icons.png");
+  background-position:-31px -252px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-pause
+{
+  background-image:url("../img/icons.png");
+  background-position:0px -108px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-pause-over
+{
+  background-image:url("../img/icons.png");
+  background-position:-31px -108px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-fast-forward
+{
+  background-image:url("../img/icons.png");
+  background-position:0px -144px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-fast-forward-over
+{
+  background-image:url("../img/icons.png");
+  background-position:-31px -144px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-skip-forward
+{
+  background-image:url("../img/icons.png");
+  background-position:0px -180px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-skip-forward-over
+{
+  background-image:url("../img/icons.png");
+  background-position:-31px -180px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-volume-high
+{
+  background-image:url("../img/icons.png");
+  background-position: -6px -288px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-volume-mute
+{
+  background-image:url("../img/icons.png");
+  background-position: 0px -360px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-volume-low
+{
+  background-image:url("../img/icons.png");
+  background-position: -6px -324px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-volume-none
+{
+  background-image:url("../img/icons.png");
+  background-position: -107px -324px;
+  width:29px;
+  height:36px;
+  float:left;
+}
+
+#oc_video-volume-slider
+{
+  background-image:url("../img/icons.png");
+  background-position: -29px -360px;
+  width:72px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-cc-off
+{
+  background-image:url("../img/icons.png");
+  background-position: -3px -216px;
+  width:33px;
+  height:36px;
+  float:left;
+}
+
+.oc_btn-cc-on
+{
+  background-image:url("../img/icons.png");
+  background-position: -111px -216px;
+  width:33px;
+  height:36px;
+  float:left;
+}

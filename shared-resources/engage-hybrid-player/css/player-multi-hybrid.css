@@ -45,11 +45,18 @@
   margin-top:               8px;
 }
 
+#oc_search
+{
+  float:                    right;
+  height:                   100%;
+  padding-left:             5px;
+  padding-right:            5px;
+}
+
 #oc_video-size-controls
 {
   float:                    right;
   height:                   100%;
-  border:                   2px solid #871B1D;
   padding-left:             5px;
   padding-right:            5px;
  
@@ -117,7 +124,6 @@
 {
     min-width:              756px;
     height:                 510px;
-    border:                 2px solid #871B1D;
     margin-top:             2px;
 }
 
@@ -141,7 +147,7 @@
 
 #oc_video-player-controls
 {
-    height:                 28px;
+    height:                 36px;
     margin-left:            10px;
     margin-right:           10px;
 }
@@ -149,52 +155,35 @@
 #oc_video-time
 {
     float:                  left;
-    text-align:             left;
-    font-size:              1em;
-    margin-top:             6px;
-        margin-right:            10px;
-    
+    text-align:             center;
+    font-size:              0.8em;
+    color:				  	#FFFFFF;
+    background-image:		url("../img/icons.png");
+    background-position:	0 0;
+    width:					130px;
+    height:					36px;
+    float:					left;
+}
+
+#simpleEdit 
+{
+     margin-top:				12px;
 }
 
 #oc_video-controls
 {
     float:                  left;
-    text-align:             left;
-    margin-left:            10px;
-    margin-right:            10px;
- 
-}
-
-#oc_video-volume
-{
-    float:                  left;
-    text-align:             left;
-    margin-left:            10px;
- 
-}
-
-#oc_video-volume-slider
-{
-	float:                  left;
-	margin-top:             8px;
-    margin-left:            1px;
-    margin-right:            10px;
-    
-	
 }
 
 #oc_video-cc
 {
-    float:                  left;
-    text-align:             left;
-    margin-left:            10px;
     
 }
 
-#oc_tabs
+#oc_tabs input
 {
-    float:                  right;
-    margin-left:            10px;
+    width:100px;
+    margin-left:10px;
 }
 
 #oc_seek-slider
@@ -255,228 +244,22 @@
 
 
 
-.oc_btn-skip-backward
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/control_skipbackward.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
 
-.oc_btn-skip-backward-over
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/control_skipbackward_blue.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
 
-.oc_btn-rewind
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/control_rewind.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
 
-.oc_btn-rewind-over
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/control_rewind_blue.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
 
-.oc_btn-play
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/control_play.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
 
-.oc_btn-play-over
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/control_play_blue.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
 
-.oc_btn-pause
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/control_pause.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
 
-.oc_btn-pause-over
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/control_pause_blue.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
 
-.oc_btn-fast-forward
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/control_fastforward.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
-
-.oc_btn-fast-forward-over
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/control_fastforward_blue.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
-
-.oc_btn-skip-forward
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/control_skipforward.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
-
-.oc_btn-skip-forward-over
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/control_skipforward_blue.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
-
-.oc_btn-volume-high
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/sound.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
-
-.oc_btn-volume-mute
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/sound_mute.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
-
-.oc_btn-volume-low
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/sound_low.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
-
-.oc_btn-volume-none
-{
-    overflow:               hidden;
-    width:                  24px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/sound_none.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
-
-.oc_btn-cc-off
-{
-    overflow:               hidden;
-    width:                  28px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/cc.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
-
-.oc_btn-cc-on
-{
-    overflow:               hidden;
-    width:                  28px;
-    height:                 28px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/cc_onnew.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
 .oc-slider-volume-Rail 
 {
-    width:                  70px;
-    height:                 8px;
-    border:                 1px solid #999999;
+    width:                  55px;
+    height:                 0px;
+    border:                 0px solid #999999;
     position:               relative;
     background:             #fff;
+    margin-left:			4px;
 }
 
 .oc-slider-volume-Thumb:focus
@@ -485,7 +268,7 @@
     background-color:       #BEBEBE;
 }
 
-.oc-slider-volume-Thumb 
+.oc-slider-volume-Thumb
 {
     margin:                 0px;
     padding:                0px;
@@ -495,6 +278,7 @@
     background:             #EEEEEE;
     border:                 1px solid #999999;
     position:               absolute;
+    margin-top:	16px;
 }
 
 .oc_offScreen-hidden 
@@ -565,8 +349,6 @@
     width:                  40px;
     margin-top:             4px;
 }
-
-
 
 
 .oc-segment-table { 

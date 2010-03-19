@@ -15,6 +15,9 @@ Opencast.Initialize = (function ()
         @memberOf Opencast.Player
         @description Keylistener.
      */
+    var myWidth           = 0,
+    myHeight = 0;
+
     function keyboardListener() {
     
         $(document).keyup(function (event) {
@@ -23,7 +26,7 @@ Opencast.Initialize = (function ()
             {
                 if (event.which === 77 || event.which === 109) // press m or M
                 {
-                	Opencast.Player.doToggleMute();
+                    Opencast.Player.doToggleMute();
                 }
                 if (event.which === 80 || event.which === 112 || event.which === 83 || event.which === 84 || event.which === 116 || event.which === 115 || event.which === 85 || event.which === 117  || event.which === 68 || event.which === 100 || event.which === 48 || event.which === 49 || event.which === 50 || event.which === 51 || event.which === 52 || event.which === 53 || event.which === 54  || event.which === 55 || event.which === 56 || event.which === 57 || event.which === 67 || event.which === 99 || event.which === 82 || event.which === 114 || event.which === 70 || event.which === 102 || event.which === 83 || event.which === 115 || event.which === 73 || event.which === 105)
                 {
@@ -35,7 +38,6 @@ Opencast.Initialize = (function ()
     }
 
     $(document).ready(function () {
-    	
         keyboardListener();
         init();
         var simpleEdit = fluid.inlineEdit("#simpleEdit", {
@@ -49,18 +51,17 @@ Opencast.Initialize = (function ()
         });
         
         Opencast.ariaSlider.init();
-        //  Will be done in the onPlayerReady function
-        //   Opencast.Scrubber.init();
+        //Opencast.Scrubber.init();
         
         $("#editorContainer").attr("className", "oc_editTime");
         $("#editField").attr("className", "oc_editTime");
         
         $("#oc_btn-cc").attr('role', 'button');
         $("#oc_btn-cc").attr('aria-pressed', 'false'); 
-    
+
         $("#oc_btn-volume").attr('role', 'button');
         $("#oc_btn-volume").attr('aria-pressed', 'false');
-    
+
         $("#oc_btn-play-pause").attr('role', 'button');
         $("#oc_btn-play-pause").attr('aria-pressed', 'false');
 
@@ -79,11 +80,8 @@ Opencast.Initialize = (function ()
         $("#time-current").attr('role', 'timer');
         $("#time-total").attr('role', 'timer');
         
-        
         $("#oc_btn-slides").attr('role', 'button');
         $("#oc_btn-slides").attr('aria-pressed', 'false'); 
-        
-        
     });
     
     
@@ -94,55 +92,61 @@ Opencast.Initialize = (function ()
      * http://www.this-play.nl/tools/resizer.html
      * 
      * */
-    function reportSize() {
-		  myWidth = 0, myHeight = 0;
-		  if( typeof( window.innerWidth ) == 'number' ) {
-		    //Non-IE
-		    myWidth = window.innerWidth;
-		    myHeight = window.innerHeight;
-		  } else {
-		    if( document.documentElement &&
-		        ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
-		      //IE 6+ in 'standards compliant mode'
-		      myWidth = document.documentElement.clientWidth;
-		      myHeight = document.documentElement.clientHeight;
-		    } else {
-		      if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
-		        //IE 4 compatible
-		        myWidth = document.body.clientWidth;
-		        myHeight = document.body.clientHeight;
-		      }
-		    }
-		  }
-		}
+    function reportSize() 
+    {
+        myWidth = 0; 
+        myHeight = 0;
+        if (typeof (window.innerWidth) === 'number') 
+        {
+            //Non-IE
+            myWidth = window.innerWidth;
+            myHeight = window.innerHeight;
+        } 
+        else 
+        {
+            if (document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)) 
+            {
+                //IE 6+ in 'standards compliant mode'
+                myWidth = document.documentElement.clientWidth;
+                myHeight = document.documentElement.clientHeight;
+            } 
+            else 
+            {
+                if (document.body && (document.body.clientWidth || document.body.clientHeight)) 
+                {
+                    //IE 4 compatible
+                    myWidth = document.body.clientWidth;
+                    myHeight = document.body.clientHeight;
+                }
+            }
+        }
+    }
     
-		function doTest(){
-			reportSize();
-			
-			if (myHeight >600)
-			{
-				$('#oc_body').css("height", (myHeight-50 + "px"));
-				if(Opencast.Player.getShowSections() === false)
-				{
-					$('#oc_flash-player').css("height", (myHeight-138 + "px"));
-				}
-				else
-				{
-					$('#oc_flash-player').css("height", (myHeight-258 + "px"));
-				}
-				
-			}
-		}
-		
-		function init(){
-			window.onresize = doTest;
-			doTest();
-		}
-		
-    
+    function doTest()
+    {
+        reportSize();
+        if (myHeight > 600)
+        {
+            $('#oc_body').css("height", (myHeight - 50 + "px"));
+            if (Opencast.Player.getShowSections() === false)
+            {
+                $('#oc_flash-player').css("height", (myHeight - 138 + "px"));
+            }
+            else
+            {
+                $('#oc_flash-player').css("height", (myHeight - 258 + "px"));
+            }
+        }
+    }
+
+    function init()
+    {
+        window.onresize = doTest;
+        doTest();
+    }
+
     return {
-    	doTest : doTest
-       
+        doTest : doTest
     };
 }());
 

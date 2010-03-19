@@ -1,4 +1,4 @@
-/*global, Player, Videodisplay, Scrubber*/
+/*global $, Player, Videodisplay, Scrubber*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
 /**
@@ -25,26 +25,23 @@ Opencast.Player = (function () {
     UNMUTE                = "Unmute: Control + Alt + M",
     MUTE                  = "Mute: Control + Alt + M",
     SLIDERVOLUME          = "slider_volume_Thumb",
-    SLIDERSEEK            = "slider_seek_Thumb",
-    SLIDES	              = "Slides",
-    SLIDESHIDE	          = "Hide Slides",
-    NOTES	              = "Notes",
-    NOTESHIDE	          = "Hide Notes",
-    SEARCH	              = "Search",
-    SEARCHHIDE	          = "Hide Search",
-    SHORTCUTS	          = "Shortcuts",
-    SHORTCUTSHIDE	      = "Hide Shortcuts",
-    EMBED				  = "Embed",
-    EMBEDHIDE			  = "Hide Embed",
+    SLIDES                = "Slides",
+    SLIDESHIDE            = "Hide Slides",
+    NOTES                  = "Notes",
+    NOTESHIDE             = "Hide Notes",
+    SEARCH                = "Search",
+    SEARCHHIDE            = "Hide Search",
+    SHORTCUTS             = "Shortcuts",
+    SHORTCUTSHIDE         = "Hide Shortcuts",
+    EMBED                 = "Embed",
+    EMBEDHIDE             = "Hide Embed",
     currentPlayPauseState = PAUSING,
     showSections          = true,
-    infoBool              = false,
     mouseOverBool         = false,
     captionsBool          = false,
     dragging              = false,
     duration              = 0;
    
-    
     /**
         @memberOf Opencast.Player
         @description Get the current play pause state.
@@ -64,7 +61,6 @@ Opencast.Player = (function () {
         currentPlayPauseState = state;
     }
 
-    
     /**
         @memberOf Opencast.Player
         @description Get the showSections.
@@ -81,27 +77,7 @@ Opencast.Player = (function () {
      */
     function setShowSections(bool)
     {
-    	showSections = bool;
-    } 
-    
-    
-    /**
-        @memberOf Opencast.Player
-        @description Get the infoBool.
-     */
-    function getInfoBool()
-    {
-        return infoBool;
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Set the infoBool.
-        @param Boolean bool
-     */
-    function setInfoBool(bool)
-    {
-        infoBool = bool;
+        showSections = bool;
     } 
     
     /**
@@ -133,15 +109,14 @@ Opencast.Player = (function () {
     }
 
     /**
-       @memberOf Opencast.Player
-       @description Set the captionsBool.
-       @param Booelan bool
+        @memberOf Opencast.Player
+        @description Set the captionsBool.
+        @param Booelan bool
      */
     function setCaptionsBool(bool)
     {
-	    captionsBool = bool;
+        captionsBool = bool;
     }
-    
     
     /**
         @memberOf Opencast.Player
@@ -152,7 +127,7 @@ Opencast.Player = (function () {
         return duration;
     }
     
-   /**
+    /**
         @memberOf Opencast.Player
         @description Get the dragging.
         @param Booelan bool
@@ -169,13 +144,9 @@ Opencast.Player = (function () {
      */
     function setDragging(bool)
     {
-     
-    	dragging = bool;
+        dragging = bool;
     }
     
-    
-   
-
     /**
         @memberOf Opencast.Player
         @description Mouse over effect, change the css style.
@@ -211,6 +182,156 @@ Opencast.Player = (function () {
             setMouseOverBool(false);
         }
     }
+
+    /**
+        @memberOf Opencast.Player
+        @description Show the slides
+     */
+    function showSlides()
+    {
+        $("#oc_slides-sections").attr("className", "oc_slidesDisplayBlock");
+        $("#oc_btn-slides").attr({ 
+            alt: SLIDESHIDE,
+            title: SLIDESHIDE,
+            value: SLIDESHIDE
+        });
+        $("#oc_btn-slides").attr('aria-pressed', 'true');
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Hide the slides
+     */
+    function hideSlides()
+    {
+        $("#oc_slides-sections").attr("className", "oc_DisplayNone");
+        $("#oc_btn-slides").attr({ 
+            alt: SLIDES,
+            title: SLIDES,
+            value: SLIDES
+        });
+        $("#oc_btn-slides").attr('aria-pressed', 'false');
+    }
+
+    /**
+        @memberOf Opencast.Player
+        @description Show the notes
+     */
+    function showNotes()
+    {
+        $("#oc_notes-sections").attr("className", "oc_notesDisplayBlock");
+        $("#oc_btn-notes").attr({ 
+            alt: NOTESHIDE,
+            title: NOTESHIDE,
+            value: NOTESHIDE
+        });
+        $("#oc_btn-notes").attr('aria-pressed', 'true');
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Hide the notes
+     */
+    function hideNotes()
+    {
+        $("#oc_notes-sections").attr("className", "oc_DisplayNone");
+        $("#oc_btn-notes").attr({ 
+            alt: NOTES,
+            title: NOTES,
+            value: NOTES
+        });
+        $("#oc_btn-notes").attr('aria-pressed', 'false');
+    }
+
+    /**
+        @memberOf Opencast.Player
+        @description Show the search
+     */
+    function showSearch()
+    {
+        $("#oc_search-sections").attr("className", "oc_searchDisplayBlock");
+        $("#oc_btn-search").attr({ 
+            alt: SEARCHHIDE,
+            title: SEARCHHIDE,
+            value: SEARCHHIDE
+        });
+        $("#oc_btn-search").attr('aria-pressed', 'true');
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Hide the search
+     */
+    function hideSearch()
+    {
+        $("#oc_search-sections").attr("className", "oc_DisplayNone");
+        $("#oc_btn-search").attr({ 
+            alt: SEARCH,
+            title: SEARCH,
+            value: SEARCH
+        });
+        $("#oc_btn-search").attr('aria-pressed', 'false');
+    }
+
+    /**
+        @memberOf Opencast.Player
+        @description Show the shortcuts
+     */
+    function showShortcuts()
+    {
+        $("#oc_shortcuts-sections").attr("className", "oc_shortcutsDisplayBlock");
+        $("#oc_btn-shortcuts").attr({ 
+            alt: SHORTCUTSHIDE,
+            title: SHORTCUTSHIDE,
+            value: SHORTCUTSHIDE
+        });
+        $("#oc_btn-shortcuts").attr('aria-pressed', 'true');
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Hide the shortcuts
+     */
+    function hideShortcuts()
+    {
+        $("#oc_shortcuts-sections").attr("className", "oc_DisplayNone");
+        $("#oc_btn-shortcuts").attr({ 
+            alt: SHORTCUTS,
+            title: SHORTCUTS,
+            value: SHORTCUTS
+        });
+        $("#oc_btn-shortcuts").attr('aria-pressed', 'false');
+    }
+
+     /**
+        @memberOf Opencast.Player
+        @description Show the embed
+     */
+    function showEmbed()
+    {
+        $("#oc_embed-sections").attr("className", "oc_embedDisplayBlock");
+        $("#oc_btn-embed").attr({ 
+            alt: EMBEDHIDE,
+            title: EMBEDHIDE,
+            value: EMBEDHIDE
+        });
+        $("#oc_btn-embed").attr('aria-pressed', 'true');
+    }
+    
+    /**
+       @memberOf Opencast.Player
+       @description Hide the embed
+     */
+    function hideEmbed()
+    {
+        $("#oc_embed-sections").attr("className", "oc_DisplayNone");
+        $("#oc_btn-embed").attr({ 
+            alt: EMBED,
+            title: EMBED,
+            value: EMBED
+        });
+        $("#oc_btn-embed").attr('aria-pressed', 'false');
+    }
     
     /**
         @memberOf Opencast.Player
@@ -220,49 +341,21 @@ Opencast.Player = (function () {
     {
         if ($("#oc_btn-slides").attr("title") === SLIDES)
         {
-        	showSlides();
-        	hideNotes();
-        	hideSearch();
-        	hideShortcuts();
-        	hideEmbed();
-        	setShowSections(true);
+            showSlides();
+            hideNotes();
+            hideSearch();
+            hideShortcuts();
+            hideEmbed();
+            setShowSections(true);
         }
         else
         {
-        	hideSlides();
-        	setShowSections(false);
+            hideSlides();
+            setShowSections(false);
         }
         Opencast.Initialize.doTest();
     }
-    
-    /**
-        @memberOf Opencast.Player
-        @description Show the slides
-     */
-    function showSlides()
-    {
-        $("#oc_slides-sections").attr("className", "oc_slidesDisplayBlock");
-    	$("#oc_btn-slides").attr({ 
-            alt: SLIDESHIDE,
-            title: SLIDESHIDE
-        });
-    	$("#oc_btn-slides").attr('aria-pressed', 'true');
-    }
-    
-    /**
-        @memberOf Opencast.Player
-        @description Hide the slides
-     */
-    function hideSlides()
-    {
-    	$("#oc_slides-sections").attr("className", "oc_DisplayNone");
-	    $("#oc_btn-slides").attr({ 
-            alt: SLIDES,
-            title: SLIDES
-        });
-	    $("#oc_btn-slides").attr('aria-pressed', 'false');
-    }
-    
+
     /**
         @memberOf Opencast.Player
         @description Toggle the slides
@@ -271,172 +364,89 @@ Opencast.Player = (function () {
     {
         if ($("#oc_btn-notes").attr("title") === NOTES)
         {
-        	showNotes(); 
-        	hideSlides();
-        	hideSearch();
-        	hideShortcuts();
-        	hideEmbed();
-        	setShowSections(true);
-    	}
+            showNotes(); 
+            hideSlides();
+            hideSearch();
+            hideShortcuts();
+            hideEmbed();
+            setShowSections(true);
+        }
         else
         {
-        	hideNotes();
-        	setShowSections(false);
+            hideNotes();
+            setShowSections(false);
         }
         Opencast.Initialize.doTest();
     }
-    
+
     /**
         @memberOf Opencast.Player
-        @description Show the notes
+        @description Toggle the search
      */
-    function showNotes()
-    {
-    	$("#oc_notes-sections").attr("className", "oc_notesDisplayBlock");
-    	$("#oc_btn-notes").attr({ 
-            alt: NOTESHIDE,
-            title: NOTESHIDE
-        });
-    	$("#oc_btn-notes").attr('aria-pressed', 'true');
-    }
-    
-    /**
-        @memberOf Opencast.Player
-        @description Hide the notes
-     */
-    function hideNotes()
-    {
-    	$("#oc_notes-sections").attr("className", "oc_DisplayNone");
-	    $("#oc_btn-notes").attr({ 
-            alt: NOTES,
-            title: NOTES
-        });
-	    $("#oc_btn-notes").attr('aria-pressed', 'false');
-    }
-    
-    
     function doToggleSearch()
     {
-    	if ($("#oc_btn-search").attr("title") === SEARCH)
+        if ($("#oc_btn-search").attr("title") === SEARCH)
         {
-    		showSearch();
-    		hideNotes(); 
-        	hideSlides();
-        	hideShortcuts();
-        	hideEmbed();
-        	setShowSections(true);
-    	}
+            showSearch();
+            hideNotes(); 
+            hideSlides();
+            hideShortcuts();
+            hideEmbed();
+            setShowSections(true);
+        }
         else
         {
-        	hideSearch();
-        	setShowSections(false);
+            hideSearch();
+            setShowSections(false);
         }
-    	Opencast.Initialize.doTest();
+        Opencast.Initialize.doTest();
     }
-    
-    function showSearch()
-    {
-    	$("#oc_search-sections").attr("className", "oc_searchDisplayBlock");
-    	$("#oc_btn-search").attr({ 
-            alt: SEARCHHIDE,
-            title: SEARCHHIDE
-        });
-    	$("#oc_btn-search").attr('aria-pressed', 'true');
-    }
-    
-    function hideSearch()
-    {
-    	$("#oc_search-sections").attr("className", "oc_DisplayNone");
-    	$("#oc_btn-search").attr({ 
-            alt: SEARCH,
-            title: SEARCH
-        });
-    	$("#oc_btn-search").attr('aria-pressed', 'false');
-    }
-    
+
+    /**
+        @memberOf Opencast.Player
+        @description Toggle the shortcuts
+     */
     function doToggleShortcuts()
     {
-    	if ($("#oc_btn-shortcuts").attr("title") === SHORTCUTS)
+        if ($("#oc_btn-shortcuts").attr("title") === SHORTCUTS)
         {
-    		showShortcuts();
-    		hideNotes(); 
-        	hideSlides();
-        	hideSearch();
-        	hideEmbed();
-        	setShowSections(true);
-    	}
+            showShortcuts();
+            hideNotes(); 
+            hideSlides();
+            hideSearch();
+            hideEmbed();
+            setShowSections(true);
+        }
         else
         {
-        	hideShortcuts();
-        	setShowSections(false);
+            hideShortcuts();
+            setShowSections(false);
         }
-    	Opencast.Initialize.doTest();
+        Opencast.Initialize.doTest();
     }
-    
-    function showShortcuts()
-    {
-    	$("#oc_shortcuts-sections").attr("className", "oc_shortcutsDisplayBlock");
-    	$("#oc_btn-shortcuts").attr({ 
-            alt: SHORTCUTSHIDE,
-            title: SHORTCUTSHIDE
-        });
-    	$("#oc_btn-shortcuts").attr('aria-pressed', 'true');
-    }
-    
-    function hideShortcuts()
-    {
-    	$("#oc_shortcuts-sections").attr("className", "oc_DisplayNone");
-    	$("#oc_btn-shortcuts").attr({ 
-            alt: SHORTCUTS,
-            title: SHORTCUTS
-        });
-    	$("#oc_btn-shortcuts").attr('aria-pressed', 'false');
-    }
-    
-    
-    
-    
+
+    /**
+        @memberOf Opencast.Player
+        @description Toggle the embed
+     */
     function doToggleEmbed()
     {
-    	if ($("#oc_btn-embed").attr("title") === EMBED)
+        if ($("#oc_btn-embed").attr("title") === EMBED)
         {
-    		showEmbed();
-    		hideNotes(); 
-        	hideSlides();
-        	hideSearch();
-        	hideShortcuts();
-        	setShowSections(true);
-    	}
+            showEmbed();
+            hideNotes(); 
+            hideSlides();
+            hideSearch();
+            hideShortcuts();
+            setShowSections(true);
+        }
         else
         {
-        	hideEmbed();
-        	setShowSections(false);
+            hideEmbed();
+            setShowSections(false);
         }
-    	Opencast.Initialize.doTest();
+        Opencast.Initialize.doTest();
     }
-    
-    function showEmbed()
-    {
-    	$("#oc_embed-sections").attr("className", "oc_embedDisplayBlock");
-    	$("#oc_btn-embed").attr({ 
-            alt: EMBEDHIDE,
-            title: EMBEDHIDE
-        });
-    	$("#oc_btn-embed").attr('aria-pressed', 'true');
-    }
-    
-    function hideEmbed()
-    {
-    	$("#oc_embed-sections").attr("className", "oc_DisplayNone");
-    	$("#oc_btn-embed").attr({ 
-            alt: EMBED,
-            title: EMBED
-        });
-    	$("#oc_btn-embed").attr('aria-pressed', 'false');
-    }
-    
-    
-    
     
     /**
      * 
@@ -493,7 +503,7 @@ Opencast.Player = (function () {
      */
     function doPlay() 
     {
-        Videodisplay.play();
+        var eventPlay = Videodisplay.play();
     }
 
     /**
@@ -502,7 +512,7 @@ Opencast.Player = (function () {
      */
     function doPause() 
     {
-        Videodisplay.pause(); 
+        var eventPause = Videodisplay.pause(); 
     }
 
     /**
@@ -527,10 +537,10 @@ Opencast.Player = (function () {
         @memberOf Opencast.Player
         @description Toggle between play and pause the video.
      */
-    function doTogglePlayPause() 
+    function doTogglePlayPause()
     {
         // Checking if btn_play_pause is "play"
-        if (getCurrentPlayPauseState() === PAUSING) 
+        if (getCurrentPlayPauseState() === PAUSING)
         {
             setCurrentPlayPauseState(PLAYING);
             doPlay();
@@ -548,7 +558,7 @@ Opencast.Player = (function () {
      */
     function doToggleMute() 
     {
-	    Videodisplay.mute();
+        var eventMute = Videodisplay.mute();
     }
     
     /**
@@ -557,12 +567,12 @@ Opencast.Player = (function () {
      */
     function lowSound()
     {
-    	$("#oc_btn-volume").attr('className', 'oc_btn-volume-low');
-    	$("#oc_btn-volume").attr({ 
+        $("#oc_btn-volume").attr('className', 'oc_btn-volume-low');
+        $("#oc_btn-volume").attr({ 
             alt: UNMUTE,
             title: UNMUTE
         });
-    	$("#oc_btn-volume").attr('aria-pressed', 'false');
+        $("#oc_btn-volume").attr('aria-pressed', 'false');
     }
     
     /**
@@ -571,12 +581,12 @@ Opencast.Player = (function () {
      */
     function noneSound()
     {
-    	$("#oc_btn-volume").attr('className', 'oc_btn-volume-none');
-    	$("#oc_btn-volume").attr({ 
+        $("#oc_btn-volume").attr('className', 'oc_btn-volume-none');
+        $("#oc_btn-volume").attr({ 
             alt: UNMUTE,
             title: UNMUTE
         });
-    	$("#oc_btn-volume").attr('aria-pressed', 'false');
+        $("#oc_btn-volume").attr('aria-pressed', 'false');
     }
     
     /**
@@ -585,12 +595,12 @@ Opencast.Player = (function () {
      */
     function highSound()
     {
-    	$("#oc_btn-volume").attr('className', 'oc_btn-volume-high');
-    	$("#oc_btn-volume").attr({ 
+        $("#oc_btn-volume").attr('className', 'oc_btn-volume-high');
+        $("#oc_btn-volume").attr({ 
             alt: UNMUTE,
             title: UNMUTE
         });
-    	$("#oc_btn-volume").attr('aria-pressed', 'false');
+        $("#oc_btn-volume").attr('aria-pressed', 'false');
     }
     
     /**
@@ -599,12 +609,12 @@ Opencast.Player = (function () {
      */
     function muteSound()
     {
-    	$("#oc_btn-volume").attr('className', 'oc_btn-volume-mute');
-    	$("#oc_btn-volume").attr({ 
+        $("#oc_btn-volume").attr('className', 'oc_btn-volume-mute');
+        $("#oc_btn-volume").attr({ 
             alt: MUTE,
             title: MUTE
         });
-    	$("#oc_btn-volume").attr('aria-pressed', 'true');
+        $("#oc_btn-volume").attr('aria-pressed', 'true');
     }
     
     
@@ -614,13 +624,12 @@ Opencast.Player = (function () {
      */
     function setCCIconOn()
     {
-    	$("#oc_btn-cc").attr({ 
+        $("#oc_btn-cc").attr({ 
             alt: CCON,
             title: CCON
         });
         $("#oc_btn-cc").attr("className", "oc_btn-cc-on");
         $("#oc_btn-cc").attr('aria-pressed', 'true');
-    	
     }
     
     /**
@@ -629,7 +638,6 @@ Opencast.Player = (function () {
      */
     function setCCIconOff()
     {
-    	
         $("#oc_btn-cc").attr({ 
             alt: CCOFF,
             title: CCOFF
@@ -639,14 +647,13 @@ Opencast.Player = (function () {
     }
     
     /**
-     
         @memberOf Opencast.Player
         @description Set the volume slider
         @param Number newVolume
      */
     function setPlayerVolume(newPlayerVolume) 
     {
-    	Videodisplay.setVolumePlayer(newPlayerVolume);
+        Videodisplay.setVolumePlayer(newPlayerVolume);
     }
     
     /**
@@ -656,8 +663,28 @@ Opencast.Player = (function () {
      */
     function doToogleClosedCaptions() 
     {
-    	Videodisplay.closedCaptions();
+        Videodisplay.closedCaptions();
     }
+    
+    
+    
+    
+    function videoSizeControlsLeft()
+    {
+    	Videodisplay.videoSizeControlsLeft();
+    }
+    
+    function videoSizeControlsCenter()
+    {
+    	Videodisplay.videoSizeControlsCenter();
+    }
+    
+    function videoSizeControlsRight()
+    {
+    	Videodisplay.videoSizeControlsRight();
+    }
+    
+    
     
     /**
      * 
@@ -678,31 +705,31 @@ Opencast.Player = (function () {
                 alt: PLAY,
                 title: PLAY
             });
-   
+
             $("#oc_btn-play-pause").attr('className', 'oc_btn-play');
             $("#oc_btn-play-pause").attr('aria-pressed', 'false');
-    
+
             if (getMouseOverBool() === true)
             {
                 $("#oc_btn-play-pause").attr("className", "oc_btn-play-over");
             }
             setCurrentPlayPauseState(PAUSING);
-        } 
+        }
         else 
         {
             $("#oc_btn-play-pause").attr({ 
                 alt: PAUSE,
                 title: PAUSE
             });
-   
+
             $("#oc_btn-play-pause").attr("className", "oc_btn-pause");
             $("#oc_btn-play-pause").attr('aria-pressed', 'true');
-    
+
             if (getMouseOverBool() === true)
             {
                 $("#oc_btn-play-pause").attr("className", "oc_btn-pause-over");
             }
-    
+
             setCurrentPlayPauseState(PLAYING);
         }
     }
@@ -735,9 +762,7 @@ Opencast.Player = (function () {
      */
     function setDuration(time) 
     {
-    	duration = time;
-    	
-    	
+        duration = time;
     }
     
     /**
@@ -747,16 +772,13 @@ Opencast.Player = (function () {
      */
     function setPlayhead(newPosition) 
     {
-        
-    	if(getDragging() === false)
+        if (getDragging() === false)
         {
-          var newPos = Math.round((newPosition / getDuration()) *  $("#scubber-channel").width());
-          $("#draggable").css("left", newPos);
-          $("#scrubber").css("left", newPos);
-          $("#play-progress").css("width", newPos);
-         }
-          
-              
+            var newPos = Math.round((newPosition / getDuration()) *  $("#scubber-channel").width());
+            $("#draggable").css("left", newPos);
+            $("#scrubber").css("left", newPos);
+            $("#play-progress").css("width", newPos);
+        }
     }
     
     /**
@@ -766,10 +788,7 @@ Opencast.Player = (function () {
      */
     function setProgress(value) 
     {
-    
-    
         $('.load-progress').css("width", (value + "%"));
-    
     }
     
     /**
@@ -779,45 +798,47 @@ Opencast.Player = (function () {
      */
     function setVolumeSlider(newVolume) 
     {
-    	Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(SLIDERVOLUME), newVolume);
+        Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(SLIDERVOLUME), newVolume);
     }
     
     return {
     	PlayPauseMouseOver : PlayPauseMouseOver,
-    	PlayPauseMouseOut : PlayPauseMouseOut,
-    	getShowSections : getShowSections,
-    	getDuration : getDuration,
-    	setDragging : setDragging,
-    	doToggleSlides : doToggleSlides,
-    	doToggleNotes : doToggleNotes,
-    	doToggleSearch : doToggleSearch,
-    	doToggleShortcuts : doToggleShortcuts,
-    	doToggleEmbed : doToggleEmbed,
-    	setMediaURL : setMediaURL,
-    	setCaptionsURL : setCaptionsURL,
-    	lowSound : lowSound,
-    	noneSound : noneSound,
-    	highSound : highSound,
-    	muteSound : muteSound,
-    	setCCIconOn : setCCIconOn,
-    	setCCIconOff : setCCIconOff,
-    	doSkipBackward : doSkipBackward,
-    	doRewind : doRewind,
-    	doPlay : doPlay,
-    	doPause : doPause,
-    	doFastForward : doFastForward,
-    	doSkipForward : doSkipForward,
-    	doTogglePlayPause : doTogglePlayPause,
-    	doToggleMute : doToggleMute,
-    	setPlayerVolume : setPlayerVolume,
-    	doToogleClosedCaptions : doToogleClosedCaptions,
-    	setPlayPauseState : setPlayPauseState,
-    	setCurrentTime : setCurrentTime,
-    	setTotalTime : setTotalTime,
-    	setDuration : setDuration,
-    	setPlayhead : setPlayhead,
-    	setProgress : setProgress,
-    	setVolumeSlider : setVolumeSlider
-    	
+        PlayPauseMouseOut : PlayPauseMouseOut,
+        getShowSections : getShowSections,
+        getDuration : getDuration,
+        setDragging : setDragging,
+        doToggleSlides : doToggleSlides,
+        doToggleNotes : doToggleNotes,
+        doToggleSearch : doToggleSearch,
+        doToggleShortcuts : doToggleShortcuts,
+        doToggleEmbed : doToggleEmbed,
+        setMediaURL : setMediaURL,
+        setCaptionsURL : setCaptionsURL,
+        lowSound : lowSound,
+        noneSound : noneSound,
+        highSound : highSound,
+        muteSound : muteSound,
+        setCCIconOn : setCCIconOn,
+        setCCIconOff : setCCIconOff,
+        doSkipBackward : doSkipBackward,
+        doRewind : doRewind,
+        doPlay : doPlay,
+        doPause : doPause,
+        doFastForward : doFastForward,
+        doSkipForward : doSkipForward,
+        doTogglePlayPause : doTogglePlayPause,
+        doToggleMute : doToggleMute,
+        setPlayerVolume : setPlayerVolume,
+        doToogleClosedCaptions : doToogleClosedCaptions,
+        videoSizeControlsLeft : videoSizeControlsLeft,
+        videoSizeControlsCenter : videoSizeControlsCenter,
+        videoSizeControlsRight : videoSizeControlsRight,
+        setPlayPauseState : setPlayPauseState,
+        setCurrentTime : setCurrentTime,
+        setTotalTime : setTotalTime,
+        setDuration : setDuration,
+        setPlayhead : setPlayhead,
+        setProgress : setProgress,
+        setVolumeSlider : setVolumeSlider
     };
 }());

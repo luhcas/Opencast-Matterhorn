@@ -35,7 +35,7 @@ function VideodisplayReady() {
 	// Global functions in the "Videodisplay.mxml" application
 
 	Videodisplay.play = function () {
-		b_Videodisplay_root.play();
+		return b_Videodisplay_root.play();
 	};
 
 	Videodisplay.stop = function () {
@@ -43,7 +43,7 @@ function VideodisplayReady() {
 	};
 
 	Videodisplay.pause = function () {
-		b_Videodisplay_root.pause();
+		return b_Videodisplay_root.pause();
 	};
 	
 	Videodisplay.skipBackward = function () {
@@ -67,11 +67,11 @@ function VideodisplayReady() {
 	};
 	
 	Videodisplay.seek = function (argNumber) {
-		b_Videodisplay_root.seek(argNumber);
+		return b_Videodisplay_root.seek(argNumber);
 	};
 	
 	Videodisplay.mute = function () {
-		b_Videodisplay_root.mute();
+		return b_Videodisplay_root.mute();
 	};
 	
 	Videodisplay.setVolumeSlider = function (argNumber) {
@@ -93,6 +93,18 @@ function VideodisplayReady() {
 	Videodisplay.setCaptionsURL = function (argString) {
 		b_Videodisplay_root.setCaptionsURL(argString);
 	};
-		
+	
+	Videodisplay.videoSizeControlsLeft = function () {
+		b_Videodisplay_root.videoSizeControlsLeft();
+	};
+	
+	Videodisplay.videoSizeControlsCenter = function () {
+		b_Videodisplay_root.videoSizeControlsCenter();
+	};
+	
+	Videodisplay.videoSizeControlsRight = function () {
+		b_Videodisplay_root.videoSizeControlsRight();
+	};
+	
 	b_Videodisplay_root.onBridgeReady();
 }
