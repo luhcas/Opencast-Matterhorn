@@ -42,6 +42,13 @@
 		  </table>
 		</div>
 		
+		<div id="oc_tabs">
+          <input id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Slides" value="Hide Slides" alt="Hide Slides" title="Hide Slides"></input>
+          <input id="oc_btn-notes" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleNotes()" name="Notes" value="Notes" alt="Notes" title="Notes"></input>
+          <input id="oc_btn-search" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSearch()" name="Search" value="Search" alt="Search" title="Search"></input>
+          <input id="oc_btn-shortcuts" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts"></input>
+          <input id="oc_btn-embed" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleEmbed()" name="Embed" value="Embed" alt="Embed" title="Embed"></input>
+        </div>
 		
 		 <div id="oc_slides-sections" class="oc_slidesDisplayBlock">
 		    <div id="segments-holder" class="oc-segments-holder">

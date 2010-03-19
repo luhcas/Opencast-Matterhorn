@@ -1,100 +1,81 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-  "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
 <html>
-    <head>
-        <title>Opencast Matterhorn - Media Player</title>
+  <head>
+    <title>Opencast Matterhorn - Media Player</title>
        
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         
-        <link rel="shortcut icon" href="engage-hybrid-player/icons/favicon.ico">
+    <link rel="shortcut icon" href="engage-hybrid-player/icons/favicon.ico">
+      
+    <link rel="stylesheet" type="text/css" href="css/player.css" />
+   
+    <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/player-multi-hybrid.css" />
+    <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/player-multi-hybrid-icons.css" />
+    <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-layout.css" />
+    <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-text.css" />
+    <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-theme-mist.css" />
+    <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-theme-hc.css" />
+    <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-states.css" />
+    <link rel="stylesheet" type="text/css" href="engage-hybrid-player/jquery/ui/css/base/ui.all.css" />
         
-        <link rel="stylesheet" type="text/css" href="css/player.css" />
-                
-        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/player-multi-hybrid.css" />
-        
-
-        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-layout.css" />
-        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-text.css" />
-        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-theme-mist.css" />
-        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-theme-hc.css" />
-        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/fluid/fss/css/fss-states.css" />
-        <link rel="stylesheet" type="text/css" href="engage-hybrid-player/jquery/ui/css/base/ui.all.css" />
-        
-        
-        <script type="text/javascript" src="engage-hybrid-player/jquery/js/jquery-1.3.2.js"></script>
-        <script type="text/javascript" src="engage-hybrid-player/bridge/lib/FABridge.js"></script>
-        <script type="text/javascript" src="engage-hybrid-player/bridge/Videodisplay.js"></script>
-        <script type="text/javascript" src="engage-hybrid-player/jquery/js/jARIA.js"></script>
-        <script type="text/javascript" src="engage-hybrid-player/jquery/js/jquery.keyboard-a11y.js"></script>
-        <script type="text/javascript" src="engage-hybrid-player/jquery/js/jquery.tooltip.js"></script>
-        <script type="text/javascript" src="engage-hybrid-player/fluid/js/Fluid.js"></script>
-        <script type="text/javascript" src="engage-hybrid-player/fluid/js/InlineEdit.js"></script>
-        <script type="text/javascript" src="engage-hybrid-player/jquery/ui/ui.core.js"></script>
-        <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-scubber.js"></script>
-        <script type="text/javascript" src="engage-hybrid-player/jquery/js/ui.draggable.js"></script>
-        
-        
-        <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid.js"></script> 
-        <script type="text/javascript" src="engage-hybrid-player/jquery/ui/ui.slider.js"></script>
-        <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSlider.js"></script>     
-        <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-initialize.js"></script>  
-        
-        
-        <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
-        <script type="text/javascript" src="js/engage-ui.js"></script>
-        <script type="text/javascript" src="js/watch.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/jquery/js/jquery-1.3.2.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/bridge/lib/FABridge.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/bridge/Videodisplay.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/jquery/js/jARIA.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/jquery/js/jquery.keyboard-a11y.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/jquery/js/jquery.tooltip.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/fluid/js/Fluid.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/fluid/js/InlineEdit.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/jquery/ui/ui.core.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-scubber.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/jquery/js/ui.draggable.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid.js"></script> 
+    <script type="text/javascript" src="engage-hybrid-player/jquery/ui/ui.slider.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSlider.js"></script>     
+    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-initialize.js"></script>  
+    <script type="text/javascript" src="engage-hybrid-player/jquery/plugins/jquery.xslt.js"></script>
+    <script type="text/javascript" src="js/engage-ui.js"></script>
+    <script type="text/javascript" src="js/watch.js"></script>
        
-    </head>
+  </head>
 
-    <body>
+  <body>
     
-    <noscript>
-      <p style="color:red;">JavaScript is turned off in your web browser. So this site wouldn't work properly! <br />
-        <strong>Please turn JavaScript on to use this site, then refresh the page.</strong>
-      </p>
-    </noscript>
+  <noscript>
+    <p style="color:red;">JavaScript is turned off in your web browser. So this site wouldn't work properly! <br />
+      <strong>Please turn JavaScript on to use this site, then refresh the page.</strong>
+    </p>
+  </noscript>
      
-    <div id="oc_title-bar" >
-  
-      <div id="oc_title" >
-      </div>
-       
-      <div id="oc_title_from" >
-      </div>
-       
-      <div id="oc_video-size-controls" >
-       
-        <div id="oc_video-size-controls-left">
-          <button class="oc_video-size-controls-monitor-left" type="submit" name="Video Controls Left" alt="Video Controls Left" title="Video Controls Left"></button>
-        </div>
-         
-        <div id="oc_video-size-controls-center">
-          <button class="oc_video-size-controls-monitor-center" type="submit" name="Video Controls Center" alt="Video Controls Center" title="Video Controls Center"></button>
-        </div>
-         
-        <div id="oc_video-size-controls-right" >
-          <button class="oc_video-size-controls-monitor-right" type="submit" name="Video Controls Right" alt="Video Controls Right" title="Video Controls Right"></button>
-        </div>
-        
-      </div>
+  <div id="oc_title-bar">
+    
+    <div id="oc_title"></div>
+    
+    <div id="oc_title_from"></div>
+    
+    <div id="oc_video-size-controls">	
+      <input id="oc_search-Field" type="text" ></input>
+	  <input id="oc_btn-search" type="submit" name="search" alt="search" title="search" value="Search"></input>
+	</div>
+  </div>
+    
+  <span id"clear" ></span>
+    
+  <div id="oc_body">
+    
+    <div id="oc_hybrid-multi-player">
       
-    </div>
-    
-    <span id"clear" ></span>
-    
-    <div id="oc_body">
-    
-      <div id="oc_hybrid-multi-player" >
-      
-        <div id="oc_flash-player" >
-          <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-flash.js"></script> 
-        </div>
+      <div id="oc_flash-player">
+        <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-flash.js"></script> 
+      </div>
         
-        <span id"clear" ></span>
+      <span id"clear"></span>
         
-        <div id="oc_video-player-controls"> 
+      <div id="oc_video-player-controls"> 
         
-          <div id="oc_video-time">
+        <div id="oc_video-time">
+         
             <div id="simpleEdit">    
               <span id="time-current" class="editableText" name="Current Time" title="Current Time" value="00:00:00" >00:00:00</span> 
               <span id="editorContainer" class ="oc_editTime-hidden" name="Edit Current Time" title="Edit Current Time" value="Edit Current Time">
@@ -103,80 +84,59 @@
               of
               <span id="time-total" name="Total Time" title="Total Time" tabIndex="0">00:00:00</span>
             </div>
-          </div>
+         
+        </div>
           
-          <div id="oc_video-controls">
-            <button id="oc_btn-skip-backward" class="oc_btn-skip-backward" onmouseover="this.className='oc_btn-skip-backward-over'" onmouseout="this.className='oc_btn-skip-backward'" type="submit" onclick="Opencast.Player.doSkipBackward();" name="Skip Backward" alt="Skip Backward" title="Skip Backward"></button>
-            <button id="oc_btn-rewind" class="oc_btn-rewind" onmouseover="this.className='oc_btn-rewind-over'" onmouseout="this.className='oc_btn-rewind'" type="submit" onclick="Opencast.Player.doRewind();" name="Rewind: Control + Alt + R" alt="Rewind: Control + Alt + R" title="Rewind: Control + Alt + R"></button>
-            
-            <button id="oc_btn-play-pause" class="oc_btn-play" onmouseover="Opencast.Player.PlayPauseMouseOver();" onmouseout="Opencast.Player.PlayPauseMouseOut();" type="submit" onclick="Opencast.Player.doTogglePlayPause();" name="Play: Control + Alt + P"  alt="Play: Control + Alt + P" title="Play: Control + Alt + P" ></button>
-            
-            
-            <button id="oc_btn-fast-forward" class="oc_btn-fast-forward" onmouseover="this.className='oc_btn-fast-forward-over'" onmouseout="this.className='oc_btn-fast-forward'" type="submit" onclick="Opencast.Player.doFastForward();" name="Fast Forward: Control + Alt + F" alt="Fast Forward: Control + Alt + F" title="Fast Forward: Control + Alt + F"></button>
-            <button id="oc_btn-skip-forward" class="oc_btn-skip-forward" onmouseover="this.className='oc_btn-skip-forward-over'" onmouseout="this.className='oc_btn-skip-forward'" type="submit" onclick="Opencast.Player.doSkipForward();" name="Skip Forward"  alt="Skip Forward" title="Skip Forward"></button>
-          </div>
+        <div id="oc_video-controls">
+          <input id="oc_btn-skip-backward" class="oc_btn-skip-backward" onmousedown="this.className='oc_btn-skip-backward-clicked'" onmouseover="this.className='oc_btn-skip-backward-over'" onmouseout="this.className='oc_btn-skip-backward'" type="submit" onclick="Opencast.Player.doSkipBackward();" name="Skip Backward" alt="Skip Backward" title="Skip Backward" value=""></input>
+          <input id="oc_btn-rewind" class="oc_btn-rewind" onmouseover="this.className='oc_btn-rewind-over'" onmouseout="this.className='oc_btn-rewind'" type="submit"  onclick="Opencast.Player.doRewind();" name="Rewind: Control + Alt + R" alt="Rewind: Control + Alt + R" title="Rewind: Control + Alt + R" value=""></input>
+          <input id="oc_btn-play-pause" class="oc_btn-play" onmouseover="Opencast.Player.PlayPauseMouseOver();" onmouseout="Opencast.Player.PlayPauseMouseOut();" type="submit" onclick="Opencast.Player.doTogglePlayPause();" name="Play: Control + Alt + P"  alt="Play: Control + Alt + P" title="Play: Control + Alt + P" value=""></input>
+          <input id="oc_btn-fast-forward" class="oc_btn-fast-forward" onmouseover="this.className='oc_btn-fast-forward-over'" onmouseout="this.className='oc_btn-fast-forward'" type="submit" onclick="Opencast.Player.doFastForward();" name="Fast Forward: Control + Alt + F" alt="Fast Forward: Control + Alt + F" title="Fast Forward: Control + Alt + F" value=""></input>
+          <input id="oc_btn-skip-forward" class="oc_btn-skip-forward" onmouseover="this.className='oc_btn-skip-forward-over'" onmouseout="this.className='oc_btn-skip-forward'" type="submit" onclick="Opencast.Player.doSkipForward();" name="Skip Forward"  alt="Skip Forward" title="Skip Forward" value=""></input>
+          <input id="oc_btn-volume" class="oc_btn-volume-high" type="submit" onclick="Opencast.Player.doToggleMute();" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M" value=""></input>
+        </div>
           
-          <div id="oc_video-volume">
-            <button id="oc_btn-volume" class="oc_btn-volume-high" type="submit" onclick="Opencast.Player.doToggleMute();" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M"></button>
-          </div>
-          
-          <div id="oc_video-volume-slider">
-          
-          
-          
+        <div id="oc_video-volume-slider">
           <div id="slider_volume_Rail" class="oc-slider-volume-Rail" title="Volume">
             <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden">Volume</label>
-            <button id="slider_volume_Thumb" class="oc-slider-volume-Thumb"></button>
-            
+            <input id="slider_volume_Thumb" class="oc-slider-volume-Thumb" type="submit" value=""></input>
           </div>
-            
-          </div>
-          
-          <div id="oc_video-cc">
-            <button id="oc_btn-cc" class="oc_btn-cc-off" type="submit" onclick="Opencast.Player.doToogleClosedCaptions();" name="Closed Caption Off: Control + Alt + C" value="Closed Caption Off: Control + Alt + C" alt="Closed Caption Off: Control + Alt + C" title="Closed Caption Off: Control + Alt + C"></button>
-          </div>
-          
-          
-          <div id="oc_tabs">
-            <button id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Slides" value="Hide Slides" alt="Hide Slides" title="Hide Slides">S</button>
-            <button id="oc_btn-notes" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleNotes()" name="Notes" value="Notes" alt="Notes" title="Notes">N</button>
-             <button id="oc_btn-search" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSearch()" name="Search" value="Search" alt="Search" title="Search">S</button>
-            <button id="oc_btn-shortcuts" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts">S</button>
-            <button id="oc_btn-embed" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleEmbed()" name="Embed" value="Embed" alt="Embed" title="Embed">E</button>
-          </div>
-          
         </div>
+          
+        <div id="oc_video-cc">
+          <input id="oc_btn-cc" class="oc_btn-cc-off" type="submit" onclick="Opencast.Player.doToogleClosedCaptions();" name="Closed Caption Off: Control + Alt + C" alt="Closed Caption Off: Control + Alt + C" title="Closed Caption Off: Control + Alt + C" value=""></input>
+        </div>
+           <div id="oc_video-size-controls" >
+      
+      <div id="oc_video-size-controls-left">
+        <input class="oc_video-size-controls-monitor-left" type="submit" onclick="Opencast.Player.videoSizeControlsLeft();" name="Video Controls Left" alt="Video Controls Left" title="Video Controls Left" value=""></input>
+      </div>
+         
+      <div id="oc_video-size-controls-center">
+        <input class="oc_video-size-controls-monitor-center" type="submit" onclick="Opencast.Player.videoSizeControlsCenter();" name="Video Controls Center" alt="Video Controls Center" title="Video Controls Center" value=""></input>
+      </div>
+         
+      <div id="oc_video-size-controls-right">
+        <input class="oc_video-size-controls-monitor-right" type="submit" onclick="Opencast.Player.videoSizeControlsRight();" name="Video Controls Right" alt="Video Controls Right" title="Video Controls Right" value=""></input>
+      </div>
+        
+    </div>
+      </div>
+        
         
         <span id"clear"></span>
-        
-        
-        
-           
-          <div id="data">
-          
-          </div>
-          
       
+      <div id="data"></div>
       
-      
-        <div id="oc_notes-sections" class="oc_DisplayNone fl-fix">notes
-        </div> 
-      
-        <div id="oc_search-sections" class="oc_DisplayNone fl-fix">search
-        </div>
-      
-        <div id="oc_shortcuts-sections" class="oc_DisplayNone fl-fix">shortcuts
-        </div> 
-        
-        <div id="oc_embed-sections" class="oc_DisplayNone fl-fix">
-        </div>
+      <div id="oc_notes-sections" class="oc_DisplayNone fl-fix">notes</div> 
+      <div id="oc_search-sections" class="oc_DisplayNone fl-fix">search</div>
+      <div id="oc_shortcuts-sections" class="oc_DisplayNone fl-fix">shortcuts</div> 
+      <div id="oc_embed-sections" class="oc_DisplayNone fl-fix"></div>
           
-          
-          
-          
-      </div>  
+    </div>  
              
-    </div>
+  </div>
     
   </body>
+  
 </html>
