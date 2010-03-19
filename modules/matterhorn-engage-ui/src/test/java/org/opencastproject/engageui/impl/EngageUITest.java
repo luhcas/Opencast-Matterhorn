@@ -17,6 +17,7 @@ import javax.xml.transform.stream.StreamSource;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class EngageUITest {
@@ -37,6 +38,7 @@ public class EngageUITest {
   public void tearDown() throws Exception {
   }
 
+  @Ignore
   @Test
   public void testPlayerXSL() throws Exception {
 
