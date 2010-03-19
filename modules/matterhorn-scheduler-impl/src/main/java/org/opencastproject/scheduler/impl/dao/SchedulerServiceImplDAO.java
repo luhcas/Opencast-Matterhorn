@@ -106,7 +106,7 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     Connection con = null;
     try {
       con = getConnection();
-      while (dbIDExists(e.getID(), con)) {
+      while (e.getID() == null || e.getID().length() < 1 || dbIDExists(e.getID(), con)) {
         e.setID(e.createID());
       }
       logger.debug("adding event {}.", e.toString());
