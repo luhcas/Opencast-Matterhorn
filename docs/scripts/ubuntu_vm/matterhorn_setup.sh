@@ -170,6 +170,21 @@ else
   echo "**** Default keyboard is US; Do you want to reconfigure? (y/n)"
   read kbresp
 
+  # Need to get a server name, not just y/n
+  ntpsrv=y
+  while [ ${#ntpsrv} -gt 0 ] && [ ${#ntpsrv} -lt 8 ]
+  do
+    echo "**** To set up a different NTP server, please enter the URL or press enter [ntp.ubuntu.com]?"
+    read ntpsrv
+  done
+
+  # ntp server?
+  if [ ${#ntpsrv} -gt 7 ]; then
+    sudo sed -i "s/ntp.ubuntu.com/$ntpsrv/" /etc/ntp.conf
+  else
+    echo "Using default NTP server: ntp.ubuntu.com"
+  fi
+
   echo "**** Do you want to install 3rd party tools? (y/n)"
   read p3resp
 
@@ -209,6 +224,9 @@ else
   # doing some additional setups
   sudo update-java-alternatives -s java-6-sun
   sudo chown -R 1000:1000 /home/opencast
+
+  # restart ntp, just to make sure that time will be synchronized
+  sudo /etc/init.d/ntp restart
 
   start_mh
 

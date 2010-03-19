@@ -63,7 +63,7 @@ sudo ubuntu-vm-builder vmw6 karmic --arch 'i386' --mem '512' --cpus 1 \
 --addpkg libtheora-dev --addpkg libx11-dev \
 --addpkg zlib1g-dev --addpkg libpng12-dev --addpkg libjpeg62-dev \
 --addpkg libtiff4-dev --addpkg ssh --addpkg maven2 --addpkg subversion \
---addpkg wget --addpkg curl --addpkg update-motd \
+--addpkg wget --addpkg curl --addpkg update-motd --addpkg ntp \
 --addpkg expect-dev --addpkg expect --addpkg vim --addpkg nano \
 --addpkg acpid --exec $HOME/postinstall.sh
 
