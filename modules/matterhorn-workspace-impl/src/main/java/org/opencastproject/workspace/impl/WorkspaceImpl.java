@@ -176,7 +176,7 @@ public class WorkspaceImpl implements Workspace {
     File tempFile = null;
     FileOutputStream out = null;
     try {
-      tempFile = File.createTempFile(mediaPackageID + "-" + mediaPackageElementID, null);
+      tempFile = new File(rootDirectory, mediaPackageID + mediaPackageElementID + fileName);
       out = new FileOutputStream(tempFile);
     } catch(IOException e) {
       throw new RuntimeException(e); // this should never happen
