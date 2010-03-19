@@ -44,14 +44,14 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
   public void setWorkflowService(WorkflowService workflowService) {
     this.workflowService = workflowService;
   }
-  
+
   private EventAdmin eventAdmin;
-  
-  protected void setEventAdmin(EventAdmin eventAdmin){
+
+  protected void setEventAdmin(EventAdmin eventAdmin) {
     this.eventAdmin = eventAdmin;
   }
-  
-  protected void unsetEventAdmin(EventAdmin eventAdmin){
+
+  protected void unsetEventAdmin(EventAdmin eventAdmin) {
     this.eventAdmin = null;
   }
 
@@ -61,10 +61,11 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
       InputStream errorHandler = ConductorServiceImpl.class.getClassLoader().getResourceAsStream(
               "/OSGI-INF/workflows/default-error-handler.xml");
       workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(errorHandler));
-      
+
       InputStream composeDistPublish = ConductorServiceImpl.class.getClassLoader().getResourceAsStream(
               "/OSGI-INF/workflows/compose-distribute-publish.xml");
-      workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(composeDistPublish));
+      workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(
+              composeDistPublish));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -80,21 +81,30 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
    */
   public void handleEvent(Event event) {
     Object property = event.getProperty("mediaPackage");
+    Object propertyWD = event.getProperty("workflowDefinition");
     if (property == null || !(property instanceof String)) {
       // received event, but without or invalid media package
       logger.error("Property 'mediaPackage' not present or is invalid");
+    } else if (propertyWD == null || !(property instanceof String)) {
+      // received event, but without or invalid media package
+      logger.error("Property 'workflowDefinition' not present or is invalid");
     } else {
-      logger.debug("Received mediapackage ingest event: {}", property);
+      logger
+              .debug("Received mediapackage ingest event. mediapackage: {}; workflowdefinition: {}", property,
+                      propertyWD);
       try {
-        MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml((String)property);
-        logger.info("Received media package {}", mp.getIdentifier());
-        
-        // execute 'Transcode, Distribute and Publish workflow'
-        WorkflowDefinition def = workflowService.getWorkflowDefinitionById("default");
+        MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(
+                (String) property);
+        String wd = (String) propertyWD;
+        logger.info("Received media package {}; starting workflow \"{}\"", mp.getIdentifier(), wd);
+
+        // execute workflow from the event
+        WorkflowDefinition def = workflowService.getWorkflowDefinitionById(wd);
         workflowService.start(def, mp, null);
 
         // execute 'review' workflow
-        // workflowService.start(workflowService.getWorkflowDefinitionByName("Review"), mp, new HashMap<String, String>());
+        // workflowService.start(workflowService.getWorkflowDefinitionByName("Review"), mp, new HashMap<String,
+        // String>());
 
         if (eventAdmin != null) {
           eventAdmin.postEvent(new Event("org/opencastproject/conductor/ACK", null));

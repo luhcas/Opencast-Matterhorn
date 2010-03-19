@@ -48,6 +48,22 @@ public interface IngestService {
           FileNotFoundException, IOException, Exception;
 
   /**
+   * Add an existing compressed MediaPackage to the repository.
+   * 
+   * @param ZippedMediaPackage
+   *          A zipped file containing manifest, tracks, catalogs and attachments
+   * @param workflowDefinitionID
+   *          workflow to be used with this media package
+   * @return MediaPackageManifest The manifest of a specific Matterhorn MediaPackage element
+   * @throws MediaPackageException
+   * @throws FileNotFoundException
+   * @throws IOException
+   * @throws Exception
+   */
+  MediaPackage addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID)
+          throws MediaPackageException, FileNotFoundException, IOException, Exception;
+
+  /**
    * Create a new MediaPackage in the repository.
    * 
    * @return The created MediaPackage
@@ -89,8 +105,9 @@ public interface IngestService {
    * @throws MalformedURLException
    * @throws IOException
    */
-  MediaPackage addTrack(InputStream mediaFile, String fileName, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, MalformedURLException, IOException;
+  MediaPackage addTrack(InputStream mediaFile, String fileName, MediaPackageElementFlavor flavor,
+          MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, MalformedURLException,
+          IOException;
 
   /**
    * Add a [metadata catalog] to an existing MediaPackage in the repository
@@ -124,8 +141,9 @@ public interface IngestService {
    * @throws MalformedURLException
    * @throws IOException
    */
-  MediaPackage addCatalog(InputStream catalog, String fileName, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, MalformedURLException, IOException;
+  MediaPackage addCatalog(InputStream catalog, String fileName, MediaPackageElementFlavor flavor,
+          MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, MalformedURLException,
+          IOException;
 
   /**
    * Add an attachment to an existing MediaPackage in the repository
@@ -159,21 +177,39 @@ public interface IngestService {
    * @throws MalformedURLException
    * @throws IOException
    */
-  MediaPackage addAttachment(InputStream file, String fileName, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, MalformedURLException, IOException;
+  MediaPackage addAttachment(InputStream file, String fileName, MediaPackageElementFlavor flavor,
+          MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, MalformedURLException,
+          IOException;
 
   /**
-   * Broadcasts an event, that media package is ingested. After broadcast ACK message
-   * is expected from ConductorService. If message contains exception, it will be thrown. 
+   * Broadcasts an event, that media package is ingested. After broadcast ACK message is expected from ConductorService.
+   * If message contains exception, it will be thrown.
    * 
    * @param mediaPackage
    *          The specific Matterhorn MediaPackage being ingested
-   * @throws IllegalStateException when EventAdmin is not available
+   * @throws IllegalStateException
+   *           when EventAdmin is not available
    * @throws Exception
-   *          Exception that occured during MediaPackage serialization or happened in ConductorService
-   *          durring MediaPackage processing
+   *           Exception that occured during MediaPackage serialization or happened in ConductorService durring
+   *           MediaPackage processing
    */
   void ingest(MediaPackage mediaPackage) throws IllegalStateException, Exception;
+
+  /**
+   * Broadcasts an event, that media package is ingested. After broadcast ACK message is expected from ConductorService.
+   * If message contains exception, it will be thrown.
+   * 
+   * @param mediaPackage
+   *          The specific Matterhorn MediaPackage being ingested
+   * @param workflowDefinitionID
+   *          workflow to be used with this media package
+   * @throws IllegalStateException
+   *           when EventAdmin is not available
+   * @throws Exception
+   *           Exception that occured during MediaPackage serialization or happened in ConductorService durring
+   *           MediaPackage processing
+   */
+  void ingest(MediaPackage mediaPackage, String workflowDefinitionID) throws IllegalStateException, Exception;
 
   /**
    * Delete an existing MediaPackage and any linked files from the temporary ingest filestore.

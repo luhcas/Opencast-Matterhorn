@@ -26,6 +26,7 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.util.ZipUtil;
+import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workspace.api.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -84,6 +85,15 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
    * @see org.opencastproject.ingest.api.IngestService#addZippedMediaPackage(java.io.InputStream)
    */
   public MediaPackage addZippedMediaPackage(InputStream zipStream) throws Exception {
+    return addZippedMediaPackage(zipStream, WorkflowService.DEFAULT_WORKFLOW_ID);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.ingest.api.IngestService#addZippedMediaPackage(java.io.InputStream, java.lang.String)
+   */
+  public MediaPackage addZippedMediaPackage(InputStream zipStream, String wd) throws Exception {
     // locally unpack the mediaPackage
     String tempPath = tempFolder + UUID.randomUUID().toString();
     // save inputStream to file
@@ -152,7 +162,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
     }
     removeDirectory(tempPath);
     // broadcast event
-    ingest(mp);
+    ingest(mp, wd);
     return mp;
   }
 
@@ -255,16 +265,25 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String,
-   *      org.opencastproject.notification.api.NotificationService)
+   * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String)
    */
   public void ingest(MediaPackage mp) throws IllegalStateException, Exception {
+    ingest(mp, WorkflowService.DEFAULT_WORKFLOW_ID);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String, java.lang.String)
+   */
+  public void ingest(MediaPackage mp, String wd) throws IllegalStateException, Exception {
 
     // broadcast event
     if (eventAdmin != null) {
       logger.info("Broadcasting event...");
       Dictionary<String, String> properties = new Hashtable<String, String>();
       properties.put("mediaPackage", mp.toXml());
+      properties.put("workflowDefinition", wd);
       Event event = new Event("org/opencastproject/ingest/INGEST_DONE", properties);
 
       // waiting 3000 ms for confirmation from Conductor service

@@ -33,6 +33,7 @@ import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.workflow.api.WorkflowService;
 
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -109,7 +110,7 @@ public class IngestRestService {
   }
 
   public void activate(ComponentContext context) {
-    if(context == null || context.getBundleContext().getProperty("serverURL") == null) {
+    if (context == null || context.getBundleContext().getProperty("serverURL") == null) {
       serverURL = UrlSupport.DEFAULT_BASE_URL;
     } else {
       serverURL = context.getBundleContext().getProperty("serverURL");
@@ -270,6 +271,18 @@ public class IngestRestService {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addMediaPackage")
   public Response addMediaPackage(@Context HttpServletRequest request) {
+    return _addMediaPackage(request, WorkflowService.DEFAULT_WORKFLOW_ID);
+  }
+
+  @POST
+  @Produces(MediaType.TEXT_XML)
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  @Path("addMediaPackage/{wdID}")
+  public Response addMediaPackage(@Context HttpServletRequest request, @PathParam("wdID") String wdID) {
+    return _addMediaPackage(request, wdID);
+  }
+
+  private Response _addMediaPackage(HttpServletRequest request, String wdID) {
     MediaPackageElementFlavor flavor = null;
     try {
       MediaPackage mp = ingestService.createMediaPackage();
@@ -294,7 +307,7 @@ public class IngestRestService {
         dcc.toXml(out, true);
         InputStream in = new ByteArrayInputStream(out.toByteArray());
         ingestService.addCatalog(in, "dublincore.xml", MediaPackageElements.DUBLINCORE_CATALOG, mp);
-        ingestService.ingest(mp);
+        ingestService.ingest(mp, wdID);
         return Response.ok(mp).build();
       }
       return Response.serverError().status(Status.BAD_REQUEST).build();
@@ -308,9 +321,19 @@ public class IngestRestService {
   @Path("addZippedMediaPackage")
   // @Consumes("application/zip")
   public Response addZippedMediaPackage(InputStream mp) {
+    return _addZippedMediaPackage(mp, WorkflowService.DEFAULT_WORKFLOW_ID);
+  }
+
+  @POST
+  @Path("addZippedMediaPackage/{wdID}")
+  public Response addZippedMediaPackage(InputStream mp, @PathParam("wdID") String wdID) {
+    return _addZippedMediaPackage(mp, wdID);
+  }
+
+  private Response _addZippedMediaPackage(InputStream mp, String wdID) {
     logger.debug("addZippedMediaPackage(InputStream) called.");
     try {
-      ingestService.addZippedMediaPackage(mp);
+      ingestService.addZippedMediaPackage(mp, wdID);
     } catch (Exception e) {
       logger.warn(e.getMessage());
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -322,10 +345,21 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("ingest")
   public Response ingest(@FormParam("mediaPackage") String mpx) {
+    return _ingest(mpx, WorkflowService.DEFAULT_WORKFLOW_ID);
+  }
+
+  @POST
+  @Produces(MediaType.TEXT_HTML)
+  @Path("ingest/{wdID}")
+  public Response ingest(@FormParam("mediaPackage") String mpx, @PathParam("wdID") String wdID) {
+    return _ingest(mpx, wdID);
+  }
+
+  private Response _ingest(String mpx, String wdID) {
     logger.debug("ingest(MediaPackage): {}", mpx);
     try {
       MediaPackage mp = builder.loadFromXml(mpx);
-      ingestService.ingest(mp);
+      ingestService.ingest(mp, wdID);
       return Response.ok(mpx).build();
     } catch (Exception e) {
       logger.warn(e.getMessage());
