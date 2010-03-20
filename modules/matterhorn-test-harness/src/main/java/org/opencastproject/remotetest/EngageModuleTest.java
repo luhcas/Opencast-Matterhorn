@@ -15,46 +15,73 @@
  */
 package org.opencastproject.remotetest;
 
-import junit.framework.Assert;
-
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+
+import junit.framework.Assert;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opencastproject.demo.DemodataLoader;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 /**
- * Tests the functionality of the Engage module
- * Tests if all media player components are available
+ * Tests the functionality of the Engage module Tests if all media player components are available
  * 
- * This needs to be improved by 
- * String[] EngageGFXuri = {
- *   "/engage-hybrid-player/icons/cc_off.png",
- *    "/engage-hybrid-player/icons/cc_on.png",
- * ....
- * }
+ * This needs to be improved by String[] EngageGFXuri = { "/engage-hybrid-player/icons/cc_off.png",
+ * "/engage-hybrid-player/icons/cc_on.png", .... }
  * 
- * String[] EngageJSuri = {
- * ...
- * }
+ * String[] EngageJSuri = { ... }
  * 
  * to remove many Testcases
  * 
- * The DefaultHttpClient needs to be threadsafe - included in org.apache.httpcomponents version 4-1alpha 
+ * The DefaultHttpClient needs to be threadsafe - included in org.apache.httpcomponents version 4-1alpha
  * 
  */
 public class EngageModuleTest {
   HttpClient client;
 
+  private static DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
+  private static XPathFactory factory = XPathFactory.newInstance();
+
   public static String ENGAGE_BASE_URL = BASE_URL + "/engage/ui";
+
+  private void clearSearchIndex() throws Exception {
+    HttpClient client = new DefaultHttpClient();
+    HttpPost post = new HttpPost(BASE_URL + "/search/rest/clear");
+
+    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+    post.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
+
+    client.execute(post);
+  }
 
   @Before
   public void setup() throws Exception {
     client = new DefaultHttpClient();
+
+    domFactory = DocumentBuilderFactory.newInstance();
+    domFactory.setNamespaceAware(false); // don't forget this!
   }
 
   @After
@@ -62,6 +89,45 @@ public class EngageModuleTest {
     client.getConnectionManager().shutdown();
   }
 
+  @Test
+  public void testContainsEngageTrack() throws Exception {
+    // Clear the search index. Remove all media packages.
+    clearSearchIndex();
+
+    // Load the data
+    String[] args = { "-n", "1" };
+    DemodataLoader.main(args);
+
+    // Ensure that the data loading finishes successfully
+    int attempts = 0;
+    boolean success = false;
+    while (true) {
+      if (++attempts == 20)
+        Assert.fail("search rest endpoint test has hung");
+
+      HttpClient client = new DefaultHttpClient();
+      HttpGet get = new HttpGet(BASE_URL + "/search/rest/episode?limit=1&offset=0");
+      String getResponse = EntityUtils.toString(client.execute(get).getEntity());
+
+      DocumentBuilder builder = domFactory.newDocumentBuilder();
+      Document doc = builder.parse(IOUtils.toInputStream(getResponse));
+
+      XPath xpath = factory.newXPath();
+
+      // Test if the media package contains a track with the tag 'engage'
+      XPathExpression expr = xpath.compile("/search-results/result/mediapackage/media/track/tags/tag[.='engage']");
+
+      NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+
+      success = (nodes.getLength() == 1);
+
+      if (success) {
+        Assert.assertTrue(true);
+        break;
+      }
+      Thread.sleep(2000);
+    }
+  }
 
   @Test
   public void testJQuery() throws Exception {
@@ -80,13 +146,6 @@ public class EngageModuleTest {
   @Test
   public void testEngageUI() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/js/engage-ui.js");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testACOETags() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/ACFLRunContent/AC_OETags.js");
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -113,20 +172,6 @@ public class EngageModuleTest {
   }
 
   @Test
-  public void testJQueryKeyboard() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/jquery/js/jquery.keyboard-a11y.js");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testJQueryTooltip() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/jquery/js/jquery.tooltip.js");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
   public void testFluid() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/fluid/js/Fluid.js");
     HttpResponse response = client.execute(get);
@@ -143,237 +188,6 @@ public class EngageModuleTest {
   @Test
   public void testJQueryCore() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/jquery/ui/ui.core.js");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testJQuerySlider() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/jquery/ui/ui.slider.js");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testPlayerHybridDownload() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/player-hybrid-download.js");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testAriaSlider() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/aria/js/ariaSlider.js");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testWatch() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/css/watch.css");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testBrowse() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/css/oc.search.browse.css");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testFluidFssReset() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/fluid/fss/css/fss-reset.css");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testFluidFssLayout() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/fluid/fss/css/fss-layout.css");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testFluidFssText() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/fluid/fss/css/fss-text.css");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testFluidFssMist() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/fluid/fss/css/fss-theme-mist.css");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testFluidFssHc() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/fluid/fss/css/fss-theme-hc.css");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testFluidFssStates() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/fluid/fss/css/fss-states.css");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testJQueryBaseAll() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/jquery/ui/css/base/ui.all.css");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testPlayer() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/css/oc.player.css");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testPlayerHybridDownloadCss() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/css/player-hybrid-download.css");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconCCOff() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/cc_off.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconCCOn() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/cc_on.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconFastForward() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/fastforward.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconFastForwardOver() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/fastforwardover.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconPause() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/pause.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconPauseOver() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/pauseover.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconPlay() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/play.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconPlayOver() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/playover.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconRewind() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/rewind.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconRewindOver() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/rewindover.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconSkipBackward() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/skipbackward.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconSkipBackwardOver() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/skipbackwardover.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconSkipForward() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/skipforward.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconSkipForwardOver() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/skipforwardover.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconVolumeHigh() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/volumehigh.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconVolumeHighBig() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/volumehighBig.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconVolumeLow() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/volumelow.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconVolumeMute() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/volumemute.png");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testIconVolumeMuteBig() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/icons/volumemuteBig.png");
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
