@@ -17,7 +17,6 @@ import javax.xml.transform.stream.StreamSource;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class EngageUITest {
@@ -38,7 +37,6 @@ public class EngageUITest {
   public void tearDown() throws Exception {
   }
 
-  @Ignore
   @Test
   public void testPlayerXSL() throws Exception {
 
@@ -51,7 +49,12 @@ public class EngageUITest {
     InputStream expectedStream = this.getClass().getClassLoader().getResourceAsStream(
             "xml" + File.separator + "player-expected.xml");
     BufferedReader expectedReader = new BufferedReader(new InputStreamReader(expectedStream));
-    String expected = expectedReader.readLine();
+
+    String expected = "";
+
+    String lastLine = "";
+    while ((lastLine = expectedReader.readLine()) != null)
+      expected += lastLine;
 
     Source xmlSource = new StreamSource(xmlFile);
     Source xsltSource = new StreamSource(xsltFile);
