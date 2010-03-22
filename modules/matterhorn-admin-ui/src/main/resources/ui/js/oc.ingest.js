@@ -6,8 +6,8 @@ ocIngest.mediaPackage = null;
 ocIngest.metadata = null;
 
 ocIngest.createMediaPackage = function() {
-  log("creating MediaPackage")
-  setProgress('100%','creating MediaPackge',' ', ' ');
+  Upload.log("creating MediaPackage")
+  Upload.setProgress('100%','creating MediaPackge',' ', ' ');
   $.ajax({
     url        : '../ingest/rest/createMediaPackage',
     type       : 'GET',
@@ -16,7 +16,7 @@ ocIngest.createMediaPackage = function() {
       showFailedScreen('Could not create MediaPackage on server.');
     },
     success    : function(data, status) {
-      log("MediaPackage created");
+      Upload.log("MediaPackage created");
       ocIngest.mediaPackage = data;
       var uploadFrame = document.getElementById("filechooser-ajax");
       uploadFrame.contentWindow.document.uploadForm.flavor.value = $('#flavor').val();
@@ -38,8 +38,8 @@ ocIngest.createDublinCoreCatalog = function(data) {
 }
 
 ocIngest.addCatalog = function(mediaPackage, dcCatalog) {
-   log("Creating DublinCore catalog");
-   setProgress('100%','adding Metadata',' ', ' ');
+   Upload.log("Creating DublinCore catalog");
+   Upload.setProgress('100%','adding Metadata',' ', ' ');
     $.ajax({
     url        : '../ingest/rest/addDCCatalog',
     type       : 'POST',
@@ -49,9 +49,9 @@ ocIngest.addCatalog = function(mediaPackage, dcCatalog) {
       showFailedScreen('Could not add DublinCore catalog to MediaPackage.');
     },
     success    : function(data, status) {
-      log("DublinCore catalog added");
+      Upload.log("DublinCore catalog added");
       ocIngest.mediaPackage = data;
-     ocIngest.startIngest(data);
+      ocIngest.startIngest(data);
     }
   });
 }
@@ -78,8 +78,8 @@ ocIngest.addTrack = function(mediaPackage, jobId, flavor) {
 */
 
 ocIngest.startIngest = function(mediaPackage) {
-    log("Starting Ingest");
-    setProgress('100%','starting Ingest',' ', ' ');
+    Upload.log("Starting Ingest");
+    Upload.setProgress('100%','starting Ingest',' ', ' ');
     $.ajax({
     url        : '../ingest/rest/startIngest',
     type       : 'POST',
@@ -89,8 +89,8 @@ ocIngest.startIngest = function(mediaPackage) {
       showFailedScreen("Could not start Ingest on MediaPackage");
     },
     success    : function(data, status) {
-      hideProgressStage();
-      showSuccessScreen();
+      Upload.hideProgressStage();
+      Upload.showSuccessScreen();
     }
   });
 }

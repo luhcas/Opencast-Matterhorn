@@ -7,20 +7,20 @@ UploadListener.updateInterval = null;
 UploadListener.updateRequested = false;
 
 UploadListener.initialized = function() {
-  log('Uploader initialized');
+  Upload.log('Uploader initialized');
   $('#track').val();
   $('#BtnBrowse').attr('disabled', false);
   UploadListener.appletPresent = true;
 }
 
 UploadListener.resumeReady = function(jobId) {
-  log('resume negotiation successful');
+  Upload.log('resume negotiation successful');
   var filename = document.Uploader.getFilename();
 }
 
 
 UploadListener.fileSelectedAjax = function(filename,jobId) {
-  log("File selected for job " + jobId + ": " + filename);
+  Upload.log("File selected for job " + jobId + ": " + filename);
   UploadListener.shortFilename = filename;
   UploadListener.jobId = jobId;
   $('#track').val(filename);
@@ -28,8 +28,8 @@ UploadListener.fileSelectedAjax = function(filename,jobId) {
 }
 
 UploadListener.uploadStarted = function() {
-  log('upload started');
-  showProgressStage();
+  Upload.log('upload started');
+  Upload.showProgressStage();
   if (!UploadListener.appletPresent) {
     UploadListener.updateInterval = window.setInterval('UploadListener.getProgress()', 1000);
   }
@@ -60,14 +60,14 @@ UploadListener.uploadProgress = function(total, transfered) {
     percentage = percentage.toFixed(2);
     percentage = percentage + '%';
   }
-  log("transfered: " + transfered + " of " + total + " bytes, " + percentage + "%");
-  setProgress(percentage,percentage,'Total: '+total+' bytes',transfered+' bytes send');
+  Upload.log("transfered: " + transfered + " of " + total + " bytes, " + percentage + "%");
+  Upload.setProgress(percentage,percentage,'Total: '+total+' bytes',transfered+' bytes send');
 }
 
 UploadListener.uploadComplete = function() {
   UploadListener.updateRequested = false;
   window.clearInterval(UploadListener.updateInterval);
-  log("upload complete");
+  Upload.log("upload complete");
   var uploadFrame = document.getElementById("filechooser-ajax");
   var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
   ocIngest.addCatalog(mp, ocIngest.createDublinCoreCatalog(ocIngest.metadata));
@@ -76,16 +76,16 @@ UploadListener.uploadComplete = function() {
 UploadListener.uploadFailed = function() {
   UploadListener.updateRequested = false;
   window.clearInterval(UploadListener.updateInterval);
-  log('ERROR: media fileupload has failed');
-  showFailedScreen("Media file upload has failed.");
+  Upload.log('ERROR: media fileupload has failed');
+  Upload.showFailedScreen("Media file upload has failed.");
 }
 
 UploadListener.error = function(message) {
   UploadListener.updateRequested = false;
   window.clearInterval(UploadListener.updateInterval);
-  log('ERROR: ' + message);
+  Upload.log('ERROR: ' + message);
 }
 
 UploadListener.log = function(message) {
-  log('Uploader: ' + message);
+  Upload.log('Uploader: ' + message);
 }

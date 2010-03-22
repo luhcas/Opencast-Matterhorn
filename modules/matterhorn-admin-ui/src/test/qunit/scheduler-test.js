@@ -1,11 +1,7 @@
 module( "FormField", {
         setup: function(){ 
-          var doc = $(document.body);
-          doc.append('<input type="text" id="textbox" value="some text here" />');
-          doc.append('<input type="checkbox" id="checkbox" checked="checked" value="true" />');
         },
         teardown: function(){
-          $(document.body).empty();
         }
 });
 
