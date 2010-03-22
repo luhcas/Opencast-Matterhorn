@@ -72,6 +72,10 @@
       <artifactId>jsr311-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>org.springframework.security</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_core</artifactId>
     </dependency>
@@ -92,22 +96,6 @@
           <artifactId>org.osgi.compendium</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>asm</groupId>
-      <artifactId>asm</artifactId>
-      <version>3.0</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sourceforge.r-osgi</groupId>
-      <artifactId>remote</artifactId>
-      <version>1.0.0.RC4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-composer-service-impl</artifactId>
-      <version>0.6-SNAPSHOT</version>
-      <type>bundle</type>
     </dependency>
 
     <!-- Database Drivers and Connection Pooling -->
@@ -140,7 +128,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator>org.opencastproject.conductor.impl.Activator</Bundle-Activator>
+            <Bundle-Activator>org.opencastproject.db.Activator</Bundle-Activator>
             <Embed-Dependency>
               c3p0;inline=true,
               h2;inline=true,
@@ -155,9 +143,30 @@
               org.opencastproject.media.mediapackage.identifier,
               org.opencastproject.media.mediapackage.mpeg7,
               org.opencastproject.media.mediapackage.track,
+              javax.servlet,
+              org.springframework.dao,
+              org.springframework.security,
+              org.springframework.security.context,
+              org.springframework.security.intercept,
+              org.springframework.security.intercept.web,
+              org.springframework.security.providers,
+              org.springframework.security.providers.anonymous,
+              org.springframework.security.providers.dao,
+              org.springframework.security.ui,
+              org.springframework.security.ui.basicauth,
+              org.springframework.security.userdetails,
+              org.springframework.security.userdetails.memory,
+              org.springframework.security.util,
+              org.springframework.security.vote,
               *;resolution:=optional
             </Import-Package>
-            <Export-Package>org.opencastproject.conductor.*</Export-Package>
+            <Export-Package>
+              org.opencastproject.authentication,
+              org.opencastproject.conductor.impl,
+              org.opencastproject.db,
+              org.opencastproject.scanner,
+              org.opencastproject.workflow.handler
+            </Export-Package>
             <Service-Component>
               OSGI-INF/conductor-service.xml,
               OSGI-INF/workflow-definition-scanner.xml,

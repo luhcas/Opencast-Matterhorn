@@ -15,6 +15,8 @@
  */
 package org.opencastproject.remotetest;
 
+import org.opencastproject.integrationtest.AuthenticationSupport;
+
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
 
 import junit.framework.Assert;
@@ -49,6 +51,7 @@ public class IngestZipTest {
   public void testIngestZip() throws Exception {
     byte[] bytesToPost = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("ingest.zip"));
     HttpPost post = new HttpPost(BASE_URL + "/ingest/rest/addZippedMediaPackage");
+    AuthenticationSupport.addAuthentication(post);
     post.setEntity(new ByteArrayEntity(bytesToPost));
     HttpResponse response = client.execute(post);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());    

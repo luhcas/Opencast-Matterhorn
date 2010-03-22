@@ -13,6 +13,10 @@
   </parent>
   <dependencies>
     <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>org.springframework.security</artifactId>
+    </dependency>
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
@@ -39,7 +43,23 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator> org.opencastproject.authentication.api.Activator </Bundle-Activator>
+            <Import-Package>
+              javax.servlet,
+              org.springframework.dao,
+              org.springframework.security,
+              org.springframework.security.context,
+              org.springframework.security.intercept,
+              org.springframework.security.intercept.web,
+              org.springframework.security.providers,
+              org.springframework.security.providers.dao,
+              org.springframework.security.ui,
+              org.springframework.security.ui.basicauth,
+              org.springframework.security.userdetails,
+              org.springframework.security.userdetails.memory,
+              org.springframework.security.util,
+              org.springframework.security.vote,
+              *
+            </Import-Package>
             <Export-Package> org.opencastproject.authentication.api </Export-Package>
           </instructions>
         </configuration>

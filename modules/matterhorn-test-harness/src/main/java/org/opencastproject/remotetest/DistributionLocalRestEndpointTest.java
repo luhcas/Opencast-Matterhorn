@@ -15,6 +15,8 @@
  */
 package org.opencastproject.remotetest;
 
+import org.opencastproject.integrationtest.AuthenticationSupport;
+
 import junit.framework.Assert;
 
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
@@ -54,6 +56,7 @@ public class DistributionLocalRestEndpointTest {
   @Test
   public void testDocs() throws Exception {
     HttpGet get = new HttpGet(BASE_URL + "/distribution/local/rest/docs");
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -61,6 +64,7 @@ public class DistributionLocalRestEndpointTest {
   @Test
   public void testWadl() throws Exception {
     HttpGet get = new HttpGet(BASE_URL + "/distribution/local/rest/?_wadl");
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -68,6 +72,7 @@ public class DistributionLocalRestEndpointTest {
   @Test
   public void testDistribute() throws Exception {
     HttpPost post = new HttpPost(BASE_URL + "/distribution/local/rest/");
+    AuthenticationSupport.addAuthentication(post);
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
     formParams.add(new BasicNameValuePair("mediapackage", getSampleMediaPackage()));

@@ -15,6 +15,8 @@
  */
 package org.opencastproject.remotetest;
 
+import org.opencastproject.integrationtest.AuthenticationSupport;
+
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
 
 import org.apache.http.HttpStatus;
@@ -110,6 +112,7 @@ public class CaptureRestEndpointTest {
 
   private void sendGet(String URL, int returnCode) throws Exception {
     HttpGet get = new HttpGet(URL);
+    AuthenticationSupport.addAuthentication(get);
     int getResponse = httpClient.execute(get).getStatusLine().getStatusCode();
     Assert.assertTrue(getResponse == returnCode);
     get.abort();
@@ -117,6 +120,7 @@ public class CaptureRestEndpointTest {
 
   private void sendPost(String URL, List<NameValuePair> params, int returnCode) throws Exception {
     HttpPost post = new HttpPost(URL);
+    AuthenticationSupport.addAuthentication(post);
     post.setEntity(new UrlEncodedFormEntity(params));
     int postResponse = httpClient.execute(post).getStatusLine().getStatusCode();
     Assert.assertTrue(postResponse == returnCode);

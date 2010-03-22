@@ -17,15 +17,8 @@ package org.opencastproject.remotetest;
 
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
+import org.opencastproject.demo.DemodataLoader;
+import org.opencastproject.integrationtest.AuthenticationSupport;
 
 import junit.framework.Assert;
 
@@ -41,9 +34,18 @@ import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opencastproject.demo.DemodataLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 
 /**
  * Tests the functionality of the Engage module Tests if all media player components are available
@@ -122,7 +124,7 @@ public class EngageModuleTest {
       success = (nodes.getLength() == 1);
 
       if (success) {
-        Assert.assertTrue(true);
+        Assert.assertTrue(true);  // FIXME this isn't necessary
         break;
       }
       Thread.sleep(2000);
@@ -132,6 +134,7 @@ public class EngageModuleTest {
   @Test
   public void testJQuery() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/jquery/jquery/jquery-1.3.2.js");
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -139,6 +142,7 @@ public class EngageModuleTest {
   @Test
   public void testJQueryXSLT() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/jquery/plugins/jquery.xslt.js");
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -146,13 +150,16 @@ public class EngageModuleTest {
   @Test
   public void testEngageUI() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/js/engage-ui.js");
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
 
+
   @Test
   public void testFABridge() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/bridge/lib/FABridge.js");
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -160,6 +167,7 @@ public class EngageModuleTest {
   @Test
   public void testVideodisplay() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/bridge/Videodisplay.js");
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -167,6 +175,7 @@ public class EngageModuleTest {
   @Test
   public void testjARIA() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/jquery/js/jARIA.js");
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -174,6 +183,7 @@ public class EngageModuleTest {
   @Test
   public void testFluid() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/fluid/js/Fluid.js");
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -181,6 +191,7 @@ public class EngageModuleTest {
   @Test
   public void testInlineEdit() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/fluid/js/InlineEdit.js");
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -188,6 +199,7 @@ public class EngageModuleTest {
   @Test
   public void testJQueryCore() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/jquery/ui/ui.core.js");
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }

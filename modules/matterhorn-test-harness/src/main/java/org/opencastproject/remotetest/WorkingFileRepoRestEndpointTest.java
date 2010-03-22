@@ -15,6 +15,8 @@
  */
 package org.opencastproject.remotetest;
 
+import org.opencastproject.integrationtest.AuthenticationSupport;
+
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
 
 import junit.framework.Assert;
@@ -64,6 +66,7 @@ public class WorkingFileRepoRestEndpointTest {
     MultipartEntity postEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
     postEntity.addPart("file", new InputStreamBody(in, fileName));
     HttpPost post = new HttpPost(BASE_URL + "/files/" + mediapackageId + "/" + elementId);
+    AuthenticationSupport.addAuthentication(post);
     post.setEntity(postEntity);
     HttpResponse response = client.execute(post);
     HttpEntity responseEntity  = response.getEntity();
@@ -73,6 +76,7 @@ public class WorkingFileRepoRestEndpointTest {
 
     // Get the file back from the repository
     HttpGet get = new HttpGet(BASE_URL + "/files/" + mediapackageId + "/" + elementId);
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse getResponse = client.execute(get);
     byte[] bytesFromGet = IOUtils.toByteArray(getResponse.getEntity().getContent());
     

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.conductor.impl.DistributeWorkflowOperationHandler" immediate="true">
-  <implementation class="org.opencastproject.conductor.impl.DistributeWorkflowOperationHandler" />
+<component name="org.opencastproject.workflow.handler.DistributeWorkflowOperationHandler" immediate="true">
+  <implementation class="org.opencastproject.workflow.handler.DistributeWorkflowOperationHandler" />
   <property name="service.description" value="Local Distribution Workflow Handler" />
   <property name="workflow.operation" value="distribute_local" />
   <service>

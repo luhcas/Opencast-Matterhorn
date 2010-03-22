@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.conductor.impl.ImageWorkflowOperationHandler" immediate="true">
-  <implementation class="org.opencastproject.conductor.impl.ImageWorkflowOperationHandler" />
+<component name="org.opencastproject.workflow.handler.ImageWorkflowOperationHandler" immediate="true">
+  <implementation class="org.opencastproject.workflow.handler.ImageWorkflowOperationHandler" />
   <property name="service.description" value="Image Workflow Operation Handler" />
   <property name="workflow.operation" value="image" />
   <service>

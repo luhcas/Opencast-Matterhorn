@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.conductor.impl.ErrorLoggingOperationHandler" immediate="true">
-  <implementation class="org.opencastproject.conductor.impl.ErrorLoggingOperationHandler" />
+<component name="org.opencastproject.workflow.handler.ErrorLoggingOperationHandler" immediate="true">
+  <implementation class="org.opencastproject.workflow.handler.ErrorLoggingOperationHandler" />
   <property name="service.description" value="Error Logging Workflow Operation Handler" />
   <property name="workflow.operation" value="log" />
   <service>

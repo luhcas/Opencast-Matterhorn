@@ -17,7 +17,9 @@ package org.opencastproject.http;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,8 +67,10 @@ public class StaticResource extends HttpServlet {
     testClasspath = (String)componentContext.getProperties().get("test.classpath");
     logger.info("registering classpath:{} at {} with welcome file {} {}, test suite: {} from classpath {}",
             new Object[] {classpath, alias, welcomeFile, welcomeFileSpecified ? "" : "(via default)", testSuite, testClasspath});
+    HttpContext httpContext = httpService.createDefaultHttpContext();
+    BundleContext bundleContext = componentContext.getBundleContext();
     try {
-      httpService.registerServlet(alias, this, null, null);
+      httpService.registerServlet(alias, this, null, new SecureContext(httpContext, bundleContext));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -164,7 +168,7 @@ public class StaticResource extends HttpServlet {
         in = url.openStream();
         IOUtils.copy(in, resp.getOutputStream());
       } catch (IOException e) {
-        logger.warn("could not open or copy streams");
+        logger.warn("could not open or copy streams", e);
         try {
           resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
           return;

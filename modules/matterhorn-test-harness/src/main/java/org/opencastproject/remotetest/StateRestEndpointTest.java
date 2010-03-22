@@ -1,5 +1,6 @@
 package org.opencastproject.remotetest;
 
+import org.opencastproject.integrationtest.AuthenticationSupport;
 import org.opencastproject.integrationtest.UniversalNamespaceResolver;
 
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
@@ -50,6 +51,7 @@ public class StateRestEndpointTest {
   @Test
   public void testGetStateGet() throws Exception {
     HttpGet request = new HttpGet(BASE_URL + "/state/rest/GetState");
+    AuthenticationSupport.addAuthentication(request);
     HttpResponse response = client.execute(request);
     
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -70,6 +72,7 @@ public class StateRestEndpointTest {
   @Test @Ignore
   public void testGetRecordingsNoneGet() throws Exception {
     HttpGet request = new HttpGet(BASE_URL + "/state/rest/GetRecordings");
+    AuthenticationSupport.addAuthentication(request);
     HttpResponse response = client.execute(request);
     
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -88,6 +91,7 @@ public class StateRestEndpointTest {
     recordingId = createRecording();
     
     HttpGet request = new HttpGet(BASE_URL + "/state/rest/GetRecordings");
+    AuthenticationSupport.addAuthentication(request);
     HttpResponse response = client.execute(request);
     
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -105,6 +109,7 @@ public class StateRestEndpointTest {
 
     HttpDelete deleteRecordingRequest = 
       new HttpDelete(BASE_URL + "/capture-admin/rest/recordings/"+ recordingId);
+    AuthenticationSupport.addAuthentication(deleteRecordingRequest);
     HttpResponse deleteRecordingResponse = client.execute(deleteRecordingRequest);
     
     Assert.assertEquals(200, deleteRecordingResponse.getStatusLine().getStatusCode());

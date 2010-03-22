@@ -176,6 +176,9 @@ public class WorkspaceImpl implements Workspace {
   }
 
   public URI put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in) {
+    // Ensure the filename doesn't contain any path separators
+    fileName = fileName.replaceAll(File.separator, "");
+
     // Store this stream in a temp file so we can cache it quickly
     File tempFile = null;
     FileOutputStream out = null;

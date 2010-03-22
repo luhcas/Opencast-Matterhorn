@@ -15,6 +15,8 @@
  */
 package org.opencastproject.remotetest;
 
+import org.opencastproject.integrationtest.AuthenticationSupport;
+
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
 
 import junit.framework.Assert;
@@ -64,6 +66,7 @@ public class WorkflowRestEndpointTest {
   public void testStartAndRetrieveWorkflowInstance() throws Exception {
     // Start a workflow instance via the rest endpoint
     HttpPost postStart = new HttpPost(BASE_URL + "/workflow/rest/start");
+    AuthenticationSupport.addAuthentication(postStart);
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
     formParams.add(new BasicNameValuePair("definition", getSampleWorkflowDefinition()));
@@ -77,11 +80,13 @@ public class WorkflowRestEndpointTest {
 
     // Ensure we can retrieve the workflow instance from the rest endpoint
     HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".xml");
+    AuthenticationSupport.addAuthentication(getWorkflowMethod);
     String getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
     Assert.assertEquals(id, getWorkflowInstanceId(getResponse));
 
     // Make sure we can retrieve it via json, too
     HttpGet getWorkflowJson = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".json");
+    AuthenticationSupport.addAuthentication(getWorkflowJson);
     String jsonResponse = EntityUtils.toString(client.execute(getWorkflowJson).getEntity());
     JSONObject json = (JSONObject) JSONValue.parse(jsonResponse);
     if(json == null) Assert.fail("JSON response should not be null, but is " + jsonResponse);
@@ -92,6 +97,7 @@ public class WorkflowRestEndpointTest {
     while(true) {
       if(++attempts == 20) Assert.fail("workflow rest endpoint test has hung");
       getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".xml");
+      AuthenticationSupport.addAuthentication(getWorkflowMethod);
       getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
       String state = getWorkflowInstanceStatus(getResponse);
       if("FAILED".equals(state)) Assert.fail("workflow instance " + id + " failed");

@@ -15,9 +15,9 @@
  */
 package org.opencastproject.remotetest;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
+
+import org.opencastproject.integrationtest.AuthenticationSupport;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -30,6 +30,9 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class AdminProxyRestEndpointTest {
 
@@ -54,12 +57,14 @@ public class AdminProxyRestEndpointTest {
 
     // GET json from countRecordings
     getJson = new HttpGet(ADMIN_BASE_URL + "/countRecordings");
+    AuthenticationSupport.addAuthentication(getJson);
     jsonResponse = EntityUtils.toString(client.execute(getJson).getEntity());
     JSONObject adminJSON = (JSONObject) JSONValue.parse(jsonResponse);
     if(adminJSON == null) Assert.fail("Not able to parse response: " + jsonResponse);
 
     // GET json from workflow/instances
     getJson = new HttpGet(BASE_URL + "/workflow/rest/instances.json");
+    AuthenticationSupport.addAuthentication(getJson);
     jsonResponse = EntityUtils.toString(client.execute(getJson).getEntity());
     JSONArray workflowJSON = (JSONArray) JSONValue.parse(jsonResponse);
     if(workflowJSON == null) Assert.fail("Not able to parse response: " + jsonResponse);

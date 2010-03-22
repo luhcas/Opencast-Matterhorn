@@ -17,8 +17,11 @@ package org.opencastproject.remotetest;
 
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
 
+import org.opencastproject.integrationtest.AuthenticationSupport;
+
 import junit.framework.Assert;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -34,10 +37,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +63,7 @@ public class IngestRestEndpointTest {
   public void testIngestThinClient() throws Exception {
     // create emptiy MediaPackage
     HttpGet get = new HttpGet(BASE_URL + "/ingest/rest/createMediaPackage");
+    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     HttpEntity entity = response.getEntity();
     String mp = EntityUtils.toString(entity);
@@ -79,6 +81,7 @@ public class IngestRestEndpointTest {
   protected String postCall(String method, String mediaFile, String flavor, String mediaPackage)
           throws ClientProtocolException, IOException {
     HttpPost post = new HttpPost(BASE_URL + method);
+    AuthenticationSupport.addAuthentication(post);
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams = new ArrayList<NameValuePair>();
     if(mediaFile != null) {
@@ -95,28 +98,10 @@ public class IngestRestEndpointTest {
     String mp = "";
     if (entity != null) {
       InputStream instream = entity.getContent();
-      mp = convertStreamToString(instream);
+      mp = IOUtils.toString(instream);
       // System.out.println(mp);
     }
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
     return mp;
-  }
-
-  protected String convertStreamToString(InputStream is) throws IOException {
-    if (is != null) {
-      StringBuilder sb = new StringBuilder();
-      String line;
-      try {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-        while ((line = reader.readLine()) != null) {
-          sb.append(line).append("\n");
-        }
-      } finally {
-        is.close();
-      }
-      return sb.toString();
-    } else {
-      return "";
-    }
   }
 }

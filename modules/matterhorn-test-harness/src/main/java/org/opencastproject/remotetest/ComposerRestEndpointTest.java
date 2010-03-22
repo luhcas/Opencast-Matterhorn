@@ -15,6 +15,8 @@
  */
 package org.opencastproject.remotetest;
 
+import org.opencastproject.integrationtest.AuthenticationSupport;
+
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
 
 import junit.framework.Assert;
@@ -63,6 +65,7 @@ public class ComposerRestEndpointTest {
   public void testEncodeAudioAndVideoTracks() throws Exception {
     // Start an encoding job via the rest endpoint
     HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/encode");
+    AuthenticationSupport.addAuthentication(postEncode);
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("audioSourceTrackId", "track-1"));
     formParams.add(new BasicNameValuePair("videoSourceTrackId", "track-2"));
@@ -81,6 +84,7 @@ public class ComposerRestEndpointTest {
     while(status == null || "RUNNING".equals(status)) {
       Thread.sleep(5000); // wait and try again
       HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/receipt/" + receiptId + ".xml");
+      AuthenticationSupport.addAuthentication(pollRequest);
       status = getRecepitStatus(client.execute(pollRequest));
       System.out.println("encoding job " + receiptId + " is " + status);
     }
@@ -92,6 +96,7 @@ public class ComposerRestEndpointTest {
   @Test
   public void testImageExtraction() throws Exception {
     HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/image");
+    AuthenticationSupport.addAuthentication(postEncode);
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("sourceTrackId", "track-2"));
     formParams.add(new BasicNameValuePair("time", "1"));

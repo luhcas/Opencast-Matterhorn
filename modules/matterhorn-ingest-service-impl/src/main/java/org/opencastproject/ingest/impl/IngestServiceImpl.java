@@ -134,7 +134,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
       InputStream manifestStream = manifest.toURI().toURL().openStream();
       mp = builder.loadFromXml(manifestStream);
       try {
-        manifestStream.close();
+        manifestStream.close(); // FIXME move to finally
       } catch (IOException e) {
         logger.error(e.getMessage());
       }
@@ -157,7 +157,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
       }
 
     } catch (Exception e) {
-      logger.error("Ingest service: Failed to ingest media package!");
+      logger.error("Ingest service: Failed to ingest media package: {}", e.getMessage());
       throw (e);
     }
     removeDirectory(tempPath);

@@ -15,6 +15,8 @@
  */
 package org.opencastproject.remotetest;
 
+import org.opencastproject.integrationtest.AuthenticationSupport;
+
 import static org.junit.Assert.assertEquals;
 
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
@@ -56,6 +58,7 @@ public class CaptureAdminRestEndpointTest {
   @Test
   public void testGetAgents() throws Exception {
     HttpGet get = new HttpGet(BASE_URL + "/capture-admin/rest/agents");
+    AuthenticationSupport.addAuthentication(get);
     String xmlResponse = EntityUtils.toString(httpClient.execute(get).getEntity());
     
     // parse the xml and extract the running clients names
@@ -70,6 +73,7 @@ public class CaptureAdminRestEndpointTest {
     for (int i = 0; i < agentList.getLength(); i++) {
       String agentName = ((Element) agentList.item(i)).getElementsByTagName("name").item(0).getTextContent();
       HttpGet agentGet = new HttpGet(get.getURI() + "/" + agentName);
+      AuthenticationSupport.addAuthentication(agentGet);
       int agentResponse = httpClient.execute(agentGet).getStatusLine().getStatusCode();
       assertEquals(agentResponse, HttpStatus.SC_OK);
     }
