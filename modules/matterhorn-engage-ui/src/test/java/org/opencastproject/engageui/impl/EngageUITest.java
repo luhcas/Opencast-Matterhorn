@@ -40,11 +40,10 @@ public class EngageUITest {
   @Test
   public void testPlayerXSL() throws Exception {
 
-    File xsltFile = new File(this.getClass().getClassLoader().getResource(
-            "ui" + File.separator + "xsl" + File.separator + "player-hybrid-download.xsl").getFile());
-
-    File xmlFile = new File(this.getClass().getClassLoader().getResource("xml" + File.separator + "episode.xml")
+    File xsltFile = new File(this.getClass().getClassLoader().getResource("ui/xsl/player-hybrid-download.xsl")
             .getFile());
+
+    File xmlFile = new File(this.getClass().getClassLoader().getResource("xml/episode.xml").getFile());
 
     InputStream expectedStream = this.getClass().getClassLoader().getResourceAsStream(
             "xml" + File.separator + "player-expected.xml");
@@ -74,11 +73,9 @@ public class EngageUITest {
 
   @Test
   public void testEpisodesXSL() throws Exception {
-    File xsltFile = new File(this.getClass().getClassLoader().getResource(
-            "ui" + File.separator + "xsl" + File.separator + "episodes.xsl").getFile());
+    File xsltFile = new File(this.getClass().getClassLoader().getResource("ui/xsl/episodes.xsl").getFile());
 
-    File xmlFile = new File(this.getClass().getClassLoader().getResource("xml" + File.separator + "episodes.xml")
-            .getFile());
+    File xmlFile = new File(this.getClass().getClassLoader().getResource("xml/episodes.xml").getFile());
 
     InputStream expectedStream = this.getClass().getClassLoader().getResourceAsStream(
             "xml" + File.separator + "episodes-expected.xml");
