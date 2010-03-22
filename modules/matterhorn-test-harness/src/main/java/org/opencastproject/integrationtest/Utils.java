@@ -64,17 +64,18 @@ public class Utils {
     return (JSONObject) JSONValue.parse(doc);
   }
   
-  public static String schedulerEvent(Integer duration) throws Exception {
+  public static String schedulerEvent(Integer duration, String title) throws Exception {
 	Long start = System.currentTimeMillis() + 60000;
 	Long end = start + duration;
-	String event = IOUtils.toString(Utils.class.getClassLoader().getResourceAsStream("scheduler-event.xml"));
+	String event = IOUtils.toString(Utils.class.getResourceAsStream("/scheduler-event.xml"));
 	return event
+		.replace("@@title@@", title)
 		.replace("@@start@@", start.toString())
 		.replace("@@end@@", end.toString())
 		.replace("@@duration@@", duration.toString());
   }
 
-  public static File getFile(String url) throws Exception {
+  public static File getUrlAsFile(String url) throws Exception {
 	  Client c = Client.create();
 	  WebResource r = c.resource(url);
 	  return r.get(File.class);

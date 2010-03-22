@@ -35,7 +35,7 @@ public class UnscheduledCaptureTest {
   public static String recordingId;
 
   @Test
-  public void testAgentRegisteredAndIdle() throws Exception {
+  public void testUnscheduledCapture() throws Exception {
     
     // Agent Registered
     ClientResponse response = CaptureAdminResources.agents();
@@ -59,44 +59,28 @@ public class UnscheduledCaptureTest {
     
     assertEquals("Response code (getState):", 200, response.getStatus());
     assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
-  }
-  
-  @Test
-  public void testStartCapture() throws Exception {
     
     // Start capture
-    ClientResponse response = CaptureResources.startCaptureGet();
+    response = CaptureResources.startCaptureGet();
     
     assertEquals("Response code (startCapture):", 200, response.getStatus());
     
     // Get capture ID
     recordingId = CaptureResources.captureId(response);
-  }
-  
-  @Test
-  public void testAgentCapturing() throws Exception {
     
     // Agent State: capturing
-    ClientResponse response = StateResources.getState();
+    response = StateResources.getState();
     
     assertEquals("Response code (getState):", 200, response.getStatus());
     assertEquals("Agent recording? (getState):", "capturing", response.getEntity(String.class));
-  }
-  
-  @Test
-  public void testStopCapture() throws Exception {
     
     // Stop capture
-    ClientResponse response = CaptureResources.stopCapturePost(recordingId);
+    response = CaptureResources.stopCapturePost(recordingId);
     
     assertEquals("Response code (stopCapturePost):", 200, response.getStatus());
-  }
-  
-  @Test
-  public void testAgentIdleAfterStopped() throws Exception {
     
     // Agent State: idle
-    ClientResponse response = StateResources.getState();
+    response = StateResources.getState();
     
     assertEquals("Response code (getState):", 200, response.getStatus());
     assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
@@ -106,21 +90,16 @@ public class UnscheduledCaptureTest {
     
     assertEquals("Response code (agent):", 200, response.getStatus());
     
-    Document xml = Utils.parseXml(response.getEntity(String.class));
+    xml = Utils.parseXml(response.getEntity(String.class));
     
     assertEquals("Agent idle? (agent):", Utils.xPath(xml, "//ns2:agent-state-update/state", XPathConstants.STRING), "idle");
     
-  }
-  
-  @Test
-  public void testRecordingFinished() throws Exception {
-    
     // State, Recordings: id is finished
-    ClientResponse response = StateResources.recordings();
+    response = StateResources.recordings();
     
     assertEquals("Response code (recordings):", 200, response.getStatus());
     
-    Document xml = Utils.parseXml(response.getEntity(String.class));
+    xml = Utils.parseXml(response.getEntity(String.class));
     
     assertTrue("Recording included? (recordings):", Utils.xPathExists(xml, "//ns1:recording-state-update[name=\'" + recordingId + "\']"));
     assertEquals("Recording finished (recordings):", "capture_finished", Utils.xPath(xml, "//ns1:recording-state-update[name=\'" + recordingId + "\']/state", XPathConstants.STRING));

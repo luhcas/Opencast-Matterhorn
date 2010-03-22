@@ -45,6 +45,12 @@ public class SearchResources {
     return r.path("episode").queryParams(params).get(ClientResponse.class);
   }
   
+  public static ClientResponse episodeQuery(String q) throws Exception {
+	MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+	params.add("q", q);
+	return r.path("episode").queryParams(params).get(ClientResponse.class);
+  }
+  
   public static ClientResponse series(String id) throws Exception {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("id", id);

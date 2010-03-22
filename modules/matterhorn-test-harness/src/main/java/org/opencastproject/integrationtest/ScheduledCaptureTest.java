@@ -18,6 +18,11 @@ package org.opencastproject.integrationtest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.UUID;
+
+import javax.xml.xpath.XPathConstants;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -32,7 +37,7 @@ import com.sun.jersey.api.client.ClientResponse;
 public class ScheduledCaptureTest {
 
 	@Test
-	public void testAgentRegisteredAndIdle() throws Exception {
+	public void testScheduledCapture() throws Exception {
 		
 		// Agent Registered
 		ClientResponse response = CaptureAdminResources.agents();
@@ -56,15 +61,41 @@ public class ScheduledCaptureTest {
 		
 		assertEquals("Response code (getState):", 200, response.getStatus());
 		assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
-	}
-	
-	@Test
-	public void testScheduleEvent() throws Exception {
+
+		String title = UUID.randomUUID().toString();
+		String event = Utils.schedulerEvent(10000, title);
 		
-		String event = Utils.schedulerEvent(60000);
-		
-		ClientResponse response = SchedulerResources.addEvent(event);
+		response = SchedulerResources.addEvent(event);
 		
 		assertEquals("Response code (addEvent):", 200, response.getStatus());
+		
+		// Pause for recording to start
+		Thread.sleep(60000);
+		
+		// Agent State: capturing
+		response = StateResources.getState();
+		
+		assertEquals("Response code (getState):", 200, response.getStatus());
+		assertEquals("Agent capturing? (getState):", "capturing", response.getEntity(String.class));
+		
+		// Pause for recording to complete
+		Thread.sleep(10000);
+		
+		// Agent State: idle
+		response = StateResources.getState();
+		
+		assertEquals("Response code (getState):", 200, response.getStatus());
+		assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
+		
+		// Pause for workflow to complete
+		Thread.sleep(10000);
+		
+		// Search index: recording present
+		response = SearchResources.episodeQuery(title);
+		
+		assertEquals("Response code (episode):", 200, response.getStatus());
+		System.out.println(response.getEntity(String.class));
+		
+		
 	}
 }

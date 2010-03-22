@@ -102,7 +102,7 @@ public class UploadTest {
 		assertEquals("Response code (getFile Track):", 200, response.getStatus());
 		assertEquals("Media Track Checksum:",
 				Checksum.create(ChecksumType.DEFAULT_TYPE, response.getEntity(File.class)),
-				Checksum.create(ChecksumType.DEFAULT_TYPE, Utils.getFile(trackUrl)));
+				Checksum.create(ChecksumType.DEFAULT_TYPE, Utils.getUrlAsFile(trackUrl)));
 		response = FilesResources.getFile(mediaPackageId, catalogId);
 		assertEquals("Response code (getFile Catalog):", 200, response.getStatus());
 		// TODO compare files
@@ -116,6 +116,7 @@ public class UploadTest {
 				Utils.xPathExists(
 						Utils.parseXml(response.getEntity(String.class)),
 						"//ns2:result[@id='" + mediaPackageId + "']/ns2:mediapackage" ));
+		
 	}
 
 }
