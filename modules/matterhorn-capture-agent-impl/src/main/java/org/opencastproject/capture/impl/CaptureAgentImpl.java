@@ -265,7 +265,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         logger.debug("Preparing for mock capture.");
         mockCapture = true;
         // if running on a Linux capture box it is preferable to use GStreamer
-        if (!System.getProperty("os.name").equalsIgnoreCase("Linux")) {
+        if (!new File("/usr/lib/libjv4linfo.so").exists()) {
           for (String device : deviceList) {
             String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
             String value = (String)properties.get(key);
