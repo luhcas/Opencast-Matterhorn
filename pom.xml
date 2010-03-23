@@ -43,6 +43,8 @@
         <module>modules/matterhorn-distribution-service-itunesu</module>
         <!-- module>modules/matterhorn-engage-player</module -->
         <module>modules/matterhorn-engage-ui</module>
+        <module>modules/matterhorn-feedback-service-api</module>
+        <module>modules/matterhorn-feedback-service-impl</module> 
         <module>modules/matterhorn-http</module>
         <module>modules/matterhorn-ingest-service-api</module>
         <module>modules/matterhorn-ingest-service-impl</module>
