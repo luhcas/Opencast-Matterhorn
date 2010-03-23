@@ -45,12 +45,7 @@ Upload.init = function() {
   // Event: Help icon clicked, display help
   $('.helpIcon').click( function() {
     var help = $(this).prev().attr('id');
-    $('#helpTitle').text(helpTexts[help][0]);
-    $('#helpText').text(helpTexts[help][1]);
-    $('#helpBox').css({
-      top:$(this).offset().top,
-      left:$(this).offset().left
-    }).fadeIn('fast');
+    Upload.showHelpBox(help);
     return false;
   });
 
@@ -103,6 +98,15 @@ Upload.checkRequiredFields = function(submit) {
     $('#container-missingFields').hide('fast');
   }
   return !missing;
+}
+
+Upload.showHelpBox = function(help) {
+  $('#helpTitle').text(helpTexts[help][0]);
+  $('#helpText').text(helpTexts[help][1]);
+  $('#helpBox').css({
+    top:$(this).offset().top,
+    left:$(this).offset().left
+  }).fadeIn('fast');
 }
 
 /** gray-out whole page and display progress popup

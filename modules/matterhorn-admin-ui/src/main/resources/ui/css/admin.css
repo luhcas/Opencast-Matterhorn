@@ -239,6 +239,15 @@ select { font-size:1.15em; }
     /*margin-top:50px;*/
 }
 
+#recordings-table-container {
+    background:white;
+    /*margin-top:50px;*/
+}
+
+#recordingsTable th {
+  padding-right:20px;
+}
+
 #stage {
     background:white;
     padding-left: 12px; /**/

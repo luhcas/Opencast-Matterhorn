@@ -11,11 +11,13 @@
     <script type="text/javascript" src="../../../src/main/resources/ui/js/oc.utils.js"></script>
     <script type="text/javascript" src="../../../src/main/resources/ui/js/oc.ingest.js"></script>
     <script type="text/javascript" src="../../../src/main/resources/ui/js/scheduler.js"></script>
+    <script type="text/javascript" src="../../../src/main/resources/ui/js/upload.helptexts.json"></script>
     <script type="text/javascript" src="../../../src/main/resources/ui/js/upload.js"></script>
     <!-- Test suite -->
     <script type="text/javascript" src="qunit/qunit.js"></script>
     <script type="text/javascript" src="scheduler-test.js"></script>
     <script type="text/javascript" src="ingest-ui-test.js"></script>
+    <script type="text/javascript" src="help-test.js"></script>
     <script type="text/javascript" src="DCXML-test.js"></script>
   </head>
   <body>
@@ -38,6 +40,7 @@
     </div>
     <span id="label-track" class="fl-label">Test label:</span>
     <input type="text" id="track" class="requiredField" value="">
+    <span id="test-help-icon" class="helpIcon" title="Click for help">&nbsp;</span>
 
     <!-- markup for upload progress test -->
     <div id="gray-out">
@@ -55,6 +58,12 @@
       <div id="label-bytestrasfered">&nbsp;</div>
     </div>
 
+    <!-- Markup for the popup help box test -->
+    <div id="helpBox" class="helpbox" style="display:none;">
+      <img src="img/lightbulb.png" alt="help" >
+      <div id="helpTitle" style="display:inline;font-weight:bold; margin-left:10px;"></div>
+      <div id="helpText" style="padding-left:7px; padding-right:7px; white-space:normal;"></div>
+    </div>
     <!-- </div> -->
 
   </body>
