@@ -47,7 +47,6 @@ import java.util.Map.Entry;
  */
 public class WorkspaceImpl implements Workspace {
   public static final String WORKSPACE_ROOTDIR = "workspace.rootdir";
-  public static final String WORKSPACE_WORKING_FILEDIR = "workspace.workingfiledir";
   private static final Logger logger = LoggerFactory.getLogger(WorkspaceImpl.class);
 
   protected WorkingFileRepository repo;
