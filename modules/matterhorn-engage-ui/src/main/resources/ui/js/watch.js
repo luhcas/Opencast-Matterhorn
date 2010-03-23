@@ -54,6 +54,17 @@ Opencast.Watch = (function () {
  //     $('#info').append("<a href=" + watchUrl.replace(/watch.html/g, "multi.html") + ">Multi</a>");
 
       
+      // Add the scrubber keypress handler to Opencast.Scrubber.init
+      $('#scrubber').bind('keydown', 'left', function(evt) {
+        Opencast.Player.doRewind();
+      });
+      
+      $('#scrubber').bind('keydown', 'right', function(evt) {
+        Opencast.Player.doFastForward();
+      });
+      
+
+      
     });
   }
   
