@@ -79,7 +79,7 @@ public class StateServiceImpl implements StateService, ManagedService {
       String key = keys.nextElement();
       props.put(key, properties.get(key));
     }
-    createPollingTask(props);
+    createPushTask(props);
   }
   
   public void deactivate() {
@@ -88,7 +88,7 @@ public class StateServiceImpl implements StateService, ManagedService {
           scheduler.shutdown(true);
       }
     } catch (SchedulerException e) {
-      logger.warn("Finalize for pollScheduler did not execute cleanly: {}.", e.getMessage());
+      logger.warn("Finalize for scheduler did not execute cleanly: {}.", e.getMessage());
     }
   }
 
@@ -165,13 +165,13 @@ public class StateServiceImpl implements StateService, ManagedService {
    * Creates the Quartz task which pushes the agent's state to the state server.
    * @param schedulerProps The properties for the Quartz scheduler
    */
-  private void createPollingTask(Properties schedulerProps) {
+  private void createPushTask(Properties schedulerProps) {
     //Either create the scheduler or empty out the existing one
     try {
       if (scheduler != null) {
         //Clear the existing jobs and reschedule everything
-        for (String name : scheduler.getJobNames(JobParameters.POLLING_TYPE)) {
-          scheduler.deleteJob(name, JobParameters.POLLING_TYPE);
+        for (String name : scheduler.getJobNames(JobParameters.RECURRING_TYPE)) {
+          scheduler.deleteJob(name, JobParameters.RECURRING_TYPE);
         }
       } else {
         StdSchedulerFactory sched_fact = new StdSchedulerFactory(schedulerProps);
@@ -185,46 +185,46 @@ public class StateServiceImpl implements StateService, ManagedService {
       return;
     }
 
-    //Setup the agent state polling
+    //Setup the agent state push jobs
     try {
-      long statePollTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL)) * 1000L;
+      long statePushTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL)) * 1000L;
       
-      //Setup the polling
-      JobDetail stateJob = new JobDetail("agentStateUpdate", JobParameters.POLLING_TYPE, AgentStateJob.class);
+      //Setup the push job
+      JobDetail stateJob = new JobDetail("agentStateUpdate", JobParameters.RECURRING_TYPE, AgentStateJob.class);
 
       stateJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
       stateJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
 
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
-      SimpleTrigger stateTrigger = new SimpleTrigger("state_polling", JobParameters.POLLING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, statePollTime);
+      SimpleTrigger stateTrigger = new SimpleTrigger("state_push", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, statePushTime);
       
       //Schedule the update
       scheduler.scheduleJob(stateJob, stateTrigger);
     } catch (NumberFormatException e) {
       logger.error("Invalid time specified in the {} value, unable to push state to remote server!", CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL);
     } catch (SchedulerException e) {
-      logger.error("SchedulerException in StateServiceImpl while trying to schedule state polling: {}.", e.getMessage());
+      logger.error("SchedulerException in StateServiceImpl while trying to schedule state push jobs: {}.", e.getMessage());
     }
 
-    //Setup the agent capabilities polling
+    //Setup the agent capabilities push jobs
     try {
-      long capbsPollTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL)) * 1000L;
+      long capbsPushTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL)) * 1000L;
       
-      //Setup the polling
-      JobDetail capbsJob = new JobDetail("agentCapabilitiesUpdate", JobParameters.POLLING_TYPE, AgentCapabilitiesJob.class);
+      //Setup the push job
+      JobDetail capbsJob = new JobDetail("agentCapabilitiesUpdate", JobParameters.RECURRING_TYPE, AgentCapabilitiesJob.class);
 
       capbsJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
       capbsJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);     
       
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
-      SimpleTrigger capbsTrigger = new SimpleTrigger("capabilities_polling", JobParameters.POLLING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, capbsPollTime);
+      SimpleTrigger capbsTrigger = new SimpleTrigger("capabilities_polling", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, capbsPushTime);
       
       //Schedule the update
       scheduler.scheduleJob(capbsJob, capbsTrigger);
     } catch (NumberFormatException e) {
       logger.error("Invalid time specified in the {} value, unable to push capabilities to remote server!", CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL);
     } catch (SchedulerException e) {
-      logger.error("SchedulerException in StateServiceImpl while trying to schedule capability polling: {}.", e.getMessage());
+      logger.error("SchedulerException in StateServiceImpl while trying to schedule capability push jobs: {}.", e.getMessage());
     }
     
   }

@@ -244,6 +244,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     if (currentRecID != null || !agentState.equals(AgentState.IDLE)) {
       logger.warn("Unable to start capture, a different capture is still in progress in {}.",
               pendingRecordings.get(currentRecID).getDir().getAbsolutePath());
+      if (properties != null && properties.contains(CaptureParameters.RECORDING_ID)) {
+        setRecordingState((String) properties.get(CaptureParameters.RECORDING_ID), RecordingState.CAPTURE_ERROR);
+      }
       return null;
     } else
       setAgentState(AgentState.CAPTURING);

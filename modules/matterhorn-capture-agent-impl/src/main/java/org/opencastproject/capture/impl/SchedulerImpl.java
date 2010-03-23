@@ -40,15 +40,6 @@ import net.fortuna.ical4j.model.property.Duration;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.opencastproject.capture.impl.jobs.JobParameters;
-import org.opencastproject.capture.impl.jobs.PollCalendarJob;
-import org.opencastproject.capture.impl.jobs.StartCaptureJob;
-import org.opencastproject.capture.impl.jobs.StopCaptureJob;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.quartz.CronExpression;
@@ -180,8 +171,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
     try {
       //Nuke any existing polling tasks
-      for (String name : scheduler.getJobNames(JobParameters.POLLING_TYPE)) {
-        scheduler.deleteJob(name, JobParameters.POLLING_TYPE);
+      for (String name : scheduler.getJobNames(JobParameters.RECURRING_TYPE)) {
+        scheduler.deleteJob(name, JobParameters.RECURRING_TYPE);
       }
 
       //Find the remote endpoint for the scheduler
@@ -198,9 +189,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       pollTime = Long.parseLong(configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL)) * 1000L;
       if (pollTime > 1) {
         //Setup the polling
-        JobDetail job = new JobDetail("calendarUpdate", JobParameters.POLLING_TYPE, PollCalendarJob.class);
+        JobDetail job = new JobDetail("calendarUpdate", JobParameters.RECURRING_TYPE, PollCalendarJob.class);
         //Create a new trigger                    Name       Group name               Start       End   # of times to repeat               Repeat interval
-        SimpleTrigger trigger = new SimpleTrigger("polling", JobParameters.POLLING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime);
+        SimpleTrigger trigger = new SimpleTrigger("polling", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime);
 
         trigger.getJobDataMap().put(JobParameters.SCHEDULER, this);
 
@@ -402,7 +393,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         log.debug("{}.", name);  
       }
       log.debug("Currently scheduled jobs for poll schedule:");
-      for (String name : scheduler.getJobNames(JobParameters.POLLING_TYPE)) {
+      for (String name : scheduler.getJobNames(JobParameters.RECURRING_TYPE)) {
         log.debug("{}.", name);
       }
       log.debug("Currently scheduled jobs for other schedule:");
@@ -663,7 +654,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       cleanJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
 
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
-      SimpleTrigger cleanTrigger = new SimpleTrigger("cleanCapture", JobParameters.POLLING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, cleanInterval);
+      SimpleTrigger cleanTrigger = new SimpleTrigger("cleanCapture", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, cleanInterval);
 
       //Schedule the update
       scheduler.scheduleJob(cleanJob, cleanTrigger);
@@ -716,13 +707,13 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     try {
       if (enable) {
         if (scheduler != null) {
-          scheduler.resumeJobGroup(JobParameters.POLLING_TYPE);
+          scheduler.resumeJobGroup(JobParameters.RECURRING_TYPE);
         } else {
           log.error("Unable to start polling, the scheduler is null!");
         }
       } else {
         if (scheduler != null) {
-          scheduler.pauseJobGroup(JobParameters.POLLING_TYPE);
+          scheduler.pauseJobGroup(JobParameters.RECURRING_TYPE);
         }        
       }
     } catch (SchedulerException e) {
@@ -781,7 +772,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   public boolean isPollingEnabled() {
     if (scheduler != null) {
       try {
-        return scheduler.getPausedTriggerGroups().contains(JobParameters.POLLING_TYPE);
+        return scheduler.getPausedTriggerGroups().contains(JobParameters.RECURRING_TYPE);
       } catch (SchedulerException e) {
         log.warn("Scheduler exception: {}.", e.getMessage());
         return false;

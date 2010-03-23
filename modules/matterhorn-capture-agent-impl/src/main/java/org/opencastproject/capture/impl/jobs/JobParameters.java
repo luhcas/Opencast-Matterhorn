@@ -46,8 +46,8 @@ public interface JobParameters {
   /** Constant defining the job type for capture jobs. */
   public static final String CAPTURE_TYPE = "captures";
 
-  /** Constant defining the job type for calendar polling jobs. */
-  public static final String POLLING_TYPE = "polling";
+  /** Constant defining the job type for recurring jobs. */
+  public static final String RECURRING_TYPE = "recurring";
 
   /** Constant defining the job type or jobs which do not fit in the above types. */
   public static final String OTHER_TYPE = "other";
