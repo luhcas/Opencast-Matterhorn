@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.feedback.endpoint.FeedbackRestService"
+	immediate="true" activate="activate" deactivate="deactivate">
+	<implementation
+		class="org.opencastproject.feedback.endpoint.FeedbackRestService" />
+	<property name="service.description" value="Feedback REST Endpoint" />
+	<property name="service.exported.interfaces"
+		value="org.opencastproject.feedback.endpoint.FeedbackRestService" />
+	<property name="service.exported.configs" value="org.apache.cxf.rs" />
+	<property name="org.apache.cxf.rs.httpservice.context" value="/feedback/rest" />
+	<service>
+		<provide interface="org.opencastproject.feedback.endpoint.FeedbackRestService" />
+	</service>
+	<reference name="service-impl"
+		interface="org.opencastproject.feedback.api.FeedbackService"
+		cardinality="1..1" policy="dynamic" bind="setService" unbind="unsetService" /> 		
+</component>
