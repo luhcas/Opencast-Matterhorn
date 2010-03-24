@@ -18,6 +18,11 @@ Epiphan Linux driver download page http://www.epiphan.com/downloads/linux. If it
 does not exist on the Epiphan download page then it can be requested by emailing
 info@epiphan.com with your kernel information. 
 
+Alternatively, if your driver is not listed in the script itself, but does exist
+on the Epiphan website, you can use option 9 to input the URL to the appropriate
+driver which will then be downloaded and installed. No modification of the script
+is necessary to incorporate a new driver.
+
 The sources which APT uses is modified so that the machine has all that it 
 requires right now for installing dependencies. To avoid conflicts it backs up
 the original sources list and creates a new one. The necessary dependencies are
