@@ -64,12 +64,15 @@ public class CaptureAgentMetadataGenerator {
     Properties caCatalog = new Properties();
     
     String [] res = event.getResources();
-    StringBuilder resList = new StringBuilder();
-    for (int i = 0; i < res.length; i++) {
-      if (i > 0) resList.append(","); //skip "," in front of first value
-      resList.append(res[i]);
+    if(res != null && res.length > 0){
+      logger.debug("resources: " + res.length);
+      StringBuilder resList = new StringBuilder();
+      for (int i = 0; i < res.length; i++) {
+        if (i > 0) resList.append(","); //skip "," in front of first value
+        resList.append(res[i]);
+      }
+      caCatalog.setProperty("capture.device.names", resList.toString());
     }
-    caCatalog.setProperty("capture.device.names", resList.toString());
     for (Entry<String, String> e : caMetadata.entrySet()) {
       caCatalog.put (e.getKey(), e.getValue());
     }       

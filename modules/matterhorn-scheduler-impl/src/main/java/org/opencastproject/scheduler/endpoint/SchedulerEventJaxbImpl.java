@@ -116,7 +116,9 @@ public class SchedulerEventJaxbImpl {
       event.setEnddate(new Date(0));
       logger.error("Must have either an enddate or duration!");
     }
-    event.setResources(resources.toArray(new String [0]));
+    if(resources != null && !resources.isEmpty()){
+      event.setResources(resources.toArray(new String [0]));
+    }
     event.setAttendees(attendees.toArray(new String [0]));
     logger.info("Event created {} ", event.toString());
     return event;
