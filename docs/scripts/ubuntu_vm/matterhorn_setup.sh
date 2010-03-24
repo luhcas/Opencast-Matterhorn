@@ -140,8 +140,9 @@ done
 # Did we get connected?
 if [ -z $MY_IP ]; then
   echo "** ERROR: Could not acquire IP address for this VM."
-  echo "Matterhorn Installation process cannot proceed."
-  echo "Please diagnose network problem and restart the VM."
+  echo "Edit file /etc/udev/rules.d/70-persistent-net.rules and remove all uncommented"
+  echo "lines, and restart the VM.  For more info see Functionality section of FAQ at"
+  echo "http://opencast.jira.com/wiki/display/MH/Release+0.5+FAQ"
 else
   # connected, start main task
   show_stat
