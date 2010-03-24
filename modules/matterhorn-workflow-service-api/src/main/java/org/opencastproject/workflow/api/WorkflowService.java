@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public interface WorkflowService {
   
-  public static final String DEFAULT_WORKFLOW_ID = "default.workflow";
+  public static final String DEFAULT_WORKFLOW_ID = "default";
 
   /**
    * Returns the {@link WorkflowDefinition} identified by <code>name</code> or <code>null</code> if no such definition
