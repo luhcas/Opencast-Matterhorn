@@ -49,14 +49,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
+//import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.persistence.RollbackException;
+//import javax.persistence.Query;
+//import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -87,9 +88,13 @@ public class IngestRestService {
   protected EntityManagerFactory emf = null;
   private String serverURL = null;
 
+  // For the progress bar -1 bug workaround, keeping UploadJobs in memory rather than saving them using JPA
+  private HashMap<String,UploadJob> jobs;
+
   public IngestRestService() {
     factory = MediaPackageBuilderFactory.newInstance();
     builder = factory.newMediaPackageBuilder();
+    jobs = new HashMap<String,UploadJob>();
   }
 
   public void setIngestService(IngestService ingestService) {
@@ -393,7 +398,7 @@ public class IngestRestService {
   }
 
   protected UploadJob createUploadJob() throws RuntimeException {
-    EntityManager em = emf.createEntityManager();
+    /*EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       UploadJob job = new UploadJob();
@@ -407,7 +412,10 @@ public class IngestRestService {
       throw new RuntimeException(ex);
     } finally {
       em.close();
-    }
+    }*/
+    UploadJob job = new UploadJob();
+    jobs.put(job.getId(), job);
+    return job;
   }
 
   /**
@@ -427,6 +435,7 @@ public class IngestRestService {
       html = html.replaceAll("\\{uploadURL\\}", uploadURL);
       html = html.replaceAll("\\{jobId\\}", job.getId());
       logger.info("New upload job created: " + job.getId());
+      jobs.put(job.getId(), job);
       return Response.ok(html).build();
     } catch (Exception ex) {
       logger.warn(ex.getMessage(), ex);
@@ -456,7 +465,12 @@ public class IngestRestService {
     EntityManager em = emf.createEntityManager();
     try {
       try { // try to get UploadJob, responde 404 if not successful
-        job = em.find(UploadJob.class, jobId);
+        //job = em.find(UploadJob.class, jobId);
+        if (jobs.containsKey(jobId)) {
+          job = jobs.get(jobId);
+        } else {
+          throw new NoResultException("Job not found");
+        }
       } catch (NoResultException e) {
         logger.warn("UploadJob not found for Id: " + jobId);
         return buildUploadFailedRepsonse();
@@ -566,9 +580,14 @@ public class IngestRestService {
     try {
       UploadJob job = null;
       try { // try to get UploadJob, responde 404 if not successful
-        Query q = em.createNamedQuery("UploadJob.getByID");
-        q.setParameter("id", jobId);
-        job = (UploadJob) q.getSingleResult();
+        //Query q = em.createNamedQuery("UploadJob.getByID");
+        //q.setParameter("id", jobId);
+        //job = (UploadJob) q.getSingleResult();
+        if (jobs.containsKey(jobId)) {
+          job = jobs.get(jobId);
+        } else {
+          throw new NoResultException("Job not found");
+        }
       } catch (NoResultException e) {
         logger.warn("UploadJob not found for Id: " + jobId);
         return Response.status(Status.NOT_FOUND).build();
