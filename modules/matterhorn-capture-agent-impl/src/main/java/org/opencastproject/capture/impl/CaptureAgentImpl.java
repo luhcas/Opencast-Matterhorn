@@ -251,6 +251,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     } else
       setAgentState(AgentState.CAPTURING);
 
+    properties = configService.merge(properties, false);
+
     RecordingImpl newRec = createRecording(mediaPackage, properties);
     if (newRec == null) {
       return null;
@@ -363,7 +365,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     // Checks there is no duplicate ID
     String recordingID = newRec.getID();
     if (pendingRecordings.containsKey(recordingID)) {
-      logger.error("There is already a recording with ID {}", recordingID);
+      logger.error("Can't create a recording with ID {}: there is already another recording with such ID", recordingID);
       setAgentState(AgentState.IDLE);
       //TODO:  Do we set the recording to an error state here?
       //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
@@ -430,7 +432,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   // FIXME: This is not exactly an efficient way to find out whether we are dealing with a mock capture. It requires
   // copying the sample files in addition to having to do filesystem lookups. (jt)
-  
+
   private boolean isMockCapture(Properties properties, String[] deviceList) {
     boolean isMockCapture = true;
     File f = new File(samplesDir);
@@ -498,27 +500,25 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     logger.debug("stopCapture() called.");
     // If pipe is null and no mock capture is on
-    if (pipe == null && !mockCapture) {
-      logger.warn("Pipeline is null, unable to stop capture.");
-      setAgentState(AgentState.IDLE);
-      return false;
-    }
-
-    // We must stop the capture as soon as possible, then check whatever needed
-    // Only if this is not a mock capture, of course
-    if (!mockCapture) {
+    if (pipe == null) {
+      if (!mockCapture) {
+        logger.warn("Pipeline is null, unable to stop capture.");
+        setAgentState(AgentState.IDLE);
+        return false;
+      }
+    } else {
+      // We must stop the capture as soon as possible, then check whatever needed
       pipe.stop();
       pipe = null;
+      
+      // Checks there is a currentRecID defined --should always be
+      if (currentRecID == null) { 
+        logger.warn("There is no currentRecID assigned, but the Pipeline was not null!");
+        setAgentState(AgentState.IDLE);
+        return false;
+      }
     }
 
-    // Checks there is a currentRecID defined --should always be
-    if (currentRecID == null) { 
-      logger.warn("There is no currentRecID assigned, but the Pipeline is not null!");
-      setAgentState(AgentState.IDLE);
-      return false;
-    }
-
-    // Gets the pipeline
     RecordingImpl theRec = pendingRecordings.get(currentRecID);
 
     // Clears currentRecID to indicate no recording is on
@@ -537,6 +537,8 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       return false; 
     }
 
+    logger.info("Recording \"{}\" succesfully stopped", theRec.getID());
+    
     return true;
   }
 
@@ -588,7 +590,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
         // TODO: This should be modified to allow a more flexible way of detecting the track flavour.
         // Suggestions: a dedicated class or a/several field(s) in the properties indicating what type of track is each
-        
+
         // FIXME: These values should be actual flavors, allowing this code to be simply MediaPackageElementFlavor.parse(name)
         // This may impact the scheduling service as well... don't let that stop you from fixing this, though! (jt)
         if (name.equals("PRESENTER") || name.equals("AUDIO"))

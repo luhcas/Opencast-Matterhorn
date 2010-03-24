@@ -91,7 +91,7 @@ public class CaptureRestEndpointTest {
 
   //TODO:  Fix these post tests once the mock capture stuff is sorted out.
   //Right now when you try and start via a post endpoints without a valid capture device it fails
-  @Test @Ignore
+  @Test 
   public void testCapturePost() throws Exception {
     //Test using only scheduled calls
     sendPost(BASE_URL + "/capture/rest/startCapture", startParams, HttpStatus.SC_OK);
@@ -101,6 +101,8 @@ public class CaptureRestEndpointTest {
   }
 
   @Test @Ignore
+  // FIXME: This test fails because the previous test creates a recording with a certain ID, and
+  // this one tries to use the same ID, which isn't allowed
   public void testScheduledMix() throws Exception {
     //Test using both scheduled and unscheduled calls
     sendPost(BASE_URL + "/capture/rest/startCapture", startParams, HttpStatus.SC_OK);
