@@ -276,8 +276,8 @@ SchedulerUI.handleAgentChange = function(elm){
           if(capabilities.length){
             SchedulerUI.displayCapabilities(capabilities);
           }else{
-            $('#input-list').append('<input type="checkbox" id="agentDefaults" value="default" disabled="disabled" checked="checked" style="display:none"><label for="agentDefaults">Agent defaults will be used.</label>');
-            SchedulerForm.formFields.resources = new FormField('agentDefaults', false, {getValue: getInputs, setValue: setInputs, checkValue: checkInputs});
+            $('#input-list').append('Agent defaults will be used.');
+            //SchedulerForm.formFields.resources = new FormField('agentDefaults', false, {getValue: getInputs, setValue: setInputs, checkValue: checkInputs});
           }
         });
 }

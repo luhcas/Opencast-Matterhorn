@@ -1,7 +1,8 @@
 module( "FormField", {
         setup: function(){ 
-        },
-        teardown: function(){
+           $(document).append('<input type="text" id="textbox" />');
+           $(document).append('<input type="checkbox" id="checkbox" value="true" />');
+           $(document).append('<input type="radio" id="radio" value="true" />');
         }
 });
 
