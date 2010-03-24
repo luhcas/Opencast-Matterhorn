@@ -12,7 +12,7 @@ svn update
 rm -rf /opt/matterhorn/felix/load
 
 # build matterhorn
-mvn clean install -DdeployTo=/opt/matterhorn/felix/load
+mvn clean install -DskipTests -DdeployTo=/opt/matterhorn/felix/load
 
 # creating backup of configuration
 tar -czf /home/opencast/felix-config-backup.tar.gz /opt/matterhorn/felix/conf/ 
