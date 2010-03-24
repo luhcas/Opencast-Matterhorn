@@ -1,12 +1,13 @@
 #!/bin/bash
 
-#stop felix
-sudo /home/opencast/shutdown.sh
 cd /opt/matterhorn/matterhorn_trunk
 # update from svn
 svn update
 # build matterhorn
 mvn clean install -DdeployTo=/opt/matterhorn/felix/load
+
+#stop felix
+sudo /home/opencast/shutdown.sh
 # creating backup of configuration
 tar -czf /home/opencast/felix-config-backup.tar.gz /opt/matterhorn/felix/conf/ 
 # update felix configuration
