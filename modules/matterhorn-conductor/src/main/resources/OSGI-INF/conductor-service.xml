@@ -13,4 +13,6 @@
   policy="static" bind="setWorkflowService" />
   <reference name="EVENT" interface="org.osgi.service.event.EventAdmin" 
   cardinality="0..1" policy="dynamic" bind="setEventAdmin" unbind="unsetEventAdmin" />
+  <reference name="ConductorStrategy" interface="org.opencastproject.conductor.api.ConductorStrategy"  
+  cardinality="0..1" policy="dynamic" bind="setConductorStrategy" unbind="unsetConductorStrategy"/>
 </component>

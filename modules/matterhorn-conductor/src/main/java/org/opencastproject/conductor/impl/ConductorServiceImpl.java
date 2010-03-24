@@ -16,6 +16,7 @@
 package org.opencastproject.conductor.impl;
 
 import org.opencastproject.conductor.api.ConductorService;
+import org.opencastproject.conductor.api.ConductorStrategy;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -39,7 +40,8 @@ import java.util.Hashtable;
 public class ConductorServiceImpl implements ConductorService, EventHandler {
   private static final Logger logger = LoggerFactory.getLogger(ConductorServiceImpl.class);
 
-  WorkflowService workflowService = null;
+  private WorkflowService workflowService = null;
+  private ConductorStrategy conductorStrategy = null;
 
   public void setWorkflowService(WorkflowService workflowService) {
     this.workflowService = workflowService;
@@ -53,6 +55,14 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
 
   protected void unsetEventAdmin(EventAdmin eventAdmin) {
     this.eventAdmin = null;
+  }
+
+  protected void setConductorStrategy(ConductorStrategy conductorStrategy) {
+    this.conductorStrategy = conductorStrategy;
+  }
+
+  protected void unsetConductorStrategy(ConductorStrategy conductorStrategy) {
+    this.conductorStrategy = null;
   }
 
   public void activate(ComponentContext componentContext) {
@@ -96,10 +106,10 @@ public class ConductorServiceImpl implements ConductorService, EventHandler {
         MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(
                 (String) property);
         String wd = (String) propertyWD;
-        logger.info("Received media package {}; starting workflow \"{}\"", mp.getIdentifier(), wd);
+        logger.info("Received media package {}; requested workflow \"{}\"", mp.getIdentifier(), wd);
 
         // execute workflow from the event
-        WorkflowDefinition def = workflowService.getWorkflowDefinitionById(wd);
+        WorkflowDefinition def = conductorStrategy.getWorkflow(wd);
         workflowService.start(def, mp, null);
 
         // execute 'review' workflow
