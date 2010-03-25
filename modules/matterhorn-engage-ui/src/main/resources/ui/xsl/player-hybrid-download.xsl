@@ -60,7 +60,7 @@
 		              <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
 		              <xsl:attribute name="onmouseout">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
 		              <a>
-		                <xsl:attribute name="href">javascript:Videodisplay.seek(<xsl:value-of
+		                <xsl:attribute name="href">javascript:Opencast.Watch.seekSegment(<xsl:value-of
 		                  select="floor(./@time div 1000)" />)</xsl:attribute>
 		                <img height="83">
 		                  <xsl:attribute name="src"><xsl:value-of

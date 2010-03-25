@@ -14,26 +14,27 @@
  *
  */
  
-#body
+
+body
 {
-    font-family:            Verdana;
-  
-} 
+  font-family:            	Verdana;
+} 	
  
 #oc_title-bar
 {
-    min-width:              760px;
-    height:                 26px;
+  min-width:              	760px;
+  height:                 	26px;
+  margin-left:				5px;
+  margin-right:				5px;
 }
 
 #oc_title
 {
-    float:                  left;
-    font-size:              1.5em;
-    text-align:             left;
-    height:                 100%;
+  float:                  	left;
+  font-size:              	1.5em;
+  text-align:             	left;
+  height:                 	100%;
 }
-
 
 #oc_title_from
 {
@@ -49,178 +50,151 @@
 {
   float:                    right;
   height:                   100%;
-  padding-left:             5px;
-  padding-right:            5px;
+  padding-top:				3px;
+}
+
+#oc_search-Field
+{
+  border: 					1px solid #999999;
+  background-color: 		#FFFFFF;
+}
+
+#clear
+{	
+  clear:                  	both;	
+}
+
+#oc_body
+{
+  min-width:              	756px;
+  height:                 	510px;
+  margin-left:				5px;
+  margin-right:				5px;
+}
+
+#oc_flash-player
+{
+  text-align:             	center;
+  height:                   100%;
+  margin-bottom:	10px;
+}
+
+#oc_video-player-controls
+{
+  height:                 	36px;
+  width:					100%;
+  background-image:			url("../img/icons.png");
+  background-position:		0 0px;
+}
+
+#oc_video-time
+{
+  float:                  	left;
+  text-align:             	center;
+  font-size:              	0.8em;
+  color:				  	#FFFFFF;
+  background-image:			url("../img/icons.png");
+  background-position:		0 0;
+  width:					30%;
+  height:					36px;
+}
+
+#simpleEdit 
+{
+  margin-top:				12px;
+}
+
+#oc_video-controls
+{
+  float:                   	left;
+  width:                    40%;
+  text-align:               center;
+}
+
+#oc_sound
+{
+  float:                  	left;
+  width:					5%;
+  text-align:            	center;
+}
+
+#oc_video-volume-slider
+{
+  width:					8%;
+  height:					36px;
+  float:					left;
+}
+
+.oc-slider-volume-Rail 
+{
+  width:                  	55px;
+  height:                 	1px;
+  border:                 	1px solid #999999;
+  position:              	relative;
+  background:             	#fff;
+  margin-top:				18px;
+}
+
+.oc-slider-volume-Thumb:focus
+{
+  border:                 	0px solid #999999;
+  background-color:       	#EEEEEE;
+}
+
+.oc-slider-volume-Thumb
+{
+  background:				transparent url("../img/icons.png");
+  background-position:		0 -396px;
+  margin:                 	0px;
+  padding:                	0px;
+  top:                 	   	-.4em;
+  width:               	   	15px; 
+  height:              	   	9px;
+  position:             	absolute;
+  margin-top:				-0px;
+}
+
+.oc-slider-volume-Thumb_
+{
+  margin:                 	0px;
+  padding:                	0px;
+  top:                 	   	-.4em;
+  width:               	   	8px; 
+  height:              	   	16px;
+  background:           	#EEEEEE;
+  border:               	1px solid #999999;
+  position:             	absolute;
+  margin-top:				-4px;
+}
+
+#oc_video-cc
+{
+  float:                  	left;
+  width:					5%;
+  text-align:            	center;
 }
 
 #oc_video-size-controls
 {
   float:                    right;
-  height:                   100%;
-  padding-left:             5px;
-  padding-right:            5px;
- 
+  width:					12%;
+  text-align:            	center;
+  z-index: 100;
 }
 
-#oc_video-size-controls-left
+#oc_tabs
 {
-    float:                  left;
-}
-
-#oc_video-size-controls-center
-{
-    float:                  left;
-    padding-left:           10px;
-    padding-right:          10px;
-}
-
-#oc_video-size-controls-right
-{
-    float:                  left;
-}
-
-.oc_video-size-controls-monitor-left
-{
-    overflow:               hidden;
-    width:                  36px;
-    height:                 24px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/monitor_left.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
-
-.oc_video-size-controls-monitor-center
-{
-    overflow:               hidden;
-    width:                  48px;
-    height:                 24px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/monitor_center.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
-
-.oc_video-size-controls-monitor-right
-{
-    overflow:               hidden;
-    width:                  36px;
-    height:                 24px;
-    margin:                 0;
-    border:                 0;
-    background:             transparent url(../icons/monitor_right.png) no-repeat center top;
-    cursor:                 pointer; /* hand-shaped cursor */
-    cursor:                 hand; /* for IE 5.x */
-}
-
-#clear
-{
-    clear:                  both;	
-}
-
-#oc_body
-{
-    min-width:              756px;
-    height:                 510px;
-    margin-top:             2px;
-}
-
-
-#oc_hybrid-multi-player
-{
-
-}
-
-#oc_flash-player
-{
-    text-align:             center;
-    margin:                 10px;
-}
-
-#oc-video-display-container
-{
-    width:                  100%;
-}
-
-
-#oc_video-player-controls
-{
-    height:                 36px;
-    margin-left:            10px;
-    margin-right:           10px;
-}
-
-#oc_video-time
-{
-    float:                  left;
-    text-align:             center;
-    font-size:              0.8em;
-    color:				  	#FFFFFF;
-    background-image:		url("../img/icons.png");
-    background-position:	0 0;
-    width:					130px;
-    height:					36px;
-    float:					left;
-}
-
-#simpleEdit 
-{
-     margin-top:				12px;
-}
-
-#oc_video-controls
-{
-    float:                  left;
-}
-
-#oc_video-cc
-{
-    
+  
 }
 
 #oc_tabs input
 {
-    width:100px;
-    margin-left:10px;
+    width:					100px;
+    margin-right:			5px;
+   
 }
 
-#oc_seek-slider
-{
-    margin-left:            10px;
-    margin-right:           10px;
-    margin-top:             1px; 
-}
 
-.oc_slider-seek-Rail 
-{
-    width:                  100%;
-    height:                 0.8em;
-    border:                 1px solid #999999;
-    position:               relative;
-    background:             transparent;    
-    -moz-border-radius:     0.2em;
-    -webkit-border-radius:  0.2em;
-}
-
-.oc_slider-seek-Thumb:focus
-{
-    border:                 0px solid #999999;
-    background-color:       #BEBEBE;
-}
-
-.oc_slider-seek-Thumb 
-{
-    margin:                 0px;
-    padding:                0px;
-    top:                    -.3em;
-    width:                  8px; 
-    height:                 16px;
-    background:             #EEEEEE;
-    border:                 1px solid #999999;
-    position:               absolute;
-}
 
 
 .oc_progress-bar
@@ -246,40 +220,133 @@
 
 
 
+#jsddm
+{	margin: 0;
+	padding: 0;
+	z-index:100;
+	}
 
 
 
-
-
-
-.oc-slider-volume-Rail 
-{
-    width:                  55px;
-    height:                 0px;
-    border:                 0px solid #999999;
-    position:               relative;
-    background:             #fff;
-    margin-left:			4px;
+#jsddm li
+{	
+  float: left;
+  list-style: none;
+ 
+ 
 }
 
-.oc-slider-volume-Thumb:focus
-{
-    border:                 0px solid #999999;
-    background-color:       #BEBEBE;
+#jsddm li a
+{	
+  display: 					block;
+  width:              		72px;
+  height:             		36px;
+  background:         		transparent url(../icons/dropdown.png) no-repeat center top;
+  text-decoration: 			none;
+  white-space: nowrap;
+  
+ 
 }
 
-.oc-slider-volume-Thumb
-{
-    margin:                 0px;
-    padding:                0px;
-    top:                    -.4em;
-    width:                  8px; 
-    height:                 16px;
-    background:             #EEEEEE;
-    border:                 1px solid #999999;
-    position:               absolute;
-    margin-top:	16px;
+#jsddm li a:hover
+{	
+  width:              72px;
+  height:             36px;
+  background:         transparent url(../icons/dropdown.png) no-repeat center top;
+  
+ 
 }
+		
+#jsddm li ul
+{	margin: 0;
+	padding: 0;
+	position: absolute;
+	visibility: hidden;
+	border-top: 1px solid white
+	
+}
+	
+		
+#jsddm li ul li
+{	float: none;
+	display: inline;
+	
+}
+		
+#jsddm li ul li a
+{	
+  width: 72px;
+  background: #000000;
+  color: #FFFFFF;
+ 
+}
+
+#jsddm li ul li a:hover
+{	
+  width: 72px;
+  background: #000000;
+  
+}
+
+
+#link1
+{
+background:         		 #000000 url(../icons/monitor_left.png) no-repeat center top !important;
+
+ width: 54px;
+ height: 36px;
+
+}
+
+#link2
+{
+
+background:         		 #000000 url(../icons/monitor_center.png) no-repeat center top !important;
+
+
+ width: 72px;
+ height: 36px;
+
+}
+
+#link3
+{
+background:         		 #000000 url(../icons/monitor_right.png) no-repeat center top !important;
+
+
+ width: 54px;
+ height: 36px;
+
+}
+
+#link1:hover
+{
+background:         		 #000000 url(../icons/monitor_left.png) no-repeat center top !important;
+
+ width: 54px;
+ height: 36px;
+
+}
+
+#link2:hover
+{
+background:         		#000000  url(../icons/monitor_center.png) no-repeat center top !important;
+
+ width: 72px;
+ height: 36px;
+
+}
+
+#link3:hover
+{
+background:         		 #000000url(../icons/monitor_right.png) no-repeat center top !important;
+
+ width: 54px;
+ height: 36px;
+
+}
+
+
 
 .oc_offScreen-hidden 
 {
@@ -295,9 +362,9 @@
 {
     display:                block;
     text-align:             center;
-    margin:                 10px;
+    margin:                 5px;
     overflow:               auto; 
-    zoom:                   1;
+   
     height:                 110px;
 }
 
@@ -311,7 +378,7 @@
     height:                 110px;
 }
 
-.oc_searchDisplayBlock
+.oc_slideTextDisplayBlock
 {
     text-align:             center;
     margin:                 10px;
@@ -348,6 +415,7 @@
 {
     width:                  40px;
     margin-top:             4px;
+    margin-right:			10px;
 }
 
 
@@ -570,11 +638,8 @@
   background-image:url("../img/scrubber.gif");
   background-position:0 -60px;
   height:7px;
-  margin-bottom:0;
-  margin-left:0;
-  margin-right:0;
-  margin-top:0;
-  width:auto;
+
+  
 }
 
 .load-progress {
@@ -607,10 +672,7 @@
   display:block;
   font-family:Lucida Grande,Lucida San Unicode,Helvetica,Arial,sans-serif;
   font-size:10px;
-  padding-bottom:0;
-  padding-left:0;
-  padding-right:5px;
-  padding-top:0;
+  
 }
 
 .volume-button {
