@@ -39,10 +39,10 @@ public class ConductorStrategyImpl implements ConductorStrategy {
         logger.error("Default workflow requested but nothing is specified in the config!");
         throw(new RuntimeException());
       }
-    } else {
       wd = workflowService.getWorkflowDefinitionById(defaultWorkflowId);
+    } else {
+      wd = workflowService.getWorkflowDefinitionById(workFlowDefinitionId);
     }
-    wd = workflowService.getWorkflowDefinitionById(workFlowDefinitionId);
     logger.info("selected workflow \"{}\"", wd.getId());
     return wd;
     

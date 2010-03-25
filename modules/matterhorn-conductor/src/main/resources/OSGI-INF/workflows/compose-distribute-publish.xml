@@ -1,5 +1,5 @@
 <definition>
-  <id>default</id>
+  <id>full</id>
   <description>
     A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
     along with their associated metadata, to the distribution channels.
