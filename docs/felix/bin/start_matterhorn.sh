@@ -2,22 +2,22 @@
 # Configure these variables to match your environment
 ##
 
-if [ -n "${FELIX_HOME:-x}" ]; then
+if [ ! -z $FELIX_HOME ]; then
   FELIX=$FELIX_HOME
 else
   FELIX="/Applications/Matterhorn"
 fi
 
-if [ -n "${M2_REPO:-x}" ]; then
+if [ ! -z $M2_REPO ]; then
   M2_REPO=$M2_REPO
 else
   M2_REPO="/Users/johndoe/.m2/repository"
 fi
 
-if [ -n "${OPENCAST_LOGDIR:-x}" ]; then
-  OPENCAST_LOGDIR=$FELIX/logs
+if [ ! -z $OPENCAST_LOGDIR ]; then
+  LOGDIR=$OPENCAST_LOGDIR
 else
-  FELIX="/Applications/Matterhorn"
+  LOGDIR=$FELIX/logs
 fi
 
 DEBUG_PORT="8000"
@@ -30,7 +30,7 @@ DEBUG_SUSPEND="n"
 MAVEN_ARG="-DM2_REPO=$M2_REPO"
 FELIX_FILEINSTALL_OPTS="-Dfelix.fileinstall.dir=$FELIX/load"
 PAX_CONFMAN_OPTS="-Dbundles.configuration.location=$FELIX/conf"
-PAX_LOGGING_OPTS="-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopencast.logdir=$OPENCAST_LOGDIR"
+PAX_LOGGING_OPTS="-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopencast.logdir=$LOGDIR"
 UTIL_LOGGING_OPTS="-Djava.util.logging.config.file=$FELIX/conf/services/java.util.logging.properties"
 
 # Clear the felix cache directory
