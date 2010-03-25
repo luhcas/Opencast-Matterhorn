@@ -8,6 +8,9 @@ cd /opt/matterhorn/matterhorn_trunk
 # update from svn
 svn update
 
+# Save current version
+svnversion > /opt/matterhorn/felix/work/opencast/static/version.txt
+
 # Clean old jars
 rm -rf /opt/matterhorn/felix/load
 
