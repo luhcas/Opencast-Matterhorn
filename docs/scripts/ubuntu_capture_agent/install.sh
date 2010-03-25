@@ -197,6 +197,10 @@ fi
 
 # build properties
 sudo -u $USERNAME ${BUILD_MATTERHORN} ${FELIX_HOME} ${JAVA_HOME}
+if [ "$?" -ne 0 ]; then
+	echo "Error building matterhorn. Contact matterhorn@opencastproject.org for assistance."
+	exit
+fi
 
 # setup properties by calling setup_devices.sh
 sudo -u $USERNAME ${SETUP_DEVICES} ${FELIX_HOME} ${JAVA_HOME}

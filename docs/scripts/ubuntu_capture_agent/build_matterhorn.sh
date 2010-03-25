@@ -21,6 +21,7 @@ svn co http://opencast.jira.com/svn/MH/trunk/modules/matterhorn-metadata-api mat
 svn co http://opencast.jira.com/svn/MH/trunk/modules/matterhorn-capture-admin-service-api matterhorn-capture-admin-service-api
 svn co http://opencast.jira.com/svn/MH/trunk/modules/matterhorn-capture-agent-api matterhorn-capture-agent-api
 svn co http://opencast.jira.com/svn/MH/trunk/modules/matterhorn-capture-agent-impl matterhorn-capture-agent-impl
+svn co http://opencast.jira.com/svn/MH/trunk/modules/matterhorn-http matterhorn-http
 
 # setup felix configuration
 cp -r /home/$USERNAME/capture-agent/docs/felix/bin/* ${FELIX_HOME}/bin
@@ -28,3 +29,4 @@ cp -r /home/$USERNAME/capture-agent/docs/felix/conf/* ${FELIX_HOME}/conf
 
 cd ..
 mvn clean install -Pcapture -DdeployTo=${FELIX_HOME}/load
+exit $?
