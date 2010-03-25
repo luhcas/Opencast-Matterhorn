@@ -257,6 +257,12 @@ select { font-size:1.15em; }
   overflow: hidden;
 }
 
+#workflow-config-container {
+  width: 96%;
+  margin-left: 2%;
+  margin-bottom: 2%;
+}
+
 #gray-out {
   display:none;
   z-index:100;
@@ -269,6 +275,7 @@ select { font-size:1.15em; }
   opacity:0.4;
   filter:alpha(opacity=40);
 }
+
 #upload-notification {
   display:none;
   background:white;
@@ -354,4 +361,8 @@ select { font-size:1.15em; }
 .fl-theme-coal .fl-icon {
   background-color: inherit;
   display: inline-block;
+}
+
+fieldset {
+  border: 1px solid gray;
 }

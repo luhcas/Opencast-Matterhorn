@@ -241,6 +241,29 @@ public class WorkflowRestService {
     }
   }
 
+  /** Returns the workflow configuration panel HTML snippet for the workflow definition
+   *  specified by
+   * @param definitionId
+   * @return config panel HTML snippet
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_XML)
+  @Path("configurationPanel")
+  public Response getConfigurationPanel(@QueryParam("definitionId") String definitionId) {
+    try {
+      WorkflowDefinition def = service.getWorkflowDefinitionById(definitionId);
+      if (def != null) {
+        String out = def.getConfigurationPanel();
+        return Response.ok(out).build();
+      } else {
+        return Response.serverError().status(Status.NOT_FOUND).build();
+      }
+    } catch (Exception e) {
+      logger.error(e.getMessage());
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
   /**
    * @param definition
    */

@@ -47,6 +47,9 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   @XmlElement(name="description")
   private String description;
 
+  @XmlElement(name="configuration_panel")
+  private String configurationPanel;
+
   @XmlElement(name="operation")
   @XmlElementWrapper(name="operations")
   private List<WorkflowOperationDefinition> operations;
@@ -66,6 +69,15 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   public void setDescription(String description) {
     this.description = description;
   }
+  
+  public void setConfigurationPanel(String panelXML) {
+    this.configurationPanel = panelXML;
+  }
+  
+  public String getConfigurationPanel() {
+    return this.configurationPanel;
+  }
+
   public List<WorkflowOperationDefinition> getOperations() {
     return operations;
   }

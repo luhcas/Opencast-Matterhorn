@@ -35,6 +35,12 @@ public interface WorkflowDefinition {
   String getDescription();
 
   /**
+   * An XML String describing the configuration parameter/panel for this
+   * WorkflowDefinition.
+   */
+  String getConfigurationPanel();
+
+  /**
    * The operations, listed in order, that this workflow definition includes.
    */
   List<WorkflowOperationDefinition> getOperations();

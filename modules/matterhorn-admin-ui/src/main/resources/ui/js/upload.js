@@ -53,7 +53,47 @@ Upload.init = function() {
   $('body').click( function() {
     $('#helpBox').fadeOut('fast');
   });
+
+  // Event: workflow selected
+  $('#workflow-selector').change( function() {
+    Upload.workflowSelected($(this).val());
+  })
+
+  // get workflow definitions
+  $.ajax({
+    url: '../workflow/rest/definitions.json',
+    dataType: 'json',
+    success: function(data) {
+      for (i in data.workflow_definitions) {
+        var option = document.createElement("option");
+        option.setAttribute("value", data.workflow_definitions[i].title);
+        option.innerHTML = data.workflow_definitions[i].title;
+        $('#workflow-selector').append(option);
+      }
+      Upload.workflowSelected($('#workflow-selector').val());
+    }
+  });
 }
+
+/** invoked when a workflow is selected. display configuration panel for
+ *  the selected workflow if defined.
+ *  
+ */
+Upload.workflowSelected = function(workflow) {
+  $('#workflow-config-container').load(
+    '../workflow/rest/configurationPanel?definitionId=' + workflow,
+    function() {
+      $('#workflow-config-container').show('fast');
+    }
+    );
+}
+
+/** collect data from workflow configuration panel
+ *
+ */
+Upload.collectWorkflowConfig = function() {
+  //TODO write something
+  }
 
 /** check if data for required fields is missing
  *
