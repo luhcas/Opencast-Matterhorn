@@ -219,7 +219,7 @@ select { font-size:1.15em; }
   color: red;
 }
 
-#category-selector-container {float:left;width:700px;margin-top:10px;margin-bottom:10px;}
+#category-selector-container {float:left;width:550px;margin-top:10px;margin-bottom:10px;}
 .category-selector {margin:0px;margin-bottom:10px;}
 .category-selector li {float:left;list-style:none;}
 .category-selector-item {}
