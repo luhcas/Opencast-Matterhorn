@@ -331,6 +331,16 @@ select { font-size:1.15em; }
 
 /* Fluid Skinning System Overrides */
 
+.fl-theme-coal h1 {
+  color: #F6921E !important;
+  border: none !important;
+}
+
+h1 {
+  color: #F6921E !important;
+  border: none !important;
+}
+
 .fl-widget .fl-widget-content {
   margin: 0px;
 }
