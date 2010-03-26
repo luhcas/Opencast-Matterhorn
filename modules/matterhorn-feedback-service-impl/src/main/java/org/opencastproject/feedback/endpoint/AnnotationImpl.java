@@ -15,6 +15,9 @@
  */
 package org.opencastproject.feedback.endpoint;
 
+import java.util.Date;
+
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -23,6 +26,8 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -34,7 +39,7 @@ import org.opencastproject.feedback.api.Annotation;
 /**
  * A JAXB-annotated implementation of {@link Annotation}
  */
-@Entity(name="AnnotationImpl")
+@Entity(name = "AnnotationImpl")
 @Table(name = "MH_ANNOTATION_IMPL")
 @NamedQueries( { @NamedQuery(name = "findAnnotations", query = "SELECT a FROM AnnotationImpl a") })
 @XmlType(name = "annotation", namespace = "http://feedback.opencastproject.org/")
@@ -47,33 +52,35 @@ public class AnnotationImpl implements Annotation {
   @XmlElement(name = "annotation-id")
   private int annotationId;
 
-  @Column(name="mediapackageId")
+  @Column(name = "mediapackageId")
   @XmlElement(name = "mediapackage-id")
   private String mediapackageId;
 
-  @Column(name="sessionId")
+  @Column(name = "sessionId")
   @XmlElement(name = "session-id")
   private int sessionId;
 
-  @Column(name="inpoint")
+  @Column(name = "inpoint")
   @XmlElement(name = "inpoint")
   private int inpoint;
 
-  @Column(name="outpoint")
+  @Column(name = "outpoint")
   @XmlElement(name = "outpoint")
   private int outpoint;
 
-  @Column(name="key")
+  @Column(name = "key")
   @XmlElement(name = "key")
   private String key;
 
-  @Column(name="value")
+  @Column(name = "value")
   @XmlElement(name = "value")
   private String value;
 
-  @Column(name="created")
+  @Basic(optional = false)
+  @Column(name = "created", insertable = false, updatable = false)
+  @Temporal(TemporalType.TIMESTAMP)
   @XmlElement(name = "created")
-  private String created;
+  private Date created = new Date();
 
   /**
    * A no-arg constructor needed by JAXB
@@ -137,12 +144,11 @@ public class AnnotationImpl implements Annotation {
     this.value = value;
   }
 
-  public String getCreated() {
+  public Date getCreated() {
     return created;
   }
 
-  public void setCreated(String created) {
+  public void setCreated(Date created) {
     this.created = created;
   }
-
 }

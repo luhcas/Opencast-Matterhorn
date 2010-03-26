@@ -153,10 +153,10 @@ public class FeedbackRestService {
    * @return The HTML with the documentation
    */
   protected String generateDocs() {
-    DocRestData data = new DocRestData("Feedback", "Feedback Service", "/scheduler/rest", notes);
+    DocRestData data = new DocRestData("Feedback", "Feedback Service", "/feedback/rest", notes);
 
     // abstract
-    data.setAbstract("This service creates, edits and retrieves and helps manage annotations.");
+    data.setAbstract("This service creates, edits and retrieves annotations.");
 
     return DocUtil.generate(data);
   }

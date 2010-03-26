@@ -15,6 +15,8 @@
  */
 package org.opencastproject.feedback.api;
 
+import java.util.Date;
+
 
 /**
  * A class that represents an annotation
@@ -50,8 +52,8 @@ public interface Annotation {
 
   void setValue(String value);
 
-  String getCreated();
+  Date getCreated();
 
-  void setCreated(String created);
+  void setCreated(Date created);
 
 }
