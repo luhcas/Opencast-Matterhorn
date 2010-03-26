@@ -372,31 +372,6 @@ public class IngestRestService {
     }
   }
 
-  // the method above yields an Exception when called via a POST from JQuery
-  /**
-   * Starts the ingest of a given MediaPackage. Returns 500 if something goes wrong unexpectedly
-   * 
-   * @param mp
-   *          MediaPackage to start Ingest on
-   * @return String "OK", 500 in case of error
-   */
-  @POST
-  @Produces(MediaType.TEXT_PLAIN)
-  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-  @Path("startIngest")
-  public Response startIngest(@FormParam("mediaPackage") String mp) {
-    logger.debug("ingest(MediaPackage): {}", mp);
-    try {
-      MediaPackage mediaPackage = builder.loadFromXml(mp); // @FormParam("mediaPackage") MediaPackage mp yields
-      // Exception
-      ingestService.ingest(mediaPackage);
-      return Response.ok("OK").build();
-    } catch (Exception e) {
-      logger.warn(e.getMessage());
-      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-    }
-  }
-
   protected UploadJob createUploadJob() throws RuntimeException {
     /*EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();

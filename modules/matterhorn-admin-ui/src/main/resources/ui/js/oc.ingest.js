@@ -78,14 +78,15 @@ ocIngest.addTrack = function(mediaPackage, jobId, flavor) {
 */
 
 ocIngest.startIngest = function(mediaPackage) {
-    Upload.log("Starting Ingest");
+    Upload.log("Starting Ingest on MediaPackage with Workflow " + $('#workflow-selector').val());
     Upload.setProgress('100%','starting Ingest',' ', ' ');
     $.ajax({
-    url        : '../ingest/rest/startIngest',
+    url        : '../ingest/rest/ingest/' + $('#workflow-selector').val(),
     type       : 'POST',
     dataType   : 'text',
     data       : {mediaPackage: ocUtils.xmlToString(mediaPackage)},
     error      : function(XHR,status,e){
+      alert("Error!!");
       showFailedScreen("Could not start Ingest on MediaPackage");
     },
     success    : function(data, status) {
