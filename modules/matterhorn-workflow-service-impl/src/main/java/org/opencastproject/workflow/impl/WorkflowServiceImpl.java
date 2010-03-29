@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
@@ -309,9 +310,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
           Map<String, String> properties) {
+    WorkflowDefinition parsedDefinition = parseDefinition(workflowDefinition, properties);
+    
     String id = UUID.randomUUID().toString();
     log_.info("Starting a new workflow instance with ID={}", id);
-    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage, properties);
+    
+    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(parsedDefinition, mediaPackage, properties);
     workflowInstance.setId(id);
     if(properties != null) {
       for(Entry<String, String> prop : properties.entrySet())
@@ -323,6 +327,31 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     return workflowInstance;
   }
   
+  /**
+   * Replaces variables in a workflow definition template with values from the provided properties.
+   * @param workflowDefinition The template
+   * @param properties The properties to replace
+   * @return The parsed workflow definition
+   */
+  protected WorkflowDefinition parseDefinition(WorkflowDefinition workflowDefinition, Map<String, String> properties) {
+    try {
+      String defXml = WorkflowBuilder.getInstance().toXml(workflowDefinition);
+      if(properties != null) {
+        for(Entry<String, String> prop : properties.entrySet()) {
+          String key = "\\$\\{" + prop.getKey() + "\\}";
+          defXml = defXml.replaceAll(key, prop.getValue());
+        }
+      }
+      // find remaining and unprocessed templates
+      if (defXml.indexOf("${") > -1) {
+        throw new IllegalStateException("Workflow definition contains variables not provided by properties");
+      }
+      return WorkflowBuilder.getInstance().parseWorkflowDefinition(defXml);
+    } catch(Exception e) {
+      throw new IllegalStateException("Unable to replace workflow definition variables", e);
+    }
+  }
+
   /**
    * Does a lookup of available operation handlers for the given workflow operation.
    * 

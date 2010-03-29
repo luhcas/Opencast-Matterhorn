@@ -5,12 +5,10 @@
     <operation
       id="op1"
       fail-on-error="true"
-      description="operation 1"/>
-
-    <operation
-      id="op2"
-      fail-on-error="false"
-      description="operation 2"/>
+      description="operation 1">
+      <configurations>
+        <configuration key="testkey">${testproperty}</configuration>
+      </configurations>
+    </operation>
   </operations>
-
 </definition>
