@@ -6,7 +6,6 @@ rem ####################################################
 rem ############### Configurations #####################
 rem ####################################################
 
-SET ARC_BIN="C:\Program Files\7-Zip\7z.exe"
 rem Without ending backslash
 SET MSYS_PATH=C:\Matterhorn
 
@@ -21,6 +20,7 @@ echo IMPORTANT: 7Zip and Wget for Windows OS are reqired
 echo.
 echo ***WARNING***: If you have cygwin installed it is recommended
 echo that you uninstall it. Otherwise you may experience build failures.
+echo.
 pause
 
 rem creating temporary directory and coping all required files in there
@@ -205,11 +205,12 @@ if errorlevel 1 (
 	cd ..
 	goto EXCEPTION
 )
-7z x -y msysDVLPR-1.0.0-alpha-1.tar.gz
-if errorlevel 1 (
-	cd ..
-	goto EXCEPTION
-)
+rem Uncomment to build faad library
+rem 7z x -y msysDVLPR-1.0.0-alpha-1.tar.gz
+rem if errorlevel 1 (
+rem 	cd ..
+rem 	goto EXCEPTION
+rem )
 
 7z x -y -o..\msys\mingw\ binutils-2.19.1-mingw32-bin.tar
 if errorlevel 1 (
@@ -293,8 +294,6 @@ echo Cleaning up
 cd ..
 rmdir /s /q $temp
 
-ENDLOCAL
-
 rem Uncomment for rebuilding autoconfiguration tools (required for faad lib)
 rem echo.
 rem echo Script finished setting up MSYS + MinGW environments.
@@ -307,7 +306,9 @@ echo.
 echo Script finished setting up MSYS + MinGW environments.
 echo New shell will open where you can execute: sh install_3rd_party.sh
 pause
-call .\msys\msys.bat -norxvt
+call %MSYS_PATH%\msys\msys.bat -norxvt
+
+ENDLOCAL
 
 goto END
 

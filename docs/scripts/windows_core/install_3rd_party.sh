@@ -9,6 +9,7 @@ INSTALL_DIR="/c"
 THIRD_PARTY_REPO="http://downloads.opencastproject.org/3rd%20Party"
 libfaad_version="2.7"
 
+
 #######################################################
 ###### rebuilding autoconfiguration tools #############
 #######################################################
@@ -18,6 +19,8 @@ build_autoconf_tools ()
 	echo 
 	echo Rebuilding auto-confoguration tools 
 	echo
+	
+	working_dir=$(pwd)
 	
 	# Building autoconfig
 	if wget ftp://ftp.gnu.org/gnu/autoconf/autoconf-2.63.tar.bz2 &&
@@ -124,6 +127,7 @@ build_zlib ()
 {
 	echo
 	echo Building Zlib...
+	working_dir=$(pwd)
 	if wget http://prdownloads.sourceforge.net/libpng/zlib-1.2.3.tar.gz &&
 		tar zxfv zlib-1.2.3.tar.gz &&
 		cd zlib-1.2.3 &&
@@ -164,6 +168,7 @@ build_faad ()
 {
 	echo
 	echo Building faad library...
+	working_dir=$(pwd)
 	if wget $THIRD_PARTY_REPO/faad2$libfaad_version.tar.gz &&
 		tar zxfv faad2$libfaad_version.tar.gz &&
 		patch -p0 < faad2-2.7.patch &&
@@ -206,12 +211,13 @@ build_ffmpeg ()
 {
 	echo
 	echo Building FFmpeg...
+	working_dir=$(pwd)
 	#mkdir $INSTALL_DIR/ffmpeg
 	if mkdir ffmpeg &&
 		cd ffmpeg &&
-		svn checkout svn://svn.ffmpeg.org/ffmpeg/trunk@20641 source &&
+		svn checkout svn://svn.ffmpeg.org/ffmpeg/trunk@22592 source &&
 		rm -rf source/libswscale &&
-		svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/libswscale@30380 source/libswscale &&
+		svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/libswscale@30929 source/libswscale &&
 		mkdir build &&
 		cd build &&
 		# Uncomment to build with faad library
@@ -324,6 +330,7 @@ build_image_lib ()
 	make install
 
 	# libjpeg
+	# TODO patch libjpeg
 	wget http://downloads.opencastproject.org/3rd%20Party/jpegsrc.v6b.tar.gz
 	tar zxfv jpegsrc.v6b.tar.gz
 	cd jpeg-6b
