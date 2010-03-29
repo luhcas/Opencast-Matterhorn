@@ -50,7 +50,7 @@ public interface WorkflowSet {
    * 
    * @return The count limit.
    */
-  long getCount();
+  long getPageSize();
 
   /**
    * Get the search time.

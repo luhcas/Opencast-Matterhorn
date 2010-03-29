@@ -49,7 +49,7 @@ public class WorkflowSetImpl implements WorkflowSet {
 
   /** The pagination limit. */
   @XmlAttribute(name="count")
-  private long count;
+  private long pageSize;
 
   /** The search time in milliseconds */
   @XmlAttribute(name="searchTime")
@@ -120,20 +120,20 @@ public class WorkflowSetImpl implements WorkflowSet {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.WorkflowSet.impl.SearchResult#getCount()
+   * @see org.opencastproject.WorkflowSet.impl.SearchResult#getPageSize()
    */
-  public long getCount() {
-    return count;
+  public long getPageSize() {
+    return pageSize;
   }
 
   /**
-   * Set the count.
+   * Set the pageSize.
    * 
-   * @param count
-   *          The count.
+   * @param pageSize
+   *          The pageSize.
    */
-  public void setCount(long count) {
-    this.count = count;
+  public void setPageSize(long pageSize) {
+    this.pageSize = pageSize;
   }
 
   /**

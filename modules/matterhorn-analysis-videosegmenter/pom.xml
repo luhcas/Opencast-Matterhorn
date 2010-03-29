@@ -67,6 +67,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Export-Package>org.opencastproject.analysis.vsegmenter</Export-Package>
             <Embed-Dependency>
               jmf;inline=true
             </Embed-Dependency>

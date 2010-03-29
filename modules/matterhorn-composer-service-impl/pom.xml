@@ -124,14 +124,15 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>1.4.3</version>
+        <version>2.0.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Import-Package> ! org.apache.xmlrpc.*, !org.apache.commons.httpclient.*, * </Import-Package>
+            <Import-Package> !org.apache.commons.httpclient.*, *;resolution:=optional </Import-Package>
+            <Private-Package> org.apache.xmlrpc.* </Private-Package>
             <Export-Package>org.opencastproject.composer.impl.*</Export-Package>
-            <Embed-Dependency>xmlrpc-client</Embed-Dependency>
+            <Embed-Dependency>xmlrpc-client;inline=true</Embed-Dependency>
             <Service-Component>
               OSGI-INF/composer-service-local.xml,
               OSGI-INF/composer-service-remote.xml,

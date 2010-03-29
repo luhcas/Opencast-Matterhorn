@@ -16,8 +16,6 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -32,19 +30,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Basic;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinTable;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -55,8 +40,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-@Entity(name="workflow")
-@Table(name="MH_WORKFLOW")
 @XmlType(name="workflow", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="workflow", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -70,52 +53,42 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     this.description = def.getDescription();
     this.state = WorkflowState.INSTANTIATED;
     this.mediaPackage = mediaPackage;
-    this.configurations = new TreeSet<WorkflowConfigurationImpl>();
+    this.configurations = new TreeSet<WorkflowConfiguration>();
     if(properties != null) {
       for(Entry<String, String> prop : properties.entrySet()) {
         configurations.add(new WorkflowConfigurationImpl(prop.getKey(), prop.getValue()));
       }
     }
-    this.operations = new ArrayList<WorkflowOperationInstanceImpl>();
+    this.operations = new ArrayList<WorkflowOperationInstance>();
     for(WorkflowOperationDefinition opDef : def.getOperations()) {
       operations.add(new WorkflowOperationInstanceImpl(opDef));
     }
   }
 
-  @Id
   @XmlID
   @XmlAttribute()
-  protected String id;
-
-  @Column(name="state")
+  private String id;
+  
   @XmlAttribute()
-  protected WorkflowState state;
+  private WorkflowState state;
 
-  @Column(name="template")
   @XmlElement(name="template")
-  protected String title;
+  private String title;
 
-  @Column(name="description")
   @XmlElement(name="description")
-  protected String description;
+  private String description;
 
-  @ElementCollection
-  @CollectionTable(name="WF_CONFIG")
   @XmlElement(name="configuration")
   @XmlElementWrapper(name="configurations")
-  protected Set<WorkflowConfigurationImpl> configurations;
+  protected Set<WorkflowConfiguration> configurations;
   
-  @Transient
   @XmlElement(name="mediapackage")
-  protected MediaPackage mediaPackage;
-
-  @ElementCollection
-  @CollectionTable(name="WF_OP")
+  private MediaPackage mediaPackage;
+  
   @XmlElement(name="operation")
   @XmlElementWrapper(name="operations")
-  protected List<WorkflowOperationInstanceImpl> operations;
+  protected List<WorkflowOperationInstance> operations;
   
-  @JoinTable(name="WF_OP")
   protected WorkflowOperationInstance currentOperation = null;
 
   /**
@@ -197,8 +170,8 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * @see org.opencastproject.workflow.api.WorkflowInstance#getOperations()
    */
   public List<WorkflowOperationInstance> getOperations() {
-    if(operations == null) operations = new ArrayList<WorkflowOperationInstanceImpl>();
-    return new ArrayList<WorkflowOperationInstance>(operations);
+    if(operations == null) operations = new ArrayList<WorkflowOperationInstance>();
+    return operations;
   }
 
   /**
@@ -207,17 +180,8 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * @param workflowOperationInstanceList
    */
   public void setOperations(List<WorkflowOperationInstance> workflowOperationInstanceList) {
-    if(operations == null) {
-      operations = new ArrayList<WorkflowOperationInstanceImpl>();
-    } else {
-      operations.clear();
-    }
-    if(workflowOperationInstanceList != null) {
-      for(WorkflowOperationInstance op : workflowOperationInstanceList) {
-        operations.add((WorkflowOperationInstanceImpl)op);
-      }
-    }
-    init(); // If we are resetting the operations, we need to update the current operation
+    this.operations = workflowOperationInstanceList;
+    init();
   }
 
   /**
@@ -255,7 +219,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   public void removeConfiguration(String key) {
     if(key == null || configurations == null) return;
-    for(Iterator<WorkflowConfigurationImpl> configIter = configurations.iterator(); configIter.hasNext();) {
+    for(Iterator<WorkflowConfiguration> configIter = configurations.iterator(); configIter.hasNext();) {
       if(key.equals(configIter.next().getKey())) configIter.remove();
     }
   }
@@ -265,7 +229,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * @see org.opencastproject.workflow.api.WorkflowInstance#setConfiguration(java.lang.String, java.lang.String)
    */
   public void setConfiguration(String key, String value) {
-    if(configurations == null) configurations = new TreeSet<WorkflowConfigurationImpl>();
+    if(configurations == null) configurations = new TreeSet<WorkflowConfiguration>();
     configurations.add(new WorkflowConfigurationImpl(key, value));
   }
 
@@ -283,13 +247,6 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   }
 
   /**
-   * @return the configurations
-   */
-  public Set<WorkflowConfiguration> getConfigurations() {
-    return new TreeSet<WorkflowConfiguration>(configurations);
-  }
-
-  /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowInstance#next()
    */
@@ -300,7 +257,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       currentOperation = operations.get(0); 
       return currentOperation;
     }
-    for(Iterator<WorkflowOperationInstanceImpl> opIter = operations.iterator(); opIter.hasNext();) {
+    for(Iterator<WorkflowOperationInstance> opIter = operations.iterator(); opIter.hasNext();) {
       WorkflowOperationInstance op = opIter.next();
       if(op.equals(currentOperation) && opIter.hasNext()) {
         currentOperation = opIter.next();
@@ -373,41 +330,4 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       }
     }
   }
-
-  /**
-   * Gets an xml representation of the current mediapackage to store in the workflow DB.
-   */
-  @Lob
-  @Basic(fetch=FetchType.EAGER)
-  public String getMediaPackageAsXml() {
-    try {
-      return mediaPackage == null ? null : mediaPackage.toXml();
-    } catch(MediaPackageException e) {
-      logger.warn("unable to marshall mediapackage {}", mediaPackage);
-      throw new RuntimeException(e);
-    }
-  }
-  public void setMediaPackageAsXml(String mediaPackageAsXml) {
-    if(mediaPackageAsXml != null) {
-      try {
-        this.mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(mediaPackageAsXml);
-      } catch(MediaPackageException e) {
-        logger.warn("unable to unmarshall mediapackage {}", mediaPackageAsXml);
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
-  @Access(AccessType.PROPERTY)
-  @Column(name="series")
-  public String getSeries() {
-    return mediaPackage == null ? null : mediaPackage.getSeries();
-  }
-
-  @Access(AccessType.PROPERTY)
-  @Column(name="mediaPackageId")
-  public String getMediaPackageId() {
-    return mediaPackage == null ? null : mediaPackage.getIdentifier().toString();
-  }
-  public void setMediaPackageId(String mediaPackageId) {logger.debug("Setting mediapackage ID, which does nothing");}
 }

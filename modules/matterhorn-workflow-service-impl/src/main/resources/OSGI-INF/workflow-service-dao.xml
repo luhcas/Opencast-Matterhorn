@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
 <component name="org.opencastproject.workflow.impl.WorkflowServiceImplDao" immediate="true" activate="activate" deactivate="deactivate">
-  <implementation class="org.opencastproject.workflow.impl.WorkflowServiceImplDaoJpaImpl" />
+  <implementation class="org.opencastproject.workflow.impl.WorkflowServiceImplDaoFileImpl" />
   <property name="service.description" value="Workflow Service DAO" />
   <service>
     <provide interface="org.opencastproject.workflow.impl.WorkflowServiceImplDao" />
   </service>
-  <reference name="persistence" interface="javax.persistence.spi.PersistenceProvider"
-    cardinality="1..1" policy="static" bind="setPersistenceProvider" />
-  <reference name="props" interface="java.util.Map"
-    cardinality="1..1" policy="static" target="(type=persistence)" bind="setPersistenceProperties" />
+  <reference name="REPO" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository"
+    cardinality="1..1" policy="static" bind="setRepository" />
 </component>
--->
 
+<!--
 <component name="org.opencastproject.workflow.impl.WorkflowServiceImplDao" immediate="true" activate="activate">
   <implementation class="org.opencastproject.workflow.impl.WorkflowServiceImplDaoDatasourceImpl" />
   <property name="service.description" value="Workflow Service DAO" />
@@ -22,3 +19,5 @@
   <reference name="dataSource" interface="javax.sql.DataSource"
     cardinality="1..1" policy="static" bind="setDataSource" />
 </component>
+-->
+

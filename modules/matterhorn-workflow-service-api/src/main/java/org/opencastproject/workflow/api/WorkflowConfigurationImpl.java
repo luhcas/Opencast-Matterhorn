@@ -15,11 +15,6 @@
  */
 package org.opencastproject.workflow.api;
 
-import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -31,19 +26,12 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * JAXB annotated implementation of {@link WorkflowConfiguration}
  */
-@Embeddable
-@Table(name="WF_CONFIG")
 @XmlType(name="configuration", namespace="http://workflow.opencastproject.org/")
 @XmlRootElement(name="configuration", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class WorkflowConfigurationImpl implements WorkflowConfiguration, Comparable<WorkflowConfiguration>, Serializable {
-  private static final long serialVersionUID = 8923613693787429549L;
-
-  @Column(name="key")
+public class WorkflowConfigurationImpl implements WorkflowConfiguration, Comparable<WorkflowConfiguration> {
   @XmlAttribute
   protected String key;
-  
-  @Column(name="value")
   @XmlValue
   protected String value;
 

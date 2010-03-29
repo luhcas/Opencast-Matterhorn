@@ -15,15 +15,22 @@ public class WorkingFileRepositoryTest {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryTest.class);
   private String mediaPackageID = "working-file-test-media-package-1";
   private String mediaPackageElementID = "working-file-test-element-1";
+  private String collectionId = "collection-1";
+  private String filename = "file.gif";
   private WorkingFileRepositoryImpl repo = new WorkingFileRepositoryImpl("target/working-file-repo-root", "http://localhost:8080");
   
   @Before
-  public void setup() {
+  public void setup() throws Exception {
     repo.activate(null);
     // Load an image file via the classpath to test whether we can put it into the repository
     InputStream in = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
     logger.info("Working with input stream " + in);
     repo.put(mediaPackageID, mediaPackageElementID, in);
+    try {in.close();} catch (IOException e) {logger.error(e.getMessage());}
+
+    in = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
+    logger.info("Working with input stream " + in);
+    repo.putInCollection(collectionId, filename, in);
     try {in.close();} catch (IOException e) {logger.error(e.getMessage());}
   }
   
@@ -66,5 +73,21 @@ public class WorkingFileRepositoryTest {
       repo.get(badId, mediaPackageElementID);
       Assert.fail();
     } catch (Exception e) {}
+  }
+
+
+  @Test
+  public void testPutIntoCollection() throws Exception {
+    // Get the file back from the repository to check whether it's the same file that we put in.
+    InputStream fromRepo = repo.getFromCollection(collectionId, filename);
+    byte[] bytesFromRepo = IOUtils.toByteArray(fromRepo);
+    byte[] bytesFromClasspath = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("opencast_header.gif"));
+    try {fromRepo.close();} catch (IOException e) {logger.error(e.getMessage());}
+    Assert.assertEquals(bytesFromClasspath.length, bytesFromRepo.length);
+  }
+  
+  @Test
+  public void testCollectionSize() throws Exception {
+    Assert.assertEquals(1, repo.getCollectionSize(collectionId));
   }
 }

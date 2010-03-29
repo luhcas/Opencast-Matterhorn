@@ -300,8 +300,6 @@ public class WorkflowRestService {
           @PathParam("output") String output) throws Exception {
 // CHECKSTYLE:ON
     if(count < 1 || count > MAX_LIMIT) count = DEFAULT_LIMIT;
-    if(startPage == 0) startPage = 1;
-    
     WorkflowQuery q = service.newWorkflowQuery();
     q.withCount(count);
     q.withStartPage(startPage);

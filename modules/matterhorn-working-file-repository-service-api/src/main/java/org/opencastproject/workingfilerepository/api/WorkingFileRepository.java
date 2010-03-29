@@ -17,6 +17,7 @@ package org.opencastproject.workingfilerepository.api;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * The Working File Repository is a file storage service that supports the lecture capture system.
@@ -65,4 +66,64 @@ public interface WorkingFileRepository {
    * @param mediaPackageElementID
    */
   void delete(String mediaPackageID, String mediaPackageElementID);
+
+  /**
+   * Gets the number of files in a collection.
+   * @param  the collection identifier
+   * @return the number of files in a collection
+   * @throws IllegalArgumentException if the collection does not exist
+   */
+  long getCollectionSize(String id);
+  
+  /**
+   * Puts a file into a collection, overwriting the existing file if present.
+   * @param collection The collection identifier
+   * @param fileName The filename to use in storing the input stream
+   * @param in the data to store
+   * @return The URI identifying the file
+   * @throws URISyntaxException if either the filename or collection ID are can not be included in a valid URI
+   */
+  URI putInCollection(String collectionId, String fileName, InputStream in) throws URISyntaxException;
+
+  /**
+   * Gets the URIs of the members of this collection
+   * @param collectionId the collection identifier
+   * @return the URIs for each member of the collection
+   */
+  URI[] getCollectionContents(String collectionId);
+  
+  /**
+   * Gets data from a collection
+   * @param collectionId the collection identifier
+   * @param fileName The filename to retrieve
+   * @return the data as a stream, or null if not found
+   */
+  InputStream getFromCollection(String collectionId, String fileName);
+  
+  /**
+   * Removes a file from a collection
+   * @param collectionId the collection identifier
+   * @param fileName the filename to remove
+   */
+  void removeFromCollection(String collectionId, String fileName);
+
+  /**
+   * Moves a file from a collection into a mediapackage
+   * @param fromCollection The collection holding the file
+   * @param fromFileName The filename
+   * @param toMediaPackage The media package ID to move the file into
+   * @param toMediaPackageElement the media package element ID of the file
+   * @return the URI pointing to the file's new location
+   */
+  URI moveTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement);
+
+  /**
+   * Copies a file from a collection into a mediapackage
+   * @param fromCollection The collection holding the file
+   * @param fromFileName The filename
+   * @param toMediaPackage The media package ID to copy the file into
+   * @param toMediaPackageElement the media package element ID of the file
+   * @return the URI pointing to the file's new location
+   */
+  URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement);
 }

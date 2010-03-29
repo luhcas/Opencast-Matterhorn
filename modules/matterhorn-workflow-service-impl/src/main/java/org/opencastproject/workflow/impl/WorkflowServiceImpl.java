@@ -79,55 +79,49 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   /**
    * A tuple of a workflow operation handler and the name of the operation it handles
    */
-  class HandlerRegistration {
-    HandlerRegistration(String operationName, WorkflowOperationHandler handler) {
+  static class HandlerRegistration {
+    public HandlerRegistration(String operationName, WorkflowOperationHandler handler) {
       this.operationName = operationName;
       this.handler = handler;
     }
     WorkflowOperationHandler handler;
     String operationName;
+    /**
+     * {@inheritDoc}
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + getOuterType().hashCode();
       result = prime * result + ((handler == null) ? 0 : handler.hashCode());
       result = prime * result + ((operationName == null) ? 0 : operationName.hashCode());
       return result;
     }
+    /**
+     * {@inheritDoc}
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(Object obj) {
-      if (this == obj) {
+      if (this == obj)
         return true;
-      }
-      if (obj == null) {
+      if (obj == null)
         return false;
-      }
-      if (!(obj instanceof HandlerRegistration)) {
+      if (getClass() != obj.getClass())
         return false;
-      }
       HandlerRegistration other = (HandlerRegistration) obj;
-      if (!getOuterType().equals(other.getOuterType())) {
-        return false;
-      }
       if (handler == null) {
-        if (other.handler != null) {
+        if (other.handler != null)
           return false;
-        }
-      } else if (!handler.equals(other.handler)) {
+      } else if (!handler.equals(other.handler))
         return false;
-      }
       if (operationName == null) {
-        if (other.operationName != null) {
+        if (other.operationName != null)
           return false;
-        }
-      } else if (!operationName.equals(other.operationName)) {
+      } else if (!operationName.equals(other.operationName))
         return false;
-      }
       return true;
-    }
-    private WorkflowServiceImpl getOuterType() {
-      return WorkflowServiceImpl.this;
     }
   }
   

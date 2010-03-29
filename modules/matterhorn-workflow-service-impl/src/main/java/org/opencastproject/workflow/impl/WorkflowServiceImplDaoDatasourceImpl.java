@@ -212,7 +212,7 @@ public class WorkflowServiceImplDaoDatasourceImpl implements WorkflowServiceImpl
       r = s.executeQuery();
       long searchTime = System.currentTimeMillis() - start;
       WorkflowSetImpl set = new WorkflowSetImpl();
-      set.setCount(Math.min(count, totalCount));
+      set.setPageSize(Math.min(count, totalCount));
       set.setStartPage(startPage);
       set.setSearchTime(searchTime);
       set.setTotalCount(totalCount);
