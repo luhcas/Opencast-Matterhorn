@@ -19,7 +19,9 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
@@ -32,49 +34,53 @@ public class SchedulerResources {
   public static Client c = Client.create();
   public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/scheduler/rest/");
   
-  public static ClientResponse addEvent(String event) throws Exception {
+  static {
+	  c.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));
+  }
+  
+  public static ClientResponse addEvent(String event) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("event", event);
     return r.path("addEvent").post(ClientResponse.class, params);
   }
   
-  public static ClientResponse updateEvent(String event) throws Exception {
+  public static ClientResponse updateEvent(String event) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("event", event);
     return r.path("updateEvent").post(ClientResponse.class, params);
   }
   
-  public static ClientResponse getEvent(String id) throws Exception {
+  public static ClientResponse getEvent(String id) throws UniformInterfaceException {
     return r.path("getEvent/" + id).get(ClientResponse.class);
   }
   
-  public static ClientResponse getDublinCoreMetadata(String id) throws Exception {
+  public static ClientResponse getDublinCoreMetadata(String id) throws UniformInterfaceException {
     return r.path("getDublinCoreMetadata/" + id).get(ClientResponse.class);
   }
   
-  public static ClientResponse findConflictingEvents(String event) throws Exception {
+  public static ClientResponse findConflictingEvents(String event) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("event", event);
     return r.path("findConflictingEvents").post(ClientResponse.class, params);
   }
   
-  public static ClientResponse removeEvent(String id) throws Exception {
+  public static ClientResponse removeEvent(String id) throws UniformInterfaceException {
     return r.path("removeEvent/" + id).get(ClientResponse.class);
   }
   
-  public static ClientResponse getEvents() throws Exception {
+  public static ClientResponse getEvents() throws UniformInterfaceException {
     return r.path("getEvents").get(ClientResponse.class);
   }
 
-  public static ClientResponse getUpcomingEvents() throws Exception {
+  public static ClientResponse getUpcomingEvents() throws UniformInterfaceException {
     return r.path("getUpcomingEvents").get(ClientResponse.class);
   }
   
-  public static ClientResponse getCalendarForCaptureAgent(String id) throws Exception {
+  public static ClientResponse getCalendarForCaptureAgent(String id) throws UniformInterfaceException {
     return r.path("getCalendarForCaptureAgent/" + id).get(ClientResponse.class);
   }
   
-  public static ClientResponse getCaptureAgentMetadata(String id) throws Exception {
+  public static ClientResponse getCaptureAgentMetadata(String id) throws UniformInterfaceException {
     return r.path("getCaptureAgentMetadata/" + id).get(ClientResponse.class);
   }
 }

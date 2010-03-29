@@ -88,14 +88,15 @@ public class ScheduledCaptureTest {
 		assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
 		
 		// Pause for workflow to complete
-		Thread.sleep(10000);
+		Thread.sleep(15000);
 		
 		// Search index: recording present
-		response = SearchResources.episodeQuery(title);
+		response = SearchResources.all(title);
 		
-		assertEquals("Response code (episode):", 200, response.getStatus());
-		System.out.println(response.getEntity(String.class));
-		
-		
+		assertEquals("Response code (search all):", 200, response.getStatus());
+	
+		xml = Utils.parseXml(response.getEntity(String.class));
+	    
+	    assertTrue("Recording included? (search all):", Utils.xPathExists(xml, "//ns2:mediapackage[title=\'" + title + "\']"));
 	}
 }

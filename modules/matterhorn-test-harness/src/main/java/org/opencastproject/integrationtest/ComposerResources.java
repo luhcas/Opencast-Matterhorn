@@ -19,7 +19,9 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
@@ -32,12 +34,16 @@ public class ComposerResources {
   public static Client c = Client.create();
   public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/composer/rest/");
   
-  public static ClientResponse profiles() throws Exception {
+  static {
+	  c.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));
+  }
+  
+  public static ClientResponse profiles() throws UniformInterfaceException {
     return r.path("profiles").get(ClientResponse.class);
   }
   
   public static ClientResponse encode(String mediapackage, 
-      String audioSourceTrackId, String videoSourceTrackId, String profileId) throws Exception {
+      String audioSourceTrackId, String videoSourceTrackId, String profileId) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("mediapackage", mediapackage);
     params.add("audioSourceTrackId", audioSourceTrackId);
@@ -46,12 +52,12 @@ public class ComposerResources {
     return r.path("encode").post(ClientResponse.class, params);
   }
   
-  public static ClientResponse receipt(String id) throws Exception {
+  public static ClientResponse receipt(String id) throws UniformInterfaceException {
     return r.path("receipt/" + id).get(ClientResponse.class);
   }
   
   public static ClientResponse image(String mediapackage, 
-      String time, String sourceTrackId, String profileId) throws Exception {
+      String time, String sourceTrackId, String profileId) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("mediapackage", mediapackage);
     params.add("time", time);

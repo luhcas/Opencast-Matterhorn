@@ -36,4 +36,5 @@ public class AuthenticationSupport {
       message.addHeader(header.getKey(), header.getValue());
     }
   }
+  
 }

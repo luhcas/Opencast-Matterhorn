@@ -19,7 +19,9 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
@@ -32,7 +34,11 @@ public class InspectionResources {
   public static Client c = Client.create();
   public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/inspection/rest/");
   
-  public static ClientResponse inspect(String url) throws Exception {
+  static {
+	  c.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));
+  }
+  
+  public static ClientResponse inspect(String url) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("url", url);
     return r.queryParams(params).get(ClientResponse.class);

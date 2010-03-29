@@ -19,7 +19,9 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
@@ -32,13 +34,17 @@ public class DistributeResources {
   public static Client c = Client.create();
   public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/distribution/");
   
+  static {
+	  c.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));
+  }
+  
   /**
    * 
    * @param channel Distribution channel: local, youtube, itunesu
    *
    */
   public static ClientResponse distribute(String channel, 
-      String mediapackage, String... elementId) throws Exception {
+      String mediapackage, String... elementId) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("mediapackage", mediapackage);
     for (String id : elementId) {

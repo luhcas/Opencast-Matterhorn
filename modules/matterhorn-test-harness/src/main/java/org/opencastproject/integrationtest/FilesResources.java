@@ -19,7 +19,9 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
@@ -32,18 +34,22 @@ public class FilesResources {
   public static Client c = Client.create();
   public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/files/");
   
-  public static ClientResponse getFile(String mediaPackageID, String mediaPackageElementID) throws Exception {
+  static {
+	  c.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));
+  }
+  
+  public static ClientResponse getFile(String mediaPackageID, String mediaPackageElementID) throws UniformInterfaceException {
     return r.path(mediaPackageID + '/' + mediaPackageElementID).get(ClientResponse.class);
   }
   
   public static ClientResponse getFile(String mediaPackageID, 
-      String mediaPackageElementID, String fileName) throws Exception {
+      String mediaPackageElementID, String fileName) throws UniformInterfaceException {
     return r.path(mediaPackageID + '/' + mediaPackageElementID + '/' + fileName).get(ClientResponse.class);
   }
   
   // FIXME
   public static ClientResponse postFile(String mediaPackageID,
-      String mediaPackageElementID, String media) throws Exception {
+      String mediaPackageElementID, String media) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("mediaPackageID", mediaPackageID);
     params.add("mediaPackageElementID", mediaPackageElementID);
@@ -51,7 +57,7 @@ public class FilesResources {
   }
   
   public static ClientResponse deleteFile(String mediaPackageID,
-      String mediaPackageElementID) throws Exception {
+      String mediaPackageElementID) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("mediaPackageID", mediaPackageID);
     params.add("mediaPackageElementID", mediaPackageElementID);

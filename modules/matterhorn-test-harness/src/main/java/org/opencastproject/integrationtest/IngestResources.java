@@ -21,7 +21,9 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
@@ -34,7 +36,11 @@ public class IngestResources {
 	public static Client c = Client.create();
 	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/ingest/rest/");
 	
-	public static ClientResponse createMediaPackage() throws Exception {
+	static {
+		  c.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));
+	  }
+	
+	public static ClientResponse createMediaPackage() throws UniformInterfaceException {
 		return r.path("createMediaPackage").get(ClientResponse.class);
 	}
 	
@@ -44,7 +50,7 @@ public class IngestResources {
 	 * 
 	 */
 	public static ClientResponse add(String type, String url,
-			String flavor, String mediaPackage) throws Exception {
+			String flavor, String mediaPackage) throws UniformInterfaceException {
 		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
 		params.add("url", url);
 		params.add("flavor", flavor);
@@ -58,7 +64,7 @@ public class IngestResources {
 	 *
 	 */
 	public static ClientResponse addTrack(String type, InputStream media,
-			String flavor, String mediaPackage) throws Exception {
+			String flavor, String mediaPackage) throws UniformInterfaceException {
 		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
 		params.add("flavor", flavor);
 		params.add("mediaPackage", mediaPackage);
@@ -67,11 +73,11 @@ public class IngestResources {
 	
 	// TODO addMediaPackage
 	
-	public static ClientResponse addZippedMediaPackage(InputStream mediaPackage) throws Exception {
+	public static ClientResponse addZippedMediaPackage(InputStream mediaPackage) throws UniformInterfaceException {
 		return r.path("addZippedMediaPackage").entity(mediaPackage).post(ClientResponse.class);
 	}
 	
-	public static ClientResponse ingest(String mediaPackageId) throws Exception {
+	public static ClientResponse ingest(String mediaPackageId) throws UniformInterfaceException {
 		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
 		params.add("mediaPackage", mediaPackageId);
 		return r.path("ingest").post(ClientResponse.class, params);

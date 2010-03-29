@@ -31,7 +31,7 @@ import org.w3c.dom.Document;
 import com.sun.jersey.api.client.ClientResponse;
 
 /**
- * Integration test for file upload
+ * Integration test for file upload using thin client
  * @author jamiehodge
  *
  */

@@ -92,7 +92,7 @@ public class UnscheduledCaptureTest {
     
     xml = Utils.parseXml(response.getEntity(String.class));
     
-    assertEquals("Agent idle? (agent):", Utils.xPath(xml, "//ns2:agent-state-update/state", XPathConstants.STRING), "idle");
+    assertEquals("Agent idle? (agent):", "idle", Utils.xPath(xml, "//ns2:agent-state-update/state", XPathConstants.STRING));
     
     // State, Recordings: id is finished
     response = StateResources.recordings();
@@ -104,7 +104,8 @@ public class UnscheduledCaptureTest {
     assertTrue("Recording included? (recordings):", Utils.xPathExists(xml, "//ns1:recording-state-update[name=\'" + recordingId + "\']"));
     assertEquals("Recording finished (recordings):", "capture_finished", Utils.xPath(xml, "//ns1:recording-state-update[name=\'" + recordingId + "\']/state", XPathConstants.STRING));
     
-    Thread.sleep(4000);
+    // Pause for admin to sync
+    Thread.sleep(10000);
     
     // Capture Admin, Recordings: id is finished
     response = CaptureAdminResources.recording(recordingId);
@@ -115,5 +116,6 @@ public class UnscheduledCaptureTest {
     
     assertTrue("Recording included? (recordings):", Utils.xPathExists(xml, "//ns2:recording-state-update[name=\'" + recordingId + "\']"));
     assertEquals("Recording finished (recordings):", "capture_finished", Utils.xPath(xml, "//ns2:recording-state-update[name=\'" + recordingId + "\']/state", XPathConstants.STRING));
+
   }
 }

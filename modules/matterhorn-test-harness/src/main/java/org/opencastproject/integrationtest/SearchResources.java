@@ -19,7 +19,9 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
@@ -32,26 +34,27 @@ public class SearchResources {
   public static Client c = Client.create();
   public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/search/rest/");
   
-  public static ClientResponse add(String mediapackage) throws Exception {
+  public static ClientResponse add(String mediapackage) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("mediapackage", mediapackage);
+    r.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));
     return r.path("add").post(ClientResponse.class, params);
   }
   
   // TODO add remaining query parameters (episode and series)
-  public static ClientResponse episode(String id) throws Exception {
+  public static ClientResponse episode(String id) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("id", id);
     return r.path("episode").queryParams(params).get(ClientResponse.class);
   }
   
-  public static ClientResponse episodeQuery(String q) throws Exception {
+  public static ClientResponse all(String q) throws UniformInterfaceException {
 	MultivaluedMap<String, String> params = new MultivaluedMapImpl();
 	params.add("q", q);
 	return r.path("episode").queryParams(params).get(ClientResponse.class);
   }
   
-  public static ClientResponse series(String id) throws Exception {
+  public static ClientResponse series(String id) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("id", id);
     return r.path("series").queryParams(params).get(ClientResponse.class);

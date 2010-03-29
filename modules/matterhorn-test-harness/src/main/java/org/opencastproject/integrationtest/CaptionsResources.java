@@ -17,7 +17,9 @@ package org.opencastproject.integrationtest;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 
 /**
  * Captions REST resources
@@ -29,15 +31,19 @@ public class CaptionsResources {
   public static Client c = Client.create();
   public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/captions/rest/");
   
-  public static ClientResponse search() throws Exception {
+  static {
+	  c.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));
+  }
+  
+  public static ClientResponse search() throws UniformInterfaceException {
     return r.path("search").get(ClientResponse.class);
   }
   
-  public static ClientResponse episode(String id) throws Exception {
+  public static ClientResponse episode(String id) throws UniformInterfaceException {
     return r.path(id).get(ClientResponse.class);
   }
   
-  public static ClientResponse add(String id, String doc, String format) throws Exception {
+  public static ClientResponse add(String id, String doc, String format) throws UniformInterfaceException {
     return r.path(id + '/' + format).post(ClientResponse.class, doc);
   }
 }

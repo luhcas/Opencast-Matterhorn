@@ -19,7 +19,9 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
@@ -31,13 +33,17 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 public class WorkflowResources {
   public static Client c = Client.create();
   public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/workflow/rest/");
+  
+  static {
+		c.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));
+	  }
 
   /**
    * 
    * @param format Response format: xml or json
    * 
    */
-  public static ClientResponse definitions(String format) throws Exception {
+  public static ClientResponse definitions(String format) throws UniformInterfaceException {
     return r.path("definitions." + format.toLowerCase()).get(ClientResponse.class);
   }
   
@@ -46,12 +52,12 @@ public class WorkflowResources {
    * @param format Response format: xml or json
    * 
    */
-  public static ClientResponse instances(String format) throws Exception {
+  public static ClientResponse instances(String format) throws UniformInterfaceException {
     return r.path("instances," + format.toLowerCase()).get(ClientResponse.class);
   }
   
   public static ClientResponse start(String mediapackage, 
-      String workflowDefinition, String properties) throws Exception {
+      String workflowDefinition, String properties) throws UniformInterfaceException {
     MultivaluedMap<String, String> params = new MultivaluedMapImpl();
     params.add("mediapackage", mediapackage);
     params.add("definition", workflowDefinition);
@@ -59,15 +65,15 @@ public class WorkflowResources {
     return r.path("start").post(ClientResponse.class, params);
   }
   
-  public static ClientResponse suspend(String id) throws Exception {
+  public static ClientResponse suspend(String id) throws UniformInterfaceException {
     return r.path("suspend/" + id).get(ClientResponse.class);
   }
   
-  public static ClientResponse resume(String id) throws Exception {
+  public static ClientResponse resume(String id) throws UniformInterfaceException {
     return r.path("resume/" + id).get(ClientResponse.class);
   }
   
-  public static ClientResponse stop(String id) throws Exception {
+  public static ClientResponse stop(String id) throws UniformInterfaceException {
     return r.path("stop/" + id).get(ClientResponse.class);
   }
 }

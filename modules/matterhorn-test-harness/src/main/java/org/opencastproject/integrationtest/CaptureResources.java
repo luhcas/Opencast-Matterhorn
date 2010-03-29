@@ -26,6 +26,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
@@ -37,6 +38,10 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 public class CaptureResources {
   public static Client c = Client.create();
   public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/capture/rest/");
+  
+  static {
+	  c.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));
+  }
   
   public static ClientResponse startCaptureGet() throws UniformInterfaceException {
     return r.path("startCapture").get(ClientResponse.class);
