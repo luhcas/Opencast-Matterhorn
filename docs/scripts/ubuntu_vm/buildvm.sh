@@ -107,6 +107,8 @@ sudo cp update-matterhorn.sh mnt/home/opencast/update-matterhorn.sh
 sudo chmod 755 mnt/home/opencast/update-matterhorn.sh
 sudo cp rc.local mnt/etc/rc.local
 sudo chmod 755 mnt/etc/rc.local
+sudo cp opencaps.sh mnt/home/opencast/opencaps.sh
+sudo chmod 755 mnt/home/opencast/opencaps.sh
 
 sudo mkdir mnt/opt/matterhorn
 

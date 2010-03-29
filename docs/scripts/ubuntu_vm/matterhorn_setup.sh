@@ -38,7 +38,7 @@ install_3p ()
   echo "Installing 3rd party tools.  This process will take several minutes..."
 
   cd $INST_DIR
-  sudo apt-get -y --force-yes install curl
+  sudo apt-get -y --force-yes install curl ntp
   sudo apt-get -y --force-yes install openssh-server openssh-client
   sudo apt-get -y --force-yes install build-essential zlib1g-dev patch byacc
 
@@ -179,18 +179,14 @@ else
     read ntpsrv
   done
 
-  # ntp server?
-  if [ ${#ntpsrv} -gt 7 ]; then
-    sudo sed -i "s/ntp.ubuntu.com/$ntpsrv/" /etc/ntp.conf
-  else
-    echo "Using default NTP server: ntp.ubuntu.com"
-  fi
-
   echo "**** Do you want to install 3rd party tools? (y/n)"
   read p3resp
 
   echo "**** Do you want to install ffmpeg? (y/n)"
   read ffresp
+
+  echo "**** Do you want to install OpenCaps? (y/n)"
+  read opencaps
 
   # update felix config (url)
   sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" $CONF_DIR/config.properties
@@ -222,9 +218,24 @@ else
     echo "ffmpeg will NOT be installed."
   fi
   
+  # Install opencaps?
+  if [ $opencaps = "y" ] || [ $opencaps = "Y" ]; then
+    /home/opencast/opencaps.sh
+  else
+    echo "opencaps will NOT be installed."
+  fi
+
+
   # doing some additional setups
   sudo update-java-alternatives -s java-6-sun
   sudo chown -R 1000:1000 /home/opencast
+
+  # ntp server?
+  if [ ${#ntpsrv} -gt 7 ]; then
+    sudo sed -i "s/ntp.ubuntu.com/$ntpsrv/" /etc/ntp.conf
+  else
+    echo "Using default NTP server: ntp.ubuntu.com"
+  fi
 
   # restart ntp, just to make sure that time will be synchronized
   sudo /etc/init.d/ntp restart

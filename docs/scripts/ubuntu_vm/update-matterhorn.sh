@@ -1,12 +1,17 @@
 #!/bin/bash
 
-#stop felix
-sudo /home/opencast/shutdown.sh
-
 cd /opt/matterhorn/matterhorn_trunk
 
 # update from svn
-svn update
+if [ -n $1 ]
+then
+  svn update -r $1
+else
+  svn update
+fi
+
+#stop felix
+sudo /home/opencast/shutdown.sh
 
 # Clean old jars
 rm -rf /opt/matterhorn/felix/load
@@ -18,8 +23,7 @@ mvn clean install -DskipTests -DdeployTo=/opt/matterhorn/felix/load
 tar -czf /home/opencast/felix-config-backup.tar.gz /opt/matterhorn/felix/conf/ 
 
 # update felix configuration
-sudo cp -rf docs/felix/conf /opt/matterhorn/felix/.
-
+cp -rf docs/felix/conf/* /opt/matterhorn/felix/conf/
 cd /home/opencast
 
 # update felix config (url)
