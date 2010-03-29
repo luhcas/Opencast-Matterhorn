@@ -1,0 +1,16 @@
+This script will install 3rd party tools for Matterhorn.
+You should execute it with administrative rights or you
+will get errors when libraries will be installed in
+/usr/local/bin.
+
+Prerequsites for running this script:
+- zlib-devel (zlib1g-dev on Ubuntu)
+- c, c++ compiler (gcc, g++ on Ubuntu, gcc, gcc-c++ on RedHat)
+- yacc (byacc)
+- svn (subversion)
+- wget (if it is not installed yet)
+- patch (if it is not installed yet)
+
+For building ffmpeg with faad library, you will also need:
+- autoconf
+- libtool
