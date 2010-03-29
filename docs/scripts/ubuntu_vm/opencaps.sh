@@ -30,7 +30,10 @@ sudo /etc/init.d/mysql start
 
 # add mysql info
 echo "**** Please enter your mysql root password for the OpenCaps configuration file"
-read pass											
+currentstate=`stty -g`
+stty -echo
+read pass
+stty $currentstate											
 sed -i "s/password/$pass/" include/config.inc.php
 
 # add matterhorn info
