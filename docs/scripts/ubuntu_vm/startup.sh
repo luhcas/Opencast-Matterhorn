@@ -48,7 +48,12 @@ rm -rf $MATTERHORN_WORK_DIR
 #
 
 mkdir -p $MATTERHORN_WORK_DIR
+mkdir -p $MATTERHORN_WORK_DIR/opencast
+mkdir -p $MATTERHORN_STATIC_DIR
 mkdir -p $MATTERHORN_BUNDLE_DIR
+
+# Save current version
+svnversion > $MATTERHORN_STATIC_DIR/version.txt
 
 #
 # Cd into the work dir, since some java code creates work files in the
