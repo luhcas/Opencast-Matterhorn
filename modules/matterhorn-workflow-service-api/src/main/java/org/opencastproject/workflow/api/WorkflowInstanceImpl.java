@@ -274,13 +274,21 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   /**
    * Initializes the workflow instance
    */
-  void init() {
+  public void init() {
     if(operations != null) {
+      OperationState previousState = null;
       for(WorkflowOperationInstance operation : operations) {
+        // If the previous operation succeeded, but this hasn't started yet, this is the current operation
+        if(previousState != null && OperationState.SUCCEEDED.equals(previousState) && OperationState.INSTANTIATED.equals(operation.getState())) {
+          this.currentOperation = operation;
+          break;
+        }
+        // If an operation is running or paused, this is the current operation
         if(OperationState.RUNNING.equals(operation.getState()) || OperationState.PAUSED.equals(operation.getState())) {
           this.currentOperation = operation;
           break;
         }
+        previousState = operation.getState();
       }
     }
   }

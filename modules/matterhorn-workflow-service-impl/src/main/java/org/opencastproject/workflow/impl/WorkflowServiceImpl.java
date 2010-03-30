@@ -29,6 +29,7 @@ import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -325,25 +326,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     return configuredInstance;
   }
   
-  /**
-   * Replaces variables in a workflow definition template with values from the provided properties.
-   * @param workflowDefinition The template
-   * @param properties The properties to replace
-   * @return The parsed workflow definition
-   */
-//  protected WorkflowDefinition updateConfiguration(WorkflowDefinition workflowDefinition, Map<String, String> properties) {
-//    try {
-//      String xml = replaceVariables(WorkflowBuilder.getInstance().toXml(workflowDefinition), properties);
-//      return WorkflowBuilder.getInstance().parseWorkflowDefinition(xml);
-//    } catch(Exception e) {
-//      throw new IllegalStateException("Unable to replace workflow definition variables", e);
-//    }
-//  }
-  
   protected WorkflowInstance updateConfiguration(WorkflowInstance instance, Map<String, String> properties) {
     try {
       String xml = replaceVariables(WorkflowBuilder.getInstance().toXml(instance), properties);
-      return WorkflowBuilder.getInstance().parseWorkflowInstance(xml);
+      WorkflowInstanceImpl workflow = (WorkflowInstanceImpl)WorkflowBuilder.getInstance().parseWorkflowInstance(xml);
+      workflow.init(); // needed to keep the current operation setting intact
+      return workflow;
     } catch(Exception e) {
       throw new IllegalStateException("Unable to replace workflow instance variables", e);
     }
@@ -509,6 +497,26 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         workflow.setMediaPackage(mp);
       }
     }
+    WorkflowState dbState = getWorkflowById(workflow.getId()).getState();
+
+    // If the workflow was paused while the operation was still working, accept the updated mediapackage
+    // and properties, but do not continue on.
+    if(result != null && result.getAction().equals(Action.CONTINUE) && WorkflowState.PAUSED.equals(dbState)) {
+      workflow.setState(WorkflowState.PAUSED);
+      workflow = updateConfiguration(workflow, result.getProperties());
+      dao.update(workflow);
+      return;
+    }
+
+    // If the workflow was stopped while the operation was still working, accept the updated mediapckage
+    // and properties, but do not continue on.
+    if(WorkflowState.STOPPED.equals(dbState)) {
+      workflow.setState(WorkflowState.STOPPED);
+      workflow = updateConfiguration(workflow, result.getProperties());
+      dao.update(workflow);
+      return;
+    }
+
     if(workflow.next() == null) {
       workflow.setState(WorkflowState.SUCCEEDED);
       dao.update(workflow);
@@ -516,7 +524,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       if(WorkflowOperationResult.Action.PAUSE.equals(result.getAction())) {
         workflow.setState(WorkflowState.PAUSED);
       }
-      updateConfiguration(workflow, result.getProperties());
+      workflow = updateConfiguration(workflow, result.getProperties());
       dao.update(workflow);
       if(WorkflowOperationResult.Action.CONTINUE.equals(result.getAction())) {
         this.run(workflow);
