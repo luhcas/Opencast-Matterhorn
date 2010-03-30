@@ -10,7 +10,7 @@ show_stat()
 {
 cat >&1 <<END
 ********************************************
-******** Finishing Matterhorn Setup ********
+******** Starting Matterhorn Setup ********
 ********************************************
 ** Installing third party components
 **
