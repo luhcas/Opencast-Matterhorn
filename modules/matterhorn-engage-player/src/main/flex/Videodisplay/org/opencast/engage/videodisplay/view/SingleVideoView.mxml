@@ -21,36 +21,21 @@
     width = "100%"
     height = "100%"
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
-    xmlns:gradientCanvas="com.gradientCanvas.*"
     >
 
-	<gradientCanvas:GradientCanvas
-		width="100%" 
-		height="100%"
-		colorsConfiguration = "2"
-		positioning ="absolute"
-		gradientType ="linear"
-		fillColors = "[#666666, #000000]"
-		fillAlphas = "[1,1]"
-		gradientRatio = "[0,255]"
-		angle="90"
-		offsetY="-20"
-		>
-		
-		<view:SingleVideodisplayView 
-	        id = "singleVideodisplayView"
-	        width = "100%"
-	        height = "100%"
-	        top="5"
-	        bottom="5"
-	        />
 	
-	    <view:Splashscreen 
-	        id = "splashscreen"
-	        width = "100%"
-	        height = "100%"
-	        />
-    
-    </gradientCanvas:GradientCanvas>
+	<view:SingleVideodisplayView 
+        id = "singleVideodisplayView"
+        width = "100%"
+        height = "100%"
+        top="5"
+        bottom="5"
+        />
+
+    <view:Splashscreen 
+        id = "splashscreen"
+        width = "100%"
+        height = "100%"
+        />
    
 </mx:Canvas>

@@ -32,6 +32,7 @@
     horizontalScrollPolicy = "off"
     xmlns:business = "org.opencast.engage.videodisplay.business.*"
     frameRate = "30"
+    backgroundGradientColors="[#666666, #000000]"
     >
 
     <mx:Style 

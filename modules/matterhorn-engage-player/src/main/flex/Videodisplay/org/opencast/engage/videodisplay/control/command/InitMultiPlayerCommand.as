@@ -140,8 +140,8 @@ package org.opencast.engage.videodisplay.control.command
 				{
 					model.layoutMetadataOne = new LayoutMetadata();
 					model.layoutMetadataOne.scaleMode = ScaleMode.LETTERBOX;
-					model.layoutMetadataOne.horizontalAlign = HorizontalAlign.CENTER;
-					model.layoutMetadataOne.verticalAlign = VerticalAlign.MIDDLE;
+					model.layoutMetadataOne.horizontalAlign = HorizontalAlign.RIGHT;
+					model.layoutMetadataOne.verticalAlign = VerticalAlign.BOTTOM;
 					model.layoutMetadataOne.percentHeight = 100;
 					model.layoutMetadataOne.percentWidth = 100;
 					value.addMetadata(LayoutMetadata.LAYOUT_NAMESPACE, model.layoutMetadataOne);
@@ -170,8 +170,8 @@ package org.opencast.engage.videodisplay.control.command
 				{
 					model.layoutMetadataTwo = new LayoutMetadata();
 					model.layoutMetadataTwo.scaleMode = ScaleMode.LETTERBOX;
-					model.layoutMetadataTwo.horizontalAlign = HorizontalAlign.CENTER;
-					model.layoutMetadataTwo.verticalAlign = VerticalAlign.MIDDLE;
+					model.layoutMetadataTwo.horizontalAlign = HorizontalAlign.LEFT;
+					model.layoutMetadataTwo.verticalAlign = VerticalAlign.BOTTOM;
 					model.layoutMetadataTwo.percentHeight = 100;
 					model.layoutMetadataTwo.percentWidth = 100;
 					value.addMetadata(LayoutMetadata.LAYOUT_NAMESPACE, model.layoutMetadataTwo);

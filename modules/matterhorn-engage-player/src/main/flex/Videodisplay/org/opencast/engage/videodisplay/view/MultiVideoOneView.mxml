@@ -29,9 +29,4 @@
         height = "100%"
         />
 
-    <view:Splashscreen 
-        id = "splashscreen"
-        width = "100%"
-        height = "100%"
-        />
 </mx:Canvas>
