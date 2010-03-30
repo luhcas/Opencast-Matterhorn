@@ -53,7 +53,19 @@ Opencast.Player = (function () {
     FLASH_MUTE			  = "";
    
    
-    /**
+     /**
+     @memberOf Opencast.Player
+     @description Returns communication values from the Flash Videodisplay
+      */
+     function flashVars() {
+    	 return {'playerType':  FLASH_PLAYERTYPE,
+    	             'playerState': FLASH_PLAYERSTATE,
+    	             'viewState':   FLASH_VIEWSTATE,
+    	             'mute':        FLASH_MUTE};
+     }
+     
+     
+     /**
         @memberOf Opencast.Player
         @description Get the current play pause state.
      */
@@ -61,6 +73,7 @@ Opencast.Player = (function () {
     {
         return currentPlayPauseState;
     }
+    
     
     /**
         @memberOf Opencast.Player
@@ -1002,6 +1015,7 @@ Opencast.Player = (function () {
         setProgress : setProgress,
         setVolumeSlider : setVolumeSlider,
         setVideoSizeList : setVideoSizeList,
-        currentTime : currentTime
+        currentTime : currentTime,
+        flashVars: flashVars
     };
 }());
