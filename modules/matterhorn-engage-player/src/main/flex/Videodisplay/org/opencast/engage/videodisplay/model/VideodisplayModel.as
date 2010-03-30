@@ -16,15 +16,15 @@
 package org.opencast.engage.videodisplay.model
 {
     
-    import com.osmf.MediaContainerUIComponent;
-    
     import mx.collections.ArrayCollection;
     import mx.controls.ProgressBar;
     
     import org.opencast.engage.videodisplay.control.util.TimeCode;
     import org.opencast.engage.videodisplay.state.MediaState;
+    import org.opencast.engage.videodisplay.state.VideoSizeState;
     import org.opencast.engage.videodisplay.vo.LanguageVO;
     import org.osmf.containers.MediaContainer;
+    import org.osmf.layout.LayoutMetadata;
     import org.osmf.media.MediaPlayer;
 
     [Bindable]
@@ -35,8 +35,20 @@ package org.opencast.engage.videodisplay.model
         public function VideodisplayModel()
         {
         }
-
-        // audioURLaudioURL
+        
+        // MULTIPLAYER
+        public var MULTIPLAYER:String = "Multiplayer";
+    	
+    	// SINGLEPLAYER
+    	public var SINGLEPLAYER:String = "Singleplayer";
+    
+        // SINGLEPLAYERWITHSLIDES
+    	public var SINGLEPLAYERWITHSLIDES:String = "SingleplayerWithSlides";
+    
+        // AUDIOPLAYER
+    	public var AUDIOPLAYER:String = "Audioplayer";
+    	 	
+    	// audioURLaudioURL
         public var audioURL:String = "";
 
         // An Array with different caption data
@@ -89,19 +101,37 @@ package org.opencast.engage.videodisplay.model
 
         // mediaState
         public var mediaState:String = MediaState.VIDEO;
+        
+        // videoSizeState
+        public var videoSizeState:String = VideoSizeState.CENTER;
 
         // The old Subtitle
         public var oldSubtitle:String = '';
-
-        // Media Player
-        public var mediaPlayer:MediaPlayer;
         
-        // container
-        public var container:MediaContainer;
+        // mediaPlayerSingle
+        public var mediaPlayerSingle:MediaPlayer;
         
-        // mediaContainerUIComponent
-        public var mediaContainerUIComponent:MediaContainerUIComponent;
-
+        // container Single
+        public var containerSingle:MediaContainer;
+        
+		// Media Player One
+        public var mediaPlayerOne:MediaPlayer;
+        
+        // Media Player Two
+        public var mediaPlayerTwo:MediaPlayer;
+        
+        // container one
+        public var containerOne:MediaContainer;
+        
+        // container two
+        public var containerTwo:MediaContainer;
+        
+        // layoutMetadataOne
+        public var layoutMetadataOne:LayoutMetadata;
+        
+        // layoutMetadataTwo
+        public var layoutMetadataTwo:LayoutMetadata;
+        
         // player volume
         public var playerVolume:Number = 1.0;
 
@@ -124,22 +154,15 @@ package org.opencast.engage.videodisplay.model
         public var videoVolume:Number = 1;
 
         // mediaURL
-        public var mediaURL:String = '';
+        public var mediaURLOne:String = '';
+        
+        // mediaURLTwo
+        public var mediaURLTwo:String = '';
 
         // captionsURL
         public var captionsURL:String = '';
         
-        // playerId
-        public var playerId:String = '';
-        
-        // firstPlayer
-        public var FIRSTPLAYER:String = 'firstPlayer';
-        
-        // secondPlayer
-        public var SECONDPLAYER:String = 'secondPlayer';
-        
         // bytesTotal
         public var bytesTotal:Number = 0;
-        
     }
 }

@@ -17,14 +17,14 @@ package org.opencast.engage.videodisplay.state
 {
 
     /**
-     *   MediaState
+     *   VideoSizeState
      *
      */
-    public class MediaState
+    public class VideoSizeState
     {
-        public static const AUDIO:String = 'audio';
-        public static const ERROR:String = 'error';
-        public static const VIDEO:String = 'video';
-        public static const MULTI:String = 'multi';
+        public static const BIGLEFT:String = 'bigleft';
+        public static const CENTER:String = 'center';
+        public static const BIGRIGHT:String = 'bigright';
+        public static const CUSTOM:String = 'custom';
     }
 }

@@ -35,7 +35,7 @@ function VideodisplayReady() {
 	// Global functions in the "Videodisplay.mxml" application
 
 	Videodisplay.play = function () {
-		b_Videodisplay_root.play();
+		return b_Videodisplay_root.play();
 	};
 
 	Videodisplay.stop = function () {
@@ -43,7 +43,7 @@ function VideodisplayReady() {
 	};
 
 	Videodisplay.pause = function () {
-		b_Videodisplay_root.pause();
+		return b_Videodisplay_root.pause();
 	};
 	
 	Videodisplay.skipBackward = function () {
@@ -67,11 +67,11 @@ function VideodisplayReady() {
 	};
 	
 	Videodisplay.seek = function (argNumber) {
-		b_Videodisplay_root.seek(argNumber);
+		return b_Videodisplay_root.seek(argNumber);
 	};
 	
 	Videodisplay.mute = function () {
-		b_Videodisplay_root.mute();
+		return b_Videodisplay_root.mute();
 	};
 	
 	Videodisplay.setVolumeSlider = function (argNumber) {
@@ -93,6 +93,38 @@ function VideodisplayReady() {
 	Videodisplay.setCaptionsURL = function (argString) {
 		b_Videodisplay_root.setCaptionsURL(argString);
 	};
-		
+	
+	Videodisplay.videoSizeControlSingleDisplay = function () {
+		b_Videodisplay_root.videoSizeControlSingleDisplay();
+	};
+	
+	Videodisplay.videoSizeControlAudioDisplay = function () {
+		b_Videodisplay_root.videoSizeControlAudioDisplay();
+	};
+	
+	Videodisplay.videoSizeControlMultiOnlyLeftDisplay = function () {
+		b_Videodisplay_root.videoSizeControlMultiOnlyLeftDisplay();
+	};
+	
+	Videodisplay.videoSizeControlMultiOnlyRightDisplay = function () {
+		b_Videodisplay_root.videoSizeControlMultiOnlyRightDisplay();
+	};
+	
+	Videodisplay.videoSizeControlMultiBigRightDisplay = function () {
+		b_Videodisplay_root.videoSizeControlMultiBigRightDisplay();
+	};
+	
+	Videodisplay.videoSizeControlMultiBigLeftDisplay = function () {
+		b_Videodisplay_root.videoSizeControlMultiBigLeftDisplay();
+	};
+	
+	Videodisplay.videoSizeControlMultiDisplay = function () {
+		b_Videodisplay_root.videoSizeControlMultiDisplay();
+	};
+	
+	Videodisplay.getViewState = function () {
+		return b_Videodisplay_root.getViewState();
+	};
+	
 	b_Videodisplay_root.onBridgeReady();
 }

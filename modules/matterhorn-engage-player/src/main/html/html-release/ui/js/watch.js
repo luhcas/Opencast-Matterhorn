@@ -6,7 +6,7 @@
 */
 Opencast.Watch = (function () {
 
-  function onPlayerReady(playerId) {
+  function onPlayerReady() {
 
     var mediaPackageId = Opencast.engage.getMediaPackageId();
     
@@ -35,7 +35,7 @@ Opencast.Watch = (function () {
       }
       // set the abstract
       $('#abstract').html($('#oc-abstract').html());
-
+      
       // Get the video url
       var videoUrl = $('#oc-video-url').html();
       Opencast.Player.setMediaURL(videoUrl,"");
@@ -48,6 +48,11 @@ Opencast.Watch = (function () {
       var embedUrl = watchUrl.replace(/watch.html/g, "embed.html")
 //      var embed = $('#oc-embed').val().replace(/src_url/g, embedUrl);
 //      $('#oc-embed').val(embed);
+      
+      
+      
+      
+   
       
       Opencast.Scrubber.init();
       
@@ -67,8 +72,8 @@ Opencast.Watch = (function () {
   }
   
   function seekSegment(seconds){
-   // Opencast.Player.setPlayhead(seconds);
-    Videodisplay.seek(seconds);
+	// Opencast.Player.setPlayhead(seconds);
+    var eventSeek = Videodisplay.seek(seconds);
   }
 
   return {

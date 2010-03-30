@@ -17,10 +17,10 @@ package org.opencast.engage.videodisplay.control
 {
     import mx.rpc.AsyncToken;
     import mx.rpc.http.HTTPService;
-
-    import org.opencast.engage.videodisplay.business.VideodisplayDelegate;
+    
     import org.opencast.engage.videodisplay.control.command.ClosedCaptionsCommand;
     import org.opencast.engage.videodisplay.control.command.DisplayCaptionCommand;
+    import org.opencast.engage.videodisplay.control.command.InitMultiPlayerCommand;
     import org.opencast.engage.videodisplay.control.command.InitPlayerCommand;
     import org.opencast.engage.videodisplay.control.command.ResizeVideodisplayCommand;
     import org.opencast.engage.videodisplay.control.command.SetCurrentCaptionsCommand;
@@ -28,6 +28,7 @@ package org.opencast.engage.videodisplay.control
     import org.opencast.engage.videodisplay.control.command.VideoControlCommand;
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.control.event.DisplayCaptionEvent;
+    import org.opencast.engage.videodisplay.control.event.InitMultiPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.InitPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
     import org.opencast.engage.videodisplay.control.event.ResizeVideodisplayEvent;
@@ -35,7 +36,6 @@ package org.opencast.engage.videodisplay.control
     import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
     import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
     import org.opencast.engage.videodisplay.control.responder.LoadDFXPXMLResponder;
-    import org.opencast.engage.videodisplay.model.VideodisplayModel;
     import org.swizframework.Swiz;
     import org.swizframework.controller.AbstractController;
 
@@ -52,6 +52,7 @@ package org.opencast.engage.videodisplay.control
             Swiz.addEventListener( SetCurrentCaptionsEvent.EVENT_NAME, setCurrentCaptions );
             Swiz.addEventListener( ClosedCaptionsEvent.EVENT_NAME, closedCaptions );
             Swiz.addEventListener( InitPlayerEvent.EVENT_NAME, initPlayer );
+            Swiz.addEventListener( InitMultiPlayerEvent.EVENT_NAME, initMultiPlayer );
         }
 
         /** initPlayer
@@ -62,6 +63,17 @@ package org.opencast.engage.videodisplay.control
         {
             var initPlayerCommand:InitPlayerCommand = new InitPlayerCommand();
             initPlayerCommand.execute( event );
+        }
+        
+        
+        /** initMultiPlayer
+         *
+         * @eventType event:InitMultiPlayerEvent
+         * */
+        public function initMultiPlayer( event:InitMultiPlayerEvent):void
+        {
+        	var initMultiPlayerCommand:InitMultiPlayerCommand = new InitMultiPlayerCommand();
+        	initMultiPlayerCommand.execute( event );
         }
 
         /** closedCaptions

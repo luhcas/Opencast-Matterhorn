@@ -42,10 +42,23 @@
 		  </table>
 		</div>
 		
-		
-		 <div id="oc_slides-sections" class="oc_slidesDisplayBlock">
-		    <div id="segments-holder" class="oc-segments-holder">
-		      <div class="oc-segments">
+		<div id="oc_tabs">
+		  <div id="oc_tabs-input">
+            <input id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Slides" value="Slides" alt="Slides" title="Slides"></input>
+            <input id="oc_btn-slidetext" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Slide Text" value="Slide Text" alt="Slide Text" title="Slide Text"></input>
+            <input id="oc_btn-notes" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleNotes()" name="Notes" value="Notes" alt="Notes" title="Notes"></input>
+            <input id="oc_btn-shortcuts" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts"></input>
+            <input id="oc_btn-embed" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleEmbed()" name="Embed" value="Embed" alt="Embed" title="Embed"></input>
+          </div>
+          <div id="oc_tabs-search">
+            <input class="oc_search-Field" type="text"></input>
+	        <input id="oc_btn-search-Tabs" type="submit" name="search" alt="search" title="search" value="Search"></input>
+            </div>
+        </div>
+		 <div id="clear"></div>
+		<div id="oc_slides-sections" class="oc_DisplayNone fl-fix">
+		  <div id="segments-holder" class="oc-segments-holder">
+		    <div class="oc-segments">
 		        <table class="oc-segment-table">
 		              <tr>
 		          <xsl:for-each select="ns2:search-results/ns2:result/ns2:segments/ns2:mediaSegments">
@@ -53,7 +66,7 @@
 		              <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
 		              <xsl:attribute name="onmouseout">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
 		              <a>
-		                <xsl:attribute name="href">javascript:Videodisplay.seek(<xsl:value-of
+		                <xsl:attribute name="href">javascript:Opencast.Watch.seekSegment(<xsl:value-of
 		                  select="floor(./@time div 1000)" />)</xsl:attribute>
 		                <img height="83">
 		                  <xsl:attribute name="src"><xsl:value-of

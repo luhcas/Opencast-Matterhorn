@@ -42,9 +42,9 @@ package bridge
         
         public static const MUTE:String                   = 'Opencast.Player.doToggleMute';
         
-        public static const HEARTIMEINFO:String           = 'Opencast.Player.hearTimeInfo'; 
+        public static const CURRENTTIME:String           = 'Opencast.Player.currentTime'; 
         
-        public static const TOGGLEINFO:String             = 'Opencast.Player.toggleInfo';
+        public static const TOGGLESHORTCUTS:String        = 'Opencast.Player.doToggleShortcuts';
         
         public static const OPENCASTVOLUME:String         = 'Opencast.Player.setOpencastVolume';
         
@@ -65,5 +65,7 @@ package bridge
         public static const SETCCICONON:String            = 'Opencast.Player.setCCIconOn'; 
           
         public static const SETCCICONOFF:String           = 'Opencast.Player.setCCIconOff'; 
+        
+        public static const SETVIDEOSIZELIST:String		  = 'Opencast.Player.setVideoSizeList';
     }
 }

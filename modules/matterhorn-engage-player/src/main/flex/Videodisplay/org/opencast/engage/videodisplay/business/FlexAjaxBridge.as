@@ -5,14 +5,15 @@ package org.opencast.engage.videodisplay.business
     import flash.events.KeyboardEvent;
     import flash.external.ExternalInterface;
     
-    import mx.controls.Alert;
-    
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
+    import org.opencast.engage.videodisplay.control.event.InitMultiPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.InitPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
     import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
     import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
+    import org.opencast.engage.videodisplay.state.MediaState;
+    import org.opencast.engage.videodisplay.state.VideoSizeState;
     import org.swizframework.Swiz;
 
     public class FlexAjaxBridge
@@ -31,20 +32,24 @@ package org.opencast.engage.videodisplay.business
          * play
          *
          * When the learnder click on the play button
+         * The return value is available in the calling javascript
          * */
-        public function play():void
+        public function play():String
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.PLAY ) );
+            return model.currentPlayerState;
         }
 
         /**
          * pause
          *
          * When the learnder click on the pause button
+         * The return value is available in the calling javascript
          * */
-        public function pause():void
+        public function pause():String
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.PAUSE ) );
+            return model.currentPlayerState;
         }
 
         /**
@@ -100,21 +105,33 @@ package org.opencast.engage.videodisplay.business
         /**
          * seek
          *
-         * Wehn the learner seek the video
+         * When the learner seek the video
          * */
-        public function seek( time:Number ):void
+        public function seek( time:Number ):Number
         {
-            model.mediaPlayer.seek( time );
+            
+            if( model.mediaState == MediaState.MULTI )
+            {
+            	model.mediaPlayerOne.seek( time );
+            	model.mediaPlayerTwo.seek( time );
+            }
+            else
+            {
+            	model.mediaPlayerSingle.seek( time );
+            }
+            return time;
         }
         
         /**
          * mute
          *
-         * Wehn the learner seek the video
+         * Wehn the learner mutes the video
+         * The return value is available in the calling javascript
          * */
-        public function mute():void
+        public function mute():Number
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.MUTE ) );
+            return model.playerVolume;
         }
         
         /**
@@ -146,8 +163,8 @@ package org.opencast.engage.videodisplay.business
         {
             if ( captionsURL != model.captionsURL )
             {
-                var position:int = model.mediaURL.lastIndexOf( '/' );
-                var mediaFile:String = model.mediaURL.substring( position + 1 );
+                var position:int = model.mediaURLOne.lastIndexOf( '/' );
+                var mediaFile:String = model.mediaURLOne.substring( position + 1 );
 
                 if ( mediaFile == 'matterhorn.mp4' )
                 {
@@ -164,11 +181,128 @@ package org.opencast.engage.videodisplay.business
          */
         public function setMediaURL( mediaURLOne:String, mediaURLTwo:String ):void
         {
-            if ( mediaURLOne != model.mediaURL )
+         mediaURLTwo = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
+            
+            // Single Player
+            if( mediaURLOne != model.mediaURLOne && mediaURLTwo == '' )
             {
-				model.mediaURL = mediaURLOne;
+				model.mediaURLOne = mediaURLOne;
                 Swiz.dispatchEvent( new InitPlayerEvent() );
             }
+            
+            // Multi Player
+            if(  mediaURLOne != model.mediaURLOne && mediaURLTwo != model.mediaURLTwo )
+            {
+            	model.mediaURLOne = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
+            	model.mediaURLTwo = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
+            	//model.mediaURLOne = mediaURLOne;
+            	//model.mediaURLTwo = mediaURLTwo;
+            	
+            	Swiz.dispatchEvent( new InitMultiPlayerEvent() );
+            	model.mediaState = MediaState.MULTI;
+            	ExternalInterface.call( ExternalFunction.SETVIDEOSIZELIST, model.MULTIPLAYER );
+            }
+        }
+        
+        
+        
+       
+	
+	
+        
+        
+        /**
+         * videoSizeControlSingleDisplay
+         *
+         * 
+         */
+        public function videoSizeControlSingleDisplay():void
+        {
+		}
+        
+        /**
+         * videoSizeControlAudioDisplay
+         *
+         * 
+         */
+        public function videoSizeControlAudioDisplay():void
+        {
+		}
+        
+        
+        /**
+         * videoSizeControlMultiOnlyLeftDisplay
+         *
+         * 
+         */
+        public function videoSizeControlMultiOnlyLeftDisplay():void
+        {
+		}
+        
+        
+        /**
+         * videoSizeControlMultiOnlyRightDisplay
+         *
+         * 
+         */
+        public function videoSizeControlMultiOnlyRightDisplay():void
+        {
+		}
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        /**
+         * videoSizeControlMultiBigLeftDisplay
+         *
+         * When the learner press the video size control button.
+         */
+        public function videoSizeControlMultiBigLeftDisplay():void
+        {
+			
+			
+			model.videoSizeState = VideoSizeState.BIGLEFT;
+        
+        }
+        
+        /**
+         * videoSizeControlMultiDisplay
+         *
+         * When the learner press the video size control button.
+         */
+        public function videoSizeControlMultiDisplay():void
+        {
+			model.videoSizeState = VideoSizeState.CENTER;
+        
+        }
+        
+        /**
+         * videoSizeControlMultiBigRightDisplay
+         *
+         * When the learner press the video size control button.
+         */
+        public function videoSizeControlMultiBigRightDisplay():void
+        {
+			model.videoSizeState = VideoSizeState.BIGRIGHT;
+        }
+        
+         /**
+         * getViewState
+         *
+         * The return value is available in the calling javascript.
+         */
+        public function getViewState():String
+        {
+        	return model.mediaState;
         }
         
         /**
@@ -178,7 +312,7 @@ package org.opencast.engage.videodisplay.business
          */
         public function reportKeyUp( event:KeyboardEvent ):void
         {
-            if ( event.altKey && event.ctrlKey )
+            if( event.altKey && event.ctrlKey )
             {
                 passCharCode( event.keyCode );
             }
@@ -192,9 +326,9 @@ package org.opencast.engage.videodisplay.business
         public function passCharCode( charCode:int ):void
         {
             // Play or pause the video
-            if ( charCode == 80 || charCode == 112 ) // P or p
+            if( charCode == 80 || charCode == 112 ) // P or p
             {
-                if ( model.mediaPlayer.playing )
+                if( model.mediaPlayerOne.playing )
                 {
                     Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.PAUSE ) );
                 }
@@ -205,13 +339,13 @@ package org.opencast.engage.videodisplay.business
             }
 
             // Mute the video
-            if ( charCode == 83 || charCode == 115 ) // S or s
+            if( charCode == 83 || charCode == 115 ) // S or s
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.STOP ) );
             }
 
             // Mute the video
-            if ( charCode == 77 || charCode == 109 ) // M or m
+            if( charCode == 77 || charCode == 109 ) // M or m
             {
                ExternalInterface.call( ExternalFunction.MUTE, '' )
             }
@@ -223,115 +357,111 @@ package org.opencast.engage.videodisplay.business
             }
 
             // Volume down
-            if ( charCode == 68 || charCode == 100 ) // D or d
+            if( charCode == 68 || charCode == 100 ) // D or d
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.VOLUMEDOWN ) );
             }
 
             // Seek 0
-            if ( charCode == 48 ) // 0
+            if( charCode == 48 ) // 0
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKZERO ) );
             }
 
             // Seek 1
-            if ( charCode == 49 ) // 1
+            if( charCode == 49 ) // 1
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKONE ) );
             }
 
             // Seek 2
-            if ( charCode == 50 ) // 2
+            if( charCode == 50 ) // 2
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKTWO ) );
             }
 
             // Seek 3
-            if ( charCode == 51 ) // 3
+            if( charCode == 51 ) // 3
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKTHREE ) );
             }
 
             // Seek 4
-            if ( charCode == 52 ) // 4
+            if( charCode == 52 ) // 4
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKFOUR ) );
             }
 
             // Seek 5
-            if ( charCode == 53 ) // 5
+            if( charCode == 53 ) // 5
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKFIVE ) );
             }
 
             // Seek 6
-            if ( charCode == 54 ) // 6
+            if( charCode == 54 ) // 6
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKSIX ) );
             }
 
             // Seek 7
-            if ( charCode == 55 ) // 7
+            if( charCode == 55 ) // 7
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKSEVEN ) );
             }
 
             // Seek 8
-            if ( charCode == 56 ) // 8
+            if( charCode == 56 ) // 8
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKEIGHT ) );
             }
 
             // Seek 9
-            if ( charCode == 57 ) // 9
+            if( charCode == 57 ) // 9
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SEEKNINE ) );
             }
 
             // Closed Caption
-            if ( charCode == 67 || charCode == 99 ) // C or c
+            if( charCode == 67 || charCode == 99 ) // C or c
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.CLOSEDCAPTIONS ) );
             }
 
             // rewind
-            if ( charCode == 82 || charCode == 114 ) // R or r
+            if( charCode == 82 || charCode == 114 ) // R or r
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.REWIND ) );
             }
 
             // Fast forward
-            if ( charCode == 70 || charCode == 102 ) // F or f
+            if( charCode == 70 || charCode == 102 ) // F or f
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.FASTFORWARD ) );
             }
 
             // time
-            if ( charCode == 84 || charCode == 116 ) // T or t
+            if( charCode == 84 || charCode == 116 ) // T or t
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.HEARTIMEINFO ) );
             }
 
             // Information
-            if ( charCode == 73 || charCode == 105 ) // I or i
+            if( charCode == 73 || charCode == 105 ) // I or i
             {
-                Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.INFORMATION ) );
+                Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SHORTCUTS ) );
             }
         }
         
         /**
          * onBridgeReady
          *
-         * Set player Id.
+         * 
          */
         public function onBridgeReady():void
         {
-            ExternalInterface.call( ExternalFunction.ONPLAYERREADY, model.playerId );
-            
-            if( model.SECONDPLAYER == model.playerId )
-            {
-                model.mediaPlayer.volume = 0;
-            }
+            ExternalInterface.call( ExternalFunction.ONPLAYERREADY );
         }
-    }
+        
+     }
 }

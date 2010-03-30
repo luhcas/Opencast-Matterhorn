@@ -31,6 +31,7 @@
     verticalScrollPolicy = "off"
     horizontalScrollPolicy = "off"
     xmlns:business = "org.opencast.engage.videodisplay.business.*"
+    frameRate = "30"
     >
 
     <mx:Style 
@@ -69,12 +70,6 @@
             {
                 /* Set up full screen handler. */
                 Application.application.stage.addEventListener( FullScreenEvent.FULL_SCREEN, fullScreenHandler );
-                
-                if ( Application.application.parameters.playerId != undefined )
-                {
-                    model.playerId = Application.application.parameters.playerId;
-                
-                }
             }
 
             /**
@@ -148,6 +143,23 @@
                 value = "true"
                 />
         </mx:State>
+        
+        <mx:State 
+            name = "multi"
+            >
+
+            <mx:SetProperty 
+                target = "{ bx_multiVideo }"
+                name = "visible"
+                value = "true"
+                />
+
+            <mx:SetProperty 
+                target = "{ bx_multiVideo }"
+                name = "includeInLayout"
+                value = "true"
+                />
+        </mx:State>
 
         <mx:State 
             name = "audio"
@@ -186,10 +198,17 @@
 
     <br:FABridge />
     
-    <view:VideoView 
+    <view:SingleVideoView 
         id = "bx_video"
         visible = "false"
         includeInLayout = "false"
+        />
+   
+   <view:MultiVideoView 
+        id = "bx_multiVideo"
+        visible = "false"
+        includeInLayout = "false"
+        currentState="{model.videoSizeState}"
         />
 
     <view:AudioView 

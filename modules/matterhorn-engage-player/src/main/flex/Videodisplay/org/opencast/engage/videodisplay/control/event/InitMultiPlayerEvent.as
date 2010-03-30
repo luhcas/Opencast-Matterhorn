@@ -13,18 +13,28 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencast.engage.videodisplay.state
+package org.opencast.engage.videodisplay.control.event
 {
+    import flash.events.Event;
 
     /**
-     *   MediaState
+     *   InitMultiPlayerEvent
      *
      */
-    public class MediaState
+    public class InitMultiPlayerEvent extends Event
     {
-        public static const AUDIO:String = 'audio';
-        public static const ERROR:String = 'error';
-        public static const VIDEO:String = 'video';
-        public static const MULTI:String = 'multi';
+        public static var EVENT_NAME:String = 'InitMultiPlayerEvent';
+
+        /** Constructor */
+        public function InitMultiPlayerEvent( bubbles:Boolean = false, cancelable:Boolean = false )
+        {
+            super( EVENT_NAME, bubbles, cancelable );
+        }
+
+        // Override the inherited clone() method.
+        override public function clone():Event
+        {
+            return new InitMultiPlayerEvent( bubbles, cancelable );
+        }
     }
 }

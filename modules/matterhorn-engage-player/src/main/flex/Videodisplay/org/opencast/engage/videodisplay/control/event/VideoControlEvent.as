@@ -27,7 +27,7 @@ package org.opencast.engage.videodisplay.control.event
         public static var EVENT_NAME:String = 'VideoControlEvent';
         public static var FASTFORWARD:String = "fastForward";
         public static var HEARTIMEINFO:String = "hearTimeInfo";
-        public static var INFORMATION:String = "Information";
+        public static var SHORTCUTS:String = "shortcuts";
         public static var MUTE:String = "mute";
         public static var PAUSE:String = "pause";
         public static var PLAY:String = "play";

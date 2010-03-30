@@ -128,7 +128,7 @@ input {
 
 /* custom default focus indicator - theme overwrites this */
 :focus {    
-   outline: 2px solid black;
+   outline: 2px solid #E9770D;
 }
 
 

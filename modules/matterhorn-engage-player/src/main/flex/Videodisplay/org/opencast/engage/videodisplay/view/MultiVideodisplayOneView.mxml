@@ -48,18 +48,15 @@
              *  */
             public function initPlayer():void
             {
-               	
                	// Set up the media player
-               	model.mediaPlayer = new MediaPlayer();
-               	model.mediaPlayer.autoPlay = true;
-               	model.mediaPlayer.autoRewind = false;
+              	model.mediaPlayerOne = new MediaPlayer();
+               	model.mediaPlayerOne.autoRewind = false;
                
                	// Set up the container
-			  	model.container = new MediaContainer();
-			  	model.container.layoutMetadata.scaleMode = ScaleMode.LETTERBOX;
+			  	model.containerOne = new MediaContainer();
+			  	model.containerOne.layoutMetadata.scaleMode = ScaleMode.LETTERBOX;
 			  	
-				
-				this.mediaContainerUIComponent.container = model.container;
+			  	this.mediaContainerUIComponentOne.container = model.containerOne;
 			}
 
             /**
@@ -76,7 +73,7 @@
     </mx:Script>
    
      <osmf:MediaContainerUIComponent
-     	id = "mediaContainerUIComponent"
+     	id = "mediaContainerUIComponentOne"
      	width="100%"
      	height="100%"
      	addedToStage = "initPlayer()"

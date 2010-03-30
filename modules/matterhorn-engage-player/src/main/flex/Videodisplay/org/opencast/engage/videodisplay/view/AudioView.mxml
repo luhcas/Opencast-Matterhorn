@@ -24,15 +24,24 @@
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
     xmlns:ui = "com.fusiox.ui.*"
     backgroundColor = "0xffffff"
+    borderStyle="solid"
+    borderThickness="2"
     >
 
     <mx:Script>
         <![CDATA[
             import org.opencast.engage.videodisplay.model.VideodisplayModel;
+            import org.opencast.engage.videodisplay.view.SoundVisualizer;
 
             [Autowire]
             [Bindable]
             public var model:VideodisplayModel;
+            private var soundVisualizer:SoundVisualizer;
+            
+            public function startVisualization():void{
+            soundVisualizer = new SoundVisualizer();
+            this.SoundVisualizerHolder.addChild(soundVisualizer);
+            }
         ]]>
     </mx:Script>
 
@@ -48,10 +57,15 @@
             horizontalAlign = "center"
             verticalAlign = "middle"
             >
+            <!-- <mx:Label
+                 text = "{model.audioURL}"
+                 styleName = "audioLabel"
+                 />-->
 
-            <mx:Label 
-                text = "{model.audioURL}"
-                styleName = "audioLabel"
+            <mx:UIComponent 
+                id = "SoundVisualizerHolder"
+                width = "100%"
+                height = "100%"
                 />
         </mx:VBox>
 

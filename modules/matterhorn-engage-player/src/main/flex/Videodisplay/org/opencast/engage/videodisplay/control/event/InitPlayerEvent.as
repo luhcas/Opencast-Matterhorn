@@ -18,7 +18,7 @@ package org.opencast.engage.videodisplay.control.event
     import flash.events.Event;
 
     /**
-     *   ClosedCaptionsEvent
+     *   InitPlayerEvent
      *
      */
     public class InitPlayerEvent extends Event
