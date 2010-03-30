@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * particular workflow.  They are not threadsafe, and will not be updated by other threads.
  */
 @XmlJavaTypeAdapter(WorkflowInstanceImpl.Adapter.class)
-public interface WorkflowInstance extends Configurable {
+public interface WorkflowInstance {
   public enum WorkflowState { INSTANTIATED, RUNNING, STOPPED, PAUSED, SUCCEEDED, FAILED, FAILING }
 
   /**
@@ -81,6 +81,12 @@ public interface WorkflowInstance extends Configurable {
    */
   public WorkflowOperationInstance next();
 
+  /**
+   * Whether there is another operation after the current operation.  If there is no next operation, this will return null.
+   * @return Whether there is a next operation.
+   */
+  boolean hasNext();
+  
   /**
    * @param mp
    */

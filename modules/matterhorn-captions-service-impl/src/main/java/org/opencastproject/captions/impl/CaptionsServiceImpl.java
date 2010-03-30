@@ -47,7 +47,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The captions handler service <br/>
@@ -212,7 +211,7 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     // TODO Only pause if there are no captions in the current media package
     logger.warn("Waiting for captions to be provided");
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.PAUSE);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(), null, Action.PAUSE);
   }
 
   /**
@@ -220,8 +219,7 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance, java.util.Map)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
-          throws WorkflowOperationException {
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     // TODO Read the properties and apply them to the mediapackage
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.CONTINUE);
   }

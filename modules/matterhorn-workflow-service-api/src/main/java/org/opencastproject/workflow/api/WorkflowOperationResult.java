@@ -17,12 +17,11 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.Map;
 
 /**
  * The result of a workflow operation.
  */
-@XmlJavaTypeAdapter(WorkflowOperationResultImpl.Adapter.class)
 public interface WorkflowOperationResult {
   public enum Action { CONTINUE, PAUSE }
 
@@ -30,6 +29,12 @@ public interface WorkflowOperationResult {
    * @return The media package that results from the execution of a workflow operation.
    */
   MediaPackage getMediaPackage();
+
+  /**
+   * Operations may optionally set properties on a workflow operation.
+   * @return The properties to set
+   */
+  Map<String, String> getProperties();
 
   /**
    * Operations may optionally request that the workflow be placed in a certain state.

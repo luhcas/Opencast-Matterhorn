@@ -147,7 +147,7 @@ public class WorkflowRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, startEndpoint);
 
     // Stop a Workflow Instance
-    RestEndpoint stopEndpoint = new RestEndpoint("stop", RestEndpoint.Method.GET, "/stop/{id}", "Stop a running workflow instance (currently a get, but should probably be a POST or even DELETE?)");
+    RestEndpoint stopEndpoint = new RestEndpoint("stop", RestEndpoint.Method.POST, "/stop/{id}", "Stop a running workflow instance (currently a get, but should probably be a POST or even DELETE?)");
     stopEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, workflow stopped"));
     stopEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow instance with this ID was not found"));
     stopEndpoint.addPathParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
@@ -155,7 +155,7 @@ public class WorkflowRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, stopEndpoint);
 
     // Suspend a Workflow Instance
-    RestEndpoint suspendEndpoint = new RestEndpoint("suspend", RestEndpoint.Method.GET, "/suspend/{id}", "Suspends a running workflow instance (currently a get, but should probably be a POST)");
+    RestEndpoint suspendEndpoint = new RestEndpoint("suspend", RestEndpoint.Method.POST, "/suspend/{id}", "Suspends a running workflow instance (currently a get, but should probably be a POST)");
     suspendEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, workflow suspended"));
     suspendEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow instance with this ID was not found"));
     suspendEndpoint.addPathParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
@@ -163,10 +163,11 @@ public class WorkflowRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, suspendEndpoint);
 
     // Resume a Workflow Instance
-    RestEndpoint resumeEndpoint = new RestEndpoint("resume", RestEndpoint.Method.GET, "/resume/{id}", "Resumes a suspended workflow instance (currently a get, but should probably be a POST)");
+    RestEndpoint resumeEndpoint = new RestEndpoint("resume", RestEndpoint.Method.POST, "/resume/{id}", "Resumes a suspended workflow instance (currently a get, but should probably be a POST)");
     resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, suspended workflow has now resumed"));
     resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A suspended workflow instance with this ID was not found"));
     resumeEndpoint.addPathParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
+    resumeEndpoint.addRequiredParam(new Param("properties", Type.TEXT, "key=value", "The properties to set for this workflow instance"));
     resumeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, resumeEndpoint);
 
@@ -346,9 +347,8 @@ public class WorkflowRestService {
     Map<String, String> properties = localMap.getMap();
     return (WorkflowInstanceImpl)service.start(workflowDefinition, mp, properties);
   }
-  // FIXME Using GET for testing purposes only.
   
-  @GET
+  @POST
   @Path("stop/{id}")
   @Produces(MediaType.TEXT_PLAIN)
   public Response stop(@PathParam("id") String workflowInstanceId) {
@@ -356,9 +356,7 @@ public class WorkflowRestService {
     return Response.ok("stopped " + workflowInstanceId).build();
   }
 
-  // FIXME Using GET for testing purposes only.
-
-  @GET
+  @POST
   @Path("suspend/{id}")
   @Produces(MediaType.TEXT_PLAIN)
   public Response suspend(@PathParam("id") String workflowInstanceId) {
@@ -366,13 +364,11 @@ public class WorkflowRestService {
     return Response.ok("suspended " + workflowInstanceId).build();
   }
 
-  // FIXME Using GET for testing purposes only.
-
-  @GET
+  @POST
   @Path("resume/{id}")
   @Produces(MediaType.TEXT_PLAIN)
-  public Response resume(@PathParam("id") String workflowInstanceId) {
-    service.resume(workflowInstanceId);
+  public Response resume(@PathParam("id") String workflowInstanceId, @FormParam("properties") LocalHashMap properties) {
+    service.resume(workflowInstanceId, properties.getMap());
     return Response.ok("resumed " + workflowInstanceId).build();
   }
 
@@ -388,7 +384,6 @@ public class WorkflowRestService {
       jsInstance.put("workflow_current_operation", opInstance.getId());
     }
     jsInstance.put("workflow_state", workflow.getState().name().toLowerCase());
-    jsInstance.put("configuration", getConfigsAsJson(workflow));
     List<WorkflowOperationInstance> operations = workflow.getOperations();
     jsInstance.put("operations", getOperationsAsJson(operations));
     jsInstance.put("mediapackage_title", mp.getTitle());

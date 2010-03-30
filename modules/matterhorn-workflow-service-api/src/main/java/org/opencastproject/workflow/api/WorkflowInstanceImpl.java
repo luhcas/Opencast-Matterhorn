@@ -26,9 +26,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -53,12 +50,6 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     this.description = def.getDescription();
     this.state = WorkflowState.INSTANTIATED;
     this.mediaPackage = mediaPackage;
-    this.configurations = new TreeSet<WorkflowConfiguration>();
-    if(properties != null) {
-      for(Entry<String, String> prop : properties.entrySet()) {
-        configurations.add(new WorkflowConfigurationImpl(prop.getKey(), prop.getValue()));
-      }
-    }
     this.operations = new ArrayList<WorkflowOperationInstance>();
     for(WorkflowOperationDefinition opDef : def.getOperations()) {
       operations.add(new WorkflowOperationInstanceImpl(opDef));
@@ -78,10 +69,6 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @XmlElement(name="description")
   private String description;
 
-  @XmlElement(name="configuration")
-  @XmlElementWrapper(name="configurations")
-  protected Set<WorkflowConfiguration> configurations;
-  
   @XmlElement(name="mediapackage")
   private MediaPackage mediaPackage;
   
@@ -203,51 +190,6 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#getConfiguration(java.lang.String)
-   */ 
-  public String getConfiguration(String key) {
-    if(key == null || configurations == null) return null;
-    for(WorkflowConfiguration config : configurations) {
-      if(key.equals(config.getKey())) return config.getValue();
-    }
-    return null;
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#removeConfiguration(java.lang.String)
-   */
-  public void removeConfiguration(String key) {
-    if(key == null || configurations == null) return;
-    for(Iterator<WorkflowConfiguration> configIter = configurations.iterator(); configIter.hasNext();) {
-      if(key.equals(configIter.next().getKey())) configIter.remove();
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#setConfiguration(java.lang.String, java.lang.String)
-   */
-  public void setConfiguration(String key, String value) {
-    if(configurations == null) configurations = new TreeSet<WorkflowConfiguration>();
-    configurations.add(new WorkflowConfigurationImpl(key, value));
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.Configurable#getConfigurationKeys()
-   */
-  @Override
-  public Set<String> getConfigurationKeys() {
-    Set<String> set = new TreeSet<String>();
-    for(WorkflowConfiguration config : configurations) {
-      set.add(config.getKey());
-    }
-    return set;
-  }
-
-  /**
-   * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowInstance#next()
    */
   @Override
@@ -268,6 +210,18 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     return null;
   }
   
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#hasNext()
+   */
+  public boolean hasNext() {
+    if(WorkflowState.FAILED.equals(state) || WorkflowState.FAILING.equals(state) || WorkflowState.STOPPED.equals(state) ||
+            WorkflowState.SUCCEEDED.equals(state)) return false;
+    if(operations == null || operations.size() == 0) throw new IllegalStateException("operations list must contain operations");
+    if(currentOperation == null) return true;
+    return operations.lastIndexOf(currentOperation) < operations.size()-1;
+  }
+
   /**
    * {@inheritDoc}
    * @see java.lang.Object#toString()

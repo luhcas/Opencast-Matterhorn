@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.impl;
 
-import org.opencastproject.workflow.api.WorkflowInstanceImpl;
+import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -26,8 +26,6 @@ import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
 /**
  * Handles execution of a workflow operation.
  */
@@ -36,19 +34,13 @@ final class WorkflowOperationWorker implements Runnable {
   private static final Logger logger = LoggerFactory.getLogger(WorkflowOperationWorker.class);
   
   protected WorkflowOperationHandler handler = null;
-  protected WorkflowInstanceImpl workflow = null;
+  protected WorkflowInstance workflow = null;
   protected WorkflowServiceImpl service = null;
-  protected Map<String, String> properties = null;
 
-  public WorkflowOperationWorker(WorkflowOperationHandler handler, WorkflowInstanceImpl workflow, WorkflowServiceImpl service) {
-    this(handler, workflow, service, null);
-  }
-
-  public WorkflowOperationWorker(WorkflowOperationHandler handler, WorkflowInstanceImpl workflow, WorkflowServiceImpl service, Map<String, String> properties) {
+  public WorkflowOperationWorker(WorkflowOperationHandler handler, WorkflowInstance workflow, WorkflowServiceImpl service) {
     this.handler = handler;
     this.workflow = workflow;
     this.service = service;
-    this.properties = properties;
   }
 
   /**
@@ -62,6 +54,9 @@ final class WorkflowOperationWorker implements Runnable {
       WorkflowOperationResult result = null;
       switch(operation.getState()) {
       case INSTANTIATED :
+        result = start();
+        break;
+      case RUNNING :
         result = start();
         break;
       case PAUSED :
@@ -97,7 +92,7 @@ final class WorkflowOperationWorker implements Runnable {
   public WorkflowOperationResult resume() throws WorkflowOperationException {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
     try {
-      WorkflowOperationResult result = handler.resume(workflow, properties);
+      WorkflowOperationResult result = handler.resume(workflow);
       if(result == null || Action.CONTINUE.equals(result.getAction())) {
         operation.setState(OperationState.SUCCEEDED);
       }

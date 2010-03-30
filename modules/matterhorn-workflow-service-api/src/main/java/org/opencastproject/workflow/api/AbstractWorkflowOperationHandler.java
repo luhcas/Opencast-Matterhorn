@@ -18,8 +18,6 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
-import java.util.Map;
-
 /**
  * Abstract base implementation for an operation handler, which implements a simple resume operation that returns a
  * {@link WorkflowOperationResult} with the current mediapackage and {@link Action#CONTINUE}.
@@ -27,7 +25,7 @@ import java.util.Map;
 public abstract class AbstractWorkflowOperationHandler implements WorkflowOperationHandler {
 
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance)
           throws WorkflowOperationException {
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.CONTINUE);
   }

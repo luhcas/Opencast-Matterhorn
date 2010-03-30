@@ -310,21 +310,19 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
           Map<String, String> properties) {
-    WorkflowDefinition parsedDefinition = parseDefinition(workflowDefinition, properties);
+//    WorkflowDefinition parsedDefinition = updateConfiguration(workflowDefinition, properties);
     
     String id = UUID.randomUUID().toString();
     log_.info("Starting a new workflow instance with ID={}", id);
     
-    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(parsedDefinition, mediaPackage, properties);
+    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage, properties);
     workflowInstance.setId(id);
-    if(properties != null) {
-      for(Entry<String, String> prop : properties.entrySet())
-        workflowInstance.setConfiguration(prop.getKey(), prop.getValue());
-    }
     workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
-    dao.update(workflowInstance);
-    run(workflowInstance);
-    return workflowInstance;
+    
+    WorkflowInstance configuredInstance = updateConfiguration(workflowInstance, properties);
+    dao.update(configuredInstance);
+    run(configuredInstance);
+    return configuredInstance;
   }
   
   /**
@@ -333,22 +331,35 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @param properties The properties to replace
    * @return The parsed workflow definition
    */
-  protected WorkflowDefinition parseDefinition(WorkflowDefinition workflowDefinition, Map<String, String> properties) {
+//  protected WorkflowDefinition updateConfiguration(WorkflowDefinition workflowDefinition, Map<String, String> properties) {
+//    try {
+//      String xml = replaceVariables(WorkflowBuilder.getInstance().toXml(workflowDefinition), properties);
+//      return WorkflowBuilder.getInstance().parseWorkflowDefinition(xml);
+//    } catch(Exception e) {
+//      throw new IllegalStateException("Unable to replace workflow definition variables", e);
+//    }
+//  }
+  
+  protected WorkflowInstance updateConfiguration(WorkflowInstance instance, Map<String, String> properties) {
     try {
-      String defXml = WorkflowBuilder.getInstance().toXml(workflowDefinition);
-      if(properties != null) {
-        for(Entry<String, String> prop : properties.entrySet()) {
-          String key = "\\$\\{" + prop.getKey() + "\\}";
-          defXml = defXml.replaceAll(key, prop.getValue());
-        }
-      }
-      // find remaining and unprocessed templates
-      if (defXml.indexOf("${") > -1) {
-        throw new IllegalStateException("Workflow definition contains variables not provided by properties");
-      }
-      return WorkflowBuilder.getInstance().parseWorkflowDefinition(defXml);
+      String xml = replaceVariables(WorkflowBuilder.getInstance().toXml(instance), properties);
+      return WorkflowBuilder.getInstance().parseWorkflowInstance(xml);
     } catch(Exception e) {
-      throw new IllegalStateException("Unable to replace workflow definition variables", e);
+      throw new IllegalStateException("Unable to replace workflow instance variables", e);
+    }
+  }
+
+  // TODO: this could be far more efficient, consider using e.g. velocity or freemarker
+  protected String replaceVariables(String source, Map<String, String> properties) {
+    String parsed = null;
+    if(properties == null) {
+      return source;
+    } else {
+      for(Entry<String, String> prop : properties.entrySet()) {
+        String key = "\\$\\{" + prop.getKey() + "\\}";
+        parsed = source.replaceAll(key, prop.getValue());
+      }
+      return parsed;
     }
   }
 
@@ -377,7 +388,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   Executor ex = Executors.newCachedThreadPool();
   
-  protected void run(final WorkflowInstanceImpl wfi) {
+  protected void run(final WorkflowInstance wfi) {
     WorkflowOperationInstance operation = wfi.getCurrentOperation();
     if(operation == null) operation = wfi.next();
     WorkflowOperationHandler operationHandler = selectOperationHandler(operation);
@@ -386,7 +397,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       log_.warn("No handler available to execute operation {}", operation);
       throw new IllegalStateException("Unable to find a workflow handler for " + operation);
     }
-    ex.execute(new WorkflowOperationWorker(operationHandler, wfi, this, null));
+    ex.execute(new WorkflowOperationWorker(operationHandler, wfi, this));
   }
 
   /**
@@ -427,8 +438,19 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * 
    * @see org.opencastproject.workflow.api.WorkflowService#resume(java.lang.String)
    */
-  public void resume(String workflowInstanceId) {
-    WorkflowInstanceImpl workflowInstance = (WorkflowInstanceImpl) getWorkflowById(workflowInstanceId);
+  @Override
+  public void resume(String id) {
+    resume(id, null);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowService#resume(java.lang.String)
+   */
+  public void resume(String workflowInstanceId, Map<String, String> properties) {
+    WorkflowInstanceImpl workflowInstance =
+      (WorkflowInstanceImpl) updateConfiguration(getWorkflowById(workflowInstanceId), properties);
     workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
     dao.update(workflowInstance);
     run(workflowInstance);
@@ -473,14 +495,14 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     return new WorkflowQueryImpl();
   }
   
-  public void handleOperationException(WorkflowInstanceImpl workflow, WorkflowOperationException e) {
+  public void handleOperationException(WorkflowInstance workflow, WorkflowOperationException e) {
     workflow.setState(WorkflowState.FAILED);
     dao.update(workflow);
   }
   
   /**
    */
-  void handleOperationResult(WorkflowInstanceImpl workflow, WorkflowOperationResult result) {
+  void handleOperationResult(WorkflowInstance workflow, WorkflowOperationResult result) {
     if(result != null) {
       MediaPackage mp = result.getMediaPackage();
       if(mp != null) {
@@ -491,8 +513,14 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       workflow.setState(WorkflowState.SUCCEEDED);
       dao.update(workflow);
     } else {
+      if(WorkflowOperationResult.Action.PAUSE.equals(result.getAction())) {
+        workflow.setState(WorkflowState.PAUSED);
+      }
+      updateConfiguration(workflow, result.getProperties());
       dao.update(workflow);
-      this.run(workflow);
+      if(WorkflowOperationResult.Action.CONTINUE.equals(result.getAction())) {
+        this.run(workflow);
+      }
     }
   }
 }

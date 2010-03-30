@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -152,7 +153,10 @@ public class WorkflowBuilder {
   }
   
   public WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage, Action action) {
-    return new WorkflowOperationResultImpl(mediaPackage, action);
+    return buildWorkflowOperationResult(mediaPackage, null, action);
   }
 
+  public WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage, Map<String, String> properties, Action action) {
+    return new WorkflowOperationResultImpl(mediaPackage, properties, action);
+  }
 }

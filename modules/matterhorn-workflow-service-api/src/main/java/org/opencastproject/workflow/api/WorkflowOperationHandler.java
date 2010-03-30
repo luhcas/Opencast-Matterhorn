@@ -15,8 +15,6 @@
  */
 package org.opencastproject.workflow.api;
 
-import java.util.Map;
-
 /**
  * Handler for workflow operations.
  */
@@ -43,11 +41,10 @@ public interface WorkflowOperationHandler {
    * If the workflow instance is not in a suspended state, this method should throw an {@link IllegalStateException}.
    * 
    * @param workflowInstance The workflow instance
-   * @param properties The properties contain additional information gathered while the workflow instance was suspended
    * @return the result of this operation
    * @throws WorkflowOperationException If the workflow operation fails to execute properly.
    */
-  WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties) throws WorkflowOperationException;  
+  WorkflowOperationResult resume(WorkflowInstance workflowInstance) throws WorkflowOperationException;  
 
   /**
    * Clean up after a workflow operation finishes

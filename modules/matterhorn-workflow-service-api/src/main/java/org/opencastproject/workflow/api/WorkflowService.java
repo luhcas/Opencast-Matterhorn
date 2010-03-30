@@ -90,9 +90,17 @@ public interface WorkflowService {
   /**
    * Resumes a suspended workflow instance.
    * 
-   * @param workflowInstanceId
+   * @param workflowInstanceId the workflow to resume
    */
-  void resume(String workflowInstanceId);
+  void resume(String id);
+
+  /**
+   * Resumes a suspended workflow instance, applying new properties to the workflow.
+   * 
+   * @param workflowInstanceId the workflow to resume
+   * @param properties the properties to apply to the resumed workflow
+   */
+  void resume(String workflowInstanceId, Map<String, String> properties);
 
   /**
    * Updates the given workflow instance with regard to the media package, the properties and the operations involved.

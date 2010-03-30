@@ -29,7 +29,7 @@ import java.util.Map.Entry;
 public class LocalHashMap {
   protected Map<String, String> map = new HashMap<String, String>();
   public Map<String, String> getMap() {return map;}
-  
+  public LocalHashMap() {}
   public LocalHashMap(String in) {
     Properties properties = new Properties();
     try {

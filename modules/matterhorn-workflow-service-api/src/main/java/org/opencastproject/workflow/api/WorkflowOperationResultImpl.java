@@ -17,28 +17,15 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.Map;
 
-/**
- * A JAXB-annotated implementation of {@link WorkflowOperationResult}
- */
-@XmlType(name="operation-result", namespace="http://workflow.opencastproject.org/")
-@XmlRootElement(name="operation-result", namespace="http://workflow.opencastproject.org/")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowOperationResultImpl implements WorkflowOperationResult {
-  @XmlElement(name="mediapackage")
   protected MediaPackage resultingMediaPackage;
-  
-  @XmlAttribute(name="action")
+
+  protected Map<String, String> properties;
+
   protected Action action;
 
-  @XmlAttribute(name="wait")
   protected boolean wait;
 
   /**
@@ -52,8 +39,9 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
    * @param resultingMediaPackage
    * @param action
    */
-  public WorkflowOperationResultImpl(MediaPackage resultingMediaPackage, Action action) {
+  public WorkflowOperationResultImpl(MediaPackage resultingMediaPackage, Map<String, String> properties, Action action) {
     this.resultingMediaPackage = resultingMediaPackage;
+    this.properties = properties;
     if(action == null) {
       throw new IllegalArgumentException("action must not be null.");
     } else {
@@ -96,11 +84,12 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
   }
 
   /**
-   * Allows JAXB handling of {@link WorkflowOperationResult} interfaces.
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationResult#getProperties()
    */
-  static class Adapter extends XmlAdapter<WorkflowOperationResultImpl, WorkflowOperationResult> {
-    public WorkflowOperationResultImpl marshal(WorkflowOperationResult op) throws Exception {return (WorkflowOperationResultImpl)op;}
-    public WorkflowOperationResult unmarshal(WorkflowOperationResultImpl op) throws Exception {return op;}
+  @Override
+  public Map<String, String> getProperties() {
+    return properties;
   }
 
 }
