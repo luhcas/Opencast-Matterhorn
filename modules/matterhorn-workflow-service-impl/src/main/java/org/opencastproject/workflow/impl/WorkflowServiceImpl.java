@@ -41,6 +41,8 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -66,7 +68,7 @@ import java.util.concurrent.Executors;
 public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /** Logging facility */
-  private static final Logger log_ = LoggerFactory.getLogger(WorkflowServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImpl.class);
 
   /**
    * The service registration property we use to identify which workflow operation a {@link WorkflowOperationHandler}
@@ -195,9 +197,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     boolean runnable = isRunnable(workflowDefinition, availableOperations, checkedWorkflows);
     int wfCount = checkedWorkflows.size() - 1;
     if (runnable)
-      log_.info("Workflow {}, containing {} derived workflows, is runnable", workflowDefinition, wfCount);
+      logger.info("Workflow {}, containing {} derived workflows, is runnable", workflowDefinition, wfCount);
     else
-      log_.warn("Workflow {}, containing {} derived workflows, is not runnable", workflowDefinition, wfCount);
+      logger.warn("Workflow {}, containing {} derived workflows, is not runnable", workflowDefinition, wfCount);
     return runnable;
   }
 
@@ -221,14 +223,14 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     // Test availability of operation handler and catch workflows
     for (WorkflowOperationDefinition op : workflowDefinition.getOperations()) {
       if (!availableOperations.contains(op.getId())) {
-        log_.info("{} is not runnable due to missing operation {}", workflowDefinition, op);
+        logger.info("{} is not runnable due to missing operation {}", workflowDefinition, op);
         return false;
       }
       String catchWorkflow = op.getExceptionHandlingWorkflow();
       if (catchWorkflow != null) {
         WorkflowDefinition catchWorkflowDefinition = getWorkflowDefinitionById(catchWorkflow);
         if (catchWorkflowDefinition == null) {
-          log_.info("{} is not runnable due to missing catch workflow {} on operation {}",
+          logger.info("{} is not runnable due to missing catch workflow {} on operation {}",
                   new Object[] {workflowDefinition, catchWorkflow, op});
           return false;
         }
@@ -323,7 +325,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 //    WorkflowDefinition parsedDefinition = updateConfiguration(workflowDefinition, properties);
     
     String id = UUID.randomUUID().toString();
-    log_.info("Starting a new workflow instance with ID={}", id);
+    logger.info("Starting a new workflow instance with ID={}", id);
     
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage, properties);
     workflowInstance.setId(id);
@@ -379,7 +381,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       int index = (int) Math.round((handlerList.size() - 1) * Math.random());
       return handlerList.get(index);
     }
-    log_.warn("No workflow operation handlers found for operation {}", operation.getId());
+    logger.warn("No workflow operation handlers found for operation {}", operation.getId());
     return null;
   }
 
@@ -391,7 +393,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     WorkflowOperationHandler operationHandler = selectOperationHandler(operation);
     // If there is no handler for the operation, mark this workflow as failed
     if (operationHandler == null) {
-      log_.warn("No handler available to execute operation {}", operation);
+      logger.warn("No handler available to execute operation {}", operation);
       throw new IllegalStateException("Unable to find a workflow handler for " + operation);
     }
     ex.execute(new WorkflowOperationWorker(operationHandler, wfi, this));
@@ -513,7 +515,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
           throw new IllegalStateException("Operation " + currentOperation.getId() + " is not resumable");
         }
         ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler)handler;
-        ((WorkflowOperationInstanceImpl)currentOperation).setHoldStateUserInterfaceUrl(resumableHandler.getHoldStateUserInterfaceURL());
+        try {
+          URL url = new URL(resumableHandler.getHoldStateUserInterfaceURL().toString().replaceAll("\\{id\\}", workflow.getId()));
+          ((WorkflowOperationInstanceImpl)currentOperation).setHoldStateUserInterfaceUrl(url);
+        } catch (MalformedURLException e) {
+          logger.warn("unable to replace workflow ID in the hold state URL", e);
+        }
       }
     }
     

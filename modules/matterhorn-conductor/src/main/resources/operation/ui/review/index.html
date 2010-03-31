@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <title>Hold for review</title>
+  </head>
+  <body>
+  
+    <form action="/workflow/rest/resume" method="post" name="resume_form" id="resume_form">
+      <input type="hidden" name="id" id="workflowId" value="${id}"></input>
+      <input type="hidden" name="properties" id="properties" value=""></input> <!-- properties can be set in the workflow instance here -->
+      <div>
+        (embed media player here)
+      <div>
+      <div>
+        <input type="button" value="Continue" onclick="updateAction();"></input>
+      <div>
+    </form>
+  </body>
+  <script language="JavaScript">
+    function updateAction() {
+      var workflowId = window.location.search.replace('?', '');
+      document.getElementById('workflowId').value = workflowId;
+      document.getElementById('resume_form').submit();
+    }
+  </script>
+</html>
+

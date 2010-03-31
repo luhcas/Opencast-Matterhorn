@@ -1,8 +1,10 @@
 <definition>
   <id>workflow-service-sample</id>
+  <title>A complete workflow suitable for testing</title>
   <description>
-    A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
-    along with their associated metadata, to the distribution channels.
+    A simple workflow that inspects the media, puts the workflow into a hold state, transcodes the media into
+    distribution formats, then sends the resulting distribution files, along with their associated metadata,
+    to the distribution channels.
   </description>
   <operations>
   
@@ -14,12 +16,12 @@
       description="Inspect the media package">
     </operation>
  
-    <!-- hold for captions -->
+    <!-- hold for review -->
     <operation
-      id="caption"
+      id="review"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Wait for captions to be submitted">
+      description="Wait for a user to review the media">
     </operation>
 
   <!-- encode to flash download -->

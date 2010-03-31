@@ -1,5 +1,6 @@
 <definition>
   <id>full</id>
+  <title>A workflow containing most of the default Matterhorn operations</title>
   <description>
     A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
     along with their associated metadata, to the distribution channels.
@@ -14,13 +15,15 @@
       description="Inspect the media package">
     </operation>
 
-    <!-- hold for captions -->
+    <!-- hold for review -->
+    <!--
     <operation
-      id="caption"
+      id="review"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Wait for captions to be submitted">
+      description="Wait for a user to review the media">
     </operation>
+    -->
  
     <!-- encode to flash download -->
     <operation

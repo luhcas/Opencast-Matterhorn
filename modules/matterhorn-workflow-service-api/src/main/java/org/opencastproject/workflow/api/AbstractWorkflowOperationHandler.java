@@ -83,7 +83,7 @@ public abstract class AbstractWorkflowOperationHandler implements ResumableWorkf
     };
     httpTracker.open();
 
-    String url = UrlSupport.concat(new String[] { bundleContext.getProperty("org.opencastproject.server.url") , alias, fileName });
+    String url = UrlSupport.concat(new String[] { bundleContext.getProperty("org.opencastproject.server.url") , alias, fileName }) + "?{id}";
     try {
       holdStateUserInterfaceUrl = new URL(url);
     } catch (MalformedURLException e) {
