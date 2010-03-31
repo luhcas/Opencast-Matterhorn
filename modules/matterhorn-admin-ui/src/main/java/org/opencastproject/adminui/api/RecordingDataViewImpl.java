@@ -63,7 +63,46 @@ public class RecordingDataViewImpl implements RecordingDataView {
   @XmlElement(name="distributionStatus")
   private String distribution_status;
 
+  @XmlElement(name="holdOperationTitle")
+  private String holdOperationTitle;
+
+  @XmlElement(name="holdActionTitle")
+  private String holdActionTitle;
+
+  @XmlElement(name="holdActionPanelURL")
+  private String holdActionPanelURL;
+
   public RecordingDataViewImpl() {}
+
+  @Override
+  public void setHoldOperationTitle(String title) {
+    this.holdOperationTitle = title;
+  }
+
+  @Override
+  public String getHoldOperationTitle() {
+    return this.holdOperationTitle;
+  }
+
+  @Override
+  public void setHoldActionTitle(String title) {
+    this.holdActionTitle = title;
+  }
+
+  @Override
+  public String getHoldActionTitle() {
+    return this.holdActionTitle;
+  }
+
+  @Override
+  public void setHoldActionPanelURL(String url) {
+    this.holdActionPanelURL= url;
+  }
+
+  @Override
+  public String getHoldActionPanelURL() {
+    return this.holdActionPanelURL;
+  }
 
   static class Adapter extends XmlAdapter<RecordingDataViewImpl, RecordingDataView> {
     public RecordingDataViewImpl marshal(RecordingDataView op) throws Exception {return (RecordingDataViewImpl)op;}

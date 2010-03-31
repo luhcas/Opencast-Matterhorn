@@ -161,4 +161,16 @@ public interface RecordingDataView {
    * @param status
    */
   void setDistributionStatus(String status);
+
+  void setHoldOperationTitle(String title);
+
+  String getHoldOperationTitle();
+
+  void setHoldActionTitle(String title);
+
+  String getHoldActionTitle();
+
+  void setHoldActionPanelURL(String url);
+
+  String getHoldActionPanelURL();
 }

@@ -55,14 +55,15 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 
 /**
  * REST endpoint for the Admin UI proxy service
  */
 @Path("/")
 public class AdminuiRestService {
-  private static final Logger logger = LoggerFactory.getLogger(AdminuiRestService.class);
 
+  private static final Logger logger = LoggerFactory.getLogger(AdminuiRestService.class);
   private SchedulerService schedulerService;
   private WorkflowService workflowService;
   private CaptureAgentStateService captureAdminService;
@@ -97,7 +98,6 @@ public class AdminuiRestService {
     captureAdminService = null;
   }
 
-
   /**
    * Returns a list of recordings in a certain state.
    * @param state state according to which the recordings should filtered
@@ -112,19 +112,22 @@ public class AdminuiRestService {
     if (state.toUpperCase().equals("ALL")) {
       return out;
     }
-    if ( (state.toUpperCase().equals("UPCOMING")) || (state.toUpperCase().equals("ALL")) ) {
+    if ((state.toUpperCase().equals("UPCOMING")) || (state.toUpperCase().equals("ALL"))) {
       out.addAll(getUpcomingRecordings());
     }
-    if ( (state.toUpperCase().equals("CAPTURING")) || (state.toUpperCase().equals("ALL")) ) {
+    if ((state.toUpperCase().equals("CAPTURING")) || (state.toUpperCase().equals("ALL"))) {
       out.addAll(getCapturingRecordings());
     }
-    if ( (state.toUpperCase().equals("PROCESSING")) || (state.toUpperCase().equals("ALL")) ) {
+    if ((state.toUpperCase().equals("PROCESSING")) || (state.toUpperCase().equals("ALL"))) {
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.RUNNING));
     }
-    if ( (state.toUpperCase().equals("FINISHED")) || (state.toUpperCase().equals("ALL")) ) {
+    if ((state.toUpperCase().equals("FINISHED")) || (state.toUpperCase().equals("ALL"))) {
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.SUCCEEDED));
     }
-    if ( (state.toUpperCase().equals("FAILED")) || (state.toUpperCase().equals("ALL")) ) {
+    if ((state.toUpperCase().equals("HOLD")) || (state.toUpperCase().equals("ALL"))) {
+      out.addAll(getRecordingsFromWorkflowService(WorkflowState.PAUSED));
+    }
+    if ((state.toUpperCase().equals("FAILED")) || (state.toUpperCase().equals("ALL"))) {
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILED));
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILING));
     }
@@ -154,7 +157,7 @@ public class AdminuiRestService {
         item.setSeriesId(mediapackage.getSeries());
         item.setSeriesTitle(mediapackage.getSeriesTitle());
         Date date = mediapackage.getDate();
-        if(date != null) {
+        if (date != null) {
           //item.setStartTime(sdf.format(date));
           item.setStartTime(Long.toString(date.getTime()));
         }
@@ -168,12 +171,24 @@ public class AdminuiRestService {
         }
         item.setProcessingStatus(sb.toString());
         /*if (operation != null) {
-         item.setProcessingStatus(operation.getState().toString() + " : " + operation.getName());
-         } else {
-         logger.warn("Could not get any WorkflowOperationInstance from WorkflowInstance.");
-         }*/
+        item.setProcessingStatus(operation.getState().toString() + " : " + operation.getName());
+        } else {
+        logger.warn("Could not get any WorkflowOperationInstance from WorkflowInstance.");
+        }*/
         // TODO get distribution status #openquestion is there a way to find out if a workflowOperation does distribution?
-        out.add(item);
+
+        // get Title and ActionTitle/ActionPanelURL from HoldOperation
+        if (state == WorkflowState.PAUSED) {
+          WorkflowOperationInstance instance = workflows[i].getCurrentOperation();
+          if (instance.getState() == OperationState.PAUSED) {       // take only those WFInstances into account that have been paused by a HoldOperation
+            item.setHoldOperationTitle(instance.getDescription());
+            // TODO item.setHoldActionTitle( ?? );
+            // TODO item.setHoldActionPanelURL( ?? );
+            out.add(item);
+          }
+        } else {
+          out.add(item);
+        }
       }
     } else {
       logger.warn("WorkflowService not present, returning empty list");
@@ -188,10 +203,12 @@ public class AdminuiRestService {
    * @return A formated string containing each of the values
    */
   private String formatMultipleString(String[] values) {
-    if(values == null || values.length == 0) return "";
+    if (values == null || values.length == 0) {
+      return "";
+    }
     StringBuilder sb = new StringBuilder();
-    for(int i=0; i<values.length; i++) {
-      if(sb.length() > 0) {
+    for (int i = 0; i < values.length; i++) {
+      if (sb.length() > 0) {
         sb.append(", ");
       }
       sb.append(values[i]);
@@ -207,11 +224,11 @@ public class AdminuiRestService {
   @GET
   @Path("countRecordings")
   public Response countRecordings() {
-    HashMap<String,Integer> stats = getRecordingsStatistic();
-    Iterator<Entry<String,Integer>> i = stats.entrySet().iterator();
+    HashMap<String, Integer> stats = getRecordingsStatistic();
+    Iterator<Entry<String, Integer>> i = stats.entrySet().iterator();
     JSONObject out = new JSONObject();
     while (i.hasNext()) {
-      Entry<String,Integer> ent = i.next();
+      Entry<String, Integer> ent = i.next();
       out.put(ent.getKey(), ent.getValue());
     }
     return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
@@ -221,9 +238,9 @@ public class AdminuiRestService {
    * returns a statistic about number and state of recordings in the system
    * @return statistic about number and state of recordings in the system
    */
-  public HashMap<String,Integer> getRecordingsStatistic() {
+  public HashMap<String, Integer> getRecordingsStatistic() {
     String logMessage = "got statistics from: ";
-    HashMap<String,Integer> out = new HashMap<String,Integer>();
+    HashMap<String, Integer> out = new HashMap<String, Integer>();
     Integer total = new Integer(0);
 
     // get number of upcoming recordings if scheduler is present
@@ -238,7 +255,7 @@ public class AdminuiRestService {
 
     // get statistics from capture admin if present
     if (captureAdminService != null) {
-      Map<String,Recording> recordings = captureAdminService.getKnownRecordings();
+      Map<String, Recording> recordings = captureAdminService.getKnownRecordings();
       Iterator<String> i = recordings.keySet().iterator();
       int capturing = 0;
       while (i.hasNext()) {
@@ -256,7 +273,7 @@ public class AdminuiRestService {
     // get statistics from workflowService if present
     if (workflowService != null) {
       WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery()).getItems();
-      int i = 0, processing = 0, inactive = 0, finished = 0, errors = 0;
+      int i = 0, processing = 0, inactive = 0, finished = 0, errors = 0, paused = 0;
       for (; i < workflows.length; i++) {
         switch (workflows[i].getState()) {
           case FAILED:
@@ -268,8 +285,12 @@ public class AdminuiRestService {
             processing++;
             break;
           case PAUSED:
+            if (workflows[i].getCurrentOperation().getState() == OperationState.PAUSED) {
+              paused++;
+            }
+            break;
           case STOPPED:
-            inactive++; 
+            inactive++;
             break;
           case SUCCEEDED:
             finished++;
@@ -279,6 +300,7 @@ public class AdminuiRestService {
       out.put("inactive", Integer.valueOf(inactive));
       out.put("errors", Integer.valueOf(errors));
       out.put("finished", Integer.valueOf(finished));
+      out.put("hold", Integer.valueOf(paused));
       total += i;
       logMessage += " workflow-service";
     } else {
@@ -318,7 +340,7 @@ public class AdminuiRestService {
     }
     return out;
   }
-  
+
   private RecordingDataViewList getCapturingRecordings() {
     RecordingDataViewList out = new RecordingDataViewListImpl();
     if (schedulerService != null && captureAdminService != null) {
@@ -336,7 +358,7 @@ public class AdminuiRestService {
         item.setCaptureAgent(events[i].getDevice());
         Recording r = captureAdminService.getRecordingState(events[i].getID());
         String recordingState = RecordingState.UNKNOWN;
-        if(r != null){
+        if (r != null) {
           recordingState = r.getState();
         }
         item.setRecordingStatus(recordingState);
@@ -357,15 +379,16 @@ public class AdminuiRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) { docs = generateDocs(); }
+    if (docs == null) {
+      docs = generateDocs();
+    }
     return docs;
   }
-
   protected String docs;
   private String[] notes = {
     "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
     "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
+    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>",};
 
   private String generateDocs() {
     DocRestData data = new DocRestData("adminuiservice", "Admin UI Service", "/admin/rest", notes);
@@ -375,10 +398,10 @@ public class AdminuiRestService {
 
     // getRecordings
     RestEndpoint endpoint = new RestEndpoint("getAgent", RestEndpoint.Method.GET,
-        "/recordings/{state}",
-        "Return all recordings with a given state");
+            "/recordings/{state}",
+            "Return all recordings with a given state");
     endpoint.addPathParam(new Param("state", Param.Type.STRING, null,
-        "The state of the recordings"));
+            "The state of the recordings"));
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addStatus(Status.OK(null));
     endpoint.setTestForm(RestTestForm.auto());
@@ -386,15 +409,16 @@ public class AdminuiRestService {
 
     // countRecordings
     endpoint = new RestEndpoint("countRecordings", RestEndpoint.Method.GET,
-        "/countRecordings",
-        "Return number of recordings that match each possible state");
+            "/countRecordings",
+            "Return number of recordings that match each possible state");
     endpoint.addFormat(new Format("JSON", null, null));
     endpoint.addStatus(Status.OK(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
     return DocUtil.generate(data);
-}
-  
-  public AdminuiRestService() {}
+  }
+
+  public AdminuiRestService() {
+  }
 }

@@ -252,3 +252,7 @@ Recordings.getURLParam = function(name) {
   else
     return results[1];
 }
+
+Recordings.displayHoldActionPanel = function(URL, wfId) {
+  alert("displaying hold action panel for MediaPackage " + wfId);
+}
