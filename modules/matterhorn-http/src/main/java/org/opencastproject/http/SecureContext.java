@@ -78,8 +78,10 @@ public class SecureContext implements HttpContext {
       return false;
     }
     if (refs == null || refs.length == 0) {
-      logger.warn("Requests are not permitted without a registered matterhorn security filter.");
-      return false;
+//      logger.warn("Requests are not permitted without a registered matterhorn security filter.");
+//      return false;
+      logger.warn("Authentication is currently disabled");
+      return true;
     }
     Filter[] filters = new Filter[refs.length];
     for (int i = 0; i < refs.length; i++)
