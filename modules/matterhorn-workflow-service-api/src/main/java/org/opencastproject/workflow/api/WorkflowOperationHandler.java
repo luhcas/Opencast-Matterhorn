@@ -34,19 +34,6 @@ public interface WorkflowOperationHandler {
   WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException;  
   
   /**
-   * Continues a suspended {@link WorkflowInstance}.  If the execution fails for some reason, this must
-   * throw a {@link WorkflowOperationException} in order to handle the problem gracefully.  Runtime exceptions will
-   * cause the entire workflow instance to fail.
-   * 
-   * If the workflow instance is not in a suspended state, this method should throw an {@link IllegalStateException}.
-   * 
-   * @param workflowInstance The workflow instance
-   * @return the result of this operation
-   * @throws WorkflowOperationException If the workflow operation fails to execute properly.
-   */
-  WorkflowOperationResult resume(WorkflowInstance workflowInstance) throws WorkflowOperationException;  
-
-  /**
    * Clean up after a workflow operation finishes
    * @param workflowInstance The workflow instance
    * @throws WorkflowOperationException If the workflow operation fails to clean up properly.

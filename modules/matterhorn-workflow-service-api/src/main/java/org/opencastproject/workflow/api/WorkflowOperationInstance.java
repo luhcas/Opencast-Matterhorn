@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.api;
 
+import java.net.URL;
+
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
@@ -39,4 +41,10 @@ public interface WorkflowOperationInstance extends Configurable {
    * @param state
    */
   void setState(OperationState state);
+  
+  /**
+   * Gets the URL for the hold state.
+   * @return
+   */
+  URL getHoldStateUserInterfaceUrl();
 }

@@ -30,6 +30,12 @@ public interface WorkflowDefinition {
   String getId();
 
   /**
+   * The title for this workflow definition
+   * @return
+   */
+  String getTitle();
+  
+  /**
    * A longer description of this workflow definition
    */
   String getDescription();
@@ -44,5 +50,11 @@ public interface WorkflowDefinition {
    * The operations, listed in order, that this workflow definition includes.
    */
   List<WorkflowOperationDefinition> getOperations();
+
+  /**
+   * Whether this definition is published.  This information is useful for user interfaces.
+   * @return Whether this is a published workflow definition
+   */
+  boolean isPublished();
 }
 

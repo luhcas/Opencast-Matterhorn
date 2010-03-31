@@ -23,12 +23,12 @@ import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationException;
-import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
@@ -55,7 +56,7 @@ import java.util.List;
  * The consumer sends back timed text, which will be stored in the working file repository and added to the media package <br/>
  * A new workflow (or the existing one with additional operations) will be kicked off (for redistribution including captions)
  */
-public class CaptionsServiceImpl implements CaptionsService, ManagedService, WorkflowOperationHandler {
+public class CaptionsServiceImpl implements CaptionsService, ManagedService, ResumableWorkflowOperationHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(CaptionsServiceImpl.class);
 
@@ -231,6 +232,15 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Wor
   @Override
   public void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.debug("cleaning up after handling a caption operation on {}", workflowInstance);
+  }
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#getHoldStateUserInterfaceURL()
+   */
+  @Override
+  public URL getHoldStateUserInterfaceURL() {
+    // TODO: Implement and return url to OpenCaps
+    return null;
   }
 
 }

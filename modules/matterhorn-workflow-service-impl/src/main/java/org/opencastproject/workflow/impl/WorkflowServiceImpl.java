@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -24,6 +25,7 @@ import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -262,6 +264,13 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     return set;
   }
 
+  protected WorkflowOperationHandler getWorkflowOperationHandler(String operationId) {
+    for(HandlerRegistration reg : getRegisteredHandlers()) {
+      if(reg.operationName.equals(operationId)) return reg.handler;
+    }
+    return null;
+  }
+  
   /**
    * Lists the names of each workflow operation. Operation names are availalbe for use if there is a registered
    * {@link WorkflowOperationHandler} with an equal {@link WorkflowServiceImpl#WORKFLOW_OPERATION_PROPERTY} property.
@@ -347,7 +356,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         String key = "\\$\\{" + prop.getKey() + "\\}";
         parsed = source.replaceAll(key, prop.getValue());
       }
-      return parsed;
+      return parsed == null ? source : parsed;
     }
   }
 
@@ -428,7 +437,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   @Override
   public void resume(String id) {
-    resume(id, null);
+    resume(id, new HashMap<String, String>());
   }
 
   /**
@@ -496,7 +505,18 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       if(mp != null) {
         workflow.setMediaPackage(mp);
       }
+      WorkflowOperationHandler handler = null;
+      if(Action.PAUSE.equals(result.getAction())) {
+        WorkflowOperationInstance currentOperation = workflow.getCurrentOperation();
+        handler = getWorkflowOperationHandler(currentOperation.getId());
+        if(! (handler instanceof ResumableWorkflowOperationHandler)) {
+          throw new IllegalStateException("Operation " + currentOperation.getId() + " is not resumable");
+        }
+        ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler)handler;
+        ((WorkflowOperationInstanceImpl)currentOperation).setHoldStateUserInterfaceUrl(resumableHandler.getHoldStateUserInterfaceURL());
+      }
     }
+    
     WorkflowState dbState = getWorkflowById(workflow.getId()).getState();
 
     // If the workflow was paused while the operation was still working, accept the updated mediapackage

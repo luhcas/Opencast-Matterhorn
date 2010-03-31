@@ -1,5 +1,7 @@
 <definition>
   <id>definition-1</id>
+  <title>The First Workflow Definition</title>
+  <published>true</published>
   <description>Unit testing workflow</description>
   <operations>
     <operation

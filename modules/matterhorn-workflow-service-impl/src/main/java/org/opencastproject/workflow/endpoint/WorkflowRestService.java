@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -368,7 +369,13 @@ public class WorkflowRestService {
   @Path("resume/{id}")
   @Produces(MediaType.TEXT_PLAIN)
   public Response resume(@PathParam("id") String workflowInstanceId, @FormParam("properties") LocalHashMap properties) {
-    service.resume(workflowInstanceId, properties.getMap());
+    Map<String, String> map;
+    if(properties == null) {
+      map = new HashMap<String, String>();
+    } else {
+      map = properties.getMap();
+    }
+    service.resume(workflowInstanceId, map);
     return Response.ok("resumed " + workflowInstanceId).build();
   }
 

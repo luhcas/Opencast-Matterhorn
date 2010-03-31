@@ -18,6 +18,7 @@ package org.opencastproject.workflow.api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -47,6 +48,12 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   @XmlElement(name="description")
   private String description;
 
+  @XmlElement(name="published")
+  private boolean published;
+  
+  @XmlElement(name="title")
+  private String title;
+  
   @XmlElement(name="configuration_panel")
   private String configurationPanel;
 
@@ -79,6 +86,7 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   }
 
   public List<WorkflowOperationDefinition> getOperations() {
+    if(operations == null) operations = new ArrayList<WorkflowOperationDefinition>();
     return operations;
   }
 
@@ -102,6 +110,34 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   static class Adapter extends XmlAdapter<WorkflowDefinitionImpl, WorkflowDefinition> {
     public WorkflowDefinitionImpl marshal(WorkflowDefinition op) throws Exception {return (WorkflowDefinitionImpl)op;}
     public WorkflowDefinition unmarshal(WorkflowDefinitionImpl op) throws Exception {return op;}
+  }
+
+  /**
+   * @return the published
+   */
+  public boolean isPublished() {
+    return published;
+  }
+
+  /**
+   * @param published the published to set
+   */
+  public void setPublished(boolean published) {
+    this.published = published;
+  }
+
+  /**
+   * @return the title
+   */
+  public String getTitle() {
+    return title;
+  }
+
+  /**
+   * @param title the title to set
+   */
+  public void setTitle(String title) {
+    this.title = title;
   }
 }
 

@@ -156,6 +156,10 @@ public class WorkflowBuilder {
     return buildWorkflowOperationResult(mediaPackage, null, action);
   }
 
+  public WorkflowOperationResult buildWorkflowOperationResult(Action action) {
+    return buildWorkflowOperationResult(null, null, action);
+  }
+
   public WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage, Map<String, String> properties, Action action) {
     return new WorkflowOperationResultImpl(mediaPackage, properties, action);
   }

@@ -17,6 +17,7 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 
+import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -51,6 +52,9 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   @XmlElementWrapper(name="configurations")
   protected Set<WorkflowConfiguration> configurations;
 
+  @XmlElement(name="holdurl")
+  protected URL holdStateUserInterfaceUrl;
+  
   /**
    * No-arg constructor needed for JAXB serialization
    */
@@ -178,5 +182,19 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
       }
     }
     return keys;
+  }
+
+  /**
+   * @return the holdStateUserInterfaceUrl
+   */
+  public URL getHoldStateUserInterfaceUrl() {
+    return holdStateUserInterfaceUrl;
+  }
+
+  /**
+   * @param holdStateUserInterfaceUrl the holdStateUserInterfaceUrl to set
+   */
+  public void setHoldStateUserInterfaceUrl(URL holdStateUserInterfaceUrl) {
+    this.holdStateUserInterfaceUrl = holdStateUserInterfaceUrl;
   }
 }

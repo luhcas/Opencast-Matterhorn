@@ -46,7 +46,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   public WorkflowInstanceImpl() {}
   
   public WorkflowInstanceImpl(WorkflowDefinition def, MediaPackage mediaPackage, Map<String, String> properties) {
-    this.title = def.getId();
+    this.title = def.getTitle() == null ? def.getId() : def.getTitle();
     this.description = def.getDescription();
     this.state = WorkflowState.INSTANTIATED;
     this.mediaPackage = mediaPackage;

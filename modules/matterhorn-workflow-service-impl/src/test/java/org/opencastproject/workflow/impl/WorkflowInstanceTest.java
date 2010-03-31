@@ -20,12 +20,18 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
+import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
+import java.io.InputStream;
 import java.net.URI;
 
 public class WorkflowInstanceTest {
@@ -37,6 +43,21 @@ public class WorkflowInstanceTest {
     Assert.assertEquals(mp.getIdentifier(), workflow.getMediaPackage().getIdentifier());
   }
 
+  @Test
+  public void testWorkflowFields() throws Exception {
+    // Workflows should obtain information from the definition used in the constructor
+    WorkflowDefinitionImpl def = new WorkflowDefinitionImpl();
+    def.setId("123");
+    def.setPublished(true);
+    
+    WorkflowInstance instance = new WorkflowInstanceImpl(def, null, null);
+    Assert.assertEquals(def.getId(), instance.getTitle());
+
+    def.setTitle("a title");
+    instance = new WorkflowInstanceImpl(def, null, null);
+    Assert.assertEquals(def.getTitle(), instance.getTitle());
+  }
+  
   @Test
   public void testMediaPackageSerializationInWorkflowInstance() throws Exception {
     WorkflowInstanceImpl workflow = new WorkflowInstanceImpl();
@@ -56,5 +77,17 @@ public class WorkflowInstanceTest {
     MediaPackage src = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(xml);
     workflow.setMediaPackage(src);
     Assert.assertEquals(2, workflow.getMediaPackage().getTracks().length);
+  }
+  
+  @Test
+  public void testWorkflowDefinitionDeserialization() throws Exception {
+    InputStream in = getClass().getResourceAsStream("/workflow-definition-1.xml");
+    WorkflowDefinition def = WorkflowBuilder.getInstance().parseWorkflowDefinition(in);
+    IOUtils.closeQuietly(in);
+    Assert.assertEquals("The First Workflow Definition", def.getTitle());
+    Assert.assertEquals(2, def.getOperations().size());
+    Assert.assertEquals("definition-1", def.getId());
+    Assert.assertEquals("Unit testing workflow", def.getDescription());
+    Assert.assertTrue(def.isPublished());
   }
 }

@@ -164,6 +164,7 @@
               OSGI-INF/conductor-service.xml,
               OSGI-INF/conductor-strategy.xml,
               OSGI-INF/workflow-definition-scanner.xml,
+              OSGI-INF/operations/caption.xml,
               OSGI-INF/operations/compose.xml,
               OSGI-INF/operations/slides-previews.xml,
               OSGI-INF/operations/image.xml,

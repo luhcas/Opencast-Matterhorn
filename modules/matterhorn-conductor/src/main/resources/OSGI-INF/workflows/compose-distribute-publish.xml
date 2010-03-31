@@ -13,6 +13,14 @@
       exception-handler-workflow="error"
       description="Inspect the media package">
     </operation>
+
+    <!-- hold for captions -->
+    <operation
+      id="caption"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Wait for captions to be submitted">
+    </operation>
  
     <!-- encode to flash download -->
     <operation
