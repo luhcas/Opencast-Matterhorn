@@ -15,19 +15,21 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import java.io.File;
-import java.util.Properties;
-
+import org.opencastproject.capture.api.AgentRecording;
+import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.CaptureAgentImpl;
-import org.opencastproject.capture.impl.CaptureParameters;
 import org.opencastproject.capture.impl.ConfigurationManager;
-import org.opencastproject.capture.impl.RecordingImpl;
 import org.opencastproject.util.FileSupport;
+
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.Properties;
 
 /**
  * The class which cleans up captures if the capture has been successfully ingested and the 
@@ -60,7 +62,7 @@ public class CleanCaptureJob implements Job {
     CaptureAgentImpl service = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
     Properties p = cm.getAllProperties();
 
-    doCleaning(p, service.getRecordings());
+    doCleaning(p, service.getKnownRecordings().values());
     
   }
   
@@ -69,7 +71,7 @@ public class CleanCaptureJob implements Job {
    * @param p Properties including the keys for maximum archival days and minimum disk space
    * @param service The capture agent
    */
-  public void doCleaning(Properties p , RecordingImpl[] recordings) {
+  public void doCleaning(Properties p , Collection<AgentRecording> recordings) {
     // Parse the necessary values for minimum disk space and maximum archival days. 
     // Note that if some of those is not specified, the corresponding cleaning is not done.
     
@@ -100,7 +102,7 @@ public class CleanCaptureJob implements Job {
     }
 
     // Gets all the recording IDs for this agent, and iterates over them
-    for (RecordingImpl theRec : recordings) {
+    for (AgentRecording theRec : recordings) {
       File recDir = theRec.getDir();
       File ingested = new File(recDir, CaptureParameters.CAPTURE_INGESTED_FILE);
 

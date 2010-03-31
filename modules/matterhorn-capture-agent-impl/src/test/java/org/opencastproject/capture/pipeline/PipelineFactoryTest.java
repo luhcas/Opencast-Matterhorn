@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.pipeline;
 
-import org.opencastproject.capture.impl.CaptureParameters;
+import org.opencastproject.capture.api.CaptureParameters;
 
 import org.gstreamer.Pipeline;
 import org.junit.AfterClass;

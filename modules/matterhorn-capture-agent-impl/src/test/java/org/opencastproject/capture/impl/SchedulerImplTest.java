@@ -15,6 +15,8 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.opencastproject.capture.api.CaptureParameters;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -317,13 +319,33 @@ public class SchedulerImplTest {
   }
 
   @Test
-  public void testGarbageCalendar() throws ConfigurationException {
+  public void testGarbageLocalCalendar() throws ConfigurationException {
     String garbage = this.getClass().getClassLoader().getResource("calendars/Garbage.ics").getFile();
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, garbage);
     sched.updated(schedulerProps);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
+  }
+
+  @Test @Ignore
+  public void testDuplicateRemoteCalendar() throws ConfigurationException {
+    String dups = this.getClass().getClassLoader().getResource("calendars/Opencast-with-dups.ics").getFile();
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, dups);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
+    sched.updated(schedulerProps);
+    String[] schedule = sched.getCaptureSchedule();
+    Assert.assertEquals(1, schedule.length);
+  }
+
+  @Test @Ignore
+  public void testDuplicateLocalCalendar() throws ConfigurationException {
+    String dups = this.getClass().getClassLoader().getResource("calendars/Opencast-with-dups.ics").getFile();
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, dups);
+    sched.updated(schedulerProps);
+    String[] schedule = sched.getCaptureSchedule();
+    Assert.assertEquals(1, schedule.length);
   }
 
   @Test

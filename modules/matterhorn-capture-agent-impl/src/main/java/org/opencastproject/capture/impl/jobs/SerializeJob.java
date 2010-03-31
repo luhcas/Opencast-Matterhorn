@@ -15,10 +15,9 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import java.text.ParseException;
-
+import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.CaptureAgentImpl;
-import org.opencastproject.capture.impl.CaptureParameters;
+
 import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDetail;
@@ -27,6 +26,8 @@ import org.quartz.JobExecutionException;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.ParseException;
 
 /**
  * The class to schedule the task of serializing the MediaPackage (this means: obtaining an XML

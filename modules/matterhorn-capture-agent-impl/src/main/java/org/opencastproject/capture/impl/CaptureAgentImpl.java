@@ -16,9 +16,15 @@
 package org.opencastproject.capture.impl;
 
 import org.opencastproject.capture.admin.api.AgentState;
+import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
+import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureAgent;
+import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.StateService;
+import org.opencastproject.capture.impl.jobs.AgentCapabilitiesJob;
+import org.opencastproject.capture.impl.jobs.AgentStateJob;
+import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -35,6 +41,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.util.ZipUtil;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -49,6 +56,11 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.component.ComponentContext;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +74,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -72,34 +85,41 @@ import java.util.Vector;
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines
  * to store several tracks from a certain recording.
  */
-public class CaptureAgentImpl implements CaptureAgent, ManagedService {
+public class CaptureAgentImpl implements CaptureAgent, StateService, ManagedService {
 
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
-  /** The default maximum length to capture, measured in seconds */
+  /** The default maximum length to capture, measured in seconds. */
   public static final long DEFAULT_MAX_CAPTURE_LENGTH = 8 * 60 * 60;
 
   /** The number of nanoseconds in a second.  This is a borrowed constant from gStreamer and is used in the pipeline initialization routines */
   public static final long GST_SECOND = 1000000000L;
 
-  /** The agent's pipeline **/
+  /** The agent's pipeline. **/
   private Pipeline pipe = null;
 
-  /** Keeps the recordings which have not been succesfully ingested yet **/
-  private Map<String, RecordingImpl> pendingRecordings = new HashMap<String,RecordingImpl>();
+  /** Keeps the recordings which have not been succesfully ingested yet. **/
+  private Map<String, AgentRecording> pendingRecordings = new HashMap<String, AgentRecording>();
 
-  /** The agent's current state.  Used for logging */
+  /** The agent's name. */
+  private String agentName = null;
+
+  /** The agent's current state.  Used for logging. */
   private String agentState = null;
 
-  /** A pointer to the state service.  This is where all of the recording state information should be kept. */
-  private StateService stateService = null;
+  /** The capabillities of this agent. */
+  private Properties agentCapabilities = null;
 
+  /** A pointer to the scheduler. */
   private SchedulerImpl scheduler = null;
 
-  /** The configuration manager for the agent */ 
+  /** The scheduler the agent will use to schedule any recurring events */
+  private Scheduler agentScheduler = null;
+
+  /** The configuration manager for the agent. */ 
   private ConfigurationManager configService = null;
 
-  /** Indicates the ID of the recording currently being recorded **/
+  /** Indicates the ID of the recording currently being recorded. **/
   private String currentRecID = null;
 
   /** Capturing files only? */
@@ -108,41 +128,13 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
   private static final String samplesDir = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "samples";
 
-  public CaptureAgentImpl() {
-    setAgentState(AgentState.IDLE);
-  }
-
-  // FIXME: this method is not called.  Is it needed? (jt)
-  /**
-   * Gets the state service this capture agent is pushing its state to
-   * @return The service this agent pushes its state to.
-   */
-  public StateService getStateService() {
-    return stateService;
-  }
-
-  /**
-   * Sets the state service this capture agent should push its state to.
-   * @param service The service to push the state information to.
-   */
-  public void setStateService(StateService service) {
-    stateService = service;
-    setAgentState(agentState);
-  }
-
-  /**
-   * Unsets the state service which this capture agent should push its state to.
-   */
-  public void unsetStateService() {
-    stateService = null;
-  }
-
   /**
    * Sets the configuration service form which this capture agent should draw its configuration data.
    * @param service The configuration service.
    */
   public void setConfigService(ConfigurationManager cfg) {
     configService = cfg;
+    agentCapabilities = new Properties();
   }
 
   /**
@@ -335,7 +327,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     setRecordingState(recordingID, RecordingState.CAPTURING);
     if (newRec.getProperty(CaptureParameters.RECORDING_END) == null) {
-      scheduleStop(newRec.getID());
+      if (!scheduleStop(newRec.getID())) {
+        //TODO:  We've failed to schedule a stop, now what?
+      }
     }
     return recordingID;
   }
@@ -467,7 +461,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    * @param recordingID The recordingID to stop.
    * @return true if the stop was scheduled, false otherwise.
    */
-  private void scheduleStop(String recordingID) {
+  private boolean scheduleStop(String recordingID) {
     String maxLength = configService.getItem(CaptureParameters.CAPTURE_MAX_LENGTH);
     long length = 0L;
     if (maxLength != null) {
@@ -487,8 +481,9 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     length = length * 1000L;
     Date stop = new Date(length + System.currentTimeMillis());
     if (scheduler != null) {
-      scheduler.scheduleUnscheduledStopCapture(recordingID, stop);
+      return scheduler.scheduleUnscheduledStopCapture(recordingID, stop);
     }
+    return false;
   }
 
   /**
@@ -519,7 +514,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       }
     }
 
-    RecordingImpl theRec = pendingRecordings.get(currentRecID);
+    AgentRecording theRec = pendingRecordings.get(currentRecID);
 
     // Clears currentRecID to indicate no recording is on
     currentRecID = null;
@@ -556,8 +551,6 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     return false;
   }
 
-  // FIXME: Media package creation seems crucial. Instead of returning true/false, an exception might make more sense.
-  // If you look a the rest of the code, no one is actually checking the return value... (jt)
   /**
    * Generates the manifest.xml file from the files specified in the properties
    * @param recID The ID for the recording whose manifest will be created
@@ -565,7 +558,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   public boolean createManifest(String recID) {
 
-    RecordingImpl recording = pendingRecordings.get(recID);    
+    AgentRecording recording = pendingRecordings.get(recID);    
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
       return false;
@@ -574,10 +567,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
 
     String[] friendlyNames = recording.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES).split(",");
 
+    MediaPackageElementBuilder elemBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+    MediaPackageElementFlavor flavor = null; 
     // Includes the tracks in the MediaPackage
     try {
-      MediaPackageElementBuilder elemBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-      MediaPackageElementFlavor flavor = null; 
 
       URI baseURI = recording.getDir().toURI();
 
@@ -625,13 +618,10 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     try {
       logger.debug("Serializing metadata and MediaPackage...");
       // Gets the manifest.xml as a Document object
-
+      
       File manifestFile = new File(recording.getDir(), CaptureParameters.MANIFEST_NAME);
       fos = new FileOutputStream(manifestFile);
       recording.getMediaPackage().toXml(fos, false);
-
-      // Stores the File reference to the MediaPackage in the corresponding recording
-      recording.setManifest(manifestFile);
 
     } catch (MediaPackageException e) {
       logger.error("MediaPackage Exception: {}.", e.getMessage());
@@ -640,12 +630,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
       logger.error("I/O Exception: {}.", e.getMessage());
       return false;
     } finally {
-      if (fos != null)
-        try {
-          fos.close();
-        } catch (IOException e) {
-          logger.error("Error serializing mediapackage to file", e);
-        }
+      IOUtils.closeQuietly(fos);
     }
 
     return true;
@@ -661,7 +646,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   public File zipFiles(String recID) {
 
     logger.debug("Compressing files...");
-    RecordingImpl recording = pendingRecordings.get(recID);
+    AgentRecording recording = pendingRecordings.get(recID);
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
       return null;
@@ -670,15 +655,12 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     Iterable<MediaPackageElement> mpElements = recording.getMediaPackage().elements();
     Vector<File> filesToZip = new Vector<File>();
 
-    // Adds the manifest first
-    filesToZip.add(recording.getManifest());
-
     // Now adds the files from the MediaPackage
     for (MediaPackageElement item : mpElements) {
       File tmpFile = null;
       String elementPath = item.getURI().getPath();
 
-      // Relative and aboslute paths are mixed
+      // Relative and absolute paths are mixed
       if (elementPath.startsWith("file:") || elementPath.startsWith(File.separator))
         tmpFile = new File(elementPath);
       else
@@ -688,6 +670,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
         logger.warn("Required file {} doesn't exist!", tmpFile.getAbsolutePath());
       filesToZip.add(tmpFile);
     }
+    filesToZip.add(new File(recording.getDir(), CaptureParameters.MANIFEST_NAME));
 
     logger.info("Zipping {} files:", filesToZip.size());
     for (File f : filesToZip)
@@ -707,7 +690,7 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   public int ingest(String recID) {
     logger.info("Ingesting recording: {}", recID);
-    RecordingImpl recording = pendingRecordings.get(recID);
+    AgentRecording recording = pendingRecordings.get(recID);
 
     if (recording == null) {
       logger.error("[ingest] Recording {} not found!", recID);
@@ -769,22 +752,25 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     }
 
     return retValue;
-  } 
+  }
 
   /**
-   * Sets the machine's current encoding state
-   * 
-   * @param state The state for the agent.  Defined in AgentState.
-   * @see org.opencastproject.capture.api.AgentState
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.StateService#getAgentName()
    */
-  private void setAgentState(String state) {
+  public String getAgentName() {
+    return agentName;
+  }
+
+  /**
+   * Sets the state of the agent.  Note that this should not change the *actual* state of the agent, only update the StateService's record of its state.
+   * This is taking a string so that inter-version compatibility it maintained (eg, a version 2 agent talking to a version 1 core)
+   * 
+   * @param state The state of the agent.  Should be defined in AgentState.
+   * @see org.opencastproject.capture.admin.api.AgentState
+   */
+  protected void setAgentState(String state) {
     agentState = state;
-    if (stateService != null) {
-      stateService.setAgentState(agentState);
-      logger.debug("Agent state set to: {}", agentState);
-    } else {
-      logger.warn("State service for capture agent is null, unable to push updates to remote server!  This is only a problem if you see this message repeating.");
-    }
   }
 
   /**
@@ -796,40 +782,75 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
   }
 
   /**
-   * Convenience method which wraps calls to the state_service to make sure it's not going to null pointer on me.
-   * @param recordingID The ID of the recording to update
-   * @param state The state to update the recording to
+   * Sets the recording's current state.
+   * 
+   * @param recordingID The ID of the recording.
+   * @param state The state for the recording.  Defined in RecordingState.
+   * @see org.opencastproject.capture.admin.api.RecordingState
    */
-  // TODO: Move this to the RecordingImpl class
-  private void setRecordingState(String recordingID, String state) {
-    if (stateService != null) {
-      stateService.setRecordingState(recordingID, state);
-    } else {
-      logger.warn("State service for capture agent is null, unable to push updates to remote server!  This is only a problem if you see this message repeating.");
+  protected void setRecordingState(String recordingID, String state) {
+    if (pendingRecordings != null && recordingID != null && state != null) {
+      AgentRecording rec = pendingRecordings.get(recordingID);
+      if (rec != null) {
+        rec.setState(state);
+      } else {
+        Properties p = configService.getAllProperties();
+        p.put(CaptureParameters.RECORDING_ID, recordingID);
+        try {
+          rec = new RecordingImpl(null, p);
+          rec.setState(state);
+        } catch (IOException e) { /* Squash this, it's trying to create a directory for a (probably) failed capture */ }
+        pendingRecordings.put(recordingID, rec);
+      }
+    } else if (recordingID == null) {
+      logger.info("Unable to create recording because recordingID parameter was null!");
+    } else if (state == null) {
+      logger.info("Unable to create recording because state parameter was null!");
+    } else if (pendingRecordings == null) {
+      logger.info("Unable to create recording because memory structure was null!");
     }
   }
 
-  // FIXME: this method is not called anywhere (jt)
   /**
-   * @param recID
-   * @return A Recording with ID recID, or null if it doesn't exists
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.StateService#getRecordingState(java.lang.String)
    */
-  public RecordingImpl getRecording(String recID) {
+  public Recording getRecordingState(String recID) {
     return pendingRecordings.get(recID);
   }
 
-  // FIXME: Why is this not part of the API? (jt)
-  // Currently, the OSGi declarative services definition exposes both api and impl. This is probably why...
   /**
-   * This method intends to facilitate the iterative operations over this agent's recordings, by providing a reference to all of them.
-   * @return A {@code String} array containing the recording IDs present in this agent
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.StateService#getKnownRecordings()
    */
-  public RecordingImpl[] getRecordings() {
-    return pendingRecordings.values().toArray(new RecordingImpl[pendingRecordings.size()]);
+  public Map<String, AgentRecording> getKnownRecordings() {
+    return pendingRecordings;
   }
 
-  public void updated(Dictionary props) throws ConfigurationException {
-    // Update any configuration properties here
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.CaptureAgent#getAgentCapabilities()
+   */
+  public Properties getAgentCapabilities() {
+    return agentCapabilities;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+   */
+  public void updated(Dictionary properties) throws ConfigurationException {
+    if (properties == null) {
+      throw new ConfigurationException("null", "Null configuration in updated!");
+    }
+
+    Properties props = new Properties();
+    Enumeration<String> keys = properties.keys();
+    while (keys.hasMoreElements()) {
+      String key = keys.nextElement();
+      props.put(key, properties.get(key));
+    }
+    createPushTask(props);
   }
 
   /**
@@ -840,15 +861,35 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
    */
   public void activate(ComponentContext ctx) {
     logger.info("Starting CaptureAgentImpl.");
-    Dictionary<String, Object> commands = new Hashtable<String, Object>();
-    commands.put(CommandProcessor.COMMAND_SCOPE, "capture");
-    commands.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "status", "start", "stop", "ingest", "reset", "capture" });
-    logger.info("Registering capture agent osgi shell commands");
-    ctx.getBundleContext().registerService(CaptureAgentShellCommands.class.getName(), new CaptureAgentShellCommands(this), commands);
+
+    if (ctx != null) {
+      //Setup the shell commands
+      Dictionary<String, Object> commands = new Hashtable<String, Object>();
+      commands.put(CommandProcessor.COMMAND_SCOPE, "capture");
+      commands.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "status", "start", "stop", "ingest", "reset", "capture" });
+      logger.info("Registering capture agent osgi shell commands");
+      ctx.getBundleContext().registerService(CaptureAgentShellCommands.class.getName(), new CaptureAgentShellCommands(this), commands);
+    } else {
+      logger.warn("Bundle context is null, so this is probably a test.  If you see this message from Felix please post a bug!");
+    }
+
     // FIXME: This should only be done in case of a mock capture, instead of just everytime the client starts
     // FIXME: Also, register a deactivate() and do some cleanup
     copyMediaToFiles();
     setAgentState(AgentState.IDLE);
+  }
+
+  /**
+   * Shuts down the capture agent.
+   */
+  public void deactivate() {
+    try {
+      if (agentScheduler != null) {
+          agentScheduler.shutdown(true);
+      }
+    } catch (SchedulerException e) {
+      logger.warn("Finalize for scheduler did not execute cleanly: {}.", e.getMessage());
+    }
   }
 
   /**
@@ -868,4 +909,71 @@ public class CaptureAgentImpl implements CaptureAgent, ManagedService {
     }
   }
 
+  /**
+   * Creates the Quartz task which pushes the agent's state to the state server.
+   * @param schedulerProps The properties for the Quartz scheduler
+   */
+  private void createPushTask(Properties schedulerProps) {
+    //Either create the scheduler or empty out the existing one
+    try {
+      if (agentScheduler != null) {
+        //Clear the existing jobs and reschedule everything
+        for (String name : agentScheduler.getJobNames(JobParameters.RECURRING_TYPE)) {
+          agentScheduler.deleteJob(name, JobParameters.RECURRING_TYPE);
+        }
+      } else {
+        StdSchedulerFactory sched_fact = new StdSchedulerFactory(schedulerProps);
+
+        //Create and start the scheduler
+        agentScheduler = sched_fact.getScheduler();
+        agentScheduler.start();
+      }
+    } catch (SchedulerException e) {
+      logger.error("Scheduler exception in State Service: {}.", e.getMessage());
+      return;
+    }
+
+    //Setup the agent state push jobs
+    try {
+      long statePushTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL)) * 1000L;
+      
+      //Setup the push job
+      JobDetail stateJob = new JobDetail("agentStateUpdate", JobParameters.RECURRING_TYPE, AgentStateJob.class);
+
+      stateJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
+      stateJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
+
+      //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
+      SimpleTrigger stateTrigger = new SimpleTrigger("state_push", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, statePushTime);
+      
+      //Schedule the update
+      agentScheduler.scheduleJob(stateJob, stateTrigger);
+    } catch (NumberFormatException e) {
+      logger.error("Invalid time specified in the {} value, unable to push state to remote server!", CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL);
+    } catch (SchedulerException e) {
+      logger.error("SchedulerException in StateServiceImpl while trying to schedule state push jobs: {}.", e.getMessage());
+    }
+
+    //Setup the agent capabilities push jobs
+    try {
+      long capbsPushTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL)) * 1000L;
+      
+      //Setup the push job
+      JobDetail capbsJob = new JobDetail("agentCapabilitiesUpdate", JobParameters.RECURRING_TYPE, AgentCapabilitiesJob.class);
+
+      capbsJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
+      capbsJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);     
+      
+      //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
+      SimpleTrigger capbsTrigger = new SimpleTrigger("capabilities_polling", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, capbsPushTime);
+      
+      //Schedule the update
+      agentScheduler.scheduleJob(capbsJob, capbsTrigger);
+    } catch (NumberFormatException e) {
+      logger.error("Invalid time specified in the {} value, unable to push capabilities to remote server!", CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL);
+    } catch (SchedulerException e) {
+      logger.error("SchedulerException in StateServiceImpl while trying to schedule capability push jobs: {}.", e.getMessage());
+    }
+    
+  }
 }

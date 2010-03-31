@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.pipeline;
 
-import org.opencastproject.capture.impl.CaptureParameters;
+import org.opencastproject.capture.api.CaptureParameters;
 
 import net.luniks.linux.jv4linfo.JV4LInfo;
 import net.luniks.linux.jv4linfo.JV4LInfoException;

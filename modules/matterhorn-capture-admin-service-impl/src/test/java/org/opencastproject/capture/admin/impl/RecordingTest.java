@@ -13,7 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.admin.api;
+package org.opencastproject.capture.admin.impl;
+
+import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.capture.admin.api.RecordingState;
 
 import junit.framework.Assert;
 
@@ -27,7 +30,7 @@ public class RecordingTest {
 
   @Before
   public void setup() {
-    recording = new Recording("test", RecordingState.CAPTURING);
+    recording = new RecordingImpl("test", RecordingState.CAPTURING);
     Assert.assertNotNull(recording);
     time = recording.getLastCheckinTime();
   }
@@ -47,14 +50,14 @@ public class RecordingTest {
   @Test
   public void changedInformation() throws InterruptedException {
     Assert.assertEquals("test", recording.getID());
-    Assert.assertEquals(AgentState.CAPTURING, recording.getState());
+    Assert.assertEquals(RecordingState.CAPTURING, recording.getState());
     Assert.assertEquals(time, recording.getLastCheckinTime());
 
     Thread.sleep(1);
     recording.setState(RecordingState.UPLOADING);
 
     Assert.assertEquals("test", recording.getID());
-    Assert.assertEquals(AgentState.UPLOADING, recording.getState());
+    Assert.assertEquals(RecordingState.UPLOADING, recording.getState());
     Thread.sleep(1);
     if (recording.getLastCheckinTime() <= time || recording.getLastCheckinTime() >= System.currentTimeMillis()) {
       Assert.fail("Invalid checkin time");

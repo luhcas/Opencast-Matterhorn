@@ -15,7 +15,8 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import org.opencastproject.capture.impl.CaptureParameters;
+import org.opencastproject.capture.api.AgentRecording;
+import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.RecordingImpl;
 
 import org.apache.commons.io.FileUtils;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Vector;
 
 
 /**
@@ -42,7 +44,7 @@ public class CleanCaptureJobTest {
 
   Properties props = null;
   CleanCaptureJob theJob = null;
-  RecordingImpl[] theRecordings = null;
+  Vector<AgentRecording> theRecordings = null;
 
   int numberOfRecordings = 5;
 
@@ -53,11 +55,12 @@ public class CleanCaptureJobTest {
     // Define particular instances for the CleanCaptureJob required arguments
     props = new Properties();
     theJob = new CleanCaptureJob();
-    theRecordings = new RecordingImpl[numberOfRecordings];
+    theRecordings = new Vector<AgentRecording>();
 
     baseDir.mkdir();
-    if (!baseDir.exists())
+    if (!baseDir.exists()) {
       Assert.fail();
+    }
 
     try {
       for (int i = 0; i < numberOfRecordings; i++) {
@@ -78,13 +81,14 @@ public class CleanCaptureJobTest {
           long modifDate = System.currentTimeMillis() + (i - numberOfRecordings/2)*CONVERSION_RATE; 
 
           // Check the "capture.ingested" file is created and its 'last modified' date set
-          if (!ingestFile.isFile())
+          if (!ingestFile.isFile()) {
             Assert.assertTrue(ingestFile.createNewFile());
+          }
           Assert.assertTrue(ingestFile.setLastModified(modifDate));
         }
 
         // Creates the recording
-        theRecordings[i] = new RecordingImpl(null, props);
+        theRecordings.add(new RecordingImpl(null, props));
       }
     } catch (IllegalArgumentException e) {
       logger.error("Unexpected Illegal Argument Exception when creating test recordings: {}", e.getMessage());
@@ -98,16 +102,17 @@ public class CleanCaptureJobTest {
   @After
   public void tearDown() {
     props = null;
-    for (int i = 0; i < numberOfRecordings; i++)
-      FileUtils.deleteQuietly(theRecordings[i].getDir());
+    for (int i = 0; i < numberOfRecordings; i++) {
+      FileUtils.deleteQuietly(theRecordings.get(i).getDir());
+    }
 
     theRecordings = null;
   }
 
-  @Test
   /**
    * The minimum space allowed in disk is set to zero and the maximum archival time is zero
    */
+  @Test
   public void diskZeroArchivalZero() {
     // Insert properties accordingly for this test
     props.setProperty(CaptureParameters.CAPTURE_CLEANER_MAX_ARCHIVAL_DAYS, "0");
@@ -118,17 +123,19 @@ public class CleanCaptureJobTest {
 
     // Check the cleaning was OK
     for (int i = 0; i < numberOfRecordings; i++) 
-      if (i <= numberOfRecordings/2)
-        Assert.assertFalse(theRecordings[i].getDir().exists());
-      else
-        Assert.assertTrue(theRecordings[i].getDir().exists());
+      if (i <= numberOfRecordings/2) {
+        Assert.assertFalse(theRecordings.get(i).getDir().exists());
+      }
+      else {
+        Assert.assertTrue(theRecordings.get(i).getDir().exists());
+      }
 
   }
 
-  @Test
   /**
    * The minimum free space in disk is zero and the maximum archival time is "infinity"
    */
+  @Test
   public void diskZeroArchivalLots() {
     // Insert properties for this test
     props.setProperty(CaptureParameters.CAPTURE_CLEANER_MAX_ARCHIVAL_DAYS, String.valueOf(Long.MAX_VALUE));
@@ -138,21 +145,21 @@ public class CleanCaptureJobTest {
     theJob.doCleaning(props, theRecordings);
 
     //Check the cleaning was OK
-    for (RecordingImpl aRec : theRecordings)
+    for (AgentRecording aRec : theRecordings)
       Assert.assertTrue(aRec.getDir().exists());
   }
 
-  @Test
   /**
    * The minimum free space in disk is a lot and the maximum archival time is "infinity". All recordings have been ingested
    */
+  @Test
   public void diskLotsArchivalLotsAllIngested() {
     // Insert properties for this test
     props.setProperty(CaptureParameters.CAPTURE_CLEANER_MAX_ARCHIVAL_DAYS, String.valueOf(Long.MAX_VALUE));
     props.setProperty(CaptureParameters.CAPTURE_CLEANER_MIN_DISK_SPACE, String.valueOf(Long.MAX_VALUE));
     try {
       // Create a capture.ingested file for the recordings that don't have it
-      for (RecordingImpl aRec : theRecordings) {
+      for (AgentRecording aRec : theRecordings) {
         File ingested = new File(aRec.getDir(), CaptureParameters.CAPTURE_INGESTED_FILE);
         if (!ingested.isFile())
           Assert.assertTrue(ingested.createNewFile());
@@ -166,14 +173,14 @@ public class CleanCaptureJobTest {
     theJob.doCleaning(props,theRecordings);
 
     // Check the cleaning was OK
-    for (RecordingImpl aRec : theRecordings)
+    for (AgentRecording aRec : theRecordings)
       Assert.assertFalse(aRec.getDir().exists());
   }
 
-  @Test
   /**
    * The minimum free space in disk is a lot and the maximum archival time is "infinity". There is non-ingested recordings
    */
+  @Test
   public void diskLotsArchivalLots() {
     // Insert properties for this test
     props.setProperty(CaptureParameters.CAPTURE_CLEANER_MAX_ARCHIVAL_DAYS, String.valueOf(Long.MAX_VALUE));
@@ -185,8 +192,8 @@ public class CleanCaptureJobTest {
     // Check the cleaning was OK
     for (int i = 0; i < numberOfRecordings; i++) 
       if (i <= numberOfRecordings/2)
-        Assert.assertFalse(theRecordings[i].getDir().exists());
+        Assert.assertFalse(theRecordings.get(i).getDir().exists());
       else
-        Assert.assertTrue(theRecordings[i].getDir().exists());
+        Assert.assertTrue(theRecordings.get(i).getDir().exists());
   }
 }

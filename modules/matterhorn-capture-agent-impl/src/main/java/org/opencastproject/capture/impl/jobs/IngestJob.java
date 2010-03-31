@@ -15,8 +15,8 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
+import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.CaptureAgentImpl;
-import org.opencastproject.capture.impl.CaptureParameters;
 
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;

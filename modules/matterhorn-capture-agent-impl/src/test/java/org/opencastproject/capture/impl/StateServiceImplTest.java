@@ -15,31 +15,36 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.opencastproject.capture.admin.api.AgentState;
+import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.capture.admin.api.RecordingState;
+import org.opencastproject.capture.api.CaptureParameters;
+
+import junit.framework.Assert;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.osgi.service.cm.ConfigurationException;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import junit.framework.Assert;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.opencastproject.capture.admin.api.AgentState;
-import org.opencastproject.capture.admin.api.Recording;
-import org.opencastproject.capture.admin.api.RecordingState;
-import org.osgi.service.cm.ConfigurationException;
-
 public class StateServiceImplTest {
-  private StateServiceImpl service = null;
+  private CaptureAgentImpl service = null;
   private ConfigurationManager cfg = null;
 
   @Before
   public void setup() {
-    service = new StateServiceImpl();
+    service = new CaptureAgentImpl();
     Assert.assertNotNull(service);
-    service.unsetConfigService();
+    
     cfg = new ConfigurationManager();
     Assert.assertNotNull(cfg);
+    cfg.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, System.getProperty("java.io.tmpdir"));
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL, "1");
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL, "http://localhost");
     service.setConfigService(cfg);
@@ -49,6 +54,15 @@ public class StateServiceImplTest {
   public void teardown() {
     service.deactivate();
     service = null;
+  }
+
+  public void deleteDir(String dirName) {
+    File dir = new File(cfg.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), dirName);
+    if (dir.exists()) {
+      try {
+        FileUtils.deleteDirectory(dir);
+      } catch (IOException e) {}
+    }
   }
 
   //Note:  This test is meant to test that the code handles weird cases in the polling, *not* the functionality itself 
@@ -95,24 +109,28 @@ public class StateServiceImplTest {
   @Test
   public void testUnpreparedImpl() {
     Assert.assertNull(service.getAgentState());
-    Assert.assertNull(service.getAgent());
+    Assert.assertNull(service.getAgentName());
     service.setAgentState("TEST");
-    Assert.assertNull(service.getAgentState());
+    Assert.assertEquals("TEST", service.getAgentState());
     service.setRecordingState(null, "won't work");
     service.setRecordingState("somethign", null);
     service.setRecordingState("works", "working");
-    Assert.assertNull(service.getKnownRecordings());
-    Assert.assertNull(service.getRecordingState("works"));
+    Assert.assertNotNull(service.getKnownRecordings());
+    Assert.assertEquals(1, service.getKnownRecordings().size());
+    Assert.assertEquals("working", service.getRecordingState("works").getState());
 
     service.activate(null);
-    Assert.assertEquals(AgentState.UNKNOWN, service.getAgentState());
+    Assert.assertEquals(AgentState.IDLE, service.getAgentState());
     service.setAgentState(AgentState.CAPTURING);
     Assert.assertEquals(AgentState.CAPTURING, service.getAgentState());
+
+    deleteDir("works");
   }
 
   @Test
   public void testRecordings() {
-    Assert.assertNull(service.getKnownRecordings());
+    Assert.assertNotNull(service.getKnownRecordings());
+    Assert.assertEquals(0, service.getKnownRecordings().size());
     service.activate(null);
     Assert.assertNotNull(service.getKnownRecordings());
     Assert.assertEquals(0, service.getKnownRecordings().size());
@@ -126,11 +144,14 @@ public class StateServiceImplTest {
     verifyRecording(service.getRecordingState("abc"), "abc", RecordingState.CAPTURING);
     verifyRecording(service.getRecordingState("123"), "123", RecordingState.UPLOADING);
     Assert.assertNull(service.getRecordingState("doesnotexist"));
+    deleteDir("abc");
+    deleteDir("123");
   }
 
   @Test
   public void testInvalidRecording() {
-    Assert.assertNull(service.getKnownRecordings());
+    Assert.assertNotNull(service.getKnownRecordings());
+    Assert.assertEquals(0, service.getKnownRecordings().size());
     service.activate(null);
     Assert.assertNotNull(service.getKnownRecordings());
     Assert.assertEquals(0, service.getKnownRecordings().size());
@@ -141,7 +162,7 @@ public class StateServiceImplTest {
   }
 
   private void verifyRecording(Recording r, String id, String state) {
-    Assert.assertEquals(id, r.id);
-    Assert.assertEquals(state, r.state);
+    Assert.assertEquals(id, r.getID());
+    Assert.assertEquals(state, r.getState());
   }
 }

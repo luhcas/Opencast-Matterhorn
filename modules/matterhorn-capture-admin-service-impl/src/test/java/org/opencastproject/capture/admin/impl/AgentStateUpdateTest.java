@@ -13,7 +13,11 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.admin.api;
+package org.opencastproject.capture.admin.impl;
+
+import org.opencastproject.capture.admin.api.Agent;
+import org.opencastproject.capture.admin.api.AgentState;
+import org.opencastproject.capture.admin.api.AgentStateUpdate;
 
 import junit.framework.Assert;
 
@@ -21,41 +25,41 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RecordingStateUpdateTest {
-  private Recording recording = null;
-  private RecordingStateUpdate rsu = null;
+public class AgentStateUpdateTest {
+  private Agent agent = null;
+  private AgentStateUpdate asu = null;
 
   @Before
   public void setup() throws InterruptedException {
-    recording = new Recording("test", RecordingState.CAPTURING);
-    Assert.assertNotNull(recording);
+    agent = new AgentImpl("test", AgentState.IDLE, null);
+    Assert.assertNotNull(agent);
     Thread.sleep(5);
-    rsu = new RecordingStateUpdate(recording);
-    Assert.assertNotNull(rsu);
+    asu = new AgentStateUpdate(agent);
+    Assert.assertNotNull(asu);
   }
 
   @After
   public void teardown() {
-    recording = null;
-    rsu = null;
+    agent = null;
+    asu = null;
   }
 
   @Test
   public void correctInformation() {
-    Assert.assertEquals("test", rsu.id);
-    Assert.assertEquals(RecordingState.CAPTURING, rsu.state);
-    if (rsu.time_since_last_update <= 1) {
-      Assert.fail("Invalid update time in recording state update");
+    Assert.assertEquals("test", asu.name);
+    Assert.assertEquals(AgentState.IDLE, asu.state);
+    if (asu.time_since_last_update <= 1) {
+      Assert.fail("Invalid update time in agent state update");
     }
   }
 
   @Test
   //This is a stupid test, but it gets us up to 100%...
   public void blank() {
-    rsu = new RecordingStateUpdate();
-    Assert.assertNotNull(rsu);
-    Assert.assertNull(rsu.id);
-    Assert.assertNull(rsu.state);
-    Assert.assertNull(rsu.time_since_last_update);
+    asu = new AgentStateUpdate();
+    Assert.assertNotNull(asu);
+    Assert.assertNull(asu.name);
+    Assert.assertNull(asu.state);
+    Assert.assertNull(asu.time_since_last_update);
   }
 }

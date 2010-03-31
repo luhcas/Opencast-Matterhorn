@@ -15,6 +15,9 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.opencastproject.capture.admin.api.RecordingState;
+import org.opencastproject.capture.api.AgentRecording;
+import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.media.mediapackage.MediaPackage;
 
 import org.apache.commons.io.FileUtils;
@@ -29,7 +32,7 @@ import java.util.Properties;
  * This class is a container for the properties relating a certain recording -- 
  * a set of Properties and a MediaPackage with all the metadata/attachments/etc. associated 
  */
-public class RecordingImpl {
+public class RecordingImpl implements AgentRecording {
 
   private static final Logger logger = LoggerFactory.getLogger(RecordingImpl.class);
   
@@ -38,22 +41,21 @@ public class RecordingImpl {
  
   /** Unique identifier for this ID   */
   private String id = null;
- 
+
+  /** The recording's state */
+  private String state = RecordingState.UNKNOWN;
+  
+  /**
+   * The time at which the recording last checked in with this service.
+   * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in). 
+   */
+  public Long lastHeardFrom; 
+
   /** Keeps the properties associated with this recording */
   private Properties props = null;
 
   /** The MediaPackage containing all the metadata/attachments/any file related with this recording */
   private MediaPackage mPkg = null;
-  
-  // FIXME: Why do we need fields for both the manifest and the mediapackage?  Right now, we have two (possibly out-of-sync)
-  // versions of the same information.
-  /** The manifest associated with this recording */
-  private File manifest = null;
-  
-  /** The name assigned to the metadata file created and attached by the capture agent */
-  // TODO: Necessary?
-  // TODO: At least, a method for overriding the default name should be provided. 
-  //private String AGENT_CATALOG_NAME = "agent_metadata.xml";
 
   /** 
    * Constructs a RecordingImpl object using the Properties and MediaPackage provided
@@ -118,44 +120,48 @@ public class RecordingImpl {
   }
   
   /**
-   * @return The {@code Properties} object associated with the recording
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.AgentRecording#getProperties()
    */
   public Properties getProperties() {
     return props;
   }
 
   /**
-   * @param props A {@code Properties} object to associate to the recording
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.AgentRecording#setProps(java.util.Properties)
    */
   public void setProps(Properties props) {
     this.props = props;
   }
 
   /**
-   * @return The current MediaPackage
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.AgentRecording#getMediaPackage()
    */
   public MediaPackage getMediaPackage() {
     return mPkg;
   }
 
-  /**
-   * @param mPkg the MediaPackage to set
-   */
   // TODO: As one can get a copy of the local MediaPackage and modify it outside, this method may not be necessary
-  
+  /**
+   * @param mPkg
+   */
   public void setMediaPackage(MediaPackage mPkg) {
     this.mPkg = mPkg;
   }
   
   /**
-   * @return The ID for this recording
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.admin.api.Recording#getID()
    */
   public String getID() {
     return id;
   }
-  
+
   /**
-   * @return A {@code File} object pointing to the directory where this recording files are
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.AgentRecording#getDir()
    */
   public File getDir() {
     return baseDir;
@@ -163,52 +169,45 @@ public class RecordingImpl {
 
   
   /**
-   * Gets a property from the local {@code Properties} object
-   * @param key The property name
-   * @return The property value, or {@code null} if it doesn't exist
-   * @see java.util.Properties#getProperty(String)
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.AgentRecording#getProperty(java.lang.String)
    */
   public String getProperty(String key) {
     return props.getProperty(key);
   }
   
   /**
-   * Sets a property in the local {@code Properties} object (by simply calling its own setProperty method)
-   * @param  key The property name
-   * @param  value The value to be set
-   * @return The previous value of the specified key in this property list, or null if it did not have one.
-   * @see java.util.Properties#setProperty(String, String)
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.AgentRecording#setProperty(java.lang.String, java.lang.String)
    */
   public String setProperty(String key, String value) {
     return (String)props.setProperty(key, value);
   }
   
-  // FIXME: Remove this method (see comment at the very top). The recording should hold a reference to the media
-  // package only.
   /**
-   * Gets the manifest for this recording
-   * @return A {@code File} object with the path of the manifest, or {@code null} if it has not been yet created
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.admin.api.Recording#setState(java.lang.String)
    */
-  public File getManifest() {
-    return manifest;
+  public void setState(String state) {
+    this.state = state;
+    lastHeardFrom = System.currentTimeMillis();
   }
-  
-  // FIXME: Remove this method (see comment at the very top). The recording should hold a reference to the media
-  // package only.
+
   /**
-   * Sets the manifest for this recording
-   * @param manifest
-   * @return A {@code boolean} indicating success or failure
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.admin.api.Recording#getState()
    */
-  public boolean setManifest(File manifest) {
-    if (manifest != null && manifest.isFile()) {
-      this.manifest = manifest;
-      return true;
-    }
-    
-    return false;
+  public String getState() {
+    return state;
   }
-  
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.admin.api.Recording#getLastCheckinTime()
+   */
+  public Long getLastCheckinTime() {
+    return lastHeardFrom;
+  }
   /*
   /**
    * Gets the name assigned to the capture metadata catalog

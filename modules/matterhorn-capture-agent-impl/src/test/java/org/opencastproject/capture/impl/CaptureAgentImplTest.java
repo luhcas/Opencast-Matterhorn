@@ -15,20 +15,22 @@
  */
 package org.opencastproject.capture.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Properties;
+import org.opencastproject.capture.admin.api.AgentState;
+import org.opencastproject.capture.api.CaptureParameters;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opencastproject.capture.admin.api.AgentState;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Properties;
 
 /**
  * Test the implementation of the Capture Agent, which uses gstreamer to 
@@ -81,7 +83,9 @@ public class CaptureAgentImplTest {
     agent = new CaptureAgentImpl();
     agent.setConfigService(config);
     sched.setCaptureAgent(agent);
-    
+
+    Assert.assertNull(agent.getAgentState());
+    agent.activate(null);
     Assert.assertEquals(agent.getAgentState(), AgentState.IDLE);
     
     // setup test media

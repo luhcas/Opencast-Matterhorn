@@ -27,51 +27,51 @@ public interface Scheduler {
    * Sets the schedule data URL from which to gather scheduling data.  This should be a endpoint which generates iCal (RFC 2445) format scheduling data.
    * @param url The URL to pull the calendaring data from.
    */
-  public void setScheduleEndpoint(URL url);
+  void setScheduleEndpoint(URL url);
 
   /**
    * Gets the current schedule data URL.  This should be an endpoint which generates iCal (RFC 2445) format scheduling data.
    * @return The current schedule data URL.
    */
-  public URL getScheduleEndpoint();
+  URL getScheduleEndpoint();
 
   /**
    * Polls the current schedule endpoint URL for new scheduling data.
    * If the new schedule data contains an error or is unreachable the previous recording schedule is used instead.
    */
-  public void updateCalendar();
+  void updateCalendar();
 
   /**
    * Gets the time between refreshes of the scheduling data.
    * @return The number of seconds between refreshes of the scheduling data.
    */
-  public int getPollingTime();
+  int getPollingTime();
 
   /**
    * Enables polling for new calendar data.
    * @param enable True to enable polling, false otherwise.
    */
-  public void enablePolling(boolean enable);
+  void enablePolling(boolean enable);
 
   /**
    * Checks to see if the is set to automatically poll for new scheduling data.
    * @return True if the system is set to poll for new data, false otherwise.
    */
-  public boolean isPollingEnabled();
+  boolean isPollingEnabled();
 
   /**
    * Starts the scheduling system.  Calling this enables scheduled captures.
    */
-  public void startScheduler();
+  void startScheduler();
 
   /**
    * Checks to see if the system is set to capture from its calendar data.
    * @return True if the system is set to capture from a schedule, false otherwise.
    */
-  public boolean isSchedulerEnabled();
+  boolean isSchedulerEnabled();
 
   /**
    * Stops the scheduling system.  Calling this disables scheduled captures.
    */
-  public void stopScheduler();
+  void stopScheduler();
 }

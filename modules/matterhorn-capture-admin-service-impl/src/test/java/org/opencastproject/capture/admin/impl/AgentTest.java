@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.admin.api;
+package org.opencastproject.capture.admin.impl;
 
 import junit.framework.Assert;
 
@@ -29,7 +29,7 @@ public class AgentTest {
 
   @Before
   public void setup() {
-    agent = new Agent("test", AgentState.IDLE, null);
+    agent = new AgentImpl("test", AgentState.IDLE, null);
     Assert.assertNotNull(agent);
     time = agent.getLastHeardFrom();
   }

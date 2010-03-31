@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.impl;
+package org.opencastproject.capture.api;
 
 /** 
  * Contains properties that the ConfigurationManager refer. These properties

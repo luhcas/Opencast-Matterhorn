@@ -15,12 +15,10 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import java.text.ParseException;
-import java.util.Properties;
-
+import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.CaptureAgentImpl;
-import org.opencastproject.capture.impl.CaptureParameters;
 import org.opencastproject.media.mediapackage.MediaPackage;
+
 import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDetail;
@@ -30,6 +28,9 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.ParseException;
+import java.util.Properties;
 
 /**
  * The class responsible for starting a capture.

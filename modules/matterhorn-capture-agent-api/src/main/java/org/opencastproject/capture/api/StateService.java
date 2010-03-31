@@ -15,10 +15,9 @@
  */
 package org.opencastproject.capture.api;
 
-import java.util.Map;
-
-import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.Recording;
+
+import java.util.Map;
 
 /**
  * Service for querying the capture agent's current state (MH-58).
@@ -26,43 +25,31 @@ import org.opencastproject.capture.admin.api.Recording;
 public interface StateService {
 
   /**
-   * Gets the internal Agent used to store this agent's state.
-   * @return The Agent which represents this capture agent.
-   * @see org.opencastproject.capture.admin.api.AgentState
+   * Gets the agent's name
+   * 
+   * @return The name of the agent as defined in the properties file with the appropriate key
+   * @see org.opencastproject.capture.api.CaptureParameters#AGENT_NAME
    */
-  public Agent getAgent();
-
-  //TODO: explain why we are passing strings instead of something more type safe
-  /**
-   * Sets the state of the agent.  Note that this should not change the *actual* state of the agent, only update the StateService's record of its state.
-   * @param state The state of the agent.  Should be defined in AgentState.
-   * @see org.opencastproject.capture.admin.api.AgentState
-   */
-  public void setAgentState(String state);
+  String getAgentName();
 
   /**
    * Gets the state of the agent.
+   * This is returning a string so that inter-version compatibility it maintained (eg, a version 2 agent talking to a version 1 core)
+   * 
    * @return The state of the agent.  Should be defined in AgentState.  May be null in cases where the service implementation is not ready yet.
    * @see org.opencastproject.capture.admin.api.AgentState
    */
-  public String getAgentState();
+  String getAgentState();
 
-  //TODO: indicate the format of the string (is it an item defined in AgentState?  Maybe this whole interface needs an introduction as to why strings are being passed?)
   /**
    * Gets a map of recording ID and Recording pairs containing all of the recordings the system is aware of.
-   * @return A map of recording-state pairs.  May be null if the implementation is not active yet.
-   */
-  public Map<String,Recording> getKnownRecordings();
-
-  /**
-   * Sets the recording's current state.
+   * The recording ID is either the DTSTART field in the scheduler iCal feed, or Unscheduled-$TIMESTAMP if the recording was unscheduled
+   * This is returning a string so that inter-version compatibility it maintained (eg, a version 2 agent talking to a version 1 core)
    * 
-   * @param recordingID The ID of the recording.
-   * @param state The state for the recording.  Defined in RecordingState.
-   * @see org.opencastproject.capture.admin.api.RecordingState
+   * @return A map of recording ID-state pairs.  May be null if the implementation is not active yet.
    */
-  public void setRecordingState(String recordingID, String state);
-  
+  Map<String, AgentRecording> getKnownRecordings();
+
   /**
    * Gets the state of a recording.
    * 
@@ -70,6 +57,6 @@ public interface StateService {
    * @return A state defined in RecordingState.  May return null if the implementation is not active.
    * @see org.opencastproject.capture.admin.api.RecordingState
    */
-  public Recording getRecordingState(String recordingID);
+  Recording getRecordingState(String recordingID);
 }
 

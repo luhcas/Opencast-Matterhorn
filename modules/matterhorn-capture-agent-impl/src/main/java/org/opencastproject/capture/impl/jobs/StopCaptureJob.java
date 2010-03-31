@@ -15,10 +15,9 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import java.util.Date;
-
+import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.CaptureAgentImpl;
-import org.opencastproject.capture.impl.CaptureParameters;
+
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
@@ -27,6 +26,8 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Date;
 
 /**
  * The class responsible for stopping a capture.

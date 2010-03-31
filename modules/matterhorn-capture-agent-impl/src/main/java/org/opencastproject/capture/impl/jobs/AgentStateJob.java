@@ -15,10 +15,10 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import org.opencastproject.capture.api.AgentRecording;
+import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.api.StateService;
+import org.opencastproject.capture.impl.ConfigurationManager;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -26,16 +26,16 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.opencastproject.capture.admin.api.Agent;
-import org.opencastproject.capture.admin.api.Recording;
-import org.opencastproject.capture.api.StateService;
-import org.opencastproject.capture.impl.CaptureParameters;
-import org.opencastproject.capture.impl.ConfigurationManager;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * This class is responsible for pushing the agent's state to the remote state service.
@@ -64,7 +64,7 @@ public class AgentStateJob implements Job {
    */
   private void sendAgentState() {
 
-    logger.debug("Sending agent {}'s state", state.getAgent().getName());
+    logger.debug("Sending agent {}'s state", state.getAgentName());
     
     //Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
@@ -85,10 +85,8 @@ public class AgentStateJob implements Job {
 
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
-    Agent a = state.getAgent();
-
     //formParams.add(new BasicNameValuePair("agentName", a.getName()));
-    formParams.add(new BasicNameValuePair("state", a.getState()));
+    formParams.add(new BasicNameValuePair("state", state.getAgentState()));
 
     send(formParams, url);
   }
@@ -114,8 +112,8 @@ public class AgentStateJob implements Job {
     }
 
     //For each recording being tracked by the system send an update
-    Map<String, Recording> recordings = state.getKnownRecordings();
-    for (Entry<String, Recording> e : recordings.entrySet()) {
+    Map<String, AgentRecording> recordings = state.getKnownRecordings();
+    for (Entry<String, AgentRecording> e : recordings.entrySet()) {
       List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
       formParams.add(new BasicNameValuePair("id", e.getKey()));

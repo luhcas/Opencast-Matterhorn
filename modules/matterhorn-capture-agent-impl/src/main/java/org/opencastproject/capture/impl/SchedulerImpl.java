@@ -15,6 +15,7 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.jobs.CleanCaptureJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.PollCalendarJob;
@@ -65,7 +66,9 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -119,8 +122,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * Updates the scheduler with new configuration data.
-   * @param properties The properties you want to use.
-   * @throws ConfigurationException
+   * {@inheritDoc}
+   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
@@ -417,6 +420,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         scheduler.deleteJob(name, JobParameters.CAPTURE_TYPE);
       }
 
+      Map<String, String> scheduledEvents = new Hashtable<String, String>();
       ComponentList list = newCal.getComponents(Component.VEVENT);
       for (Object item : list) {
         VEvent event = (VEvent) item;
@@ -458,6 +462,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         }
 
         CronExpression startCronExpression = getCronString(start);
+        String conflict = scheduledEvents.get(startCronExpression); 
+        if (conflict != null) {
+          log.warn("Unable to schedule event {} because its starting time coinsides with event {}!", start, conflict);
+          continue;
+        }
         CronTrigger trig = new CronTrigger();
         trig.setCronExpression(startCronExpression);
         trig.setName(startCronExpression.toString());
@@ -528,6 +537,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         }
 
         scheduler.scheduleJob(job, trig);
+        scheduledEvents.put(startCronExpression.toString(), start.toString());
       }
 
       checkSchedules();
@@ -543,8 +553,6 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       log.error("MediaPackageException exception: {}.", e.getMessage());
     } catch (MalformedURLException e) {
       log.error("MalformedURLException: {}.", e.getMessage());
-    } catch (IOException e) {
-      log.error("IOException: {}.", e.getMessage());
     }
   }
 

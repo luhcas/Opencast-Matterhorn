@@ -88,11 +88,11 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
     //Pull all the existing agents into the in-memory structure
     EntityManager em = emf.createEntityManager();
-    List<Agent> dbResults = null;
+    List<AgentImpl> dbResults = null;
     try {
       sem.acquire();
-      Query q = em.createNamedQuery("Agent.getAll");
-      dbResults = q.getResultList();
+      Query q = em.createNamedQuery("AgentImpl.getAll");
+      dbResults = (List<AgentImpl>) q.getResultList();
       sem.release();
     } catch (InterruptedException e) {
       logger.warn("Semaphore broken in getKnownAgents, DB may be inconsistent.");
@@ -155,7 +155,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       }
 
       logger.debug("Creating Agent {} with state {}.", agentName, state);
-      Agent a = new Agent(agentName, state, new Properties());
+      Agent a = new AgentImpl(agentName, state, new Properties());
       agents.put(agentName, a);
       updateAgentInDatabase(a);
     }
@@ -219,7 +219,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       }
 
       logger.debug("Creating Agent {} with state {}.", agentName, AgentState.UNKNOWN);
-      Agent a = new Agent(agentName, AgentState.UNKNOWN, capabilities);
+      Agent a = new AgentImpl(agentName, AgentState.UNKNOWN, capabilities);
       agents.put(agentName, a);
       updateAgentInDatabase(a);
     }
@@ -238,7 +238,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       sem.acquire();
       tx = em.getTransaction();
       tx.begin();
-      Agent existing = em.find(Agent.class, a.getName());
+      Agent existing = em.find(AgentImpl.class, a.getName());
       if (existing != null) {
         existing.setCapabilities(a.getCapabilities());
         existing.setLastHeardFrom(a.getLastHeardFrom());
@@ -269,7 +269,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       sem.acquire();
       tx = em.getTransaction();
       tx.begin();
-      Agent existing = em.find(Agent.class, agentName);
+      Agent existing = em.find(AgentImpl.class, agentName);
       if (existing != null) {
         em.remove(existing);
       }
@@ -317,7 +317,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
         return;
       }
       logger.debug("Creating Recording {} with state {}.", id, state);
-      Recording r = new Recording(id, state);
+      Recording r = new RecordingImpl(id, state);
       recordings.put(id, r);
     }
   }

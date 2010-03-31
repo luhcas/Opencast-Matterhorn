@@ -15,12 +15,18 @@
  */
 package org.opencastproject.capture.endpoint;
 
+import org.opencastproject.capture.admin.api.RecordingStateUpdate;
+import org.opencastproject.capture.api.AgentRecording;
+import org.opencastproject.capture.api.StateService;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Status;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -31,12 +37,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import org.opencastproject.capture.admin.api.Recording;
-import org.opencastproject.capture.admin.api.RecordingStateUpdate;
-import org.opencastproject.capture.api.StateService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The REST endpoint for the state service on the capture device
@@ -68,9 +68,9 @@ public class StateRestService {
   @Path("GetRecordings")
   public List<RecordingStateUpdate> getRecordings() {
     LinkedList<RecordingStateUpdate> update = new LinkedList<RecordingStateUpdate>();
-    Map<String, Recording> data = service.getKnownRecordings();
+    Map<String, AgentRecording> data = service.getKnownRecordings();
     //Run through and build a map of updates (rather than states)
-    for (Entry<String, Recording> e : data.entrySet()) {
+    for (Entry<String, AgentRecording> e : data.entrySet()) {
       update.add(new RecordingStateUpdate(e.getValue()));
     }
     return update;

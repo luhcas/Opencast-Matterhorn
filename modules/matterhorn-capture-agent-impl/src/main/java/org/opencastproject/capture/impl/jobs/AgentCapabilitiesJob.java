@@ -15,9 +15,8 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import org.opencastproject.capture.admin.api.Agent;
-import org.opencastproject.capture.api.StateService;
-import org.opencastproject.capture.impl.CaptureParameters;
+import org.opencastproject.capture.api.CaptureAgent;
+import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.ConfigurationManager;
 
 import org.apache.http.client.HttpClient;
@@ -41,7 +40,7 @@ public class AgentCapabilitiesJob implements Job {
   private static final Logger logger = LoggerFactory.getLogger(AgentStateJob.class);
 
   private ConfigurationManager config = null;
-  private StateService state = null;
+  private CaptureAgent agent = null;
 
   /**
    * Pushes the agent's capabilities to the remote state service.
@@ -50,7 +49,7 @@ public class AgentCapabilitiesJob implements Job {
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
     config = (ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE);
-    state = (StateService) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE);
+    agent = (CaptureAgent) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE);
 
     //Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
@@ -69,11 +68,9 @@ public class AgentCapabilitiesJob implements Job {
       return;
     }
 
-    Agent a = state.getAgent();
-
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      a.getCapabilities().storeToXML(baos, "Capabilities for the agent " + a.getName());
+      agent.getAgentCapabilities().storeToXML(baos, "Capabilities for the agent " + agent.getAgentName());
       HttpPost remoteServer = new HttpPost(url);
       remoteServer.setEntity(new StringEntity(baos.toString()));
       HttpClient client = new DefaultHttpClient();

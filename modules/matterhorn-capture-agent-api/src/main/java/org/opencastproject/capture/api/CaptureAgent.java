@@ -24,70 +24,79 @@ import java.util.Properties;
  */
 public interface CaptureAgent {
   /**
-   * Starting a simple capture.
+   * Starting a simple capture.  Uses the machine's default settings for everything and assigns a generated recording ID to the capture.
+   * Note that this will not start a second capture if there is already one in progress.  You must first stop the running capture before starting another.
+   * @return The recording ID associated with the recording, or null in the case of an error.
    */
   String startCapture();
 
-  // FIXME: What happens if there is an ongoing recording? Looking at the implementation, we can see that <code>null</code>
-  // is returned, which should be documented. Even better would be do throw a checked exception, since this looks like
-  // an illegal state to us.
-  // FIXME: The @return javadoc is missing.
   /**
-   * Starting a simple capture.
-   * 
-   * @param mediaPackage 
+   * Starting a simple capture.  Uses the machine's default settings for capture parameters and assigns a generated recording ID to the capture, but uses the metadata passed in via the parameter.
+   * Note that this will not start a second capture if there is already one in progress.  You must first stop the running capture before starting another.
+   * @param mediaPackage The media package of metadata for the capture.
+   * @return The recording ID associated with the recording, or null in the case of an error.
    */
   String startCapture(MediaPackage mediaPackage);
 
-  // FIXME: What are these properties?  How do I know the valid keys?
-  // FIXME: See comments on #startCapture(MediaPackage)
   /**
-   * Starting a simple capture.
-   * 
-   * @param configuration HashMap<String, String> for properties.
+   * Starting a simple capture.  Uses the machine's default metadata and assigns a generated recording ID to the capture if one is not specified in the properties object.  The relevant keys can be found in CaptureParameters.
+   * Properties not in the configuration parameter use the machine defaults.  If, for example, you only wish to specify the recording's ID then only set that value in the properties and the machine will use its defeaults for the others. 
+   * Note that this will not start a second capture if there is already one in progress.  You must first stop the running capture before starting another.
+   * @param configuration Properties object containing the properties for the recording.
+   * @return The recording ID associated with the recording, or null in the case of an error.
+   * @see org.opencastproject.capture.api.CaptureParameters
    */
   String startCapture(Properties configuration);
 
-  //TODO: provide @see link for configuration properties, or at least an a href link to a configurations file in the repo
-  // FIXME: See comments on #startCapture(MediaPackage)
   /**
-   * Starting a simple capture.
-   * 
-   * @param mediaPackage 
-   * @param configuration HashMap<String, String> for properties.
+   * Starting a simple capture.  Generates a recording ID to the capture if one is not specified in the properties object.  The relevant keys can be found in CaptureParameters.
+   * Both parameters - the recording properties and the metadata - are used rather than the machine defaults.
+   * Note that this will not start a second capture if there is already one in progress.  You must first stop the running capture before starting another.
+   * @param mediaPackage The media package of metadata for the capture.
+   * @param configuration Properties object containing the properties for the recording.
+   * @return The recording ID associated with the recording, or null in the case of an error.
+   * @see CaptureAgent#startCapture(Properties)
+   * @see org.opencastproject.capture.api.CaptureParameters
    */
   String startCapture(MediaPackage mediaPackage, Properties configuration);
   
-  // FIXME: Javadocs are talking about a string instead of boolean
-  // FIXME: What does "false" as a return value mean? Was the capture not stopped, or was there no capture running?
-  // Even better would be to return void, with checked exceptions indicating various problems.
   /**
-   * Stops the capture
-   * @return A string indicating the success or fail of the action
+   * Stops the capture.  Returns true on success.
+   * Error conditions occur if gstreamer has an unexpected error, or there is no recording currently in progress.  In this case it will return false.
+   * @return True if the capture stopped successfully, false if the recordingID parameter was not the recording currently being captured, or there was an error.
    */
   boolean stopCapture();
 
-  // FIXME: document why the recordingId is necessary.  There doesn't seem to be a need for this parameter, since there
-  // should only be one recording at a time.
   /**
    * Stops the capture
    * This version takes in a recording ID and only stops the recording if that ID matches the current recording's ID.
+   * This is used to prevent accidental stops of recordings.
    * @param recordingID The ID of the recording you wish to stop
-   * @return A string indicating the success or fail of the action
+   * @return True if the capture stopped successfully, false if the recordingID parameter was not the recording currently being captured, or there was an error.
+   * @see org.opencastproject.capture.api.CaptureAgent#stopCapture()
    */
   boolean stopCapture(String recordingID);
 
-  // FIXME: This method should return an instance of the class (or better: enum) AgentState rather than a string
+  /**
+   * Gets the agent's name.
+   * @return The name of the agent.
+   */
+  String getAgentName();
+
   /**
    * Gets the machine's current state.
+   * This is returning a string so that inter-version compatibility it maintained (eg, a version 2 agent talking to a version 1 core).
    * 
-   * @return A state (should be defined in AgentState)
+   * @return A state (should be defined in AgentState).
    * @see org.opencastproject.capture.admin.api.AgentState
    */
   String getAgentState();
 
-  // FIXME: In this interface, we would expect to find information about the agent's capabilities as well. 
-  //String[] getAgentCapabilities();
-  
+  /**
+   * Gets the agent's capabilities.
+   * @return The agent's capabilities.
+   * TODO:  Define the format for an agent's capabillities.
+   */
+  Properties getAgentCapabilities();
 }
 

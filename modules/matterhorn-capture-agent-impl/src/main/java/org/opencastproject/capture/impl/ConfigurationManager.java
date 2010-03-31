@@ -15,6 +15,15 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.opencastproject.capture.api.CaptureParameters;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -26,13 +35,6 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class for retrieving, storing and accessing both local and centralised 
