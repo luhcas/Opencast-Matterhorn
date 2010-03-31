@@ -586,7 +586,7 @@ function setAgent(value) {
       }
     }
     if(!found){ //Couldn't find the previsouly selected agent, add to list and notifiy user.
-      this.fields.attendees.append($('<option>' + agentId + '</option>').val(agentId));
+      this.fields.attendees.append($('<option selected="selected">' + agentId + '</option>').val(agentId));
       $('#attendees').change();
     }
     this.fields.attendees.val(agentId);
@@ -606,7 +606,7 @@ function checkAgent() {
 
 /**
  *  Overrides getValue of FormFields for duration fields
- *  @return {Date Object} Date object, start date, incremented by duration.
+ *  @return {integer} duration.
  */
 function getDuration() {
   if(this.checkValue()){
@@ -630,7 +630,7 @@ function getDurationDisplay() {
 
 /**
  *  Overrides setValue for FormFields for duration fields
- *  @param {integer} Duration in milliseconds
+ *  @param {string} Duration in milliseconds
  */
 function setDuration(value) {
   if(typeof value == 'string'){
