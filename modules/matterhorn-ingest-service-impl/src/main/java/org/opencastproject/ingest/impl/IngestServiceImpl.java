@@ -15,6 +15,7 @@
  */
 package org.opencastproject.ingest.impl;
 
+import org.opencastproject.conductor.api.ConductorStrategy;
 import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -26,6 +27,8 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.util.ZipUtil;
+import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workspace.api.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
@@ -34,9 +37,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,19 +47,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.UUID;
 import java.util.Date;
+import java.util.Dictionary;
+import java.util.UUID;
 
 /**
  * Creates and augments Matterhorn MediaPackages. Stores media into the Working File Repository.
  */
-public class IngestServiceImpl implements IngestService, ManagedService, EventHandler {
+public class IngestServiceImpl implements IngestService, ManagedService {
   // TODO CONFIGURATION (tempPath, BUFFER)
 
   private static final Logger logger = LoggerFactory.getLogger(IngestServiceImpl.class);
   private MediaPackageBuilder builder = null;
+  private ConductorStrategy conductorStrategy;
+  private WorkflowService workflowService;
   private Workspace workspace;
   private String tempFolder;
   private String fs;
@@ -84,7 +85,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
    * 
    * @see org.opencastproject.ingest.api.IngestService#addZippedMediaPackage(java.io.InputStream)
    */
-  public MediaPackage addZippedMediaPackage(InputStream zipStream) throws Exception {
+  public String addZippedMediaPackage(InputStream zipStream) throws Exception {
     return addZippedMediaPackage(zipStream, WorkflowService.DEFAULT_WORKFLOW_ID);
   }
 
@@ -93,7 +94,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
    * 
    * @see org.opencastproject.ingest.api.IngestService#addZippedMediaPackage(java.io.InputStream, java.lang.String)
    */
-  public MediaPackage addZippedMediaPackage(InputStream zipStream, String wd) throws Exception {
+  public String addZippedMediaPackage(InputStream zipStream, String wd) throws Exception {
     // locally unpack the mediaPackage
     String tempPath = tempFolder + UUID.randomUUID().toString();
     // save inputStream to file
@@ -161,9 +162,7 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
       throw (e);
     }
     removeDirectory(tempPath);
-    // broadcast event
-    ingest(mp, wd);
-    return mp;
+    return ingest(mp, wd);
   }
 
   /**
@@ -267,8 +266,8 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
    * 
    * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String)
    */
-  public void ingest(MediaPackage mp) throws IllegalStateException, Exception {
-    ingest(mp, WorkflowService.DEFAULT_WORKFLOW_ID);
+  public String ingest(MediaPackage mp) throws Exception {
+    return ingest(mp, WorkflowService.DEFAULT_WORKFLOW_ID);
   }
 
   /**
@@ -276,78 +275,13 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
    * 
    * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String, java.lang.String)
    */
-  public void ingest(MediaPackage mp, String wd) throws IllegalStateException, Exception {
+  public String ingest(MediaPackage mp, String wd) throws Exception {
+    WorkflowDefinition workflowDef = conductorStrategy.getWorkflow(wd);
+    WorkflowInstance workflowInst = workflowService.start(workflowDef, mp, null);
 
-    // broadcast event
-    if (eventAdmin != null) {
-      logger.info("Broadcasting event...");
-      Dictionary<String, String> properties = new Hashtable<String, String>();
-      properties.put("mediaPackage", mp.toXml());
-      properties.put("workflowDefinition", wd);
-      Event event = new Event("org/opencastproject/ingest/INGEST_DONE", properties);
+    return workflowInst.getId();
 
-      // waiting 3000 ms for confirmation from Conductor service
-      synchronized (this) {
-        try {
-          eventAdmin.postEvent(event);
-          logger.info("Waiting for answer...");
-          this.wait(3000);
-        } catch (InterruptedException e) {
-          logger.warn("Waiting for answer interupted: " + e.getMessage());
-        }
-      }
-
-      // processing of confirmation
-      if (errorFlag) {
-        logger.error("Received exception from Conductor service: " + error.getLocalizedMessage());
-        errorFlag = false;
-        throw new Exception("Exception durring media package processing in Conductor service: ", error);
-      } else if (ackFlag) {
-        logger.info("Received ACK message: Conductor processed event succesfully");
-        ackFlag = false;
-      } else {
-        logger.warn("Timeout occured while waiting for ACK message from Conductor service");
-      }
-    } else {
-      // no EventAdmin available
-      logger.error("Ingest service: Broadcasting event failed - Event admin not available");
-      throw new IllegalStateException("EventAdmin not available");
-    }
   }
-
-  // ----------------------------------------------
-  // -------- processing of Conductor ACK ---------
-  // ----------------------------------------------
-
-  private boolean errorFlag = false;
-  private boolean ackFlag = false;
-  private Throwable error = null;
-
-  /**
-   * {@inheritDoc} If event contains exception property, exception has occured during processing sent media package in
-   * Conductor service.
-   * 
-   * @see org.osgi.service.event.EventHandler#handleEvent(org.osgi.service.event.Event)
-   */
-  public void handleEvent(Event event) {
-
-    ackFlag = true;
-
-    if (event.getProperty("exception") != null) {
-      errorFlag = true;
-      error = (Throwable) event.getProperty("exception");
-    }
-
-    synchronized (this) {
-      this.notifyAll();
-    }
-  }
-
-  // -----------------------------------------------
-  // --------------------- end ---------------------
-  // -----------------------------------------------
-
-  private EventAdmin eventAdmin;
 
   /**
    * {@inheritDoc}
@@ -454,15 +388,16 @@ public class IngestServiceImpl implements IngestService, ManagedService, EventHa
   // ---------------------------------------------
   // --------- bind and unbind bundles ---------
   // ---------------------------------------------
+  public void setConductorStrategy(ConductorStrategy conductorStrategy) {
+    this.conductorStrategy = conductorStrategy;
+  }
+
+  public void setWorkflowService(WorkflowService workflowService) {
+    this.workflowService = workflowService;
+  }
+
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
 
-  public void setEventAdmin(EventAdmin eventAdmin) {
-    this.eventAdmin = eventAdmin;
-  }
-
-  public void unsetEventAdmin(EventAdmin eventAdmin) {
-    this.eventAdmin = null;
-  }
 }

@@ -38,14 +38,14 @@ public interface IngestService {
    * 
    * @param ZippedMediaPackage
    *          A zipped file containing manifest, tracks, catalogs and attachments
-   * @return MediaPackageManifest The manifest of a specific Matterhorn MediaPackage element
+   * @return Workflow instance id.
    * @throws MediaPackageException
    * @throws FileNotFoundException
    * @throws IOException
    * @throws Exception
    */
-  MediaPackage addZippedMediaPackage(InputStream ZippedMediaPackage) throws MediaPackageException,
-          FileNotFoundException, IOException, Exception;
+  String addZippedMediaPackage(InputStream ZippedMediaPackage) throws MediaPackageException, FileNotFoundException,
+          IOException, Exception;
 
   /**
    * Add an existing compressed MediaPackage to the repository.
@@ -54,13 +54,13 @@ public interface IngestService {
    *          A zipped file containing manifest, tracks, catalogs and attachments
    * @param workflowDefinitionID
    *          workflow to be used with this media package
-   * @return MediaPackageManifest The manifest of a specific Matterhorn MediaPackage element
+   * @return Workflow instance id.
    * @throws MediaPackageException
    * @throws FileNotFoundException
    * @throws IOException
    * @throws Exception
    */
-  MediaPackage addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID)
+  String addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID)
           throws MediaPackageException, FileNotFoundException, IOException, Exception;
 
   /**
@@ -187,13 +187,12 @@ public interface IngestService {
    * 
    * @param mediaPackage
    *          The specific Matterhorn MediaPackage being ingested
-   * @throws IllegalStateException
-   *           when EventAdmin is not available
+   * @return Workflow instance id.
    * @throws Exception
    *           Exception that occured during MediaPackage serialization or happened in ConductorService durring
    *           MediaPackage processing
    */
-  void ingest(MediaPackage mediaPackage) throws IllegalStateException, Exception;
+  String ingest(MediaPackage mediaPackage) throws IllegalStateException, Exception;
 
   /**
    * Broadcasts an event, that media package is ingested. After broadcast ACK message is expected from ConductorService.
@@ -203,13 +202,12 @@ public interface IngestService {
    *          The specific Matterhorn MediaPackage being ingested
    * @param workflowDefinitionID
    *          workflow to be used with this media package
-   * @throws IllegalStateException
-   *           when EventAdmin is not available
+   * @return Workflow instance id.
    * @throws Exception
    *           Exception that occured during MediaPackage serialization or happened in ConductorService durring
    *           MediaPackage processing
    */
-  void ingest(MediaPackage mediaPackage, String workflowDefinitionID) throws IllegalStateException, Exception;
+  String ingest(MediaPackage mediaPackage, String workflowDefinitionID) throws IllegalStateException, Exception;
 
   /**
    * Delete an existing MediaPackage and any linked files from the temporary ingest filestore.

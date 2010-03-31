@@ -15,23 +15,33 @@
  */
 package org.opencastproject.ingest.impl;
 
+import org.opencastproject.conductor.api.ConductorStrategy;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workspace.api.Workspace;
+
+import junit.framework.Assert;
 
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.service.event.EventAdmin;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Map;
 
 public class IngestServiceImplTest {
   private IngestServiceImpl service = null;
+  private ConductorStrategy conductorStrategy = null;
+  private WorkflowService workflowService = null;
+  private WorkflowInstance workflowInstance = null;
+  private WorkflowDefinition workflowDefinition = null;
   private Workspace workspace = null;
   private MediaPackage mediaPackage = null;
   private URI urlTrack;
@@ -43,8 +53,11 @@ public class IngestServiceImplTest {
   private URI urlAttachment;
   private URI urlPackage;
 
+  private static String workflowInstanceID = "junit_workflow_instance_id";
+
   @Before
   public void setup() throws Exception {
+
     urlTrack = IngestServiceImplTest.class.getResource("/av.mov").toURI();
     urlTrack1 = IngestServiceImplTest.class.getResource("/vonly.mov").toURI();
     urlTrack2 = IngestServiceImplTest.class.getResource("/aonly.mov").toURI();
@@ -56,30 +69,14 @@ public class IngestServiceImplTest {
     // set up service and mock workspace
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
-                    .anyObject())).andReturn(urlTrack);
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(urlTrack);
     EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
-                    .anyObject())).andReturn(urlCatalog);
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(urlCatalog);
     EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
-                    .anyObject())).andReturn(urlAttachment);
-    EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
-                    .anyObject())).andReturn(urlTrack1);
-    EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
-                    .anyObject())).andReturn(urlTrack2);
-    EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
-                    .anyObject())).andReturn(urlCatalog1);
-    EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
-                    .anyObject())).andReturn(urlCatalog2);
-    EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (InputStream) EasyMock
-                    .anyObject())).andReturn(urlCatalog);
-    
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(urlAttachment);
     EasyMock.expect(
             workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
                     (InputStream) EasyMock.anyObject())).andReturn(urlTrack1);
@@ -95,11 +92,46 @@ public class IngestServiceImplTest {
     EasyMock.expect(
             workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
                     (InputStream) EasyMock.anyObject())).andReturn(urlCatalog);
+
+    EasyMock.expect(
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(urlTrack1);
+    EasyMock.expect(
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(urlTrack2);
+    EasyMock.expect(
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(urlCatalog1);
+    EasyMock.expect(
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(urlCatalog2);
+    EasyMock.expect(
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(urlCatalog);
+
+    workflowDefinition = EasyMock.createNiceMock(WorkflowDefinition.class);
+
+    conductorStrategy = EasyMock.createNiceMock(ConductorStrategy.class);
+    EasyMock.expect(conductorStrategy.getWorkflow((String) EasyMock.anyObject())).andReturn(workflowDefinition);
+
+    workflowInstance = EasyMock.createNiceMock(WorkflowInstance.class);
+    EasyMock.expect(workflowInstance.getId()).andReturn(workflowInstanceID);
+
+    workflowService = EasyMock.createNiceMock(WorkflowService.class);
+    EasyMock.expect(
+            workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(),
+                    (Map) EasyMock.anyObject())).andReturn(workflowInstance);
+
     EasyMock.replay(workspace);
+    EasyMock.replay(conductorStrategy);
+    EasyMock.replay(workflowInstance);
+    EasyMock.replay(workflowService);
+
     service = new IngestServiceImpl();
-    service.setEventAdmin(EasyMock.createNiceMock(EventAdmin.class));
     service.setTempFolder("target/temp/");
     service.setWorkspace(workspace);
+    service.setConductorStrategy(conductorStrategy);
+    service.setWorkflowService(workflowService);
   }
 
   @After
@@ -110,19 +142,27 @@ public class IngestServiceImplTest {
   @Test
   public void testThinClient() throws Exception {
     mediaPackage = service.createMediaPackage();
-    service.addTrack(urlTrack, null, mediaPackage);
-    service.addCatalog(urlCatalog, DublinCoreCatalog.FLAVOR, mediaPackage);
-    service.addAttachment(urlAttachment, MediaPackageElements.COVER_FLAVOR, mediaPackage);
-    service.ingest(mediaPackage);
-    // FIXME Add assertions here
+    mediaPackage = service.addTrack(urlTrack, null, mediaPackage);
+    mediaPackage = service.addCatalog(urlCatalog, DublinCoreCatalog.FLAVOR, mediaPackage);
+    mediaPackage = service.addAttachment(urlAttachment, MediaPackageElements.COVER_FLAVOR, mediaPackage);
+    String def = service.ingest(mediaPackage);
+    Assert.assertEquals(1, mediaPackage.getTracks().length);
+    Assert.assertEquals(1, mediaPackage.getCatalogs().length);
+    Assert.assertEquals(1, mediaPackage.getAttachments().length);
+    Assert.assertEquals(workflowInstanceID, def);
   }
 
   @Test
   public void testThickClient() throws Exception {
     InputStream packageStream = urlPackage.toURL().openStream();
-    mediaPackage = service.addZippedMediaPackage(packageStream);
-    try {packageStream.close();} catch (IOException e) {}
-    // FIXME Add assertions here
+    String def = service.addZippedMediaPackage(packageStream);
+    try {
+      packageStream.close();
+    } catch (IOException e) {
+    }
+    // Assert.assertEquals(2, mediaPackage.getTracks().length);
+    // Assert.assertEquals(3, mediaPackage.getCatalogs().length);
+    Assert.assertEquals(workflowInstanceID, def);
   }
 
 }
