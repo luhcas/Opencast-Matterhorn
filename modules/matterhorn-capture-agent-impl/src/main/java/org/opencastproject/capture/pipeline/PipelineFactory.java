@@ -75,7 +75,12 @@ public class PipelineFactory {
       String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
       String srcLoc = props.getProperty(srcProperty);
-      String outputLoc = new File(outputDirectory, props.getProperty(outputProperty)).getAbsolutePath();
+      File dev = new File(outputDirectory, props.getProperty(outputProperty));
+      if (dev == null || (dev != null && !dev.exists())) {
+        logger.error("Device {} does not exist, so we cannot create a pipeline.  Aborting!", outputProperty);
+        return null;
+      }
+      String outputLoc = dev.getAbsolutePath();
 
       if (new File(srcLoc).isFile()) {
         // Non-V4L file. If it exists, assume it is ingestable
