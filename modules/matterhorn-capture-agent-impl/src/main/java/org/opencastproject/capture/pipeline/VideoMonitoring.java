@@ -30,6 +30,12 @@ import org.gstreamer.elements.AppSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+
 /**
  * Class containing video monitoring services that can be incorporated into
  * GStreamer pipelines and used for confidence monitoring.
@@ -48,7 +54,7 @@ public class VideoMonitoring {
    * @param interval how often to grab data from the pipeline
    * @return the pipeline with the video monitoring added, or null on failure
    */
-  public static boolean addVideoMonitor(Pipeline pipeline, Element src, Element sink, final long interval) {
+  public static boolean addVideoMonitor(Pipeline pipeline, Element src, Element sink, final long interval, final String location) {
           
       Element tee, queue0, queue1, decodebin, jpegenc;
       final Element ffmpegcolorspace;
@@ -125,6 +131,22 @@ public class VideoMonitoring {
             int width = s.getInteger("width");
             int height = s.getInteger("height");
             logger.info("Grabbed frame: ({}, {})", width, height);
+            
+            /* saving the frame to disk */
+            byte bytes[] = new byte[buffer.getSize()];
+            ByteBuffer byteBuffer = buffer.getByteBuffer();
+            byteBuffer.get(bytes, 0, buffer.getSize());
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+              baos.write(bytes);
+              OutputStream fos = new FileOutputStream(location);
+              baos.writeTo(fos);
+              fos.close();
+              baos.close();
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+            
           }
           buffer = null;
         }
