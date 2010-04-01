@@ -64,7 +64,6 @@ public class SchedulerEventImpl implements SchedulerEvent {
    * @see org.opencastproject.scheduler.api.SchedulerEvent#addResource(java.lang.String)
    */
   public void addResource(String resource) {
-    
     synchronized (resources) {
       if (! resources.contains(resource)) resources.add(resource); // only save unique resources
     }
