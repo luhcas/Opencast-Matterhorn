@@ -21,15 +21,15 @@ input
   border:					0 none;
   onfocus:					none;  
   overflow:					hidden;
-  margin-left:				2px;
-  margin-right:				2px;
- 
 }
 
 
 #oc_video-controls input
 {
- float: 					left;
+  float: 					left;
+  margin-left: 				2px;
+  margin-right:				2px;
+  
 }
 
 input:hover
@@ -244,3 +244,59 @@ input:hover
   height:					36px;
  
 }
+
+#oc_btn-dropdown
+{
+  background:         	    url(../icons/monitor_center.png) no-repeat center top !important;
+  width: 					48px;
+  height: 					36px;
+  margin-top:				6px;
+
+}
+.oc_btn-singleDisplay
+{
+  background:         	    url(../icons/monitor.png) no-repeat center top !important;
+  width: 					24px;
+  height: 					24px;
+  margin-left:				4px;
+  margin-right:				4px;
+}
+
+.oc_btn-bigLeftDisplay
+{
+  background:         	    url(../icons/monitor_left.png) no-repeat center top !important;
+  width: 					36px;
+  height: 					24px;
+  margin-left:				4px;
+  margin-right:				4px;
+}
+
+
+.oc_btn-centerDisplay
+{
+  background:         	    url(../icons/monitor_center.png) no-repeat center top !important;
+  width: 					48px;
+  height: 					24px;
+  margin-left:				4px;
+  margin-right:				4px;
+}
+
+.oc_btn-bigRightDisplay
+{
+  background:         	    url(../icons/monitor_right.png) no-repeat center top !important;
+  width: 					36px;
+  height: 					24px;
+  margin-left:				4px;
+  margin-right:				4px;
+}
+
+.oc_btn-audioDisplay
+{
+  background:         	    url(../icons/audio.png) no-repeat center top !important;
+  width: 					24px;
+  height: 					24px;
+  margin-left:				4px;
+  margin-right:				4px;
+}
+
+

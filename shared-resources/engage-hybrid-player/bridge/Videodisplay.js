@@ -94,16 +94,36 @@ function VideodisplayReady() {
 		b_Videodisplay_root.setCaptionsURL(argString);
 	};
 	
-	Videodisplay.videoSizeControlsLeft = function () {
-		b_Videodisplay_root.videoSizeControlsLeft();
+	Videodisplay.videoSizeControlSingleDisplay = function () {
+		b_Videodisplay_root.videoSizeControlSingleDisplay();
 	};
 	
-	Videodisplay.videoSizeControlsCenter = function () {
-		b_Videodisplay_root.videoSizeControlsCenter();
+	Videodisplay.videoSizeControlAudioDisplay = function () {
+		b_Videodisplay_root.videoSizeControlAudioDisplay();
 	};
 	
-	Videodisplay.videoSizeControlsRight = function () {
-		b_Videodisplay_root.videoSizeControlsRight();
+	Videodisplay.videoSizeControlMultiOnlyLeftDisplay = function () {
+		b_Videodisplay_root.videoSizeControlMultiOnlyLeftDisplay();
+	};
+	
+	Videodisplay.videoSizeControlMultiOnlyRightDisplay = function () {
+		b_Videodisplay_root.videoSizeControlMultiOnlyRightDisplay();
+	};
+	
+	Videodisplay.videoSizeControlMultiBigRightDisplay = function () {
+		b_Videodisplay_root.videoSizeControlMultiBigRightDisplay();
+	};
+	
+	Videodisplay.videoSizeControlMultiBigLeftDisplay = function () {
+		b_Videodisplay_root.videoSizeControlMultiBigLeftDisplay();
+	};
+	
+	Videodisplay.videoSizeControlMultiDisplay = function () {
+		b_Videodisplay_root.videoSizeControlMultiDisplay();
+	};
+	
+	Videodisplay.getViewState = function () {
+		return b_Videodisplay_root.getViewState();
 	};
 	
 	b_Videodisplay_root.onBridgeReady();
