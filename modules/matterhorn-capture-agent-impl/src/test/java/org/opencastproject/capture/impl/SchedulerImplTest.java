@@ -328,24 +328,37 @@ public class SchedulerImplTest {
     Assert.assertEquals(0, schedule.length);
   }
 
-  @Test @Ignore
-  public void testDuplicateRemoteCalendar() throws ConfigurationException {
-    String dups = this.getClass().getClassLoader().getResource("calendars/Opencast-with-dups.ics").getFile();
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, dups);
+  @Test
+  public void testValidRemoteDuplicateCalendar() throws IOException, ConfigurationException {
+    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    File testfile = setupTestCalendar("calendars/Opencast-with-dups.ics", times);
+    //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL().toString());
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
     sched.updated(schedulerProps);
+    //TODO:  Figure out why this fails 1/3 times on some machines without the sleep() here.
+    try {
+      Thread.sleep(200);
+    } catch (InterruptedException e) {
+      Assert.fail();
+    }
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
+    Assert.assertEquals(times[0], schedule[0]);
+    testfile.delete();
   }
 
-  @Test @Ignore
-  public void testDuplicateLocalCalendar() throws ConfigurationException {
-    String dups = this.getClass().getClassLoader().getResource("calendars/Opencast-with-dups.ics").getFile();
+  @Test
+  public void testValidLocalDuplicateCalendar() throws IOException, ConfigurationException {
+    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    File testfile = setupTestCalendar("calendars/Opencast-with-dups.ics", times);
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
-    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, dups);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
     sched.updated(schedulerProps);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
+    Assert.assertEquals(times[0], schedule[0]);
+    testfile.delete();
   }
 
   @Test
