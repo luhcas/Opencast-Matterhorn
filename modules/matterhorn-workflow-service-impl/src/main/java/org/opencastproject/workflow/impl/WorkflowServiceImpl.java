@@ -516,8 +516,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         }
         ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler)handler;
         try {
-          URL url = new URL(resumableHandler.getHoldStateUserInterfaceURL().toString().replaceAll("\\{id\\}", workflow.getId()));
-          ((WorkflowOperationInstanceImpl)currentOperation).setHoldStateUserInterfaceUrl(url);
+          if(resumableHandler.getHoldStateUserInterfaceURL() != null) {
+            URL url = new URL(resumableHandler.getHoldStateUserInterfaceURL().toString().replaceAll("\\{id\\}", workflow.getId()));
+            ((WorkflowOperationInstanceImpl)currentOperation).setHoldStateUserInterfaceUrl(url);
+          }
         } catch (MalformedURLException e) {
           logger.warn("unable to replace workflow ID in the hold state URL", e);
         }
