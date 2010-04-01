@@ -16,7 +16,7 @@
 package org.opencastproject.workflow.api;
 
 
-import org.opencastproject.http.SecureContext;
+import org.opencastproject.http.SecureHttpContext;
 import org.opencastproject.http.StaticResource;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
@@ -68,7 +68,7 @@ public abstract class AbstractWorkflowOperationHandler implements ResumableWorkf
         HttpService httpService = (HttpService)bundleContext.getService(reference);
         HttpContext defaultHttpContext = httpService.createDefaultHttpContext();
         try {
-          httpService.registerResources(alias, path, new SecureContext(defaultHttpContext, bundleContext));
+          httpService.registerResources(alias, path, new SecureHttpContext(defaultHttpContext, bundleContext));
         } catch (NamespaceException e) {
           throw new IllegalStateException(alias + " has already been registered.  Choose another alias.", e);
         }

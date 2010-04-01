@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="services.listing.ui" immediate="true" activate="activate" deactivate="deactivate">
+<component name="org.opencastproject.welcome" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.http.StaticResource" />
-  <property name="service.description" value="Service Listing User Interface" />
+  <property name="service.description" value="Matterhorn welcome pages" />
   <property name="alias" value="/" />
   <property name="classpath" value="/ui" />
   <property name="welcome.file" value="welcome.html" />

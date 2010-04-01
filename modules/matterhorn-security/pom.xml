@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>matterhorn-authentication-api</artifactId>
+  <artifactId>matterhorn-security</artifactId>
   <packaging>bundle</packaging>
-  <name>matterhorn-authentication-api</name>
+  <name>matterhorn-security</name>
   <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -15,6 +15,10 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>org.springframework.security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.osgi</groupId>
+      <artifactId>spring-osgi-core</artifactId>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -47,23 +51,32 @@
               javax.servlet,
               org.springframework.dao,
               org.springframework.security,
+              org.springframework.security.config,
               org.springframework.security.context,
+              org.springframework.security.event.authentication,
+              org.springframework.security.event.authorization,
               org.springframework.security.intercept,
               org.springframework.security.intercept.web,
               org.springframework.security.providers,
+              org.springframework.security.providers.anonymous,
               org.springframework.security.providers.dao,
+              org.springframework.security.providers.preauth,
               org.springframework.security.ui,
               org.springframework.security.ui.basicauth,
+              org.springframework.security.ui.preauth,
+              org.springframework.security.ui.preauth.x509,
               org.springframework.security.userdetails,
               org.springframework.security.userdetails.memory,
               org.springframework.security.util,
               org.springframework.security.vote,
-              *
+              *;resolution:=optional
             </Import-Package>
-            <Export-Package> org.opencastproject.authentication.api </Export-Package>
+            <Export-Package> org.opencastproject.security </Export-Package>
+            <Service-Component>OSGI-INF/security-config-scanner.xml</Service-Component>
           </instructions>
         </configuration>
       </plugin>
     </plugins>
   </build>
 </project>
+

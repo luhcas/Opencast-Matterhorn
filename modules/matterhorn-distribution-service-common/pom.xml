@@ -35,11 +35,6 @@
       <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.xmlschema</artifactId>
-      <version>1.4.3_1</version>
-    </dependency>
-    <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
     </dependency>

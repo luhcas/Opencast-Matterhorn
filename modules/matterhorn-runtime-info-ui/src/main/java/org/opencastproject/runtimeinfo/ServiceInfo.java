@@ -15,52 +15,48 @@
  */
 package org.opencastproject.runtimeinfo;
 
+import org.opencastproject.http.SecureHttpContext;
 import org.opencastproject.http.StaticResource;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
-import java.util.Dictionary;
-import java.util.Hashtable;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Lists all service endpoints currently registered with the system.
+ * Registers servlets for listing service endpoints currently registered with the system, and optionally mounts the
+ * selenium UI test suites.
  */
-public class InfoServlet implements BundleActivator {
+public class ServiceInfo {
   private static final long serialVersionUID = 1L;
-  private static final Logger logger = LoggerFactory.getLogger(InfoServlet.class);
+  private static final Logger logger = LoggerFactory.getLogger(ServiceInfo.class);
   private static final String WS_CONTEXT = "org.apache.cxf.ws.httpservice.context";
   private static final String WS_CONTEXT_FILTER = "(" + WS_CONTEXT + "=*)";
   private static final String RS_CONTEXT = "org.apache.cxf.rs.httpservice.context";
   private static final String RS_CONTEXT_FILTER = "(" + RS_CONTEXT + "=*)";
   
+  private HttpService httpService;
   private BundleContext bundleContext;
-
-  /**
-   * Gets the server url including protocol and port as a string.  Returns null if the server url has not been
-   * explicitly identified in the container.
-   *
-   * @return A URL or null if the server has not been set   
-   */
-  protected String getServerUrl() {
-    String serverUrl = bundleContext.getProperty("serverUrl");
-    return serverUrl;
+  private boolean testMode;
+  private String serverUrl;
+  
+  public void setHttpService(HttpService httpService) {
+    this.httpService = httpService;
   }
   
   protected ServiceReference[] getSoapServiceReferences() throws InvalidSyntaxException {
@@ -74,33 +70,28 @@ public class InfoServlet implements BundleActivator {
   protected ServiceReference[] getUserInterfaceServiceReferences() throws InvalidSyntaxException {
     return bundleContext.getAllServiceReferences(StaticResource.class.getName(), "(&(alias=*)(classpath=*))");
   }
-
   
-  protected boolean isTestMode() {
-    return "true".equalsIgnoreCase(bundleContext.getProperty("testMode"));
-  }
-  
-  @SuppressWarnings("unchecked")
-  public void start(BundleContext context) throws Exception {
+  public void activate(ComponentContext cc) {
     logger.debug("start()");
-    this.bundleContext = context;
+    this.bundleContext = cc.getBundleContext();
+    this.serverUrl = bundleContext.getProperty("org.opencastproject.server.url");    
+    this.testMode = "true".equalsIgnoreCase(bundleContext.getProperty("testMode"));
     
     // Register the info servlet
-    Dictionary servletProps = new Hashtable();
-    servletProps.put("alias", "/info.json");
-    servletProps.put("servlet-name", "Info Servlet");
-    context.registerService(Servlet.class.getName(), new Info(), servletProps);
-
-    // Register the UI test harness
-    if(isTestMode()) {
-      Dictionary testServletProps = new Hashtable();
-      testServletProps.put("alias", "/TestSuites.html");
-      testServletProps.put("servlet-name", "Test Suite Servlet");
-      context.registerService(Servlet.class.getName(), new TestSuiteServlet(), testServletProps);
+    try {
+      httpService.registerServlet("/info.json", new Info(), null, new SecureHttpContext(httpService.createDefaultHttpContext(), bundleContext));
+      // Register the UI test harness
+      if(testMode) {
+        httpService.registerServlet("/TestSuites.html", new TestSuiteServlet(), null, new SecureHttpContext(httpService.createDefaultHttpContext(), bundleContext));
+      }
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
     }
   }
   
-  public void stop(BundleContext context) throws Exception {
+  public void deactivate() {
+    httpService.unregister("/info.json");
+    httpService.unregister("/TestSuites.html");
   }
   
   class Info extends HttpServlet {
@@ -130,11 +121,6 @@ public class InfoServlet implements BundleActivator {
         e.printStackTrace();
       }
       if (serviceRefs == null) return json;
-      String serverUrl = getServerUrl();
-      //check for relative paths
-      if (serverUrl == null){
-          serverUrl="";
-      }
       for (ServiceReference ref : serviceRefs) {
         String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
         String servletContextPath = (String)ref.getProperty(WS_CONTEXT);
@@ -157,11 +143,6 @@ public class InfoServlet implements BundleActivator {
         e.printStackTrace();
       }
       if (serviceRefs == null) return json;
-      String serverUrl = getServerUrl();
-      //check for relative paths
-      if (serverUrl == null){
-          serverUrl="";
-      }
       for (ServiceReference jaxRsRef : serviceRefs) {
         String description = (String)jaxRsRef.getProperty(Constants.SERVICE_DESCRIPTION);
         String servletContextPath = (String)jaxRsRef.getProperty(RS_CONTEXT);
@@ -184,11 +165,6 @@ public class InfoServlet implements BundleActivator {
         e.printStackTrace();
       }
       if (serviceRefs == null) return json;
-      String serverUrl = getServerUrl();
-      //check for relative paths
-      if (serverUrl == null){
-          serverUrl="";
-      }
       for (ServiceReference ref : serviceRefs) {
         String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
         String alias = (String)ref.getProperty("alias");
@@ -198,7 +174,7 @@ public class InfoServlet implements BundleActivator {
         JSONObject endpoint = new JSONObject();
         endpoint.put("description", description);
         endpoint.put("welcomepage", serverUrl + welcomePath);
-        if(testSuite != null && isTestMode()) {
+        if(testSuite != null && testMode) {
           String testSuitePath = "/".equals(alias) ? alias + testSuite : alias + "/" + testSuite;
           endpoint.put("testsuite", serverUrl + testSuitePath);
         }
@@ -211,11 +187,6 @@ public class InfoServlet implements BundleActivator {
   class TestSuiteServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-      String serverUrl = getServerUrl();
-      //check for relative paths
-      if (serverUrl == null){
-        serverUrl="";
-      }
       PrintWriter out = resp.getWriter();
       out.println("<html><head><meta content=\"text/html; charset=ISO-8859-1\" http-equiv=\"content-type\"><title>Test Suite</title></head>");
       out.println("<body><h1>Acceptance Test Suites</h1><ul>");

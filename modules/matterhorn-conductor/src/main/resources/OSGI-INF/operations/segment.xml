@@ -10,9 +10,4 @@
     name="VideoSegmenterService" policy="static" bind="setVideoSegmenter"/>
   <reference cardinality="1..1" interface="org.opencastproject.workspace.api.Workspace"
     name="Workspace" policy="static" bind="setWorkspace"/>
-
-<!--
-  <reference cardinality="1..1" interface="ch.ethz.iks.r_osgi.RemoteOSGiService"
-  name="RemoteOSGiService" policy="static" bind="setRemoteServices"/>
--->
 </component>

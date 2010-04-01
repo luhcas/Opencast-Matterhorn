@@ -34,14 +34,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- *
+ * An HttpContext that routes all requests through all {@link Filter}s registered with (org.opencastproject.filter=true.
  */
-public class SecureContext implements HttpContext {
-  private static final Logger logger = LoggerFactory.getLogger(SecureContext.class);
+public class SecureHttpContext implements HttpContext {
+  private static final Logger logger = LoggerFactory.getLogger(SecureHttpContext.class);
   private HttpContext delegate;
   private BundleContext bundleContext;
   
-  public SecureContext(HttpContext delegate, BundleContext bundleContext) {
+  public SecureHttpContext(HttpContext delegate, BundleContext bundleContext) {
     this.delegate = delegate;
     this.bundleContext = bundleContext;
   }
@@ -80,8 +80,7 @@ public class SecureContext implements HttpContext {
     if (refs == null || refs.length == 0) {
 //      logger.warn("Requests are not permitted without a registered matterhorn security filter.");
 //      return false;
-      logger.warn("Authentication is currently disabled");
-      return true;
+      return true; // TODO: this must be changed to false for the next release
     }
     Filter[] filters = new Filter[refs.length];
     for (int i = 0; i < refs.length; i++)

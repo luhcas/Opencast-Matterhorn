@@ -70,7 +70,7 @@ public class StaticResource extends HttpServlet {
     HttpContext httpContext = httpService.createDefaultHttpContext();
     BundleContext bundleContext = componentContext.getBundleContext();
     try {
-      httpService.registerServlet(alias, this, null, new SecureContext(httpContext, bundleContext));
+      httpService.registerServlet(alias, this, null, new SecureHttpContext(httpContext, bundleContext));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

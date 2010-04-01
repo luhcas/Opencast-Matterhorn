@@ -16,8 +16,8 @@
 package org.opencastproject.http;
 
 import org.apache.commons.io.FileUtils;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -28,53 +28,44 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Dictionary;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
- * Registers static content resources on the filesystem with the http service.
+ * Registers static content resources on the filesystem with the http service.  Follows the security scheme defined in
+ * {@link SecureHttpContext}.
  */
-public class StaticHttpContext implements ManagedService {
+public class StaticHttpContext {
   private static final Logger logger = LoggerFactory.getLogger(StaticHttpContext.class);
-  String defaultPath;
+  String filesystemPath;
   protected HttpService httpService;
   StaticContext context;
 
   public StaticHttpContext() {
-    defaultPath = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "static";
-    logger.info("Registering resources at {} at URL /static", defaultPath);
-    context = new StaticContext(defaultPath);
+    filesystemPath = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "static";
+    logger.info("Registering resources at {} at URL /static", filesystemPath);
   }
   
   public void setHttpService(HttpService httpService) {
     this.httpService = httpService;
+  }
+  
+  public void activate(ComponentContext cc) {
     try {
-      httpService.registerResources("/static", "/", context);
+      httpService.registerResources("/static", "/", new StaticContext(filesystemPath, httpService.createDefaultHttpContext(), cc.getBundleContext()));
     } catch (NamespaceException e) {
       throw new RuntimeException(e);
     }
   }
-
-  public void unsetHttpService(HttpService httpService) {
+  
+  public void deactivate() {
     httpService.unregister("/static");
   }
 
-  @SuppressWarnings("unchecked")
-  public void updated(Dictionary properties) throws ConfigurationException {
-    if(properties.get("baseResourcePath") != null) {
-      context.setBaseResourcePath((String) properties.get("baseResourcePath"));
-    }
-  }
-
-  static class StaticContext implements HttpContext {
+  class StaticContext extends SecureHttpContext {
     private String baseResourcePath;
-
-    public StaticContext(String baseResourcePath) {
+    public StaticContext(String baseResourcePath, HttpContext delegate, BundleContext bundleContext) {
+      super(delegate, bundleContext);
       setBaseResourcePath(baseResourcePath);
     }
-
     public void setBaseResourcePath(String baseResourcePath) {
       this.baseResourcePath = baseResourcePath;
       File f = new File(baseResourcePath);
@@ -89,11 +80,6 @@ public class StaticHttpContext implements ManagedService {
         }
       }
     }
-
-    public String getMimeType(String name) {
-      return null;
-    }
-
     public URL getResource(String name) {
       File f = new File(baseResourcePath, name);
       if( ! f.isFile()) {
@@ -104,10 +90,6 @@ public class StaticHttpContext implements ManagedService {
       } catch (MalformedURLException e) {
         throw new RuntimeException(e);
       }
-    }
-
-    public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-      return true;
     }
   }
 }
