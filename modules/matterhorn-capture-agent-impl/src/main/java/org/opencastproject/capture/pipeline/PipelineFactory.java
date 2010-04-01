@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -75,12 +76,17 @@ public class PipelineFactory {
       String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
       String srcLoc = props.getProperty(srcProperty);
-      File dev = new File(outputDirectory, props.getProperty(outputProperty));
-      if (dev == null || (dev != null && !dev.exists())) {
-        logger.error("Device {} does not exist, so we cannot create a pipeline.  Aborting!", outputProperty);
+      File outputFile = new File(outputDirectory, props.getProperty(outputProperty));
+      try {
+        if(!outputFile.createNewFile()){
+          logger.error("Could not create ouput file for {}, file may already exist.", name);
+          return null;
+        }
+      } catch (IOException e) {
+        logger.error("An error occured while creating output file for {}. {}", name, e.getMessage());
         return null;
       }
-      String outputLoc = dev.getAbsolutePath();
+      String outputLoc = outputFile.getAbsolutePath();
 
       if (new File(srcLoc).isFile()) {
         // Non-V4L file. If it exists, assume it is ingestable
