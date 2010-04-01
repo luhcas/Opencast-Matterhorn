@@ -181,7 +181,7 @@
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">cover/source</configuration>
         <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">engage-image.http</configuration>
+        <configuration key="encoding-profile">engage-cover.http</configuration>
         <configuration key="time">1</configuration>
       </configurations>
     </operation>
@@ -210,7 +210,7 @@
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">cover/source</configuration>
         <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">engage-image.http</configuration>
+        <configuration key="encoding-profile">engage-cover.http</configuration>
         <configuration key="time">1</configuration>
       </configurations>
     </operation>
