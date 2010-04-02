@@ -15,7 +15,6 @@
  */
 package org.opencastproject.ingest.impl;
 
-import org.opencastproject.conductor.api.ConductorStrategy;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
@@ -38,10 +37,8 @@ import java.util.Map;
 
 public class IngestServiceImplTest {
   private IngestServiceImpl service = null;
-  private ConductorStrategy conductorStrategy = null;
   private WorkflowService workflowService = null;
   private WorkflowInstance workflowInstance = null;
-  private WorkflowDefinition workflowDefinition = null;
   private Workspace workspace = null;
   private MediaPackage mediaPackage = null;
   private URI urlTrack;
@@ -55,6 +52,7 @@ public class IngestServiceImplTest {
 
   private static String workflowInstanceID = "junit_workflow_instance_id";
 
+  @SuppressWarnings("unchecked")
   @Before
   public void setup() throws Exception {
 
@@ -109,28 +107,23 @@ public class IngestServiceImplTest {
             workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
                     (InputStream) EasyMock.anyObject())).andReturn(urlCatalog);
 
-    workflowDefinition = EasyMock.createNiceMock(WorkflowDefinition.class);
-
-    conductorStrategy = EasyMock.createNiceMock(ConductorStrategy.class);
-    EasyMock.expect(conductorStrategy.getWorkflow((String) EasyMock.anyObject())).andReturn(workflowDefinition);
-
     workflowInstance = EasyMock.createNiceMock(WorkflowInstance.class);
     EasyMock.expect(workflowInstance.getId()).andReturn(workflowInstanceID);
 
     workflowService = EasyMock.createNiceMock(WorkflowService.class);
-    EasyMock.expect(
-            workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(),
-                    (Map) EasyMock.anyObject())).andReturn(workflowInstance);
+    EasyMock.expect(workflowService.start((MediaPackage) EasyMock.anyObject(), (Map) EasyMock.anyObject())).andReturn(
+            workflowInstance);
+    EasyMock.expect(workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(), (Map) EasyMock.anyObject())).andReturn(
+            workflowInstance);
+    EasyMock.expect(workflowService.start((MediaPackage) EasyMock.anyObject())).andReturn(workflowInstance);
 
     EasyMock.replay(workspace);
-    EasyMock.replay(conductorStrategy);
     EasyMock.replay(workflowInstance);
     EasyMock.replay(workflowService);
 
     service = new IngestServiceImpl();
     service.setTempFolder("target/temp/");
     service.setWorkspace(workspace);
-    service.setConductorStrategy(conductorStrategy);
     service.setWorkflowService(workflowService);
   }
 
@@ -145,24 +138,25 @@ public class IngestServiceImplTest {
     mediaPackage = service.addTrack(urlTrack, null, mediaPackage);
     mediaPackage = service.addCatalog(urlCatalog, DublinCoreCatalog.FLAVOR, mediaPackage);
     mediaPackage = service.addAttachment(urlAttachment, MediaPackageElements.COVER_FLAVOR, mediaPackage);
-    String def = service.ingest(mediaPackage);
+    WorkflowInstance instance = service.ingest(mediaPackage);
     Assert.assertEquals(1, mediaPackage.getTracks().length);
     Assert.assertEquals(1, mediaPackage.getCatalogs().length);
     Assert.assertEquals(1, mediaPackage.getAttachments().length);
-    Assert.assertEquals(workflowInstanceID, def);
+    Assert.assertEquals(workflowInstanceID, instance.getId());
   }
 
   @Test
   public void testThickClient() throws Exception {
     InputStream packageStream = urlPackage.toURL().openStream();
-    String def = service.addZippedMediaPackage(packageStream);
+    WorkflowInstance instance = service.addZippedMediaPackage(packageStream);
     try {
       packageStream.close();
     } catch (IOException e) {
+      Assert.fail(e.getMessage());
     }
     // Assert.assertEquals(2, mediaPackage.getTracks().length);
     // Assert.assertEquals(3, mediaPackage.getCatalogs().length);
-    Assert.assertEquals(workflowInstanceID, def);
+    Assert.assertEquals(workflowInstanceID, instance.getId());
   }
 
 }

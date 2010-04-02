@@ -147,7 +147,7 @@ public final class ChecksumType implements Serializable {
       try {
         return ChecksumType.fromString(str);
       } catch (NoSuchAlgorithmException e) {
-        logger.warn(e.getMessage());
+        logger.warn(e.getMessage(), e);
         throw e;
       }
     }

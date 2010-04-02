@@ -29,11 +29,6 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-conductor-api</artifactId>
-      <version>0.6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workflow-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
@@ -161,8 +156,7 @@
               org.opencastproject.workflow.handler
             </Export-Package>
             <Service-Component>
-              OSGI-INF/conductor-service.xml,
-              OSGI-INF/conductor-strategy.xml,
+              OSGI-INF/workflow-definition-loader.xml,
               OSGI-INF/workflow-definition-scanner.xml,
               OSGI-INF/operations/compose.xml,
               OSGI-INF/operations/slides-previews.xml,

@@ -35,7 +35,6 @@
         <module>modules/matterhorn-capture-admin-service-impl</module>
         <module>modules/matterhorn-composer-service-api</module>
         <module>modules/matterhorn-composer-service-impl</module>
-        <module>modules/matterhorn-conductor-api</module>
         <module>modules/matterhorn-conductor</module>
         <module>modules/matterhorn-demo</module>
         <module>modules/matterhorn-distribution-service-api</module>
@@ -56,7 +55,6 @@
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-dublincore</module>
         <module>modules/matterhorn-mpeg7</module>
-        <module>modules/matterhorn-notification-service-api</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-search-service-api</module>
         <module>modules/matterhorn-search-service-impl</module>

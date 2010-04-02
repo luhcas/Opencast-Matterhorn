@@ -28,6 +28,7 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowQuery;
+import org.opencastproject.workflow.api.WorkflowSelectionStrategy;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -75,6 +76,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * should handle.
    */
   protected static final String WORKFLOW_OPERATION_PROPERTY = "workflow.operation";
+  protected static final String WORKFLOW_DEFINITION_DEFAULT = "conductor.strategy.defaultworkflow";
 
   /** TODO: Remove references to the component context once felix scr 1.2 becomes available */
   protected ComponentContext componentContext = null;
@@ -322,7 +324,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
           Map<String, String> properties) {
-//    WorkflowDefinition parsedDefinition = updateConfiguration(workflowDefinition, properties);
+    if(workflowDefinition == null) throw new IllegalArgumentException("workflow definition must not be null");
+    if(mediaPackage == null) throw new IllegalArgumentException("mediapackage must not be null");
     
     String id = UUID.randomUUID().toString();
     logger.info("Starting a new workflow instance with ID={}", id);
@@ -400,14 +403,14 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   }
 
   /**
-   * Returns the workflow identified by <code>name</code> or <code>null</code> if no such workflow was found.
+   * Returns the workflow identified by <code>id</code> or <code>null</code> if no such definition was found.
    * 
-   * @param name
-   *          the workflow definition name
+   * @param id
+   *          the workflow definition id
    * @return the workflow
    */
-  public WorkflowDefinition getWorkflowDefinitionById(String name) {
-    return workflowDefinitions.get(name);
+  public WorkflowDefinition getWorkflowDefinitionById(String id) {
+    return workflowDefinitions.get(id);
   }
 
   /**
@@ -559,5 +562,68 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         this.run(workflow);
       }
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition, org.opencastproject.media.mediapackage.MediaPackage)
+   */
+  @Override
+  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage) {
+    if(workflowDefinition == null) throw new IllegalArgumentException("workflow definition must not be null");
+    if(mediaPackage == null) throw new IllegalArgumentException("mediapackage must not be null");
+    Map<String, String> properties = new HashMap<String, String>();
+    return start(workflowDefinition, mediaPackage, properties);
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.media.mediapackage.MediaPackage, java.util.Map)
+   */
+  @Override
+  public WorkflowInstance start(MediaPackage mediaPackage, Map<String, String> properties) {
+    if(mediaPackage == null) throw new IllegalArgumentException("mediapackage must not be null");
+    WorkflowDefinition def = getWorkflowDefinition(mediaPackage, properties);
+    return start(def, mediaPackage, properties);
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.media.mediapackage.MediaPackage)
+   */
+  @Override
+  public WorkflowInstance start(MediaPackage mediaPackage) {
+    if(mediaPackage == null) throw new IllegalArgumentException("mediapackage must not be null");
+    Map<String, String> properties = new HashMap<String, String>(); 
+    WorkflowDefinition def = getWorkflowDefinition(mediaPackage, properties);
+    return start(def, mediaPackage, properties);
+  }
+
+  /**
+   * Gets the workflow definition for a submitted mediapackage and properties.
+   * 
+   * @param mediaPackage
+   * @param properties
+   * @return The workflow definition
+   * @throws IllegalStateException if no acceptable workflow definition can be found
+   */
+  protected WorkflowDefinition getWorkflowDefinition(MediaPackage mediaPackage, Map<String, String> properties) {
+    // Get the default workflow, either from a WorkflowSelectionStrategy or from the bundle context
+    WorkflowDefinition def = null;
+    ServiceReference ref = componentContext.getBundleContext().getServiceReference(WorkflowSelectionStrategy.class.getName());
+    if(ref != null) {
+      WorkflowSelectionStrategy strategy = (WorkflowSelectionStrategy)componentContext.getBundleContext().getService(ref);
+      def = strategy.getWorkflowDefinition(mediaPackage, properties);
+    }
+    // Still no definition?  Try finding the default workflow definition ID in the bundle context
+    if(def == null) {
+      String defaultId = componentContext.getBundleContext().getProperty(WORKFLOW_DEFINITION_DEFAULT);
+      if(defaultId != null) {
+        def = getWorkflowDefinitionById(defaultId);
+      }
+    }
+    // If there is still no definition defined, we can not continue
+    if(def == null) throw new IllegalStateException("Unable to determine the default workflow definition");
+    return def;
   }
 }

@@ -141,7 +141,7 @@ public class StaticResource extends HttpServlet {
           resp.sendError(404);
           return;
         } catch (IOException e) {
-          logger.warn(e.getMessage());
+          logger.warn(e.getMessage(), e);
           return;
         }
       }

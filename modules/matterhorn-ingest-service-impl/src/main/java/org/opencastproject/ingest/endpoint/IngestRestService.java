@@ -27,13 +27,13 @@ import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.util.DocUtil;
-import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.workflow.api.WorkflowService;
+import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowInstance;
 
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -54,10 +54,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-//import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
-//import javax.persistence.Query;
-//import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -86,7 +83,6 @@ public class IngestRestService {
   protected PersistenceProvider persistenceProvider;
   protected Map<String, Object> persistenceProperties;
   protected EntityManagerFactory emf = null;
-  private String serverURL = null;
 
   // For the progress bar -1 bug workaround, keeping UploadJobs in memory rather than saving them using JPA
   private HashMap<String,UploadJob> jobs;
@@ -115,11 +111,6 @@ public class IngestRestService {
   }
 
   public void activate(ComponentContext context) {
-    if (context == null || context.getBundleContext().getProperty("serverURL") == null) {
-      serverURL = UrlSupport.DEFAULT_BASE_URL;
-    } else {
-      serverURL = context.getBundleContext().getProperty("serverURL");
-    }
     try {
       emf = persistenceProvider
               .createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
@@ -137,7 +128,7 @@ public class IngestRestService {
       mp = ingestService.createMediaPackage();
       return Response.ok(mp).build();
     } catch (Exception e) {
-      logger.warn(e.getMessage());
+      logger.warn(e.getMessage(), e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -164,7 +155,7 @@ public class IngestRestService {
       mp = ingestService.addTrack(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
       return Response.ok(mp).build();
     } catch (Exception e) {
-      logger.warn(e.getMessage());
+      logger.warn(e.getMessage(), e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -188,7 +179,7 @@ public class IngestRestService {
               .parseFlavor(flavor), mp);
       return Response.ok(resultingMediaPackage).build();
     } catch (Exception e) {
-      logger.warn(e.getMessage());
+      logger.warn(e.getMessage(), e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -211,7 +202,7 @@ public class IngestRestService {
       mp = ingestService.addAttachment(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
       return Response.ok(mp).build();
     } catch (Exception e) {
-      logger.warn(e.getMessage());
+      logger.warn(e.getMessage(), e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -276,7 +267,7 @@ public class IngestRestService {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addMediaPackage")
   public Response addMediaPackage(@Context HttpServletRequest request) {
-    return _addMediaPackage(request, WorkflowService.DEFAULT_WORKFLOW_ID);
+    return _addMediaPackage(request, null);
   }
 
   @POST
@@ -312,8 +303,13 @@ public class IngestRestService {
         dcc.toXml(out, true);
         InputStream in = new ByteArrayInputStream(out.toByteArray());
         ingestService.addCatalog(in, "dublincore.xml", MediaPackageElements.DUBLINCORE_CATALOG, mp);
-        ingestService.ingest(mp, wdID);
-        return Response.ok(mp).build();
+        WorkflowInstance workflow;
+        if(wdID == null) {
+          workflow = ingestService.ingest(mp);
+        } else {
+          workflow = ingestService.ingest(mp, wdID);
+        }
+        return Response.ok(workflow).build();
       }
       return Response.serverError().status(Status.BAD_REQUEST).build();
     } catch (Exception e) {
@@ -324,50 +320,56 @@ public class IngestRestService {
 
   @POST
   @Path("addZippedMediaPackage")
-  // @Consumes("application/zip")
   public Response addZippedMediaPackage(InputStream mp) {
-    return _addZippedMediaPackage(mp, WorkflowService.DEFAULT_WORKFLOW_ID);
+    logger.debug("addZippedMediaPackage(InputStream) called.");
+    try {
+      WorkflowInstance workflow = ingestService.addZippedMediaPackage(mp);
+      return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
+    } catch (Exception e) {
+      logger.warn(e.getMessage(), e);
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   @POST
   @Path("addZippedMediaPackage/{wdID}")
   public Response addZippedMediaPackage(InputStream mp, @PathParam("wdID") String wdID) {
-    return _addZippedMediaPackage(mp, wdID);
-  }
-
-  private Response _addZippedMediaPackage(InputStream mp, String wdID) {
-    logger.debug("addZippedMediaPackage(InputStream) called.");
+    logger.debug("addZippedMediaPackage(InputStream, ID) called.");
     try {
-      ingestService.addZippedMediaPackage(mp, wdID);
+      WorkflowInstance workflow = ingestService.addZippedMediaPackage(mp, wdID);
+      return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
     } catch (Exception e) {
-      logger.warn(e.getMessage());
+      logger.warn(e.getMessage(), e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
-    return Response.ok().build();
   }
 
   @POST
   @Produces(MediaType.TEXT_HTML)
   @Path("ingest")
   public Response ingest(@FormParam("mediaPackage") String mpx) {
-    return _ingest(mpx, WorkflowService.DEFAULT_WORKFLOW_ID);
+    logger.debug("ingest(MediaPackage): {}", mpx);
+    try {
+      MediaPackage mp = builder.loadFromXml(mpx);
+      WorkflowInstance workflow = ingestService.ingest(mp);
+      return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
+    } catch (Exception e) {
+      logger.warn(e.getMessage(), e);
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   @POST
   @Produces(MediaType.TEXT_HTML)
   @Path("ingest/{wdID}")
   public Response ingest(@FormParam("mediaPackage") String mpx, @PathParam("wdID") String wdID) {
-    return _ingest(mpx, wdID);
-  }
-
-  private Response _ingest(String mpx, String wdID) {
-    logger.debug("ingest(MediaPackage): {}", mpx);
+    logger.debug("ingest(MediaPackage, ID): {}, {}", mpx, wdID);
     try {
       MediaPackage mp = builder.loadFromXml(mpx);
-      ingestService.ingest(mp, wdID);
-      return Response.ok(mpx).build();
+      WorkflowInstance workflow = ingestService.ingest(mp, wdID);
+      return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
     } catch (Exception e) {
-      logger.warn(e.getMessage());
+      logger.warn(e.getMessage(), e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }

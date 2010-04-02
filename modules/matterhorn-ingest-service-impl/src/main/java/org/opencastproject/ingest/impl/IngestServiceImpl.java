@@ -15,7 +15,6 @@
  */
 package org.opencastproject.ingest.impl;
 
-import org.opencastproject.conductor.api.ConductorStrategy;
 import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -35,8 +34,6 @@ import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,18 +45,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Date;
-import java.util.Dictionary;
 import java.util.UUID;
 
 /**
  * Creates and augments Matterhorn MediaPackages. Stores media into the Working File Repository.
  */
-public class IngestServiceImpl implements IngestService, ManagedService {
+public class IngestServiceImpl implements IngestService {
   // TODO CONFIGURATION (tempPath, BUFFER)
 
   private static final Logger logger = LoggerFactory.getLogger(IngestServiceImpl.class);
   private MediaPackageBuilder builder = null;
-  private ConductorStrategy conductorStrategy;
   private WorkflowService workflowService;
   private Workspace workspace;
   private String tempFolder;
@@ -75,18 +70,13 @@ public class IngestServiceImpl implements IngestService, ManagedService {
     tempFolder += "opencast" + fs + "ingest-temp" + fs;
   }
 
-  @SuppressWarnings("unchecked")
-  public void updated(Dictionary props) throws ConfigurationException {
-    // Update any configuration properties here
-  }
-
   /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.ingest.api.IngestService#addZippedMediaPackage(java.io.InputStream)
    */
-  public String addZippedMediaPackage(InputStream zipStream) throws Exception {
-    return addZippedMediaPackage(zipStream, WorkflowService.DEFAULT_WORKFLOW_ID);
+  public WorkflowInstance addZippedMediaPackage(InputStream zipStream) throws Exception {
+    return addZippedMediaPackage(zipStream, null);
   }
 
   /**
@@ -94,7 +84,7 @@ public class IngestServiceImpl implements IngestService, ManagedService {
    * 
    * @see org.opencastproject.ingest.api.IngestService#addZippedMediaPackage(java.io.InputStream, java.lang.String)
    */
-  public String addZippedMediaPackage(InputStream zipStream, String wd) throws Exception {
+  public WorkflowInstance addZippedMediaPackage(InputStream zipStream, String wd) throws Exception {
     // locally unpack the mediaPackage
     String tempPath = tempFolder + UUID.randomUUID().toString();
     // save inputStream to file
@@ -162,7 +152,11 @@ public class IngestServiceImpl implements IngestService, ManagedService {
       throw (e);
     }
     removeDirectory(tempPath);
-    return ingest(mp, wd);
+    if(wd == null) {
+      return ingest(mp);
+    } else {
+      return ingest(mp, wd);
+    }
   }
 
   /**
@@ -266,8 +260,8 @@ public class IngestServiceImpl implements IngestService, ManagedService {
    * 
    * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String)
    */
-  public String ingest(MediaPackage mp) throws Exception {
-    return ingest(mp, WorkflowService.DEFAULT_WORKFLOW_ID);
+  public WorkflowInstance ingest(MediaPackage mp) throws Exception {
+    return workflowService.start(mp);
   }
 
   /**
@@ -275,12 +269,11 @@ public class IngestServiceImpl implements IngestService, ManagedService {
    * 
    * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String, java.lang.String)
    */
-  public String ingest(MediaPackage mp, String wd) throws Exception {
-    WorkflowDefinition workflowDef = conductorStrategy.getWorkflow(wd);
-    WorkflowInstance workflowInst = workflowService.start(workflowDef, mp, null);
-
-    return workflowInst.getId();
-
+  public WorkflowInstance ingest(MediaPackage mp, String wd) throws Exception {
+    WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(wd);
+    if(workflowDef == null) throw new IllegalStateException(wd + " is not a registered workflow definition");
+    WorkflowInstance workflowInst = workflowService.start(workflowDef, mp);
+    return workflowInst;
   }
 
   /**
@@ -388,10 +381,6 @@ public class IngestServiceImpl implements IngestService, ManagedService {
   // ---------------------------------------------
   // --------- bind and unbind bundles ---------
   // ---------------------------------------------
-  public void setConductorStrategy(ConductorStrategy conductorStrategy) {
-    this.conductorStrategy = conductorStrategy;
-  }
-
   public void setWorkflowService(WorkflowService workflowService) {
     this.workflowService = workflowService;
   }

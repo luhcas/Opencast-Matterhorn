@@ -21,6 +21,7 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
 import org.opencastproject.util.ConfigurationException;
+import org.opencastproject.workflow.api.WorkflowInstance;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -38,13 +39,13 @@ public interface IngestService {
    * 
    * @param ZippedMediaPackage
    *          A zipped file containing manifest, tracks, catalogs and attachments
-   * @return Workflow instance id.
+   * @return Workflow instance.
    * @throws MediaPackageException
    * @throws FileNotFoundException
    * @throws IOException
    * @throws Exception
    */
-  String addZippedMediaPackage(InputStream ZippedMediaPackage) throws MediaPackageException, FileNotFoundException,
+  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage) throws MediaPackageException, FileNotFoundException,
           IOException, Exception;
 
   /**
@@ -54,13 +55,13 @@ public interface IngestService {
    *          A zipped file containing manifest, tracks, catalogs and attachments
    * @param workflowDefinitionID
    *          workflow to be used with this media package
-   * @return Workflow instance id.
+   * @return Workflow instance.
    * @throws MediaPackageException
    * @throws FileNotFoundException
    * @throws IOException
    * @throws Exception
    */
-  String addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID)
+  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID)
           throws MediaPackageException, FileNotFoundException, IOException, Exception;
 
   /**
@@ -192,7 +193,7 @@ public interface IngestService {
    *           Exception that occured during MediaPackage serialization or happened in ConductorService durring
    *           MediaPackage processing
    */
-  String ingest(MediaPackage mediaPackage) throws IllegalStateException, Exception;
+  WorkflowInstance ingest(MediaPackage mediaPackage) throws IllegalStateException, Exception;
 
   /**
    * Broadcasts an event, that media package is ingested. After broadcast ACK message is expected from ConductorService.
@@ -207,7 +208,7 @@ public interface IngestService {
    *           Exception that occured during MediaPackage serialization or happened in ConductorService durring
    *           MediaPackage processing
    */
-  String ingest(MediaPackage mediaPackage, String workflowDefinitionID) throws IllegalStateException, Exception;
+  WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID) throws IllegalStateException, Exception;
 
   /**
    * Delete an existing MediaPackage and any linked files from the temporary ingest filestore.

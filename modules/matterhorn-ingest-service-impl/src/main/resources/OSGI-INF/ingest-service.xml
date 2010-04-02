@@ -4,10 +4,7 @@
   <property name="service.description" value="Ingest Service" />
   <service>
     <provide interface="org.opencastproject.ingest.api.IngestService" />
-    <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
-  <reference name="conductorStrategy" interface="org.opencastproject.conductor.api.ConductorStrategy"
-    cardinality="1..1" policy="static" bind="setConductorStrategy" />
   <reference name="workflowService" interface="org.opencastproject.workflow.api.WorkflowService"
     cardinality="1..1" policy="static" bind="setWorkflowService" />
   <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"

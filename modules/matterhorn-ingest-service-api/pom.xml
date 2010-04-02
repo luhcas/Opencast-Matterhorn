@@ -14,7 +14,7 @@
   <dependencies>  
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-notification-service-api</artifactId>
+      <artifactId>matterhorn-workflow-service-api</artifactId>
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>

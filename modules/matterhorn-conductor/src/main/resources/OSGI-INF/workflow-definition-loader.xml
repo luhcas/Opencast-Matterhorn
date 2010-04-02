@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.workflow.WorkflowDefinitionLoader" immediate="true" activate="activate">
+  <implementation class="org.opencastproject.workflow.WorkflowDefinitionLoader" />
+  <property name="service.description" value="Workflow Definition Loader" />
+  <service>
+    <provide interface="org.opencastproject.workflow.WorkflowDefinitionLoader" />
+  </service>
+  <reference cardinality="1..1" interface="org.opencastproject.workflow.api.WorkflowService" name="WorkflowService" 
+  policy="static" bind="setWorkflowService" />
+</component>

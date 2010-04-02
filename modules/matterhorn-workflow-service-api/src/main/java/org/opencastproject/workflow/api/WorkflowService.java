@@ -25,8 +25,6 @@ import java.util.Map;
  */
 public interface WorkflowService {
   
-  public static String DEFAULT_WORKFLOW_ID = "default.workflow";
-
   /**
    * Returns the {@link WorkflowDefinition} identified by <code>name</code> or <code>null</code> if no such definition
    * was found.
@@ -58,13 +56,42 @@ public interface WorkflowService {
   /**
    * Creates a new workflow instance and starts the workflow.
    * 
-   * @param workflowDefinitionId
-   * @param mediaPackage
-   * @param properties
+   * @param workflowDefinition the workflow definition
+   * @param mediaPackage the mediapackage to process
+   * @param properties any properties to apply to the workflow definition
    * @return The new workflow instance
    */
   WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
           Map<String, String> properties);
+
+  /**
+   * Creates a new workflow instance and starts the workflow.
+   * 
+   * @param workflowDefinition the workflow definition
+   * @param mediaPackage the mediapackage to process
+   * @return The new workflow instance
+   */
+  WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage);
+
+  /**
+   * Creates a new workflow instance using the default workflow definition (which can be configured through the use of
+   * a {@link WorkflowSelectionStrategy}), and starts the workflow.  The supplied properties are applied to the workflow
+   * instance immediately.
+   * 
+   * @param mediaPackage the mediapackage to process
+   * @param properties any properties to apply to the workflow definition
+   * @return The new workflow instance
+   */
+  WorkflowInstance start(MediaPackage mediaPackage, Map<String, String> properties);
+
+  /**
+   * Creates a new workflow instance using the default workflow definition (which can be configured through the use of
+   * a {@link WorkflowSelectionStrategy}), and starts the workflow.
+   * 
+   * @param mediaPackage the mediapackage to process
+   * @return The new workflow instance
+   */
+  WorkflowInstance start(MediaPackage mediaPackage);
 
   /**
    * Gets the total number of workflows that have been created to date.

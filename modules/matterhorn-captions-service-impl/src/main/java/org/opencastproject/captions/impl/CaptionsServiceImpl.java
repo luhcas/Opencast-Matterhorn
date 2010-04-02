@@ -151,7 +151,7 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Res
         workflowDefinition.setDescription("Captions added workflow for media: " + workflowId);
         // TODO what is this and what do I do with it?
         workflowDefinition.setOperations(new ArrayList<WorkflowOperationDefinition>());
-        workflowService.start(workflowDefinition, mp, null);
+        workflowService.start(workflowDefinition, mp);
       } else if (WorkflowInstance.WorkflowState.PAUSED.equals(workflow.getState())) {
         MediaPackage mediaPackage = workflow.getMediaPackage();
         addCaptionToMediaPackage(mediaPackage, uri, mediaPackageElementID, captionType);

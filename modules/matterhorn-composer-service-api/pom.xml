@@ -12,11 +12,6 @@
   </parent>
   <dependencies>
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-notification-service-api</artifactId>
-      <version>0.6-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
     </dependency>
