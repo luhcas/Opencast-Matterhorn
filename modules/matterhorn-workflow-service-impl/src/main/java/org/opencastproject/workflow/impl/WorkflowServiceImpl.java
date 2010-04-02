@@ -76,7 +76,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * should handle.
    */
   protected static final String WORKFLOW_OPERATION_PROPERTY = "workflow.operation";
-  protected static final String WORKFLOW_DEFINITION_DEFAULT = "conductor.strategy.defaultworkflow";
+  protected static final String WORKFLOW_DEFINITION_DEFAULT = "org.opencastproject.workflow.default.definition";
 
   /** TODO: Remove references to the component context once felix scr 1.2 becomes available */
   protected ComponentContext componentContext = null;
