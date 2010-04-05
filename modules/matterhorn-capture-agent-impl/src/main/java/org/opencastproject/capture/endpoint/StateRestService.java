@@ -60,7 +60,11 @@ public class StateRestService {
   @Produces(MediaType.TEXT_PLAIN)
   @Path("GetState")
   public String getState() {
-    return this.service.getAgentState();
+    if (service != null) {
+      return this.service.getAgentState();
+    } else {
+      return "Server Error";
+    }
   }
 
   @GET
@@ -68,10 +72,12 @@ public class StateRestService {
   @Path("GetRecordings")
   public List<RecordingStateUpdate> getRecordings() {
     LinkedList<RecordingStateUpdate> update = new LinkedList<RecordingStateUpdate>();
-    Map<String, AgentRecording> data = service.getKnownRecordings();
-    //Run through and build a map of updates (rather than states)
-    for (Entry<String, AgentRecording> e : data.entrySet()) {
-      update.add(new RecordingStateUpdate(e.getValue()));
+    if (service != null) {
+      Map<String, AgentRecording> data = service.getKnownRecordings();
+      //Run through and build a map of updates (rather than states)
+      for (Entry<String, AgentRecording> e : data.entrySet()) {
+        update.add(new RecordingStateUpdate(e.getValue()));
+      }
     }
     return update;
   }

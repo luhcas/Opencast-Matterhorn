@@ -51,7 +51,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * FIXME -- Add javadocs
+ * The REST endpoint for the capture agent service on the capture device
  */
 @Path("/")
 public class CaptureAgentStateRestService {
@@ -69,6 +69,9 @@ public class CaptureAgentStateRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("agents/{name}")
   public Response getAgentState(@PathParam("name") String agentName) {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
     Agent ret = service.getAgentState(agentName);
 
     if (ret != null) {
@@ -85,39 +88,47 @@ public class CaptureAgentStateRestService {
   //@Produces(MediaType.TEXT_XML)
   @Path("agents/{name}")
   public Response setAgentState(@PathParam("name") String agentName, @FormParam("state") String state) {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+
     int result = service.setAgentState(agentName, state);
-    //return new AgentStateUpdate(service.getAgentState(agentName));
+
     switch (result) {
-    case CaptureAgentStateService.OK:
-      logger.debug("{}'s state successfully set to {}", agentName, state);
-      return Response.ok(agentName + " set to " + state).build();
-    case CaptureAgentStateService.BAD_PARAMETER:
-      logger.debug("{} is not a valid state", state);
-      return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
-    case CaptureAgentStateService.NO_SUCH_AGENT:
-      logger.debug("The agent {} is not registered in the system");
-      return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
-    default:
-      logger.error("Unexpected server error in setAgent endpoint");
-      return Response.serverError().build();
+      case CaptureAgentStateService.OK:
+        logger.debug("{}'s state successfully set to {}", agentName, state);
+        return Response.ok(agentName + " set to " + state).build();
+      case CaptureAgentStateService.BAD_PARAMETER:
+        logger.debug("{} is not a valid state", state);
+        return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
+      case CaptureAgentStateService.NO_SUCH_AGENT:
+        logger.debug("The agent {} is not registered in the system");
+        return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
+      default:
+        logger.error("Unexpected server error in setAgent endpoint");
+        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
   @DELETE
   @Path("agents/{name}")
   public Response removeAgent(@PathParam("name") String agentName) {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+
     int result = service.removeAgent(agentName);
 
     switch (result) {
-    case CaptureAgentStateService.OK:
-      logger.debug("The agent {} was successfully removed", agentName);
-      return Response.ok(agentName + " removed").build();
-    case CaptureAgentStateService.NO_SUCH_AGENT:
-      logger.debug("The agent {} is not registered in the system", agentName);
-      return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
-    default:
-      logger.error("Unexpected server error in removeAgent endpoint");
-      return Response.serverError().build();
+      case CaptureAgentStateService.OK:
+        logger.debug("The agent {} was successfully removed", agentName);
+        return Response.ok(agentName + " removed").build();
+      case CaptureAgentStateService.NO_SUCH_AGENT:
+        logger.debug("The agent {} is not registered in the system", agentName);
+        return Response.status(Response.Status.NOT_FOUND).build();
+      default:
+        logger.error("Unexpected server error in removeAgent endpoint");
+        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -127,10 +138,14 @@ public class CaptureAgentStateRestService {
   public List<AgentStateUpdate> getKnownAgents() {
     logger.debug("Returning list of known agents...");
     LinkedList<AgentStateUpdate> update = new LinkedList<AgentStateUpdate>();
-    Map<String, Agent> data = service.getKnownAgents();
-    //Run through and build a map of updates (rather than states)
-    for (Entry<String, Agent> e : data.entrySet()) {
-      update.add(new AgentStateUpdate(e.getValue()));
+    if (service != null) {
+      Map<String, Agent> data = service.getKnownAgents();
+      //Run through and build a map of updates (rather than states)
+      for (Entry<String, Agent> e : data.entrySet()) {
+        update.add(new AgentStateUpdate(e.getValue()));
+      }
+    } else {
+      logger.info("Service was null for getKnownAgents");
     }
     return update;
   }
@@ -139,6 +154,10 @@ public class CaptureAgentStateRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("agents/{name}/capabilities")
   public Response getCapabilities(@PathParam("name") String agentName) {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+
     Properties props = service.getAgentCapabilities(agentName);
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     try {
@@ -149,7 +168,7 @@ public class CaptureAgentStateRestService {
       
     } catch (IOException e) {
       logger.error("An IOException occurred when serializing the agent capabilities");
-      return Response.serverError().build();
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     } catch (NullPointerException e) {
       logger.debug("The agent {} is not registered in the system", agentName);
       return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
@@ -161,6 +180,10 @@ public class CaptureAgentStateRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("agents/{name}/capabilities")
   public Response setCapabilities(@PathParam("name") String agentName, InputStream reqBody) {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+
     Properties caps = new Properties();
     try {
       caps.loadFromXML(reqBody);
@@ -171,15 +194,15 @@ public class CaptureAgentStateRestService {
       caps.storeToXML(buffer, "Capabilities for the agent " + agentName);
 
       switch (result) {
-      case CaptureAgentStateService.OK:
-        logger.debug("{}'s capabilities updated", agentName);
-        return Response.ok(buffer.toString()).build();
-      case CaptureAgentStateService.BAD_PARAMETER:
-        logger.debug("The agent name cannot be blank or null");
-        return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
-      default:
-        logger.error("Unexpected server error in setCapabilities endpoint");
-        return Response.serverError().build();
+        case CaptureAgentStateService.OK:
+          logger.debug("{}'s capabilities updated", agentName);
+          return Response.ok(buffer.toString()).build();
+        case CaptureAgentStateService.BAD_PARAMETER:
+          logger.debug("The agent name cannot be blank or null");
+          return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
+        default:
+          logger.error("Unexpected server error in setCapabilities endpoint");
+          return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
       }
       
     } catch (IOException e) {
@@ -193,6 +216,10 @@ public class CaptureAgentStateRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("recordings/{id}")
   public Response getRecordingState(@PathParam("id") String id) {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+
     Recording rec = service.getRecordingState(id);
 
     if (rec != null) {
@@ -210,6 +237,10 @@ public class CaptureAgentStateRestService {
   // TODO: setRecordingState should return a boolean indicating if this recording existed or not
   // This way we could return a 404 if the recording doesn't exist, or OK otherwise
   public Response setRecordingState(@PathParam("id") String id, @FormParam("state") String state) {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+
     service.setRecordingState(id, state);
     return Response.ok(id + " set to " + state).build();
   }
@@ -219,6 +250,10 @@ public class CaptureAgentStateRestService {
   // TODO: removeRecording should return a boolean indicating if this recording existed or not
   // This way we could return a 404 if the recording doesn't exist, or OK otherwise
   public Response removeRecording(@PathParam("id") String id) {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+
     service.removeRecording(id);
     return Response.ok(id + " removed").build();
   }
@@ -228,10 +263,14 @@ public class CaptureAgentStateRestService {
   @Path("recordings")
   public List<RecordingStateUpdate> getAllRecordings() {
     LinkedList<RecordingStateUpdate> update = new LinkedList<RecordingStateUpdate>();
-    Map<String, Recording> data = service.getKnownRecordings();
-    //Run through and build a map of updates (rather than states)
-    for (Entry<String, Recording> e : data.entrySet()) {
-      update.add(new RecordingStateUpdate(e.getValue()));
+    if (service != null) {
+      Map<String, Recording> data = service.getKnownRecordings();
+      //Run through and build a map of updates (rather than states)
+      for (Entry<String, Recording> e : data.entrySet()) {
+        update.add(new RecordingStateUpdate(e.getValue()));
+      }
+    } else {
+      logger.info("Service was null for getAllRecordings");
     }
     return update;
   }

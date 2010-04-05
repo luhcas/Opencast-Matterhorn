@@ -40,7 +40,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * FIXME -- Add javadocs
+ * The REST endpoint for the capture agent service on the capture device
  */
 @Path("/")
 public class CaptureRestService {
@@ -119,16 +119,20 @@ public class CaptureRestService {
   @Produces(MediaType.TEXT_PLAIN)
   @Path("startCapture")
   public Response startCapture() {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+
     String out;
     try {
       out = service.startCapture();
       if (out != null) {
         return Response.ok("Start Capture OK. OUT: " + out).build();
       } else {
-        return Response.serverError().status(500).build();
+        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
       }
     } catch (Exception e) {
-      return Response.serverError().status(500).build();
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -136,6 +140,10 @@ public class CaptureRestService {
   @Produces(MediaType.TEXT_PLAIN)
   @Path("startCapture")
   public Response startCapture(@FormParam("config") String config) {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+
     Properties configuration = new Properties();
     try {
       configuration.load(new StringReader(config));
@@ -149,9 +157,9 @@ public class CaptureRestService {
       if (out != null)
         return Response.ok("Started capture " + out).build();
       else
-        return Response.serverError().status(500).build();
+        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      return Response.serverError().status(500).build();
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -169,15 +177,19 @@ public class CaptureRestService {
   @Produces(MediaType.TEXT_PLAIN)
   @Path("stopCapture")
   public Response stopCapture() {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+
     boolean out;
     try {
       out = service.stopCapture();
       if (out)
         return Response.ok("Stop Capture OK. OUT: " + out).build();
       else
-        return Response.serverError().status(500).build();
+        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      return Response.serverError().status(500).build();
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -185,15 +197,19 @@ public class CaptureRestService {
   @Produces(MediaType.TEXT_PLAIN)
   @Path("stopCapture")
   public Response stopCapture(@FormParam("recordingID") String recordingID) {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
+    }
+
     boolean out;
     try {
       out = service.stopCapture(recordingID);
       if (out)
         return Response.ok("Stopped Capture").build();
       else
-        return Response.serverError().status(500).build();
+        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     } catch (Exception e) {
-      return Response.serverError().status(500).build();
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
