@@ -79,7 +79,7 @@ public class AgentImpl implements Agent {
   public AgentImpl(String agentName, String agentState, Properties capabilities) {
     name = agentName;
     this.setState(agentState);
-    // TODO: agents with no capabilities are allowed? (i.e. with capabilities == null)
+    //Agents with no capabilities are allowed.  These can/will be updated after the agent is built if necessary.
     this.capabilities = capabilities;
   }
 

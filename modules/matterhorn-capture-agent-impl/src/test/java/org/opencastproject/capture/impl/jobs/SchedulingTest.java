@@ -53,7 +53,7 @@ public class SchedulingTest {
   private static MediaPackage mp;
   
   @Before
-  public void init() {
+  public void init() throws ConfigurationException, MediaPackageException{
     try {
       sched = new StdSchedulerFactory().getScheduler();
       sched.start();
@@ -62,15 +62,7 @@ public class SchedulingTest {
       e.printStackTrace();
     } 
     
-    try {
-      mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-    } catch (ConfigurationException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (MediaPackageException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     long time = TriggerUtils.getNextGivenSecondDate(null,10).getTime();
     
     props = new Properties();

@@ -33,7 +33,6 @@ import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
@@ -107,9 +106,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ManagedServ
   /** The agent's current state.  Used for logging. */
   private String agentState = null;
 
-  /** The capabillities of this agent. */
-  private Properties agentCapabilities = null;
-
   /** A pointer to the scheduler. */
   private SchedulerImpl scheduler = null;
 
@@ -134,7 +130,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ManagedServ
    */
   public void setConfigService(ConfigurationManager cfg) {
     configService = cfg;
-    agentCapabilities = new Properties();
   }
 
   /**
@@ -328,7 +323,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ManagedServ
     setRecordingState(recordingID, RecordingState.CAPTURING);
     if (newRec.getProperty(CaptureParameters.RECORDING_END) == null) {
       if (!scheduleStop(newRec.getID())) {
-        //TODO:  We've failed to schedule a stop, now what?
+        stopCapture(newRec.getID());
+        setRecordingState(newRec.getID(), RecordingState.CAPTURE_ERROR);
       }
     }
     return recordingID;
@@ -578,18 +574,14 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ManagedServ
       for (String name : friendlyNames) {
         name = name.trim();
         // FIXME: when and why does this happen?  is it an actual configuration error?  if so, throw something. (jt)
-        if ("".equals(name))
+        if ("".equals(name)){
+          logger.error("GDLGDL blank string in names!");
           continue;
+        }
 
-        // TODO: This should be modified to allow a more flexible way of detecting the track flavour.
-        // Suggestions: a dedicated class or a/several field(s) in the properties indicating what type of track is each
-
-        // FIXME: These values should be actual flavors, allowing this code to be simply MediaPackageElementFlavor.parse(name)
-        // This may impact the scheduling service as well... don't let that stop you from fixing this, though! (jt)
-        if (name.equals("PRESENTER") || name.equals("AUDIO"))
-          flavor = MediaPackageElements.PRESENTER_SOURCE;
-        else if (name.equals("SCREEN"))
-          flavor = MediaPackageElements.PRESENTATION_SOURCE;
+        String flavorPointer = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_FLAVOR; 
+        String flavorString = recording.getProperty(flavorPointer);
+        flavor = MediaPackageElementFlavor.parseFlavor(flavorString);
 
         String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
         File outputFile = new File(recording.getDir(), recording.getProperty(outputProperty));
@@ -832,7 +824,11 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ManagedServ
    * @see org.opencastproject.capture.api.CaptureAgent#getAgentCapabilities()
    */
   public Properties getAgentCapabilities() {
-    return agentCapabilities;
+    if (configService != null) {
+      return configService.getCapabilities();
+    } else {
+      return null;
+    }
   }
 
   /**

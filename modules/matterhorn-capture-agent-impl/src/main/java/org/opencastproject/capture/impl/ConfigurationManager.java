@@ -32,6 +32,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -264,14 +265,32 @@ public class ConfigurationManager implements ManagedService {
       logger.error("Null friendly name list.  Capabilities filtering aborted.");
       return null;
     }
+    //Get the names and setup a hash map of them
     String[] friendlyNames = names.split(",");
-    
+    HashMap<String, Integer> propertyCounts = new HashMap<String, Integer>();
     for (String name : friendlyNames) {
-      String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
-      if (properties.containsKey(key)) {
-        capabilities.setProperty(name, properties.getProperty(key));
-      } else {
-        logger.error("Invalid configuration, properties are missing for device {}", key);
+      propertyCounts.put(name, 0);
+    }
+
+    //For each key
+    for (Object obj : properties.keySet()) {
+      String key = (String) obj;
+      //For each device
+      for (String name : friendlyNames) {
+        String check = CaptureParameters.CAPTURE_DEVICE_PREFIX + name;
+        //If the key looks like a device prefix + the name, copy it
+        if (key.contains(check)) {
+          capabilities.setProperty(key, properties.getProperty(key));
+          propertyCounts.put(name, propertyCounts.get(name)+1);
+        }
+      }
+    }
+
+    //Check to make sure the counts are all correct, otherwise return null/error
+    for (String name : friendlyNames) {
+      //TODO:  make this a constant?
+      if (propertyCounts.get(name) != 3) {
+        logger.error("Invalid configuration data for device {}, agent capabilities are null!", name);
         return null;
       }
     }

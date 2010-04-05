@@ -517,6 +517,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
               jobProps.putAll(props);
               job.getJobDataMap().put(JobParameters.CAPTURE_PROPS, jobProps);
               hasProperties = true;
+              pack.add(new URI(filename));
             } else if (filename.equals("metadata.xml"))
               pack.add(new URI(filename), MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_CATALOG);
             else

@@ -16,6 +16,8 @@
 package org.opencastproject.capture.impl;
 
 
+import org.opencastproject.capture.api.CaptureParameters;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -137,9 +139,10 @@ public class ConfigurationManagerTest {
     configManager.updated(sourceProps);
 
     Properties caps = configManager.getCapabilities();
-    Assert.assertEquals("screen.mpg", caps.get("SCREEN"));
-    Assert.assertEquals("camera.mpg", caps.get("PRESENTER"));
-    Assert.assertEquals("audio.mp3", caps.get("MICROPHONE"));
+    //TODO:  Make these checks better
+    Assert.assertEquals("screen.mpg", caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + "SCREEN" + CaptureParameters.CAPTURE_DEVICE_SOURCE));
+    Assert.assertEquals("camera.mpg", caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + "PRESENTER" + CaptureParameters.CAPTURE_DEVICE_SOURCE));
+    Assert.assertEquals("audio.mp3", caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + "MICROPHONE" + CaptureParameters.CAPTURE_DEVICE_SOURCE));
   }
 
   @Test

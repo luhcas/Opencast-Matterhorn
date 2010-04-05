@@ -128,6 +128,9 @@ public interface CaptureParameters {
   
   /** Property specifying the source location of the device e.g., /dev/video0 */
   String CAPTURE_DEVICE_SOURCE = ".src";
+
+  /** Property specifying the flavor of the device */
+  String CAPTURE_DEVICE_FLAVOR = ".flavor";
   
   /** Property specifying the name of the file to output */
   String CAPTURE_DEVICE_DEST = ".outputfile";

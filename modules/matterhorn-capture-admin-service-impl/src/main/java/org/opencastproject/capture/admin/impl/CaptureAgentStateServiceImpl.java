@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Semaphore;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -60,7 +59,6 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   private HashMap<String, Agent> agents;
   private HashMap<String, Recording> recordings;
-  private Semaphore sem;
 
   /**
    * @param persistenceProvider the persistenceProvider to set
@@ -84,21 +82,14 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   public void activate(ComponentContext cc) {
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl", persistenceProperties);
-    sem = new Semaphore(1);
 
     //Pull all the existing agents into the in-memory structure
     EntityManager em = emf.createEntityManager();
     List<AgentImpl> dbResults = null;
-    try {
-      sem.acquire();
-      Query q = em.createNamedQuery("AgentImpl.getAll");
-      dbResults = (List<AgentImpl>) q.getResultList();
-      sem.release();
-    } catch (InterruptedException e) {
-      logger.warn("Semaphore broken in getKnownAgents, DB may be inconsistent.");
-    } finally {
-      em.close();
-    }
+    Query q = em.createNamedQuery("AgentImpl.getAll");
+    dbResults = (List<AgentImpl>) q.getResultList();
+    em.close();
+
     if (dbResults != null) {
       for (Agent a : dbResults) {
         if (!agents.containsKey(a.getName())) {
@@ -231,11 +222,10 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * Updates or adds an agent to the database.
    * @param a The Agent you wish to modify or add in the database.
    */
-  private void updateAgentInDatabase(Agent a) {
+  private synchronized void updateAgentInDatabase(Agent a) {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = null;
     try {
-      sem.acquire();
       tx = em.getTransaction();
       tx.begin();
       Agent existing = em.find(AgentImpl.class, a.getName());
@@ -248,11 +238,8 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
         em.persist(a);
       }
       tx.commit();
-      sem.release();
     } catch (RollbackException e) {
       logger.warn("Unable to commit to DB in updateAgent.");
-    } catch (InterruptedException e) {
-      logger.warn("Semaphore broken in updateAgent, DB may be inconsistent.");
     } finally {
       em.close();
     }
@@ -262,11 +249,10 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * Removes an agent from the database.
    * @param agentName The name of the agent you wish to remove.
    */
-  private void deleteAgentFromDatabase(String agentName) {
+  private synchronized void deleteAgentFromDatabase(String agentName) {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = null;
     try {
-      sem.acquire();
       tx = em.getTransaction();
       tx.begin();
       Agent existing = em.find(AgentImpl.class, agentName);
@@ -274,11 +260,8 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
         em.remove(existing);
       }
       tx.commit();
-      sem.release();
     } catch (RollbackException e) {
       logger.warn("Unable to commit to DB in deleteAgent.");
-    } catch (InterruptedException e) {
-      logger.warn("Semaphore broken in deleteAgent, DB may be inconsistent.");
     } finally {
       em.close();
     }

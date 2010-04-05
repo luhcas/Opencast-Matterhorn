@@ -93,9 +93,8 @@ public interface CaptureAgent {
   String getAgentState();
 
   /**
-   * Gets the agent's capabilities.
-   * @return The agent's capabilities.
-   * TODO:  Define the format for an agent's capabillities.
+   * Gets the agent's capabilities as they appear in the configuration file.
+   * @return The agent's capabilities, or null in the case of an error.
    */
   Properties getAgentCapabilities();
 }

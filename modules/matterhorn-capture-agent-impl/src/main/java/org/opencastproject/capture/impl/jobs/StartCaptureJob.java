@@ -64,7 +64,7 @@ public class StartCaptureJob implements Job {
       return;
     }
 
-    // TODO: Considering ONLY the case where we have both parameters. Should we create default MPkg. and/or Properties otherwise?
+    //We require both objects to exist, if either of them doesn't then the scheduler didn't do its job properly
     if (props == null || mp == null) {
       logger.error("Insufficient parameters provided. startCapture() needs Properties and a MediaPackage to proceed");
       return;

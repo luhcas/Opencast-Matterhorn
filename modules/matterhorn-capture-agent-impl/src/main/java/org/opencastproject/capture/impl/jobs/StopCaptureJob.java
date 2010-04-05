@@ -58,8 +58,8 @@ public class StopCaptureJob implements Job {
       String postfix = ctx.getMergedJobDataMap().getString(JobParameters.JOB_POSTFIX);
       // Create job and trigger
       JobDetail job = new JobDetail("SerializeJob-" + postfix, JobParameters.OTHER_TYPE, SerializeJob.class);
-      // TODO: Should we need a cron trigger in case the serialization fails? 
-      // Or do we assume that is an unrecoverable error?
+
+      //Setup the trigger.  The serialization job will automatically refire if it fails, so we don't need to worry about it
       SimpleTrigger trigger = new SimpleTrigger("SerializeJobTrigger-" + postfix, JobParameters.OTHER_TYPE, new Date());
       trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
       trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, ca);
