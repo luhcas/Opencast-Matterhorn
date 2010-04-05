@@ -168,7 +168,7 @@ else
     echo "No proxy server specified."
   fi
 
-  echo "**** Default keyboard is US; Do you want to reconfigure? (y/n)"
+  echo "**** Default keyboard is US; Do you want to reconfigure? [y/N]"
   read kbresp
 
   # Need to get a server name, not just y/n
@@ -179,13 +179,13 @@ else
     read ntpsrv
   done
 
-  echo "**** Do you want to install 3rd party tools? (y/n)"
+  echo "**** Do you want to install 3rd party tools? [y/N]"
   read p3resp
 
-  echo "**** Do you want to install ffmpeg? (y/n)"
+  echo "**** Do you want to install ffmpeg? [y/N]"
   read ffresp
 
-  echo "**** Do you want to install OpenCaps? (y/n)"
+  echo "**** Do you want to install OpenCaps? [y/N]"
   read opencaps
 
   # update felix config (url)
