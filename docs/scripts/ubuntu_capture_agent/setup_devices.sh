@@ -63,7 +63,7 @@ for dev in $(seq 0 1 $devAryLen)
 	fi
 	echo "capture.device.$cleanName.src=$device" >> $CAPTURE_PROPS
 	echo "capture.device.$cleanName.outputfile=$cleanName" >> $CAPTURE_PROPS
-	echo "capture.device.$cleanName.flavor=PRESENTATION_SOURCE" >> $CAPTURE_PROPS
+	echo "capture.device.$cleanName.flavor=PRESENTATION/SOURCE" >> $CAPTURE_PROPS
   allDevices="${allDevices}${cleanName},"
   if [ "$name" != "${supportedDevices[2]}" ];
     then
@@ -99,7 +99,7 @@ audioDevice=hw:$(sudo arecord -l| grep Analog |  cut --delimiter=' ' -f 2 | sed 
 cleanAudioDevice=`echo $audioDevice | sed s/\://g`
 echo "capture.device.$cleanAudioDevice.src=$audioDevice" >> $CAPTURE_PROPS
 echo "capture.device.$cleanAudioDevice.outputfile=$cleanAudioDevice" >> $CAPTURE_PROPS
-echo "capture.device.$cleanAudioDevice.flavor=PRESENTATION_SOURCE" >> $CAPTURE_PROPS
+echo "capture.device.$cleanAudioDevice.flavor=PRESENTATION/SOURCE" >> $CAPTURE_PROPS
 
 allDevices="${allDevices}${cleanAudioDevice}"
 echo "capture.device.names=${allDevices}" >> $CAPTURE_PROPS
