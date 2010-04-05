@@ -126,6 +126,9 @@ start_mh ()
 }
 
 ############################### START HERE ###############################
+# Turn off screensaver
+setterm -blank 0 
+
 # Wait for network connection
 for ntime in 1 2 3 4 5 6 7 8 9 10
 do
