@@ -29,8 +29,9 @@ while read line
 	done
 done < /tmp/devlist.txt
 
+
 CAPTURE_PROPS=$1/conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties
-cp /home/$USERNAME/capture-agent/modules/matterhorn-capture-agent-impl/src/test/resources/config/capture.properties $CAPTURE_PROPS
+sed -i "/capture.device/d" $CAPTURE_PROPS
 
 touch /home/$USERNAME/95-perso.rules
 rm -f /home/$USERNAME/device_config.sh
