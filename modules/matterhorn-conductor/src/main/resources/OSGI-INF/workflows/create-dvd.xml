@@ -1,0 +1,63 @@
+<definition>
+  <id>create-dvd</id>
+  <description>
+    A workflow that encodes the source media to a format suitable for a
+    video DVD depending on the TV norm selected (NTSC or PAL). The encoded
+    recordings(s) are then compiled to an ISO image. The resulting DVD is
+    playable in a stand alone DVD player.
+  </description>
+
+  <configuration_panel>
+<![CDATA[
+    <fieldset>
+      <legend>DVD Specs</legend>
+      <ul class="no-bullets formField-list fl-controls-right">
+        <li class="ui-helper-clearfix">
+          <label class="fl-label"><span class="color-red">* </span>Title:</label>
+          <input type="text" class="configField requiredField" id="dvd.title" name="dvd.title">
+        </li>
+        <li class="ui-helper-clearfix">
+          <label class="fl-label">TV Norm:</label>
+          <select id="dvd.format" name="dvd.format" class="configField">
+            <option value="pal">PAL</option>
+            <option value="ntsc">NTSC</option>
+          </select>
+        </li>
+      </ul>
+    </fieldset>
+]]>
+  </configuration_panel>
+
+  <operations>
+
+    <!-- inspect the media -->
+    <operation
+      id="inspect"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Inspect the media package">
+    </operation>
+
+    <!-- encode media to MPEG-2 with resolution depending on targeted TV Norm -->
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode presenter (camera) to mpeg2 for DVD">
+      <configurations>
+        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-tags">DVD</configuration>
+        <!-- <configuration key="encoding-profile">dvd-${dvd.format}.http</configuration> -->
+        <configuration key="encoding-profile">dvd-ntsc.http</configuration>
+      </configurations>
+    </operation>
+
+    <!-- hold for download of DVD image -->
+    <operation
+      id="download-dvd"
+      description="hold for download of DVD image">
+    </operation>
+
+  </operations>
+</definition>

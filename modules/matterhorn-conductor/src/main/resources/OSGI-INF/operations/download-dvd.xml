@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.workflow.handler.DownloadDVDWorkflowOperationHandler" immediate="true"
+  activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.workflow.handler.DownloadDVDWorkflowOperationHandler" />
+  <property name="service.description" value="DVD Download Workflow Operation Handler" />
+  <property name="workflow.operation" value="download-dvd" />
+  <service>
+    <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
+  </service>
+</component>
