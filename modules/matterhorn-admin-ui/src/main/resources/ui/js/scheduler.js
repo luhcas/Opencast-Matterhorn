@@ -271,7 +271,10 @@ SchedulerUI.handleAgentChange = function(elm){
           var capabilities = [];
           $.each($('entry', d), function(a, i){
             var s = $(i).attr('key');
-            capabilities.push(s);
+            if(s.indexOf(".src") != -1){
+              var name = s.split('.');
+              capabilities.push(name[2]);
+            }
           });
           if(capabilities.length){
             SchedulerUI.displayCapabilities(capabilities);
