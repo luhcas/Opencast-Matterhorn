@@ -150,7 +150,7 @@
               *;resolution:=optional
             </Import-Package>
             <Export-Package>
-              org.opencastproject.conductor.impl,
+              <!-- org.opencastproject.conductor.impl,   still neccessary since /impl/ConductorService.java was removed? -->
               org.opencastproject.db,
               org.opencastproject.scanner,
               org.opencastproject.workflow.handler
@@ -167,6 +167,7 @@
               OSGI-INF/operations/publish.xml,
               OSGI-INF/operations/review.xml,
               OSGI-INF/operations/segment.xml,
+              OSGI-INF/operations/download-dvd.xml,
               OSGI-INF/feeds/aggregation-feed.xml,
               OSGI-INF/feeds/custom-feed.xml,
               OSGI-INF/feeds/latest-feed.xml,
