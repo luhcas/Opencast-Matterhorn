@@ -12,6 +12,6 @@ su $USERNAME -c "svn up /home/$USERNAME/capture-agent/docs"
 REV=`su $USERNAME -c "svn info /home/$USERNAME/capture-agent/modules/matterhorn-capture-agent-impl | grep Revision"`
 
 cd /home/$USERNAME/capture-agent
-su $USERNAME -c "mvn clean install -Pcapture -DdeployTo=${FELIX_HOME}/load | mail -s \"testopencast $REV `date`\" lecture@cs.usask.ca"
+su $USERNAME -c "mvn clean install -Pcapture -DdeployTo=${FELIX_HOME}/load | mail -s \"testopencast $REV `date`\" example@example.com"
 
 /sbin/reboot now
