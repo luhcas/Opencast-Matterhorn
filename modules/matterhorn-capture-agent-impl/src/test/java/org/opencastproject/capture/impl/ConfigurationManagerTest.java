@@ -139,10 +139,16 @@ public class ConfigurationManagerTest {
     configManager.updated(sourceProps);
 
     Properties caps = configManager.getCapabilities();
-    //TODO:  Make these checks better
-    Assert.assertEquals("screen.mpg", caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + "SCREEN" + CaptureParameters.CAPTURE_DEVICE_SOURCE));
-    Assert.assertEquals("camera.mpg", caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + "PRESENTER" + CaptureParameters.CAPTURE_DEVICE_SOURCE));
-    Assert.assertEquals("audio.mp3", caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + "MICROPHONE" + CaptureParameters.CAPTURE_DEVICE_SOURCE));
+    assertCaps(caps, "SCREEN", "screen.mpg", "screen_out.mpg", "presentation/source");
+    assertCaps(caps, "PRESENTER", "camera.mpg", "camera_out.mpg", "presentation/source");
+    assertCaps(caps, "MICROPHONE", "audio.mp3", "audio_out.mp3", "presentation/source");
+  }
+
+  //TODO:  Make these checks better
+  private void assertCaps(Properties caps, String name, String source, String dest, String flavour) {
+    Assert.assertEquals(source, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE));
+    Assert.assertEquals(dest, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_DEST));
+    Assert.assertEquals(flavour, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_FLAVOR));
   }
 
   @Test

@@ -68,7 +68,36 @@ public class RecordingImpl implements AgentRecording {
     this.mPkg = mp;
     this.props = (Properties)properties.clone();
     
-    // FIXME: It would make sense to make this if ()...else () its own method. It would certainly ease testing. (jt)
+    determineRootURLandID();
+    
+    // Checks that recordingID is not null (can't be, otherwise we won't be able to identify the recording
+    if (id == null) {
+      logger.error("Couldn't get a proper recordingID from Properties");
+      throw new IllegalArgumentException("Couldn't get a proper recordingID from Properties");
+    }
+    //Setup the root capture dir, also make sure that it exists.
+    if (!baseDir.exists()) {
+      try {
+        FileUtils.forceMkdir(baseDir);
+      } catch (IOException e) {
+        logger.error("IOException creating required directory {}.", baseDir.toString());
+        //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+        throw e;
+      }
+      //Should have been created.  Let's make sure of that.
+      if (!baseDir.exists()) {
+        logger.error("Unable to start capture, could not create required directory {}.", baseDir.toString());
+        //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+        throw new IOException ("Unable to create base directory");
+      }
+    }
+  }
+
+  /**
+   * Determines the root URL and ID from the recording's properties
+   * //TODO:  What if the properties object contains a character in the recording id or root url fields that is invalid for the filesystem? 
+   */
+  public void determineRootURLandID() {
     //Figures out where captureDir lives
     if (this.props.containsKey(CaptureParameters.RECORDING_ROOT_URL)) {
       baseDir = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL));
@@ -93,30 +122,6 @@ public class RecordingImpl implements AgentRecording {
       }
       props.put(CaptureParameters.RECORDING_ROOT_URL, baseDir.getAbsolutePath());
     }
-    
-    // Checks that recordingID is not null (can't be, otherwise we won't be able to identify the recording
-    if (id == null) {
-      logger.error("Couldn't get a proper recordingID from Properties");
-      throw new IllegalArgumentException("Couldn't get a proper recordingID from Properties");
-    }
-    //Setup the root capture dir, also make sure that it exists.
-    if (!baseDir.exists()) {
-      try {
-        FileUtils.forceMkdir(baseDir);
-      } catch (IOException e) {
-        logger.error("IOException creating required directory {}.", baseDir.toString());
-        //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-        throw e;
-      }
-      //Should have been created.  Let's make sure of that.
-      if (!baseDir.exists()) {
-        logger.error("Unable to start capture, could not create required directory {}.", baseDir.toString());
-        //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-        throw new IOException ("Unable to create base directory");
-      }
-    }
-    
-    
   }
   
   /**
@@ -141,14 +146,6 @@ public class RecordingImpl implements AgentRecording {
    */
   public MediaPackage getMediaPackage() {
     return mPkg;
-  }
-
-  // TODO: As one can get a copy of the local MediaPackage and modify it outside, this method may not be necessary
-  /**
-   * @param mPkg
-   */
-  public void setMediaPackage(MediaPackage mPkg) {
-    this.mPkg = mPkg;
   }
   
   /**

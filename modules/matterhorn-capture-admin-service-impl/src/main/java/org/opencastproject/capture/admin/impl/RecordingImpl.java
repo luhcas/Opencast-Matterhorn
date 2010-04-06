@@ -52,19 +52,16 @@ public class RecordingImpl implements Recording {
   }
 
   /**
-   * Gets the ID of the recording.
-   *
-   * @return The ID of the recording.
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.admin.api.Recording#getID()
    */
   public String getID() {
     return id;
   }
 
   /**
-   * Sets the state of the recording, and updates the time it was last heard from.
-   *
-   * @param newState The new state of the recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.  This can be equal to the current one if the goal is to update the timestamp.
-   * @see RecordingState
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.admin.api.Recording#setState(java.lang.String)
    */
   public void setState(String newState) {
     state = newState;
@@ -72,19 +69,16 @@ public class RecordingImpl implements Recording {
   }
 
   /**
-   * Gets the state of the recording.
-   *
-   * @return The state of the recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.
-   * @see RecordingState
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.admin.api.Recording#getState()
    */
   public String getState() {
     return state;
   }
 
   /**
-   * Gets the time at which the recording last checked in.
-   *
-   * @return The number of milliseconds since 1970 when the recording last checked in.
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.admin.api.Recording#getLastCheckinTime()
    */
   public Long getLastCheckinTime() {
     return lastHeardFrom;

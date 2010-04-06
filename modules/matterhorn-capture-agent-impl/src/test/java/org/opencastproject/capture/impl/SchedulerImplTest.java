@@ -121,7 +121,7 @@ public class SchedulerImplTest {
     }
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
-    Assert.assertEquals(times[0], schedule[0]);
+    Assert.assertEquals("c3a1c747-5501-44ff-b57a-67a4854a39b0", schedule[0]);
     testfile.delete();
   }
 
@@ -134,7 +134,7 @@ public class SchedulerImplTest {
     sched.updated(schedulerProps);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
-    Assert.assertEquals(times[0], schedule[0]);
+    Assert.assertEquals("c3a1c747-5501-44ff-b57a-67a4854a39b0", schedule[0]);
     testfile.delete();
   }
 
@@ -344,7 +344,7 @@ public class SchedulerImplTest {
     }
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
-    Assert.assertEquals(times[0], schedule[0]);
+    Assert.assertEquals("c3a1c747-5501-44ff-b57a-67a4854a39b0", schedule[0]);
     testfile.delete();
   }
 
@@ -357,7 +357,7 @@ public class SchedulerImplTest {
     sched.updated(schedulerProps);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
-    Assert.assertEquals(times[0], schedule[0]);
+    Assert.assertEquals("c3a1c747-5501-44ff-b57a-67a4854a39b0", schedule[0]);
     testfile.delete();
   }
 

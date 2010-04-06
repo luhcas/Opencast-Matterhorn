@@ -130,21 +130,21 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     if (state == null || state.equals("")) {
       logger.debug("Unable to set agent state, state is blank or null.");
       return BAD_PARAMETER;
+    } else if (agentName == null || agentName.equals("")) {
+      logger.debug("Unable to set agent state, agent name is blank or null.");
+      return BAD_PARAMETER;
     }
+ 
 
     Agent req = agents.get(agentName);
     //if the agent is known set the state
     if (req != null) {
       logger.debug("Setting Agent {} to state {}.", agentName, state);
       req.setState(state);
+      agents.put(agentName, req);
       updateAgentInDatabase(req);
     } else {     
       // If the agent doesn't exists, but the name is not null nor empty, create a new one.
-      if (agentName == null || agentName.equals("")) {
-        logger.debug("Unable to set agent state, agent name is blank or null.");
-        return BAD_PARAMETER;
-      }
-
       logger.debug("Creating Agent {} with state {}.", agentName, state);
       Agent a = new AgentImpl(agentName, state, new Properties());
       agents.put(agentName, a);

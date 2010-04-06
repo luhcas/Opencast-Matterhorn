@@ -424,6 +424,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       ComponentList list = newCal.getComponents(Component.VEVENT);
       for (Object item : list) {
         VEvent event = (VEvent) item;
+        String uid = event.getUid().getValue();
         Date start = event.getStartDate().getDate();
         Date end = event.getEndDate().getDate();
         //Note that we're assuming this is accurate...
@@ -445,41 +446,41 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         }
 
         if (duration != null && duration.getDuration().isNegative()) {
-          log.warn("Event {} has a negative duration, skipping.", start.toString());
+          log.warn("Event {} has a negative duration, skipping.", uid);
           continue;
         } else if (start.before(new Date())) {
-          log.warn("Event {} is scheduled for a time that has already passed, skipping.", start.toString());
+          log.warn("Event {} is scheduled for a time that has already passed, skipping.", uid);
           continue;
         } else if (duration.getDuration().compareTo(new Dur(0,0,0,0)) == 0) {
-          log.warn("Event {} has a duration of 0, skipping.", start.toString());
+          log.warn("Event {} has a duration of 0, skipping.", uid);
           continue;
         }
 
         //Check to make sure the recording isn't set for more than the maximum length
         if (duration.getDuration().compareTo(maxDuration) > 0) {
-          log.warn("Event {} set to longer than maximum allowed capture duration, cutting off capture at {} seconds.", start.toString(), CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH);
+          log.warn("Event {} set to longer than maximum allowed capture duration, cutting off capture at {} seconds.", uid, CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH);
           duration.setDuration(new Dur(0,8,0,0));
         }
 
         CronExpression startCronExpression = getCronString(start);
         String conflict = scheduledEvents.get(startCronExpression); 
         if (conflict != null) {
-          log.warn("Unable to schedule event {} because its starting time coinsides with event {}!", start, conflict);
+          log.warn("Unable to schedule event {} because its starting time coinsides with event {}!", uid, conflict);
           continue;
         }
         CronTrigger trig = new CronTrigger();
         trig.setCronExpression(startCronExpression);
         trig.setName(startCronExpression.toString());
 
-        JobDetail job = new JobDetail(start.toString(), JobParameters.CAPTURE_TYPE, StartCaptureJob.class);
+        JobDetail job = new JobDetail(uid, JobParameters.CAPTURE_TYPE, StartCaptureJob.class);
 
         PropertyList attachments = event.getProperties(Property.ATTACH);
         ListIterator<Property> iter = (ListIterator<Property>) attachments.listIterator();
 
         boolean hasProperties = false;
         Properties props = new Properties();
-        props.put(CaptureParameters.RECORDING_ID, start.toString());
-        props.put(JobParameters.JOB_POSTFIX, start.toString());
+        props.put(CaptureParameters.RECORDING_ID, uid);
+        props.put(JobParameters.JOB_POSTFIX, uid);
         String endCronString = getCronString(duration.getDuration().getTime(start)).toString();
         props.put(CaptureParameters.RECORDING_END, endCronString);
         log.debug("Event {} end cron expression set to {}.", endCronString);
@@ -538,7 +539,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         }
 
         scheduler.scheduleJob(job, trig);
-        scheduledEvents.put(startCronExpression.toString(), start.toString());
+        scheduledEvents.put(start.toString(), uid);
       }
 
       checkSchedules();

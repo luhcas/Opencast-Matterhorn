@@ -65,6 +65,16 @@ public class PipelineFactory {
     }
 
     String[] friendlyNames = deviceNames.split(",");
+    if (friendlyNames.length < 1) {
+      logger.error("Insufficient number of capture devices listed.  Aborting!");
+      return null;
+    } else if (friendlyNames.length == 1) {
+      //Java gives us an array even if the string being split it blank...
+      if (friendlyNames[0].trim().equals("")) {
+        logger.error("Invalid capture device listed.  Aborting!");
+        return null;
+      }
+    }
     String outputDirectory = props.getProperty(CaptureParameters.RECORDING_ROOT_URL);
 
     for (String name : friendlyNames) {

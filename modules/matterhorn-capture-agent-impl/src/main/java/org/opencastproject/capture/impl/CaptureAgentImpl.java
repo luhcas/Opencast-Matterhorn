@@ -130,6 +130,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ManagedServ
    */
   public void setConfigService(ConfigurationManager cfg) {
     configService = cfg;
+    agentName = configService.getItem(CaptureParameters.AGENT_NAME);
   }
 
   /**
@@ -235,8 +236,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ManagedServ
         setRecordingState((String) properties.get(CaptureParameters.RECORDING_ID), RecordingState.CAPTURE_ERROR);
       }
       return null;
-    } else
+    } else {
       setAgentState(AgentState.CAPTURING);
+    }
 
     properties = configService.merge(properties, false);
 
