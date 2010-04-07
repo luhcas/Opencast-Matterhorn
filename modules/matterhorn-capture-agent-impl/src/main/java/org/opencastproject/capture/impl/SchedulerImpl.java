@@ -668,9 +668,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       //Schedule the update
       scheduler.scheduleJob(cleanJob, cleanTrigger);
     } catch (NumberFormatException e) {
-      log.error("Invalid time specified in the {} value, unable to push capabilities to remote server!", CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL);
+      log.error("Invalid time specified in the {} value. Job for cleaning captures not scheduled!", CaptureParameters.CAPTURE_CLEANER_INTERVAL);
     } catch (SchedulerException e) {
-      log.error("SchedulerException in StateServiceImpl while trying to schedule capability polling: {}.", e.getMessage());
+      log.error("SchedulerException while trying to schedule a cleaning job: {}.", e.getMessage());
     }
 
   }
