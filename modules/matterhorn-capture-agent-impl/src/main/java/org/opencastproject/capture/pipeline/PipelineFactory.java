@@ -45,20 +45,24 @@ public class PipelineFactory {
   private static final Logger logger = LoggerFactory.getLogger(PipelineFactory.class);
 
   public enum Codec { MPEG2, H264, AAC, MP3 };
+  
+  private static Properties properties;
 
   /**
    * Create a bin that contains multiple pipelines using each source in the properties object as the gstreamer source
    * 
-   * @param props
+   * @param properties
    *          Properties object defining sources 
    * @return The bin to control the pipelines
    * @throws UnsupportedDeviceException
    */
   public static Pipeline create(Properties props) {
+    properties = props;
     ArrayList<CaptureDevice> devices = new ArrayList<CaptureDevice>();
+    
 
     // Setup pipeline for all the devices specified
-    String deviceNames = props.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
+    String deviceNames = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
     if (deviceNames == null) {
       logger.error("No capture devices specified in {}.", CaptureParameters.CAPTURE_DEVICE_NAMES);
       return null;
@@ -75,7 +79,7 @@ public class PipelineFactory {
         return null;
       }
     }
-    String outputDirectory = props.getProperty(CaptureParameters.RECORDING_ROOT_URL);
+    String outputDirectory = properties.getProperty(CaptureParameters.RECORDING_ROOT_URL);
 
     for (String name : friendlyNames) {
 
@@ -85,8 +89,8 @@ public class PipelineFactory {
       // Get properties from 
       String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
-      String srcLoc = props.getProperty(srcProperty);
-      File outputFile = new File(outputDirectory, props.getProperty(outputProperty));
+      String srcLoc = properties.getProperty(srcProperty);
+      File outputFile = new File(outputDirectory, properties.getProperty(outputProperty));
       try {
         if(!outputFile.createNewFile()){
           logger.error("Could not create ouput file for {}, file may already exist.", name);
@@ -134,8 +138,8 @@ public class PipelineFactory {
       CaptureDevice capdev = new CaptureDevice(srcLoc, devName, outputLoc);
       String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_CODEC;
       String bitrateProperty = codecProperty + CaptureParameters.CAPTURE_DEVICE_BITRATE;
-      String codec = props.getProperty(codecProperty);
-      String bitrate = props.getProperty(bitrateProperty);
+      String codec = properties.getProperty(codecProperty);
+      String bitrate = properties.getProperty(bitrateProperty);
 
       if (codec != null)
         capdev.properties.setProperty("codec", codec);
@@ -210,6 +214,8 @@ public class PipelineFactory {
    * @return True, if successful
    */
   private static boolean getHauppaugePipeline(CaptureDevice captureDevice, Pipeline pipeline) {
+    String imageloc = properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
+    String device = new File(captureDevice.getOutputPath()).getName();
     String error = null;
     String codec =  captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
@@ -254,7 +260,7 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, mpegpsdemux, mpegvideoparse);
     else if (!mpegvideoparse.link(dec))
       error = formatPipelineError(captureDevice, mpegvideoparse, dec);
-    else if (!dec.link(enc))
+    else if (!VideoMonitoring.addVideoMonitor(pipeline, dec, enc, 30, imageloc, device))
       error = formatPipelineError(captureDevice, dec, enc);
     else if (!enc.link(mpegtsmux))
       error = formatPipelineError(captureDevice, enc, mpegtsmux);

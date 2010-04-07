@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.capture.endpoint.VideoMonitorRestService" activate="activate" immediate="true">
+  <implementation class="org.opencastproject.capture.endpoint.VideoMonitorRestService" />
+  <property name="service.description" value="Video Monitoring REST Endpoint" />
+  <property name="service.exported.interfaces" value="org.opencastproject.capture.endpoint.VideoMonitorRestService" />
+  <property name="service.exported.configs" value="org.apache.cxf.rs" />
+  <property name="org.apache.cxf.rs.httpservice.context" value="/monitoring/video" />
+  <service>
+    <provide interface="org.opencastproject.capture.endpoint.VideoMonitorRestService" />
+  </service>
+  <reference name="monitor-impl" interface="org.opencastproject.capture.api.VideoMonitor"
+    cardinality="1..1" policy="static" bind="setService" unbind="unsetService"/>
+</component>
+

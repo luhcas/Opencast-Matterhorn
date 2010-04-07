@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -52,9 +53,12 @@ public class VideoMonitoring {
    * @param src the source element which will be tee'd
    * @param sink the sink element which the src originally sent data to
    * @param interval how often to grab data from the pipeline
+   * @param location the directory to save the image to
+   * @param device name of device; used to name the jpeg file
    * @return the pipeline with the video monitoring added, or null on failure
    */
-  public static boolean addVideoMonitor(Pipeline pipeline, Element src, Element sink, final long interval, final String location) {
+  public static boolean addVideoMonitor(Pipeline pipeline, Element src, Element sink, final long interval, final String location,
+          final String device) {
           
       Element tee, queue0, queue1, decodebin, jpegenc;
       final Element ffmpegcolorspace;
@@ -139,7 +143,7 @@ public class VideoMonitoring {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try {
               baos.write(bytes);
-              OutputStream fos = new FileOutputStream(location);
+              OutputStream fos = new FileOutputStream(new File(location, device + ".jpg"));
               baos.writeTo(fos);
               fos.close();
               baos.close();

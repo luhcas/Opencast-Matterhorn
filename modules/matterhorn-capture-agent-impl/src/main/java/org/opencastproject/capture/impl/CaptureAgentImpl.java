@@ -22,6 +22,7 @@ import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.StateService;
+import org.opencastproject.capture.api.VideoMonitor;
 import org.opencastproject.capture.impl.jobs.AgentCapabilitiesJob;
 import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
@@ -64,9 +65,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -84,7 +87,7 @@ import java.util.Vector;
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines
  * to store several tracks from a certain recording.
  */
-public class CaptureAgentImpl implements CaptureAgent, StateService, ManagedService {
+public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonitor, ManagedService {
 
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
@@ -974,4 +977,32 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ManagedServ
     }
     
   }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.VideoMonitor#getConfidenceSource(java.lang.String)
+   */
+  public byte[] getConfidenceSource(String device) {
+    if (currentRecID != null) {
+      // get the image for the device specified
+      AgentRecording rec = pendingRecordings.get(currentRecID);
+      String location = rec.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
+      File fimage = new File(location, device);
+      int length = (int) fimage.length();
+      byte[] ibytes = new byte[length];
+      
+      try {
+        InputStream fis = new FileInputStream(fimage);
+        fis.read(ibytes, 0, length);
+        fis.close();
+        return ibytes;
+      } catch (FileNotFoundException e) {
+        logger.error("Could not read confidence image from: {}", device);
+      } catch (IOException e) {
+        logger.error("Confidence read error: {}", e.getMessage());
+      }
+    }
+    return null;
+  }
+  
 }

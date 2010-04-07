@@ -162,4 +162,11 @@ public interface CaptureParameters {
   /** Default name for the manifest file */
   String MANIFEST_NAME = "manifest.xml";
   
+  /**
+   * Settings that control the capture agent confidence monitoring
+   */
+  
+  /** Directory which contains confidence monitoring images */
+  String CAPTURE_CONFIDENCE_VIDEO_LOCATION = "capture.confidence.video.location";
+  
 }
