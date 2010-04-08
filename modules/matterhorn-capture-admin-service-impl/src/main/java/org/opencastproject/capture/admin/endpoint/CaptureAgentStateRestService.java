@@ -234,28 +234,30 @@ public class CaptureAgentStateRestService {
 
   @POST
   @Path("recordings/{id}")
-  // TODO: setRecordingState should return a boolean indicating if this recording existed or not
-  // This way we could return a 404 if the recording doesn't exist, or OK otherwise
   public Response setRecordingState(@PathParam("id") String id, @FormParam("state") String state) {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
 
-    service.setRecordingState(id, state);
-    return Response.ok(id + " set to " + state).build();
+    if (service.setRecordingState(id, state)) {
+      return Response.ok(id + " set to " + state).build();
+    } else {
+      return Response.serverError().status(Response.Status.BAD_REQUEST).build();
+    }
   }
 
   @DELETE
   @Path("recordings/{id}")
-  // TODO: removeRecording should return a boolean indicating if this recording existed or not
-  // This way we could return a 404 if the recording doesn't exist, or OK otherwise
   public Response removeRecording(@PathParam("id") String id) {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
 
-    service.removeRecording(id);
-    return Response.ok(id + " removed").build();
+    if (service.removeRecording(id)) {
+      return Response.ok(id + " removed").build();
+    } else {
+      return Response.serverError().status(Response.Status.BAD_REQUEST).build();
+    }
   }
 
   @GET

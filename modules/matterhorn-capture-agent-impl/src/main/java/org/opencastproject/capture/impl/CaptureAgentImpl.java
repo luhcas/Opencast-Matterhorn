@@ -27,7 +27,6 @@ import org.opencastproject.capture.impl.jobs.AgentCapabilitiesJob;
 import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.pipeline.PipelineFactory;
-import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
@@ -36,11 +35,8 @@ import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.util.ZipUtil;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -94,7 +90,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
   /** The default maximum length to capture, measured in seconds. */
   public static final long DEFAULT_MAX_CAPTURE_LENGTH = 8 * 60 * 60;
 
-  /** The number of nanoseconds in a second.  This is a borrowed constant from gStreamer and is used in the pipeline initialization routines */
+  /** The number of nanoseconds in a second.  This is a borrowed constant from gStreamer and is used in the pipeline initialisation routines */
   public static final long GST_SECOND = 1000000000L;
 
   /** The agent's pipeline. **/
@@ -121,13 +117,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
   /** Indicates the ID of the recording currently being recorded. **/
   private String currentRecID = null;
 
-  /** Capturing files only? */
-  private boolean mockCapture = false;
-  private boolean noPrefix = false;
-
-  private static final String samplesDir = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "samples";
-
-  /**
+    /**
    * Sets the configuration service form which this capture agent should draw its configuration data.
    * @param service The configuration service.
    */
@@ -235,6 +225,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
     if (currentRecID != null || !agentState.equals(AgentState.IDLE)) {
       logger.warn("Unable to start capture, a different capture is still in progress in {}.",
               pendingRecordings.get(currentRecID).getDir().getAbsolutePath());
+      //TODO:  What if we don't have a recording ID already (eg, an unscheduled capture)
       if (properties != null && properties.contains(CaptureParameters.RECORDING_ID)) {
         setRecordingState((String) properties.get(CaptureParameters.RECORDING_ID), RecordingState.CAPTURE_ERROR);
       }
@@ -247,81 +238,16 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
 
     RecordingImpl newRec = createRecording(mediaPackage, properties);
     if (newRec == null) {
-      return null;
-    }
-
-    // Is this a "mock" capture?
-    mockCapture = false;
-    // FIXME: (Rubencino) Source paths should be absolute or relative to some other property. This patch fixes it temporarily
-    noPrefix = false;
-    if (properties != null && properties.get(CaptureParameters.CAPTURE_DEVICE_NAMES) != null) {
-      File f = new File(samplesDir);
-      String[] deviceList = ((String)properties.get(CaptureParameters.CAPTURE_DEVICE_NAMES)).split(",");
-      mockCapture = isMockCapture(properties, deviceList);
-      if (mockCapture) {
-        logger.debug("Preparing for mock capture.");
-        mockCapture = true;
-        // if running on a Linux capture box it is preferable to use GStreamer
-        if (!new File("/usr/lib/libjv4linfo.so").exists()) {
-          for (String device : deviceList) {
-            String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
-            String value = (String)properties.get(key);
-            // FIXME: Added by Rubencino to fix the CaptureAgentImpl test: routes to source files should be absolute
-            File src;
-            if (noPrefix)
-              src = new File(value);
-            else
-              src = new File(f, value);
-            String destFileNameKey = CaptureParameters.CAPTURE_DEVICE_PREFIX  + device + CaptureParameters.CAPTURE_DEVICE_DEST;
-            String destFileName = (String)properties.get(destFileNameKey);
-            File dest = new File(newRec.getDir(), destFileName);
-            logger.debug("Copying mock file {} to {}", src, dest);
-            try {
-              FileUtils.copyFile(src, dest);
-            } catch (FileNotFoundException e) {
-              resetOnFailure(newRec.getID());
-              throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
-            } catch (IOException e) {
-              resetOnFailure(newRec.getID());
-              throw new RuntimeException("Error copying " + src + " to recording directory " + newRec.getDir());
-            }
-          }
-
-          Catalog[] packageCatalogs = mediaPackage.getCatalogs();
-
-          if ((packageCatalogs == null) || (packageCatalogs.length == 0)) {
-            // Add the sample dublin core, otherwise the recording won't show up in search
-            File dcCatalog = new File(newRec.getDir(),"dublincore.xml");
-            try {
-              FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/dublincore.xml"),dcCatalog);
-              MediaPackageElementBuilder eb = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-              mediaPackage.add(eb.elementFromURI(newRec.getDir().toURI().relativize(dcCatalog.toURI()), Type.Catalog, DublinCoreCatalog.FLAVOR));
-            } catch (UnsupportedElementException e) {
-              resetOnFailure(newRec.getID());
-              throw new RuntimeException("Error adding " + dcCatalog + " to recording");
-            } catch (IOException e) {
-              resetOnFailure(newRec.getID());
-              throw new RuntimeException("Error copying " + dcCatalog + " to destination directory");
-            }
-          }
-          // When we return the recording, the mock capture is completed so reset
-          // the CaptureAgent state
-          setRecordingState(newRec.getID(), RecordingState.CAPTURING);
-          return newRec.getID();
-        }
-        else {
-          for (String device : deviceList) {
-            String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
-            String value = (String) newRec.getProperty(key);
-            if (! new File(value).exists())
-              newRec.setProperty(key, new File(samplesDir, value).getAbsolutePath());
-          }
-        }
+      //TODO:  What if we don't have a recording ID already (eg, an unscheduled capture)
+      if (properties != null && properties.contains(CaptureParameters.RECORDING_ID)) {
+        setRecordingState((String) properties.get(CaptureParameters.RECORDING_ID), RecordingState.CAPTURE_ERROR);
       }
+      return null;
     }
 
     String recordingID = initPipeline(newRec);
     if (recordingID == null) {
+      resetOnFailure(newRec.getID());
       return null;
     }
 
@@ -329,7 +255,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
     if (newRec.getProperty(CaptureParameters.RECORDING_END) == null) {
       if (!scheduleStop(newRec.getID())) {
         stopCapture(newRec.getID());
-        setRecordingState(newRec.getID(), RecordingState.CAPTURE_ERROR);
+        resetOnFailure(newRec.getID());
       }
     }
     return recordingID;
@@ -425,27 +351,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
     return newRec.getID();
   }
 
-  // FIXME: This is not exactly an efficient way to find out whether we are dealing with a mock capture. It requires
-  // copying the sample files in addition to having to do filesystem lookups. (jt)
-
-  private boolean isMockCapture(Properties properties, String[] deviceList) {
-    boolean isMockCapture = true;
-    File f = new File(samplesDir);
-    for (String device : deviceList) {
-      String key = CaptureParameters.CAPTURE_DEVICE_PREFIX + device + CaptureParameters.CAPTURE_DEVICE_SOURCE;
-      String value = properties.getProperty(key);
-      if (value == null || !(new File(f, value).isFile())) {
-        // FIXME: Added by Rubencino: routes to source files should be absolute. Test doesn't work otherwise
-        if (value != null && new File(value).isFile()) {
-          noPrefix = true;
-          continue;
-        } else
-          isMockCapture = false;
-      }
-    }
-    return isMockCapture;
-  }
-
   /**
    * Convenience method to reset an agent when a capture fails to start.
    * @param recordingID The recordingID of the capture which failed to start.
@@ -454,7 +359,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
     setAgentState(AgentState.IDLE);
     setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
     currentRecID = null;
-    pendingRecordings.remove(recordingID);
   }
 
   /**
@@ -497,11 +401,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
     logger.debug("stopCapture() called.");
     // If pipe is null and no mock capture is on
     if (pipe == null) {
-      if (!mockCapture) {
         logger.warn("Pipeline is null, unable to stop capture.");
         setAgentState(AgentState.IDLE);
         return false;
-      }
     } else {
       // We must stop the capture as soon as possible, then check whatever needed
       pipe.stop();
@@ -580,7 +482,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
         name = name.trim();
         // FIXME: when and why does this happen?  is it an actual configuration error?  if so, throw something. (jt)
         if ("".equals(name)){
-          logger.error("GDLGDL blank string in names!");
+          logger.error("Blank string in names!  Please tell someone on IRC");
           continue;
         }
 
@@ -756,6 +658,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
    * @see org.opencastproject.capture.api.StateService#getAgentName()
    */
   public String getAgentName() {
+    //Occasionally we're seeing a null agent name, so this fixes the problem
+    if (agentName == null) {
+      agentName = configService.getItem(CaptureParameters.AGENT_NAME);
+    }
     return agentName;
   }
 
@@ -874,9 +780,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
       logger.warn("Bundle context is null, so this is probably a test.  If you see this message from Felix please post a bug!");
     }
 
-    // FIXME: This should only be done in case of a mock capture, instead of just everytime the client starts
     // FIXME: Also, register a deactivate() and do some cleanup
-    copyMediaToFiles();
     setAgentState(AgentState.IDLE);
   }
 
@@ -890,23 +794,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
       }
     } catch (SchedulerException e) {
       logger.warn("Finalize for scheduler did not execute cleanly: {}.", e.getMessage());
-    }
-  }
-
-  /**
-   * Copy sample media included in the bundle to java.io.tmpdir/opencast/samples.
-   */
-  protected void copyMediaToFiles() {
-    File tmpDir = new File(samplesDir);
-    try {
-      tmpDir.mkdirs();
-      logger.info("Preparing sample media");
-      FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/audio.mp3"), new File(tmpDir, "audio.mp3"));
-      FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/screen.mpg"), new File(tmpDir, "screen.mpg"));
-      FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/camera.mpg"), new File(tmpDir, "camera.mpg"));
-      FileUtils.copyURLToFile(getClass().getClassLoader().getResource("samples/dublincore.xml"), new File(tmpDir, "dublincore.xml"));
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to copy media to " + tmpDir, e);
     }
   }
 

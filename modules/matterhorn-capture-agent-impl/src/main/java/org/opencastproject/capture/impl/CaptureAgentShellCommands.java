@@ -17,6 +17,8 @@ package org.opencastproject.capture.impl;
 
 import org.opencastproject.capture.admin.api.AgentState;
 
+import java.io.File;
+
 /**
  * Implementation of shell commands for the capture agent.
  */
@@ -75,12 +77,26 @@ public class CaptureAgentShellCommands {
       System.err.println("Nothing has been recorded");
       return;
     }
-    // FIXME: What if this method returns false?!!
-    agent.createManifest(recordingId);
+
+    if (!agent.createManifest(recordingId)) {
+      System.out.println("Error creating manifest, aborting!");
+      return;
+    }
+
     System.out.println("Zipping recording (" + recordingId + ")");
-    agent.zipFiles(recordingId);
+    File zip = agent.zipFiles(recordingId);
+    if (zip == null) {
+      System.out.println("Error zipping files, aborting!");
+      return;
+    }
+
     System.out.println("Ingesting recording (" + recordingId + ")");
-    agent.ingest(recordingId);
+    int httpCode = agent.ingest(recordingId);
+    if (httpCode != 200) {
+      System.out.println("Error ingesting, HTTP status code was " + httpCode);
+      return;
+    }
+
     recordingId = null;
   }
 

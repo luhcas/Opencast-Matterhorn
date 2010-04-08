@@ -286,22 +286,24 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * {@inheritDoc}
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#setRecordingState(java.lang.String, java.lang.String)
    */
-  public void setRecordingState(String id, String state) {
+  public boolean setRecordingState(String id, String state) {
     Recording req = recordings.get(id);
     if (req != null) {
       logger.debug("Setting Recording {} to state {}.", id, state);
       req.setState(state);
+      return true;
     } else {
       if (id == null || id.equals("")) {
         logger.debug("Unable to set recording state, recording name is blank or null.");
-        return;
+        return false;
       } else if (state == null || state.equals("")) {
         logger.debug("Unable to set recording state, recording state is blank or null.");
-        return;
+        return false;
       }
       logger.debug("Creating Recording {} with state {}.", id, state);
       Recording r = new RecordingImpl(id, state);
       recordings.put(id, r);
+      return true;
     }
   }
 
@@ -309,9 +311,13 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * {@inheritDoc}
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#removeRecording(java.lang.String)
    */
-  public void removeRecording(String id) {
+  public boolean removeRecording(String id) {
     logger.debug("Removing Recording {}.", id);
-    recordings.remove(id);
+    if (recordings.remove(id) == null) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**

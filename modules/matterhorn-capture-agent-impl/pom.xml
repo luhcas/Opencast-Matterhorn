@@ -28,6 +28,36 @@
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-util</artifactId>
+      <version>0.6-SNAPSHOT</version>
+      <type>bundle</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-http</artifactId>
+      <version>0.6-SNAPSHOT</version>
+      <type>bundle</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject.samples</groupId>
+      <artifactId>audio</artifactId>
+      <version>1.0</version>
+      <type>mp3</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject.samples</groupId>
+      <artifactId>camera</artifactId>
+      <version>1.0</version>
+      <type>mpg</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject.samples</groupId>
+      <artifactId>screen</artifactId>
+      <version>1.0</version>
+      <type>mpg</type>
+    </dependency>
+    <dependency>
       <groupId>net.luniks.linux.jv4linfo</groupId>
       <artifactId>libjv4linfo</artifactId>
       <version>0.2.1</version>
@@ -117,18 +147,6 @@
       <groupId>org.apache.felix.karaf.shell</groupId>
       <artifactId>org.apache.felix.karaf.shell.console</artifactId>
       <version>1.0.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-util</artifactId>
-        <version>0.6-SNAPSHOT</version>
-      <type>bundle</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-http</artifactId>
-        <version>0.6-SNAPSHOT</version>
-      <type>bundle</type>
     </dependency>
     <dependency>
       <groupId>org.easymock</groupId>

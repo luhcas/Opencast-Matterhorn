@@ -16,11 +16,13 @@
 package org.opencastproject.capture.impl;
 
 import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.util.XProperties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +33,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Timer;
@@ -51,7 +52,7 @@ public class ConfigurationManager implements ManagedService {
     LoggerFactory.getLogger(ConfigurationManager.class);
   
   /** Hashtable that represents config file in memory */
-  private Properties properties = new Properties();
+  private XProperties properties = new XProperties();
   
   /** should point to a centralised config file */
   private URL url; 
@@ -59,6 +60,10 @@ public class ConfigurationManager implements ManagedService {
   /** Timer that will every at a specified interval to retrieve the centralised
    * configuration file from a server */
   private Timer timer;
+
+  public void activate(ComponentContext ctx) {
+    properties.setBundleContext(ctx.getBundleContext());
+  }
 
   public void deactivate() {
     if (timer != null) {
@@ -72,11 +77,7 @@ public class ConfigurationManager implements ManagedService {
       logger.debug("Null properties in updated!");
       return;
     }
-    Enumeration<String> keys = props.keys();
-    while (keys.hasMoreElements()) {
-      String key = keys.nextElement();
-      properties.put(key, props.get(key));
-    }
+    properties.merge(props);
 
     // Attempt to parse the location of the configuration server
     try {
@@ -314,7 +315,7 @@ public class ConfigurationManager implements ManagedService {
     // overwrite the current properties in the ConfigurationManager
     if (overwrite) {
       for (Object key : p.keySet()) {
-        properties.setProperty((String) key, (String) p.get(key));
+        properties.setProperty((String) key, p.getProperty((String) key));
       }
       return getAllProperties();
     }
@@ -322,7 +323,7 @@ public class ConfigurationManager implements ManagedService {
     else {
       Properties merged = getAllProperties();
       for (Object key : p.keySet()) {
-        merged.setProperty(key.toString(), p.get(key).toString());
+        merged.setProperty(key.toString(), p.getProperty((String) key));
       }
       return merged;
     }

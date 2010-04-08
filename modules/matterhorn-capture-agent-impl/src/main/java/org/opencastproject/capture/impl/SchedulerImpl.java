@@ -483,7 +483,6 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         props.put(JobParameters.JOB_POSTFIX, uid);
         String endCronString = getCronString(duration.getDuration().getTime(start)).toString();
         props.put(CaptureParameters.RECORDING_END, endCronString);
-        log.debug("Event {} end cron expression set to {}.", endCronString);
 
         //Create the directory we'll be capturing into
         File captureDir = new File(configService.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),

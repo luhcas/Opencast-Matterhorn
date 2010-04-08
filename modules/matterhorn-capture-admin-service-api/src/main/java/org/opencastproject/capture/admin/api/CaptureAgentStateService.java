@@ -99,14 +99,14 @@ public interface CaptureAgentStateService {
    * @param state The state to set for that recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.
    * @see RecordingState
    */
-  public void setRecordingState(String id, String state);
+  public boolean setRecordingState(String id, String state);
 
   /**
    * Removes a recording from the system, if the recording exists.
    *
    * @param id The id of the recording to remove.
    */
-  public void removeRecording(String id);
+  public boolean removeRecording(String id);
   
   /**
    * Gets the state of all recordings in the system.

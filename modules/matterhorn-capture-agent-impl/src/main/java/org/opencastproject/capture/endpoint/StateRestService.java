@@ -78,6 +78,8 @@ public class StateRestService {
       for (Entry<String, AgentRecording> e : data.entrySet()) {
         update.add(new RecordingStateUpdate(e.getValue()));
       }
+    } else {
+      logger.debug("Service is null in getRecordings()");
     }
     return update;
   }

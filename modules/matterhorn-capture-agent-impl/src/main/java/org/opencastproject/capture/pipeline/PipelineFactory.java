@@ -73,7 +73,7 @@ public class PipelineFactory {
       logger.error("Insufficient number of capture devices listed.  Aborting!");
       return null;
     } else if (friendlyNames.length == 1) {
-      //Java gives us an array even if the string being split it blank...
+      //Java gives us an array even if the string being split is blank...
       if (friendlyNames[0].trim().equals("")) {
         logger.error("Invalid capture device listed.  Aborting!");
         return null;
@@ -102,6 +102,7 @@ public class PipelineFactory {
       }
       String outputLoc = outputFile.getAbsolutePath();
 
+      logger.debug("Device {} has source at {}.", name, srcLoc);
       if (new File(srcLoc).isFile()) {
         // Non-V4L file. If it exists, assume it is ingestable
         // TODO: Fix security risk. Any file on CaptureAgent filesytem could be ingested
