@@ -21,6 +21,8 @@ import java.util.LinkedList;
 import java.util.UUID;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
+import org.opencastproject.scheduler.impl.jpa.Event;
+import org.opencastproject.scheduler.impl.jpa.Metadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -419,4 +421,25 @@ public class SchedulerEventImpl implements SchedulerEvent {
   public int hashCode () {
     return getID().toString().hashCode();
   }
+  
+  public Event toEvent() {
+    Event e = new Event();
+    e.setEventId(id);
+    e.setRecurringEvent(null);
+    LinkedList<Metadata> metadataList = new LinkedList<Metadata>();
+    for (String key : metadata.keySet()) {
+      metadataList.add(new Metadata(key, metadata.get(key)));
+    }
+    metadataList.add(new Metadata("time.start", new Long(getStartdate().getTime()).toString()));
+    metadataList.add(new Metadata("time.end", new Long(getStartdate().getTime()).toString()));
+    String attendeeString = new String();
+    for (String attendee : attendees) attendeeString += attendee + ",";
+    metadataList.add(new Metadata("attendees", attendeeString));
+    String resourceString = new String();
+    for (String resource : resources) resourceString += resource + ",";
+    metadataList.add(new Metadata("resources", resourceString));
+    e.setMetadata(metadataList);
+    
+    return e;
+  }  
 }

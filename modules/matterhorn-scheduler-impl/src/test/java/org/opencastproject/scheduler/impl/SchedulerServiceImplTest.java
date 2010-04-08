@@ -20,18 +20,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Date;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
@@ -48,6 +44,8 @@ import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.scheduler.endpoint.SchedulerRestService;
 import org.opencastproject.scheduler.impl.dao.SchedulerServiceImplDAO;
+import org.opencastproject.scheduler.impl.jpa.Event;
+import org.opencastproject.scheduler.impl.jpa.SchedulerServiceImplJPA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -57,6 +55,7 @@ import junit.framework.Assert;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
 import org.junit.Before;
@@ -66,10 +65,12 @@ public class SchedulerServiceImplTest {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImplTest.class);
   
   private SchedulerService service = null;
+  private SchedulerServiceImplJPA serviceJPA = null;
   private static final String storageRoot = "target" + File.separator + "scheduler-test-db";
   private static final String resourcesRoot = "src" + File.separator + "main" + File.separator + "resources";
   
   private SchedulerEvent event;
+  private DataSource datasource;
 
   private DataSource connectToDatabase(File storageDirectory) {
     if (storageDirectory == null) {
@@ -87,8 +88,21 @@ public class SchedulerServiceImplTest {
     } catch (IOException e) {
       Assert.fail(e.getMessage());
     }    
-    service = new SchedulerServiceImplDAO(connectToDatabase(new File(storageRoot)));
+    datasource = connectToDatabase(new File(storageRoot));
+    service = new SchedulerServiceImplDAO(datasource);
     // set Metadata Mapping Files. This depends on if its called from OSGI or in a regular case.
+    
+    // Collect the persistence properties
+    Map<String, Object> props = new HashMap<String, Object>();
+    props.put("javax.persistence.nonJtaDataSource", datasource);
+    props.put("eclipselink.ddl-generation", "create-tables");
+    props.put("eclipselink.ddl-generation.output-mode", "database");
+    
+    serviceJPA = new SchedulerServiceImplJPA();
+    serviceJPA.setPersistenceProvider(new PersistenceProvider());
+    serviceJPA.setPersistenceProperties(props);
+    serviceJPA.activate(null);    
+
     try {
       ((SchedulerServiceImplDAO)service).setDublinCoreGenerator(new DublinCoreGenerator(new FileInputStream(resourcesRoot+ File.separator+"config"+File.separator+"dublincoremapping.properties")));
       ((SchedulerServiceImplDAO)service).setCaptureAgentMetadataGenerator(new CaptureAgentMetadataGenerator(new FileInputStream(resourcesRoot+ File.separator+"config"+File.separator+"captureagentmetadatamapping.properties")));
@@ -114,6 +128,17 @@ public class SchedulerServiceImplTest {
   @After
   public void teardown() {
     service = null;
+    serviceJPA.destroy();
+    serviceJPA = null;
+  }
+  
+  @Test
+  public void testPersistence () {
+    SchedulerEvent eventStored = serviceJPA.addEvent(event);
+    Assert.assertNotNull(eventStored);
+    Assert.assertNotNull(eventStored.getID());
+    SchedulerEvent eventLoaded = serviceJPA.getEvent(eventStored.getID());
+    Assert.assertEquals(eventStored, eventLoaded);
   }
   
   @Test
