@@ -254,5 +254,6 @@ Recordings.getURLParam = function(name) {
 }
 
 Recordings.displayHoldActionPanel = function(URL, wfId) {
-  alert("displaying hold action panel for MediaPackage " + wfId);
+  $('#holdActionPanel-container iframe').attr('src', URL);
+  $('#holdActionPanel-container').fadeIn('fast');
 }

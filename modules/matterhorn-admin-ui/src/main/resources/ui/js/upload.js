@@ -45,7 +45,8 @@ Upload.init = function() {
   // Event: Help icon clicked, display help
   $('.helpIcon').click( function() {
     var help = $(this).prev().attr('id');
-    Upload.showHelpBox(help);
+    //alert("Displaying help for: " + help);
+    Upload.showHelpBox(help,$(this).offset().top,$(this).offset().left);
     return false;
   });
 
@@ -147,12 +148,12 @@ Upload.checkRequiredFields = function(submit) {
   return !missing;
 }
 
-Upload.showHelpBox = function(help) {
+Upload.showHelpBox = function(help,top,left) {
   $('#helpTitle').text(helpTexts[help][0]);
   $('#helpText').text(helpTexts[help][1]);
   $('#helpBox').css({
-    top:$(this).offset().top,
-    left:$(this).offset().left
+    top:top,
+    left:left
   }).fadeIn('fast');
 }
 
