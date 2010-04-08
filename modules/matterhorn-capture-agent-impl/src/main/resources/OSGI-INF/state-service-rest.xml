@@ -2,9 +2,7 @@
 <component name="org.opencastproject.capture.endpoint.StateRestService" immediate="true">
   <implementation class="org.opencastproject.capture.endpoint.StateRestService" />
   <property name="service.description" value="State REST Endpoint" />
-  <property name="service.exported.interfaces" value="org.opencastproject.capture.endpoint.StateRestService" />
-  <property name="service.exported.configs" value="org.apache.cxf.rs" />
-  <property name="org.apache.cxf.rs.httpservice.context" value="/state/rest" />
+  <property name="opencast.rest.url" value="/state/rest" />
   <service>
     <provide interface="org.opencastproject.capture.endpoint.StateRestService" />
   </service>

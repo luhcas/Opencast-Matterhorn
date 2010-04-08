@@ -39,6 +39,8 @@ import org.opencastproject.workspace.api.Workspace;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +68,16 @@ public class CaptionsServiceImpl implements CaptionsService, ManagedService, Res
   }
   public void unsetWorkspace(Workspace workspace) {
     this.workspace = null;
+  }
+  protected HttpService httpService;
+  protected HttpContext httpContext;
+
+  public void setHttpService(HttpService httpService) {
+    this.httpService = httpService;
+  }
+  
+  public void setHttpContext(HttpContext httpContext) {
+    this.httpContext = httpContext;
   }
 
   private WorkflowService workflowService;

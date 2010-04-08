@@ -17,7 +17,6 @@ package org.opencastproject.http;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -26,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -45,41 +45,85 @@ public class StaticResource extends HttpServlet {
   String welcomeFile;
   String testClasspath;
   String testSuite;
-
+  URL defaultUrl;
+  
   HttpService httpService;
+  HttpContext httpContext;
   ComponentContext componentContext;
+
+  public StaticResource() {}
+
+  public StaticResource(String classpath, String alias, String welcomeFile) {
+    this(classpath, alias, welcomeFile, null, null, null, null);
+  }
+
+  public StaticResource(String classpath, String alias, String welcomeFile, String testClasspath, String testSuite) {
+    this(classpath, alias, welcomeFile, testClasspath, testSuite, null, null);
+  }
+
+  public StaticResource(String classpath, String alias, String welcomeFile, HttpService httpService, HttpContext httpContext) {
+    this(classpath, alias, welcomeFile, null, null, httpService, httpContext);
+  }
+
+  public StaticResource(String classpath, String alias, String welcomeFile, String testClasspath, String testSuite,
+          HttpService httpService, HttpContext httpContext) {
+    this.classpath = classpath;
+    this.alias = alias;
+    this.welcomeFile = welcomeFile;
+    this.testClasspath = testClasspath;
+    this.testSuite = testSuite;
+    this.httpService = httpService;
+    this.httpContext = httpContext;
+  }
+
 
   public void setHttpService(HttpService service) {
     this.httpService = service;
   }
+  
+  public void setHttpContext(HttpContext httpContext) {
+    this.httpContext = httpContext;
+  }
 
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
-    welcomeFile = (String)componentContext.getProperties().get("welcome.file");
+    if(welcomeFile == null) welcomeFile = (String)componentContext.getProperties().get("welcome.file");
     boolean welcomeFileSpecified = true;
     if(welcomeFile == null) {
       welcomeFileSpecified = false;
       welcomeFile = "index.html";
     }
-    alias = (String)componentContext.getProperties().get("alias");
-    classpath = (String)componentContext.getProperties().get("classpath");
-    testSuite = (String)componentContext.getProperties().get("test.suite");
-    testClasspath = (String)componentContext.getProperties().get("test.classpath");
+    if(alias == null) alias = (String)componentContext.getProperties().get("alias");
+    if(classpath == null) classpath = (String)componentContext.getProperties().get("classpath");
+    if(testSuite == null) testSuite = (String)componentContext.getProperties().get("test.suite");
+    if(testClasspath == null) testClasspath = (String)componentContext.getProperties().get("test.classpath");
     logger.info("registering classpath:{} at {} with welcome file {} {}, test suite: {} from classpath {}",
             new Object[] {classpath, alias, welcomeFile, welcomeFileSpecified ? "" : "(via default)", testSuite, testClasspath});
-    HttpContext httpContext = httpService.createDefaultHttpContext();
-    BundleContext bundleContext = componentContext.getBundleContext();
     try {
-      httpService.registerServlet(alias, this, null, new SecureHttpContext(httpContext, bundleContext));
+      httpService.registerServlet(alias, this, null, httpContext);
     } catch (Exception e) {
       throw new RuntimeException(e);
+    }
+    String serverUrl = componentContext.getBundleContext().getProperty("org.opencastproject.server.url");
+    try {
+      defaultUrl = new URL(serverUrl + alias);
+    } catch (MalformedURLException e) {
+      throw new IllegalStateException("unable to construct URL " + serverUrl + "/" + alias, e);
     }
   }
   
   public void deactivate(ComponentContext context) {
-    httpService.unregister(alias);
+    try {
+      httpService.unregister(alias);
+    } catch(Exception e) {
+      logger.debug("unable to unregister alias " + alias, e);
+    }
   }
 
+  public URL getDefaultUrl() {
+    return defaultUrl;
+  }
+  
   @Override
   public String toString() {
     return "StaticResource [alias=" + alias + ", classpath=" + classpath + ", welcome file=" + welcomeFile + "]";
@@ -123,7 +167,7 @@ public class StaticResource extends HttpServlet {
       }
 
       URL url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
-      if(url == null && testMode) {
+      if(url == null && testMode && testClasspath != null) {
         if(pathInfo == null) {
           if( ! servletPath.equals(alias)) {
             classpathToResource = testClasspath.substring(1) + servletPath;

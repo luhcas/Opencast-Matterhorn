@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>matterhorn-http</artifactId>
+  <artifactId>matterhorn-rest</artifactId>
   <packaging>bundle</packaging>
-  <name>matterhorn-http</name>
+  <name>matterhorn-rest</name>
   <version>0.6-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -17,16 +17,16 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-    </dependency>
-    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-bundle-minimal</artifactId>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -57,9 +57,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package>org.opencastproject.http</Export-Package>
+            <Private-Package>org.opencastproject.rest</Private-Package>
+            <Import-Package>META-INF.cxf, META-INF.cxf.osgi, *</Import-Package>
             <Service-Component>
-              OSGI-INF/httpContext.xml
+              OSGI-INF/rest.xml
             </Service-Component>
           </instructions>
         </configuration>
@@ -67,3 +68,4 @@
     </plugins>
   </build>
 </project>
+

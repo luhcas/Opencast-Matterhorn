@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
+import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -23,16 +23,26 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Simple implementation that hold for upload of a captions file.
  */
-public class ReviewWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
+public class ReviewWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
   
   private static final Logger logger = LoggerFactory.getLogger(ReviewWorkflowOperationHandler.class);
   
+  public void setHttpService(HttpService service) {
+    super.httpService = service;
+  }
+  
+  public void setHttpContext(HttpContext httpContext) {
+    super.httpContext = httpContext;
+  }
+
   /** Path to the hold ui resources */
   private static final String HOLD_UI_PATH = "/operation/ui/review/index.html";
   
@@ -51,5 +61,4 @@ public class ReviewWorkflowOperationHandler extends AbstractWorkflowOperationHan
     logger.info("Holding for review...");
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
   }
-
 }

@@ -22,17 +22,14 @@ import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * Run all integration tests
- * @author jamiehodge
  *
  */
-
 @RunWith(Suite.class)
 @SuiteClasses({
   UploadTest.class,
   UnscheduledCaptureTest.class,
   ScheduledCaptureTest.class
 })
-
 public class IntegrationTests {
   public static String BASE_URL = "http://localhost:8080";
   public static String AGENT = "demo_capture_agent";

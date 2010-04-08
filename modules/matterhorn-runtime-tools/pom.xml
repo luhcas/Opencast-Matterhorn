@@ -94,15 +94,6 @@
       <groupId>org.apache.cxf</groupId>
       <artifactId>cxf-bundle-minimal</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.cxf.dosgi</groupId>
-      <artifactId>cxf-dosgi-ri-discovery-local</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.cxf.dosgi</groupId>
-      <artifactId>cxf-dosgi-ri-dsw-cxf</artifactId>
-    </dependency>
-    <!-- End CXF -->
 
     <!-- Spring -->
     <dependency>
@@ -248,6 +239,11 @@
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.commons-httpclient</artifactId>
+      <version>3.1_4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.jaxb-impl</artifactId>
       <version>2.1.6_1</version>
     </dependency>
@@ -255,6 +251,11 @@
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.wsdl4j</artifactId>
       <version>1.6.1_1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.xerces</artifactId>
+      <version>2.9.1_3</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.jettison</groupId>

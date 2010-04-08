@@ -2,9 +2,7 @@
 <component name="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" immediate="true">
   <implementation class="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" />
   <property name="service.description" value="Media Inspection REST Endpoint" />
-  <property name="service.exported.interfaces" value="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" />
-  <property name="service.exported.configs" value="org.apache.cxf.rs" />
-  <property name="org.apache.cxf.rs.httpservice.context" value="/inspection/rest" />
+  <property name="opencast.rest.url" value="/inspection/rest" />
   <service>
     <provide interface="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" />
   </service>

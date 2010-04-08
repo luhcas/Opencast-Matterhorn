@@ -68,18 +68,6 @@
       <version>0.6-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>org.springframework.security</artifactId>
-    </dependency>
-      <dependency>
-        <groupId>org.springframework.osgi</groupId>
-        <artifactId>spring-osgi-core</artifactId>
-      </dependency>
-    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_core</artifactId>
     </dependency>

@@ -19,6 +19,7 @@ import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -36,6 +37,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 
 import java.io.File;
 import java.io.IOException;
@@ -135,7 +138,7 @@ public class HoldStateTest {
     Assert.assertTrue(xmlFromDb.contains("bar"));
   }
 
-  class HoldingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
+  class HoldingWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
     MediaPackage mp;
 
     HoldingWorkflowOperationHandler(MediaPackage mp) {
@@ -145,6 +148,9 @@ public class HoldStateTest {
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, Action.PAUSE);
     }
+
+    public void setHttpContext(HttpContext httpContext) {}
+    public void setHttpService(HttpService httpService) {}
   }
 
   class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {

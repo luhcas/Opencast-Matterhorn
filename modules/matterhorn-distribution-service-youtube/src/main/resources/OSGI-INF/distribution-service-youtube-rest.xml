@@ -2,9 +2,7 @@
 <component name="org.opencastproject.distribution.youtube.endpoint.YoutubeDistributionRestService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.distribution.youtube.endpoint.YoutubeDistributionRestService" />
   <property name="service.description" value="Distribution (Youtube) REST Endpoint" />
-  <property name="service.exported.interfaces" value="org.opencastproject.distribution.youtube.endpoint.YoutubeDistributionRestService" />
-  <property name="service.exported.configs" value="org.apache.cxf.rs" />
-  <property name="org.apache.cxf.rs.httpservice.context" value="/distribution/youtube/rest" />
+  <property name="opencast.rest.url" value="/distribution/youtube/rest" />
   <service>
     <provide interface="org.opencastproject.distribution.youtube.endpoint.YoutubeDistributionRestService" />
   </service>

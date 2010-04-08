@@ -2,9 +2,7 @@
 <component name="org.opencastproject.captions.CaptionsRestService" immediate="true">
   <implementation class="org.opencastproject.captions.endpoint.CaptionsRestService" />
   <property name="service.description" value="Captions REST Endpoint" />
-  <property name="service.exported.interfaces" value="org.opencastproject.captions.endpoint.CaptionsRestService" />
-  <property name="service.exported.configs" value="org.apache.cxf.rs" />
-  <property name="org.apache.cxf.rs.httpservice.context" value="/captions/rest" />
+  <property name="opencast.rest.url" value="/captions/rest" />
   <service>
     <provide interface="org.opencastproject.captions.endpoint.CaptionsRestService" />
   </service>

@@ -2,9 +2,7 @@
 <component name="org.opencastproject.workflow.endpoint.WorkflowRestService" activate="activate" immediate="true">
   <implementation class="org.opencastproject.workflow.endpoint.WorkflowRestService" />
   <property name="service.description" value="Workflow REST Endpoint" />
-  <property name="service.exported.interfaces" value="org.opencastproject.workflow.endpoint.WorkflowRestService" />
-  <property name="service.exported.configs" value="org.apache.cxf.rs" />
-  <property name="org.apache.cxf.rs.httpservice.context" value="/workflow/rest" />
+  <property name="opencast.rest.url" value="/workflow/rest" />
   <service>
     <provide interface="org.opencastproject.workflow.endpoint.WorkflowRestService" />
   </service>

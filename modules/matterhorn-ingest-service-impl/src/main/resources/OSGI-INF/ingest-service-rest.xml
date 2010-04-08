@@ -2,9 +2,7 @@
 <component name="org.opencastproject.ingest.endpoint.IngestRestService" immediate="true" activate="activate">
   <implementation class="org.opencastproject.ingest.endpoint.IngestRestService" />
   <property name="service.description" value="Ingest REST Endpoint" />
-  <property name="service.exported.interfaces" value="org.opencastproject.ingest.endpoint.IngestRestService" />
-  <property name="service.exported.configs" value="org.apache.cxf.rs" />
-  <property name="org.apache.cxf.rs.httpservice.context" value="/ingest/rest" />
+  <property name="opencast.rest.url" value="/ingest/rest" />
   <service>
     <provide interface="org.opencastproject.ingest.endpoint.IngestRestService" />
   </service>

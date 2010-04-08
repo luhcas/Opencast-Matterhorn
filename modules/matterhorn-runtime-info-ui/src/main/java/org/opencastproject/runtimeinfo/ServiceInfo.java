@@ -15,7 +15,6 @@
  */
 package org.opencastproject.runtimeinfo;
 
-import org.opencastproject.http.SecureHttpContext;
 import org.opencastproject.http.StaticResource;
 
 import org.json.simple.JSONArray;
@@ -25,6 +24,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +51,7 @@ public class ServiceInfo {
   private static final String RS_CONTEXT_FILTER = "(" + RS_CONTEXT + "=*)";
   
   private HttpService httpService;
+  private HttpContext httpContext;
   private BundleContext bundleContext;
   private boolean testMode;
   private String serverUrl;
@@ -59,6 +60,10 @@ public class ServiceInfo {
     this.httpService = httpService;
   }
   
+  public void setHttpContext(HttpContext httpContext) {
+    this.httpContext = httpContext;
+  }
+
   protected ServiceReference[] getSoapServiceReferences() throws InvalidSyntaxException {
     return bundleContext.getAllServiceReferences(null, WS_CONTEXT_FILTER);
   }
@@ -79,10 +84,10 @@ public class ServiceInfo {
     
     // Register the info servlet
     try {
-      httpService.registerServlet("/info.json", new Info(), null, new SecureHttpContext(httpService.createDefaultHttpContext(), bundleContext));
+      httpService.registerServlet("/info.json", new Info(), null, httpContext);
       // Register the UI test harness
       if(testMode) {
-        httpService.registerServlet("/TestSuites.html", new TestSuiteServlet(), null, new SecureHttpContext(httpService.createDefaultHttpContext(), bundleContext));
+        httpService.registerServlet("/TestSuites.html", new TestSuiteServlet(), null, httpContext);
       }
     } catch (Exception e) {
       throw new IllegalStateException(e);

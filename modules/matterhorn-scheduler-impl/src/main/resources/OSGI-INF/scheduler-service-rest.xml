@@ -4,10 +4,7 @@
   <implementation
     class="org.opencastproject.scheduler.endpoint.SchedulerRestService" />
   <property name="service.description" value="Scheduler REST Endpoint" />
-  <property name="service.exported.interfaces"
-    value="org.opencastproject.scheduler.endpoint.SchedulerRestService" />
-  <property name="service.exported.configs" value="org.apache.cxf.rs" />
-  <property name="org.apache.cxf.rs.httpservice.context" value="/scheduler/rest" />
+  <property name="opencast.rest.url" value="/scheduler/rest" />
   <service>
     <provide interface="org.opencastproject.scheduler.endpoint.SchedulerRestService" />
   </service>

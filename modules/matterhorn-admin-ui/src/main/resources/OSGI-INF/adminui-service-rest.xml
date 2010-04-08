@@ -2,9 +2,7 @@
 <component name="org.opencastproject.adminui.endpoint.AdminuiRestService" activate="activate" immediate="true">
   <implementation class="org.opencastproject.adminui.endpoint.AdminuiRestService" />
   <property name="service.description" value="Admin UI REST Proxy" />
-  <property name="service.exported.interfaces" value="org.opencastproject.adminui.endpoint.AdminuiRestService" />
-  <property name="service.exported.configs" value="org.apache.cxf.rs" />
-  <property name="org.apache.cxf.rs.httpservice.context" value="/admin/rest" />
+  <property name="opencast.rest.url" value="/admin/rest" />
   <service>
     <provide interface="org.opencastproject.adminui.endpoint.AdminuiRestService" />
   </service>

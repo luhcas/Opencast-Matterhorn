@@ -2,9 +2,7 @@
 <component name="org.opencastproject.composer.impl.endpoint.ComposerRestService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.composer.impl.endpoint.ComposerRestService" />
   <property name="service.description" value="Composer REST Endpoint" />
-  <property name="service.exported.interfaces" value="org.opencastproject.composer.impl.endpoint.ComposerRestService" />
-  <property name="service.exported.configs" value="org.apache.cxf.rs" />
-  <property name="org.apache.cxf.rs.httpservice.context" value="/composer/rest" />
+  <property name="opencast.rest.url" value="/composer/rest" />
   <service>
     <provide interface="org.opencastproject.composer.impl.endpoint.ComposerRestService" />
   </service>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="workflowcontroler.ui" immediate="true" activate="activate" deactivate="deactivate">
+<component name="workflowcontroler.ui" immediate="true"
+  activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.http.StaticResource" />
   <property name="service.description" value="Workflow Controller" />
   <property name="alias" value="/workflow/ui" />
@@ -10,5 +11,7 @@
   </service>
   <reference name="http-service" interface="org.osgi.service.http.HttpService"
     cardinality="1..1" policy="static" bind="setHttpService" />
+  <reference name="http-context" interface="org.osgi.service.http.HttpContext"
+    cardinality="1..1" policy="static" bind="setHttpContext" />
 </component>
 

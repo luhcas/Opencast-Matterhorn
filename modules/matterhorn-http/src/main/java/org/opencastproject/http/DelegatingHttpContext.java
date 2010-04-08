@@ -18,11 +18,16 @@ package org.opencastproject.http;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.servlet.Filter;
@@ -34,39 +39,74 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * An HttpContext that routes all requests through all {@link Filter}s registered with (org.opencastproject.filter=true.
+ * Matterhorn's shared {@link HttpContext}. This delegates resource lookups in the configured /static URL space to the
+ * filesystem. All {@link Servlet} and {@link StaticResource} registrations should use the {@link HttpContext} that is
+ * registered with the OSGi service registry.
  */
-public class SecureHttpContext implements HttpContext {
-  private static final Logger logger = LoggerFactory.getLogger(SecureHttpContext.class);
-  private HttpContext delegate;
-  private BundleContext bundleContext;
-  
-  public SecureHttpContext(HttpContext delegate, BundleContext bundleContext) {
-    this.delegate = delegate;
-    this.bundleContext = bundleContext;
+public class DelegatingHttpContext implements HttpContext {
+  private static final Logger logger = LoggerFactory.getLogger(DelegatingHttpContext.class);
+
+  protected String filesystemPath = null;
+  protected BundleContext bundleContext = null;
+  protected HttpService httpService;
+
+  public void setHttpService(HttpService httpService) {
+    this.httpService = httpService;
   }
-  
+
+  public void activate(ComponentContext cc) {
+    this.bundleContext = cc.getBundleContext();
+    filesystemPath = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "static";
+    logger.info("Registering resources at {} at URL /static", filesystemPath);
+    try {
+      httpService.registerResources("/static", "/", this);
+    } catch (NamespaceException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void deactivate() {
+    httpService.unregister("/static");
+  }
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.osgi.service.http.HttpContext#getMimeType(java.lang.String)
    */
   @Override
   public String getMimeType(String name) {
-    return delegate.getMimeType(name);
+    return null;
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.osgi.service.http.HttpContext#getResource(java.lang.String)
    */
   @Override
-  public URL getResource(String name) {
-    return delegate.getResource(name);
+  public URL getResource(String path) {
+    String normalized = path == null ? null : path.trim().replaceAll("/+", "/");
+    if (normalized != null && normalized.startsWith("/") && normalized.length() > 1) {
+      normalized = normalized.substring(1);
+    }
+
+    File f = new File(filesystemPath, normalized);
+    if (!f.isFile()) {
+      return null;
+    }
+    try {
+      return f.toURI().toURL();
+    } catch (MalformedURLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
    * {@inheritDoc}
-   * @see org.osgi.service.http.HttpContext#handleSecurity(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * 
+   * @see org.osgi.service.http.HttpContext#handleSecurity(javax.servlet.http.HttpServletRequest,
+   *      javax.servlet.http.HttpServletResponse)
    */
   @Override
   public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -78,8 +118,8 @@ public class SecureHttpContext implements HttpContext {
       return false;
     }
     if (refs == null || refs.length == 0) {
-//      logger.warn("Requests are not permitted without a registered matterhorn security filter.");
-//      return false;
+      // logger.warn("Requests are not permitted without a registered matterhorn security filter.");
+      // return false;
       return true; // TODO: this must be changed to false for the next release
     }
     Filter[] filters = new Filter[refs.length];
@@ -100,11 +140,11 @@ public class SecureHttpContext implements HttpContext {
   class Chain implements FilterChain {
     int current = 0;
     Filter[] filters;
-  
+
     Chain(Filter[] filters) {
       this.filters = filters;
     }
-  
+
     public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
       if (current < filters.length && !response.isCommitted()) {
         Filter filter = filters[current++];
@@ -113,5 +153,4 @@ public class SecureHttpContext implements HttpContext {
       }
     }
   }
-
 }

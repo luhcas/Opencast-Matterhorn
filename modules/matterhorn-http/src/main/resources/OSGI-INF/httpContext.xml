@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.http.DelegatingHttpContext" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.http.DelegatingHttpContext" />
+  <property name="service.description" value="Opencast HttpContent" />
+  <property name="httpContext.id" value="opencast.httpcontent" />
+  <service>
+    <provide interface="org.osgi.service.http.HttpContext" />
+  </service>
+  <reference name="http-service" interface="org.osgi.service.http.HttpService"
+    cardinality="1..1" policy="static" bind="setHttpService" />
+</component>

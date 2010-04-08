@@ -36,10 +36,8 @@ import com.sun.jersey.api.client.WebResource;
 
 /**
  * Test utilities
- * @author jamiehodge
  *
  */
-
 public class Utils {
 
   public static Document parseXml(String doc) throws Exception {

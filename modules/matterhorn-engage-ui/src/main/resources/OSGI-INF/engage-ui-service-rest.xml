@@ -2,9 +2,7 @@
 <component name="org.opencastproject.engageui.endpoint.EngageuiRestService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.engageui.endpoint.EngageuiRestService" />
   <property name="service.description" value="Engage UI REST Proxy" />
-  <property name="service.exported.interfaces" value="org.opencastproject.engageui.endpoint.EngageuiRestService" />
-  <property name="service.exported.configs" value="org.apache.cxf.rs" />
-  <property name="org.apache.cxf.rs.httpservice.context" value="/engageui/rest" />
+  <property name="opencast.rest.url" value="/engageui/rest" />
   <service>
     <provide interface="org.opencastproject.engageui.endpoint.EngageuiRestService" />
   </service>

@@ -47,6 +47,7 @@
         <module>modules/matterhorn-feedback-service-api</module>
         <module>modules/matterhorn-feedback-service-impl</module> 
         <module>modules/matterhorn-http</module>
+        <module>modules/matterhorn-rest</module>
         <module>modules/matterhorn-ingest-service-api</module>
         <module>modules/matterhorn-ingest-service-impl</module>
         <module>modules/matterhorn-inspection-service-api</module>
@@ -90,6 +91,7 @@
         <module>modules/matterhorn-util</module>
         <module>modules/matterhorn-media</module>
         <module>modules/matterhorn-http</module>
+        <module>modules/matterhorn-rest</module>
         <module>modules/matterhorn-capture-admin-service-api</module>
         <module>modules/matterhorn-capture-agent-api</module>
         <module>modules/matterhorn-capture-agent-impl</module>
@@ -490,23 +492,9 @@
       <dependency>
         <groupId>org.apache.cxf</groupId>
         <artifactId>cxf-bundle-minimal</artifactId>
-        <version>2.2.5</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.cxf.dosgi</groupId>
-        <artifactId>cxf-dosgi-ri-discovery-local</artifactId>
-        <version>1.1</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.cxf.dosgi</groupId>
-        <artifactId>cxf-dosgi-ri-dsw-cxf</artifactId>
-        <version>1.1-MH1</version>
+        <version>2.2.7</version>
       </dependency>
 
-      <!--
-        Spring 2.5.6.SEC01 is needed for OSGI (as opposed to 2.5.6)
-        http://forum.springsource.org/showthread.php?t=69049
-      -->
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>org.springframework.aop</artifactId>
@@ -572,6 +560,24 @@
 	      <artifactId>org.springframework.security</artifactId>
 	      <version>2.0.4.A</version>
 	    </dependency>
+
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>org.springframework.security.providers.openid</artifactId>
+        <version>2.0.4.A</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>com.springsource.org.apache.commons.httpclient</artifactId>
+        <version>3.1.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.codehaus.spring-security-oauth</groupId>
+        <artifactId>spring-security-oauth</artifactId>
+        <version>3.13</version>
+      </dependency>
 
       <dependency>
         <groupId>org.jdom</groupId>

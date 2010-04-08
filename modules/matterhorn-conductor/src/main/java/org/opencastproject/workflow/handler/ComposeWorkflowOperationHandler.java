@@ -54,15 +54,6 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /** The composer service */
   private ComposerService composerService = null;
 
-  /** Remote services handle (R-OSGI) */
-//  private RemoteOSGiService remote = null;
-
-//  /** Available composer services */
-//  private ComposerService[] allComposerServices;
-
-  /** Configuration handle for remote servers */
-  public static final String CONFIG_REMOTE_SERVERS = "remote.servers";
-
   /**
    * Callback for the OSGi declarative services configuration.
    * 

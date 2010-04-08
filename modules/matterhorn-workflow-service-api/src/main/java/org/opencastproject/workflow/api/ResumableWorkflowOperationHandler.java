@@ -15,6 +15,9 @@
  */
 package org.opencastproject.workflow.api;
 
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+
 import java.net.URL;
 
 /**
@@ -41,4 +44,17 @@ public interface ResumableWorkflowOperationHandler extends WorkflowOperationHand
    * @return The URL for the user interface
    */
   URL getHoldStateUserInterfaceURL();
+
+  /**
+   * Sets the HttpService to use when registering the resume user interface
+   * @param httpService The HttpService
+   */
+  void setHttpService(HttpService httpService);
+
+  /**
+   * Sets the HttpContext to use when registering the resume user interface
+   * @param httpContext The HttpContext
+   */
+  void setHttpContext(HttpContext httpContext);
+
 }

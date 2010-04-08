@@ -17,8 +17,26 @@
       <artifactId>org.springframework.security</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>org.springframework.security.providers.openid</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.spring-security-oauth</groupId>
+      <artifactId>spring-security-oauth</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.openid4java</groupId>
+      <artifactId>com.springsource.org.openid4java</artifactId>
+      <version>0.9.5</version>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.osgi</groupId>
       <artifactId>spring-osgi-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.nekohtml</groupId>
+      <artifactId>com.springsource.org.cyberneko.html</artifactId>
+      <version>1.9.13</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -50,28 +68,16 @@
             <Import-Package>
               javax.servlet,
               org.springframework.dao,
-              org.springframework.security,
-              org.springframework.security.config,
-              org.springframework.security.context,
-              org.springframework.security.event.authentication,
-              org.springframework.security.event.authorization,
-              org.springframework.security.intercept,
-              org.springframework.security.intercept.web,
-              org.springframework.security.providers,
-              org.springframework.security.providers.anonymous,
-              org.springframework.security.providers.dao,
-              org.springframework.security.providers.preauth,
-              org.springframework.security.ui,
-              org.springframework.security.ui.basicauth,
-              org.springframework.security.ui.preauth,
-              org.springframework.security.ui.preauth.x509,
-              org.springframework.security.userdetails,
-              org.springframework.security.userdetails.memory,
-              org.springframework.security.util,
-              org.springframework.security.vote,
               *;resolution:=optional
             </Import-Package>
             <Export-Package> org.opencastproject.security </Export-Package>
+            <Embed-Dependency>
+              spring-security-oauth;inline=true,
+              com.springsource.org.openid4java;inline=true,
+              com.springsource.org.cyberneko.html;inline=true,
+              org.springframework.security;inline=true,
+              org.springframework.security.providers.openid;inline=true
+            </Embed-Dependency>
             <Service-Component>OSGI-INF/security-config-scanner.xml</Service-Component>
           </instructions>
         </configuration>
