@@ -15,9 +15,9 @@
  */
 package org.opencastproject.remotetest;
 
-import org.opencastproject.integrationtest.AuthenticationSupport;
-
 import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
+
+import org.opencastproject.integrationtest.AuthenticationSupport;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -30,7 +30,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -51,17 +50,18 @@ public class CaptureRestEndpointTest {
   @Before
   public void setup() throws Exception {
     httpClient = new DefaultHttpClient();
+    String time = String.valueOf(System.currentTimeMillis());
 
     // Test Properties from resources
     Properties props = new Properties();
-    props.put("capture.recording.id", "static-test");
+    props.put("capture.recording.id", time);
 
     StringWriter writer = new StringWriter();
     props.store(writer, null);
     startParams.add(new BasicNameValuePair("config", writer.toString()));
 
     stopParams = new ArrayList<NameValuePair>();
-    stopParams.add(new BasicNameValuePair("recordingID", "static-test"));
+    stopParams.add(new BasicNameValuePair("recordingID", time));
 
   }
   
@@ -89,8 +89,6 @@ public class CaptureRestEndpointTest {
     sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
   }
 
-  //TODO:  Fix these post tests once the mock capture stuff is sorted out.
-  //Right now when you try and start via a post endpoints without a valid capture device it fails
   @Test 
   public void testCapturePost() throws Exception {
     //Test using only scheduled calls
@@ -100,10 +98,8 @@ public class CaptureRestEndpointTest {
     sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
   }
 
-  @Test @Ignore
-  // FIXME: This test fails because the previous test creates a recording with a certain ID, and
-  // this one tries to use the same ID, which isn't allowed
-  public void testScheduledMix() throws Exception {
+  @Test
+  public void testCaptureMix() throws Exception {
     //Test using both scheduled and unscheduled calls
     sendPost(BASE_URL + "/capture/rest/startCapture", startParams, HttpStatus.SC_OK);
     Thread.sleep(1000);

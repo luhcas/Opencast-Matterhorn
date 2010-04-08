@@ -91,6 +91,8 @@ public class PipelineFactory {
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
       String srcLoc = properties.getProperty(srcProperty);
       File outputFile = new File(outputDirectory, properties.getProperty(outputProperty));
+      logger.debug("Device {} has source at {}.", name, srcLoc);
+      logger.debug("Device {} has output at {}.", name, outputFile);
       try {
         if(!outputFile.createNewFile()){
           logger.error("Could not create ouput file for {}, file may already exist.", name);
@@ -102,7 +104,6 @@ public class PipelineFactory {
       }
       String outputLoc = outputFile.getAbsolutePath();
 
-      logger.debug("Device {} has source at {}.", name, srcLoc);
       if (new File(srcLoc).isFile()) {
         // Non-V4L file. If it exists, assume it is ingestable
         // TODO: Fix security risk. Any file on CaptureAgent filesytem could be ingested

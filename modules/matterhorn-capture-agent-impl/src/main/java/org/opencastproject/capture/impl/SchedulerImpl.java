@@ -284,6 +284,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       if (calendar == null) {
         try {
           calendarString = readCalendar(localCalendarCacheURL);
+          url = localCalendarCacheURL;
         } catch (IOException e1) {
           log.warn("Unable to read from cached schedule: {}.", e1.getMessage());
           return null;
