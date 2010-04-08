@@ -43,7 +43,7 @@ import org.opencastproject.integrationtest.UploadTest;
   StateRestEndpointTest.class,
   UploadTest.class,
   UnscheduledCaptureTest.class,
-  ScheduledCaptureTest.class,
+  ScheduledCaptureTest.class
 })
 public class AllRemoteTests {
   public static String BASE_URL = "http://localhost:8080";
