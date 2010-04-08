@@ -47,7 +47,7 @@ public class ServiceInfo {
   private static final Logger logger = LoggerFactory.getLogger(ServiceInfo.class);
   private static final String WS_CONTEXT = "org.apache.cxf.ws.httpservice.context";
   private static final String WS_CONTEXT_FILTER = "(" + WS_CONTEXT + "=*)";
-  private static final String RS_CONTEXT = "org.apache.cxf.rs.httpservice.context";
+  private static final String RS_CONTEXT = "opencast.rest.url";
   private static final String RS_CONTEXT_FILTER = "(" + RS_CONTEXT + "=*)";
   
   private HttpService httpService;
