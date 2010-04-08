@@ -30,10 +30,12 @@ public class CaptureDeviceTest {
     DeviceName device = DeviceName.FILE;
     String source = "source";
     String dest = "destination";
-    CaptureDevice captureDevice = new CaptureDevice(source, device, dest);
+    String fname = "TEST";
+    CaptureDevice captureDevice = new CaptureDevice(source, device, fname, dest);
     Assert.assertEquals(source, captureDevice.getLocation());
     Assert.assertEquals(dest, captureDevice.getOutputPath());
     Assert.assertEquals(device, captureDevice.getName());
+    Assert.assertEquals(fname, captureDevice.getFriendlyName());
     System.out.println(captureDevice.toString());
   }
 

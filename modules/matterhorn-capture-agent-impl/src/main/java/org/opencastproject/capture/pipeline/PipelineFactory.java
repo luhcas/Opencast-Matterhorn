@@ -44,8 +44,6 @@ public class PipelineFactory {
 
   private static final Logger logger = LoggerFactory.getLogger(PipelineFactory.class);
 
-  public enum Codec { MPEG2, H264, AAC, MP3 };
-  
   private static Properties properties;
 
   /**
@@ -137,7 +135,7 @@ public class PipelineFactory {
       }
 
       // devices will store the CaptureDevice list arbitrary order
-      CaptureDevice capdev = new CaptureDevice(srcLoc, devName, outputLoc);
+      CaptureDevice capdev = new CaptureDevice(srcLoc, devName, name, outputLoc);
       String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_CODEC;
       String bitrateProperty = codecProperty + CaptureParameters.CAPTURE_DEVICE_BITRATE;
       String codec = properties.getProperty(codecProperty);
@@ -164,7 +162,6 @@ public class PipelineFactory {
       if (!addPipeline(devices.get(i), pipeline))
         logger.error("Failed to create pipeline for {}.", devices.get(i));
     }
-
     return pipeline;
   }
 
@@ -216,8 +213,11 @@ public class PipelineFactory {
    * @return True, if successful
    */
   private static boolean getHauppaugePipeline(CaptureDevice captureDevice, Pipeline pipeline) {
+    // confidence monitoring vars
     String imageloc = properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
     String device = new File(captureDevice.getOutputPath()).getName();
+    int interval = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName() + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "30"));
+    // pipeline vars
     String error = null;
     String codec =  captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
@@ -262,7 +262,7 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, mpegpsdemux, mpegvideoparse);
     else if (!mpegvideoparse.link(dec))
       error = formatPipelineError(captureDevice, mpegvideoparse, dec);
-    else if (!VideoMonitoring.addVideoMonitor(pipeline, dec, enc, 30, imageloc, device))
+    else if (!VideoMonitoring.addVideoMonitor(pipeline, dec, enc, interval, imageloc, device))
       error = formatPipelineError(captureDevice, dec, enc);
     else if (!enc.link(mpegtsmux))
       error = formatPipelineError(captureDevice, enc, mpegtsmux);
@@ -288,8 +288,11 @@ public class PipelineFactory {
    * @return True, if successful
    */
   private static boolean getVGA2USBPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
+    // confidence vars
     String imageloc = properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
     String device = new File(captureDevice.getOutputPath()).getName();
+    int interval = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName() + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "30"));
+
     String error = null;
     String codec = captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
@@ -324,7 +327,7 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, videoscale, videorate);
     else if (!videorate.link(filter))
       error = formatPipelineError(captureDevice, videorate, filter);
-    else if (!VideoMonitoring.addVideoMonitor(pipeline, filter, ffmpegcolorspace, 30, imageloc, device))
+    else if (!VideoMonitoring.addVideoMonitor(pipeline, filter, ffmpegcolorspace, interval, imageloc, device))
       error = formatPipelineError(captureDevice, filter, ffmpegcolorspace);
     else if (!ffmpegcolorspace.link(enc))
       error = formatPipelineError(captureDevice, ffmpegcolorspace, enc);
@@ -408,8 +411,11 @@ public class PipelineFactory {
    * @return True, if successful
    */
   private static boolean getBluecherryPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
+    // confidence vars
     String imageloc = properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
     String device = new File(captureDevice.getOutputPath()).getName();
+    int interval = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName() + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "30"));
+
     String error = null;
     String codec = captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
@@ -432,7 +438,7 @@ public class PipelineFactory {
 
     if (!v4l2src.link(queue))
       error = formatPipelineError(captureDevice, v4l2src, queue);
-    else if (!VideoMonitoring.addVideoMonitor(pipeline, queue, enc, 30, imageloc, device))
+    else if (!VideoMonitoring.addVideoMonitor(pipeline, queue, enc, interval, imageloc, device))
       error = formatPipelineError(captureDevice, queue, enc);
     else if (!enc.link(mpegtsmux))
       error = formatPipelineError(captureDevice, enc, mpegtsmux);
