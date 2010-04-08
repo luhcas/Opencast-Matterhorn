@@ -4,12 +4,12 @@
 <head profile="http://selenium-ide.openqa.org/profiles/test-case">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="selenium.base" href="" />
-<title>FindPlayPause</title>
+<title>FlashMute</title>
 </head>
 <body>
 <table cellpadding="1" cellspacing="1" border="1">
 <thead>
-<tr><td rowspan="1" colspan="3">FindPlayPause</td></tr>
+<tr><td rowspan="1" colspan="3">FlashMute</td></tr>
 </thead><tbody>
 <tr>
 	<td>open</td>
@@ -42,44 +42,34 @@
 	<td></td>
 </tr>
 <tr>
-	<td>verifyTextPresent</td>
-	<td>00:00:00 of</td>
-	<td></td>
-</tr>
-<tr>
-	<td>verifyElementPresent</td>
-	<td>css=#oc_btn-play-pause[title^=&quot;Play&quot;]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>pause</td>
 	<td>2000</td>
 	<td></td>
 </tr>
 <tr>
-	<td>click</td>
-	<td>oc_btn-play-pause</td>
-	<td></td>
-</tr>
-<tr>
-	<td>waitForText</td>
-	<td>time-current</td>
-	<td>exact:00:00:01</td>
-</tr>
-<tr>
-	<td>verifyElementPresent</td>
-	<td>css=#oc_btn-play-pause[title^=&quot;Pause&quot;]</td>
-	<td></td>
+	<td>verifyEval</td>
+	<td>this.browserbot.getUserWindow().Opencast.Player.flashVars().mute === ''</td>
+	<td>true</td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>oc_btn-play-pause</td>
+	<td>oc_btn-volume</td>
 	<td></td>
 </tr>
 <tr>
-	<td>verifyElementPresent</td>
-	<td>css=#oc_btn-play-pause[title^=&quot;Play&quot;]</td>
+	<td>verifyEval</td>
+	<td>this.browserbot.getUserWindow().Opencast.Player.flashVars().mute === 0</td>
+	<td>true</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>oc_btn-volume</td>
 	<td></td>
+</tr>
+<tr>
+	<td>verifyEval</td>
+	<td>this.browserbot.getUserWindow().Opencast.Player.flashVars().mute &gt; 0</td>
+	<td>true</td>
 </tr>
 
 </tbody></table>
