@@ -23,10 +23,10 @@ public interface VideoMonitor {
   /**
    * Return the JPEG image monitor associated with the device
    * 
-   * @param device Friendly name of device to get source from
+   * @param friendlyName Friendly name of device to get source from
    * @return a byte array in jpeg form
    */
-  byte[] getConfidenceSource(String device);
+  byte[] grabFrame(String friendlyName);
   
   
 }

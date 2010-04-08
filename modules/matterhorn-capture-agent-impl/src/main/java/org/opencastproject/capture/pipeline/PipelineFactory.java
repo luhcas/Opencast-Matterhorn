@@ -287,6 +287,8 @@ public class PipelineFactory {
    * @return True, if successful
    */
   private static boolean getVGA2USBPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
+    String imageloc = properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
+    String device = new File(captureDevice.getOutputPath()).getName();
     String error = null;
     String codec = captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
@@ -321,7 +323,7 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, videoscale, videorate);
     else if (!videorate.link(filter))
       error = formatPipelineError(captureDevice, videorate, filter);
-    else if (!filter.link(ffmpegcolorspace))
+    else if (!VideoMonitoring.addVideoMonitor(pipeline, filter, ffmpegcolorspace, 30, imageloc, device))
       error = formatPipelineError(captureDevice, filter, ffmpegcolorspace);
     else if (!ffmpegcolorspace.link(enc))
       error = formatPipelineError(captureDevice, ffmpegcolorspace, enc);
@@ -405,6 +407,8 @@ public class PipelineFactory {
    * @return True, if successful
    */
   private static boolean getBluecherryPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
+    String imageloc = properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
+    String device = new File(captureDevice.getOutputPath()).getName();
     String error = null;
     String codec = captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
@@ -427,7 +431,7 @@ public class PipelineFactory {
 
     if (!v4l2src.link(queue))
       error = formatPipelineError(captureDevice, v4l2src, queue);
-    else if (!queue.link(enc))
+    else if (!VideoMonitoring.addVideoMonitor(pipeline, queue, enc, 30, imageloc, device))
       error = formatPipelineError(captureDevice, queue, enc);
     else if (!enc.link(mpegtsmux))
       error = formatPipelineError(captureDevice, enc, mpegtsmux);

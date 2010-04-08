@@ -20,9 +20,9 @@ import org.opencastproject.capture.api.VideoMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
 
@@ -45,11 +45,11 @@ public class VideoMonitorRestService {
     this.service = null;
   }
   
-  @POST
+  @GET
   @Produces("image/jpeg")
-  @Path("getConfidence")
-  public byte[] getConfidence(@FormParam("device") String device) {
-    return service.getConfidenceSource(device);
+  @Path("{name}")
+  public byte[] grabFrame(@PathParam("name") String device) {
+    return service.grabFrame(device);
   }
   
 }

@@ -866,15 +866,17 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
   }
 
   /**
+   * 
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.VideoMonitor#getConfidenceSource(java.lang.String)
+   * @see org.opencastproject.capture.api.VideoMonitor#grabFrame(java.lang.String)
    */
-  public byte[] getConfidenceSource(String device) {
+  public byte[] grabFrame(String friendlyName) {
     if (currentRecID != null) {
       // get the image for the device specified
       AgentRecording rec = pendingRecordings.get(currentRecID);
       String location = rec.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
-      File fimage = new File(location, device);
+      String device = rec.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + friendlyName + CaptureParameters.CAPTURE_DEVICE_DEST);
+      File fimage = new File(location, device + ".jpg");
       int length = (int) fimage.length();
       byte[] ibytes = new byte[length];
       
