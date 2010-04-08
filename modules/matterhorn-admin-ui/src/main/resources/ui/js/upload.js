@@ -95,8 +95,12 @@ Upload.workflowSelected = function(workflow) {
  *
  */
 Upload.collectWorkflowConfig = function() {
-  //TODO write something
-  }
+  var out = {};
+  $('.configField').each(function() {
+    out[$(this).attr('name')] = $(this).val();
+  });
+  return out;
+}
 
 /** check if data for required fields is missing
  *

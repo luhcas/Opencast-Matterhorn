@@ -45,6 +45,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -270,9 +271,24 @@ public class IngestServiceImpl implements IngestService {
    * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String, java.lang.String)
    */
   public WorkflowInstance ingest(MediaPackage mp, String wd) throws Exception {
+    return ingest(mp, wd, null);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String, java.lang.String, java.util.Map)
+   */
+  @Override
+  public WorkflowInstance ingest(MediaPackage mp, String wd, Map<String,String> properties) throws Exception {
+    WorkflowInstance workflowInst;
     WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(wd);
     if(workflowDef == null) throw new IllegalStateException(wd + " is not a registered workflow definition");
-    WorkflowInstance workflowInst = workflowService.start(workflowDef, mp);
+    if (properties == null) {
+      workflowInst = workflowService.start(workflowDef, mp);
+    } else {
+      workflowInst = workflowService.start(workflowDef, mp, properties);
+    }
     return workflowInst;
   }
 

@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Map;
 
 /**
  * Generates {@link MediaPackage}s from media, metadata, and attachments.
@@ -209,6 +210,23 @@ public interface IngestService {
    *           MediaPackage processing
    */
   WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID) throws IllegalStateException, Exception;
+
+  /**
+   * Broadcasts an event, that media package is ingested. After broadcast ACK message is expected from ConductorService.
+   * If message contains exception, it will be thrown.
+   * 
+   * @param mediaPackage
+   *          The specific Matterhorn MediaPackage being ingested
+   * @param workflowDefinitionID
+   *          workflow to be used with this media package
+   * @param properties
+   *          configuration properties for the workflow
+   * @return Workflow instance id.
+   * @throws Exception
+   *           Exception that occured during MediaPackage serialization or happened in ConductorService durring
+   *           MediaPackage processing
+   */
+  WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID, Map<String,String> properties) throws IllegalStateException, Exception;
 
   /**
    * Delete an existing MediaPackage and any linked files from the temporary ingest filestore.
