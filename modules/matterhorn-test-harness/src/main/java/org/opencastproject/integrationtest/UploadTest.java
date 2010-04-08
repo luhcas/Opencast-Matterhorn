@@ -47,50 +47,40 @@ public class UploadTest {
 		
 		// Create Media Package
 		ClientResponse response = IngestResources.createMediaPackage();
-		
 		assertEquals("Response code (createMediaPacakge):", 200, response.getStatus());
-		
 		mediaPackage = response.getEntity(String.class);
 		// TODO validate Media Package
 		
 		// Add Track
 		response = IngestResources.add("Track", trackUrl, "presenter/source", mediaPackage);
-		
 		assertEquals("Response code (addTrack):", 200, response.getStatus());
-		
 		mediaPackage = response.getEntity(String.class);
 		// TODO validate Media Package
 		
 		// Add Catalog
 		response = IngestResources.add("Catalog", catalogUrl, "metadata/dublincore", mediaPackage);
-		
 		assertEquals("Response code (addCatalog):", 200, response.getStatus());
-		
 		mediaPackage = response.getEntity(String.class);
 		// TODO validate Media Package
 		
 		// Add Attachment
 		response = IngestResources.add("Attachment", attachmentUrl, "attachment/txt", mediaPackage);
-		
 		assertEquals("Response code (addAttachment):", 200, response.getStatus());
-		
 		mediaPackage = response.getEntity(String.class);
 		// TODO validate Media Package
 		
 		// Ingest
 		response = IngestResources.ingest(mediaPackage);
-		
 		assertEquals("Response code (ingest):", 200, response.getStatus());
-		
 		mediaPackage = response.getEntity(String.class);
 		Document xml = Utils.parseXml(mediaPackage);
 		
 		// Pause for ingest to complete
-		Thread.sleep(4000);
+		Thread.sleep(2000);
 		
 		// Confirm Ingest
 		String mediaPackageId = (String) Utils.xPath(xml, 
-				"/ns2:mediapackage/@id", XPathConstants.STRING);
+				"//mediapackage/@id", XPathConstants.STRING);
 		String trackId = (String) Utils.xPath(xml,
 				"//media/track/@id", XPathConstants.STRING);
 		String catalogId = (String) Utils.xPath(xml, 
@@ -98,6 +88,7 @@ public class UploadTest {
 		String attachmentId = (String) Utils.xPath(xml,
 				"//attachments/attachment/@id", XPathConstants.STRING);
 		
+		// Retrieve and compare mediapackage elements from files repository
 		response = FilesResources.getFile(mediaPackageId, trackId);
 		assertEquals("Response code (getFile Track):", 200, response.getStatus());
 		assertEquals("Media Track Checksum:",
@@ -110,6 +101,10 @@ public class UploadTest {
 		assertEquals("Response code (getFile Attachment):", 200, response.getStatus());
 		// TODO compare files
 		
+		// Pause for indexing to complete
+		Thread.sleep(2000);
+		
+		// Confirm search indexing 
 		response = SearchResources.episode(mediaPackageId);
 		assertEquals("Response code (episode):", 200, response.getStatus());
 		assertTrue("Episode Registered:", 

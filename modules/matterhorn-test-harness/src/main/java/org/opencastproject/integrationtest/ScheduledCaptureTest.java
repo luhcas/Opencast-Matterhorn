@@ -22,7 +22,6 @@ import java.util.UUID;
 
 import javax.xml.xpath.XPathConstants;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -39,64 +38,71 @@ public class ScheduledCaptureTest {
 	@Test
 	public void testScheduledCapture() throws Exception {
 		
-		// Agent Registered
+		// Agent registered (Capture Admin Agents)
 		ClientResponse response = CaptureAdminResources.agents();
-		
 		assertEquals("Response code (agents):", 200, response.getStatus());
-		
 		Document xml = Utils.parseXml(response.getEntity(String.class));
-		
 		assertTrue("Agent included? (agents):", Utils.xPathExists(xml, "//ns1:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']" ));
 		
+		// Agent registered (Capture Admin Agent)
 		response = CaptureAdminResources.agent(IntegrationTests.AGENT);
-		
 		assertEquals("Response code (agent):", 200, response.getStatus());
-		
 		xml = Utils.parseXml(response.getEntity(String.class));
-		
 		assertTrue("Agent included? (agent):", Utils.xPathExists(xml, "//ns2:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']"));
 		
-		// Agent State: idle
+		// Agent idle (State)
 		response = StateResources.getState();
-		
 		assertEquals("Response code (getState):", 200, response.getStatus());
 		assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
+		
+		// Agent idle (Capture Admin Agent)
+		response = CaptureAdminResources.agent(IntegrationTests.AGENT);
+		assertEquals("Response code (agent):", 200, response.getStatus());
+		assertEquals("Agent idle? (agent):", "idle", Utils.xPath(xml, "//ns2:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']/state", XPathConstants.STRING));
 
+		// Generate unique title and create event XML
 		String title = UUID.randomUUID().toString();
 		String event = Utils.schedulerEvent(10000, title);
 		
+		// Add event (Scheduler)
 		response = SchedulerResources.addEvent(event);
-		
 		assertEquals("Response code (addEvent):", 200, response.getStatus());
 		
 		// Pause for recording to start
 		Thread.sleep(60000);
 		
-		// Agent State: capturing
-		response = StateResources.getState();
+		// Agent capturing (Capture Admin Agents)
+		// response = CaptureAdminResources.agents();
+		// assertEquals("Response code (agents):", 200, response.getStatus());
+		// xml = Utils.parseXml(response.getEntity(String.class));
+		// assertEquals("Agent capturing? (agent):", "capturing", Utils.xPath(xml, "//ns1:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']/state", XPathConstants.STRING));
 		
+		// Agent capturing (State)
+		response = StateResources.getState();
 		assertEquals("Response code (getState):", 200, response.getStatus());
 		assertEquals("Agent capturing? (getState):", "capturing", response.getEntity(String.class));
 		
 		// Pause for recording to complete
 		Thread.sleep(10000);
 		
-		// Agent State: idle
+		// Agent idle (State)
 		response = StateResources.getState();
-		
 		assertEquals("Response code (getState):", 200, response.getStatus());
 		assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
+		
+		// Agent idle (Capture Admin Agents)
+		// response = CaptureAdminResources.agents();
+		// assertEquals("Response code (agents):", 200, response.getStatus());
+		// xml = Utils.parseXml(response.getEntity(String.class));
+		// assertEquals("Agent capturing? (agent):", "capturing", Utils.xPath(xml, "//ns1:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']/state", XPathConstants.STRING));
 		
 		// Pause for workflow to complete
 		Thread.sleep(15000);
 		
-		// Search index: recording present
+		// Recording indexed (Search)
 		response = SearchResources.all(title);
-		
 		assertEquals("Response code (search all):", 200, response.getStatus());
-	
 		xml = Utils.parseXml(response.getEntity(String.class));
-	    
 	    assertTrue("Recording included? (search all):", Utils.xPathExists(xml, "//ns2:mediapackage[title=\'" + title + "\']"));
 	}
 }

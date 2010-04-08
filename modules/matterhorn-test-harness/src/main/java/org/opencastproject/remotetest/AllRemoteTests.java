@@ -21,6 +21,9 @@ import org.junit.runner.RunWith;
 import org.junit.runner.notification.Failure;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import org.opencastproject.integrationtest.ScheduledCaptureTest;
+import org.opencastproject.integrationtest.UnscheduledCaptureTest;
+import org.opencastproject.integrationtest.UploadTest;
 
 /**
  * Runs all of the remote tests
@@ -37,7 +40,10 @@ import org.junit.runners.Suite.SuiteClasses;
   CaptureAdminRestEndpointTest.class,
   EngageModuleTest.class,
   AdminProxyRestEndpointTest.class,
-  StateRestEndpointTest.class
+  StateRestEndpointTest.class,
+  UploadTest.class,
+  UnscheduledCaptureTest.class,
+  ScheduledCaptureTest.class,
 })
 public class AllRemoteTests {
   public static String BASE_URL = "http://localhost:8080";

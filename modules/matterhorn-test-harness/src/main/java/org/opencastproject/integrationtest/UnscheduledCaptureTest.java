@@ -37,85 +37,66 @@ public class UnscheduledCaptureTest {
   @Test
   public void testUnscheduledCapture() throws Exception {
     
-    // Agent Registered
+    // Agent Registered (Capture Admin Agents)
     ClientResponse response = CaptureAdminResources.agents();
-    
     assertEquals("Response code (agents):", 200, response.getStatus());
-    
     Document xml = Utils.parseXml(response.getEntity(String.class));
-    
     assertTrue("Agent included? (agents):", Utils.xPathExists(xml, "//ns1:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']" ));
     
+    // Agent Registered (Capture Admin Agent)
     response = CaptureAdminResources.agent(IntegrationTests.AGENT);
-    
     assertEquals("Response code (agent):", 200, response.getStatus());
-    
     xml = Utils.parseXml(response.getEntity(String.class));
-    
     assertTrue("Agent included? (agent):", Utils.xPathExists(xml, "//ns2:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']"));
     
-    // Agent State: idle
+    // Agent idle (State)
     response = StateResources.getState();
-    
     assertEquals("Response code (getState):", 200, response.getStatus());
     assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
     
-    // Start capture
+    // Start capture (Capture)
     response = CaptureResources.startCaptureGet();
-    
     assertEquals("Response code (startCapture):", 200, response.getStatus());
     
-    // Get capture ID
+    // Get capture ID (Capture)
     recordingId = CaptureResources.captureId(response);
     
-    // Agent State: capturing
+    // Agent capturing (State)
     response = StateResources.getState();
-    
     assertEquals("Response code (getState):", 200, response.getStatus());
     assertEquals("Agent recording? (getState):", "capturing", response.getEntity(String.class));
     
-    // Stop capture
+    // Stop capture (Capture)
     response = CaptureResources.stopCapturePost(recordingId);
-    
     assertEquals("Response code (stopCapturePost):", 200, response.getStatus());
     
-    // Agent State: idle
+    // Agent idle (State)
     response = StateResources.getState();
-    
     assertEquals("Response code (getState):", 200, response.getStatus());
     assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
     
-    // Capture Admin: idle
+    // Agent idle (Capture Admin)
     response = CaptureAdminResources.agent(IntegrationTests.AGENT);
-    
     assertEquals("Response code (agent):", 200, response.getStatus());
-    
     xml = Utils.parseXml(response.getEntity(String.class));
-    
     assertEquals("Agent idle? (agent):", "idle", Utils.xPath(xml, "//ns2:agent-state-update/state", XPathConstants.STRING));
     
-    // State, Recordings: id is finished
+    // Recording is finished (State)
     response = StateResources.recordings();
-    
     assertEquals("Response code (recordings):", 200, response.getStatus());
-    
     xml = Utils.parseXml(response.getEntity(String.class));
-    
     assertTrue("Recording included? (recordings):", Utils.xPathExists(xml, "//ns1:recording-state-update[name=\'" + recordingId + "\']"));
     assertEquals("Recording finished (recordings):", "capture_finished", Utils.xPath(xml, "//ns1:recording-state-update[name=\'" + recordingId + "\']/state", XPathConstants.STRING));
     
-    // Pause for admin to sync
-    Thread.sleep(10000);
+    // Pause for Capture Admin to sync
+    Thread.sleep(5000);
     
-    // Capture Admin, Recordings: id is finished
-    response = CaptureAdminResources.recording(recordingId);
-    
-    assertEquals("Response code (recording):", 200, response.getStatus());
-    
-    xml = Utils.parseXml(response.getEntity(String.class));
-    
-    assertTrue("Recording included? (recordings):", Utils.xPathExists(xml, "//ns2:recording-state-update[name=\'" + recordingId + "\']"));
-    assertEquals("Recording finished (recordings):", "capture_finished", Utils.xPath(xml, "//ns2:recording-state-update[name=\'" + recordingId + "\']/state", XPathConstants.STRING));
+    // Recording is finished (Capture Admin)
+    // response = CaptureAdminResources.recording(recordingId);
+    // assertEquals("Response code (recording):", 200, response.getStatus());
+    // xml = Utils.parseXml(response.getEntity(String.class));
+    // assertTrue("Recording included? (recordings):", Utils.xPathExists(xml, "//ns2:recording-state-update[name=\'" + recordingId + "\']"));
+    // assertEquals("Recording finished (recordings):", "capture_finished", Utils.xPath(xml, "//ns2:recording-state-update[name=\'" + recordingId + "\']/state", XPathConstants.STRING));
 
   }
 }

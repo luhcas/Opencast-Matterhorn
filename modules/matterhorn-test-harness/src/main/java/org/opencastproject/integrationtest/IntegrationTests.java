@@ -30,7 +30,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
   UploadTest.class,
   UnscheduledCaptureTest.class,
-  ScheduledCaptureTest.class
+  ScheduledCaptureTest.class,
 })
 
 public class IntegrationTests {
