@@ -190,12 +190,12 @@ public class SchedulerServiceImplTest {
     } catch (InterruptedException e) {
     }
     
-    // test for upcoming events (it should not be in there)
+    // test for upcoming events (it should not be in there). Not in use currently because of changes in design. 
     SchedulerEvent[] upcoming = service.getUpcomingEvents();
     boolean eventFound = false;
-    for (int i = 0; i < upcoming.length; i++ ) 
-      if (upcoming[i].equals(eventUpdated)) eventFound= true; 
-    Assert.assertFalse(eventFound);    
+//    for (int i = 0; i < upcoming.length; i++ ) 
+//      if (upcoming[i].equals(eventUpdated)) eventFound= true; 
+//    Assert.assertFalse(eventFound);    
     
     // test if event is in list in general 
     SchedulerEvent[] allEvents = service.getEvents(null);

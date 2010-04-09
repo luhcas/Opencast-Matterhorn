@@ -382,7 +382,9 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
      
       if (filter.getStart() != null) {
         if (where.length() > 0) where += " AND ";
-        where += " EVENT.startdate >= "+filter.getStart().getTime()+" "; // time is saved as time in millis because of BD compatibility issues  
+        where += " EVENT.enddate >= "+filter.getStart().getTime()+" "; // time is saved as time in millis because of BD compatibility issues 
+        // enddate was choosen, because events that may have scheduled to late but may currently be recorded should be listed too.
+        // So events that have been started already but are not finished will still be listed.  
       }
       if (filter.getEnd() != null) {
         if (where.length() > 0) where += " AND ";
