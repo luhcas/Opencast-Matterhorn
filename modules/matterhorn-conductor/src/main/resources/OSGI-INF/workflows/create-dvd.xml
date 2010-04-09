@@ -47,6 +47,7 @@
       <configurations>
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/dvd</configuration>
         <configuration key="target-tags">DVD</configuration>
         <configuration key="encoding-profile">dvd-${dvd.format}.http</configuration>
       </configurations>

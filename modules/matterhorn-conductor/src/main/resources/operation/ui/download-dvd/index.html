@@ -6,7 +6,7 @@
       $(document).ready(function() {
         var id = window.location.href.split(/\?/)[1]; // get the workflowInstances Id
         var url = '../workflow/rest/instance/' + id + '.json';
-        alert("Id: " + id + "\n" + "URL: " + url);
+        //alert("Id: " + id + "\n" + "URL: " + url);
         // get WorkflowInstance
         $.ajax({
           url : '../workflow/rest/instance/' + id + '.json',
