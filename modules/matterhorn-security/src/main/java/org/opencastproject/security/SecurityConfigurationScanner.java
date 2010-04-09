@@ -40,6 +40,7 @@ public class SecurityConfigurationScanner {
   protected Timer timer;
   File securityConfig;
   long lastModified = -1;
+  boolean warned = false;
   
 
   public void activate(ComponentContext cc) {
@@ -72,8 +73,11 @@ public class SecurityConfigurationScanner {
     public void run() {
       // If the file modification date has been set but it's last modified hasn't changed, there is nothing to do
       securityConfig = getSecurityConfig();
-      if( ! securityConfig.exists() || ! securityConfig.canRead()) {
-        logger.warn("Unable to read security configuration file at " + bundleContext.getProperty(SECURITY_CONFIG_FILE));
+      if(! securityConfig.exists() || ! securityConfig.canRead()) {
+        if(!warned) {
+          logger.warn("Unable to read security configuration file at " + bundleContext.getProperty(SECURITY_CONFIG_FILE));
+          warned = true;
+        }
         return;
       }
 
@@ -92,6 +96,7 @@ public class SecurityConfigurationScanner {
         logger.info("registered {}", springContext);
       }
       springContext.refresh();
+      warned = false;
     }
   }
 }
