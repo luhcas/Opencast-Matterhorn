@@ -1,0 +1,32 @@
+<definition>
+  <id>republish-after-captioning</id>
+  <title>Republish media packages that have been captioned</title>
+  <description>
+    OpenCaps can add captions to mediapackages that have already been processed. These media packages need to be
+    redistributed and published.
+  </description>
+  <operations>
+
+    <operation
+      id="distribute_local"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Distribute media to the local distribution channel">
+      <configurations>
+        <configuration key="source-tags">engage,atom,rss</configuration>
+        <configuration key="target-tags">publish</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="publish"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Add metadata to the search index">
+      <configurations>
+        <configuration key="source-tags">publish</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>

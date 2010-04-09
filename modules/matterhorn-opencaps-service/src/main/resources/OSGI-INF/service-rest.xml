@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.opencaps.OpencapsRestService" immediate="true">
+  <implementation class="org.opencastproject.opencaps.endpoint.OpencapsRestService" />
+  <property name="service.description" value="Opencaps REST Endpoint" />
+  <property name="opencast.rest.url" value="/opencaps/rest" />
+  <service>
+    <provide interface="org.opencastproject.opencaps.endpoint.OpencapsRestService" />
+  </service>
+  <!-- dynamic and 0..1 to allow the endpoint to work without the service, continue to serve up 503 and docs -->
+  <reference name="service-impl" interface="org.opencastproject.opencaps.OpencapsService"
+    cardinality="0..1" policy="dynamic" bind="setService" unbind="unsetService" />
+</component>

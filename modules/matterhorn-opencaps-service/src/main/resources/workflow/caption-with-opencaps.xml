@@ -1,0 +1,114 @@
+<definition>
+  <id>caption-with-opencaps</id>
+  <title>Hold workflow for captions</title>
+  <description>
+    Excercise opencaps integration.
+  </description>
+  <operations>
+
+    <!-- inspect the media -->
+    <operation
+      id="inspect"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Inspect the media package">
+    </operation>
+
+    <!-- encode to quicktime -->
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode all tracks for use by opencaps">
+      <configurations>
+        <configuration key="source-audio-flavor">*/source</configuration>
+        <configuration key="source-video-flavor">*/source</configuration>
+        <configuration key="target-tags">captions</configuration>
+        <configuration key="encoding-profile">mov-low.http</configuration>
+      </configurations>
+    </operation>
+    
+    <!--  hold for captions -->
+    <operation
+      id="caption"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Add captions">
+      <configurations>
+        <configuration key="opencaps.url">http://localhost/opencaps/?id={id}</configuration>
+      </configurations>
+    </operation>
+    
+    <!-- encode to flash download -->
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode presenter (camera) video to Flash download">
+      <configurations>
+        <configuration key="source-audio-flavor">*/source</configuration>
+        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">flash.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode presentation (screen) to Flash download">
+      <configurations>
+        <configuration key="source-audio-flavor">*/source</configuration>
+        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">flash.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode presenter audio to Flash download">
+      <configurations>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">flash.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode presentation audio to Flash download">
+      <configurations>
+        <configuration key="source-audio-flavor">presentation/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">flash.http</configuration>
+      </configurations>
+    </operation>
+
+    <!-- distribute to the local distribution channel -->
+    <operation
+      id="distribute_local"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Distribute media to the local distribution channel">
+      <configurations>
+        <configuration key="source-tags">engage,atom,rss</configuration>
+        <configuration key="target-tags">publish</configuration>
+      </configurations>
+    </operation>
+
+    <!-- publish to the engage search facility -->
+    <operation
+      id="publish"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Add metadata to the search index">
+      <configurations>
+        <configuration key="source-tags">publish</configuration>
+      </configurations>
+    </operation>
+
+  </operations>
+</definition>
