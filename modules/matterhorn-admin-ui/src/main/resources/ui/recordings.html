@@ -121,5 +121,13 @@
         </div>
       </div>
     </div>
+    <!-- p>
+    <button type="button" onclick="Recordings.displayHoldActionPanel('http://outstack.virtuos.uos.de:8080/org.opencastproject.workflow.handler.downloaddvdworkflowoperationhandler/index.html?9cc8c5bf-ce45-493d-974a-e9ec9eb6ead3','9cc8c5bf-ce45-493d-974a-e9ec9eb6ead3');">Display Example of Hold UI</button>
+    </p -->
+    <div id="holdActionPanel-container">
+      <iframe id="holdActionPanel-iframe" src="">
+      </iframe>
+      <button type="button" id="continueBtn" onclick="$('#holdActionPanel-container').fadeOut('fast');">Continue</button>
+    </div>
   </body>
 </html>

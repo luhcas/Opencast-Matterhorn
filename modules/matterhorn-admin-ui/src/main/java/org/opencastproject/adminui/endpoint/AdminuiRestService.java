@@ -109,9 +109,9 @@ public class AdminuiRestService {
   public RecordingDataViewListImpl getRecordings(@PathParam("state") String state) {
     RecordingDataViewListImpl out = new RecordingDataViewListImpl();
     // This returnes an empty list as long as there's no recordings - all screen (to speed things up)
-    if (state.toUpperCase().equals("ALL")) {
+    /*if (state.toUpperCase().equals("ALL")) {
       return out;
-    }
+    }*/
     if ((state.toUpperCase().equals("UPCOMING")) || (state.toUpperCase().equals("ALL"))) {
       out.addAll(getUpcomingRecordings());
     }

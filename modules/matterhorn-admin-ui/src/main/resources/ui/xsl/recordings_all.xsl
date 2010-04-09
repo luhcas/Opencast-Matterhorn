@@ -12,37 +12,19 @@
   <xsl:output method="html"/>
 
   <xsl:template match="ns1:recordingLists">
-    <center>
-      <div  style="width:600px;padding-top:30px;">
-        <table style="border:1px solid black;">
-          <tr>
-            <td style="border:none;">
-              <img src="img/under_construction.gif" alt="Under construction" title="Under construction" style="vertical-align: bottom;"></img>
-            </td>
-            <td style="border:none;" align="left">
-              <b> Under development.</b>
-              <br />
-              <span>
-              When implemented will show a list of all recordings in the system.
-              </span>
-            </td>
-          </tr>
-        </table>
-      </div>
-    </center>
-    <!-- <center><b>Under development. When implemented will show all recordings in the system.</b></center> -->
-  </xsl:template>
-<!--
-  <xsl:template match="ns1:recordingLists">
+    <div style="border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:600px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
+      <img title="Information" alt="Information" src="img/information.png" style="vertical-align: bottom;"></img>
+      This page shows all recordings that are currently in the system.
+    </div>
     <table id="recordingsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
       <thead>
         <tr>
-          <th width="25%">Title</th>
-          <th width="15%">Presenter</th>
-          <th width="20%">Course/Series</th>
-          <th width="20%">Recording Date and Time</th>
-          <th width="10%">Capture Agent</th>
-          <th width="10%">Status</th>
+          <th width="30%" class="sortable">Title</th>
+          <th width="15%" class="sortable">Presenter</th>
+          <th width="20%" class="sortable">Course/Series</th>
+          <th width="20%" class="sortable date-column">Recording Date &amp; Time</th>
+          <!-- <th width="10%" class="sortable">Capture Agent</th> -->
+          <th width="15%" class="sortable">Status</th>
         </tr>
       </thead>
       <tbody>
@@ -52,9 +34,9 @@
   </xsl:template>
 
   <xsl:template match="ns1:recording">
-    <tr>
+    <tr class="highlightable">
       <td>
-        <a>
+        <a title="View Recording Info">
           <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
           <xsl:value-of select="title" />
         </a>
@@ -67,16 +49,19 @@
       </td>
       <td class="td-TimeDate">
         <span class="date-start">
-          <xsl:value-of select="startTime" />
+          <span class="time-raw" style="display:none;"><xsl:value-of select="startTime" /></span>
         </span>
+        <!-- <span class="date-end">
+          <xsl:value-of select="endTime" />
+        </span> -->
       </td>
-      <td>
+      <!-- <td>
         <xsl:value-of select="captureAgent" />
-      </td>
-      <td>
-        <xsl:value-of select="distributionStatus" />
+      </td> -->
+      <td class="processingStatus">
+        <xsl:value-of select="processingStatus" />
       </td>
     </tr>
   </xsl:template>
--->
+
 </xsl:stylesheet>

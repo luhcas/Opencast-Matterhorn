@@ -257,6 +257,30 @@ select { font-size:1.15em; }
   overflow: hidden;
 }
 
+#holdActionPanel-container {
+  display:none;
+  background:white;
+  height:400px;
+  width:600px;
+  z-index:100;
+  position:fixed;
+  top:100px;
+  left:100px;
+  border:1px solid silver;
+}
+
+#holdActionPanel-iframe {
+  border:none;
+  width:600px;
+  height:370px;;
+}
+
+#continueBtn {
+  float:right;
+  margin-right:16px;
+  margin-bottom:10px;
+}
+
 #workflow-config-container {
   width: 96%;
   margin-left: 2%;
