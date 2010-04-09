@@ -53,7 +53,9 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
   protected Set<WorkflowConfiguration> configurations;
   
   /** A no-arg constructor is needed by JAXB */
-  public WorkflowOperationDefinitionImpl() {}
+  public WorkflowOperationDefinitionImpl() {
+    this.failWorkflowOnException = true;
+  }
   
   /**
    * @param id The unique name of this operation

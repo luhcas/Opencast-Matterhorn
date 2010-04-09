@@ -15,14 +15,10 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-
 import java.net.URL;
 
 /**
  * TODO: Comment me!
- *
  */
 public interface ResumableWorkflowOperationHandler extends WorkflowOperationHandler {
   /**
@@ -41,20 +37,10 @@ public interface ResumableWorkflowOperationHandler extends WorkflowOperationHand
   /**
    * Gets the URL for the user interface for resuming the workflow.
    * 
+   * @param workflowInstance The workflow instance
    * @return The URL for the user interface
+   * @throws WorkflowOperationException If the url to the hold state ui can't be created
    */
-  URL getHoldStateUserInterfaceURL();
-
-  /**
-   * Sets the HttpService to use when registering the resume user interface
-   * @param httpService The HttpService
-   */
-  void setHttpService(HttpService httpService);
-
-  /**
-   * Sets the HttpContext to use when registering the resume user interface
-   * @param httpContext The HttpContext
-   */
-  void setHttpContext(HttpContext httpContext);
+  URL getHoldStateUserInterfaceURL(WorkflowInstance wokflowInstance) throws WorkflowOperationException;
 
 }

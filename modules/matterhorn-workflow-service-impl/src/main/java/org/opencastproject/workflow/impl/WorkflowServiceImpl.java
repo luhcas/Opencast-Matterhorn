@@ -42,7 +42,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -519,11 +518,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         }
         ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler)handler;
         try {
-          if(resumableHandler.getHoldStateUserInterfaceURL() != null) {
-            URL url = new URL(resumableHandler.getHoldStateUserInterfaceURL().toString().replaceAll("\\{id\\}", workflow.getId()));
+          if(resumableHandler.getHoldStateUserInterfaceURL(workflow) != null) {
+            URL url = resumableHandler.getHoldStateUserInterfaceURL(workflow);
             ((WorkflowOperationInstanceImpl)currentOperation).setHoldStateUserInterfaceUrl(url);
           }
-        } catch (MalformedURLException e) {
+        } catch (WorkflowOperationException e) {
           logger.warn("unable to replace workflow ID in the hold state URL", e);
         }
       }

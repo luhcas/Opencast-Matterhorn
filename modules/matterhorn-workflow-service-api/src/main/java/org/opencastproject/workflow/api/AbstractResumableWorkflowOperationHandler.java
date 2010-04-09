@@ -44,7 +44,7 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
     this.componentContext = componentContext;
   }
 
-  public URL getHoldStateUserInterfaceURL() {
+  public URL getHoldStateUserInterfaceURL(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     if(staticResource == null) return null;
     return staticResource.getDefaultUrl();
   }
@@ -81,4 +81,5 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
           throws WorkflowOperationException {
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
   }
+
 }

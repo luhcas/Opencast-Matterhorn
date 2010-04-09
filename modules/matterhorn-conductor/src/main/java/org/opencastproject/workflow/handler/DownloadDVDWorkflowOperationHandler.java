@@ -49,7 +49,7 @@ public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkfl
   public void activate(ComponentContext cc) {
     super.activate(cc);
     registerHoldStateUserInterface(HOLD_UI_PATH);
-    logger.info("Registering download-DVD hold state ui as {}", getHoldStateUserInterfaceURL());
+    logger.info("Registering download-DVD hold state ui from classpath {}", HOLD_UI_PATH);
   }
 
   /**
@@ -61,4 +61,5 @@ public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkfl
     logger.info("Holding for download of DVD image...");
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
   }
+
 }
