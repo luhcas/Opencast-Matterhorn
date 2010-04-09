@@ -72,7 +72,7 @@
         <module>modules/matterhorn-scheduler-api</module>
         <module>modules/matterhorn-scheduler-impl</module>
         <module>modules/matterhorn-test-harness</module>
-        <module>modules/matterhorn-captions-service-impl</module>
+        <module>modules/matterhorn-opencaps-service</module>
         <module>modules/matterhorn-caption-api</module>
         <module>modules/matterhorn-caption-impl</module>
         <module>modules/matterhorn-admin-ui</module>
