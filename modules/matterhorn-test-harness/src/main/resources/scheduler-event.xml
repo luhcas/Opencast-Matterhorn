@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ns1:SchedulerEvent xmlns:ns1="http://scheduler.opencastproject.org">
-	<id>123</id>
+	<id>@@id@@</id>
 	<metadata>
 		<item key="channel-id">
 			<value>Matterhorn Media Module</value>

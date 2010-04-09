@@ -62,11 +62,12 @@ public class Utils {
     return (JSONObject) JSONValue.parse(doc);
   }
   
-  public static String schedulerEvent(Integer duration, String title) throws Exception {
+  public static String schedulerEvent(Integer duration, String title, String id) throws Exception {
 	Long start = System.currentTimeMillis() + 60000;
 	Long end = start + duration;
 	String event = IOUtils.toString(Utils.class.getResourceAsStream("/scheduler-event.xml"));
 	return event
+		.replace("@@id@@", id)
 		.replace("@@title@@", title)
 		.replace("@@start@@", start.toString())
 		.replace("@@end@@", end.toString())

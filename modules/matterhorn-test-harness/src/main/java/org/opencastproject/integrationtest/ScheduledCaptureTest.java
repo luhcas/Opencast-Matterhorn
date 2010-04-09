@@ -62,11 +62,38 @@ public class ScheduledCaptureTest {
 
 		// Generate unique title and create event XML
 		String title = UUID.randomUUID().toString();
-		String event = Utils.schedulerEvent(10000, title);
+		String id = UUID.randomUUID().toString();
+		String event = Utils.schedulerEvent(10000, title, id);
 		
 		// Add event (Scheduler)
 		response = SchedulerResources.addEvent(event);
 		assertEquals("Response code (addEvent):", 200, response.getStatus());
+		
+		// Event included? (Scheduler: events)
+		response = SchedulerResources.getEvents();
+		assertEquals("Response code (getEvents):", 200, response.getStatus());
+		xml = Utils.parseXml(response.getEntity(String.class));
+		assertTrue("Event included? (getEvents):", Utils.xPathExists(xml, "//ns1:SchedulerEvent[id=\'" + id + "\']"));
+		
+		// Event included? (Scheduler: upcoming events)
+		response = SchedulerResources.getUpcomingEvents();
+		assertEquals("Response code (getUpcomingEvents):", 200, response.getStatus());
+		xml = Utils.parseXml(response.getEntity(String.class));
+		assertTrue("Event included? (getUpcomingEvents):", Utils.xPathExists(xml, "//ns1:SchedulerEvent[id=\'" + id + "\']"));
+		
+		// Compare event (Scheduler: event)
+		response = SchedulerResources.getEvent(id);
+		assertEquals("Response code (getEvent):", 200, response.getStatus());
+		xml = Utils.parseXml(response.getEntity(String.class));
+		assertEquals("Event id (getEvent):", title, Utils.xPath(xml, "//item[@key='title']/value", XPathConstants.STRING));
+		assertEquals("Event title (getEvent):", id, Utils.xPath(xml, "//id", XPathConstants.STRING));
+		
+		// Compare event DC metadata (Scheduler)
+		response = SchedulerResources.getDublinCoreMetadata(id);
+		assertEquals("Response code (getDublinCoreMetadata):", 200, response.getStatus());
+		xml = Utils.parseXml(response.getEntity(String.class));
+		assertEquals("Event id (getDublinCoreMetadata):", title, Utils.xPath(xml, "//dcterms:title", XPathConstants.STRING));
+		assertEquals("Event title (getDublinCoreMetadata):", id, Utils.xPath(xml, "//dcterms:identifier", XPathConstants.STRING));
 		
 		// Pause for recording to start
 		Thread.sleep(60000);
