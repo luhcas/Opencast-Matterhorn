@@ -33,7 +33,6 @@ package org.opencast.engage.videodisplay.control.command
     import org.osmf.elements.VideoElement;
     import org.osmf.events.AudioEvent;
     import org.osmf.events.BufferEvent;
-    import org.osmf.events.LoadEvent;
     import org.osmf.events.MediaErrorEvent;
     import org.osmf.events.TimeEvent;
     import org.osmf.layout.HorizontalAlign;
@@ -353,6 +352,7 @@ package org.opencast.engage.videodisplay.control.command
             model.error = new Error();
             model.error.name = event.error.message;
             model.error.message = event.error.detail;
+            model.mediaState = MediaState.ERROR;
         }
 
         /**

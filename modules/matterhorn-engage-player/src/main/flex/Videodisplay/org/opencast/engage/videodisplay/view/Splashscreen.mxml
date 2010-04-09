@@ -231,6 +231,7 @@
             width = "100%"
             verticalScrollPolicy = "off"
             horizontalScrollPolicy = "off"
+            bottom="10"
             >
 
             <view:CaptionsView 

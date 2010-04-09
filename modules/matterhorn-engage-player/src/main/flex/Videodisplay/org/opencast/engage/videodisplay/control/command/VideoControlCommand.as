@@ -79,7 +79,6 @@ package org.opencast.engage.videodisplay.control.command
                 		{
                 			model.mediaPlayerOne.pause();
                 			model.mediaPlayerTwo.pause();
-                		
                 		}
                 	}
                 	else
@@ -104,7 +103,6 @@ package org.opencast.engage.videodisplay.control.command
                 			model.mediaPlayerOne.seek( 0 );
                 			model.mediaPlayerTwo.pause();
                 			model.mediaPlayerTwo.seek( 0 );
-                		
                 		}
                 	}
                 	else
@@ -134,62 +132,109 @@ package org.opencast.engage.videodisplay.control.command
                 	break;
 
                 case VideoControlEvent.REWIND:
-                
-                    if ( model.currentPlayhead + 1 > model.rewindTime )
-                    {
-                    	
-                    	if( model.mediaState == MediaState.MULTI)
-	                	{
-	                		if( model.mediaPlayerOne.playing && model.mediaPlayerTwo.playing)
-	                		{
-	                			model.mediaPlayerOne.pause();
-	                			model.mediaPlayerTwo.pause();
-                            	model.mediaPlayerOne.seek( model.currentPlayhead - model.rewindTime );
-                            	model.mediaPlayerTwo.seek( model.currentPlayhead - model.rewindTime );
-                            	model.mediaPlayerOne.play();
-                            	model.mediaPlayerTwo.play();
-	                		
-	                		}
-	                		else
+                    
+                    if( model.mediaState == MediaState.MULTI)
+                	{
+                		if( model.mediaPlayerOne.playing && model.mediaPlayerTwo.playing)
+                		{
+                			model.mediaPlayerOne.pause();
+                            model.mediaPlayerTwo.pause();
+                			
+                			if( model.currentPlayhead - model.rewindTime >= 0)
+                			{
+                			    model.mediaPlayerOne.seek( model.currentPlayhead - model.rewindTime );
+                                model.mediaPlayerTwo.seek( model.currentPlayhead - model.rewindTime );
+                			}
+                			else
+                			{
+                			    model.mediaPlayerOne.seek( 0 );
+                                model.mediaPlayerTwo.seek( 0 );
+                			}
+                        }
+                		else
+                    	{
+                    		if( model.currentPlayhead - model.rewindTime >= 0 )
+                    		{
+                    			model.mediaPlayerOne.seek( model.currentPlayhead - model.rewindTime );
+                                model.mediaPlayerTwo.seek( model.currentPlayhead - model.rewindTime );
+                    		}
+                    		else
+                    		{
+                    			model.mediaPlayerOne.seek( 0 );
+                                model.mediaPlayerTwo.seek( 0 );
+                    		}
+                    	}
+                	}
+                	else
+                	{
+                		if ( model.mediaPlayerSingle.playing )
+	                    {
+	                    	model.mediaPlayerSingle.pause();
+                        	if( model.currentPlayhead - model.rewindTime >= 0 )
                         	{
-                        		model.mediaPlayerOne.seek( model.currentPlayhead - model.rewindTime );
-                            	model.mediaPlayerTwo.seek( model.currentPlayhead - model.rewindTime );
+                        		model.mediaPlayerSingle.seek( model.currentPlayhead - model.rewindTime );
                         	}
-	                	}
-	                	else
-	                	{
-	                		if ( model.mediaPlayerSingle.playing )
-		                    {
-		                    	model.mediaPlayerSingle.pause();
-                            	model.mediaPlayerSingle.seek( model.currentPlayhead - model.rewindTime );
-                            	model.mediaPlayerSingle.play();
-		                    }
-		                    else
-		                    {
-		                    	model.mediaPlayerSingle.seek( model.currentPlayhead - model.rewindTime );
-		                    }
-	                	}
-                    }
-                	break;
+                        	else
+                        	{
+                        		model.mediaPlayerSingle.seek( 0 );
+                        	}
+                        }
+	                    else
+	                    {
+	                    	if( model.currentPlayhead - model.rewindTime >= 0 )
+                            {
+                                model.mediaPlayerSingle.seek( model.currentPlayhead - model.rewindTime );
+                            }
+                            else
+                            {
+                                model.mediaPlayerSingle.seek( 0 );
+                            }
+	                    }
+                	}
+                    break;
 
                 case VideoControlEvent.FASTFORWARD:
                 
                 	if( model.mediaState == MediaState.MULTI)
 	                {
-	                	model.mediaPlayerOne.seek( model.currentPlayhead + model.fastForwardTime );
-	                	model.mediaPlayerTwo.seek( model.currentPlayhead + model.fastForwardTime );	
+	                	if( model.mediaPlayerOne.playing && model.mediaPlayerTwo.playing)
+                        {
+                        	model.mediaPlayerOne.pause();
+                        	model.mediaPlayerTwo.pause();
+                        }
+	                	
+	                	if( model.currentPlayhead + model.fastForwardTime > model.currentDuration )
+	                	{
+	                		model.mediaPlayerOne.seek( model.currentDuration );
+                            model.mediaPlayerTwo.seek( model.currentDuration ); 
+	                	}
+	                	else
+	                	{
+	                		model.mediaPlayerOne.seek( model.currentPlayhead + model.fastForwardTime );
+                            model.mediaPlayerTwo.seek( model.currentPlayhead + model.fastForwardTime ); 
+	                	}
 	                }
 	                else
 	                {
-	                	model.mediaPlayerSingle.seek( model.currentPlayhead + model.fastForwardTime );
-	                
+	                	if ( model.mediaPlayerSingle.playing )
+                        {
+                        	model.mediaPlayerSingle.pause();
+                        }
+	                	
+	                	if( model.currentPlayhead + model.fastForwardTime > model.currentDuration )
+                        {
+                            model.mediaPlayerSingle.seek( model.currentPlayhead + model.fastForwardTime ); 
+                        }
+                        else
+                        {
+                            model.mediaPlayerSingle.seek( model.currentDuration ); 
+                        }
 	                }
                 	break;
 
                 case VideoControlEvent.SKIPFORWARD:
                 
-                
-                	if( model.mediaState == MediaState.MULTI)
+                    if( model.mediaState == MediaState.MULTI)
                 	{
                 		if( model.mediaPlayerOne.playing && model.mediaPlayerTwo.playing)
                 		{

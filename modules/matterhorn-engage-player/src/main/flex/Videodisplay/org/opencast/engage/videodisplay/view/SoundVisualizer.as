@@ -42,8 +42,8 @@ package org.opencast.engage.videodisplay.view
 
             g.clear();
 
-            g.lineStyle( 0, 0x6600CC );
-            g.beginFill( 0x6600CC );
+            g.lineStyle( 0, 0xFA6E23 );
+            g.beginFill( 0xFA6E23 );
             g.moveTo( 0, PLOT_HEIGHT );
 
             var n:Number = 0;
@@ -57,8 +57,8 @@ package org.opencast.engage.videodisplay.view
             g.lineTo( CHANNEL_LENGTH * 2, PLOT_HEIGHT );
             g.endFill();
 
-            g.lineStyle( 0, 0xCC0066 );
-            g.beginFill( 0xCC0066, 0.5 );
+            g.lineStyle( 0, 0xFDB792 );
+            g.beginFill( 0xFDB792, 0.5 );
             g.moveTo( CHANNEL_LENGTH * 2, PLOT_HEIGHT );
 
             for ( i = CHANNEL_LENGTH; i > 0; i-- )

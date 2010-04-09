@@ -70,13 +70,13 @@ package org.opencast.engage.videodisplay.model
         public var currentCaptionSet:Array;
 
         // Current Duration
-        public var currentDuration:Number;
+        public var currentDuration:Number = 0;
 
         // Current Player State
         public var currentPlayerState:String;
 
         // Current Playhead
-        public var currentPlayhead:Number;
+        public var currentPlayhead:Number = 0;
 
         // The current Subtitle
         public var currentSubtitle:String = '';
@@ -140,12 +140,6 @@ package org.opencast.engage.videodisplay.model
 
         // Rewind Time
         public var rewindTime:Number = 10;
-
-        // Skip Backward Time
-        public var skipBackwardTime:Number = 0;
-
-        // Forward Time
-        public var skipForwardTime:Number = 10;
 
         // Time Code
         public var timeCode:TimeCode = new TimeCode();

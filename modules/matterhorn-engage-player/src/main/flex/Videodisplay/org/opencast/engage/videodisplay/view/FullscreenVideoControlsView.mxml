@@ -1,6 +1,5 @@
 <?xml version = "1.0" encoding = "utf-8"?>
 <!--
-
      /**
      *  Copyright 2009 The Regents of the University of California
      *  Licensed under the Educational Community License, Version 2.0
@@ -20,56 +19,28 @@
 <mx:Canvas 
     xmlns:mx = "http://www.adobe.com/2006/mxml"
     width = "100%"
-    height = "100%"
+    height = "40"
+    backgroundAlpha = "1.0"
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
-    xmlns:ui = "com.fusiox.ui.*"
-    borderStyle="solid"
-    borderThickness="2"
     >
 
     <mx:Script>
         <![CDATA[
+           
+           
+            
             import org.opencast.engage.videodisplay.model.VideodisplayModel;
-            import org.opencast.engage.videodisplay.view.SoundVisualizer;
+           
 
             [Autowire]
             [Bindable]
             public var model:VideodisplayModel;
-            private var soundVisualizer:SoundVisualizer;
+
+
             
-            public function startVisualization():void
-            {
-                soundVisualizer = new SoundVisualizer();
-                this.SoundVisualizerHolder.addChild( soundVisualizer );
-            }
         ]]>
     </mx:Script>
 
-    <mx:VBox 
-        width = "100%"
-        height = "100%"
-        >
-
-        <mx:VBox 
-            width = "100%"
-            height = "100%"
-            horizontalAlign="center"
-            verticalAlign="middle"
-            >
-             <mx:Label
-                 text = "{model.audioURL}"
-                 styleName = "audioLabel"
-                 />
-            <mx:UIComponent 
-                id = "SoundVisualizerHolder"
-                width = "100%"
-                height = "100%"
-                />
-                
-        </mx:VBox>
-
-        <view:CaptionsView 
-            id = "captions"
-            />
-    </mx:VBox>
+   
+        />
 </mx:Canvas>

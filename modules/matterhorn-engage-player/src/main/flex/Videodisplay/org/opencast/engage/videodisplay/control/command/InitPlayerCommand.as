@@ -19,6 +19,7 @@ package org.opencast.engage.videodisplay.control.command
     
     import flash.external.ExternalInterface;
     
+    import mx.controls.Alert;
     import mx.core.Application;
     
     import org.opencast.engage.videodisplay.control.event.DisplayCaptionEvent;
@@ -82,8 +83,7 @@ package org.opencast.engage.videodisplay.control.command
                     	mediaElement =  new VideoElement ( new URLResource( model.mediaURLOne ) );
                     	setMediaElement( mediaElement );
                         model.mediaState = MediaState.VIDEO;
-                        ExternalInterface.call( ExternalFunction.SETVIDEOSIZELIST, model.SINGLEPLAYER );
-						break;
+                        break;
 
                     case "mp3":
                         mediaElement = new AudioElement( new URLResource( model.mediaURLOne ) );
@@ -92,7 +92,6 @@ package org.opencast.engage.videodisplay.control.command
                         var position:int = model.mediaURLOne.lastIndexOf( '/' );
                         model.audioURL = model.mediaURLOne.substring( position + 1 );
                         Application.application.bx_audio.startVisualization();
-                        ExternalInterface.call( ExternalFunction.SETVIDEOSIZELIST, model.AUDIOPLAYER );
                         break;
 
                     default:
@@ -118,14 +117,12 @@ package org.opencast.engage.videodisplay.control.command
                 {
                     model.mediaPlayerSingle.autoPlay = true;
                     model.mediaPlayerSingle.volume = 1.0;
-                   
-                }
+                 }
             }
             else
             {
                 model.mediaPlayerSingle.autoPlay = true;
                 model.mediaPlayerSingle.volume = 1.0;
-              
             }
             
             // Set up the MediaPlayer.
@@ -161,7 +158,7 @@ package org.opencast.engage.videodisplay.control.command
 					layoutMetadata = new LayoutMetadata();
 					layoutMetadata.scaleMode = ScaleMode.LETTERBOX;
 					layoutMetadata.horizontalAlign = HorizontalAlign.CENTER;
-					layoutMetadata.verticalAlign = VerticalAlign.MIDDLE;
+					layoutMetadata.verticalAlign = VerticalAlign.BOTTOM;
 					layoutMetadata.percentHeight = 100;
 					layoutMetadata.percentWidth = 100;
 					value.addMetadata(LayoutMetadata.LAYOUT_NAMESPACE, layoutMetadata);

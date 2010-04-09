@@ -22,7 +22,7 @@ Opencast.Watch = (function ()
         //var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
         // restEndpoint = "http://video.lernfunk.de/REST/ws/episode?id="+mediaPackageId;
 
-        $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function () 
+        $('#data').xslt(restEndpoint, "xsl/embed-hybrid-player.xsl", function () 
         {
             // some code to run after the mapping
             // set the title of the page
@@ -55,10 +55,12 @@ Opencast.Watch = (function ()
             var mediaUrlTwo = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
             //var mediaUrlTwo = '';
 
+            Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
             //
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')
             {
-                Opencast.Player.setVideoSizeList(MULTIPLAYER);
+                Opencast.Player.setVideoSizeList(SINGLEPLAYERWITHSLIDES);
+                Opencast.Player.videoSizeControlMultiOnlyLeftDisplay();
             }
             else if (mediaUrlOne !== '' && mediaUrlTwo === '')
             {
@@ -75,8 +77,6 @@ Opencast.Watch = (function ()
                 }
             }
       
-            Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
-
             // Set the caption
             Opencast.Player.setCaptionsURL('engage-hybrid-player/dfxp/matterhorn.dfxp.xml');
       

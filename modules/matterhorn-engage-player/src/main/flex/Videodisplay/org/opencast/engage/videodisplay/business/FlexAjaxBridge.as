@@ -5,6 +5,8 @@ package org.opencast.engage.videodisplay.business
     import flash.events.KeyboardEvent;
     import flash.external.ExternalInterface;
     
+    import mx.controls.Alert;
+    
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.control.event.InitMultiPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.InitPlayerEvent;
@@ -165,12 +167,14 @@ package org.opencast.engage.videodisplay.business
             {
                 var position:int = model.mediaURLOne.lastIndexOf( '/' );
                 var mediaFile:String = model.mediaURLOne.substring( position + 1 );
-
+				
+				// TODO remove the if when we have vor dfxp files
                 if ( mediaFile == 'matterhorn.mp4' )
                 {
                     model.captionsURL = captionsURL;
                     Swiz.dispatchEvent( new LoadDFXPXMLEvent( model.captionsURL ) );
                 }
+                
             }
         }
         
@@ -181,35 +185,23 @@ package org.opencast.engage.videodisplay.business
          */
         public function setMediaURL( mediaURLOne:String, mediaURLTwo:String ):void
         {
-         mediaURLTwo = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
-            
             // Single Player
             if( mediaURLOne != model.mediaURLOne && mediaURLTwo == '' )
             {
-				model.mediaURLOne = mediaURLOne;
+                model.mediaURLOne = mediaURLOne;
                 Swiz.dispatchEvent( new InitPlayerEvent() );
             }
             
             // Multi Player
             if(  mediaURLOne != model.mediaURLOne && mediaURLTwo != model.mediaURLTwo )
             {
-            	model.mediaURLOne = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
-            	model.mediaURLTwo = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
-            	//model.mediaURLOne = mediaURLOne;
-            	//model.mediaURLTwo = mediaURLTwo;
-            	
-            	Swiz.dispatchEvent( new InitMultiPlayerEvent() );
-            	model.mediaState = MediaState.MULTI;
-            	ExternalInterface.call( ExternalFunction.SETVIDEOSIZELIST, model.MULTIPLAYER );
+                model.mediaURLOne = mediaURLOne;
+                model.mediaURLTwo = mediaURLTwo;
+                
+                Swiz.dispatchEvent( new InitMultiPlayerEvent() );
+                model.mediaState = MediaState.MULTI;
             }
         }
-        
-        
-        
-       
-	
-	
-        
         
         /**
          * videoSizeControlSingleDisplay
@@ -218,6 +210,7 @@ package org.opencast.engage.videodisplay.business
          */
         public function videoSizeControlSingleDisplay():void
         {
+        	model.videoSizeState = VideoSizeState.SINGLE;
 		}
         
         /**
@@ -227,6 +220,7 @@ package org.opencast.engage.videodisplay.business
          */
         public function videoSizeControlAudioDisplay():void
         {
+        	
 		}
         
         
@@ -237,6 +231,7 @@ package org.opencast.engage.videodisplay.business
          */
         public function videoSizeControlMultiOnlyLeftDisplay():void
         {
+        	model.videoSizeState = VideoSizeState.ONLYLEFT;
 		}
         
         
@@ -247,19 +242,8 @@ package org.opencast.engage.videodisplay.business
          */
         public function videoSizeControlMultiOnlyRightDisplay():void
         {
+        	model.videoSizeState = VideoSizeState.ONLYRIGHT;
 		}
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         
         /**
          * videoSizeControlMultiBigLeftDisplay
