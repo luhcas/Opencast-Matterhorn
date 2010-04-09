@@ -187,12 +187,14 @@ public class AudioVisualElementSelector extends
     boolean foundVideo = false;
     
     // special handling for */* flavors
-    if ("*".equals(audioFlavor.getType()) || "*".equals(audioFlavor.getSubtype())) {
-      intermediaryAudioFlavor = videoFlavor;
-      intermediary = true;
-    } else if ("*".equals(audioFlavor.getType()) || "*".equals(audioFlavor.getSubtype())) {
-      intermediaryVideoFlavor = audioFlavor;
-      intermediary = true;
+    if (audioFlavor != null) {
+      if ("*".equals(audioFlavor.getType()) || "*".equals(audioFlavor.getSubtype())) {
+        intermediaryAudioFlavor = videoFlavor;
+        intermediary = true;
+      } else if ("*".equals(audioFlavor.getType()) || "*".equals(audioFlavor.getSubtype())) {
+        intermediaryVideoFlavor = audioFlavor;
+        intermediary = true;
+      }
     }
 
     // Try to look up the best match first. If it fails, try again with wildcard flavors (if defined)
