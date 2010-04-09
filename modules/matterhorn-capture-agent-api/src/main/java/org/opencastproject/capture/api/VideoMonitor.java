@@ -15,6 +15,8 @@
  */
 package org.opencastproject.capture.api;
 
+import java.util.List;
+
 /** 
  * OSGi service for video confidence monitoring
  */
@@ -28,5 +30,11 @@ public interface VideoMonitor {
    */
   byte[] grabFrame(String friendlyName);
   
+  /**
+   * Provide access to the devices on the capture box
+   * 
+   * @return the list of friendly device names associated with the capture agent
+   */
+  List<String> getFriendlyNames();
   
 }

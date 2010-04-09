@@ -75,6 +75,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
@@ -892,6 +893,21 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
       }
     }
     return null;
+  }
+  
+  /**
+   * 
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.VideoMonitor#getFriendlyNames()
+   */
+  public LinkedList<String> getFriendlyNames() {
+    String devices = configService.getItem(CaptureParameters.CAPTURE_DEVICE_NAMES);
+    String[] friendlyNames = devices.split(",");
+    LinkedList<String> deviceList = new LinkedList<String>();
+    for (String name : friendlyNames) {
+      deviceList.add(name);
+    }
+    return deviceList;
   }
   
 }
