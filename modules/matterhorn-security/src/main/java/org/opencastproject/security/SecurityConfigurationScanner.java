@@ -25,8 +25,12 @@ import org.springframework.osgi.context.support.OsgiBundleXmlApplicationContext;
 
 import java.io.File;
 import java.util.Date;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.servlet.Filter;
 
 /**
  * Scans for the security.xml file in the configuration directory.
@@ -56,8 +60,13 @@ public class SecurityConfigurationScanner {
   
   public void deactivate() {
     timer.cancel();
-    if(springContext != null)
+    if(reg != null) {
+      reg.unregister();
+      reg = null;
+    }
+    if(springContext != null && springContext.isRunning()) {
       springContext.close();
+    }
   }
   
   protected File getSecurityConfig() {
@@ -69,6 +78,7 @@ public class SecurityConfigurationScanner {
      * {@inheritDoc}
      * @see java.util.TimerTask#run()
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void run() {
       // If the file modification date has been set but it's last modified hasn't changed, there is nothing to do
@@ -90,13 +100,29 @@ public class SecurityConfigurationScanner {
       // This is the first access to the file, or the file has changed.  Update the lastModified time and (re)load.
       lastModified = securityConfig.lastModified();
 
-      if(springContext == null) {
-        springContext = new OsgiBundleXmlApplicationContext(new String[] {"file:" + securityConfig.getAbsolutePath()});
-        springContext.setBundleContext(bundleContext);
-        logger.info("registered {}", springContext);
+      try {
+        if(springContext == null) {
+          springContext = new OsgiBundleXmlApplicationContext(new String[] {"file:" + securityConfig.getAbsolutePath()});
+          springContext.setBundleContext(bundleContext);
+          logger.info("registered {}", springContext);
+        }
+        springContext.refresh();
+        
+        // Register the filter as an osgi bundle, unregistering the previous version (if it has already been registered)
+        Dictionary props = new Hashtable<String, Boolean>();
+        props.put("org.opencastproject.filter", Boolean.TRUE);
+        if(reg != null) {
+          reg.unregister();
+          reg = null;
+        }
+        reg = bundleContext.registerService(Filter.class.getName(), springContext.getBean("springSecurityFilterChain"), props);
+
+        // Reset the warning, in case we remove this successfully configured spring filter chain
+        warned = false;
+      } catch(Exception e) {
+        // If we throw an exception, the scanner thread will stop.  Instead, just log the problem.
+        logger.warn("Unable to update the spring security configuration", e);
       }
-      springContext.refresh();
-      warned = false;
     }
   }
 }

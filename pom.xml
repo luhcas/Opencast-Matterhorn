@@ -495,76 +495,113 @@
         <version>2.2.7</version>
       </dependency>
 
+      <!-- Spring -->
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>org.springframework.aop</artifactId>
-        <version>2.5.6.SEC01</version>
+        <version>3.0.2.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>org.springframework.asm</artifactId>
+        <version>3.0.2.RELEASE</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>org.springframework.core</artifactId>
-        <version>2.5.6.SEC01</version>
+        <version>3.0.2.RELEASE</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>org.springframework.beans</artifactId>
-        <version>2.5.6.SEC01</version>
+        <version>3.0.2.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>org.springframework.expression</artifactId>
+        <version>3.0.2.RELEASE</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>org.springframework.transaction</artifactId>
-        <version>2.5.6.SEC01</version>
+        <version>3.0.2.RELEASE</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>org.springframework.context</artifactId>
-        <version>2.5.6.SEC01</version>
+        <version>3.0.2.RELEASE</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>org.springframework.context.support</artifactId>
-        <version>2.5.6.SEC01</version>
+        <version>3.0.2.RELEASE</version>
       </dependency>
 
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>org.springframework.web</artifactId>
-        <version>2.5.6.SEC01</version>
+        <version>3.0.2.RELEASE</version>
       </dependency>
 
 	    <dependency>
 	      <groupId>org.springframework.osgi</groupId>
-	      <artifactId>spring-osgi-io</artifactId>
-	      <version>1.2.0</version>
+	      <artifactId>org.springframework.osgi.io</artifactId>
+	      <version>1.2.1</version>
 	    </dependency>
 
 	    <dependency>
 	      <groupId>org.springframework.osgi</groupId>
-	      <artifactId>spring-osgi-core</artifactId>
-	      <version>1.2.0</version>
+	      <artifactId>org.springframework.osgi.core</artifactId>
+	      <version>1.2.1</version>
 	    </dependency>
 
 	    <dependency>
 	      <groupId>org.springframework.osgi</groupId>
-	      <artifactId>spring-osgi-extender</artifactId>
-	      <version>1.2.0</version>
+	      <artifactId>org.springframework.osgi.extender</artifactId>
+	      <version>1.2.1</version>
 	    </dependency>
 
 	    <dependency>
 	      <groupId>org.springframework.security</groupId>
-	      <artifactId>org.springframework.security</artifactId>
-	      <version>2.0.4.A</version>
+	      <artifactId>org.springframework.security.core</artifactId>
+	      <version>3.0.2.RELEASE</version>
 	    </dependency>
 
       <dependency>
         <groupId>org.springframework.security</groupId>
-        <artifactId>org.springframework.security.providers.openid</artifactId>
-        <version>2.0.4.A</version>
+        <artifactId>org.springframework.security.config</artifactId>
+        <version>3.0.2.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>org.springframework.security.web</artifactId>
+        <version>3.0.2.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>org.springframework.security.openid</artifactId>
+        <version>3.0.2.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openid4java</groupId>
+        <artifactId>com.springsource.org.openid4java</artifactId>
+        <version>0.9.5</version>
+      </dependency>
+
+      <dependency>
+        <groupId>net.sourceforge.nekohtml</groupId>
+        <artifactId>com.springsource.org.cyberneko.html</artifactId>
+        <version>1.9.13</version>
       </dependency>
 
       <dependency>

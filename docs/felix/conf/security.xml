@@ -1,18 +1,13 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
-  xmlns:osgi="http://www.springframework.org/schema/osgi"
   xmlns:sec="http://www.springframework.org/schema/security"
   xmlns:oauth="http://spring-security-oauth.codehaus.org/3.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/osgi
-       http://www.springframework.org/schema/osgi/spring-osgi.xsd
        http://www.springframework.org/schema/security
-       http://www.springframework.org/schema/security/spring-security-2.0.4.xsd
-       http://spring-security-oauth.codehaus.org/3.0
-       http://spring-security-oauth.codehaus.org/schema/spring-security-oauth-3.0.xsd">
+       http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
-  <sec:http>
+  <sec:http create-session="ifRequired" servlet-api-provision="true" realm="Opencast Matterhorn">
     <sec:intercept-url pattern='/**' access='ROLE_USER,ROLE_ANONYMOUS'/>
     <sec:x509 subject-principal-regex="CN=(.*?)," user-service-ref="userDetailsService"/>
     <sec:openid-login />
@@ -24,50 +19,16 @@
     <sec:user name="admin" password="opencast" authorities="ROLE_ADMIN,ROLE_USER" />
   </sec:user-service>
 
-  <sec:authentication-provider user-service-ref="userDetailsService" />
+  <sec:authentication-manager>
+    <sec:authentication-provider user-service-ref="userDetailsService" />
+  </sec:authentication-manager>
+
+  <sec:global-method-security jsr250-annotations="enabled" />
 
   <!-- Logging interceptors, in case they are needed -->
   <!--
-  <bean class="org.springframework.security.event.authentication.LoggerListener" />
-  <bean class="org.springframework.security.event.authorization.LoggerListener" />
+  <bean class="org.springframework.security.access.event.LoggerListener" />
+  <bean class="org.springframework.security.authentication.event.LoggerListener" />
   -->
 
-  <!-- Publish the filter chain as an OSGi service -->
-
-  <osgi:service id="SecurityFilterChainOsgi" ref="springSecurityFilterChain" interface="javax.servlet.Filter">
-    <osgi:service-properties>
-
-    <!-- Flag this filter to be used by CXF for the rest endpoints (the prop key changed, so register both) -->
-      <entry>
-        <key>
-          <value>org.apache.cxf.rs.httpservice.filter</value>
-        </key>
-        <value>true</value>
-      </entry>
-      <entry>
-        <key>
-          <value>org.apache.cxf.httpservice.filter</value>
-        </key>
-        <value>true</value>
-      </entry>
-
-    <!-- Flag this filter to be used by the Matterhorn SecureHttpContext -->
-      <entry>
-        <key>
-          <value>org.opencastproject.filter</value>
-        </key>
-        <value>true</value>
-      </entry>
-
-    <!-- Pax web whiteboard will pick up this filter, and will complain if no servletNames or urlPatterns are specified -->
-      <entry>
-        <key>
-          <value>servletNames</value>
-        </key>
-        <value>none</value> <!-- This intentionally bogus name should *not* point to a servlet in the HttpService -->
-      </entry>
-    </osgi:service-properties>
-  </osgi:service>
-
 </beans>
-
