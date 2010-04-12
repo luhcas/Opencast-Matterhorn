@@ -196,10 +196,16 @@ public class AudioVisualElementSelector extends
         intermediary = true;
       }
     }
-
+    
     // Try to look up the best match first. If it fails, try again with wildcard flavors (if defined)
     result = select(mediaPackage, intermediaryAudioFlavor, intermediaryVideoFlavor);
-    if (intermediary && (!foundAudio && requireAudio) || (!foundVideo && requireVideo)) {
+    for (Track t : result) {
+      if (t.hasAudio() && t.getFlavor().equals(intermediaryAudioFlavor))
+        foundAudio = true;
+      if (t.hasVideo() && t.getFlavor().equals(intermediaryVideoFlavor))
+        foundVideo = true;
+    }
+    if (intermediary && ((!foundAudio && requireAudio) || (!foundVideo && requireVideo))) {
       result = select(mediaPackage, audioFlavor, videoFlavor);
     }
 

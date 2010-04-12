@@ -129,38 +129,61 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
 
     // interlacing
     String scanType = (String) xpath.evaluate("scantype/@type", node, XPathConstants.STRING);
-    if (scanType != null && !scanType.trim().equals(""))
+    if (scanType != null && !scanType.trim().equals("")) {
+      if (vs.scanType == null)
+        vs.scanType = new Scan();
       vs.scanType.type = ScanType.fromString(scanType);
+    }
 
     String scanOrder = (String) xpath.evaluate("interlacing/@order", node, XPathConstants.STRING);
-    if (scanOrder != null && !scanOrder.trim().equals(""))
+    if (scanOrder != null && !scanOrder.trim().equals("")) {
+      if (vs.scanType == null)
+        vs.scanType = new Scan();
       vs.scanType.order = ScanOrder.fromString(scanOrder);
-
+    }
     // device
     String deviceType = (String) xpath.evaluate("device/@type", node, XPathConstants.STRING);
-    if (deviceType != null && !deviceType.trim().equals(""))
+    if (deviceType != null && !deviceType.trim().equals("")) {
+      if (vs.device == null)
+        vs.device = new Device();
       vs.device.type = deviceType;
+    }
 
     String deviceVersion = (String) xpath.evaluate("device/@version", node, XPathConstants.STRING);
-    if (deviceVersion != null && !deviceVersion.trim().equals(""))
+    if (deviceVersion != null && !deviceVersion.trim().equals("")) {
+      if (vs.device == null)
+        vs.device = new Device();
       vs.device.version = deviceVersion;
-
+    }
+    
     String DeviceVendor = (String) xpath.evaluate("device/@vendor", node, XPathConstants.STRING);
-    if (DeviceVendor != null && !DeviceVendor.trim().equals(""))
+    if (DeviceVendor != null && !DeviceVendor.trim().equals("")) {
+      if (vs.device == null)
+        vs.device = new Device();
       vs.device.vendor = DeviceVendor;
+    }
 
     // encoder
     String encoderType = (String) xpath.evaluate("encoder/@type", node, XPathConstants.STRING);
-    if (encoderType != null && !encoderType.trim().equals(""))
+    if (encoderType != null && !encoderType.trim().equals("")) {
+      if (vs.encoder == null)
+        vs.encoder = new Encoder();
       vs.encoder.type = encoderType;
-
+    }
+    
     String encoderVersion = (String) xpath.evaluate("encoder/@version", node, XPathConstants.STRING);
-    if (encoderVersion != null && !encoderVersion.trim().equals(""))
+    if (encoderVersion != null && !encoderVersion.trim().equals("")) {
+      if (vs.encoder == null)
+        vs.encoder = new Encoder();
       vs.encoder.version = encoderVersion;
+    }
 
     String encoderVendor = (String) xpath.evaluate("encoder/@vendor", node, XPathConstants.STRING);
-    if (encoderVendor != null && !encoderVendor.trim().equals(""))
+    if (encoderVendor != null && !encoderVendor.trim().equals("")) {
+      if (vs.encoder == null)
+        vs.encoder = new Encoder();
       vs.encoder.vendor = encoderVendor;
+    }
 
     return vs;
   }

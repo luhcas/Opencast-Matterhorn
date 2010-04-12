@@ -161,7 +161,8 @@ public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
       fromDb.setHost(receipt.getHost());
       tx.commit();
     } catch(RollbackException e) {
-      tx.rollback();
+      if (tx.isActive())
+        tx.rollback();
       throw e;
     } finally {
       em.close();
