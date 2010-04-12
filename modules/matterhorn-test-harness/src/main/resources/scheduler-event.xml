@@ -34,8 +34,8 @@
 		<attendee>Student 1</attendee>
 	</attendees>
 	<resources>
-		<resource>SCREEN</resource>
-		<resource>PRESENTER</resource>
-		<resource>MICROPHONE</resource>
+		<resource>MOCK_SCREEN</resource>
+		<resource>MOCK_PRESENTER</resource>
+		<resource>MOCK_MICROPHONE</resource>
 	</resources>
 </ns1:SchedulerEvent>

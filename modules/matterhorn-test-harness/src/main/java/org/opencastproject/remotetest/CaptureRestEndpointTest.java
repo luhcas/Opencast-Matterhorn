@@ -30,7 +30,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -42,7 +41,6 @@ import java.util.Properties;
  * Test the functionality of the capture endpoints. Does not assume capture
  * devices are connected, so only mock captures are tested
  */
-@Ignore("Fix me!")
 public class CaptureRestEndpointTest {
   
   private HttpClient httpClient;

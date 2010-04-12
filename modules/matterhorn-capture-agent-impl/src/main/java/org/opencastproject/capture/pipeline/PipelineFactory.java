@@ -87,6 +87,13 @@ public class PipelineFactory {
       // Get properties from 
       String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
+      if (outputDirectory == null) {
+        logger.warn("Output directory is null, this may not work because we may not be able to write to the current output dir!");
+      }
+      if (!properties.containsKey(outputProperty)) {
+        logger.error("Invalid device name: {}.  No keys named {} exist in the properties!", name, CaptureParameters.CAPTURE_DEVICE_PREFIX  + name);
+        return null;
+      }
       String srcLoc = properties.getProperty(srcProperty);
       File outputFile = new File(outputDirectory, properties.getProperty(outputProperty));
       logger.debug("Device {} has source at {}.", name, srcLoc);

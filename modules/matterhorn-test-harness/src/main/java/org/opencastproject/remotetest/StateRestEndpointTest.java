@@ -1,9 +1,23 @@
 package org.opencastproject.remotetest;
 
+import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
+
 import org.opencastproject.integrationtest.AuthenticationSupport;
 import org.opencastproject.integrationtest.UniversalNamespaceResolver;
 
-import static org.opencastproject.remotetest.AllRemoteTests.BASE_URL;
+import junit.framework.Assert;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.w3c.dom.Document;
 
 import java.util.HashSet;
 import java.util.regex.Matcher;
@@ -17,21 +31,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
-import junit.framework.Assert;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.w3c.dom.Document;
 
 
 public class StateRestEndpointTest {
@@ -67,9 +66,11 @@ public class StateRestEndpointTest {
     states.add("unknown");
     
     Assert.assertTrue(states.contains(responseString));
+    
+    Thread.sleep(3000);
   }
   
-  @Test @Ignore
+  @Test
   public void testGetRecordingsNoneGet() throws Exception {
     HttpGet request = new HttpGet(BASE_URL + "/state/rest/GetRecordings");
     AuthenticationSupport.addAuthentication(request);
@@ -84,7 +85,7 @@ public class StateRestEndpointTest {
 
   }
   
-  @Test @Ignore
+  @Test
   public void testGetRecordingsPresentGet() throws Exception {
     String recordingId;
     
@@ -113,6 +114,7 @@ public class StateRestEndpointTest {
     HttpResponse deleteRecordingResponse = client.execute(deleteRecordingRequest);
     
     Assert.assertEquals(200, deleteRecordingResponse.getStatusLine().getStatusCode());
+    Thread.sleep(3000);
   }
   
   protected Document parseResponse(String responseXml) throws Exception {
