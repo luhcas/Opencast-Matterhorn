@@ -18,14 +18,15 @@ package org.opencastproject.integrationtest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.UUID;
+import com.sun.jersey.api.client.ClientResponse;
 
-import javax.xml.xpath.XPathConstants;
-
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import com.sun.jersey.api.client.ClientResponse;
+import java.util.UUID;
+
+import javax.xml.xpath.XPathConstants;
 
 /**
  * Integration test for scheduled capture
@@ -33,6 +34,7 @@ import com.sun.jersey.api.client.ClientResponse;
  *
  */
 
+@Ignore("Fix me!")
 public class ScheduledCaptureTest {
 
 	@Test
