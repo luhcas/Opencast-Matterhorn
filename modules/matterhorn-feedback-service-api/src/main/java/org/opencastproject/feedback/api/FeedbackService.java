@@ -26,12 +26,23 @@ public interface FeedbackService {
    * 
    * @param a
    *          The Annotation that will be added to the database
-   * @return the updated annotation, with a new ID. null if there are errors in adding the annotation.
+   * @return the updated annotation, with a new ID. NULL if there are errors while adding the annotation.
    */
   Annotation addAnnotation(Annotation a);
 
   /**
-   * Returns annotations of a give key
+   * Returns annotations
+   * 
+   * @param offset
+   *          the offset
+   * @param limit
+   *          the limit
+   * @return the annotation list
+   */
+  AnnotationList getAnnotations(int offset, int limit);
+  
+  /**
+   * Returns annotations of a given key
    * 
    * @param key
    *          The annotation key
@@ -42,4 +53,32 @@ public interface FeedbackService {
    * @return the annotation list
    */
   AnnotationList getAnnotationsByKey(String key, int offset, int limit);
+
+  /**
+   * Returns annotations of a given day (YYYYMMDD)
+   * 
+   * @param day
+   *          The day in the format of YYYYMMDD
+   * @param offset
+   *          the offset
+   * @param limit
+   *          the limit
+   * @return the annotation list
+   */
+  AnnotationList getAnnotationsByDay(String day, int offset, int limit);
+
+  /**
+   * Returns annotations of a given key and day
+   * 
+   * @param key
+   *          The annotation key
+   * @param day
+   *          The day
+   * @param offset
+   *          the offset
+   * @param limit
+   *          the limit
+   * @return the annotation list
+   */
+  AnnotationList getAnnotationsByKeyAndDay(String key, String day, int offset, int limit);
 }

@@ -41,7 +41,15 @@ import org.opencastproject.feedback.api.Annotation;
  */
 @Entity(name = "AnnotationImpl")
 @Table(name = "MH_ANNOTATION_IMPL")
-@NamedQueries( { @NamedQuery(name = "findAnnotations", query = "SELECT a FROM AnnotationImpl a") })
+@NamedQueries( {
+        @NamedQuery(name = "findAnnotations", query = "SELECT a FROM AnnotationImpl a"),
+        @NamedQuery(name = "findAnnotationsByKey", query = "SELECT a FROM AnnotationImpl a WHERE a.key = :key"),
+        @NamedQuery(name = "findAnnotationsByIntervall", query = "SELECT a FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end"),
+        @NamedQuery(name = "findAnnotationsByKeyAndIntervall", query = "SELECT a FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end AND a.key = :key"),
+        @NamedQuery(name = "findTotal", query = "SELECT COUNT(a) FROM AnnotationImpl a"),
+        @NamedQuery(name = "findTotalByKey", query = "SELECT COUNT(a) FROM AnnotationImpl a WHERE a.key = :key"),
+        @NamedQuery(name = "findTotalByIntervall", query = "SELECT COUNT(a) FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end"),
+        @NamedQuery(name = "findTotalByKeyAndIntervall", query = "SELECT COUNT(a) FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end AND a.key = :key") })
 @XmlType(name = "annotation", namespace = "http://feedback.opencastproject.org/")
 @XmlRootElement(name = "annotation", namespace = "http://feedback.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -77,7 +85,7 @@ public class AnnotationImpl implements Annotation {
   private String value;
 
   @Basic(optional = false)
-  @Column(name = "created", insertable = false, updatable = false)
+  @Column(name = "created")
   @Temporal(TemporalType.TIMESTAMP)
   @XmlElement(name = "created")
   private Date created = new Date();

@@ -46,17 +46,17 @@ public class AnnotationListImpl implements AnnotationList {
   protected int limit;
 
   @XmlElement(name = "annotation", namespace = "http://feedback.opencastproject.org/")
-  protected List<Annotation> annotations;
+  protected List<AnnotationImpl> annotations;
 
   public void add(Annotation annotation) {
-    annotations.add(annotation);
+    annotations.add((AnnotationImpl)annotation);
   }
 
   /**
    * A no-arg constructor needed by JAXB
    */
   public AnnotationListImpl() {
-    this.annotations = new ArrayList<Annotation>();
+    this.annotations = new ArrayList<AnnotationImpl>();
   }
 
   public void setTotal(int total) {

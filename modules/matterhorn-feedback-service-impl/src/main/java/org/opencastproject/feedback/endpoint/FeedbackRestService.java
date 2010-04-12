@@ -21,7 +21,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringUtils;
 import org.opencastproject.feedback.api.Annotation;
 import org.opencastproject.feedback.api.FeedbackService;
 import org.opencastproject.util.DocUtil;
@@ -88,22 +90,26 @@ public class FeedbackRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("annotation")
-  public Response getAnnotations() {
+  public Response getAnnotations(@QueryParam("key") String key, @QueryParam("day") String day,
+          @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
 
-    Annotation f1 = new AnnotationImpl();
-    f1.setAnnotationId(1);
+    // Are the values of offset and limit valid?
+    if (offset < 0 || limit < 0)
+      return Response.status(Status.BAD_REQUEST).build();
 
-    Annotation f2 = new AnnotationImpl();
-    f2.setAnnotationId(2);
+    // Set default value of limit (max result value)
+    if (limit == 0)
+      limit = 10;
 
-    AnnotationListImpl annotations = new AnnotationListImpl();
-    annotations.add(f1);
-    annotations.add(f2);
-    annotations.setTotal(2);
-    annotations.setLimit(10);
-    annotations.setOffset(0);
+    if (!StringUtils.isEmpty(key) && !StringUtils.isEmpty(day))
+      return Response.ok(feedbackService.getAnnotationsByKeyAndDay(key, day, offset, limit)).build();
+    else if (!StringUtils.isEmpty(key))
+      return Response.ok(feedbackService.getAnnotationsByKey(key, offset, limit)).build();
+    else if (!StringUtils.isEmpty(day))
+      return Response.ok(feedbackService.getAnnotationsByDay(day, offset, limit)).build();
+    else
+      return Response.ok(feedbackService.getAnnotations(offset, limit)).build();
 
-    return Response.ok(annotations).build();
   }
 
   @GET
