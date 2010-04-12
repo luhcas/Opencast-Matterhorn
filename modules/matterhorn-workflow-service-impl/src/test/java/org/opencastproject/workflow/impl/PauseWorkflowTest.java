@@ -58,9 +58,10 @@ public class PauseWorkflowTest {
   @Before
   public void setup() throws Exception {
     // always start with a fresh solr root directory
+    File sRoot = new File(storageRoot);
     try {
-      FileUtils.deleteDirectory(new File(storageRoot));
-      FileUtils.forceMkdir(new File(storageRoot));
+      FileUtils.deleteDirectory(sRoot);
+      FileUtils.forceMkdir(sRoot);
     } catch (IOException e) {
       Assert.fail(e.getMessage());
     }
@@ -83,7 +84,7 @@ public class PauseWorkflowTest {
       }
     };
 
-    repo = new WorkingFileRepositoryImpl(storageRoot, "file:" + storageRoot);
+    repo = new WorkingFileRepositoryImpl(storageRoot, sRoot.toURI().toString());
     dao = new WorkflowServiceImplDaoFileImpl();
     dao.setRepository(repo);
     dao.setStorageRoot(storageRoot + File.separator + "lucene");
