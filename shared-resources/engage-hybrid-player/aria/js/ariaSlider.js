@@ -13,7 +13,10 @@ Opencast.ariaSlider = (function ()
     var gDragging    = '',
         gDragOffset  = 0,
         sliderVolume = 'slider_volume_Thumb',
-        sliderSeek   = 'slider_seek_Thumb';
+        sliderSeek   = 'slider_seek_Thumb',
+        EMBED        = 'embed',
+        ADVANCED     = 'advanced',
+        playerView   = '';
     
     /**
         @memberOf Opencast.ariaSlider
@@ -92,17 +95,25 @@ Opencast.ariaSlider = (function ()
         var max = parseFloat(target.getAttribute('aria-valuemax'));
         var newValue = Math.min(Math.max(value, min), max);
         var newPos = Math.round(newValue * ratio);
-        target.style.left = newPos + 'px';
-        target.setAttribute('aria-valuenow', newValue);
         
-        // if target is the volume slider
-        if (target.id === sliderVolume)
+       
+    	// if target is the volume slider
+        if (target.id === sliderVolume && $("#oc_volume-menue").css("visibility") === 'visible' )
         {
+        	target.style.left = newPos + 'px';
+            target.setAttribute('aria-valuenow', newValue);
         	target.setAttribute('aria-valuetext', 'Volume: ' + Math.round(newValue) + '%');
+        	$("#slider_volume_Rail").attr("title", 'Volume ' + Math.round(newValue) + '%');
             Opencast.Player.setPlayerVolume(newValue / 100);
         }
-        
-        
+        else if( target.id === sliderVolume && $("#oc_volume-menue").css("visibility") === undefined )
+        {
+        	target.style.left = newPos + 'px';
+            target.setAttribute('aria-valuenow', newValue);
+        	target.setAttribute('aria-valuetext', 'Volume: ' + Math.round(newValue) + '%');
+        	$("#slider_volume_Rail").attr("title", 'Volume ' + Math.round(newValue) + '%');
+            Opencast.Player.setPlayerVolume(newValue / 100);
+        }
     }
     
     /**
@@ -125,7 +136,7 @@ Opencast.ariaSlider = (function ()
         {
         	
         	target.setAttribute('aria-valuetext', 'Volume: ' + Math.round(newValue) + '%');
-           $("#slider_volume_Rail").attr("title", 'Volume ' + Math.round(newValue) + '%');
+            $("#slider_volume_Rail").attr("title", 'Volume ' + Math.round(newValue) + '%');
          }
         
     }
@@ -339,7 +350,7 @@ Opencast.ariaSlider = (function ()
         @memberOf Opencast.ariaSlider
         @description Init the sliders.
     */
-    function init() 
+    function init(playerView) 
     {
         setVolumeHandlers(getElementId(sliderVolume));
     }

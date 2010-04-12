@@ -21,7 +21,7 @@ Opencast.Watch = (function ()
         //var restEndpoint = "xml/episode.xml";
         var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
 
-        $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function () 
+        $('#data').xslt(restEndpoint, "xsl/embed-hybrid-player.xsl", function () 
         {
             // some code to run after the mapping
             // set the title of the page
@@ -46,7 +46,7 @@ Opencast.Watch = (function ()
             }
             // set the abstract
             $('#abstract').html($('#oc-abstract').html());
-      
+
             // Get the video url
             var mediaUrlOne = $('#oc-video-url').html();
             var mediaUrlTwo = $('#oc-video-url').html();
@@ -56,7 +56,8 @@ Opencast.Watch = (function ()
             //
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')
             {
-                Opencast.Player.setVideoSizeList(MULTIPLAYER);
+                Opencast.Player.setVideoSizeList(SINGLEPLAYERWITHSLIDES);
+                Opencast.Player.videoSizeControlMultiOnlyLeftDisplay();
             }
             else if (mediaUrlOne !== '' && mediaUrlTwo === '')
             {
@@ -73,7 +74,6 @@ Opencast.Watch = (function ()
                 }
             }
       
-
             // Set the caption
             Opencast.Player.setCaptionsURL('engage-hybrid-player/dfxp/matterhorn.dfxp.xml');
       
@@ -90,22 +90,6 @@ Opencast.Watch = (function ()
       
             //$('#info').append("<a href=" + watchUrl.replace(/watch.html/g, "multi.html") + ">Multi</a>");
 
-      // Add the scrubber keypress handler to Opencast.Scrubber.init
-      $('#scrubber').bind('keydown', 'left', function(evt) {
-      //  Opencast.Player.doRewind();
-      });
-      
-      $('#scrubber').bind('keyup', 'left', function(evt) {
-      //  Opencast.Player.stopRewind();
-      });
-      
-      $('#scrubber').bind('keydown', 'right', function(evt) {
-       // Opencast.Player.doFastForward();
-      });
-      
-      $('#scrubber').bind('keyup', 'right', function(evt) {
-       // Opencast.Player.stopFastForward();
-      });
       
         });
     }

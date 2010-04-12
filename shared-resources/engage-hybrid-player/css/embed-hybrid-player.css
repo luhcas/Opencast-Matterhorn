@@ -19,70 +19,47 @@ body
 {
   font-family:              Verdana;
 }   
+  
+#oc_embed-title-bar
+{
+  height:                   20px;
+  width:                    100%;
+  background-image:         url("../img/icons.png");
+  background-position:      0 -4px;
+} 
+  
+#oc_embed-title
+{
+  font-size:                1em;
+  text-align:               center;
+  height:                   100%;
+  color:                    #FA6E23;
+  margin-top:               2px;
+}
+
+#oc_embed-title a
+{
+  color:                    #FA6E23;
+  margin-top:               2px;
+}
  
-#oc_title-bar
-{
-  min-width:                760px;
-  height:                   26px;
-  margin-left:              5px;
-  margin-right:             5px;
-}
-
-#oc_title
-{
-  float:                    left;
-  font-size:                1.5em;
-  text-align:               left;
-  height:                   100%;
-}
-
-#oc_title_from
-{
-  float:                    left;
-  font-size:                1.0em;
-  text-align:               left;
-  height:                   100%;
-  padding-left:             5px; 
-  margin-top:               8px;
-}
-
-#oc_search
-{
-  float:                    right;
-  height:                   100%;
-  padding-top:              3px;
-}
-
-.oc_search-Field
-{
-  border:                   1px solid #000000;
-  background-color:         #E3E3D7;
-  color:                    #000000;
-}
-
-#oc_btn-search
-{
-  width:                    100px;
-}
-
-.clear
+#clear
 {   
   clear:                    both;   
 }
 
 #oc_body
 {
-  min-width:                756px;
-  height:                   510px;
-  margin-left:              5px;
-  margin-right:             5px;
+  width:                    100%;
+  
 }
 
 #oc_flash-player
 {
+  witdh:                    100%;
   text-align:               center;
-  height:                   100%;
-  margin-bottom:            10px;
+  margin-bottom:            0px;
+  margin-top:               2px;
 }
 
 #oc_video-player-controls
@@ -110,15 +87,14 @@ body
 #simpleEdit 
 {
   margin-top:               12px;
-  margin-left:              10px;
-  font-size:                1.2em;
+  margin-left:              5px;
 }
 
 .oc_current-time
 {
   cursor:                   pointer;
   cursor:                   hand;
-  width:                    64px !important;
+  width:                    49px !important;
   background-color:         transparent !important;
   color:                    #FFFFFF;
 }
@@ -130,14 +106,14 @@ body
 
 .oc_edit-time
 {
-  width:                    64px !important;
+ width:                     49px !important;
   background-color:         #E3E3D7 !important;
   color:                    #000000;
 }
 
 .oc_edit-time-error
 {
-  width:                    64px !important;
+  width:                    49px !important;
   background-color:         #ff0000;  
   color:                    #ffffff; 
 }
@@ -146,27 +122,70 @@ body
   display:                  none;
 }
 
-
-
 #oc_video-controls
 {
   float:                    left;
   width:                    40%;
-  text-align:               right;
+  margin-left:              0px;
 }
 
 #oc_sound
 {
   float:                    left;
-  width:                    5%;
+  width:                    8%;
   text-align:               center;
+}
+
+
+
+
+#oc_volume-dropdown
+{
+  margin:                   0;
+  padding:                  0;
+  float:                    right;
+  margin-right:             10px;
+}
+
+#oc_volume-dropdown li
+{   
+  float:                    left;
+  list-style:               none;
+}
+    
+#oc_volume-dropdown li ul
+{
+  margin:                   0;
+  padding:                  0;
+  position:                 absolute;
+  visibility:               hidden;
+  border-top:               1px solid white
+}   
+        
+#oc_volume-dropdown li ul li
+{   
+  float:                    none;
+  display:                  inline;
+}
+        
+#oc_volume-dropdown-div
+{   
+  height:                   28px;
+  padding-top:              4px;
+  background-image:         url("../img/icons.png");
+  background-position:      0 -4px;
+  text-align:               center;
+  margin-left:              -40px;
+
 }
 
 #oc_video-volume-slider
 {
-  width:                    8%;
+  
   height:                   36px;
   float:                    left;
+  margin-right:             5px;
+  margin-left:              5px;
 }
 
 .oc-slider-volume-Rail 
@@ -176,7 +195,7 @@ body
   border:                   1px solid #999999;
   position:                 relative;
   background:               #fff;
-  margin-top:               18px;
+  margin-top:               12px;
 }
 
 .oc-slider-volume-Thumb:focus
@@ -200,14 +219,14 @@ body
 #oc_video-cc
 {
   float:                    left;
-  width:                    5%;
+  width:                    8%;
   text-align:               center;
 }
 
 #oc_video-size-controls
 {
   float:                    right;
-  width:                    12%;
+  width:                    14%;
 }
 
 #oc_tabs
@@ -261,16 +280,6 @@ body
   display:                  inline;
 }
         
-#oc_video-size-dropdown li ul li a
-{   
-  background:               #000000;
-}
-
-#oc_video-size-dropdown li ul li a:hover
-{   
-  background:               #000000; 
-}
-
 #oc_video-size-dropdown-div
 {   
   height:                   28px;
@@ -300,78 +309,67 @@ body
 
 .oc_offScreen-hidden 
 {
-  position:                 absolute; 
-  left:                     -10000px; 
-  top:                      auto; 
-  width:                    1px; 
-  height:                   1px; 
-  overflow:                 hidden;
+    position:               absolute; 
+    left:                   -10000px; 
+    top:                    auto; 
+    width:                  1px; 
+    height:                 1px; 
+    overflow:               hidden;
 }
 
 .oc_slidesDisplayBlock
 {
-  display:                  block;
-  text-align:               center;
-  margin:                   5px;
-  overflow:                 auto; 
+    display:                block;
+    text-align:             center;
+    margin:                 5px;
+    overflow:               auto; 
 }
 
 .oc_notesDisplayBlock
 {
-  display:                  block;
-  text-align:               center;
-  margin:                   10px;
-  overflow:                 auto; 
-  zoom:                     1;
+    display:                block;
+    text-align:             center;
+    margin:                 10px;
+    overflow:               auto; 
+    zoom:                   1;
 }
 
 .oc_slideTextDisplayBlock
 {
-  text-align:               center;
-  margin:                   10px;
-  overflow:                 auto; 
-  zoom:                     1;
+    text-align:             center;
+    margin:                 10px;
+    overflow:               auto; 
+    zoom:                   1;
+
 }
 
 .oc_shortcutsDisplayBlock
 {
-  text-align:               left;
-  margin:                   10px;
-  overflow:                 auto; 
-  zoom:                     1;
+    text-align:             left;
+    margin:                 10px;
+    overflow:               auto; 
+    zoom:                   1;
 }
 
 .oc_embedDisplayBlock
 {
-  text-align:               center;
-  margin:                   10px;
-  overflow:                 auto; 
-  zoom:                     1;
-}
-
-.oc_embed-textarea
-{
-  width:                    95%;
-  overflow:                 auto;
-  margin-top:               5px;
+    text-align:             center;
+    margin:                 10px;
+    overflow:               auto; 
+    zoom:                   1;
 }
 
 .oc_DisplayNone
 {
-  display:                  none;
+    display:                none;
 }
 
 .oc_btn-tabs
 {
-  width:                    40px;
-  margin-top:               4px;
-  margin-right:               10px;
+    width:                  40px;
+    margin-top:             4px;
+    margin-right:           10px;
 }
-
-
-
-
-
 
 .oc-segment-table 
 { 
