@@ -28,17 +28,18 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
-      <scope>provided</scope>
     </dependency>
     <!-- Embedding opencast version of truezip -->
     <dependency>
@@ -51,6 +52,16 @@
           <artifactId>bcprov-jdk15</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>oauth.signpost</groupId>
+      <artifactId>signpost-core</artifactId>
+      <version>1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>oauth.signpost</groupId>
+      <artifactId>signpost-commonshttp4</artifactId>
+      <version>1.2</version>
     </dependency>
     <!-- logging -->
     <dependency>
@@ -71,12 +82,6 @@
     </dependency>
   </dependencies>
 
-  <scm>
-    <connection>scm:svn:http://source.opencastproject.org/svn/momatterhorn-terhorn-util/trunk</connection>
-    <developerConnection>scm:svn:https://source.opencastproject.org/svn/matterhorn-atterhorn-util/trunk</developerConnection>
-    <url>https://source.opencastproject.org/svmatterhorn-/matterhorn-util/trunk</url>
-  </scm>
-
   <build>
     <plugins>
       <plugin>
@@ -90,7 +95,12 @@
             <Export-Package> org.opencastproject.util.*;-split-package:=merge-first </Export-Package>
             <Private-Package> META-INF.services;-split-package:=merge-first </Private-Package>
             <Import-Package> !com.sun.*, *;resolution:=optional </Import-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
+            <Embed-Dependency>
+              freemarker;inline=true,
+              opencast-truezip;inline=true,
+              signpost-core;inline=true,
+              signpost-commonshttp4;inline=true
+            </Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
           </instructions>
         </configuration>

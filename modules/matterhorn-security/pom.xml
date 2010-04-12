@@ -13,6 +13,11 @@
   </parent>
   <dependencies>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-util</artifactId>
+      <version>0.6-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>org.springframework.security.core</artifactId>
     </dependency>
@@ -37,6 +42,11 @@
       <artifactId>com.springsource.org.cyberneko.html</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.codehaus.spring-security-oauth</groupId>
+      <artifactId>spring-security-oauth</artifactId>
+      <version>3.14.SS3</version>
+    </dependency>
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
@@ -51,6 +61,18 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+    </dependency>
+    
+    <!-- Testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
@@ -80,6 +102,9 @@
               *;resolution:=optional
             </Import-Package>
             <Export-Package> org.opencastproject.security </Export-Package>
+            <Embed-Dependency>
+              spring-security-oauth;inline=true
+            </Embed-Dependency>
             <Service-Component>OSGI-INF/security-config-scanner.xml</Service-Component>
           </instructions>
         </configuration>

@@ -97,11 +97,19 @@ public class RestPublisher {
 
   /**
    * Creates a REST endpoint for the JAX-RS annotated service.
-   * @param ref The service reference
+   * @param alias The endpoint's root URI
    * @param service The service itself
    */
   protected void createEndpoint(ServiceReference ref, Object service) {
-    String alias = ref.getProperty(SERVICE_PROPERTY).toString();
+    Object aliasObj = ref.getProperty(SERVICE_PROPERTY);
+    if(aliasObj == null) {
+      logger.warn("Unable to publish a REST endpoint for {}", service.getClass().getName());
+      return;
+    } else if ( ! (aliasObj instanceof String)) {
+      logger.warn("Property '{}' must be a string, but is a {}", SERVICE_PROPERTY, aliasObj.getClass());
+      return;
+    }
+    String alias = (String)aliasObj;
     CXFNonSpringServlet cxf = new CXFNonSpringServlet();
     try {
       httpService.registerServlet(alias, cxf, new Hashtable<String, String>(), httpContext);

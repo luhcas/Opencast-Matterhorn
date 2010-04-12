@@ -38,9 +38,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Collection;
-import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -62,60 +60,6 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
    */
   protected void setComposerService(ComposerService composerService) {
     this.composerService = composerService;
-  }
-
-  /**
-   * Callback for the OSGi declarative services configuration.
-   * 
-   * @param remote
-   *          the R-OSGI wraper service for remote services
-   */
-//  protected void setRemoteServices(RemoteOSGiService remote) {
-//    this.remote = remote;
-//    listAllComposerServices();
-//  }
-
-  protected void listAllComposerServices() {
-//    ArrayList<ComposerService> tempAllComposerServices = new ArrayList<ComposerService>();
-
-    // add local composer service
-//    tempAllComposerServices.add(localComposerService);
-//    allComposerServices = new ComposerService[] { localComposerService };
-
-    // get remote servers list from config
-    Properties serversProperties = new Properties();
-    try {
-      serversProperties.load(getClass().getClassLoader().getResourceAsStream("config/remote.servers.properties"));
-    } catch (IOException e) {
-      logger.warn("Unable to load configuration for remote servers");
-      return;
-    }
-    String composerServicesList = serversProperties.getProperty("remote.servers");
-    if (composerServicesList == null) {
-      logger.warn("Remote Composer servers are not configured");
-      return;
-    }
-
-    // try to connect to remote servers and add remote services to list
-//    String[] allServicesTxtArr = composerServicesList.split(",");
-//    String s = "";
-//    for (int i = 0; i < allServicesTxtArr.length; i++) {
-//      try {
-//        s = allServicesTxtArr[i];
-//        URI uri = new URI(s);
-//        remote.connect(uri);
-//        RemoteServiceReference[] remoteServer = remote.getRemoteServiceReferences(uri, ComposerService.class.getName(),
-//                null);
-//        for (RemoteServiceReference r : remoteServer) {
-//          tempAllComposerServices.add((ComposerService) remote.getRemoteService(r));
-//        }
-//      } catch (Exception e) {
-//        logger.warn("Remote server:'" + s + "' could not be accessed!");
-//      }
-//    }
-//
-//    allComposerServices = (ComposerService[]) tempAllComposerServices
-//            .toArray(new ComposerService[tempAllComposerServices.size()]);
   }
 
   /**

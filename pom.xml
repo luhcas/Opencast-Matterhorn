@@ -605,9 +605,21 @@
       </dependency>
 
       <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>com.springsource.org.apache.commons.httpclient</artifactId>
-        <version>3.1.0</version>
+        <groupId>org.apache.servicemix.bundles</groupId>
+        <artifactId>org.apache.servicemix.bundles.commons-httpclient</artifactId>
+        <version>3.1_4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore-osgi</artifactId>
+        <version>4.0.1</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient-osgi</artifactId>
+        <version>4.0.1</version>
       </dependency>
 
       <dependency>

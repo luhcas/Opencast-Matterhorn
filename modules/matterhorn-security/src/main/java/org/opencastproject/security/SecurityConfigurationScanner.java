@@ -22,11 +22,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.osgi.context.ConfigurableOsgiBundleApplicationContext;
 import org.springframework.osgi.context.support.OsgiBundleXmlApplicationContext;
+import org.springframework.security.oauth.provider.ProtectedResourceProcessingFilter;
+import org.springframework.security.web.FilterChainProxy;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -106,9 +111,15 @@ public class SecurityConfigurationScanner {
           springContext.setBundleContext(bundleContext);
           logger.info("registered {}", springContext);
         }
+        // Refrsh the spring application context
         springContext.refresh();
+
+        // Add the oauth filter
+        addOauthFilter();
         
-        // Register the filter as an osgi bundle, unregistering the previous version (if it has already been registered)
+        // Refresh again?
+
+        // Register the filter as an osgi bundle, unregistering the previous version if it has already been registered
         Dictionary props = new Hashtable<String, Boolean>();
         props.put("org.opencastproject.filter", Boolean.TRUE);
         if(reg != null) {
@@ -124,5 +135,23 @@ public class SecurityConfigurationScanner {
         logger.warn("Unable to update the spring security configuration", e);
       }
     }
+    
+    /**
+     * Adds the OAuth custom filter to the filterchain.
+     * 
+     * @param filterChain
+     */
+    protected void addOauthFilter() {
+      FilterChainProxy filterChain = (FilterChainProxy)springContext.getBean("springSecurityFilterChain");
+      ProtectedResourceProcessingFilter oauthFilter = new ProtectedResourceProcessingFilter();
+      oauthFilter.setConsumerDetailsService(new TrustedConsumerDetailsService());
+      Map<String, List<Filter>> map = filterChain.getFilterChainMap();
+      List<Filter> globalFilters = map.get("/**");
+      if(globalFilters == null) {
+        globalFilters = new ArrayList<Filter>();
+      }
+      globalFilters.add(oauthFilter);
+    }
+    
   }
 }
