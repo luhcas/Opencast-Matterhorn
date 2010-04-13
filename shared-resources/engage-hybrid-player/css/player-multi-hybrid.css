@@ -439,7 +439,7 @@ body
   background-position:      0 -445px;
   height:                   15px;
   width:                    13px;
-  margin-top:               -10px;
+  margin-top:               -4px;
   margin-left:              -2px;
   position:                 relative; 
   border:                   0px;
@@ -546,6 +546,7 @@ body
   margin-top:0;
   padding-right:0px;
   position:relative;
+  top: -7px;
 }
 
 .progress-text 
