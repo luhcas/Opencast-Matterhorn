@@ -20,32 +20,34 @@ import org.opencastproject.analysis.api.MediaAnalysisFlavor;
 import org.opencastproject.analysis.api.MediaAnalysisServiceSupport;
 import org.opencastproject.analysis.vsegmenter.jmf.ImageUtils;
 import org.opencastproject.analysis.vsegmenter.jmf.PlayerListener;
+import org.opencastproject.metadata.mpeg7.ContentSegment;
+import org.opencastproject.metadata.mpeg7.MediaLocator;
+import org.opencastproject.metadata.mpeg7.MediaLocatorImpl;
+import org.opencastproject.metadata.mpeg7.MediaTime;
+import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
-import org.opencastproject.workspace.api.NotFoundException;
-import org.opencastproject.workspace.api.Workspace;
+import org.opencastproject.metadata.mpeg7.Video;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 
 import javax.media.Buffer;
 import javax.media.Controller;
 import javax.media.Duration;
 import javax.media.Manager;
-import javax.media.MediaLocator;
 import javax.media.Player;
 import javax.media.Time;
 import javax.media.control.FrameGrabbingControl;
 import javax.media.control.FramePositioningControl;
+import javax.media.protocol.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -57,8 +59,9 @@ import javax.xml.transform.stream.StreamResult;
  * changes.
  * 
  * Videos that can be used by this segmenter need to be created using this commandline:
+ * 
  * <pre>
- * ffmpeg -i &lt;inputfile&gt; -deinterlace -r 1 -vcodec mjpeg -qscale 1 &lt;outputfile&gt;
+ * ffmpeg -i &lt;inputfile&gt; -deinterlace -r 1 -vcodec mjpeg -qscale 1 -an &lt;outputfile&gt;
  * </pre>
  */
 public class VideoSegmenter extends MediaAnalysisServiceSupport {
@@ -72,11 +75,11 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   /** The number of frames that need to resemble until a scene is considered "stable" */
   public static final int STABILITY_THRESHOLD = 10;
 
+  /** Number of pixels that may change between two frames without considering them different */
+  public static final int CHANGES_THRESHOLD = 1000;
+
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(VideoSegmenter.class);
-
-  /** The local workspace */
-  private Workspace workspace = null;
 
   /** The buffered edge image of the current scene */
   private BufferedImage currentImage = null;
@@ -102,20 +105,22 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   @Override
   public Mpeg7Catalog analyze(URL mediaUrl) throws MediaAnalysisException {
     Mpeg7Catalog mpeg7 = Mpeg7CatalogImpl.newInstance();
-    
-    try {
-      File trackFile = workspace.get(mediaUrl.toURI());
-      trackFile = new File("/Users/wunden/Desktop/slides-vga-mjpeg.mov");
 
+    try {
       // Create a player
-      Player player = Manager.createRealizedPlayer(new MediaLocator(trackFile.toURI().toURL()));
+      DataSource ds = Manager.createDataSource(mediaUrl);
+      Player player = Manager.createRealizedPlayer(ds);
       playerListener = new PlayerListener(player);
 
       // Create a frame positioner
       FramePositioningControl fpc = (FramePositioningControl) player.getControl(FRAME_POSITIONING);
+      if (fpc == null)
+        throw new MediaAnalysisException("Unable to create a frame positioning control for " + mediaUrl);
 
       // Create a frame grabber
       FrameGrabbingControl fg = (FrameGrabbingControl) player.getControl(FRAME_GRABBING);
+      if (fg == null)
+        throw new MediaAnalysisException("Unable to create a frame grabber for " + mediaUrl);
 
       // Load the movie and change the player to prefetched state
       player.prefetch();
@@ -123,14 +128,11 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
         throw new MediaAnalysisException("Unable to switch player into 'prefetch' state");
       }
 
-      logger.info("MJPEG track {} loaded", trackFile);
-
       Time duration = player.getDuration();
       int totalFrames = -1;
 
       // Get the movie duration
       if (duration != Duration.DURATION_UNKNOWN) {
-        System.out.println("Movie duration: " + duration.getSeconds());
         totalFrames = fpc.mapTimeToFrame(duration);
         if (totalFrames != FramePositioningControl.FRAME_UNKNOWN)
           logger.debug("Total # of video frames in the movies: " + totalFrames);
@@ -140,11 +142,21 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
         throw new MediaAnalysisException("Java media framework is unable to detect movie duration");
       }
 
+      logger.info("Track {} with {} frames loaded", mediaUrl, totalFrames);
+
+      MediaTime contentTime = new MediaTimeImpl(0, (long) duration.getSeconds() * 1000);
+      MediaLocator contentLocator = new MediaLocatorImpl(mediaUrl.toURI());
+      Video videoContent = mpeg7.addVideoContent("videosegment", contentTime, contentLocator);
+      int segmentCount = 0;
+
+      ContentSegment contentSegment = videoContent.getTemporalDecomposition().createSegment("segment-" + segmentCount);
+
       EdgeDetector edgeDetector = new EdgeDetector();
       // TODO: configure edge detector
 
       int t = 1;
       int lastKnownTimestamp = -1;
+      long startOfSegment = 0;
       boolean approachingSceneChange = false;
 
       while (t < duration.getSeconds()) {
@@ -164,26 +176,36 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
         edgeDetector.setSourceImage(bufferedImage);
         edgeDetector.setEdgesImage(null);
         logger.debug("Running edge detection on image at {} seconds", t);
-        edgeDetector.process();
+        // edgeDetector.process();
 
         // // Get the edge image and store it.
-        BufferedImage edgeImage = edgeDetector.getEdgesImage();
+        // BufferedImage edgeImage = edgeDetector.getEdgesImage();
 
         logger.debug("Inspecting movie at {} seconds", t);
 
         // If things look stable, then let's look ahead as much as possible whithout loosing information (which is equal
         // to looking ahead STABILITY_THRESHOLD seconds.
 
-        if (isNewScene(edgeImage, STABILITY_THRESHOLD)) {
+        if (isNewScene(bufferedImage, STABILITY_THRESHOLD)) {
           // Did we try a lucky punch and look ahead?
           if (t - lastKnownTimestamp > 1) {
             t = lastKnownTimestamp + 1;
             approachingSceneChange = true;
           } else {
+            segmentCount++;
             approachingSceneChange = false;
             lastKnownTimestamp = t;
+
+            contentSegment.setMediaTime(new MediaTimeImpl(startOfSegment, t - startOfSegment));
+            logger.info("Found new scene at frame {}", startOfSegment);
             t++;
-            logger.info("Found new scene at {} seconds", t);
+
+            // Create a new segment if this wasn't the first one
+            if (startOfSegment > 0) {
+              contentSegment = videoContent.getTemporalDecomposition().createSegment("segment-" + segmentCount);
+              startOfSegment = t;
+            }
+
           }
         } else if (approachingSceneChange || t < STABILITY_THRESHOLD) {
           lastKnownTimestamp = t;
@@ -194,7 +216,10 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
       }
 
-      logger.info("Finished video segmentation");
+      // Finish off the last segment
+      contentSegment.setMediaTime(new MediaTimeImpl(startOfSegment, (long) duration.getSeconds() - startOfSegment));
+
+      logger.info("Finished video segmentation of {}", mediaUrl);
 
     } catch (Exception e) {
       throw new MediaAnalysisException(e);
@@ -218,20 +243,25 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
     if (currentImage == null) {
       differsFromCurrentScene = true;
-      logger.info("Found first scene");
+      logger.debug("First segment started");
     } else if (currentImage.getWidth() != image.getWidth() || currentImage.getHeight() != image.getHeight()) {
       differsFromCurrentScene = true;
       logger.warn("Resolution change detected ({},{}) -> ({},{})", new Object[] { currentImage.getWidth(),
               currentImage.getHeight(), image.getWidth(), image.getHeight() });
     } else {
-      // TODO: Improve this. One pixel difference should not lead to a new scene
+      int changes = 0;
       imagecomparison: for (int x = 0; x < image.getWidth(); x++) {
         for (int y = 0; y < image.getHeight(); y++) {
           if (image.getRGB(x, y) != currentImage.getRGB(x, y)) {
             differsFromCurrentScene = true;
-            break imagecomparison;
+            changes++;
+            if (changes > CHANGES_THRESHOLD) {
+              logger.debug("Found more than {} changes between the last frames", CHANGES_THRESHOLD);
+              break imagecomparison;
+            }
           }
         }
+        logger.debug("Found {} changes to the previous frame", changes);
       }
     }
 
@@ -246,22 +276,11 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
       }
     } else {
       currentSceneStabilityCount = 1;
-      logger.info("Found image in new scene");
+      logger.debug("Found image in new scene");
     }
 
     currentImage = image;
     return false;
-  }
-
-  /**
-   * Callback for declarative services configuration that will introduce us to the local workspace service.
-   * Implementation assumes that the reference is configured as being static.
-   * 
-   * @param workspace
-   *          an instance of the workspace
-   */
-  public void setWorkspace(Workspace workspace) {
-    this.workspace = workspace;
   }
 
   /**
@@ -288,19 +307,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     Mpeg7Catalog catalog = null;
     try {
       VideoSegmenter vsegmenter = new VideoSegmenter();
-      vsegmenter.workspace = new Workspace() {
-        public void delete(String mediaPackageID, String mediaPackageElementID) throws NotFoundException {
-        }
-        public File get(URI uri) throws NotFoundException {
-          return new File(uri);
-        }
-        public URI getURI(String mediaPackageID, String mediaPackageElementID) throws NotFoundException {
-          return null;
-        }
-        public URI put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in) {
-          return null;
-        }
-      };
       catalog = vsegmenter.analyze(mediaUrl);
     } catch (MediaAnalysisException e) {
       System.err.println("Error on videosegmentation: " + e.getMessage());
@@ -312,6 +318,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     if (catalog != null) {
       try {
         Transformer t = TransformerFactory.newInstance().newTransformer();
+        t.setOutputProperty(OutputKeys.INDENT, "yes");
+        t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
         t.transform(new DOMSource(catalog.toXml()), new StreamResult(System.out));
       } catch (TransformerException e) {
         e.printStackTrace();
