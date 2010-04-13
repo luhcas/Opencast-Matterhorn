@@ -188,13 +188,14 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       }
       remoteCalendarURL = new URL(new URL(remoteBase), configService.getItem(CaptureParameters.AGENT_NAME));
 
-      //Times are in seconds in the config file, so multiply by 1000
-      pollTime = Long.parseLong(configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL)) * 1000L;
+      //Times are in seconds in the config file, so don't forget to multiply by 1000 later!
+      pollTime = Long.parseLong(configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL));
       if (pollTime > 1) {
         //Setup the polling
         JobDetail job = new JobDetail("calendarUpdate", JobParameters.RECURRING_TYPE, PollCalendarJob.class);
         //Create a new trigger                    Name       Group name               Start       End   # of times to repeat               Repeat interval
-        SimpleTrigger trigger = new SimpleTrigger("polling", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime);
+        SimpleTrigger trigger = new SimpleTrigger("polling", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime * 1000L);
+        trigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
 
         trigger.getJobDataMap().put(JobParameters.SCHEDULER, this);
 

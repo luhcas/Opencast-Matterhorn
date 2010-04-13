@@ -109,19 +109,19 @@ public class ConfigurationManager implements ManagedService {
     if (url != null && reload != null) {
       long delay = 0;
       try {
-        // Times in the config file are in seconds, so multiply by 1000
-        delay = Long.parseLong(reload) * 1000L;
+        // Times in the config file are in seconds, so don't forget to multiply by 1000 later
+        delay = Long.parseLong(reload);
         if (delay < 1) {
           logger.info("Polling time has been set to less than 1 second, polling disabled.");
           return;
         }
+        delay =  delay * 1000L;
+
+        timer = new Timer();
+        timer.schedule(new UpdateConfig(), delay, delay);
       } catch (NumberFormatException e) {
         logger.warn("Invalid polling time for parameter {}.", CaptureParameters.CAPTURE_CONFIG_REMOTE_POLLING_INTERVAL);
-        // If the polling time value is invalid, don't poll
-        return;
       }
-      timer = new Timer();
-      timer.schedule(new UpdateConfig(), delay, delay);
     }
   }
   
