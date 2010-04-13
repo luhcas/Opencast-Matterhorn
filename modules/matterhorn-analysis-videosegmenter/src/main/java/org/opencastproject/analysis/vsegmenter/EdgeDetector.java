@@ -213,7 +213,7 @@ public class EdgeDetector {
   /**
    * Processes the input image and returns the resulting edge image.
    */
-  public void process() {
+  public BufferedImage process() {
     if (sourceImage == null)
       throw new IllegalStateException("No source image has been set");
     
@@ -241,7 +241,7 @@ public class EdgeDetector {
     int high = Math.round(highThreshold * MAGNITUDE_SCALE);
     performHysteresis(low, high);
     thresholdEdges();
-    writeEdges(data);
+    return writeEdges(data);    
   }
 
   // NOTE: The elements of the method below (specifically the technique for
@@ -509,7 +509,7 @@ public class EdgeDetector {
     }
   }
 
-  private void writeEdges(int pixels[]) {
+  private BufferedImage writeEdges(int pixels[]) {
     // NOTE: There is currently no mechanism for obtaining the edge data
     // in any other format other than an INT_ARGB type BufferedImage.
     // This may be easily remedied by providing alternative accessors.
@@ -517,6 +517,7 @@ public class EdgeDetector {
       edgesImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     }
     edgesImage.getWritableTile(0, 0).setDataElements(0, 0, width, height, pixels);
+    return edgesImage;
   }
 
 }

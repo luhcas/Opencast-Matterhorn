@@ -72,23 +72,14 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   /** Constant used to retreive the frame grabbing control */
   public static final String FRAME_GRABBING = "javax.media.control.FrameGrabbingControl";
 
-  /** The number of frames that need to resemble until a scene is considered "stable" */
-  public static final int STABILITY_THRESHOLD = 10;
+  /** The number of seconds that need to resemble until a scene is considered "stable" */
+  public static final int STABILITY_THRESHOLD = 5;
 
   /** Number of pixels that may change between two frames without considering them different */
   public static final int CHANGES_THRESHOLD = 1000;
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(VideoSegmenter.class);
-
-  /** The buffered edge image of the current scene */
-  private BufferedImage currentImage = null;
-
-  /** The number of stable images for the current scene */
-  private int currentSceneStabilityCount = 0;
-
-  /** Listener used to control the player state */
-  private PlayerListener playerListener = null;
 
   /**
    * Creates a new video segmenter.
@@ -104,13 +95,24 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
    */
   @Override
   public Mpeg7Catalog analyze(URL mediaUrl) throws MediaAnalysisException {
+
+    BufferedImage previousImage = null;
+    int currentSceneStabilityCount = 0;
+    PlayerListener playerListener = null;
+
     Mpeg7Catalog mpeg7 = Mpeg7CatalogImpl.newInstance();
 
     try {
       // Create a player
       DataSource ds = Manager.createDataSource(mediaUrl);
-      Player player = Manager.createRealizedPlayer(ds);
-      playerListener = new PlayerListener(player);
+      Player player = null;
+      try {
+        player = Manager.createRealizedPlayer(ds);
+        playerListener = new PlayerListener(player);
+        player.addControllerListener(playerListener);
+      } catch (Exception e) {
+        throw new MediaAnalysisException(e);
+      }
 
       // Create a frame positioner
       FramePositioningControl fpc = (FramePositioningControl) player.getControl(FRAME_POSITIONING);
@@ -129,20 +131,13 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
       }
 
       Time duration = player.getDuration();
-      int totalFrames = -1;
 
       // Get the movie duration
-      if (duration != Duration.DURATION_UNKNOWN) {
-        totalFrames = fpc.mapTimeToFrame(duration);
-        if (totalFrames != FramePositioningControl.FRAME_UNKNOWN)
-          logger.debug("Total # of video frames in the movies: " + totalFrames);
-        else
-          logger.warn("The FramePositiongControl does not support mapTimeToFrame.");
-      } else {
+      if (duration == Duration.DURATION_UNKNOWN) {
         throw new MediaAnalysisException("Java media framework is unable to detect movie duration");
       }
 
-      logger.info("Track {} with {} frames loaded", mediaUrl, totalFrames);
+      logger.info("Track {} loaded, duration is {} s", mediaUrl, duration.getSeconds());
 
       MediaTime contentTime = new MediaTimeImpl(0, (long) duration.getSeconds() * 1000);
       MediaLocator contentLocator = new MediaLocatorImpl(mediaUrl.toURI());
@@ -155,9 +150,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
       // TODO: configure edge detector
 
       int t = 1;
-      int lastKnownTimestamp = -1;
+      int lastKnownTimestamp = 0;
       long startOfSegment = 0;
-      boolean approachingSceneChange = false;
 
       while (t < duration.getSeconds()) {
 
@@ -166,52 +160,71 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
         // Take a snap of the current frame
         Buffer buf = fg.grabFrame();
-        buf.setTimeStamp(t);
-
         BufferedImage bufferedImage = ImageUtils.createImage(buf);
-        if (bufferedImage == null)
+        if (bufferedImage == null) {
           throw new MediaAnalysisException("Unable to extract image at time " + t);
+        }
+        
+        logger.info("Analyzing video at {} s", t);
 
         // Let the edge detector do it's work (force it to create a new image for the result)
+        logger.debug("Running edge detection on image at {} seconds", t);
         edgeDetector.setSourceImage(bufferedImage);
         edgeDetector.setEdgesImage(null);
-        logger.debug("Running edge detection on image at {} seconds", t);
-        // edgeDetector.process();
-
-        // // Get the edge image and store it.
-        // BufferedImage edgeImage = edgeDetector.getEdgesImage();
+        BufferedImage edgeImage = edgeDetector.process();
 
         logger.debug("Inspecting movie at {} seconds", t);
 
-        // If things look stable, then let's look ahead as much as possible whithout loosing information (which is equal
-        // to looking ahead STABILITY_THRESHOLD seconds.
+        // Compare the new image with our previous sample
+        boolean differsFromPreviousImage = ImageUtils.isDifferent(previousImage, edgeImage, CHANGES_THRESHOLD);
 
-        if (isNewScene(bufferedImage, STABILITY_THRESHOLD)) {
-          // Did we try a lucky punch and look ahead?
+        // We found an image that is different compared to the previous one. Let's see if this image remains stable
+        // for some time (STABILITY_THRESHOLD) so we can declare a new scene
+        if (differsFromPreviousImage) {
+
+          // If this is the result of a lucky punch (looking ahead STABILITY_THRESHOLD seconds), then we should
+          // really start over an make sure we get the correct beginning of the new scene
           if (t - lastKnownTimestamp > 1) {
             t = lastKnownTimestamp + 1;
-            approachingSceneChange = true;
-          } else {
-            segmentCount++;
-            approachingSceneChange = false;
-            lastKnownTimestamp = t;
-
-            contentSegment.setMediaTime(new MediaTimeImpl(startOfSegment, t - startOfSegment));
-            logger.info("Found new scene at frame {}", startOfSegment);
-            t++;
-
-            // Create a new segment if this wasn't the first one
-            if (startOfSegment > 0) {
-              contentSegment = videoContent.getTemporalDecomposition().createSegment("segment-" + segmentCount);
-              startOfSegment = t;
-            }
-
+            continue;
           }
-        } else if (approachingSceneChange || t < STABILITY_THRESHOLD) {
+
+          previousImage = bufferedImage;
           lastKnownTimestamp = t;
           t++;
-        } else {
-          t += STABILITY_THRESHOLD;
+          logger.debug("Found image in new scene");
+        }
+
+        // Seems to be the same image. If we have just recently detected a new scene, let's see if we are able to
+        // confirm that this is scene is stable (>= STABILITY_THRESHOLD)
+        else {
+          
+          if (currentSceneStabilityCount < STABILITY_THRESHOLD) {
+            currentSceneStabilityCount++;
+            
+            // Did we find a new scene?
+            if (currentSceneStabilityCount == STABILITY_THRESHOLD) {
+              segmentCount++;
+              lastKnownTimestamp = t;
+
+              contentSegment.setMediaTime(new MediaTimeImpl(startOfSegment, t - startOfSegment));
+              logger.info("Found new scene at {} s", startOfSegment);
+              t += STABILITY_THRESHOLD;
+
+              // Create a new segment if this wasn't the first one
+              if (startOfSegment > 0) {
+                contentSegment = videoContent.getTemporalDecomposition().createSegment("segment-" + segmentCount);
+                startOfSegment = t;
+              }
+            }
+
+            t++;
+          } else {
+            // If things look stable, then let's look ahead as much as possible whithout loosing information (which is
+            // equal to looking ahead STABILITY_THRESHOLD seconds.
+            t += STABILITY_THRESHOLD;
+          }
+
         }
 
       }
@@ -226,61 +239,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     }
 
     return mpeg7;
-  }
-
-  /**
-   * Returns <code>true</code> if <code>image</code> is the same in a row of <code>stabilityThreshold</code> images.
-   * 
-   * @param image
-   *          the image
-   * @param stabilityThreshold
-   *          the number of images that need to resemble in order to call it stable
-   * 
-   * @return <code>true</code> if a new scene has been detected
-   */
-  private boolean isNewScene(BufferedImage image, int stabilityThreshold) {
-    boolean differsFromCurrentScene = false;
-
-    if (currentImage == null) {
-      differsFromCurrentScene = true;
-      logger.debug("First segment started");
-    } else if (currentImage.getWidth() != image.getWidth() || currentImage.getHeight() != image.getHeight()) {
-      differsFromCurrentScene = true;
-      logger.warn("Resolution change detected ({},{}) -> ({},{})", new Object[] { currentImage.getWidth(),
-              currentImage.getHeight(), image.getWidth(), image.getHeight() });
-    } else {
-      int changes = 0;
-      imagecomparison: for (int x = 0; x < image.getWidth(); x++) {
-        for (int y = 0; y < image.getHeight(); y++) {
-          if (image.getRGB(x, y) != currentImage.getRGB(x, y)) {
-            differsFromCurrentScene = true;
-            changes++;
-            if (changes > CHANGES_THRESHOLD) {
-              logger.debug("Found more than {} changes between the last frames", CHANGES_THRESHOLD);
-              break imagecomparison;
-            }
-          }
-        }
-        logger.debug("Found {} changes to the previous frame", changes);
-      }
-    }
-
-    if (!differsFromCurrentScene) {
-      if (currentSceneStabilityCount == stabilityThreshold) {
-        return false;
-      } else {
-        currentSceneStabilityCount++;
-        if (currentSceneStabilityCount == stabilityThreshold) {
-          return true;
-        }
-      }
-    } else {
-      currentSceneStabilityCount = 1;
-      logger.debug("Found image in new scene");
-    }
-
-    currentImage = image;
-    return false;
   }
 
   /**
