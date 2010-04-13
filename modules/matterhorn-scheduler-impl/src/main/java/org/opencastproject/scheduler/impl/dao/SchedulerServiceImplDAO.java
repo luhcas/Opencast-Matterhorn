@@ -15,6 +15,15 @@
  */
 package org.opencastproject.scheduler.impl.dao;
 
+import org.opencastproject.scheduler.api.SchedulerEvent;
+import org.opencastproject.scheduler.api.SchedulerFilter;
+import org.opencastproject.scheduler.impl.SchedulerEventImpl;
+import org.opencastproject.scheduler.impl.SchedulerFilterImpl;
+import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -25,15 +34,6 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 
 import javax.sql.DataSource;
-
-import org.opencastproject.scheduler.api.SchedulerEvent;
-import org.opencastproject.scheduler.api.SchedulerFilter;
-import org.opencastproject.scheduler.impl.SchedulerEventImpl;
-import org.opencastproject.scheduler.impl.SchedulerFilterImpl;
-import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
-import org.opencastproject.util.UrlSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of Scheduler Service based on sql DataSource
@@ -78,29 +78,6 @@ public class SchedulerServiceImplDAO extends SchedulerServiceImpl {
     if (e == null || ! e.valid()) {
       logger.warn("Event that was added is not valid.");
       return null;
-    }
-    if (e.getMetadata().get("ingest-url") == null) {
-      String ingestUrl = null;
-      if(componentContext == null) {
-        logger.debug("No Component Context available, constructing default ingest URL.");
-        ingestUrl = UrlSupport.DEFAULT_BASE_URL+"/ingest/rest/addZippedMediaPackage";
-      } else {
-        String ccIngestUrl = componentContext.getBundleContext().getProperty("org.opencastproject.capture.ingest.endpoint.url");
-        logger.debug("configured ingest url is {}", ccIngestUrl);
-        if(ccIngestUrl == null) {
-          logger.debug("ingest URL not found in config file, constructing default based on server URL");
-          ccIngestUrl = componentContext.getBundleContext().getProperty("org.opencastproject.server.url")+"/ingest/rest/addZippedMediaPackage";
-          if(ccIngestUrl == null) {
-            logger.debug("ingest URL not found in config file, constructing default");
-            ingestUrl = UrlSupport.DEFAULT_BASE_URL+"/ingest/rest/addZippedMediaPackage";
-          } else {
-            ingestUrl = ccIngestUrl;
-          }
-        } else {
-          ingestUrl = ccIngestUrl;
-        }
-      }      
-      e.getMetadata().put("ingest-url", ingestUrl);
     }
     PreparedStatement s = null;
     Connection con = null;

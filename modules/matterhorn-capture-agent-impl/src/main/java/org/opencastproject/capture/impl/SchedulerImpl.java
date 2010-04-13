@@ -366,7 +366,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * Returns the name for every scheduled job.
-   * Job titles are their DTSTART fields, so they look like 20091105T142500.
+   * Job titles are their UUIDs assigned from the scheduler, or Unscheduled-$timestamp.
    * @return An array of Strings containing the name of every scheduled job, or null if there is an error.
    */
   public String[] getCaptureSchedule() {
@@ -415,14 +415,21 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    */
   private synchronized void setCaptureSchedule(Calendar newCal) {
     log.debug("setCaptureSchedule(newCal)");
+
+    ComponentList list = newCal.getComponents(Component.VEVENT);
+    LinkedList<String> newIDs = new LinkedList<String>();
+    for (VEvent event : (VEvent) list) {
+      
+    }
+
     try {
       //Clear the existing jobs and reschedule everything
       for (String name : scheduler.getJobNames(JobParameters.CAPTURE_TYPE)) {
+        scheduler.getTriggersOfJob(name, JobParameters.CAPTURE_TYPE);
         scheduler.deleteJob(name, JobParameters.CAPTURE_TYPE);
       }
 
       Map<String, String> scheduledEvents = new Hashtable<String, String>();
-      ComponentList list = newCal.getComponents(Component.VEVENT);
       for (Object item : list) {
         VEvent event = (VEvent) item;
         String uid = event.getUid().getValue();
@@ -472,6 +479,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         CronTrigger trig = new CronTrigger();
         trig.setCronExpression(startCronExpression);
         trig.setName(startCronExpression.toString());
+        trig.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
 
         JobDetail job = new JobDetail(uid, JobParameters.CAPTURE_TYPE, StartCaptureJob.class);
 
@@ -512,7 +520,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           //Handle any attachments
           //TODO:  Should this string be hardcoded?
           try { 
-            if (filename.equals("agent.properties")) {
+            if (filename.equals("org.opencastproject.capture.agent.properties")) {
               Properties jobProps = new Properties();
               jobProps.load(new StringReader(contents));
               jobProps.putAll(props);
@@ -535,7 +543,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         job.getJobDataMap().put(JobParameters.JOB_SCHEDULER, scheduler);
 
         if (!hasProperties) {
-          log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", start.toString());
+          log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", uid);
         }
 
         scheduler.scheduleJob(job, trig);
@@ -629,6 +637,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   public boolean scheduleUnscheduledStopCapture(String recordingID, Date stop) {
     SimpleTrigger trig = new SimpleTrigger("StopCaptureTrigger-" + recordingID, JobParameters.OTHER_TYPE, stop);
+    trig.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
     JobDetail job = new JobDetail("StopCapture-" + recordingID, JobParameters.OTHER_TYPE, StopCaptureJob.class);
 
     job.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgent);

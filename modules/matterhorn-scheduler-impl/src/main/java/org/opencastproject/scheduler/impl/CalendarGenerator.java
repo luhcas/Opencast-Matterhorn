@@ -129,7 +129,7 @@ public class CalendarGenerator {
         caParameters.add(new FmtType("application/text"));        
         caParameters.add(Value.BINARY);
         caParameters.add(Encoding.BASE64);
-        caParameters.add(new XParameter("X-APPLE-FILENAME", "agent.properties"));
+        caParameters.add(new XParameter("X-APPLE-FILENAME", "org.opencastproject.capture.agent.properties"));
         Attach agentsAttachment = new Attach(caParameters, caGenerator.generateAsString(e).getBytes("UTF-8"));
         event.getProperties().add(agentsAttachment);
     } catch (Exception e1) {
