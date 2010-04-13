@@ -43,7 +43,7 @@ public class AudioMonitoringTest {
     
     boolean ret = AudioMonitoring.addAudioMonitor(pipeline, src, sink, 0);
     Assert.assertTrue(ret);
-    Assert.assertEquals(7, pipeline.getElements().size());
+    Assert.assertEquals(8, pipeline.getElements().size());
   }
   
 }

@@ -15,19 +15,18 @@
  */
 package org.opencastproject.capture.pipeline;
 
-import com.sun.jna.Pointer;
-
-import org.gstreamer.Buffer;
-import org.gstreamer.Caps;
+import org.gstreamer.Bus;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
+import org.gstreamer.Message;
 import org.gstreamer.Pad;
 import org.gstreamer.PadDirection;
 import org.gstreamer.Pipeline;
-import org.gstreamer.Structure;
-import org.gstreamer.elements.AppSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Class containing audio monitoring services that can be incorporated into
@@ -36,6 +35,8 @@ import org.slf4j.LoggerFactory;
 public class AudioMonitoring {
   
   private static final Logger logger = LoggerFactory.getLogger(VideoMonitoring.class);
+  
+  private static List<Double> rmsValues;
   
   /**
    * Add a method for confidence monitoring to a pipeline capturing audio by
@@ -49,25 +50,28 @@ public class AudioMonitoring {
    */
   public static boolean addAudioMonitor(Pipeline pipeline, Element src, Element sink, final long interval) {
           
-      Element tee, queue0, queue1, decodebin;
-      final AppSink appsink;
+      Element tee, queue0, queue1, decodebin, fakesink;
+      final Element level;
+      
+      rmsValues = new LinkedList<Double>();
       
       // the items to be tee'd and added to the pipeline
       tee = ElementFactory.make("tee", null);
       queue0 = ElementFactory.make("queue", null);
       queue1 = ElementFactory.make("queue", null);
       decodebin = ElementFactory.make("decodebin", null);
-      appsink = (AppSink) ElementFactory.make("appsink", null);
+      level = ElementFactory.make("level", null);
+      fakesink = ElementFactory.make("fakesink", null);
       
       tee.set("silent", "false");
-      appsink.set("emit-signals", "true");
+      level.set("message", "true");
       
-      pipeline.addMany(tee, queue0, queue1, decodebin, appsink);
+      pipeline.addMany(tee, queue0, queue1, decodebin, level, fakesink);
       src.unlink(sink);
       
       decodebin.connect(new Element.PAD_ADDED() {
         public void padAdded(Element element, Pad pad) {
-          pad.link(appsink.getStaticPad("sink"));
+          pad.link(level.getStaticPad("sink"));
         }
       });
       
@@ -94,27 +98,41 @@ public class AudioMonitoring {
       
       Pad p = new Pad(null, PadDirection.SRC);
       decodebin.addPad(p);
-
-      // Callback that will be executed every time a new buffer is received
-      // from the pipeline capturing the video. For confidence monitoring
-      // it is not necessary to use every buffer
-      appsink.connect(new AppSink.NEW_BUFFER() {
+      
+      if (!level.link(fakesink)) {
+        logger.error("Could not link {} with {}", level.toString(), fakesink.toString());
+        return false;
+      }
+      
+      // callback to listen for messages from the level element, giving us
+      // information about the audio being recorded
+      Bus bus = pipeline.getBus();
+      bus.connect(new Bus.MESSAGE() {
         long previous = -1;
-        public void newBuffer(Element elem, Pointer userData) {
-          AppSink appsink = (AppSink) elem;
-          long seconds = appsink.getClock().getTime().getSeconds();
-          Buffer buffer = appsink.pullBuffer();
-          if (seconds % interval == 0 && seconds != previous) {
-            previous = seconds;
-            Caps caps = buffer.getCaps();
-            Structure s = caps.getStructure(0);
-            logger.info("Grabbed buffer: {}", s);
+        public void busMessage(Bus bus, Message msg) {
+          if (msg.getSource().equals(level)) {
+            Element level = (Element) msg.getSource();
+            long seconds = level.getClock().getTime().getSeconds();
+            if (seconds % interval == 0 && seconds != previous) {
+              previous = seconds;
+              String data = msg.getStructure().toString();
+              int start = data.indexOf("rms");
+              int end = data.indexOf("}", start);
+              String rms = data.substring(start, end+1);
+              start = rms.indexOf("{");
+              end = rms.indexOf("}");
+              double value = Double.parseDouble(rms.substring(start+1, end).split(",")[0]);
+              rmsValues.add(value);
+            }
           }
-          buffer = null;
         }
       });
       
       return true;
+  }
+  
+  public static List<Double> getRMSValues() {
+    return rmsValues;
   }
 
 }
