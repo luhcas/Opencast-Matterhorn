@@ -61,6 +61,8 @@ public class StopCaptureJob implements Job {
 
       //Setup the trigger.  The serialization job will automatically refire if it fails, so we don't need to worry about it
       SimpleTrigger trigger = new SimpleTrigger("SerializeJobTrigger-" + postfix, JobParameters.OTHER_TYPE, new Date());
+      trigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
+
       trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
       trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, ca);
       trigger.getJobDataMap().put(JobParameters.JOB_POSTFIX, postfix);

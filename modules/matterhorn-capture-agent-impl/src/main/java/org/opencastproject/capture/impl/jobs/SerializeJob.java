@@ -75,6 +75,8 @@ public class SerializeJob implements Job {
       trigger = new CronTrigger();
       trigger.setGroup(JobParameters.OTHER_TYPE);
       trigger.setName("IngestJobTrigger-" + postfix);
+      trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
+
       //TODO:  Make this configurable.  Or at least slow it down a bit - hitting things every 20 seconds it too fast.
       trigger.setCronExpression("0/20 * * * * ?");
       trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, ca);

@@ -124,12 +124,12 @@ public class ScheduledCaptureTest {
 		// assertEquals("Agent capturing? (agent):", "capturing", Utils.xPath(xml, "//ns1:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']/state", XPathConstants.STRING));
 		
 		// Pause for workflow to complete
-		Thread.sleep(15000);
+		Thread.sleep(30000);
 		
 		// Recording indexed (Search)
 		response = SearchResources.all(title);
 		assertEquals("Response code (search all):", 200, response.getStatus());
 		xml = Utils.parseXml(response.getEntity(String.class));
-	    assertTrue("Recording included? (search all):", Utils.xPathExists(xml, "//ns2:mediapackage[title=\'" + title + "\']"));
+	  assertTrue("Recording included? (search all):", Utils.xPathExists(xml, "//ns2:mediapackage[title=\'" + title + "\']"));
 	}
 }

@@ -416,20 +416,14 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   private synchronized void setCaptureSchedule(Calendar newCal) {
     log.debug("setCaptureSchedule(newCal)");
 
-    ComponentList list = newCal.getComponents(Component.VEVENT);
-    LinkedList<String> newIDs = new LinkedList<String>();
-    for (VEvent event : (VEvent) list) {
-      
-    }
-
     try {
       //Clear the existing jobs and reschedule everything
       for (String name : scheduler.getJobNames(JobParameters.CAPTURE_TYPE)) {
-        scheduler.getTriggersOfJob(name, JobParameters.CAPTURE_TYPE);
         scheduler.deleteJob(name, JobParameters.CAPTURE_TYPE);
       }
 
       Map<String, String> scheduledEvents = new Hashtable<String, String>();
+      ComponentList list = newCal.getComponents(Component.VEVENT);
       for (Object item : list) {
         VEvent event = (VEvent) item;
         String uid = event.getUid().getValue();
