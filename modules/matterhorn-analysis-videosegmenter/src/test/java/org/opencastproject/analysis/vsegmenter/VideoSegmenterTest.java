@@ -35,6 +35,7 @@ import java.util.Iterator;
 /**
  * Test class for video segmentation.
  */
+@Ignore("Fix me Toby!")
 public class VideoSegmenterTest {
 
   /** Video file to test. Contains a new scene at 00:07 */
