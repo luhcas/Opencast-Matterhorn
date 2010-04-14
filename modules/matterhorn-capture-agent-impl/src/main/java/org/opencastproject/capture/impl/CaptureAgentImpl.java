@@ -22,10 +22,11 @@ import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.StateService;
-import org.opencastproject.capture.api.VideoMonitor;
+import org.opencastproject.capture.api.ConfidenceMonitor;
 import org.opencastproject.capture.impl.jobs.AgentCapabilitiesJob;
 import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
+import org.opencastproject.capture.pipeline.AudioMonitoring;
 import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
@@ -76,6 +77,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
@@ -84,7 +86,7 @@ import java.util.Vector;
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines
  * to store several tracks from a certain recording.
  */
-public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonitor, ManagedService {
+public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceMonitor, ManagedService {
 
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
@@ -869,7 +871,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
   /**
    * 
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.VideoMonitor#grabFrame(java.lang.String)
+   * @see org.opencastproject.capture.api.ConfidenceMonitor#grabFrame(java.lang.String)
    */
   public byte[] grabFrame(String friendlyName) {
     if (currentRecID != null) {
@@ -898,7 +900,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
   /**
    * 
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.VideoMonitor#getFriendlyNames()
+   * @see org.opencastproject.capture.api.ConfidenceMonitor#getFriendlyNames()
    */
   public LinkedList<String> getFriendlyNames() {
     String devices = configService.getItem(CaptureParameters.CAPTURE_DEVICE_NAMES);
@@ -908,6 +910,15 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, VideoMonito
       deviceList.add(name);
     }
     return deviceList;
+  }
+  
+  /**
+   * s
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.ConfidenceMonitor#getRMSValues(java.lang.String)
+   */
+  public List<Double> getRMSValues(String friendlyName) {
+    return AudioMonitoring.getRMSValues();
   }
   
 }

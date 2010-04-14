@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.endpoint;
 
-import org.opencastproject.capture.api.VideoMonitor;
+import org.opencastproject.capture.api.ConfidenceMonitor;
 import org.opencastproject.capture.api.AgentDevice;
 
 import org.slf4j.Logger;
@@ -32,21 +32,21 @@ import javax.ws.rs.core.MediaType;
 
 
 @Path("/")
-public class VideoMonitorRestService {
+public class ConfidenceMonitorRestService {
   
-  private static final Logger logger = LoggerFactory.getLogger(VideoMonitorRestService.class);
+  private static final Logger logger = LoggerFactory.getLogger(ConfidenceMonitorRestService.class);
   
-  private VideoMonitor service;
+  private ConfidenceMonitor service;
   
   public void activate() {
     logger.info("Video Monitoring Service Activated");
   }
   
-  public void setService(VideoMonitor service) {
+  public void setService(ConfidenceMonitor service) {
     this.service = service;
   }
   
-  public void unsetService(VideoMonitor service) {
+  public void unsetService(ConfidenceMonitor service) {
     this.service = null;
   }
   
@@ -67,6 +67,19 @@ public class VideoMonitorRestService {
       devices.add(new AgentDevice(name));
     }
     return devices;
+  }
+  
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  @Path("audio/{name}")
+  public String getRMSValues(@PathParam("name") String device) {
+    List<Double> rmsValues = service.getRMSValues(device);
+    String output = "";
+    for (double value : rmsValues) {
+      output += Double.toString(value) + ",";
+    }
+    return output.substring(0, output.length() - 2);
+    
   }
   
 }

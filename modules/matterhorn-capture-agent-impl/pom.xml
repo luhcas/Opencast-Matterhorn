@@ -218,7 +218,7 @@
               OSGI-INF/scheduler-service.xml,
               OSGI-INF/configuration-service.xml,
               OSGI-INF/capture-ui.xml,
-              OSGI-INF/videomonitor-service-rest.xml
+              OSGI-INF/confidence-monitor-service-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

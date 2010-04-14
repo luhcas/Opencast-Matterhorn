@@ -18,9 +18,9 @@ package org.opencastproject.capture.api;
 import java.util.List;
 
 /** 
- * OSGi service for video confidence monitoring
+ * OSGi service for confidence monitoring
  */
-public interface VideoMonitor {
+public interface ConfidenceMonitor {
 
   /**
    * Return the JPEG image monitor associated with the device
@@ -29,6 +29,14 @@ public interface VideoMonitor {
    * @return a byte array in jpeg form
    */
   byte[] grabFrame(String friendlyName);
+  
+  /**
+   * Return a list of recent RMS values from the audio device
+   * 
+   * @param friendlyName Friendly name for the audio device
+   * @return a list of doubles representing the RMS values
+   */
+  List<Double> getRMSValues(String friendlyName);
   
   /**
    * Provide access to the devices on the capture box
