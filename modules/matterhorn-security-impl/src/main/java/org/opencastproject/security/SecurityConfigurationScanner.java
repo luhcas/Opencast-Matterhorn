@@ -106,7 +106,7 @@ public class SecurityConfigurationScanner {
           springContext.setBundleContext(bundleContext);
           logger.info("registered {}", springContext);
         }
-        // Refrsh the spring application context
+        // Refresh the spring application context
         springContext.refresh();
 
         // Register the filter as an osgi bundle, unregistering the previous version if it has already been registered
