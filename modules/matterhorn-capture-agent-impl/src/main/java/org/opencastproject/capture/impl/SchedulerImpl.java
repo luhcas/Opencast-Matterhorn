@@ -183,7 +183,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       if (remoteBase != null && remoteBase.charAt(remoteBase.length()-1) != '/') {
         remoteBase = remoteBase + "/";
       } else if (remoteBase == null) {
-        log.warn("Key {} is missing from the config file or invalid, unable to start polling.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL);
+        log.error("Key {} is missing from the config file or invalid, unable to start polling.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL);
         return;
       }
       remoteCalendarURL = new URL(new URL(remoteBase), configService.getItem(CaptureParameters.AGENT_NAME));
@@ -284,8 +284,13 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       //This case handles not having a network connection by just reading from the cached copy of the calendar 
       if (calendar == null) {
         try {
-          calendarString = readCalendar(localCalendarCacheURL);
-          url = localCalendarCacheURL;
+          if (localCalendarCacheURL != null) {
+            calendarString = readCalendar(localCalendarCacheURL);
+            url = localCalendarCacheURL;
+          } else {
+            log.warn("Unable to read calendar from local calendar cache because location was null!");
+            return null;
+          }
         } catch (IOException e1) {
           log.warn("Unable to read from cached schedule: {}.", e1.getMessage());
           return null;
@@ -672,7 +677,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       //Schedule the update
       scheduler.scheduleJob(cleanJob, cleanTrigger);
     } catch (NumberFormatException e) {
-      log.error("Invalid time specified in the {} value. Job for cleaning captures not scheduled!", CaptureParameters.CAPTURE_CLEANER_INTERVAL);
+      log.warn("Invalid time specified in the {} value. Job for cleaning captures not scheduled!", CaptureParameters.CAPTURE_CLEANER_INTERVAL);
     } catch (SchedulerException e) {
       log.error("SchedulerException while trying to schedule a cleaning job: {}.", e.getMessage());
     }
@@ -785,11 +790,13 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   public boolean isPollingEnabled() {
     if (scheduler != null) {
       try {
-        return scheduler.getPausedTriggerGroups().contains(JobParameters.RECURRING_TYPE);
+        return scheduler.getTrigger("polling", JobParameters.RECURRING_TYPE) != null;
       } catch (SchedulerException e) {
         log.warn("Scheduler exception: {}.", e.getMessage());
         return false;
       }
+    } else {
+      log.warn("Scheduler is null, so polling cannot be enabled!");
     }
     return false;
   }

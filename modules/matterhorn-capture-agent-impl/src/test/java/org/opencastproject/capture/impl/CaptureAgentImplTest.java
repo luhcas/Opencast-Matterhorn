@@ -18,7 +18,9 @@ package org.opencastproject.capture.impl;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.api.CaptureParameters;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +58,12 @@ public class CaptureAgentImplTest {
   
   /** Directory containing the captured media */
   private static URL outputDir = null;
-  
+
+  @AfterClass
+  public static void afterclass() {
+    FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir"), "capture-agent-test"));
+  }
+
   @Before
   public void setup() throws ConfigurationException, IOException {
     //Craete the configuration manager
@@ -67,6 +74,8 @@ public class CaptureAgentImplTest {
     }
     Properties p = new Properties();
     p.load(s);
+    p.put("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "capture-agent-test").getAbsolutePath());
+    p.put("org.opencastproject.server.url", "http://localhost:8080");
     config.updated(p);
 
     sched = new SchedulerImpl();

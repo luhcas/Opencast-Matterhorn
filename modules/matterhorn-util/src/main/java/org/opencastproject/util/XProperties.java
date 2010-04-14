@@ -56,7 +56,7 @@ public class XProperties extends Properties {
    */
   @Override
   public String getProperty(String key) {
-    String prop = super.getProperty(key);
+    String prop = getUninterpretedProperty(key);
     if (prop != null) {
       int start = prop.indexOf(START_REPLACEMENT);
       while (start != -1) {
@@ -67,16 +67,8 @@ public class XProperties extends Properties {
           return null;
         }
         String subkey = prop.substring(start + START_REPLACEMENT.length(), end);
-        Pattern p = Pattern.compile(START_REPLACEMENT + subkey + END_REPLACEMENT, Pattern.LITERAL);
-        if (System.getProperty(subkey) != null) {
-          prop = p.matcher(prop).replaceAll(System.getProperty(subkey));
-        } else if (this.getProperty(subkey) != null) {
-          prop = p.matcher(prop).replaceAll(this.getProperty(subkey));
-        } else if (this.context != null && this.context.getProperty(subkey) != null) {
-          prop = p.matcher(prop).replaceAll(this.context.getProperty(subkey));
-        } else if (System.getenv(subkey) != null) {
-          prop = p.matcher(prop).replaceAll(System.getenv(subkey));
-        } else {
+        prop = findReplacement(prop, subkey);
+        if (prop == null) {
           log.error("Unable to find replacement for subkey {} in key {}, returning null!", subkey, key);
           return null;
         }
@@ -84,6 +76,49 @@ public class XProperties extends Properties {
       }
     }
     return prop;
+  }
+
+  /**
+   * Wrapper around the actual search and replace functionality.  This function will value with all of the instances of subkey replaced.
+   * @param value The original string you wish to replace.
+   * @param subkey The substring you wish to replace.  This must be the substring rather than the full variable - M2_REPO rather than ${M2_REPO} 
+   * @return The value string with all instances of subkey replaced, or null in the case of an error.
+   */
+  private String findReplacement(String value, String subkey) {
+    if (subkey == null) {
+      return null;
+    }
+    Pattern p = Pattern.compile(START_REPLACEMENT + subkey + END_REPLACEMENT, Pattern.LITERAL);
+    if (System.getProperty(subkey) != null) {
+      return p.matcher(value).replaceAll(System.getProperty(subkey));
+    } else if (this.getProperty(subkey) != null) {
+      return p.matcher(value).replaceAll(this.getProperty(subkey));
+    } else if (this.context != null && this.context.getProperty(subkey) != null) {
+      return p.matcher(value).replaceAll(this.context.getProperty(subkey));
+    } else if (System.getenv(subkey) != null) {
+      return p.matcher(value).replaceAll(System.getenv(subkey));
+    } else {
+      return null;
+    }    
+  }
+
+  /**
+   * Returns the value of a variable with the same priority replacement scheme as getProperty.
+   * @param variable The variable you need the replacement for.
+   * @return The value for variable.
+   * @see org.opencastproject.util.XProperties#getProperty(String)
+   */
+  public String expandVariable(String variable) {
+    return findReplacement(START_REPLACEMENT + variable + END_REPLACEMENT, variable);
+  }
+
+  /**
+   * A wrapper around the old getProperty behaviour, this method does not do any variable expansion.
+   * @param key The key of the property
+   * @return The property exactly as it appears in the properties list without any variable expansion
+   */
+  public String getUninterpretedProperty(String key) {
+    return super.getProperty(key);
   }
 
   /**

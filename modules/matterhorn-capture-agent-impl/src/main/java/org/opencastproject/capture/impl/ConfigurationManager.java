@@ -69,6 +69,7 @@ public class ConfigurationManager implements ManagedService {
     if (timer != null) {
       timer.cancel();
     }
+    properties.setBundleContext(null);
   }
   
   @Override
@@ -173,6 +174,29 @@ public class ConfigurationManager implements ManagedService {
     else {
       return properties.getProperty(key);
     }
+  }
+
+  /**
+   * Returns the value of an expanded variable
+   * @param variable The name of the variable (ie, java.io.tmpdir, or M2_REPO)
+   * @return The value of that variable, or null if the variable is not found
+   */
+  public String getVariable(String variable) {
+    return properties.expandVariable(variable);
+  }
+
+  /**
+   * Retrieve property for configuration.  The return value for this function do *not* have its variable(s) expanded. 
+   * @param key the key to retrieve from the property list.
+   * @return the value corresponding to the key.
+   */
+  public String getUninterpretedItem(String key) {
+    if (key == null) {
+      return null;
+    }
+    else {
+      return properties.getUninterpretedProperty(key);
+    }    
   }
   
   /**

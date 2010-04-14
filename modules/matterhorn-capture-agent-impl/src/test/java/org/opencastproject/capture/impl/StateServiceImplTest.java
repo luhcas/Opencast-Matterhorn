@@ -24,6 +24,7 @@ import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
@@ -37,6 +38,11 @@ public class StateServiceImplTest {
   private CaptureAgentImpl service = null;
   private ConfigurationManager cfg = null;
 
+  @AfterClass
+  public static void after() {
+    FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir"), "capture-state-test"));
+  }
+
   @Before
   public void setup() {
     service = new CaptureAgentImpl();
@@ -44,7 +50,7 @@ public class StateServiceImplTest {
     
     cfg = new ConfigurationManager();
     Assert.assertNotNull(cfg);
-    cfg.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, System.getProperty("java.io.tmpdir"));
+    cfg.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, new File(System.getProperty("java.io.tmpdir"), "capture-state-test").getAbsolutePath());
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL, "1");
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL, "http://localhost");
     service.setConfigService(cfg);
