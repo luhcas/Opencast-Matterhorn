@@ -319,10 +319,12 @@ public class PipelineFactory {
     Element filesink = ElementFactory.make("filesink", null);
 
     v4lsrc.set("device", captureDevice.getLocation());
-    filter.setCaps(Caps.fromString("video/x-raw-yuv,width=1024,height=768,framerate=30/1"));
+    filter.setCaps(Caps.fromString("video/x-raw-yuv,width=1024,height=768,framerate=28/5"));
     filesink.set("location", captureDevice.getOutputPath());
     if (bitrate != null)
       enc.set("bitrate", bitrate);
+    else
+      enc.set("bitrate", "2000000");
 
     pipeline.addMany(v4lsrc, queue, videoscale, videorate, filter, ffmpegcolorspace, enc, mpegtsmux, filesink);
 
@@ -441,6 +443,8 @@ public class PipelineFactory {
     filesink.set("location", captureDevice.getOutputPath());
     if (bitrate != null)
       enc.set("bitrate", bitrate);
+    else
+      enc.set("bitrate", "2000000");
 
     pipeline.addMany(v4l2src, queue, enc, mpegtsmux, filesink);
 
