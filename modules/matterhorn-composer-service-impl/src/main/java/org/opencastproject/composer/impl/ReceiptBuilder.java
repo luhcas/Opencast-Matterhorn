@@ -43,6 +43,7 @@ public class ReceiptBuilder {
   private ReceiptBuilder() throws JAXBException {
     StringBuilder sb = new StringBuilder();
     sb.append("org.opencastproject.media.mediapackage");
+    sb.append(":org.opencastproject.composer.impl");
     sb.append(":org.opencastproject.composer.impl.endpoint");
     jaxbContext= JAXBContext.newInstance(sb.toString(), ReceiptBuilder.class.getClassLoader());
   }
@@ -75,7 +76,7 @@ public class ReceiptBuilder {
   public Receipt parseReceipt(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-            Receipt.class).getValue();
+            ReceiptImpl.class).getValue();
   }
   
   /**

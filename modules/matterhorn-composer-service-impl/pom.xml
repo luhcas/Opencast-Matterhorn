@@ -32,6 +32,17 @@
       <version>0.7-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-security-api</artifactId>
+      <version>0.7-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-security-impl</artifactId>
+      <version>0.7-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
@@ -129,7 +140,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Import-Package> !org.apache.commons.httpclient.*, *;resolution:=optional </Import-Package>
+            <Import-Package> org.apache.commons.httpclient.*, *;resolution:=optional </Import-Package>
             <Private-Package> org.apache.xmlrpc.* </Private-Package>
             <Export-Package>org.opencastproject.composer.impl.*</Export-Package>
             <Embed-Dependency>xmlrpc-client;inline=true</Embed-Dependency>

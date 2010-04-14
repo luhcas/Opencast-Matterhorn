@@ -7,28 +7,52 @@
        http://www.springframework.org/schema/security
        http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
-  <sec:http create-session="ifRequired" servlet-api-provision="true" realm="Opencast Matterhorn">
-    <sec:intercept-url pattern='/**' access='ROLE_USER,ROLE_ANONYMOUS'/>
+  <sec:http create-session="ifRequired" servlet-api-provision="true" realm="Opencast Matterhorn" entry-point-ref="matterhornEntryPoint">
+    <sec:intercept-url pattern='/**' access='ROLE_USER, ROLE_ANONYMOUS'/>
     <sec:x509 subject-principal-regex="CN=(.*?)," user-service-ref="userDetailsService"/>
+    <sec:form-login />
     <sec:openid-login />
-    <sec:http-basic />
+    <sec:custom-filter position="BASIC_AUTH_FILTER" ref="digestFilter" />
     <sec:anonymous />
   </sec:http>
 
   <sec:user-service id="userDetailsService">
     <sec:user name="admin" password="opencast" authorities="ROLE_ADMIN,ROLE_USER" />
+    <sec:user name="matterhorn_system_account" password="CHANGE_ME" authorities="ROLE_ADMIN,ROLE_USER" />
   </sec:user-service>
 
   <sec:authentication-manager>
     <sec:authentication-provider user-service-ref="userDetailsService" />
   </sec:authentication-manager>
 
+
+  <bean id="matterhornEntryPoint" class= "org.opencastproject.security.DelegatingAuthenticationEntryPoint">
+    <property name="userEntryPoint" ref="userEntryPoint" />
+    <property name="systemAuthenticationEntryPoint" ref="digestEntryPoint" />
+  </bean>
+  
+  <bean id="userEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+   <property name="loginFormUrl" value="/spring_security_login" />
+  </bean>
+
+  <bean id="digestEntryPoint" class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
+    <property name="realmName" value="Opencast Matterhorn"/>
+    <property name="key" value="matterhorn"/>
+    <property name="nonceValiditySeconds" value="10"/>
+  </bean>
+
+  <bean id="digestFilter" class= "org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
+    <property name="userDetailsService" ref="userDetailsService"/>
+    <property name="authenticationEntryPoint" ref="digestEntryPoint"/>
+    <property name="userCache">
+      <bean class="org.springframework.security.core.userdetails.cache.NullUserCache" />
+    </property>
+  </bean>
+
   <sec:global-method-security jsr250-annotations="enabled" />
 
   <!-- Logging interceptors, in case they are needed -->
-  <!--
   <bean class="org.springframework.security.access.event.LoggerListener" />
   <bean class="org.springframework.security.authentication.event.LoggerListener" />
-  -->
 
 </beans>

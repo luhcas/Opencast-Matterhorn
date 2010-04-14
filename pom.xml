@@ -59,7 +59,8 @@
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-search-service-api</module>
         <module>modules/matterhorn-search-service-impl</module>
-        <module>modules/matterhorn-security</module>
+        <module>modules/matterhorn-security-api</module>
+        <module>modules/matterhorn-security-impl</module>
         <!-- <module>modules/matterhorn-stream</module> --> <!-- Streaming server must be implemented in a separate JVM -->
         <module>modules/matterhorn-util</module>
         <module>modules/matterhorn-workflow-service-api</module>
@@ -620,12 +621,6 @@
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient-osgi</artifactId>
         <version>4.0.1</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.codehaus.spring-security-oauth</groupId>
-        <artifactId>spring-security-oauth</artifactId>
-        <version>3.13</version>
       </dependency>
 
       <dependency>

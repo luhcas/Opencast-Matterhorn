@@ -23,20 +23,29 @@ import org.opencastproject.composer.api.Receipt.Status;
 import org.opencastproject.composer.impl.endpoint.EncodingProfileList;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.security.api.TrustedHttpClientFactory;
+import org.opencastproject.security.api.TrustedHttpClientFactory.HttpClientAndContext;
 
-import org.apache.cxf.jaxrs.client.WebClient;
-import org.apache.cxf.jaxrs.ext.form.Form;
-import org.apache.cxf.jaxrs.ext.xml.XMLSource;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  * Proxies a remote composer service for use as a JVM-local service.
@@ -45,14 +54,24 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   private static final Logger logger = LoggerFactory.getLogger(ComposerServiceRemoteImpl.class);
 
   public static final String REMOTE_COMPOSER = "remote.composer";
+  public static final ResponseHandler<Long> longResponseHandler = new LongResponseHandler();
+  public static final ResponseHandler<EncodingProfile> encodingProfileResponseHandler = new EncodingProfileResponseHandler();
+  public static final ResponseHandler<EncodingProfileList> encodingProfileListResponseHandler = new EncodingProfileListResponseHandler();
+  public static final ResponseHandler<Receipt> receiptResponseHandler = new ReceiptResponseHandler();
 
   protected String remoteHost;
+  protected TrustedHttpClientFactory trustedClientFactory;
 
   public void setRemoteHost(String remoteHost) {
     this.remoteHost = remoteHost;
   }
 
-  public ComposerServiceRemoteImpl() {}
+  public void setTrustedClientFactory(TrustedHttpClientFactory trustedClientFactory) {
+    this.trustedClientFactory = trustedClientFactory;
+  }
+
+  public ComposerServiceRemoteImpl() {
+  }
 
   public ComposerServiceRemoteImpl(String remoteHost) {
     this.remoteHost = remoteHost;
@@ -61,7 +80,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   public void activate(ComponentContext cc) {
     this.remoteHost = cc.getBundleContext().getProperty(REMOTE_COMPOSER);
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -69,9 +88,8 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public long countJobs(Status status) {
-    WebClient client = WebClient.create(remoteHost);
-    Long l = client.path("/composer/rest/count").query("status", status).accept("text/plain").get(Long.class);
-    return l;
+    if (status == null) throw new IllegalArgumentException("status must not be null");
+    return countJobs(status, null);
   }
 
   /**
@@ -82,10 +100,22 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public long countJobs(Status status, String host) {
-    WebClient client = WebClient.create(remoteHost);
-    Long l = client.path("/composer/rest/count").query("status", status).query("host", host).accept("text/plain").get(
-            Long.class);
-    return l;
+    if (status == null) throw new IllegalArgumentException("status must not be null");
+    List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
+    queryStringParams.add(new BasicNameValuePair("status", status.toString().toLowerCase()));
+    if(host != null) {
+      queryStringParams.add(new BasicNameValuePair("host", host));
+    }
+    String url = remoteHost + "/composer/rest/count?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
+    HttpClient client = trustedClientFactory.getTrustedHttpClient(url);
+    HttpGet get = trustedClientFactory.getTrustedHttpGet(url);
+    try {
+      return client.execute(get, longResponseHandler);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      client.getConnectionManager().shutdown();
+    }
   }
 
   /**
@@ -132,13 +162,28 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
           String profileId, boolean block) throws EncoderException, MediaPackageException {
-    WebClient client = WebClient.create(remoteHost);
-    Form form = new Form().set("mediapackage", mediaPackage.toXml()).set("videoSourceTrackId", sourceVideoTrackId).set(
-            "audioSourceTrackId", sourceAudioTrackId).set("profileId", profileId);
-    Response response = client.path("/composer/rest/encode").accept(MediaType.TEXT_XML).form(form);
-    XMLSource xs = new XMLSource((InputStream) response.getEntity());
-    Receipt r = xs.getNode("/*", ReceiptImpl.class);
-
+    String url = remoteHost + "/composer/rest/encode";
+    HttpClientAndContext clientAndContext = trustedClientFactory.getTrustedHttpClientAndContext(url);
+    HttpPost post = trustedClientFactory.getTrustedHttpPost(url);
+    Receipt r;
+    try {
+      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+      params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
+      params.add(new BasicNameValuePair("videoSourceTrackId", sourceVideoTrackId));
+      params.add(new BasicNameValuePair("audioSourceTrackId", sourceAudioTrackId));
+      params.add(new BasicNameValuePair("profileId", profileId));
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+      HttpResponse response = clientAndContext.getHttpClient().execute(post, clientAndContext.getHttpContext());
+      
+      String content = EntityUtils.toString(response.getEntity());
+      r = ReceiptBuilder.getInstance().parseReceipt(content);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      clientAndContext.getHttpClient().getConnectionManager().shutdown();
+    }
+    
     if (block) {
       r = poll(r.getId());
     }
@@ -152,15 +197,13 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public EncodingProfile getProfile(String profileId) {
+    String url = remoteHost + "/composer/rest/profile/" + profileId + ".xml";
+    HttpClient client = trustedClientFactory.getTrustedHttpClient(url);
+    HttpGet get = trustedClientFactory.getTrustedHttpGet(url);
     try {
-      return WebClient.create(remoteHost).path("/composer/rest/profile/" + profileId + ".xml").accept(
-              MediaType.TEXT_XML).get(EncodingProfileImpl.class);
-    } catch (WebApplicationException e) {
-      if (e.getResponse().getStatus() == 404) {
-        return null;
-      } else {
-        throw e;
-      }
+      return client.execute(get, encodingProfileResponseHandler);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -171,15 +214,13 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public Receipt getReceipt(String id) {
+    String url = remoteHost + "/composer/rest/receipt/" + id + ".xml";
+    HttpClient client = trustedClientFactory.getTrustedHttpClient(url);
+    HttpGet get = trustedClientFactory.getTrustedHttpGet(url);
     try {
-      return WebClient.create(remoteHost).path("/composer/rest/receipt/" + id + ".xml").accept(MediaType.TEXT_XML).get(
-              ReceiptImpl.class);
-    } catch (WebApplicationException e) {
-      if (e.getResponse().getStatus() == 404) {
-        return null;
-      } else {
-        throw e;
-      }
+      return client.execute(get, receiptResponseHandler);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -204,13 +245,26 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public Receipt image(MediaPackage mediaPackage, String sourceVideoTrackId, String profileId, long time, boolean block)
           throws EncoderException, MediaPackageException {
-    WebClient client = WebClient.create(remoteHost);
-    Form form = new Form().set("mediapackage", mediaPackage.toXml()).set("sourceTrackId", sourceVideoTrackId).set(
-            "profileId", profileId).set("time", time);
-    Response response = client.path("/encode").accept(MediaType.TEXT_XML).form(form);
-    XMLSource xs = new XMLSource((InputStream) response.getEntity());
-    Receipt r = xs.getNode("/", ReceiptImpl.class);
-
+    String url = remoteHost + "/composer/rest/image";
+    HttpClientAndContext clientAndContext = trustedClientFactory.getTrustedHttpClientAndContext(url);
+    HttpPost post = trustedClientFactory.getTrustedHttpPost(url);
+    Receipt r;
+    try {
+      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+      params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
+      params.add(new BasicNameValuePair("sourceTrackId", sourceVideoTrackId));
+      params.add(new BasicNameValuePair("profileId", profileId));
+      params.add(new BasicNameValuePair("time", Long.toString(time)));
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+      HttpResponse response = clientAndContext.getHttpClient().execute(post, clientAndContext.getHttpContext());
+      r = ReceiptBuilder.getInstance().parseReceipt(response.getEntity().getContent());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      clientAndContext.getHttpClient().getConnectionManager().shutdown();
+    }
+    
     if (block) {
       r = poll(r.getId());
     }
@@ -224,10 +278,16 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public EncodingProfile[] listProfiles() {
-    EncodingProfileList profileList = WebClient.create(remoteHost).path("/composer/rest/profiles.xml").accept(
-            MediaType.TEXT_XML).get(EncodingProfileList.class);
-    List<EncodingProfileImpl> list = profileList.getProfiles();
-    return list.toArray(new EncodingProfile[list.size()]);
+    String url = remoteHost + "/composer/rest/profiles.xml";
+    HttpClient client = trustedClientFactory.getTrustedHttpClient(url);
+    HttpGet get = trustedClientFactory.getTrustedHttpGet(url);
+    try {
+      EncodingProfileList profileList = client.execute(get, encodingProfileListResponseHandler);
+      List<EncodingProfileImpl> list = profileList.getProfiles();
+      return list.toArray(new EncodingProfile[list.size()]);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -248,5 +308,77 @@ public class ComposerServiceRemoteImpl implements ComposerService {
       r = getReceipt(id);
     }
     return r;
+  }
+
+  static class LongResponseHandler implements ResponseHandler<Long> {
+    public Long handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
+      StatusLine statusLine = response.getStatusLine();
+      if(statusLine.getStatusCode() == 404) {
+        return null;
+      } else if (statusLine.getStatusCode() >= 300) {
+        throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+      }
+      HttpEntity entity = response.getEntity();
+      return entity == null ? null : Long.valueOf(EntityUtils.toString(entity));
+    }
+  }
+
+  static class EncodingProfileResponseHandler implements ResponseHandler<EncodingProfile> {
+    public EncodingProfile handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
+      StatusLine statusLine = response.getStatusLine();
+      if(statusLine.getStatusCode() == 404) {
+        return null;
+      } else if (statusLine.getStatusCode() >= 300) {
+        throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+      }
+      HttpEntity entity = response.getEntity();
+      if(entity == null) {
+        return null;
+      } else {
+        try {
+          return EncodingProfileBuilder.getInstance().parseProfile(entity.getContent());
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+  }
+
+  static class EncodingProfileListResponseHandler implements ResponseHandler<EncodingProfileList> {
+    public EncodingProfileList handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
+      StatusLine statusLine = response.getStatusLine();
+      if(statusLine.getStatusCode() == 404) {
+        return null;
+      } else if (statusLine.getStatusCode() >= 300) {
+        throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+      }
+      HttpEntity entity = response.getEntity();
+      if(entity == null) {
+        return null;
+      } else {
+        try {
+          return EncodingProfileBuilder.getInstance().parseProfileList(entity.getContent());
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+  }
+
+  static class ReceiptResponseHandler implements ResponseHandler<Receipt> {
+    public Receipt handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
+      StatusLine statusLine = response.getStatusLine();
+      if(statusLine.getStatusCode() == 404) {
+        return null;
+      } else if (statusLine.getStatusCode() >= 300) {
+        throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+      }
+      HttpEntity entity = response.getEntity();
+      try {
+        return entity == null ? null : ReceiptBuilder.getInstance().parseReceipt(entity.getContent());
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 }

@@ -181,10 +181,10 @@ public class ComposerRestService {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("count")
-  public Response count(@QueryParam("status") Status status, @QueryParam("host") String host) {
+  public Response count(@QueryParam("status") String status, @QueryParam("host") String host) {
     if(status == null) return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
-    if(host == null) return Response.ok(composerService.countJobs(status)).build();
-    return Response.ok(composerService.countJobs(status, host)).build();
+    if(host == null) return Response.ok(composerService.countJobs(Status.valueOf(status.toUpperCase()))).build();
+    return Response.ok(composerService.countJobs(Status.valueOf(status.toUpperCase()), host)).build();
   }
   
   @GET

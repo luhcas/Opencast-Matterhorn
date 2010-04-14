@@ -8,6 +8,7 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.security.TrustedHttpClientFactoryImpl;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -30,6 +31,7 @@ public class ComposerRemoteServiceTest {
   @Before
   public void setUp() throws Exception {
     service = new ComposerServiceRemoteImpl("http://localhost:8080");
+    service.setTrustedClientFactory(new TrustedHttpClientFactoryImpl("matterhorn_system_account", "CHANGE_ME"));
   }
 
   @After
