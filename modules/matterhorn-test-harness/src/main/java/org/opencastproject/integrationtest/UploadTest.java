@@ -33,10 +33,8 @@ import javax.xml.xpath.XPathConstants;
 
 /**
  * Integration test for file upload using thin client
- * @author jamiehodge
- *
  */
-@Ignore("Fix me!")
+@Ignore
 public class UploadTest {
 	static String trackUrl = IntegrationTests.BASE_URL + "/workflow/samples/camera.mpg";
 	static String catalogUrl = IntegrationTests.BASE_URL + "/workflow/samples/dc-1.xml";
@@ -77,7 +75,7 @@ public class UploadTest {
 		Document xml = Utils.parseXml(mediaPackage);
 		
 		// Pause for ingest to complete
-		Thread.sleep(2000);
+		Thread.sleep(5000);
 		
 		// Confirm Ingest
 		String mediaPackageId = (String) Utils.xPath(xml, 
