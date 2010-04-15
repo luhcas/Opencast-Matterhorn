@@ -439,7 +439,14 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
 
     logger.info("Recording \"{}\" succesfully stopped", theRec.getID());
-    
+
+    if (scheduler.scheduleIngest(theRec.getID())) {
+      logger.info("Ingest scheduled for recording {}.", theRec.getID());
+    } else {
+      logger.warn("Ingest scheduling failed for recording {}!", theRec.getID());
+      setRecordingState(theRec.getID(), RecordingState.UPLOAD_ERROR);
+    }
+
     return true;
   }
 

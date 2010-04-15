@@ -19,6 +19,7 @@ import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.jobs.CleanCaptureJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.PollCalendarJob;
+import org.opencastproject.capture.impl.jobs.SerializeJob;
 import org.opencastproject.capture.impl.jobs.StartCaptureJob;
 import org.opencastproject.capture.impl.jobs.StopCaptureJob;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -635,6 +636,12 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     return null;*/
   }
 
+  /**
+   * Schedules a {@Code StopCaptureJob} to stop a capture at a given time.
+   * @param recordingID The recordingID of the recording you wish to stop.
+   * @param stop The time (in seconds since 1970) at which to stop the capture.
+   * @return True if the job was scheduled, false otherwise.
+   */
   public boolean scheduleUnscheduledStopCapture(String recordingID, Date stop) {
     SimpleTrigger trig = new SimpleTrigger("StopCaptureTrigger-" + recordingID, JobParameters.OTHER_TYPE, stop);
     trig.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
@@ -653,8 +660,51 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     return true; 
   }
 
+  /**
+   * Schedules a {@Code StopCaptureJob} to stop a capture at a given time.
+   * @param recordingID The recordingID of the recording you wish to stop.
+   * @param atTime The time (in seconds since 1970) at which to stop the capture.
+   * @return True if the job was scheduled, false otherwise.
+   */
   public boolean scheduleUnscheduledStopCapture(String recordingID, long atTime) {
     return scheduleUnscheduledStopCapture(recordingID, new Date(atTime));
+  }
+
+  /**
+   * Schedules an immediate {@code SerializeJob} for the recording.
+   * @param recordingID The ID of the recording to it ingest.
+   * @return True if the job was scheduled correctly, false otherwise.
+   */
+  public boolean scheduleIngest(String recordingID) {
+    try {
+      String[] jobs = scheduler.getJobNames(JobParameters.OTHER_TYPE);
+      for (String jobname : jobs) {
+        if (jobname.equals("StopCapture-" + recordingID)) {
+          scheduler.deleteJob(jobname, JobParameters.OTHER_TYPE);
+        }
+      }
+    } catch (SchedulerException e) {
+      log.warn("Unable to remove scheduled stopCapture for recording {}.", recordingID);
+    }
+
+    // Create job and trigger
+    JobDetail job = new JobDetail("SerializeJob-" + recordingID, JobParameters.OTHER_TYPE, SerializeJob.class);
+
+    //Setup the trigger.  The serialization job will automatically refire if it fails, so we don't need to worry about it
+    SimpleTrigger trigger = new SimpleTrigger("SerializeJobTrigger-" + recordingID, JobParameters.OTHER_TYPE, new Date());
+    trigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
+
+    trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
+    trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, this.captureAgent);
+    trigger.getJobDataMap().put(JobParameters.JOB_POSTFIX, recordingID);
+
+    try {
+      scheduler.scheduleJob(job, trigger);
+    } catch (SchedulerException e) {
+      log.error("Unable to schedule ingest of recording {}!", recordingID);
+      return false;
+    }
+    return true;
   }
 
   /**
