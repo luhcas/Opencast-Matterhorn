@@ -18,7 +18,6 @@ Opencast.Watch = (function ()
 	  
         var mediaPackageId = Opencast.engage.getMediaPackageId();
     
-        //var restEndpoint = "xml/episode.xml";
         var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
 
         $('#data').xslt(restEndpoint, "xsl/embed-hybrid-player.xsl", function () 
@@ -46,13 +45,15 @@ Opencast.Watch = (function ()
             }
             // set the abstract
             $('#abstract').html($('#oc-abstract').html());
-
+      
             // Get the video url
-            var mediaUrlOne = $('#oc-video-url').html();
-            var mediaUrlTwo = $('#oc-video-url').html();
+            var mediaUrlOne = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
+            //var mediaUrlOne = 'http://mediapm.edgesuite.net/osmf/content/test/train_1500.mp3';
+            //var mediaUrlOne = 'engage-hybrid-player/mp3/need.mp3';
+            var mediaUrlTwo = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
+            //var mediaUrlTwo = '';
 
             Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
-
             //
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')
             {

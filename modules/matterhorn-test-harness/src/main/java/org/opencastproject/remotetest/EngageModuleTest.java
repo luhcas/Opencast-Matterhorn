@@ -133,7 +133,7 @@ public class EngageModuleTest {
 
   @Test
   public void testJQuery() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/jquery/jquery/jquery-1.3.2.js");
+    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/jquery/jquery-1.3.2.js");
     AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -173,32 +173,8 @@ public class EngageModuleTest {
   }
 
   @Test
-  public void testjARIA() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/jquery/js/jARIA.js");
-    AuthenticationSupport.addAuthentication(get);
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testFluid() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/fluid/js/Fluid.js");
-    AuthenticationSupport.addAuthentication(get);
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
-  public void testInlineEdit() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/fluid/js/InlineEdit.js");
-    AuthenticationSupport.addAuthentication(get);
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
-
-  @Test
   public void testJQueryCore() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/jquery/ui/ui.core.js");
+    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/jquery/ui/ui.core.js");
     AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());

@@ -67,7 +67,7 @@ public class EngageUITest {
 
     expectedStream.close();
     expectedReader.close();
-
+    
     Assert.assertTrue(expected.equals(actual));
   }
 
