@@ -21,6 +21,7 @@
           <th width="20%" class="sortable date-column">Recording Date &amp; Time</th>
           <!-- <th width="10%" class="sortable">Capture Agent</th> -->
           <th width="15%" class="sortable">Status</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -56,6 +57,16 @@
       </td> -->
       <td class="processingStatus">
         <xsl:value-of select="processingStatus" />
+      </td>
+      <td class="td-Action">
+          <a>
+              <xsl:attribute name="href">
+                  <xsl:text>javascript:Recordings.removeRecording('</xsl:text>
+                  <xsl:value-of select="id" />
+                  <xsl:text>');</xsl:text>
+              </xsl:attribute>
+              Remove
+          </a>
       </td>
     </tr>
   </xsl:template>

@@ -257,3 +257,16 @@ Recordings.displayHoldActionPanel = function(URL, wfId) {
   $('#holdActionPanel-container iframe').attr('src', URL);
   $('#holdActionPanel-container').fadeIn('fast');
 }
+
+Recordings.removeRecording = function(workflowId) {
+  $.ajax({
+    url        : '../workflow/rest/remove/'+workflowId,
+    type       : 'GET',
+    error      : function(XHR,status,e){
+      alert('Could not remove Workflow ' + workflowId);
+    },
+    success    : function(data) {
+      location.reload();
+    }
+  });
+}
