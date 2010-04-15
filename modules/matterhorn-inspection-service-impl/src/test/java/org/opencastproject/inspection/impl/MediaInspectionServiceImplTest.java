@@ -27,6 +27,8 @@ import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
@@ -37,6 +39,9 @@ public class MediaInspectionServiceImplTest {
 
   private URI uriTrack;
   private Track track;
+
+  private String defaultBinaryPath = "/usr/local/bin/mediainfo";
+  private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImplTest.class);
 
   @Before
   public void setup() throws Exception {
@@ -59,6 +64,14 @@ public class MediaInspectionServiceImplTest {
 
   @Test
   public void testInspection() throws Exception {
+
+    logger.info("Checking for binary in " + defaultBinaryPath);
+    if (!new File(defaultBinaryPath).canExecute()) {
+      logger.warn("Binary not found, skipping test...");
+      return;
+    }
+    logger.info("Binary found, executing test...");
+
     track = service.inspect(uriTrack);
     // test the returned values
     Checksum cs = Checksum.create(ChecksumType.fromString("md5"), "9d3523e464f18ad51f59564acde4b95a");
@@ -70,6 +83,14 @@ public class MediaInspectionServiceImplTest {
 
   @Test
   public void testEnrichment() throws Exception {
+
+    logger.info("Checking for binary in " + defaultBinaryPath);
+    if (!new File(defaultBinaryPath).canExecute()) {
+      logger.warn("Binary not found, skipping test...");
+      return;
+    }
+    logger.info("Binary found, executing test...");
+
     // init a track with inspect
     track = service.inspect(uriTrack);
     // make changes to metadata
