@@ -319,7 +319,7 @@ public class PipelineFactory {
     Element filesink = ElementFactory.make("filesink", null);
 
     v4lsrc.set("device", captureDevice.getLocation());
-    filter.setCaps(Caps.fromString("video/x-raw-yuv,width=1024,height=768,framerate=28/5"));
+    filter.setCaps(Caps.fromString("video/x-raw-yuv,width=1024,height=768,framerate=30/1"));
     filesink.set("location", captureDevice.getOutputPath());
     if (bitrate != null)
       enc.set("bitrate", bitrate);
