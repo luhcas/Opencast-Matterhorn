@@ -49,14 +49,14 @@ Opencast.Watch = (function ()
             $('#abstract').html($('#oc-abstract').html());
       
             // TODO MERGE
-            //var mediaUrlOne = $('#oc-video-url').html();
-            //var mediaUrlTwo = $('#oc-video-url').html();
+            var mediaUrlOne = $('#oc-video-url').html();
+            var mediaUrlTwo = $('#oc-video-url').html();
             
             // Get the video url
             //var mediaUrlOne = 'rtmp://cp67126.edgefcs.net/ondemand/mediapm/strobe/content/test/SpaceAloneHD_sounas_640_500_short';
             //var mediaUrlOne = 'http://mediapm.edgesuite.net/osmf/content/test/train_1500.mp3';
-            var mediaUrlOne = 'http://mediapm.edgesuite.net/strobe/content/test/elephants_dream_768x428_24_short.flv';
-            var mediaUrlTwo = 'rtmp://cp67126.edgefcs.net/ondemand/mediapm/strobe/content/test/SpaceAloneHD_sounas_640_500_short';
+            //var mediaUrlOne = 'http://mediapm.edgesuite.net/strobe/content/test/elephants_dream_768x428_24_short.flv';
+            //var mediaUrlTwo = 'rtmp://cp67126.edgefcs.net/ondemand/mediapm/strobe/content/test/SpaceAloneHD_sounas_640_500_short';
             //var mediaUrlTwo = 'http://mediapm.edgesuite.net/strobe/content/test/elephants_dream_768x428_24_short.flv';
 
             //var mediaUrlTwo = '';
