@@ -22,7 +22,6 @@ import org.gstreamer.Gst;
 import org.gstreamer.Pipeline;
 import org.gstreamer.elements.FakeSink;
 import org.gstreamer.elements.FakeSrc;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,13 +34,6 @@ public class VideoMonitoringTest {
     if (!new File("/usr/lib/libjv4linfo.so").exists())
       return;
     Gst.init();
-  }
-  
-  @AfterClass
-  public static void tearDown() {
-    if (!new File("/usr/lib/libjv4linfo.so").exists())
-      return;
-    Gst.deinit();
   }
   
   @Test

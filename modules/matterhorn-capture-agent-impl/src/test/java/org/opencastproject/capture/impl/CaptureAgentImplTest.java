@@ -162,16 +162,11 @@ public class CaptureAgentImplTest {
     File manifestFile = new File(outputDir.getPath(), CaptureParameters.MANIFEST_NAME);
     Assert.assertTrue(manifestFile.exists());
     
-    // test zipping media
-    File zippedMedia = agent.zipFiles(recordingID);
-    Assert.assertTrue(zippedMedia.exists());
-    
     // clean up the files created
     cameraFile.deleteOnExit();
     screenFile.deleteOnExit();
     audioFile.deleteOnExit();
     captureStopped.deleteOnExit();
     manifestFile.deleteOnExit();
-    zippedMedia.deleteOnExit();
   }
 }
