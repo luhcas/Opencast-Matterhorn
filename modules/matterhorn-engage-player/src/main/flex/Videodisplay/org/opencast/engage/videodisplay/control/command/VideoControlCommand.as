@@ -19,10 +19,11 @@ package org.opencast.engage.videodisplay.control.command
     
     import flash.external.ExternalInterface;
     
+    import mx.controls.Alert;
+    
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
-    import org.opencast.engage.videodisplay.state.MediaState;
     import org.opencast.engage.videodisplay.state.PlayerState;
     import org.swizframework.Swiz;
 
@@ -48,428 +49,188 @@ package org.opencast.engage.videodisplay.control.command
             var currentPlayPauseState:String;
             var percent:int = 100;
             var skipVolume:Number = 0.1;
+            var playState:Boolean = false;
 
             switch ( event.videoControlType )
             {
                 case VideoControlEvent.PLAY:
-                	if( model.mediaState == MediaState.MULTI)
+                	if( !model.mediaPlayer.playing )
                 	{
-                		if( !model.mediaPlayerOne.playing && !model.mediaPlayerTwo.playing)
-                		{
-                			model.mediaPlayerOne.play();
-                			model.mediaPlayerTwo.play();
-                		}
-                	}
-                	else
-                	{
-                		if ( !model.mediaPlayerSingle.playing )
-	                    {
-	                    	model.mediaPlayerSingle.play();
-	                    }
+                		model.mediaPlayer.play();
                 	}
                 	model.currentPlayerState = PlayerState.PLAYING;
                     currentPlayPauseState = PlayerState.PAUSING;
                     ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
-                    break;
+                	break;
 
                 case VideoControlEvent.PAUSE:
-                	if( model.mediaState == MediaState.MULTI)
-                	{
-                		if( model.mediaPlayerOne.playing && model.mediaPlayerTwo.playing)
-                		{
-                			model.mediaPlayerOne.pause();
-                			model.mediaPlayerTwo.pause();
-                		}
-                	}
-                	else
-                	{
-                		if ( model.mediaPlayerSingle.playing )
-	                    {
-	                    	model.mediaPlayerSingle.pause();
-	                    }
-                	}
-                	model.currentPlayerState = PlayerState.PAUSING;
+                    if( model.mediaPlayer.playing )
+                    {
+                        model.mediaPlayer.pause();
+                    }
+                    model.currentPlayerState = PlayerState.PAUSING;
                     currentPlayPauseState = PlayerState.PLAYING;
                     ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
                     break;
 
                 case VideoControlEvent.STOP:
-                
-                	if( model.mediaState == MediaState.MULTI)
-                	{
-                		if( model.mediaPlayerOne.playing && model.mediaPlayerTwo.playing)
-                		{
-                			model.mediaPlayerOne.pause();
-                			model.mediaPlayerOne.seek( 0 );
-                			model.mediaPlayerTwo.pause();
-                			model.mediaPlayerTwo.seek( 0 );
-                		}
-                	}
-                	else
-                	{
-                		if ( model.mediaPlayerSingle.playing )
-	                    {
-	                    	model.mediaPlayerSingle.pause();
-	                    	model.mediaPlayerSingle.seek( 0 );
-	                    }
-                	}
-                
-             		model.currentPlayerState = PlayerState.PAUSING;
-                    currentPlayPauseState = PlayerState.PLAYING;
-                    ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
-                
+                    if( model.mediaPlayer.playing )
+                    {
+                        model.mediaPlayer.pause();
+                        model.mediaPlayer.seek( 0 );
+                        model.currentPlayerState = PlayerState.PAUSING;
+                        currentPlayPauseState = PlayerState.PLAYING;
+                        ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
+                    }
+                    else
+                    {
+                        model.mediaPlayer.seek( 0 );
+                    }
+                    break;
+                    
                 case VideoControlEvent.SKIPBACKWARD:
                 	
-                	if( model.mediaState == MediaState.MULTI)
+                	playState = model.mediaPlayer.playing;
+                	
+                	if( model.mediaPlayer.playing )
                 	{
-                		model.mediaPlayerOne.seek( 0 );
-                		model.mediaPlayerTwo.seek( 0 );
+                	   model.mediaPlayer.pause();
                 	}
-                	else
+                	
+                    model.mediaPlayer.seek(0);
+                	
+                	if( playState )
                 	{
-                		model.mediaPlayerSingle.seek( 0 );
+                	   model.mediaPlayer.play();
                 	}
                 	break;
 
                 case VideoControlEvent.REWIND:
                     
-                    if( model.mediaState == MediaState.MULTI)
-                	{
-                		if( model.mediaPlayerOne.playing && model.mediaPlayerTwo.playing)
-                		{
-                			model.mediaPlayerOne.pause();
-                            model.mediaPlayerTwo.pause();
-                			
-                			if( model.currentPlayhead - model.rewindTime >= 0)
-                			{
-                			    model.mediaPlayerOne.seek( model.currentPlayhead - model.rewindTime );
-                                model.mediaPlayerTwo.seek( model.currentPlayhead - model.rewindTime );
-                			}
-                			else
-                			{
-                			    model.mediaPlayerOne.seek( 0 );
-                                model.mediaPlayerTwo.seek( 0 );
-                			}
-                        }
-                		else
-                    	{
-                    		if( model.currentPlayhead - model.rewindTime >= 0 )
-                    		{
-                    			model.mediaPlayerOne.seek( model.currentPlayhead - model.rewindTime );
-                                model.mediaPlayerTwo.seek( model.currentPlayhead - model.rewindTime );
-                    		}
-                    		else
-                    		{
-                    			model.mediaPlayerOne.seek( 0 );
-                                model.mediaPlayerTwo.seek( 0 );
-                    		}
-                    	}
-                	}
-                	else
-                	{
-                		if ( model.mediaPlayerSingle.playing )
-	                    {
-	                    	model.mediaPlayerSingle.pause();
-                        	if( model.currentPlayhead - model.rewindTime >= 0 )
-                        	{
-                        		model.mediaPlayerSingle.seek( model.currentPlayhead - model.rewindTime );
-                        	}
-                        	else
-                        	{
-                        		model.mediaPlayerSingle.seek( 0 );
-                        	}
-                        }
-	                    else
-	                    {
-	                    	if( model.currentPlayhead - model.rewindTime >= 0 )
-                            {
-                                model.mediaPlayerSingle.seek( model.currentPlayhead - model.rewindTime );
-                            }
-                            else
-                            {
-                                model.mediaPlayerSingle.seek( 0 );
-                            }
-	                    }
-                	}
+                    if( model.mediaPlayer.playing )
+                    {
+                        model.mediaPlayer.pause();
+                    }
+                    
+                    if( model.currentPlayhead - model.rewindTime >= 0 )
+                    {
+                        model.mediaPlayer.seek( model.currentPlayhead - model.rewindTime );
+                    }
+                    else
+                    {
+                        model.mediaPlayer.seek( 0 );
+                    }
                     break;
 
                 case VideoControlEvent.FASTFORWARD:
                 
-                	if( model.mediaState == MediaState.MULTI)
-	                {
-	                	if( model.mediaPlayerOne.playing && model.mediaPlayerTwo.playing)
-                        {
-                        	model.mediaPlayerOne.pause();
-                        	model.mediaPlayerTwo.pause();
-                        }
-	                	
-	                	if( model.currentPlayhead + model.fastForwardTime > model.currentDuration )
-	                	{
-	                		model.mediaPlayerOne.seek( model.currentDuration );
-                            model.mediaPlayerTwo.seek( model.currentDuration ); 
-	                	}
-	                	else
-	                	{
-	                		model.mediaPlayerOne.seek( model.currentPlayhead + model.fastForwardTime );
-                            model.mediaPlayerTwo.seek( model.currentPlayhead + model.fastForwardTime ); 
-	                	}
-	                }
-	                else
-	                {
-	                	if ( model.mediaPlayerSingle.playing )
-                        {
-                        	model.mediaPlayerSingle.pause();
-                        }
-	                	
-	                	if( model.currentPlayhead + model.fastForwardTime > model.currentDuration )
-                        {
-                            model.mediaPlayerSingle.seek( model.currentPlayhead + model.fastForwardTime ); 
-                        }
-                        else
-                        {
-                            model.mediaPlayerSingle.seek( model.currentDuration ); 
-                        }
-	                }
-                	break;
+                	if( model.mediaPlayer.playing )
+                    {
+                        model.mediaPlayer.pause();
+                    }
+                    if( model.currentPlayhead + model.fastForwardTime > model.currentDuration )
+                    {
+                        model.mediaPlayer.seek( model.currentDuration );
+                    }
+                    else
+                    {
+                        model.mediaPlayer.seek( model.currentPlayhead + model.fastForwardTime );
+                    }
+                    break;
 
                 case VideoControlEvent.SKIPFORWARD:
-                
-                    if( model.mediaState == MediaState.MULTI)
-                	{
-                		if( model.mediaPlayerOne.playing && model.mediaPlayerTwo.playing)
-                		{
-                			model.mediaPlayerOne.seek( model.currentDuration - 1 );
-                			model.mediaPlayerTwo.seek( model.currentDuration - 1 );
-                        	model.mediaPlayerOne.pause();
-                        	model.mediaPlayerTwo.pause();
-                        	
-                        	model.currentPlayerState = PlayerState.PAUSING;
-                        	currentPlayPauseState = PlayerState.PLAYING;
-                        	ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
-                		}
-                		else
-                		{
-                			model.mediaPlayerOne.seek( model.currentDuration - 1 );
-                			model.mediaPlayerTwo.seek( model.currentDuration - 1 );
-                		}
-                		
-                	}
-                	else
-                	{
-                		if ( model.mediaPlayerSingle.playing )
-	                    {
-	                    	model.mediaPlayerSingle.seek( model.currentDuration - 1 );
-                        	model.mediaPlayerSingle.pause();
-                        	
-                        	model.currentPlayerState = PlayerState.PAUSING;
-                        	currentPlayPauseState = PlayerState.PLAYING;
-                        	ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
-                        }
-	                    else
-	                    {
-	                    	model.mediaPlayerSingle.seek( model.currentDuration - 1 );
-	                    }
-                	
-                	}
-                	break;
-
+                    playState = model.mediaPlayer.playing;
+                    
+                    if( model.mediaPlayer.playing )
+                    {
+                       model.mediaPlayer.pause();
+                    }
+                    
+                    model.mediaPlayer.seek(0);
+                    
+                    if( playState )
+                    {
+                       model.mediaPlayer.play();
+                    }
+                    break;
+                    
                 case VideoControlEvent.MUTE:
                 
-                	if( model.mediaState == MediaState.MULTI )
+                	if( model.mediaPlayer.muted )
                 	{
-                		if( model.mediaPlayerOne.muted == true)
-	                    {
-	                    	model.mediaPlayerOne.muted = false;
-	                    }
-	                    else
-	                    {
-	                    	model.mediaPlayerOne.muted = true;
-	                    }
+                	   model.mediaPlayer.muted = false;
                 	}
                 	else
                 	{
-                		if( model.mediaPlayerSingle.muted == true)
-	                    {
-	                    	model.mediaPlayerSingle.muted = false;
-	                    }
-	                    else
-	                    {
-	                    	model.mediaPlayerSingle.muted = true;
-	                    }
-                	
+                	    model.mediaPlayer.muted = true;
                 	}
                 	break;
 
                 case VideoControlEvent.VOLUMEUP:
                 
-                	if( model.mediaState == MediaState.MULTI )
-                	{
-                		
-                		if ( model.mediaPlayerOne.volume != 1 )
-	                    {
-	                        model.mediaPlayerOne.volume = model.mediaPlayerOne.volume + skipVolume;
-	                    }
-	                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round(model.mediaPlayerOne.volume * percent) );
-                	}
-                	else
-                	{
-                		if ( model.mediaPlayerSingle.volume != 1 )
-	                    {
-	                        model.mediaPlayerSingle.volume = model.mediaPlayerSingle.volume + skipVolume;
-	                    }
-	                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round(model.mediaPlayerSingle.volume * percent) );
-                	}
-                	
-					break;
+                	if ( model.mediaPlayer.volume != 1 )
+                    {
+                        model.mediaPlayer.volume = model.mediaPlayer.volume + skipVolume;
+                    }
+                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round(model.mediaPlayer.volume * percent) );
+            	    break;
 
                 case VideoControlEvent.VOLUMEDOWN:
                 
-                	if( model.mediaState == MediaState.MULTI )
-                	{
-                		if ( model.mediaPlayerOne.volume != 0 )
-	                    {
-	                        model.mediaPlayerOne.volume = model.mediaPlayerOne.volume - skipVolume;
-	                        if( model.mediaPlayerOne.volume < 0 )
-	                        {
-	                        	model.mediaPlayerOne.volume = 0;
-	                        }
-	                    }
-                		ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round(model.mediaPlayerOne.volume * percent) );
-                		
-                	}
-                	else
-                	{
-                		if ( model.mediaPlayerSingle.volume != 0 )
-	                    {
-	                        model.mediaPlayerSingle.volume = model.mediaPlayerOne.volume - skipVolume;
-	                        if( model.mediaPlayerSingle.volume < 0 )
-	                        {
-	                        	model.mediaPlayerSingle.volume = 0;
-	                        }
-	                    }
-                		ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round(model.mediaPlayerSingle.volume * percent) );
-                	}
-                	
-                    break;
+                	if ( model.mediaPlayer.volume != 0 )
+                    {
+                        model.mediaPlayer.volume = model.mediaPlayer.volume - skipVolume;
+                        if( model.mediaPlayer.volume < 0 )
+                        {
+                            model.mediaPlayer.volume = 0;
+                        }
+                    }
+                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round(model.mediaPlayer.volume * percent) );
+            	    break;
 
                 case VideoControlEvent.SEEKZERO:
-                	if( model.mediaState == MediaState.MULTI )
-                    {
-                    	model.mediaPlayerOne.seek( ( model.currentDuration / 10 ) * 0 );
-                    	model.mediaPlayerTwo.seek( ( model.currentDuration / 10 ) * 0 );
-                    }
-                    else
-                    {
-                    	model.mediaPlayerSingle.seek( ( model.currentDuration / 10 ) * 0 );
-                    }
-                	break;
+                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 0 );
+                    break;
 
                 case VideoControlEvent.SEEKONE:
-                    if( model.mediaState == MediaState.MULTI )
-                    {
-                    	model.mediaPlayerOne.seek( ( model.currentDuration / 10 ) * 1 );
-                    	model.mediaPlayerTwo.seek( ( model.currentDuration / 10 ) * 1 );
-                    }
-                    else
-                    {
-                    	model.mediaPlayerSingle.seek( ( model.currentDuration / 10 ) * 1 );
-                    }
+                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 1 );
                     break;
 
                 case VideoControlEvent.SEEKTWO:
-                    if( model.mediaState == MediaState.MULTI )
-                    {
-                    	model.mediaPlayerOne.seek( ( model.currentDuration / 10 ) * 2 );
-                    	model.mediaPlayerTwo.seek( ( model.currentDuration / 10 ) * 2 );
-                    }
-                    else
-                    {
-                    	model.mediaPlayerSingle.seek( ( model.currentDuration / 10 ) * 2 );
-                    }
+                    
+                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 2 );
                     break;
 
                 case VideoControlEvent.SEEKTHREE:
-                    if( model.mediaState == MediaState.MULTI )
-                    {
-                    	model.mediaPlayerOne.seek( ( model.currentDuration / 10 ) * 3 );
-                    	model.mediaPlayerTwo.seek( ( model.currentDuration / 10 ) * 3 );
-                    }
-                    else
-                    {
-                    	model.mediaPlayerSingle.seek( ( model.currentDuration / 10 ) * 3 );
-                    }
+                    
+                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 3 );
                     break;
 
                 case VideoControlEvent.SEEKFOUR:
-                    if( model.mediaState == MediaState.MULTI )
-                    {
-                    	model.mediaPlayerOne.seek( ( model.currentDuration / 10 ) * 4 );
-                    	model.mediaPlayerTwo.seek( ( model.currentDuration / 10 ) * 4 );
-                    }
-                    else
-                    {
-                    	model.mediaPlayerSingle.seek( ( model.currentDuration / 10 ) * 4 );
-                    }
+                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 4 );
                     break;
 
                 case VideoControlEvent.SEEKFIVE:
-                    if( model.mediaState == MediaState.MULTI )
-                    {
-                    	model.mediaPlayerOne.seek( ( model.currentDuration / 10 ) * 5 );
-                    	model.mediaPlayerTwo.seek( ( model.currentDuration / 10 ) * 5 );
-                    }
-                    else
-                    {
-                    	model.mediaPlayerSingle.seek( ( model.currentDuration / 10 ) * 5 );
-                    }
+                    
+                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 5 );
                     break;
 
                 case VideoControlEvent.SEEKSIX:
-                    if( model.mediaState == MediaState.MULTI )
-                    {
-                    	model.mediaPlayerOne.seek( ( model.currentDuration / 10 ) * 6 );
-                    	model.mediaPlayerTwo.seek( ( model.currentDuration / 10 ) * 6 );
-                    }
-                    else
-                    {
-                    	model.mediaPlayerSingle.seek( ( model.currentDuration / 10 ) * 6 );
-                    }
+                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 6 );
                     break;
 
                 case VideoControlEvent.SEEKSEVEN:
-                    if( model.mediaState == MediaState.MULTI )
-                    {
-                    	model.mediaPlayerOne.seek( ( model.currentDuration / 10 ) * 7 );
-                    	model.mediaPlayerTwo.seek( ( model.currentDuration / 10 ) * 7 );
-                    }
-                    else
-                    {
-                    	model.mediaPlayerSingle.seek( ( model.currentDuration / 10 ) * 7 );
-                    }
+                   
+                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 7 );
                     break;
 
                 case VideoControlEvent.SEEKEIGHT:
-                    if( model.mediaState == MediaState.MULTI )
-                    {
-                    	model.mediaPlayerOne.seek( ( model.currentDuration / 10 ) * 8 );
-                    	model.mediaPlayerTwo.seek( ( model.currentDuration / 10 ) * 8 );
-                    }
-                    else
-                    {
-                    	model.mediaPlayerSingle.seek( ( model.currentDuration / 10 ) * 8 );
-                    }
+                    
+                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 8 );
                     break;
 
                 case VideoControlEvent.SEEKNINE:
-                    if( model.mediaState == MediaState.MULTI )
-                    {
-                    	model.mediaPlayerOne.seek( ( model.currentDuration / 10 ) * 9 );
-                    	model.mediaPlayerTwo.seek( ( model.currentDuration / 10 ) * 9 );
-                    }
-                    else
-                    {
-                    	model.mediaPlayerSingle.seek( ( model.currentDuration / 10 ) * 9 );
-                    }
+                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 9 );
                     break;
 
                 case VideoControlEvent.CLOSEDCAPTIONS:

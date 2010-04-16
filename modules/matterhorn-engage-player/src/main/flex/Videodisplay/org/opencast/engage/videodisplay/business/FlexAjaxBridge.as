@@ -5,17 +5,17 @@ package org.opencast.engage.videodisplay.business
     import flash.events.KeyboardEvent;
     import flash.external.ExternalInterface;
     
-    import mx.controls.Alert;
-    
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
-    import org.opencast.engage.videodisplay.control.event.InitMultiPlayerEvent;
-    import org.opencast.engage.videodisplay.control.event.InitPlayerEvent;
+    import org.opencast.engage.videodisplay.control.event.InitMediaPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
     import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
     import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
-    import org.opencast.engage.videodisplay.state.MediaState;
-    import org.opencast.engage.videodisplay.state.VideoSizeState;
+    import org.osmf.layout.HorizontalAlign;
+    import org.osmf.layout.LayoutMetadata;
+    import org.osmf.layout.LayoutMode;
+    import org.osmf.layout.ScaleMode;
+    import org.osmf.layout.VerticalAlign;
     import org.swizframework.Swiz;
 
     public class FlexAjaxBridge
@@ -111,16 +111,7 @@ package org.opencast.engage.videodisplay.business
          * */
         public function seek( time:Number ):Number
         {
-            
-            if( model.mediaState == MediaState.MULTI )
-            {
-            	model.mediaPlayerOne.seek( time );
-            	model.mediaPlayerTwo.seek( time );
-            }
-            else
-            {
-            	model.mediaPlayerSingle.seek( time );
-            }
+            model.mediaPlayer.seek( time );
             return time;
         }
         
@@ -165,16 +156,8 @@ package org.opencast.engage.videodisplay.business
         {
             if ( captionsURL != model.captionsURL )
             {
-                var position:int = model.mediaURLOne.lastIndexOf( '/' );
-                var mediaFile:String = model.mediaURLOne.substring( position + 1 );
-				
-				// TODO remove the if when we have vor dfxp files
-                if ( mediaFile == 'matterhorn.mp4' )
-                {
-                    model.captionsURL = captionsURL;
-                    Swiz.dispatchEvent( new LoadDFXPXMLEvent( model.captionsURL ) );
-                }
-                
+                model.captionsURL = captionsURL;
+                Swiz.dispatchEvent( new LoadDFXPXMLEvent( model.captionsURL ) );
             }
         }
         
@@ -185,99 +168,39 @@ package org.opencast.engage.videodisplay.business
          */
         public function setMediaURL( mediaURLOne:String, mediaURLTwo:String ):void
         {
-            // Single Player
-            if( mediaURLOne != model.mediaURLOne && mediaURLTwo == '' )
+            Swiz.dispatchEvent( new InitMediaPlayerEvent( mediaURLOne, mediaURLTwo ) );
+        }
+        
+        /**
+         * videoSizeControl
+         *
+         * When the learner press the video size control button.
+         */
+        public function videoSizeControl( sizeLeft:Number, sizeRight:Number ):void
+        {
+			if( sizeLeft == 100 )
             {
-                model.mediaURLOne = mediaURLOne;
-                Swiz.dispatchEvent( new InitPlayerEvent() );
+                model.layoutMetadataOne.percentWidth = sizeLeft;
+                model.layoutMetadataTwo.percentWidth = sizeRight;
+                model.layoutMetadataOne.horizontalAlign = HorizontalAlign.CENTER;
+                model.layoutMetadataParallelElement.layoutMode = LayoutMode.NONE;
             }
-            
-            // Multi Player
-            if(  mediaURLOne != model.mediaURLOne && mediaURLTwo != model.mediaURLTwo )
+            else if(sizeRight == 100)
             {
-                model.mediaURLOne = mediaURLOne;
-                model.mediaURLTwo = mediaURLTwo;
-                
-                Swiz.dispatchEvent( new InitMultiPlayerEvent() );
-                model.mediaState = MediaState.MULTI;
+                model.layoutMetadataOne.percentWidth = sizeLeft;
+                model.layoutMetadataTwo.percentWidth = sizeRight;
+                model.layoutMetadataTwo.horizontalAlign = HorizontalAlign.CENTER;
+                model.layoutMetadataParallelElement.layoutMode = LayoutMode.NONE;
             }
-        }
-        
-        /**
-         * videoSizeControlSingleDisplay
-         *
-         * 
-         */
-        public function videoSizeControlSingleDisplay():void
-        {
-        	model.videoSizeState = VideoSizeState.SINGLE;
+            else 
+            {               
+            	model.layoutMetadataParallelElement.layoutMode = LayoutMode.HORIZONTAL;
+            	model.layoutMetadataOne.percentWidth = sizeLeft;
+                model.layoutMetadataTwo.percentWidth = sizeRight;
+                model.layoutMetadataOne.horizontalAlign = HorizontalAlign.CENTER;
+                model.layoutMetadataTwo.horizontalAlign = HorizontalAlign.CENTER;
+            }
 		}
-        
-        /**
-         * videoSizeControlAudioDisplay
-         *
-         * 
-         */
-        public function videoSizeControlAudioDisplay():void
-        {
-        	
-		}
-        
-        
-        /**
-         * videoSizeControlMultiOnlyLeftDisplay
-         *
-         * 
-         */
-        public function videoSizeControlMultiOnlyLeftDisplay():void
-        {
-        	model.videoSizeState = VideoSizeState.ONLYLEFT;
-		}
-        
-        
-        /**
-         * videoSizeControlMultiOnlyRightDisplay
-         *
-         * 
-         */
-        public function videoSizeControlMultiOnlyRightDisplay():void
-        {
-        	model.videoSizeState = VideoSizeState.ONLYRIGHT;
-		}
-        
-        /**
-         * videoSizeControlMultiBigLeftDisplay
-         *
-         * When the learner press the video size control button.
-         */
-        public function videoSizeControlMultiBigLeftDisplay():void
-        {
-			
-			
-			model.videoSizeState = VideoSizeState.BIGLEFT;
-        
-        }
-        
-        /**
-         * videoSizeControlMultiDisplay
-         *
-         * When the learner press the video size control button.
-         */
-        public function videoSizeControlMultiDisplay():void
-        {
-			model.videoSizeState = VideoSizeState.CENTER;
-        
-        }
-        
-        /**
-         * videoSizeControlMultiBigRightDisplay
-         *
-         * When the learner press the video size control button.
-         */
-        public function videoSizeControlMultiBigRightDisplay():void
-        {
-			model.videoSizeState = VideoSizeState.BIGRIGHT;
-        }
         
          /**
          * getViewState
@@ -312,7 +235,7 @@ package org.opencast.engage.videodisplay.business
             // Play or pause the video
             if( charCode == 80 || charCode == 112 ) // P or p
             {
-                if( model.mediaPlayerOne.playing )
+                if( model.mediaPlayer.playing )
                 {
                     Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.PAUSE ) );
                 }

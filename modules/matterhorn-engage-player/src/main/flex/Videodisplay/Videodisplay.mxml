@@ -44,7 +44,6 @@
         	import org.opencast.engage.videodisplay.business.FlexAjaxBridge;
             import bridge.ExternalFunction;
             import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
-            import org.opencast.engage.videodisplay.control.event.InitPlayerEvent;
             import org.opencast.engage.videodisplay.control.util.TimeCode;
             import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
             import org.opencast.engage.videodisplay.control.event.SetCurrentCaptionsEvent;
@@ -129,34 +128,17 @@
     <mx:states>
 
         <mx:State 
-            name = "video"
+            name = "media"
             >
 
             <mx:SetProperty 
-                target = "{ bx_video }"
+                target = "{ bx_media }"
                 name = "visible"
                 value = "true"
                 />
 
             <mx:SetProperty 
-                target = "{ bx_video }"
-                name = "includeInLayout"
-                value = "true"
-                />
-        </mx:State>
-        
-        <mx:State 
-            name = "multi"
-            >
-
-            <mx:SetProperty 
-                target = "{ bx_multiVideo }"
-                name = "visible"
-                value = "true"
-                />
-
-            <mx:SetProperty 
-                target = "{ bx_multiVideo }"
+                target = "{ bx_media }"
                 name = "includeInLayout"
                 value = "true"
                 />
@@ -199,28 +181,22 @@
 
     <br:FABridge />
     
-    <view:SingleVideoView 
-        id = "bx_video"
-        visible = "false"
-        includeInLayout = "false"
-        />
-   
-   <view:MultiVideoView 
-        id = "bx_multiVideo"
-        visible = "false"
-        includeInLayout = "false"
-        currentState="{model.videoSizeState}"
-        />
-
     <view:AudioView 
         id = "bx_audio"
         visible = "false"
         includeInLayout = "false"
         />
+        
+    <view:MediaView
+    	id="bx_media"
+    	visible = "false"
+        includeInLayout = "false"
+    	/>
 
     <view:ErrorView 
         id = "bx_error"
         visible = "false"
         includeInLayout = "false"
         />
+        
 </mx:Application>

@@ -215,14 +215,14 @@ Button.ccOff
 
 .volumeMuteBig
 {
-  upSkin: Embed(source='../../../resources/icons/volumemuteBig.png');
-  overSkin: Embed(source='../../../resources/icons/volumemuteBig.png');
-  downSkin: Embed(source='../../../resources/icons/volumemuteBig.png');
-  disabledSkin: Embed(source='../../../resources/icons/volumemuteBig.png');
-  selectedUpSkin: Embed(source='../../../resources/icons/volumemuteBig.png'); 
-  selectedOverSkin: Embed(source='../../../resources/icons/volumemuteBig.png');
-  selectedDownSkin: Embed(source='../../../resources/icons/volumemuteBig.png');
-  selectedDisabledSkin: Embed(source='../../../resources/icons/volumemuteBig.png');  
+  upSkin: Embed(source='volumemuteBig.png');
+  overSkin: Embed(source='volumemuteBig.png');
+  downSkin: Embed(source='volumemuteBig.png');
+  disabledSkin: Embed(source='volumemuteBig.png');
+  selectedUpSkin: Embed(source='volumemuteBig.png'); 
+  selectedOverSkin: Embed(source='volumemuteBig.png');
+  selectedDownSkin: Embed(source='volumemuteBig.png');
+  selectedDisabledSkin: Embed(source='volumemuteBig.png');  
   
    
 }
@@ -230,13 +230,13 @@ Button.ccOff
 .volumeHighBig
 {
     
-  upSkin: Embed(source='../../../resources/icons/volumehighBig.png');
-  overSkin: Embed(source='../../../resources/icons/volumehighBig.png');
-  downSkin: Embed(source='../../../resources/icons/volumehighBig.png');
-  disabledSkin: Embed(source='../../../resources/icons/volumehighBig.png');
-  selectedUpSkin: Embed(source='../../../resources/icons/volumehighBig.png'); 
-  selectedOverSkin: Embed(source='../../../resources/icons/volumehighBig.png');
-  selectedDownSkin: Embed(source='../../../resources/icons/volumehighBig.png');
-  selectedDisabledSkin: Embed(source='../../../resources/icons/volumehighBig.png');  
+  upSkin: Embed(source='volumehighBig.png');
+  overSkin: Embed(source='volumehighBig.png');
+  downSkin: Embed(source='volumehighBig.png');
+  disabledSkin: Embed(source='volumehighBig.png');
+  selectedUpSkin: Embed(source='volumehighBig.png'); 
+  selectedOverSkin: Embed(source='volumehighBig.png');
+  selectedDownSkin: Embed(source='volumehighBig.png');
+  selectedDisabledSkin: Embed(source='volumehighBig.png');  
    
 }
