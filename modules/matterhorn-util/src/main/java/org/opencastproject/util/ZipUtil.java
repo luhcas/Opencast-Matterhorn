@@ -42,18 +42,6 @@ public class ZipUtil {
    * @return the resulting zip archive file
    */
   public static java.io.File zip(java.io.File[] sourceFiles, String destination) {
-    return zip(sourceFiles, destination, false);
-  }
-
-  /**
-   * Compresses a files into a zip archive. May add files recursively.
-   *
-   * @param sourceFiles The files to include in the root of the archive
-   * @param destination The path to put the resulting zip archive file.
-   * @param recursively Set true to recursively add directories.
-   * @return the resulting zip archive file
-   */
-  public static java.io.File zip(java.io.File[] sourceFiles, String destination, boolean recursively) {
     if (sourceFiles == null || sourceFiles.length <= 0) {
       throw new IllegalArgumentException("sourceFiles must include at least 1 file");
     }
@@ -63,8 +51,22 @@ public class ZipUtil {
     // patch from ruben.perez to ensure only exposes java.io.File: http://issues.opencastproject.org/jira/browse/MH-1698 - AZ
     java.io.File normalFile = new java.io.File(destination);
     File zipFile = new File(normalFile);
-    _zip(zipFile, sourceFiles, recursively, -1);
-
+    for(java.io.File f : sourceFiles) {
+      OutputStream out = null;
+      InputStream in = null;
+      try {
+        out = new FileOutputStream(zipFile.getAbsolutePath() + "/" + f.getName());
+        in = new FileInputStream(f);
+        File.cat(in, out);
+      } catch (Exception e) {
+        zipFile.delete();
+        throw new RuntimeException(e);
+      } finally {
+        if(in != null) {try {in.close();} catch (IOException e) {logger.error(e.getMessage());}}
+        if(out != null) {try {out.close();} catch (IOException e) {logger.error(e.getMessage());}}
+      }
+    }
+    
     // Solves issue MH-1809 (java.io.File.length() doesn't return actual zip file size) 
     try {
       File.umount();
@@ -72,50 +74,8 @@ public class ZipUtil {
       zipFile.delete();
       throw new RuntimeException(e);
     }
-
+    
     return normalFile;
-  }
-
-  private static void _zip(File zipFile, java.io.File[] files, boolean recursively, int basePathLen) {
-    for (java.io.File f : files) {
-      OutputStream out = null;
-      InputStream in = null;
-      int curBasePathLen = basePathLen < 0
-          ? lenSkippingSlash(f.getParentFile().getAbsolutePath())
-          : basePathLen;
-      if (f.isDirectory()) {
-        if (recursively)
-          _zip(zipFile, f.listFiles(), recursively, curBasePathLen);
-      } else {
-        try {
-          out = new FileOutputStream(zipFile.getAbsolutePath() + "/" + f.getAbsolutePath().substring(curBasePathLen));
-          in = new FileInputStream(f);
-          File.cat(in, out);
-        } catch (Exception e) {
-          zipFile.delete();
-          throw new RuntimeException(e);
-        } finally {
-          if (in != null) {
-            try {
-              in.close();
-            } catch (IOException e) {
-              logger.error(e.getMessage());
-            }
-          }
-          if (out != null) {
-            try {
-              out.close();
-            } catch (IOException e) {
-              logger.error(e.getMessage());
-            }
-          }
-        }
-      }
-    }
-  }
-
-  private static int lenSkippingSlash(String path) {
-    return path.endsWith(File.separator) ? path.length() : path.length() + 1;
   }
 
   /**
@@ -135,16 +95,29 @@ public class ZipUtil {
     if (destination.exists() && destination.isFile()) {
       throw new IllegalArgumentException("destination file must be a directory");
     }
-    if (!destination.exists())
-      if (!destination.mkdirs())
-        throw new RuntimeException("cannot create " + destination);
-
+    if( ! destination.exists()) destination.mkdir();
+    
     File zip = new File(zipFile);
-    if (zip.copyAllTo(destination)) {
+    for(String path : zip.list()) {
+      OutputStream out = null;
+      InputStream in = null;
       try {
-        File.umount();
-      } catch (ArchiveException e) {
-        logger.error(e.getMessage());
+        File inFile = new File(zip, path);
+        if( ! inFile.exists()) {
+          throw new IllegalStateException("Found non-existent zip entry " + path);
+        }
+        if(inFile.isDirectory()) {
+          throw new IllegalStateException("Zipped directories are not yet supported");
+        }
+        in = new FileInputStream(inFile);
+        out = new FileOutputStream(new File(destination, path));
+        File.cat(in, out);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      } finally {
+        if(in != null) {try {in.close();} catch (IOException e) {logger.error(e.getMessage());}}
+        if(out != null) {try {out.close();} catch (IOException e) {logger.error(e.getMessage());}}
+        try {File.umount();} catch (ArchiveException e) {logger.error(e.getMessage());}
       }
     }
   }
