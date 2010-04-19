@@ -3,9 +3,9 @@
 #
 # Branch a Module
 #
-BRANCH_OLD=0.6-SNAPSHOT
-BRANCH_VER=0.7-SNAPSHOT
-JIRA_TKT=MH-3333
+BRANCH_OLD=0.6
+BRANCH_VER=0.61
+JIRA_TKT=MH-3218
 
 WORK_DIR=/Users/mtrehan/Matterhorn/svn
 
@@ -14,7 +14,7 @@ SVN_URL=https://opencast.jira.com/svn/MH
 TRUNK_URL=$SVN_URL/trunk
 BRANCH_URL=$SVN_URL/branches/$BRANCH_VER
 
-#svn copy $TRUNK_URL $BRANCH_URL -m "$JIRA_TKT Creating $BRANCH_VER Branch"
+svn copy $TRUNK_URL $BRANCH_URL -m "$JIRA_TKT Creating $BRANCH_VER Branch"
 
 cd $WORK_DIR
 
