@@ -155,72 +155,82 @@ public class StaticResource extends HttpServlet {
     }
     
     // Find and deliver the resource
-      String classpathToResource;
+    String classpathToResource;
+    if(pathInfo == null) {
+      if( ! servletPath.equals(alias)) {
+        classpathToResource = classpath + servletPath;
+      } else {
+        classpathToResource = classpath + "/" + welcomeFile;
+      }
+    } else {
+      classpathToResource = classpath + pathInfo;
+    }
+
+    // Make sure we are using an absolute path
+    if (!classpathToResource.startsWith("/"))
+      classpathToResource = "/" + classpathToResource;
+
+    // Try to load the resource from the regular resources section
+    URL url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
+    
+    // No luck? Maybe it's part of the test class path?
+    if(url == null && testMode && testClasspath != null) {
       if(pathInfo == null) {
         if( ! servletPath.equals(alias)) {
-          classpathToResource = classpath.substring(1) + servletPath;
+          classpathToResource = testClasspath + servletPath;
         } else {
-          classpathToResource = classpath.substring(1) + "/" + welcomeFile;
+          classpathToResource = testClasspath + "/" + testSuite;
         }
       } else {
-        classpathToResource = classpath.substring(1) + pathInfo;
+        classpathToResource = testClasspath + pathInfo;
       }
-
-      URL url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
-      if(url == null && testMode && testClasspath != null) {
-        if(pathInfo == null) {
-          if( ! servletPath.equals(alias)) {
-            classpathToResource = testClasspath.substring(1) + servletPath;
-          } else {
-            classpathToResource = testClasspath.substring(1) + "/" + testSuite;
-          }
-        } else {
-          classpathToResource = testClasspath.substring(1) + pathInfo;
-        }
-        url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
-      }
+      if (!classpathToResource.startsWith("/"))
+        classpathToResource = "/" + classpathToResource;
+      url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
+    }
       
-      if(url == null) {
-        try {
-          resp.sendError(404);
-          return;
-        } catch (IOException e) {
-          logger.warn(e.getMessage(), e);
-          return;
-        }
-      }
-      logger.debug("opening url {} {}", new Object[] {classpathToResource, url});
-      InputStream in = null;
+    if(url == null) {
       try {
-        in = url.openStream();
-        String md5 = DigestUtils.md5Hex(in);
-        if(md5.equals(req.getHeader("If-None-Match"))) {
-          resp.setStatus(304);
-          return;
-        }
-        resp.setHeader("ETag", md5);
+        resp.sendError(404);
+        return;
       } catch (IOException e) {
-        logger.warn("This system can not generate md5 hashes.");
-      } finally {
-        IOUtils.closeQuietly(in);
+        logger.warn(e.getMessage(), e);
+        return;
       }
-      String contentType = mimeMap.getContentType(url.getFile());
-      if( ! "application/octet-stream".equals(contentType)){
-        resp.setHeader("Content-Type", contentType);
+    }
+    logger.debug("opening url {} {}", new Object[] {classpathToResource, url});
+    InputStream in = null;
+    try {
+      in = url.openStream();
+      String md5 = DigestUtils.md5Hex(in);
+      if(md5.equals(req.getHeader("If-None-Match"))) {
+        resp.setStatus(304);
+        return;
       }
+      resp.setHeader("ETag", md5);
+    } catch (IOException e) {
+      logger.warn("This system can not generate md5 hashes.");
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+    String contentType = mimeMap.getContentType(url.getFile());
+    if( ! "application/octet-stream".equals(contentType)){
+      resp.setHeader("Content-Type", contentType);
+    }
+    try {
+      in = url.openStream();
+      IOUtils.copy(in, resp.getOutputStream());
+    } catch (IOException e) {
+      logger.warn("could not open or copy streams", e);
       try {
-        in = url.openStream();
-        IOUtils.copy(in, resp.getOutputStream());
-      } catch (IOException e) {
-        logger.warn("could not open or copy streams", e);
-        try {
-          resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-          return;
-        } catch (IOException e1) {
-          logger.warn("unable to send http 500 error: {}", e1);
-        }
-      } finally {
-        IOUtils.closeQuietly(in);
+        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        return;
+      } catch (IOException e1) {
+        logger.warn("unable to send http 500 error: {}", e1);
       }
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
+
 }
