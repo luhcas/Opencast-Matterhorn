@@ -1,20 +1,21 @@
 <html>
   <head>
     <title>Download DVD Image</title>
-    <script type="text/javascript" src="../admin/jquery/jquery-1.4.min.js"></script>
+    <script type="text/javascript" src="../../../admin/jquery/jquery-1.4.min.js"></script>
     <script type="text/javascript">
       $(document).ready(function() {
-        var id = window.location.href.split(/\?/)[1]; // get the workflowInstances Id
-        var url = '../workflow/rest/instance/' + id + '.json';
-        //alert("Id: " + id + "\n" + "URL: " + url);
+        var id = parent.document.getElementById("holdWorkflowId").value;
         // get WorkflowInstance
         $.ajax({
-          url : '../workflow/rest/instance/' + id + '.json',
-          dataType : 'json',    // or XML..
+          url : '../../../workflow/rest/instance/' + id + '.xml',
+          dataType : 'xml',    // or XML..
           success : function(data) {    // get neccessary data to make the link to the DVD image working
-            $('#dvd-image-link').text(data.mediapackage_title);
-            // TODO where do we get the URL to the DVD image from? I guess from the <mediapackage>
-            $('#dvd-image-link').attr('href', "javascript:alert('under construction');");
+            var elms = data.documentElement.getElementsByTagName('track');
+            for (i in elms) {
+              if (elms[i].getAttribute('type').match(/dvd/)) {
+                $('#dvd-image-link').attr('href', elms[i].getElementsByTagName('url')[0].firstChild.data);
+              }
+            }
           }
         });
       });
@@ -22,6 +23,9 @@
   </head>
   <body>
     <h1>Download DVD image</h1>
-    Download DVD image here: <a id="dvd-image-link" href="#"></a>
+    To download the DVD encoded recording click <a id="dvd-image-link" href="#">here</a>.
+    <p>
+      <input type="checkbox" name="delete-image" checked="true"> Delete image when continuing.
+    </p>
   </body>
 </html>

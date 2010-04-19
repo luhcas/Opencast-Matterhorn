@@ -45,51 +45,51 @@ select { font-size:1.15em; }
 }
 
 .icon-check {
-    background-image: url(../img/tick.png);
+    background-image: url(../shared_img/icons/tick.png);
 }
 
 .icon-error {
-    background-image: url(../img/exclamation.png);
+    background-image: url(../shared_img/icons/exclamation.png);
 }
 
 .icon-info {
-    background-image: url(../img/information.png);
+    background-image: url(../shared_img/icons/information.png);
 }
 
 .icon-running {
-    background-image: url(../img/cog.png);
+    background-image: url(../shared_img/icons/cog.png);
 }
 
 .icon-add {
-    background-image: url(../img/add.png);
+    background-image: url(../shared_img/icons/add.png);
 }
 
 .icon-idle {
-    background-image: url(../img/cup.png);
+    background-image: url(../shared_img/icons/cup.png);
 }
 
 .icon-capturing {
-    background-image: url(../img/camera.png);
+    background-image: url(../shared_img/icons/camera.png);
 }
 
 .icon-arrow-right {
-  background-image: url(../img/arrow-right.png);
+  background-image: url(../shared_img/icons/arrow-right.png);
   background-position: 0 0;
 }
 
 .icon-arrow-down {
-  background-image: url(../img/arrow-down.png);
+  background-image: url(../shared_img/icons/arrow-down.png);
   background-position: 0 0;
 }
 
 .icon-help {
-  background-image: url(../img/help.png);
+  background-image: url(../shared_img/icons/help.png);
   background-position: 0 0;
   vertical-align: top;
 }
 
 .icon-bullet {
-  background-image: url(../img/bullet-arrow.png);
+  background-image: url(../shared_img/icons/bullet-arrow.png);
   background-position: 0 0;
 }
 
@@ -98,7 +98,7 @@ select { font-size:1.15em; }
 }
 
 .loadingAnimation {
-  background-image:url(../img/loading.gif);
+  background-image:url(../shared_img/loading.gif);
   background-position: center;
   background-repeat:no-repeat;
   height:40px;
@@ -106,7 +106,7 @@ select { font-size:1.15em; }
 }
 
 .progressbar {  /* q&d: to be removed after 0.5 */
-  background-image:url(../img/loading.gif);
+  background-image:url(../shared_img/loading.gif);
   background-position: center;
   background-repeat:no-repeat;
   height:40px;
@@ -313,21 +313,21 @@ select { font-size:1.15em; }
 
 .sortable {
   cursor:pointer;
-  background-image:url(../img/bg.gif);
+  background-image:url(../shared_img/icons/bg.gif);
   background-position: center right;
   background-repeat:no-repeat;
 }
 
 .sortable-asc {
   cursor:pointer;
-  background-image:url(../img/asc.gif);
+  background-image:url(../shared_img/icons/asc.gif);
   background-position: center right;
   background-repeat:no-repeat;
 }
 
 .sortable-desc {
   cursor:pointer;
-  background-image:url(../img/desc.gif);
+  background-image:url(../shared_img/icons/desc.gif);
   background-position: center right;
   background-repeat:no-repeat;
 }

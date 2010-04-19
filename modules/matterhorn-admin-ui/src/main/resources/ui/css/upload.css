@@ -16,6 +16,6 @@ a {color:blue;}*/
 .formField {width:440px !important;float:left;}
 .no-bullets {list-style-type: none;}
 .collapse-control {padding-left:18px;cursor:pointer;background:silver;}
-.collapse-control-closed {background-image:url(../img/arrow-right.png);background-position:top left !important; background-repeat:no-repeat;}
-.collapse-control-open {background-image:url(../img/arrow-down.png);background-position:top left !important; background-repeat:no-repeat;}
+.collapse-control-closed {background-image:url(../shared_img/icons/arrow-right.png);background-position:top left !important; background-repeat:no-repeat;}
+.collapse-control-open {background-image:url(../shared_img/icons/arrow-down.png);background-position:top left !important; background-repeat:no-repeat;}
 .titlebar {background-color:silver !important; padding-left:8px;}

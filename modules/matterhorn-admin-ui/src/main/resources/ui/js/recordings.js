@@ -255,7 +255,23 @@ Recordings.getURLParam = function(name) {
 
 Recordings.displayHoldActionPanel = function(URL, wfId) {
   $('#holdActionPanel-container iframe').attr('src', URL);
+  $('#holdWorkflowId').val(wfId);
   $('#holdActionPanel-container').fadeIn('fast');
+}
+
+Recordings.continueWorkflow = function() {
+  var workflowId = $('#holdWorkflowId').val();
+  $.ajax({
+    type       : 'POST',
+    url        : '../workflow/rest/' + workflowId + '/resume',
+    error      : function(XHR,status,e){
+      alert('Could not remsume Workflow ' + status);
+    },
+    success    : function(data) {
+      $('#holdActionPanel-container').fadeOut('fast');
+      location.reload();
+    }
+  });
 }
 
 Recordings.removeRecording = function(workflowId) {

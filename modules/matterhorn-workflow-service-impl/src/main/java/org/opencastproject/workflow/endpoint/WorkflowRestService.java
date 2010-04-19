@@ -385,6 +385,23 @@ public class WorkflowRestService {
   }
 
   @POST
+  @Path("{wfId}/resume")
+  public Response resume(@PathParam("wfId") String wfId) {
+    try {
+      if (service.getWorkflowById(wfId) != null) {
+        service.resume(wfId);
+      } else {
+        return Response.status(Status.NOT_FOUND).build();
+      }
+      return Response.ok("OK").build();
+    } catch (Exception e) {
+      logger.error(e.getMessage());
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+
+  }
+
+  @POST
   @Path("resume")
   @Produces(MediaType.TEXT_PLAIN)
   public Response resume(@FormParam("id") String workflowInstanceId, @FormParam("properties") LocalHashMap properties) {

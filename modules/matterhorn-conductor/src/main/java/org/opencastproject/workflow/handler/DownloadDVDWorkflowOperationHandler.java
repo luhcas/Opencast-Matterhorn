@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.handler;
 
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -34,14 +36,13 @@ import org.slf4j.LoggerFactory;
 public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(DownloadDVDWorkflowOperationHandler.class);
-
   /** Path to the hold ui resources */
   private static final String HOLD_UI_PATH = "/operation/ui/download-dvd/index.html";
 
   public void setHttpService(HttpService service) {
     super.httpService = service;
   }
-  
+
   public void setHttpContext(HttpContext httpContext) {
     super.httpContext = httpContext;
   }
@@ -62,4 +63,28 @@ public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkfl
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance)
+   */
+  @Override
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance)
+          throws WorkflowOperationException {
+    logger.info("DownloadDVD operation resumed");
+    // remove the DVD encoded track from the mediaPackage
+    try {
+      MediaPackage mp = workflowInstance.getMediaPackage();
+      Track[] tracks = mp.getTracks();
+      for (int i = 0; i < tracks.length; i++) {
+        if (tracks[i].getMimeType().getType().equals("video/dvd")) {
+          logger.info("found DVD track, deleting...");
+          mp.remove(tracks[i]);
+        }
+      }
+    } catch (Exception e) {
+      logger.error("Could not remove dvd encoded track - {}", e.getMessage());
+      e.printStackTrace();
+    }
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+  }
 }

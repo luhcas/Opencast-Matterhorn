@@ -183,7 +183,7 @@ public class AdminuiRestService {
           if (instance.getState() == OperationState.PAUSED) {       // take only those WFInstances into account that have been paused by a HoldOperation
             item.setHoldOperationTitle(instance.getDescription());
             // TODO item.setHoldActionTitle( ?? );
-            // TODO item.setHoldActionPanelURL( ?? );
+            item.setHoldActionPanelURL(instance.getHoldStateUserInterfaceUrl().toString());
             out.add(item);
           }
         } else {
