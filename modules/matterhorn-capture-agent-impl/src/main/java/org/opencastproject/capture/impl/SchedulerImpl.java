@@ -379,12 +379,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   public String[] getCaptureSchedule() {
     if (scheduler != null) {
       try {
-        String[] retVal = scheduler.getJobNames(JobParameters.CAPTURE_TYPE);
-        if (retVal == null) {
-          return new String[1];
-        } else {
-          return retVal;
-        }
+        return scheduler.getJobNames(JobParameters.CAPTURE_TYPE);
       } catch (SchedulerException e) {
         log.error("Scheduler exception: {}.", e.toString());
       }
@@ -433,28 +428,47 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       ComponentList list = newCal.getComponents(Component.VEVENT);
       for (Object item : list) {
         VEvent event = (VEvent) item;
-        String uid = event.getUid().getValue();
-        Date start = event.getStartDate().getDate();
-        Date end = event.getEndDate().getDate();
+
+        //Get the ID, or generate one
+        String uid = null;
+        if (event.getUid() != null) {
+          uid = event.getUid().getValue();
+        } else {
+          log.warn("Event has no UID field, autogenerating name...");
+          uid = "UnknownUID-" + item.hashCode(); 
+        }
+
+        //Get the start time
+        Date start = null;
+        if (event.getStartDate() != null) {
+          start = event.getStartDate().getDate();          
+        } else {
+          log.error("Event {} has no start time, unable to schedule!", uid);
+          continue;
+        }
+
+        //Get the end time
+        Date end = null;
+        if (event.getEndDate() != null) {
+          end = event.getEndDate().getDate();
+        } else {
+          log.debug("Event {} has no end time...", uid);
+        }
+
+        //Determine the duration
         //Note that we're assuming this is accurate...
         Duration duration = event.getDuration();
         if (duration == null) {
-          if (start != null && end != null) {
-            //Note that in the example metadata I was given the duration field did not exist...
+          if (end != null) {
             duration = new Duration(start, end);
           } else {
-            if (start != null) {
-              log.warn("Event {} has no duration and no end time, skipping.", start.toString());
-            } else if (end != null) {
-              log.warn("Event {} has no duration and no begin time, skipping.", end.toString());
-            } else {
-              log.warn("Event has no duration, no begin and no end time, skipping.");
-            }
+            log.warn("Event {} has no duration and no end time, skipping.", uid);
             continue;
           }
         }
 
-        if (duration != null && duration.getDuration().isNegative()) {
+        //Sanity checks on the duration
+        if (duration.getDuration().isNegative()) {
           log.warn("Event {} has a negative duration, skipping.", uid);
           continue;
         } else if (start.before(new Date())) {
@@ -472,7 +486,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         }
 
         CronExpression startCronExpression = getCronString(start);
-        String conflict = scheduledEvents.get(startCronExpression); 
+        String conflict = scheduledEvents.get(startCronExpression.toString()); 
         if (conflict != null) {
           log.warn("Unable to schedule event {} because its starting time coinsides with event {}!", uid, conflict);
           continue;
@@ -484,71 +498,18 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
         JobDetail job = new JobDetail(uid, JobParameters.CAPTURE_TYPE, StartCaptureJob.class);
 
-        PropertyList attachments = event.getProperties(Property.ATTACH);
-        ListIterator<Property> iter = (ListIterator<Property>) attachments.listIterator();
-
-        boolean hasProperties = false;
         Properties props = new Properties();
         props.put(CaptureParameters.RECORDING_ID, uid);
         props.put(JobParameters.JOB_POSTFIX, uid);
         String endCronString = getCronString(duration.getDuration().getTime(start)).toString();
         props.put(CaptureParameters.RECORDING_END, endCronString);
 
-        //Create the directory we'll be capturing into
-        File captureDir = new File(configService.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),
-                props.getProperty(CaptureParameters.RECORDING_ID));
-        if (!captureDir.exists()) {
-          try {
-            FileUtils.forceMkdir(captureDir);
-          } catch (IOException e) {
-            log.error("IOException creating required directory {}, skipping capture.", captureDir.toString());
-            continue;
-          }
-        }
-
-        MediaPackage pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-        //For each attachment
-        while (iter.hasNext()) {
-          Property p = iter.next();
-          //TODO:  Make this not hardcoded?  Make this not depend on Apple's idea of rfc 2445?
-          String filename = p.getParameter("X-APPLE-FILENAME").getValue();
-          if (filename == null) {
-            log.warn("No filename given for attachment, skipping.");
-            continue;
-          }
-          String contents = getAttachmentAsString(p);
-
-          //Handle any attachments
-          //TODO:  Should this string be hardcoded?
-          try { 
-            if (filename.equals("org.opencastproject.capture.agent.properties")) {
-              Properties jobProps = new Properties();
-              jobProps.load(new StringReader(contents));
-              jobProps.putAll(props);
-              job.getJobDataMap().put(JobParameters.CAPTURE_PROPS, jobProps);
-              hasProperties = true;
-              pack.add(new URI(filename));
-            } else if (filename.equals("metadata.xml"))
-              pack.add(new URI(filename), MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_CATALOG);
-            else
-              pack.add(new URI(filename));
-          } catch(Exception e) {};
-          job.getJobDataMap().put(JobParameters.MEDIA_PACKAGE, pack);
-          //Note that we overwrite any pre-existing files with this.  In other words, if there is a file called foo.txt in the
-          //captureDir directory and there is an attachment called foo.txt then we will overwrite the one on disk with the one from the ical
-          URL u = new File(captureDir, filename).toURI().toURL();
-          writeFile(u, contents);
-        }
-
-        job.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgent);
-        job.getJobDataMap().put(JobParameters.JOB_SCHEDULER, scheduler);
-
-        if (!hasProperties) {
+        
+        if (!scheduleEvent(event, props, job)) {
           log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", uid);
         }
-
         scheduler.scheduleJob(job, trig);
-        scheduledEvents.put(start.toString(), uid);
+        scheduledEvents.put(startCronExpression.toString(), uid);
       }
 
       checkSchedules();
@@ -565,6 +526,63 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     } catch (MalformedURLException e) {
       log.error("MalformedURLException: {}.", e.getMessage());
     }
+  }
+
+  private boolean scheduleEvent(VEvent event, Properties props, JobDetail job) throws org.opencastproject.util.ConfigurationException, MediaPackageException, MalformedURLException, ParseException {
+    MediaPackage pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
+    boolean hasProperties = false;
+
+    //Create the directory we'll be capturing into
+    File captureDir = new File(configService.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),
+            props.getProperty(CaptureParameters.RECORDING_ID));
+    if (!captureDir.exists()) {
+      try {
+        FileUtils.forceMkdir(captureDir);
+      } catch (IOException e) {
+        log.error("IOException creating required directory {}, skipping capture.", captureDir.toString());
+        return false;
+      }
+    }
+
+    PropertyList attachments = event.getProperties(Property.ATTACH);
+    ListIterator<Property> iter = (ListIterator<Property>) attachments.listIterator();
+    //For each attachment
+    while (iter.hasNext()) {
+      Property p = iter.next();
+      //TODO:  Make this not hardcoded?  Make this not depend on Apple's idea of rfc 2445?
+      String filename = p.getParameter("X-APPLE-FILENAME").getValue();
+      if (filename == null) {
+        log.warn("No filename given for attachment, skipping.");
+        continue;
+      }
+      String contents = getAttachmentAsString(p);
+
+      //Handle any attachments
+      //TODO:  Should this string be hardcoded?
+      try { 
+        if (filename.equals("org.opencastproject.capture.agent.properties")) {
+          Properties jobProps = new Properties();
+          jobProps.load(new StringReader(contents));
+          jobProps.putAll(props);
+          job.getJobDataMap().put(JobParameters.CAPTURE_PROPS, jobProps);
+          hasProperties = true;
+          pack.add(new URI(filename));
+        } else if (filename.equals("metadata.xml"))
+          pack.add(new URI(filename), MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_CATALOG);
+        else
+          pack.add(new URI(filename));
+      } catch(Exception e) {};
+      job.getJobDataMap().put(JobParameters.MEDIA_PACKAGE, pack);
+      //Note that we overwrite any pre-existing files with this.  In other words, if there is a file called foo.txt in the
+      //captureDir directory and there is an attachment called foo.txt then we will overwrite the one on disk with the one from the ical
+      URL u = new File(captureDir, filename).toURI().toURL();
+      writeFile(u, contents);
+    }
+
+    job.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgent);
+    job.getJobDataMap().put(JobParameters.JOB_SCHEDULER, scheduler);
+
+    return hasProperties;
   }
 
   /**

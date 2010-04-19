@@ -108,6 +108,8 @@ public class StateRestEndpointTest {
     Assert.assertTrue((Boolean) getXPath(parsedResponse, "//ns1:recording-state-update/state", XPathConstants.BOOLEAN));
     Assert.assertTrue((Boolean) getXPath(parsedResponse, "//ns1:recording-state-update/time-since-last-update", XPathConstants.BOOLEAN));
 
+    Thread.sleep(10000);
+
     HttpDelete deleteRecordingRequest = 
       new HttpDelete(BASE_URL + "/capture-admin/rest/recordings/"+ recordingId);
     AuthenticationSupport.addAuthentication(deleteRecordingRequest);

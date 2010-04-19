@@ -56,9 +56,6 @@ public class CaptureAgentImplTest {
   /** Define a recording ID for the test */
   private final static String recordingID = "UnitTest1";
   
-  /** Directory containing the captured media */
-  private static URL outputDir = null;
-
   @AfterClass
   public static void afterclass() {
     FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir"), "capture-agent-test"));
@@ -66,7 +63,7 @@ public class CaptureAgentImplTest {
 
   @Before
   public void setup() throws ConfigurationException, IOException {
-    //Craete the configuration manager
+    //Create the configuration manager
     config = new ConfigurationManager();
     InputStream s = getClass().getClassLoader().getResourceAsStream("config/capture.properties");
     if (s == null) {
@@ -97,76 +94,58 @@ public class CaptureAgentImplTest {
     agent.activate(null);
     Assert.assertEquals(agent.getAgentState(), AgentState.IDLE);
     
-    // setup test media
-    URL testScreen = getClass().getClassLoader().getResource("capture/screen.mpg");
-    URL testPresenter = getClass().getClassLoader().getResource("capture/camera.mpg");
-    URL testAudio = getClass().getClassLoader().getResource("capture/audio.mp3");
-    outputDir = getClass().getClassLoader().getResource("ingest");
-    
     // setup testing properties
     properties = new Properties();
     properties.setProperty(CaptureParameters.RECORDING_ID, recordingID);
-    properties.setProperty(CaptureParameters.RECORDING_ROOT_URL, outputDir.getPath());
-    properties.setProperty(CaptureParameters.CAPTURE_DEVICE_NAMES, "SCREEN,PRESENTER,AUDIO");
-    properties.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "PRESENTER" + CaptureParameters.CAPTURE_DEVICE_SOURCE, testPresenter.getPath());
-    properties.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "PRESENTER" + CaptureParameters.CAPTURE_DEVICE_DEST, "camera_out.mpg");
-    properties.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "PRESENTER" + CaptureParameters.CAPTURE_DEVICE_FLAVOR, "presentation/source");
-    properties.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "SCREEN" + CaptureParameters.CAPTURE_DEVICE_SOURCE, testScreen.getPath());
-    properties.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "SCREEN" + CaptureParameters.CAPTURE_DEVICE_DEST, "screen_out.mpg");
-    properties.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "SCREEN" + CaptureParameters.CAPTURE_DEVICE_FLAVOR, "presentation/source");
-    properties.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "AUDIO" + CaptureParameters.CAPTURE_DEVICE_SOURCE, testAudio.getPath());
-    properties.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "AUDIO" + CaptureParameters.CAPTURE_DEVICE_DEST, "audio_out.mp3");
-    properties.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "AUDIO" + CaptureParameters.CAPTURE_DEVICE_FLAVOR, "presentation/source");
-
   }
   
   @After
   public void tearDown() {
     agent = null;
     properties = null;
-    outputDir = null;
   }
   
   @Test
-  public void testCaptureAgentImpl() {
-    if (!new File("/usr/lib/libjv4linfo.so").exists()) {
-      logger.error("Necessary libjv4linfo.so dependency not installed in /usr/lib: Tests not executing.");
-      return;
-    }
-    
+  public void testCaptureAgentImpl() throws Exception {
     // start the capture, assert the recording id is correct
     String id = agent.startCapture(properties);
-    Assert.assertEquals(id, recordingID);
+    Assert.assertEquals(recordingID, id);
+
+    File outputdir = new File(config.getItem("capture.filesystem.cache.capture.url"), id);
     
     // even with a mock capture, the state should remain capturing until stopCapture has been called
     Assert.assertEquals(AgentState.CAPTURING, agent.getAgentState());
     
     // affirm the captured media exists in the appropriate location
-    String cameraOut = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "PRESENTER" + CaptureParameters.CAPTURE_DEVICE_DEST);
-    String screenOut = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "SCREEN" + CaptureParameters.CAPTURE_DEVICE_DEST);
-    String audioOut = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "AUDIO" + CaptureParameters.CAPTURE_DEVICE_DEST);
-    File cameraFile = new File(outputDir.getPath(), cameraOut);
-    File screenFile = new File(outputDir.getPath(), screenOut);
-    File audioFile = new File(outputDir.getPath(), audioOut);
-    Assert.assertTrue(cameraFile.exists() && screenFile.exists() && audioFile.exists());
+    String[] devnames = config.getItem(CaptureParameters.CAPTURE_DEVICE_NAMES).split(",");
+    Assert.assertTrue(devnames.length >= 1);
+    Assert.assertFalse(devnames[0].equals(""));
+
+    for (String devname : devnames) {
+      File outputfile = new File(outputdir, config.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + devname + CaptureParameters.CAPTURE_DEVICE_DEST));
+      Assert.assertTrue(outputfile.exists());
+    }
     
     // the appropriate files exists, so the capture can be stopped. The agent's state should return to idle
     // and a stopped capture file should exists.
     Assert.assertTrue(agent.stopCapture(recordingID));
     Assert.assertEquals(AgentState.IDLE, agent.getAgentState());
-    File captureStopped = new File(outputDir.getPath(), CaptureParameters.CAPTURE_STOPPED_FILE_NAME);
+    File captureStopped = new File(outputdir.getAbsolutePath(), CaptureParameters.CAPTURE_STOPPED_FILE_NAME);
     Assert.assertTrue(captureStopped.exists());
     
+    Thread.sleep(1000);
+
     // test creation of the manifest file
-    Assert.assertTrue(agent.createManifest(recordingID));
-    File manifestFile = new File(outputDir.getPath(), CaptureParameters.MANIFEST_NAME);
+    File manifestFile = new File(outputdir.getAbsolutePath(), CaptureParameters.MANIFEST_NAME);
     Assert.assertTrue(manifestFile.exists());
+
+    Thread.sleep(1000);
+
+    // test zipping media
+    File zippedMedia = new File(outputdir.getAbsolutePath(), CaptureParameters.ZIP_NAME);
+    Assert.assertTrue(zippedMedia.exists());
     
     // clean up the files created
-    cameraFile.deleteOnExit();
-    screenFile.deleteOnExit();
-    audioFile.deleteOnExit();
-    captureStopped.deleteOnExit();
-    manifestFile.deleteOnExit();
+    FileUtils.deleteQuietly(outputdir);
   }
 }

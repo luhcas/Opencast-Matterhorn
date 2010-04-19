@@ -283,7 +283,8 @@ public class CaptureAgentStateServiceImplTest {
     verifyRecording("Recording1", RecordingState.CAPTURING);
     verifyRecording("Recording2", RecordingState.UPLOADING);
 
-    service.removeRecording("Recording1");
+    Assert.assertTrue(service.removeRecording("Recording1"));
+    Assert.assertFalse(service.removeRecording("asdfasdf"));
     Assert.assertEquals(1, service.getKnownRecordings().size());
     verifyRecording("notAnRecording", null);
     verifyRecording("Recording1", null);

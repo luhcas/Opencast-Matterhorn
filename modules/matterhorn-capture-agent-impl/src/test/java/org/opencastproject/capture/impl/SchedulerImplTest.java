@@ -42,6 +42,7 @@ public class SchedulerImplTest {
   SchedulerImpl sched = null;
   ConfigurationManager config = null;
   Properties schedulerProps = null;
+  CaptureAgentImpl agent = null;
 
   @AfterClass
   public static void afterclass() {
@@ -69,6 +70,8 @@ public class SchedulerImplTest {
     config.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "capture-sched-test").getAbsolutePath());
     config.setItem("org.opencastproject.server.url", "http://localhost:8080");
 
+    agent = new CaptureAgentImpl();
+
     sched = new SchedulerImpl();
     sched.setConfigService(config);
     schedulerProps = new Properties();
@@ -82,6 +85,8 @@ public class SchedulerImplTest {
     } catch (IOException e) {
       throw new RuntimeException("Unable to read configuration data for scheduler!");
     }
+    sched.setCaptureAgent(agent);
+    Assert.assertNull(sched.getCaptureSchedule());
   }
 
   @After
@@ -89,6 +94,7 @@ public class SchedulerImplTest {
     sched.unsetCaptureAgent();
     sched.unsetConfigService();
     sched.deactivate();
+    sched.finalize();
     sched = null;
     config = null;
     schedulerProps = null;
@@ -96,10 +102,14 @@ public class SchedulerImplTest {
 
   private String[] formatDate(Date d) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-    String[] times = new String[2];
+    String[] times = new String[4];
     times[0] = sdf.format(d);
     d.setTime(d.getTime() + 60000L);
     times[1] = sdf.format(d);
+    d.setTime(d.getTime() + 60000L);
+    times[2] = sdf.format(d);
+    d.setTime(d.getTime() + 60000L);
+    times[3] = sdf.format(d);
     return times;
   }
 
@@ -116,10 +126,15 @@ public class SchedulerImplTest {
   private File setupTestCalendar(String calLocation, String[] times) throws IOException {
     String source = readFile(this.getClass().getClassLoader().getResource(calLocation));
 
+    //TODO:  Fix this
     source = source.replace("@START@", times[0]);
     source = source.replace("@END@", times[1]);
+    source = source.replace("@START2@", times[1]);
+    source = source.replace("@END2@", times[2]);
+    source = source.replace("@START3@", times[2]);
+    source = source.replace("@END3@", times[3]);
     
-    File output = File.createTempFile("valid", ".ics");
+    File output = File.createTempFile("scheduler-test-", ".ics");
     FileWriter out = null;
     out = new FileWriter(output);
     out.write(source);
@@ -159,6 +174,15 @@ public class SchedulerImplTest {
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("c3a1c747-5501-44ff-b57a-67a4854a39b0", schedule[0]);
     testfile.delete();
+  }
+
+  @Test
+  public void testBrokenCalendarURLs() throws IOException, ConfigurationException {
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "foobar:?8785346");
+    sched.updated(schedulerProps);
+    String[] schedule = sched.getCaptureSchedule();
+    Assert.assertEquals(0, schedule.length);
   }
 
   @Test
@@ -367,7 +391,7 @@ public class SchedulerImplTest {
     }
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
-    Assert.assertEquals("c3a1c747-5501-44ff-b57a-67a4854a39b0", schedule[0]);
+    Assert.assertEquals("one", schedule[0]);
     testfile.delete();
   }
 
@@ -380,7 +404,22 @@ public class SchedulerImplTest {
     sched.updated(schedulerProps);
     String[] schedule = sched.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
-    Assert.assertEquals("c3a1c747-5501-44ff-b57a-67a4854a39b0", schedule[0]);
+    Assert.assertEquals("one", schedule[0]);
+    testfile.delete();
+  }
+
+  @Test
+  public void testEdgecases() throws IOException, ConfigurationException {
+    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    File testfile = setupTestCalendar("calendars/Edge-Cases.ics", times);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
+    config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
+    sched.updated(schedulerProps);
+    String[] schedule = sched.getCaptureSchedule();
+    Assert.assertEquals(3, schedule.length);
+    Assert.assertEquals("No-end-but-duration", schedule[0]);
+    Assert.assertEquals("Longer-than-max-capture-time-using-duration", schedule[1]);
+    Assert.assertEquals("Longer-than-max-capture-time-using-DTEND", schedule[2]);
     testfile.delete();
   }
 
@@ -395,6 +434,7 @@ public class SchedulerImplTest {
 
   @Test
   public void testBrokenScheduler() {
+    //TODO:  Fix this
     boolean expectedException = false;
 
     //Try it

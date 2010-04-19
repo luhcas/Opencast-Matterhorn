@@ -313,7 +313,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    */
   public boolean removeRecording(String id) {
     logger.debug("Removing Recording {}.", id);
-    if (recordings.remove(id) == null) {
+    if (recordings.remove(id) != null) {
       return true;
     } else {
       return false;

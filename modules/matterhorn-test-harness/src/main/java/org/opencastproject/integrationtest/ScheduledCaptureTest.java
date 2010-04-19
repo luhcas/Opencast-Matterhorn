@@ -131,5 +131,7 @@ public class ScheduledCaptureTest {
 		assertEquals("Response code (search all):", 200, response.getStatus());
 		xml = Utils.parseXml(response.getEntity(String.class));
 	  assertTrue("Recording included? (search all):", Utils.xPathExists(xml, "//ns2:mediapackage[title=\'" + title + "\']"));
+
+	  Thread.sleep(5000);
 	}
 }

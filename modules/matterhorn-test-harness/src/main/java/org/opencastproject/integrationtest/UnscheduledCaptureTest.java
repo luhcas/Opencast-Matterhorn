@@ -75,7 +75,7 @@ public class UnscheduledCaptureTest {
     assertEquals("Response code (getState):", 200, response.getStatus());
     assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
 
-    Thread.sleep(10000);
+    Thread.sleep(15000);
 
     // Agent idle (Capture Admin)
     response = CaptureAdminResources.agent(IntegrationTests.AGENT);
@@ -88,17 +88,17 @@ public class UnscheduledCaptureTest {
     assertEquals("Response code (recordings):", 200, response.getStatus());
     xml = Utils.parseXml(response.getEntity(String.class));
     assertTrue("Recording included? (recordings):", Utils.xPathExists(xml, "//ns1:recording-state-update[name=\'" + recordingId + "\']"));
-    assertEquals("Recording finished (recordings):", "capture_finished", Utils.xPath(xml, "//ns1:recording-state-update[name=\'" + recordingId + "\']/state", XPathConstants.STRING));
+    assertEquals("Recording finished (recordings):", "upload_finished", Utils.xPath(xml, "//ns1:recording-state-update[name=\'" + recordingId + "\']/state", XPathConstants.STRING));
     
     // Pause for Capture Admin to sync
-    Thread.sleep(5000);
+    Thread.sleep(10000);
     
     // Recording is finished (Capture Admin)
-    // response = CaptureAdminResources.recording(recordingId);
-    // assertEquals("Response code (recording):", 200, response.getStatus());
-    // xml = Utils.parseXml(response.getEntity(String.class));
-    // assertTrue("Recording included? (recordings):", Utils.xPathExists(xml, "//ns2:recording-state-update[name=\'" + recordingId + "\']"));
-    // assertEquals("Recording finished (recordings):", "capture_finished", Utils.xPath(xml, "//ns2:recording-state-update[name=\'" + recordingId + "\']/state", XPathConstants.STRING));
+    response = CaptureAdminResources.recording(recordingId);
+    assertEquals("Response code (recording):", 200, response.getStatus());
+    xml = Utils.parseXml(response.getEntity(String.class));
+    assertTrue("Recording included? (recordings):", Utils.xPathExists(xml, "//ns2:recording-state-update[name=\'" + recordingId + "\']"));
+    assertEquals("Recording finished (recordings):", "upload_finished", Utils.xPath(xml, "//ns2:recording-state-update[name=\'" + recordingId + "\']/state", XPathConstants.STRING));
 
   }
 }
