@@ -12,7 +12,9 @@ if
 	# installing prerequisite tools
 	sudo apt-get -y install zlib1g-dev gcc g++ pkg-config byacc subversion patch &&
 	# installing required libraries
-	sudo apt-get -y install libjpeg-dev libpng12-dev libtiff-dev jam
+	sudo apt-get -y install libjpeg-dev libpng12-dev libtiff-dev jam &&
+	# installing gstreamer
+	sudo apt-get -y install gstreamer0.10-plugins* gstreamer0.10-ffmpeg
 then
 	echo
 	echo "Required libraries were installed. Executing main script..."
