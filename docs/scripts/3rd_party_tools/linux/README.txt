@@ -6,16 +6,16 @@ To automatically install all required tools you can execute:
 - ./preinstall_debian.sh for debian based system with apt-get as package manager
 
 If you don't execute scripts as privileged user you will be asked for password
-when needed. When reqired tools are installed main installation (install_3rd_party.sh)
-script will be automatically executed.
+when needed. When reqired tools are installed, main installation script
+(install_3rd_party.sh) will be automatically executed.
 
 NOTE: If you would like to copy scripts and execute them from different directory,
 make sure that all files (preinstallation script, install_3rd_party.sh and patches)
 are in same directory. You may experience build failures otherwise.
 
 
-Second way is to install all packages manually and execute main script 
-(install_3rd_party.sh) directly.
+You can also execute main script (install_3rd_party.sh) directly. In this case you will
+need to manually install required tools and packages.
 
 Tools that you need to install:
 - c/c++ compiler

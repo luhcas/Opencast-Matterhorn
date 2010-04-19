@@ -19,7 +19,7 @@ then
 	echo
 	echo "Required libraries were installed. Executing main script..."
 	echo
-	wait 3
+	sleep 1
 	sudo sh install_3rd_party.sh 2>&1
 	return $?
 else

@@ -101,7 +101,7 @@ setup_libpng ()
 	cd libpng-${libpng_version}
 	if ! [ -f ./libpng.la ]
 	then
-		./configure &&
+		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib &&
 		make
 		if ! [ $? -eq 0 ]
 		then
@@ -147,7 +147,7 @@ setup_libjpeg ()
 	cd jpeg-${libjpeg_version}
 	if ! [ -f ./libjpeg.a ]
 	then
-		./configure &&
+		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib &&
 		make
 		patch -p0 -N Makefile ../libjpeg-6b.patch
 		if ! [ $? -eq 0 ]
@@ -193,7 +193,7 @@ setup_libtiff ()
 	cd tiff-$libtiff_version
 	if ! [ -f ./libtiff/libtiff.la ]
 	then
-		./configure &&
+		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib &&
 		make
 		if ! [ $? -eq 0 ]
 		then 
@@ -374,7 +374,7 @@ setup_opencv ()
 	cd opencv-$opencv_version
 	if ! [ -f ./cv/src/cvaccum.lo ]
 	then
-		./configure &&
+		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib &&
 		make
 		if ! [ $? -eq 0 ]
 		then
@@ -423,7 +423,7 @@ setup_tesseract ()
 	cd tesseract-$tesseract_version
 	if ! [ -f ./ccmain/adaptions.o ]
 	then
-		./configure &&
+		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib &&
 		make
 		if ! [ $? -eq 0 ]
 		then
@@ -469,7 +469,7 @@ setup_ocropus ()
 	export PATH=$PATH:/usr/local/bin
 	if ! [ -f ./ocr-utils/libocrutils.a ]
 	then
-		./configure &&
+		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib &&
 		jam
 		if ! [ $? -eq 0 ]
 		then
@@ -548,7 +548,7 @@ echo "have all required tools and libraries installed. Otherwise"
 echo "you will experience build failures."
 echo
 echo "Also you need to be able to access 3690/tcp since ffmpeg"
-echo "is grabbed svn."
+echo "is grabbed from svn."
 echo
 sleep 5
 

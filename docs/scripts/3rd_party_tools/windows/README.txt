@@ -1,3 +1,5 @@
+INSTALLING 3rd PARTY TOOLS
+
 Prerequisites:
 - 7zip archiver [http://www.7-zip.org/]
 - wget for Windows OS [http://gnuwin32.sourceforge.net/packages/wget.htm]
