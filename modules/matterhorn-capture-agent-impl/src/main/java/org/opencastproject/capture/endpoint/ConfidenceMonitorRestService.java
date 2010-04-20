@@ -71,14 +71,16 @@ public class ConfidenceMonitorRestService {
   
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  @Path("audio/{name}")
-  public String getRMSValues(@PathParam("name") String device) {
-    List<Double> rmsValues = service.getRMSValues(device);
+  @Path("audio/{name}/{timestamp}")
+  public String getRMSValues(@PathParam("name") String device, @PathParam("timestamp") double timestamp) {
+    List<Double> rmsValues = service.getRMSValues(device, timestamp);
     String output = "";
     for (double value : rmsValues) {
-      output += Double.toString(value) + ",";
+      output += Double.toString(value) + "\n";
     }
-    return output.substring(0, output.length() - 2);
+    if (output.length() > 1)
+      return output.substring(0, output.length() - 2);
+    return output;
     
   }
   

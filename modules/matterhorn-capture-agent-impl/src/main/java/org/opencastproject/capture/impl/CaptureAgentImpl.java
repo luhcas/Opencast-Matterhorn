@@ -921,12 +921,12 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   }
   
   /**
-   * s
+   * 
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.ConfidenceMonitor#getRMSValues(java.lang.String)
+   * @see org.opencastproject.capture.api.ConfidenceMonitor#getRMSValues(java.lang.String, double)
    */
-  public List<Double> getRMSValues(String friendlyName) {
-    return AudioMonitoring.getRMSValues();
+  public List<Double> getRMSValues(String friendlyName, double timestamp) {
+    return AudioMonitoring.getRMSValues(friendlyName, timestamp);
   }
   
 }

@@ -31,12 +31,14 @@ public interface ConfidenceMonitor {
   byte[] grabFrame(String friendlyName);
   
   /**
-   * Return a list of recent RMS values from the audio device
+   * Return all RMS values from device 'name' that occur after Unix time
+   * 'timestamp'
    * 
-   * @param friendlyName Friendly name for the audio device
-   * @return a list of doubles representing the RMS values
+   * @param friendlyName The friendly name of the device
+   * @param timestamp Unix time in milliseconds marking start of RMS data
+   * @return A List of RMS values that occur *after* timestamp
    */
-  List<Double> getRMSValues(String friendlyName);
+  List<Double> getRMSValues(String friendlyName, double timestamp);
   
   /**
    * Provide access to the devices on the capture box

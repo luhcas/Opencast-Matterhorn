@@ -395,7 +395,7 @@ public class PipelineFactory {
 
     if (!alsasrc.link(queue))
       error = formatPipelineError(captureDevice, alsasrc, queue);
-    else if (!AudioMonitoring.addAudioMonitor(pipeline, queue, enc, interval))
+    else if (!AudioMonitoring.addAudioMonitor(pipeline, queue, enc, interval, captureDevice.getFriendlyName()))
       error = formatPipelineError(captureDevice, queue, enc);
     else if (!enc.link(mux))
       error = formatPipelineError(captureDevice, enc, mux);

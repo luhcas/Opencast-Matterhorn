@@ -25,8 +25,11 @@ import org.gstreamer.Pipeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Class containing audio monitoring services that can be incorporated into
@@ -36,7 +39,43 @@ public class AudioMonitoring {
   
   private static final Logger logger = LoggerFactory.getLogger(VideoMonitoring.class);
   
-  private static List<Double> rmsValues;
+  private static HashMap<String, SortedSet<Pair>> deviceRMSValues;
+  
+  /**
+   * Simple inner class to pair RMS values with their timestamps and sort them
+   * by timestamp
+   */
+  private static class Pair implements Comparable<Pair> {
+    
+    private double timestamp;
+    
+    private double rms;
+    
+    public Pair(double timestamp, double rms) {
+      this.timestamp = timestamp;
+      this.rms = rms;
+    }
+    
+    public double getTimestamp() {
+      return timestamp;
+    }
+    
+    public double getRMS() {
+      return rms;
+    }
+
+    @Override
+    public int compareTo(Pair p) {
+      if (p.getTimestamp() < this.getTimestamp())
+        return 1;
+      else if (p.getTimestamp() > this.getTimestamp())
+        return -1;
+      else
+        return 0;
+    }
+    
+  }
+  
   
   /**
    * Add a method for confidence monitoring to a pipeline capturing audio by
@@ -48,12 +87,19 @@ public class AudioMonitoring {
    * @param interval how often to grab data from the pipeline
    * @return the pipeline with the audio monitoring added, or null on failure
    */
-  public static boolean addAudioMonitor(Pipeline pipeline, Element src, Element sink, final long interval) {
+  public static boolean addAudioMonitor(Pipeline pipeline, Element src, Element sink, final long interval, final String name) {
           
       Element tee, queue0, queue1, decodebin, fakesink;
       final Element level;
       
-      rmsValues = new LinkedList<Double>();
+      // setup structure to associate timestamps with RMS values
+      if (deviceRMSValues == null) {
+        deviceRMSValues = new HashMap<String, SortedSet<Pair>>();
+      }
+      deviceRMSValues.put(name, new TreeSet<Pair>());
+      
+      
+      
       
       // the items to be tee'd and added to the pipeline
       tee = ElementFactory.make("tee", null);
@@ -122,7 +168,8 @@ public class AudioMonitoring {
               start = rms.indexOf("{");
               end = rms.indexOf("}");
               double value = Double.parseDouble(rms.substring(start+1, end).split(",")[0]);
-              rmsValues.add(value);
+              
+              deviceRMSValues.get(name).add(new Pair(System.currentTimeMillis(), value));
             }
           }
         }
@@ -131,7 +178,20 @@ public class AudioMonitoring {
       return true;
   }
   
-  public static List<Double> getRMSValues() {
+  /**
+   * Return all RMS values from device 'name' that occur after Unix time
+   * 'timestamp'
+   * 
+   * @param name The friendly name of the device
+   * @param timestamp Unix time in milliseconds marking start of RMS data
+   * @return A List of RMS values that occur *after* timestamp
+   */
+  public static List<Double> getRMSValues(String name, double timestamp) {
+    TreeSet<Pair> set = (TreeSet<Pair>) deviceRMSValues.get(name).tailSet(new Pair(timestamp, 0));
+    List<Double> rmsValues = new LinkedList<Double>();
+    for (Pair p : set) {
+      rmsValues.add(p.getRMS());
+    }
     return rmsValues;
   }
 
