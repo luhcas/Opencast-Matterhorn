@@ -172,4 +172,7 @@ public interface CaptureParameters {
   /** Directory which contains confidence monitoring images */
   String CAPTURE_CONFIDENCE_VIDEO_LOCATION = "capture.confidence.video.location";
   
+  /** Maximum number of seconds of audio monitoring data to store in memory */
+  String CAPTURE_CONFIDENCE_AUDIO_LENGTH = "capture.confidence.audio.length";
+  
 }

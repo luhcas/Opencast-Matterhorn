@@ -365,6 +365,7 @@ public class PipelineFactory {
    */
   private static boolean getAlsasrcPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
     int interval = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName() + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "30"));
+    int monitoringLength = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_AUDIO_LENGTH, "60"));
     String error = null;
     String codec = captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
@@ -395,7 +396,7 @@ public class PipelineFactory {
 
     if (!alsasrc.link(queue))
       error = formatPipelineError(captureDevice, alsasrc, queue);
-    else if (!AudioMonitoring.addAudioMonitor(pipeline, queue, enc, interval, captureDevice.getFriendlyName()))
+    else if (!AudioMonitoring.addAudioMonitor(pipeline, queue, enc, interval, monitoringLength, captureDevice.getFriendlyName()))
       error = formatPipelineError(captureDevice, queue, enc);
     else if (!enc.link(mux))
       error = formatPipelineError(captureDevice, enc, mux);

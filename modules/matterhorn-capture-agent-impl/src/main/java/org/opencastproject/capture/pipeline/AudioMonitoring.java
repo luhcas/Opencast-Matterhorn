@@ -85,9 +85,11 @@ public class AudioMonitoring {
    * @param src the source element which will be tee'd
    * @param sink the sink element which the src originally sent data to
    * @param interval how often to grab data from the pipeline
+   * @param maxLength The number of seconds to store RMS data for
+   * @param name The friendly name of the device to add audio monitoring to
    * @return the pipeline with the audio monitoring added, or null on failure
    */
-  public static boolean addAudioMonitor(Pipeline pipeline, Element src, Element sink, final long interval, final String name) {
+  public static boolean addAudioMonitor(Pipeline pipeline, Element src, Element sink, final long interval, final long maxLength, final String name) {
           
       Element tee, queue0, queue1, decodebin, fakesink;
       final Element level;
@@ -169,7 +171,15 @@ public class AudioMonitoring {
               end = rms.indexOf("}");
               double value = Double.parseDouble(rms.substring(start+1, end).split(",")[0]);
               
-              deviceRMSValues.get(name).add(new Pair(System.currentTimeMillis(), value));
+              // add the new value (timestamp, rms) value pair to the hashmap for this device
+              TreeSet<Pair> deviceRMS = (TreeSet<Pair>) deviceRMSValues.get(name);
+              deviceRMS.add(new Pair(System.currentTimeMillis(), value));
+              
+              // keep the maximum number of pairs stored to be 1000 / interval
+              
+              if (deviceRMS.size() > (maxLength / interval)) {
+                deviceRMS.remove(deviceRMS.first());
+              }
             }
           }
         }
