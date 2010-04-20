@@ -89,7 +89,7 @@ setup_libpng ()
 	cd ${working_dir}/libpng
 	if ! [ -f ./libpng-${libpng_version}/png.h ]
 	then
-		wget $libpng_url &&
+		curl --remote-name $libpng_url &&
 		tar zxfv libpng${libpng_version}.tar.gz
 		if ! [ $? -eq 0 ]
 		then
@@ -135,7 +135,7 @@ setup_libjpeg ()
 	if ! [ -f ./jpeg-${libjpeg_version}/jpeglib.h ]
 	then
 		cp ${base_dir}/libjpeg-6b.patch . &&
-		wget $libjpeg_url &&
+		curl --remote-name $libjpeg_url &&
 		tar zxfv jpegsrc.v${libjpeg_version}.tar.gz
 		if ! [ $? -eq 0 ]
 		then
@@ -181,7 +181,7 @@ setup_libtiff ()
 	cd ${working_dir}/libtiff
 	if ! [ -f ./tiff-$libtiff_version/autogen.sh ]
 	then
-		wget $libtiff_url &&
+		curl --remote-name $libtiff_url &&
 		unzip tiff$libtiff_version.zip
 		if ! [ $? -eq 0 ]
 		then 
@@ -227,7 +227,7 @@ setup_jam ()
 	cd ${working_dir}/jam
 	if ! [ -f ./jam-${jam_version}/jam.h ]
 	then
-		wget $jam_url &&
+		curl --remote-name $jam_url &&
 		unzip -d jam-$jam_version jam${jam_version}.zip
 		if ! [ $? -eq 0 ]
 		then
@@ -317,7 +317,7 @@ setup_mediainfo ()
 	cd ${working_dir}/mediainfo
 	if ! [ -f ./MediaInfo_CLI_GNU_FromSource/CLI_Compile.sh ]
 	then
-		wget $mediainfo_url &&
+		curl --remote-name $mediainfo_url &&
 		tar xfvj MediaInfo_CLI_${mediainfo_version}_GNU_FromSource.tar.bz2
 		if ! [ $? -eq 0 ]
 		then 
@@ -361,7 +361,7 @@ setup_opencv ()
 	if ! [ -f opencv-$opencv_version/configure.in ]
 	then
 		cp ${base_dir}/opencv-1.0.0.patch . &&
-		wget $opencv_url &&
+		curl --remote-name $opencv_url &&
 		tar zxfv opencv${opencv_version}.tar.gz &&
 		patch -p0 -N  opencv-${opencv_version}/cxcore/include/cxmisc.h opencv-1.0.0.patch
 		if ! [ $? -eq 0 ]
@@ -407,8 +407,8 @@ setup_tesseract ()
 	cd ${working_dir}/tesseract
 	if ! [ -f tesseract-$tesseract_version/eurotext.tif ]
 	then
-		wget $tesseract_url &&
-		wget $tesseract_lang_url &&
+		curl --remote-name $tesseract_url &&
+		curl --remote-name $tesseract_lang_url &&
 		tar zxfv tesseract${tesseract_version}.tar.gz &&
 		cd ./tesseract-$tesseract_version &&
 		tar zxfv ../tesseract${tesseract_lang_version}.tar.gz &&
@@ -456,7 +456,7 @@ setup_ocropus ()
 	cd ${working_dir}/ocropus
 	if ! [ -f ocropus/generate_version_cc.sh ]
 	then
-		wget $ocropus_url &&
+		curl --remote-name $ocropus_url &&
 		tar zxfv ocropus${ocropus_revision}.tar.gz
 		if ! [ $? -eq 0 ]
 		then
@@ -502,7 +502,7 @@ setup_videosegmenter ()
 	cd ${working_dir}/videosegmenter
 	if ! [ -f vsegmenter-$videosegmenter_version/videosegmenter.c ]
 	then
-		wget $videosegmenter_url &&
+		curl --remote-name $videosegmenter_url &&
 		tar zxfv vsegmenter${videosegmenter_version}.tar.gz
 		if ! [ $? -eq 0 ]
 		then
