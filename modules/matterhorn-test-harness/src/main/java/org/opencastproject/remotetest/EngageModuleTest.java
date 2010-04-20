@@ -33,6 +33,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -91,7 +92,10 @@ public class EngageModuleTest {
     client.getConnectionManager().shutdown();
   }
 
+
+  
   @Test
+  @Ignore
   public void testContainsEngageTrack() throws Exception {
     // Clear the search index. Remove all media packages.
     clearSearchIndex();
