@@ -9,7 +9,6 @@
 	<packaging>swf</packaging>
 	<name>matterhorn-engage-player</name>
 
-
 	<parent>
 		<groupId>org.opencastproject</groupId>
 		<artifactId>base</artifactId>
@@ -22,7 +21,6 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
-	<!-- This gets a pass for MH-1810 since it does not inherit the base POM -AZ -->
 	<repositories>
 		<repository>
 			<id>opencast</id>
@@ -58,7 +56,6 @@
 					<accessible>true</accessible>
 					<headlessServer>true</headlessServer>
 					<showWarnings>false</showWarnings>
-
 					<output>${project.build.directory}/hybrid-player/Videodisplay.swf</output>
 					<!--<coverageViewerPath>/Applications/CoverageViewer.app</coverageViewerPath>-->
 				</configuration>
@@ -134,7 +131,69 @@
 							</execution>
 						</executions>
 					</plugin>
+				</plugins>
+			</build>
+		</profile>
 
+<!-- mvn -P production , copies only files needed for engage-ui  -->
+		<profile>
+			<id>production</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.flexmojos</groupId>
+						<artifactId>flexmojos-maven-plugin</artifactId>
+						<dependencies>
+							<dependency>
+								<groupId>com.adobe.flex</groupId>
+								<artifactId>compiler</artifactId>
+								<version>3.4.0.9271</version>
+								<type>pom</type>
+							</dependency>
+						</dependencies>
+						<version>3.4.2</version>
+						<extensions>true</extensions>
+						<configuration>
+							<targetPlayer>10.0.0</targetPlayer>
+							<accessible>true</accessible>
+							<headlessServer>true</headlessServer>
+							<showWarnings>false</showWarnings>
+							<output>${project.build.directory}/shared-resources/player/Videodisplay.swf</output>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.4.1</version>
+						<executions>
+							<execution>
+								<id>copy-resources</id>
+								<phase>install</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${basedir}/target/shared-resources/player</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/main/html/html-release</directory>
+											<filtering>true</filtering>
+											<includes>
+												<include>engage-hybrid-player/</include>
+											</includes>
+										</resource>
+										<resource>
+											<directory>src/main/flex/Videodisplay/</directory>
+											<filtering>true</filtering>
+											<includes>
+												<include>style/</include>
+											</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
