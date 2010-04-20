@@ -74,14 +74,12 @@ public class ConfidenceMonitorRestService {
   @Path("audio/{name}/{timestamp}")
   public String getRMSValues(@PathParam("name") String device, @PathParam("timestamp") double timestamp) {
     List<Double> rmsValues = service.getRMSValues(device, timestamp);
-    String output = "";
+    String output = Long.toString(System.currentTimeMillis()) + "\n";
     for (double value : rmsValues) {
+      value = Math.round(value * 100.00) / 100.00;
       output += Double.toString(value) + "\n";
     }
-    if (output.length() > 1)
-      return output.substring(0, output.length() - 2);
-    return output;
-    
+    return output.substring(0, output.length() - 2);
   }
   
 }
