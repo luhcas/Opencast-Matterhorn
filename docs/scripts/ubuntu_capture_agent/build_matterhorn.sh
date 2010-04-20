@@ -9,7 +9,6 @@ export JAVA_HOME=$2
 mkdir -p /home/$USERNAME/capture-agent
 cd /home/$USERNAME/capture-agent
 svn co http://opencast.jira.com/svn/MH/trunk
-svn co http://opencast.jira.com/svn/MH/trunk/modules/matterhorn-rest matterhorn-rest
 
 # setup felix configuration
 cp -r /home/$USERNAME/capture-agent/docs/felix/bin/* ${FELIX_HOME}/bin
