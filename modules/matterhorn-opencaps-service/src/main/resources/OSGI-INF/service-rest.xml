@@ -8,5 +8,5 @@
   </service>
   <!-- dynamic and 0..1 to allow the endpoint to work without the service, continue to serve up 503 and docs -->
   <reference name="service-impl" interface="org.opencastproject.opencaps.OpencapsService"
-    cardinality="0..1" policy="dynamic" bind="setService" unbind="unsetService" />
+    cardinality="1..1" policy="static" bind="setService" unbind="unsetService" />
 </component>

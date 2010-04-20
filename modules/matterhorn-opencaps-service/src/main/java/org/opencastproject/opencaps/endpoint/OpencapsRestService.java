@@ -129,27 +129,10 @@ public class OpencapsRestService {
     logger.info("ACTIVATE: service={}", service);
   }
 
-  /**
-   * Checks if the service or services are available, if not it handles it by returning a 503 with a message
-   * 
-   * @param services
-   *          an array of services to check
-   */
-  protected void checkNotNull(Object... services) {
-    if (services != null) {
-      for (Object object : services) {
-        if (object == null) {
-          throw new javax.ws.rs.WebApplicationException(javax.ws.rs.core.Response.Status.SERVICE_UNAVAILABLE);
-        }
-      }
-    }
-  }
-
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("list/processed.json")
   public String getSearchResults(@QueryParam("count") Integer perPage, @QueryParam("startPage") Integer page) {
-    checkNotNull(service);
     if (page == null || page < 1) {
       page = 1;
     }
@@ -181,7 +164,6 @@ public class OpencapsRestService {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("list/held.json")
   public String getHeldMedia(@QueryParam("count") Integer perPage, @QueryParam("startPage") Integer page) {
-    checkNotNull(service);
     if (page == null || page < 1) {
       page = 1;
     }
@@ -213,7 +195,6 @@ public class OpencapsRestService {
   @Path("/{id}")
   @Produces(MediaType.APPLICATION_JSON)
   public String getCaptionsItem(@PathParam("id") String workflowId) {
-    checkNotNull(service);
     OpencapsMediaItem cmi = service.getCaptionsMediaItem(workflowId);
     if (cmi == null) {
       throw new WebApplicationException(Response.Status.NOT_FOUND);
@@ -243,7 +224,6 @@ public class OpencapsRestService {
   @Path("/{id}/{type}")
   public Response addCaption(@PathParam("id") String workflowId, @PathParam("type") String captionType,
           @Context HttpServletRequest request, InputStream stream) {
-    checkNotNull(service);
     InputStream is = null;
     try {
       is = request.getInputStream();

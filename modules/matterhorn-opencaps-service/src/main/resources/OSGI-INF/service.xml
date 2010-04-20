@@ -11,6 +11,7 @@
         cardinality="1..1" policy="static" bind="setWorkflowService" unbind="unsetWorkflowService" />
     <!-- services I provide -->
     <service>
+        <provide interface="org.opencastproject.opencaps.OpencapsService" />
         <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
     </service>
 </component>
