@@ -520,6 +520,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         try {
           if(resumableHandler.getHoldStateUserInterfaceURL(workflow) != null) {
             URL url = resumableHandler.getHoldStateUserInterfaceURL(workflow);
+            String holdActionTitle = resumableHandler.getHoldActionTitle();
+            ((WorkflowOperationInstanceImpl)currentOperation).setHoldActionTitle(holdActionTitle);
             ((WorkflowOperationInstanceImpl)currentOperation).setHoldStateUserInterfaceUrl(url);
           }
         } catch (WorkflowOperationException e) {

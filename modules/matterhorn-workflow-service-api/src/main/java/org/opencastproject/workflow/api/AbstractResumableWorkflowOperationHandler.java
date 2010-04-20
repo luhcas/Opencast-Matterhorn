@@ -38,8 +38,10 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
   protected HttpService httpService;
   protected HttpContext httpContext;
   protected StaticResource staticResource;
+  protected String holdActionTitle;
 
-  
+  private static final String DEFAULT_TITLE = "Action";    // TODO maybe there's a better default action title?
+
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
   }
@@ -47,6 +49,18 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
   public URL getHoldStateUserInterfaceURL(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     if(staticResource == null) return null;
     return staticResource.getDefaultUrl();
+  }
+
+  protected void setHoldActionTitle(String title) {
+    this.holdActionTitle = title;
+  }
+
+  public String getHoldActionTitle() {
+    if (holdActionTitle == null) {
+      return DEFAULT_TITLE;
+    } else {
+      return holdActionTitle;
+    }
   }
 
   protected URL registerHoldStateUserInterface(final String resourcePath) {

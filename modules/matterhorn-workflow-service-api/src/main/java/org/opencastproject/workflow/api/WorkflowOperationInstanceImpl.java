@@ -54,7 +54,10 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
 
   @XmlElement(name="holdurl")
   protected URL holdStateUserInterfaceUrl;
-  
+
+  @XmlElement(name="hold-action-title")
+  protected String holdActionTitle;
+
   /**
    * No-arg constructor needed for JAXB serialization
    */
@@ -197,4 +200,23 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   public void setHoldStateUserInterfaceUrl(URL holdStateUserInterfaceUrl) {
     this.holdStateUserInterfaceUrl = holdStateUserInterfaceUrl;
   }
+
+  /** Set the title for the link to this operations hold state UI,
+   *  a default String if no title is set.
+   *
+   * @return title to be displayed
+   */
+  public void setHoldActionTitle(String title) {
+    this.holdActionTitle = title;
+  }
+
+  /** Returns the title for the link to this operations hold state UI,
+   *  a default String if no title is set.
+   *
+   * @return title to be displayed
+   */
+  public String getHoldActionTitle() {
+    return holdActionTitle;
+  }
+
 }

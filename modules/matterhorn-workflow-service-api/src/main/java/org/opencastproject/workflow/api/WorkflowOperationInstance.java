@@ -47,4 +47,11 @@ public interface WorkflowOperationInstance extends Configurable {
    * @return
    */
   URL getHoldStateUserInterfaceUrl();
+
+  /** Returns the title for the link to this operations hold state UI,
+   *  a default String if no title is set.
+   *
+   * @return title to be displayed
+   */
+  String getHoldActionTitle();
 }

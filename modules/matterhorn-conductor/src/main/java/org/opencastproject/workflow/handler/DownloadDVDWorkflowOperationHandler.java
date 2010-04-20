@@ -38,6 +38,7 @@ public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkfl
   private static final Logger logger = LoggerFactory.getLogger(DownloadDVDWorkflowOperationHandler.class);
   /** Path to the hold ui resources */
   private static final String HOLD_UI_PATH = "/operation/ui/download-dvd/index.html";
+  private static final String ACTION_TITLE = "download DVD";
 
   public void setHttpService(HttpService service) {
     super.httpService = service;
@@ -50,6 +51,7 @@ public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkfl
   public void activate(ComponentContext cc) {
     super.activate(cc);
     registerHoldStateUserInterface(HOLD_UI_PATH);
+    setHoldActionTitle(ACTION_TITLE);
     logger.info("Registering download-DVD hold state ui from classpath {}", HOLD_UI_PATH);
   }
 
@@ -70,14 +72,13 @@ public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkfl
   @Override
   public WorkflowOperationResult resume(WorkflowInstance workflowInstance)
           throws WorkflowOperationException {
-    logger.info("DownloadDVD operation resumed");
     // remove the DVD encoded track from the mediaPackage
     try {
       MediaPackage mp = workflowInstance.getMediaPackage();
       Track[] tracks = mp.getTracks();
       for (int i = 0; i < tracks.length; i++) {
-        if (tracks[i].getMimeType().getType().equals("video/dvd")) {
-          logger.info("found DVD track, deleting...");
+        if (tracks[i].getFlavor().getSubtype().toUpperCase().equals("DVD")) {
+          logger.info("Deleting {} from MediaPackage {}", tracks[i].toString(), mp.getIdentifier().toString() );
           mp.remove(tracks[i]);
         }
       }

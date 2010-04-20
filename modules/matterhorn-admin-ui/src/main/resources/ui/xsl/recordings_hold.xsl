@@ -56,8 +56,7 @@
           <xsl:attribute name="href">
             <xsl:text>javascript:Recordings.displayHoldActionPanel('</xsl:text><xsl:value-of select="holdActionPanelURL" /><xsl:text>','</xsl:text><xsl:value-of select="id" /><xsl:text>');</xsl:text>
           </xsl:attribute>
-          <!-- xsl:value-of select="holdActionTitle" / -->
-          Action
+          <xsl:value-of select="holdActionTitle" />
         </a>
       </td>
     </tr>

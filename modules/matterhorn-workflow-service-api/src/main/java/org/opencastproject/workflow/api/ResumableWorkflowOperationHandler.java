@@ -43,4 +43,10 @@ public interface ResumableWorkflowOperationHandler extends WorkflowOperationHand
    */
   URL getHoldStateUserInterfaceURL(WorkflowInstance wokflowInstance) throws WorkflowOperationException;
 
+  /** Returns the title for the link to this operations hold state UI.
+   *
+   * @return title to be displayed
+   */
+  String getHoldActionTitle();
+
 }
