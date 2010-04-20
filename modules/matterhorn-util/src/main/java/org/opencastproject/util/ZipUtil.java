@@ -15,17 +15,18 @@
  */
 package org.opencastproject.util;
 
+import de.schlichtherle.io.ArchiveException;
+import de.schlichtherle.io.File;
+import de.schlichtherle.io.FileInputStream;
+import de.schlichtherle.io.FileOutputStream;
+
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import de.schlichtherle.io.ArchiveException;
-import de.schlichtherle.io.File;
-import de.schlichtherle.io.FileInputStream;
-import de.schlichtherle.io.FileOutputStream;
 
 /**
  * Provides static methods for compressing and extracting zip files using zip64 extensions when necessary.
@@ -95,30 +96,15 @@ public class ZipUtil {
     if (destination.exists() && destination.isFile()) {
       throw new IllegalArgumentException("destination file must be a directory");
     }
-    if( ! destination.exists()) destination.mkdir();
-    
-    File zip = new File(zipFile);
-    for(String path : zip.list()) {
-      OutputStream out = null;
-      InputStream in = null;
-      try {
-        File inFile = new File(zip, path);
-        if( ! inFile.exists()) {
-          throw new IllegalStateException("Found non-existent zip entry " + path);
-        }
-        if(inFile.isDirectory()) {
-          throw new IllegalStateException("Zipped directories are not yet supported");
-        }
-        in = new FileInputStream(inFile);
-        out = new FileOutputStream(new File(destination, path));
-        File.cat(in, out);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      } finally {
-        if(in != null) {try {in.close();} catch (IOException e) {logger.error(e.getMessage());}}
-        if(out != null) {try {out.close();} catch (IOException e) {logger.error(e.getMessage());}}
-        try {File.umount();} catch (ArchiveException e) {logger.error(e.getMessage());}
-      }
+    try {
+      FileUtils.forceMkdir(destination);
+      de.schlichtherle.io.File f = new de.schlichtherle.io.File(zipFile);
+      f.archiveCopyAllTo(destination);
+    } catch (IOException e) {
+      throw new IllegalStateException("Unabel to create archive destination directory " + destination);
+    } finally {
+      try {File.umount();} catch (ArchiveException e) {logger.error(e.getMessage());}
     }
   }
+
 }

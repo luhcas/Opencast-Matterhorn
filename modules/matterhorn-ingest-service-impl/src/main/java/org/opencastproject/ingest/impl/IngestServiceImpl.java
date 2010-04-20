@@ -46,6 +46,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.Date;
 import java.util.Map;
+import java.util.Stack;
 import java.util.UUID;
 
 /**
@@ -343,19 +344,20 @@ public class IngestServiceImpl implements IngestService {
    * @return the manifest file
    */
   private File getManifest(File mediapackageDir) {
-    File[] files = mediapackageDir.listFiles(new FileFilter() {
-      @Override
-      public boolean accept(File pathname) {
-        return pathname.getName().endsWith(".xml");
-      }
-    });
-    if (files == null)
-      return null;
-    else if (files.length == 0)
-      return null;
-    else if (files.length == 1)
-      return files[0];
-    else {
+    Stack<File> stack = new Stack<File>();
+    stack.push(mediapackageDir);
+    for (File f : mediapackageDir.listFiles()) {
+      if (f.isDirectory())
+        stack.push(f);
+    }
+    while (!stack.empty()) {
+      File dir = stack.pop();
+      File[] files = dir.listFiles(new FileFilter() {
+        @Override
+        public boolean accept(File pathname) {
+          return pathname.getName().endsWith(".xml");
+        }
+      });
       for (File f : files) {
         if ("index.xml".equals(f.getName()) || "manifest.xml".equals(f.getName()))
           return f;
