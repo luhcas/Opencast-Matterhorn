@@ -19,23 +19,27 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.Track;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This <code>MediaPackageElementSelector</code> selects a combination of tracks
- * from a <code>MediaPackage</code> that contain audio and video stream.
+ * This <code>MediaPackageElementSelector</code> selects a combination of tracks from a <code>MediaPackage</code> that
+ * contain audio and video stream.
  */
-public class AudioVisualElementSelector extends
-        AbstractMediaPackageElementSelector<Track> {
+public class AudioVisualElementSelector extends AbstractMediaPackageElementSelector<Track> {
 
   /** Explicit video flavor */
   protected MediaPackageElementFlavor videoFlavor = null;
 
   /** Explicit audio flavor */
   protected MediaPackageElementFlavor audioFlavor = null;
+
+  /** The resulting audio track */
+  protected Track audioTrack = null;
+
+  /** The resulting video track */
+  protected Track videoTrack = null;
 
   /** Make this selector require an audio track */
   protected boolean requireAudio = true;
@@ -50,8 +54,7 @@ public class AudioVisualElementSelector extends
   }
 
   /**
-   * Creates a new selector that will restrict the result of
-   * <code>select()</code> to the given flavor.
+   * Creates a new selector that will restrict the result of <code>select()</code> to the given flavor.
    * 
    * @param flavor
    *          the flavor
@@ -61,8 +64,7 @@ public class AudioVisualElementSelector extends
   }
 
   /**
-   * Creates a new selector that will restrict the result of
-   * <code>select()</code> to the given flavor.
+   * Creates a new selector that will restrict the result of <code>select()</code> to the given flavor.
    * 
    * @param flavor
    *          the flavor
@@ -80,9 +82,10 @@ public class AudioVisualElementSelector extends
   public void setAudioFlavor(String flavor) {
     if (flavor == null) {
       audioFlavor = null;
-      return;
+    } else {
+      setAudioFlavor(MediaPackageElementFlavor.parseFlavor(flavor));
     }
-    setAudioFlavor(MediaPackageElementFlavor.parseFlavor(flavor));
+    setRequireAudioTrack(flavor != null);
   }
 
   /**
@@ -98,9 +101,8 @@ public class AudioVisualElementSelector extends
   }
 
   /**
-   * If set to <code>true</code>, this selector requires an audio track to be
-   * part of the result set, or a video track containing at least one audio
-   * stream.
+   * If set to <code>true</code>, this selector requires an audio track to be part of the result set, or a video track
+   * containing at least one audio stream.
    * 
    * @param require
    *          <code>true</code> to require an audio track
@@ -110,8 +112,7 @@ public class AudioVisualElementSelector extends
   }
 
   /**
-   * If set to <code>true</code>, this selector requires a video track to be
-   * part of the result set.
+   * If set to <code>true</code>, this selector requires a video track to be part of the result set.
    * 
    * @param require
    *          <code>true</code> to require a video track
@@ -121,8 +122,7 @@ public class AudioVisualElementSelector extends
   }
 
   /**
-   * Returns the explicit audio flavor or <code>null</code> if none was
-   * specified.
+   * Returns the explicit audio flavor or <code>null</code> if none was specified.
    * 
    * @return the audio flavor
    */
@@ -142,6 +142,7 @@ public class AudioVisualElementSelector extends
     } else {
       setVideoFlavor(MediaPackageElementFlavor.parseFlavor(flavor));
     }
+    setRequireVideoTrack(flavor != null);
   }
 
   /**
@@ -157,8 +158,7 @@ public class AudioVisualElementSelector extends
   }
 
   /**
-   * Returns the explicit video flavor or <code>null</code> if none was
-   * specified.
+   * Returns the explicit video flavor or <code>null</code> if none was specified.
    * 
    * @return the video flavor
    */
@@ -167,64 +167,34 @@ public class AudioVisualElementSelector extends
   }
 
   /**
-   * Returns a track or a number of tracks from the media package that together
-   * contain audio and video. If no such combination can be found, e. g. there
-   * is no audio or video at all, an empty array is returned.
+   * Returns the audio track that has been selected by a call to {@link #select(MediaPackage)}, which might be
+   * <code>null</code> if no audio is required or available.
+   * 
+   * @return the audio track
+   */
+  public Track getAudioTrack() {
+    return audioTrack;
+  }
+
+  /**
+   * Returns the video track that has been selected by a call to {@link #select(MediaPackage)}, which might be
+   * <code>null</code> if no video is required or available.
+   * 
+   * @return the video track
+   */
+  public Track getVideoTrack() {
+    return videoTrack;
+  }
+
+  /**
+   * Returns a track or a number of tracks from the media package that together contain audio and video. If no such
+   * combination can be found, e. g. there is no audio or video at all, an empty array is returned.
    * 
    * @see org.opencastproject.media.mediapackage.selector.AbstractMediaPackageElementSelector#select(org.opencastproject.media.mediapackage.MediaPackage)
    */
   @Override
   public Collection<Track> select(MediaPackage mediaPackage) {
-    // instead of relying on the broken superclass, we'll inspect every track
-    // Collection<Track> candidates = super.select(mediaPackage);
-    Set<Track> result = new HashSet<Track>();
-
-    MediaPackageElementFlavor intermediaryAudioFlavor = audioFlavor;
-    MediaPackageElementFlavor intermediaryVideoFlavor = videoFlavor;
-    boolean intermediary = false;
-
-    boolean foundAudio = false;
-    boolean foundVideo = false;
-    
-    // special handling for */* flavors
-    if (audioFlavor != null) {
-      if ("*".equals(audioFlavor.getType()) || "*".equals(audioFlavor.getSubtype())) {
-        intermediaryAudioFlavor = videoFlavor;
-        intermediary = true;
-      } else if ("*".equals(audioFlavor.getType()) || "*".equals(audioFlavor.getSubtype())) {
-        intermediaryVideoFlavor = audioFlavor;
-        intermediary = true;
-      }
-    }
-    
-    // Try to look up the best match first. If it fails, try again with wildcard flavors (if defined)
-    result = select(mediaPackage, intermediaryAudioFlavor, intermediaryVideoFlavor);
-    for (Track t : result) {
-      if (t.hasAudio() && t.getFlavor().equals(intermediaryAudioFlavor))
-        foundAudio = true;
-      if (t.hasVideo() && t.getFlavor().equals(intermediaryVideoFlavor))
-        foundVideo = true;
-    }
-    if (intermediary && ((!foundAudio && requireAudio) || (!foundVideo && requireVideo))) {
-      result = select(mediaPackage, audioFlavor, videoFlavor);
-    }
-
-    if ((!foundAudio && requireAudio) || (!foundVideo && requireVideo))
-      result.clear();
-
-    // We were lucky, a combination was found!
-    return result;
-  }
-
-  /**
-   * Returns a track or a number of tracks from the media package that together
-   * contain audio and video. If no such combination can be found, e. g. there
-   * is no audio or video at all, an empty array is returned.
-   * 
-   * @see org.opencastproject.media.mediapackage.selector.AbstractMediaPackageElementSelector#select(org.opencastproject.media.mediapackage.MediaPackage)
-   */
-  public Set<Track> select(MediaPackage mediaPackage, MediaPackageElementFlavor audioFlavor, MediaPackageElementFlavor videoFlavor) {
-    Collection<Track> candidates = Arrays.asList(mediaPackage.getTracks());
+    Collection<Track> candidates = super.select(mediaPackage);
     Set<Track> result = new HashSet<Track>();
 
     boolean foundAudio = false;
@@ -237,15 +207,19 @@ public class AudioVisualElementSelector extends
         foundVideo |= t.hasVideo();
         result.add(t);
       } else {
-        if (audioFlavor != null && t.hasAudio() && audioFlavor.equals(t.getFlavor())) {
+        if (audioFlavor != null && t.hasAudio() && audioFlavor.matches(t.getFlavor()) && !(videoFlavor == null && t.hasVideo())) {
           foundAudio = true;
+          audioTrack = t;
           result.add(t);
         }
-        if (videoFlavor != null && t.hasVideo() && videoFlavor.equals(t.getFlavor())) {
+        if (videoFlavor != null && t.hasVideo() && videoFlavor.matches(t.getFlavor()) && !(audioFlavor == null && t.hasAudio())) {
           foundVideo = true;
+          videoTrack = t;
           result.add(t);
         }
       }
+      if ((foundAudio || audioFlavor == null) && (foundVideo || videoFlavor == null))
+        break;
     }
 
     if ((!foundAudio && requireAudio) || (!foundVideo && requireVideo))

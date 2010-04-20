@@ -122,7 +122,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
     for (Map.Entry<String, String> entry : format.getExtensions().entrySet()) {
       String key = entry.getKey();
       if (key.startsWith(CMD_SUFFIX) && key.length() > CMD_SUFFIX.length()) {
-        String value = replaceCommandlineParameters(entry.getValue());
+        String value = processParameters(entry.getValue());
         String partName = "#\\{" + key.substring(CMD_SUFFIX.length() + 1) + "\\}";
         if (!value.matches(".*#\\{.*\\}.*"))
           commandline = commandline.replaceAll(partName, value);
@@ -130,7 +130,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
     }
 
     // Replace the commandline parameters passed in at compile time
-    commandline = replaceCommandlineParameters(commandline);
+    commandline = processParameters(commandline);
 
     // Remove unused commandline parts
     commandline = commandline.replaceAll("#\\{.*\\}", "");

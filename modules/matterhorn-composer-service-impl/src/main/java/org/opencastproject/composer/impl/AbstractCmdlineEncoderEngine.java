@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.activation.MimetypesFileTypeMap;
+
 /**
  * Wrapper around any kind of command line controllable encoder.
  * <p/>
@@ -120,16 +122,18 @@ public abstract class AbstractCmdlineEncoderEngine extends
                 .normalize(audioSource.getAbsolutePath());
         params.put("in.audio.path", audioInput);
         params.put("in.audio.name", FilenameUtils.getBaseName(audioInput));
-        params.put("in.audio.extension", FilenameUtils.getExtension(audioInput));
+        params.put("in.audio.suffix", FilenameUtils.getExtension(audioInput));
         params.put("in.audio.filename", FilenameUtils.getName(audioInput));
+        params.put("in.audio.mimetype", MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(audioInput));
       }
       if (videoSource != null) {
         String videoInput = FilenameUtils
                   .normalize(videoSource.getAbsolutePath());
         params.put("in.video.path", videoInput);
         params.put("in.video.name", FilenameUtils.getBaseName(videoInput));
-        params.put("in.video.extension", FilenameUtils.getExtension(videoInput));
+        params.put("in.video.suffix", FilenameUtils.getExtension(videoInput));
         params.put("in.video.filename", FilenameUtils.getName(videoInput));
+        params.put("in.video.mimetype", MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(videoInput));
       }
       File parentFile;
       if(videoSource == null) {
@@ -139,7 +143,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
       }
       params.put("out.dir", parentFile.getParent());
       params.put("out.name", FilenameUtils.getBaseName(parentFile.getName()));
-      params.put("out.suffix", profile.getSuffix());
+      params.put("out.suffix", processParameters(profile.getSuffix()));
 
       if(properties != null) params.putAll(properties);
       
@@ -189,7 +193,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
         );
       }
       fireEncoded(this, profile, audioSource, videoSource);
-      return new File(parentFile.getParent(), FilenameUtils.getBaseName(parentFile.getCanonicalPath()) + profile.getSuffix());
+      return new File(parentFile.getParent(), FilenameUtils.getBaseName(parentFile.getCanonicalPath()) + processParameters(profile.getSuffix()));
     } catch (EncoderException e) {
       if (audioSource != null) {
         log_.warn("Error while encoding audio track {} and video track {} using '{}': {}",
@@ -293,7 +297,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
    */
   protected List<String> buildArgumentList(EncodingProfile format)
           throws EncoderException {
-    String optionString = replaceCommandlineParameters(cmdlineOptions);
+    String optionString = processParameters(cmdlineOptions);
     String[] options = optionString.split(" ");
     List<String> arguments = new ArrayList<String>(options.length);
     arguments.addAll(Arrays.asList(options));
@@ -306,7 +310,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
    * 
    * @return the commandline
    */
-  protected String replaceCommandlineParameters(String cmd) {
+  protected String processParameters(String cmd) {
     String r = cmd;
     for (Map.Entry<String, String> e : params.entrySet()) {
       r = r.replace("#{" + e.getKey() + "}", e.getValue());

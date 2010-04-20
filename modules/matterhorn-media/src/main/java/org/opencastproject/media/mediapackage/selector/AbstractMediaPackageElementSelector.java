@@ -57,7 +57,14 @@ public abstract class AbstractMediaPackageElementSelector<T extends MediaPackage
       if (type.isAssignableFrom(e.getClass())) {
 
         // Any of the flavors?
-        if (flavors.size() > 0 && !flavors.contains(e.getFlavor()))
+        boolean matchesFlavor = false;
+        for (MediaPackageElementFlavor flavor : flavors) {
+          if (flavor.matches(e.getFlavor())) {
+            matchesFlavor = true;
+            break;
+          }
+        }
+        if (!matchesFlavor)
           continue;
 
         // What about tags?

@@ -329,6 +329,24 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
     }
   }
 
+  public boolean matches(MediaPackageElementFlavor other) {
+    if (other == null)
+      return false;
+    if (this == other)
+      return true;
+    if (subtype == null) {
+      if (other.subtype != null && !"*".equals(other.subtype))
+        return false;
+    } else if (!subtype.equals(other.subtype) && (!"*".equals(subtype) && !"*".equals(other.subtype)))
+      return false;
+    if (type == null) {
+      if (other.type != null && !"*".equals(other.type))
+        return false;
+    } else if (!type.equals(other.type) && (!"*".equals(type) && !"*".equals(other.type)))
+      return false;
+    return true;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -348,14 +366,14 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
       return false;
     MediaPackageElementFlavor other = (MediaPackageElementFlavor) obj;
     if (subtype == null) {
-      if (other.subtype != null && !"*".equals(other.subtype))
+      if (other.subtype != null)
         return false;
-    } else if (!subtype.equals(other.subtype) && (!"*".equals(subtype) && !"*".equals(other.subtype)))
+    } else if (!subtype.equals(other.subtype))
       return false;
     if (type == null) {
-      if (other.type != null && !"*".equals(other.type))
+      if (other.type != null)
         return false;
-    } else if (!type.equals(other.type) && (!"*".equals(type) && !"*".equals(other.type)))
+    } else if (!type.equals(other.type))
       return false;
     return true;
   }

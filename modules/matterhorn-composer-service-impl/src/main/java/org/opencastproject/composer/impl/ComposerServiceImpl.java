@@ -29,6 +29,8 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.identifier.IdBuilder;
+import org.opencastproject.media.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.workspace.api.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
@@ -71,9 +73,12 @@ public class ComposerServiceImpl implements ComposerService {
   /** Reference to the database service */
   private ComposerServiceDao dao;
 
+  /** Id builder used to create ids for encoded tracks */
+  private final IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
+
   /** Thread pool */
   ExecutorService executor = null;
-
+  
   private Map<String, Object> encoderEngineConfig = new ConcurrentHashMap<String, Object>();
   public static final String CONFIG_FFMPEG_PATH = "composer.ffmpegpath";
 
@@ -185,7 +190,7 @@ public class ComposerServiceImpl implements ComposerService {
   public Receipt encode(final MediaPackage mp, final String sourceVideoTrackId, final String sourceAudioTrackId,
           final String profileId, final boolean block) throws EncoderException, MediaPackageException {
 
-    final String targetTrackId = "track-" + (mp.getTracks().length + 1);
+    final String targetTrackId = idBuilder.createNew().toString();
     final Receipt receipt = dao.createReceipt();
 
     // Get the tracks and make sure they exist

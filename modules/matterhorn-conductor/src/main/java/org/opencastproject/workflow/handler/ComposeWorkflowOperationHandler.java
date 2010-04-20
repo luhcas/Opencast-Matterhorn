@@ -22,6 +22,7 @@ import org.opencastproject.composer.api.Receipt;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.selector.AudioVisualElementSelector;
@@ -51,6 +52,12 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
   /** The composer service */
   private ComposerService composerService = null;
+
+  /** Name of the audio-only (strip video) profile */
+  public static final String AUDIO_ONLY_PROFILE = "audio-only.http";
+
+  /** Name of the audio-only (strip audio) profile */
+  public static final String VIDEO_ONLY_PROFILE = "video-only.http";
 
   /**
    * Callback for the OSGi declarative services configuration.
@@ -126,28 +133,18 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
     // make sure we have the required tracks:
     AudioVisualElementSelector avSelector = new AudioVisualElementSelector();
     avSelector.setVideoFlavor(sourceVideoFlavor);
-    avSelector.setAudioFlavor(sourceAudioFlavor);
+    avSelector.setAudioFlavor(sourceAudioFlavor);      
     switch (profile.getApplicableMediaType()) {
-    case Stream:
-      avSelector.setRequireVideoTrack(false);
-      avSelector.setRequireAudioTrack(false);
-      break;
-    case AudioVisual:
-      avSelector.setRequireVideoTrack(true);
-      avSelector.setRequireAudioTrack(true);
-      break;
-    case Visual:
-      avSelector.setRequireVideoTrack(true);
-      avSelector.setRequireAudioTrack(false);
-      break;
-    case Audio:
-      avSelector.setRequireVideoTrack(false);
-      avSelector.setRequireAudioTrack(true);
-      break;
-    default:
-      logger.warn("Don't know if the current track is applicable to encoding profile '" + profile + "' based on type "
-              + profile.getApplicableMediaType());
-      return mediaPackage;
+      case AudioVisual:
+        avSelector.setRequireVideoTrack(true);
+        avSelector.setRequireAudioTrack(true);
+        break;
+      case Visual:
+        avSelector.setRequireVideoTrack(true);
+        break;
+      case Audio:
+        avSelector.setRequireAudioTrack(true);
+        break;
     }
     Collection<Track> tracks = avSelector.select(mediaPackage);
 
@@ -159,14 +156,10 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       logger.debug("Skipping encoding of media package to '{}': no suitable input tracks found", profile);
       return mediaPackage;
     } else {
-      for (Track t : tracks) {
-        if (sourceVideoTrackId == null && t.hasVideo()) {
-          sourceVideoTrackId = t.getIdentifier();
-        }
-        if (sourceAudioTrackId == null && t.hasAudio()) {
-          sourceAudioTrackId = t.getIdentifier();
-        }
-      }
+      if (avSelector.getAudioTrack() != null)
+        sourceAudioTrackId = avSelector.getAudioTrack().getIdentifier();
+      if (avSelector.getVideoTrack() != null)
+        sourceVideoTrackId = avSelector.getVideoTrack().getIdentifier();
     }
 
     // Don't pass the same track as audio *and* video
@@ -181,20 +174,37 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       }
     }
 
+    // If muxing (audio + video from two different files) is happening, then we need to make sure that those files
+    // contain the relevant streams only. Therefore, we encode to audio-only and video-only first.
+    if (sourceAudioTrackId != null && sourceVideoTrackId != null) {
+      Track audioTrack = mediaPackage.getTrack(sourceAudioTrackId);
+      if (audioTrack.hasVideo()) {
+        Track strippedTrack = getStrippedTrack(mediaPackage, audioTrack, AUDIO_ONLY_PROFILE);
+        mediaPackage.add(strippedTrack);
+        sourceAudioTrackId = strippedTrack.getIdentifier();
+      }
+      Track videoTrack = mediaPackage.getTrack(sourceVideoTrackId);
+      if (videoTrack.hasAudio()) {
+        Track strippedTrack = getStrippedTrack(mediaPackage, videoTrack, VIDEO_ONLY_PROFILE);
+        mediaPackage.add(strippedTrack);
+        sourceVideoTrackId = strippedTrack.getIdentifier();
+      }
+    }
+
     // choose composer service with least running jobs
-//    listAllComposerServices();
-//    ComposerService cs = allComposerServices[0];
-//    for (ComposerService c : allComposerServices) {
-//      if (c.countJobs() < cs.countJobs()) {
-//        cs = c;
-//      }
-//    }
-//    logger.debug("Media will be encoded on {}", cs.toString());
+    // listAllComposerServices();
+    // ComposerService cs = allComposerServices[0];
+    // for (ComposerService c : allComposerServices) {
+    // if (c.countJobs() < cs.countJobs()) {
+    // cs = c;
+    // }
+    // }
+    // logger.debug("Media will be encoded on {}", cs.toString());
 
     // Start encoding and wait for the result
     final Receipt receipt = composerService.encode(mediaPackage, sourceVideoTrackId, sourceAudioTrackId, profile
             .getIdentifier(), true);
-    Track composedTrack = (Track)receipt.getElement();
+    Track composedTrack = (Track) receipt.getElement();
     updateTrack(composedTrack, operation, profile);
 
     // store new tracks to mediaPackage
@@ -204,14 +214,24 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
     String parentId = sourceVideoTrackId == null ? sourceAudioTrackId : sourceVideoTrackId;
     mediaPackage.addDerived(composedTrack, mediaPackage.getElementById(parentId));
 
-    // Add the flavor and tags, if specified
-    if(targetTrackFlavor != null) {
-      MediaPackageElementFlavor targetFlavor = MediaPackageElementFlavor.parseFlavor(targetTrackFlavor);
-      composedTrack.setFlavor(targetFlavor);
+    // Add the flavor
+    MediaPackageElementFlavor targetFlavor = null;
+    if (targetTrackFlavor != null) {
+      targetFlavor = MediaPackageElementFlavor.parseFlavor(targetTrackFlavor);
+    } else {
+      if (sourceVideoFlavor != null)
+        targetFlavor = MediaPackageElementFlavor.parseFlavor(sourceVideoFlavor);
+      else if (sourceAudioFlavor != null)
+        targetFlavor = MediaPackageElementFlavor.parseFlavor(sourceAudioFlavor);
     }
-    if(targetTrackTags != null) {
+    composedTrack.setFlavor(targetFlavor);
+
+    // Add the tags
+    if (targetTrackTags != null) {
       String[] tags = targetTrackTags.split("\\W");
-      if(tags.length > 0) for(String tag : tags) composedTrack.addTag(tag);
+      if (tags.length > 0)
+        for (String tag : tags)
+          composedTrack.addTag(tag);
     }
     return mediaPackage;
   }
@@ -245,4 +265,52 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       }
     }
   }
+
+  /**
+   * Create a stripped down version of the track, using the specified encoding profile. The result is a track (with
+   * either stripped video or audio), a reference to the original track as well as a flavor created from the original
+   * track and including the encoding profile, as in <code>source/presentation+audioonly</code>.
+   * 
+   * @param mediaPackage
+   *          the media package
+   * @param trackId
+   *          the track identifier
+   * @param profile
+   *          the encoding profile
+   * @return the encoded track
+   * @throws MediaPackageException
+   *           if accessing the media package fails
+   * @throws EncoderException
+   *           if encoding fails
+   */
+  private Track getStrippedTrack(MediaPackage mediaPackage, Track track, String profile) throws MediaPackageException,
+          EncoderException {
+    MediaPackageElementFlavor strippedFlavor = null;
+
+    // Create a derived flavor (original+audionly)
+    if (track.getFlavor() != null) {
+      String profileSuffix = profile.replaceAll("\\.[\\W]*$", "").replaceAll("\\W", "");
+      String subtype = track.getFlavor().getSubtype() + "+" + profileSuffix;
+      strippedFlavor = new MediaPackageElementFlavor(track.getFlavor().getType(), subtype);
+    }
+
+    // See if such a track is already part of the mediapackage
+    Track strippedTrack = null;
+    if (strippedFlavor != null) {
+      Track[] candidates = mediaPackage.getTracks(strippedFlavor, new MediaPackageReferenceImpl(track));
+      if (candidates.length == 1)
+        strippedTrack = candidates[0];
+    }
+
+    // If no such track was found, create it
+    if (strippedTrack == null) {
+      logger.info("Creating stripped version of '{}' using encoding profile '{}'", track, profile);
+      final Receipt receipt = composerService.encode(mediaPackage, track.getIdentifier(), null, profile, true);
+      strippedTrack = (Track) receipt.getElement();
+      strippedTrack.setFlavor(strippedFlavor);
+      strippedTrack.referTo(track);
+    }
+    return strippedTrack;
+  }
+
 }
