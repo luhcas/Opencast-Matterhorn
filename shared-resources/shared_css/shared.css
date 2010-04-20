@@ -1,0 +1,22 @@
+body {
+	padding-top: 20px;
+}
+
+#pageHeader {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	line-height: 20px;
+	font-size: 0.8em;
+	color: #FFF;
+	background-color: #F6921E;
+	text-align:left;
+}
+
+#pageHeader div {
+	display: inline-block;
+	width: 200px;
+	padding-left: 5px;
+	padding-right: 5px;
+}

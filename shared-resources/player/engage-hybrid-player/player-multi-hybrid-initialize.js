@@ -1,4 +1,4 @@
-/*global $, Player, Videodisplay, fluid, Scrubber*/
+/*global $, Player, Videodisplay,window, fluid, Scrubber*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
 /**
@@ -43,78 +43,93 @@ Opencast.Initialize = (function ()
     var closetimer		= 0;
     var ddmenuitem      = 0;
 
-    function dropdown_open()
-    {	dropdown_canceltimer();
-        dropdown_close();
-    	ddmenuitem = $(this).find('ul').eq(0).css('visibility', 'visible');
-    }
+    
 
     function dropdown_close()
-    {	if(ddmenuitem) ddmenuitem.css('visibility', 'hidden');}
+    {
+        if (ddmenuitem)
+        {
+            ddmenuitem.css('visibility', 'hidden');
+        }
+    }
 
     function dropdown_timer()
-    {	closetimer = window.setTimeout(dropdown_close, timeout);}
+    {
+        closetimer = window.setTimeout(dropdown_close, timeout);
+    }
 
     function dropdown_canceltimer()
-    {	if(closetimer)
-    	{	window.clearTimeout(closetimer);
-    		closetimer = null;}}
+    {
+        if (closetimer)
+        {
+            window.clearTimeout(closetimer);
+            closetimer = null;
+        }
+    }
+    
+    function dropdown_open()
+    {
+        dropdown_canceltimer();
+        dropdown_close();
+        ddmenuitem = $(this).find('ul').eq(0).css('visibility', 'visible');
+    }
     
     $(document).ready(function () {
         keyboardListener();
-        init();
+       
        
         $('#wysiwyg').wysiwyg({
-            controls: {
-              strikeThrough : { visible : true },
-              underline     : { visible : true },
+            controls: 
+            {
+                strikeThrough : { visible : true },
+                underline     : { visible : true },
               
-              separator00 : { visible : true },
+                separator00 : { visible : true },
               
-              justifyLeft   : { visible : true },
-              justifyCenter : { visible : true },
-              justifyRight  : { visible : true },
-              justifyFull   : { visible : true },
+                justifyLeft   : { visible : true },
+                justifyCenter : { visible : true },
+                justifyRight  : { visible : true },
+                justifyFull   : { visible : true },
               
-              separator01 : { visible : true },
+                separator01 : { visible : true },
+            
+                indent  : { visible : true },
+                outdent : { visible : true },
               
-              indent  : { visible : true },
-              outdent : { visible : true },
+                separator02 : { visible : true },
               
-              separator02 : { visible : true },
+                subscript   : { visible : true },
+                superscript : { visible : true },
               
-              subscript   : { visible : true },
-              superscript : { visible : true },
+                separator03 : { visible : true },
               
-              separator03 : { visible : true },
+                undo : { visible : true },
+                redo : { visible : true },
               
-              undo : { visible : true },
-              redo : { visible : true },
+                separator04 : { visible : true },
               
-              separator04 : { visible : true },
-              
-              insertOrderedList    : { visible : true },
-              insertUnorderedList  : { visible : true },
-              insertHorizontalRule : { visible : true },
+                insertOrderedList    : { visible : true },
+                insertUnorderedList  : { visible : true },
+                insertHorizontalRule : { visible : true },
 
-              separator07 : { visible : true },
-              
-              cut   : { visible : true },
-              copy  : { visible : true },
-              paste : { visible : true }
+                separator07 : { visible : true },
+             
+                cut   : { visible : true },
+                copy  : { visible : true },
+                paste : { visible : true }
             }
-          });
+        });
         
         
         $('#oc_video-size-dropdown > li').bind('mouseover', dropdown_open);
         //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
-    	$('#oc_video-size-dropdown > li').bind('mouseout',  dropdown_timer);
-    	
-    	$('#oc_volume-dropdown > li').bind('mouseover', dropdown_open);
+        $('#oc_video-size-dropdown > li').bind('mouseout',  dropdown_timer);
+ 
+        $('#oc_volume-dropdown > li').bind('mouseover', dropdown_open);
         //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
-    	$('#oc_volume-dropdown > li').bind('mouseout',  dropdown_timer);
-    	
-    	// init the aria slider for the volume
+        $('#oc_volume-dropdown > li').bind('mouseout',  dropdown_timer);
+
+        // init the aria slider for the volume
         Opencast.ariaSlider.init();
        
         // aria roles
@@ -150,154 +165,153 @@ Opencast.Initialize = (function ()
         
         
         // Handler for .click()
-        $('#oc_btn-skip-backward').click(function() 
+        $('#oc_btn-skip-backward').click(function () 
         {
-        	Opencast.Player.doSkipBackward();
+            Opencast.Player.doSkipBackward();
         });
-        $('#oc_btn-play-pause').click(function() 
+        $('#oc_btn-play-pause').click(function () 
         {
-        	Opencast.Player.doTogglePlayPause();
+            Opencast.Player.doTogglePlayPause();
         });
-        $('#oc_btn-skip-forward').click(function() 
+        $('#oc_btn-skip-forward').click(function () 
         {
-        	Opencast.Player.doSkipForward();
+            Opencast.Player.doSkipForward();
         });
-        $('#oc_btn-volume').click(function() 
+        $('#oc_btn-volume').click(function () 
         {
-           	Opencast.Player.doToggleMute();
+            Opencast.Player.doToggleMute();
         });
-        $('#oc_btn-cc').click(function() 
+        $('#oc_btn-cc').click(function () 
         {
             Opencast.Player.doToogleClosedCaptions();
         });
-        $('#oc_current-time').click(function() 
+        $('#oc_current-time').click(function () 
         {
-        	Opencast.Player.showEditTime();
+            Opencast.Player.showEditTime();
         });
        
         // Handler for .mouseover()
-        $('#oc_btn-skip-backward').mouseover(function() 
+        $('#oc_btn-skip-backward').mouseover(function () 
         {
-        	this.className='oc_btn-skip-backward-over';  
+            this.className = 'oc_btn-skip-backward-over';  
         });
-        $('#oc_btn-rewind').mouseover(function()
+        $('#oc_btn-rewind').mouseover(function ()
         {
-        	this.className='oc_btn-rewind-over';
+            this.className = 'oc_btn-rewind-over';
         });
-        $('#oc_btn-play-pause').mouseover(function() 
+        $('#oc_btn-play-pause').mouseover(function () 
         {
-        	Opencast.Player.PlayPauseMouseOver();
+            Opencast.Player.PlayPauseMouseOver();
         });
-        $('#oc_btn-fast-forward').mouseover(function() 
+        $('#oc_btn-fast-forward').mouseover(function () 
         {
-        	this.className='oc_btn-fast-forward-over';
+            this.className = 'oc_btn-fast-forward-over';
         });
-        $('#oc_btn-skip-forward').mouseover(function() 
+        $('#oc_btn-skip-forward').mouseover(function () 
         {
-        	this.className='oc_btn-skip-forward-over';
+            this.className = 'oc_btn-skip-forward-over';
         });
-        $('#oc_btn-cc').mouseover(function() 
+        $('#oc_btn-cc').mouseover(function () 
         {
-        	if(Opencast.Player.getCaptionsBool() === false)
-        	{
-        		this.className='oc_btn-cc-over';
-        	}
+            if (Opencast.Player.getCaptionsBool() === false)
+            {
+                this.className = 'oc_btn-cc-over';
+            }
         });
         
         // Handler for .mouseout()
-        $('#oc_btn-skip-backward').mouseout(function() 
+        $('#oc_btn-skip-backward').mouseout(function () 
         {
-            this.className='oc_btn-skip-backward';         
+            this.className = 'oc_btn-skip-backward';         
         });
-        $('#oc_btn-rewind').mouseout(function()
+        $('#oc_btn-rewind').mouseout(function ()
         {
-          	this.className='oc_btn-rewind';
+            this.className = 'oc_btn-rewind';
         });
-        $('#oc_btn-play-pause').mouseout(function() 
+        $('#oc_btn-play-pause').mouseout(function () 
         {
-          	Opencast.Player.PlayPauseMouseOut();
+            Opencast.Player.PlayPauseMouseOut();
         });
-        $('#oc_btn-fast-forward').mouseout(function() 
+        $('#oc_btn-fast-forward').mouseout(function () 
         {
-           	this.className='oc_btn-fast-forward';
+            this.className = 'oc_btn-fast-forward';
         });
-        $('#oc_btn-skip-forward').mouseout(function() 
+        $('#oc_btn-skip-forward').mouseout(function () 
         {
-           	this.className='oc_btn-skip-forward';
+            this.className = 'oc_btn-skip-forward';
         });
-        $('#oc_btn-cc').mouseout(function() 
+        $('#oc_btn-cc').mouseout(function () 
         {
-        	if(Opencast.Player.getCaptionsBool() === false)
-        	{
-        		this.className='oc_btn-cc-off';
-        	}
-           	
+            if (Opencast.Player.getCaptionsBool() === false)
+            {
+                this.className = 'oc_btn-cc-off';
+            }
+ 
         });
         
         // Handler for .mousedown()
-        $('#oc_btn-skip-backward').mousedown(function() 
+        $('#oc_btn-skip-backward').mousedown(function () 
         {
-        	this.className='oc_btn-skip-backward-clicked';   
+            this.className = 'oc_btn-skip-backward-clicked';   
         });
-        $('#oc_btn-rewind').mousedown(function()
+        $('#oc_btn-rewind').mousedown(function ()
         {
-           	this.className='oc_btn-rewind-clicked';
-           	Opencast.Player.doRewind();
+            this.className = 'oc_btn-rewind-clicked';
+            Opencast.Player.doRewind();
         });
         
-        $('#oc_btn-play-pause').mousedown(function() 
+        $('#oc_btn-play-pause').mousedown(function () 
         {
-          	Opencast.Player.PlayPauseMouseOut();
+            Opencast.Player.PlayPauseMouseOut();
         });
-        $('#oc_btn-fast-forward').mousedown(function() 
+        $('#oc_btn-fast-forward').mousedown(function () 
         {
-            this.className='oc_btn-fast-forward-clicked';
+            this.className = 'oc_btn-fast-forward-clicked';
             Opencast.Player.doFastForward();
             
         });
-        $('#oc_btn-skip-forward').mousedown(function() 
+        $('#oc_btn-skip-forward').mousedown(function () 
         {
-            this.className='oc_btn-skip-forward-clicked';
+            this.className = 'oc_btn-skip-forward-clicked';
         });
                                
         // Handler for .mouseup()
-        $('#oc_btn-skip-backward').mouseup(function() 
+        $('#oc_btn-skip-backward').mouseup(function () 
         {
-        	this.className='oc_btn-skip-backward-over';  
+            this.className = 'oc_btn-skip-backward-over';  
         });
-        $('#oc_btn-rewind').mouseup(function()
+        $('#oc_btn-rewind').mouseup(function ()
         {
-        	this.className='oc_btn-rewind-over';
-        	
-        	Opencast.Player.stopRewind();
+            this.className = 'oc_btn-rewind-over';
+            Opencast.Player.stopRewind();
         });
-        $('#oc_btn-play-pause').mouseup(function() 
+        $('#oc_btn-play-pause').mouseup(function () 
         {
-        	Opencast.Player.PlayPauseMouseOver();
+            Opencast.Player.PlayPauseMouseOver();
         });
-        $('#oc_btn-fast-forward').mouseup(function() 
+        $('#oc_btn-fast-forward').mouseup(function () 
         {
-        	this.className='oc_btn-fast-forward-over';
-        	Opencast.Player.stopFastForward();
+            this.className = 'oc_btn-fast-forward-over';
+            Opencast.Player.stopFastForward();
         });
-        $('#oc_btn-skip-forward').mouseup(function() 
+        $('#oc_btn-skip-forward').mouseup(function () 
         {
-        	this.className='oc_btn-skip-forward-over';
+            this.className = 'oc_btn-skip-forward-over';
         });
               
         // Handler onBlur
-        $('#oc_edit-time').blur(function() 
+        $('#oc_edit-time').blur(function () 
         {
-        	Opencast.Player.hideEditTime(); 	
+            Opencast.Player.hideEditTime();
         });
         
         // Handler keypress
-        $('#oc_edit-time').keypress(function(event) 
+        $('#oc_edit-time').keypress(function (event) 
         {
-        	if (event.keyCode == '13') 
-        	{
-        		Opencast.Player.editTime();
-        	};	
+            if (event.keyCode === '13') 
+            {
+                Opencast.Player.editTime();
+            }
         });
     });
     
@@ -341,42 +355,43 @@ Opencast.Initialize = (function ()
     
     function doTest()
     {
-      
-    	reportSize();
+        // TODO
+    	//var test = Opencast.Player.getMediaHeight();
+        
+        
+        
+
+        reportSize();
         if (myHeight > 600)
         {
-           //$('#oc_body').css("height", (myHeight - 50 + "px"));
-        	//$('#oc_flash-player').css("height", (myHeight - 180 + "px"));
-        	
-           
-           
-           if (Opencast.Player.getShowSections() === false)
+            //$('#oc_body').css("height", (myHeight - 50 + "px"));
+            //$('#oc_flash-player').css("height", (myHeight - 180 + "px"));
+ 
+            if (Opencast.Player.getShowSections() === false)
             {
-             $('#oc_flash-player').css("height", (myHeight - 180 + "px"));
+                $('#oc_flash-player').css("height", (myHeight - 180 + "px"));
             }
             else
             {
-              $('#oc_flash-player').css("height", (myHeight - 288 + "px"));
+                $('#oc_flash-player').css("height", (myHeight - 288 + "px"));
             }
         }
         //
-        var margin= 0;
+        var margin = 0;
         margin = $('#oc_video-controls').width();
-        margin = (margin - 165 ) /2;
-        $('#oc_btn-skip-backward').css("margin-left", (margin +"px") );
+        margin = (margin - 165) / 2;
+        $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
     }
 
     function init()
     {
         window.onresize = doTest;
         doTest();
+       
     }
-    
-    
-    
-
     return {
-        doTest : doTest
+        doTest : doTest,
+        init : init
     };
 }());
 

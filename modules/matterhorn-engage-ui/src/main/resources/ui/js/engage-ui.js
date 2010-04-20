@@ -19,6 +19,15 @@ Opencast.engage = (function () {
     
     /**
      * @memberOf Opencast.engage
+     * @description Gets the current video url
+     */
+    function getVideoUrl() {
+      var value = getGETParameter("videoUrl");
+      return value;
+    }
+    
+    /**
+     * @memberOf Opencast.engage
      * @description Get the value of the GET parameter with the passed "name"
      * @param string name
      * @return The value of the GET parameter
@@ -35,6 +44,7 @@ Opencast.engage = (function () {
     }
     
     return {
-      getMediaPackageId : getMediaPackageId
+      getMediaPackageId : getMediaPackageId,
+      getVideoUrl : getVideoUrl
     };
 }());

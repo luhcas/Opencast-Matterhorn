@@ -19,7 +19,7 @@
 							<xsl:when test="ns2:mediapackage/media/track/tags/tag[.='engage']">
 								<b>
 									<a>
-										<xsl:attribute name="href">player.html?id=<xsl:value-of
+										<xsl:attribute name="href">watch.html?id=<xsl:value-of
 											select="ns2:mediapackage/@id" /></xsl:attribute>
 										<xsl:value-of select='substring(ns2:dcTitle, 0, 60)' />
 										<xsl:if test='string-length(ns2:dcTitle)>60'>

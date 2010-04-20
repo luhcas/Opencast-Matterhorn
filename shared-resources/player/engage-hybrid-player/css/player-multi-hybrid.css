@@ -17,23 +17,23 @@
 
 body
 {
-  font-family:            	Verdana;
-} 	
+  font-family:              Verdana;
+}   
  
 #oc_title-bar
 {
-  min-width:              	760px;
-  height:                 	26px;
-  margin-left:				5px;
-  margin-right:				5px;
+  min-width:                760px;
+  height:                   26px;
+  margin-left:              5px;
+  margin-right:             5px;
 }
 
 #oc_title
 {
-  float:                  	left;
-  font-size:              	1.5em;
-  text-align:             	left;
-  height:                 	100%;
+  float:                    left;
+  font-size:                1.5em;
+  text-align:               left;
+  height:                   100%;
 }
 
 #oc_title_from
@@ -50,67 +50,67 @@ body
 {
   float:                    right;
   height:                   100%;
-  padding-top:				3px;
+  padding-top:              3px;
 }
 
 .oc_search-Field
 {
-  border: 					1px solid #000000;
-  background-color: 		#E3E3D7;
+  border:                   1px solid #000000;
+  background-color:         #E3E3D7;
   color:                    #000000;
 }
 
 #oc_btn-search
 {
-  width:					100px;
+  width:                    100px;
 }
 
 .clear
-{	
-  clear:                  	both;	
+{   
+  clear:                    both;   
 }
 
 #oc_body
 {
-  min-width:              	756px;
-  height:                 	510px;
-  margin-left:				5px;
-  margin-right:				5px;
+  min-width:                756px;
+  height:                   510px;
+  margin-left:              5px;
+  margin-right:             5px;
 }
 
 #oc_flash-player
 {
-  text-align:             	center;
+  text-align:               center;
   height:                   100%;
-  margin-bottom:			10px;
+  margin-bottom:            10px;
 }
 
 #oc_video-player-controls
 {
-  height:                 	36px;
-  width:					100%;
-  background-image:			url("../img/icons.png");
-  background-position:		0 0px;
-  margin-top:	 			5px;
-  margin-bottom: 			5px;
+  height:                   36px;
+  width:                    100%;
+  background-image:         url("../img/icons.png");
+  background-position:      0 0px;
+  margin-top:               5px;
+  margin-bottom:            5px;
 }
 
 #oc_video-time
 {
-  float:                  	left;
-  text-align:             	left;
-  font-size:              	0.8em;
-  color:				  	#FFFFFF;
-  background-image:			url("../img/icons.png");
-  background-position:		0 0;
-  width:					30%;
-  height:					36px;
+  float:                    left;
+  text-align:               left;
+  font-size:                0.8em;
+  color:                    #FFFFFF;
+  background-image:         url("../img/icons.png");
+  background-position:      0 0;
+  width:                    30%;
+  height:                   36px;
 }
 
 #simpleEdit 
 {
-  margin-top:				12px;
-  margin-left:				10px;
+  margin-top:               12px;
+  margin-left:              10px;
   font-size:                1.2em;
 }
 
@@ -148,7 +148,7 @@ body
 
 #oc_video-controls
 {
-  float:                   	left;
+  float:                    left;
   width:                    40%;
   text-align:               right;
 }
@@ -240,48 +240,48 @@ body
 
 .oc-slider-volume-Rail 
 {
-  width:                  	55px;
-  height:                 	2px;
-  border:                 	1px solid #999999;
-  position:              	relative;
-  background:             	#fff;
-  margin-top:				18px;
+  width:                    55px;
+  height:                   2px;
+  border:                   1px solid #999999;
+  position:                 relative;
+  background:               #fff;
+  margin-top:               18px;
 }
 
 .oc-slider-volume-Thumb:focus
 {
-  border:                 	0px solid #999999;
-  background-color:       	#EEEEEE;
+  border:                   0px solid #999999;
+  background-color:         #EEEEEE;
 }
 
 .oc-slider-volume-Thumb
 {
-  background:				transparent url("../img/icons.png");
-  background-position:		0 -396px;
-  margin:                 	0px;
-  padding:                	0px;
-  width:               	   	15px; 
-  height:              	   	9px;
-  position:             	absolute;
-  margin-top:				-3px;
+  background:               transparent url("../img/icons.png");
+  background-position:      0 -396px;
+  margin:                   0px;
+  padding:                  0px;
+  width:                    15px; 
+  height:                   9px;
+  position:                 absolute;
+  margin-top:               -3px;
 }
 
 #oc_video-cc
 {
-  float:                  	left;
-  width:					5%;
-  text-align:            	center;
+  float:                    left;
+  width:                    5%;
+  text-align:               center;
 }
 
 #oc_video-size-controls
 {
   float:                    right;
-  width:					12%;
+  width:                    12%;
 }
 
 #oc_tabs
 {
-  width:					100%;
+  width:                    100%;
 }
 
 #oc_tabs-input
@@ -296,57 +296,57 @@ body
 
 #oc_tabs input
 {
-  width:					100px;
-  margin-right:				5px;
-  margin-top:				2px;
+  width:                    100px;
+  margin-right:             5px;
+  margin-top:               2px;
 }
 
 #oc_video-size-dropdown
 {
-  margin: 					0;
-  padding: 					0;
-  float: 					right;
-  margin-right:				10px;
+  margin:                   0;
+  padding:                  0;
+  float:                    right;
+  margin-right:             10px;
 }
 
 #oc_video-size-dropdown li
-{	
-  float: 					left;
-  list-style: 				none;
+{   
+  float:                    left;
+  list-style:               none;
 }
-	
+    
 #oc_video-size-dropdown li ul
 {
-  margin: 					0;
-  padding: 					0;
-  position: 				absolute;
-  visibility: 				hidden;
-  border-top: 				1px solid white
-}	
-		
+  margin:                   0;
+  padding:                  0;
+  position:                 absolute;
+  visibility:               hidden;
+  border-top:               1px solid white
+}   
+        
 #oc_video-size-dropdown li ul li
-{	
-  float: 					none;
-  display: 					inline;
+{   
+  float:                    none;
+  display:                  inline;
 }
-		
+        
 #oc_video-size-dropdown li ul li a
-{	
-  background: 				#000000;
+{   
+  background:               #000000;
 }
 
 #oc_video-size-dropdown li ul li a:hover
-{	
-  background: 				#000000; 
+{   
+  background:               #000000; 
 }
 
 #oc_video-size-dropdown-div
-{	
-  height: 					28px;
-  padding-top:				4px;
-  background-image:			url("../img/icons.png");
-  background-position:		0 -4px;
-  text-align:             	center;
+{   
+  height:                   28px;
+  padding-top:              4px;
+  background-image:         url("../img/icons.png");
+  background-position:      0 -4px;
+  text-align:               center;
 }
 
 .oc_progress-bar
@@ -442,7 +442,7 @@ body
 {
   width:                    40px;
   margin-top:               4px;
-  margin-right:			      10px;
+  margin-right:               10px;
 }
 
 
@@ -512,30 +512,30 @@ body
 
 .scrubber-button 
 {
-  background:				transparent url("../img/icons.png");
-  background-position: 		0 -445px;
-  height: 					15px;
-  width: 					13px;
-  margin-top:				-10px;
-  margin-left:				-2px;
-  position:					relative; 
-  border: 					0px;
-  top:						0px; 
-  z-index:					2;
+  background:               transparent url("../img/icons.png");
+  background-position:      0 -445px;
+  height:                   15px;
+  width:                    13px;
+  margin-top:               -4px;
+  margin-left:              -2px;
+  position:                 relative; 
+  border:                   0px;
+  top:                      0px; 
+  z-index:                  2;
 }
 
 #draggable 
 { 
-  background:				transparent url("../img/icons.png");
-  background-position: 		0 -445px;
-  height: 					15px;
-  width: 					13px;
-  margin-top:				-14px;
-  margin-left:				-2px;
-  position:					relative; 
-  border: 					0px;
-  top:						0px; 
-  z-index:					3;
+  background:               transparent url("../img/icons.png");
+  background-position:      0 -445px;
+  height:                   15px;
+  width:                    13px;
+  margin-top:               -14px;
+  margin-left:              -2px;
+  position:                 relative; 
+  border:                   0px;
+  top:                      0px; 
+  z-index:                  3;
 }
 
 .play-segment 
@@ -619,10 +619,11 @@ body
 
 .scrubber-channel 
 {
-  display:block;
+   display:block;
   margin-top:0;
   padding-right:0px;
   position:relative;
+  top: -7px;
 }
 
 .progress-text 
@@ -654,5 +655,55 @@ body
   border-top-width:1px;
 }
 
+.segment-holder {
+  background-image:url("../img/scrubber.gif");
+  height:25px;
+  border-bottom-color:#000000;
+  border-bottom-style:solid;
+  border-bottom-width:1px;
+  border-right-color:#000000;
+  border-right-style:solid;
+  border-right-width:1px;
+  border-right-color:#000000;
+  border-right-style:solid;
+  border-right-width:1px;
+  border-top-color:#000000;
+  border-top-style:solid;
+  border-top-width:1px;
+  padding-bottom:0.0em;
+  padding-left:0.0em;
+  padding-right:0.0em;
+  padding-top:0.0em;
+}
+
+.segment-holder-over {
+  background-image:url("../img/scrubber.gif");
+  background-position:0 -20px;
+  height:25px;
+  border-bottom-color:#000000;
+  border-bottom-style:solid;
+  border-bottom-width:1px;
+  border-right-color:#000000;
+  border-right-style:solid;
+  border-right-width:1px;
+  border-right-color:#000000;
+  border-right-style:solid;
+  border-right-width:1px;
+  border-top-color:#000000;
+  border-top-style:solid;
+  border-top-width:1px;
+  padding-bottom:0.0em;
+  padding-left:0.0em;
+  padding-right:0.0em;
+  padding-top:0.0em;
+}
+
+
+.segments {
+  border-left-color:#000000;
+  border-left-style:solid;
+  border-left-width:1px;
+  width: 100%;
+}
 
  

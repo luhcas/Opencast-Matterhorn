@@ -105,6 +105,63 @@
               </resources>
             </configuration>
           </execution>
+           <execution>
+            <id>copy-shared_img</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/ui/shared_img</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../../shared-resources/shared_img/</directory>
+                  <includes>
+                    <include> **/* </include>
+                  </includes>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-shared_css</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/ui/shared_css</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../../shared-resources/shared_css/</directory>
+                  <includes>
+                    <include> **/* </include>
+                  </includes>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-shared_js</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/ui/shared_js</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../../shared-resources/shared_js/</directory>
+                  <includes>
+                    <include> **/* </include>
+                  </includes>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>

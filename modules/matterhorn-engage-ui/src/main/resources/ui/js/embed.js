@@ -1,4 +1,4 @@
-/*global $, Videodisplay, Opencast, fluid*/
+/*global $, Videodisplay, window, Opencast, fluid*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
 /**
@@ -9,13 +9,13 @@ Opencast.Watch = (function ()
 
     function onPlayerReady() 
     {
-	    var MULTIPLAYER			   = "Multiplayer",
-	        SINGLEPLAYER		   = "Singleplayer",
-	        SINGLEPLAYERWITHSLIDES = "SingleplayerWithSlides",
-	        AUDIOPLAYER			   = "Audioplayer",
-	        ADVANCEDPLAYER         = "advancedPlayer",
-	        EMBEDPLAYER            = "embedPlayer";
-	  
+        var MULTIPLAYER			   = "Multiplayer",
+            SINGLEPLAYER		   = "Singleplayer",
+            SINGLEPLAYERWITHSLIDES = "SingleplayerWithSlides",
+            AUDIOPLAYER			   = "Audioplayer",
+            ADVANCEDPLAYER         = "advancedPlayer",
+            EMBEDPLAYER            = "embedPlayer";
+
         var mediaPackageId = Opencast.engage.getMediaPackageId();
     
         var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
@@ -46,15 +46,15 @@ Opencast.Watch = (function ()
             // set the abstract
             $('#abstract').html($('#oc-abstract').html());
       
-         // TODO MERGE
+            // TODO MERGE
             var mediaUrlOne = $('#oc-video-url').html();
             var mediaUrlTwo = $('#oc-video-url').html();
             
             // Get the video url
-         //   var mediaUrlOne = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
+            //var mediaUrlOne = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
             //var mediaUrlOne = 'http://mediapm.edgesuite.net/osmf/content/test/train_1500.mp3';
             //var mediaUrlOne = 'engage-hybrid-player/mp3/need.mp3';
-        //    var mediaUrlTwo = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
+            // var mediaUrlTwo = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
             //var mediaUrlTwo = '';
 
             Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
@@ -66,7 +66,7 @@ Opencast.Watch = (function ()
             }
             else if (mediaUrlOne !== '' && mediaUrlTwo === '')
             {
-            	var pos = mediaUrlOne.lastIndexOf(".");
+                var pos = mediaUrlOne.lastIndexOf(".");
                 var fileType = mediaUrlOne.substring(pos + 1);
                 //
                 if (fileType === 'mp3')
