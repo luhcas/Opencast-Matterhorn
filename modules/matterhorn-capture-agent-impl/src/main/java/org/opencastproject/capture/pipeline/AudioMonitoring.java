@@ -15,6 +15,8 @@
  */
 package org.opencastproject.capture.pipeline;
 
+import org.opencastproject.capture.api.CaptureParameters;
+
 import org.gstreamer.Bus;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -204,5 +207,96 @@ public class AudioMonitoring {
     }
     return rmsValues;
   }
-
+  
+  /**
+   * Return a pipeline that doesn't capture, but only does confidence monitoring
+   * 
+   * @param pipeline The pipeline to add the new confidence monitoring pipeline to
+   * @param c The CaptureDevice the confidence monitoring is for
+   * @param properties Properties that define the interval and maximum time for the confidence monitoring
+   */
+  public static void getConfidencePipeline(Pipeline pipeline, CaptureDevice c, Properties properties) {
+    Element alsasrc, queue, decodebin, fakesink;
+    final Element level;
+    boolean success = true;
+    final int interval = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + c.getFriendlyName() + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "30"));
+    final int maxLength = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_AUDIO_LENGTH, "60"));
+    final String name = c.getFriendlyName();
+    
+    if (deviceRMSValues == null) {
+      deviceRMSValues = new HashMap<String, SortedSet<Pair>>();
+    }
+    deviceRMSValues.put(name, new TreeSet<Pair>());
+    
+    alsasrc = ElementFactory.make("alsasrc", null);
+    queue = ElementFactory.make("queue", null);
+    decodebin = ElementFactory.make("decodebin", null);
+    level = ElementFactory.make("level", null);
+    fakesink = ElementFactory.make("fakesink", null);
+    
+    level.set("message", "true");
+    
+    pipeline.addMany(alsasrc, queue, decodebin, level, fakesink);
+    
+    decodebin.connect(new Element.PAD_ADDED() {
+      public void padAdded(Element element, Pad pad) {
+        pad.link(level.getStaticPad("sink"));
+      }
+    });
+    
+    if (!alsasrc.link(queue)) {
+      logger.error("Could not link {} with {}", alsasrc.toString(), queue.toString());
+      success = false;
+    }
+    if (!queue.link(decodebin)) {
+      logger.error("Could not link {} with {}", queue.toString(), decodebin.toString());
+      success = false;
+    }
+    
+    Pad p = new Pad(null, PadDirection.SRC);
+    decodebin.addPad(p);
+    
+    if (!level.link(fakesink)) {
+      logger.error("Could not link {} with {}", level.toString(), fakesink.toString());
+      success = false;
+    }
+    
+    if (!success) {
+      pipeline.removeMany(alsasrc, queue, decodebin, level, fakesink);
+      return;
+    }
+   
+    // callback to listen for messages from the level element, giving us
+    // information about the audio being recorded
+    Bus bus = pipeline.getBus();
+    bus.connect(new Bus.MESSAGE() {
+      long previous = -1;
+      public void busMessage(Bus bus, Message msg) {
+        if (msg.getSource().equals(level)) {
+          Element level = (Element) msg.getSource();
+          long seconds = level.getClock().getTime().getSeconds();
+          if (seconds % interval == 0 && seconds != previous) {
+            previous = seconds;
+            String data = msg.getStructure().toString();
+            int start = data.indexOf("rms");
+            int end = data.indexOf("}", start);
+            String rms = data.substring(start, end+1);
+            start = rms.indexOf("{");
+            end = rms.indexOf("}");
+            double value = Double.parseDouble(rms.substring(start+1, end).split(",")[0]);
+            
+            // add the new value (timestamp, rms) value pair to the hashmap for this device
+            TreeSet<Pair> deviceRMS = (TreeSet<Pair>) deviceRMSValues.get(name);
+            deviceRMS.add(new Pair(System.currentTimeMillis(), value));
+            
+            // keep the maximum number of pairs stored to be 1000 / interval
+            
+            if (deviceRMS.size() > (maxLength / interval)) {
+              deviceRMS.remove(deviceRMS.first());
+            }
+          }
+        }
+      }
+    });
+  }
 }

@@ -98,6 +98,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /** The agent's pipeline. **/
   private Pipeline pipe = null;
+  
+  /** Pipeline for confidence monitoring while agent is idle */
+  private Pipeline confidencePipe = null;
 
   /** Keeps the recordings which have not been succesfully ingested yet. **/
   private Map<String, AgentRecording> pendingRecordings = new HashMap<String, AgentRecording>();
@@ -309,7 +312,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   private String initPipeline(RecordingImpl newRec) {
     try {
-      pipe = PipelineFactory.create(newRec.getProperties());
+      pipe = PipelineFactory.create(newRec.getProperties(), false);
     } catch (UnsatisfiedLinkError e) {
       logger.error(e.getMessage() + " : please add libjv4linfo.so to /usr/lib to correct this issue.");
       return null;
@@ -686,6 +689,21 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @see org.opencastproject.capture.admin.api.AgentState
    */
   protected void setAgentState(String state) {
+    if (state.equalsIgnoreCase(AgentState.CAPTURING) && confidencePipe != null) {
+      confidencePipe.stop();
+      confidencePipe = null;
+      logger.info("Confidence monitoring shutting down.");
+    } else if (state.equalsIgnoreCase(AgentState.IDLE)){
+      try {
+        while (configService.getAllProperties().size() == 0);
+        confidencePipe = PipelineFactory.create(configService.getAllProperties(), true);
+        confidencePipe.play();
+        logger.info("Confidence monitoring beginning.");
+      } catch (Exception e) {
+        logger.warn("Confidence monitoring not started: {}", e.getMessage());
+      }
+    }
+      
     agentState = state;
   }
 
@@ -883,25 +901,21 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @see org.opencastproject.capture.api.ConfidenceMonitor#grabFrame(java.lang.String)
    */
   public byte[] grabFrame(String friendlyName) {
-    if (currentRecID != null) {
-      // get the image for the device specified
-      AgentRecording rec = pendingRecordings.get(currentRecID);
-      String location = rec.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
-      String device = rec.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + friendlyName + CaptureParameters.CAPTURE_DEVICE_DEST);
-      File fimage = new File(location, device + ".jpg");
-      int length = (int) fimage.length();
-      byte[] ibytes = new byte[length];
-      
-      try {
-        InputStream fis = new FileInputStream(fimage);
-        fis.read(ibytes, 0, length);
-        fis.close();
-        return ibytes;
-      } catch (FileNotFoundException e) {
-        logger.error("Could not read confidence image from: {}", device);
-      } catch (IOException e) {
-        logger.error("Confidence read error: {}", e.getMessage());
-      }
+    // get the image for the device specified
+    String location = configService.getItem(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
+    String device = configService.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + friendlyName + CaptureParameters.CAPTURE_DEVICE_DEST);
+    File fimage = new File(location, device + ".jpg");
+    int length = (int) fimage.length();
+    byte[] ibytes = new byte[length];
+    try {
+      InputStream fis = new FileInputStream(fimage);
+      fis.read(ibytes, 0, length);
+      fis.close();
+      return ibytes;
+    } catch (FileNotFoundException e) {
+      logger.error("Could not read confidence image from: {}", device);
+    } catch (IOException e) {
+      logger.error("Confidence read error: {}", e.getMessage());
     }
     return null;
   }

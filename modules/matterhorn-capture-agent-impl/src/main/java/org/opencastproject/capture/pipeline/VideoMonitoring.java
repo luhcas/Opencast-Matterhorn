@@ -16,6 +16,8 @@
 package org.opencastproject.capture.pipeline;
 
 
+import org.opencastproject.capture.api.CaptureParameters;
+
 import com.sun.jna.Pointer;
 
 import org.gstreamer.Buffer;
@@ -36,6 +38,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Properties;
 
 /**
  * Class containing video monitoring services that can be incorporated into
@@ -103,7 +106,6 @@ public class VideoMonitoring {
       }
       if (!queue1.link(decodebin)) {
         logger.error("Could not link {} with {}", queue1.toString(), ffmpegcolorspace.toString());
-        System.out.println(queue1.getStaticPad("src").getCaps());
         return false;
       }
       
@@ -134,7 +136,7 @@ public class VideoMonitoring {
             Structure s = caps.getStructure(0);
             int width = s.getInteger("width");
             int height = s.getInteger("height");
-            logger.info("Grabbed frame: ({}, {})", width, height);
+            logger.debug("Grabbed frame: ({}, {})", width, height);
             
             /* saving the frame to disk */
             byte bytes[] = new byte[buffer.getSize()];
@@ -159,5 +161,108 @@ public class VideoMonitoring {
       return true;
   }
   
+  /**
+   * Return a pipeline that doesn't capture, but only does confidence monitoring
+   * 
+   * @param pipeline The pipeline to add the new confidence monitoring pipeline to
+   * @param capdev The CaptureDevice the confidence monitoring is for
+   * @param properties Properties that define the interval and location for the confidence monitoring
+   */
+  public static void getConfidencePipeline(Pipeline pipeline, CaptureDevice capdev, Properties properties) {
+      Element src, queue, decodebin, jpegenc;
+      final Element ffmpegcolorspace;
+      AppSink appsink;
+      boolean success = true;
+      final int interval = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + capdev.getFriendlyName() + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "30"));
+      final String device = new File(capdev.getOutputPath()).getName();
+      final String location = properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
 
+      
+      switch (capdev.getName()) {
+        case EPIPHAN_VGA2USB: src = ElementFactory.make("v4lsrc", null); src.set("device", capdev.getLocation()); break;
+        case HAUPPAUGE_WINTV: src = ElementFactory.make("filesrc", null); src.set("location", capdev.getLocation()); break;
+        case BLUECHERRY_PROVIDEO: src = ElementFactory.make("v4l2src", null); src.set("device", capdev.getLocation()); break;
+        default: return;
+      }
+      
+      queue = ElementFactory.make("queue", null);
+      decodebin = ElementFactory.make("decodebin", null);
+      ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
+      jpegenc = ElementFactory.make("jpegenc", null);
+      appsink = (AppSink) ElementFactory.make("appsink", null);
+      
+      appsink.set("emit-signals", "true");
+      
+      pipeline.addMany(src, queue, decodebin, ffmpegcolorspace, jpegenc, appsink);
+      
+      decodebin.connect(new Element.PAD_ADDED() {
+        public void padAdded(Element element, Pad pad) {
+          pad.link(ffmpegcolorspace.getStaticPad("sink"));
+        }
+      });
+      
+      if (!src.link(queue)) {
+        logger.error("Could not link {} with {}", src.toString(), queue.toString());
+        success = false;
+      }
+      if (!queue.link(decodebin)) {
+        logger.error("Could not link {} with {}", queue.toString(), decodebin.toString());
+        success = false;
+      }
+      
+      Pad p = new Pad(null, PadDirection.SRC);
+      decodebin.addPad(p);
+      
+      if (!ffmpegcolorspace.link(jpegenc)) {
+        logger.error("Could not link {} with {}", ffmpegcolorspace.toString(), jpegenc.toString());
+        success = false;
+      }
+      if (!jpegenc.link(appsink)) {
+        logger.error("Could not link {} with {}", jpegenc.toString(), appsink.toString());
+        success = false;
+      }
+      
+      if (!success) {
+        pipeline.removeMany(src, queue, decodebin, ffmpegcolorspace, jpegenc, appsink);
+        return;
+      }
+      
+      
+      // Callback that will be executed every time a new buffer is received
+      // from the pipeline capturing the video. For confidence monitoring
+      // it is not necessary to use every buffer
+      appsink.connect(new AppSink.NEW_BUFFER() {
+        long previous = -1;
+        public void newBuffer(Element elem, Pointer userData) {
+          AppSink appsink = (AppSink) elem;
+          long seconds = appsink.getClock().getTime().getSeconds();
+          Buffer buffer = appsink.pullBuffer();
+          if (seconds % interval == 0 && seconds != previous) {
+            previous = seconds;
+            Caps caps = buffer.getCaps();
+            Structure s = caps.getStructure(0);
+            int width = s.getInteger("width");
+            int height = s.getInteger("height");
+            logger.debug("Grabbed frame: ({}, {})", width, height);
+            
+            /* saving the frame to disk */
+            byte bytes[] = new byte[buffer.getSize()];
+            ByteBuffer byteBuffer = buffer.getByteBuffer();
+            byteBuffer.get(bytes, 0, buffer.getSize());
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+              baos.write(bytes);
+              OutputStream fos = new FileOutputStream(new File(location, device + ".jpg"));
+              baos.writeTo(fos);
+              fos.close();
+              baos.close();
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+            
+          }
+          buffer = null;
+        }
+      });
+  }
 }

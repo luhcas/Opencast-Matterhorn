@@ -54,7 +54,7 @@ public class PipelineFactory {
    * @return The bin to control the pipelines
    * @throws UnsupportedDeviceException
    */
-  public static Pipeline create(Properties props) {
+  public static Pipeline create(Properties props, boolean confidence) {
     properties = props;
     ArrayList<CaptureDevice> devices = new ArrayList<CaptureDevice>();
     
@@ -98,16 +98,20 @@ public class PipelineFactory {
       File outputFile = new File(outputDirectory, properties.getProperty(outputProperty));
       logger.debug("Device {} has source at {}.", name, srcLoc);
       logger.debug("Device {} has output at {}.", name, outputFile);
-      try {
-        if(!outputFile.createNewFile()){
-          logger.error("Could not create ouput file for {}, file may already exist.", name);
+      
+      if (!confidence) {
+        try {
+          if(!outputFile.createNewFile()){
+            logger.error("Could not create ouput file for {}, file may already exist.", name);
+            return null;
+          }
+        } catch (IOException e) {
+          logger.error("An error occured while creating output file for {}. {}", name, e.getMessage());
           return null;
         }
-      } catch (IOException e) {
-        logger.error("An error occured while creating output file for {}. {}", name, e.getMessage());
-        return null;
       }
       String outputLoc = outputFile.getAbsolutePath();
+      
 
       if (srcLoc == null) {
         logger.error("Unable to create pipeline for {} because its source file/device does not exist!", name);
@@ -170,10 +174,21 @@ public class PipelineFactory {
     Gst.init(); // cannot using gst library without first initialising it
 
     Pipeline pipeline = new Pipeline();
-    for (int i = 0; i < devices.size(); i++) {
-      if (!addPipeline(devices.get(i), pipeline))
-        logger.error("Failed to create pipeline for {}.", devices.get(i));
+    
+    if (confidence) {
+      for (CaptureDevice c : devices) {
+        if (c.getName() == DeviceName.ALSASRC)
+          AudioMonitoring.getConfidencePipeline(pipeline, c, properties);
+        else
+          VideoMonitoring.getConfidencePipeline(pipeline, c, properties);
+      }
+    } else {
+      for (CaptureDevice c : devices) {
+        if (!addPipeline(c, pipeline))
+          logger.error("Failed to create pipeline for {}.", c);
+      }
     }
+    
     return pipeline;
   }
 
