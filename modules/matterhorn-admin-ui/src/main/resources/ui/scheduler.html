@@ -24,6 +24,7 @@
     <script type="text/javascript" src="js/scheduler.helptexts.json"></script>
     <script type="text/javascript" src="js/scheduler.js"></script>
     <script type="text/javascript" src="shared_js/version.js"></script>
+    <script type="text/javascript" src="js/adminui.js"></script>
     <script type="text/javascript">
       $(document).ready(init);
     </script>
@@ -119,17 +120,17 @@
               <form action="">
                 <ul class="fl-controls-right form-list">
                   <li class="required">
-                    <label class="fl-label" for="title" id="label-title">Title:</label>
+                    <label class="fl-label" for="title" id="label-title"><span id="i18n_title_label"></span>:</label>
                     <input type="text" class="form-field" name="title" id="title">
                     <span class="fl-icon icon-help" id="help_title" title="Click for help"></span>
                   </li>
                   <li>
-                    <label class="fl-label" for="creator" id="label-creator">Presenter:</label>
+                    <label class="fl-label" for="creator" id="label-creator"><span id="i18n_presenter_label"></span>:</label>
                     <input type="text" class="form-field" name="creator" id="creator">
                     <span class="fl-icon icon-help"  id="help_presenter" title="Click for help"></span>
                   </li>
                   <li>
-                    <label class="fl-label" for="contributor" id="label-contributor">Sponsoring Department:</label>
+                    <label class="fl-label" for="contributor" id="label-contributor"><span id="i18n_dept_label"></span>:</label>
                     <input type="text" class="form-field" name="contributor" id="contributor">
                     <span class="fl-icon icon-help"  id="help_contributor" title="Click for help"></span>
                   </li>
@@ -144,28 +145,28 @@
           <div class="fl-widget">
             <div class="fl-widget-titlebar folder-head">
               <span class="fl-icon icon-arrow-right folder-icon"></span>
-              <b style="verticle-align: middle;">Additional Description</b>
+              <b style="verticle-align: middle;" id="i18n_additional"></b>
             </div>
             <div class="fl-widget-content folder-content">
               <form action="">
                 <ul class="fl-controls-right form-list">
                   <li class="additionalMeta">
-                    <label class="fl-label" for="series"  id="label-series">Series:</label>
+                    <label class="fl-label" for="series"  id="label-series"><span id="i18n_series_label"></span>:</label>
                     <input type="text" class="form-field" name="series" id="series">
                     <span class="fl-icon icon-help"  id="help_series" title="Click for help"></span>
                   </li>
                   <li class="additionalMeta">
-                    <label class="fl-label" for="subject" id="label-subject">Subject:</label>
+                    <label class="fl-label" for="subject" id="label-subject"><span id="i18n_sub_label"></span>:</label>
                     <input type="text" class="form-field" name="subject" id="subject">
                     <span class="fl-icon icon-help"  id="help_subject" title="Click for help"></span>
                   </li>
                   <li class="additionalMeta">
-                    <label class="fl-label" for="language" id="label-language">Language:</label>
+                    <label class="fl-label" for="language" id="label-language"><span id="i18n_lang_label"></span>:</label>
                     <input type="text" class="form-field" name="language" id="language">
                     <span class="fl-icon icon-help"  id="help_language" title="Click for help"></span>
                   </li>
                   <li class="additionalMeta">
-                    <label class="fl-label" for="description" id="label-description">Description:</label>
+                    <label class="fl-label" for="description" id="label-description"><span id="i18n_desc_label"></span>:</label>
                     <textarea name="description" id="description" class="form-field" rows="5" cols="10"></textarea>
                     <span class="fl-icon icon-help"  id="help_description" title="Click for help"></span>
                   </li>
@@ -178,24 +179,24 @@
         <!-- Distribution and Licensing -->
         <div class="fl-container-800">
           <div class="fl-widget">
-            <div class="fl-widget-titlebar form-box-title"><b>Distribution</b></div>
+            <div class="fl-widget-titlebar form-box-title"><b id="i18n_distribution"></b></div>
             <div class="fl-widget-content form-box-container">
               <form action="">
                 <ul class="fl-controls-right form-list">
                   <li class="required">
-                    <label class="fl-label form-box-label" id="label-distribution">Distribution Channel(s):</label>
+                    <label class="fl-label form-box-label" id="label-distribution"><span id="i18n_dist_label"></span>:</label>
                     <div style="float: left;">
                       <ul class="form-box-group">
                         <li class="column1">
                           <input type="checkbox" id="distMatterhornMM" value="Matterhorn Media Module" checked="checked" disabled="disabled">
-                          <label for="distMatterhornMM">Matterhorn Media Module</label>
+                          <label for="distMatterhornMM" id="i18n_dist_mmm"></label>
                         </li>
                       </ul>
                     </div>
                     <span class="fl-icon icon-help" id="help_distribution" title="Click for help"></span>
                   </li>
                   <li style="clear:both">
-                    <label class="fl-label" for="license"  id="label-license">License:</label>
+                    <label class="fl-label" for="license"  id="label-license"><span id="i18n_license_label"></span>:</label>
                     <input type="text" name="license" id="license" class="form-field">
                     <span class="fl-icon icon-help" id="help_license" title="Click for help"></span>
                   </li>
@@ -208,111 +209,214 @@
         <!-- Scheduling Specifics -->
         <div class="fl-container-800">
           <div class="fl-widget">
-            <div class="fl-widget-titlebar form-box-title"><b>Capture</b></div>
+            <div class="fl-widget-titlebar form-box-title"><b id="i18n_capture"></b></div>
             <div class="fl-widget-content form-box-container">
               <form action="">
-                <ul class="fl-controls-right form-list">
-                  <li class="required">
-                    <label class="fl-label form-box-label" id="label-startdate">Start Date:</label>
-                    <input type="text" size="10" name="startDate" id="startDate" style="margin-right:5px;">
-                    <span class="fl-icon icon-help" id="help_startdate" title="Click for help"></span>
-                  </li>
-                  <li class="required">
-                    <label class="fl-label form-box-label" id="label-starttime">Start Time:</label>
-                    <select id="startTimeHour">
-                      <option value="0">00</option>
-                      <option value="1">01</option>
-                      <option value="2">02</option>
-                      <option value="3">03</option>
-                      <option value="4">04</option>
-                      <option value="5">05</option>
-                      <option value="6">06</option>
-                      <option value="7">07</option>
-                      <option value="8">08</option>
-                      <option value="9">09</option>
-                      <option value="10">10</option>
-                      <option value="11">11</option>
-                      <option value="12">12</option>
-                      <option value="13">13</option>
-                      <option value="14">14</option>
-                      <option value="15">15</option>
-                      <option value="16">16</option>
-                      <option value="17">17</option>
-                      <option value="18">18</option>
-                      <option value="19">19</option>
-                      <option value="20">20</option>
-                      <option value="21">21</option>
-                      <option value="22">22</option>
-                      <option value="23">23</option>
-                    </select>
-                    <select id="startTimeMin">
-                      <option value="0">00</option>
-                      <option value="5">05</option>
-                      <option value="10">10</option>
-                      <option value="15">15</option>
-                      <option value="20">20</option>
-                      <option value="25">25</option>
-                      <option value="30">30</option>
-                      <option value="35">35</option>
-                      <option value="40">40</option>
-                      <option value="45">45</option>
-                      <option value="50">50</option>
-                      <option value="55">55</option>
-                    </select>
-                    <span class="fl-icon icon-help" id="help_starttime" title="Click for help"></span>
-                  </li>
-                  <li class="required">
-                    <label class="fl-label form-box-label" id="label-duration">Duration:</label>
-                    <select id="durationHour">
-                      <option value="0">0</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5</option>
-                      <option value="6">6</option>
-                      <option value="7">7</option>
-                      <option value="8">8</option>
-                      <option value="9">9</option>
-                      <option value="10">10</option>
-                      <option value="11">11</option>
-                      <option value="12">12</option>
-                    </select>
-                    hour(s)
-                    <select id="durationMin">
-                      <option value="0">0</option>
-                      <option value="5">5</option>
-                      <option value="10">10</option>
-                      <option value="15">15</option>
-                      <option value="20">20</option>
-                      <option value="25">25</option>
-                      <option value="30">30</option>
-                      <option value="35">35</option>
-                      <option value="40">40</option>
-                      <option value="45">45</option>
-                      <option value="50">50</option>
-                      <option value="55">55</option>
-                    </select>
-                    minutes
-                    <span class="fl-icon icon-help" id="help_duration" title="Click for help"></span>
-                  </li>
-                  <li class="required" style="clear: both;">
-                    <label class="fl-label"  id="label-attendees">Capture Agent:</label>
-                    <div>
-                      <select id="attendees" name="attendees">
-                        <option value="">Choose one:</option>
+                <fieldset>
+                  <legend><span id="i18n_recording_date">Recording Date(s)</span></legend>
+                  <!--
+                  <div id="schedule-tpye-select">
+                    <input type="radio" value="automatic" name="schedule-type" id="automatic-sched">
+                    <label for="automatic-sched"><span id="i18n_sched_automatic">Automatic</span></label>
+                    <input type="radio" value="manual" name="schedule-type" id="manual-sched">
+                    <label for="manual-sched"><span id="i18n_sched_manual">Manual</span></label>
+                  </div>
+                  -->
+                  <fieldset>
+                    <ul class="fl-controls-right form-list">
+                      <li>
+                        <label for="schedule_repeat" class="fl-label form-box-label"><span id="i18n_sched_repeats">Repeats</span>:</label>
+                        <select id="schedule_repeat">
+                          <option value="norepeat" selected="selected"><span id="i18n_sched_no_repeat">Don't Repeat</span></option>
+                          <option value="weekly"><span id="i18n_sched_weekly">Weekly</span></option>
+                        </select>
+                      </li>
+                      <li class="required hidden" id="day-select">
+                        <label class="fl-label form-box-label" for="repeat-days"><span id="i18n_sched_days">Days</span>:</label>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th id="i18n_day_short_sun">S</th>
+                              <th id="i18n_day_short_mon">M</th>
+                              <th id="i18n_day_short_tue">T</th>
+                              <th id="i18n_day_short_wed">W</th>
+                              <th id="i18n_day_short_thu">Th</th>
+                              <th id="i18n_day_short_fri">F</th>
+                              <th id="i18n_day_short_sat">Sa</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td><input type="checkbox" id="repeat_sun" value="SU" /></td>
+                              <td><input type="checkbox" id="repeat_mon" value="MO" /></td>
+                              <td><input type="checkbox" id="repeat_tue" value="TU" /></td>
+                              <td><input type="checkbox" id="repeat_wed" value="WE" /></td>
+                              <td><input type="checkbox" id="repeat_thu" value="TH" /></td>
+                              <td><input type="checkbox" id="repeat_fri" value="FR" /></td>
+                              <td><input type="checkbox" id="repeat_sat" value="SA" /></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </li>
+                      <li class="required">
+                        <label class="fl-label form-box-label" id="label-startdate"><span id="i18n_startdate_label"></span>:</label>
+                        <input type="text" size="10" name="startDate" id="startDate" style="margin-right:5px;">
+                        <span class="fl-icon icon-help" id="help_startdate" title="Click for help"></span>
+                      </li>
+                      <li class="required hidden" id="repeat-enddate">
+                        <label class="fl-label form-box-label" id="label-enddate"><span id="i18n_enddate_label"></span>:</label>
+                        <input type="text" size="10" name="endDate" id="endDate" style="margin-right:5px;">
+                        <span class="fl-icon icon-help" id="help_enddate" title="Click for help"></span>
+                      </li>
+                    </ul>
+                  </fieldset>
+                  <ul class="fl-controls-right form-list">
+                    <li class="required">
+                      <label class="fl-label form-box-label" id="label-starttime"><span id="i18n_starttime_label"></span>:</label>
+                      <select id="startTimeHour">
+                        <option value="0">00</option>
+                        <option value="1">01</option>
+                        <option value="2">02</option>
+                        <option value="3">03</option>
+                        <option value="4">04</option>
+                        <option value="5">05</option>
+                        <option value="6">06</option>
+                        <option value="7">07</option>
+                        <option value="8">08</option>
+                        <option value="9">09</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                        <option value="20">20</option>
+                        <option value="21">21</option>
+                        <option value="22">22</option>
+                        <option value="23">23</option>
                       </select>
-                      <span class="fl-icon icon-help"  id="help_agent" title="Click for help"></span>
-                    </div>
-                  </li>
-                  <li class="required">
-                    <label class="fl-label" id="label-input">Input(s):</label>
-                    <div class="form-radio-group" style="float: left; width: 300px;">
-                      <div id="input-list"></div>
-                      <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
-                    </div>
-                  </li>
-                </ul>
+                      <select id="startTimeMin">
+                        <option value="0">00</option>
+                        <option value="1">01</option>
+                        <option value="2">02</option>
+                        <option value="3">03</option>
+                        <option value="4">04</option>
+                        <option value="5">05</option>
+                        <option value="6">06</option>
+                        <option value="7">07</option>
+                        <option value="8">08</option>
+                        <option value="9">09</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                        <option value="20">20</option>
+                        <option value="21">21</option>
+                        <option value="22">22</option>
+                        <option value="23">23</option>
+                        <option value="24">24</option>
+                        <option value="25">25</option>
+                        <option value="26">26</option>
+                        <option value="27">27</option>
+                        <option value="28">28</option>
+                        <option value="29">29</option>
+                        <option value="30">30</option>
+                        <option value="31">31</option>
+                        <option value="32">32</option>
+                        <option value="33">33</option>
+                        <option value="34">34</option>
+                        <option value="35">35</option>
+                        <option value="36">36</option>
+                        <option value="37">37</option>
+                        <option value="38">38</option>
+                        <option value="39">39</option>
+                        <option value="40">40</option>
+                        <option value="41">41</option>
+                        <option value="42">42</option>
+                        <option value="43">43</option>
+                        <option value="44">44</option>
+                        <option value="45">45</option>
+                        <option value="46">46</option>
+                        <option value="47">47</option>
+                        <option value="48">48</option>
+                        <option value="49">49</option>
+                        <option value="50">50</option>
+                        <option value="51">51</option>
+                        <option value="52">52</option>
+                        <option value="53">53</option>
+                        <option value="54">54</option>
+                        <option value="55">55</option>
+                        <option value="56">56</option>
+                        <option value="57">57</option>
+                        <option value="58">58</option>
+                        <option value="59">59</option>
+                      </select>
+                      <span class="fl-icon icon-help" id="help_starttime" title="Click for help"></span>
+                    </li>
+                    <li class="required">
+                      <label class="fl-label form-box-label" id="label-duration"><span id="i18n_dur_label"></span>:</label>
+                      <select id="durationHour">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                      </select>
+                      <span id="i18n_dur_hours"></span>
+                      <select id="durationMin">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                        <option value="25">25</option>
+                        <option value="30">30</option>
+                        <option value="35">35</option>
+                        <option value="40">40</option>
+                        <option value="45">45</option>
+                        <option value="50">50</option>
+                        <option value="55">55</option>
+                      </select>
+                      <span id="i18n_dur_minutes"></span>
+                      <span class="fl-icon icon-help" id="help_duration" title="Click for help"></span>
+                    </li>
+                    <li class="required" style="clear: both;">
+                      <label class="fl-label"  id="label-attendees"><span id="i18n_agent_label"></span>:</label>
+                      <div>
+                        <select id="attendees" name="attendees">
+                          <option value="">Choose one:</option>
+                        </select>
+                        <span class="fl-icon icon-help"  id="help_agent" title="Click for help"></span>
+                      </div>
+                    </li>
+                    <li class="required">
+                      <label class="fl-label" id="label-input"><span id="i18n_input_label"></span>:</label>
+                      <div class="form-radio-group" style="float: left; width: 300px;">
+                        <div id="input-list"></div>
+                        <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
+                      </div>
+                    </li>
+                  </ul>
+                </fieldset>
               </form>
             </div>
           </div>
@@ -334,7 +438,7 @@
                   </li>
                   <li style="margin-top: 0.6em;">
                     <label class="fl-label">&nbsp;</label>
-                    <span style="color: red;">*</span> Required
+                    <span style="color: red;">*</span><span id="i18n_required"></span>
                   </li>
                 </ul>
               </form>
@@ -348,7 +452,7 @@
         <div id="heading-metadata" style="background-color:#66FF66;font-weight:bold; margin-bottom:1em; margin-left:auto; margin-right:auto; padding:10px; text-align:center;">
           <div id="i18n_del_msg"></div>
         </div>
-        <div style="text-align: center;"><a href="/admin/recordings.html?show=upcoming">&lt;&lt; Back to Recordings</a></div>
+        <div style="text-align: center;"><a href="/admin/recordings.html?show=upcoming">&lt;&lt; <span id="i18n_return_recordings"></span></a></div>
       </div>
       
       <!-- template for the popup help box -->

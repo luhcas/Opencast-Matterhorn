@@ -49,7 +49,7 @@ popupHelp.helpTexts = {
     
     "starttime" : [
         "Start Time",
-        "Select a start time for this recording, using 24-hour time. This is the precise time that recording will start; there is no buffer."
+        "Select a start time for this recording, using 24-hour time. This is the precise time that recording will start; there is no buffer. Time select is local to the agent."
     ],
     
     "duration" : [

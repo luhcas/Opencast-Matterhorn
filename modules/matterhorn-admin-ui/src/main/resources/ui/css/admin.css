@@ -199,6 +199,10 @@ select { font-size:1.15em; }
   color: red;
 }
 
+.hidden {
+  display: none !important;
+}
+
 #category-selector-container {float:left;width:650px;margin-top:10px;margin-bottom:10px;}
 .category-selector {margin:0px;margin-bottom:10px;}
 .category-selector li {float:left;list-style:none;}

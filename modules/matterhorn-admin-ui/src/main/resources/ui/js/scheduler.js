@@ -21,20 +21,21 @@ var CAPTURE_ADMIN_URL = '/capture-admin/rest';
 
 var SchedulerForm     = SchedulerForm || {};
 var SchedulerUI       = SchedulerUI || {};
+var Agent             = Agent || {};
 
 function init() {
   //Do internationalization of text
   jQuery.i18n.properties({name:'scheduler',path:'i18n/'});
+  AdminUI.internationalize(i18n, 'i18n');
+  //Handle special cases like the window title.
   document.title = i18n.window.prefix + " " + i18n.window.schedule;
-  $("#i18n_tab_recording").text(i18n.tab.recording);
-  $("#i18n_tab_agent").text(i18n.tab.agent);
-  $("#i18n_page_title").text(i18n.page.title.sched);
   
   var d = new Date();
   d.setHours(d.getHours() + 1); //increment an hour.
   $('#startTimeHour').val(d.getHours());
-  $('#startDate').datepicker({showOn: 'both', buttonImage: 'img/calendar.gif', buttonImageOnly: true});
+  $('#startDate').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
   $('#startDate').datepicker('setDate', d);
+  $('#endDate').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
   
   $('.required > label').prepend('<span style="color: red;">*</span>');
   
@@ -90,6 +91,8 @@ function init() {
   $('#cancelButton').click(SchedulerUI.cancelForm);
   
   $('#attendees').change(SchedulerUI.handleAgentChange);
+  
+  $('#schedule_repeat').change(function(){ SchedulerUI.showDaySelect(this.options[this.selectedIndex].value); });
   
   SchedulerUI.loadKnownAgents();
   
@@ -271,9 +274,14 @@ SchedulerUI.handleAgentChange = function(elm){
           var capabilities = [];
           $.each($('entry', d), function(a, i){
             var s = $(i).attr('key');
-            if(s.indexOf(".src") != -1){
+            if(s.indexOf('.src') != -1){
               var name = s.split('.');
               capabilities.push(name[2]);
+            } else if(s == 'capture.device.timezone.offset') {
+              var agent_tz = parseInt($(i).text());
+              if(agent_tz !== 'NaN'){
+                SchedulerUI.handleAgentTZ(agent_tz);
+              }
             }
           });
           if(capabilities.length){
@@ -290,6 +298,52 @@ SchedulerUI.displayCapabilities = function(capa){
     $('#input-list').append('<input type="checkbox" id="' + v + '" value="' + v + '" checked="checked"><label for="' + v +'">' + v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() + '</label>');
   });
   SchedulerForm.formFields.resources = new FormField(capa, false, {getValue: getInputs, setValue: setInputs, checkValue: checkInputs});
+}
+
+SchedulerUI.handleAgentTZ = function(tz){
+  var localTZ = -(new Date()).getTimezoneOffset(); //offsets in minutes
+  if(tz != localTZ){
+    //Display note of agent TZ difference, all times local to capture agent.
+    //update time picker to agent time
+    console.log('Agent TZ is different from user\'s local tz', tz, localTZ);
+    Agent.tzDiff = tz - localTZ;
+  }else{
+    Agent.tzDiff = 0;
+  }
+}
+
+SchedulerUI.toICalDate = function(d){
+  if(d.constructor != Date){
+    d = new Date(0);
+  }
+  var month = SchedulerUI.padstring(d.getUTCMonth() + 1, '0', 2);
+  var hours = SchedulerUI.padstring(d.getUTCHours(), '0', 2);
+  var minutes = SchedulerUI.padstring(d.getUTCMinutes(), '0', 2);
+  var seconds = SchedulerUI.padstring(d.getUTCSeconds(), '0', 2);
+  return '' + d.getUTCFullYear() + month + d.getUTCDate() + 'T' + hours + minutes + seconds + 'Z';
+}
+
+SchedulerUI.padstring = function(str, pad, padlen){
+  if(typeof str != 'string'){ 
+    str = str.toString();
+  }
+  while(str.length < padlen && pad.length > 0){
+    str = pad + str;
+  }
+  return str;
+}
+      
+
+SchedulerUI.showDaySelect = function(selection){
+  if(selection == 'weekly'){
+    $('#day-select').removeClass('hidden');
+    $('#repeat-enddate').removeClass('hidden');
+    SchedulerForm.formFields.recurrence = new FormField(['schedule_repeat', 'repeat_sun', 'repeat_mon', 'repeat_tue', 'repeat_wed', 'repeat_thu', 'repeat_fri', 'repeat_sat', 'endDate'], false, {getValue: getRecurValue, setValue: setRecurValue, checkValue: checkRecurValue, dispValue: getRecurDisp});
+  }else{
+    $('#day-select').addClass('hidden');
+    $('#repeat-enddate').addClass('hidden');
+    delete SchedulerForm.formFields.recurrence;
+  }
 }
 
 /* ======================== SchedulerForm ======================== */
@@ -766,7 +820,9 @@ function setStartDate(value){
  */
 function checkStartDate(){
   var date = this.fields.startDate.datepicker('getDate');
-  var now = new Date();
+  var now = (new Date()).getTime();
+  now += Agent.tzDiff  * 60 * 1000; //Offset by the difference between local and client.
+  now = new Date(now);
   if(this.fields.startDate &&
     date &&
     this.fields.startTimeHour &&
@@ -781,4 +837,127 @@ function checkStartDate(){
     }
     return false;
   }
+}
+
+function getRecurValue(){
+  if(this.checkValue()){
+    if(this.fields.schedule_repeat.val() == 'weekly'){
+      var rrule = "RRULE:FREQ=WEEKLY;UNTIL=" + SchedulerUI.toICalDate(this.fields.endDate.datepicker('getDate')) + ";BYDAY=";
+      var days = [];
+      if(this.fields.repeat_sun[0].checked){
+        days.push("SU");
+      }
+      if(this.fields.repeat_mon[0].checked){
+        days.push("MO");
+      }
+      if(this.fields.repeat_tue[0].checked){
+        days.push("TU");
+      }
+      if(this.fields.repeat_wed[0].checked){
+        days.push("WE");
+      }
+      if(this.fields.repeat_thu[0].checked){
+        days.push("TH");
+      }
+      if(this.fields.repeat_fri[0].checked){
+        days.push("FR");
+      }
+      if(this.fields.repeat_sat[0].checked){
+        days.push("SA");
+      }
+      this.value = rrule + days.toString();
+    }
+  }
+  return this.value;
+}
+
+function setRecurValue(value){
+  if(typeof value == 'string'){
+    value = { rrule: value };
+  }
+  if(value.rrule.indexOf('FREQ=WEEKLY') != -1){
+    this.fields.schedule_repeat.val('weekly');
+    var days = value.rrule.split('BYDAY=')
+    if(days[1].length > 0){
+      days = days[1].split(',');
+      this.fields.repeat_sun[0].checked = this.fields.repeat_mon[0].checked = this.fields.repeat_tue[0].checked = this.fields.repeat_wed[0].checked = this.fields.repeat_thu[0].checked = this.fields.repeat_fri[0].checked = this.fields.repeat_sat[0].checked = false;
+      for(d in days){
+        switch(days[d]){
+          case 'SU':
+            this.fields.repeat_sun[0].checked = true;
+            break;
+          case 'MO':
+            this.fields.repeat_mon[0].checked = true;
+            break;
+          case 'TU':
+            this.fields.repeat_tue[0].checked = true;
+            break;
+          case 'WE':
+            this.fields.repeat_wed[0].checked = true;
+            break;
+          case 'TH':
+            this.fields.repeat_thu[0].checked = true;
+            break;
+          case 'FR':
+            this.fields.repeat_fri[0].checked = true;
+            break;
+          case 'SA':
+            this.fields.repeat_sat[0].checked = true;
+            break;
+        }
+      }
+    }
+  }
+}
+
+function checkRecurValue(){
+  if(this.fields.schedule_repeat.val() != 'norepeat'){
+    if(this.fields.repeat_sun[0].checked ||
+       this.fields.repeat_mon[0].checked ||
+       this.fields.repeat_tue[0].checked ||
+       this.fields.repeat_wed[0].checked ||
+       this.fields.repeat_thu[0].checked ||
+       this.fields.repeat_fri[0].checked ||
+       this.fields.repeat_sat[0].checked ){
+      if(this.fields.endDate.datepicker('getDate')){ //Todo, check enddate is after start date.
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function getRecurDisp(){
+  var rrule = this.getValue();
+  var days = rrule.split('BYDAY=');
+  if(days[1].length > 0){
+    days = days[1].split(',');
+    var dlist = [];
+    for(d in days){
+      switch(days[d]){
+        case 'SU':
+          dlist.push(i18n.day.sun);
+          break;
+        case 'MO':
+          dlist.push(i18n.day.mon);
+          break;
+        case 'TU':
+          dlist.push(i18n.day.tue);
+          break;
+        case 'WE':
+          dlist.push(i18n.day.wed);
+          break;
+        case 'TH':
+          dlist.push(i18n.day.thu);
+          break;
+        case 'FR':
+          dlist.push(i18n.day.fri);
+          break;
+        case 'SA':
+          dlist.push(i18n.day.sat);
+          break;
+      }
+    }
+  }
+  return "Weekly on " + dlist.toString();
 }
