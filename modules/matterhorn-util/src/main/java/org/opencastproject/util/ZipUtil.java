@@ -15,18 +15,22 @@
  */
 package org.opencastproject.util;
 
-import de.schlichtherle.io.ArchiveException;
-import de.schlichtherle.io.File;
-import de.schlichtherle.io.FileInputStream;
-import de.schlichtherle.io.FileOutputStream;
-
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Provides static methods for compressing and extracting zip files using zip64 extensions when necessary.
@@ -43,40 +47,89 @@ public class ZipUtil {
    * @return the resulting zip archive file
    */
   public static java.io.File zip(java.io.File[] sourceFiles, String destination) {
+    return zip(sourceFiles, destination, false);
+  }
+
+  public static java.io.File zip(java.io.File[] sourceFiles, File destination) {
+    return zip(sourceFiles, destination, false);
+  }
+
+  /**
+   * Compresses a files into a zip archive. May add files recursively.
+   *
+   * @param sourceFiles The files to include in the root of the archive
+   * @param destination The path to put the resulting zip archive file.
+   * @param recursively Set true to recursively add directories.
+   * @return the resulting zip archive file
+   */
+  public static File zip(File[] sourceFiles, String destination, boolean recursively) {
+    return zip(sourceFiles, new File(destination), recursively);
+  }
+
+  public static File zip(File[] sourceFiles, File destination, boolean recursively) {
     if (sourceFiles == null || sourceFiles.length <= 0) {
       throw new IllegalArgumentException("sourceFiles must include at least 1 file");
     }
-    if (destination == null || "".equals(destination)) {
+    if (destination == null) {
       throw new IllegalArgumentException("destination must be set");
     }
-    // patch from ruben.perez to ensure only exposes java.io.File: http://issues.opencastproject.org/jira/browse/MH-1698 - AZ
-    java.io.File normalFile = new java.io.File(destination);
-    File zipFile = new File(normalFile);
-    for(java.io.File f : sourceFiles) {
-      OutputStream out = null;
-      InputStream in = null;
-      try {
-        out = new FileOutputStream(zipFile.getAbsolutePath() + "/" + f.getName());
-        in = new FileInputStream(f);
-        File.cat(in, out);
-      } catch (Exception e) {
-        zipFile.delete();
-        throw new RuntimeException(e);
-      } finally {
-        if(in != null) {try {in.close();} catch (IOException e) {logger.error(e.getMessage());}}
-        if(out != null) {try {out.close();} catch (IOException e) {logger.error(e.getMessage());}}
+    ZipOutputStream out = new ZipOutputStream(outputStream(destination));
+    try {
+      _zip(sourceFiles, out, -1, recursively);
+      return destination;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      IOUtils.closeQuietly(out);
+    }
+  }
+
+  private static void _zip(File[] files, ZipOutputStream out, int basePath, boolean recursively) {
+    for (File file : files) {
+      if (file.isDirectory()) {
+        if (recursively)
+          _zip(file.listFiles(), out, curBasePath(file, basePath), recursively);
+      } else {
+        InputStream in = inputStream(file);
+        try {
+          out.putNextEntry(new ZipEntry(entryName(file, curBasePath(file, basePath))));
+          IOUtils.copy(in, out);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        } finally {
+          IOUtils.closeQuietly(in);
+        }
       }
     }
-    
-    // Solves issue MH-1809 (java.io.File.length() doesn't return actual zip file size) 
+  }
+
+  private static int curBasePath(File f, int basePath) {
+    return basePath >= 0 ? basePath : f.getParentFile().getAbsolutePath().length();
+  }
+
+  private static String entryName(File f, int basePath) {
+    return rel(f.getAbsolutePath().substring(basePath));
+  }
+
+  private static InputStream inputStream(File file) {
     try {
-      File.umount();
-    } catch (ArchiveException e) {
-      zipFile.delete();
+      return new BufferedInputStream(new FileInputStream(file));
+    } catch (FileNotFoundException e) {
       throw new RuntimeException(e);
     }
-    
-    return normalFile;
+  }
+
+  private static OutputStream outputStream(File file) {
+    try {
+      return new BufferedOutputStream(new FileOutputStream(file));
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /** Chop of a leading separator. */
+  private static String rel(String path) {
+    return path.startsWith(File.separator) ? path.substring(1) : path;
   }
 
   /**
@@ -96,15 +149,27 @@ public class ZipUtil {
     if (destination.exists() && destination.isFile()) {
       throw new IllegalArgumentException("destination file must be a directory");
     }
+    if (!destination.exists())
+      if (!destination.mkdirs())
+        throw new RuntimeException("cannot create " + destination);
+
+    ZipInputStream in = new ZipInputStream(inputStream(zipFile));
     try {
-      FileUtils.forceMkdir(destination);
-      de.schlichtherle.io.File f = new de.schlichtherle.io.File(zipFile);
-      f.archiveCopyAllTo(destination);
+      ZipEntry entry;
+      while ((entry = in.getNextEntry()) != null) {
+        File file = new File(destination, entry.getName());
+        file.getParentFile().mkdirs();
+        OutputStream out = outputStream(file);
+        try {
+          IOUtils.copy(in, out);
+        } finally {
+          IOUtils.closeQuietly(out);
+        }
+      }
     } catch (IOException e) {
-      throw new IllegalStateException("Unabel to create archive destination directory " + destination);
+      throw new RuntimeException(e);
     } finally {
-      try {File.umount();} catch (ArchiveException e) {logger.error(e.getMessage());}
+      IOUtils.closeQuietly(in);
     }
   }
-
 }
