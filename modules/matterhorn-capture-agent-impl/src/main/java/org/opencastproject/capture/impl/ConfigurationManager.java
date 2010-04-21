@@ -347,7 +347,12 @@ public class ConfigurationManager implements ManagedService {
     else {
       Properties merged = getAllProperties();
       for (Object key : p.keySet()) {
-        merged.setProperty(key.toString(), p.getProperty((String) key));
+        String property = p.getProperty((String) key);
+        if (property != null) {
+          merged.setProperty(key.toString(), property);
+        } else {
+          logger.error("Unable to merge properties!");
+        }
       }
       return merged;
     }

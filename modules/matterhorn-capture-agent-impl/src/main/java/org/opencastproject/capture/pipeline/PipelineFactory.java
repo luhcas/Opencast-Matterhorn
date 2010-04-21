@@ -109,6 +109,11 @@ public class PipelineFactory {
       }
       String outputLoc = outputFile.getAbsolutePath();
 
+      if (srcLoc == null) {
+        logger.error("Unable to create pipeline for {} because its source file/device does not exist!", name);
+        return null;
+      }
+
       if (new File(srcLoc).isFile()) {
         // Non-V4L file. If it exists, assume it is ingestable
         // TODO: Fix security risk. Any file on CaptureAgent filesytem could be ingested

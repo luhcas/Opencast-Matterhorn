@@ -97,7 +97,7 @@ public class RecordingImpl implements AgentRecording {
    * Determines the root URL and ID from the recording's properties
    * //TODO:  What if the properties object contains a character in the recording id or root url fields that is invalid for the filesystem? 
    */
-  public void determineRootURLandID() {
+  protected void determineRootURLandID() {
     //Figures out where captureDir lives
     if (this.props.containsKey(CaptureParameters.RECORDING_ROOT_URL)) {
       baseDir = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL));

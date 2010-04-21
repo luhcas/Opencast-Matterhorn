@@ -228,9 +228,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     if (currentRecID != null || !agentState.equals(AgentState.IDLE)) {
       logger.warn("Unable to start capture, a different capture is still in progress in {}.",
               pendingRecordings.get(currentRecID).getDir().getAbsolutePath());
-      //TODO:  What if we don't have a recording ID already (eg, an unscheduled capture)
-      if (properties != null && properties.contains(CaptureParameters.RECORDING_ID)) {
-        setRecordingState((String) properties.get(CaptureParameters.RECORDING_ID), RecordingState.CAPTURE_ERROR);
+      if (properties != null && properties.getProperty(CaptureParameters.RECORDING_ID) != null) {
+        setRecordingState(properties.getProperty(CaptureParameters.RECORDING_ID), RecordingState.CAPTURE_ERROR);
+      } else {
+        setRecordingState("Unscheduled-" + System.currentTimeMillis(), RecordingState.CAPTURE_ERROR);
       }
       return null;
     } else {

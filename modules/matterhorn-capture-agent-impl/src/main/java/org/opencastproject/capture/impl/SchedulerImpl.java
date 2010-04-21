@@ -472,7 +472,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           log.warn("Event {} has a negative duration, skipping.", uid);
           continue;
         } else if (start.before(new Date())) {
-          log.warn("Event {} is scheduled for a time that has already passed, skipping.", uid);
+          log.debug("Event {} is scheduled for a time that has already passed, skipping.", uid);
           continue;
         } else if (duration.getDuration().compareTo(new Dur(0,0,0,0)) == 0) {
           log.warn("Event {} has a duration of 0, skipping.", uid);
