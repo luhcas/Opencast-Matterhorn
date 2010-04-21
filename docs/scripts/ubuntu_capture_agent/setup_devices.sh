@@ -13,8 +13,8 @@ ls /dev/video* | grep '/dev/video[0-9]$' > /tmp/devlist.txt
 #Read each line in the file.  Note that if we move the call from above to this line the devices array gets all kinds of scoping problems.
 #FIXME: The Hauppage, as it is two devices, appears duplicated. Should only appear once
 i=0
-while read line
- do
+while reline
+ do         
 	let aryLen=${#supportedDevices[@]}-1
 	for item in $(seq 0 1 $aryLen)
 	 do
@@ -31,6 +31,7 @@ done < /tmp/devlist.txt
 
 
 CAPTURE_PROPS=$1/conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties
+GEN_PROPS=$1/conf/config.properties
 sed -i "/capture.device/d" $CAPTURE_PROPS
 
 touch /home/$USERNAME/95-perso.rules
@@ -122,9 +123,8 @@ sudo -u $USERNAME mkdir -p $OC_DIR/cache/captures
 # define capture agent name by using the hostname
 sed -i s/capture\.agent\.name.*/capture\.agent\.name=`hostname`/g $CAPTURE_PROPS
 
-# Prompt for core hostname. default to localhost:8080
-echo -n "Please enter Matterhorn Core hostname (default: http://localhost:8080) "
-read core
-if [ "$core" != "" ]; then
-  sed -i "s#http:\/\/localhost:8080#$core#g" $CAPTURE_PROPS
-fi
+# Prompt for core hostname. default to localhost:8080                                                                                                        
+read -p "Please enter Matterhorn Core hostname: (http://localhost:8080) " core
+# Escapes the special characters so that sed does not interpret them
+core=$(echo ${core:-"http://localhost:8080"} | sed 's/\([\/\.\-]\)/\\\1/g')
+sed -i "s/\(org\.opencastproject\.server\.url=\).*$/\1$core/" $GEN_PROPS
