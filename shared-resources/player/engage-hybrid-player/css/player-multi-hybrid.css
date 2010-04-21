@@ -426,6 +426,14 @@ body
   zoom:                     1;
 }
 
+.oc_descriptionDisplayBlock
+{
+  text-align:               center;
+  margin:                   10px;
+  overflow:                 auto; 
+  zoom:                     1;
+}
+
 .oc_embed-textarea
 {
   width:                    95%;

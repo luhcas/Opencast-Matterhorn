@@ -18,7 +18,9 @@ Opencast.Watch = (function ()
 
         var mediaPackageId = Opencast.engage.getMediaPackageId();
     
-        var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
+        var restEndpoint = "xml/episode.xml";
+        //var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
+        // restEndpoint = "http://video.lernfunk.de/REST/ws/episode?id="+mediaPackageId;
 
         $('#data').xslt(restEndpoint, "xsl/embed-hybrid-player.xsl", function () 
         {
@@ -46,17 +48,9 @@ Opencast.Watch = (function ()
             // set the abstract
             $('#abstract').html($('#oc-abstract').html());
       
-            // TODO MERGE
             var mediaUrlOne = $('#oc-video-url').html();
             var mediaUrlTwo = $('#oc-video-url').html();
             
-            // Get the video url
-            //var mediaUrlOne = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
-            //var mediaUrlOne = 'http://mediapm.edgesuite.net/osmf/content/test/train_1500.mp3';
-            //var mediaUrlOne = 'engage-hybrid-player/mp3/need.mp3';
-            // var mediaUrlTwo = 'rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/algorithmen09_2009_10_27_14_9__131_173_10_32.flv';
-            //var mediaUrlTwo = '';
-
             Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
             //
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')
@@ -85,16 +79,23 @@ Opencast.Watch = (function ()
             // set embed field
             var watchUrl = window.location.href;
             var embedUrl = watchUrl.replace(/watch.html/g, "embed.html");
-            //var embed = $('#oc-embed').val().replace(/src_url/g, embedUrl);
-            //$('#oc-embed').val(embed);
-      
+            
             // init the volume scrubber
             Opencast.Scrubber.init();
-      
-            //$('#info').append("<a href=" + restEndpoint + ">XML</a>&nbsp;");
-      
-            //$('#info').append("<a href=" + watchUrl.replace(/watch.html/g, "multi.html") + ">Multi</a>");
+            
 
+            $('#scrubber').bind('keydown', 'left', function(evt) 
+            {
+                var newPosition = Math.round((($("#draggable").position().left - 20 ) / $("#scubber-channel").width()) * Opencast.Player.getDuration());
+                Videodisplay.seek(newPosition);
+            });
+            
+            $('#scrubber').bind('keydown', 'right', function(evt)
+            {
+                var newPosition = Math.round((($("#draggable").position().left + 20 ) / $("#scubber-channel").width()) * Opencast.Player.getDuration());
+                Videodisplay.seek(newPosition);            
+            });
+          
       
         });
     }

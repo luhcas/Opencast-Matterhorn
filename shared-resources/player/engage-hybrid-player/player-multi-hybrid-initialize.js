@@ -163,7 +163,6 @@ Opencast.Initialize = (function ()
         $("#oc_btn-slides").attr('role', 'button');
         $("#oc_btn-slides").attr('aria-pressed', 'false'); 
         
-        
         // Handler for .click()
         $('#oc_btn-skip-backward').click(function () 
         {
@@ -285,6 +284,7 @@ Opencast.Initialize = (function ()
             this.className = 'oc_btn-rewind-over';
             Opencast.Player.stopRewind();
         });
+        
         $('#oc_btn-play-pause').mouseup(function () 
         {
             Opencast.Player.PlayPauseMouseOver();
@@ -308,13 +308,61 @@ Opencast.Initialize = (function ()
         // Handler keypress
         $('#oc_edit-time').keypress(function (event) 
         {
-            if (event.keyCode === '13') 
+            if (event.keyCode == '13') 
             {
                 Opencast.Player.editTime();
             }
+        })
+        
+        // Handler keydown
+        $('#oc_btn-rewind').keydown(function (event) 
+        {
+           
+            if (event.keyCode == '13' || event.keyCode == '32') 
+            {
+                this.className = 'oc_btn-rewind-clicked';
+                Opencast.Player.doRewind();
+            }
+            else if(event.keyCode == '9')
+            {
+                this.className = 'oc_btn-rewind-over';
+                Opencast.Player.stopRewind();
+            }
         });
+        
+        $('#oc_btn-fast-forward').keydown(function (event) 
+        {
+            if (event.keyCode == '13' || event.keyCode == '32') 
+            {
+                this.className = 'oc_btn-fast-forward-clicked';
+                Opencast.Player.doFastForward();
+            }
+            else if(event.keyCode == '9')
+            {
+                this.className = 'oc_btn-fast-forward-over';
+                Opencast.Player.stopFastForward();
+            }
+        });
+        
+        // Handler keyup
+        $('#oc_btn-rewind').keyup(function (event) 
+        {
+            if (event.keyCode == '13' || event.keyCode == '32') 
+            {
+                this.className = 'oc_btn-rewind-over';
+                Opencast.Player.stopRewind();
+            }
+        });
+       
+       $('#oc_btn-fast-forward').keyup(function (event) 
+       {
+           if (event.keyCode == '13' || event.keyCode == '32') 
+           {
+               this.className = 'oc_btn-fast-forward-over';
+               Opencast.Player.stopFastForward();
+           } 
+       });        
     });
-    
     
     /*
      * 

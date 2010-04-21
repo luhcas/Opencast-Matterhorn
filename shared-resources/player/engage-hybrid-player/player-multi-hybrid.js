@@ -37,6 +37,8 @@ Opencast.Player = (function () {
     EMBEDHIDE              = "Hide Embed",
     BOOKMARK               = "Bookmark",
     BOOKMARKHIDE           = "Hide Bookmark",
+    DESCRIPTION            = "Description",
+    DESCRIPTIONHIDE        = "Hide Description",
     MULTIPLAYER            = "Multiplayer",
     SINGLEPLAYER           = "Singleplayer",
     SINGLEPLAYERWITHSLIDES = "SingleplayerWithSlides",
@@ -416,6 +418,38 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
+        @description Show the description
+     */
+    function showDescription()
+    {
+        $("#oc_description-sections").attr("className", "oc_descriptionDisplayBlock");
+        $("#oc_btn-description").attr({ 
+            alt: DESCRIPTIONHIDE,
+            title: DESCRIPTIONHIDE,
+            value: DESCRIPTIONHIDE
+        });
+        $("#oc_btn-description").attr('aria-pressed', 'true');
+    }
+
+    /**
+       @memberOf Opencast.Player
+       @description Hide the description
+     */
+    function hideDescription()
+    {
+        $("#oc_description-sections").attr("className", "oc_DisplayNone");
+        $("#oc_btn-description").attr({ 
+            alt: DESCRIPTION,
+            title: DESCRIPTION,
+            value: DESCRIPTION
+        });
+        $("#oc_btn-description").attr('aria-pressed', 'false');
+    }
+    
+    
+    
+    /**
+        @memberOf Opencast.Player
         @description Toggle the slides
      */
     function doToggleSlides()
@@ -428,6 +462,7 @@ Opencast.Player = (function () {
             hideShortcuts();
             hideEmbed();
             hideBookmark();
+            hideDescription();
             setShowSections(true);
         }
         else
@@ -452,6 +487,7 @@ Opencast.Player = (function () {
             hideShortcuts();
             hideEmbed();
             hideBookmark();
+            hideDescription();
             setShowSections(true);
         }
         else
@@ -476,6 +512,7 @@ Opencast.Player = (function () {
             hideShortcuts();
             hideEmbed();
             hideBookmark();
+            hideDescription();
             setShowSections(true);
         }
         else
@@ -500,6 +537,7 @@ Opencast.Player = (function () {
             hideSlideText();
             hideEmbed();
             hideBookmark();
+            hideDescription();
             setShowSections(true);
         }
         else
@@ -524,6 +562,7 @@ Opencast.Player = (function () {
             hideSlideText();
             hideShortcuts();
             hideBookmark();
+            hideDescription();
             setShowSections(true);
         }
         else
@@ -548,6 +587,7 @@ Opencast.Player = (function () {
             hideSlides();
             hideSlideText();
             hideShortcuts();
+            hideDescription();
             setShowSections(true);
         }
         else
@@ -557,6 +597,39 @@ Opencast.Player = (function () {
         }
         Opencast.Initialize.doTest();
     }
+    
+    
+    function doToggleDescription()
+    {
+        if ($("#oc_btn-description").attr("title") === DESCRIPTION)
+        {
+            showDescription();
+            hideBookmark();
+            hideEmbed();
+            hideNotes(); 
+            hideSlides();
+            hideSlideText();
+            hideShortcuts();
+            setShowSections(true);
+        }
+        else
+        {
+            hideDescription();
+            setShowSections(false);
+        }
+        Opencast.Initialize.doTest();
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
@@ -653,7 +726,6 @@ Opencast.Player = (function () {
      */
     function doRewind()  
     {
- 
         if (intval === "")
         {
             setSeekState(getCurrentPlayPauseState());
@@ -1213,6 +1285,7 @@ Opencast.Player = (function () {
         doToggleShortcuts : doToggleShortcuts,
         doToggleEmbed : doToggleEmbed,
         doToggleBookmark : doToggleBookmark,
+        doToggleDescription : doToggleDescription,
         removeOldAlert : removeOldAlert,
         addAlert : addAlert,
         embedIFrame : embedIFrame,

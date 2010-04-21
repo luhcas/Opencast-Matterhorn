@@ -49,35 +49,45 @@ Opencast.Initialize = (function ()
     var ddmenuitem      = 0;
 
     function dropdown_open()
-    {	dropdown_canceltimer();
+    {
+        dropdown_canceltimer();
         dropdown_close();
-    	ddmenuitem = $(this).find('ul').eq(0).css('visibility', 'visible');
+        ddmenuitem = $(this).find('ul').eq(0).css('visibility', 'visible');
     }
 
     function dropdown_close()
-    {	if(ddmenuitem) ddmenuitem.css('visibility', 'hidden');}
+    {
+        if(ddmenuitem) ddmenuitem.css('visibility', 'hidden');
+    }
 
     function dropdown_timer()
-    {	closetimer = window.setTimeout(dropdown_close, timeout);}
+    {
+        closetimer = window.setTimeout(dropdown_close, timeout);
+    }
 
     function dropdown_canceltimer()
-    {	if(closetimer)
-    	{	window.clearTimeout(closetimer);
-    		closetimer = null;}}
+    {
+        if(closetimer)
+        {
+            window.clearTimeout(closetimer);
+            closetimer = null;
+        }
+    }
     
-    $(document).ready(function () {
+    $(document).ready(function () 
+    {
         keyboardListener();
         
         $('#oc_video-size-dropdown > li').bind('mouseover', dropdown_open);
         //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
-    	$('#oc_video-size-dropdown > li').bind('mouseout',  dropdown_timer);
-    	
-    	$('#oc_volume-dropdown > li').bind('mouseover', dropdown_open);
+        $('#oc_video-size-dropdown > li').bind('mouseout',  dropdown_timer);
+     
+        $('#oc_volume-dropdown > li').bind('mouseover', dropdown_open);
         //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
-    	$('#oc_volume-dropdown > li').bind('mouseout',  dropdown_timer);
-    	
-    	
-    	// init the aria slider for the volume
+        $('#oc_volume-dropdown > li').bind('mouseout',  dropdown_timer);
+     
+    
+        // init the aria slider for the volume
         Opencast.ariaSlider.init();
        
         // aria roles
@@ -191,77 +201,132 @@ Opencast.Initialize = (function ()
         });
         $('#oc_btn-cc').mouseout(function() 
         {
-        	if(Opencast.Player.getCaptionsBool() === false)
-        	{
-        		this.className='oc_btn-cc-off';
-        	}
-           	
+            if(Opencast.Player.getCaptionsBool() === false)
+            {
+                this.className='oc_btn-cc-off';
+            }
         });
         
         // Handler for .mousedown()
         $('#oc_btn-skip-backward').mousedown(function () 
-                {
-                    this.className = 'oc_btn-skip-backward-clicked';   
-                });
-                $('#oc_btn-rewind').mousedown(function ()
-                {
-                    this.className = 'oc_btn-rewind-clicked';
-                    Opencast.Player.doRewind();
-                });
-                
-                $('#oc_btn-play-pause').mousedown(function () 
-                {
-                    Opencast.Player.PlayPauseMouseOut();
-                });
-                $('#oc_btn-fast-forward').mousedown(function () 
-                {
-                    this.className = 'oc_btn-fast-forward-clicked';
-                    Opencast.Player.doFastForward();
-                    
-                });
-                $('#oc_btn-skip-forward').mousedown(function () 
-                {
-                    this.className = 'oc_btn-skip-forward-clicked';
-                });
+        {
+            this.className = 'oc_btn-skip-backward-clicked';   
+        });
+        
+        $('#oc_btn-rewind').mousedown(function ()
+        {
+            this.className = 'oc_btn-rewind-clicked';
+            Opencast.Player.doRewind();
+        });
+         
+        $('#oc_btn-play-pause').mousedown(function () 
+        {
+            Opencast.Player.PlayPauseMouseOut();
+        });
+        
+        $('#oc_btn-fast-forward').mousedown(function () 
+        {
+            this.className = 'oc_btn-fast-forward-clicked';
+            Opencast.Player.doFastForward();
+        });
+        
+        $('#oc_btn-skip-forward').mousedown(function () 
+        {
+            this.className = 'oc_btn-skip-forward-clicked';
+        });
                                
         // Handler for .mouseup()
-                $('#oc_btn-skip-backward').mouseup(function () 
-                        {
-                            this.className = 'oc_btn-skip-backward-over';  
-                        });
-                        $('#oc_btn-rewind').mouseup(function ()
-                        {
-                            this.className = 'oc_btn-rewind-over';
-                            Opencast.Player.stopRewind();
-                        });
-                        $('#oc_btn-play-pause').mouseup(function () 
-                        {
-                            Opencast.Player.PlayPauseMouseOver();
-                        });
-                        $('#oc_btn-fast-forward').mouseup(function () 
-                        {
-                            this.className = 'oc_btn-fast-forward-over';
-                            Opencast.Player.stopFastForward();
-                        });
-                        $('#oc_btn-skip-forward').mouseup(function () 
-                        {
-                            this.className = 'oc_btn-skip-forward-over';
-                        });
+        $('#oc_btn-skip-backward').mouseup(function () 
+        {
+            this.className = 'oc_btn-skip-backward-over';  
+        });
+        
+        $('#oc_btn-rewind').mouseup(function ()
+        {
+            this.className = 'oc_btn-rewind-over';
+            Opencast.Player.stopRewind();
+        });
+        
+        $('#oc_btn-play-pause').mouseup(function () 
+        {
+            Opencast.Player.PlayPauseMouseOver();
+        });
+        
+        $('#oc_btn-fast-forward').mouseup(function () 
+        {
+            this.className = 'oc_btn-fast-forward-over';
+            Opencast.Player.stopFastForward();
+        });
+        
+        $('#oc_btn-skip-forward').mouseup(function () 
+        {
+            this.className = 'oc_btn-skip-forward-over';
+        });
         
         // Handler onBlur
         $('#oc_edit-time').blur(function() 
         {
-        	Opencast.Player.hideEditTime(); 	
+            Opencast.Player.hideEditTime(); 	
         });
         
         // Handler keypress
         $('#oc_edit-time').keypress(function(event) 
         {
-        	if (event.keyCode == '13') 
-        	{
-        		Opencast.Player.editTime();
-        	};	
+            if (event.keyCode == '13') 
+            {
+                Opencast.Player.editTime();
+            }
         });
+        
+        // Handler keydown
+        $('#oc_btn-rewind').keydown(function (event) 
+        {
+           
+            if (event.keyCode == '13' || event.keyCode == '32') 
+            {
+                this.className = 'oc_btn-rewind-clicked';
+                Opencast.Player.doRewind();
+            }
+            else if(event.keyCode == '9')
+            {
+                this.className = 'oc_btn-rewind-over';
+                Opencast.Player.stopRewind();
+            }
+        });
+        
+        $('#oc_btn-fast-forward').keydown(function (event) 
+        {
+            if (event.keyCode == '13' || event.keyCode == '32') 
+            {
+                this.className = 'oc_btn-fast-forward-clicked';
+                Opencast.Player.doFastForward();
+            }
+            else if(event.keyCode == '9')
+            {
+                this.className = 'oc_btn-fast-forward-over';
+                Opencast.Player.stopFastForward();
+            }
+        });
+        
+        // Handler keyup
+        $('#oc_btn-rewind').keyup(function (event) 
+        {
+            if (event.keyCode == '13' || event.keyCode == '32') 
+            {
+                this.className = 'oc_btn-rewind-over';
+                Opencast.Player.stopRewind();
+            }
+        });
+       
+        $('#oc_btn-fast-forward').keyup(function (event) 
+        {
+            if (event.keyCode == '13' || event.keyCode == '32') 
+            {
+                this.className = 'oc_btn-fast-forward-over';
+                Opencast.Player.stopFastForward();
+            } 
+        });   
+        
         
         // to calculate the embed flash height
         var iFrameHeight = document.documentElement.clientHeight;

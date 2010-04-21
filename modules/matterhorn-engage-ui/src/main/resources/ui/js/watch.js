@@ -49,7 +49,7 @@ Opencast.Watch = (function ()
             // set the media URLs
             var mediaUrlOne = $('#oc-video-url').html();
             var mediaUrlTwo = $('#oc-video-url').html();
-
+            
             Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
 
             //
@@ -72,18 +72,15 @@ Opencast.Watch = (function ()
                 }
             }
       
-
             // Set the caption
             Opencast.Player.setCaptionsURL('engage-hybrid-player/dfxp/matterhorn.dfxp.xml');
       
             // init the volume scrubber
             Opencast.Scrubber.init();
             
-            //
+            // init
             Opencast.Initialize.init();
                        
-            
-            
             $('#scrubber').bind('keydown', 'left', function(evt) 
             {
                 var newPosition = Math.round((($("#draggable").position().left - 20 ) / $("#scubber-channel").width()) * Opencast.Player.getDuration());
@@ -93,11 +90,15 @@ Opencast.Watch = (function ()
             $('#scrubber').bind('keydown', 'right', function(evt)
             {
                 var newPosition = Math.round((($("#draggable").position().left + 20 ) / $("#scubber-channel").width()) * Opencast.Player.getDuration());
-                Videodisplay.seek(newPosition);
+                Videodisplay.seek(newPosition);            
+                
             });
-        });
+            
+         // set description html text
+            $('#oc_description-sections').html('description');
+       });
     }
-
+  
     function hoverSegment(segmentId)
     {
     
