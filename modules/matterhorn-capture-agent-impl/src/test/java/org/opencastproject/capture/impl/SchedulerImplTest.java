@@ -17,7 +17,10 @@ package org.opencastproject.capture.impl;
 
 import org.opencastproject.capture.api.CaptureParameters;
 
+import clover.retrotranslator.edu.emory.mathcs.backport.java.util.Arrays;
+
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -102,7 +105,7 @@ public class SchedulerImplTest {
 
   private String[] formatDate(Date d) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-    String[] times = new String[4];
+    String[] times = new String[5];
     times[0] = sdf.format(d);
     d.setTime(d.getTime() + 60000L);
     times[1] = sdf.format(d);
@@ -110,6 +113,8 @@ public class SchedulerImplTest {
     times[2] = sdf.format(d);
     d.setTime(d.getTime() + 60000L);
     times[3] = sdf.format(d);
+    d.setTime(new Date().getTime() - 60000L);
+    times[4] = sdf.format(d);
     return times;
   }
 
@@ -133,6 +138,7 @@ public class SchedulerImplTest {
     source = source.replace("@END2@", times[2]);
     source = source.replace("@START3@", times[2]);
     source = source.replace("@END3@", times[3]);
+    source = source.replace("@PAST@", times[4]);
     
     File output = File.createTempFile("scheduler-test-", ".ics");
     FileWriter out = null;
@@ -416,10 +422,12 @@ public class SchedulerImplTest {
     config.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
     sched.updated(schedulerProps);
     String[] schedule = sched.getCaptureSchedule();
-    Assert.assertEquals(3, schedule.length);
-    Assert.assertEquals("No-end-but-duration", schedule[0]);
+    Assert.assertEquals(4, schedule.length);
+    Arrays.sort(schedule);
+    Assert.assertEquals("Longer-than-max-capture-time-using-DTEND", schedule[0]);
     Assert.assertEquals("Longer-than-max-capture-time-using-duration", schedule[1]);
-    Assert.assertEquals("Longer-than-max-capture-time-using-DTEND", schedule[2]);
+    Assert.assertEquals("No-attachments", schedule[2]);
+    Assert.assertEquals("No-end-but-duration", schedule[3]);
     testfile.delete();
   }
 

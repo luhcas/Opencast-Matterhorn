@@ -141,7 +141,7 @@ public class ConfigurationManagerTest {
     }
   }
 
-  @Test @Ignore
+  @Test
   public void testCapabilities() throws IOException, ConfigurationException {
     Properties sourceProps = new Properties();
     InputStream is = getClass().getClassLoader().getResourceAsStream("config/capture.properties");
@@ -156,18 +156,19 @@ public class ConfigurationManagerTest {
     configManager.updated(sourceProps);
     
     Properties caps = configManager.getCapabilities();
-    assertCaps(caps, "MOCK_SCREEN", configManager.getVariable("M2_REPO") + "/org/opencastproject/samples/screen/1.0/screen-1.0.mpg", "screen_out.mpg", "presentation/source");
-    assertCaps(caps, "MOCK_PRESENTER", configManager.getVariable("M2_REPO") + "/org/opencastproject/samples/camera/1.0/camera-1.0.mpg", "camera_out.mpg", "presentation/source");
-    assertCaps(caps, "MOCK_MICROPHONE", configManager.getVariable("M2_REPO") + "/org/opencastproject/samples/audio/1.0/audio-1.0.mp3", "audio_out.mp3", "presentation/source");
+    assertCaps(caps, "MOCK_SCREEN", "M2_REPO", "/org/opencastproject/samples/screen/1.0/screen-1.0.mpg", "screen_out.mpg", "presentation/source");
+    assertCaps(caps, "MOCK_PRESENTER", "M2_REPO", "/org/opencastproject/samples/camera/1.0/camera-1.0.mpg", "camera_out.mpg", "presentation/source");
+    assertCaps(caps, "MOCK_MICROPHONE", "M2_REPO", "/org/opencastproject/samples/audio/1.0/audio-1.0.mp3", "audio_out.mp3", "presentation/source");
   }
 
-  private void assertCaps(Properties caps, String name, String source, String dest, String flavour) {
-    Assert.assertEquals(source, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE));
+  private void assertCaps(Properties caps, String name, String baseVar, String relPath, String dest, String flavour) {
+    Assert.assertEquals("${"+baseVar+"}"+relPath, configManager.getUninterpretedItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE));
+    Assert.assertEquals(configManager.getVariable(baseVar) + relPath, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE));
     Assert.assertEquals(dest, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_DEST));
     Assert.assertEquals(flavour, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_FLAVOR));
   }
 
-  @Test @Ignore
+  @Test
   public void testBrokenCapabilities() throws IOException, ConfigurationException {
     Properties sourceProps = new Properties();
     InputStream is = getClass().getClassLoader().getResourceAsStream("config/capture.properties");

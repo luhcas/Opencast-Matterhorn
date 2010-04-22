@@ -105,7 +105,7 @@ public class CaptureAgentImplTest {
     properties = null;
   }
   
-  @Test @Ignore
+  @Test
   public void testCaptureAgentImpl() throws Exception {
     // start the capture, assert the recording id is correct
     String id = agent.startCapture(properties);
