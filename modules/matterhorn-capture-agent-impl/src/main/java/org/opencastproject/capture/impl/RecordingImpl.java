@@ -66,15 +66,14 @@ public class RecordingImpl implements AgentRecording {
   public RecordingImpl(MediaPackage mp, Properties properties) throws IOException, IllegalArgumentException {
     // Stores the MediaPackage
     this.mPkg = mp;
-    this.props = (Properties)properties.clone();
-    
-    determineRootURLandID();
-    
-    // Checks that recordingID is not null (can't be, otherwise we won't be able to identify the recording
-    if (id == null) {
-      logger.error("Couldn't get a proper recordingID from Properties");
-      throw new IllegalArgumentException("Couldn't get a proper recordingID from Properties");
+    if (properties != null) {
+      this.props = (Properties) properties.clone();
+    } else {
+      logger.warn("Properties parameter was null, this recording will be in a very weird state!");
     }
+
+    determineRootURLandID();
+
     //Setup the root capture dir, also make sure that it exists.
     if (!baseDir.exists()) {
       try {
@@ -98,6 +97,12 @@ public class RecordingImpl implements AgentRecording {
    * //TODO:  What if the properties object contains a character in the recording id or root url fields that is invalid for the filesystem? 
    */
   protected void determineRootURLandID() {
+    if (props == null) {
+      logger.info("Properties are null for recording, guessing that the root capture dir is java.io.tmpdir...");
+      props = new Properties();
+      props.setProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, System.getProperty("java.io.tmpdir"));
+    }
+
     //Figures out where captureDir lives
     if (this.props.containsKey(CaptureParameters.RECORDING_ROOT_URL)) {
       baseDir = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL));
@@ -178,7 +183,7 @@ public class RecordingImpl implements AgentRecording {
    * @see org.opencastproject.capture.api.AgentRecording#setProperty(java.lang.String, java.lang.String)
    */
   public String setProperty(String key, String value) {
-    return (String)props.setProperty(key, value);
+    return (String) props.setProperty(key, value);
   }
   
   /**
@@ -205,12 +210,4 @@ public class RecordingImpl implements AgentRecording {
   public Long getLastCheckinTime() {
     return lastHeardFrom;
   }
-  /*
-  /**
-   * Gets the name assigned to the capture metadata catalog
-   * @return A {@code String} with the name
-   */
-  /*public String getAgentCatalogName() {
-    return AGENT_CATALOG_NAME;
-  }*/
 }

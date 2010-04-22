@@ -62,6 +62,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Date;
@@ -287,7 +288,6 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         try {
           if (localCalendarCacheURL != null) {
             calendarString = readCalendar(localCalendarCacheURL);
-            url = localCalendarCacheURL;
           } else {
             log.warn("Unable to read calendar from local calendar cache because location was null!");
             return null;
@@ -559,7 +559,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
       //Handle any attachments
       //TODO:  Should this string be hardcoded?
-      try { 
+      try {
         if (filename.equals("org.opencastproject.capture.agent.properties")) {
           Properties jobProps = new Properties();
           jobProps.load(new StringReader(contents));
@@ -567,11 +567,16 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           job.getJobDataMap().put(JobParameters.CAPTURE_PROPS, jobProps);
           hasProperties = true;
           pack.add(new URI(filename));
-        } else if (filename.equals("metadata.xml"))
+        } else if (filename.equals("metadata.xml")) {
           pack.add(new URI(filename), MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_CATALOG);
-        else
+        } else {
           pack.add(new URI(filename));
-      } catch(Exception e) {};
+        }
+      } catch (IOException e) {
+        log.error("Unable to read properties file attached to event {}!", props.getProperty(CaptureParameters.RECORDING_ID));
+      } catch (URISyntaxException e) {
+        log.error("Unable to add file {} to mediapackage: {}.", filename, e.getMessage());
+      }
       job.getJobDataMap().put(JobParameters.MEDIA_PACKAGE, pack);
       //Note that we overwrite any pre-existing files with this.  In other words, if there is a file called foo.txt in the
       //captureDir directory and there is an attachment called foo.txt then we will overwrite the one on disk with the one from the ical

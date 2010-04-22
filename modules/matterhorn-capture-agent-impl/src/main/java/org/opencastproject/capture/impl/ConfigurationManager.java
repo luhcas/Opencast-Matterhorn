@@ -352,6 +352,7 @@ public class ConfigurationManager implements ManagedService {
           merged.setProperty(key.toString(), property);
         } else {
           logger.error("Unable to merge properties!");
+          return null;
         }
       }
       return merged;

@@ -133,25 +133,11 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   }
 
   /**
-   * Unsets the scheduler service which this service uses to schedule stops for unscheduled captures.
-   */
-  public void unsetScheduler() {
-    scheduler = null;
-  }
-
-  /**
    * Sets he scheduler service which this service uses to schedule stops for unscheduled captures.
    * @param s The scheduler service.
    */
   public void setScheduler(SchedulerImpl s) {
     scheduler = s;
-  }
-
-  /**
-   * Unsets the config service from which this capture agent draws its configuration.
-   */
-  public void unsetConfigService() {
-    configService = null;
   }
 
   /**
