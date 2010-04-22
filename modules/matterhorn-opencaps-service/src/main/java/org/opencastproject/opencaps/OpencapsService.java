@@ -63,6 +63,8 @@ public class OpencapsService implements ResumableWorkflowOperationHandler {
   public static final String REPUBLISH_WORKFLOW = "republish-after-captioning";
   public static final String REPUBLISH_WORKFLOW_DEF = "/workflow/republish-after-captioning.xml";
   public static final String WORKFLOW_DEF = "/workflow/caption-with-opencaps.xml";
+  // FIXME: add a correct title for opencaps hold action
+  public static final String HOLD_ACTION_TITLE = "Opencaps";
 
   private static final Logger logger = LoggerFactory.getLogger(OpencapsService.class);
 
@@ -262,6 +264,16 @@ public class OpencapsService implements ResumableWorkflowOperationHandler {
     else
       throw new WorkflowOperationException("No url to captions hold state specified");
   }
+  
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#getHoldActionTitle()
+   */
+  @Override
+  public String getHoldActionTitle() {
+    return HOLD_ACTION_TITLE;
+  }
 
   /**
    * This will hold the results of a request for captionable media
@@ -279,5 +291,6 @@ public class OpencapsService implements ResumableWorkflowOperationHandler {
       this.total = total;
     }
   }
+
 
 }
