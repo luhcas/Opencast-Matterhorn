@@ -405,16 +405,14 @@ Opencast.Initialize = (function ()
     {
         // TODO
     	//var test = Opencast.Player.getMediaHeight();
+        //alert(test);
+    	
         
-        
-        
+       
 
         reportSize();
         if (myHeight > 600)
         {
-            //$('#oc_body').css("height", (myHeight - 50 + "px"));
-            //$('#oc_flash-player').css("height", (myHeight - 180 + "px"));
- 
             if (Opencast.Player.getShowSections() === false)
             {
                 $('#oc_flash-player').css("height", (myHeight - 180 + "px"));

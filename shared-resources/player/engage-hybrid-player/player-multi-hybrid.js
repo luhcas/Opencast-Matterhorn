@@ -620,19 +620,6 @@ Opencast.Player = (function () {
         Opencast.Initialize.doTest();
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     /**
         @memberOf Opencast.Player
         @description Remove the alert div.
@@ -1132,29 +1119,45 @@ Opencast.Player = (function () {
      */
     function editTime()
     {
-        var timeString = $("#oc_edit-time").attr("value");
-        timeString = timeString.replace(/[-\/]/g, ':'); 
-        timeString = timeString.replace(/[^0-9: ]/g, ''); 
-        timeString = timeString.replace(/ +/g, ' '); 
-        var time = timeString.split(':');
+        var playheadString = $("#oc_edit-time").attr("value");
+        var durationString = $("#oc_duration").text();
+        playheadString = playheadString.replace(/[-\/]/g, ':'); 
+        playheadString = playheadString.replace(/[^0-9: ]/g, ''); 
+        playheadString = playheadString.replace(/ +/g, ' '); 
+        var playheadArray = playheadString.split(':');
+        var durationArray = durationString.split(':');
 
         try
         {
-            var seekHour = parseInt(time[0], 10);
-            var seekMinutes = parseInt(time[1], 10);
-            var seekSeconds = parseInt(time[2], 10);
+            var playheadHour = parseInt(playheadArray[0], 10);
+            var playheadMinutes = parseInt(playheadArray[1], 10);
+            var playheadSeconds = parseInt(playheadArray[2], 10);
             
-            if (seekHour > 99 || seekMinutes > 59 || seekSeconds > 59)
+            var durationHour = parseInt(durationArray[0], 10);
+            var durationMinutes = parseInt(durationArray[1], 10);
+            var durationSeconds = parseInt(durationArray[2], 10);
+            
+            if (playheadHour > 99 || playheadMinutes > 59 || playheadSeconds > 59)
             {
                 addAlert('Wrong time enter like this: HH:MM:SS');
                 $("#oc_edit-time").attr("className", "oc_edit-time-error");
             } 
             else 
             {
-                var seek = (seekHour * 60 * 60) + (seekMinutes * 60) + (seekSeconds);
-                Videodisplay.seek(seek);
-                Videodisplay.play();
-                hideEditTime();
+                var newPlayhead = (playheadHour * 60 * 60) + (playheadMinutes * 60) + (playheadSeconds);
+                var durationSeconds = (durationHour * 60 * 60) + (durationMinutes * 60) + (durationSeconds);
+                
+                if( newPlayhead > durationSeconds )
+                {
+                    addAlert('Wrong time enter like this: HH:MM:SS');
+                    $("#oc_edit-time").attr("className", "oc_edit-time-error");
+                }
+                else
+                {
+                    Videodisplay.seek(newPlayhead);
+                    Videodisplay.play();
+                    hideEditTime();
+                }
             }
         }
         catch (exception) 
