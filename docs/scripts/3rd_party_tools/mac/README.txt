@@ -24,7 +24,6 @@ Tools that you need to install:
 - pgkconfig
 - byacc
 - subversion
-- wget
 
 If possible also install the following packages:
 - jpeg (development version)

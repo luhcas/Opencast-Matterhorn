@@ -10,7 +10,7 @@ sleep 5
 
 if
 	# installing prerequisite tools
-	sudo port install zlib pkgconfig byacc subversion wget &&
+	sudo port install zlib pkgconfig byacc subversion &&
 	# installing required libraries
 	sudo port install jpeg libpng tiff jam
 then

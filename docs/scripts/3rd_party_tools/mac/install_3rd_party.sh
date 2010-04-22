@@ -7,8 +7,8 @@
 # ---- directories -----
 
 base_dir=$(pwd)
-mkdir -p 3rd_party
-cd 3rd_party
+mkdir -p /tmp/3rd_party
+cd /tmp/3rd_party
 working_dir=$(pwd)
 
 # ---- 3rd party repository -----
@@ -105,6 +105,7 @@ setup_libpng ()
 		make
 		if ! [ $? -eq 0 ]
 		then
+			make clean
 			cd $working_dir
 			return 1
 		fi
@@ -152,6 +153,7 @@ setup_libjpeg ()
 		patch -p0 -N Makefile ../libjpeg-6b.patch
 		if ! [ $? -eq 0 ]
 		then
+			make clean
 			cd $working_dir
 			return 1
 		fi
@@ -196,9 +198,9 @@ setup_libtiff ()
 		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib &&
 		make
 		if ! [ $? -eq 0 ]
-		then 
+		then
+			make clean
 			cd ${working_dir}
-			rm -rf libtiff
 			return 1
 		fi
 	fi
@@ -242,6 +244,7 @@ setup_jam ()
 		make
 		if ! [ $? -eq 0 ]
 		then
+			make clean
 			cd $working_dir
 			return 1
 		fi
@@ -288,6 +291,7 @@ setup_ffmpeg ()
 		make
 		if ! [ $? -eq 0 ]
 		then
+			make clean
 			cd $working_dir
 			return 1
 		fi
@@ -331,7 +335,7 @@ setup_mediainfo ()
 	then
 		./CLI_Compile.sh
 		if ! [ $? -eq 0 ]
-		then 
+		then
 			cd ${working_dir}
 			return 1
 		fi
@@ -378,6 +382,7 @@ setup_opencv ()
 		make
 		if ! [ $? -eq 0 ]
 		then
+			make clean
 			cd $working_dir
 			return 1
 		fi
@@ -427,6 +432,7 @@ setup_tesseract ()
 		make
 		if ! [ $? -eq 0 ]
 		then
+			make clean
 			cd $working_dir
 			return 1
 		fi
@@ -473,6 +479,7 @@ setup_ocropus ()
 		jam
 		if ! [ $? -eq 0 ]
 		then
+			jam clean
 			cd $working_dir
 			return 1
 		fi
@@ -517,6 +524,7 @@ setup_videosegmenter ()
 		make
 		if ! [ $? -eq 0 ]
 		then
+			make clean
 			cd $working_dir
 			return 1
 		fi
