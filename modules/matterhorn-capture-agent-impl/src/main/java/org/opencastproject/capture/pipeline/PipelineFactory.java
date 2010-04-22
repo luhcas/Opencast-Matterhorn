@@ -123,13 +123,14 @@ public class PipelineFactory {
         // TODO: Fix security risk. Any file on CaptureAgent filesytem could be ingested
         devName = DeviceName.FILE;
       } else {
-        // Attempt to determine what the device is using the JV4LInfo library 
-        try {
-          // ALSA source
-          if (srcLoc.contains("hw:"))
-            devName = DeviceName.ALSASRC;
-          // V4L devices
-          else {
+        // ALSA source
+        if (srcLoc.contains("hw:")){
+          devName = DeviceName.ALSASRC;
+        } else if (srcLoc.equals("dv1394")) {
+          devName = DeviceName.DV_1394;
+        } else { // V4L devices
+          // Attempt to determine what the device is using the JV4LInfo library 
+          try {
             V4LInfo v4linfo = JV4LInfo.getV4LInfo(srcLoc);
             String deviceString = v4linfo.toString();
             if (deviceString.contains("Epiphan VGA2USB"))
@@ -142,11 +143,11 @@ public class PipelineFactory {
               logger.error("Do not recognized device: {}.", srcLoc);
               return null;
             }
+          } catch (JV4LInfoException e) {
+            // The v4l device caused an exception
+            logger.error("Unexpected jv4linfo exception: {}.", e.getMessage());
+            return null;
           }
-        } catch (JV4LInfoException e) {
-          // The v4l device caused an exception
-          logger.error("Unexpected jv4linfo exception: {}.", e.getMessage());
-          return null;
         }
       }
 
@@ -212,6 +213,8 @@ public class PipelineFactory {
       return getAlsasrcPipeline(captureDevice, pipeline);
     else if(captureDevice.getName() == DeviceName.FILE)
       return getFilePipeline(captureDevice, pipeline);
+    else if(captureDevice.getName() == DeviceName.DV_1394)
+      return getDvPipeline(captureDevice, pipeline);
     return false;
   }
 
@@ -511,4 +514,48 @@ public class PipelineFactory {
     }
     return true;
   }
+  
+  /**
+   * Adds a pipeline specifically designed to captured from a DV Camera attached by firewire to the main pipeline
+   * 
+   * @param captureDevice
+   *          DV Camera attached to firewire
+   * @param pipeline
+   *          The Pipeline bin to add it to
+   * @return True, if successful
+   */
+  private static boolean getDvPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
+    String error = null;
+    String codec =  captureDevice.properties.getProperty("codec");
+    String bitrate = captureDevice.properties.getProperty("bitrate");
+    Element queue = ElementFactory.make("queue", null);
+    Element src = ElementFactory.make("dv1394src", null);
+    Element dec = ElementFactory.make("capsfilter", null);
+    Element enc = ElementFactory.make("capsfilter", null);
+    Element filesink = ElementFactory.make("filesink", null);
+    
+    filesink.set("location", captureDevice.getOutputPath());
+    if (bitrate != null)
+      enc.set("bitrate", bitrate);
+    
+    pipeline.addMany(src, queue, dec, enc, filesink);
+    
+    if (!src.link(queue))
+      error = formatPipelineError(captureDevice, src, queue);
+    else if (!queue.link(dec))
+      error = formatPipelineError(captureDevice, queue, dec);
+    else if (!dec.link(enc))
+      error = formatPipelineError(captureDevice, dec, enc);
+    else if (!enc.link(filesink))
+      error = formatPipelineError(captureDevice, enc, filesink);
+    
+    if (error != null) {
+      pipeline.removeMany(src, queue, enc, dec, filesink);
+      logger.error(error);
+      return false;
+    }
+    
+    return true;
+  }
+  
 }

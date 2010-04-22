@@ -23,5 +23,6 @@ public enum DeviceName {
   HAUPPAUGE_WINTV,     /* Hauppauge devices                 */
   BLUECHERRY_PROVIDEO, /* Bluecherry ProVideo-143           */
   ALSASRC,             /* Linux sound capture               */
-  FILE                 /* A media file on the filesystem    */
+  FILE,                /* A media file on the filesystem    */
+  DV_1394
 }

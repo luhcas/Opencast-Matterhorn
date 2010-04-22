@@ -71,6 +71,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -754,7 +755,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   public Properties getAgentCapabilities() {
     if (configService != null) {
-      return configService.getCapabilities();
+      Properties p = configService.getCapabilities();
+      Calendar cal = Calendar.getInstance();
+      p.setProperty("capture.device.timezone.offset", Integer.toString((cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)) / (60 * 1000)));
+      return p;
     } else {
       return null;
     }
