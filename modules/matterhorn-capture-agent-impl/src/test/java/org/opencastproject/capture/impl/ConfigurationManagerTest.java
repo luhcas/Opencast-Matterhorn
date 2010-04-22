@@ -156,6 +156,7 @@ public class ConfigurationManagerTest {
     configManager.updated(sourceProps);
     
     Properties caps = configManager.getCapabilities();
+    Assert.assertNotNull(caps);
     assertCaps(caps, "MOCK_SCREEN", "M2_REPO", "/org/opencastproject/samples/screen/1.0/screen-1.0.mpg", "screen_out.mpg", "presentation/source");
     assertCaps(caps, "MOCK_PRESENTER", "M2_REPO", "/org/opencastproject/samples/camera/1.0/camera-1.0.mpg", "camera_out.mpg", "presentation/source");
     assertCaps(caps, "MOCK_MICROPHONE", "M2_REPO", "/org/opencastproject/samples/audio/1.0/audio-1.0.mp3", "audio_out.mp3", "presentation/source");

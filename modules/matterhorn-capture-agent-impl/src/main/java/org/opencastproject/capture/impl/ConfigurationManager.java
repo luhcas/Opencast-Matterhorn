@@ -305,7 +305,12 @@ public class ConfigurationManager implements ManagedService {
         String check = CaptureParameters.CAPTURE_DEVICE_PREFIX + name;
         //If the key looks like a device prefix + the name, copy it
         if (key.contains(check)) {
-          capabilities.setProperty(key, properties.getProperty(key));
+          String property = properties.getProperty(key);
+          if (property == null) {
+            logger.error("Unable to expand variable in value for key {}, returning null!", key);
+            return null;
+          }
+          capabilities.setProperty(key, property);
           propertyCounts.put(name, propertyCounts.get(name)+1);
         }
       }
