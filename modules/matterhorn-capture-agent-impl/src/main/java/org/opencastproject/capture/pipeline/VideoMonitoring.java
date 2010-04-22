@@ -21,13 +21,11 @@ import org.opencastproject.capture.api.CaptureParameters;
 import com.sun.jna.Pointer;
 
 import org.gstreamer.Buffer;
-import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.gstreamer.PadDirection;
 import org.gstreamer.Pipeline;
-import org.gstreamer.Structure;
 import org.gstreamer.elements.AppSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,12 +130,7 @@ public class VideoMonitoring {
           Buffer buffer = appsink.pullBuffer();
           if (seconds % interval == 0 && seconds != previous) {
             previous = seconds;
-            Caps caps = buffer.getCaps();
-            Structure s = caps.getStructure(0);
-            int width = s.getInteger("width");
-            int height = s.getInteger("height");
-            logger.debug("Grabbed frame: ({}, {})", width, height);
-            
+
             /* saving the frame to disk */
             byte bytes[] = new byte[buffer.getSize()];
             ByteBuffer byteBuffer = buffer.getByteBuffer();
@@ -239,11 +232,6 @@ public class VideoMonitoring {
           Buffer buffer = appsink.pullBuffer();
           if (seconds % interval == 0 && seconds != previous) {
             previous = seconds;
-            Caps caps = buffer.getCaps();
-            Structure s = caps.getStructure(0);
-            int width = s.getInteger("width");
-            int height = s.getInteger("height");
-            logger.debug("Grabbed frame: ({}, {})", width, height);
             
             /* saving the frame to disk */
             byte bytes[] = new byte[buffer.getSize()];

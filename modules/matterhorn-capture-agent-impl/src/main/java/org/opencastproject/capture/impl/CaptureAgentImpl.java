@@ -677,6 +677,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   protected void setAgentState(String state) {
     if (state.equalsIgnoreCase(AgentState.CAPTURING) && confidencePipe != null) {
       confidencePipe.stop();
+      while (confidencePipe.isPlaying());
       confidencePipe = null;
       logger.info("Confidence monitoring shutting down.");
     } else if (state.equalsIgnoreCase(AgentState.IDLE)){
