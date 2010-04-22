@@ -23,6 +23,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
@@ -31,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -105,7 +105,7 @@ public class CaptureAgentImplTest {
     properties = null;
   }
   
-  @Test
+  @Test @Ignore
   public void testCaptureAgentImpl() throws Exception {
     // start the capture, assert the recording id is correct
     String id = agent.startCapture(properties);
