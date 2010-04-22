@@ -53,7 +53,17 @@ public class WorkflowResources {
    * 
    */
   public static ClientResponse instances(String format) throws UniformInterfaceException {
-    return r.path("instances," + format.toLowerCase()).get(ClientResponse.class);
+    return r.path("instances." + format.toLowerCase()).get(ClientResponse.class);
+  }
+  
+  /**
+   * 
+   * @param id Workflow instance ID
+   * @param format Response format: xml or json
+   *
+   */
+  public static ClientResponse instance(String id, String format) throws UniformInterfaceException {
+	  return r.path("instance/" + id + "." + format.toLowerCase()).get(ClientResponse.class);
   }
   
   public static ClientResponse start(String mediapackage, 

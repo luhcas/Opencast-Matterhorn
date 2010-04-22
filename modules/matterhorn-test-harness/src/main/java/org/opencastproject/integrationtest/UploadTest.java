@@ -16,30 +16,29 @@
 package org.opencastproject.integrationtest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 
 import com.sun.jersey.api.client.ClientResponse;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
-
-import java.io.File;
 
 import javax.xml.xpath.XPathConstants;
 
 /**
  * Integration test for file upload using thin client
+ * @author jamiehodge
  */
-@Ignore
+
 public class UploadTest {
 	static String trackUrl = IntegrationTests.BASE_URL + "/workflow/samples/camera.mpg";
 	static String catalogUrl = IntegrationTests.BASE_URL + "/workflow/samples/dc-1.xml";
 	static String attachmentUrl = IntegrationTests.BASE_URL + "/workflow/samples/index.txt";
 	static String mediaPackage;
+	static String[] catalogKeys = {"format", "promoted", "description", "subject", "publisher", "identifier", "title"}; 
 	
 	@Test
 	public void testIngestThinClient() throws Exception {
@@ -73,43 +72,71 @@ public class UploadTest {
 		assertEquals("Response code (ingest):", 200, response.getStatus());
 		mediaPackage = response.getEntity(String.class);
 		Document xml = Utils.parseXml(mediaPackage);
-		
-		// Pause for ingest to complete
-		Thread.sleep(5000);
-		
-		// Confirm Ingest
+		String workflowId = (String) Utils.xPath(xml, 
+				"//ns3:workflow/@id", XPathConstants.STRING);
 		String mediaPackageId = (String) Utils.xPath(xml, 
 				"//mediapackage/@id", XPathConstants.STRING);
-		String trackId = (String) Utils.xPath(xml,
-				"//media/track/@id", XPathConstants.STRING);
-		String catalogId = (String) Utils.xPath(xml, 
-				"//metadata/catalog/@id", XPathConstants.STRING);
-		String attachmentId = (String) Utils.xPath(xml,
-				"//attachments/attachment/@id", XPathConstants.STRING);
 		
-		// Retrieve and compare mediapackage elements from files repository
-		response = FilesResources.getFile(mediaPackageId, trackId);
-		assertEquals("Response code (getFile Track):", 200, response.getStatus());
+		// Confirm ingest
+		int retries = 0;
+		int timeout = 10;
+		while (retries < timeout) {
+			Thread.sleep(1000);
+			
+			// Check workflow instance status
+			response = WorkflowResources.instance(workflowId, "xml");
+			assertEquals("Response code (workflow instance):", 200, response.getStatus());
+			String workflowInstance = response.getEntity(String.class);
+			xml = Utils.parseXml(workflowInstance);
+			if (Utils.xPath(xml, "//ns3:workflow/@state", XPathConstants.STRING).equals("RUNNING")) { break; }
+			
+			retries++;
+		}
+		
+		if (retries == timeout) {
+			fail();
+		}
+		
+		// Compare Track
+		String ingestedTrackUrl = (String) Utils.xPath(xml, "//media/track[@type='presenter/source']/url", XPathConstants.STRING);
 		assertEquals("Media Track Checksum:",
-				Checksum.create(ChecksumType.DEFAULT_TYPE, response.getEntity(File.class)),
+				Checksum.create(ChecksumType.DEFAULT_TYPE, Utils.getUrlAsFile(ingestedTrackUrl)),
 				Checksum.create(ChecksumType.DEFAULT_TYPE, Utils.getUrlAsFile(trackUrl)));
-		response = FilesResources.getFile(mediaPackageId, catalogId);
-		assertEquals("Response code (getFile Catalog):", 200, response.getStatus());
-		// TODO compare files
-		response = FilesResources.getFile(mediaPackageId, attachmentId);
-		assertEquals("Response code (getFile Attachment):", 200, response.getStatus());
-		// TODO compare files
 		
-		// Pause for indexing to complete
-		Thread.sleep(2000);
+		// Compare Catalog
+		String ingestedCatalogUrl = (String) Utils.xPath(xml, "//metadata/catalog[@type='metadata/dublincore']/url", XPathConstants.STRING);
+		Document ingestedCatalog = Utils.getUrlAsDocument(ingestedCatalogUrl);
+		Document catalog = Utils.getUrlAsDocument(catalogUrl);
+		for (String key : catalogKeys) {
+			assertEquals("Catalog " + key + ":", 
+				((String) Utils.xPath(ingestedCatalog, "//dcterms:" + key, XPathConstants.STRING)).trim(),
+				((String) Utils.xPath(catalog, "//dcterms:" + key, XPathConstants.STRING)).trim());
+		}
 		
-		// Confirm search indexing 
-		response = SearchResources.episode(mediaPackageId);
-		assertEquals("Response code (episode):", 200, response.getStatus());
-		assertTrue("Episode Registered:", 
-				Utils.xPathExists(
-						Utils.parseXml(response.getEntity(String.class)),
-						"//ns2:result[@id='" + mediaPackageId + "']/ns2:mediapackage" ));
+		// Compare Attachment
+		String ingestedAttachmentUrl = (String) Utils.xPath(xml, "//attachments/attachment[@type='attachment/txt']/url", XPathConstants.STRING);
+		assertEquals("Attachment Checksum:",
+				Checksum.create(ChecksumType.DEFAULT_TYPE, Utils.getUrlAsFile(ingestedAttachmentUrl)),
+				Checksum.create(ChecksumType.DEFAULT_TYPE, Utils.getUrlAsFile(attachmentUrl)));
+		
+		// Confirm search indexing
+		retries = 0;
+		timeout = 10;
+		while (retries < timeout) {
+			Thread.sleep(1000);
+			
+			// Check workflow instance status
+			response = SearchResources.episode(mediaPackageId);
+			assertEquals("Response code (episode):", 200, response.getStatus());
+			xml = Utils.parseXml(response.getEntity(String.class));
+			if (Utils.xPathExists(xml, "//ns2:result[@id='" + mediaPackageId + "']/ns2:mediapackage").equals(true)) { break; }
+			
+			retries++;
+		}
+		
+		if (retries == timeout) {
+			fail();
+		}
 		
 	}
 

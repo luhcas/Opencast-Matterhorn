@@ -29,7 +29,7 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 
 public class AdminResources {
   public static Client c = Client.create();
-  public static WebResource r = c.resource("/admin/rest/");
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/admin/rest/");
   
   static {
 	  c.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));

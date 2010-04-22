@@ -32,6 +32,7 @@ import org.json.simple.JSONValue;
 import org.w3c.dom.Document;
 
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 
 /**
@@ -74,10 +75,17 @@ public class Utils {
 		.replace("@@duration@@", duration.toString());
   }
 
-  public static File getUrlAsFile(String url) throws Exception {
+  public static File getUrlAsFile(String url) throws UniformInterfaceException {
 	  Client c = Client.create();
 	  WebResource r = c.resource(url);
 	  return r.get(File.class);
+  }
+  
+  public static Document getUrlAsDocument(String url) throws UniformInterfaceException, Exception {
+	  Client c = Client.create();
+	  WebResource r = c.resource(url);
+	  String response = r.get(String.class);
+	  return parseXml(response);
   }
   
 }
