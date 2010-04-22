@@ -69,6 +69,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       rootDirectory = cc.getBundleContext().getProperty("workingFileRepoPath");
     }
     createRootDirectory();
+    
+    logger.info(getDiskSpace());
 }
 
 
@@ -385,5 +387,26 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       }
     }
     return uris;
+  }
+  
+  public long getTotalSpace() {
+    String temp = "getSpace";
+    //if (rootDirectory == null) 
+    File f = new File(rootDirectory);
+    return f.getTotalSpace();
+  }
+  
+  public long getUsableSpace() {
+    String temp = "getSpace";
+    //if (rootDirectory == null) 
+    File f = new File(rootDirectory);
+    return f.getUsableSpace();
+  }
+  
+  public String getDiskSpace() {
+    int usable = Math.round(getUsableSpace() / 1024 / 1024 / 1024);
+    int total = Math.round(getTotalSpace() / 1024 / 1024 / 1024);
+    long percent = Math.round(100.0 * getUsableSpace()/(1+getTotalSpace()));
+    return "Usable space "+usable+" Gb out of "+total+" Gb ("+percent+"%)";
   }
 }

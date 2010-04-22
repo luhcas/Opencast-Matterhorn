@@ -184,6 +184,27 @@ public class WorkingFileRepositoryRestEndpoint {
     return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type", contentType).
       header("Content-length", contentLength).entity(in).build();
   }
+  
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("getTotalStorage")
+  public long getTotalStorage() {
+    return repo.getTotalSpace();
+  }
+  
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("getAvailableStorage")
+  public long getAvailableStorage() {
+    return repo.getUsableSpace();
+  }
+  
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("getStorageInfo")
+  public String getStorageInfo() {
+    return repo.getDiskSpace();
+  }
 
   @GET
   @Produces(MediaType.TEXT_HTML)

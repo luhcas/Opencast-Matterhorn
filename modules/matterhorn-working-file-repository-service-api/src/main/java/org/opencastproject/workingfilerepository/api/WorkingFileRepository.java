@@ -126,4 +126,23 @@ public interface WorkingFileRepository {
    * @return the URI pointing to the file's new location
    */
   URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement);
+  
+  /**
+   * Gets the total space of storage in Bytes
+   * @return Number of all bytes in storage
+   */
+  public long getTotalSpace();
+  
+  /**
+   * Gets the available space of storage in Bytes
+   * This is free storage that is not reserved
+   * @return Number of available bytes in storage
+   */
+  public long getUsableSpace();
+  
+  /**
+   * A textual representation of available and total storage 
+   * @return Percentage and numeric values of used storage space
+   */
+  public String getDiskSpace();
 }
