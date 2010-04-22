@@ -20,6 +20,8 @@ Opencast.Watch = (function ()
     
         var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
 
+        //var restEndpoint = "xml/episode.xml";
+        
         $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function () 
         {
             // some code to run after the mapping

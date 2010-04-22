@@ -18,8 +18,8 @@ Opencast.Watch = (function ()
 
         var mediaPackageId = Opencast.engage.getMediaPackageId();
     
-        var restEndpoint = "xml/episode.xml";
-        //var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
+        //var restEndpoint = "xml/episode.xml";
+        var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
         // restEndpoint = "http://video.lernfunk.de/REST/ws/episode?id="+mediaPackageId;
 
         $('#data').xslt(restEndpoint, "xsl/embed-hybrid-player.xsl", function () 
