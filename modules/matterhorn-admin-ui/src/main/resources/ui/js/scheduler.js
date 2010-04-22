@@ -305,7 +305,7 @@ SchedulerUI.handleAgentTZ = function(tz){
   if(tz != localTZ){
     //Display note of agent TZ difference, all times local to capture agent.
     //update time picker to agent time
-    console.log('Agent TZ is different from user\'s local tz', tz, localTZ);
+    //console.log('Agent TZ is different from user\'s local tz', tz, localTZ);
     Agent.tzDiff = tz - localTZ;
   }else{
     Agent.tzDiff = 0;

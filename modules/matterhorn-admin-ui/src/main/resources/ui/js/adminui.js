@@ -12,3 +12,11 @@ AdminUI.internationalize = function(obj, prefix){
     }
   }
 }
+
+AdminUI.log = function(msg){
+  if(console){
+    console.log(msg);
+  }else{
+    alert(msg);
+  }
+}
