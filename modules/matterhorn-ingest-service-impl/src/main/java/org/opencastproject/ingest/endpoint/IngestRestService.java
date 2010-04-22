@@ -112,7 +112,8 @@ public class IngestRestService {
 
   public void activate(ComponentContext context) {
     try {
-      emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
+      emf = persistenceProvider
+              .createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
     } catch (Exception e) {
       logger.error("Unable to initialize JPA EntityManager: " + e.getMessage());
     }
@@ -174,7 +175,8 @@ public class IngestRestService {
           @FormParam("mediaPackage") String mpx) {
     try {
       MediaPackage mp = builder.loadFromXml(mpx);
-      MediaPackage resultingMediaPackage = ingestService.addCatalog(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      MediaPackage resultingMediaPackage = ingestService.addCatalog(new URI(url), MediaPackageElementFlavor
+              .parseFlavor(flavor), mp);
       return Response.ok(resultingMediaPackage).build();
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
@@ -220,6 +222,7 @@ public class IngestRestService {
       String fileName = null;
       MediaPackage mp = null;
       if (ServletFileUpload.isMultipartContent(request)) {
+        boolean isDone = false;
         for (FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
           FileItemStream item = iter.next();
           String fieldName = item.getFieldName();
@@ -233,22 +236,27 @@ public class IngestRestService {
               mp = builder.loadFromXml(item.openStream());
             }
           } else {
+            // once the body gets read iter.hasNext must not be invoked
+            // or the stream can not be read
             fileName = item.getName();
             in = item.openStream();
+            isDone = true;
           }
+          if (isDone)
+            break;
         }
         switch (type) {
-          case Attachment:
-            ingestService.addAttachment(in, fileName, flavor, mp);
-            break;
-          case Catalog:
-            ingestService.addCatalog(in, fileName, flavor, mp);
-            break;
-          case Track:
-            ingestService.addTrack(in, fileName, flavor, mp);
-            break;
-          default:
-            throw new IllegalStateException("Type must be one of track, catalog, or attachment");
+        case Attachment:
+          ingestService.addAttachment(in, fileName, flavor, mp);
+          break;
+        case Catalog:
+          ingestService.addCatalog(in, fileName, flavor, mp);
+          break;
+        case Track:
+          ingestService.addTrack(in, fileName, flavor, mp);
+          break;
+        default:
+          throw new IllegalStateException("Type must be one of track, catalog, or attachment");
         }
         ingestService.ingest(mp);
         return Response.ok(mp.toXml()).build();
@@ -358,20 +366,15 @@ public class IngestRestService {
   }
 
   /*
-  @POST
-  @Produces(MediaType.TEXT_HTML)
-  @Path("ingest/{wdID}")
-  public Response ingest(@FormParam("mediaPackage") String mpx, @PathParam("wdID") String wdID) {
-  logger.debug("ingest(MediaPackage, ID): {}, {}", mpx, wdID);
-  try {
-  MediaPackage mp = builder.loadFromXml(mpx);
-  WorkflowInstance workflow = ingestService.ingest(mp, wdID);
-  return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
-  } catch (Exception e) {
-  logger.warn(e.getMessage(), e);
-  return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-  }
-  }
+   * @POST
+   * 
+   * @Produces(MediaType.TEXT_HTML)
+   * 
+   * @Path("ingest/{wdID}") public Response ingest(@FormParam("mediaPackage") String mpx, @PathParam("wdID") String
+   * wdID) { logger.debug("ingest(MediaPackage, ID): {}, {}", mpx, wdID); try { MediaPackage mp =
+   * builder.loadFromXml(mpx); WorkflowInstance workflow = ingestService.ingest(mp, wdID); return
+   * Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build(); } catch (Exception e) {
+   * logger.warn(e.getMessage(), e); return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build(); } }
    */
   @POST
   @Produces(MediaType.TEXT_HTML)
@@ -383,10 +386,11 @@ public class IngestRestService {
     try {
       for (Iterator<String> i = params.keySet().iterator(); i.hasNext();) {
         String key = i.next();
-        if (key.toUpperCase().equals("MEDIAPACKAGE")) {   // does't feel good to have a 'special case' in the param list
+        if (key.toUpperCase().equals("MEDIAPACKAGE")) { // does't feel good to have a 'special case' in the param list
           mp = builder.loadFromXml(((String[]) params.get(key))[0]);
         } else {
-          wfConfig.put(key, ((String[]) params.get(key))[0]); // TODO how do we handle multiple values eg. resulting from checkboxes
+          wfConfig.put(key, ((String[]) params.get(key))[0]); // TODO how do we handle multiple values eg. resulting
+                                                              // from checkboxes
         }
       }
       if (mp != null) {
@@ -402,21 +406,11 @@ public class IngestRestService {
   }
 
   protected UploadJob createUploadJob() throws RuntimeException {
-    /*EntityManager em = emf.createEntityManager();
-    EntityTransaction tx = em.getTransaction();
-    try {
-    UploadJob job = new UploadJob();
-    tx.begin();
-    em.persist(job);
-    tx.commit();
-    return job;
-    } catch (RollbackException ex) {
-    logger.error(ex.getMessage(), ex);
-    tx.rollback();
-    throw new RuntimeException(ex);
-    } finally {
-    em.close();
-    }*/
+    /*
+     * EntityManager em = emf.createEntityManager(); EntityTransaction tx = em.getTransaction(); try { UploadJob job =
+     * new UploadJob(); tx.begin(); em.persist(job); tx.commit(); return job; } catch (RollbackException ex) {
+     * logger.error(ex.getMessage(), ex); tx.rollback(); throw new RuntimeException(ex); } finally { em.close(); }
+     */
     UploadJob job = new UploadJob();
     jobs.put(job.getId(), job);
     return job;
@@ -435,7 +429,7 @@ public class IngestRestService {
     try {
       UploadJob job = createUploadJob();
       String html = IOUtils.toString(getClass().getResourceAsStream("/templates/uploadform.html"));
-      //String uploadURL = serverURL + "/ingest/rest/addElementMonitored/" + job.getId();
+      // String uploadURL = serverURL + "/ingest/rest/addElementMonitored/" + job.getId();
       String uploadURL = "addElementMonitored/" + job.getId();
       html = html.replaceAll("\\{uploadURL\\}", uploadURL);
       html = html.replaceAll("\\{jobId\\}", job.getId());
@@ -470,7 +464,7 @@ public class IngestRestService {
     EntityManager em = emf.createEntityManager();
     try {
       try { // try to get UploadJob, responde 404 if not successful
-        //job = em.find(UploadJob.class, jobId);
+        // job = em.find(UploadJob.class, jobId);
         if (jobs.containsKey(jobId)) {
           job = jobs.get(jobId);
         } else {
@@ -558,7 +552,8 @@ public class IngestRestService {
       // mp
       // yields
       // Exception
-      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc), "dublinCore.xml", MediaPackageElementFlavor.parseFlavor("metadata/dublincore"), mediaPackage);
+      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc), "dublinCore.xml", MediaPackageElementFlavor
+              .parseFlavor("metadata/dublincore"), mediaPackage);
       return Response.ok(mediaPackage).build();
     } catch (Exception e) {
       logger.error(e.getMessage());
@@ -584,9 +579,9 @@ public class IngestRestService {
     try {
       UploadJob job = null;
       try { // try to get UploadJob, responde 404 if not successful
-        //Query q = em.createNamedQuery("UploadJob.getByID");
-        //q.setParameter("id", jobId);
-        //job = (UploadJob) q.getSingleResult();
+        // Query q = em.createNamedQuery("UploadJob.getByID");
+        // q.setParameter("id", jobId);
+        // job = (UploadJob) q.getSingleResult();
         if (jobs.containsKey(jobId)) {
           job = jobs.get(jobId);
         } else {
@@ -616,18 +611,20 @@ public class IngestRestService {
     }
     return docs;
   }
+
   protected String docs;
   private String[] notes = {
-    "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-    "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>",};
+          "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+          "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+          "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
 
   // CHECKSTYLE:OFF
   private String generateDocs() {
     DocRestData data = new DocRestData("ingestservice", "Ingest Service", "/ingest/rest", notes);
 
     // abstract
-    data.setAbstract("This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.");
+    data
+            .setAbstract("This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.");
 
     // createMediaPackage
     RestEndpoint endpoint = new RestEndpoint("createMediaPackage", RestEndpoint.Method.GET, "/createMediaPackage",
@@ -709,7 +706,8 @@ public class IngestRestService {
     endpoint.addFormat(new Format("JSON", null, null));
     endpoint.addPathParam(new Param("mpId", Param.Type.STRING, null, "The media package ID"));
     endpoint.addPathParam(new Param("filename", Param.Type.STRING, null, "The name of the file"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the total and currently received number of bytes"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status
+            .OK("Returns the total and currently received number of bytes"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
