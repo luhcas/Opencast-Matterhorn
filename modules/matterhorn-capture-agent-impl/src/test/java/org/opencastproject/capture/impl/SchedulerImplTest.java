@@ -17,10 +17,7 @@ package org.opencastproject.capture.impl;
 
 import org.opencastproject.capture.api.CaptureParameters;
 
-import clover.retrotranslator.edu.emory.mathcs.backport.java.util.Arrays;
-
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -37,6 +34,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
 
