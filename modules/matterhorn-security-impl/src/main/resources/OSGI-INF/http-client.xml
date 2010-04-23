@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.security.TrustedHttpClientFactoryImpl" immediate="true" activate="activate" deactivate="deactivate">
-  <implementation class="org.opencastproject.security.TrustedHttpClientFactoryImpl" />
+<component name="org.opencastproject.security.TrustedHttpClientImpl" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.security.TrustedHttpClientImpl" />
   <property name="service.description" value="Provides Trusted Http Clients (for use with digest authentication)" />
   <service>
-    <provide interface="org.opencastproject.security.api.TrustedHttpClientFactory" />
+    <provide interface="org.opencastproject.security.api.TrustedHttpClient" />
   </service>
 </component>

@@ -23,14 +23,12 @@ import org.opencastproject.composer.api.Receipt.Status;
 import org.opencastproject.composer.impl.endpoint.EncodingProfileList;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.security.api.TrustedHttpClientFactory;
-import org.opencastproject.security.api.TrustedHttpClientFactory.HttpClientAndContext;
+import org.opencastproject.security.api.TrustedHttpClient;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -60,14 +58,14 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   public static final ResponseHandler<Receipt> receiptResponseHandler = new ReceiptResponseHandler();
 
   protected String remoteHost;
-  protected TrustedHttpClientFactory trustedClientFactory;
+  protected TrustedHttpClient trustedHttpClient;
 
   public void setRemoteHost(String remoteHost) {
     this.remoteHost = remoteHost;
   }
 
-  public void setTrustedClientFactory(TrustedHttpClientFactory trustedClientFactory) {
-    this.trustedClientFactory = trustedClientFactory;
+  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
+    this.trustedHttpClient = trustedHttpClient;
   }
 
   public ComposerServiceRemoteImpl() {
@@ -107,14 +105,11 @@ public class ComposerServiceRemoteImpl implements ComposerService {
       queryStringParams.add(new BasicNameValuePair("host", host));
     }
     String url = remoteHost + "/composer/rest/count?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
-    HttpClient client = trustedClientFactory.getTrustedHttpClient(url);
-    HttpGet get = trustedClientFactory.getTrustedHttpGet(url);
+    HttpGet get = new HttpGet(url);
     try {
-      return client.execute(get, longResponseHandler);
+      return trustedHttpClient.execute(get, longResponseHandler);
     } catch (Exception e) {
       throw new RuntimeException(e);
-    } finally {
-      client.getConnectionManager().shutdown();
     }
   }
 
@@ -163,8 +158,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   public Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
           String profileId, boolean block) throws EncoderException, MediaPackageException {
     String url = remoteHost + "/composer/rest/encode";
-    HttpClientAndContext clientAndContext = trustedClientFactory.getTrustedHttpClientAndContext(url);
-    HttpPost post = trustedClientFactory.getTrustedHttpPost(url);
+    HttpPost post = new HttpPost(url);
     Receipt r;
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
@@ -174,14 +168,12 @@ public class ComposerServiceRemoteImpl implements ComposerService {
       params.add(new BasicNameValuePair("profileId", profileId));
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
-      HttpResponse response = clientAndContext.getHttpClient().execute(post, clientAndContext.getHttpContext());
+      HttpResponse response = trustedHttpClient.execute(post);
       
       String content = EntityUtils.toString(response.getEntity());
       r = ReceiptBuilder.getInstance().parseReceipt(content);
     } catch (Exception e) {
       throw new RuntimeException(e);
-    } finally {
-      clientAndContext.getHttpClient().getConnectionManager().shutdown();
     }
     
     if (block) {
@@ -198,10 +190,9 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public EncodingProfile getProfile(String profileId) {
     String url = remoteHost + "/composer/rest/profile/" + profileId + ".xml";
-    HttpClient client = trustedClientFactory.getTrustedHttpClient(url);
-    HttpGet get = trustedClientFactory.getTrustedHttpGet(url);
+    HttpGet get = new HttpGet(url);
     try {
-      return client.execute(get, encodingProfileResponseHandler);
+      return trustedHttpClient.execute(get, encodingProfileResponseHandler);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -215,10 +206,9 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public Receipt getReceipt(String id) {
     String url = remoteHost + "/composer/rest/receipt/" + id + ".xml";
-    HttpClient client = trustedClientFactory.getTrustedHttpClient(url);
-    HttpGet get = trustedClientFactory.getTrustedHttpGet(url);
+    HttpGet get = new HttpGet(url);
     try {
-      return client.execute(get, receiptResponseHandler);
+      return trustedHttpClient.execute(get, receiptResponseHandler);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -246,8 +236,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   public Receipt image(MediaPackage mediaPackage, String sourceVideoTrackId, String profileId, long time, boolean block)
           throws EncoderException, MediaPackageException {
     String url = remoteHost + "/composer/rest/image";
-    HttpClientAndContext clientAndContext = trustedClientFactory.getTrustedHttpClientAndContext(url);
-    HttpPost post = trustedClientFactory.getTrustedHttpPost(url);
+    HttpPost post = new HttpPost(url);
     Receipt r;
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
@@ -257,12 +246,10 @@ public class ComposerServiceRemoteImpl implements ComposerService {
       params.add(new BasicNameValuePair("time", Long.toString(time)));
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
-      HttpResponse response = clientAndContext.getHttpClient().execute(post, clientAndContext.getHttpContext());
+      HttpResponse response = trustedHttpClient.execute(post);
       r = ReceiptBuilder.getInstance().parseReceipt(response.getEntity().getContent());
     } catch (Exception e) {
       throw new RuntimeException(e);
-    } finally {
-      clientAndContext.getHttpClient().getConnectionManager().shutdown();
     }
     
     if (block) {
@@ -279,10 +266,9 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public EncodingProfile[] listProfiles() {
     String url = remoteHost + "/composer/rest/profiles.xml";
-    HttpClient client = trustedClientFactory.getTrustedHttpClient(url);
-    HttpGet get = trustedClientFactory.getTrustedHttpGet(url);
+    HttpGet get = new HttpGet(url);
     try {
-      EncodingProfileList profileList = client.execute(get, encodingProfileListResponseHandler);
+      EncodingProfileList profileList = trustedHttpClient.execute(get, encodingProfileListResponseHandler);
       List<EncodingProfileImpl> list = profileList.getProfiles();
       return list.toArray(new EncodingProfile[list.size()]);
     } catch (Exception e) {
