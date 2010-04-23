@@ -38,6 +38,7 @@ import java.util.Properties;
  * Test the implementation of the Capture Agent, which uses gstreamer to 
  * generate pipelines that capture the media. 
  */
+@Ignore
 public class CaptureAgentImplTest {
   
   private static Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);

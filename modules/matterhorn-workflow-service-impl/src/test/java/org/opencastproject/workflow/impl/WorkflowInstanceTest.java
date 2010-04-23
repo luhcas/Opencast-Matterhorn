@@ -33,6 +33,8 @@ import org.junit.Test;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WorkflowInstanceTest {
   @Test
@@ -50,9 +52,11 @@ public class WorkflowInstanceTest {
     def.setId("123");
     def.setPublished(true);
     
-    WorkflowInstance instance = new WorkflowInstanceImpl(def, null, null);
+    Map<String, String> props = new HashMap<String, String>();
+    props.put("key1", "value1");
+    WorkflowInstance instance = new WorkflowInstanceImpl(def, null, props);
     Assert.assertEquals(def.getId(), instance.getTitle());
-
+    Assert.assertEquals("value1", instance.getConfiguration("key1"));
     def.setTitle("a title");
     instance = new WorkflowInstanceImpl(def, null, null);
     Assert.assertEquals(def.getTitle(), instance.getTitle());

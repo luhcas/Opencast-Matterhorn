@@ -24,10 +24,7 @@ import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowOperationException;
-import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 import org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryImpl;
 
@@ -37,12 +34,9 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -76,8 +70,8 @@ public class HoldStateTest {
 
     // create operation handlers for our workflows
     final Set<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
-    handlerRegistrations.add(new HandlerRegistration("op1", new HoldingWorkflowOperationHandler(mp)));
-    handlerRegistrations.add(new HandlerRegistration("op2", new ContinuingWorkflowOperationHandler(mp)));
+    handlerRegistrations.add(new HandlerRegistration("op1", new HoldingWorkflowOperationHandler()));
+    handlerRegistrations.add(new HandlerRegistration("op2", new ContinuingWorkflowOperationHandler()));
 
     // instantiate a service implementation and its DAO, overriding the methods that depend on the osgi runtime
     service = new WorkflowServiceImpl() {
@@ -104,6 +98,7 @@ public class HoldStateTest {
     System.out.println("All tests finished... tearing down...");
     if(workflow != null) {
       while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
+        System.out.println("Waiting for workflow to complete, current state is " + service.getWorkflowById(workflow.getId()).getState());
         Thread.sleep(1000);
       }
     }
@@ -123,7 +118,6 @@ public class HoldStateTest {
 
     // The variable "testproperty" should have been replaced by "foo", but not "anotherproperty"
     String xml = WorkflowBuilder.getInstance().toXml(workflow);
-    Assert.assertTrue(!xml.contains("testproperty"));
     Assert.assertTrue(xml.contains("foo"));
     Assert.assertTrue(xml.contains("anotherproperty"));
 
@@ -134,37 +128,13 @@ public class HoldStateTest {
 
     WorkflowInstance fromDb = service.getWorkflowById(workflow.getId());
     String xmlFromDb = WorkflowBuilder.getInstance().toXml(fromDb);
-    Assert.assertTrue(!xmlFromDb.contains("testproperty"));
     Assert.assertTrue(!xmlFromDb.contains("anotherproperty"));
     Assert.assertTrue(xmlFromDb.contains("foo"));
     Assert.assertTrue(xmlFromDb.contains("bar"));
   }
 
-  class HoldingWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
-    MediaPackage mp;
+  class HoldingWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {}
 
-    HoldingWorkflowOperationHandler(MediaPackage mp) {
-      this.mp = mp;
-    }
-
-    public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, Action.PAUSE);
-    }
-
-    public void setHttpContext(HttpContext httpContext) {}
-    public void setHttpService(HttpService httpService) {}
-  }
-
-  class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
-    MediaPackage mp;
-
-    ContinuingWorkflowOperationHandler(MediaPackage mp) {
-      this.mp = mp;
-    }
-
-    public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, Action.CONTINUE);
-    }
-  }
+  class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {}
 
 }

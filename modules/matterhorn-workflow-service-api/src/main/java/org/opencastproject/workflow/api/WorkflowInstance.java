@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * particular workflow.  They are not threadsafe, and will not be updated by other threads.
  */
 @XmlJavaTypeAdapter(WorkflowInstanceImpl.Adapter.class)
-public interface WorkflowInstance {
+public interface WorkflowInstance extends Configurable {
   public enum WorkflowState { INSTANTIATED, RUNNING, STOPPED, PAUSED, SUCCEEDED, FAILED, FAILING }
 
   /**
