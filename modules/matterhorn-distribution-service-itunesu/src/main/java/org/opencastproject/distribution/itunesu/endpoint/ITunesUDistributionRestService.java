@@ -17,7 +17,7 @@ package org.opencastproject.distribution.itunesu.endpoint;
 
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageImpl;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -34,10 +34,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -61,9 +61,9 @@ public class ITunesUDistributionRestService {
   }
 
   @POST
-  @Path("")
   @Produces(MediaType.TEXT_XML)
-  public Response distribute(@FormParam("mediapackage") MediaPackageImpl mediaPackage, @FormParam("elementId") List<String> elementIds) throws Exception {
+  public Response distribute(@FormParam("mediapackage") String mediaPackageXml, @FormParam("elementId") List<String> elementIds) throws Exception {
+    MediaPackage mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(mediaPackageXml);
     MediaPackage result = null;
     String[] elements = elementIds == null ? new String[0] : elementIds.toArray(new String[elementIds.size()]);
     try {
@@ -76,10 +76,9 @@ public class ITunesUDistributionRestService {
   }
   
   @DELETE
-  @Path("")
   @Produces(MediaType.TEXT_XML)
-  public Response retract(@FormParam("mediapackage") MediaPackageImpl mediaPackage, @FormParam("elementId") List<String> elementIds) throws Exception {
-    String[] elements = elementIds == null ? new String[0] : elementIds.toArray(new String[elementIds.size()]);
+  public Response retract(@FormParam("mediapackage") String mediaPackageXml, @FormParam("elementId") List<String> elementIds) throws Exception {
+    MediaPackage mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(mediaPackageXml);
     try {
       service.retract(mediaPackage);
     } catch (Exception e) {
