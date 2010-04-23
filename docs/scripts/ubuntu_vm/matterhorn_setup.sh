@@ -182,6 +182,9 @@ else
     read ntpsrv
   done
 
+  echo "**** Do you want to change the timezone on this VM? [y/N]"
+  read changetz
+
   echo "**** Do you want to install 3rd party tools? [y/N]"
   read p3resp
 
@@ -206,6 +209,13 @@ else
   
   echo "Installation wget, subversion and git."
   sudo apt-get -y --force-yes install wget subversion git-core
+
+  # Change Timezone?
+  if [ $changetz = "y" ] || [ $changetz = "Y" ]; then
+    tzselect
+  else
+    echo "Timezone will NOT be changed."
+  fi
 
   # Install 3P tools?
   if [ $p3resp = "y" ] || [ $p3resp = "Y" ]; then
