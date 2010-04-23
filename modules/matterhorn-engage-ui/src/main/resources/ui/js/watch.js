@@ -17,11 +17,9 @@ Opencast.Watch = (function ()
 	        EMBEDPLAYER            = "embedPlayer";
 	  
         var mediaPackageId = Opencast.engage.getMediaPackageId();
-    
-        var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
 
-        //var restEndpoint = "xml/episode.xml";
-        
+        var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
+
         $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function () 
         {
             // some code to run after the mapping
@@ -49,12 +47,19 @@ Opencast.Watch = (function ()
             $('#abstract').html($('#oc-abstract').html());
       
             // set the media URLs
-            var mediaUrlOne = $('#oc-video-url').html();
-            var mediaUrlTwo = $('#oc-video-url').html();
-            
+            var mediaUrlOne = $('#oc-video-presenter-source').html();
+            var mediaUrlTwo = $('#oc-video-presentation-source').html();
+
+            // legacy support for any engage tagged track
+            var engageUrl = $('#oc-video-engage').html();
+            if(mediaUrlOne === null)
+              mediaUrlOne = engageUrl;
+
+            mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
+            mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
+
             Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
 
-            //
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')
             {
                 Opencast.Player.setVideoSizeList(MULTIPLAYER);

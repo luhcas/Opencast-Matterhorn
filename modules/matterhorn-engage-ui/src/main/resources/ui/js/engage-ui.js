@@ -7,7 +7,17 @@ var Opencast = Opencast || {};
 @namespace the global Opencast namespace engage
 */
 Opencast.engage = (function () {
-
+  /**
+   * @memberOf Opencast.engage
+   * @description Gets the url to the search service;
+   */
+  function getSearchServiceEpisodeIdURL() {
+    var restEndpoint = "../../search/rest/episode?id=";
+    //  var restEndpoint = "xml/episode.xml";   // Activate for testing purposes
+    return restEndpoint;
+  }
+  
+  
     /**
      * @memberOf Opencast.engage
      * @description Gets the current media package id
@@ -45,6 +55,7 @@ Opencast.engage = (function () {
     
     return {
       getMediaPackageId : getMediaPackageId,
-      getVideoUrl : getVideoUrl
+      getVideoUrl : getVideoUrl,
+      getSearchServiceEpisodeIdURL :  getSearchServiceEpisodeIdURL
     };
 }());

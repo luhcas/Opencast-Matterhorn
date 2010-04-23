@@ -17,10 +17,8 @@ Opencast.Watch = (function ()
             EMBEDPLAYER            = "embedPlayer";
 
         var mediaPackageId = Opencast.engage.getMediaPackageId();
-    
-        //var restEndpoint = "xml/episode.xml";
-        var restEndpoint = "../../search/rest/episode?id=" + mediaPackageId;
-        // restEndpoint = "http://video.lernfunk.de/REST/ws/episode?id="+mediaPackageId;
+
+        var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
 
         $('#data').xslt(restEndpoint, "xsl/embed-hybrid-player.xsl", function () 
         {
@@ -47,10 +45,21 @@ Opencast.Watch = (function ()
             }
             // set the abstract
             $('#abstract').html($('#oc-abstract').html());
-      
-            var mediaUrlOne = $('#oc-video-url').html();
-            var mediaUrlTwo = $('#oc-video-url').html();
+
             
+            
+            // set the media URLs
+            var mediaUrlOne = $('#oc-video-presenter-source').html();
+            var mediaUrlTwo = $('#oc-video-presentation-source').html();
+
+            // legacy support for any engage tagged track
+            var engageUrl = $('#oc-video-engage').html();
+            if(mediaUrlOne === null)
+              mediaUrlOne = engageUrl;
+
+            mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
+            mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
+
             Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
             //
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')
