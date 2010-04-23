@@ -174,7 +174,7 @@ echo "=========================="
 #get maven to update whatever dependancies we might have for opencast
 pwd
 cd matterhorn_trunk
-export MAVEN_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m"
+export MAVEN_OPTS='-Xms256m -Xmx960m -XX:PermSize=64m -XX:MaxPermSize=150m'
 mvn install -fn -DskipTests -Dmaven.repo.local=$M2/repository -DdeployTo=$HOME/mnt/opt/matterhorn/felix/load
 cd ..
 

@@ -16,6 +16,8 @@ sudo /home/opencast/shutdown.sh
 # Clean old jars
 rm -rf /opt/matterhorn/felix/load
 
+export MAVEN_OPTS='-Xms256m -Xmx960m -XX:PermSize=64m -XX:MaxPermSize=150m'
+
 # build matterhorn
 mvn clean install -DskipTests -DdeployTo=/opt/matterhorn/felix/load
 
