@@ -195,7 +195,7 @@ else
   sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" $CONF_DIR/config.properties
 
   # update capture properties
-  sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opencast/config/capture.properties
+  # sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opencast/config/capture.properties
 
   # Reconfigure Keyboard?
   if [ $kbresp = "y" ] || [ $kbresp = "Y" ]; then
