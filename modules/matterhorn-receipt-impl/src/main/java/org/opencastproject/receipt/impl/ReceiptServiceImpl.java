@@ -13,14 +13,19 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.composer.impl.dao;
+package org.opencastproject.receipt.impl;
 
-import org.opencastproject.composer.api.Receipt;
-import org.opencastproject.composer.api.Receipt.Status;
-import org.opencastproject.composer.impl.ReceiptImpl;
+import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.receipt.api.ReceiptService;
+import org.opencastproject.receipt.api.Receipt.Status;
 
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,12 +38,16 @@ import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
 
 /**
- * Uses JPA for persistence of {@link Receipt}s
+ * JPA implementation of the {@link ReceiptService}
  */
-public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
+public class ReceiptServiceImpl implements ReceiptService {
+  private static final Logger logger = LoggerFactory.getLogger(ReceiptServiceImpl.class);
+
   /** The JPA provider */
   protected PersistenceProvider persistenceProvider;
 
+  protected String hostName;
+  
   /**
    * @param persistenceProvider the persistenceProvider to set
    */
@@ -61,7 +70,13 @@ public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
   protected EntityManagerFactory emf = null;
   
   public void activate(ComponentContext cc) {
-    emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.composer", persistenceProperties);
+    emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.receipt", persistenceProperties);
+    try {
+      hostName = InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      logger.warn("unable to determine the host name... using 'localhost'");
+      hostName = "localhost";
+    }
   }
 
   public void deactivate() {
@@ -70,31 +85,59 @@ public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.impl.dao.ComposerServiceDao#count(org.opencastproject.composer.api.Receipt.Status)
+   * @see org.opencastproject.receipt.api.ReceiptService#parseReceipt(java.io.InputStream)
    */
   @Override
-  public long count(Status status) {
+  public Receipt parseReceipt(InputStream in) {
+    try {
+      return ReceiptBuilder.getInstance().parseReceipt(in);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.receipt.api.ReceiptService#parseReceipt(java.lang.String)
+   */
+  @Override
+  public Receipt parseReceipt(String xml) {
+    try {
+      return ReceiptBuilder.getInstance().parseReceipt(xml);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.receipt.api.ReceiptService#count(java.lang.String, org.opencastproject.receipt.api.Receipt.Status)
+   */
+  @Override
+  public long count(String type, Status status) {
     EntityManager em = emf.createEntityManager();
     try {
-      Query query = em.createQuery("SELECT COUNT(r) FROM Receipt r where r.status = :status");
+      Query query = em.createQuery("SELECT COUNT(r) FROM Receipt r where r.status = :status and r.type = :type");
       query.setParameter("status", status);
+      query.setParameter("type", type);
       Number countResult = (Number) query.getSingleResult();
       return countResult.longValue();
     } finally {
       em.close();
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.impl.dao.ComposerServiceDao#count(org.opencastproject.composer.api.Receipt.Status, java.lang.String)
+   * @see org.opencastproject.receipt.api.ReceiptService#count(java.lang.String, org.opencastproject.receipt.api.Receipt.Status, java.lang.String)
    */
   @Override
-  public long count(Status status, String host) {
+  public long count(String type, Status status, String host) {
     EntityManager em = emf.createEntityManager();
     try {
-      Query query = em.createQuery("SELECT COUNT(r) FROM Receipt r where r.status = :status and r.host = :host");
+      Query query = em.createQuery("SELECT COUNT(r) FROM Receipt r where r.status = :status and r.type = :type and r.host = :host");
       query.setParameter("status", status);
+      query.setParameter("type", type);
       query.setParameter("host", host);
       Number countResult = (Number) query.getSingleResult();
       return countResult.longValue();
@@ -105,12 +148,12 @@ public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.impl.dao.ComposerServiceDao#createReceipt()
+   * @see org.opencastproject.receipt.api.ReceiptService#createReceipt(java.lang.String)
    */
   @Override
-  public Receipt createReceipt() {
+  public Receipt createReceipt(String type) {
     String id = UUID.randomUUID().toString();
-    Receipt receipt = new ReceiptImpl(id, Status.QUEUED, "localhost"); // FIXME Find host name from configuration?
+    Receipt receipt = new ReceiptImpl(id, Status.QUEUED, type, hostName, null);
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
@@ -128,7 +171,7 @@ public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.impl.dao.ComposerServiceDao#getReceipt(java.lang.String)
+   * @see org.opencastproject.receipt.api.ReceiptService#getReceipt(java.lang.String)
    */
   @Override
   public Receipt getReceipt(String id) {
@@ -139,10 +182,10 @@ public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
       em.close();
     }
   }
-
+  
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.impl.dao.ComposerServiceDao#updateReceipt(org.opencastproject.composer.api.Receipt)
+   * @see org.opencastproject.receipt.api.ReceiptService#updateReceipt(org.opencastproject.receipt.api.Receipt)
    */
   @Override
   public void updateReceipt(Receipt receipt) {
@@ -158,6 +201,7 @@ public class ComposerServiceDaoJpaImpl implements ComposerServiceDao {
       }
       fromDb.setElement(receipt.getElement());
       fromDb.setStatus(receipt.getStatus());
+      fromDb.setType(receipt.getType());
       fromDb.setHost(receipt.getHost());
       tx.commit();
     } catch(RollbackException e) {

@@ -13,20 +13,38 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.composer.impl.dao;
+package org.opencastproject.receipt.api;
 
-import org.opencastproject.composer.api.Receipt;
-import org.opencastproject.composer.api.Receipt.Status;
+import org.opencastproject.receipt.api.Receipt.Status;
+
+import java.io.InputStream;
 
 /**
- * Provides persistence support for {@link Receipt}s
+ * Manages {@link Receipt}s for asynchronous services.
  */
-public interface ComposerServiceDao {
+public interface ReceiptService {
+
+  /**
+   * Parses an xml string representing a Receipt
+   * 
+   * @param xml The xml string
+   * @return The receipt
+   */
+  Receipt parseReceipt(String xml);
+  
+  /**
+   * Parses an xml stream representing a Receipt
+   * 
+   * @param in The xml input stream
+   * @return The receipt
+   */
+  Receipt parseReceipt(InputStream in);
+  
   /**
    * Create and store a new receipt in {@link Status#QUEUED}
    * @return
    */
-  Receipt createReceipt();
+  Receipt createReceipt(String type);
 
   /**
    * Update the receipt in the database
@@ -42,17 +60,19 @@ public interface ComposerServiceDao {
   Receipt getReceipt(String id);
   
   /**
-   * Count the number of receipts in this {@link Status}
-   * @param status
+   * Count the number of receipts of this type in this {@link Status}
+   * @param type The type of receipts
+   * @param status The status of the receipts
    * @return
    */
-  long count(Status status);
+  long count(String type, Status status);
 
   /**
    * Count the number of receipts in this {@link Status} on this host
-   * @param status
+   * @param type The type of receipts
+   * @param status The status of the receipts
    * @param host The server that created and will be handling the encoding job
    * @return
    */
-  long count(Status status, String host);
+  long count(String type, Status status, String host);
 }

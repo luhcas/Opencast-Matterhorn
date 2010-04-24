@@ -15,15 +15,17 @@
  */
 package org.opencastproject.composer.api;
 
-import org.opencastproject.composer.api.Receipt.Status;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.receipt.api.Receipt.Status;
 
 /**
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this encoding job.
  */
 public interface ComposerService {
-
+  final String RECEIPT_TYPE = "COMPOSER";
+    
   /**
    * Encode one track, using that track's audio and video streams.
    * 

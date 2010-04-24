@@ -18,11 +18,12 @@ package org.opencastproject.composer.impl;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.composer.api.Receipt;
-import org.opencastproject.composer.api.Receipt.Status;
 import org.opencastproject.composer.impl.endpoint.EncodingProfileList;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.receipt.api.ReceiptService;
+import org.opencastproject.receipt.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 
 import org.apache.http.HttpEntity;
@@ -52,13 +53,14 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   private static final Logger logger = LoggerFactory.getLogger(ComposerServiceRemoteImpl.class);
 
   public static final String REMOTE_COMPOSER = "remote.composer";
-  public static final ResponseHandler<Long> longResponseHandler = new LongResponseHandler();
-  public static final ResponseHandler<EncodingProfile> encodingProfileResponseHandler = new EncodingProfileResponseHandler();
-  public static final ResponseHandler<EncodingProfileList> encodingProfileListResponseHandler = new EncodingProfileListResponseHandler();
-  public static final ResponseHandler<Receipt> receiptResponseHandler = new ReceiptResponseHandler();
+  protected ResponseHandler<Long> longResponseHandler = new LongResponseHandler();
+  protected ResponseHandler<EncodingProfile> encodingProfileResponseHandler = new EncodingProfileResponseHandler();
+  protected ResponseHandler<EncodingProfileList> encodingProfileListResponseHandler = new EncodingProfileListResponseHandler();
+  protected ResponseHandler<Receipt> receiptResponseHandler = new ReceiptResponseHandler();
 
   protected String remoteHost;
   protected TrustedHttpClient trustedHttpClient;
+  protected ReceiptService receiptService;
 
   public void setRemoteHost(String remoteHost) {
     this.remoteHost = remoteHost;
@@ -66,6 +68,10 @@ public class ComposerServiceRemoteImpl implements ComposerService {
 
   public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
     this.trustedHttpClient = trustedHttpClient;
+  }
+
+  public void setReceiptService(ReceiptService receiptService) {
+    this.receiptService = receiptService;
   }
 
   public ComposerServiceRemoteImpl() {
@@ -81,8 +87,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.composer.api.Receipt.Status)
+   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.receipt.api.Receipt.Status)
    */
   @Override
   public long countJobs(Status status) {
@@ -171,7 +176,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
       HttpResponse response = trustedHttpClient.execute(post);
       
       String content = EntityUtils.toString(response.getEntity());
-      r = ReceiptBuilder.getInstance().parseReceipt(content);
+      r = receiptService.parseReceipt(content);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -247,7 +252,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
       HttpResponse response = trustedHttpClient.execute(post);
-      r = ReceiptBuilder.getInstance().parseReceipt(response.getEntity().getContent());
+      r = receiptService.parseReceipt(response.getEntity().getContent());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -296,7 +301,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
     return r;
   }
 
-  static class LongResponseHandler implements ResponseHandler<Long> {
+  class LongResponseHandler implements ResponseHandler<Long> {
     public Long handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
       StatusLine statusLine = response.getStatusLine();
       if(statusLine.getStatusCode() == 404) {
@@ -309,7 +314,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
     }
   }
 
-  static class EncodingProfileResponseHandler implements ResponseHandler<EncodingProfile> {
+  class EncodingProfileResponseHandler implements ResponseHandler<EncodingProfile> {
     public EncodingProfile handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
       StatusLine statusLine = response.getStatusLine();
       if(statusLine.getStatusCode() == 404) {
@@ -330,7 +335,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
     }
   }
 
-  static class EncodingProfileListResponseHandler implements ResponseHandler<EncodingProfileList> {
+  class EncodingProfileListResponseHandler implements ResponseHandler<EncodingProfileList> {
     public EncodingProfileList handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
       StatusLine statusLine = response.getStatusLine();
       if(statusLine.getStatusCode() == 404) {
@@ -351,7 +356,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
     }
   }
 
-  static class ReceiptResponseHandler implements ResponseHandler<Receipt> {
+  class ReceiptResponseHandler implements ResponseHandler<Receipt> {
     public Receipt handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
       StatusLine statusLine = response.getStatusLine();
       if(statusLine.getStatusCode() == 404) {
@@ -361,7 +366,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
       }
       HttpEntity entity = response.getEntity();
       try {
-        return entity == null ? null : ReceiptBuilder.getInstance().parseReceipt(entity.getContent());
+        return entity == null ? null : receiptService.parseReceipt(entity.getContent());
       } catch (Exception e) {
         throw new RuntimeException(e);
       }

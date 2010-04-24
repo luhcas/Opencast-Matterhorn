@@ -19,9 +19,6 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderEngine;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.composer.api.Receipt;
-import org.opencastproject.composer.api.Receipt.Status;
-import org.opencastproject.composer.impl.dao.ComposerServiceDao;
 import org.opencastproject.composer.impl.ffmpeg.FFmpegEncoderEngine;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.Attachment;
@@ -31,6 +28,9 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.identifier.IdBuilder;
 import org.opencastproject.media.mediapackage.identifier.IdBuilderFactory;
+import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.receipt.api.ReceiptService;
+import org.opencastproject.receipt.api.Receipt.Status;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.workspace.api.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
@@ -71,7 +71,7 @@ public class ComposerServiceImpl implements ComposerService {
   private Workspace workspace = null;
 
   /** Reference to the database service */
-  private ComposerServiceDao dao;
+  private ReceiptService receiptService;
 
   /** Id builder used to create ids for encoded tracks */
   private final IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
@@ -83,8 +83,7 @@ public class ComposerServiceImpl implements ComposerService {
   public static final String CONFIG_FFMPEG_PATH = "composer.ffmpegpath";
 
   /**
-   * Callback for declarative services configuration that will introduce us to the media inspection service.
-   * Implementation assumes that the reference is configured as being static.
+   * Sets the media inspection service
    * 
    * @param mediaInspectionService
    *          an instance of the media inspection service
@@ -94,8 +93,7 @@ public class ComposerServiceImpl implements ComposerService {
   }
 
   /**
-   * Callback for declarative services configuration that will introduce us to the local workspace service.
-   * Implementation assumes that the reference is configured as being static.
+   * Sets the workspace
    * 
    * @param workspace
    *          an instance of the workspace
@@ -105,14 +103,11 @@ public class ComposerServiceImpl implements ComposerService {
   }
 
   /**
-   * Callback for declarative services configuration that will introduce us to the database service. Implementation
-   * assumes that the reference is configured as being static.
-   * 
-   * @param workspace
-   *          an instance of the workspace
+   * Sets the receipt service
+   * @param receiptService
    */
-  public void setDao(ComposerServiceDao dao) {
-    this.dao = dao;
+  public void setReceiptService(ReceiptService receiptService) {
+    this.receiptService = receiptService;
   }
 
   /**
@@ -191,7 +186,7 @@ public class ComposerServiceImpl implements ComposerService {
           final String profileId, final boolean block) throws EncoderException, MediaPackageException {
 
     final String targetTrackId = idBuilder.createNew().toString();
-    final Receipt receipt = dao.createReceipt();
+    final Receipt receipt = receiptService.createReceipt(RECEIPT_TYPE);
 
     // Get the tracks and make sure they exist
     Track audioTrack = mp.getTrack(sourceAudioTrackId);
@@ -224,7 +219,7 @@ public class ComposerServiceImpl implements ComposerService {
     final EncodingProfile profile = profileManager.getProfile(profileId);
     if (profile == null) {
       receipt.setStatus(Status.FAILED);
-      dao.updateReceipt(receipt);
+      receiptService.updateReceipt(receipt);
       throw new RuntimeException("Profile '" + profileId + " is unkown");
     }
 
@@ -233,7 +228,7 @@ public class ComposerServiceImpl implements ComposerService {
         logger.info("encoding track {} for media package {} using source audio track {} and source video track {}",
                 new String[] { targetTrackId, mp.getIdentifier().toString(), sourceAudioTrackId, sourceVideoTrackId });
         receipt.setStatus(Status.RUNNING);
-        dao.updateReceipt(receipt);
+        receiptService.updateReceipt(receipt);
 
         // Do the work
         File encodingOutput;
@@ -241,7 +236,7 @@ public class ComposerServiceImpl implements ComposerService {
           encodingOutput = engine.encode(audioFile, videoFile, profile, null);
         } catch (EncoderException e) {
           receipt.setStatus(Status.FAILED);
-          dao.updateReceipt(receipt);
+          receiptService.updateReceipt(receipt);
           throw new RuntimeException(e);
         }
 
@@ -256,7 +251,7 @@ public class ComposerServiceImpl implements ComposerService {
           logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
         } catch (Exception e) {
           receipt.setStatus(Status.FAILED);
-          dao.updateReceipt(receipt);
+          receiptService.updateReceipt(receipt);
           logger.error("unable to put the encoded file into the workspace");
           e.printStackTrace();
         } finally {
@@ -271,7 +266,7 @@ public class ComposerServiceImpl implements ComposerService {
 
         receipt.setElement(inspectedTrack);
         receipt.setStatus(Status.FINISHED);
-        dao.updateReceipt(receipt);
+        receiptService.updateReceipt(receipt);
       }
     };
     Future<?> future = executor.submit(runnable);
@@ -356,7 +351,7 @@ public class ComposerServiceImpl implements ComposerService {
     } catch (NotFoundException e) {
       throw new MediaPackageException("unable to access video track " + videoTrack, e);
     }
-    final Receipt receipt = dao.createReceipt();
+    final Receipt receipt = receiptService.createReceipt(RECEIPT_TYPE);
 
     Runnable runnable = new Runnable() {
       @Override
@@ -365,7 +360,7 @@ public class ComposerServiceImpl implements ComposerService {
                 mediaPackage.getIdentifier().toString(), sourceVideoTrackId });
 
         receipt.setStatus(Status.RUNNING);
-        dao.updateReceipt(receipt);
+        receiptService.updateReceipt(receipt);
 
         Map<String, String> properties = new HashMap<String, String>();
         String timeAsString = Long.toString(time);
@@ -391,7 +386,7 @@ public class ComposerServiceImpl implements ComposerService {
           logger.debug("Copied the encoded file to the workspace at {}", returnURL);
         } catch (Exception e) {
           receipt.setStatus(Status.FAILED);
-          dao.updateReceipt(receipt);
+          receiptService.updateReceipt(receipt);
           throw new RuntimeException("unable to put the encoded file into the workspace", e);
         } finally {
           IOUtils.closeQuietly(in);
@@ -403,7 +398,7 @@ public class ComposerServiceImpl implements ComposerService {
 
         receipt.setElement(attachment);
         receipt.setStatus(Status.FINISHED);
-        dao.updateReceipt(receipt);
+        receiptService.updateReceipt(receipt);
       }
     };
     Future<?> future = executor.submit(runnable);
@@ -425,7 +420,7 @@ public class ComposerServiceImpl implements ComposerService {
    * @see org.opencastproject.composer.api.ComposerService#getReceipt(java.lang.String)
    */
   public Receipt getReceipt(String id) {
-    return dao.getReceipt(id);
+    return receiptService.getReceipt(id);
   }
 
   /**
@@ -435,7 +430,7 @@ public class ComposerServiceImpl implements ComposerService {
    */
   @Override
   public long countJobs(Status status) {
-    return dao.count(status);
+    return receiptService.count(RECEIPT_TYPE, status);
   }
 
   /**
@@ -445,6 +440,6 @@ public class ComposerServiceImpl implements ComposerService {
    */
   @Override
   public long countJobs(Status status, String host) {
-    return dao.count(status, host);
+    return receiptService.count(RECEIPT_TYPE, status, host);
   }
 }

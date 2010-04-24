@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.composer.impl.dao.ComposerServiceDao" immediate="true" activate="activate" deactivate="deactivate">
-  <implementation class="org.opencastproject.composer.impl.dao.ComposerServiceDaoJpaImpl" />
-  <property name="service.description" value="Composer Service DAO" />
+<component name="org.opencastproject.receipt.api.ReceiptService" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.receipt.impl.ReceiptServiceImpl" />
+  <property name="service.description" value="Receipt Service" />
   <service>
-    <provide interface="org.opencastproject.composer.impl.dao.ComposerServiceDao" />
+    <provide interface="org.opencastproject.receipt.api.ReceiptService" />
   </service>
   <reference name="persistence" interface="javax.persistence.spi.PersistenceProvider"
     cardinality="1..1" policy="static" bind="setPersistenceProvider" />

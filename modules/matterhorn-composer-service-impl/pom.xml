@@ -90,37 +90,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.persistence</groupId>
-      <artifactId>javax.persistence</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.persistence</groupId>
-      <artifactId>org.eclipse.persistence.core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.persistence</groupId>
-      <artifactId>org.eclipse.persistence.jpa</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.persistence</groupId>
-      <artifactId>org.eclipse.persistence.asm</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.persistence</groupId>
-      <artifactId>org.eclipse.persistence.antlr</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>c3p0</groupId>
-      <artifactId>c3p0</artifactId>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-receipt-impl</artifactId>
+      <version>0.7-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -148,10 +120,8 @@
               OSGI-INF/composer-service-local.xml,
               OSGI-INF/composer-service-remote.xml,
               OSGI-INF/composer-service-delegating.xml,
-              OSGI-INF/composer-service-dao.xml,
               OSGI-INF/composer-service-rest.xml
             </Service-Component>
-            <JPA-PersistenceUnits>org.opencastproject.composer</JPA-PersistenceUnits>
           </instructions>
         </configuration>
       </plugin>

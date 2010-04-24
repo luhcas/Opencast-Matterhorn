@@ -63,6 +63,8 @@
         <module>modules/matterhorn-security-impl</module>
         <!-- <module>modules/matterhorn-stream</module> --> <!-- Streaming server must be implemented in a separate JVM -->
         <module>modules/matterhorn-util</module>
+        <module>modules/matterhorn-receipt-api</module>
+        <module>modules/matterhorn-receipt-impl</module>
         <module>modules/matterhorn-workflow-service-api</module>
         <module>modules/matterhorn-workflow-service-impl</module>
         <module>modules/matterhorn-workflow-ui</module>

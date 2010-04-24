@@ -1,13 +1,13 @@
 package org.opencastproject.composer.impl;
 
 
-import org.opencastproject.composer.api.Receipt;
-import org.opencastproject.composer.api.Receipt.Status;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.receipt.api.Receipt.Status;
 import org.opencastproject.security.TrustedHttpClientImpl;
 
 import org.junit.After;

@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>matterhorn-composer-service-api</artifactId>
+  <artifactId>matterhorn-receipt-api</artifactId>
   <packaging>bundle</packaging>
-  <name>matterhorn-composer-service-api</name>
+  <name>matterhorn-receipt-api</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -12,31 +12,13 @@
   </parent>
   <dependencies>
     <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-media</artifactId>
       <version>0.7-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-util</artifactId>
-      <version>0.7-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-receipt-api</artifactId>
-      <version>0.7-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
     </dependency>
   </dependencies>
   <build>
@@ -50,7 +32,7 @@
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Export-Package>
-              org.opencastproject.composer.api
+              org.opencastproject.receipt.api
             </Export-Package>
           </instructions>
         </configuration>

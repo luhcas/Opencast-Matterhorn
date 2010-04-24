@@ -2,7 +2,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
                  http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
-  <persistence-unit name="org.opencastproject.composer" transaction-type="RESOURCE_LOCAL">
-    <class>org.opencastproject.composer.impl.ReceiptImpl</class>
+  <persistence-unit name="org.opencastproject.receipt" transaction-type="RESOURCE_LOCAL">
+    <class>org.opencastproject.receipt.impl.ReceiptImpl</class>
   </persistence-unit>
 </persistence>

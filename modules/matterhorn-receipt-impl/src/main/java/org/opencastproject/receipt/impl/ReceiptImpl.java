@@ -13,15 +13,15 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.composer.impl;
+package org.opencastproject.receipt.impl;
 
-import org.opencastproject.composer.api.Receipt;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.receipt.api.Receipt;
 
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
@@ -51,7 +51,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 /**
- * A receipt for an encoding job.  A Receipt may be used to track an encoding job once it has been queued.
+ * A receipt for a long running, asynchronously executed job.
  */
 @Entity(name="Receipt")
 @Access(AccessType.PROPERTY)
@@ -61,23 +61,18 @@ import javax.xml.transform.stream.StreamResult;
 public class ReceiptImpl implements Receipt {
   public ReceiptImpl() {}
 
-  public ReceiptImpl(String id, Status status) {
+  public ReceiptImpl(String id, Status status, String type, String host, MediaPackageElement element) {
     this();
     this.id = id;
     this.status = status;
-  }
-
-  public ReceiptImpl(String id, Status status, String host) {
-    this(id, status);
+    this.type = type;
     this.host = host;
-  }
-
-  public ReceiptImpl(String id, Status status, String host, MediaPackageElement element) {
-    this(id, status, host);
     this.element = element;
   }
 
   String id;
+  
+  String type;
   
   Status status;
 
@@ -128,6 +123,26 @@ public class ReceiptImpl implements Receipt {
   @Override
   public void setStatus(Status status) {
     this.status = status;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.receipt.api.Receipt#getType()
+   */
+  @Column
+  @XmlAttribute
+  @Override
+  public String getType() {
+    return type;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.receipt.api.Receipt#setType(java.lang.String)
+   */
+  @Override
+  public void setType(String type) {
+    this.type = type;
   }
 
   /**

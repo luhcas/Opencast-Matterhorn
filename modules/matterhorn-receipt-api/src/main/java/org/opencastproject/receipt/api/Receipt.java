@@ -13,12 +13,12 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.composer.api;
+package org.opencastproject.receipt.api;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 
 /**
- * A receipt for an encoding job.  A Receipt may be used to track an encoding job once it has been queued.
+ * A receipt for an long running, asynchronous job.  A Receipt may be used to track any task once it has been queued.
  */
 public interface Receipt {
   public static enum Status {QUEUED, RUNNING, FINISHED, FAILED}
@@ -27,6 +27,10 @@ public interface Receipt {
 
   public void setId(String id);
 
+  public String getType();
+  
+  public void setType(String type);
+  
   public Status getStatus();
 
   public void setStatus(Status status);

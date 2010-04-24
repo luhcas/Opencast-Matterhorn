@@ -18,10 +18,10 @@ package org.opencastproject.composer.impl;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.composer.api.Receipt;
-import org.opencastproject.composer.api.Receipt.Status;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.receipt.api.Receipt.Status;
 
 import org.osgi.service.component.ComponentContext;
 

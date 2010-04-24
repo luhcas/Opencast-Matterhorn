@@ -18,10 +18,10 @@ package org.opencastproject.composer.impl.endpoint;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.composer.api.Receipt;
-import org.opencastproject.composer.api.Receipt.Status;
 import org.opencastproject.composer.impl.EncodingProfileImpl;
 import org.opencastproject.media.mediapackage.MediaPackageImpl;
+import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.receipt.api.Receipt.Status;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -125,7 +125,7 @@ public class ComposerRestService {
    *          The ID of the video source track in the media package to be encoded
    * @param profileId
    *          The profile to use in encoding this track
-   * @return A {@link Response} with the resulting {@link Track} in the response body
+   * @return A {@link Response} with the resulting track in the response body
    * @throws Exception
    */
   @POST

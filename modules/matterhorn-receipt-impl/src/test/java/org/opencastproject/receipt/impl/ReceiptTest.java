@@ -13,15 +13,14 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.composer.impl;
+package org.opencastproject.receipt.impl;
 
 
-import org.opencastproject.composer.api.Receipt;
-import org.opencastproject.composer.api.Receipt.Status;
-import org.opencastproject.composer.impl.dao.ComposerServiceDaoJpaImpl;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.receipt.api.Receipt.Status;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -36,14 +35,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ReceiptTest {
+  private static final String RECEIPT_TYPE = "testing";
+  
   private ComboPooledDataSource pooledDataSource = null;
-  private ComposerServiceDaoJpaImpl dao = null;
+  private ReceiptServiceImpl receiptService = null;
 
-  /**
-   * @throws java.lang.Exception
-   */
   @Before
-  public void setUpBeforeClass() throws Exception {
+  public void setUp() throws Exception {
     pooledDataSource = new ComboPooledDataSource();
     pooledDataSource.setDriverClass("org.h2.Driver");
     pooledDataSource.setJdbcUrl("jdbc:h2:./target/db" + System.currentTimeMillis() + ";LOCK_MODE=1;MVCC=TRUE");
@@ -56,52 +54,49 @@ public class ReceiptTest {
     props.put("eclipselink.ddl-generation", "create-tables");
     props.put("eclipselink.ddl-generation.output-mode", "database");
 
-    dao = new ComposerServiceDaoJpaImpl();
-    dao.setPersistenceProvider(new PersistenceProvider());
-    dao.setPersistenceProperties(props);
-    dao.activate(null);
+    receiptService = new ReceiptServiceImpl();
+    receiptService.setPersistenceProvider(new PersistenceProvider());
+    receiptService.setPersistenceProperties(props);
+    receiptService.activate(null);
   }
 
-  /**
-   * @throws java.lang.Exception
-   */
   @After
-  public void tearDownAfterClass() throws Exception {
-    dao.deactivate();
+  public void tearDown() throws Exception {
+    receiptService.deactivate();
     pooledDataSource.close();
   }
   
   @Test
   public void testGetReceipt() throws Exception {
-    ReceiptImpl receipt = (ReceiptImpl) dao.createReceipt();
+    ReceiptImpl receipt = (ReceiptImpl) receiptService.createReceipt(RECEIPT_TYPE);
     Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
             new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
     t.setIdentifier("track-1");
     receipt.setElement(t);
     receipt.setStatus(Status.FINISHED);
-    dao.updateReceipt(receipt);
+    receiptService.updateReceipt(receipt);
     
-    Receipt receiptFromDb = dao.getReceipt(receipt.getId());
+    Receipt receiptFromDb = receiptService.getReceipt(receipt.getId());
     Assert.assertEquals(receipt.getElement().getIdentifier(), receiptFromDb.getElement().getIdentifier());
   }
 
   @Test
   public void testGetReceipts() throws Exception {
-    dao.createReceipt();
-    long queuedJobs = dao.count(Status.QUEUED);
+    receiptService.createReceipt(RECEIPT_TYPE);
+    long queuedJobs = receiptService.count(RECEIPT_TYPE, Status.QUEUED);
     Assert.assertEquals(1, queuedJobs);
   }
   
   @Test
   public void testCount() throws Exception {
-    dao.createReceipt();
-    ReceiptImpl remote1 = (ReceiptImpl)dao.createReceipt();
-    ReceiptImpl remote2 = (ReceiptImpl)dao.createReceipt();
+    receiptService.createReceipt(RECEIPT_TYPE);
+    ReceiptImpl remote1 = (ReceiptImpl)receiptService.createReceipt(RECEIPT_TYPE);
+    ReceiptImpl remote2 = (ReceiptImpl)receiptService.createReceipt(RECEIPT_TYPE);
     remote1.setHost("remote");
     remote2.setHost("remote");
-    dao.updateReceipt(remote1);
-    dao.updateReceipt(remote2);
-    Assert.assertEquals(2, dao.count(Status.QUEUED, "remote"));
+    receiptService.updateReceipt(remote1);
+    receiptService.updateReceipt(remote2);
+    Assert.assertEquals(2, receiptService.count(RECEIPT_TYPE, Status.QUEUED, "remote"));
   }
 
 }
