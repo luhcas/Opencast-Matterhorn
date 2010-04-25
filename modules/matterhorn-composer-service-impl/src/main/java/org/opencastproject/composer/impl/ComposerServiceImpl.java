@@ -186,7 +186,7 @@ public class ComposerServiceImpl implements ComposerService {
           final String profileId, final boolean block) throws EncoderException, MediaPackageException {
 
     final String targetTrackId = idBuilder.createNew().toString();
-    final Receipt receipt = receiptService.createReceipt(RECEIPT_TYPE);
+    final Receipt composerReceipt = receiptService.createReceipt(RECEIPT_TYPE);
 
     // Get the tracks and make sure they exist
     Track audioTrack = mp.getTrack(sourceAudioTrackId);
@@ -197,6 +197,8 @@ public class ComposerServiceImpl implements ComposerService {
       try {
         audioFile = workspace.get(audioTrack.getURI());
       } catch (NotFoundException e) {
+        composerReceipt.setStatus(Status.FAILED);
+        receiptService.updateReceipt(composerReceipt);
         throw new MediaPackageException("unable to access audio track " + audioTrack);
       }
     }
@@ -209,6 +211,8 @@ public class ComposerServiceImpl implements ComposerService {
       try {
         videoFile = workspace.get(videoTrack.getURI());
       } catch (NotFoundException e) {
+        composerReceipt.setStatus(Status.FAILED);
+        receiptService.updateReceipt(composerReceipt);
         throw new MediaPackageException("unable to access video track " + videoTrack);
       }
     }
@@ -218,8 +222,8 @@ public class ComposerServiceImpl implements ComposerService {
     final EncoderEngine engine = factory.newEngineByProfile(profileId);
     final EncodingProfile profile = profileManager.getProfile(profileId);
     if (profile == null) {
-      receipt.setStatus(Status.FAILED);
-      receiptService.updateReceipt(receipt);
+      composerReceipt.setStatus(Status.FAILED);
+      receiptService.updateReceipt(composerReceipt);
       throw new RuntimeException("Profile '" + profileId + " is unkown");
     }
 
@@ -227,16 +231,16 @@ public class ComposerServiceImpl implements ComposerService {
       public void run() {
         logger.info("encoding track {} for media package {} using source audio track {} and source video track {}",
                 new String[] { targetTrackId, mp.getIdentifier().toString(), sourceAudioTrackId, sourceVideoTrackId });
-        receipt.setStatus(Status.RUNNING);
-        receiptService.updateReceipt(receipt);
+        composerReceipt.setStatus(Status.RUNNING);
+        receiptService.updateReceipt(composerReceipt);
 
         // Do the work
         File encodingOutput;
         try {
           encodingOutput = engine.encode(audioFile, videoFile, profile, null);
         } catch (EncoderException e) {
-          receipt.setStatus(Status.FAILED);
-          receiptService.updateReceipt(receipt);
+          composerReceipt.setStatus(Status.FAILED);
+          receiptService.updateReceipt(composerReceipt);
           throw new RuntimeException(e);
         }
 
@@ -250,10 +254,10 @@ public class ComposerServiceImpl implements ComposerService {
           encodingOutput.delete();
           logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
         } catch (Exception e) {
-          receipt.setStatus(Status.FAILED);
-          receiptService.updateReceipt(receipt);
+          composerReceipt.setStatus(Status.FAILED);
+          receiptService.updateReceipt(composerReceipt);
           logger.error("unable to put the encoded file into the workspace");
-          e.printStackTrace();
+          throw new RuntimeException(e);
         } finally {
           IOUtils.closeQuietly(in);
         }
@@ -261,25 +265,26 @@ public class ComposerServiceImpl implements ComposerService {
           encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
 
         // Have the encoded track inspected and return the result
-        Track inspectedTrack = inspectionService.inspect(returnURL);
+        Receipt inspectionReceipt = inspectionService.inspect(returnURL, true);
+        Track inspectedTrack = (Track)inspectionReceipt.getElement();
         inspectedTrack.setIdentifier(targetTrackId);
 
-        receipt.setElement(inspectedTrack);
-        receipt.setStatus(Status.FINISHED);
-        receiptService.updateReceipt(receipt);
+        composerReceipt.setElement(inspectedTrack);
+        composerReceipt.setStatus(Status.FINISHED);
+        receiptService.updateReceipt(composerReceipt);
       }
     };
     Future<?> future = executor.submit(runnable);
     if (block) {
       try {
         future.get();
-      } catch (ExecutionException e) {
-        throw new EncoderException(engine, e);
-      } catch (InterruptedException e) {
+      } catch (Exception e) {
+        composerReceipt.setStatus(Status.FAILED);
+        receiptService.updateReceipt(composerReceipt);
         throw new EncoderException(engine, e);
       }
     }
-    return receipt;
+    return composerReceipt;
   }
 
   /**

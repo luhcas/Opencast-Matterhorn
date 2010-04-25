@@ -24,7 +24,7 @@ import org.opencastproject.receipt.api.Receipt.Status;
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this encoding job.
  */
 public interface ComposerService {
-  final String RECEIPT_TYPE = "COMPOSER";
+  final String RECEIPT_TYPE = "org.opencastproject.composer";
     
   /**
    * Encode one track, using that track's audio and video streams.

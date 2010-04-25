@@ -69,6 +69,10 @@ public class ReceiptTest {
   @Test
   public void testGetReceipt() throws Exception {
     ReceiptImpl receipt = (ReceiptImpl) receiptService.createReceipt(RECEIPT_TYPE);
+    
+    Receipt receiptFromDb = receiptService.getReceipt(receipt.getId());
+    Assert.assertEquals(Status.QUEUED, receiptFromDb.getStatus());
+
     Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
             new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
     t.setIdentifier("track-1");
@@ -76,15 +80,21 @@ public class ReceiptTest {
     receipt.setStatus(Status.FINISHED);
     receiptService.updateReceipt(receipt);
     
-    Receipt receiptFromDb = receiptService.getReceipt(receipt.getId());
+    receiptFromDb = receiptService.getReceipt(receipt.getId());
     Assert.assertEquals(receipt.getElement().getIdentifier(), receiptFromDb.getElement().getIdentifier());
   }
 
   @Test
   public void testGetReceipts() throws Exception {
-    receiptService.createReceipt(RECEIPT_TYPE);
+    String id = receiptService.createReceipt(RECEIPT_TYPE).getId();
     long queuedJobs = receiptService.count(RECEIPT_TYPE, Status.QUEUED);
     Assert.assertEquals(1, queuedJobs);
+    
+    Receipt receipt = receiptService.getReceipt(id);
+    receipt.setStatus(Status.RUNNING);
+    receiptService.updateReceipt(receipt);
+    queuedJobs = receiptService.count(RECEIPT_TYPE, Status.QUEUED);
+    Assert.assertEquals(0, queuedJobs);
   }
   
   @Test

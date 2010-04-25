@@ -29,6 +29,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.metadata.dublincore.Precision;
+import org.opencastproject.receipt.api.Receipt;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -123,7 +124,8 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
     for (Track track : mediaPackage.getTracks()) {
       
       logger.info("Inspecting track '{}' of {}", track.getIdentifier(), mediaPackage);
-      Track inspectedTrack = inspectionService.enrich(track, false);
+      Receipt receipt = inspectionService.enrich(track, false, true);
+      Track inspectedTrack = (Track)receipt.getElement();
       if (inspectedTrack == null)
         throw new WorkflowOperationException("Track " + track + " could not be inspected");
       

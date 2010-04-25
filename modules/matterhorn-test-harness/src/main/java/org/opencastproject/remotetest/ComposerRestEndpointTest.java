@@ -81,7 +81,7 @@ public class ComposerRestEndpointTest {
     
     // Poll the service for the status of the receipt.
     String status = null;
-    while(status == null || "RUNNING".equals(status)) {
+    while(status == null || "RUNNING".equals(status) || "QUEUED".equals(status)) {
       Thread.sleep(5000); // wait and try again
       HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/receipt/" + receiptId + ".xml");
       AuthenticationSupport.addAuthentication(pollRequest);

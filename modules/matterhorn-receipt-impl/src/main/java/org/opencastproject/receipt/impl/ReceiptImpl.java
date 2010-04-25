@@ -55,9 +55,9 @@ import javax.xml.transform.stream.StreamResult;
  */
 @Entity(name="Receipt")
 @Access(AccessType.PROPERTY)
-@Table(name="MH_COMPOSER")
+@Table(name="MH_RECEIPT")
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name="receipt", namespace="http://composer.opencastproject.org/")
+@XmlRootElement(name="receipt", namespace="http://receipt.opencastproject.org/")
 public class ReceiptImpl implements Receipt {
   public ReceiptImpl() {}
 
@@ -83,7 +83,7 @@ public class ReceiptImpl implements Receipt {
   /**
    * 
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.Receipt#getId()
+   * @see org.opencastproject.receipt.api.Receipt#getId()
    */
   @Id
   @XmlID
@@ -96,7 +96,7 @@ public class ReceiptImpl implements Receipt {
   /**
    * 
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.Receipt#setId(java.lang.String)
+   * @see org.opencastproject.receipt.api.Receipt#setId(java.lang.String)
    */
   @Override
   public void setId(String id) {
@@ -106,7 +106,7 @@ public class ReceiptImpl implements Receipt {
   /**
    * 
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.Receipt#getStatus()
+   * @see org.opencastproject.receipt.api.Receipt#getStatus()
    */
   @Column
   @XmlAttribute
@@ -118,7 +118,7 @@ public class ReceiptImpl implements Receipt {
   /**
    * 
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.Receipt#setStatus(org.opencastproject.composer.api.Receipt.Status)
+   * @see org.opencastproject.receipt.api.Receipt#setStatus(org.opencastproject.receipt.api.Receipt.Status)
    */
   @Override
   public void setStatus(Status status) {
@@ -148,7 +148,7 @@ public class ReceiptImpl implements Receipt {
   /**
    * 
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.Receipt#getHost()
+   * @see org.opencastproject.receipt.api.Receipt#getHost()
    */
   @Column
   @XmlElement
@@ -165,7 +165,7 @@ public class ReceiptImpl implements Receipt {
   /**
    * 
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.Receipt#getElement()
+   * @see org.opencastproject.receipt.api.Receipt#getElement()
    */
   @Transient
   @Override
@@ -175,7 +175,7 @@ public class ReceiptImpl implements Receipt {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.Receipt#setElement(org.opencastproject.media.mediapackage.MediaPackageElement)
+   * @see org.opencastproject.receipt.api.Receipt#setElement(org.opencastproject.media.mediapackage.MediaPackageElement)
    */
   @Transient
   @Override

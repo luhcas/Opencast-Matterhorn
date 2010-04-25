@@ -53,7 +53,7 @@ public interface ReceiptService {
   void updateReceipt(Receipt receipt);
 
   /**
-   * Gets a receipt by its ID
+   * Gets a receipt by its ID, or null if not found
    * @param id
    * @return
    */

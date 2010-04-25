@@ -23,13 +23,13 @@ import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.receipt.api.Receipt.Status;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workflow.handler.InspectWorkflowOperationHandler;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.easymock.EasyMock;
@@ -51,6 +51,7 @@ public class InspectWorkflowOperationHandlerTest {
   private URI uriMP;
   private Track newTrack;
   private MediaPackage mp;
+  private Receipt receipt;
 
   @Before
   public void setup() throws Exception {
@@ -64,9 +65,16 @@ public class InspectWorkflowOperationHandlerTest {
     // set up service
     operationHandler = new InspectWorkflowOperationHandler();
     
+    // mock the receipt
+    receipt = EasyMock.createNiceMock(Receipt.class);
+    EasyMock.expect(receipt.getElement()).andReturn(newTrack);
+    EasyMock.expect(receipt.getId()).andReturn("123");
+    EasyMock.expect(receipt.getStatus()).andReturn(Status.FINISHED);
+    EasyMock.replay(receipt);
+    
     // set up mock inspect
     inspectionService = EasyMock.createNiceMock(MediaInspectionService.class);
-    EasyMock.expect(inspectionService.enrich((Track)EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(newTrack);
+    EasyMock.expect(inspectionService.enrich((Track)EasyMock.anyObject(), EasyMock.anyBoolean(), EasyMock.anyBoolean())).andReturn(receipt);
     EasyMock.replay(inspectionService);
     operationHandler.setInspectionService(inspectionService);
     
@@ -82,7 +90,7 @@ public class InspectWorkflowOperationHandlerTest {
   }
 
   @Test
-  public void testPublishOperation() throws Exception {
+  public void testInspectOperation() throws Exception {
     // Set up a mediapackage to publish
     MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();

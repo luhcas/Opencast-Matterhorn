@@ -15,7 +15,11 @@
  */
 package org.opencastproject.inspection.impl;
 
+import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.receipt.api.ReceiptService;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeType;
@@ -38,7 +42,6 @@ public class MediaInspectionServiceImplTest {
   private Workspace workspace = null;
 
   private URI uriTrack;
-  private Track track;
 
   private String defaultBinaryPath = "/usr/local/bin/mediainfo";
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImplTest.class);
@@ -55,6 +58,13 @@ public class MediaInspectionServiceImplTest {
     EasyMock.expect(workspace.get(uriTrack)).andReturn(f);
     EasyMock.replay(workspace);
     service.setWorkspace(workspace);
+
+    ReceiptService rs = EasyMock.createNiceMock(ReceiptService.class);
+    EasyMock.expect(rs.createReceipt(MediaInspectionService.RECEIPT_TYPE)).andReturn(new ReceiptStub()).anyTimes();
+    EasyMock.replay(rs);
+    service.setReceiptService(rs);
+    
+    service.activate();
   }
 
   @After
@@ -73,7 +83,8 @@ public class MediaInspectionServiceImplTest {
     logger.info("Binary found, executing test...");
 
     try {
-      track = service.inspect(uriTrack);
+      Receipt receipt = service.inspect(uriTrack, true);
+      Track track = (Track)receipt.getElement();
       // test the returned values
       Checksum cs = Checksum.create(ChecksumType.fromString("md5"), "9d3523e464f18ad51f59564acde4b95a");
       Assert.assertEquals(track.getChecksum(), cs);
@@ -97,19 +108,22 @@ public class MediaInspectionServiceImplTest {
 
     try {
       // init a track with inspect
-      track = service.inspect(uriTrack);
+      Receipt receipt = service.inspect(uriTrack, true);
+      Track track = (Track)receipt.getElement();
       // make changes to metadata
       Checksum cs = track.getChecksum();
       track.setChecksum(null);
       MimeType mt = new MimeType("video", "flash");
       track.setMimeType(mt);
       // test the enrich scenario
-      Track newTrack = service.enrich(track, false);
+      Receipt newReceipt = service.enrich(track, false, true);
+      Track newTrack = (Track)newReceipt.getElement();
       Assert.assertEquals(newTrack.getChecksum(), cs);
       Assert.assertEquals(newTrack.getMimeType(), mt);
       Assert.assertEquals(newTrack.getDuration(), 14546);
       // test the override scenario
-      newTrack = service.enrich(track, true);
+      newReceipt = service.enrich(track, true, true);
+      newTrack = (Track)newReceipt.getElement();
       Assert.assertEquals(newTrack.getChecksum(), cs);
       Assert.assertNotSame(newTrack.getMimeType(), mt);
       Assert.assertEquals(newTrack.getDuration(), 14546);
@@ -118,4 +132,35 @@ public class MediaInspectionServiceImplTest {
     }
   }
 
+  class ReceiptStub implements Receipt {
+    MediaPackageElement element;
+    Status status;
+    public MediaPackageElement getElement() {
+      return element;
+    }
+    public String getHost() {
+      return null;
+    }
+    public String getId() {
+      return null;
+    }
+    public Status getStatus() {
+      return status;
+    }
+    public String getType() {
+      return MediaInspectionService.RECEIPT_TYPE;
+    }
+    public void setElement(MediaPackageElement element) {
+      this.element = element;
+    }
+    public void setHost(String host) {
+    }
+    public void setId(String id) {
+    }
+    public void setStatus(Status status) {
+      this.status = status;
+    }
+    public void setType(String type) {
+    }
+  }
 }

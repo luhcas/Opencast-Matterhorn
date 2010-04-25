@@ -16,7 +16,7 @@
 package org.opencastproject.inspection.impl.endpoints;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.receipt.api.Receipt;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -61,8 +61,19 @@ public class MediaInspectionRestEndpoint {
   public Response getTrack(@QueryParam("url") URI url) {
     checkNotNull(service);
     try {
-      Track t = service.inspect(url);
-      return Response.ok(t).build();
+      Receipt r = service.inspect(url, false);
+      return Response.ok(r).build();
+    } catch (Exception e) {
+      logger.info(e.getMessage());
+      return Response.serverError().status(400).build();
+    }
+  }
+  
+  public Response getReceipt(@QueryParam("id") String id) {
+    checkNotNull(service);
+    try {
+      Receipt r = service.getReceipt(id);
+      return Response.ok(r).build();
     } catch (Exception e) {
       logger.info(e.getMessage());
       return Response.serverError().status(400).build();
@@ -89,10 +100,10 @@ public class MediaInspectionRestEndpoint {
     data.setAbstract("This service extracts technical metadata from media files.");
     // getTrack
     RestEndpoint endpoint = new RestEndpoint("getTrack", RestEndpoint.Method.GET, "/",
-            "Analyze a given media file");
+            "Analyze a given media file, returning a receipt to check on the status and outcome of the job");
     endpoint.addOptionalParam(new Param("url", Param.Type.STRING, null, "Location of the media file"));
     endpoint.addFormat(Format.xml());
-    endpoint.addStatus(Status.OK("XML encoded track is returned"));
+    endpoint.addStatus(Status.OK("XML encoded receipt is returned"));
     endpoint.addStatus(new Status(400, "Problem retrieving media file or invalid media file or URL"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
