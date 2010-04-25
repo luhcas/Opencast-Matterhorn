@@ -32,6 +32,7 @@ import java.net.URI;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -69,7 +70,10 @@ public class MediaInspectionRestEndpoint {
     }
   }
   
-  public Response getReceipt(@QueryParam("id") String id) {
+  @GET
+  @Path("/receipt/{id}.xml")
+  @Produces(MediaType.TEXT_XML)
+  public Response getReceipt(@PathParam("id") String id) {
     checkNotNull(service);
     try {
       Receipt r = service.getReceipt(id);
@@ -107,6 +111,17 @@ public class MediaInspectionRestEndpoint {
     endpoint.addStatus(new Status(400, "Problem retrieving media file or invalid media file or URL"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+
+    // getReceipt
+    RestEndpoint receiptEndpoint = new RestEndpoint("getReceipt", RestEndpoint.Method.GET, "/receipt/{id}.xml",
+            "Check on the status of an inspection receipt");
+    receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "ID of the receipt"));
+    receiptEndpoint.addFormat(Format.xml());
+    receiptEndpoint.addStatus(Status.OK("XML encoded receipt is returned"));
+    receiptEndpoint.addStatus(new Status(400, "Problem retrieving receipt"));
+    receiptEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, receiptEndpoint);
+    
     return DocUtil.generate(data);
   }
 
