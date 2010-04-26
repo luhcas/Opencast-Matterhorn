@@ -45,6 +45,11 @@ public interface WorkflowInstance extends Configurable {
   String getDescription();
 
   /**
+   * The parent workflow instance ID, if any
+   */
+  String getParentId();
+  
+  /**
    * Returns the {@link WorkflowOperationInstance}s that make up this workflow.
    * 
    * @return the workflow operations

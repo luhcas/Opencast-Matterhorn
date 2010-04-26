@@ -317,19 +317,18 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition,
-   *      org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition, org.opencastproject.media.mediapackage.MediaPackage, java.lang.String, java.util.Map)
    */
+  @Override
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
-          Map<String, String> properties) {
+          String parentWorkflowId, Map<String, String> properties) {
     if(workflowDefinition == null) throw new IllegalArgumentException("workflow definition must not be null");
     if(mediaPackage == null) throw new IllegalArgumentException("mediapackage must not be null");
-    
+    if(parentWorkflowId != null && getWorkflowById(parentWorkflowId) == null) throw new IllegalArgumentException("Parent workflow " + parentWorkflowId + " not found");
     String id = UUID.randomUUID().toString();
     logger.info("Starting a new workflow instance with ID={}", id);
     
-    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage, properties);
+    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage, parentWorkflowId, properties);
     workflowInstance.setId(id);
     workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
     
@@ -337,6 +336,17 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     dao.update(configuredInstance);
     run(configuredInstance);
     return configuredInstance;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition,
+   *      org.opencastproject.media.mediapackage.MediaPackage)
+   */
+  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
+          Map<String, String> properties) {
+    return start(workflowDefinition, mediaPackage, null, properties);
   }
   
   protected WorkflowInstance updateConfiguration(WorkflowInstance instance, Map<String, String> properties) {

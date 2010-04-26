@@ -69,6 +69,18 @@ public interface WorkflowService {
    * 
    * @param workflowDefinition the workflow definition
    * @param mediaPackage the mediapackage to process
+   * @param parentWorkflowId An existing workflow to associate with the new workflow instance
+   * @param properties any properties to apply to the workflow definition
+   * @return The new workflow instance
+   */
+  WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage, String parentWorkflowId,
+          Map<String, String> properties);
+
+  /**
+   * Creates a new workflow instance and starts the workflow.
+   * 
+   * @param workflowDefinition the workflow definition
+   * @param mediaPackage the mediapackage to process
    * @return The new workflow instance
    */
   WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage);

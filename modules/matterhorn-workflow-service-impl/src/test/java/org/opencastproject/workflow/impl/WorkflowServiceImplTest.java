@@ -224,6 +224,30 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
+  
+  
+  
+  @Test
+  public void testParentWorkflow() {
+    WorkflowInstance originalInstance = service.start(workingDefinition, mediapackage1, null);
+    WorkflowInstance childInstance = service.start(workingDefinition, mediapackage1, originalInstance.getId(), null);
+    Assert.assertEquals(originalInstance.getId(), service.getWorkflowById(childInstance.getId()).getParentId());
+
+    try {
+      service.start(workingDefinition, mediapackage1, "bad parent ID", null);
+      Assert.fail("Workflows should not be started with bad parent IDs");
+    } catch(IllegalArgumentException e) {} // the exception is expected
+    
+    // cleanup the database
+    service.removeFromDatabase(childInstance.getId());
+    service.removeFromDatabase(originalInstance.getId());
+  }
+
+  
+  
+  
+  
+  
   @Test
   public void testGetWorkflowByEpisodeId() {
     String mediaPackageId = mediapackage1.getIdentifier().toString();

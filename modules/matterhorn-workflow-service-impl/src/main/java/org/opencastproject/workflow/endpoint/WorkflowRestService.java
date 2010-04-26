@@ -144,6 +144,7 @@ public class WorkflowRestService {
     startEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, workflow running or queued"));
     startEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(), "The media package upon which to perform the workflow"));
     startEndpoint.addRequiredParam(new Param("definition", Type.TEXT, generateWorkflowDefinition(), "The workflow definition"));
+    startEndpoint.addOptionalParam(new Param("parent", Type.STRING, "", "An optional parent workflow instance"));
     startEndpoint.addRequiredParam(new Param("properties", Type.TEXT, "encode=true\nflash.http=true\nyouTube=true\nitunes=false", "The properties to set for this workflow instance"));
     startEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, startEndpoint);
@@ -363,9 +364,10 @@ public class WorkflowRestService {
   public WorkflowInstanceImpl start(
           @FormParam("definition") WorkflowDefinitionImpl workflowDefinition,
           @FormParam("mediapackage") MediaPackageImpl mp,
+          @FormParam("parent") String parentWorkflowId,
           @FormParam("properties") LocalHashMap localMap) {
     Map<String, String> properties = localMap.getMap();
-    return (WorkflowInstanceImpl)service.start(workflowDefinition, mp, properties);
+    return (WorkflowInstanceImpl)service.start(workflowDefinition, mp, parentWorkflowId, properties);
   }
   
   @POST

@@ -48,9 +48,10 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
 
   public WorkflowInstanceImpl() {}
   
-  public WorkflowInstanceImpl(WorkflowDefinition def, MediaPackage mediaPackage, Map<String, String> properties) {
+  public WorkflowInstanceImpl(WorkflowDefinition def, MediaPackage mediaPackage, String parentWorkflowId, Map<String, String> properties) {
     this.title = def.getTitle() == null ? def.getId() : def.getTitle();
     this.description = def.getDescription();
+    this.parentId = parentWorkflowId;
     this.state = WorkflowState.INSTANTIATED;
     this.mediaPackage = mediaPackage;
     this.operations = new ArrayList<WorkflowOperationInstance>();
@@ -78,6 +79,9 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @XmlElement(name="description")
   private String description;
 
+  @XmlElement(name="parent", nillable=true)
+  private String parentId;
+  
   @XmlElement(name="mediapackage")
   private MediaPackage mediaPackage;
   
@@ -139,6 +143,20 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  /**
+   * @return the parentId
+   */
+  public String getParentId() {
+    return parentId;
+  }
+
+  /**
+   * @param parentId the parentId to set
+   */
+  public void setParentId(String parentId) {
+    this.parentId = parentId;
   }
 
   /**
