@@ -36,13 +36,16 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * The REST endpoint 
@@ -98,6 +101,22 @@ public class SearchRestService {
     seriesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, seriesEndpoint);
 
+    // episode and series
+    RestEndpoint episodeAndSeriesEndpoint = new RestEndpoint("episodeAndSeries", RestEndpoint.Method.GET, "/", "Search for episodes and series matching the query parameters");
+    episodeAndSeriesEndpoint.addFormat(new Format("XML", null, null));
+    episodeAndSeriesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results, expressed as xml"));
+    episodeAndSeriesEndpoint.addOptionalParam(new Param("q", Type.STRING, null, "Any episode or series that matches this free-text query."));
+    episodeAndSeriesEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0", "The maximum number of items to return per page"));
+    episodeAndSeriesEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
+    episodeAndSeriesEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, episodeAndSeriesEndpoint);
+    
+    // remove
+    RestEndpoint removeEndpoint = new RestEndpoint("remove", RestEndpoint.Method.DELETE, "/{id}", "Removes a mediapackage from the search index");
+    removeEndpoint.addPathParam(new Param("id", Type.STRING, "", "The media package ID to remove from the search index"));
+    removeEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, removeEndpoint);    
+    
     // add
     RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.POST, "/add", "Adds a mediapackage to the search index");
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containing the search results"));
@@ -106,6 +125,13 @@ public class SearchRestService {
     addEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, addEndpoint);    
 
+    // clear
+    RestEndpoint clearEndpoint = new RestEndpoint("clear", RestEndpoint.Method.POST, "/clear", "Clears the entiresearch index");
+    clearEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, clearEndpoint);    
+
+    logger.debug("generated documentation for {}", data);
+    
     return DocUtil.generate(data);
   }
 
@@ -114,12 +140,12 @@ public class SearchRestService {
     "  <metadata>\n" +
     "    <catalog id=\"catalog-1\" type=\"metadata/dublincore\">\n" +
     "      <mimetype>text/xml</mimetype>\n" +
-    "      <url>http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/dublincore.xml</url>\n" +
+    "      <url>https://opencast.jira.com/svn/MH/trunk/modules/matterhorn-media/src/test/resources/dublincore.xml</url>\n" +
     "      <checksum type=\"md5\">2b8a52878c536e64e20e309b5d7c1070</checksum>\n" +
     "    </catalog>\n" +
     "    <catalog id=\"catalog-3\" type=\"metadata/mpeg-7\" ref=\"track:track-1\">\n" +
     "      <mimetype>text/xml</mimetype>\n" +
-    "      <url>http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/mpeg7.xml</url>\n" +
+    "      <url>https://opencast.jira.com/svn/MH/trunk/modules/matterhorn-media/src/test/resources/mpeg7.xml</url>\n" +
     "      <checksum type=\"md5\">2b8a52878c536e64e20e309b5d7c1070</checksum>\n" +
     "    </catalog>\n" +
     "  </metadata>\n" +
@@ -132,16 +158,18 @@ public class SearchRestService {
     searchService.add(mediaPackage);
   }
 
-  @POST
-  @Path("remove")
-  public void delete(@QueryParam("id") String mediaPackageId) throws SearchException {
+  @DELETE
+  @Path("{id}")
+  public Response remove(@PathParam("id") String mediaPackageId) throws SearchException {
     searchService.delete(mediaPackageId);
+    return Response.ok().build();
   }
 
   @POST
   @Path("clear")
-  public void clear() throws SearchException {
+  public Response clear() throws SearchException {
     searchService.clear();
+    return Response.ok().build();
   }
   
   @GET
