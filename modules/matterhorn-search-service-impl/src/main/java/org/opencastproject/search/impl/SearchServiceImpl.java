@@ -344,8 +344,12 @@ public class SearchServiceImpl implements SearchService {
    */
   public void add(MediaPackage mediaPackage) throws SearchException {
     try {
-      log_.info("Adding mediapackage {} to search index", mediaPackage.getIdentifier());
-      solrIndexManager.add(mediaPackage);
+      log_.debug("Attempting to add mediapackage {} to search index", mediaPackage.getIdentifier());
+      if(solrIndexManager.add(mediaPackage)) {
+        log_.info("Added mediapackage {} to the search index", mediaPackage.getIdentifier());
+      } else {
+        log_.warn("Failed to add mediapackage {} to the search index", mediaPackage.getIdentifier());
+      }
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }
