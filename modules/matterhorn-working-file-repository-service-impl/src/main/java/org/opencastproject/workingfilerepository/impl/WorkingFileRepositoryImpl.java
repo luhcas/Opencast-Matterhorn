@@ -58,10 +58,10 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   
   public void activate(ComponentContext cc) {
     if(rootDirectory != null) return; // If the root directory was set by the constructor, respect that setting
-    if(cc == null || cc.getBundleContext().getProperty("serverUrl") == null) {
+    if(cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
-      serverUrl = cc.getBundleContext().getProperty("serverUrl");
+      serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     }
     if(cc == null || cc.getBundleContext().getProperty("workingFileRepoPath") == null) {
       rootDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo";
@@ -231,7 +231,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       rootDirectory = newRootDirectory;
       createRootDirectory();
     }
-    String newServerUrl = (String)props.get("serverUrl");
+    String newServerUrl = (String)props.get("org.opencastproject.server.url");
     if(newServerUrl != null) {
       logger.info("setting serverUrl to {}", newServerUrl);
       serverUrl = newServerUrl;

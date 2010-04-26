@@ -64,10 +64,10 @@ public class ComposerRestService {
 
   public void activate(ComponentContext cc) {
     // Generate the docs, using the local server URL
-    if (cc == null || cc.getBundleContext().getProperty("serverUrl") == null) {
+    if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
-      serverUrl = cc.getBundleContext().getProperty("serverUrl");
+      serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     }
     docs = generateDocs();
   }

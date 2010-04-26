@@ -190,7 +190,7 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
    *           if starting the component is resulting in an error
    */
   public void activate(ComponentContext context) throws Exception {
-    String serverUrl = context.getBundleContext().getProperty("serverUrl");
+    String serverUrl = context.getBundleContext().getProperty("org.opencastproject.server.url");
     if(serverUrl == null) serverUrl = UrlSupport.DEFAULT_BASE_URL;
     Dictionary<?, ?> properties = context.getProperties();
     uri = (String) properties.get(PROP_URI);

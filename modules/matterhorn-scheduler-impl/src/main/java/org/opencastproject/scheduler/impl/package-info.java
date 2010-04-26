@@ -20,7 +20,7 @@
  * 
  * There is the possibility to define other ingestion endpoints that the capture agent might use. This is defined in the 
  * felix confing with the key "capture.ingest.enpoint.url". If this is missing, the value will be constructed from the 
- * "serverURL" that is in the felix-config too.  
+ * "org.opencastproject.server.url" that is in the felix-config too.  
  */
 @javax.xml.bind.annotation.XmlSchema(elementFormDefault=XmlNsForm.QUALIFIED)
 package org.opencastproject.scheduler.impl;

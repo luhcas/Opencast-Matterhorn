@@ -79,7 +79,7 @@ public class SchedulerRestService {
     if(cc == null) {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
-      String ccServerUrl = cc.getBundleContext().getProperty("serverUrl");
+      String ccServerUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
       logger.info("configured server url is {}", ccServerUrl);
       if(ccServerUrl == null) {
         serverUrl = UrlSupport.DEFAULT_BASE_URL;

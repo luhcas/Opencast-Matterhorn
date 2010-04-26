@@ -75,10 +75,10 @@ public class WorkspaceImpl implements Workspace {
 
     filesystemMappings = new HashMap<String, String>();
     String filesUrl;
-    if (cc == null || cc.getBundleContext().getProperty("serverUrl") == null) {
+    if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
       filesUrl = UrlSupport.DEFAULT_BASE_URL + "/files";
     } else {
-      filesUrl = cc.getBundleContext().getProperty("serverUrl") + "/files";
+      filesUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url") + "/files";
     }
 
     // Find the working file repository's root directory
