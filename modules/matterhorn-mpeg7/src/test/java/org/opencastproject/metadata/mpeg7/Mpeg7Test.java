@@ -25,7 +25,6 @@ import static org.junit.Assert.fail;
 import org.opencastproject.util.FileSupport;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -67,7 +66,6 @@ public class Mpeg7Test {
    * Test method for {@link org.opencastproject.media.mediapackage.mpeg7.Mpeg7CatalogImpl#fromFile(java.io.File)} .
    */
   @Test
-  @Ignore
   public void testFromFile() {
     Mpeg7Catalog mpeg7 = Mpeg7CatalogImpl.fromURI(catalogFile.toURI());
     testContent(mpeg7);
@@ -202,10 +200,10 @@ public class Mpeg7Test {
     assertEquals(25, segment1MediaTime.getMediaTimePoint().getFractionsPerSecond());
     assertEquals(0, segment1MediaTime.getMediaTimePoint().getNFractions());
     // Media duration
-    assertEquals(0, segment1MediaTime.getMediaDuration().getDays() == 0);
-    assertEquals(1, segment1MediaTime.getMediaDuration().getHours() == 1);
-    assertEquals(7, segment1MediaTime.getMediaDuration().getMinutes() == 7);
-    assertEquals(35, segment1MediaTime.getMediaDuration().getSeconds() == 35);
+    assertEquals(0, segment1MediaTime.getMediaDuration().getDays());
+    assertEquals(1, segment1MediaTime.getMediaDuration().getHours());
+    assertEquals(7, segment1MediaTime.getMediaDuration().getMinutes());
+    assertEquals(35, segment1MediaTime.getMediaDuration().getSeconds());
     // Text annotations
     assertTrue(v1Segment1.hasTextAnnotations());
     assertTrue(v1Segment1.hasTextAnnotations(0.4f, 0.5f));

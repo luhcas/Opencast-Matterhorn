@@ -28,7 +28,6 @@ import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.URL;
@@ -81,14 +80,12 @@ public class VideoSegmenterTest {
   }
 
   @Test
-  @Ignore
   public void testImageExtraction() {
     // int undefined = -16777216;
 
   }
 
   @Test
-  @Ignore
   public void testAnalyze() {
     Mpeg7Catalog catalog = vsegmenter.analyze(mediaUrl);
 
@@ -116,7 +113,7 @@ public class VideoSegmenterTest {
     MediaTime secondSegmentMediaTime = secondSegment.getMediaTime();
     startTime = secondSegmentMediaTime.getMediaTimePoint().getTimeInMilliseconds()/1000;
     duration = secondSegmentMediaTime.getMediaDuration().getDurationInMilliseconds()/1000;
-    assertEquals("Unexpected start time of second segment", firstSegmentDuration, startTime);
+    assertEquals("Unexpected start time of second segment", (firstSegmentMediaTime.getMediaTimePoint().getTimeInMilliseconds()/1000) + firstSegmentDuration, startTime);
     assertEquals("Unexpected duration of second segment", secondSegmentDuration, duration);
 
     // There should be no third segment

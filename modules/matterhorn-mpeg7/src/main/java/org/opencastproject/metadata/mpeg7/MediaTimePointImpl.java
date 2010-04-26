@@ -119,14 +119,14 @@ public class MediaTimePointImpl implements MediaTimePoint {
    * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getDay()
    */
   public int getDay() {
-    return day + 1;
+    return day;
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getHour()
    */
   public int getHour() {
-    return hour + 1;
+    return hour;
   }
 
   /**
