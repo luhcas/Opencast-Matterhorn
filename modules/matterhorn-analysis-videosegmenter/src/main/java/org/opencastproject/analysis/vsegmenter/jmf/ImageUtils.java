@@ -15,18 +15,19 @@
  */
 package org.opencastproject.analysis.vsegmenter.jmf;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.Dimension;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.media.Buffer;
-import javax.media.Format;
-import javax.media.format.RGBFormat;
-import javax.media.format.VideoFormat;
-import javax.media.util.BufferToImage;
 
 /**
  * A collection of utility methods used to deal with frame buffers and images.
@@ -62,21 +63,23 @@ public class ImageUtils {
       logger.warn("Resolution change detected ({} -> {})", currentResolution, newResolution);
     } else {
       int changes = 0;
+      long pixels = image.getWidth() * image.getHeight();
       imagecomparison: for (int x = 0; x < image.getWidth(); x++) {
         for (int y = 0; y < image.getHeight(); y++) {
           if (image.getRGB(x, y) != currentImage.getRGB(x, y)) {
-            if (image.getRGB(x, y) == -16777216)
-              logger.debug("Looks like a no-signal image");
-            differsFromCurrentScene = true;
+//            if (image.getRGB(x, y) == -16777216)
+//              logger.info("Looks like a no-signal image");
             changes++;
             if (changes > changesThreshold) {
-              logger.debug("Found more than {} changes between the last frames", changesThreshold);
+              logger.debug("Found more than {} changes", changesThreshold);
+              differsFromCurrentScene = true;
               break imagecomparison;
             }
           }
         }
-        logger.debug("Found {} changes to the previous frame", changes);
       }
+      float percentage = ((float)changes)/((float)pixels);
+      logger.debug("Found {}% changes to the previous frame", percentage);
     }
 
     return differsFromCurrentScene;
@@ -90,39 +93,22 @@ public class ImageUtils {
    *          the buffer
    * @return a <code>BufferedImage</code>
    */
-  public static BufferedImage createImage(Buffer buf) {
-    VideoFormat vf = (VideoFormat) buf.getFormat();
-    Dimension resolution = vf.getSize();
-
-    int width = (int) resolution.getWidth();
-    int height = (int) resolution.getHeight();
-    int maxDataLength = vf.getMaxDataLength();
-
-    RGBFormat rgbFormat = new RGBFormat(resolution, maxDataLength, Format.byteArray, 0, Format.NOT_SPECIFIED, // TODO:
-            // Figure
-            // out
-            // data
-            // size
-            0xFF0000, 0xFF00, 0xFF, 1, width, VideoFormat.FALSE, Format.NOT_SPECIFIED);
-
-    buf.setFormat(rgbFormat);
-    buf.setSequenceNumber(0);
-    buf.setTimeStamp(0);
-
-    // Convert the buffer to an image
-    BufferToImage bufferToImage = new BufferToImage(rgbFormat);
-    Image im = bufferToImage.createImage(buf);
-
-    // We need a BufferedImage. Chances are that we already have one
-    BufferedImage bufferedImage = null;
-    if (im instanceof BufferedImage) {
-      bufferedImage = (BufferedImage) im;
-    } else {
-      bufferedImage = new BufferedImage((int) width, height, BufferedImage.TYPE_3BYTE_BGR);
-      bufferedImage.getGraphics().drawImage(im, 0, 0, null);
-    }
-
+  public static BufferedImage createImage(Buffer buf) throws IOException {
+    InputStream is = new ByteArrayInputStream((byte[])buf.getData());
+    BufferedImage bufferedImage = ImageIO.read(new MemoryCacheImageInputStream(is));
     return bufferedImage;
+  }
+
+  /**
+   * Writes the image to disk.
+   * 
+   * @param image
+   *          the image
+   */
+  public static void saveImage(BufferedImage image, File file) throws IOException {
+    file.getParentFile().mkdirs();
+    FileUtils.deleteQuietly(file);
+    ImageIO.write(image, "jpg", file);
   }
 
 }

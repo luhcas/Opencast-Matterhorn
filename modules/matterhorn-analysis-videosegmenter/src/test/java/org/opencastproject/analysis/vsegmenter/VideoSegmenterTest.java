@@ -16,10 +16,12 @@
 package org.opencastproject.analysis.vsegmenter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.metadata.mpeg7.ContentSegment;
+import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.MultimediaContentType;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
@@ -35,17 +37,19 @@ import java.util.Iterator;
 /**
  * Test class for video segmentation.
  */
-@Ignore("Fix me Toby!")
 public class VideoSegmenterTest {
 
-  /** Video file to test. Contains a new scene at 00:07 */
+  /** Video file to test. Contains a new scene at 00:12 */
   protected static final String mediaResource = "/scene-change.mov";
 
   /** Duration of whole movie */
   protected static final int mediaDuration = 20;
 
   /** Duration of the first segment */
-  protected static final int firstSegmentDuration = 7;
+  protected static final int firstSegmentDuration = 12;
+
+  /** Duration of the seconds segment */
+  protected static final int secondSegmentDuration = mediaDuration - firstSegmentDuration;
 
   /** The video segmenter */
   protected VideoSegmenter vsegmenter = null;
@@ -76,13 +80,14 @@ public class VideoSegmenterTest {
     vsegmenter = new VideoSegmenter();
   }
 
-  @Test @Ignore
+  @Test
+  @Ignore
   public void testImageExtraction() {
-    //int undefined = -16777216;
+    // int undefined = -16777216;
 
   }
 
-  @Test @Ignore
+  @Test
   public void testAnalyze() {
     Mpeg7Catalog catalog = vsegmenter.analyze(mediaUrl);
 
@@ -97,19 +102,24 @@ public class VideoSegmenterTest {
     Iterator<? extends ContentSegment> si = segments.segments();
     assertTrue(si.hasNext());
     ContentSegment firstSegment = si.next();
-    assertEquals("First segment should start at 00:00", 0, firstSegment.getMediaTime().getMediaTimePoint().getSeconds());
-    // assertEquals(firstSegmentDuration, firstSegment.getMediaTime().getMediaDuration().getSeconds());
-    //
-    // // What about the second one?
-    // si.next();
-    // assertTrue(si.hasNext());
-    //    
-    // ContentSegment secondSegment = si.next();
-    // assertEquals(firstSegmentDuration, secondSegment.getMediaTime().getMediaTimePoint().getSeconds());
-    // assertEquals(mediaDuration - firstSegmentDuration, firstSegment.getMediaTime().getMediaDuration().getSeconds());
-    //    
-    // // There should be no third segment
-    // assertFalse(si.hasNext());
+    MediaTime firstSegmentMediaTime = firstSegment.getMediaTime();
+    long startTime = firstSegmentMediaTime.getMediaTimePoint().getSeconds();
+    long duration = firstSegmentMediaTime.getMediaDuration().getDurationInMilliseconds()/1000;
+    assertEquals("Unexepcted start time of second segment", 0, startTime);
+    assertEquals("Unexpected duration of first segment", firstSegmentDuration, duration);
+
+    // What about the second one?
+    assertTrue("Video is expected to have more than one segment", si.hasNext());
+
+    ContentSegment secondSegment = si.next();
+    MediaTime secondSegmentMediaTime = secondSegment.getMediaTime();
+    startTime = secondSegmentMediaTime.getMediaTimePoint().getTimeInMilliseconds()/1000;
+    duration = secondSegmentMediaTime.getMediaDuration().getDurationInMilliseconds()/1000;
+    assertEquals("Unexpected start time of second segment", firstSegmentDuration, startTime);
+    assertEquals("Unexpected duration of second segment", secondSegmentDuration, duration);
+
+    // There should be no third segment
+    assertFalse("Found an unexpected third video segment", si.hasNext());
   }
 
 }

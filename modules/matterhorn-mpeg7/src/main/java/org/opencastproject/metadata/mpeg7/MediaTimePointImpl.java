@@ -108,7 +108,7 @@ public class MediaTimePointImpl implements MediaTimePoint {
     second = calendar.get(Calendar.SECOND);
     minute = calendar.get(Calendar.MINUTE);
     hour = calendar.get(Calendar.HOUR_OF_DAY) - 1;
-    day = calendar.get(Calendar.DAY_OF_MONTH);
+    day = calendar.get(Calendar.DAY_OF_MONTH) - 1;
     month = calendar.get(Calendar.MONTH);
     year = calendar.get(Calendar.YEAR);
     fractions = 0;
@@ -119,14 +119,14 @@ public class MediaTimePointImpl implements MediaTimePoint {
    * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getDay()
    */
   public int getDay() {
-    return day;
+    return day + 1;
   }
 
   /**
    * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getHour()
    */
   public int getHour() {
-    return hour;
+    return hour + 1;
   }
 
   /**
