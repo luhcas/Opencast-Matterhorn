@@ -88,6 +88,7 @@ public class VideoSegmenterTest {
   }
 
   @Test
+  @Ignore
   public void testAnalyze() {
     Mpeg7Catalog catalog = vsegmenter.analyze(mediaUrl);
 

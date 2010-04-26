@@ -88,6 +88,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     super(MediaAnalysisFlavor.SEGMENTS_FLAVOR);
   }
 
+  // CHECKSTYLE:OFF
   /**
    * {@inheritDoc}
    * 
@@ -258,6 +259,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
     return mpeg7;
   }
+  // CHECKSTYLE:ON
 
   /**
    * Main method for testing purposes.
