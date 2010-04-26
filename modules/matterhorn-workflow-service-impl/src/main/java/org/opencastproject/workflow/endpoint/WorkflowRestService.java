@@ -39,6 +39,7 @@ import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.service.component.ComponentContext;
@@ -367,7 +368,7 @@ public class WorkflowRestService {
           @FormParam("parent") String parentWorkflowId,
           @FormParam("properties") LocalHashMap localMap) {
     Map<String, String> properties = localMap.getMap();
-    return (WorkflowInstanceImpl)service.start(workflowDefinition, mp, parentWorkflowId, properties);
+    return (WorkflowInstanceImpl)service.start(workflowDefinition, mp, StringUtils.trimToNull(parentWorkflowId), properties);
   }
   
   @POST
