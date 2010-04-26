@@ -2,9 +2,8 @@
 Capture Agent Installation
 ==========================
 
-Execute install.sh to being installation process. You will need sudo privileges,
-but do not run the script with the sudo command, you will be prompted where 
-it is necessary. Running it with sudo will modify the environment in a bad way.
+Execute install.sh to being installation process. You will need sudo privileges, 
+so it should be run with 'sudo' or by the 'root' user.
 
 The script sets up a *new* user to control everything matterhorn related on the 
 system. This user will be given sudo privileges because it needs to control many
@@ -46,6 +45,7 @@ then installed from these sources using apt-get. These dependencies are:
   gstreamer0.10-plugins-base
   gstreamer0.10-plugins-ugly-multiverse
   gstreamer0.10-plugins-base-apps
+  ntp
   
 Felix is downloaded from the Apache website and installed in the home directory
 of the "matterhorn" user. 
@@ -53,18 +53,9 @@ of the "matterhorn" user.
 In order to use the video4linux devices with Java libjv4linfo.so has to be
 installed so that is downloaded from its homepage and installed using ant.
 
-Once all of the dependencies have been installed the capture code from the 
-Matterhorn codebase is checked out. This includes:
-
-  matterhorn-build-tools
-  matterhorn-runtime-tools
-  matterhorn-metadata-api
-  matterhorn-dublincore
-  matterhorn-util
-  matterhorn-media
-  matterhorn-capture-admin-service-api
-  matterhorn-capture-agent-api 
-  matterhorn-capture-agent-impl
+Once all of the dependencies have been installed the trunk from the 
+Matterhorn codebase is checked out. However the user can choose another location
+to be checked out instead (e.g. branches)
   
 This code is then compiled and loaded into Felix by executing:
 
@@ -72,11 +63,11 @@ This code is then compiled and loaded into Felix by executing:
   
 The script then sets up all of the devices it can recognize on your system using
 a few v4l tools bundled with v4l-conf. It will then prompt for information 
-regarding the devices (whether they are PAL/NTSC and the names that should be
-used to identify them). After that it finishes creating the capture agent 
-configuration by setting up the capture agent name, creating the directory
-structure for capturing and prompting for the Matterhorn Core server to push
-its status to.
+regarding the devices (the video standard they should use -NTSC, PAL, etc...-, 
+the names that should be used to identify them and their associated flavors).
+After that it finishes creating the capture agent configuration by setting up
+the capture agent name, creating the directory structure for capturing and prompting
+for the Matterhorn Core server to push its status to.
 
 After the script runs successfully, everytime the machine reboots the Matterhorn
 Capture Agent will be executed. If it isn't, you can execute it manually by
