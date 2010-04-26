@@ -9,68 +9,66 @@ Opencast.Watch = (function ()
 
     function onPlayerReady() 
     {
-        var MULTIPLAYER			   = "Multiplayer",
-            SINGLEPLAYER		   = "Singleplayer",
+        var MULTIPLAYER        = "Multiplayer",
+            SINGLEPLAYER       = "Singleplayer",
             SINGLEPLAYERWITHSLIDES = "SingleplayerWithSlides",
-            AUDIOPLAYER			   = "Audioplayer",
+            AUDIOPLAYER        = "Audioplayer",
             ADVANCEDPLAYER         = "advancedPlayer",
             EMBEDPLAYER            = "embedPlayer";
 
-        document.title = "Opencast Matterhorn - Media Player - " + $('#oc-title').html();
-  
-        // set the title on the top of the player
-        $('#oc_title').html($('#oc-title').html());
-  
-        // set date
-        if (!($('#oc-creator').html() === ""))
-        {
-            $('#oc_title_from').html(" by " + $('#oc-creator').html());
-        }
-  
-        if ($('#oc-date').html() === "")
-        {
-            $('#oc_title_from').html(" by " + $('#oc-creator').html());
-        }
-        else 
-        {
-            $('#oc_title_from').html(" by " + $('#oc-creator').html() + " (" + $('#oc-date').html() + ")");
-        }
-  
-        var mediaUrlOne = Opencast.engage.getVideoUrl();
-        var mediaUrlTwo = '';
-        
+        var mediaPackageId = Opencast.engage.getMediaPackageId();
 
-        Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
-        //
-        if (mediaUrlOne !== '' && mediaUrlTwo !== '')
+        var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
+
+        $('#data').xslt(restEndpoint, "xsl/preview-hybrid-player.xsl", function () 
         {
-            Opencast.Player.setVideoSizeList(SINGLEPLAYERWITHSLIDES);
-            Opencast.Player.videoSizeControlMultiOnlyLeftDisplay();
-        }
-        else if (mediaUrlOne !== '' && mediaUrlTwo === '')
-        {
-            var pos = mediaUrlOne.lastIndexOf(".");
-            var fileType = mediaUrlOne.substring(pos + 1);
-            //
-            if (fileType === 'mp3')
+            // set the media URLs
+            var mediaUrlOne = Opencast.engage.getVideoUrl();
+            var mediaUrlTwo = '';
+
+            mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
+            mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
+
+            Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
+
+            if (mediaUrlOne !== '' && mediaUrlTwo !== '')
             {
-                Opencast.Player.setVideoSizeList(AUDIOPLAYER);
+                Opencast.Player.setVideoSizeList(SINGLEPLAYERWITHSLIDES);
+                Opencast.Player.videoSizeControlMultiOnlyLeftDisplay();
             }
-            else
+            else if (mediaUrlOne !== '' && mediaUrlTwo === '')
             {
-                Opencast.Player.setVideoSizeList(SINGLEPLAYER);
+                var pos = mediaUrlOne.lastIndexOf(".");
+                var fileType = mediaUrlOne.substring(pos + 1);
+                //
+                if (fileType === 'mp3')
+                {
+                    Opencast.Player.setVideoSizeList(AUDIOPLAYER);
+                }
+                else
+                {
+                    Opencast.Player.setVideoSizeList(SINGLEPLAYER);
+                }
             }
-        }
-  
-        // Set the caption
-        Opencast.Player.setCaptionsURL('engage-hybrid-player/dfxp/matterhorn.dfxp.xml');
-  
-        // set embed field
-        var watchUrl = window.location.href;
-        var embedUrl = watchUrl.replace(/watch.html/g, "embed.html");
-  
-        // init the volume scrubber
-        Opencast.Scrubber.init();
+
+            // init the volume scrubber
+            Opencast.Scrubber.init();
+            
+
+            $('#scrubber').bind('keydown', 'left', function(evt) 
+            {
+                var newPosition = Math.round((($("#draggable").position().left - 20 ) / $("#scubber-channel").width()) * Opencast.Player.getDuration());
+                Videodisplay.seek(newPosition);
+            });
+            
+            $('#scrubber').bind('keydown', 'right', function(evt)
+            {
+                var newPosition = Math.round((($("#draggable").position().left + 20 ) / $("#scubber-channel").width()) * Opencast.Player.getDuration());
+                Videodisplay.seek(newPosition);            
+            });
+          
+      
+        });
     }
   
     function hoverSegment(segmentId)
