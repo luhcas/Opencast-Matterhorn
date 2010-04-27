@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title id="i18n_window_title"></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- styles -->
+    <style>
+      #audio_preview {
+        height: 500px;
+      }
+
+    <!-- scripts -->
+    <script type="text/javascript" src="jquery/jquery-1.4.min.js"></script>
+    <script type="text/javascript">
+      var CAPTURE_AGENT_CONFIDENCE_MONITORING_URL = "/confidence/rest";
+      var Monitor = {} || Monitor;
+      var AudioBar = {} || AudioBar;
+      var Monitor.intervalImgId = null;
+      var Monitor.intervalAudioId = null;
+      var Monitor.selectedDevice = null;
+      Monitor.loadDevices = function(){
+        //load the devices
+        $.get(CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/devices", function(data){
+          //do stuff to make a device array.
+          var devices = ['Presenter'];
+        });
+      }
+      
+      Monitor.selectDevice = function(device){
+        if(Monitor.selectedDevice != device){
+          if(Monitor.intervalId){ clearInterval(Monitor.intervalImgId); clearInterval(Monitor.intervalAudioId); }
+          Monitor.intervalImgId = setInterval(Monitor.updateImg, 5000);
+          Monitor.intervalAudioId = setInterval(Monitor.updateAudio, 1000);
+        }
+      }
+      
+      Monitor.updateImg = function(){
+        var imgGrab = CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/" + Monitor.selectedDevice;
+        $("#image_preview").replaceWith('<img src="' + imgGrab + '"></img>');
+      }
+      
+      Monitor.updateAudio = function(){
+        
+      }
+      
+      AudioBar.setValue = function(){
+      
+      }
+      
+    </script>
+  </head>
+  <body>
+    <!-- notification that javaScript is disabled -->
+    <noscript>
+      <center>
+        <div style="border:1px solid red;width:530px;margin:20px;">
+          <div style="text-align: left;background:red; color:white;padding-top:2px;padding-bottom:2px;">
+            <div class="icon icon-error" style="margin-left:5px;margin-right:5px;">&nbsp;</div>
+            JavaScript is disabled
+          </div>
+          <div style="padding:10px;">
+            JavaScript is turned off in your web browser, so this site won't work properly! <br />
+            <strong>
+              Please turn JavaScript on to use this site, then refresh the page.
+            </strong>
+          </div>
+        </div>
+      </center>
+    </noscript>  d 
+
+    <!-- fl-centered doesn't work in winXP-IE8 -->
+    <div>
+      <div id="page_tabs">
+        <ul>
+          <li><a href="/confidence/index.html" alt="Confidence Monitoring">Monitor</a></li>
+        </ul>
+      </div>
+      <div>
+        <div>
+          <ul id="device_tab"></ul>
+        </div>
+        <div>
+          <div id="image_preview"></div>
+          <div id="audio_preview">
+            <div id="meter_mask"></div>
+            <img id="audio_meter" src="http://localhost/~msutton/audiobar.png"></img>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
