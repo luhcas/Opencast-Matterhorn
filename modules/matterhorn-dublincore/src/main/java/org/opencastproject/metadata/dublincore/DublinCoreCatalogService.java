@@ -21,6 +21,7 @@ import org.opencastproject.media.mediapackage.MediaPackageMetadata;
 import org.opencastproject.media.mediapackage.MediapackageMetadataImpl;
 import org.opencastproject.metadata.api.CatalogService;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.security.api.TrustedHttpClient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,12 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
 
   protected int priority = 0;
 
+  protected TrustedHttpClient trustedHttpClient;
+  
+  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
+    this.trustedHttpClient = trustedHttpClient;
+  }
+  
   @SuppressWarnings("unchecked")
   public void activate(Map properties) {
     logger.debug("activate()");
@@ -119,7 +126,9 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
    */
   @Override
   public DublinCoreCatalog load(Catalog catalog) {
-    return new DublinCoreCatalogImpl(catalog);
+    DublinCoreCatalogImpl cat = new DublinCoreCatalogImpl(catalog);
+    cat.trustedHttpClient = trustedHttpClient;
+    return cat;
   }
 
   /**

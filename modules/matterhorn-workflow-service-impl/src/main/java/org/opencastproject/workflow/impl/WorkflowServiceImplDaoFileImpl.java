@@ -342,8 +342,6 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
    */
   @Override
   public void remove(String id) {
-    String fileName = getFilename(id);
-    repo.removeFromCollection(COLLECTION_ID, fileName);
     IndexWriter indexWriter = null;
     try {
       indexWriter = new IndexWriter(directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
@@ -361,6 +359,8 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
         }
       }
     }
+    String fileName = getFilename(id);
+    repo.removeFromCollection(COLLECTION_ID, fileName);
   }
 
   /**
