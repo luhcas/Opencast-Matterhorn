@@ -525,10 +525,10 @@ body
   height:                   15px;
   width:                    13px;
   margin-top:               -4px;
-  margin-left:              -2px;
+  margin-left:              -6px;
   position:                 relative; 
   border:                   0px;
-  top:                      0px; 
+  top:                      -20px; 
   z-index:                  2;
 }
 
@@ -539,10 +539,10 @@ body
   height:                   15px;
   width:                    13px;
   margin-top:               -14px;
-  margin-left:              -2px;
+  margin-left:              -6px;
   position:                 relative; 
   border:                   0px;
-  top:                      0px; 
+  top:                      -21px; 
   z-index:                  3;
 }
 
