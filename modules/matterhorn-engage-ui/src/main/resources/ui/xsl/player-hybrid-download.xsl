@@ -44,6 +44,7 @@
 		
 		<div id="oc_tabs">
 		  <div id="oc_tabs-input">
+            <input id="oc_btn-description" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleDescription()" name="Description" value="Description" alt="Description" title="Description"></input>
             <input id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Slides" value="Hide Slides" alt="Hide Slides" title="Hide Slides"></input>
             <input id="oc_btn-slidetext" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Slide Text" value="Slide Text" alt="Slide Text" title="Slide Text"></input>
             <input id="oc_btn-notes" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleNotes()" name="Notes" value="Notes" alt="Notes" title="Notes"></input>

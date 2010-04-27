@@ -57,7 +57,7 @@ Opencast.Watch = (function ()
 
             mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
             mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
-
+            
             Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
 
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')

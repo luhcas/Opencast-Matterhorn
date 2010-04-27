@@ -18,7 +18,19 @@ var Opencast = Opencast || {};
 Opencast.Initialize = (function () 
 {
     
+	var VOLUME = 'volume',
+    VIDEOSIZE = 'videosize',
+    divId = '';
     
+    function setDivId(id)
+    {
+    	divId = id;
+    }
+    
+    function getDivId()
+    {
+    	return divId;
+    }
     
     /**
         @memberOf Opencast.Player
@@ -48,16 +60,12 @@ Opencast.Initialize = (function ()
     var closetimer		= 0;
     var ddmenuitem      = 0;
 
-    function dropdown_open()
-    {
-        dropdown_canceltimer();
-        dropdown_close();
-        ddmenuitem = $(this).find('ul').eq(0).css('visibility', 'visible');
-    }
-
     function dropdown_close()
     {
-        if(ddmenuitem) ddmenuitem.css('visibility', 'hidden');
+        if (ddmenuitem)
+        {
+            ddmenuitem.css('visibility', 'hidden');
+        }
     }
 
     function dropdown_timer()
@@ -67,11 +75,38 @@ Opencast.Initialize = (function ()
 
     function dropdown_canceltimer()
     {
-        if(closetimer)
+        if (closetimer)
         {
             window.clearTimeout(closetimer);
             closetimer = null;
         }
+    }
+    
+    function dropdown_open()
+    {
+        dropdown_canceltimer();
+        dropdown_close();
+       
+	    if(getDivId() === VOLUME)
+        {
+            ddmenuitem = $('#oc_volume-menue').css('visibility', 'visible');
+
+        }
+	    else if(getDivId() === VIDEOSIZE)
+	    {
+            ddmenuitem = $('#oc_video-size-menue').css('visibility', 'visible');
+        }
+        else
+        {
+            ddmenuitem = $(this).find('ul').eq(0).css('visibility', 'visible');
+        }
+	    setDivId('');
+    }
+    
+    function dropdownVideo_open()
+    {
+    	setDivId(VIDEOSIZE);
+        dropdown_open();
     }
     
     $(document).ready(function () 
@@ -81,11 +116,47 @@ Opencast.Initialize = (function ()
         $('#oc_video-size-dropdown > li').bind('mouseover', dropdown_open);
         //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
         $('#oc_video-size-dropdown > li').bind('mouseout',  dropdown_timer);
-     
+        
+        // Handler focus
+        $('#oc_btn-dropdown').focus(function () 
+        {	
+        	setDivId(VIDEOSIZE);
+        	dropdown_open();
+        });
+        
+        // Handler blur
+        $('#oc_btn-dropdown').blur(function () 
+        {	
+            dropdown_timer();
+        });
+        
         $('#oc_volume-dropdown > li').bind('mouseover', dropdown_open);
         //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
         $('#oc_volume-dropdown > li').bind('mouseout',  dropdown_timer);
-     
+
+        // Handler focus
+        $('#oc_btn-volume').focus(function () 
+        {	
+        	setDivId(VOLUME);
+        	dropdown_open();
+        })
+        
+        $('#slider_volume_Thumb').focus(function () 
+        {
+        	setDivId(VOLUME);
+        	dropdown_open();
+        })
+        
+        // Handler blur
+        $('#oc_btn-volume').blur(function () 
+        {	
+            dropdown_timer();
+        })
+        
+        $('#slider_volume_Thumb').blur(function () 
+        {
+            dropdown_timer();
+        })
     
         // init the aria slider for the volume
         Opencast.ariaSlider.init();
@@ -269,25 +340,25 @@ Opencast.Initialize = (function ()
             Opencast.Player.hideEditTime(); 	
         });
         
-        // Handler keypress
-        $('#oc_edit-time').keypress(function(event) 
+     // Handler keypress
+        $('#oc_edit-time').keypress(function (event) 
         {
-            if (event.keyCode == '13') 
+            if (event.keyCode === 13) 
             {
                 Opencast.Player.editTime();
             }
-        });
+        })
         
         // Handler keydown
         $('#oc_btn-rewind').keydown(function (event) 
         {
            
-            if (event.keyCode == '13' || event.keyCode == '32') 
+            if (event.keyCode === 13 || event.keyCode === 32) 
             {
                 this.className = 'oc_btn-rewind-clicked';
                 Opencast.Player.doRewind();
             }
-            else if(event.keyCode == '9')
+            else if(event.keyCode === 9)
             {
                 this.className = 'oc_btn-rewind-over';
                 Opencast.Player.stopRewind();
@@ -296,12 +367,12 @@ Opencast.Initialize = (function ()
         
         $('#oc_btn-fast-forward').keydown(function (event) 
         {
-            if (event.keyCode == '13' || event.keyCode == '32') 
+            if (event.keyCode === 13 || event.keyCode === 32) 
             {
                 this.className = 'oc_btn-fast-forward-clicked';
                 Opencast.Player.doFastForward();
             }
-            else if(event.keyCode == '9')
+            else if(event.keyCode === 9)
             {
                 this.className = 'oc_btn-fast-forward-over';
                 Opencast.Player.stopFastForward();
@@ -311,21 +382,21 @@ Opencast.Initialize = (function ()
         // Handler keyup
         $('#oc_btn-rewind').keyup(function (event) 
         {
-            if (event.keyCode == '13' || event.keyCode == '32') 
+            if (event.keyCode === 13 || event.keyCode === 32) 
             {
                 this.className = 'oc_btn-rewind-over';
                 Opencast.Player.stopRewind();
             }
         });
        
-        $('#oc_btn-fast-forward').keyup(function (event) 
-        {
-            if (event.keyCode == '13' || event.keyCode == '32') 
-            {
-                this.className = 'oc_btn-fast-forward-over';
-                Opencast.Player.stopFastForward();
-            } 
-        });   
+       $('#oc_btn-fast-forward').keyup(function (event) 
+       {
+           if (event.keyCode === 13 || event.keyCode === 32) 
+           {
+               this.className = 'oc_btn-fast-forward-over';
+               Opencast.Player.stopFastForward();
+           } 
+       });
         
         
         // to calculate the embed flash height
@@ -353,7 +424,8 @@ Opencast.Initialize = (function ()
     });
     
     return {
-       
+    	dropdownVideo_open : dropdownVideo_open,
+        dropdown_timer : dropdown_timer
     };
 }());
 

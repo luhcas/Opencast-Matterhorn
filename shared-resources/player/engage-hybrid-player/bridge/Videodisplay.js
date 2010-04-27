@@ -102,9 +102,5 @@ function VideodisplayReady() {
 		return b_Videodisplay_root.getViewState();
 	};
 	
-	Videodisplay.getMediaHeight = function () {
-		return b_Videodisplay_root.getMediaHeight();
-	};
-	
 	b_Videodisplay_root.onBridgeReady();
 }
