@@ -775,6 +775,7 @@ function getStartDate(){
     date = this.fields.startDate.datepicker('getDate').getTime() / 1000; // Get date in milliseconds, convert to seconds.
     date += this.fields.startTimeHour.val() * 3600; // convert hour to seconds, add to date.
     date += this.fields.startTimeMin.val() * 60; //convert minutes to seconds, add to date.
+    date -= Agent.tzDiff * 60; //Agent TZ offset
     date = date * 1000; //back to milliseconds
     this.value = (new Date(date)).getTime();
   }
@@ -799,7 +800,7 @@ function setStartDate(value){
   }
   var date = parseInt(value.startdate);
   if(date != 'NaN') {
-    date = new Date(date);
+    date = new Date(date + (Agent.tzDiff * 60 * 1000));
   } else {
     throw 'Could not parse date.';
   }

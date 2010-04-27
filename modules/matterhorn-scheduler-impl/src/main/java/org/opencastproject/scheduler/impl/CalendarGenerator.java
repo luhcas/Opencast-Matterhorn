@@ -91,7 +91,11 @@ public class CalendarGenerator {
    */
   public boolean addEvent (SchedulerEvent e) {
     logger.debug("creating iCal VEvent from SchedulerEvent: {}", e.toString());
-    VEvent event = new VEvent(new DateTime(e.getStartdate()), new DateTime(e.getEnddate()), e.getTitle());
+    DateTime startDate = new DateTime(e.getStartdate());
+    DateTime endDate = new DateTime(e.getEnddate());
+    startDate.setUtc(true);
+    endDate.setUtc(true);
+    VEvent event = new VEvent(startDate, endDate, e.getTitle());
     try {
       ParameterList pl = new ParameterList();
       pl.add(new Cn(e.getCreator()));
