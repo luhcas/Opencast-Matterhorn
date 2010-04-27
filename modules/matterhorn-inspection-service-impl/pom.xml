@@ -5,27 +5,27 @@
   <artifactId>matterhorn-inspection-service-impl</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-inspection-service-impl</name>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.8-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.8-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-inspection-service-api</artifactId>
-      <version>0.7-SNAPSHOT</version>
+      <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workspace-api</artifactId>
-      <version>0.7-SNAPSHOT</version>
+      <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-util</artifactId>
-      <version>0.7-SNAPSHOT</version>
+      <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>

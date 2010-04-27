@@ -5,22 +5,22 @@
   <artifactId>matterhorn-analysis-api</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-analysis-api</name>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.8-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.8-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-media</artifactId>
-      <version>0.7-SNAPSHOT</version>
+      <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-mpeg7</artifactId>
-      <version>0.7-SNAPSHOT</version>
+      <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

@@ -5,11 +5,11 @@
   <artifactId>matterhorn-workspace-api</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-workspace-api</name>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.8-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.8-SNAPSHOT</version>
   </parent>
   <build>
     <plugins>

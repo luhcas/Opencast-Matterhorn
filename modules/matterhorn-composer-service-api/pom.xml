@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.8-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
@@ -22,17 +22,17 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-media</artifactId>
-      <version>0.7-SNAPSHOT</version>
+      <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-util</artifactId>
-      <version>0.7-SNAPSHOT</version>
+      <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-receipt-api</artifactId>
-      <version>0.7-SNAPSHOT</version>
+      <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

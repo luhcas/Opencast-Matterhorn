@@ -5,7 +5,7 @@
   <artifactId>matterhorn-demo</artifactId>
   <packaging>jar</packaging>
   <name>matterhorn-demo</name>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.8-SNAPSHOT</version>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -14,12 +14,12 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-media</artifactId>
-      <version>0.7-SNAPSHOT</version>
+      <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-dublincore</artifactId>
-      <version>0.7-SNAPSHOT</version>
+      <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
