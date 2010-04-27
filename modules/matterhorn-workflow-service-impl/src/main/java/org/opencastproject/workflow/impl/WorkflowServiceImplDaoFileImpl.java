@@ -112,20 +112,21 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       }
     }
     
-    // Get all of the existing workflows
-    // FIXME: check for an existing index, and only update when necessary
-    WorkflowBuilder builder = WorkflowBuilder.getInstance();
-    URI[] uris = repo.getCollectionContents(COLLECTION_ID);
-    for (URI uri : uris) {
-      InputStream in = null;
-      try {
-        in = repo.getFromCollection(COLLECTION_ID, FilenameUtils.getName(uri.toString()));
-        WorkflowInstance instance = builder.parseWorkflowInstance(in);
-        index(instance);
-      } catch (Exception e) {
-        logger.warn("unable to parse workflow instance", e);
-      } finally {
-        IOUtils.closeQuietly(in);
+    if(countWorkflowInstances() == 0) {
+      // this may be a new index, so get all of the existing workflows and index them
+      WorkflowBuilder builder = WorkflowBuilder.getInstance();
+      URI[] uris = repo.getCollectionContents(COLLECTION_ID);
+      for (URI uri : uris) {
+        InputStream in = null;
+        try {
+          in = repo.getFromCollection(COLLECTION_ID, FilenameUtils.getName(uri.toString()));
+          WorkflowInstance instance = builder.parseWorkflowInstance(in);
+          index(instance);
+        } catch (Exception e) {
+          logger.warn("unable to parse workflow instance", e);
+        } finally {
+          IOUtils.closeQuietly(in);
+        }
       }
     }
   }
