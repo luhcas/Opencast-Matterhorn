@@ -43,11 +43,9 @@ apt-get update > /dev/null
 apt-get -y --force-yes install ${noinst[@]}  &> /dev/null
 echo "Done"
 
-# Write the uninstalled package list to the cleanup.sh template
-sed -i "s/^PKG_LIST=/PKG_LIST=( `echo ${noinst[@]}` )/" $CLEANUP
-
-# Define java home
+# Define some enviroment variables
 export JAVA_HOME=$JAVA_PREFIX/`ls $JAVA_PREFIX | grep $JAVA_PATTERN`
+export PKG_LIST=${noinst[@]}
 
 cd $CA_DIR
 

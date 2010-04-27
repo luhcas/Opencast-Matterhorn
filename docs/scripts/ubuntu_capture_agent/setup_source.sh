@@ -22,7 +22,8 @@ if [[ $(echo "${answer:-Y}" | grep -i '^[n]') ]]; then
 fi
 
 echo -n "Downloading matterhorn source from repository... "
-svn co ${address:-$TRUNK_URL} $TRUNK > /dev/null
+rm -rf $TRUNK
+svn co --force ${address:-$TRUNK_URL} $TRUNK > /dev/null
 if [[ $? -ne 0 ]]; then
     echo "Error!"
     echo "Couldn't check out the matterhorn code. Aborting"

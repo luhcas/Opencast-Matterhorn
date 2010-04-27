@@ -64,4 +64,7 @@ if [[ $(echo ${response:-no} | grep -i '^y') ]]; then
     echo "Done"
 fi
 
-echo "Done uninstalling Matterhorn Capture Agent." 
+# Kills felix
+kill -9 $(ps U matterhorn | grep java | cut -d ' ' -f 2)
+
+echo -e "\n\nDone uninstalling Matterhorn Capture Agent." 

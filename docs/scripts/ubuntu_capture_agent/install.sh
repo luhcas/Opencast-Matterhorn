@@ -7,12 +7,13 @@
 # Variables section ####################################################################################################################
 
 # General variables
-START_PATH=$PWD
+
 MAX_PASSWD_ATTEMPTS=3                                    # Maximum number of attempts to stablish the matterhorn user password
 CA_SUBDIR=capture-agent                                  # Name for the directory where the matterhorn-related files will be stored
 
 export USERNAME=matterhorn                               # Default name for the matterhorn user
 
+export START_PATH=$PWD                                   # Path from where this script is run initially
 export WORKING_DIR=/tmp/cainstallscript                  # Directory where this script will be run
 export TRUNK_URL=http://opencast.jira.com/svn/MH/trunk
 export TRUNK_SUBDIR=matterhorn-trunk                     # Subdir under the selected user $HOME directory
@@ -96,7 +97,7 @@ for (( i = 0; i < ${#SCRIPTS[@]}; i++ )); do
 	    cp $START_PATH/$f $WORKING_DIR
 	else
 	    # The script is not in the initial directory, so try to download it from the opencast source page
-	    wget $SCRIPTS_URL/$f >> /dev/null	    
+	    wget $SCRIPTS_URL/$f &> /dev/null	    
 	    # Check the file is downloaded
 	    if [[ $? -ne 0 ]]; then
 		echo "Couldn't retrieve the script $f from the repository. Try to download it manually and re-run this script."
@@ -160,7 +161,7 @@ ${SETUP_BOOT}
 echo -e "\n\n\nCapture Agent succesfully installed\n\n\n"
 
 unset response
-read -p "It is recommended to reboot the system after installation. Do you wish to do it now (Y/n)?"
+read -p "It is recommended to reboot the system after installation. Do you wish to do it now (Y/n)? " response
 
 while [[ -z "$(echo ${response:-Y} | grep -i '^[yn]')" ]]; do
     read -p "Please enter (Y)es or (n)o: " response
@@ -172,7 +173,8 @@ if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
 else
     echo -e "\n\nThe capture agent will start automatically after rebooting the system."
     echo "However, you can start it manually by running ${FELIX_HOME}/bin/start_matterhorn.sh"
-    echo "Please redirect your questions / suggestions / etc. to the list: matterhorn@opencastproject.org"
+    echo "Please direct your questions / suggestions / etc. to the list: matterhorn@opencastproject.org"
     read -e -n 1 -s -p "\nHit any key to exit..."
     clear
+
 fi

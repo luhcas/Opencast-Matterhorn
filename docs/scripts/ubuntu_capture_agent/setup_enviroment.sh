@@ -10,8 +10,39 @@ if [[ ! $INSTALL_RUN ]]; then
     exit 1
 fi
 
-echo -n "Setting up maven and felix enviroment for $USERNAME... "
+# Setup opencast directories
+read -p "Where would you like the opencast directories to be stored ($OC_DIR)? " directory
 
+if [[ "$directory" != "" ]]; then
+    OC_DIR="$directory"
+fi
+echo
+
+mkdir -p $OC_DIR/cache
+mkdir -p $OC_DIR/config
+mkdir -p $OC_DIR/volatile
+mkdir -p $OC_DIR/cache/captures
+
+chown -R $USERNAME:$USERNAME $OC_DIR
+chmod -R 700 $OC_DIR
+
+# Define capture agent name by using the hostname
+unset agentName
+hostname=`hostname`
+read -p "Please enter the agent name: ($hostname) " name
+while [[ -z $(echo "${agentName:-$hostname}" | grep '^[a-zA-Z0-9_\-][a-zA-Z0-9_\-]*$') ]]; do
+    read - p "Please use only alphanumeric characters, hyphen(-) and underscore(_): ($hostname) " agentName
+done 
+sed -i "s/capture\.agent\.name.*/capture\.agent\.name=${agentName:-$hostname}/g" $CAPTURE_PROPS
+echo
+
+# Prompt for core hostname. Default to localhost:8080
+read -p "Please enter Matterhorn Core hostname ($DEFAULT_CORE_URL): " core
+core=$(echo ${core:-$DEFAULT_CORE_URL} | sed 's/\([\/\.]\)/\\\1/g')
+sed -i "s/\(org\.opencastproject\.server\.url=\).*$/\1$core/" $GEN_PROPS
+
+# Set up maven and felix enviroment variables in the user session
+echo -n "Setting up maven and felix enviroment for $USERNAME... "
 EXPORT_M2_REPO="export M2_REPO=${M2_REPO}"
 EXPORT_FELIX_HOME="export FELIX_HOME=${FELIX_HOME}"
 EXPORT_JAVA_HOME="export JAVA_HOME=${JAVA_HOME}"
@@ -39,12 +70,30 @@ echo "Done"
 
 # Set up the deinstallation script
 # The syntax ${varname//\//\\/} escapes the possible /'s that might be in the variable's value
-echo "Creating the cleanup script... "
-sed -i "s/^USER=/USER=${USERNAME//\//\\/}/" "$CLEANUP"
-sed -i "s/^SRC_LIST=/SRC_LIST=${SRC_LIST//\//\\/}/" "$CLEANUP"
-sed -i "s/^SRC_LIST_BKP=/SRC_LIST_BKP=${SRC_LIST_BKP//\//\\/}/" "$CLEANUP"
-sed -i "s/^OC_DIR=/OC_DIR=${OC_DIR//\//\\/}/" "$CLEANUP"
-sed -i "s/^CA_DIR=/CA_DIR=${CA_DIR//\//\\/}/" "$CLEANUP"
-sed -i "s/^ON_STARTUP_FILE=/ON_STARTUP_FILE=${ON_STARTUP_FILE//\//\\/}/" "$CLEANUP"
+echo -n "Creating the cleanup script... "
+SRC_LIST_BKP=$SRC_LIST.$BKP_SUFFIX
+sed -i "s/^USER=[^\ ]*\?\(.*\)$/USER=${USERNAME//\//\\/}\1/" "$CLEANUP"
+sed -i "s/^SRC_LIST=[^\ ]*\?\(.*\)$/SRC_LIST=${SRC_LIST//\//\\/}\1/" "$CLEANUP"
+sed -i "s/^SRC_LIST_BKP=[^\ ]*\?\(.*\)$/SRC_LIST_BKP=${SRC_LIST_BKP//\//\\/}\1/" "$CLEANUP"
+sed -i "s/^OC_DIR=[^\ ]*\?\(.*\)$/OC_DIR=${OC_DIR//\//\\/}\1/" "$CLEANUP"
+sed -i "s/^CA_DIR=[^\ ]*\?\(.*\)$/CA_DIR=${CA_DIR//\//\\/}\1/" "$CLEANUP"
+sed -i "s/^ON_STARTUP_FILE=[^\ ]*\?\(.*\)$/ON_STARTUP_FILE=${ON_STARTUP_FILE//\//\\/}\1/" "$CLEANUP"
 
-cp $CLEANUP $CA_DIR
+# Write the uninstalled package list to the cleanup.sh template
+if [[ ${#PKG_LIST[@]} -gt 0 ]]; then
+    sed -i "s/^PKG_LIST=.*$/PKG_LIST=( ${PKG_LIST[@]} )" $CLEANUP
+else
+    sed -i "s/^PKG_LIST=.*$/PKG_LIST=" $CLEANUP
+fi
+
+echo "Done"
+
+# Prompt for the location of the cleanup script
+unset location
+read -p "Please enter the matterhorn to store the cleanup script ($START_PATH): " location
+while [[ ! -d "${location:-$START_PATH}"  ]]; do
+    read -p "Please enter a valid location ($START_PATH): " location
+done
+
+cp $CLEANUP ${location:=$START_PATH} 2> /dev/null
+chown --reference=$location $location/$CLEANUP

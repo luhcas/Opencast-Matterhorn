@@ -3,7 +3,10 @@ Capture Agent Installation
 ==========================
 
 Execute install.sh to being installation process. You will need sudo privileges, 
-so it should be run with 'sudo' or by the 'root' user.
+so it should be run with 'sudo' or by the 'root' user. Also, there is no need to
+download all the installation scripts, since the install.sh script will fetch
+them from the matterhorn site in case they are not present in the directory from
+where the script is run.
 
 The script sets up a *new* user to control everything matterhorn related on the 
 system. This user will be given sudo privileges because it needs to control many

@@ -43,8 +43,6 @@ for (( i = 0; i < ${#devlist[@]}; i++ )); do
     done
 done
 
-CAPTURE_PROPS=${FELIX_HOME}/${FELIX_PROPS_SUFFIX}
-GEN_PROPS=${FELIX_HOME}/${FELIX_GENCONF_SUFFIX}
 sed -i "/capture.device/d" $CAPTURE_PROPS
 
 config=$CA_DIR/$CONFIG_SCRIPT
@@ -73,7 +71,7 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     unset response
     read -p "Device ${devName[$i]} has been found. Do you want to configure it for matterhorn (Y/n)? " response
     while [[ -z "$(echo ${response:-Y} | grep -i '^[yn]')" ]]; do
-	read -p "Please enter (y)es or (n)o (no): " response
+	read -p "Please enter (Y)es or (n)o: " response
     done
 
     if [[ -n "$(echo ${response:-Y} | grep -i '^n')" ]]; then
@@ -87,7 +85,6 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
 	read -p "Please enter a name without parentheses or whitespaces ($cleanName): " tempName
     done
     cleanName=${tempName:-$cleanName}
-    echo
 
     read -p "Please enter the flavor assigned to the device ${devName[$i]}: " flavor
     # Grep matches anything that has two fields consisting of exclusively alphanumeric characters or underscores, separated by a single slash '/'
@@ -199,34 +196,3 @@ fi
 
 
 echo "capture.device.names=${allDevices}" >> $CAPTURE_PROPS
-
-# Setup opencast directories
-read -p "Where would you like the opencast directories to be stored? ($OC_DIR): " directory
-
-if [[ "$directory" != "" ]]; then
-    OC_DIR="$directory"
-fi
-echo
-
-mkdir -p $OC_DIR/cache
-mkdir -p $OC_DIR/config
-mkdir -p $OC_DIR/volatile
-mkdir -p $OC_DIR/cache/captures
-
-chown -R $USERNAME:$USERNAME $OC_DIR
-chmod -R 700 $OC_DIR
-
-# Define capture agent name by using the hostname
-unset agentName
-hostname=`hostname`
-read -p "Please enter the agent name: ($hostname) " name
-while [[ -z $(echo "${agentName:-$hostname}" | grep '^[a-zA-Z0-9_\-][a-zA-Z0-9_\-]*$') ]]; do
-    read - p "Please use only alphanumeric characters, hyphen(-) and underscore(_): ($hostname) " agentName
-done 
-sed -i "s/capture\.agent\.name.*/capture\.agent\.name=${agentName:-$hostname}/g" $CAPTURE_PROPS
-echo
-
-# Prompt for core hostname. default to localhost:8080
-read -p "Please enter Matterhorn Core hostname: (http://localhost:8080) " core
-core=$(echo ${core:-"http://localhost:8080"} | sed 's/\([\/\.]\)/\\\1/g')
-sed -i "s/\(org\.opencastproject\.server\.url=\).*$/\1$core/" $GEN_PROPS
