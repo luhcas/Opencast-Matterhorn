@@ -93,7 +93,7 @@ public class WorkflowServiceImplTest {
     repo = new WorkingFileRepositoryImpl(storageRoot, sRoot.toURI().toString());
     dao = new WorkflowServiceImplDaoFileImpl();
     dao.setRepository(repo);
-    dao.setStorageRoot(storageRoot + File.separator + "lucene");
+    dao.setStorageRoot(storageRoot + File.separator + "lucene." + System.currentTimeMillis());
     dao.activate();
     service.setDao(dao);
     service.activate(null);
@@ -224,9 +224,6 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
-  
-  
-  
   @Test
   public void testParentWorkflow() {
     WorkflowInstance originalInstance = service.start(workingDefinition, mediapackage1, null);
@@ -243,11 +240,6 @@ public class WorkflowServiceImplTest {
     service.removeFromDatabase(originalInstance.getId());
   }
 
-  
-  
-  
-  
-  
   @Test
   public void testGetWorkflowByEpisodeId() {
     String mediaPackageId = mediapackage1.getIdentifier().toString();
