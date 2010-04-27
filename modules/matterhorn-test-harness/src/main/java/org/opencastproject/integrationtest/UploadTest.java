@@ -94,7 +94,7 @@ public class UploadTest {
 		}
 		
 		if (retries == timeout) {
-			fail();
+			fail("Workflow instance failed to start.");
 		}
 		
 		// Compare Track
@@ -121,7 +121,6 @@ public class UploadTest {
 		
 		// Confirm search indexing
 		retries = 0;
-		timeout = 10;
 		while (retries < timeout) {
 			Thread.sleep(1000);
 			
@@ -135,7 +134,7 @@ public class UploadTest {
 		}
 		
 		if (retries == timeout) {
-			fail();
+			fail("Search Service failed to index file.");
 		}
 		
 	}
