@@ -350,6 +350,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   }
   
   protected WorkflowInstance updateConfiguration(WorkflowInstance instance, Map<String, String> properties) {
+    if(properties == null) return instance;
     try {
       String xml = replaceVariables(WorkflowBuilder.getInstance().toXml(instance), properties);
       WorkflowInstanceImpl workflow = (WorkflowInstanceImpl)WorkflowBuilder.getInstance().parseWorkflowInstance(xml);
@@ -528,8 +529,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         }
         ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler)handler;
         try {
-          if(resumableHandler.getHoldStateUserInterfaceURL(workflow) != null) {
-            URL url = resumableHandler.getHoldStateUserInterfaceURL(workflow);
+          URL url = resumableHandler.getHoldStateUserInterfaceURL(workflow);
+          if(url != null) {
             String holdActionTitle = resumableHandler.getHoldActionTitle();
             ((WorkflowOperationInstanceImpl)currentOperation).setHoldActionTitle(holdActionTitle);
             ((WorkflowOperationInstanceImpl)currentOperation).setHoldStateUserInterfaceUrl(url);
@@ -537,6 +538,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         } catch (WorkflowOperationException e) {
           logger.warn("unable to replace workflow ID in the hold state URL", e);
         }
+        workflow.setState(WorkflowState.PAUSED);
+        workflow = updateConfiguration(workflow, result.getProperties());
+        dao.update(workflow);
+        return;
       }
     }
     

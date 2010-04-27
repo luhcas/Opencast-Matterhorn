@@ -101,6 +101,9 @@ final class WorkflowOperationWorker implements Runnable {
       if(result == null || Action.CONTINUE.equals(result.getAction())) {
         operation.setState(OperationState.SUCCEEDED);
       }
+      if(result != null && Action.PAUSE.equals(result.getAction())) {
+        operation.setState(OperationState.PAUSED);
+      }
       return result;
     } catch(Exception e) {
       operation.setState(OperationState.FAILED);

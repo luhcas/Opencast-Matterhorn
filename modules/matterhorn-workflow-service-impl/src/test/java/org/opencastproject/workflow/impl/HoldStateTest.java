@@ -24,7 +24,10 @@ import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowOperationException;
+import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 import org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryImpl;
 
@@ -52,6 +55,7 @@ public class HoldStateTest {
   private MediaPackage mp = null;
   private WorkflowServiceImplDaoFileImpl dao = null;
   private WorkingFileRepositoryImpl repo = null;
+  private HoldingWorkflowOperationHandler holdingOperationHandler;
 
   @Before
   public void setup() throws Exception {
@@ -70,7 +74,8 @@ public class HoldStateTest {
 
     // create operation handlers for our workflows
     final Set<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
-    handlerRegistrations.add(new HandlerRegistration("op1", new HoldingWorkflowOperationHandler()));
+    holdingOperationHandler = new HoldingWorkflowOperationHandler();
+    handlerRegistrations.add(new HandlerRegistration("op1", holdingOperationHandler));
     handlerRegistrations.add(new HandlerRegistration("op2", new ContinuingWorkflowOperationHandler()));
 
     // instantiate a service implementation and its DAO, overriding the methods that depend on the osgi runtime
@@ -133,7 +138,54 @@ public class HoldStateTest {
     Assert.assertTrue(xmlFromDb.contains("bar"));
   }
 
-  class HoldingWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {}
+  @Test
+  public void testMultipleHolds() throws Exception {
+    workflow = service.start(def, mp);
+    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
+      System.out.println("Waiting for workflow to enter paused state...");
+      try {Thread.sleep(1000);} catch (InterruptedException e) {}
+    }
+
+    // Simulate a user resuming the workflow, but the handler still keeps the workflow in a hold state
+    holdingOperationHandler.pauseOnResume = true;
+    service.resume(workflow.getId());
+
+    // The workflow is running again, but should very quickly reenter the paused state
+    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
+      System.out.println("Waiting for workflow to reenter paused state...");
+      try {Thread.sleep(1000);} catch (InterruptedException e) {}
+    }
+
+    WorkflowInstance fromDb = service.getWorkflowById(workflow.getId());
+    Assert.assertEquals(WorkflowState.PAUSED, fromDb.getState());
+    
+    // Resume the workflow again, and this time continue with the workflow
+    holdingOperationHandler.pauseOnResume = false;
+    service.resume(workflow.getId());
+
+    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
+      System.out.println("Waiting for workflow to finish...");
+      try {Thread.sleep(1000);} catch (InterruptedException e) {}
+    }
+    Assert.assertEquals(WorkflowState.SUCCEEDED, service.getWorkflowById(workflow.getId()).getState());
+  }
+
+  class HoldingWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
+
+    /** Whether to return pause or continue when {@link #resume(WorkflowInstance)} is called */
+    boolean pauseOnResume;
+    
+    /**
+     * {@inheritDoc}
+     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance)
+     */
+    @Override
+    public WorkflowOperationResult resume(WorkflowInstance workflowInstance)
+            throws WorkflowOperationException {
+      Action action = pauseOnResume ? Action.PAUSE : Action.CONTINUE;
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(action);
+    }
+  }
 
   class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {}
 
