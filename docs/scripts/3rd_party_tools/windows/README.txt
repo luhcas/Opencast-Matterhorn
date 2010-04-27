@@ -9,10 +9,10 @@ Make sure that all binaries (7z, wget and svn) can be reached from command line 
 and wget binaries in PATH environment variable.
 
 Using scripts:
-- OPTIONAL: you can specify location and name of temporary directory in setup_msys.bat (default: ./$temp)
+- OPTIONAL: you can specify location and name of temporary directory in setup_msys.bat (default: %TEMP%/3rd_party_tmp)
 - OPTIONAL: you can specify desired location of 3rd party tools by modifying install_3rd_party.sh with notepad
 	    or similar program. Use Unix style paths, for example C:\Matterhorn is written as /c/Matterhorn
-	    Default is /c (or C:)
+	    Default is /c/3rd_party_tools (or C:\3rd_party_tools)
 - execute setup_msys.bat
 - after downloading of required files is completed, setup will execute installer for MSys. Chose directory
   where you want to install it (IMPORTANT: use path without spaces). When post installation script asks you

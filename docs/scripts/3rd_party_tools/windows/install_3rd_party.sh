@@ -1,43 +1,113 @@
 #! /bin/sh
 
-#######################################################
-##################### Configuration ###################
-#######################################################
+############################################
+############# Configurations ###############
+############################################
 
-# Where to install 3rd party tools
-INSTALL_DIR="/c"
+# ---- directories -----
 
-# --- 3rd party repository ---
+base_dir=$(pwd)
+mkdir -p 3rd_party
+cd 3rd_party
+working_dir=$(pwd)
+
+install_dir="/c/3rd_party_tools"
+mkdir -p install_dir
+
+# ---- 3rd party repository -----
 thirdparty_repository="http://downloads.opencastproject.org/3rd%20Party"
 
-# --- 3rd party tools versions ---
+# ---- 3rd party tools version ----
+
+# zlib
+zlib_version="1.2.3"
+
+# libpng
+libpng_version="1.2.26"
+
+# libjpeg
+libjpeg_version="6b"
+
+# libtiff
+libtiff_version="3.8.2"
+
+# jam
+jam_version="2.5.2"
 
 # ffmpeg
 ffmpeg_revision="22592"
 
-# libswscale (required by ffmpeg)
+# libswscale
 libswscale_revision="30929"
 
 # mediainfo
 mediainfo_version="0.7.19"
+
+# tesseract
+tesseract_version="2.01"
+tesseract_lang_version="2.00.eng"
+
+# ocropus
+ocropus_revision="r644"
+
+# ---- 3rd party tools properties ----
+
+zlib_url="http://prdownloads.sourceforge.net/libpng/zlib-${zlib_version}.tar.gz"
+
+libpng_url="${thirdparty_repository}/libpng${libpng_version}.tar.gz"
+
+libjpeg_url="${thirdparty_repository}/jpegsrc.v${libjpeg_version}.tar.gz"
+
+libtiff_url="${thirdparty_repository}/tiff${libtiff_version}.zip"
+
+jam_url="http://sourceforge.net/projects/freetype/files/ftjam/${jam_version}/ftjam-${jam_version}-win32.zip/download"
+
+ffmpeg_url="svn://svn.ffmpeg.org/ffmpeg/trunk"
+libswscale_url="svn://svn.mplayerhq.hu/mplayer/trunk/libswscale"
+
+mediainfo_url="${thirdparty_repository}/MediaInfo_CLI_${mediainfo_version}_GNU_FromSource.tar.bz2"
+
+tesseract_url="${thirdparty_repository}/tesseract${tesseract_version}.tar.gz"
+tesseract_lang_url="${thirdparty_repository}/tesseract${tesseract_lang_version}.tar.gz"
+
+ocropus_url="${thirdparty_repository}/ocropus${ocropus_revision}.tar.gz"
 
 ##########################################################
 ############ Third party tools building ##################
 ##########################################################
 
 # Zlib
-build_zlib ()
+setup_zlib ()
 {
 	echo
 	echo "Building Zlib..."
 	echo
-	working_dir=$(pwd)
-	if wget http://prdownloads.sourceforge.net/libpng/zlib-1.2.3.tar.gz &&
-		tar zxfv zlib-1.2.3.tar.gz &&
-		cd zlib-1.2.3 &&
+	mkdir -p ${working_dir}/zlib
+	cd ${working_dir}/zlib
+	if ! [ -f ./zlib-${zlib_version}/zlib.h ]
+	then
+		wget ${zlib_url} &&
+		tar zxfv zlib-${zlib_version}.tar.gz
+		if ! [ $? -eq 0 ]
+		then
+			cd $working_dir
+			rm -rf zlib
+			return 1
+		fi
+	fi
+	cd zlib-${zlib_version}
+	if ! [ -f ./libz.a ]
+	then
 		./configure --prefix=/mingw &&
-		make &&
-		make install
+		make
+		if ! [ $? -eq 0 ]
+		then
+			make distclean
+			cd $working_dir
+			return 1
+		fi
+	fi
+	if make install
 	then
 		echo
 		echo "Zlib was installed succesfully!"
@@ -51,62 +121,223 @@ build_zlib ()
 	fi
 }
 
-clean_zlib ()
-{
-	echo
-	echo "Cleaning Zlib..."
-	if [ -f zlib-1.2.3.tar.gz ]
-	then
-		echo "Removing zlib-1.2.3.tar.gz..."
-		rm -f zlib-1.2.3.tar.gz
-	fi
-	if [ -d zlib-1.2.3 ]
-	then
-		echo "Removing zlib-1.2.3..."
-		rm -rf zlib-1.2.3
-	fi
-}
+# setup libpng
 
-#FFmpeg
-build_ffmpeg ()
+setup_png ()
 {
 	echo
-	echo "Building FFmpeg..."
+	echo "Installing libpng $libpng_version"
 	echo
-	working_dir=$(pwd)
-	#mkdir $INSTALL_DIR/ffmpeg
-	if mkdir ffmpeg &&
-		cd ffmpeg &&
-		svn checkout svn://svn.ffmpeg.org/ffmpeg/trunk@${ffmpeg_revision} source &&
-		rm -rf source/libswscale &&
-		svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/libswscale@${libswscale_revision} source/libswscale &&
-		mkdir build &&
-		cd build &&
-		../source/configure --enable-memalign-hack --target-os=mingw32 --enable-shared --enable-runtime-cpudetect --disable-ffplay --disable-ffserver --extra-ldflags=-L/usr/static/lib --extra-cflags=-I/usr/static/include --prefix=$INSTALL_DIR/FFmpeg &&
-		make &&
-		make install
+	mkdir -p ${working_dir}/libpng
+	cd ${working_dir}/libpng
+	if ! [ -f ./libpng-${libpng_version}/png.h ]
+	then
+		wget $libpng_url &&
+		tar zxfv libpng${libpng_version}.tar.gz
+		if ! [ $? -eq 0 ]
+		then
+			cd $working_dir
+			rm -rf libpng
+			return 1
+		fi
+	fi
+	cd libpng-${libpng_version}
+	if ! [ -f ./libpng.la ]
+	then
+		./configure --prefix=/mingw --disable-shared &&
+		make
+		if ! [ $? -eq 0 ]
+		then
+			make distclean
+			cd $working_dir
+			return 1
+		fi
+	fi
+	if make install
 	then
 		echo
-		echo "FFmpeg build successfully!"
+		echo "Libpng installed successfully."
 		cd $working_dir
 		return 0
 	else
 		echo
-		echo "FFmpeg build failed!"
+		echo "Libpng installation failed."
 		cd $working_dir
 		return 1
 	fi
 }
 
-clean_ffmpeg ()
+# libjpeg
+
+setup_libjpeg ()
 {
 	echo
-	echo "Cleaning FFmpeg..."
+	echo "Installing libjpeg $libjpeg_version"
 	echo
-	if [ -d ffmpeg ]
+	mkdir -p ${working_dir}/libjpeg
+	cd ${working_dir}/libjpeg
+	if ! [ -f ./jpeg-${libjpeg_version}/jpeglib.h ]
 	then
-		echo "Removing ffmpeg..."
-		rm -rf ffmpeg
+		cp ${base_dir}/patches/libjpeg-6b.patch . &&
+		wget $libjpeg_url &&
+		tar zxfv jpegsrc.v${libjpeg_version}.tar.gz
+		if ! [ $? -eq 0 ]
+		then
+			cd $working_dir
+			rm -rf libjpeg
+			return 1
+		fi
+	fi
+	cd jpeg-${libjpeg_version}
+	if ! [ -f ./libjpeg.a ]
+	then
+		./configure --prefix=/mingw --disable-shared &&
+		make
+		patch -p0 -N Makefile ../libjpeg-6b.patch
+		if ! [ $? -eq 0 ]
+		then
+			make distclean
+			cd $working_dir
+			return 1
+		fi
+	fi
+	if make install install-lib
+	then
+		echo
+		echo "Libjpeg installed successfully."
+		cd $working_dir
+		return 0
+	else
+		echo
+		echo "Libjpeg installation failed."
+		cd $working_dir
+		return 1
+	fi
+}
+
+# libtiff
+
+setup_libtiff ()
+{
+	echo
+	echo "Installing libtiff $libtiff_version"
+	echo
+	mkdir -p ${working_dir}/libtiff
+	cd ${working_dir}/libtiff
+	if ! [ -f ./tiff-$libtiff_version/autogen.sh ]
+	then
+		wget $libtiff_url &&
+		7z x -y tiff$libtiff_version.zip
+		if ! [ $? -eq 0 ]
+		then 
+			cd ${working_dir}
+			rm -rf libtiff
+			return 1
+		fi
+	fi
+	cd tiff-$libtiff_version
+	if ! [ -f ./libtiff/libtiff.la ]
+	then
+		./configure --prefix=/mingw --disable-shared &&
+		make
+		if ! [ $? -eq 0 ]
+		then
+			make distclean
+			cd ${working_dir}
+			return 1
+		fi
+	fi
+	if make install
+	then
+		echo
+		echo "Libtiff installed successfully."
+		cd $working_dir
+		return 0
+	else
+		echo
+		echo "Libtiff installation failed."
+		cd $working_dir
+		return 1
+	fi
+}
+
+# jam
+# Download prebuilt binary
+
+get_jam ()
+{
+	echo
+	echo "Installing prebuilt jam binary $jam_version"
+	echo
+	mkdir -p ${working_dir}/jam
+	cd ${working_dir}/jam
+	if ! [ -f ftjam-${jam_version}-win32.zip ]
+	then
+		wget $jam_url &&
+		7z x -y ftjam-${jam_version}-win32.zip &&
+		mv -f jam.exe /usr/bin
+		if [ $? -eq 0 ]
+		then
+			echo
+			echo "Jam installed successfully."
+			cd ${working_dir}
+			return 0
+		else
+			echo
+			echo "Jam installation failed."
+			cd ${working_dir}
+			rm -rf jam
+			return 1
+		fi
+	fi
+	#export JAM_TOOLSET=MINGW
+}
+
+# ffmpeg
+
+setup_ffmpeg ()
+{
+	echo
+	echo "Installing ffmpeg r${ffmpeg_revision} with libswscale r${libswscale_revision}"
+	echo
+	mkdir -p ${working_dir}/ffmpeg
+	cd ${working_dir}/ffmpeg
+	if ! [ -f ./source/version.h ]
+	then
+		svn checkout ${ffmpeg_url}@${ffmpeg_revision} source &&
+		rm -rf source/libswscale &&
+		svn checkout ${libswscale_url}@${libswscale_revision} source/libswscale
+		if ! [ $? -eq 0 ]
+		then
+			cd $working_dir
+			rm -rf ffmpeg
+			return 1
+		fi
+	fi
+	cd source
+	if ! [ -f ffmpeg ]
+	then
+		./configure --enable-memalign-hack --target-os=mingw32 --enable-shared --enable-runtime-cpudetect --disable-ffplay --disable-ffserver --prefix=${install_dir}/FFmpeg &&
+		make
+		if ! [ $? -eq 0 ]
+		then
+			make distclean
+			cd $working_dir
+			return 1
+		fi
+	fi
+	mkdir -p ${install_dir}/FFmpeg
+	if make install
+	then
+		echo
+		echo "FFmpeg installed successfully."
+		cd $working_dir
+		return 0
+	else
+		echo
+		echo "FFmpeg installation failed."
+		cd $working_dir
+		return 1
 	fi
 }
 
@@ -114,37 +345,49 @@ clean_ffmpeg ()
 # Using prebuild binary
 # http://sourceforge.net/projects/mediainfo/files/binary/mediainfo/0.7.19/MediaInfo_CLI_0.7.19_Windows_i386.zip/download
 # http://sourceforge.net/projects/mediainfo/files/binary/mediainfo/0.7.19/MediaInfo_CLI_0.7.19_Windows_x64.zip/download
+
 get_mediainfo ()
 {
+	echo
+	echo "Installing prebuilt MediaInfo $mediainfo_version"
+	echo
+	mkdir -p ${working_dir}/mediainfo
+	cd ${working_dir}/mediainfo
 	arc=$(echo ${PROCESSOR_ARCHITECTURE})
-	if [ ${arc:${#arc}-2} == "86" ]
+	if [ ${arc:${#arc}-2} == "86" ] && ! [ -f ./MediaInfo_CLI_${mediainfo_version}_Windows_i386.zip ]
 	then
 		if wget http://sourceforge.net/projects/mediainfo/files/binary/mediainfo/${mediainfo_version}/MediaInfo_CLI_${mediainfo_version}_Windows_i386.zip/download &&
 			mkdir MediaInfo &&
 			7z x -y -oMediaInfo MediaInfo_CLI_${mediainfo_version}_Windows_i386.zip &&
-			cp -rf MediaInfo $INSTALL_DIR
+			cp -rf MediaInfo $install_dir
 		then
 			echo
 			echo "MediaInfo downloaded and extracted successfully!"
+			cd $working_dir
 			return 0
 		else
 			echo
 			echo "Setting up MediaInfo failed!"
+			cd $working_dir
+			rm -rf ${working_dir}/mediainfo
 			return 1
 		fi
-	elif [ ${arc:${#arc}-2} == "64" ]
+	elif [ ${arc:${#arc}-2} == "64" ] && ! [ -f MediaInfo_CLI_${mediainfo_version}_Windows_x64.zip ]
 	then
 		if wget http://sourceforge.net/projects/mediainfo/files/binary/mediainfo/${mediainfo_version}/MediaInfo_CLI_${mediainfo_version}_Windows_x64.zip/download &&
 			mkdir MediaInfo &&
 			7z x -y -oMediaInfo MediaInfo_CLI_${mediainfo_version}_Windows_x64.zip &&
-			cp -rf MediaInfo $INSTALL_DIR
+			cp -rf MediaInfo $install_dir
 		then
 			echo
 			echo "MediaInfo downloaded and extracted successfully!"
+			cd $working_dir
 			return 0
 		else
 			echo
 			echo "Setting up MediaInfo failed!"
+			cd $working_dir
+			rm -rf ${working_dir}/mediainfo
 			return 1
 		fi
 	else
@@ -153,144 +396,57 @@ get_mediainfo ()
 	fi	
 }
 
-clean_mediainfo ()
+# tesseract
+
+setup_tesseract ()
 {
 	echo
-	echo "Cleaning MediaInfo..."
+	echo "Installing tesseract $tesseract_version"
 	echo
-	if [ -f MediaInfo_CLI_${mediainfo_version}_Windows_i386.zip ]
+	mkdir -p ${working_dir}/tesseract
+	cd ${working_dir}/tesseract
+	if ! [ -f tesseract-$tesseract_version/eurotext.tif ]
 	then
-		echo "Removing MediaInfo_CLI_0.7.19_Windows_i386.zip..."
-		rm -f MediaInfo_CLI_${mediainfo_version}_Windows_i386.zip
+		cp ${base_dir}/patches/tesseract-2.01.patch . &&
+		wget $tesseract_url &&
+		wget $tesseract_lang_url &&
+		tar zxfv tesseract${tesseract_version}.tar.gz &&
+		cd ./tesseract-$tesseract_version &&
+		tar zxfv ../tesseract${tesseract_lang_version}.tar.gz &&
+		cd .. &&
+		patch -p0 -N tesseract-${tesseract_version}/dict/dawg.h tesseract-2.01.patch
+		if ! [ $? -eq 0 ]
+		then
+			cd $working_dir
+			rm -rf tesseract
+			return 1
+		fi
 	fi
-	if [ -f MediaInfo_CLI_${mediainfo_version}_Windows_x64.zip ]
+	cd tesseract-$tesseract_version
+	if ! [ -f ./ccmain/adaptions.o ]
 	then
-		echo "Removing MediaInfo_CLI_0.7.19_Windows_x64.zip..."
-		rm -f MediaInfo_CLI_${mediainfo_version}_Windows_x64.zip
+		./configure CFLAGS="-D__MSW32__ -Dultoa=_ultoa" CPPFLAGS="-D__MSW32__ -Dultoa=_ultoa" LIBS="-ltiff -ljpeg -lz -lws2_32" --prefix=${install_dir}/Tesseract --disable-shared &&
+		make
+		if ! [ $? -eq 0 ]
+		then
+			make clean
+			cd $working_dir
+			return 1
+		fi
 	fi
-	if [ -d MediaInfo ]
+	mkdir -p ${install_dir}/Tesseract
+	if make install && cp /mingw/bin/libgcc_s_dw2-1.dll ${install_dir}/Tesseract/bin
 	then
-		echo "Removing MediaInfo..."
-		rm -rf MediaInfo
-	fi
-}
-
-###############################################################
-### Experimental scripts for building other 3rd party tools ###
-###############################################################
-
-build_image_lib ()
-{
-	# libpng
-	wget http://downloads.opencastproject.org/3rd%20Party/libpng1.2.26.tar.gz
-	tar zxfv libpng1.2.26.tar.gz
-	cd libpng-1.2.26
-	./configure LDFLAGS=-L/usr/local/lib CFLAGS=-I/usr/local/include --includedir=/usr/local/ --disable-shared
-	make
-	make install
-
-	# libjpeg
-	# TODO patch libjpeg
-	wget http://downloads.opencastproject.org/3rd%20Party/jpegsrc.v6b.tar.gz
-	tar zxfv jpegsrc.v6b.tar.gz
-	cd jpeg-6b
-	./configure LDFLAGS=-L/usr/local/lib CFLAGS=-I/usr/local/include --includedir=/usr/local/ --disable-shared
-	make
-	make install
-
-	# tifflib
-	wget http://downloads.opencastproject.org/3rd%20Party/tiff3.8.2.zip
-	7z x -y tiff3.8.2.zip
-	cd tiff-3.8.2
-	./configure LDFLAGS=-L/usr/local/lib CFLAGS=-I/usr/local/include --includedir=/usr/local/
-	make
-	make install
-}
-
-clean_image_lib ()
-{
-	echo
-	echo "Cleaning image libraries..."
-	if [ -f libpng1.2.26.tar.gz ]
-	then
-		echo "Removing libpng1.2.26.tar.gz..."
-		rm -f libpng1.2.26.tar.gz
-	fi
-	if [ -d libpng-1.2.26 ]
-	then
-		echo "Removing libpng-1.2.26..."
-		rm -rf libpng-1.2.26
-	fi
-	if [ -f jpegsrc.v6b.tar.gz ]
-	then
-		echo "Removing jpegsrc.v6b.tar.gz..."
-		rm -f jpegsrc.v6b.tar.gz
-	fi
-	if [ -d jpeg-6b ]
-	then
-		echo "Removing jpeg-6b..."
-		rm -rf jpeg-6b
-	fi
-	if [ -f tiff3.8.2.zip ]
-	then
-		echo "Removing tiff3.8.2.zip..."
-		rm -f tiff3.8.2.zip
-	fi
-	if [ -d tiff-3.8.2 ]
-	then
-		echo "Removing tiff-3.8.2..."
-		rm -rf tiff-3.8.2
-	fi
-}
-
-# jam
-get_jam ()
-{
-	# Will not build out of source due to unknown dependencies
-	#wget http://downloads.opencastproject.org/3rd%20Party/jam2.5.zip
-	# Downloading prebuilt .exe
-	wget http://sourceforge.net/projects/freetype/files/ftjam/2.5.2/ftjam-2.5.2-win32.zip/download
-	7z x -y ftjam-2.5.2-win32.zip
-	mv jam.exe /usr/bin
-	export JAM_TOOLSET=MINGW
-}
-
-clean_jam ()
-{
-	echo
-	echo "Cleaning jam..."
-	if [ -f ftjam-2.5.2-win32.zip ]
-	then
-		echo "Removing ftjam-2.5.2-win32.zip..."
-		rm -f ftjam-2.5.2-win32.zip
-	fi
-}
-
-# tessaract
-build_tesseract ()
-{
-	wget http://downloads.opencastproject.org/3rd%20Party/tesseract2.01.tar.gz
-	tar zxfv tesseract2.01.tar.gz
-	#cd tesseract-2.01
-	# FIXME linking with tiff
-	# will fail due to name clash between constructs of windows socket2 header file and construct used in tesseract 
-	#./configure LDFLAGS=-L/usr/local/lib CFLAGS="-I/usr/local/include -D__MSW32__ -Dultoa=_ultoa" CPPFLAGS="-I/usr/local/include -D__MSW32__ -Dultoa=_ultoa" --includedir=/usr/local/ --disable-shared
-	# Can be built using Visual Studio or msbuild, haven't tried to link it with ocrupus
-}
-
-clean_tesseract ()
-{
-	echo
-	echo "Cleaning tesseract..."
-	if [ -f tesseract2.01.tar.gz ]
-	then
-		echo Removing tesseract2.01.tar.gz...
-		rm -f tesseract2.01.tar.gz
-	fi
-	if [ -f tesseract-2.01 ]
-	then
-		echo Removing tesseract-2.01...
-		rm -rf tesseract-2.01
+		echo
+		echo "Tesseract installed successfully."
+		cd $working_dir
+		return 0
+	else
+		make clean
+		echo
+		echo "Tesseract installation failed."
+		cd $working_dir
+		return 1
 	fi
 }
 
@@ -305,21 +461,36 @@ echo "ffmpeg is grabbed from svn and built from source"
 echo
 sleep 5
 
-#mediainfo
-if ! (mkdir $INSTALL_DIR/MediaInfo && get_mediainfo && clean_mediainfo)
-then
-	clean_mediainfo
-	rm -rf $INSTALL_DIR/MediaInfo
-	echo "3rd party tools installation failed."
-	exit 1
-fi
+# patching winsock2.h
+patch -p0 -N /mingw/include/winsock2.h ${base_dir}/patches/winsock2.patch > /dev/null
 
-# ffmpeg
-if ! (mkdir $INSTALL_DIR/FFmpeg && build_zlib && build_ffmpeg && clean_zlib && clean_ffmpeg)
+# --- Prerequisites ---
+setup_zlib &&
+setup_png &&
+setup_libjpeg &&
+setup_libtiff &&
+
+# --- FFmpeg & MediaInfo ---
+setup_ffmpeg &&
+get_mediainfo &&
+
+# --- MediaAnalzyer ---
+setup_tesseract
+
+# --- Cleaning ---
+
+if [ $? -eq 0 ]
 then
-	clean_zlib
-	clean_ffmpeg
-	rm -rf $INSTALL_DIR/FFmpeg
+	echo
+	echo "3rd party tools installation was successfully completed."
+	cd $base_dir
+	read -p "Do you want to remove source directories? [y] " choice
+	if ! [ "$choice" = "n" ]
+		then rm -rf $working_dir
+	fi
+	exit 0
+else
+	echo
 	echo "3rd party tools installation failed."
 	exit 1
 fi

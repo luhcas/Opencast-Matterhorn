@@ -380,7 +380,7 @@ setup_opencv ()
 	cd opencv-$opencv_version
 	if ! [ -f ./cv/src/cvaccum.lo ]
 	then
-		./configure &&
+		./configure --disable-apps --without-swig --without-python --without-gtk --without-quicktime &&
 		make
 		if ! [ $? -eq 0 ]
 		then

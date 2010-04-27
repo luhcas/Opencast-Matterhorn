@@ -378,7 +378,8 @@ setup_opencv ()
 	cd opencv-$opencv_version
 	if ! [ -f ./cv/src/cvaccum.lo ]
 	then
-		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib &&
+		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib --disable-apps --without-swig --without-python --without-gtk --without-quicktime &&
+		#./configure CXXFLAGS="-I/opt/local/include -march=nocona -mtune=generic" LDFLAGS=-L/opt/local/lib --disable-apps --without-swig --without-python --without-gtk --without-quicktime &&
 		make
 		if ! [ $? -eq 0 ]
 		then

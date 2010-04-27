@@ -14,7 +14,7 @@ if
 	# installing required libraries
 	sudo apt-get -y install libjpeg-dev libpng12-dev libtiff-dev jam &&
 	# installing gstreamer
-	sudo apt-get -y install gstreamer0.10-plugins* gstreamer0.10-ffmpeg
+	sudo apt-get -y install gstreamer0.10-plugins*
 then
 	echo
 	echo "Required libraries were installed. Executing main script..."

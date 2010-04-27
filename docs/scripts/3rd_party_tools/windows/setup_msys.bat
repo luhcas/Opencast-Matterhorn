@@ -7,7 +7,7 @@ rem ############### Configurations #####################
 rem ####################################################
 
 rem Without ending backslash
-SET TEMP_DIR=.\$temp
+SET TEMP_DIR=%temp%\3rd_party_tmp
 
 rem ####################################################
 rem ################ Execution script ##################
@@ -24,6 +24,9 @@ echo.
 pause
 
 rem creating temporary directory and coping all required files in there
+if exist %TEMP_DIR% (
+	rmdir /s /q %TEMP_DIR%
+)
 mkdir %TEMP_DIR%
 
 echo.
@@ -32,7 +35,13 @@ echo.
 if exist install_3rd_party.sh (
 	copy install_3rd_party.sh %TEMP_DIR%
 ) else (
-	echo Installation script install_3rd_party.sh is missing!
+ 	echo Installation script install_3rd_party.sh is missing!
+	goto EXCEPTION
+)
+if exist patches (
+	xcopy /s /i patches %TEMP_DIR%\patches
+) else (
+	echo Directory with patches is missing!
 	goto EXCEPTION
 )
 
@@ -192,6 +201,7 @@ start /wait "MsysDTK installation" msysDTK-1.0.1.exe
 rem Building script for required libraries and ffmpeg
 mkdir %MSYS_DIR%\home\%username%
 copy install_3rd_party.sh %MSYS_DIR%\home\%username%\
+xcopy /s /i patches %MSYS_DIR%\home\%username%\patches
 
 rem Cleaning
 echo.
