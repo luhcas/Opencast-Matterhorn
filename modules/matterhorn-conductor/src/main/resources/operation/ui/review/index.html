@@ -1,26 +1,36 @@
 <html>
   <head>
     <title>Hold for review</title>
+    <link rel="stylesheet" type="text/css" href="../../../infusion-1.1.2/fss/css/fss-reset.css">
+    <link rel="stylesheet" type="text/css" href="../../../css/admin.css">
+    <script type="text/javascript" src="../../../admin/jquery/jquery-1.4.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        var id = parent.document.getElementById("holdWorkflowId").value;
+        $.ajax({
+          url : '../../../workflow/rest/instance/' + id + '.xml',
+          dataType : 'xml',    // or XML..
+          success : function(data) {    // get neccessary data to call the preview player 
+            var elms = data.documentElement.getElementsByTagName('track');
+            for (i in elms) {
+              var tags = elms[i].getElementsByTagName('tag');
+              if (tags.length > 0) {
+                for (j in tags) {
+                  if (tags[j].firstChild.data.match(/preview/)) {
+                    var videoUrl = elms[i].getElementsByTagName("url")[0].firstChild.data;
+                    //alert("Video URL: " + videoUrl);
+                    window.location.href = '../../../engage/ui/preview.html?videoUrl=' + videoUrl;
+                  }
+                }
+              }
+            }
+          }
+        });
+      });
+    </script>
   </head>
   <body>
-  
-    <form action="/workflow/rest/resume" method="post" name="resume_form" id="resume_form">
-      <input type="hidden" name="id" id="workflowId" value="${id}"></input>
-      <input type="hidden" name="properties" id="properties" value=""></input> <!-- properties can be set in the workflow instance here -->
-      <div>
-        (embed media player here)
-      <div>
-      <div>
-        <input type="button" value="Continue" onclick="updateAction();"></input>
-      <div>
-    </form>
+    loading...
   </body>
-  <script language="JavaScript">
-    function updateAction() {
-      var workflowId = window.location.search.replace('?', '');
-      document.getElementById('workflowId').value = workflowId;
-      document.getElementById('resume_form').submit();
-    }
-  </script>
 </html>
 

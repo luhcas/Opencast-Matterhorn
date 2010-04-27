@@ -48,6 +48,7 @@ public class ReviewWorkflowOperationHandler extends AbstractResumableWorkflowOpe
   
   public void activate(ComponentContext cc) {
     super.activate(cc);
+    setHoldActionTitle("Review");
     registerHoldStateUserInterface(HOLD_UI_PATH);
     logger.info("Registering review hold state ui from classpath {}", HOLD_UI_PATH);
   }

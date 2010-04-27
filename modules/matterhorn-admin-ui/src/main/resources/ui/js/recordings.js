@@ -28,6 +28,11 @@ Recordings.lastCount = null;
  *  Display the recordings specified by the URL param show or upcoming recordings otherwise.
  */
 Recordings.init = function() {
+  // Event: clicked somewhere
+  $('body').click( function() {
+    $('#holdActionPanel-container').fadeOut('fast');
+  });
+
   /* Event: Scheduler button clicked */
   $('#button_schedule').click( function() {
     window.location.href = '../../admin/scheduler.html';
