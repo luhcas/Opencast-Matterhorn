@@ -1,5 +1,13 @@
-//load the devices
-$.get(CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/devices", function(data){
+var CAPTURE_AGENT_CONFIDENCE_MONITORING_URL = "/confidence/rest";
+var Monitor = {} || Monitor;
+var AudioBar = {} || AudioBar;
+var Monitor.intervalImgId = null;
+var Monitor.intervalAudioId = null;
+var Monitor.selectedDevice = null;
+
+Monitor.loadDevices = function(){
+  //load the devices
+  $.get(CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/devices", function(data){
       //do stuff to make a device array.
       var devices = $('name', data);
       for(d in devices){
