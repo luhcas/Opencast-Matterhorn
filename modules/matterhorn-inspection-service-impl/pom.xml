@@ -78,6 +78,17 @@
       <artifactId>easymock</artifactId>
       <version>2.5.2</version>
     </dependency>
+    <dependency>
+    	<groupId>org.apache.httpcomponents</groupId>
+    	<artifactId>httpclient</artifactId>
+    	<version>4.1-alpha1</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.opencastproject</groupId>
+    	<artifactId>matterhorn-security-api</artifactId>
+    	<version>0.7-SNAPSHOT</version>
+    	<type>bundle</type>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -91,7 +102,9 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.inspection.impl.* </Export-Package>
             <Service-Component>
-              OSGI-INF/inspection-service.xml,
+              OSGI-INF/inspection-service-delegating.xml,
+              OSGI-INF/inspection-service-local.xml,
+              OSGI-INF/inspection-service-remote.xml,
               OSGI-INF/inspection-service-rest.xml
             </Service-Component>
           </instructions>

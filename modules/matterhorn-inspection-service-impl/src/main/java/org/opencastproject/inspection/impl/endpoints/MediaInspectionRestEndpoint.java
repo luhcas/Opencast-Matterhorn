@@ -59,10 +59,11 @@ public class MediaInspectionRestEndpoint {
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  public Response getTrack(@QueryParam("url") URI url) {
+  @Path("inspect")
+  public Response inspectTrack(@QueryParam("uri") URI uri) {
     checkNotNull(service);
     try {
-      Receipt r = service.inspect(url, false);
+      Receipt r = service.inspect(uri, false);
       return Response.ok(r).build();
     } catch (Exception e) {
       logger.info(e.getMessage());
@@ -103,9 +104,9 @@ public class MediaInspectionRestEndpoint {
     // abstract
     data.setAbstract("This service extracts technical metadata from media files.");
     // getTrack
-    RestEndpoint endpoint = new RestEndpoint("getTrack", RestEndpoint.Method.GET, "/",
+    RestEndpoint endpoint = new RestEndpoint("inspect", RestEndpoint.Method.GET, "/inspect",
             "Analyze a given media file, returning a receipt to check on the status and outcome of the job");
-    endpoint.addOptionalParam(new Param("url", Param.Type.STRING, null, "Location of the media file"));
+    endpoint.addOptionalParam(new Param("uri", Param.Type.STRING, null, "Location of the media file"));
     endpoint.addFormat(Format.xml());
     endpoint.addStatus(Status.OK("XML encoded receipt is returned"));
     endpoint.addStatus(new Status(400, "Problem retrieving media file or invalid media file or URL"));
