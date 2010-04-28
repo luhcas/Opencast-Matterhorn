@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.workflow.handler.DistributeDownloadWorkflowOperationHandler" immediate="true">
+  <implementation class="org.opencastproject.workflow.handler.DistributeWorkflowOperationHandler" />
+  <property name="service.description" value="Local Distribution Workflow Handler" />
+  <property name="workflow.operation" value="distribute-download" />
+  <service>
+    <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
+  </service>
+  <reference cardinality="1..1" interface="org.opencastproject.distribution.api.DistributionService"
+  name="DistributionService" policy="static" target="(distribution.channel=download)" bind="setDistributionService"/>
+</component>

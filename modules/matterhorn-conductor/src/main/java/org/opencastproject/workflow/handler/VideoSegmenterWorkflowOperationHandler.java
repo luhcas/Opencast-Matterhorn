@@ -21,6 +21,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
+import org.opencastproject.receipt.api.Receipt;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -88,7 +89,8 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
     // Segment the media package
     Mpeg7Catalog mpeg7 = null;
     try {
-      mpeg7 = videosegmenter.analyze(mediaPackage, track.getIdentifier());
+      Receipt receipt = videosegmenter.analyze(mediaPackage, track.getIdentifier(), true);
+      mpeg7 = (Mpeg7Catalog)receipt.getElement();
       mediaPackage.add(mpeg7);
     } catch (Exception e) {
       throw new WorkflowOperationException(e);

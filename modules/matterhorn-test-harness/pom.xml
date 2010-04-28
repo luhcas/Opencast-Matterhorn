@@ -110,7 +110,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.opencastproject.remotetest.AllRemoteTests</mainClass>
+              <mainClass>org.opencastproject.remotetest.RemoteTestRunner</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>
