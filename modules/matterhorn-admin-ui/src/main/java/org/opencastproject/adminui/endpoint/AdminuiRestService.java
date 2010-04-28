@@ -115,7 +115,7 @@ public class AdminuiRestService {
     if ((state.toUpperCase().equals("UPCOMING")) || (state.toUpperCase().equals("ALL"))) {
       out.addAll(getUpcomingRecordings());
     }
-    if ((state.toUpperCase().equals("CAPTURING")) || (state.toUpperCase().equals("ALL"))) {
+    if ((state.toUpperCase().equals("CAPTURING"))) {
       out.addAll(getCapturingRecordings());
     }
     if ((state.toUpperCase().equals("PROCESSING")) || (state.toUpperCase().equals("ALL"))) {
