@@ -44,9 +44,9 @@ Opencast.Watch = (function ()
                 $('#oc_title_from').html(" by " + $('#oc-creator').html() + " (" + $('#oc-date').html() + ")");
             }
             // set the abstract
-            $('#abstract').html($('#oc-abstract').html());
-      
-            // set the media URLs
+            $('#oc_description-sections').html($('#oc-abstract').html());
+
+        // set the media URLs
             var mediaUrlOne = $('#oc-video-presenter-source').html();
             var mediaUrlTwo = $('#oc-video-presentation-source').html();
 
@@ -101,8 +101,6 @@ Opencast.Watch = (function ()
                 
             });
             
-         // set description html text
-            $('#oc_description-sections').html('description');
        });
     }
   
