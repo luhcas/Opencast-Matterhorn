@@ -259,12 +259,6 @@ select { font-size:1.15em; }
   height:370px;;
 }
 
-#continueBtn {
-  float:right;
-  margin-right:16px;
-  margin-bottom:10px;
-}
-
 #workflow-config-container {
   width: 96%;
   margin-left: 2%;

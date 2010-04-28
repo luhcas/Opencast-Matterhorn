@@ -129,7 +129,8 @@
       <iframe id="holdActionPanel-iframe" src="">
       </iframe>
       <input type="hidden" id="holdWorkflowId" value="">
-      <button type="button" id="continueBtn" onclick="Recordings.continueWorkflow();">Continue</button>
+      <button type="button" id="continueBtn" onclick="Recordings.continueWorkflow();" style="float:right;margin-right:16px;margin-bottom:10px;">Continue</button>
+      <button type="button" onclick="$('#holdActionPanel-container').fadeOut('fast');" style="float:right;margin-right:4px;">Cancel</button>
     </div>
   </body>
 </html>
