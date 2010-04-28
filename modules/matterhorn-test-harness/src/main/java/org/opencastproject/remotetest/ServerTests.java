@@ -46,9 +46,7 @@ import org.junit.runners.Suite.SuiteClasses;
   CaptureAdminRestEndpointTest.class,
   EngageModuleTest.class,
   AdminProxyRestEndpointTest.class,
-  UploadTest.class,
-  UnscheduledCaptureTest.class,
-  ScheduledCaptureTest.class
+  UploadTest.class
 })
 public class ServerTests {
 

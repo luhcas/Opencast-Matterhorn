@@ -41,11 +41,6 @@ public class ScheduledCaptureTest {
   @Test
   public void testScheduledCapture() throws Exception {
 
-    //Only run this test if -DDoCaptureTests=true is passed
-    if (System.getProperty("DoCaptureTests") == null || !System.getProperty("DoCaptureTests").equals("true")) {
-      return;
-    }
-
     // Agent registered (Capture Admin Agents)
     ClientResponse response = CaptureAdminResources.agents();
     assertEquals("Response code (agents):", 200, response.getStatus());
