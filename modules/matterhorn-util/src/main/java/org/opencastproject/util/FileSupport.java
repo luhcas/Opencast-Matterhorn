@@ -24,7 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 
 /**
  * Utility class, dealing with files.
@@ -149,24 +149,20 @@ public class FileSupport {
       dest.getParentFile().mkdirs();
       if (dest.exists())
         delete(dest);
-      InputStream in = new FileInputStream(sourceLocation);
-      OutputStream out = new FileOutputStream(dest);
 
-      // Copy the bits from instream to outstream
+      FileChannel source = null;
+      FileChannel destination = null;
       try {
-        byte[] buf = new byte[4048];
-        int len;
-        while ((len = in.read(buf)) > 0) {
-          out.write(buf, 0, len);
-        }
+        source = new FileInputStream(sourceLocation).getChannel();
+        destination = new FileOutputStream(dest).getChannel();
+        destination.transferFrom(source, 0, source.size());
       } finally {
-        if (in != null)
-          in.close();
-        if (out != null) {
-          out.flush();
-          out.close();
-        }
+        if (source != null)
+          source.close();
+        if (destination != null)
+          destination.close();
       }
+            
       if (sourceLocation.length() != dest.length()) {
         log_.warn("Source " + sourceLocation + " and target " + dest
             + " do not have the same length");

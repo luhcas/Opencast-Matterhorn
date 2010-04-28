@@ -55,10 +55,9 @@ public class DistributionRestService {
     this.service = service;
   }
 
-  public void unsetService(DistributionService service) {
-    this.service = null;
-  }
-
+  /** The base URL for this rest endpoint */
+  protected String alias;
+  
   @POST
   @Path("")
   @Produces(MediaType.TEXT_XML)
@@ -98,7 +97,7 @@ public class DistributionRestService {
   }
 
   private String generateDocs() {
-    DocRestData data = new DocRestData("localdistributionservice", "Local Distribution Service", "/distribution/local/rest", notes);
+    DocRestData data = new DocRestData("localdistributionservice", "Local Distribution Service", alias, notes);
 
     // abstract
     data.setAbstract("This service distributes media packages to the Matterhorn feed and engage services.");
@@ -128,6 +127,7 @@ public class DistributionRestService {
     } else {
       String ccServerUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
       logger.info("configured server url is {}", ccServerUrl);
+      alias = (String)cc.getProperties().get("opencast.rest.url");
       if(ccServerUrl == null) {
         serverUrl = UrlSupport.DEFAULT_BASE_URL;
       } else {

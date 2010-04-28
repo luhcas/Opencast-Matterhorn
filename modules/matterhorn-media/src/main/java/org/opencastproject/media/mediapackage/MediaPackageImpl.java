@@ -367,7 +367,7 @@ public final class MediaPackageImpl implements MediaPackage {
     }
     for (Catalog newCatalog : newCatalogs) {
       if (!oldCatalogs.contains(newCatalog)) {
-        manifest.add(newCatalog);
+        add(newCatalog);
       }
     }
   }
@@ -451,7 +451,7 @@ public final class MediaPackageImpl implements MediaPackage {
     }
     for (Track newTrack : newTracks) {
       if (!oldTracks.contains(newTrack)) {
-        manifest.add(newTrack);
+        add(newTrack);
       }
     }
   }
@@ -565,7 +565,7 @@ public final class MediaPackageImpl implements MediaPackage {
     }
     for (Attachment newAttachment : newAttachments) {
       if (!oldAttachments.contains(newAttachment)) {
-        manifest.add(newAttachment);
+        add(newAttachment);
       }
     }
   }

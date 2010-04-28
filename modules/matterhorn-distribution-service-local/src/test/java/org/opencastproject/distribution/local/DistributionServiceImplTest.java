@@ -34,7 +34,7 @@ import java.net.URI;
 
 public class DistributionServiceImplTest {
   
-  private LocalDistributionService service = null;
+  private DownloadDistributionService service = null;
   private MediaPackage mp = null;
   private File distributionRoot = null;
 
@@ -46,7 +46,7 @@ public class DistributionServiceImplTest {
     mp = builder.loadFromXml(this.getClass().getResourceAsStream("/mediapackage.xml"));
     
     distributionRoot = new File("./target/static");
-    service = new LocalDistributionService(distributionRoot);
+    service = new DownloadDistributionService(distributionRoot);
     service.activate(null);
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     service.setWorkspace(workspace);
@@ -68,16 +68,16 @@ public class DistributionServiceImplTest {
     service.distribute(mp, new String[] {"track-1", "catalog-1"}); // "catalog-2" and "notes" are not to be distributed
     File mpDir = new File(distributionRoot, mp.getIdentifier().compact());
     Assert.assertTrue(mpDir.exists());
-    File mediaDir = new File(mpDir, "media");
-    File metadataDir = new File(mpDir, "metadata");
-    File attachmentsDir = new File(mpDir, "attachments");
+    File mediaDir = new File(mpDir, "track");
+    File metadataDir = new File(mpDir, "catalog");
+    File attachmentsDir = new File(mpDir, "attachment");
     Assert.assertTrue(mediaDir.exists());
     Assert.assertTrue(metadataDir.exists());
-    Assert.assertTrue(attachmentsDir.exists());
-    Assert.assertTrue(new File(mediaDir, "track-1.mov").exists()); // the filenames are changed to reflect the element ID
-    Assert.assertTrue(new File(metadataDir, "catalog-1.xml").exists());
-    Assert.assertTrue( ! new File(metadataDir, "mpeg7.xml").exists());
-    Assert.assertTrue( ! new File(attachmentsDir, "attachment.txt").exists());
+    Assert.assertFalse(attachmentsDir.exists());
+    Assert.assertTrue(new File(mediaDir, "media.mov").exists()); // the filenames are changed to reflect the element ID
+    Assert.assertTrue(new File(metadataDir, "dublincore.xml").exists());
+    Assert.assertFalse(new File(metadataDir, "mpeg7.xml").exists());
+    Assert.assertFalse(new File(attachmentsDir, "attachment.txt").exists());
   }
 
 }

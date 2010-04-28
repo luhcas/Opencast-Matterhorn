@@ -89,7 +89,7 @@
 
     <!-- distribute to the local distribution channel -->
     <operation
-      id="distribute_local"
+      id="distribute-download"
       fail-on-error="true"
       exception-handler-workflow="error"
       description="Distribute media to the local distribution channel">

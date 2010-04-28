@@ -189,8 +189,9 @@ final class ManifestImpl {
 
     // Check if element has an id
     if (element.getIdentifier() == null) {
-      if (element instanceof AbstractMediaPackageElement)
+      if (element instanceof AbstractMediaPackageElement) {
         ((AbstractMediaPackageElement) element).setIdentifier(id);
+      }
       else
         throw new UnsupportedElementException(element, "Found unkown element without id");
     }
