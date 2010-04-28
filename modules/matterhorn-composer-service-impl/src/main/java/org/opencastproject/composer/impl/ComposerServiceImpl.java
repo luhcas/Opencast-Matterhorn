@@ -70,7 +70,7 @@ public class ComposerServiceImpl implements ComposerService {
   /** Reference to the workspace service */
   private Workspace workspace = null;
 
-  /** Reference to the database service */
+  /** Reference to the receipt service */
   private ReceiptService receiptService;
 
   /** Id builder used to create ids for encoded tracks */

@@ -32,14 +32,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
@@ -156,8 +154,7 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
         mimeType = MimeTypes.parseMimeType(mimeTypeValue);
 
       // create the catalog
-      Mpeg7Parser mpeg7Parser = new Mpeg7Parser();
-      Mpeg7CatalogImpl mpeg7 = mpeg7Parser.parse(url.toURL().openStream());
+      Mpeg7CatalogImpl mpeg7 = Mpeg7CatalogImpl.newInstance();
       if (id != null && !id.equals(""))
         mpeg7.setIdentifier(id);
 
@@ -191,12 +188,6 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
       throw new UnsupportedElementException("Error while reading catalog information from manifest: " + e.getMessage());
     } catch (NoSuchAlgorithmException e) {
       throw new UnsupportedElementException("Unsupported digest algorithm: " + e.getMessage());
-    } catch (ParserConfigurationException e) {
-      throw new UnsupportedElementException("Unable to create parser for mpeg-7 catalog " + url + ": " + e.getMessage());
-    } catch (IOException e) {
-      throw new UnsupportedElementException("Error while reading mpeg-7 catalog " + url + ": " + e.getMessage());
-    } catch (SAXException e) {
-      throw new UnsupportedElementException("Error while parsing mpeg-7 catalog " + url + ": " + e.getMessage());
     } catch (URISyntaxException e) {
       throw new UnsupportedElementException("Error while reading mpeg-7 catalog " + url + ": " + e.getMessage());
     }

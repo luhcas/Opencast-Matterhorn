@@ -23,6 +23,11 @@
       <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-security-api</artifactId>
+      <version>0.8-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>

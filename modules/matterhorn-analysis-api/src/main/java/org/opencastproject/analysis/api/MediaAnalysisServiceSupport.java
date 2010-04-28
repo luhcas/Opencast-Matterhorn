@@ -18,7 +18,7 @@ package org.opencastproject.analysis.api;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
+import org.opencastproject.receipt.api.Receipt;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -72,10 +72,10 @@ public abstract class MediaAnalysisServiceSupport implements MediaAnalysisServic
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.analysis.api.MediaAnalysisService#analyze(java.net.URL)
+   * @see org.opencastproject.analysis.api.MediaAnalysisService#analyze(java.net.URL, boolean)
    */
   @Override
-  public abstract Mpeg7Catalog analyze(URL mediaUrl) throws MediaAnalysisException;
+  public abstract Receipt analyze(URL mediaUrl, boolean block) throws MediaAnalysisException;
 
   /**
    * {@inheritDoc}
@@ -83,11 +83,10 @@ public abstract class MediaAnalysisServiceSupport implements MediaAnalysisServic
    * This implementation will simply try to extract the element from the media package and then call
    * {@link #analyze(URL)}.
    * 
-   * @see org.opencastproject.analysis.api.MediaAnalysisService#analyze(org.opencastproject.media.mediapackage.MediaPackage,
-   *      java.lang.String)
+   * @see org.opencastproject.analysis.api.MediaAnalysisService#analyze(MediaPackage, String, boolean)
    */
   @Override
-  public Mpeg7Catalog analyze(MediaPackage mediaPackage, String elementId) throws MediaAnalysisException {
+  public Receipt analyze(MediaPackage mediaPackage, String elementId, boolean block) throws MediaAnalysisException {
     if (mediaPackage == null)
       throw new MediaAnalysisException("Media package must not be null");
     if (elementId == null)
@@ -98,7 +97,7 @@ public abstract class MediaAnalysisServiceSupport implements MediaAnalysisServic
       throw new MediaAnalysisException("Element '" + elementId + "' not found in mediapackage " + mediaPackage);
 
     try {
-      return analyze(element.getURI().toURL());
+      return analyze(element.getURI().toURL(), block);
     } catch (MalformedURLException e) {
       throw new MediaAnalysisException("URI of media package element " + element + " cannot be converted to URL", e);
     }

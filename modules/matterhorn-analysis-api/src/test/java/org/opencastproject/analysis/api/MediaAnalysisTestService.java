@@ -15,9 +15,10 @@
  */
 package org.opencastproject.analysis.api;
 
+import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
+import org.opencastproject.receipt.api.Receipt;
 
 import org.junit.Ignore;
 
@@ -47,8 +48,42 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
    * @see org.opencastproject.analysis.api.MediaAnalysisServiceSupport#analyze(java.net.URL)
    */
   @Override
-  public Mpeg7Catalog analyze(URL mediaUrl) throws MediaAnalysisException {
-    return Mpeg7CatalogImpl.newInstance();
+  public Receipt analyze(URL mediaUrl, boolean block) throws MediaAnalysisException {
+    ReceiptStub receipt = new ReceiptStub();
+    receipt.element = Mpeg7CatalogImpl.newInstance();
+    return receipt;
+  }
+
+  class ReceiptStub implements Receipt {
+    MediaPackageElement element;
+    Status status;
+    public MediaPackageElement getElement() {
+      return element;
+    }
+    public String getHost() {
+      return null;
+    }
+    public String getId() {
+      return null;
+    }
+    public Status getStatus() {
+      return status;
+    }
+    public String getType() {
+      return "analysis-test";
+    }
+    public void setElement(MediaPackageElement element) {
+      this.element = element;
+    }
+    public void setHost(String host) {
+    }
+    public void setId(String id) {
+    }
+    public void setStatus(Status status) {
+      this.status = status;
+    }
+    public void setType(String type) {
+    }
   }
 
 }

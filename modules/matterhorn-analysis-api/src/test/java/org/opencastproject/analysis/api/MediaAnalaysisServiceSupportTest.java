@@ -57,9 +57,9 @@ public class MediaAnalaysisServiceSupportTest extends TestCase {
    * .
    */
   public void testAnalyzeMediaPackageString() {
-    assertNotNull(analysis.analyze(mediaPackage, trackId));
+    assertNotNull(analysis.analyze(mediaPackage, trackId, true));
     try {
-      analysis.analyze(mediaPackage, "non-existent");
+      analysis.analyze(mediaPackage, "non-existent", true);
       fail("Should have failed due to non-existent track id");
     } catch (MediaAnalysisException e) {
       // expected

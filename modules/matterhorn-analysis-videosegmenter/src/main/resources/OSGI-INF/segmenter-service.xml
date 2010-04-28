@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.workflow.handler.ComposeWorkflowOperationHandler" immediate="true">
-  <implementation class="org.opencastproject.workflow.handler.VideoSegmenterWorkflowOperationHandler" />
-  <property name="service.description" value="Videosegmentation Workflow Operation Handler" />
-  <property name="workflow.operation" value="segment" />
+<component name="org.opencastproject.analysis.vsegmenter.VideoSegmenter" immediate="true">
+  <implementation class="org.opencastproject.analysis.vsegmenter.VideoSegmenter" />
+  <property name="service.description" value="Videosegmentation Service" />
   <service>
-    <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
+    <provide interface="org.opencastproject.analysis.api.MediaAnalysisService" />
+    <provide interface="org.opencastproject.analysis.vsegmenter.VideoSegmenter" />
   </service>
-  <reference cardinality="1..1" interface="org.opencastproject.analysis.vsegmenter.VideoSegmenter"
-    name="VideoSegmenterService" policy="static" bind="setVideoSegmenter"/>
-  <reference cardinality="1..1" interface="org.opencastproject.workspace.api.Workspace"
-    name="Workspace" policy="static" bind="setWorkspace"/>
+  <reference cardinality="1..1" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository"
+    name="fileRepo" policy="static" bind="setFileRepo"/>
+  <reference name="receiptService" interface="org.opencastproject.receipt.api.ReceiptService"
+    cardinality="1..1" policy="static" bind="setReceiptService" />
+  <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"
+    cardinality="1..1" policy="static" bind="setTrustedHttpClient" />
 </component>

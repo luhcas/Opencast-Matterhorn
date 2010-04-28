@@ -129,7 +129,6 @@ public class Mpeg7Parser extends DefaultHandler {
     // Did we parse an mpeg-7 document?
     if (!isMpeg7)
       throw new IllegalArgumentException("Content of input stream is not mpeg-7");
-
     return mpeg7Doc;
   }
 

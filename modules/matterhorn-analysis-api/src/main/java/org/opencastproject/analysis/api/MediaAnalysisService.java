@@ -18,7 +18,7 @@ package org.opencastproject.analysis.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
+import org.opencastproject.receipt.api.Receipt;
 
 import java.net.URL;
 
@@ -32,9 +32,11 @@ public interface MediaAnalysisService {
    * 
    * @param mediaUrl
    *          url of the file location
+   * @param block
+   *          whether to block the calling thread until the analysis is complete
    * @return the metadata
    */
-  Mpeg7Catalog analyze(URL mediaUrl) throws MediaAnalysisException;
+  Receipt analyze(URL mediaUrl, boolean block) throws MediaAnalysisException;
 
   /**
    * Gets the specified track from the media package and returns metadata in an mpeg-7 format.
@@ -43,9 +45,11 @@ public interface MediaAnalysisService {
    *          the media package
    * @param trackId
    *          identifier of a track contained in the media package
+   * @param block
+   *          whether to block the calling thread until the analysis is complete
    * @return the metadata
    */
-  Mpeg7Catalog analyze(MediaPackage mediaPackage, String trackId) throws MediaAnalysisException;
+  Receipt analyze(MediaPackage mediaPackage, String trackId, boolean block) throws MediaAnalysisException;
 
   /**
    * Returns the flavor that this media analysis service implementation produces. The flavor will usually be of type

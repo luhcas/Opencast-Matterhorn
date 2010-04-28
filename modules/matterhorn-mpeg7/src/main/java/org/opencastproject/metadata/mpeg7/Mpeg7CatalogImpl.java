@@ -18,9 +18,12 @@ package org.opencastproject.metadata.mpeg7;
 
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.CatalogImpl;
+import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeTypes;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -28,6 +31,7 @@ import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +60,12 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   /** Flag used for lazy loading */
   protected boolean isLoaded = false;
 
+  protected TrustedHttpClient trustedHttpClient;
+
+  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
+    this.trustedHttpClient = trustedHttpClient;
+  }
+  
   /** the logging facility provided by log4j */
   final static Logger log_ = LoggerFactory.getLogger(Mpeg7CatalogImpl.class.getName());
 
@@ -63,7 +73,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
    * Creates a new mpeg-7 metadata container.
    * 
    * @param id
-   *          the element identifier withing the package
+   *          the element identifier within the package
    * @param uri
    *          the document location
    * @param size
@@ -152,13 +162,22 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
    */
   private void loadCatalogData() throws IllegalStateException {
     Mpeg7Parser parser = new Mpeg7Parser(this);
+    InputStream in = null;
     try {
       log_.debug("Reading mpeg-7 catalog content from " + uri);
+      if(uri.toURL().getProtocol().startsWith("http")) {
+        HttpGet get = new HttpGet(uri);
+        in = trustedHttpClient.execute(get).getEntity().getContent();
+      } else {
+        in = uri.toURL().openStream();
+      }
       isLoaded = true;
-      parser.parse(uri.toURL().openStream());
+      parser.parse(in);
     } catch (Exception e) {
       isLoaded = false;
       throw new IllegalStateException("Unable to load mpeg-7 catalog data from " + uri + ":" + e.getMessage(), e);
+    } finally {
+      IOUtils.closeQuietly(in);
     }
   }
 
@@ -259,6 +278,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   public Audio addAudioContent(String id, MediaTime time, MediaLocator locator) {
     if (!isLoaded())
       loadCatalogData();
+    this.isLoaded = true;
     MultimediaContentImpl<Audio> content = (MultimediaContentImpl<Audio>) getMultimediaContent(MultimediaContent.Type.AudioType);
     if (content == null) {
       content = new MultimediaContentImpl<Audio>(MultimediaContent.Type.AudioType);
@@ -277,6 +297,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   public Audio removeAudioContent(String id) {
     if (!isLoaded())
       loadCatalogData();
+    this.isLoaded = true;
     MultimediaContentType element = removeContentElement(id, MultimediaContent.Type.AudioType);
     if (element != null)
       return (Audio) element;
@@ -315,6 +336,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   public Video addVideoContent(String id, MediaTime time, MediaLocator locator) {
     if (!isLoaded())
       loadCatalogData();
+    this.isLoaded = true;
     MultimediaContentImpl<Video> content = (MultimediaContentImpl<Video>) getMultimediaContent(MultimediaContent.Type.VideoType);
     if (content == null) {
       content = new MultimediaContentImpl<Video>(MultimediaContent.Type.VideoType);
@@ -333,6 +355,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   public Video removeVideoContent(String id) {
     if (!isLoaded())
       loadCatalogData();
+    this.isLoaded = true;
     MultimediaContentType element = removeContentElement(id, MultimediaContent.Type.VideoType);
     if (element != null)
       return (Video) element;
@@ -371,6 +394,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   public AudioVisual addAudioVisualContent(String id, MediaTime time, MediaLocator locator) {
     if (!isLoaded())
       loadCatalogData();
+    this.isLoaded = true;
     MultimediaContentImpl<AudioVisual> content = (MultimediaContentImpl<AudioVisual>) getMultimediaContent(MultimediaContent.Type.AudioVisualType);
     if (content == null) {
       content = new MultimediaContentImpl<AudioVisual>(MultimediaContent.Type.AudioVisualType);
@@ -389,6 +413,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   public AudioVisual removeAudioVisualContent(String id) {
     if (!isLoaded())
       loadCatalogData();
+    this.isLoaded = true;
     MultimediaContentType element = removeContentElement(id, MultimediaContent.Type.AudioVisualType);
     if (element != null)
       return (AudioVisual) element;

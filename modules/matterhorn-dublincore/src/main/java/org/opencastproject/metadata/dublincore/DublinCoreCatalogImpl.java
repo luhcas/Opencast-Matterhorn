@@ -280,6 +280,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
   @Override
   public void bindPrefix(String prefix, String namespaceName) {
     super.bindPrefix(prefix, namespaceName);
+    this.isLoaded = true;
   }
 
   @SuppressWarnings("unchecked")
@@ -517,6 +518,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
 
   private void _set(EName property, String value, String language,
           EName encodingScheme) {
+    this.isLoaded = true;
     if (value == null) {
       // No value, remove the whole element
       _remove(property, language);
@@ -566,6 +568,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
 
   private void _add(EName property, String value, String language,
           EName encodingScheme) {
+    this.isLoaded = true;
     if (LANGUAGE_UNDEFINED.equals(language)) {
       if (encodingScheme == null) {
         addElement(property, value);
@@ -601,6 +604,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
   }
 
   private void _remove(EName property, String language) {
+    this.isLoaded = true;
     if (LANGUAGE_ANY.equals(language)) {
       removeElement(property);
     } else if (LANGUAGE_UNDEFINED.equals(language)) {
@@ -611,7 +615,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
   }
 
   public void clear() {
-    isLoaded = false;
+    isLoaded = true;
     super.clear();
   }
 

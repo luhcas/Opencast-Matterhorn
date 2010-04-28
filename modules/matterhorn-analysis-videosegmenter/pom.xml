@@ -21,6 +21,12 @@
       <version>0.8-SNAPSHOT</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-working-file-repository-service-api</artifactId>
+      <version>0.8-SNAPSHOT</version>
+    </dependency>
+
     <!--  Thirdparty dependencies -->
 
     <dependency>
@@ -42,6 +48,13 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>2.5.1</version>
       <scope>test</scope>
     </dependency>
 
@@ -86,6 +99,9 @@
             <Import-Package>
               *;resolution:=optional
             </Import-Package>
+            <Service-Component>
+              OSGI-INF/segmenter-service.xml
+            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

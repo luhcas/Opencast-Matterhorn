@@ -17,11 +17,18 @@ package org.opencastproject.metadata.mpeg7;
 
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.metadata.api.CatalogService;
+import org.opencastproject.security.api.TrustedHttpClient;
 
 /**
  * Loads {@link Mpeg7Catalog}s
  */
 public class Mpeg7CatalogService implements CatalogService<Mpeg7Catalog> {
+
+  protected TrustedHttpClient trustedHttpClient;
+  
+  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
+    this.trustedHttpClient = trustedHttpClient;
+  }
 
   /**
    * {@inheritDoc}
@@ -30,7 +37,9 @@ public class Mpeg7CatalogService implements CatalogService<Mpeg7Catalog> {
    */
   @Override
   public Mpeg7Catalog load(Catalog catalog) {
-    return Mpeg7CatalogImpl.fromURI(catalog.getURI());
+    Mpeg7CatalogImpl cat = (Mpeg7CatalogImpl) Mpeg7CatalogImpl.fromURI(catalog.getURI());
+    cat.trustedHttpClient = trustedHttpClient;
+    return cat;
   }
 
   /**
@@ -40,7 +49,9 @@ public class Mpeg7CatalogService implements CatalogService<Mpeg7Catalog> {
    */
   @Override
   public Mpeg7Catalog newInstance() {
-    return Mpeg7CatalogImpl.newInstance();
+    Mpeg7CatalogImpl cat = Mpeg7CatalogImpl.newInstance();
+    cat.trustedHttpClient = trustedHttpClient;
+    return cat;
   }
 
 }

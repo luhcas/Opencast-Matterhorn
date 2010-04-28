@@ -20,16 +20,29 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.metadata.mpeg7.ContentSegment;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.MultimediaContentType;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
+import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.receipt.api.ReceiptService;
+import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
+import de.schlichtherle.io.File;
+import de.schlichtherle.io.FileOutputStream;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.Iterator;
 
@@ -68,6 +81,9 @@ public class VideoSegmenterTest {
     mediaUrl = VideoSegmenterTest.class.getResource(mediaResource).toURI().toURL();
   }
 
+  static String collection;
+  static String filename;
+  
   /**
    * Setup for the video segmenter service, including creation of a mock workspace.
    * 
@@ -76,9 +92,39 @@ public class VideoSegmenterTest {
    */
   @Before
   public void setUp() throws Exception {
+    WorkingFileRepository fileRepo = EasyMock.createNiceMock(WorkingFileRepository.class);
+    EasyMock.expect(fileRepo.putInCollection((String)EasyMock.anyObject(), (String)EasyMock.anyObject(),
+            (InputStream)EasyMock.anyObject())).andAnswer(new IAnswer<URI>() {
+              public URI answer() throws Throwable {
+                Object[] args = EasyMock.getCurrentArguments();
+                collection = (String)args[0];
+                filename = (String)args[1] + ".xml";
+                InputStream in = (InputStream)args[2];
+                File file = new File("target", filename);
+                FileOutputStream out = new FileOutputStream(file);
+                IOUtils.copy(in, out);
+                IOUtils.closeQuietly(out);
+                IOUtils.closeQuietly(in);
+                return file.toURI();
+              }
+            });
+    EasyMock.replay(fileRepo);
+    
+    Receipt receipt = new ReceiptStub();
+    
+    ReceiptService receiptService = EasyMock.createNiceMock(ReceiptService.class);
+    EasyMock.expect(receiptService.createReceipt((String)EasyMock.anyObject())).andReturn(receipt).anyTimes();
+    EasyMock.replay(receiptService);
+    
     vsegmenter = new VideoSegmenter();
+    vsegmenter.setFileRepo(fileRepo);
+    vsegmenter.setReceiptService(receiptService);
   }
 
+  public void tearDown() throws Exception {
+    FileUtils.deleteQuietly(new File("target", filename));
+  }
+  
   @Test
   public void testImageExtraction() {
     // int undefined = -16777216;
@@ -87,7 +133,8 @@ public class VideoSegmenterTest {
 
   @Test
   public void testAnalyze() {
-    Mpeg7Catalog catalog = vsegmenter.analyze(mediaUrl);
+    Receipt receipt = vsegmenter.analyze(mediaUrl, true);
+    Mpeg7Catalog catalog = (Mpeg7Catalog) receipt.getElement();
 
     // Is there multimedia content in the catalog?
     assertTrue("Audiovisual content was expected", catalog.hasVideoContent());
@@ -120,4 +167,35 @@ public class VideoSegmenterTest {
     assertFalse("Found an unexpected third video segment", si.hasNext());
   }
 
+  class ReceiptStub implements Receipt {
+    MediaPackageElement element;
+    Status status;
+    public MediaPackageElement getElement() {
+      return element;
+    }
+    public String getHost() {
+      return null;
+    }
+    public String getId() {
+      return null;
+    }
+    public Status getStatus() {
+      return status;
+    }
+    public String getType() {
+      return "analysis-test";
+    }
+    public void setElement(MediaPackageElement element) {
+      this.element = element;
+    }
+    public void setHost(String host) {
+    }
+    public void setId(String id) {
+    }
+    public void setStatus(Status status) {
+      this.status = status;
+    }
+    public void setType(String type) {
+    }
+  }
 }
