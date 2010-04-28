@@ -18,20 +18,19 @@ export WORKING_DIR=/tmp/cainstallscript                  # Directory where this 
 export TRUNK_URL=http://opencast.jira.com/svn/MH/trunk
 export TRUNK_SUBDIR=matterhorn-trunk                     # Subdir under the selected user $HOME directory
 export OC_DIR=/opencast                                  # Opencast configuration directory
-export DEV_RULES=matterhorn.rules                        # File containing the rules to be applied by udev to the configured devices -- not a pun!
-export CONFIG_SCRIPT=device_config.sh                    # File name for the bash script containing the device configuration routine
+export DEV_RULES=/etc/udev/rules.d/matterhorn.rules      # File containing the rules to be applied by udev to the configured devices -- not a pun!
+export CONFIG_SCRIPT=device_config.sh                    # File name for the bash script under HOME containing the device configuration routine
 export DEFAULT_CORE_URL=http://localhost:8080            # Default value for the core url
 export VGA2USB_DRV=epiphan_driver                        # Subdirectory under HOME where the epiphan driver will be downloaded to
-export INSTALL_LIST=.matterhorn_packages                 # File under the CA_SUBDIR to hold a list of packages actually installed by this script
 export SRC_LIST=/etc/apt/sources.list                    # Location of the file 'sources.list'
 export BKP_SUFFIX=backup                                 # Suffix to be appended to the backup file for sources.list
-export STARTUP_SCRIPT=matterhorn.conf                    # Name of the script which is set up to configure and run felix upon startup
+export STARTUP_SCRIPT=/etc/init/matterhorn.conf          # Path of the script which is set up to configure and run felix upon startup
 
 export INSTALL_RUN=true                                  # The subsidiary scripts will check for this variable to check they are being run from here
 
 
 # Third-party dependencies variables
-export PKG_LIST=(alsa-utils v4l-conf ivtv-utils maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg ntp)
+export PKG_LIST=(alsa-utils v4l-conf ivtv-utils curl maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg ntp)
                                                                          # List of required packages
 export FELIX_FILENAME=org.apache.felix.main.distribution-2.0.4.tar.gz
 export FELIX_URL=http://apache.mirror.iweb.ca/felix/$FELIX_FILENAME
@@ -46,7 +45,7 @@ export JAVA_PATTERN=java-6-sun-1                                         # A reg
 export M2_SUFFIX=.m2/repository                                          # Path to the maven2 repository, under the user home
 
 export DEFAULT_NTP_SERVER=ntp.ubuntu.com                                 # Default ntp server
-export NTP_CONF=/etc/ntp.conf
+export NTP_CONF=/etc/ntp.conf                                            # Location for the ntp configuration files
 
 # Required scripts for installation
 SETUP_USER=./setup_user.sh
@@ -174,7 +173,8 @@ else
     echo -e "\n\nThe capture agent will start automatically after rebooting the system."
     echo "However, you can start it manually by running ${FELIX_HOME}/bin/start_matterhorn.sh"
     echo "Please direct your questions / suggestions / etc. to the list: matterhorn@opencastproject.org"
-    read -e -n 1 -s -p "\nHit any key to exit..."
+    echo
+    read -n 1 -s -p "Hit any key to exit..."
     clear
 
 fi

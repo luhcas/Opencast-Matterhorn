@@ -9,6 +9,8 @@ SRC_LIST=                                                # Location for sources.
 SRC_LIST_BKP=                                            # Location for the backup file
 OC_DIR=                                                  # Location of matterhorn files
 CA_DIR=                                                  # The directory where the capture agent files live
+STARTUP_SCRIPT=                                          # Path to the matterhorn startup script
+RULES_FILE=                                              # Path to the file specifying rules for the installed devices
 PKG_LIST=                                                # List of packages to be uninstalled
 
 # Checks if this script is being run with root privileges, exiting if it doesn't
@@ -38,10 +40,10 @@ apt-get autoremove &> /dev/null
 mv $SRC_LIST.$SRC_LIST_BKP $SRC_LIST &> /dev/null
 
 # Remove the configuration that starts matterhorn on boot
-rm -f /etc/init/matterhorn.conf
+rm -f $STARTUP_SCRIPT
 
 # Remove the udev rules that manage the devices
-rm -f /etc/udev/rules.d/95-perso.rules
+rm -f $RULES_FILE
 
 # Remove the capture storage directory
 rm -rf $OC_DIR
@@ -53,18 +55,18 @@ rm -f /usr/lib/libjv4linfo.so
 rm -rf $CA_DIR
 
 # Remove the user and their home directory
-read -p "Do you want to remove the matterhorn user? (no) " response
+read -p "Do you want to remove the matterhorn user (y/N)? " response
 until [[ $(echo ${response:-no} | grep -i '^[yn]') ]]; do
-    read -p "Please answer (Y)es or (n)o: (no) " response
+    read -p "Please answer (y)es or (N)o: " response
 done
 
 if [[ $(echo ${response:-no} | grep -i '^y') ]]; then
-    echo "Deleting user $USER... "
+    echo -n "Deleting user $USER... "
     userdel -r -f $USER &> /dev/null
     echo "Done"
 fi
 
 # Kills felix
-kill -9 $(ps U matterhorn | grep java | cut -d ' ' -f 2)
+kill -9 $(ps U matterhorn 2> /dev/null | grep java | cut -d ' ' -f 2) 2> /dev/null
 
-echo -e "\n\nDone uninstalling Matterhorn Capture Agent." 
+echo -e "\n\nDone uninstalling Matterhorn Capture Agent.\n\n" 

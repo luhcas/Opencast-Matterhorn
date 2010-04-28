@@ -46,8 +46,9 @@ done
 sed -i "/capture.device/d" $CAPTURE_PROPS
 
 config=$CA_DIR/$CONFIG_SCRIPT
+rules=tmp.rules
 
-touch $DEV_RULES
+touch $rules
 rm -f $config
 touch $config
 
@@ -63,7 +64,7 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     sysdevice=$(cat $realpath/../../device 2> /dev/null)
 
     if [[ $? -eq 0 ]]; then
-	echo "KERNEL==\"video[0-9]\", SYSFS{vendor}==\"$vendor\", SYSFS{device}==\"$sysdevice\", SYMLINK+=\"$symlinkName\"" >> $DEV_RULES
+	echo "KERNEL==\"video[0-9]\", SYSFS{vendor}==\"$vendor\", SYSFS{device}==\"$sysdevice\", SYMLINK+=\"$symlinkName\"" >> $rules
 	#device="/dev/$symlinkName"
     fi
 
@@ -153,8 +154,8 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     echo
 done
 
-mv $DEV_RULES /etc/udev/rules.d
-chown root:video /etc/udev/rules.d/$DEV_RULES
+mv $rules $DEV_RULES
+chown root:video /$DEV_RULES
 
 
 # Audio device

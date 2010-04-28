@@ -10,8 +10,6 @@ if [[ ! $INSTALL_RUN ]]; then
     exit 1
 fi
 
-STARTUP_SCRIPT=/etc/init/$STARTUP_SCRIPT
-
 echo "# Start the matterhorn capture agent" >> $STARTUP_SCRIPT
 
 # This section sets up some enviroment variables
@@ -38,6 +36,5 @@ echo "su matterhorn -c \"exec /bin/bash ${FELIX_HOME}/bin/start_matterhorn.sh\" 
 echo "end script" >> $STARTUP_SCRIPT
 
 
-# Copy the script to its final location under /etc/init and set the appropriate permissions
-#mv $STARTUP_SCRIPT /etc/init
+# Set the appropriate permissions
 chown root:root $STARTUP_SCRIPT

@@ -77,23 +77,35 @@ sed -i "s/^SRC_LIST=[^\ ]*\?\(.*\)$/SRC_LIST=${SRC_LIST//\//\\/}\1/" "$CLEANUP"
 sed -i "s/^SRC_LIST_BKP=[^\ ]*\?\(.*\)$/SRC_LIST_BKP=${SRC_LIST_BKP//\//\\/}\1/" "$CLEANUP"
 sed -i "s/^OC_DIR=[^\ ]*\?\(.*\)$/OC_DIR=${OC_DIR//\//\\/}\1/" "$CLEANUP"
 sed -i "s/^CA_DIR=[^\ ]*\?\(.*\)$/CA_DIR=${CA_DIR//\//\\/}\1/" "$CLEANUP"
-sed -i "s/^ON_STARTUP_FILE=[^\ ]*\?\(.*\)$/ON_STARTUP_FILE=${ON_STARTUP_FILE//\//\\/}\1/" "$CLEANUP"
+sed -i "s/^RULES_FILE=[^\ ]*\?\(.*\)$/RULES_FILE=${DEV_RULES//\//\\/}\1/" "$CLEANUP"
+sed -i "s/^CA_DIR=[^\ ]*\?\(.*\)$/CA_DIR=${CA_DIR//\//\\/}\1/" "$CLEANUP"
+sed -i "s/^STARTUP_SCRIPT=[^\ ]*\?\(.*\)$/STARTUP_SCRIPT=${STARTUP_SCRIPT//\//\\/}\1/" "$CLEANUP"
 
 # Write the uninstalled package list to the cleanup.sh template
 if [[ ${#PKG_LIST[@]} -gt 0 ]]; then
-    sed -i "s/^PKG_LIST=.*$/PKG_LIST=( ${PKG_LIST[@]} )" $CLEANUP
+    sed -i "s/^PKG_LIST=.*$/PKG_LIST=( ${PKG_LIST[@]} )/" $CLEANUP
 else
-    sed -i "s/^PKG_LIST=.*$/PKG_LIST=" $CLEANUP
+    sed -i "s/^PKG_LIST=.*$/PKG_LIST=/" $CLEANUP
 fi
 
 echo "Done"
 
 # Prompt for the location of the cleanup script
 unset location
-read -p "Please enter the matterhorn to store the cleanup script ($START_PATH): " location
-while [[ ! -d "${location:-$START_PATH}"  ]]; do
-    read -p "Please enter a valid location ($START_PATH): " location
+
+while [[ true  ]]; do
+    read -p "Please enter the location to store the cleanup script ($START_PATH): " location
+    if [[ -d "${location:=$START_PATH}" ]]; then
+	if [[ -e $location ]]; then
+	    read -p "File $location/$CLEANUP already exists. Do you wish to overwrite it (y/N)? " response
+	    if [[ -n "$(echo ${response:-N} | grep -i '^y')" ]]; then
+		break;
+	    fi
+	fi
+    else
+	echo "Invalid location. $location is not a directory."
+    fi
 done
 
-cp $CLEANUP ${location:=$START_PATH} 2> /dev/null
+cp $CLEANUP ${location:=$START_PATH}
 chown --reference=$location $location/$CLEANUP
