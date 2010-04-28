@@ -21,14 +21,21 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
-@Entity(name="metadata")
-@Table(name="MH_METADATA")
+import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
+
+@Entity(name="Metadata")
+@Table(name="Metadata")
+@XmlType(name="Metadata")
 public class Metadata {
   @Id
   @GeneratedValue
+  @XmlAttribute(name="id")
   protected long id;
-
+  
+  @XmlAttribute(name="key")
   @Column(name="key")
   protected String key;
   @Column(name="value")
@@ -62,4 +69,29 @@ public class Metadata {
     this.value = value;
   }  
   
+  public String toString () {
+    return "("+id+") "+key+":"+value;
+  }
+  
+  public boolean equals (Object o) {
+    if (o == null) return false;
+    if (! (o instanceof Metadata)) return false;
+    Metadata m = (Metadata) o;
+    if (m.getKey().equals(getKey()) && m.getValue().equals(getValue())) return true;
+    return false;
+  }
+  
+  public int hashCode () {
+    return getKey().hashCode();
+  }
+  
+  /**
+   * valueOf function is called by JAXB to bind values. This function calls the ScheduleEvent factory.
+   *
+   *  @param    xmlString string representation of an event.
+   *  @return   instantiated event SchdeulerEventJaxbImpl.
+   */
+  public static Metadata valueOf(String xmlString) throws Exception {
+    return (Metadata) SchedulerBuilder.getInstance().parseMetadata(xmlString);
+  }   
 }

@@ -16,6 +16,9 @@
 package org.opencastproject.scheduler.endpoint;
 
 import org.apache.commons.io.IOUtils;
+import org.opencastproject.scheduler.impl.jpa.Event;
+import org.opencastproject.scheduler.impl.jpa.Metadata;
+import org.opencastproject.scheduler.impl.jpa.RecurringEvent;
 
 import java.io.InputStream;
 
@@ -95,4 +98,34 @@ public class SchedulerBuilder {
   public SchedulerFilterJaxbImpl parseSchedulerFilterJaxbImpl(String in) throws Exception {
     return parseSchedulerFilterJaxbImpl(IOUtils.toInputStream(in, "UTF8"));
   }
+
+  public Event parseEvent(String in) throws Exception {
+    return parseEvent(IOUtils.toInputStream(in, "UTF8"));
+  }
+  
+  public Event parseEvent(InputStream in) throws Exception {
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
+                                  Event.class).getValue();
+  }
+  
+  public RecurringEvent parseRecurringEvent(String in) throws Exception {
+    return parseRecurringEvent(IOUtils.toInputStream(in, "UTF8"));
+  }
+  
+  public RecurringEvent parseRecurringEvent(InputStream in) throws Exception {
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
+                                  RecurringEvent.class).getValue();
+  }  
+  
+  public Metadata parseMetadata(String in) throws Exception {
+    return parseMetadata(IOUtils.toInputStream(in, "UTF8"));
+  }
+  
+  public Metadata parseMetadata(InputStream in) throws Exception {
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
+                                  Metadata.class).getValue();
+  }   
 }

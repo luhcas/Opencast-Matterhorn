@@ -294,7 +294,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
    */  
   public boolean valid () {
     logger.debug("Title Valid?");
-    if (metadata.get("title") == null) return false;
+    if (getTitle() == null) return false;
     logger.debug("Start time Valid?");
     if (start.getTime() == 0) return false;
     logger.debug("End time Valid?");
@@ -431,7 +431,7 @@ public class SchedulerEventImpl implements SchedulerEvent {
       metadataList.add(new Metadata(key, metadata.get(key)));
     }
     metadataList.add(new Metadata("time.start", new Long(getStartdate().getTime()).toString()));
-    metadataList.add(new Metadata("time.end", new Long(getStartdate().getTime()).toString()));
+    metadataList.add(new Metadata("time.end", new Long(getEnddate().getTime()).toString()));
     String attendeeString = new String();
     for (String attendee : attendees) attendeeString += attendee + ",";
     metadataList.add(new Metadata("attendees", attendeeString));

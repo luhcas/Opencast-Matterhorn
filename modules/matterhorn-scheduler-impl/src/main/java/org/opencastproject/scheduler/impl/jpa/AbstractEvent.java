@@ -1,0 +1,82 @@
+/**
+ *  Copyright 2009, 2010 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+
+package org.opencastproject.scheduler.impl.jpa;
+
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.persistence.EntityManagerFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public abstract class AbstractEvent {
+  private static final Logger logger = LoggerFactory.getLogger(AbstractEvent.class);
+  
+  protected Hashtable<String, String> metadataTable;
+  
+  protected EntityManagerFactory emf = null;
+
+  
+  public String generateId() {
+    return UUID.randomUUID().toString();
+  }
+  
+  
+  protected void buildMetadataTable (List<Metadata> metadata) {
+    metadataTable = new Hashtable<String, String>(); // Buffer metadata in Hashtable for quick 
+    for (Metadata data : metadata) metadataTable.put(data.key, data.value); // Overwrite with event specific data
+  }
+  
+  public String getValue (String key) throws IncompleteDataException {
+   if (metadataTable == null) throw new IncompleteDataException ("Metadata table not generated");
+   return metadataTable.get(key);
+   
+  }
+  
+  public Set<String> getKeySet () throws IncompleteDataException {
+    if (metadataTable == null) throw new IncompleteDataException ("Metadata table not generated");
+    return metadataTable.keySet();
+  }
+  
+  public Date getValueAsDate (String key) throws IncompleteDataException {
+    if (metadataTable == null) throw new IncompleteDataException ("Metadata table not generated");
+    if (! containsKey(key)) {
+      logger.warn("Could not convert to date, because of missing entry for {}.", key);
+      return null;
+    }
+    try {
+      return new Date(Long.parseLong(metadataTable.get(key)));
+    } catch (Exception e) {
+      logger.warn("Could not parse value of {}: {}", key, metadataTable.get(key));
+      return null;
+    }
+  }
+  
+  public boolean containsKey (String key)  throws IncompleteDataException{
+    if (metadataTable == null) throw new IncompleteDataException ("Metadata table not generated");
+    return metadataTable.containsKey(key);
+  }
+
+  public void setEntityManagerFactory (EntityManagerFactory emf) {
+    this.emf = emf;
+  }  
+  
+}

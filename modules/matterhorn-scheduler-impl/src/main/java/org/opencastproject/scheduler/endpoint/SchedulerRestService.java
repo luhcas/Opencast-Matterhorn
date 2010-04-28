@@ -17,6 +17,9 @@ package org.opencastproject.scheduler.endpoint;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
+import org.opencastproject.scheduler.impl.jpa.Event;
+import org.opencastproject.scheduler.impl.jpa.RecurringEvent;
+import org.opencastproject.scheduler.impl.jpa.SchedulerServiceImplJPA;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -50,7 +53,7 @@ import javax.xml.bind.Unmarshaller;
 @Path("/")
 public class SchedulerRestService {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerRestService.class);
-  private SchedulerService service;
+  private SchedulerServiceImplJPA service;
   
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
   
@@ -59,7 +62,7 @@ public class SchedulerRestService {
    * @param service
    */
   public void setService(SchedulerService service) {
-    this.service = service;
+    this.service = (SchedulerServiceImplJPA) service;
   }
   
   /**
@@ -71,7 +74,7 @@ public class SchedulerRestService {
   }
   
   /**
-   * The method tha will be called, if the service will be activated
+   * The method that will be called, if the service will be activated
    * @param cc The ComponentContext of this service
    */
   public void activate(ComponentContext cc) {
@@ -98,12 +101,71 @@ public class SchedulerRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("getEvent/{eventID}")
   public Response getEvent(@PathParam("eventID") String eventID) {
-    logger.info("Event Lookup: {}", eventID);
+    logger.debug("Event Lookup: {}", eventID);
     SchedulerEvent event = service.getEvent(eventID);
     if (event == null) return Response.status(Status.BAD_REQUEST).build();
     return Response.ok(new SchedulerEventJaxbImpl(event)).build();
   }
   
+  /**
+   * Get a specific scheduled event.
+   * @param eventID The unique ID of the event.
+   * @return event XML with the data of the event
+   */
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("event/{eventID}")
+  public Response getSingleEvent(@PathParam("eventID") String eventID) {
+    logger.debug("Single event Lookup: {}", eventID);
+    try {
+      Event event = service.getEventJPA(eventID);
+      if (event == null) return Response.status(Status.BAD_REQUEST).build();
+      return Response.ok(event).build();
+    } catch (Exception e) {
+      logger.warn("Single event Lookup failed: {}", eventID);
+      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+    }
+  }
+  
+  /**
+   * Get a specific scheduled event.
+   * @param eventID The unique ID of the event.
+   * @return event XML with the data of the event
+   */
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("recurrence/{recurringEventID}")
+  public Response getRecurringEvent(@PathParam("recurringEventID") String eventID) {
+    logger.debug("Recurrent event Lookup: {}", eventID);
+    try {
+      RecurringEvent event = service.getRecurringEvent(eventID);
+      if (event == null) return Response.status(Status.BAD_REQUEST).build();
+      return Response.ok(event).build();
+    } catch (Exception e) {
+      logger.warn("Recurrent event Lookup failed: {}", eventID);
+      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+    }
+  } 
+  
+  /**
+   * Get a specific scheduled event.
+   * @param eventID The unique ID of the event.
+   * @return event XML with the data of the event
+   */
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("recurrence/{recurringEventID}/events")
+  public Response getEventsFromRecurringEvent(@PathParam("recurringEventID") String eventID) {
+    logger.debug("Getting events from recurrent event: {}", eventID);
+    try {
+      RecurringEvent event = service.getRecurringEvent(eventID);
+      if (event == null) return Response.status(Status.BAD_REQUEST).build();
+      return Response.ok(event).build();
+    } catch (Exception e) {
+      logger.warn("Getting events from recurrent event failed: {}", eventID);
+      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+    }
+  }  
   /**
    * Gets a XML with the Dublin Core metadata for the specified event. 
    * @param eventID The unique ID of the event. 

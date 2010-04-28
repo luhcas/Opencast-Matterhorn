@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -43,8 +44,10 @@ import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.scheduler.endpoint.SchedulerRestService;
-import org.opencastproject.scheduler.impl.dao.SchedulerServiceImplDAO;
 import org.opencastproject.scheduler.impl.jpa.Event;
+import org.opencastproject.scheduler.impl.jpa.IncompleteDataException;
+import org.opencastproject.scheduler.impl.jpa.Metadata;
+import org.opencastproject.scheduler.impl.jpa.RecurringEvent;
 import org.opencastproject.scheduler.impl.jpa.SchedulerServiceImplJPA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +92,6 @@ public class SchedulerServiceImplTest {
       Assert.fail(e.getMessage());
     }    
     datasource = connectToDatabase(new File(storageRoot));
-    service = new SchedulerServiceImplDAO(datasource);
     // set Metadata Mapping Files. This depends on if its called from OSGI or in a regular case.
     
     // Collect the persistence properties
@@ -97,15 +99,22 @@ public class SchedulerServiceImplTest {
     props.put("javax.persistence.nonJtaDataSource", datasource);
     props.put("eclipselink.ddl-generation", "create-tables");
     props.put("eclipselink.ddl-generation.output-mode", "database");
-    
+//    
     serviceJPA = new SchedulerServiceImplJPA();
     serviceJPA.setPersistenceProvider(new PersistenceProvider());
     serviceJPA.setPersistenceProperties(props);
+//    try {
+//      serviceJPA.setDataSource(datasource);
+//    } catch (SQLException e1) {
+//      Assert.fail("Could not connect to Database");
+//    }
     serviceJPA.activate(null);    
+    
+    service = serviceJPA;
 
     try {
-      ((SchedulerServiceImplDAO)service).setDublinCoreGenerator(new DublinCoreGenerator(new FileInputStream(resourcesRoot+ File.separator+"config"+File.separator+"dublincoremapping.properties")));
-      ((SchedulerServiceImplDAO)service).setCaptureAgentMetadataGenerator(new CaptureAgentMetadataGenerator(new FileInputStream(resourcesRoot+ File.separator+"config"+File.separator+"captureagentmetadatamapping.properties")));
+      ((SchedulerServiceImpl)service).setDublinCoreGenerator(new DublinCoreGenerator(new FileInputStream(resourcesRoot+ File.separator+"config"+File.separator+"dublincoremapping.properties")));
+      ((SchedulerServiceImpl)service).setCaptureAgentMetadataGenerator(new CaptureAgentMetadataGenerator(new FileInputStream(resourcesRoot+ File.separator+"config"+File.separator+"captureagentmetadatamapping.properties")));
     } catch (FileNotFoundException e) {
       Assert.fail(e.getMessage());
     } catch (IOException e) {
@@ -139,6 +148,21 @@ public class SchedulerServiceImplTest {
     Assert.assertNotNull(eventStored.getID());
     SchedulerEvent eventLoaded = serviceJPA.getEvent(eventStored.getID());
     Assert.assertEquals(eventStored, eventLoaded);
+    
+    Event eventModified = serviceJPA.getEventJPA(eventLoaded.getID());
+    logger.info("State of the loaded event {}.", eventModified);
+    
+    eventModified.getMetadata().add(new Metadata("stupid.unused.key","no matter what"));
+    for (int i = 0; i < eventModified.getMetadata().size(); i++) {
+      if (eventModified.getMetadata().get(i).getKey().equals("creator") || eventModified.getMetadata().get(i).getKey().equals("series-id")) 
+        eventModified.getMetadata().remove(i);
+    }
+    
+    serviceJPA.updateEvent(eventModified);
+    
+    Event eventReloaded = serviceJPA.getEventJPA(eventModified.getEventId());
+    
+    logger.info("State of the updated event {}.", eventReloaded);
   }
   
   @Test
@@ -149,10 +173,16 @@ public class SchedulerServiceImplTest {
     Assert.assertNotNull(eventUpdated);
     Assert.assertNotNull(eventUpdated.getID());
     
-    // retrive event
+    // retrieve event
     SchedulerEvent loadedEvent = service.getEvent(eventUpdated.getID());
     logger.debug("loaded: {} ",loadedEvent);
     Assert.assertEquals(loadedEvent.getLocation(), event.getLocation());
+    Assert.assertEquals(loadedEvent.getStartdate(), event.getStartdate());
+    Assert.assertEquals(loadedEvent.getEnddate(), event.getEnddate());
+    Assert.assertEquals(loadedEvent.getContributor(), event.getContributor());
+    Assert.assertEquals(loadedEvent.getCreator(), event.getCreator());
+    Assert.assertEquals(loadedEvent.getDevice(), event.getDevice());
+    Assert.assertEquals(loadedEvent.getTitle(), event.getTitle());
     
     //test iCalender export
     CalendarBuilder calBuilder = new CalendarBuilder();
@@ -220,11 +250,15 @@ public class SchedulerServiceImplTest {
     filter.setDeviceFilter("something");
     allEvents = service.getEvents(filter);
     eventFound = false;
-    for (int i = 0; i < allEvents.length; i++ ) 
-      if (allEvents[i].equals(eventUpdated)) eventFound= true; 
+    for (int i = 0; i < allEvents.length; i++ ) {    
+      if (allEvents[i].equals(eventUpdated)) {
+        Assert.fail("FALSE EVENT:  filtered for "+filter+" in" + allEvents[i]);
+      }
+    }
     Assert.assertFalse(eventFound);    
     
     // update event
+    eventUpdated.setEnddate(new Date(System.currentTimeMillis()+900000));
     eventUpdated.setStartdate(new Date(System.currentTimeMillis()+20000));
     eventUpdated.setContributor("Matterhorn");
     Assert.assertTrue(service.updateEvent(eventUpdated));
@@ -286,6 +320,46 @@ public class SchedulerServiceImplTest {
       Assert.fail();
     }
     service.removeEvent(event.getID());
+  }
+  
+  @Test
+  public void testRecurrence () {
+    RecurringEvent recurringEvent = new RecurringEvent("FREQ=WEEKLY;BYDAY=TU");
+    GregorianCalendar now = new GregorianCalendar();
+    GregorianCalendar start = new GregorianCalendar(now.get(GregorianCalendar.YEAR)+1, 1, 1);
+    GregorianCalendar end = new GregorianCalendar(now.get(GregorianCalendar.YEAR)+1, 6, 1);
+    recurringEvent.getMetadata().add(new Metadata("", ""+start.getTimeInMillis()));
+    recurringEvent.getMetadata().add(new Metadata("recurrence.end", ""+end.getTimeInMillis()));
+    recurringEvent.getMetadata().add(new Metadata("recurrence.duration", "900000"));
+    recurringEvent.getMetadata().add(new Metadata("title", "recurrence test title"));
+    
+    RecurringEvent storedEvent = serviceJPA.addRecurringEvent(recurringEvent);
+    
+    Assert.assertNotNull(storedEvent);
+    Assert.assertNotNull(storedEvent.getRecurringEventId());
+    
+    RecurringEvent loadedEvent = serviceJPA.getRecurringEvent(storedEvent.getRecurringEventId());
+    
+    Assert.assertNotNull(loadedEvent);
+    Assert.assertEquals(storedEvent.getValueAsDate("recurrence.start"), loadedEvent.getValueAsDate("recurrence.start"));
+    
+    Assert.assertNotNull(loadedEvent.getEvents());
+    
+    Event oldEvent = null;
+    for (Event e : loadedEvent.getEvents()) {
+      Assert.assertTrue(e.getStartdate().before(e.getEnddate()));
+      try {
+        Assert.assertTrue(e.getValue("title").equals(loadedEvent.getValue("title")));
+      } catch (IncompleteDataException e1) {
+        Assert.fail("Recurring event Metadata could not be processed");
+      }
+      if (oldEvent != null) {
+        Assert.assertTrue(oldEvent.getStartdate().before(e.getStartdate()));
+      }
+      oldEvent = e;
+    }
+    
+    
   }
   
 }

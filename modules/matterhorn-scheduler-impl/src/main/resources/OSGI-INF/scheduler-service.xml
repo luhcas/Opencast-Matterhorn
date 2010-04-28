@@ -2,13 +2,13 @@
 <component name="org.opencastproject.scheduler.api.SchedulerService"
   immediate="true" activate="activate" deactivate="deactivate">
   <implementation
-    class="org.opencastproject.scheduler.impl.dao.SchedulerServiceImplDAO" />
+    class="org.opencastproject.scheduler.impl.jpa.SchedulerServiceImplJPA" />
   <property name="service.description" value="Scheduler Service" />
   <service>
     <provide interface="org.opencastproject.scheduler.api.SchedulerService" />
-    <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
-  <reference name="dataSource" 
-    interface="javax.sql.DataSource" 
-    cardinality="1..1" policy="static" bind="setDataSource" />
+  <reference name="persistence" interface="javax.persistence.spi.PersistenceProvider"
+    cardinality="1..1" policy="static" bind="setPersistenceProvider" />    
+  <reference name="props" interface="java.util.Map"
+    cardinality="1..1" policy="static" target="(type=persistence)" bind="setPersistenceProperties" />  
 </component>

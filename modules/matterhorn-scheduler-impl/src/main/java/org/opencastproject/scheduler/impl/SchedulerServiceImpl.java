@@ -143,9 +143,7 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerService#getRecordingEvents()
    */
-  public SchedulerEvent [] getCapturingEvents() {
-    return getCapturingEvents();
-  }
+  public abstract SchedulerEvent [] getCapturingEvents();
   
   /**
    * {@inheritDoc}
@@ -162,7 +160,7 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
   public void activate(ComponentContext componentContext) {
     logger.info("SchedulerService activated.");
     if (componentContext == null) {
-      logger.error("Could not activate because of missing ComponentContext");
+      logger.warn("Could not activate because of missing ComponentContext");
       return;
     }
     this.componentContext = componentContext;
