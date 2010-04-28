@@ -16,6 +16,9 @@
 package org.opencastproject.inspection.impl.endpoints;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.receipt.api.Receipt;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -25,8 +28,10 @@ import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Status;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 import java.net.URI;
 
@@ -37,6 +42,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * A service endpoint to expose the {@link MediaInspectionService} via REST.
@@ -44,11 +51,13 @@ import javax.ws.rs.core.Response;
 @Path("/")
 public class MediaInspectionRestEndpoint {
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionRestEndpoint.class);
-  
+
   protected MediaInspectionService service;
+
   public void setService(MediaInspectionService service) {
     this.service = service;
   }
+
   public void unsetService(MediaInspectionService service) {
     this.service = null;
   }
@@ -70,9 +79,25 @@ public class MediaInspectionRestEndpoint {
       return Response.serverError().status(400).build();
     }
   }
-  
+
   @GET
-  @Path("/receipt/{id}.xml")
+  @Produces(MediaType.TEXT_XML)
+  @Path("enrich")
+  public Response enrichTrack(@QueryParam("mediaPackageElement") String mediaPackageElement,
+          @QueryParam("override") boolean override) {
+    checkNotNull(service);
+    try {
+      MediaPackageElement mpe = getElement(mediaPackageElement);
+      Receipt r = service.enrich(mpe, override, false);
+      return Response.ok(r).build();
+    } catch (Exception e) {
+      logger.info(e.getMessage());
+      return Response.serverError().status(400).build();
+    }
+  }
+
+  @GET
+  @Path("receipt/{id}.xml")
   @Produces(MediaType.TEXT_XML)
   public Response getReceipt(@PathParam("id") String id) {
     checkNotNull(service);
@@ -103,7 +128,7 @@ public class MediaInspectionRestEndpoint {
     DocRestData data = new DocRestData("inspection", "Media inspection", "/inspection/rest", notes);
     // abstract
     data.setAbstract("This service extracts technical metadata from media files.");
-    // getTrack
+    // inspect
     RestEndpoint endpoint = new RestEndpoint("inspect", RestEndpoint.Method.GET, "/inspect",
             "Analyze a given media file, returning a receipt to check on the status and outcome of the job");
     endpoint.addOptionalParam(new Param("uri", Param.Type.STRING, null, "Location of the media file"));
@@ -112,6 +137,22 @@ public class MediaInspectionRestEndpoint {
     endpoint.addStatus(new Status(400, "Problem retrieving media file or invalid media file or URL"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+
+    // enrich
+    RestEndpoint enrichEndpoint = new RestEndpoint(
+            "enrich",
+            RestEndpoint.Method.GET,
+            "/enrich",
+            "Analyze and add missing metadata of a given media file, returning a receipt to check on the status and outcome of the job");
+    enrichEndpoint.addOptionalParam(new Param("mediaPackageElement", Param.Type.STRING, null,
+            "MediaPackage Element, that should be enriched with metadata"));
+    enrichEndpoint.addOptionalParam(new Param("override", Param.Type.BOOLEAN, null,
+            "Should the existing metadata values remain"));
+    enrichEndpoint.addFormat(Format.xml());
+    enrichEndpoint.addStatus(Status.OK("XML encoded receipt is returned"));
+    enrichEndpoint.addStatus(new Status(400, "Problem retrieving media file or invalid media file or URL"));
+    enrichEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, enrichEndpoint);
 
     // getReceipt
     RestEndpoint receiptEndpoint = new RestEndpoint("getReceipt", RestEndpoint.Method.GET, "/receipt/{id}.xml",
@@ -122,14 +163,15 @@ public class MediaInspectionRestEndpoint {
     receiptEndpoint.addStatus(new Status(400, "Problem retrieving receipt"));
     receiptEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, receiptEndpoint);
-    
+
     return DocUtil.generate(data);
   }
 
   /**
-   * Checks if the service or services are available,
-   * if not it handles it by returning a 503 with a message
-   * @param services an array of services to check
+   * Checks if the service or services are available, if not it handles it by returning a 503 with a message
+   * 
+   * @param services
+   *          an array of services to check
    */
   protected void checkNotNull(Object... services) {
     if (services != null) {
@@ -139,6 +181,15 @@ public class MediaInspectionRestEndpoint {
         }
       }
     }
+  }
+
+  public MediaPackageElement getElement(String xml) throws Exception {
+    if (xml == null)
+      return null;
+    DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    Document doc = docBuilder.parse(IOUtils.toInputStream(xml));
+    return MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromManifest(
+            doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
   }
 
 }

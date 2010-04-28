@@ -71,8 +71,7 @@ public class MediaInspectionServiceDelegatingImpl implements MediaInspectionServ
 
   @Override
   public Receipt enrich(MediaPackageElement original, boolean override, boolean block) {
-    // TODO: change to delegate once it is available in rest endpoint
-    return local.enrich(original, override, block);
+    return delegate.enrich(original, override, block);
   }
 
   @Override

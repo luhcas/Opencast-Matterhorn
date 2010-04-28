@@ -33,11 +33,21 @@ import org.apache.http.message.BasicNameValuePair;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * Proxies a remote media inspection service for use as a JVM-local service.
@@ -96,8 +106,38 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
 
   @Override
   public Receipt enrich(MediaPackageElement original, boolean override, boolean block) {
-    // TODO make enrich method available in rest endpoint
-    return null;
+    logger.info("Enriching a Track(" + original.getIdentifier() + ") on a remote server: " + remoteHost);
+    List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
+    try {
+      queryStringParams.add(new BasicNameValuePair("mediaPackageElement", getXML(original)));
+    } catch (Exception e1) {
+      throw new RuntimeException(e1);
+    }
+    queryStringParams.add(new BasicNameValuePair("override", new Boolean(override).toString()));
+
+    String url = remoteHost + "/inspection/rest/enrich?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
+    HttpGet get = new HttpGet(url);
+    try {
+      return trustedHttpClient.execute(get, receiptResponseHandler);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public String getXML(MediaPackageElement element) throws Exception {
+    if (element == null)
+      return null;
+    DocumentBuilder docBuilder;
+    docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    Document doc = docBuilder.newDocument();
+    Node node = element.toManifest(doc, null);
+    DOMSource domSource = new DOMSource(node);
+    StringWriter writer = new StringWriter();
+    StreamResult result = new StreamResult(writer);
+    Transformer transformer;
+    transformer = TransformerFactory.newInstance().newTransformer();
+    transformer.transform(domSource, result);
+    return writer.toString();
   }
 
   // @Override

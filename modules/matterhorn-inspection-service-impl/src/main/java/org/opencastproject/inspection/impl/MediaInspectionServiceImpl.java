@@ -106,16 +106,17 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   public void activate() {
     executor = Executors.newFixedThreadPool(4);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.inspection.api.MediaInspectionService#getReceipt(java.lang.String)
    */
   @Override
   public Receipt getReceipt(String id) {
     return receiptService.getReceipt(id);
   }
-  
+
   public Receipt inspect(final URI uri, final boolean block) {
     logger.debug("inspect(" + uri + ") called, using workspace " + workspace);
 
@@ -144,7 +145,8 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
           rs.updateReceipt(receipt);
           return null; // TODO: does the contract for this service define what to do if the file isn't valid media?
         } else {
-          MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+          MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance()
+                  .newElementBuilder();
           TrackImpl track;
           MediaPackageElement element;
           try {
@@ -210,10 +212,10 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         }
       }
     };
-    
+
     Future<Track> future = executor.submit(command);
-    
-    if(block) {
+
+    if (block) {
       try {
         future.get();
       } catch (Exception e) {
@@ -223,7 +225,8 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     return receipt;
   }
 
-  protected Callable<MediaPackageElement> getEnrichTrackCommand(final Track originalTrack, final boolean override, final Receipt receipt) {
+  protected Callable<MediaPackageElement> getEnrichTrackCommand(final Track originalTrack, final boolean override,
+          final Receipt receipt) {
     final ReceiptService rs = receiptService;
     return new Callable<MediaPackageElement>() {
       public MediaPackageElement call() throws Exception {
@@ -349,10 +352,11 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
           return track;
         }
       }
-    };    
+    };
   }
-  
-  protected Callable<MediaPackageElement> getEnrichElementCommand(final MediaPackageElement element, final boolean override, final Receipt receipt) {
+
+  protected Callable<MediaPackageElement> getEnrichElementCommand(final MediaPackageElement element,
+          final boolean override, final Receipt receipt) {
     final ReceiptService rs = receiptService;
     return new Callable<MediaPackageElement>() {
       public MediaPackageElement call() throws Exception {
@@ -375,10 +379,10 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
             throw new RuntimeException(e);
           }
         }
-        if(element.getMimeType() == null || override) {
+        if (element.getMimeType() == null || override) {
           try {
             element.setMimeType(MimeTypes.fromURL(file.toURI().toURL()));
-          } catch(UnknownFileTypeException e) {
+          } catch (UnknownFileTypeException e) {
             logger.info("unable to determine the mime type for {}", file.getName());
           }
         }
@@ -389,25 +393,27 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       }
     };
   }
-  
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(org.opencastproject.media.mediapackage.AbstractMediaPackageElement, boolean, boolean)
+   * 
+   * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(org.opencastproject.media.mediapackage.AbstractMediaPackageElement,
+   *      boolean, boolean)
    */
   @Override
   public Receipt enrich(final MediaPackageElement element, final boolean override, final boolean block) {
     Callable<MediaPackageElement> command;
     final Receipt receipt = receiptService.createReceipt(RECEIPT_TYPE);
-    if(element instanceof Track) {
+    if (element instanceof Track) {
       final Track originalTrack = (Track) element;
       command = getEnrichTrackCommand(originalTrack, override, receipt);
     } else {
       command = getEnrichElementCommand(element, override, receipt);
     }
-    
+
     Future<MediaPackageElement> future = executor.submit(command);
-    
-    if(block) {
+
+    if (block) {
       try {
         future.get();
       } catch (Exception e) {
@@ -416,7 +422,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     }
     return receipt;
   }
-  
+
   private MediaContainerMetadata getFileMetadata(File file) {
     if (file == null) {
       throw new IllegalArgumentException("file to analyze cannot be null");
