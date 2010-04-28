@@ -87,7 +87,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.inspection.api.MediaInspectionService#inspect(java.net.URI)
+   * @see org.opencastproject.inspection.api.MediaInspectionService#inspect(java.net.URI, boolean)
    */
   @Override
   public Receipt inspect(URI uri, boolean block) {
@@ -104,6 +104,12 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(org.opencastproject.media.mediapackage.AbstractMediaPackageElement,
+   *      boolean, boolean)
+   */
   @Override
   public Receipt enrich(MediaPackageElement original, boolean override, boolean block) {
     logger.info("Enriching a Track(" + original.getIdentifier() + ") on a remote server: " + remoteHost);
@@ -140,24 +146,11 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
     return writer.toString();
   }
 
-  // @Override
-  // public Track enrich(Track originalTrack, Boolean override) {
-  // URI uri = originalTrack.getURI();
-  // logger.info("Enriching a Track(" + uri + ") on a remote server: " + remoteHost);
-  // List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
-  //    
-  // queryStringParams.add(new BasicNameValuePair("track", originalTrack));
-  // queryStringParams.add(new BasicNameValuePair("override", uri.toString()));
-  //
-  // String url = remoteHost + "/inspection/rest/inspect/" + URLEncodedUtils.format(queryStringParams, "UTF-8");
-  // HttpGet get = new HttpGet(url);
-  // try {
-  // return trustedHttpClient.execute(get, trackResponseHandler);
-  // } catch (Exception e) {
-  // throw new RuntimeException(e);
-  // }
-  // }
-
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.inspection.api.MediaInspectionService#getReceipt(java.lang.String)
+   */
   @Override
   public Receipt getReceipt(String id) {
     logger.info("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);

@@ -69,16 +69,32 @@ public class MediaInspectionServiceDelegatingImpl implements MediaInspectionServ
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(org.opencastproject.media.mediapackage.AbstractMediaPackageElement,
+   *      boolean, boolean)
+   */
   @Override
   public Receipt enrich(MediaPackageElement original, boolean override, boolean block) {
     return delegate.enrich(original, override, block);
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.inspection.api.MediaInspectionService#getReceipt(java.lang.String)
+   */
   @Override
   public Receipt getReceipt(String id) {
     return delegate.getReceipt(id);
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.inspection.api.MediaInspectionService#inspect(java.net.URI, boolean)
+   */
   @Override
   public Receipt inspect(URI uri, boolean block) {
     return delegate.inspect(uri, block);

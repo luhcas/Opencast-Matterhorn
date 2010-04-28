@@ -68,7 +68,6 @@ import java.util.concurrent.Future;
 public class MediaInspectionServiceImpl implements MediaInspectionService, ManagedService {
   // FIXME move this to media info analyzer service
   public static final String CONFIG_ANALYZER_MEDIAINFOPATH = "inspection.analyzer.mediainfopath";
-
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImpl.class);
 
   Workspace workspace;
@@ -117,6 +116,11 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     return receiptService.getReceipt(id);
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.inspection.api.MediaInspectionService#inspect(java.net.URI, boolean)
+   */
   public Receipt inspect(final URI uri, final boolean block) {
     logger.debug("inspect(" + uri + ") called, using workspace " + workspace);
 

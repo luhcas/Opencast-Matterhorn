@@ -32,12 +32,17 @@ public interface MediaInspectionService {
   /**
    * Inspect a track based on a given uri to the track and put the gathered data into the track
    * 
-   * @param uri the uri to a track in a media package
-   * @param block whether this operation should block the calling thread, or return the receipt immediately without
-   *  the inspected track.
-   * @return the updated track OR null if no metadata can be found
-   * @throws IllegalStateException if the analyzer cannot be loaded
-   * @throws RuntimeException if there is a failure during media package update
+   * @param uri
+   *          the uri to a track in a media package
+   * @param block
+   *          whether this operation should block the calling thread, or return the receipt immediately without the
+   *          inspected track.
+   * @return the receipt of this job, that can be used to check the current status of inspect method and retrieve track
+   *         with added metadata when done
+   * @throws IllegalStateException
+   *           if the analyzer cannot be loaded
+   * @throws RuntimeException
+   *           if there is a failure during media package update
    */
   Receipt inspect(URI uri, boolean block);
 
@@ -49,16 +54,21 @@ public interface MediaInspectionService {
    * @param override
    *          In case of conflict between existing and automatically obtained metadata this switch selects preference.
    *          False..The original metadata will be kept, True..The new metadata will be used.
-   * @return the updated track OR null if no metadata found
-   * @throws IllegalStateException if the analyzer cannot be loaded
-   * @throws RuntimeException if there is a failure during media package update
+   * @return the receipt of this job, that can be used to check the current status of enrich method and retrieve
+   *         enriched element when done
+   * @throws IllegalStateException
+   *           if the analyzer cannot be loaded
+   * @throws RuntimeException
+   *           if there is a failure during media package update
    */
   Receipt enrich(MediaPackageElement original, boolean override, boolean block);
 
   /**
-   * Gets the receipt with a given ID.  This can be used to retrieve the status and outcome of a non-blocking call to
+   * Gets the receipt with a given ID. This can be used to retrieve the status and outcome of a non-blocking call to
    * {@link #inspect(URI, boolean)} or {@link #enrich(MediaPackageElement, boolean, boolean)}.
-   * @param id The id of the receipt
+   * 
+   * @param id
+   *          The id of the receipt
    * @return The receipt, or null if not found
    */
   Receipt getReceipt(String id);
