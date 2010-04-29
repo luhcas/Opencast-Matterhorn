@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.inbox.InboxService" immediate="false" activate="activate" deactivate="deactivate">
+	
+  <implementation class="org.opencastproject.inbox.InboxService" />
+  <property name="service.description" value="Inbox file watcher" />
+  <service>
+     <provide interface="org.osgi.service.cm.ManagedService"/>
+     <provide interface="org.opencastproject.inbox.InboxService"/>
+  </service>
+  <property name="service.pid" type="String" value="org.opencastproject.inbox.InboxService.properties"/>
+  <reference bind="setWorkingFileRepositoryService" cardinality="1..1" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository" name="WorkingFileRepository" policy="static" unbind="unsetWorkingFileRepositoryService"/>
+</component>
