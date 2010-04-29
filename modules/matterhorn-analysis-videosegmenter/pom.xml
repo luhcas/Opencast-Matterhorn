@@ -98,7 +98,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Export-Package>org.opencastproject.analysis.vsegmenter</Export-Package>
+            <Export-Package>
+              org.opencastproject.analysis.vsegmenter,
+              org.opencastproject.analysis.vsegmenter.endpoint
+            </Export-Package>
             <Embed-Dependency>
               jmf;inline=true
             </Embed-Dependency>
@@ -106,6 +109,7 @@
               *;resolution:=optional
             </Import-Package>
             <Service-Component>
+              OSGI-INF/segmenter-rest.xml,
               OSGI-INF/segmenter-service.xml
             </Service-Component>
           </instructions>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.analysis.vsegmenter.endpoint.VideoSegmenterRestEndpoint"
+  immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.analysis.vsegmenter.endpoint.VideoSegmenterRestEndpoint" />
+  <property name="service.description" value="Vide Segmenter REST Endpoint" />
+  <property name="opencast.rest.url" value="/vsegmenter/rest" />
+  <service>
+    <provide interface="org.opencastproject.analysis.vsegmenter.endpoint.VideoSegmenterRestEndpoint" />
+  </service>
+  <reference name="videoSegmenter" interface="org.opencastproject.analysis.vsegmenter.VideoSegmenter"
+    cardinality="1..1" policy="static" bind="setVideoSegmenter" />
+</component>

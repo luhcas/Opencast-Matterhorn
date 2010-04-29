@@ -38,6 +38,13 @@ public interface MediaAnalysisService {
   Receipt analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException;
 
   /**
+   * Gets the receipt with this identifier
+   * @param id The ID of the receipt
+   * @return The receipt, or null if none is found.
+   */
+  Receipt getReceipt(String id);
+
+  /**
    * Returns the flavor that this media analysis service implementation produces. The flavor will usually be of type
    * <code>mpeg-7</code> and contain a specific subtype such as <code>segments</code> or <code>text</code>.
    * 

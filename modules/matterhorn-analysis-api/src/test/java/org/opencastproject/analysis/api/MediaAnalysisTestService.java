@@ -52,6 +52,15 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
     return receipt;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.analysis.api.MediaAnalysisService#getReceipt(java.lang.String)
+   */
+  @Override
+  public Receipt getReceipt(String id) {
+    return null;
+  }
+  
   class ReceiptStub implements Receipt {
     MediaPackageElement element;
     Status status;

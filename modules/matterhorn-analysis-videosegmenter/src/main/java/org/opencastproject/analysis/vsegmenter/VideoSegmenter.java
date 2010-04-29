@@ -330,6 +330,15 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   }
 
   /**
+   * {@inheritDoc}
+   * @see org.opencastproject.analysis.api.MediaAnalysisService#getReceipt(java.lang.String)
+   */
+  @Override
+  public Receipt getReceipt(String id) {
+    return receiptService.getReceipt(id);
+  }
+
+  /**
    * Returns the segments for the movie accessible through the frame grabbing control.
    * 
    * @param video
@@ -493,5 +502,4 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
     return composedTrack;
   }
-
 }
