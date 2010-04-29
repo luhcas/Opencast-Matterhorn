@@ -37,6 +37,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>pause</td>
+	<td>5000</td>
+	<td>5000</td>
+</tr>
+<tr>
 	<td>waitForTextNotPresent</td>
 	<td>00:00:00 of 00:00:00</td>
 	<td></td>
@@ -52,21 +57,20 @@
 	<td>nonsense</td>
 </tr>
 <tr>
-	<td>fireEvent</td>
+	<td>keyPress</td>
 	<td>oc_edit-time</td>
-	<td>blur</td>
+	<td>\13</td>
 </tr>
 <tr>
-	<td>waitForText</td>
+	<td>pause</td>
+	<td>2000</td>
+	<td>2000</td>
+</tr>
+<tr>
+	<td>verifyValue</td>
 	<td>oc_current-time</td>
-	<td>00:00:01</td>
+	<td>regexp:00:00:\d\d</td>
 </tr>
-<tr>
-	<td>verifyElementPresent</td>
-	<td>css=#oc_btn-play-pause[title^=&quot;Pause&quot;]</td>
-	<td></td>
-</tr>
-
 </tbody></table>
 </body>
 </html>
