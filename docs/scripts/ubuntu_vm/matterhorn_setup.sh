@@ -193,6 +193,11 @@ else
 
   echo "**** Do you want to install OpenCaps? [y/N]"
   read opencaps
+  if [ $opencaps = "y" ] || [ $opencaps = "Y" ]; then
+    echo "**** Install OpenCaps as Matterhorn plugin only? [Y/n]"
+    read opencapsminimal
+  fi
+
 
   # update felix config (url)
   sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" $CONF_DIR/config.properties
@@ -233,7 +238,11 @@ else
   
   # Install opencaps?
   if [ $opencaps = "y" ] || [ $opencaps = "Y" ]; then
-    /home/opencast/opencaps.sh
+    if [ $opencapsminimal = "n" ] || [ $opencaps = "N" ]; then
+      /home/opencast/opencaps.sh
+    else
+      /home/opencast/opencaps_matterhorn_only.sh
+    fi
   else
     echo "opencaps will NOT be installed."
   fi

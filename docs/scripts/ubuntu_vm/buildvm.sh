@@ -65,6 +65,7 @@ sudo ubuntu-vm-builder vmw6 karmic --arch 'i386' --mem '512' --cpus 1 \
 --addpkg libtiff4-dev --addpkg ssh --addpkg maven2 --addpkg subversion \
 --addpkg wget --addpkg curl --addpkg update-motd --addpkg ntp \
 --addpkg expect-dev --addpkg expect --addpkg vim --addpkg nano \
+--addpkg gstreamer0.10-plugins* --addpkg gstreamer0.10-ffmpeg \
 --addpkg acpid --exec $HOME/postinstall.sh
 
 #change the vm to use nat networking instead of bridged
@@ -109,6 +110,8 @@ sudo cp rc.local mnt/etc/rc.local
 sudo chmod 755 mnt/etc/rc.local
 sudo cp opencaps.sh mnt/home/opencast/opencaps.sh
 sudo chmod 755 mnt/home/opencast/opencaps.sh
+sudo cp opencaps.sh mnt/home/opencast/opencaps_matterhorn_only.sh
+sudo chmod 755 mnt/home/opencast/opencaps_matterhorn_only.sh
 
 sudo mkdir mnt/opt/matterhorn
 
@@ -133,12 +136,12 @@ echo "===================="
 echo "==Installing Red5==="
 echo "===================="
 
-if [ ! -e red5-0.9.0 ]; then
-wget http://www.red5.org/downloads/0_9/red5-0.9.0.tar.gz
-tar -xzf red5-0.9.0.tar.gz
+if [ ! -e red5-0.9.1 ]; then
+wget http://www.red5.org/downloads/0_9/red5-0.9.1.tar.gz
+tar -xzf red5-0.9.1.tar.gz
 fi
 
-sudo cp -r red5-0.9.0 mnt/opt/matterhorn/red5
+sudo cp -r red5-0.9.1 mnt/opt/matterhorn/red5
 sudo cp red5 mnt/etc/init.d/
 sudo ln -s /etc/init.d/red5 mnt/etc/rc0.d/S87red5
 sudo ln -s /etc/init.d/red5 mnt/etc/rc1.d/S87red5
