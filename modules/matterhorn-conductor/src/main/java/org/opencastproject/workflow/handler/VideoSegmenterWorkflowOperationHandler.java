@@ -89,7 +89,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
     // Segment the media package
     Mpeg7Catalog mpeg7 = null;
     try {
-      Receipt receipt = videosegmenter.analyze(mediaPackage, track.getIdentifier(), true);
+      Receipt receipt = videosegmenter.analyze(track, true);
       mpeg7 = (Mpeg7Catalog)receipt.getElement();
       mediaPackage.add(mpeg7);
     } catch (Exception e) {

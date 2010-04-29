@@ -6,8 +6,10 @@
     <provide interface="org.opencastproject.analysis.api.MediaAnalysisService" />
     <provide interface="org.opencastproject.analysis.vsegmenter.VideoSegmenter" />
   </service>
+  <reference cardinality="1..1" interface="org.opencastproject.composer.api.ComposerService"
+    name="composer" policy="static" bind="setComposerService"/>
   <reference cardinality="1..1" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository"
-    name="fileRepo" policy="static" bind="setFileRepo"/>
+    name="repository" policy="static" bind="setFileRepository"/>
   <reference name="receiptService" interface="org.opencastproject.receipt.api.ReceiptService"
     cardinality="1..1" policy="static" bind="setReceiptService" />
   <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"

@@ -22,8 +22,6 @@ import org.opencastproject.receipt.api.Receipt;
 
 import org.junit.Ignore;
 
-import java.net.URL;
-
 /**
  * Test implementation for the abstract media analysis support.
  */
@@ -48,7 +46,7 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
    * @see org.opencastproject.analysis.api.MediaAnalysisServiceSupport#analyze(java.net.URL)
    */
   @Override
-  public Receipt analyze(URL mediaUrl, boolean block) throws MediaAnalysisException {
+  public Receipt analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException {
     ReceiptStub receipt = new ReceiptStub();
     receipt.element = Mpeg7CatalogImpl.newInstance();
     return receipt;

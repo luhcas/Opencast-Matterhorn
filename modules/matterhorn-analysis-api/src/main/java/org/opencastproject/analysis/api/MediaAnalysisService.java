@@ -16,11 +16,9 @@
 
 package org.opencastproject.analysis.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.receipt.api.Receipt;
-
-import java.net.URL;
 
 /**
  * Api for media analysis implementations, aimed at extracting metadata information from audio and audiovisual tracks.
@@ -28,28 +26,16 @@ import java.net.URL;
 public interface MediaAnalysisService {
 
   /**
-   * Takes the given track and returns metadata in an mpeg-7 format.
+   * Takes the given element and returns a receipt that can be used to get the resulting
+   * {@link org.opencastproject.metadata.mpeg7.Mpeg7Catalog}.
    * 
-   * @param mediaUrl
-   *          url of the file location
+   * @param mediaPackageElement
+   *          element to analyze
    * @param block
    *          whether to block the calling thread until the analysis is complete
    * @return the metadata
    */
-  Receipt analyze(URL mediaUrl, boolean block) throws MediaAnalysisException;
-
-  /**
-   * Gets the specified track from the media package and returns metadata in an mpeg-7 format.
-   * 
-   * @param mediaPackage
-   *          the media package
-   * @param trackId
-   *          identifier of a track contained in the media package
-   * @param block
-   *          whether to block the calling thread until the analysis is complete
-   * @return the metadata
-   */
-  Receipt analyze(MediaPackage mediaPackage, String trackId, boolean block) throws MediaAnalysisException;
+  Receipt analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException;
 
   /**
    * Returns the flavor that this media analysis service implementation produces. The flavor will usually be of type

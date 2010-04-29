@@ -15,13 +15,8 @@
  */
 package org.opencastproject.analysis.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.receipt.api.Receipt;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Convencience implementation that can be used to easily build media analysis service implementations.
@@ -72,40 +67,6 @@ public abstract class MediaAnalysisServiceSupport implements MediaAnalysisServic
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.analysis.api.MediaAnalysisService#analyze(java.net.URL, boolean)
-   */
-  @Override
-  public abstract Receipt analyze(URL mediaUrl, boolean block) throws MediaAnalysisException;
-
-  /**
-   * {@inheritDoc}
-   * <p>
-   * This implementation will simply try to extract the element from the media package and then call
-   * {@link #analyze(URL)}.
-   * 
-   * @see org.opencastproject.analysis.api.MediaAnalysisService#analyze(MediaPackage, String, boolean)
-   */
-  @Override
-  public Receipt analyze(MediaPackage mediaPackage, String elementId, boolean block) throws MediaAnalysisException {
-    if (mediaPackage == null)
-      throw new MediaAnalysisException("Media package must not be null");
-    if (elementId == null)
-      throw new MediaAnalysisException("Element identifier must not be null");
-
-    MediaPackageElement element = mediaPackage.getElementById(elementId);
-    if (element == null)
-      throw new MediaAnalysisException("Element '" + elementId + "' not found in mediapackage " + mediaPackage);
-
-    try {
-      return analyze(element.getURI().toURL(), block);
-    } catch (MalformedURLException e) {
-      throw new MediaAnalysisException("URI of media package element " + element + " cannot be converted to URL", e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
    * @see org.opencastproject.analysis.api.MediaAnalysisService#produces()
    */
   @Override
@@ -127,15 +88,21 @@ public abstract class MediaAnalysisServiceSupport implements MediaAnalysisServic
    * Returns <code>true</code> if the requirements that this media analysis service defines are met.
    * 
    * @return <code>true</code> if all requirements are met
+   * @throws IllegalArgumetnException
+   *           if the element is <code>null</code>
    */
-  protected boolean hasRequirementsFulfilled(MediaPackage mediaPackage) {
-    if (mediaPackage == null)
+  protected boolean isSupported(MediaPackageElement element) throws IllegalArgumentException {
+    if (element == null)
       throw new IllegalArgumentException("Media package cannot be null");
+    
+    if (requires().length == 0)
+      return true;
+    
     for (MediaPackageElementFlavor flavor : requires()) {
-      if (mediaPackage.getCatalogs(flavor).length == 0)
-        return false;
+      if (flavor.equals(element.getFlavor()))
+        return true;
     }
-    return true;
+    return false;
   }
 
 }

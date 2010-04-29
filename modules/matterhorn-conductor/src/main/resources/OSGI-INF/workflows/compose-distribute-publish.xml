@@ -25,6 +25,19 @@
     </operation>
     -->
  
+    <!-- run the videosegmentation -->
+    <!-- UNCOMMENT TO ACTIVATE
+    <operation
+      id="segment"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Extract segments from presentation">
+      <configurations>
+        <configuration key="analysis.track.flavor">presentation/source</configuration>
+      </configurations>
+    </operation>
+    -->
+ 
     <!-- encode to flash download -->
     <operation
       id="compose"

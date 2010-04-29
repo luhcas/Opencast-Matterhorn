@@ -57,6 +57,7 @@ public class MimeTypes {
   public static MimeType XML = null;
   public static MimeType TEXT = null;
   public static MimeType JPG = null;
+  public static MimeType MJPEG = null;
   public static MimeType MPEG4 = null;
   public static MimeType MPEG4_AAC = null;
   public static MimeType DV = null;
@@ -72,6 +73,7 @@ public class MimeTypes {
     XML = MimeTypes.parseMimeType("text/xml");
     TEXT = MimeTypes.parseMimeType("text/plain");
     JPG = MimeTypes.parseMimeType("image/jpg");
+    MJPEG = MimeTypes.parseMimeType("video/x-motion-jpeg");
     MPEG4 = MimeTypes.parseMimeType("video/mp4");
     MPEG4_AAC = MimeTypes.parseMimeType("video/x-m4v");
     DV = MimeTypes.parseMimeType("video/x-dv");

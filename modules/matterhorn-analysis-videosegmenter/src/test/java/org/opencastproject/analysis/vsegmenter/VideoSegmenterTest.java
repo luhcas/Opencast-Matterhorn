@@ -21,6 +21,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.track.TrackImpl;
 import org.opencastproject.metadata.mpeg7.ContentSegment;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
@@ -28,6 +31,7 @@ import org.opencastproject.metadata.mpeg7.MultimediaContentType;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.receipt.api.Receipt;
 import org.opencastproject.receipt.api.ReceiptService;
+import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
 import de.schlichtherle.io.File;
@@ -43,7 +47,6 @@ import org.junit.Test;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URL;
 import java.util.Iterator;
 
 /**
@@ -67,7 +70,7 @@ public class VideoSegmenterTest {
   protected VideoSegmenter vsegmenter = null;
 
   /** The media url */
-  protected static URL mediaUrl = null;
+  protected static Track track = null;
 
   /**
    * Copies test files to the local file system, since jmf is not able to access movies from the resource section of a
@@ -78,7 +81,9 @@ public class VideoSegmenterTest {
    */
   @BeforeClass
   public static void setUpClass() throws Exception {
-    mediaUrl = VideoSegmenterTest.class.getResource(mediaResource).toURI().toURL();
+    track = TrackImpl.fromURI(VideoSegmenterTest.class.getResource(mediaResource).toURI());
+    track.setFlavor(MediaPackageElements.PRESENTATION_SOURCE);
+    track.setMimeType(MimeTypes.MJPEG);
   }
 
   static String collection;
@@ -117,7 +122,7 @@ public class VideoSegmenterTest {
     EasyMock.replay(receiptService);
     
     vsegmenter = new VideoSegmenter();
-    vsegmenter.setFileRepo(fileRepo);
+    vsegmenter.setFileRepository(fileRepo);
     vsegmenter.setReceiptService(receiptService);
   }
 
@@ -133,7 +138,7 @@ public class VideoSegmenterTest {
 
   @Test
   public void testAnalyze() {
-    Receipt receipt = vsegmenter.analyze(mediaUrl, true);
+    Receipt receipt = vsegmenter.analyze(track, true);
     Mpeg7Catalog catalog = (Mpeg7Catalog) receipt.getElement();
 
     // Is there multimedia content in the catalog?
@@ -198,4 +203,5 @@ public class VideoSegmenterTest {
     public void setType(String type) {
     }
   }
+
 }

@@ -32,10 +32,11 @@ import java.net.URI;
  */
 public class MediaAnalaysisServiceSupportTest extends TestCase {
 
-  MediaAnalysisServiceSupport analysis = null;
+  MediaAnalysisServiceSupport analyzer = null;
   MediaPackageElementFlavor resultingFlavor = MediaAnalysisFlavor.TEXTS_FLAVOR;
   MediaPackageElementFlavor[] requiredFlavors = new MediaPackageElementFlavor[] { MediaAnalysisFlavor.SEGMENTS_FLAVOR };
   MediaPackage mediaPackage = null;
+  Track track = null;
   String trackId = "track-1";
 
   /**
@@ -44,11 +45,11 @@ public class MediaAnalaysisServiceSupportTest extends TestCase {
    * @see junit.framework.TestCase#setUp()
    */
   protected void setUp() throws Exception {
-    analysis = new MediaAnalysisTestService(resultingFlavor, requiredFlavors);
+    analyzer = new MediaAnalysisTestService(resultingFlavor, requiredFlavors);
     mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-    Track t = TrackImpl.fromURI(new URI("http://localhost/track.mov"));
-    t.setIdentifier(trackId);
-    mediaPackage.add(t);
+    track = TrackImpl.fromURI(new URI("http://localhost/track.mov"));
+    track.setIdentifier(trackId);
+    mediaPackage.add(track);
   }
 
   /**
@@ -57,43 +58,44 @@ public class MediaAnalaysisServiceSupportTest extends TestCase {
    * .
    */
   public void testAnalyzeMediaPackageString() {
-    assertNotNull(analysis.analyze(mediaPackage, trackId, true));
-    try {
-      analysis.analyze(mediaPackage, "non-existent", true);
-      fail("Should have failed due to non-existent track id");
-    } catch (MediaAnalysisException e) {
-      // expected
-    }
+    assertNotNull(analyzer.analyze(track, true));
   }
 
   /**
    * Test method for {@link org.opencastproject.analysis.api.MediaAnalysisServiceSupport#produces()}.
    */
   public void testProduces() {
-    assertNotNull(analysis.produces());
-    assertEquals(MediaAnalysisFlavor.TEXTS_FLAVOR, analysis.produces());
+    assertNotNull(analyzer.produces());
+    assertEquals(MediaAnalysisFlavor.TEXTS_FLAVOR, analyzer.produces());
   }
 
   /**
    * Test method for {@link org.opencastproject.analysis.api.MediaAnalysisServiceSupport#requires()}.
    */
   public void testRequires() {
-    assertNotNull(analysis.requires());
-    assertEquals(1, analysis.requires().length);
-    assertEquals(MediaAnalysisFlavor.SEGMENTS_FLAVOR, analysis.requires()[0]);
+    assertNotNull(analyzer.requires());
+    assertEquals(1, analyzer.requires().length);
+    assertEquals(MediaAnalysisFlavor.SEGMENTS_FLAVOR, analyzer.requires()[0]);
   }
 
   /**
    * Test method for
-   * {@link org.opencastproject.analysis.api.MediaAnalysisServiceSupport#hasRequirementsFulfilled(org.opencastproject.media.mediapackage.MediaPackage)}
+   * {@link org.opencastproject.analysis.api.MediaAnalysisServiceSupport#isSupported(org.opencastproject.media.mediapackage.MediaPackageElement)}
    * .
    */
-  public void testHasRequirementsFulfilled() {
-    assertFalse(analysis.hasRequirementsFulfilled(mediaPackage));
+  public void isSupported() {
+    try {
+      analyzer.isSupported(null);
+    } catch (IllegalArgumentException e) {
+      // This is expected
+    }
+    
+    assertFalse(analyzer.isSupported(track));
+
     Mpeg7CatalogImpl catalog = Mpeg7CatalogImpl.newInstance();
     catalog.setFlavor(MediaAnalysisFlavor.SEGMENTS_FLAVOR);
     mediaPackage.add(catalog);
-    assertTrue(analysis.hasRequirementsFulfilled(mediaPackage));
+    assertTrue(analyzer.isSupported(track));
   }
 
 }
