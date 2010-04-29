@@ -184,7 +184,7 @@ if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
     read -p "Please enter the flavor assigned to ${cleanAudioDevice}: " flavor
     # Grep matches anything that has two fields consisting of exclusively alphanumeric characters or underscores, separated by a single slash '/'
     while [[ -z $(echo $flavor | grep '^[^/][^/]*/[^/][^/]*$') ]]; do
-	read - p "Invalid syntax. The flavors follow the pattern <prefix>/<suffix>: " flavor
+	read -p "Invalid syntax. The flavors follow the pattern <prefix>/<suffix>: " flavor
     done
     echo
     
