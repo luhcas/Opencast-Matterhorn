@@ -79,7 +79,7 @@ public class UploadTest {
 		
 		// Confirm ingest
 		int retries = 0;
-		int timeout = 10;
+		int timeout = 20; // FIXME: This value will be different, depending on CPU speed, workflow definitions, etc
 		while (retries < timeout) {
 			Thread.sleep(1000);
 			
