@@ -79,6 +79,7 @@
         <module>modules/matterhorn-caption-api</module>
         <module>modules/matterhorn-caption-impl</module>
         <module>modules/matterhorn-admin-ui</module>
+        <module>modules/matterhorn-inbox</module>
       </modules>
     </profile>
     <profile>
