@@ -156,7 +156,7 @@ Button.ccOn
   upSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_up');
   overSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_up');
   downSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_down');
-  disabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_up');
+  disabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_disable');
   selectedUpSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_up'); 
   selectedOverSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_up');
   selectedDownSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_up');
@@ -190,6 +190,19 @@ Button.ccOff
     font-size: 9; 
 }
 
+.videocontrollerTextInput
+{
+	color: #000000;
+    font-size: 9;
+    background-color: #FFFFFF; 
+}
+
+.videocontrollerTextInputError
+{
+    color: #000000;
+    font-size: 9; 
+    background-color: #E13E23;
+}
 .audioLabel
 {
     color: #000000;
@@ -205,10 +218,23 @@ Button.ccOff
 
 .HSliderSeek
 {
-   thumb-skin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_scrubber');
+   
+   
+   thumbUpSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_scrubber');
+   thumbDownSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_scrubber_down');
+   thumbOverSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_scrubber');
+   
+   
+   
+   
+   
    trackSkin:  Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber');
+   trackHighlightSkin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber_highlight');
+   track-over-skin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scruber_empty');
    showTrackHighlight:true;
-   themeColor: #FA6E23;
+   allowTrackClick:true;
+  
+  
 }
 
 .HSliderVolume
@@ -281,7 +307,7 @@ Button.ccOff
 
 .volumeBackground
 {
-    borderSkin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_volume_controls');
+    borderSkin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_volume');
 }
 
 .scrubberBackground

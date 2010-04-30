@@ -378,6 +378,17 @@ Opencast.Initialize = (function ()
                 Opencast.Player.stopFastForward();
             }
         });
+        $('#oc_current-time').keydown(function (event) 
+        {
+            if (event.keyCode === 37) 
+            {
+                Opencast.Player.doRewind();
+            }
+            else if(event.keyCode === 39)
+            {
+                Opencast.Player.doFastForward();
+            }
+       });
         
         // Handler keyup
         $('#oc_btn-rewind').keyup(function (event) 
@@ -389,15 +400,25 @@ Opencast.Initialize = (function ()
             }
         });
        
-       $('#oc_btn-fast-forward').keyup(function (event) 
-       {
-           if (event.keyCode === 13 || event.keyCode === 32) 
-           {
-               this.className = 'oc_btn-fast-forward-over';
-               Opencast.Player.stopFastForward();
-           } 
-       });
-        
+        $('#oc_btn-fast-forward').keyup(function (event) 
+        {
+            if (event.keyCode === 13 || event.keyCode === 32) 
+            {
+                this.className = 'oc_btn-fast-forward-over';
+                Opencast.Player.stopFastForward();
+            } 
+        });
+        $('#oc_current-time').keyup(function (event) 
+        {
+    	    if (event.keyCode === 37) 
+    	    {
+    	         Opencast.Player.stopRewind();
+    	    }
+    	    else if(event.keyCode === 39)
+    	    {
+    	         Opencast.Player.stopFastForward();
+    	    }
+        });
         
         // to calculate the embed flash height
         var iFrameHeight = document.documentElement.clientHeight;
