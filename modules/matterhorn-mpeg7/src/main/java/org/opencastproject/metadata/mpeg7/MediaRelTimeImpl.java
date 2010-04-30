@@ -17,7 +17,7 @@
 package org.opencastproject.metadata.mpeg7;
 
 /**
- * TODO: Comment me!
+ * <code>MediaTime</code> that contains a relative <code>MediaTimePoint</code>.
  */
 public class MediaRelTimeImpl extends MediaTimeImpl {
 

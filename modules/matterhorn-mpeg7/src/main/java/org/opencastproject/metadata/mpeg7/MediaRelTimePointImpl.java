@@ -23,9 +23,18 @@ import org.w3c.dom.Node;
 import java.util.Formatter;
 
 /**
- * TODO: Comment me!
+ * Implementation of a relative <code>TimePoint</code>.
  */
 public class MediaRelTimePointImpl extends MediaTimePointImpl implements MediaTimePoint {
+
+  /** Time delimiter */
+  private static final String TimeSpecDelimiter = "T";
+
+  /** Fraction delimiter */
+  private static final String FractionSpecDelimiter = "F";
+
+  /** Time separator */
+  private static final String TimeSeparator = ":";
 
   /** Number of milliseconds per second */
   private static final long MS_PER_SECOND = 1000L;
@@ -77,6 +86,64 @@ public class MediaRelTimePointImpl extends MediaTimePointImpl implements MediaTi
     this.second = second;
     this.minute = minute;
     this.hour = hour;
+  }
+
+  /**
+   * Creates a relative timepoint representation from the given time point string.
+   * 
+   * @param text
+   *          the timepoint text representation
+   * @return the the timepoint
+   * @throws IllegalArgumentException
+   *           if <code>text</code> is malformed
+   */
+  public static MediaRelTimePointImpl parseTimePoint(String text) throws IllegalArgumentException {
+    MediaRelTimePointImpl timePoint = new MediaRelTimePointImpl();
+    timePoint.parse(text);
+    return timePoint;
+  }
+
+  /**
+   * Parses a timepoint string.
+   */
+  private void parse(String text) throws IllegalArgumentException {
+    String time = null;
+    String fractions = null;
+    time = text.substring(text.indexOf(TimeSpecDelimiter) + 1, text.indexOf(TimeSpecDelimiter) + 9);
+    fractions = text.substring(text.indexOf(TimeSpecDelimiter) + time.length() + 2);
+    if (fractions.contains(TimeSeparator)) {
+      timeZone = fractions.substring(fractions.length() - 6);
+      fractions = fractions.substring(0, fractions.length() - 7);
+    }
+    parseTime(time);
+    parseFractions(fractions);
+  }
+
+  /**
+   * Parses the time portion of a time point
+   * 
+   * @param time
+   *          the time
+   */
+  private void parseTime(String time) {
+    int firstTimeSeparator = time.indexOf(TimeSeparator);
+    int lastTimeSeparator = time.lastIndexOf(TimeSeparator);
+    if (firstTimeSeparator > -1) {
+      hour = Short.parseShort(time.substring(0, firstTimeSeparator));
+      minute = Short.parseShort(time.substring(firstTimeSeparator + 1, lastTimeSeparator));
+      second = Short.parseShort(time.substring(lastTimeSeparator + 1));
+    }
+  }
+
+  /**
+   * Parses the fractions of a time point.
+   * 
+   * @param fractions
+   *          the fractions
+   */
+  private void parseFractions(String fractions) {
+    this.fractions = Integer.parseInt(fractions.substring(0, fractions.indexOf(FractionSpecDelimiter)));
+    this.fractionsPerSecond = Integer.parseInt(fractions.substring(fractions.indexOf(FractionSpecDelimiter) + 1));
   }
 
   /**

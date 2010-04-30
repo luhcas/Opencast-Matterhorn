@@ -250,7 +250,7 @@ public class Mpeg7Parser extends DefaultHandler {
 
     // Media/Segment time point
     if ("MediaRelTimePoint".equals(localName)) {
-      MediaTimePointImpl tp = MediaTimePointImpl.parseTimePoint(getTagContent());
+      MediaRelTimePointImpl tp = MediaRelTimePointImpl.parseTimePoint(getTagContent());
       if (ParserState.MultimediaContent.equals(state))
         contentTimePoint = tp;
       else if (ParserState.Segment.equals(state)) {
