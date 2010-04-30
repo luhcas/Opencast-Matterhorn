@@ -58,13 +58,13 @@ public class VideoSegmenterTest {
   protected static final String mediaResource = "/scene-change.mov";
 
   /** Duration of whole movie */
-  protected static final int mediaDuration = 20;
+  protected static final long mediaDuration = 20000L;
 
   /** Duration of the first segment */
-  protected static final int firstSegmentDuration = 12;
+  protected static final long firstSegmentDuration = 12000L;
 
   /** Duration of the seconds segment */
-  protected static final int secondSegmentDuration = mediaDuration - firstSegmentDuration;
+  protected static final long secondSegmentDuration = mediaDuration - firstSegmentDuration;
 
   /** The video segmenter */
   protected VideoSegmenter vsegmenter = null;
@@ -153,8 +153,8 @@ public class VideoSegmenterTest {
     assertTrue(si.hasNext());
     ContentSegment firstSegment = si.next();
     MediaTime firstSegmentMediaTime = firstSegment.getMediaTime();
-    long startTime = firstSegmentMediaTime.getMediaTimePoint().getSeconds();
-    long duration = firstSegmentMediaTime.getMediaDuration().getDurationInMilliseconds()/1000;
+    long startTime = firstSegmentMediaTime.getMediaTimePoint().getTimeInMilliseconds();
+    long duration = firstSegmentMediaTime.getMediaDuration().getDurationInMilliseconds();
     assertEquals("Unexepcted start time of second segment", 0, startTime);
     assertEquals("Unexpected duration of first segment", firstSegmentDuration, duration);
 
@@ -163,9 +163,9 @@ public class VideoSegmenterTest {
 
     ContentSegment secondSegment = si.next();
     MediaTime secondSegmentMediaTime = secondSegment.getMediaTime();
-    startTime = secondSegmentMediaTime.getMediaTimePoint().getTimeInMilliseconds()/1000;
-    duration = secondSegmentMediaTime.getMediaDuration().getDurationInMilliseconds()/1000;
-    assertEquals("Unexpected start time of second segment", (firstSegmentMediaTime.getMediaTimePoint().getTimeInMilliseconds()/1000) + firstSegmentDuration, startTime);
+    startTime = secondSegmentMediaTime.getMediaTimePoint().getTimeInMilliseconds();
+    duration = secondSegmentMediaTime.getMediaDuration().getDurationInMilliseconds();
+    assertEquals("Unexpected start time of second segment", firstSegmentDuration, startTime);
     assertEquals("Unexpected duration of second segment", secondSegmentDuration, duration);
 
     // There should be no third segment

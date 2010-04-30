@@ -441,7 +441,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
           lastStableImageTime = t;
           t++;
         } else {
-          // If things look stable, then let's look ahead as much as possible whithout loosing information (which is
+          // If things look stable, then let's look ahead as much as possible without loosing information (which is
           // equal to looking ahead STABILITY_THRESHOLD seconds.
           lastStableImageTime = t;
           t += STABILITY_THRESHOLD;
@@ -453,7 +453,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     // Finish off the last segment
     long startOfSegmentms = startOfSegment * 1000L;
     long durationms = ((long) durationInSeconds - startOfSegment) * 1000;
-    contentSegment.setMediaTime(new MediaTimeImpl(startOfSegmentms, durationms));
+    contentSegment.setMediaTime(new MediaRelTimeImpl(startOfSegmentms, durationms));
     segments.add(contentSegment);
 
     return segments;
