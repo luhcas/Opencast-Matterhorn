@@ -34,6 +34,7 @@ import org.opencastproject.metadata.mpeg7.MediaLocatorImpl;
 import org.opencastproject.metadata.mpeg7.MediaRelTimeImpl;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
+import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.receipt.api.Receipt;
@@ -214,6 +215,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
         PlayerListener playerListener = null;
 
         Mpeg7CatalogImpl mpeg7 = Mpeg7CatalogImpl.newInstance();
+        mpeg7.setFlavor(Mpeg7Catalog.SLIDES_FLAVOR);
+        mpeg7.setReference(new MediaPackageReferenceImpl(element));
         mpeg7.setTrustedHttpClient(trustedHttpClient);
 
         try {
