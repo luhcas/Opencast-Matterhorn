@@ -9,7 +9,7 @@
   <property name="feed.description" value="Episodes from more than one series" />
   <property name="feed.copyright" value="All rights reserved by The Opencast Project" />
   <property name="feed.home" value="/engage/ui" />
-  <property name="feed.entry" value="/engage/ui/watch.html?id={0}" />
+  <property name="feed.entry" value="/engage/ui/embed.html?id={0}" />
   <property name="feed.cover" value="/engage/feed-cover.png" />
   <!--
   <property name="feed.rssflavor" value="engage/rss" />
