@@ -3,8 +3,8 @@
 #
 # Branch a Module
 #
-BRANCH_OLD=0.6
-BRANCH_VER=0.61
+BRANCH_OLD=0.7-SNAPSHOT
+BRANCH_VER=0.7
 JIRA_TKT=MH-3218
 
 WORK_DIR=/Users/mtrehan/Matterhorn/svn
