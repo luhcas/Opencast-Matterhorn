@@ -317,7 +317,7 @@ public class SolrIndexManager {
     }
 
     // Add mpeg7
-    Catalog mpeg7Catalogs[] = mediaPackage.getCatalogs(Mpeg7Catalog.SLIDES_FLAVOR);
+    Catalog mpeg7Catalogs[] = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR);
     if (mpeg7Catalogs.length > 0) {
       Mpeg7Catalog mpeg7Catalog =  mpeg7Service.load(mpeg7Catalogs[0]);
       addMpeg7Metadata(solrEpisodeDocument, mediaPackage, mpeg7Catalog);

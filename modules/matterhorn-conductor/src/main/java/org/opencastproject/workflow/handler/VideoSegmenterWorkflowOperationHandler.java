@@ -62,6 +62,13 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
   /** The composer service */
   private VideoSegmenter videosegmenter = null;
 
+  /** The workflow operation handler ID */
+//  private String id;
+//  
+//  public void activate(ComponentContext cc) {
+//    
+//  }
+  
   /**
    * {@inheritDoc}
    * 

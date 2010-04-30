@@ -16,7 +16,6 @@
 package org.opencastproject.analysis.vsegmenter;
 
 import org.opencastproject.analysis.api.MediaAnalysisException;
-import org.opencastproject.analysis.api.MediaAnalysisFlavor;
 import org.opencastproject.analysis.api.MediaAnalysisServiceSupport;
 import org.opencastproject.analysis.vsegmenter.jmf.ImageUtils;
 import org.opencastproject.analysis.vsegmenter.jmf.PlayerListener;
@@ -24,6 +23,7 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReference;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
@@ -34,7 +34,6 @@ import org.opencastproject.metadata.mpeg7.MediaLocatorImpl;
 import org.opencastproject.metadata.mpeg7.MediaRelTimeImpl;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
-import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.receipt.api.Receipt;
@@ -135,7 +134,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
    * Creates a new video segmenter.
    */
   public VideoSegmenter() {
-    super(MediaAnalysisFlavor.SEGMENTS_FLAVOR);
+    super(MediaPackageElements.SEGMENTS_FLAVOR);
     executor = Executors.newFixedThreadPool(4);
   }
 
@@ -215,9 +214,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
         PlayerListener playerListener = null;
 
         Mpeg7CatalogImpl mpeg7 = Mpeg7CatalogImpl.newInstance();
-        mpeg7.setFlavor(Mpeg7Catalog.SLIDES_FLAVOR);
-        mpeg7.setReference(new MediaPackageReferenceImpl(element));
-        mpeg7.setTrustedHttpClient(trustedHttpClient);
 
         try {
 
@@ -296,7 +292,10 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
           URI uri = repository.putInCollection(COLLECTION_ID, UUID.randomUUID().toString(), in);
 
           mpeg7.setURI(uri);
-          mpeg7.setFlavor(MediaAnalysisFlavor.SEGMENTS_FLAVOR);
+          mpeg7.setFlavor(MediaPackageElements.SEGMENTS_FLAVOR);
+          mpeg7.setReference(new MediaPackageReferenceImpl(element));
+          mpeg7.setTrustedHttpClient(trustedHttpClient);
+
           receipt.setElement(mpeg7);
           receipt.setStatus(Status.FINISHED);
           rs.updateReceipt(receipt);

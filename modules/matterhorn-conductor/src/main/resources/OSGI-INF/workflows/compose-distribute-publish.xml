@@ -45,6 +45,7 @@
       <configurations>
         <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/delivery</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
       </configurations>
@@ -57,6 +58,7 @@
       <configurations>
         <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
       </configurations>
@@ -68,6 +70,7 @@
       description="Encode presenter audio to Flash download">
       <configurations>
         <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/delivery</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
       </configurations>
@@ -79,6 +82,7 @@
       description="Encode presentation audio to Flash download">
       <configurations>
         <configuration key="source-audio-flavor">presentation/source</configuration>
+        <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
       </configurations>
@@ -93,6 +97,7 @@
       <configurations>
         <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/delivery</configuration>
         <configuration key="target-tags">atom, captioning</configuration>
         <configuration key="encoding-profile">mov-low.http</configuration>
       </configurations>
@@ -105,6 +110,7 @@
       <configurations>
         <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">rss, atom, captioning</configuration>
         <configuration key="encoding-profile">mov-low.http</configuration>
       </configurations>
@@ -119,6 +125,7 @@
       <configurations>
         <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/delivery</configuration>
         <configuration key="target-tags">atom</configuration>
         <configuration key="encoding-profile">avi-low.http</configuration>
       </configurations>
@@ -131,6 +138,7 @@
       <configurations>
         <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">avi-low.http</configuration>
       </configurations>
@@ -144,6 +152,7 @@
       description="Encode presenter (camera) to m4a/aac download">
       <configurations>
         <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/delivery</configuration>
         <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">m4a.http</configuration>
       </configurations>
@@ -155,6 +164,7 @@
       description="Encode presentation (screen) to m4a/aac download">
       <configurations>
         <configuration key="source-audio-flavor">presentation/source</configuration>
+        <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">atom</configuration>
         <configuration key="encoding-profile">m4a.http</configuration>
       </configurations>
@@ -219,24 +229,13 @@
       </configurations>
     </operation>
 
-  <!-- Generate slide previews -->
+    <!-- Generate segment previews -->
+    <!--
     <operation
-      id="slide-previews"
+      id="segmentpreviews"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (screen) to cover image">
-      <configurations>
-        <configuration key="source-flavor">presenter/source</configuration>
-        <configuration key="source-tags"></configuration>
-        <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">engage-slides.http</configuration>
-      </configurations>
-    </operation>
-    <operation
-      id="slide-previews"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encode presenter (camera) to cover image">
+      description="Encode presentation (screen) to segment preview image">
       <configurations>
         <configuration key="source-flavor">presentation/source</configuration>
         <configuration key="source-tags"></configuration>
@@ -244,6 +243,7 @@
         <configuration key="encoding-profile">engage-slides.http</configuration>
       </configurations>
     </operation>
+    -->
 
     <operation
       id="distribute-download"

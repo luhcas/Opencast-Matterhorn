@@ -31,9 +31,8 @@ import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.metadata.mpeg7.ContentSegment;
 import org.opencastproject.metadata.mpeg7.MediaTimePoint;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
-import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
-import org.opencastproject.metadata.mpeg7.MultimediaContent;
-import org.opencastproject.metadata.mpeg7.MultimediaContentType;
+import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
+import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.receipt.api.Receipt;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -55,19 +54,15 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
- * This workflow operation will look for MPEG-7 catalogs and create a preview
- * image for every time segment it finds by calling to the composer service.
+ * The workflow definition for creating segment preview images from an segment mpeg-7 catalog.
  */
-public class SlidePreviewsWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
+public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
 
   /** The logging facility */
-  private static final Logger logger = LoggerFactory.getLogger(SlidePreviewsWorkflowOperationHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(SegmentPreviewsWorkflowOperationHandler.class);
 
   /** The composer service */
   private ComposerService composerService = null;
-
-  /** The mpeg7 service */
-  private Mpeg7CatalogService mpeg7Service = null;
 
   /**
    * Callback for the OSGi declarative services configuration.
@@ -79,38 +74,39 @@ public class SlidePreviewsWorkflowOperationHandler extends AbstractWorkflowOpera
     this.composerService = composerService;
   }
 
-  protected void setMpeg7CatalogService(Mpeg7CatalogService mpeg7CatalogService) {
-    this.mpeg7Service = mpeg7CatalogService;
-  }
-
   /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    logger.debug("Running compose workflow operation on workflow {}", workflowInstance.getId());
+    logger.debug("Running segments preview workflow operation on {}", workflowInstance);
 
-    // Encode the media package
+    // Check if there is an mpeg-7 catalog containing video segments
+    MediaPackage src = (MediaPackage) workflowInstance.getMediaPackage().clone();
+    Catalog[] segmentCatalogs = src.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR);
+    if (segmentCatalogs.length == 0) {
+      logger.info("Media package {} does not contain segment information", src);
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+    }
+
+    // Create the image
     MediaPackage resultingMediaPackage = null;
     try {
-      resultingMediaPackage = createSlidePreview(workflowInstance.getMediaPackage(), workflowInstance
-              .getCurrentOperation());
+      resultingMediaPackage = createPreviews(src, workflowInstance.getCurrentOperation());
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
     }
 
-    logger.debug("Compose operation completed");
+    logger.debug("Segments preview operation completed");
 
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, Action.CONTINUE);
   }
 
   /**
-   * Encode tracks from MediaPackage using profiles stored in properties and
-   * updates current MediaPackage.
+   * Encode tracks from MediaPackage using profiles stored in properties and updates current MediaPackage.
    * 
-   * @param src
-   *          The source media package
+   * @param mediaPackage
    * @param properties
    * @return
    * @throws EncoderException
@@ -119,26 +115,15 @@ public class SlidePreviewsWorkflowOperationHandler extends AbstractWorkflowOpera
    * @throws ExecutionException
    * @throws InterruptedException
    */
-  private MediaPackage createSlidePreview(MediaPackage src, WorkflowOperationInstance operation)
+  private MediaPackage createPreviews(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
           throws EncoderException, MediaPackageException, UnsupportedElementException, InterruptedException,
           ExecutionException {
-    MediaPackage mediaPackage = (MediaPackage) src.clone();
-
-    // Find the mpeg7 slides catalog
-    Catalog mpeg7Catalogs[] = mediaPackage.getCatalogs(Mpeg7Catalog.SLIDES_FLAVOR);
-    if (mpeg7Catalogs.length == 0) {
-      logger.debug("No slides catalog available.");
-      return mediaPackage;
-    } else if (mpeg7Catalogs.length > 1) {
-      logger.debug("multiple slides catalogs found... using the first catalog to generate images.");
-    }
-
-    Mpeg7Catalog mpeg7Catalog = mpeg7Service.load(mpeg7Catalogs[0]);
 
     // Read the configuration properties
     String sourceVideoFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
     String sourceTags = StringUtils.trimToNull(operation.getConfiguration("source-tags"));
     String targetImageTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
+    String targetImageFlavor = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));
     String encodingProfileName = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
 
     // Find the encoding profile
@@ -157,6 +142,8 @@ public class SlidePreviewsWorkflowOperationHandler extends AbstractWorkflowOpera
     for (Track track : mediaPackage.getTracks()) {
       if (sourceVideoFlavor == null
               || (track.getFlavor() != null && sourceVideoFlavor.equals(track.getFlavor().toString()))) {
+        if (!track.hasVideo())
+          continue;
         if (sourceTags == null) {
           videoTracks.add(track);
           continue;
@@ -175,71 +162,63 @@ public class SlidePreviewsWorkflowOperationHandler extends AbstractWorkflowOpera
       logger.debug("Mediapackage {} has no suitable tracks to extract images based on tags {} and flavor {}",
               new Object[] { mediaPackage, sourceTags, sourceVideoFlavor });
       return mediaPackage;
-    }
-
-    // Check for multimedia content
-    if (!mpeg7Catalog.multimediaContent().hasNext()) {
-      logger.warn("Mpeg-7 doesn't contain  multimedia content");
-      return mediaPackage;
-    }
-
-    // Get the content duration by looking at the first content track. This
-    // of course assumes that all tracks are equally long.
-    Iterator<MultimediaContent<? extends MultimediaContentType>> mmIter = mpeg7Catalog.multimediaContent();
-
-    // We assume that there is just one track per mpeg7 catalog
-    if (!mmIter.hasNext()) {
-      logger.debug("No track in this mpeg7 catalog");
-      return mediaPackage;
-    }
-
-    MultimediaContent<?> multimediaContent = mmIter.next();
-    // for every multimedia content track
-    for (Iterator<?> iterator = multimediaContent.elements(); iterator.hasNext();) {
-      MultimediaContentType type = (MultimediaContentType) iterator.next();
-
-      // for every segment in the current multimedia content track
-
-      Iterator<? extends ContentSegment> ctIter = type.getTemporalDecomposition().segments();
-      while (ctIter.hasNext()) {
-        ContentSegment contentSegment = ctIter.next();
-
-        // get the segments time properties
-        MediaTimePoint timepoint = contentSegment.getMediaTime().getMediaTimePoint();
-        long time = timepoint.getTimeInMilliseconds();
-        long timeInSeconds = time/1000L;
+    } else {
+      for (Track t : videoTracks) {
         
-        if (time < 0) {
-          logger.warn("Segment does not have a time associated with it");
+        // Try to load the segments catalog
+        MediaPackageReference trackReference = new MediaPackageReferenceImpl(t);
+        Catalog[] segmentCatalogs = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR, trackReference);
+        Mpeg7Catalog mpeg7 = null;
+        if (segmentCatalogs.length > 0) {
+          mpeg7 = (Mpeg7Catalog)segmentCatalogs[0];
+          if (segmentCatalogs.length > 1)
+            logger.warn("More than one segments catalog found for track {}. Resuming with the first one ({})", t, mpeg7);
+        } else {
+          logger.debug("No segments catalog found for track {}", t);
           continue;
         }
 
-        if (time > mediaPackage.getDuration()) {
-          logger.warn("The duration of the mpeg-7 catalog does not match the media package duration");
-          return mediaPackage;
+        // Check the catalog's consistency
+        if (mpeg7.videoContent() == null || mpeg7.videoContent().next() == null) {
+          logger.info("Segments catalog {} contains no video content", mpeg7);
+          continue;
         }
+        
+        Video videoContent = mpeg7.videoContent().next();
+        TemporalDecomposition<? extends ContentSegment> decomposition = videoContent.getTemporalDecomposition();
 
-        // create an image for this timepoint
-        for (Track t : videoTracks) {
-          if (t.hasVideo()) {
-            Receipt receipt = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), timeInSeconds, true);
-            Attachment composedImage = (Attachment)receipt.getElement();
+        // Are there any segments?
+        if (decomposition == null || !decomposition.hasSegments()) {
+          logger.info("Segments catalog {} contains no video content", mpeg7);
+          continue;
+        }
+          
+        // Create the preview images according to the mpeg7 segments
+        if (t.hasVideo() && mpeg7 != null) {
+
+          Iterator<? extends ContentSegment> segmentIterator = decomposition.segments();
+
+          while (segmentIterator.hasNext()) {
+            ContentSegment segment = segmentIterator.next();
+            MediaTimePoint tp = segment.getMediaTime().getMediaTimePoint();
+
+            // Choose a time
+            long time = tp.getTimeInMilliseconds();
+  
+            Receipt receipt = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), time, true);
+            Attachment composedImage = (Attachment) receipt.getElement();
             if (composedImage == null)
-              throw new RuntimeException("unable to compose image");
-
-            MediaPackageElementFlavor flavor = MediaPackageElements.SLIDE_PREVIEW_FLAVOR;
-            if (t.getFlavor() != null) {
-              String flavorType = MediaPackageElements.SLIDE_PREVIEW_FLAVOR.getType();
-              String flavorSubtype = t.getFlavor().getType();
-              flavor = new MediaPackageElementFlavor(flavorType, flavorSubtype);
-            }
-            composedImage.setFlavor(flavor);
-            logger.debug("image has flavor '{}'", composedImage.getFlavor());
-
+              throw new RuntimeException("Unable to compose image");
+  
+            // Add the flavor, either from the operation configuration or from the composer
+            if (targetImageFlavor != null)
+              composedImage.setFlavor(MediaPackageElementFlavor.parseFlavor(targetImageFlavor));
+            logger.debug("Preview image has flavor '{}'", composedImage.getFlavor());
+  
             // Set the mimetype
             if (profile.getMimeType() != null)
               composedImage.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
-
+  
             // Add tags
             if (targetImageTags != null) {
               for (String tag : targetImageTags.split("\\W")) {
@@ -248,16 +227,20 @@ public class SlidePreviewsWorkflowOperationHandler extends AbstractWorkflowOpera
                   composedImage.addTag(tag);
               }
             }
+
+            // Refere to the original track including a timestamp
+            MediaPackageReferenceImpl ref = new MediaPackageReferenceImpl(t);
+            ref.setProperty("time", tp.toString());
+            composedImage.setReference(ref);
             
             // store new image in the mediaPackage
-            MediaPackageReference ref = new MediaPackageReferenceImpl(); // links to this mediapackage
-            ref.setProperty("time", Long.toString(timepoint.getTimeInMilliseconds()));
             mediaPackage.add(composedImage);
-            composedImage.setReference(ref);
           }
         }
       }
     }
+
     return mediaPackage;
   }
+
 }

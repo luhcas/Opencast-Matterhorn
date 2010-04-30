@@ -52,4 +52,16 @@ public interface MediaPackageElements {
   /** Slide preview attachment flavor */
   MediaPackageElementFlavor SLIDE_PREVIEW_FLAVOR = new MediaPackageElementFlavor("preview", "source", "Slide previw image");
 
+  /** The flavor produced by video segmentation */
+  MediaPackageElementFlavor SEGMENTS_FLAVOR = new MediaPackageElementFlavor("mpeg-7", "segments");
+
+  /** The flavor produced by text extraction */
+  MediaPackageElementFlavor TEXTS_FLAVOR = new MediaPackageElementFlavor("mpeg-7", "text");
+
+  /** The flavor produced by speech recognition */
+  MediaPackageElementFlavor SPEECH_FLAVOR = new MediaPackageElementFlavor("mpeg-7", "speech");
+
+  /** A flavor for chapters */
+  MediaPackageElementFlavor CHAPTER_FLAVOR = new MediaPackageElementFlavor("mpeg-7", "chapter", "MPEG-7 chapters catalog");
+
 }

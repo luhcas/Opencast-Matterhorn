@@ -40,4 +40,19 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
   @Override
   public void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException {}
 
+  /**
+   * The ID of this operation handler
+   * @return
+   */
+//  public abstract String getOperationHandlerId();
+  
+  /**
+   * {@inheritDoc}
+   * @see java.lang.Object#toString()
+   */
+//  @Override
+//  public String toString() {
+//    return getOperationHandlerId();
+//  }
+  
 }

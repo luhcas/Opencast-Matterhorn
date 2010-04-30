@@ -18,6 +18,7 @@ package org.opencastproject.analysis.api;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.track.TrackImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
@@ -33,8 +34,8 @@ import java.net.URI;
 public class MediaAnalaysisServiceSupportTest extends TestCase {
 
   MediaAnalysisServiceSupport analyzer = null;
-  MediaPackageElementFlavor resultingFlavor = MediaAnalysisFlavor.TEXTS_FLAVOR;
-  MediaPackageElementFlavor[] requiredFlavors = new MediaPackageElementFlavor[] { MediaAnalysisFlavor.SEGMENTS_FLAVOR };
+  MediaPackageElementFlavor resultingFlavor = MediaPackageElements.TEXTS_FLAVOR;
+  MediaPackageElementFlavor[] requiredFlavors = new MediaPackageElementFlavor[] { MediaPackageElements.SEGMENTS_FLAVOR };
   MediaPackage mediaPackage = null;
   Track track = null;
   String trackId = "track-1";
@@ -66,7 +67,7 @@ public class MediaAnalaysisServiceSupportTest extends TestCase {
    */
   public void testProduces() {
     assertNotNull(analyzer.produces());
-    assertEquals(MediaAnalysisFlavor.TEXTS_FLAVOR, analyzer.produces());
+    assertEquals(MediaPackageElements.TEXTS_FLAVOR, analyzer.produces());
   }
 
   /**
@@ -75,7 +76,7 @@ public class MediaAnalaysisServiceSupportTest extends TestCase {
   public void testRequires() {
     assertNotNull(analyzer.requires());
     assertEquals(1, analyzer.requires().length);
-    assertEquals(MediaAnalysisFlavor.SEGMENTS_FLAVOR, analyzer.requires()[0]);
+    assertEquals(MediaPackageElements.SEGMENTS_FLAVOR, analyzer.requires()[0]);
   }
 
   /**
@@ -93,7 +94,7 @@ public class MediaAnalaysisServiceSupportTest extends TestCase {
     assertFalse(analyzer.isSupported(track));
 
     Mpeg7CatalogImpl catalog = Mpeg7CatalogImpl.newInstance();
-    catalog.setFlavor(MediaAnalysisFlavor.SEGMENTS_FLAVOR);
+    catalog.setFlavor(MediaPackageElements.SEGMENTS_FLAVOR);
     mediaPackage.add(catalog);
     assertTrue(analyzer.isSupported(track));
   }

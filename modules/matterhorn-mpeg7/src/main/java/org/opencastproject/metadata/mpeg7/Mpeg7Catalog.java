@@ -34,9 +34,6 @@ public interface Mpeg7Catalog extends Mpeg7, Catalog {
   /** Element type definition */
   // TODO Remove the generic mpeg7 flavor
   MediaPackageElementFlavor FLAVOR = new MediaPackageElementFlavor("metadata", "mpeg-7", "MPEG-7 slides catalog");
-  MediaPackageElementFlavor SLIDES_FLAVOR = new MediaPackageElementFlavor("segments", "slides", "MPEG-7 slides catalog");
-  MediaPackageElementFlavor SPEECH_FLAVOR = new MediaPackageElementFlavor("segments", "speech", "MPEG-7 speech catalog");
-  MediaPackageElementFlavor CHAPTER_FLAVOR = new MediaPackageElementFlavor("segments", "chapter", "MPEG-7 chapters catalog");
 
   /**
    * Saves the catalog to disk.
