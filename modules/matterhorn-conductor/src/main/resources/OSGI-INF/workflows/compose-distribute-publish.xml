@@ -16,7 +16,7 @@
     </operation>
 
     <!-- hold for review -->
-    <!--
+    <!-- UNCOMMENT TO ACTIVATE
     <operation
       id="review"
       fail-on-error="true"
@@ -26,7 +26,6 @@
     -->
  
     <!-- run the videosegmentation -->
-    <!-- UNCOMMENT TO ACTIVATE
     <operation
       id="segment"
       fail-on-error="true"
@@ -36,7 +35,6 @@
         <configuration key="analysis.track.flavor">presentation/source</configuration>
       </configurations>
     </operation>
-    -->
  
     <!-- encode to flash download -->
     <operation
