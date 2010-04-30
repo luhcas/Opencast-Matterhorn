@@ -31,6 +31,7 @@ import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.metadata.mpeg7.ContentSegment;
 import org.opencastproject.metadata.mpeg7.MediaLocator;
 import org.opencastproject.metadata.mpeg7.MediaLocatorImpl;
+import org.opencastproject.metadata.mpeg7.MediaRelTimeImpl;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
@@ -106,7 +107,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   public static final int STABILITY_THRESHOLD = 5;
 
   /** Number of pixels that may change between two frames without considering them different */
-  public static final int CHANGES_THRESHOLD = 57600; // 75% change considering 320*240
+  public static final float CHANGES_THRESHOLD = 0.75f; // 75% change
 
   /** The expected mimetype of the resulting preview encoding */
   public static final MimeType MJPEG_MIMETYPE = MimeTypes.MJPEG;
@@ -289,12 +290,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
           // Store the bytes in the file repository
           ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-          URI uri;
-          if (element.getMediaPackage() == null) {
-            uri = repository.putInCollection(COLLECTION_ID, UUID.randomUUID().toString(), in);
-          } else {
-            uri = repository.put(element.getMediaPackage().getIdentifier().toString(), element.getIdentifier(), in);
-          }
+          URI uri = repository.putInCollection(COLLECTION_ID, UUID.randomUUID().toString(), in);
 
           mpeg7.setURI(uri);
           mpeg7.setFlavor(MediaAnalysisFlavor.SEGMENTS_FLAVOR);
@@ -358,16 +354,16 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     List<ContentSegment> segments = new ArrayList<ContentSegment>();
 
     int t = 1;
-    int lastKnownTimestamp = 0;
+    int lastStableImageTime = 0;
     long startOfSegment = 0;
     int currentSceneStabilityCount = 0;
     boolean sceneChangeImminent = false;
-    int segmentCount = 0;
+    int segmentCount = 1;
     BufferedImage previousImage = null;
 
     long durationInSeconds = video.getMediaTime().getMediaDuration().getDurationInMilliseconds() / 1000;
     ContentSegment contentSegment = video.getTemporalDecomposition().createSegment("segment-" + segmentCount);
-
+    
     while (t < durationInSeconds) {
       // Move the positioning control to the correct time
       fpc.seek(t);
@@ -396,15 +392,17 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
         // If this is the result of a lucky punch (looking ahead STABILITY_THRESHOLD seconds), then we should
         // really start over an make sure we get the correct beginning of the new scene
-        if (t - lastKnownTimestamp > 1) {
-          t = lastKnownTimestamp;
-          sceneChangeImminent = true;
+        if (!sceneChangeImminent && t - lastStableImageTime > 1) {
+          t = lastStableImageTime;
         } else {
-          lastKnownTimestamp = t - 1;
-          currentSceneStabilityCount = 0;
+          lastStableImageTime = t - 1;
           previousImage = bufferedImage;
           t++;
         }
+
+        currentSceneStabilityCount = 0;
+        sceneChangeImminent = true;
+
         logger.debug("Found image in new scene");
       }
 
@@ -416,32 +414,33 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
           // Did we find a new scene?
           if (currentSceneStabilityCount == STABILITY_THRESHOLD) {
-            lastKnownTimestamp = t;
+            lastStableImageTime = t;
 
             long endOfSegment = t - STABILITY_THRESHOLD;
             long durationms = (endOfSegment - startOfSegment) * 1000L;
 
             // Create a new segment if this wasn't the first one
             if (endOfSegment > 1) {
-              contentSegment.setMediaTime(new MediaTimeImpl(startOfSegment * 1000L, durationms));
+              contentSegment.setMediaTime(new MediaRelTimeImpl(startOfSegment * 1000L, durationms));
               contentSegment = video.getTemporalDecomposition().createSegment("segment-" + ++segmentCount);
+              segments.add(contentSegment);
               startOfSegment = endOfSegment;
             }
             t += STABILITY_THRESHOLD;
             sceneChangeImminent = false;
 
-            logger.info("Found new scene at {} s", startOfSegment);
+            logger.debug("Found new scene at {} s", startOfSegment);
           } else {
             t++;
           }
         } else if (sceneChangeImminent) {
           // We found a scene change by looking ahead. Now we want to get to the exact position
-          lastKnownTimestamp = t;
+          lastStableImageTime = t;
           t++;
         } else {
           // If things look stable, then let's look ahead as much as possible whithout loosing information (which is
           // equal to looking ahead STABILITY_THRESHOLD seconds.
-          lastKnownTimestamp = t;
+          lastStableImageTime = t;
           t += STABILITY_THRESHOLD;
         }
         previousImage = bufferedImage;
@@ -452,6 +451,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     long startOfSegmentms = startOfSegment * 1000L;
     long durationms = ((long) durationInSeconds - startOfSegment) * 1000;
     contentSegment.setMediaTime(new MediaTimeImpl(startOfSegmentms, durationms));
+    segments.add(contentSegment);
 
     return segments;
   }
@@ -483,8 +483,9 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     MediaPackageReference original = new MediaPackageReferenceImpl(track);
 
     // See if encoding has already taken place
-    List<Track> derivedTracks = Arrays.asList(track.getMediaPackage().getTracks(original));
+    List<Track> derivedTracks = new ArrayList<Track>();
     derivedTracks.add(track);
+    derivedTracks.addAll(Arrays.asList(track.getMediaPackage().getTracks(original)));
     for (Track t : derivedTracks) {
       if (MJPEG_MIMETYPE.equals(t.getMimeType())) {
         logger.info("Using existing mjpeg track {}", t);

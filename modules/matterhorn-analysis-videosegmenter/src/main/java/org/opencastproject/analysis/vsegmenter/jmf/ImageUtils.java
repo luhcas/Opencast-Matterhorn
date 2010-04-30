@@ -50,7 +50,7 @@ public class ImageUtils {
    * 
    * @return <code>true</code> if a new scene has been detected
    */
-  public static boolean isDifferent(BufferedImage currentImage, BufferedImage image, int changesThreshold) {
+  public static boolean isDifferent(BufferedImage currentImage, BufferedImage image, float changesThreshold) {
     boolean differsFromCurrentScene = false;
 
     if (currentImage == null) {
@@ -64,14 +64,15 @@ public class ImageUtils {
     } else {
       int changes = 0;
       long pixels = image.getWidth() * image.getHeight();
+      long changesThresholdPixels = (long)(pixels * changesThreshold);
       imagecomparison: for (int x = 0; x < image.getWidth(); x++) {
         for (int y = 0; y < image.getHeight(); y++) {
           if (image.getRGB(x, y) != currentImage.getRGB(x, y)) {
 //            if (image.getRGB(x, y) == -16777216)
 //              logger.info("Looks like a no-signal image");
             changes++;
-            if (changes > changesThreshold) {
-              logger.debug("Found more than {} changes", changesThreshold);
+            if (changes > changesThresholdPixels) {
+              logger.debug("Found more than {} changes", changesThresholdPixels);
               differsFromCurrentScene = true;
               break imagecomparison;
             }
