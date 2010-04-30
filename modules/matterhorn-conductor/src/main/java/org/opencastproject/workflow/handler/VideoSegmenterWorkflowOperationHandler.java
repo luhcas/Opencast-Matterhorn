@@ -139,5 +139,14 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
   protected void setVideoSegmenter(VideoSegmenter videosegmenter) {
     this.videosegmenter = videosegmenter;
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return "videosegmenter";
+  }
 
 }
