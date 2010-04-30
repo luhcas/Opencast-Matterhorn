@@ -108,6 +108,9 @@ public abstract class AbstractCmdlineEncoderEngine extends
   @Override
   public File encode(File audioSource, File videoSource, EncodingProfile profile, Map<String, String> properties)
           throws EncoderException {
+    // Fist, update the parameters
+    if(properties != null) params.putAll(properties);
+
     // build command
     BufferedReader in = null;
     Process encoderProcess = null;
@@ -144,8 +147,6 @@ public abstract class AbstractCmdlineEncoderEngine extends
       params.put("out.dir", parentFile.getParent());
       params.put("out.name", FilenameUtils.getBaseName(parentFile.getName()));
       params.put("out.suffix", processParameters(profile.getSuffix()));
-
-      if(properties != null) params.putAll(properties);
       
       // create encoder process.
       // no special working dir is set which means the working dir of the

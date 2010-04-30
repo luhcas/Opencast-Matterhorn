@@ -33,7 +33,6 @@ import org.opencastproject.metadata.mpeg7.MediaLocator;
 import org.opencastproject.metadata.mpeg7.MediaLocatorImpl;
 import org.opencastproject.metadata.mpeg7.MediaRelTimeImpl;
 import org.opencastproject.metadata.mpeg7.MediaTime;
-import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.receipt.api.Receipt;
@@ -268,7 +267,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
           logger.info("Track {} loaded, duration is {} s", mediaUrl, duration.getSeconds());
 
-          MediaTime contentTime = new MediaTimeImpl(0, (long) duration.getSeconds() * 1000);
+          MediaTime contentTime = new MediaRelTimeImpl(0, (long) duration.getSeconds() * 1000);
           MediaLocator contentLocator = new MediaLocatorImpl(mediaUrl.toURI());
           Video videoContent = mpeg7.addVideoContent("videosegment", contentTime, contentLocator);
 

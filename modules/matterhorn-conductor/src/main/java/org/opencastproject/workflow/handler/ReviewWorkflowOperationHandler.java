@@ -44,7 +44,7 @@ public class ReviewWorkflowOperationHandler extends AbstractResumableWorkflowOpe
   }
 
   /** Path to the hold ui resources */
-  private static final String HOLD_UI_PATH = "/operation/ui/review/index.html";
+  private static final String HOLD_UI_PATH = "/ui/operation/review/index.html";
   
   public void activate(ComponentContext cc) {
     super.activate(cc);

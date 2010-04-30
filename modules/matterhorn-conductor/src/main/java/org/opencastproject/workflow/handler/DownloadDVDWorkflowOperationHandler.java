@@ -37,7 +37,7 @@ public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkfl
 
   private static final Logger logger = LoggerFactory.getLogger(DownloadDVDWorkflowOperationHandler.class);
   /** Path to the hold ui resources */
-  private static final String HOLD_UI_PATH = "/operation/ui/download-dvd/index.html";
+  private static final String HOLD_UI_PATH = "/ui/operation/download-dvd/index.html";
   private static final String ACTION_TITLE = "download DVD";
 
   public void setHttpService(HttpService service) {

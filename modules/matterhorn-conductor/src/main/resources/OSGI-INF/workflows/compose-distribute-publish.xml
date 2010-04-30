@@ -89,6 +89,9 @@
     </operation>
 
     <!-- encode to quicktime download -->
+
+<!--
+
     <operation
       id="compose"
       fail-on-error="true"
@@ -115,8 +118,10 @@
         <configuration key="encoding-profile">mov-low.http</configuration>
       </configurations>
     </operation>
+-->
     
     <!-- encode to avi download -->
+<!--
     <operation
       id="compose"
       fail-on-error="true"
@@ -143,8 +148,9 @@
         <configuration key="encoding-profile">avi-low.http</configuration>
       </configurations>
     </operation>
- 
+--> 
      <!-- encode to m4a download -->
+<!--
     <operation
       id="compose"
       fail-on-error="true"
@@ -169,6 +175,7 @@
         <configuration key="encoding-profile">m4a.http</configuration>
       </configurations>
     </operation>
+-->
  
     <!-- encode to cover image -->
     <operation
@@ -230,7 +237,6 @@
     </operation>
 
     <!-- Generate segment previews -->
-    <!--
     <operation
       id="segmentpreviews"
       fail-on-error="true"
@@ -243,7 +249,6 @@
         <configuration key="encoding-profile">engage-slides.http</configuration>
       </configurations>
     </operation>
-    -->
 
     <operation
       id="distribute-download"

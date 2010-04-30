@@ -7,5 +7,7 @@
     <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
   </service>
   <reference cardinality="1..1" interface="org.opencastproject.composer.api.ComposerService"
-  name="ComposerService" policy="static" bind="setComposerService"/>
+    name="ComposerService" policy="static" bind="setComposerService"/>
+  <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"
+    cardinality="1..1" policy="static" bind="setTrustedHttpClient" />
 </component>

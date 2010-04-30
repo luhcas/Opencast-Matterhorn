@@ -30,10 +30,11 @@ import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.metadata.mpeg7.ContentSegment;
 import org.opencastproject.metadata.mpeg7.MediaTimePoint;
-import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
+import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -64,6 +65,8 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
   /** The composer service */
   private ComposerService composerService = null;
 
+  private TrustedHttpClient trustedHttpClient = null;
+  
   /**
    * Callback for the OSGi declarative services configuration.
    * 
@@ -72,6 +75,10 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
    */
   protected void setComposerService(ComposerService composerService) {
     this.composerService = composerService;
+  }
+  
+  protected void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
+    this.trustedHttpClient = trustedHttpClient;
   }
 
   /**
@@ -168,9 +175,10 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
         // Try to load the segments catalog
         MediaPackageReference trackReference = new MediaPackageReferenceImpl(t);
         Catalog[] segmentCatalogs = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR, trackReference);
-        Mpeg7Catalog mpeg7 = null;
+        Mpeg7CatalogImpl mpeg7 = null;
         if (segmentCatalogs.length > 0) {
-          mpeg7 = (Mpeg7Catalog)segmentCatalogs[0];
+          mpeg7 = new Mpeg7CatalogImpl(segmentCatalogs[0]);
+          mpeg7.setTrustedHttpClient(trustedHttpClient);
           if (segmentCatalogs.length > 1)
             logger.warn("More than one segments catalog found for track {}. Resuming with the first one ({})", t, mpeg7);
         } else {
@@ -203,7 +211,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
             MediaTimePoint tp = segment.getMediaTime().getMediaTimePoint();
 
             // Choose a time
-            long time = tp.getTimeInMilliseconds();
+            long time = tp.getTimeInMilliseconds()/1000;
   
             Receipt receipt = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), time, true);
             Attachment composedImage = (Attachment) receipt.getElement();
@@ -228,7 +236,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
               }
             }
 
-            // Refere to the original track including a timestamp
+            // Refer to the original track including a timestamp
             MediaPackageReferenceImpl ref = new MediaPackageReferenceImpl(t);
             ref.setProperty("time", tp.toString());
             composedImage.setReference(ref);
