@@ -13,7 +13,7 @@
 
   <xsl:template match="ns1:recordingLists">
     <div style="border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:900px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
-      <img title="Information" alt="Information" src="img/information.png" style="vertical-align: bottom;"></img>
+      <img title="Information" alt="Information" src="shared_img/icons/information.png" style="vertical-align: bottom;"></img>
       All recordings scheduled for the future appear below. (Future versions of Matterhorn will allow you to filter this list to show specific days.)
     </div>
     <table id="recordingsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
