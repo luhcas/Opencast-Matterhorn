@@ -24,7 +24,12 @@ import java.util.Map;
  * Manages {@link WorkflowDefinition}s and {@link WorkflowInstance}s.
  */
 public interface WorkflowService {
-  
+  /**
+   * The service registration property we use to identify which workflow operation a {@link WorkflowOperationHandler}
+   * should handle.
+   */
+  final String WORKFLOW_OPERATION_PROPERTY = "workflow.operation";
+
   /**
    * Returns the {@link WorkflowDefinition} identified by <code>name</code> or <code>null</code> if no such definition
    * was found.

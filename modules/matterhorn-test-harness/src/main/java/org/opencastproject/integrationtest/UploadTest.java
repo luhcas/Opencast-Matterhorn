@@ -77,27 +77,8 @@ public class UploadTest {
     String mediaPackageId = (String) Utils.xPath(xml, "//mediapackage/@id", XPathConstants.STRING);
 
     // Confirm ingest
-    int retries = 0;
-    int timeout = 20; // FIXME: This value will be different, depending on CPU speed, workflow definitions, etc
-    while (retries < timeout) {
-      Thread.sleep(1000);
-
-      // Check workflow instance status
-      response = IngestResources.getWorkflowInstance(workflowId);
-
-      assertEquals("Response code (workflow instance):", 200, response.getStatus());
-      String workflowInstance = response.getEntity(String.class);
-      xml = Utils.parseXml(workflowInstance);
-      if (Utils.xPath(xml, "//ns3:workflow/@state", XPathConstants.STRING).equals("RUNNING")) {
-        break;
-      }
-
-      retries++;
-    }
-
-    if (retries == timeout) {
-      fail("Workflow instance failed to start.");
-    }
+    response = IngestResources.getWorkflowInstance(workflowId);
+    assertEquals("Response code (workflow instance):", 200, response.getStatus());
 
     // Compare Track
     String ingestedTrackUrl = (String) Utils.xPath(xml, "//media/track[@type='presenter/source']/url",
@@ -124,7 +105,8 @@ public class UploadTest {
             .getUrlAsFile(attachmentUrl)));
 
     // Confirm search indexing
-    retries = 0;
+    int retries = 0;
+    int timeout = 20;
     while (retries < timeout) {
       Thread.sleep(1000);
 

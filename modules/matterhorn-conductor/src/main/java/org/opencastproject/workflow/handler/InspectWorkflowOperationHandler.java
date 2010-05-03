@@ -46,7 +46,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -57,6 +59,13 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowOperationHandler.class);
 
+  /** The configuration options for this handler */
+  private static final SortedMap<String, String> CONFIG_OPTIONS;
+
+  static {
+    CONFIG_OPTIONS = new TreeMap<String, String>();
+  }
+
   /** The inspection service */
   private MediaInspectionService inspectionService = null;
 
@@ -66,6 +75,7 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /** The dublin core catalog service */
   private DublinCoreCatalogService dcService;
 
+  /** The metadata services */
   private SortedSet<MediaPackageMetadataService> metadataServices;
 
   public InspectWorkflowOperationHandler () {
@@ -77,18 +87,15 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
     });
   }
 
-  public void setDublincoreService(DublinCoreCatalogService dcService) {
-    this.dcService = dcService;
-  }
-  
-  public void addMetadataService(MediaPackageMetadataService service) {
-    metadataServices.add(service);
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
+   */
+  @Override
+  public SortedMap<String, String> getConfigurationOptions() {
+    return CONFIG_OPTIONS;
   }
 
-  public void removeMetadataService(MediaPackageMetadataService service) {
-    metadataServices.remove(service);
-  }
-  
   /**
    * Callback for the OSGi declarative services configuration.
    * 
@@ -224,4 +231,18 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       }
     }
   }
+  
+  public void setDublincoreService(DublinCoreCatalogService dcService) {
+    this.dcService = dcService;
+  }
+  
+  public void addMetadataService(MediaPackageMetadataService service) {
+    metadataServices.add(service);
+  }
+
+  public void removeMetadataService(MediaPackageMetadataService service) {
+    metadataServices.remove(service);
+  }
+  
+
 }

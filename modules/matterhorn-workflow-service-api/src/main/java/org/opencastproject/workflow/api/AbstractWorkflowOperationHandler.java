@@ -18,11 +18,29 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
+import org.osgi.framework.Constants;
+import org.osgi.service.component.ComponentContext;
+
 /**
  * Abstract base implementation for an operation handler, which implements a simple start operation that returns a
  * {@link WorkflowOperationResult} with the current mediapackage and {@link Action#CONTINUE}.
  */
 public abstract class AbstractWorkflowOperationHandler implements WorkflowOperationHandler {
+
+  /** The ID of this operation handler */
+  protected String id;
+
+  /** The description of what this handler actually does */
+  protected String description;
+
+  /**
+   * Activates this component with its properties once all of the collaborating services have been set
+   * @param cc The component's context, containing the properties used for configuration
+   */
+  protected void activate(ComponentContext cc) {
+    this.id = (String)cc.getProperties().get(WorkflowService.WORKFLOW_OPERATION_PROPERTY);
+    this.description = (String)cc.getProperties().get(Constants.SERVICE_DESCRIPTION);
+  }
 
   /**
    * {@inheritDoc}
@@ -39,20 +57,33 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
    */
   @Override
   public void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException {}
-
-  /**
-   * The ID of this operation handler
-   * @return
-   */
-//  public abstract String getOperationHandlerId();
   
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getId()
+   */
+  @Override
+  public String getId() {
+    return id;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getDescription()
+   */
+  @Override
+  public String getDescription() {
+    return description;
+  }
+  
+
   /**
    * {@inheritDoc}
    * @see java.lang.Object#toString()
    */
-//  @Override
-//  public String toString() {
-//    return getOperationHandlerId();
-//  }
+  @Override
+  public String toString() {
+    return "'" + getId() + "' Operation Handler";
+  }
   
 }

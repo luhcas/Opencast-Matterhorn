@@ -30,16 +30,36 @@ import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 /**
  *  Operation that holds for download of DVD image
  */
 public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(DownloadDVDWorkflowOperationHandler.class);
+
   /** Path to the hold ui resources */
   private static final String HOLD_UI_PATH = "/ui/operation/download-dvd/index.html";
   private static final String ACTION_TITLE = "download DVD";
 
+  /** The configuration options for this handler */
+  private static final SortedMap<String, String> CONFIG_OPTIONS;
+
+  static {
+    CONFIG_OPTIONS = new TreeMap<String, String>();
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
+   */
+  @Override
+  public SortedMap<String, String> getConfigurationOptions() {
+    return CONFIG_OPTIONS;
+  }
+  
   public void setHttpService(HttpService service) {
     super.httpService = service;
   }

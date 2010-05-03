@@ -25,11 +25,30 @@ import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 /**
  * Logs a failing workflow instance.
  */
 public class ErrorLoggingOperationHandler extends AbstractWorkflowOperationHandler {
   private static final Logger logger = LoggerFactory.getLogger(ErrorLoggingOperationHandler.class);
+
+  /** The configuration options for this handler */
+  private static final SortedMap<String, String> CONFIG_OPTIONS;
+
+  static {
+    CONFIG_OPTIONS = new TreeMap<String, String>();
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
+   */
+  @Override
+  public SortedMap<String, String> getConfigurationOptions() {
+    return CONFIG_OPTIONS;
+  }
 
   /**
    * {@inheritDoc}

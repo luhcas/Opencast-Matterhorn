@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.workflow.handler.VideoSegmenterWorkflowOperationHandler" immediate="true">
+<component name="org.opencastproject.workflow.handler.VideoSegmenterWorkflowOperationHandler" immediate="true" activate="activate">
   <implementation class="org.opencastproject.workflow.handler.VideoSegmenterWorkflowOperationHandler" />
   <property name="service.description" value="Videosegmentation Workflow Operation Handler" />
   <property name="workflow.operation" value="segment" />

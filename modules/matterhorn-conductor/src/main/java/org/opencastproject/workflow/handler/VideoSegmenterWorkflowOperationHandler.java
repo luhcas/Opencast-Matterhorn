@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -56,19 +58,29 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
   /** Name of the configuration key that specifies the flavor of the track to analyze */ 
   private static final String PROP_ANALYSIS_TRACK_FLAVOR = "analysis.track.flavor";
 
+  /** The configuration options for this handler */
+  private static final SortedMap<String, String> CONFIG_OPTIONS;
+
+  static {
+    CONFIG_OPTIONS = new TreeMap<String, String>();
+    CONFIG_OPTIONS.put(PROP_ANALYSIS_TRACK_FLAVOR, "The flavor of the track to analyze.  If multiple tracks match this flavor, the first will be used.");
+  }
+
   /** The local workspace */
   private Workspace workspace = null;
 
   /** The composer service */
   private VideoSegmenter videosegmenter = null;
 
-  /** The workflow operation handler ID */
-//  private String id;
-//  
-//  public void activate(ComponentContext cc) {
-//    
-//  }
-  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
+   */
+  @Override
+  public SortedMap<String, String> getConfigurationOptions() {
+    return CONFIG_OPTIONS;
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -87,10 +99,12 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
       candidates = mediaPackage.getTracks(MediaPackageElementFlavor.parseFlavor(trackFlavor));
     else
       candidates = mediaPackage.getTracks(MediaPackageElements.PRESENTATION_SOURCE);
-    if (candidates.length == 0)
-      return null;
-    else if (candidates.length > 1)
+    if (candidates.length == 0) {
+      logger.info("No matching tracks available for video segmentation in workflow {}", workflowInstance);
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+    } else if (candidates.length > 1) {
       logger.info("Found more than one track to segment, choosing the first one ({})", candidates[0]);
+    }
     Track track = candidates[0];    
     
     // Segment the media package
@@ -145,15 +159,6 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
    */
   protected void setVideoSegmenter(VideoSegmenter videosegmenter) {
     this.videosegmenter = videosegmenter;
-  }
-  
-  /**
-   * {@inheritDoc}
-   * @see java.lang.Object#toString()
-   */
-  @Override
-  public String toString() {
-    return "videosegmenter";
   }
 
 }

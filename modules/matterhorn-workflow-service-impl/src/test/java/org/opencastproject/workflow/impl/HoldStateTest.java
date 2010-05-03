@@ -44,6 +44,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class HoldStateTest {
   /** The solr root directory */
@@ -80,7 +82,7 @@ public class HoldStateTest {
 
     // instantiate a service implementation and its DAO, overriding the methods that depend on the osgi runtime
     service = new WorkflowServiceImpl() {
-      protected Set<HandlerRegistration> getRegisteredHandlers() {
+      public Set<HandlerRegistration> getRegisteredHandlers() {
         return handlerRegistrations;
       }
     };
@@ -175,6 +177,8 @@ public class HoldStateTest {
     /** Whether to return pause or continue when {@link #resume(WorkflowInstance)} is called */
     boolean pauseOnResume;
     
+    public SortedMap<String, String> getConfigurationOptions() {return new TreeMap<String, String>();}
+
     /**
      * {@inheritDoc}
      * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance)
@@ -187,6 +191,13 @@ public class HoldStateTest {
     }
   }
 
-  class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {}
+  class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
+    @Override
+    public SortedMap<String, String> getConfigurationOptions() {return new TreeMap<String, String>();}
+    @Override
+    public String getId() {return this.getClass().getName();}
+    @Override
+    public String getDescription() {return "ContinuingWorkflowOperationHandler";}
+  }
 
 }

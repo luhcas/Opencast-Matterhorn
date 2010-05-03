@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -50,6 +52,19 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
   
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(ImageWorkflowOperationHandler.class);
+
+  /** The configuration options for this handler */
+  private static final SortedMap<String, String> CONFIG_OPTIONS;
+
+  static {
+    CONFIG_OPTIONS = new TreeMap<String, String>();
+    CONFIG_OPTIONS.put("source-flavor", "The \"flavor\" of the track to use as a video source input");
+    CONFIG_OPTIONS.put("source-tags", "The required tags that must exist on the track for the track to be used as a video source");
+    CONFIG_OPTIONS.put("encoding-profile", "The encoding profile to use");
+    CONFIG_OPTIONS.put("time", "The number of seconds into the video file to extract the image");
+    CONFIG_OPTIONS.put("target-flavor", "The flavor to apply to the extracted image");
+    CONFIG_OPTIONS.put("target-tags", "The tags to apply to the extracted image");
+  }
 
   /** The composer service */
   private ComposerService composerService = null;
@@ -62,6 +77,15 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
    */
   protected void setComposerService(ComposerService composerService) {
     this.composerService = composerService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
+   */
+  @Override
+  public SortedMap<String, String> getConfigurationOptions() {
+    return CONFIG_OPTIONS;
   }
 
   /**

@@ -32,11 +32,14 @@ import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
+import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.impl.WorkflowServiceImpl;
+import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -52,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -63,7 +67,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.opencastproject.workflow.impl.WorkflowServiceImpl;
 
 /**
  * A REST endpoint for the {@link WorkflowService}
@@ -139,6 +142,13 @@ public class WorkflowRestService {
     instanceEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, instanceEndpoint);
 
+    // Operation Handlers
+    RestEndpoint handlersEndpoint = new RestEndpoint("handlers", RestEndpoint.Method.GET, "/handlers.json", "Returns the registered workflow operation handlers");
+    handlersEndpoint.addFormat(new Format("json", null, null));
+    handlersEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
+    handlersEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, handlersEndpoint);
+    
     // Start a new Workflow Instance
     RestEndpoint startEndpoint = new RestEndpoint("start", RestEndpoint.Method.POST, "/start", "Start a new workflow instance");
     startEndpoint.addFormat(new Format("xml", null, null));
@@ -418,6 +428,26 @@ public class WorkflowRestService {
     return Response.ok("resumed " + workflowInstanceId).build();
   }
 
+  @GET
+  @Path("handlers.json")
+  @SuppressWarnings("unchecked")
+  public Response getOperationHandlers() {
+    JSONArray jsonArray = new JSONArray();
+    for(HandlerRegistration reg : ((WorkflowServiceImpl)service).getRegisteredHandlers()) {
+      WorkflowOperationHandler handler = reg.getHandler();
+      JSONObject jsonHandler = new JSONObject();
+      jsonHandler.put("id", handler.getId());
+      jsonHandler.put("description", handler.getDescription());
+      JSONObject jsonConfigOptions = new JSONObject();
+      for(Entry<String, String> configEntry : handler.getConfigurationOptions().entrySet()) {
+        jsonConfigOptions.put(configEntry.getKey(), configEntry.getValue());
+      }
+      jsonHandler.put("options", jsonConfigOptions);
+      jsonArray.add(jsonHandler);
+    }
+    return Response.ok(jsonArray.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+  }
+  
   @SuppressWarnings("unchecked")
   protected JSONObject getWorkflowInstanceAsJson(WorkflowInstance workflow, boolean includeDublinCoreFields) throws Exception {
     MediaPackage mp = workflow.getMediaPackage();

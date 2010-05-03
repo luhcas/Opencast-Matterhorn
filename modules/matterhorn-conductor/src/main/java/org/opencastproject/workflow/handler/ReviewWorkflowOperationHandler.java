@@ -28,24 +28,35 @@ import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 /**
  * Simple implementation that hold for upload of a captions file.
  */
 public class ReviewWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
   
   private static final Logger logger = LoggerFactory.getLogger(ReviewWorkflowOperationHandler.class);
-  
-  public void setHttpService(HttpService service) {
-    super.httpService = service;
-  }
-  
-  public void setHttpContext(HttpContext httpContext) {
-    super.httpContext = httpContext;
-  }
+
+  /** The configuration options for this handler */
+  private static final SortedMap<String, String> CONFIG_OPTIONS;
 
   /** Path to the hold ui resources */
   private static final String HOLD_UI_PATH = "/ui/operation/review/index.html";
-  
+
+  static {
+    CONFIG_OPTIONS = new TreeMap<String, String>();
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
+   */
+  @Override
+  public SortedMap<String, String> getConfigurationOptions() {
+    return CONFIG_OPTIONS;
+  }
+
   public void activate(ComponentContext cc) {
     super.activate(cc);
     setHoldActionTitle("Review");
@@ -61,5 +72,13 @@ public class ReviewWorkflowOperationHandler extends AbstractResumableWorkflowOpe
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.info("Holding for review...");
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
+  }
+
+  public void setHttpService(HttpService service) {
+    super.httpService = service;
+  }
+  
+  public void setHttpContext(HttpContext httpContext) {
+    super.httpContext = httpContext;
   }
 }

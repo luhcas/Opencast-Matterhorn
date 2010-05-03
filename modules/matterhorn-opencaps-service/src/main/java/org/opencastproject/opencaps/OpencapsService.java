@@ -33,6 +33,7 @@ import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,8 @@ import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * The captions handler service <br/>
@@ -68,13 +71,29 @@ public class OpencapsService implements ResumableWorkflowOperationHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(OpencapsService.class);
 
+  /** The configuration options for this handler */
+  private static final SortedMap<String, String> CONFIG_OPTIONS;
+
+  static {
+    CONFIG_OPTIONS = new TreeMap<String, String>();
+  }
+
   private Workspace workspace;
 
   private WorkflowService workflowService;
 
   private WorkflowDefinition workflowDefinition;
 
+  /** The ID of this operation handler */
+  protected String id;
+
+  /** The description of what this handler actually does */
+  protected String description;
+
   public void activate(ComponentContext cc) {
+    this.id = (String)cc.getProperties().get(WorkflowService.WORKFLOW_OPERATION_PROPERTY);
+    this.description = (String)cc.getProperties().get(Constants.SERVICE_DESCRIPTION);
+
     // Load the republish workflow definition, but don't register it with the workflow service
     InputStream in = null;
     try {
@@ -111,6 +130,33 @@ public class OpencapsService implements ResumableWorkflowOperationHandler {
 
   public void unsetWorkflowService(WorkflowService workflowService) {
     this.workflowService = null;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getId()
+   */
+  @Override
+  public String getId() {
+    return id;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getDescription()
+   */
+  @Override
+  public String getDescription() {
+    return description;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
+   */
+  @Override
+  public SortedMap<String, String> getConfigurationOptions() {
+    return CONFIG_OPTIONS;
   }
 
   public CaptionsResults getProcessedMedia(int start, int max) {

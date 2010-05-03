@@ -15,10 +15,32 @@
  */
 package org.opencastproject.workflow.api;
 
+import java.util.SortedMap;
+
 /**
  * Handler for workflow operations.
  */
 public interface WorkflowOperationHandler {
+  
+  /**
+   * The identifier used to map a workflow operation to its handler
+   * @return This handler's identifier
+   */
+  String getId();
+  
+  /**
+   * Returns a description of what this handler does.
+   * @return The handler's description
+   */
+  String getDescription();
+
+  /**
+   * Returns the configuration keys that this handler accepts, along with a description of their purpose.
+   * 
+   * @return The configuration keys and their meaning
+   */
+  SortedMap<String, String> getConfigurationOptions();
+  
   /**
    * Runs the workflow operation on this {@link WorkflowInstance}.  If the execution fails for some reason, this must
    * throw a {@link WorkflowOperationException} in order to handle the problem gracefully.  Runtime exceptions will

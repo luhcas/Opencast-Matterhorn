@@ -40,6 +40,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class PauseFinalOperationTest {
   /** The solr root directory */
@@ -75,7 +77,7 @@ public class PauseFinalOperationTest {
 
     // instantiate a service implementation and its DAO, overriding the methods that depend on the osgi runtime
     service = new WorkflowServiceImpl() {
-      protected Set<HandlerRegistration> getRegisteredHandlers() {
+      public Set<HandlerRegistration> getRegisteredHandlers() {
         return handlerRegistrations;
       }
     };
@@ -134,6 +136,15 @@ public class PauseFinalOperationTest {
     OpHandler(MediaPackage mp) {
       this.mp = mp;
     }
+
+    @Override
+    public SortedMap<String, String> getConfigurationOptions() {return new TreeMap<String, String>();}
+    
+    @Override
+    public String getId() {return this.getClass().getName();}
+
+    @Override
+    public String getDescription() {return "ContinuingWorkflowOperationHandler";}
 
     @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {

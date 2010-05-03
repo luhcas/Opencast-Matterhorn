@@ -44,6 +44,7 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
 
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
+    super.activate(componentContext);
   }
 
   public URL getHoldStateUserInterfaceURL(WorkflowInstance workflowInstance) throws WorkflowOperationException {

@@ -27,6 +27,7 @@ import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowOperationResultImpl;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSelectionStrategy;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -70,11 +71,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImpl.class);
 
-  /**
-   * The service registration property we use to identify which workflow operation a {@link WorkflowOperationHandler}
-   * should handle.
-   */
-  protected static final String WORKFLOW_OPERATION_PROPERTY = "workflow.operation";
   protected static final String WORKFLOW_DEFINITION_DEFAULT = "org.opencastproject.workflow.default.definition";
 
   /** TODO: Remove references to the component context once felix scr 1.2 becomes available */
@@ -86,13 +82,18 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   /**
    * A tuple of a workflow operation handler and the name of the operation it handles
    */
-  static class HandlerRegistration {
+  public static class HandlerRegistration {
     public HandlerRegistration(String operationName, WorkflowOperationHandler handler) {
       this.operationName = operationName;
       this.handler = handler;
     }
     WorkflowOperationHandler handler;
     String operationName;
+    
+    public WorkflowOperationHandler getHandler() {
+      return handler;
+    }
+    
     /**
      * {@inheritDoc}
      * @see java.lang.Object#hashCode()
@@ -251,7 +252,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * 
    * @return All currently registered handlers
    */
-  protected Set<HandlerRegistration> getRegisteredHandlers() {
+  public Set<HandlerRegistration> getRegisteredHandlers() {
     Set<HandlerRegistration> set = new HashSet<HandlerRegistration>();
     ServiceReference[] refs;
     try {
@@ -515,41 +516,46 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   /**
    */
   void handleOperationResult(WorkflowInstance workflow, WorkflowOperationResult result) {
-    if(result != null) {
+    if(result == null) {
+      // Just continue using the workflow's current mediapackage, but log a warning
+      logger.warn("Handling a null operation result for workflow {}", workflow);
+      result = new WorkflowOperationResultImpl(workflow.getMediaPackage(), null, Action.CONTINUE);
+    } else {
+      // Update the workflow's mediapackage if a new one was produced in this operation
       MediaPackage mp = result.getMediaPackage();
       if(mp != null) {
         workflow.setMediaPackage(mp);
       }
-      WorkflowOperationHandler handler = null;
-      if(Action.PAUSE.equals(result.getAction())) {
-        WorkflowOperationInstance currentOperation = workflow.getCurrentOperation();
-        handler = getWorkflowOperationHandler(currentOperation.getId());
-        if(! (handler instanceof ResumableWorkflowOperationHandler)) {
-          throw new IllegalStateException("Operation " + currentOperation.getId() + " is not resumable");
-        }
-        ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler)handler;
-        try {
-          URL url = resumableHandler.getHoldStateUserInterfaceURL(workflow);
-          if(url != null) {
-            String holdActionTitle = resumableHandler.getHoldActionTitle();
-            ((WorkflowOperationInstanceImpl)currentOperation).setHoldActionTitle(holdActionTitle);
-            ((WorkflowOperationInstanceImpl)currentOperation).setHoldStateUserInterfaceUrl(url);
-          }
-        } catch (WorkflowOperationException e) {
-          logger.warn("unable to replace workflow ID in the hold state URL", e);
-        }
-        workflow.setState(WorkflowState.PAUSED);
-        workflow = updateConfiguration(workflow, result.getProperties());
-        dao.update(workflow);
-        return;
+    }
+    WorkflowOperationHandler handler = null;
+    if(Action.PAUSE.equals(result.getAction())) {
+      WorkflowOperationInstance currentOperation = workflow.getCurrentOperation();
+      handler = getWorkflowOperationHandler(currentOperation.getId());
+      if(! (handler instanceof ResumableWorkflowOperationHandler)) {
+        throw new IllegalStateException("Operation " + currentOperation.getId() + " is not resumable");
       }
+      ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler)handler;
+      try {
+        URL url = resumableHandler.getHoldStateUserInterfaceURL(workflow);
+        if(url != null) {
+          String holdActionTitle = resumableHandler.getHoldActionTitle();
+          ((WorkflowOperationInstanceImpl)currentOperation).setHoldActionTitle(holdActionTitle);
+          ((WorkflowOperationInstanceImpl)currentOperation).setHoldStateUserInterfaceUrl(url);
+        }
+      } catch (WorkflowOperationException e) {
+        logger.warn("unable to replace workflow ID in the hold state URL", e);
+      }
+      workflow.setState(WorkflowState.PAUSED);
+      workflow = updateConfiguration(workflow, result.getProperties());
+      dao.update(workflow);
+      return;
     }
     
     WorkflowState dbState = getWorkflowById(workflow.getId()).getState();
 
     // If the workflow was paused while the operation was still working, accept the updated mediapackage
     // and properties, but do not continue on.
-    if(result != null && result.getAction().equals(Action.CONTINUE) && WorkflowState.PAUSED.equals(dbState)) {
+    if(result.getAction().equals(Action.CONTINUE) && WorkflowState.PAUSED.equals(dbState)) {
       workflow.setState(WorkflowState.PAUSED);
       workflow = updateConfiguration(workflow, result.getProperties());
       dao.update(workflow);

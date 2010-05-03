@@ -47,6 +47,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class WorkflowServiceImplTest {
 
@@ -86,7 +88,7 @@ public class WorkflowServiceImplTest {
     
     // instantiate a service implementation and its DAO, overriding the methods that depend on the osgi runtime
     service = new WorkflowServiceImpl() {
-      protected Set<HandlerRegistration> getRegisteredHandlers() {
+      public Set<HandlerRegistration> getRegisteredHandlers() {
         return handlerRegistrations;
       }
     };
@@ -499,12 +501,26 @@ public class WorkflowServiceImplTest {
     SucceedingWorkflowOperationHandler(MediaPackage mp) {
       this.mp = mp;
     }
+    @Override
+    public SortedMap<String, String> getConfigurationOptions() {return new TreeMap<String, String>();}
+    @Override
+    public String getId() {return this.getClass().getName();}
+    @Override
+    public String getDescription() {return "ContinuingWorkflowOperationHandler";}
+    @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, Action.CONTINUE);
     }
   }
 
   class FailingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
+    @Override
+    public SortedMap<String, String> getConfigurationOptions() {return new TreeMap<String, String>();}
+    @Override
+    public String getId() {return this.getClass().getName();}
+    @Override
+    public String getDescription() {return "ContinuingWorkflowOperationHandler";}
+    @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
       throw new WorkflowOperationException("this operation handler always fails.  that's the point.");
     }

@@ -128,6 +128,7 @@
               postgresql;inline=true
             </Embed-Dependency>
             <Import-Package>
+              org.osgi.service.component.*,
               org.opencastproject.feed.impl,
               org.opencastproject.media.mediapackage,
               org.opencastproject.media.mediapackage.attachment,
@@ -146,16 +147,16 @@
               OSGI-INF/workflow-definition-loader.xml,
               OSGI-INF/workflow-definition-scanner.xml,
               OSGI-INF/operations/compose.xml,
-              OSGI-INF/operations/image.xml,
               OSGI-INF/operations/distribute-download.xml,
               OSGI-INF/operations/distribute-streaming.xml,
+              OSGI-INF/operations/download-dvd.xml,
               OSGI-INF/operations/error-handler.xml,
+              OSGI-INF/operations/image.xml,
               OSGI-INF/operations/inspect.xml,
               OSGI-INF/operations/publish.xml,
               OSGI-INF/operations/review.xml,
               OSGI-INF/operations/segment.xml,
               OSGI-INF/operations/segmentpreviews.xml,
-              OSGI-INF/operations/download-dvd.xml,
               OSGI-INF/feeds/aggregation-feed.xml,
               OSGI-INF/feeds/custom-feed.xml,
               OSGI-INF/feeds/latest-feed.xml,

@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Workflow operation for handling "publish" operations
@@ -42,6 +44,23 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
   /** The search service */
   private SearchService searchService = null;
+
+  /** The configuration options for this handler */
+  private static final SortedMap<String, String> CONFIG_OPTIONS;
+
+  static {
+    CONFIG_OPTIONS = new TreeMap<String, String>();
+    CONFIG_OPTIONS.put("source-tags", "Publish any mediapackage elements with one of these (whitespace separated) tags");
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
+   */
+  @Override
+  public SortedMap<String, String> getConfigurationOptions() {
+    return CONFIG_OPTIONS;
+  }
 
   /**
    * Callback for declarative services configuration that will introduce us to the search service.

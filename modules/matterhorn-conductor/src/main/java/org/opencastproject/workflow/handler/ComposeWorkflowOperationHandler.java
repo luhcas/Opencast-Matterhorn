@@ -40,6 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -50,15 +52,27 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(ComposeWorkflowOperationHandler.class);
 
-  /** The composer service */
-  private ComposerService composerService = null;
-
   /** Name of the audio-only (strip video) profile */
   public static final String AUDIO_ONLY_PROFILE = "audio-only.http";
 
   /** Name of the audio-only (strip audio) profile */
   public static final String VIDEO_ONLY_PROFILE = "video-only.http";
 
+  /** The configuration options for this handler */
+  private static final SortedMap<String, String> CONFIG_OPTIONS;
+
+  static {
+    CONFIG_OPTIONS = new TreeMap<String, String>();
+    CONFIG_OPTIONS.put("source-video-flavor", "The \"flavor\" of the track to use as a video source input");
+    CONFIG_OPTIONS.put("source-audio-flavor","The \"flavor\" of the track to use as an audio source input");
+    CONFIG_OPTIONS.put("encoding-profile","The encoding profile to use");
+    CONFIG_OPTIONS.put("target-flavor","The flavor to apply to the encoded file");
+    CONFIG_OPTIONS.put("target-tags","The tags to apply to the encoded file");
+  }
+  
+  /** The composer service */
+  private ComposerService composerService = null;
+  
   /**
    * Callback for the OSGi declarative services configuration.
    * 
@@ -69,6 +83,15 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
     this.composerService = composerService;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
+   */
+  @Override
+  public SortedMap<String, String> getConfigurationOptions() {
+    return CONFIG_OPTIONS;
+  }
+  
   /**
    * {@inheritDoc}
    * 

@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * The workflow definition for handling "distribute" operations
@@ -55,6 +57,24 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
     this.distributionService = distributionService;
   }
 
+  /** The configuration options for this handler */
+  private static final SortedMap<String, String> CONFIG_OPTIONS;
+
+  static {
+    CONFIG_OPTIONS = new TreeMap<String, String>();
+    CONFIG_OPTIONS.put("source-tags","Distribute any mediapackage elements with one of these (whitespace separated) tags");
+    CONFIG_OPTIONS.put("target-tags","Apple these (whitespace separated) tags to any mediapackage elements produced as a result of distribution");
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
+   */
+  @Override
+  public SortedMap<String, String> getConfigurationOptions() {
+    return CONFIG_OPTIONS;
+  }
+  
   /**
    * {@inheritDoc}
    * 
