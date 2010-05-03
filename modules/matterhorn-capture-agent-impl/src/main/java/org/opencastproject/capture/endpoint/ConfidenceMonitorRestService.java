@@ -17,6 +17,13 @@ package org.opencastproject.capture.endpoint;
 
 import org.opencastproject.capture.api.ConfidenceMonitor;
 import org.opencastproject.capture.api.AgentDevice;
+import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Param.Type;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +44,44 @@ public class ConfidenceMonitorRestService {
   private static final Logger logger = LoggerFactory.getLogger(ConfidenceMonitorRestService.class);
   
   private ConfidenceMonitor service;
+  
+  protected String docs;
+  
+  protected String generateDocs() {
+    DocRestData data = new DocRestData("ConfidenceMonitor", "Confidence Monitor", "/confidence/rest", null);
+    
+    // grabFrame Endpoint
+    RestEndpoint grabFrameEndpoint = new RestEndpoint("grabFrame", RestEndpoint.Method.GET, "/{name}", "Loads a JPEG image from the device specified");
+    grabFrameEndpoint.addFormat(new Format("jpeg", "The image of the device", null));
+    grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
+    grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("Couldn't grab a frame from specified device"));
+    Param device = new Param("name", Type.STRING, null, "The device to grab a frame from");
+    grabFrameEndpoint.addPathParam(device);
+    grabFrameEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, grabFrameEndpoint);
+    
+    // list devices endpoint
+    RestEndpoint getDevices = new RestEndpoint("getDevices", RestEndpoint.Method.GET, "/devices", "Lists devices accessible on capture agent");
+    getDevices.addFormat(new Format("XML", "Devices that support confidence monitoring", null));
+    getDevices.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
+    getDevices.addStatus(org.opencastproject.util.doc.Status.ERROR("Couldn't list devices"));
+    getDevices.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, getDevices);
+    
+    // audio rms endpoint
+    RestEndpoint getRMSValues = new RestEndpoint("getRMSValues", RestEndpoint.Method.GET, "/audio/{name}/{timestamp}", "List X seconds of RMS values from audio device");
+    getRMSValues.addFormat(new Format("String", "Current timestamp of capture agent followed by list of RMS values", null));
+    getRMSValues.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
+    getRMSValues.addStatus(org.opencastproject.util.doc.Status.ERROR("Couldn't grab RMS values"));
+    Param audioDevice = new Param("name", Type.STRING, null, "The device to get RMS values from");
+    Param timestamp = new Param("timestamp", Type.STRING, null, "The timestamp to start getting RMS values from");
+    getRMSValues.addPathParam(audioDevice);
+    getRMSValues.addPathParam(timestamp);
+    getRMSValues.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, getRMSValues);
+    
+    return DocUtil.generate(data);
+  }
   
   public void activate() {
     logger.info("Video Monitoring Service Activated");
@@ -80,6 +125,14 @@ public class ConfidenceMonitorRestService {
       output += Double.toString(value) + "\n";
     }
     return output.substring(0, output.length() - 2);
+  }
+  
+  @GET
+  @Produces(MediaType.TEXT_HTML)
+  @Path("docs")
+  public String getDocumentation() {
+    if (docs == null) { docs = generateDocs(); }
+    return docs;
   }
   
 }
