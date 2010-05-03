@@ -19,12 +19,11 @@ import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.ConfigurationManager;
+import org.opencastproject.security.api.TrustedHttpClient;
 
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -46,6 +45,7 @@ public class AgentStateJob implements Job {
 
   private ConfigurationManager config = null;
   private StateService state = null;
+  private TrustedHttpClient client = null;
 
   /**
    * Pushes the agent's state to the remote state service.
@@ -55,6 +55,7 @@ public class AgentStateJob implements Job {
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
     config = (ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE);
     state = (StateService) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE);
+    client = (TrustedHttpClient) ctx.getMergedJobDataMap().get(JobParameters.TRUSTED_CLIENT);
     sendAgentState();
     sendRecordingState();
   }
@@ -134,7 +135,6 @@ public class AgentStateJob implements Job {
 
     try {
       remoteServer.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
-      HttpClient client = new DefaultHttpClient();
       client.execute(remoteServer);
     } catch (Exception e) {
       logger.error("Unable to push update to remote server: {}.", e.getMessage());

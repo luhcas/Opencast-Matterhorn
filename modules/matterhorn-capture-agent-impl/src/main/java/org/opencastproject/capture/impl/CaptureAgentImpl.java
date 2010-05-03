@@ -21,8 +21,8 @@ import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.CaptureParameters;
-import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.api.ConfidenceMonitor;
+import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.jobs.AgentCapabilitiesJob;
 import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
@@ -36,15 +36,13 @@ import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.ZipUtil;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.FileEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.gstreamer.Bus;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
@@ -121,6 +119,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   /** The configuration manager for the agent. */ 
   private ConfigurationManager configService = null;
 
+  /** The http client used to communicate with the core */
+  private TrustedHttpClient client = null;
+
   /** Indicates the ID of the recording currently being recorded. **/
   private String currentRecID = null;
 
@@ -139,6 +140,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   public void setScheduler(SchedulerImpl s) {
     scheduler = s;
+  }
+
+  public void setTrustedClient(TrustedHttpClient c) {
+    client = c;
   }
 
   /**
@@ -616,41 +621,29 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       return -1;
     }
 
-    HttpClient client = new DefaultHttpClient();
     HttpPost postMethod = new HttpPost(url.toString());
     int retValue = -1;
 
     File fileDesc = new File(recording.getDir(), CaptureParameters.ZIP_NAME);
 
-    try {
-      // Sets the file as the body of the request
-      FileEntity myFileEntity = new FileEntity(fileDesc, URLConnection.getFileNameMap().getContentTypeFor(fileDesc.getName()));
+    // Sets the file as the body of the request
+    FileEntity myFileEntity = new FileEntity(fileDesc, URLConnection.getFileNameMap().getContentTypeFor(fileDesc.getName()));
 
-      logger.debug("Sending the file " + fileDesc.getAbsolutePath() + " with a size of "+ fileDesc.length());
+    logger.debug("Sending the file " + fileDesc.getAbsolutePath() + " with a size of "+ fileDesc.length());
 
-      setRecordingState(recID, RecordingState.UPLOADING);
+    setRecordingState(recID, RecordingState.UPLOADING);
 
-      postMethod.setEntity(myFileEntity);
+    postMethod.setEntity(myFileEntity);
 
-      // Send the file
-      HttpResponse response = client.execute(postMethod);
+    // Send the file
+    HttpResponse response = client.execute(postMethod);
 
-      retValue = response.getStatusLine().getStatusCode();
+    retValue = response.getStatusLine().getStatusCode();
 
-      if (retValue == 200) {
-        setRecordingState(recID, RecordingState.UPLOAD_FINISHED);
-      } else {
-        setRecordingState(recID, RecordingState.UPLOAD_ERROR);
-      }
-    } catch (ClientProtocolException e) {
-      logger.error("Failed to submit the data: {}.", e.getMessage());
+    if (retValue == 200) {
+      setRecordingState(recID, RecordingState.UPLOAD_FINISHED);
+    } else {
       setRecordingState(recID, RecordingState.UPLOAD_ERROR);
-    } catch (IOException e) {
-      logger.error("I/O Exception: {}.", e.getMessage());
-      setRecordingState(recID, RecordingState.UPLOAD_ERROR);
-    } finally {
-      client.getConnectionManager().shutdown();
-      //setAgentState(AgentState.IDLE);
     }
 
     return retValue;
@@ -851,6 +844,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
       stateJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
       stateJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
+      stateJob.getJobDataMap().put(JobParameters.TRUSTED_CLIENT, client);
 
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
       SimpleTrigger stateTrigger = new SimpleTrigger("state_push", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, statePushTime);
@@ -871,7 +865,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       JobDetail capbsJob = new JobDetail("agentCapabilitiesUpdate", JobParameters.RECURRING_TYPE, AgentCapabilitiesJob.class);
 
       capbsJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
-      capbsJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);     
+      capbsJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);   
+      capbsJob.getJobDataMap().put(JobParameters.TRUSTED_CLIENT, client);
       
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
       SimpleTrigger capbsTrigger = new SimpleTrigger("capabilities_polling", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, capbsPushTime);

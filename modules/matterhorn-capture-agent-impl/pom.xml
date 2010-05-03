@@ -41,6 +41,12 @@
       <type>bundle</type>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-security-api</artifactId>
+      <version>0.8-SNAPSHOT</version>
+      <type>bundle</type>
+    </dependency>
+    <dependency>
       <groupId>org.opencastproject.samples</groupId>
       <artifactId>audio</artifactId>
       <version>1.0</version>
@@ -198,7 +204,6 @@
               org.gstreamer,
               net.java.dev.jna,
               net.fortuna.ical4j.*,
-              org.apache.http.*;-split-package:=merge-first,
               ui.*
             </Private-Package>
             <Embed-Dependency>

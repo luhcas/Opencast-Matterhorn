@@ -18,11 +18,10 @@ package org.opencastproject.capture.impl.jobs;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.ConfigurationManager;
+import org.opencastproject.security.api.TrustedHttpClient;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -41,6 +40,7 @@ public class AgentCapabilitiesJob implements Job {
 
   private ConfigurationManager config = null;
   private CaptureAgent agent = null;
+  private TrustedHttpClient client = null;
 
   /**
    * Pushes the agent's capabilities to the remote state service.
@@ -50,6 +50,7 @@ public class AgentCapabilitiesJob implements Job {
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
     config = (ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE);
     agent = (CaptureAgent) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE);
+    client = (TrustedHttpClient) ctx.getMergedJobDataMap().get(JobParameters.TRUSTED_CLIENT);
 
     //Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
@@ -73,7 +74,6 @@ public class AgentCapabilitiesJob implements Job {
       agent.getAgentCapabilities().storeToXML(baos, "Capabilities for the agent " + agent.getAgentName());
       HttpPost remoteServer = new HttpPost(url);
       remoteServer.setEntity(new StringEntity(baos.toString()));
-      HttpClient client = new DefaultHttpClient();
       client.execute(remoteServer);
     } catch (IOException e) {
       logger.error ("Unexpected I/O exception: {}", e.getMessage());

@@ -37,6 +37,9 @@ public interface JobParameters {
   /** Constant used to define the key for the CaptureAgentImpl object which is pulled out of the execution context. */
   public static final String CAPTURE_AGENT = "capture_agent";
 
+  /** Constant used to define the key for the TrustedHttpClient object which is pulled out of the execution context. */
+  public static final String TRUSTED_CLIENT = "trusted_client";
+
   /** Constant used to define the scheduler which should be used to schedule post-capture jobs in the appropriate classes. */
   public static final String JOB_SCHEDULER = "job_scheduler";
 

@@ -27,6 +27,7 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.security.api.TrustedHttpClient;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
@@ -42,6 +43,8 @@ import net.fortuna.ical4j.model.property.Duration;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.quartz.CronExpression;
@@ -106,6 +109,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /** The maximum duration to schedule something for */
   private Dur maxDuration = new Dur(new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis() + (CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH * 1000)));
 
+  /** The trusted HttpClient used to talk to the core */
+  private TrustedHttpClient trustedClient = null;
 
   public void setConfigService(ConfigurationManager svc) {
     configService = svc;
@@ -228,11 +233,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     }
   }
 
-  /**
-   * Sets the capture agent for this scheduler to null.
-   */
-  public void unsetCaptureAgent() {
-    captureAgent = null;
+  public void setTrustedClient(TrustedHttpClient client) {
+    trustedClient = client;
   }
 
   /**
@@ -293,6 +295,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
             return null;
           }
         } catch (IOException e1) {
+          log.warn("Unable to read from cached schedule: {}.", e1.getMessage());
+          return null;
+        } catch (URISyntaxException e1) {
           log.warn("Unable to read from cached schedule: {}.", e1.getMessage());
           return null;
         }
@@ -358,12 +363,18 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @param url The URL to read the source data from.
    * @return A String containing the source data.
    * @throws IOException
+   * @throws URISyntaxException 
    */
-  private String readCalendar(URL url) throws IOException, NullPointerException {
+  private String readCalendar(URL url) throws IOException, NullPointerException, URISyntaxException {
     StringBuilder sb = new StringBuilder();
-    //TODO:  Handle reading UTF16, and every other format under the sun
-    //Urgh, read in the data.  These ugly lines handle both HTTP and local file
-    DataInputStream in = new DataInputStream(url.openStream());
+    DataInputStream in = null;
+    if (url.getProtocol().equals("file")) {
+      in = new DataInputStream(url.openStream());
+    } else {
+      HttpGet get = new HttpGet(url.toURI());
+      HttpResponse response = trustedClient.execute(get);
+      in = new DataInputStream(response.getEntity().getContent());
+    }
     int c = 0;
     while ((c = in.read()) != -1) {
       sb.append((char) c);
@@ -395,8 +406,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   private void checkSchedules() throws SchedulerException {
     if (scheduler != null) {
       log.debug("Currently scheduled jobs for capture schedule:");
+      //GDLGDL
       for (String name : scheduler.getJobNames(JobParameters.CAPTURE_TYPE)) {
-        log.debug("{}.", name);  
+        log.debug("{} at {}.", name, scheduler.getJobDetail(name, JobParameters.CAPTURE_TYPE).getJobDataMap().get("GDLGDL"));  
       }
       log.debug("Currently scheduled jobs for poll schedule:");
       for (String name : scheduler.getJobNames(JobParameters.RECURRING_TYPE)) {
@@ -504,10 +516,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         String endCronString = getCronString(duration.getDuration().getTime(start)).toString();
         props.put(CaptureParameters.RECORDING_END, endCronString);
 
-        
         if (!scheduleEvent(event, props, job)) {
           log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", uid);
         }
+        //GDLGDL
+        job.getJobDataMap().put("GDLGDL", startCronExpression.toString());
         scheduler.scheduleJob(job, trig);
         scheduledEvents.put(startCronExpression.toString(), uid);
       }

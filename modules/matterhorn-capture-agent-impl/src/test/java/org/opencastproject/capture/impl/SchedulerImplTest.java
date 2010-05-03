@@ -92,8 +92,6 @@ public class SchedulerImplTest {
 
   @After
   public void tearDown() {
-    sched.unsetCaptureAgent();
-    sched.unsetConfigService();
     sched.deactivate();
     sched.finalize();
     sched = null;
