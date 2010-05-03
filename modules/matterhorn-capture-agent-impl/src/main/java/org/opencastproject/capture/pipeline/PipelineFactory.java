@@ -257,6 +257,7 @@ public class PipelineFactory {
     Element mpegpsdemux = ElementFactory.make("mpegpsdemux", null);
     final Element mpegvideoparse = ElementFactory.make("mpegvideoparse", null);
     if (codec != null) {
+      logger.debug("{} using encoder: {}", captureDevice.getName(), codec);
       dec = ElementFactory.make("mpeg2dec", null);
       enc = ElementFactory.make(codec, null);
     }
@@ -269,9 +270,10 @@ public class PipelineFactory {
 
     filesrc.set("location", captureDevice.getLocation());
     filesink.set("location", captureDevice.getOutputPath());
-    if (bitrate != null)
+    if (bitrate != null) {
+      logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);
       enc.set("bitrate", bitrate);
-
+    }
     pipeline.addMany(filesrc, queue, mpegpsdemux, mpegvideoparse, dec, enc, mpegtsmux, filesink);
 
     /*
@@ -284,7 +286,7 @@ public class PipelineFactory {
     });
     Pad newpad = new Pad(null, PadDirection.SRC);
 
-    if (!filesrc.link(queue))
+    if (!VideoMonitoring.addVideoMonitor(pipeline, filesrc, queue, interval, imageloc, device))
       error = formatPipelineError(captureDevice, filesrc, queue);
     else if (!queue.link(mpegpsdemux))
       error = formatPipelineError(captureDevice, queue, mpegpsdemux);
@@ -292,7 +294,7 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, mpegpsdemux, mpegvideoparse);
     else if (!mpegvideoparse.link(dec))
       error = formatPipelineError(captureDevice, mpegvideoparse, dec);
-    else if (!VideoMonitoring.addVideoMonitor(pipeline, dec, enc, interval, imageloc, device))
+    else if (!dec.link(enc))
       error = formatPipelineError(captureDevice, dec, enc);
     else if (!enc.link(mpegtsmux))
       error = formatPipelineError(captureDevice, enc, mpegtsmux);
@@ -334,18 +336,24 @@ public class PipelineFactory {
     Element videorate = ElementFactory.make("videorate", null);
     Element filter = ElementFactory.make("capsfilter", null);
     Element ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
-    if (codec != null)
+    if (codec != null) {
+      logger.debug("{} encoder set to: {}", captureDevice.getName(), codec);
       enc = ElementFactory.make(codec, null);
-    else
+    }
+    else {
       enc = ElementFactory.make("ffenc_mpeg2video", null);
+    }
+    
     Element mpegtsmux = ElementFactory.make("mpegtsmux", null);
     Element filesink = ElementFactory.make("filesink", null);
 
     v4lsrc.set("device", captureDevice.getLocation());
     filter.setCaps(Caps.fromString("video/x-raw-yuv,width=1024,height=768,framerate=30/1"));
     filesink.set("location", captureDevice.getOutputPath());
-    if (bitrate != null)
+    if (bitrate != null) {
+      logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);      
       enc.set("bitrate", bitrate);
+    }
     else
       enc.set("bitrate", "2000000");
 
@@ -397,6 +405,7 @@ public class PipelineFactory {
     Element alsasrc = ElementFactory.make("alsasrc", null);
     Element queue = ElementFactory.make("queue", null);
     if (codec != null) {
+      logger.debug("{} encoder set to: {}", captureDevice.getName(), codec);
       enc = ElementFactory.make(codec, null);
       if (codec.equalsIgnoreCase("faac"))
         mux = ElementFactory.make("mp4mux", null);
@@ -412,8 +421,10 @@ public class PipelineFactory {
 
     alsasrc.set("device", captureDevice.getLocation());
     filesink.set("location", captureDevice.getOutputPath());
-    if (bitrate != null)
+    if (bitrate != null) {
+      logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);
       enc.set("bitrate", bitrate);
+    }
 
     pipeline.addMany(alsasrc, queue, enc, mux, filesink);
 
@@ -456,8 +467,10 @@ public class PipelineFactory {
     Element enc;
     Element v4l2src = ElementFactory.make("v4l2src", null);
     Element queue = ElementFactory.make("queue", null);
-    if (codec != null)
+    if (codec != null) {
+      logger.debug("{} encoder set to: {}", captureDevice.getName(), codec);
       enc = ElementFactory.make(codec, null);
+    }
     else
       enc = ElementFactory.make("ffenc_mpeg2video", null);
     Element mpegtsmux = ElementFactory.make("mpegtsmux", null);
@@ -465,8 +478,10 @@ public class PipelineFactory {
 
     v4l2src.set("device", captureDevice.getLocation());
     filesink.set("location", captureDevice.getOutputPath());
-    if (bitrate != null)
+    if (bitrate != null) {
+      logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);
       enc.set("bitrate", bitrate);
+    }
     else
       enc.set("bitrate", "2000000");
 
@@ -535,8 +550,10 @@ public class PipelineFactory {
     Element filesink = ElementFactory.make("filesink", null);
     
     filesink.set("location", captureDevice.getOutputPath());
-    if (bitrate != null)
+    if (bitrate != null) {
+      logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);
       enc.set("bitrate", bitrate);
+    }
     
     pipeline.addMany(src, queue, dec, enc, filesink);
     

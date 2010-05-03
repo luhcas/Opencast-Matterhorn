@@ -139,7 +139,7 @@ public interface CaptureParameters {
   String CAPTURE_DEVICE_CODEC = ".codec";
   
   /** Property appended to CAPTURE_DEVICE_CODEC to specify that codec's bitrate */
-  String CAPTURE_DEVICE_BITRATE = ".properties.bitrate";
+  String CAPTURE_DEVICE_BITRATE = ".bitrate";
   
   /** Time interval between confidence updates (in seconds) */
   String CAPTURE_DEVICE_CONFIDENCE_INTERVAL = ".confidence.interval";
