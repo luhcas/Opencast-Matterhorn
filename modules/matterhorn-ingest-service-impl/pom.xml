@@ -192,7 +192,9 @@
 						<Import-Package> org.opencastproject.http, *;resolution:=optional </Import-Package>
 						<Import-Package> javax.persistence, *;resolution:=optional </Import-Package>
 						<Service-Component>
-							OSGI-INF/ingest-service.xml,
+							OSGI-INF/ingest-service-delegating.xml,
+							OSGI-INF/ingest-service-local.xml,
+							OSGI-INF/ingest-service-remote.xml,
 							OSGI-INF/ingest-service-rest.xml
             </Service-Component>
 						<JPA-PersistenceUnits>

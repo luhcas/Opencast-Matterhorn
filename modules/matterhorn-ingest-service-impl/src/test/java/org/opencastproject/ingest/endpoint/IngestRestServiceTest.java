@@ -31,6 +31,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,6 +73,15 @@ public class IngestRestServiceTest {
             .andReturn(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
     EasyMock.expect(ingestService.addTrack(
             (URI)EasyMock.anyObject(), (MediaPackageElementFlavor)EasyMock.anyObject(), (MediaPackage)EasyMock.anyObject()))
+            .andReturn(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
+    EasyMock.expect(ingestService.addAttachment(
+            (InputStream)EasyMock.anyObject(), (String)EasyMock.anyObject(), (MediaPackageElementFlavor)EasyMock.anyObject(), (MediaPackage)EasyMock.anyObject()))
+            .andReturn(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
+    EasyMock.expect(ingestService.addCatalog(
+            (InputStream)EasyMock.anyObject(), (String)EasyMock.anyObject(), (MediaPackageElementFlavor)EasyMock.anyObject(), (MediaPackage)EasyMock.anyObject()))
+            .andReturn(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
+    EasyMock.expect(ingestService.addTrack(
+            (InputStream)EasyMock.anyObject(), (String)EasyMock.anyObject(), (MediaPackageElementFlavor)EasyMock.anyObject(), (MediaPackage)EasyMock.anyObject()))
             .andReturn(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
     EasyMock.replay(ingestService);
 

@@ -133,18 +133,35 @@ public class IngestRestService {
     }
   }
 
-  // @POST
-  // @Produces(MediaType.TEXT_HTML)
-  // @Path("discardMediaPackage")
-  // public Response discardMediaPackage(MediapackageType mpt) {
-  // try {
-  // MediaPackage mp = builder.loadFromManifest(IOUtils.toInputStream(mpt.toXml()));
-  // service.discardMediaPackage(mp);
-  // return Response.ok("Media package discarded.").build();
-  // } catch (Exception e) {
-  // return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-  // }
-  // }
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("getWorkflowInstance/{id}.xml")
+  public Response getWorkflowInstance(@PathParam("id") String id) {
+    WorkflowInstance wf;
+    //id = id.substring(0, id.length()-4);
+    try {
+      wf = ingestService.getWorkflowInstance(id);
+      return Response.ok(wf).build();
+    } catch (Exception e) {
+      logger.warn(e.getMessage(), e);
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  @POST
+  @Path("discardMediaPackage")
+  public Response discardMediaPackage(@FormParam("mediaPackage") String mpx) {
+    logger.debug("discardMediaPackage(MediaPackage): {}", mpx);
+    try {
+      MediaPackage mp = builder.loadFromXml(mpx);
+      ingestService.discardMediaPackage(mp);
+      return Response.ok().build();
+    } catch (Exception e) {
+      logger.warn(e.getMessage(), e);
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("addTrack")
@@ -247,18 +264,18 @@ public class IngestRestService {
         }
         switch (type) {
         case Attachment:
-          ingestService.addAttachment(in, fileName, flavor, mp);
+          mp = ingestService.addAttachment(in, fileName, flavor, mp);
           break;
         case Catalog:
-          ingestService.addCatalog(in, fileName, flavor, mp);
+          mp = ingestService.addCatalog(in, fileName, flavor, mp);
           break;
         case Track:
-          ingestService.addTrack(in, fileName, flavor, mp);
+          mp = ingestService.addTrack(in, fileName, flavor, mp);
           break;
         default:
           throw new IllegalStateException("Type must be one of track, catalog, or attachment");
         }
-        ingestService.ingest(mp);
+        // ingestService.ingest(mp);
         return Response.ok(mp.toXml()).build();
       }
       return Response.serverError().status(Status.BAD_REQUEST).build();
@@ -390,7 +407,7 @@ public class IngestRestService {
           mp = builder.loadFromXml(((String[]) params.get(key))[0]);
         } else {
           wfConfig.put(key, ((String[]) params.get(key))[0]); // TODO how do we handle multiple values eg. resulting
-                                                              // from checkboxes
+          // from checkboxes
         }
       }
       if (mp != null) {
@@ -635,6 +652,17 @@ public class IngestRestService {
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
+    // discardMediaPackage
+    endpoint = new RestEndpoint("discardMediaPackage", RestEndpoint.Method.POST, "/discardMediaPackage",
+            "Discard a media package");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint
+            .addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null, "Given media package to be destroyed"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
     // addTrack (URL)
     endpoint = new RestEndpoint("addTrackURL", RestEndpoint.Method.POST, "/addTrack",
             "Add a media track to a given media package using an URL");
@@ -798,6 +826,16 @@ public class IngestRestService {
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // get workflow instance
+    endpoint = new RestEndpoint("getWorkflowInstance", RestEndpoint.Method.GET, "/getWorkflowInstance/{id}.xml",
+            "Get un updated workflow instance");
+    endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addPathParam(new Param("id", Param.Type.STRING, null, "The ID of the given workflow instance"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns workflow instance"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
     return DocUtil.generate(data);
   }

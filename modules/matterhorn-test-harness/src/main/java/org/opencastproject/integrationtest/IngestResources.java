@@ -28,59 +28,66 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
  * Ingest REST resources
+ * 
  * @author jamiehodge
- *
+ * 
  */
 
 public class IngestResources {
-	public static Client c = Client.create();
-	public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/ingest/rest/");
-	
-	static {
-		  c.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));
-	  }
-	
-	public static ClientResponse createMediaPackage() throws UniformInterfaceException {
-		return r.path("createMediaPackage").get(ClientResponse.class);
-	}
-	
-	/**
-	 * 
-	 * @param type Type of media to add: Track, Catalog, Attachment
-	 * 
-	 */
-	public static ClientResponse add(String type, String url,
-			String flavor, String mediaPackage) throws UniformInterfaceException {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("url", url);
-		params.add("flavor", flavor);
-		params.add("mediaPackage", mediaPackage);
-		return r.path("add" + type).post(ClientResponse.class, params);
-	}
-	
-	/**
-	 * 
-	 * @param type Type of media to add: Track, Catalog, Attachment
-	 *
-	 */
-	public static ClientResponse addTrack(String type, InputStream media,
-			String flavor, String mediaPackage) throws UniformInterfaceException {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("flavor", flavor);
-		params.add("mediaPackage", mediaPackage);
-		return r.path("add" + type).entity(media).post(ClientResponse.class, params);
-	}
-	
-	// TODO addMediaPackage
-	
-	public static ClientResponse addZippedMediaPackage(InputStream mediaPackage) throws UniformInterfaceException {
-		return r.path("addZippedMediaPackage").entity(mediaPackage).post(ClientResponse.class);
-	}
-	
-	public static ClientResponse ingest(String mediaPackageId) throws UniformInterfaceException {
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("mediaPackage", mediaPackageId);
-		return r.path("ingest").post(ClientResponse.class, params);
-	}
+  public static Client c = Client.create();
+  public static WebResource r = c.resource(IntegrationTests.BASE_URL + "/ingest/rest/");
+
+  static {
+    c.addFilter(new HTTPBasicAuthFilter(IntegrationTests.USER, IntegrationTests.PASS));
+  }
+
+  public static ClientResponse createMediaPackage() throws UniformInterfaceException {
+    return r.path("createMediaPackage").get(ClientResponse.class);
+  }
+
+  /**
+   * 
+   * @param type
+   *          Type of media to add: Track, Catalog, Attachment
+   * 
+   */
+  public static ClientResponse add(String type, String url, String flavor, String mediaPackage)
+          throws UniformInterfaceException {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("url", url);
+    params.add("flavor", flavor);
+    params.add("mediaPackage", mediaPackage);
+    return r.path("add" + type).post(ClientResponse.class, params);
+  }
+
+  /**
+   * 
+   * @param type
+   *          Type of media to add: Track, Catalog, Attachment
+   * 
+   */
+  public static ClientResponse addTrack(String type, InputStream media, String flavor, String mediaPackage)
+          throws UniformInterfaceException {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("flavor", flavor);
+    params.add("mediaPackage", mediaPackage);
+    return r.path("add" + type).entity(media).post(ClientResponse.class, params);
+  }
+
+  // TODO addMediaPackage
+
+  public static ClientResponse addZippedMediaPackage(InputStream mediaPackage) throws UniformInterfaceException {
+    return r.path("addZippedMediaPackage").entity(mediaPackage).post(ClientResponse.class);
+  }
+
+  public static ClientResponse ingest(String mediaPackageId) throws UniformInterfaceException {
+    MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+    params.add("mediaPackage", mediaPackageId);
+    return r.path("ingest").post(ClientResponse.class, params);
+  }
+
+  public static ClientResponse getWorkflowInstance(String id) throws UniformInterfaceException {
+    return r.path("getWorkflowInstance/" + id + ".xml").get(ClientResponse.class);
+  }
 
 }

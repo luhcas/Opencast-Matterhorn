@@ -46,8 +46,8 @@ public interface IngestService {
    * @throws IOException
    * @throws Exception
    */
-  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage) throws MediaPackageException, FileNotFoundException,
-          IOException, Exception;
+  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage) throws MediaPackageException,
+          FileNotFoundException, IOException, Exception;
 
   /**
    * Add an existing compressed MediaPackage to the repository.
@@ -209,7 +209,8 @@ public interface IngestService {
    *           Exception that occured during MediaPackage serialization or happened in ConductorService durring
    *           MediaPackage processing
    */
-  WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID) throws IllegalStateException, Exception;
+  WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID) throws IllegalStateException,
+          Exception;
 
   /**
    * Broadcasts an event, that media package is ingested. After broadcast ACK message is expected from ConductorService.
@@ -226,7 +227,8 @@ public interface IngestService {
    *           Exception that occured during MediaPackage serialization or happened in ConductorService durring
    *           MediaPackage processing
    */
-  WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID, Map<String,String> properties) throws IllegalStateException, Exception;
+  WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID, Map<String, String> properties)
+          throws IllegalStateException, Exception;
 
   /**
    * Delete an existing MediaPackage and any linked files from the temporary ingest filestore.
@@ -235,5 +237,14 @@ public interface IngestService {
    *          The specific Matterhorn MediaPackage
    */
   void discardMediaPackage(MediaPackage mediaPackage);
+
+  /**
+   * Get a workflow instance of a asynchronous job.
+   * 
+   * @param id
+   *          An id of the requested workflow instance
+   * @return Updated workflow instance.
+   */
+  WorkflowInstance getWorkflowInstance(String id);
 
 }
