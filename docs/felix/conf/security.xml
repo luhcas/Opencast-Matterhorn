@@ -8,7 +8,7 @@
        http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
   <sec:http create-session="ifRequired" servlet-api-provision="true" realm="Opencast Matterhorn" entry-point-ref="matterhornEntryPoint">
-    <sec:intercept-url pattern='/**' access='ROLE_USER, ROLE_ANONYMOUS'/>
+    <sec:intercept-url pattern='/**' access='ROLE_USER, ROLE_ADMIN'/>
     <sec:x509 subject-principal-regex="CN=(.*?)," user-service-ref="userDetailsService"/>
     <sec:form-login />
     <sec:openid-login />

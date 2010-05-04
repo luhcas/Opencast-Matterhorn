@@ -118,9 +118,8 @@ public class DelegatingHttpContext implements HttpContext {
       return false;
     }
     if (refs == null || refs.length == 0) {
-      // logger.warn("Requests are not permitted without a registered matterhorn security filter.");
-      // return false;
-      return true; // TODO: this must be changed to false for the next release
+     logger.warn("Requests are not permitted without a registered matterhorn security filter.");
+     return false;
     }
     Filter[] filters = new Filter[refs.length];
     for (int i = 0; i < refs.length; i++)

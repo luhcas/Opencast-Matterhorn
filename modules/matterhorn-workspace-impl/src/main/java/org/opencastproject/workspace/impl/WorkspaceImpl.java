@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workspace.impl;
 
+import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.IoSupport;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
@@ -23,7 +24,10 @@ import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.TeeInputStream;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +38,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -51,6 +56,7 @@ public class WorkspaceImpl implements Workspace {
   private static final Logger logger = LoggerFactory.getLogger(WorkspaceImpl.class);
 
   protected WorkingFileRepository repo;
+  protected TrustedHttpClient trustedHttpClient;
   protected String rootDirectory = null;
   protected Map<String, String> filesystemMappings;
 
@@ -140,12 +146,22 @@ public class WorkspaceImpl implements Workspace {
       return f;
     } else {
       logger.info("Copying {} to {}", urlString, f.getAbsolutePath());
+      HttpGet get = new HttpGet(urlString);
+      HttpResponse response = trustedHttpClient.execute(get);
+      InputStream in = null;
+      OutputStream out = null;
       try {
-        FileUtils.copyURLToFile(uri.toURL(), f);
-        return f;
-      } catch (IOException e) {
+        in = response.getEntity().getContent();
+        out = new FileOutputStream(f);
+        IOUtils.copyLarge(in, out);
+      } catch (Exception e) {
+        logger.warn("Could not copy {} to {}", urlString, f.getAbsolutePath());
         throw new NotFoundException(e);
+      } finally {
+        IOUtils.closeQuietly(in);
+        IOUtils.closeQuietly(out);
       }
+      return f;
     }
   }
 
@@ -222,6 +238,10 @@ public class WorkspaceImpl implements Workspace {
 
   public void setRepository(WorkingFileRepository repo) {
     this.repo = repo;
+  }
+
+  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
+    this.trustedHttpClient = trustedHttpClient;
   }
 
   private void createRootDirectory() {

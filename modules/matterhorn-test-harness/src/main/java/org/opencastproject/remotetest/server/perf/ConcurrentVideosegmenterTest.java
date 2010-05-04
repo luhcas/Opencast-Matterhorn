@@ -30,8 +30,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.databene.contiperf.PerfTest;
+import org.databene.contiperf.junit.ContiPerfRule;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -41,6 +43,9 @@ import java.util.List;
  * Runs many concurrent workflows
  */
 public class ConcurrentVideosegmenterTest {
+  @Rule
+  public ContiPerfRule i = new ContiPerfRule();
+  
   TrustedHttpClientImpl httpClient;
   String trackXml = "<track id=\"track-1\"><mimetype>video/quicktime</mimetype><tags/><url>https://opencast.jira.com/svn/MH/trunk/modules/matterhorn-analysis-videosegmenter/src/test/resources/scene-change.mov</url><checksum type=\"md5\">89b99cf1efe6614e35b1a765b519f56d</checksum><duration>20000</duration><video id=\"video-1\"><device/><encoder type=\"M-JPEG\"/><bitrate>187396.0</bitrate><framerate>0.95</framerate><resolution>320x240</resolution></video></track>";
 
@@ -50,6 +55,8 @@ public class ConcurrentVideosegmenterTest {
     
     // We run this once in the startup so we don't try to download the same file 10 times at once 
     httpClient.execute(getPost());
+    
+    
   }
 
   protected HttpPost getPost() throws Exception {
