@@ -19,7 +19,6 @@ import org.opencastproject.adminui.api.RecordingDataView;
 import org.opencastproject.adminui.api.RecordingDataViewImpl;
 import org.opencastproject.adminui.api.RecordingDataViewList;
 import org.opencastproject.adminui.api.RecordingDataViewListImpl;
-import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
@@ -259,9 +258,10 @@ public class AdminuiRestService {
       Iterator<String> i = recordings.keySet().iterator();
       int capturing = 0;
       while (i.hasNext()) {
-        if (recordings.get(i.next()).getState().equals(AgentState.CAPTURING)) {
+        //if (recordings.get(i.next()).getState().equals(RecordingState.CAPTURING)) {  // deactivating this since I think we want to count all recordings active on an agent (all states)
+          i.next();      // FIXME remvoe if the above if gets re-activated
           capturing++;
-        }
+        //}
       }
       out.put("capturing", new Integer(capturing));
       total += capturing;

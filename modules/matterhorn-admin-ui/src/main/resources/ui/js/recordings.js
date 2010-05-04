@@ -279,6 +279,14 @@ Recordings.continueWorkflow = function() {
   });
 }
 
+Recordings.retryRecording = function(workflowId) {
+  // TDOD call the workflow rest endpoint to start the workflow again
+}
+
+Recordings.editRetryRecording = function(workflowId) {
+  location.href = "retry.html?id=" + workflowId;
+}
+
 Recordings.removeRecording = function(workflowId) {
   $.ajax({
     url        : '../workflow/rest/remove/'+workflowId,

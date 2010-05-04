@@ -1,0 +1,309 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <!-- HEAD -->
+  <head>
+    <title id="i18n_window_title"></title>
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <!-- styles -->
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-theme-coal.css">
+    <link rel="stylesheet" type="text/css" href="css/admin.css">
+    <link rel="stylesheet" type="text/css" href="css/popuphelp.css">
+    <link type="text/css" rel="stylesheet" href="css/upload.css">
+    <link type="text/css" rel="stylesheet" href="css/progress.css">
+    <link rel="stylesheet" type="text/css" href="shared_css/shared.css">
+    <style type="text/css">
+      .container {margin-bottom: 10px;}
+      .color-red {color:red;}
+      .formField-list {margin-left:5px; margin-right:5px; padding:0px;}
+      .formField-list li {margin-bottom: 4px;}
+      .formField-label {width: 165px !important; text-align:right; margin-right:1em; float:left;}
+      .formField {width:440px !important;float:left;}
+      .no-bullets li {list-style-type: none;}
+      .collapse-control {padding-left:18px;cursor:pointer;background:silver;}
+      .collapse-control-closed {background-image:url(shared_img/icons/arrow-right.png);background-position:center left !important; background-repeat:no-repeat;}
+      .collapse-control-open {background-image:url(shared_img/icons/arrow-down.png);background-position:center left !important; background-repeat:no-repeat;}
+      .titlebar {background-color:silver !important; padding-left:8px;}
+      .helpIcon {display:block;float:left;margin-left:5px;width:16px;height:16px;background-image:url(shared_img/icons/help.png);background-position:center center;background-repeat:no-repeat;cursor:pointer;}
+    </style>
+
+    <!-- scripts -->
+    <script type="text/javascript" src="infusion-1.1.2/InfusionAll.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.7.2.custom.min.js"></script>
+    <script type="text/javascript" src="js/upload.helptexts.json"></script>
+    <script type="text/javascript" src="js/upload.js"></script>
+    <script type="text/javascript" src="js/uploadListener.js"></script>
+    <script type="text/javascript" src="js/oc.utils.js"></script>
+    <script type="text/javascript" src="js/oc.ingest.js"></script>
+    <!--<script type="text/javascript" src="shared_js/version.js"></script>-->
+    <script type="text/javascript">
+      $(document).ready(function() {
+        Upload.init();
+      });
+    </script>
+  </head>
+
+  <!-- BODY -->
+  <body>
+    <div id="pageHeader">
+      <div id="currentVersion"></div>
+      <div id="newestVersion" style="text-align: right; float: right;"></div>
+    </div>
+
+    <!-- notification that javaScript is disabled -->
+    <noscript>
+      <center>
+        <div style="border:1px solid red;width:530px;margin:20px;">
+          <div style="text-align: left;background:red; color:white;padding-top:2px;padding-bottom:2px;">
+            <div class="icon icon-error" style="margin-left:5px;margin-right:5px;">&nbsp;</div>
+            JavaScript is disabled
+          </div>
+          <div style="padding:10px;">
+            JavaScript is turned off in your web browser, so this site won't work properly! <br />
+            <strong>
+              Please turn JavaScript on to use this site, then refresh the page.
+            </strong>
+          </div>
+        </div>
+      </center>
+    </noscript>
+
+    <!-- BEGIN of stage -->
+    <!-- fl-centered doesn't work in winXP-IE8 -->
+    <div class="fl-container-850 fl-theme-coal">
+      <div style="margin-top: .5em">
+        <a href="../../welcome.html">
+          <h1><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn">&nbsp;&nbsp;Opencast Matterhorn</h1>
+        </a>
+      </div>
+      <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
+        <li class="fl-activeTab"><a href="/admin/" id="i18n_tab_recording" id="i18n_tab_recording">Recordings</a></li>
+        <li class=""><a href="/admin/agents_status.html" id="i18n_tab_agent" id="i18n_tab_agent">Capture Agents</a></li>
+      </ul>
+      <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
+        <div class="fl-container-800" style="text-align: center;">
+          <h2 id="page-title"><span id="i18n_page_title">Upload Recording</span></h2>
+        </div>
+
+        <!-- missing fields notification -->
+        <div id="container-missingFields" class="container" style="display:none;">
+          <div id="heading-missingFields" class="fl-widget-header warnbox-title">Missing Inputs</div>
+          <div id="content-missingFields" class="fl-widget-content warnbox-content">
+            <ul>
+              <li id="notification-title" class="missing-fields-item">
+                <!-- <span class="fl-icon inline-icon icon-bullet"></span> -->
+                <span style="width:600px;">
+                  Please enter a <a href="javascript:document.uploadForm.title.focus();">title</a> for the recording.
+                </span>
+              </li>
+              <li id="notification-flavor" class="missing-fields-item">
+                <span class="fl-icon inline-icon icon-bullet"></span>Please select the <a href="javascript:document.getElementById('flavor').focus();">media file content</a> - the type of content the media file contains.
+              </li>
+              <li id="notification-track" class="missing-fields-item">
+                <!-- <span class="fl-icon inline-icon icon-bullet"></span> -->
+                <span>
+                  Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload. Supported file formats are: .avi, .mp3, .mp4, .mov, .mpg, .mkv, .flv or .wmv.
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <form id="uploadForm" name="uploadForm" action="../ingest/rest/addMediaPackage" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
+
+          <!-- basic metadata -->
+          <div id="container-basicData" class="container fl-widget">
+            <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
+              <ul class="no-bullets formField-list fl-controls-right">
+                <!-- field: Title -->
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label"><span class="color-red">* </span><span id="i18n_title_label">Title</span>:</label>
+                  <input type="text" class="formField requiredField" id="title" name="title">
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                </li>
+                <!-- field: Presenter -->
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label"><span id="i18n_presenter_label">Presenter</span>:</label>
+                  <input type="text" class="formField" id="creator" name="creator">
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                </li>
+                <!-- field: Sponsoring Department -->
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label"><span id="i18n_dept_label">Sponsoring Department</span>:</label>
+                  <input type="text" class="formField" id="contributor" name="contributor">
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- additional metadata -->
+          <div id="container-additionalData" class="container fl-widget">
+            <div id="heading-additionalData" class="fl-widget-titlebar collapse-control collapse-control-closed"><span id="i18n_aditional">Additional Description</span></div>
+            <div id="content-basicData" class="fl-widget-content ui-helper-clearfix collapsable" style="display:none;">
+              <ul class="no-bullets formField-list fl-controls-right">
+                <!-- field: Series -->
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label"><span id="i18n_series_label">Series</span>:</label>
+                  <input type="text" class="formField" id="isPartOf" name="isPartOf">
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                </li>
+                <!-- field: Subject -->
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label"><span id="i18n_sub_label">Subject</span>:</label>
+                  <input type="text" class="formField" id="subject" name="subject">
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                </li>
+                <!-- field: Language -->
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label"><span id="i18n_lang_label">Language</span>:</label>
+                  <input type="text" class="formField" id="language" name="language">
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                </li>
+                <!-- field: Description -->
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label"><span id="i18n_desc_label">Description</span>:</label>
+                  <textarea class="formField" id="description" name="description" rows="5"></textarea>
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- distribution data -->
+          <div id="container-additionalData" class="container fl-widget">
+            <div id="heading-additionalData" class="fl-widget-header  titlebar"><span id="i18n_distribition">Distribution</span></div>
+            <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
+              <ul class="no-bullets formField-list fl-controls-right">
+                <!-- field: License -->
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label"><span class="color-red">* </span><span id="i18n_dist_label">Distribution Channel(s)</span>:</label>
+                  <span id="dist" style="float:left;">
+                    <input id="distribution" type="checkbox" checked="checked" disabled="disabled" class="formField" value="Matterhorn Media Module" style="width: inherit !important;">
+                    <span id="i18n_dist_mmm">&nbsp;Matterhorn Media Module</span>
+                  </span>
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                </li>
+                <!-- field: License -->
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label"><span id="i18n_license_label">License</span>:</label>
+                  <input type="text" class="formField" id="license" name="license">
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- file upload -->
+          <div id="container-additionalData" class="container fl-widget">
+            <div id="heading-additionalData" class="fl-widget-titlebar titlebar"><span id="i18n_upload_title">File Upload</span></div>
+            <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
+              <ul class="no-bullets formField-list fl-controls-right">
+                <!-- field: Media file content -->
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label"><span class="color-red">* </span><span id="i18n_upload.content">Media file content</span>:</label>
+                  <select name="flavor" id="flavor" class="requiredField" style="float:left;margin:3px;">
+                    <option value="">Choose one:</option>
+                    <option value="presenter/source">Presenter</option>
+                    <option value="presentation/source">Presentation</option>
+                    <option value="indefinite/source">Other/Mixed/Unknown</option>
+                  </select>
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                </li>
+                <!--<li class="ui-helper-clearfix">
+                  <span class="formField-label">&nbsp;</span>
+                  <span style="float:left;">File must contain video.</span>
+                </li>-->
+                <!-- field: Media File -->
+                <li class="ui-helper-clearfix">
+                  <!--<input type="hidden" class="formField" name="flavor" id="flavor" value="presentation/source">-->
+                  <label class="fl-label"><span class="color-red">* </span><span id="i18n_upload_file">Media File</span>:</label>
+                  <input type="hidden" name="track" id="track" class="requiredField" value="">
+                  <iframe name="filechooserAjax" id="filechooser-ajax" src="../ingest/rest/uploadform.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
+                  </iframe>
+                  <span class="helpIcon"  title="Click for help">&nbsp;</span>
+                </li>
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label">&nbsp;</label>
+                  <span style="float:left;" title="Click for help" class="instruction-text" id="i18n_upload_instr">File must be 2GB or less</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div id="container-processing" class="container fl-widget">
+            <div id="heading-processing" class="fl-widget-titlebar titlebar"><span id="i18n_process_title">Processing</span></div>
+            <div id="content-processing" class="fl-widget-content ui-helper-clearfix">
+              <ul class="no-bullets formField-list fl-controls-right">
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label"><span class="color-red">* </span><span id="i18n_process_instr">Processing instructions</span>:</label>
+                  <select name="workflow-selector" id="workflow-selector" class="requiredField" style="float:left;margin:3px;"></select>
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                </li>
+              </ul>
+              <div id="workflow-config-container">
+
+              </div>
+            </div>
+          </div>
+
+          <!-- submit/cancel controls -->
+          <div id="container-additionalData" class="container fl-widget">
+            <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
+              <ul class="no-bullets formField-list fl-controls-right">
+                <!-- submit / cancal button -->
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label" style="float:left;">&nbsp;</label>
+                  <span class="fl-fix instruction-text" style="float:right; width:560px;margin-bottom:20px;" id="i18n_submit_instr">NOTE: Information entered here (for an Uploaded Recording) cannot be edited after it is submitted in this version of Matterhorn.</span>
+                </li>
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label">&nbsp;</label>
+                  <button type="button" id="BtnSubmit" class="mouseover-pointer control-button">Submit</button>
+                  <button id="btnCancle" type="button" onclick="history.back();" class="mouseover-pointer control-button">Cancel</button>
+                  <!-- <a href="index.html" style="float:right;">Switch to AJAX upload form</a> -->
+                </li>
+                <!-- * = required -->
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label">&nbsp;</label>
+                  <span class="color-red">* </span><span id="i18n_required">Required</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </form>
+
+        <!-- END of stage -->
+      </div>
+    </div>
+
+    <textarea id="console" style="width:500px;height:300px;display:none;"></textarea>
+
+    <div id="gray-out">
+      &nbsp;
+    </div>
+    <div id="progress-stage" style="display:none;">
+      <div id="label-filename">
+        &nbsp;
+      </div>
+      <div id="progressbar">
+        <div id="progressbar-indicator" style="width:0%;">&nbsp;</div>
+        <div id="progressbar-label"><span id="i18n_progress">Initializing upload...</span></div>
+      </div>
+      <div id="label-filesize">&nbsp</div>
+      <div id="label-bytestrasfered">&nbsp;</div>
+    </div>
+
+    <!-- template for the popup help box -->
+    <div id="helpBox" class="helpbox" style="display:none;">
+      <img src="shared_img/icons/lightbulb.png" alt="help" >
+      <div id="helpTitle" style="display:inline;font-weight:bold; margin-left:10px;"></div>
+      <div id="helpText" style="padding-left:7px; padding-right:7px; white-space:normal;"></div>
+    </div>
+
+  </body>
+
+</html>
