@@ -138,7 +138,7 @@ public class SearchRestService {
   protected String generateMediaPackage() {
     return "<ns2:mediapackage xmlns:ns2=\"http://mediapackage.opencastproject.org\" start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n" +
     "  <metadata>\n" +
-    "    <catalog id=\"catalog-1\" type=\"metadata/dublincore\">\n" +
+    "    <catalog id=\"catalog-1\" type=\"dublincore/episode\">\n" +
     "      <mimetype>text/xml</mimetype>\n" +
     "      <url>https://opencast.jira.com/svn/MH/trunk/modules/matterhorn-media/src/test/resources/dublincore.xml</url>\n" +
     "      <checksum type=\"md5\">2b8a52878c536e64e20e309b5d7c1070</checksum>\n" +

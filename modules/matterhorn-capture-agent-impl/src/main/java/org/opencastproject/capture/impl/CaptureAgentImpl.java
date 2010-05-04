@@ -761,6 +761,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * {@inheritDoc}
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
+  @SuppressWarnings("unchecked")
   public void updated(Dictionary properties) throws ConfigurationException {
     if (properties == null) {
       throw new ConfigurationException("null", "Null configuration in updated!");

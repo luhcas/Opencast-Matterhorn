@@ -43,6 +43,7 @@ public class JPAStore<ValueClass> implements Store<ValueClass> {
   /**
    * Public constructor
    */
+  @SuppressWarnings("unchecked")
   public JPAStore(Serializer serializer, EntityManagerFactory emf, String distributionChannel) {
     this.serializer = serializer;
     this.emf = emf;
@@ -95,6 +96,7 @@ public class JPAStore<ValueClass> implements Store<ValueClass> {
    * @param key the key of the entry
    * @param the entry
    */
+  @SuppressWarnings("unchecked")
   private TaskEntity getEntryByKey(String id) {
     // for this distribution channel only    
     EntityManager em = emf.createEntityManager();
@@ -200,7 +202,8 @@ public class JPAStore<ValueClass> implements Store<ValueClass> {
    * Retrieves the set of keys.
    *
    * @return the set of keys.
-   */  
+   */
+  @SuppressWarnings("unchecked")
   public Set<String> keySet() {
     HashSet<String> keys = new HashSet<String>();
     EntityManager em = emf.createEntityManager();

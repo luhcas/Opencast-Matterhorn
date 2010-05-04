@@ -28,7 +28,7 @@
     </track>
   </media>
   <metadata>
-    <catalog id="catalog-1" type="metadata/dublincore">
+    <catalog id="catalog-1" type="dublincore/episode">
       <mimetype>text/xml</mimetype>
       <url>@SAMPLES_URL@/dc-1.xml</url>
       <checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</checksum>

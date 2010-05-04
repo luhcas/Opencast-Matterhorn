@@ -18,6 +18,7 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageMetadata;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
@@ -162,8 +163,8 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
    *            the media package
    */
   private void updateDublinCore(MediaPackage mediaPackage) throws Exception {
-    // Complete dublin core (if available)
-    Catalog dcCatalogs[] = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
+    // Complete episode dublin core catalog (if available)
+    Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.DUBLINCORE_EIPSODE, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
     if (dcCatalogs.length > 0) {
       DublinCoreCatalog dublinCore = dcService.load(dcCatalogs[0]);
       Date today = new Date();

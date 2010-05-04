@@ -81,6 +81,7 @@ public class MemoryStore<ValueClass> implements Store<ValueClass> {
      * @param serializer Serializer implementation
      */
 
+    @SuppressWarnings("unchecked")
     public MemoryStore(Serializer serializer) {
         this.serializer = serializer;
         contents_map = new HashMap<String, Entry>();

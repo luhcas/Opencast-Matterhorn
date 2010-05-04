@@ -52,6 +52,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   protected PersistenceProvider persistenceProvider;
 
   /** The persistence properties */
+  @SuppressWarnings("unchecked")
   protected Map persistenceProperties;
 
   /** The factory used to generate the entity manager */
@@ -70,6 +71,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   /**
    * @param persistenceProperties the persistenceProperties to set
    */
+  @SuppressWarnings("unchecked")
   public void setPersistenceProperties(Map persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
   }
@@ -80,6 +82,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     recordings = new HashMap<String, Recording>();
   }
 
+  @SuppressWarnings("unchecked")
   public void activate(ComponentContext cc) {
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl", persistenceProperties);
 
@@ -328,6 +331,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     return recordings;
   }
 
+  @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {
 
   }

@@ -60,12 +60,12 @@ public class MediaPackageJaxbSerializationTest {
     attachment.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, "123456abcd"));
     mp.add(attachment);
     Catalog cat1 = (Catalog)elementBuilder.elementFromURI(new URI("http://opencastproject.org/index.html"),
-            Catalog.TYPE, MediaPackageElements.DUBLINCORE_CATALOG);
+            Catalog.TYPE, MediaPackageElements.DUBLINCORE_EIPSODE);
     cat1.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, "7891011abcd"));
     mp.add(cat1);
     
     Catalog cat2 = (Catalog)elementBuilder.elementFromURI(new URI("http://opencastproject.org/index.html"),
-            Catalog.TYPE, MediaPackageElements.DUBLINCORE_CATALOG);
+            Catalog.TYPE, MediaPackageElements.DUBLINCORE_EIPSODE);
     cat2.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, "7891011abcd"));
     mp.addDerived(cat2, cat1);
     
@@ -95,7 +95,7 @@ public class MediaPackageJaxbSerializationTest {
    */
   @Test
   public void testJaxbWithoutXsi() throws Exception {
-    String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><ns2:mediapackage start=\"0\" id=\"123\" duration=\"0\" xmlns:ns2=\"http://mediapackage.opencastproject.org\"><metadata><catalog type=\"metadata/dublincore\"><mimetype>text/xml</mimetype><tags/><checksum type=\"md5\">7891011abcd</checksum><url>http://opencastproject.org/index.html</url></catalog></metadata><attachments><attachment id=\"attachment-1\"><tags/><checksum type=\"md5\">123456abcd</checksum><url>http://opencastproject.org/index.html</url></attachment></attachments></ns2:mediapackage>";
+    String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><ns2:mediapackage start=\"0\" id=\"123\" duration=\"0\" xmlns:ns2=\"http://mediapackage.opencastproject.org\"><metadata><catalog type=\"dublincore/episode\"><mimetype>text/xml</mimetype><tags/><checksum type=\"md5\">7891011abcd</checksum><url>http://opencastproject.org/index.html</url></catalog></metadata><attachments><attachment id=\"attachment-1\"><tags/><checksum type=\"md5\">123456abcd</checksum><url>http://opencastproject.org/index.html</url></attachment></attachments></ns2:mediapackage>";
     MediaPackage deserialized = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(IOUtils.toInputStream(xml));
     Assert.assertEquals(2, deserialized.getElements().length);
   }

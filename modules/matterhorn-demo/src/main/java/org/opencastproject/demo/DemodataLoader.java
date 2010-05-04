@@ -22,6 +22,8 @@ import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.identifier.Id;
 import org.opencastproject.media.mediapackage.identifier.IdBuilder;
@@ -185,7 +187,8 @@ public class DemodataLoader {
       mpBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(packageDir));
       File manifestFile = new File(packageDir, "index.xml");
       MediaPackage mediaPackage = mpBuilder.loadFromXml(new FileInputStream(manifestFile));
-      addMediaPackageMetadata(mediaPackage);
+      addMediaPackageMetadata(mediaPackage, MediaPackageElements.DUBLINCORE_EIPSODE);
+      addMediaPackageMetadata(mediaPackage, MediaPackageElements.DUBLINCORE_SERIES);
       Id mediapackageId = idBuilder.createNew();
       mediaPackage.setIdentifier(mediapackageId);
   
@@ -288,9 +291,11 @@ public class DemodataLoader {
    * 
    * @param mediapackage
    *          the media package
+   * @param flavor
+   *          the dublin core catalog flavor
    */
-  private static void addMediaPackageMetadata(MediaPackage mediapackage) {    
-    Catalog[] dcs = mediapackage.getCatalogs(DublinCoreCatalog.FLAVOR);
+  private static void addMediaPackageMetadata(MediaPackage mediapackage, MediaPackageElementFlavor flavor) {    
+    Catalog[] dcs = mediapackage.getCatalogs(flavor);
     for (Catalog catalog : dcs) {
       DublinCoreCatalog dc = new DublinCoreCatalogImpl(catalog);
       

@@ -76,10 +76,10 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
     try {
       // Check type and flavor
       if (type != null && flavor != null)
-        return type.equals(Catalog.TYPE) && flavor.equals(MediaPackageElements.DUBLINCORE_CATALOG);
+        return type.equals(Catalog.TYPE) && flavor.equals(MediaPackageElements.DUBLINCORE_EIPSODE);
       else if (type != null && !type.equals(Catalog.TYPE))
         return false;
-      else if (flavor != null && !flavor.equals(MediaPackageElements.DUBLINCORE_CATALOG))
+      else if (flavor != null && !flavor.equals(MediaPackageElements.DUBLINCORE_EIPSODE))
         return false;
       return false;
     } catch (IllegalArgumentException e) {
@@ -92,7 +92,7 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
    *      , org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
    */
   public boolean accept(MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
-    return type.equals(MediaPackageElement.Type.Catalog) && flavor.equals(MediaPackageElements.DUBLINCORE_CATALOG);
+    return type.equals(MediaPackageElement.Type.Catalog) && flavor.equals(MediaPackageElements.DUBLINCORE_EIPSODE);
   }
 
   /**
@@ -103,7 +103,7 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
       String name = elementNode.getNodeName();
       String flavor = xpath.evaluate("@type", elementNode);
       return name.equalsIgnoreCase(MediaPackageElement.Type.Catalog.toString())
-              && MediaPackageElements.DUBLINCORE_CATALOG.eq(flavor);
+              && MediaPackageElements.DUBLINCORE_EIPSODE.eq(flavor);
     } catch (XPathExpressionException e) {
       return false;
     }

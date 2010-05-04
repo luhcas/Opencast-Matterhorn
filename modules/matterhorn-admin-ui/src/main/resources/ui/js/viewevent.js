@@ -38,7 +38,7 @@ function handleWorkflow(workflowDoc){
     rootEl = $("ns2\\:workflow-instance");
   }
   if(rootEl){
-    dcURL = rootEl.find("metadata:first > catalog[type='metadata/dublincore'] url:first").text();
+    dcURL = rootEl.find("metadata:first > catalog[type='dublincore/episode'] url:first").text();
     //TODO: get extra metadata catalog URL
     //var caURL = $("ns2\\:workflow-instance", testDoc).find("metadata:first > catalog[type='metadata/extra'] url").text();
     

@@ -48,6 +48,11 @@ import java.util.Date;
 
 public abstract class Action implements Serializable {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 2600233233804117511L;
+
     /** Default number of seconds allowed for action. */
     public static final long DEFAULT_TASK_SECONDS = 60L * 60L * 5L;
 

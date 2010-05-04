@@ -18,6 +18,8 @@ package org.opencastproject.metadata.dublincore;
 
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.EName;
+import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.XMLCatalogImpl;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.Checksum;
@@ -126,9 +128,9 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    * @param checksum
    *          the catalog checksum
    */
-  protected DublinCoreCatalogImpl(String id, URI uri, long size,
+  protected DublinCoreCatalogImpl(String id, URI uri, MediaPackageElementFlavor flavor, long size,
           Checksum checksum) {
-    super(id, DublinCoreCatalog.FLAVOR, uri, size, checksum, MimeTypes.XML);
+    super(id, flavor, uri, size, checksum, MimeTypes.XML);
     bindings.bindPrefix(XMLConstants.DEFAULT_NS_PREFIX,
             OPENCASTPROJECT_DUBLIN_CORE_NS_URI);
     bindings.bindPrefix("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI);
@@ -138,7 +140,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
   }
 
   /**
-   * Creates a new dublin core metadata container.
+   * Creates a new dublin core metadata container, defaulting the flavor to {@link MediaPackageElements#DUBLINCORE_EIPSODE}.
    * 
    * @param uri
    *          the document location
@@ -148,7 +150,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    *          the catalog checksum
    */
   protected DublinCoreCatalogImpl(URI uri, long size, Checksum checksum) {
-    this(null, uri, size, checksum);
+    this(null, uri, MediaPackageElements.DUBLINCORE_EIPSODE, size, checksum);
   }
 
   /**
@@ -158,14 +160,14 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    *          the element identifier withing the package
    */
   protected DublinCoreCatalogImpl(String id) {
-    this(id, null, 0, null);
+    this(id, null, MediaPackageElements.DUBLINCORE_EIPSODE, 0, null);
   }
 
   /**
    * Creates a new dublin core metadata container.
    */
   protected DublinCoreCatalogImpl() {
-    this(null, null, 0, null);
+    this(null, null, MediaPackageElements.DUBLINCORE_EIPSODE, 0, null);
   }
 
   /**
@@ -173,13 +175,13 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    *          The original catalog to use as a template
    */
   public DublinCoreCatalogImpl(Catalog cat) {
-    this(cat.getIdentifier(), cat.getURI(), cat.getSize(), cat.getChecksum());
+    this(cat.getIdentifier(), cat.getURI(), cat.getFlavor(), cat.getSize(), cat.getChecksum());
     this.setIdentifier(cat.getIdentifier());
     this.mimeType = cat.getMimeType();
     this.tags = new TreeSet<String>();
     for (String t : cat.getTags())
       tags.add(t);
-    this.flavor = DublinCoreCatalog.FLAVOR;
+    this.flavor = cat.getFlavor();
     this.reference = cat.getReference();
     this.isLoaded = false;
   }

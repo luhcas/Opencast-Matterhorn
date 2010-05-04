@@ -112,7 +112,7 @@ public class IngestRestServiceTest {
 
   @Test
   public void testAddMediaPackageCatalog() throws Exception {
-    Response response = restService.addMediaPackageCatalog("http://foo/dc.xml", "metadata/dublincore",
+    Response response = restService.addMediaPackageCatalog("http://foo/dc.xml", "dublincore/episode",
             ((MediaPackage)restService.createMediaPackage().getEntity()).toXml());
     Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
   }

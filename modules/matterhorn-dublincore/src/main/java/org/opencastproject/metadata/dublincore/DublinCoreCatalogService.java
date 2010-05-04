@@ -67,7 +67,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
   public MediaPackageMetadata getMetadata(MediaPackage mp) {
     MediapackageMetadataImpl metadata = new MediapackageMetadataImpl();
     
-    Catalog[] dcs = mp.getCatalogs(DublinCoreCatalog.FLAVOR);
+    Catalog[] dcs = mp.getCatalogs(DublinCoreCatalog.ANY_DUBLINCORE);
     for (Catalog catalog : dcs) {
       DublinCoreCatalog dc = load(catalog);
       if (catalog.getReference() == null) {

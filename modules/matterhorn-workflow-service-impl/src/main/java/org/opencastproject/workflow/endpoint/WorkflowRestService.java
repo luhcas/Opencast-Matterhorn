@@ -221,7 +221,7 @@ public class WorkflowRestService {
     "    </track>\n" +
     "  </media>\n" +
     "  <metadata>\n" +
-    "    <catalog id=\"catalog-1\" type=\"metadata/dublincore\">\n" +
+    "    <catalog id=\"catalog-1\" type=\"dublincore/episode\">\n" +
     "      <mimetype>text/xml</mimetype>\n" +
     "      <url>" + samplesUrl + "/dc-1.xml</url>\n" +
     "      <checksum type=\"md5\">20e466615251074e127a1627fd0dae3e</checksum>\n" +

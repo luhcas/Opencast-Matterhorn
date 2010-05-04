@@ -83,6 +83,7 @@ public class AdminProxyRestEndpointTest {
    * @param in JSONArray of WorklfowInstances
    * @return out HashMap<String,Long>
    */
+  @SuppressWarnings("unchecked")
   private HashMap<String,Long> countWorkflowInstances(JSONArray in) {
     HashMap<String,Long> out = new HashMap<String,Long>();    // Long here because JSONArray.get("a_number") returns long (so we don't have to cast in the test above)
     out.put("INSTANTIATED", Long.valueOf(0L));

@@ -41,6 +41,7 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
   /** 
    * Properties that are updated by ManagedService updated method
    */
+  @SuppressWarnings("unchecked")
   protected Dictionary properties;
   
   /**
@@ -149,6 +150,7 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
    * {@inheritDoc}
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
+  @SuppressWarnings("unchecked")
   public void updated(Dictionary properties) throws ConfigurationException {
     this.properties = properties;
   }  

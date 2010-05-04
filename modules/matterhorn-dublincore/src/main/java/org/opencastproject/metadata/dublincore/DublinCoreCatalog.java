@@ -28,8 +28,5 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 @XmlJavaTypeAdapter(XMLCatalogImpl.Adapter.class)
 public interface DublinCoreCatalog extends XMLCatalog, DublinCore, Cloneable {
-
-  /** Element type definition */
-  MediaPackageElementFlavor FLAVOR = new MediaPackageElementFlavor("metadata", "dublincore", "Dublin core catalog");
-
+  MediaPackageElementFlavor ANY_DUBLINCORE = MediaPackageElementFlavor.parseFlavor("dublincore/*");
 }

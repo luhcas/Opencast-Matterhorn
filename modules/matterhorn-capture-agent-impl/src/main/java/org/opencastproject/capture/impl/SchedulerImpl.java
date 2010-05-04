@@ -132,6 +132,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * {@inheritDoc}
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
     try {
@@ -541,6 +542,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     }
   }
 
+  @SuppressWarnings("unchecked")
   private boolean scheduleEvent(VEvent event, Properties props, JobDetail job) throws org.opencastproject.util.ConfigurationException, MediaPackageException, MalformedURLException, ParseException {
     MediaPackage pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     boolean hasProperties = false;
@@ -581,7 +583,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           hasProperties = true;
           pack.add(new URI(filename));
         } else if (filename.equals("metadata.xml")) {
-          pack.add(new URI(filename), MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_CATALOG);
+          pack.add(new URI(filename), MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_EIPSODE);
         } else {
           pack.add(new URI(filename));
         }

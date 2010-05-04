@@ -51,6 +51,7 @@ public class VersionRestService {
    */
   @GET
   @Path("current")
+  @SuppressWarnings("unchecked")
   public Response getCurrentVersion() {
     String curr = "";
     StringWriter writer = new StringWriter();
@@ -70,6 +71,7 @@ public class VersionRestService {
   
   @GET
   @Path("newest")
+  @SuppressWarnings("unchecked")
   public Response getNewestVersion() {
     String etag = "";
     try {

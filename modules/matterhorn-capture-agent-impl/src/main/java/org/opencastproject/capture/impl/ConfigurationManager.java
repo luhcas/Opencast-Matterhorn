@@ -72,6 +72,7 @@ public class ConfigurationManager implements ManagedService {
     properties.setBundleContext(null);
   }
   
+  @SuppressWarnings("unchecked")
   @Override
   public void updated(Dictionary props) throws ConfigurationException {
     if (props == null) {

@@ -313,6 +313,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     return list;    
   }  
   
+  @SuppressWarnings("unchecked")
   public Event [] getAllEvents () {
     EntityManager em = emf.createEntityManager();
     Query query = em.createNamedQuery("Event.getAll");

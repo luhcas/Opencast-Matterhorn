@@ -30,8 +30,10 @@ import java.util.Map;
 public class MarkerLocator implements ClassLocator {
 
     /** Class or interface. */
+    @SuppressWarnings("unchecked")
     private Class marker_class;
 
+    @SuppressWarnings("unchecked")
     public MarkerLocator(Class marker_class) {
         this.marker_class = marker_class;
     }
@@ -49,6 +51,7 @@ public class MarkerLocator implements ClassLocator {
      *                                or is not an action subclass.
      */
 
+    @SuppressWarnings("unchecked")
     public Class locate(Map map, Path path)
             throws ClassNotFoundException {
         String class_name = (String)map.get("class");

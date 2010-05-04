@@ -45,7 +45,8 @@ public class MockHttpServletRequest implements HttpServletRequest
 	private final InputStream m_requestData;
 	private final int length;
 	private String m_strContentType;
-	private Map m_headers = new java.util.HashMap();
+	@SuppressWarnings("unchecked")
+  private Map m_headers = new java.util.HashMap();
 
 	/**
 	 * Creates a new instance with the given request data
@@ -63,6 +64,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	 * Creates a new instance with the given request data
 	 * and content type.
 	 */
+  @SuppressWarnings("unchecked")
 	public MockHttpServletRequest(
 			final InputStream requestData,
 			final int requestLength,
@@ -109,7 +111,8 @@ public class MockHttpServletRequest implements HttpServletRequest
 	/**
 	 * @see javax.servlet.http.HttpServletRequest#getHeaders(String)
 	 */
-	public Enumeration getHeaders(String arg0)
+	@SuppressWarnings("unchecked")
+  public Enumeration getHeaders(String arg0)
 	{
 		// todo - implement
 		return null;
@@ -118,7 +121,8 @@ public class MockHttpServletRequest implements HttpServletRequest
 	/**
 	 * @see javax.servlet.http.HttpServletRequest#getHeaderNames()
 	 */
-	public Enumeration getHeaderNames()
+	@SuppressWarnings("unchecked")
+  public Enumeration getHeaderNames()
 	{
 		// todo - implement
 		return null;
@@ -288,7 +292,8 @@ public class MockHttpServletRequest implements HttpServletRequest
 	/**
 	 * @see javax.servlet.ServletRequest#getAttributeNames()
 	 */
-	public Enumeration getAttributeNames()
+	@SuppressWarnings("unchecked")
+  public Enumeration getAttributeNames()
 	{
 		return null;
 	}
@@ -355,7 +360,8 @@ public class MockHttpServletRequest implements HttpServletRequest
 	/**
 	 * @see javax.servlet.ServletRequest#getParameterNames()
 	 */
-	public Enumeration getParameterNames()
+	@SuppressWarnings("unchecked")
+  public Enumeration getParameterNames()
 	{
 		return null;
 	}
@@ -371,6 +377,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	/**
 	 * @see javax.servlet.ServletRequest#getParameterMap()
 	 */
+  @SuppressWarnings("unchecked")
 	public Map getParameterMap()
 	{
 		return null;
@@ -489,6 +496,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	/**
 	 * @see javax.servlet.ServletRequest#getLocales()
 	 */
+  @SuppressWarnings("unchecked")
 	public Enumeration getLocales()
 	{
 		return null;

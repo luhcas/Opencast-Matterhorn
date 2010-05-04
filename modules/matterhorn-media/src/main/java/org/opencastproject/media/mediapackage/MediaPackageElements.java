@@ -28,8 +28,11 @@ public interface MediaPackageElements {
   /** The manifest file name */
   String MANIFEST_FILENAME = "index.xml";
 
-  /** Element type definition */
-  MediaPackageElementFlavor DUBLINCORE_CATALOG = new MediaPackageElementFlavor("metadata", "dublincore");
+  /** Dublin core catalog describing an episode */
+  MediaPackageElementFlavor DUBLINCORE_EIPSODE = new MediaPackageElementFlavor("dublincore", "episode");
+
+  /** Dublin core catalog describing a series */
+  MediaPackageElementFlavor DUBLINCORE_SERIES = new MediaPackageElementFlavor("dublincore", "series");
 
   /** Track containing the presenter/s */
   MediaPackageElementFlavor PRESENTER_SOURCE = new MediaPackageElementFlavor("presenter", "source");

@@ -6,7 +6,7 @@
     </track>
   </media>
   <metadata>
-    <catalog id="catalog-1" type="metadata/dublincore">
+    <catalog id="catalog-1" type="dublincore/episode">
       <mimetype>text/xml</mimetype>
       <url>@SAMPLES_URL@/dc-1.xml</url>
     </catalog>

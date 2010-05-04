@@ -17,7 +17,6 @@ package org.opencastproject.ingest.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -136,7 +135,7 @@ public class IngestServiceImplTest {
   public void testThinClient() throws Exception {
     mediaPackage = service.createMediaPackage();
     mediaPackage = service.addTrack(urlTrack, null, mediaPackage);
-    mediaPackage = service.addCatalog(urlCatalog, DublinCoreCatalog.FLAVOR, mediaPackage);
+    mediaPackage = service.addCatalog(urlCatalog, MediaPackageElements.DUBLINCORE_EIPSODE, mediaPackage);
     mediaPackage = service.addAttachment(urlAttachment, MediaPackageElements.COVER_FLAVOR, mediaPackage);
     WorkflowInstance instance = service.ingest(mediaPackage);
     Assert.assertEquals(1, mediaPackage.getTracks().length);

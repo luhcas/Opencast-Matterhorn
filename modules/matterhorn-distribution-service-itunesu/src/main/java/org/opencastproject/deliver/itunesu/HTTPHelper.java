@@ -17,6 +17,7 @@ package org.opencastproject.deliver.itunesu;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 
 import java.io.IOException;
 import java.io.File;
@@ -170,7 +171,7 @@ public class HTTPHelper
 
     // content type
     stringBuffer.append("Content-Type: ");
-    String type = connection.guessContentTypeFromName(fileName);
+    String type = URLConnection.guessContentTypeFromName(fileName);
     if (type == null) {
       // default content type
       type = "application/octet-stream";

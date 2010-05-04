@@ -325,7 +325,7 @@ public class IngestRestService {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         dcc.toXml(out, true);
         InputStream in = new ByteArrayInputStream(out.toByteArray());
-        ingestService.addCatalog(in, "dublincore.xml", MediaPackageElements.DUBLINCORE_CATALOG, mp);
+        ingestService.addCatalog(in, "dublincore.xml", MediaPackageElements.DUBLINCORE_EIPSODE, mp);
         WorkflowInstance workflow;
         if (wdID == null) {
           workflow = ingestService.ingest(mp);
@@ -396,6 +396,7 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_HTML)
   @Path("ingest/{wdID}")
+  @SuppressWarnings("unchecked")
   public Response ingest(@PathParam("wdID") String wdID, @Context HttpServletRequest request) {
     Map<String, String[]> params = request.getParameterMap();
     HashMap<String, String> wfConfig = new HashMap<String, String>();
@@ -570,7 +571,7 @@ public class IngestRestService {
       // yields
       // Exception
       mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc), "dublinCore.xml", MediaPackageElementFlavor
-              .parseFlavor("metadata/dublincore"), mediaPackage);
+              .parseFlavor("dublincore/episode"), mediaPackage);
       return Response.ok(mediaPackage).build();
     } catch (Exception e) {
       logger.error(e.getMessage());

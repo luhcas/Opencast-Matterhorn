@@ -73,7 +73,7 @@ public class MediaPackageElementBuilderTest {
   @Test
   public void testNewElement() {
     try {
-      mediaPackageElementBuilder.newElement(MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_CATALOG);
+      mediaPackageElementBuilder.newElement(MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_EIPSODE);
     } catch (IOException e) {
       fail(e.getMessage());
     }

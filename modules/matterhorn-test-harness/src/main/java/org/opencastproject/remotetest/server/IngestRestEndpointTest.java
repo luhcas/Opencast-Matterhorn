@@ -70,7 +70,7 @@ public class IngestRestEndpointTest {
 
     // Grow media package
     mp = postCall("/ingest/rest/addTrack", "av.mov", "track/presenter", mp);
-    mp = postCall("/ingest/rest/addCatalog", "dublincore.xml", "metadata/dublincore", mp);
+    mp = postCall("/ingest/rest/addCatalog", "dublincore.xml", "dublincore/episode", mp);
     mp = postCall("/ingest/rest/addAttachment", "cover.png", "cover/source", mp);
 
     // Ingest the new grown media package

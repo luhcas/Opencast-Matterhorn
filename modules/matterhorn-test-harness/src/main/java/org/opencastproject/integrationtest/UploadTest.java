@@ -57,7 +57,7 @@ public class UploadTest {
     // TODO validate Media Package
 
     // Add Catalog
-    response = IngestResources.add("Catalog", catalogUrl, "metadata/dublincore", mediaPackage);
+    response = IngestResources.add("Catalog", catalogUrl, "dublincore/episode", mediaPackage);
     assertEquals("Response code (addCatalog):", 200, response.getStatus());
     mediaPackage = response.getEntity(String.class);
     // TODO validate Media Package
@@ -87,7 +87,7 @@ public class UploadTest {
             .getUrlAsFile(ingestedTrackUrl)), Checksum.create(ChecksumType.DEFAULT_TYPE, Utils.getUrlAsFile(trackUrl)));
 
     // Compare Catalog
-    String ingestedCatalogUrl = (String) Utils.xPath(xml, "//metadata/catalog[@type='metadata/dublincore']/url",
+    String ingestedCatalogUrl = (String) Utils.xPath(xml, "//metadata/catalog[@type='dublincore/episode']/url",
             XPathConstants.STRING);
     Document ingestedCatalog = Utils.getUrlAsDocument(ingestedCatalogUrl);
     Document catalog = Utils.getUrlAsDocument(catalogUrl);

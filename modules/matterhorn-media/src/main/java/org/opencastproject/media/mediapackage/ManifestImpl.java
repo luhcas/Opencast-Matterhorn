@@ -638,7 +638,7 @@ final class ManifestImpl {
     Collection<Catalog> catalogs = loadCatalogs();
     List<Catalog> candidates = new ArrayList<Catalog>(catalogs);
     for (Catalog c : catalogs) {
-      if (!flavor.equals(c.getFlavor())) {
+      if (c.getFlavor() == null || !c.getFlavor().matches(flavor)) {
         candidates.remove(c);
       }
     }

@@ -24,7 +24,6 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReference;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.metadata.dublincore.DCMIPeriod;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
@@ -265,16 +264,14 @@ public class SolrIndexManager {
               .getFlavor());
 
     // Add dublin core
-    if (!mediaPackage.hasCatalogs(DublinCoreCatalog.FLAVOR,
-            MediaPackageReferenceImpl.ANY_MEDIAPACKAGE)) {
+    if (!mediaPackage.hasCatalogs(MediaPackageElements.DUBLINCORE_EIPSODE)) {
       log_.debug("No episode dublincore metadata found in media package "
               + mediaPackage);
       return null;
     }
 
     // If this is the case, try to get a hold on it
-    Catalog dcCatalogs[] = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR,
-            MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
+    Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.DUBLINCORE_EIPSODE);
     
     DublinCoreCatalog dublinCore =  dcService.load(dcCatalogs[0]);
 
@@ -338,15 +335,13 @@ public class SolrIndexManager {
     SolrUpdateableInputDocument solrSeriesDocument = new SolrUpdateableInputDocument();
 
     // Check if there is a dublin core for series
-    if (!mediaPackage.hasCatalogs(DublinCoreCatalog.FLAVOR,
-            MediaPackageReferenceImpl.ANY_SERIES)) {
+    if (!mediaPackage.hasCatalogs(MediaPackageElements.DUBLINCORE_SERIES)) {
       log_.debug("No series dublincore found in media package " + mediaPackage);
       return null;
     }
 
     // If this is the case, try to get a hold on it
-    Catalog dcCatalogs[] = mediaPackage.getCatalogs(DublinCoreCatalog.FLAVOR,
-            MediaPackageReferenceImpl.ANY_SERIES);
+    Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.DUBLINCORE_SERIES);
     DublinCoreCatalog dublinCore = (DublinCoreCatalog) dcCatalogs[0];
     String seriesId = dublinCore.getFirst(DublinCore.PROPERTY_IDENTIFIER);
 
