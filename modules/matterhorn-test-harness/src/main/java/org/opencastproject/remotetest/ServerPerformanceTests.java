@@ -15,18 +15,19 @@
  */
 package org.opencastproject.remotetest;
 
+import org.opencastproject.remotetest.server.perf.ConcurrentVideosegmenterTest;
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * Test runner for all remote tests
+ * Runs the server-side tests
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-  CaptureAgentTests.class,
-  ServerTests.class
+  ConcurrentVideosegmenterTest.class
 })
-public class AllTests {
+public class ServerPerformanceTests {
 
 }

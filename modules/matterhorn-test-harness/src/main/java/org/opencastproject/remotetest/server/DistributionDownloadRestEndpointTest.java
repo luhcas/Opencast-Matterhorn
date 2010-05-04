@@ -15,20 +15,20 @@
  */
 package org.opencastproject.remotetest.server;
 
-import org.opencastproject.integrationtest.AuthenticationSupport;
+import static org.opencastproject.remotetest.Main.BASE_URL;
+import static org.opencastproject.remotetest.Main.PASSWORD;
+import static org.opencastproject.remotetest.Main.USERNAME;
+
+import org.opencastproject.security.TrustedHttpClientImpl;
 
 import junit.framework.Assert;
-
-import static org.opencastproject.remotetest.RemoteTestRunner.BASE_URL;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Before;
@@ -41,22 +41,20 @@ import java.util.List;
  * Tests the functionality of the local distribution service rest endpoint
  */
 public class DistributionDownloadRestEndpointTest {
-  HttpClient client;
+  TrustedHttpClientImpl client;
 
   @Before
   public void setup() throws Exception {
-    client = new DefaultHttpClient();
+    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
   }
 
   @After
   public void teardown() throws Exception {
-    client.getConnectionManager().shutdown();
   }
 
   @Test
   public void testDocs() throws Exception {
     HttpGet get = new HttpGet(BASE_URL + "/distribution/download/rest/docs");
-    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -64,7 +62,6 @@ public class DistributionDownloadRestEndpointTest {
   @Test
   public void testWadl() throws Exception {
     HttpGet get = new HttpGet(BASE_URL + "/distribution/download/rest/?_wadl");
-    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -72,7 +69,6 @@ public class DistributionDownloadRestEndpointTest {
   @Test
   public void testDistribute() throws Exception {
     HttpPost post = new HttpPost(BASE_URL + "/distribution/download/rest/");
-    AuthenticationSupport.addAuthentication(post);
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
     formParams.add(new BasicNameValuePair("mediapackage", getSampleMediaPackage()));

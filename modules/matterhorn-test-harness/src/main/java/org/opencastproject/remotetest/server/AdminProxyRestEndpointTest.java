@@ -15,13 +15,13 @@
  */
 package org.opencastproject.remotetest.server;
 
-import static org.opencastproject.remotetest.RemoteTestRunner.BASE_URL;
+import static org.opencastproject.remotetest.Main.BASE_URL;
+import static org.opencastproject.remotetest.Main.PASSWORD;
+import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.integrationtest.AuthenticationSupport;
+import org.opencastproject.security.TrustedHttpClientImpl;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -36,18 +36,17 @@ import java.util.Iterator;
 
 public class AdminProxyRestEndpointTest {
 
-  HttpClient client;
+  TrustedHttpClientImpl client;
 
   public static String ADMIN_BASE_URL = BASE_URL + "/admin/rest";
 
   @Before
   public void setup() throws Exception {
-    client = new DefaultHttpClient();
+    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
   }
 
   @After
   public void teardown() throws Exception {
-    client.getConnectionManager().shutdown();
   }
 
   @Test
@@ -57,14 +56,12 @@ public class AdminProxyRestEndpointTest {
 
     // GET json from countRecordings
     getJson = new HttpGet(ADMIN_BASE_URL + "/countRecordings");
-    AuthenticationSupport.addAuthentication(getJson);
     jsonResponse = EntityUtils.toString(client.execute(getJson).getEntity());
     JSONObject adminJSON = (JSONObject) JSONValue.parse(jsonResponse);
     if(adminJSON == null) Assert.fail("Not able to parse response: " + jsonResponse);
 
     // GET json from workflow/instances
     getJson = new HttpGet(BASE_URL + "/workflow/rest/instances.json");
-    AuthenticationSupport.addAuthentication(getJson);
     jsonResponse = EntityUtils.toString(client.execute(getJson).getEntity());
     JSONArray workflowJSON = (JSONArray) JSONValue.parse(jsonResponse);
     if(workflowJSON == null) Assert.fail("Not able to parse response: " + jsonResponse);

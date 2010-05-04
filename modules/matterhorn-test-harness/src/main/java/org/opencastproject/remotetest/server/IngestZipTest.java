@@ -15,18 +15,18 @@
  */
 package org.opencastproject.remotetest.server;
 
-import org.opencastproject.integrationtest.AuthenticationSupport;
+import static org.opencastproject.remotetest.Main.BASE_URL;
+import static org.opencastproject.remotetest.Main.PASSWORD;
+import static org.opencastproject.remotetest.Main.USERNAME;
 
-import static org.opencastproject.remotetest.RemoteTestRunner.BASE_URL;
+import org.opencastproject.security.TrustedHttpClientImpl;
 
 import junit.framework.Assert;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,23 +35,21 @@ import org.junit.Test;
  * Posts a zip file to the ingest service
  */
 public class IngestZipTest {
-  HttpClient client;
+  TrustedHttpClientImpl client;
 
   @Before
   public void setup() throws Exception {
-    client = new DefaultHttpClient();
+    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
   }
 
   @After
   public void teardown() throws Exception {
-    client.getConnectionManager().shutdown();
   }
 
   @Test
   public void testIngestZip() throws Exception {
     byte[] bytesToPost = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("ingest.zip"));
     HttpPost post = new HttpPost(BASE_URL + "/ingest/rest/addZippedMediaPackage");
-    AuthenticationSupport.addAuthentication(post);
     post.setEntity(new ByteArrayEntity(bytesToPost));
     HttpResponse response = client.execute(post);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());    

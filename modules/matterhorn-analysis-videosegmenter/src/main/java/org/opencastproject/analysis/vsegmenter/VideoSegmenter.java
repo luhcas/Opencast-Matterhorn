@@ -42,6 +42,7 @@ import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -120,6 +122,9 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   /** The repository to store the mpeg7 catalogs */
   private WorkingFileRepository repository;
 
+  /** The workspace to ue when retrieving remote media files */
+  private Workspace workspace;
+  
   /** The composer service */
   private ComposerService composer;
 
@@ -147,7 +152,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   }
 
   /**
-   * Sets the workspace
+   * Sets the file repository
    * 
    * @param repository
    *          an instance of the working file repository
@@ -156,6 +161,16 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     this.repository = repository;
   }
 
+  /**
+   * Sets the workspace
+   * 
+   * @param workspace
+   *          an instance of the workspace
+   */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
+  
   /**
    * Sets the receipt service
    * 
@@ -220,7 +235,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
           Track mjpegTrack = prepare(track);
 
           // Create a player
-          URL mediaUrl = mjpegTrack.getURI().toURL();
+          File mediaFile = workspace.get(mjpegTrack.getURI());
+          URL mediaUrl = mediaFile.toURI().toURL();
           DataSource ds = Manager.createDataSource(mediaUrl);
           Player player = null;
           try {

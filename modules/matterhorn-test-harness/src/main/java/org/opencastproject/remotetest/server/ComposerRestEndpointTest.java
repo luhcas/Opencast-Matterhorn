@@ -15,20 +15,20 @@
  */
 package org.opencastproject.remotetest.server;
 
-import org.opencastproject.integrationtest.AuthenticationSupport;
+import static org.opencastproject.remotetest.Main.BASE_URL;
+import static org.opencastproject.remotetest.Main.PASSWORD;
+import static org.opencastproject.remotetest.Main.USERNAME;
 
-import static org.opencastproject.remotetest.RemoteTestRunner.BASE_URL;
+import org.opencastproject.security.TrustedHttpClientImpl;
 
 import junit.framework.Assert;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
@@ -49,23 +49,21 @@ import javax.xml.xpath.XPathFactory;
  * Tests the functionality of a remote workflow service rest endpoint
  */
 public class ComposerRestEndpointTest {
-  HttpClient client;
+  TrustedHttpClientImpl client;
 
   @Before
   public void setup() throws Exception {
-    client = new DefaultHttpClient();
+    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
   }
 
   @After
   public void teardown() throws Exception {
-    client.getConnectionManager().shutdown();
   }
     
   @Test
   public void testEncodeAudioAndVideoTracks() throws Exception {
     // Start an encoding job via the rest endpoint
     HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/encode");
-    AuthenticationSupport.addAuthentication(postEncode);
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("audioSourceTrackId", "track-1"));
     formParams.add(new BasicNameValuePair("videoSourceTrackId", "track-2"));
@@ -84,7 +82,6 @@ public class ComposerRestEndpointTest {
     while(status == null || "RUNNING".equals(status) || "QUEUED".equals(status)) {
       Thread.sleep(5000); // wait and try again
       HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/receipt/" + receiptId + ".xml");
-      AuthenticationSupport.addAuthentication(pollRequest);
       status = getRecepitStatus(client.execute(pollRequest));
       System.out.println("encoding job " + receiptId + " is " + status);
     }
@@ -96,7 +93,6 @@ public class ComposerRestEndpointTest {
   @Test
   public void testImageExtraction() throws Exception {
     HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/image");
-    AuthenticationSupport.addAuthentication(postEncode);
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("sourceTrackId", "track-2"));
     formParams.add(new BasicNameValuePair("time", "1"));

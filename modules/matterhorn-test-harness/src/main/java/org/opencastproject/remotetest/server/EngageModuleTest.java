@@ -15,10 +15,12 @@
  */
 package org.opencastproject.remotetest.server;
 
-import static org.opencastproject.remotetest.RemoteTestRunner.BASE_URL;
+import static org.opencastproject.remotetest.Main.BASE_URL;
+import static org.opencastproject.remotetest.Main.USERNAME;
+import static org.opencastproject.remotetest.Main.PASSWORD;
 
 import org.opencastproject.demo.DemodataLoader;
-import org.opencastproject.integrationtest.AuthenticationSupport;
+import org.opencastproject.security.TrustedHttpClientImpl;
 
 import junit.framework.Assert;
 
@@ -62,7 +64,7 @@ import javax.xml.xpath.XPathFactory;
  * 
  */
 public class EngageModuleTest {
-  HttpClient client;
+  TrustedHttpClientImpl client;
 
   private static DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
   private static XPathFactory factory = XPathFactory.newInstance();
@@ -70,7 +72,7 @@ public class EngageModuleTest {
   public static String ENGAGE_BASE_URL = BASE_URL + "/engage/ui";
 
   private void clearSearchIndex() throws Exception {
-    HttpClient client = new DefaultHttpClient();
+    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
     HttpPost post = new HttpPost(BASE_URL + "/search/rest/clear");
 
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
@@ -81,7 +83,7 @@ public class EngageModuleTest {
 
   @Before
   public void setup() throws Exception {
-    client = new DefaultHttpClient();
+    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
 
     domFactory = DocumentBuilderFactory.newInstance();
     domFactory.setNamespaceAware(false); // don't forget this!
@@ -89,7 +91,6 @@ public class EngageModuleTest {
 
   @After
   public void teardown() throws Exception {
-    client.getConnectionManager().shutdown();
   }
 
 
@@ -138,7 +139,6 @@ public class EngageModuleTest {
   @Test
   public void testJQuery() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/jquery/jquery-1.3.2.js");
-    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -146,7 +146,6 @@ public class EngageModuleTest {
   @Test
   public void testJQueryXSLT() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/jquery/plugins/jquery.xslt.js");
-    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -154,7 +153,6 @@ public class EngageModuleTest {
   @Test
   public void testEngageUI() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/js/engage-ui.js");
-    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -163,7 +161,6 @@ public class EngageModuleTest {
   @Test
   public void testFABridge() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/bridge/lib/FABridge.js");
-    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -171,7 +168,6 @@ public class EngageModuleTest {
   @Test
   public void testVideodisplay() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/bridge/Videodisplay.js");
-    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -179,7 +175,6 @@ public class EngageModuleTest {
   @Test
   public void testJQueryCore() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/jquery/ui/ui.core.js");
-    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }

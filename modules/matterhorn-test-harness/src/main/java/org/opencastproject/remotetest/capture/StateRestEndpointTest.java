@@ -1,18 +1,18 @@
 package org.opencastproject.remotetest.capture;
 
-import static org.opencastproject.remotetest.RemoteTestRunner.BASE_URL;
+import static org.opencastproject.remotetest.Main.BASE_URL;
+import static org.opencastproject.remotetest.Main.PASSWORD;
+import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.integrationtest.AuthenticationSupport;
 import org.opencastproject.integrationtest.UniversalNamespaceResolver;
+import org.opencastproject.security.TrustedHttpClientImpl;
 
 import junit.framework.Assert;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -34,23 +34,21 @@ import javax.xml.xpath.XPathFactory;
 
 
 public class StateRestEndpointTest {
-  HttpClient client;
+  TrustedHttpClientImpl client;
   
   
   @Before
   public void setup() throws Exception {
-    client = new DefaultHttpClient();
+    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
   }
   
   @After
   public void teardown() throws Exception {
-    client.getConnectionManager().shutdown();
   }
   
   @Test
   public void testGetStateGet() throws Exception {
     HttpGet request = new HttpGet(BASE_URL + "/state/rest/GetState");
-    AuthenticationSupport.addAuthentication(request);
     HttpResponse response = client.execute(request);
     
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -73,7 +71,6 @@ public class StateRestEndpointTest {
   @Test
   public void testGetRecordingsNoneGet() throws Exception {
     HttpGet request = new HttpGet(BASE_URL + "/state/rest/GetRecordings");
-    AuthenticationSupport.addAuthentication(request);
     HttpResponse response = client.execute(request);
     
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -92,7 +89,6 @@ public class StateRestEndpointTest {
     recordingId = createRecording();
     
     HttpGet request = new HttpGet(BASE_URL + "/state/rest/GetRecordings");
-    AuthenticationSupport.addAuthentication(request);
     HttpResponse response = client.execute(request);
     
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -112,7 +108,6 @@ public class StateRestEndpointTest {
 
     HttpDelete deleteRecordingRequest = 
       new HttpDelete(BASE_URL + "/capture-admin/rest/recordings/"+ recordingId);
-    AuthenticationSupport.addAuthentication(deleteRecordingRequest);
     HttpResponse deleteRecordingResponse = client.execute(deleteRecordingRequest);
     
     Assert.assertEquals(200, deleteRecordingResponse.getStatusLine().getStatusCode());

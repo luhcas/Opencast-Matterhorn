@@ -33,6 +33,7 @@ import org.opencastproject.receipt.api.Receipt;
 import org.opencastproject.receipt.api.ReceiptService;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
+import org.opencastproject.workspace.api.Workspace;
 
 import de.schlichtherle.io.File;
 import de.schlichtherle.io.FileOutputStream;
@@ -114,7 +115,9 @@ public class VideoSegmenterTest {
               }
             });
     EasyMock.replay(fileRepo);
-    
+    Workspace workspace = EasyMock.createNiceMock(Workspace.class);
+    EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(track.getURI()));
+    EasyMock.replay(workspace);
     Receipt receipt = new ReceiptStub();
     
     ReceiptService receiptService = EasyMock.createNiceMock(ReceiptService.class);
@@ -123,6 +126,7 @@ public class VideoSegmenterTest {
     
     vsegmenter = new VideoSegmenter();
     vsegmenter.setFileRepository(fileRepo);
+    vsegmenter.setWorkspace(workspace);
     vsegmenter.setReceiptService(receiptService);
   }
 

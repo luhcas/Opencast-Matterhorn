@@ -35,6 +35,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -102,6 +103,12 @@ public class WorkspaceImpl implements Workspace {
    * @return The file, or null if the file is not on a configured mount.
    */
   protected File getLocallyMountedFile(String urlString) {
+    if(urlString.startsWith("file")) {
+      try {
+        File f = new File(new URI(urlString));
+        if(f.exists() && f.canRead()) return f;
+      } catch(URISyntaxException e) {}
+    }
     for (Entry<String, String> entry : filesystemMappings.entrySet()) {
       String baseUrl = entry.getKey();
       String baseFilesystemPath = entry.getValue();

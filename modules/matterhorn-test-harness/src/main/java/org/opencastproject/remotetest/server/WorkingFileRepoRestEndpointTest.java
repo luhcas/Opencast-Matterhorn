@@ -15,22 +15,22 @@
  */
 package org.opencastproject.remotetest.server;
 
-import org.opencastproject.integrationtest.AuthenticationSupport;
+import static org.opencastproject.remotetest.Main.BASE_URL;
+import static org.opencastproject.remotetest.Main.PASSWORD;
+import static org.opencastproject.remotetest.Main.USERNAME;
 
-import static org.opencastproject.remotetest.RemoteTestRunner.BASE_URL;
+import org.opencastproject.security.TrustedHttpClientImpl;
 
 import junit.framework.Assert;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -43,16 +43,15 @@ import java.util.Arrays;
  * Tests the working file repository's rest endpoint
  */
 public class WorkingFileRepoRestEndpointTest {
-  HttpClient client;
+  TrustedHttpClientImpl client;
 
   @Before
   public void setup() throws Exception {
-    client = new DefaultHttpClient();
+    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
   }
 
   @After
   public void teardown() throws Exception {
-    client.getConnectionManager().shutdown();
   }
 
   @Test
@@ -66,7 +65,6 @@ public class WorkingFileRepoRestEndpointTest {
     MultipartEntity postEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
     postEntity.addPart("file", new InputStreamBody(in, fileName));
     HttpPost post = new HttpPost(BASE_URL + "/files/" + mediapackageId + "/" + elementId);
-    AuthenticationSupport.addAuthentication(post);
     post.setEntity(postEntity);
     HttpResponse response = client.execute(post);
     HttpEntity responseEntity  = response.getEntity();
@@ -76,7 +74,6 @@ public class WorkingFileRepoRestEndpointTest {
 
     // Get the file back from the repository
     HttpGet get = new HttpGet(BASE_URL + "/files/" + mediapackageId + "/" + elementId);
-    AuthenticationSupport.addAuthentication(get);
     HttpResponse getResponse = client.execute(get);
     byte[] bytesFromGet = IOUtils.toByteArray(getResponse.getEntity().getContent());
     

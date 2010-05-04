@@ -15,20 +15,20 @@
  */
 package org.opencastproject.remotetest.server;
 
-import static org.opencastproject.remotetest.RemoteTestRunner.BASE_URL;
+import static org.opencastproject.remotetest.Main.BASE_URL;
+import static org.opencastproject.remotetest.Main.PASSWORD;
+import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.integrationtest.AuthenticationSupport;
+import org.opencastproject.security.TrustedHttpClientImpl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
@@ -46,23 +46,21 @@ import java.util.List;
  * Posts a zip file to the ingest service
  */
 public class IngestRestEndpointTest {
-  HttpClient client;
+  TrustedHttpClientImpl client;
 
   @Before
   public void setup() throws Exception {
-    client = new DefaultHttpClient();
+    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
   }
 
   @After
   public void teardown() throws Exception {
-    client.getConnectionManager().shutdown();
   }
 
   @Test
   public void testIngestThinClient() throws Exception {
     // create emptiy MediaPackage
     HttpGet get = new HttpGet(BASE_URL + "/ingest/rest/createMediaPackage");
-    AuthenticationSupport.addAuthentication(get);
     HttpResponse response = client.execute(get);
     HttpEntity entity = response.getEntity();
     String mp = EntityUtils.toString(entity);
@@ -80,7 +78,6 @@ public class IngestRestEndpointTest {
   protected String postCall(String method, String mediaFile, String flavor, String mediaPackage)
           throws ClientProtocolException, IOException {
     HttpPost post = new HttpPost(BASE_URL + method);
-    AuthenticationSupport.addAuthentication(post);
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams = new ArrayList<NameValuePair>();
     if(mediaFile != null) {

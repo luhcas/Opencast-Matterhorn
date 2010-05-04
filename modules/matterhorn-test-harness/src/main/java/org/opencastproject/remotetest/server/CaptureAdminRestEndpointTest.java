@@ -15,17 +15,16 @@
  */
 package org.opencastproject.remotetest.server;
 
-import org.opencastproject.integrationtest.AuthenticationSupport;
-
 import static org.junit.Assert.assertEquals;
+import static org.opencastproject.remotetest.Main.BASE_URL;
+import static org.opencastproject.remotetest.Main.PASSWORD;
+import static org.opencastproject.remotetest.Main.USERNAME;
 
-import static org.opencastproject.remotetest.RemoteTestRunner.BASE_URL;
+import org.opencastproject.security.TrustedHttpClientImpl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -43,22 +42,20 @@ import javax.xml.xpath.XPathFactory;
  * Test the Capture Admin REST endpoints
  */
 public class CaptureAdminRestEndpointTest {
-  private HttpClient httpClient;
+  private TrustedHttpClientImpl httpClient;
   
   @Before
   public void setup() throws Exception {
-    httpClient = new DefaultHttpClient();
+    httpClient = new TrustedHttpClientImpl(USERNAME, PASSWORD);
   }
   
   @After
   public void tearDown() throws Exception {
-    httpClient.getConnectionManager().shutdown();
   }
   
   @Test
   public void testGetAgents() throws Exception {
     HttpGet get = new HttpGet(BASE_URL + "/capture-admin/rest/agents");
-    AuthenticationSupport.addAuthentication(get);
     String xmlResponse = EntityUtils.toString(httpClient.execute(get).getEntity());
     
     // parse the xml and extract the running clients names
@@ -73,7 +70,6 @@ public class CaptureAdminRestEndpointTest {
     for (int i = 0; i < agentList.getLength(); i++) {
       String agentName = ((Element) agentList.item(i)).getElementsByTagName("name").item(0).getTextContent();
       HttpGet agentGet = new HttpGet(get.getURI() + "/" + agentName);
-      AuthenticationSupport.addAuthentication(agentGet);
       int agentResponse = httpClient.execute(agentGet).getStatusLine().getStatusCode();
       assertEquals(agentResponse, HttpStatus.SC_OK);
     }

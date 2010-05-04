@@ -15,17 +15,17 @@
  */
 package org.opencastproject.remotetest.capture;
 
-import static org.opencastproject.remotetest.RemoteTestRunner.BASE_URL;
+import static org.opencastproject.remotetest.Main.BASE_URL;
+import static org.opencastproject.remotetest.Main.PASSWORD;
+import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.integrationtest.AuthenticationSupport;
+import org.opencastproject.security.TrustedHttpClientImpl;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Assert;
@@ -45,13 +45,13 @@ import java.util.Properties;
 @Ignore
 public class CaptureRestEndpointTest {
   
-  private HttpClient httpClient;
+  private TrustedHttpClientImpl httpClient;
   private ArrayList<NameValuePair> startParams = new ArrayList<NameValuePair>();
   private ArrayList<NameValuePair> stopParams = new ArrayList<NameValuePair>();
   
   @Before
   public void setup() throws Exception {
-    httpClient = new DefaultHttpClient();
+    httpClient = new TrustedHttpClientImpl(USERNAME, PASSWORD);
     String time = String.valueOf(System.currentTimeMillis());
 
     // Test Properties from resources
@@ -69,7 +69,6 @@ public class CaptureRestEndpointTest {
   
   @After
   public void tearDown() throws Exception {
-    httpClient.getConnectionManager().shutdown();
   }
   
   @Test
@@ -112,7 +111,6 @@ public class CaptureRestEndpointTest {
 
   private void sendGet(String URL, int returnCode) throws Exception {
     HttpGet get = new HttpGet(URL);
-    AuthenticationSupport.addAuthentication(get);
     int getResponse = httpClient.execute(get).getStatusLine().getStatusCode();
     Assert.assertTrue(getResponse == returnCode);
     get.abort();
@@ -120,7 +118,6 @@ public class CaptureRestEndpointTest {
 
   private void sendPost(String URL, List<NameValuePair> params, int returnCode) throws Exception {
     HttpPost post = new HttpPost(URL);
-    AuthenticationSupport.addAuthentication(post);
     post.setEntity(new UrlEncodedFormEntity(params));
     int postResponse = httpClient.execute(post).getStatusLine().getStatusCode();
     Assert.assertTrue(postResponse == returnCode);

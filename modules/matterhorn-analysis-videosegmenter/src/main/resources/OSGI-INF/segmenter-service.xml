@@ -10,6 +10,8 @@
     name="composer" policy="static" bind="setComposerService"/>
   <reference cardinality="1..1" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository"
     name="repository" policy="static" bind="setFileRepository"/>
+  <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
+    cardinality="1..1" policy="static" bind="setWorkspace" />
   <reference name="receiptService" interface="org.opencastproject.receipt.api.ReceiptService"
     cardinality="1..1" policy="static" bind="setReceiptService" />
   <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"
