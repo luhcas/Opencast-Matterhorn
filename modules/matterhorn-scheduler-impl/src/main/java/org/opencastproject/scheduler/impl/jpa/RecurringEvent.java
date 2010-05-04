@@ -30,6 +30,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.MapKey;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -51,6 +53,10 @@ import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.parameter.Value;
 import net.fortuna.ical4j.model.property.RRule;
 
+@NamedQueries( {
+  @NamedQuery(name = "RecurringEvent.getAll", query = "SELECT e FROM RecurringEvent e")
+})
+
 @XmlType(name="RecurringEvent", namespace="http://scheduler.opencastproject.org")
 @XmlRootElement(name="RecurringEvent", namespace="http://scheduler.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -60,32 +66,47 @@ public class RecurringEvent extends AbstractEvent{
   private static final Logger logger = LoggerFactory.getLogger(RecurringEvent.class);
   
   @XmlID
-  @Id 
+  @Id
+  @XmlElement(name="RecurringEventId")
   protected String rEventId;
   
   @XmlElement(name="recurrence")
   @Column(name="recurrence")
   protected String recurrence;
   
-  @XmlElementWrapper(name="metadata-list")
+  @XmlElementWrapper(name="MetadataList")
   @XmlElement(name="metadata")
   @OneToMany (fetch=FetchType.EAGER, cascade=CascadeType.ALL)
   @MapKey(name="metadata")
   protected List<Metadata> metadata = new LinkedList<Metadata>();
 
-  @OneToMany(cascade = CascadeType.ALL)
+  @XmlElementWrapper(name="Events")
+  @XmlElement(name="event")
+  @OneToMany(fetch=FetchType.EAGER, cascade = CascadeType.ALL)
   @MapKey(name="generatedEvents")
   protected List<Event> generatedEvents = new LinkedList<Event>();
   
+  @XmlElementWrapper(name="Dates")
+  @XmlElement(name="date")
   @Transient
   List<Date> generatedDates;
 
   public RecurringEvent () {
   }
-  
-  public RecurringEvent (String recurrence) {
-    setRecurrence(recurrence);
+  public RecurringEvent (String xml) {
+    try {
+      RecurringEvent e =  RecurringEvent.valueOf(xml);
+      this.setRecurringEventId(e.getRecurringEventId());
+      this.setMetadata(e.getMetadata());
+      this.setRecurrence(e.getRecurrence());
+    } catch (Exception e) {
+      logger.warn ("Could not parse Event XML {}", xml);
+    }
   }
+  
+//  public RecurringEvent (String recurrence) {
+//    setRecurrence(recurrence);
+//  }
 
   public RecurringEvent (String recurrence, List<Metadata> metadata) {
     this(recurrence);
@@ -143,12 +164,14 @@ public class RecurringEvent extends AbstractEvent{
   }
 
   public List<Event> generatedEvents() {
-    if (generatedEvents != null) return generatedEvents;
+    if (generatedEvents != null && generatedEvents.size() > 0) return generatedEvents;
     generatedEvents = new LinkedList<Event>();
     generateDates();
 
     for (int i = 0; i < generatedDates.size(); i++) {
       Event event = new Event();
+      event.generateId();
+      event.setEntityManagerFactory(emf);
       event.setPositionInRecurrence(i);
       event.setRecurringEventId(getRecurringEventId());
       generatedEvents.add(event);
@@ -185,7 +208,9 @@ public class RecurringEvent extends AbstractEvent{
   }
   
   public List<Event> getEvents () {
-    return generatedEvents();
+    List<Event> events = generatedEvents();
+    for (Event e : events) e.setEntityManagerFactory(emf);
+    return events;
   }
   
   public Date getDateForEventByIndex (int index) {
@@ -239,7 +264,7 @@ public class RecurringEvent extends AbstractEvent{
     for (Metadata data : e.getMetadata()) {
       if (containsKey(data.getKey())) {
         for (Metadata dataOld : getMetadata()) {
-          if (dataOld.getKey().equals(data.key) && ! dataOld.equals(data)) { 
+          if (dataOld.getKey().equals(data.getKey()) && ! dataOld.equals(data)) { 
             dataOld.setValue(data.getValue());
             break;
           }
@@ -256,7 +281,7 @@ public class RecurringEvent extends AbstractEvent{
   public static RecurringEvent find (String recurringEventId, EntityManagerFactory emf) {
     logger.debug("loading recurring event with the ID {}", recurringEventId);
     if (recurringEventId == null || emf == null) {
-      logger.warn("could not find reccuring event {}. Null Pointer exeption");
+      logger.warn("could not find reccuring event {}. Null Pointer exeption", recurringEventId);
       return null;
     }
     EntityManager em = emf.createEntityManager();
@@ -303,6 +328,17 @@ public class RecurringEvent extends AbstractEvent{
   
   public String generateId () {
     return rEventId = super.generateId();
+  }
+  
+  /**
+   * removes a generated event from the list of events that belong to this recurring event. 
+   * If an event is removed the date at which this event would have happened will not be recorded! 
+   * @param e the event that should be removed
+   * @return true if the event could be deleted
+   */
+  public boolean removeEvent (Event e) {
+    metadataTable = null;
+    return metadata.remove(e);
   }
   
 }

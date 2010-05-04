@@ -21,9 +21,11 @@ import org.opencastproject.scheduler.impl.jpa.Metadata;
 import org.opencastproject.scheduler.impl.jpa.RecurringEvent;
 
 import java.io.InputStream;
+import java.io.StringWriter;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -33,6 +35,7 @@ public class SchedulerBuilder {
   private static SchedulerBuilder instance = null;
   
   protected JAXBContext jaxbContext = null;
+  protected JAXBContext jaxbContextJPA = null;
   
   /**
    *  Set up the JAXBContext.
@@ -40,6 +43,7 @@ public class SchedulerBuilder {
    */
   private SchedulerBuilder() throws JAXBException {
     jaxbContext = JAXBContext.newInstance("org.opencastproject.scheduler.endpoint", SchedulerBuilder.class.getClassLoader());
+    jaxbContextJPA = JAXBContext.newInstance("org.opencastproject.scheduler.impl.jpa", SchedulerBuilder.class.getClassLoader());
   }
   
   /**
@@ -104,7 +108,7 @@ public class SchedulerBuilder {
   }
   
   public Event parseEvent(InputStream in) throws Exception {
-    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    Unmarshaller unmarshaller = jaxbContextJPA.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
                                   Event.class).getValue();
   }
@@ -114,17 +118,31 @@ public class SchedulerBuilder {
   }
   
   public RecurringEvent parseRecurringEvent(InputStream in) throws Exception {
-    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    Unmarshaller unmarshaller = jaxbContextJPA.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
                                   RecurringEvent.class).getValue();
-  }  
+  } 
+  
+  public String marshallRecurringEvent (RecurringEvent e) throws Exception {
+    Marshaller marshaller = jaxbContextJPA.createMarshaller();
+    StringWriter writer = new StringWriter();
+    marshaller.marshal(e, writer);
+    return writer.toString();
+  }
+  
+  public String marshallEvent (Event e) throws Exception {
+    Marshaller marshaller = jaxbContextJPA.createMarshaller();
+    StringWriter writer = new StringWriter();
+    marshaller.marshal(e, writer);
+    return writer.toString();
+  }    
   
   public Metadata parseMetadata(String in) throws Exception {
     return parseMetadata(IOUtils.toInputStream(in, "UTF8"));
   }
   
   public Metadata parseMetadata(InputStream in) throws Exception {
-    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    Unmarshaller unmarshaller = jaxbContextJPA.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
                                   Metadata.class).getValue();
   }   

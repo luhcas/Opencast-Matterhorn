@@ -159,6 +159,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     } finally {
       em.close();
     }
+    e.setEntityManagerFactory(emf);
     return e;
   }  
   
@@ -302,6 +303,17 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     return list;
   }  
   
+  public List<RecurringEvent> filterRecurringEventsForBeforeDate (List<RecurringEvent> list, String key, Date time) {
+    LinkedList<RecurringEvent> marked = new LinkedList<RecurringEvent>(); //needed because loop will not terminate correctly, if list is modified
+    for (RecurringEvent e: list) {
+      if (! e.containsKey(key)) marked.add(e);
+      else if (! e.getValueAsDate(key).before(time)) marked.add(e);
+    }
+    for (RecurringEvent e: marked) list.remove(e);
+    
+    return list;
+  }  
+  
   private List<Event> filterEventsForAfterDate (List<Event> list, String key, Date time) {
     LinkedList<Event> marked = new LinkedList<Event>(); //needed because loop will not terminate correctly, if list is modified
     for (Event e: list) {
@@ -323,8 +335,22 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     } finally {
       em.close();
     }
+    for (Event e : events) e.setEntityManagerFactory(emf);
     return events.toArray(new Event[0]);
   }
+  
+  public RecurringEvent [] getAllRecurringEvents () {
+    EntityManager em = emf.createEntityManager();
+    Query query = em.createNamedQuery("RecurringEvent.getAll");
+    List<RecurringEvent> events = null;
+    try {
+      events = (List<RecurringEvent>) query.getResultList();
+    } finally {
+      em.close();
+    }
+    for (RecurringEvent e : events) e.setEntityManagerFactory(emf);
+    return events.toArray(new RecurringEvent[0]);
+  }  
     
   public List<Event> getUpcoming (List<Event> list) {
     Date now = new Date(System.currentTimeMillis());
@@ -365,6 +391,12 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
       em.getTransaction().begin();
       event = em.find(Event.class, eventID);
       if (event == null) return false; // Event not in database
+      String rEventID = event.getRecurringEventId();
+      if (rEventID != null) { // remove Event from recuring Event list, if necessary
+        RecurringEvent rEvent = em.find(RecurringEvent.class, rEventID);
+        rEvent.removeEvent(event);
+        em.merge(rEvent);
+      }
       em.remove(event);
       em.getTransaction().commit();
     } finally {
@@ -372,7 +404,22 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     }
     return true; 
   }
-
+  
+  public boolean removeRecurringEvent(String rEventID) {
+    logger.debug("Removing recurring event with the ID {}", rEventID);
+    RecurringEvent event;
+    EntityManager em = emf.createEntityManager();
+    try {
+      em.getTransaction().begin();
+      event = em.find(RecurringEvent.class, rEventID);
+      if (event == null) return false; // Event not in database
+      em.remove(event);
+      em.getTransaction().commit();
+    } finally {
+      em.close();
+    }
+    return true; 
+  }
   /**
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.impl.SchedulerServiceImpl#updateEvent(org.opencastproject.scheduler.api.SchedulerEvent)

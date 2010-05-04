@@ -16,6 +16,7 @@
 package org.opencastproject.scheduler.impl.jpa;
 
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -64,6 +65,20 @@ import org.slf4j.LoggerFactory;
 @Table(name="Event")
 public class Event extends AbstractEvent {
 
+  public Event() {
+    
+  }
+  
+  public Event (String xml) {
+    try {
+      Event e =  Event.valueOf(xml);
+      this.setEventId(e.getEventId());
+      this.setMetadata(e.getCompleteMetadata());
+    } catch (Exception e) {
+      logger.warn ("Could not parse Event XML {}", xml);
+    }
+  }
+  
   private static final Logger logger = LoggerFactory.getLogger(Event.class);
   
   @XmlID
@@ -90,12 +105,12 @@ public class Event extends AbstractEvent {
   }
 
   public void setRecurringEventId(String recurringEventId) {
-    updateMetadata(new Metadata("recurrence.position", recurringEventId));
+    updateMetadata(new Metadata("recurrence.id", recurringEventId));
   }
   
   protected void updateMetadata (Metadata data) {
     if (containsKey(data.getKey())) {
-      for (Metadata olddata : getMetadata()) {
+      for (Metadata olddata : getCompleteMetadata()) {
         if (olddata.getKey().equals(data.getKey())) {
           olddata.setValue(data.value);
           break;
@@ -134,7 +149,7 @@ public class Event extends AbstractEvent {
   }
 
   public RecurringEvent getRecurringEvent() {
-    if (recurringEvent == null)
+    if (getRecurringEventId()!= null && recurringEvent == null)
       recurringEvent = RecurringEvent.find(getRecurringEventId(), emf);
     return recurringEvent;
   }
@@ -145,18 +160,34 @@ public class Event extends AbstractEvent {
       setRecurringEventId(recurringEvent.getRecurringEventId());
   }
 
-  public List<Metadata> getMetadata() {
-    return metadata;
+  @XmlElementWrapper(name="complete-metadata")
+  @XmlElement(name="metadata")
+  public List<Metadata> getCompleteMetadata() {
+    Hashtable<String, Metadata> m = new Hashtable<String, Metadata>();
+    if (getRecurringEvent() != null) {
+      for (Metadata data : getRecurringEvent().getMetadata()) {
+        m.put(data.getKey(), data);
+      }
+      for (Metadata data : getMetadata()) {
+        m.put(data.getKey(), data);
+      }
+    } else return getMetadata();
+    return new LinkedList<Metadata>(m.values());
   }
 
+  public List<Metadata> getMetadata() {
+    return metadata;
+  }  
+  
   public void setMetadata(List<Metadata> metadata) {
     metadataTable = null;
     this.metadata = metadata;
   }
   
   protected void buildMetadataTable () {
-    if (recurringEvent != null) 
-      for (Metadata data : recurringEvent.getMetadata()) metadataTable.put(data.key, data.value); // Inherit values
+    if (metadataTable == null) metadataTable = new Hashtable<String, String>();
+    if (getRecurringEvent() != null )
+      for (Metadata data : getRecurringEvent().getMetadata()) metadataTable.put(data.getKey(), data.getValue()); // Inherit values
     super.buildMetadataTable(metadata);
   }
   
@@ -218,9 +249,9 @@ public class Event extends AbstractEvent {
     //eliminate removed keys
     for (String key : getKeySet()) {
       if (! e.containsKey(key)) {
-        for (int i = 0; i < getMetadata().size(); i++) {
-          if (getMetadata().get(i).getKey().equals(key)) {
-            getMetadata().remove(i);
+        for (int i = 0; i < getCompleteMetadata().size(); i++) {
+          if (getCompleteMetadata().get(i).getKey().equals(key)) {
+            getCompleteMetadata().remove(i);
             break; //skip rest of the loop if found
           }
         }
@@ -228,16 +259,16 @@ public class Event extends AbstractEvent {
     }
     
     //update the list
-    for (Metadata data : e.getMetadata()) {
+    for (Metadata data : e.getCompleteMetadata()) {
       if (containsKey(data.getKey())) {
-        for (Metadata dataOld : getMetadata()) {
-          if (dataOld.getKey().equals(data.key) && ! dataOld.equals(data)) { 
+        for (Metadata dataOld : getCompleteMetadata()) {
+          if (dataOld.getKey().equals(data.getKey()) && ! dataOld.equals(data)) { 
             dataOld.setValue(data.getValue());
             break;
           }
         }
       } else {
-        getMetadata().add(data);
+        getCompleteMetadata().add(data);
       }
     }
     //metadata = e.getMetadata(); 
@@ -278,7 +309,7 @@ public class Event extends AbstractEvent {
   public String toString () {
     String result;
     result = getEventId();
-    if (getRecurringEventId() != null) result += ", Recurring Event: "+getRecurringEvent().getRecurringEventId();
+    if (getRecurringEventId() != null) result += ", Recurring Event: "+getRecurringEventId();
     else result += ", no recuring event";
     for (Metadata data : metadata) {
       result += ", "+data.toString();

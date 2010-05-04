@@ -32,10 +32,8 @@ import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
 public class Metadata {
   @Id
   @GeneratedValue
-  @XmlAttribute(name="id")
   protected long id;
   
-  @XmlAttribute(name="key")
   @Column(name="key")
   protected String key;
   @Column(name="value")
@@ -50,6 +48,7 @@ public class Metadata {
     this.value = value;
   }
   
+  @XmlAttribute
   public long getId() {
     return id;
   }

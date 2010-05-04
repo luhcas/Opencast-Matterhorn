@@ -152,10 +152,10 @@ public class SchedulerServiceImplTest {
     Event eventModified = serviceJPA.getEventJPA(eventLoaded.getID());
     logger.info("State of the loaded event {}.", eventModified);
     
-    eventModified.getMetadata().add(new Metadata("stupid.unused.key","no matter what"));
-    for (int i = 0; i < eventModified.getMetadata().size(); i++) {
-      if (eventModified.getMetadata().get(i).getKey().equals("creator") || eventModified.getMetadata().get(i).getKey().equals("series-id")) 
-        eventModified.getMetadata().remove(i);
+    eventModified.getCompleteMetadata().add(new Metadata("stupid.unused.key","no matter what"));
+    for (int i = 0; i < eventModified.getCompleteMetadata().size(); i++) {
+      if (eventModified.getCompleteMetadata().get(i).getKey().equals("creator") || eventModified.getCompleteMetadata().get(i).getKey().equals("series-id")) 
+        eventModified.getCompleteMetadata().remove(i);
     }
     
     serviceJPA.updateEvent(eventModified);
@@ -350,6 +350,7 @@ public class SchedulerServiceImplTest {
       Assert.assertTrue(e.getStartdate().before(e.getEnddate()));
       try {
         Assert.assertTrue(e.getValue("title").equals(loadedEvent.getValue("title")));
+        Assert.assertTrue(e.getRecurringEventId().equals(loadedEvent.getRecurringEventId()));
       } catch (IncompleteDataException e1) {
         Assert.fail("Recurring event Metadata could not be processed");
       }
