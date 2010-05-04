@@ -264,14 +264,14 @@ public class SolrIndexManager {
               .getFlavor());
 
     // Add dublin core
-    if (!mediaPackage.hasCatalogs(MediaPackageElements.DUBLINCORE_EIPSODE)) {
+    if (!mediaPackage.hasCatalogs(MediaPackageElements.DUBLINCORE_EPISODE)) {
       log_.debug("No episode dublincore metadata found in media package "
               + mediaPackage);
       return null;
     }
 
     // If this is the case, try to get a hold on it
-    Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.DUBLINCORE_EIPSODE);
+    Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.DUBLINCORE_EPISODE);
     
     DublinCoreCatalog dublinCore =  dcService.load(dcCatalogs[0]);
 

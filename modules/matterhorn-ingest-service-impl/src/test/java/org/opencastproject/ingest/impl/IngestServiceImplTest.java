@@ -135,7 +135,7 @@ public class IngestServiceImplTest {
   public void testThinClient() throws Exception {
     mediaPackage = service.createMediaPackage();
     mediaPackage = service.addTrack(urlTrack, null, mediaPackage);
-    mediaPackage = service.addCatalog(urlCatalog, MediaPackageElements.DUBLINCORE_EIPSODE, mediaPackage);
+    mediaPackage = service.addCatalog(urlCatalog, MediaPackageElements.DUBLINCORE_EPISODE, mediaPackage);
     mediaPackage = service.addAttachment(urlAttachment, MediaPackageElements.COVER_FLAVOR, mediaPackage);
     WorkflowInstance instance = service.ingest(mediaPackage);
     Assert.assertEquals(1, mediaPackage.getTracks().length);

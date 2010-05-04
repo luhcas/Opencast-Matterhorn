@@ -60,12 +60,12 @@ public class MediaPackageJaxbSerializationTest {
     attachment.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, "123456abcd"));
     mp.add(attachment);
     Catalog cat1 = (Catalog)elementBuilder.elementFromURI(new URI("http://opencastproject.org/index.html"),
-            Catalog.TYPE, MediaPackageElements.DUBLINCORE_EIPSODE);
+            Catalog.TYPE, MediaPackageElements.DUBLINCORE_EPISODE);
     cat1.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, "7891011abcd"));
     mp.add(cat1);
     
     Catalog cat2 = (Catalog)elementBuilder.elementFromURI(new URI("http://opencastproject.org/index.html"),
-            Catalog.TYPE, MediaPackageElements.DUBLINCORE_EIPSODE);
+            Catalog.TYPE, MediaPackageElements.DUBLINCORE_EPISODE);
     cat2.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, "7891011abcd"));
     mp.addDerived(cat2, cat1);
     

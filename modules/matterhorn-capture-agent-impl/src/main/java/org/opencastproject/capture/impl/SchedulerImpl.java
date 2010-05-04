@@ -407,9 +407,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   private void checkSchedules() throws SchedulerException {
     if (scheduler != null) {
       log.debug("Currently scheduled jobs for capture schedule:");
-      //GDLGDL
       for (String name : scheduler.getJobNames(JobParameters.CAPTURE_TYPE)) {
-        log.debug("{} at {}.", name, scheduler.getJobDetail(name, JobParameters.CAPTURE_TYPE).getJobDataMap().get("GDLGDL"));  
+        log.debug("{}.", name);  
       }
       log.debug("Currently scheduled jobs for poll schedule:");
       for (String name : scheduler.getJobNames(JobParameters.RECURRING_TYPE)) {
@@ -498,12 +497,15 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           duration.setDuration(new Dur(0,8,0,0));
         }
 
+        //Get the cron expression and make sure it doesn't conflict with any existing captures
+        //Note that this means the order in which the scheduled events appear in the source iCal makes a functional difference!
         CronExpression startCronExpression = getCronString(start);
         String conflict = scheduledEvents.get(startCronExpression.toString()); 
         if (conflict != null) {
           log.warn("Unable to schedule event {} because its starting time coinsides with event {}!", uid, conflict);
           continue;
         }
+        //Create the trigger
         CronTrigger trig = new CronTrigger();
         trig.setCronExpression(startCronExpression);
         trig.setName(startCronExpression.toString());
@@ -511,17 +513,16 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
         JobDetail job = new JobDetail(uid, JobParameters.CAPTURE_TYPE, StartCaptureJob.class);
 
+        //Setup the basic job properties
         Properties props = new Properties();
         props.put(CaptureParameters.RECORDING_ID, uid);
         props.put(JobParameters.JOB_POSTFIX, uid);
         String endCronString = getCronString(duration.getDuration().getTime(start)).toString();
         props.put(CaptureParameters.RECORDING_END, endCronString);
 
-        if (!scheduleEvent(event, props, job)) {
+        if (!setupEvent(event, props, job)) {
           log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", uid);
         }
-        //GDLGDL
-        job.getJobDataMap().put("GDLGDL", startCronExpression.toString());
         scheduler.scheduleJob(job, trig);
         scheduledEvents.put(startCronExpression.toString(), uid);
       }
@@ -542,8 +543,19 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     }
   }
 
+  /**
+   * A helper function to wrap the configuration of an event.  This function writes the attached files to disk and generates the initial mediapackage. 
+   * @param event The VEvent of the capture.  This contains all of the attachments and such needed to setup the directory structure.
+   * @param props The system properties for the job.  This can be overridden by the properties attached to the event.
+   * @param job The job instance itself.  This is what everything gets attached to so that Quartz can run properly.
+   * @return True if the setup worked, false if there was an error.
+   * @throws org.opencastproject.util.ConfigurationException
+   * @throws MediaPackageException
+   * @throws MalformedURLException
+   * @throws ParseException
+   */
   @SuppressWarnings("unchecked")
-  private boolean scheduleEvent(VEvent event, Properties props, JobDetail job) throws org.opencastproject.util.ConfigurationException, MediaPackageException, MalformedURLException, ParseException {
+  private boolean setupEvent(VEvent event, Properties props, JobDetail job) throws org.opencastproject.util.ConfigurationException, MediaPackageException, MalformedURLException, ParseException {
     MediaPackage pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     boolean hasProperties = false;
 
@@ -570,20 +582,27 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         log.warn("No filename given for attachment, skipping.");
         continue;
       }
+      //Get the contents of the attachment.  Note that this assumes the attachment is a string of some sorts
+      //This breaks with binary files (probably)
       String contents = getAttachmentAsString(p);
 
       //Handle any attachments
       //TODO:  Should this string be hardcoded?
       try {
+        //If the event has properties
         if (filename.equals("org.opencastproject.capture.agent.properties")) {
+          //Load the properties
           Properties jobProps = new Properties();
           jobProps.load(new StringReader(contents));
+          //Merge them overtop of the system properties
           jobProps.putAll(props);
+          //Attach the properties to the job itself
           job.getJobDataMap().put(JobParameters.CAPTURE_PROPS, jobProps);
           hasProperties = true;
+          //And attach the properties file to the mediapackage
           pack.add(new URI(filename));
         } else if (filename.equals("metadata.xml")) {
-          pack.add(new URI(filename), MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_EIPSODE);
+          pack.add(new URI(filename), MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_EPISODE);
         } else {
           pack.add(new URI(filename));
         }

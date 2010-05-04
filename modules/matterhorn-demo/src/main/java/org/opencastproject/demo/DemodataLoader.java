@@ -187,7 +187,7 @@ public class DemodataLoader {
       mpBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(packageDir));
       File manifestFile = new File(packageDir, "index.xml");
       MediaPackage mediaPackage = mpBuilder.loadFromXml(new FileInputStream(manifestFile));
-      addMediaPackageMetadata(mediaPackage, MediaPackageElements.DUBLINCORE_EIPSODE);
+      addMediaPackageMetadata(mediaPackage, MediaPackageElements.DUBLINCORE_EPISODE);
       addMediaPackageMetadata(mediaPackage, MediaPackageElements.DUBLINCORE_SERIES);
       Id mediapackageId = idBuilder.createNew();
       mediaPackage.setIdentifier(mediapackageId);

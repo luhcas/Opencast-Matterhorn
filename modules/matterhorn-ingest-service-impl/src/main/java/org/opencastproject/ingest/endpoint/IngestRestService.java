@@ -325,7 +325,7 @@ public class IngestRestService {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         dcc.toXml(out, true);
         InputStream in = new ByteArrayInputStream(out.toByteArray());
-        ingestService.addCatalog(in, "dublincore.xml", MediaPackageElements.DUBLINCORE_EIPSODE, mp);
+        ingestService.addCatalog(in, "dublincore.xml", MediaPackageElements.DUBLINCORE_EPISODE, mp);
         WorkflowInstance workflow;
         if (wdID == null) {
           workflow = ingestService.ingest(mp);
