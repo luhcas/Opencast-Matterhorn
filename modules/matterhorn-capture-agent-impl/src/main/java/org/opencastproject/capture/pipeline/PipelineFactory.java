@@ -154,14 +154,18 @@ public class PipelineFactory {
       // devices will store the CaptureDevice list arbitrary order
       CaptureDevice capdev = new CaptureDevice(srcLoc, devName, name, outputLoc);
       String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_CODEC;
+      String containerProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_CONTAINER;
       String bitrateProperty = codecProperty + CaptureParameters.CAPTURE_DEVICE_BITRATE;
       String codec = properties.getProperty(codecProperty);
+      String container = properties.getProperty(containerProperty);
       String bitrate = properties.getProperty(bitrateProperty);
 
       if (codec != null)
         capdev.properties.setProperty("codec", codec);
       if (bitrate != null)
         capdev.properties.setProperty("bitrate", bitrate);
+      if (container != null)
+        capdev.properties.setProperty("container", container);
 
       if (!devices.add(capdev))
         logger.error("Unable to add device: {}.", capdev);
@@ -250,12 +254,14 @@ public class PipelineFactory {
     // pipeline vars
     String error = null;
     String codec =  captureDevice.properties.getProperty("codec");
+    String container = captureDevice.properties.getProperty("container");
     String bitrate = captureDevice.properties.getProperty("bitrate");
-    Element dec, enc;
+    Element dec, enc, muxer;
     Element filesrc = ElementFactory.make("filesrc", null);
     Element queue = ElementFactory.make("queue", null);
     Element mpegpsdemux = ElementFactory.make("mpegpsdemux", null);
     final Element mpegvideoparse = ElementFactory.make("mpegvideoparse", null);
+    
     if (codec != null) {
       logger.debug("{} using encoder: {}", captureDevice.getName(), codec);
       dec = ElementFactory.make("mpeg2dec", null);
@@ -265,16 +271,24 @@ public class PipelineFactory {
       dec = ElementFactory.make("capsfilter", null);
       enc = ElementFactory.make("capsfilter", null);
     }
-    Element mpegtsmux = ElementFactory.make("mpegtsmux", null);
+    
+    if (container != null) {
+      logger.debug("{} muxing to: {}", captureDevice.getName(), container);
+      muxer = ElementFactory.make(container, null);
+    }
+    else {
+      muxer = ElementFactory.make("mpegtsmux", null);
+    }
+    
     Element filesink = ElementFactory.make("filesink", null);
-
     filesrc.set("location", captureDevice.getLocation());
     filesink.set("location", captureDevice.getOutputPath());
+    
     if (bitrate != null) {
       logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);
       enc.set("bitrate", bitrate);
     }
-    pipeline.addMany(filesrc, queue, mpegpsdemux, mpegvideoparse, dec, enc, mpegtsmux, filesink);
+    pipeline.addMany(filesrc, queue, mpegpsdemux, mpegvideoparse, dec, enc, muxer, filesink);
 
     /*
      * mpegpsdemux source pad is only available sometimes, therefore we need to add a listener to accept dynamic pads
@@ -296,13 +310,13 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, mpegvideoparse, dec);
     else if (!dec.link(enc))
       error = formatPipelineError(captureDevice, dec, enc);
-    else if (!enc.link(mpegtsmux))
-      error = formatPipelineError(captureDevice, enc, mpegtsmux);
-    else if (!mpegtsmux.link(filesink))
-      error = formatPipelineError(captureDevice, mpegtsmux, filesink);
+    else if (!enc.link(muxer))
+      error = formatPipelineError(captureDevice, enc, muxer);
+    else if (!muxer.link(filesink))
+      error = formatPipelineError(captureDevice, muxer, filesink);
 
     if (error != null) {
-      pipeline.removeMany(filesrc, queue, mpegpsdemux, mpegvideoparse, mpegtsmux, filesink);
+      pipeline.removeMany(filesrc, queue, mpegpsdemux, mpegvideoparse, muxer, filesink);
       logger.error(error);
       return false;
     }
@@ -327,15 +341,17 @@ public class PipelineFactory {
 
     String error = null;
     String codec = captureDevice.properties.getProperty("codec");
+    String container = captureDevice.properties.getProperty("container");
     String bitrate = captureDevice.properties.getProperty("bitrate");
     // Create elements, add them to pipeline, then link them 
-    Element enc;
+    Element enc, muxer;
     Element v4lsrc = ElementFactory.make("v4lsrc", null);
     Element queue = ElementFactory.make("queue", null);
     Element videoscale = ElementFactory.make("videoscale", null);
     Element videorate = ElementFactory.make("videorate", null);
     Element filter = ElementFactory.make("capsfilter", null);
     Element ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
+    
     if (codec != null) {
       logger.debug("{} encoder set to: {}", captureDevice.getName(), codec);
       enc = ElementFactory.make(codec, null);
@@ -344,7 +360,14 @@ public class PipelineFactory {
       enc = ElementFactory.make("ffenc_mpeg2video", null);
     }
     
-    Element mpegtsmux = ElementFactory.make("mpegtsmux", null);
+    if (container != null) {
+      logger.debug("{} muxing to: {}", captureDevice.getName(), container);
+      muxer = ElementFactory.make(container, null);
+    }
+    else {
+      muxer = ElementFactory.make("mpegtsmux", null);
+    }
+    
     Element filesink = ElementFactory.make("filesink", null);
 
     v4lsrc.set("device", captureDevice.getLocation());
@@ -357,7 +380,7 @@ public class PipelineFactory {
     else
       enc.set("bitrate", "2000000");
 
-    pipeline.addMany(v4lsrc, queue, videoscale, videorate, filter, ffmpegcolorspace, enc, mpegtsmux, filesink);
+    pipeline.addMany(v4lsrc, queue, videoscale, videorate, filter, ffmpegcolorspace, enc, muxer, filesink);
 
     if (!v4lsrc.link(queue))
       error = formatPipelineError(captureDevice, v4lsrc, queue);
@@ -371,13 +394,13 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, filter, ffmpegcolorspace);
     else if (!ffmpegcolorspace.link(enc))
       error = formatPipelineError(captureDevice, ffmpegcolorspace, enc);
-    else if (!enc.link(mpegtsmux))
-      error = formatPipelineError(captureDevice, enc, mpegtsmux);
-    else if (!mpegtsmux.link(filesink))
-      error = formatPipelineError(captureDevice, mpegtsmux, filesink);
+    else if (!enc.link(muxer))
+      error = formatPipelineError(captureDevice, enc, muxer);
+    else if (!muxer.link(filesink))
+      error = formatPipelineError(captureDevice, muxer, filesink);
 
     if (error != null) {
-      pipeline.removeMany(v4lsrc, queue, videoscale, videorate, filter, ffmpegcolorspace, enc, mpegtsmux, filesink);
+      pipeline.removeMany(v4lsrc, queue, videoscale, videorate, filter, ffmpegcolorspace, enc, muxer, filesink);
       logger.error(error);
       return false;
     }
@@ -399,6 +422,7 @@ public class PipelineFactory {
     int monitoringLength = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_AUDIO_LENGTH, "60"));
     String error = null;
     String codec = captureDevice.properties.getProperty("codec");
+    String container = captureDevice.properties.getProperty("container");
     String bitrate = captureDevice.properties.getProperty("bitrate");
     Element enc, mux;
 
@@ -415,6 +439,11 @@ public class PipelineFactory {
     else {
       enc = ElementFactory.make("twolame", null);
       mux = ElementFactory.make("capsfilter", null);
+    }
+    
+    if (container != null) {
+      logger.debug("{} muxing to: {}", captureDevice.getName(), container);
+      mux = ElementFactory.make(container, null);
     }
     Element filesink = ElementFactory.make("filesink", null);
 
@@ -463,8 +492,9 @@ public class PipelineFactory {
 
     String error = null;
     String codec = captureDevice.properties.getProperty("codec");
+    String container = captureDevice.properties.getProperty("container");
     String bitrate = captureDevice.properties.getProperty("bitrate");
-    Element enc;
+    Element enc, muxer;
     Element v4l2src = ElementFactory.make("v4l2src", null);
     Element queue = ElementFactory.make("queue", null);
     if (codec != null) {
@@ -473,7 +503,15 @@ public class PipelineFactory {
     }
     else
       enc = ElementFactory.make("ffenc_mpeg2video", null);
-    Element mpegtsmux = ElementFactory.make("mpegtsmux", null);
+    
+    if (container != null) {
+      logger.debug("{} muxing to: {}", captureDevice.getName(), container);
+      muxer = ElementFactory.make(container, null);
+    }
+    else {
+      muxer = ElementFactory.make("ffenc_mpeg2video", null);
+    }
+    
     Element filesink = ElementFactory.make("filesink", null);
 
     v4l2src.set("device", captureDevice.getLocation());
@@ -485,19 +523,19 @@ public class PipelineFactory {
     else
       enc.set("bitrate", "2000000");
 
-    pipeline.addMany(v4l2src, queue, enc, mpegtsmux, filesink);
+    pipeline.addMany(v4l2src, queue, enc, muxer, filesink);
 
     if (!v4l2src.link(queue))
       error = formatPipelineError(captureDevice, v4l2src, queue);
     else if (!VideoMonitoring.addVideoMonitor(pipeline, queue, enc, interval, imageloc, device))
       error = formatPipelineError(captureDevice, queue, enc);
-    else if (!enc.link(mpegtsmux))
-      error = formatPipelineError(captureDevice, enc, mpegtsmux);
-    else if (!mpegtsmux.link(filesink))
-      error = formatPipelineError(captureDevice, mpegtsmux, filesink);
+    else if (!enc.link(muxer))
+      error = formatPipelineError(captureDevice, enc, muxer);
+    else if (!muxer.link(filesink))
+      error = formatPipelineError(captureDevice, muxer, filesink);
 
     if (error != null) {
-      pipeline.removeMany(v4l2src, queue, enc, mpegtsmux, filesink);
+      pipeline.removeMany(v4l2src, queue, enc, muxer, filesink);
       logger.error(error);
       return false;
     }

@@ -138,6 +138,9 @@ public interface CaptureParameters {
   /** Property specifying a codec for the device */
   String CAPTURE_DEVICE_CODEC = ".codec";
   
+  /** Property specifying the media container to use */
+  String CAPTURE_DEVICE_CONTAINER = ".container";
+  
   /** Property appended to CAPTURE_DEVICE_CODEC to specify that codec's bitrate */
   String CAPTURE_DEVICE_BITRATE = ".bitrate";
   
