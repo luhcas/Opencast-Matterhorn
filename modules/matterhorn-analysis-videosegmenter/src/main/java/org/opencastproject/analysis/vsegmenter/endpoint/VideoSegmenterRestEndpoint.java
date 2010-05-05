@@ -15,7 +15,7 @@
  */
 package org.opencastproject.analysis.vsegmenter.endpoint;
 
-import org.opencastproject.analysis.vsegmenter.VideoSegmenter;
+import org.opencastproject.analysis.vsegmenter.VideoSegmenterDelegatingImpl;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
@@ -52,18 +52,19 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class VideoSegmenterRestEndpoint {
   private static final Logger logger = LoggerFactory.getLogger(VideoSegmenterRestEndpoint.class);
   protected String docs;
-  protected VideoSegmenter videoSegmenter;
-  
-  public void setVideoSegmenter(VideoSegmenter videoSegmenter) {
+  protected VideoSegmenterDelegatingImpl videoSegmenter;
+
+  public void setVideoSegmenter(VideoSegmenterDelegatingImpl videoSegmenter) {
     this.videoSegmenter = videoSegmenter;
   }
-  
+
   public void activate(ComponentContext cc) {
     this.docs = generateDocs();
   }
 
-  public void deactivate() {}
-  
+  public void deactivate() {
+  }
+
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("/analyze")
@@ -71,28 +72,27 @@ public class VideoSegmenterRestEndpoint {
     try {
       DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
       Document doc = docBuilder.parse(IOUtils.toInputStream(trackAsXml));
-      MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromManifest(
-              doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
+      MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+              .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
       Receipt receipt = videoSegmenter.analyze(element, false);
       return Response.ok(receipt).build();
-    } catch(Exception e) {
+    } catch (Exception e) {
       logger.warn(e.getMessage(), e);
       return Response.serverError().build();
     }
   }
-  
+
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("receipt/{id}.xml")
   public Response getReceipt(@PathParam("id") String id) {
     Receipt receipt = videoSegmenter.getReceipt(id);
-    if(receipt == null) {
+    if (receipt == null) {
       return Response.status(404).build();
     } else {
       return Response.ok(receipt).build();
     }
   }
-  
 
   @GET
   @Produces(MediaType.TEXT_HTML)
@@ -109,16 +109,18 @@ public class VideoSegmenterRestEndpoint {
             "Submit a track for analysis");
     analyzeEndpoint.addStatus(org.opencastproject.util.doc.Status
             .OK("The receipt to use when polling for the resulting mpeg7 catalog"));
-    analyzeEndpoint.addRequiredParam(new Param("track", Type.TEXT, "", "The track to analyze.  Must be a motion jpeg file."));
+    analyzeEndpoint.addRequiredParam(new Param("track", Type.TEXT, "",
+            "The track to analyze.  Must be a motion jpeg file."));
     analyzeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, analyzeEndpoint);
-    
+
     // receipt
     RestEndpoint receiptEndpoint = new RestEndpoint("receipt", RestEndpoint.Method.GET, "/receipt/{id}.xml",
             "Retrieve a receipt for an analysis task");
-    receiptEndpoint.addStatus(org.opencastproject.util.doc.Status.OK(
-            "Results in an xml document containing the status of the analysis job, and the catalog produced by this " +
-            "analysis job if it the task is finished"));
+    receiptEndpoint
+            .addStatus(org.opencastproject.util.doc.Status
+                    .OK("Results in an xml document containing the status of the analysis job, and the catalog produced by this "
+                            + "analysis job if it the task is finished"));
     receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the receipt id"));
     receiptEndpoint.addFormat(new Format("xml", null, null));
     receiptEndpoint.setTestForm(RestTestForm.auto());
