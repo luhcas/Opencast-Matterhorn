@@ -509,7 +509,7 @@ public class PipelineFactory {
       muxer = ElementFactory.make(container, null);
     }
     else {
-      muxer = ElementFactory.make("ffenc_mpeg2video", null);
+      muxer = ElementFactory.make("mpegtsmux", null);
     }
     
     Element filesink = ElementFactory.make("filesink", null);
