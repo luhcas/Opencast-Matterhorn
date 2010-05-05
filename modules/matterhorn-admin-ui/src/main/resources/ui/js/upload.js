@@ -12,6 +12,21 @@ Upload.init = function() {
     $('#console').show();
   }
 
+  // Event: Add form filed button clicked
+  $('.addFormFieldBtn').click(function() {
+    var toClone = $(this).parent().children('.formField');
+    var clone = $(toClone).clone(true);
+    $(clone).removeAttr('id').val('');
+    $(this).parent().children('.additionalFieldsContainer').append(clone);   // .insertBefore() yields exception
+    var remove = document.createElement("span");
+    $(remove).addClass("deleteIcon");
+    $(remove).bind('click',function() {
+      $(this).prev().remove();
+      $(this).remove();
+    });
+    $(this).parent().children('.additionalFieldsContainer').append(remove);
+  });
+
   // Event: Submit button, submit form if no missing inputs
   $('#BtnSubmit').click( function() {
     if (Upload.checkRequiredFields(true))  {

@@ -63,6 +63,10 @@ select { font-size:1.15em; }
     background-image: url(../shared_img/icons/add.png);
 }
 
+.icon-delete {
+    background-image: url(../shared_img/icons/delete.png);
+}
+
 .icon-idle {
     background-image: url(../shared_img/icons/cup.png);
 }

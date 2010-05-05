@@ -29,6 +29,8 @@
       .collapse-control-open {background-image:url(shared_img/icons/arrow-down.png);background-position:center left !important; background-repeat:no-repeat;}
       .titlebar {background-color:silver !important; padding-left:8px;}
       .helpIcon {display:block;float:left;margin-left:5px;width:16px;height:16px;background-image:url(shared_img/icons/help.png);background-position:center center;background-repeat:no-repeat;cursor:pointer;}
+      .addIcon {display:block;float:left;margin-left:5px;width:16px;height:16px;background-image:url(shared_img/icons/add.png);background-position:center center;background-repeat:no-repeat;cursor:pointer;}
+      .deleteIcon {display:block;float:left;margin-left:5px;width:16px;height:16px;background-image:url(shared_img/icons/delete.png);background-position:center center;background-repeat:no-repeat;cursor:pointer;}
     </style>
 
     <!-- scripts -->
@@ -128,8 +130,12 @@
                 <!-- field: Presenter -->
                 <li class="ui-helper-clearfix">
                   <label class="fl-label"><span id="i18n_presenter_label">Presenter</span>:</label>
-                  <input type="text" class="formField" id="creator" name="creator">
-                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                  <div style="display: table-cell;">
+                    <input type="text" class="formField" id="creator" name="creator">
+                    <span class="helpIcon" title="Click for help">&nbsp;</span>
+                    <div class="additionalFieldsContainer" style="display:table-cell;"></div>
+                    <a href="#" class="addFormFieldBtn"><span>Add additional presenter</span></a>
+                  </div>
                 </li>
                 <!-- field: Sponsoring Department -->
                 <li class="ui-helper-clearfix">
