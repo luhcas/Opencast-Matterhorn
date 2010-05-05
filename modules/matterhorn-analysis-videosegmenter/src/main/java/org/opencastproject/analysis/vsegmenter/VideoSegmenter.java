@@ -17,6 +17,7 @@ package org.opencastproject.analysis.vsegmenter;
 
 import org.opencastproject.analysis.api.MediaAnalysisException;
 import org.opencastproject.analysis.api.MediaAnalysisServiceSupport;
+import org.opencastproject.analysis.vsegmenter.jmf.FrameGrabber;
 import org.opencastproject.analysis.vsegmenter.jmf.ImageUtils;
 import org.opencastproject.analysis.vsegmenter.jmf.PlayerListener;
 import org.opencastproject.composer.api.ComposerService;
@@ -53,11 +54,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -65,15 +69,18 @@ import java.util.concurrent.Future;
 import javax.media.Buffer;
 import javax.media.Controller;
 import javax.media.Duration;
+import javax.media.IncompatibleSourceException;
 import javax.media.Manager;
-import javax.media.Player;
+import javax.media.Processor;
 import javax.media.Time;
-import javax.media.control.FrameGrabbingControl;
-import javax.media.control.FramePositioningControl;
+import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -124,7 +131,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
   /** The workspace to ue when retrieving remote media files */
   private Workspace workspace;
-  
+
   /** The composer service */
   private ComposerService composer;
 
@@ -170,7 +177,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
-  
+
   /**
    * Sets the receipt service
    * 
@@ -225,7 +232,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
         receipt.setStatus(Status.RUNNING);
         rs.updateReceipt(receipt);
 
-        PlayerListener playerListener = null;
+        PlayerListener processorListener = null;
 
         Mpeg7CatalogImpl mpeg7 = Mpeg7CatalogImpl.newInstance();
 
@@ -238,43 +245,60 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
           File mediaFile = workspace.get(mjpegTrack.getURI());
           URL mediaUrl = mediaFile.toURI().toURL();
           DataSource ds = Manager.createDataSource(mediaUrl);
-          Player player = null;
+          Processor processor = null;
           try {
-            player = Manager.createRealizedPlayer(ds);
-            playerListener = new PlayerListener(player);
-            player.addControllerListener(playerListener);
+            processor = Manager.createProcessor(ds);
+            processorListener = new PlayerListener(processor);
+            processor.addControllerListener(processorListener);
           } catch (Exception e) {
             receipt.setStatus(Status.FAILED);
             rs.updateReceipt(receipt);
             throw new MediaAnalysisException(e);
           }
 
-          // Create a frame positioner
-          FramePositioningControl fpc = (FramePositioningControl) player.getControl(FRAME_POSITIONING);
-          if (fpc == null) {
+          // Configure the processor
+          processor.configure();
+          if (!processorListener.waitForState(Processor.Configured)) {
             receipt.setStatus(Status.FAILED);
             rs.updateReceipt(receipt);
-            throw new MediaAnalysisException("Unable to create a frame positioning control for " + mediaUrl);
+            throw new MediaAnalysisException("Unable to configure processor");
           }
 
-          // Create a frame grabber
-          FrameGrabbingControl fg = (FrameGrabbingControl) player.getControl(FRAME_GRABBING);
-          if (fg == null) {
+          // Set the processor to RAW content
+          processor.setContentDescriptor(new ContentDescriptor(ContentDescriptor.RAW));
+
+          // Realize the processor
+          processor.realize();
+          if (!processorListener.waitForState(Processor.Realized)) {
             receipt.setStatus(Status.FAILED);
             rs.updateReceipt(receipt);
-            throw new MediaAnalysisException("Unable to create a frame grabber for " + mediaUrl);
+            throw new MediaAnalysisException("Unable to realize the processor");
           }
 
-          // Load the movie and change the player to prefetched state
-          player.prefetch();
-          if (!playerListener.waitForState(Controller.Prefetched)) {
+          // Get the output DataSource from the processor and
+          // hook it up to the DataSourceHandler.
+          DataSource outputDataSource = processor.getDataOutput();
+          FrameGrabber dsh = new FrameGrabber();
+
+          try {
+            dsh.setSource(outputDataSource);
+          } catch (IncompatibleSourceException e) {
+            receipt.setStatus(Status.FAILED);
+            rs.updateReceipt(receipt);
+            throw new MediaAnalysisException("Cannot handle the output data source from the processor: "
+                    + outputDataSource);
+          }
+
+          // Load the movie and change the processor to prefetched state
+          processor.prefetch();
+          if (!processorListener.waitForState(Controller.Prefetched)) {
             receipt.setStatus(Status.FAILED);
             rs.updateReceipt(receipt);
             throw new MediaAnalysisException("Unable to switch player into 'prefetch' state");
           }
-          Time duration = player.getDuration();
 
           // Get the movie duration
+          Time duration = processor.getDuration();
           if (duration == Duration.DURATION_UNKNOWN) {
             receipt.setStatus(Status.FAILED);
             rs.updateReceipt(receipt);
@@ -291,21 +315,15 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
           // TODO: configure edge detector
 
           logger.info("Starting video segmentation of {}", mediaUrl);
-          List<ContentSegment> segments = segment(videoContent, fpc, fg);
+
+          processor.setRate(1.0f);
+          processor.start();
+          dsh.start();
+          List<ContentSegment> segments = segment(videoContent, dsh);
+
           logger.info("Segmentation of {} yields {} segments", mediaUrl, segments.size());
 
-          // Store the mpeg7 in the file repository, and store the mpeg7 catalog in the receipt
-          // Write the catalog to a byte[]
-          ByteArrayOutputStream out = new ByteArrayOutputStream();
-          Transformer transformer = TransformerFactory.newInstance().newTransformer();
-          transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-          transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-          transformer.transform(new DOMSource(mpeg7.toXml()), new StreamResult(out));
-
-          // Store the bytes in the file repository
-          ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-          URI uri = repository.putInCollection(COLLECTION_ID, UUID.randomUUID().toString(), in);
-
+          URI uri = uploadMpeg7(mpeg7);
           mpeg7.setURI(uri);
           mpeg7.setFlavor(MediaPackageElements.SEGMENTS_FLAVOR);
           mpeg7.setReference(new MediaPackageReferenceImpl(element));
@@ -343,7 +361,40 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   }
 
   /**
+   * Stores the mpeg-7 catalog in the working file repository.
+   * 
+   * @param catalog
+   *          the catalog
+   * @return the catalog's URI in the working file repository
+   * @throws TransformerFactoryConfigurationError
+   *           if serializing the catalog to xml fails
+   * @throws IOException
+   *           if writing the catalog to the working file repository fails
+   * @throws ParserConfigurationException
+   *           if the xml parser is not set up correctly
+   * @throws TransformerException
+   *           if creating the xml representation from the dom tree fails
+   * @throws URISyntaxException
+   *           if the working file repository created an invalid uri
+   */
+  protected URI uploadMpeg7(Mpeg7CatalogImpl catalog) throws TransformerFactoryConfigurationError,
+          TransformerException, ParserConfigurationException, IOException, URISyntaxException {
+    // Store the mpeg7 in the file repository, and store the mpeg7 catalog in the receipt
+    // Write the catalog to a byte[]
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+    transformer.transform(new DOMSource(catalog.toXml()), new StreamResult(out));
+
+    // Store the bytes in the file repository
+    ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+    return repository.putInCollection(COLLECTION_ID, UUID.randomUUID().toString(), in);
+  }
+
+  /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.analysis.api.MediaAnalysisService#getReceipt(java.lang.String)
    */
   @Override
@@ -358,16 +409,15 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
    *          the mpeg-7 video representation
    * @param fpc
    *          the frame positioning control
-   * @param fg
-   *          the frame grabbing control
+   * @param dsh
+   *          the data source handler
    * @return the list of segments
    * @throws IOException
    *           if accessing a frame fails
    * @throws MediaAnalysisException
    *           if segmentation of the video fails
    */
-  protected List<ContentSegment> segment(Video video, FramePositioningControl fpc, FrameGrabbingControl fg)
-          throws IOException, MediaAnalysisException {
+  protected List<ContentSegment> segment(Video video, FrameGrabber dsh) throws IOException, MediaAnalysisException {
     List<ContentSegment> segments = new ArrayList<ContentSegment>();
 
     int t = 1;
@@ -375,29 +425,21 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     long startOfSegment = 0;
     int currentSceneStabilityCount = 0;
     boolean sceneChangeImminent = false;
+    boolean luckyPunchRecovery = false;
     int segmentCount = 1;
     BufferedImage previousImage = null;
-
+    BlockingQueue<Buffer> bufferQueue = new ArrayBlockingQueue<Buffer>(STABILITY_THRESHOLD + 1);
     long durationInSeconds = video.getMediaTime().getMediaDuration().getDurationInMilliseconds() / 1000;
     ContentSegment contentSegment = video.getTemporalDecomposition().createSegment("segment-" + segmentCount);
-    
-    while (t < durationInSeconds) {
-      // Move the positioning control to the correct time
-      fpc.seek(t);
 
-      // Take a snap of the current frame
-      Buffer buf = fg.grabFrame();
+    Buffer buf = dsh.getBuffer();
+
+    while (t < durationInSeconds && buf != null && !buf.isEOM()) {
       BufferedImage bufferedImage = ImageUtils.createImage(buf);
-      if (bufferedImage == null) {
+      if (bufferedImage == null)
         throw new MediaAnalysisException("Unable to extract image at time " + t);
-      }
-      logger.trace("Analyzing video at {} s", t);
 
-      // Let the edge detector do it's work (force it to create a new image for the result)
-      logger.debug("Running edge detection on image at {} seconds", t);
-      // edgeDetector.setSourceImage(bufferedImage);
-      // edgeDetector.setEdgesImage(null);
-      // BufferedImage edgeImage = edgeDetector.process();
+      logger.trace("Analyzing video at {} s", t);
 
       // Compare the new image with our previous sample
       boolean differsFromPreviousImage = ImageUtils.isDifferent(previousImage, bufferedImage, CHANGES_THRESHOLD);
@@ -410,6 +452,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
         // If this is the result of a lucky punch (looking ahead STABILITY_THRESHOLD seconds), then we should
         // really start over an make sure we get the correct beginning of the new scene
         if (!sceneChangeImminent && t - lastStableImageTime > 1) {
+          luckyPunchRecovery = true;
+          bufferQueue.add(buf);
           t = lastStableImageTime;
         } else {
           lastStableImageTime = t - 1;
@@ -419,8 +463,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
         currentSceneStabilityCount = 0;
         sceneChangeImminent = true;
-
-        logger.debug("Found image in new scene");
       }
 
       // Seems to be the same image. If we have just recently detected a new scene, let's see if we are able to
@@ -443,6 +485,10 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
               segments.add(contentSegment);
               startOfSegment = endOfSegment;
             }
+
+            // After finding a new segment, likelihood of a stable image is good, let's take a look ahead. Since
+            // a processor can't seek, we need to store the buffers in between, in case we need to come back.
+            fillLookAheadBuffer(bufferQueue, buf, dsh);
             t += STABILITY_THRESHOLD;
             sceneChangeImminent = false;
 
@@ -458,10 +504,17 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
           // If things look stable, then let's look ahead as much as possible without loosing information (which is
           // equal to looking ahead STABILITY_THRESHOLD seconds.
           lastStableImageTime = t;
+          fillLookAheadBuffer(bufferQueue, buf, dsh);
           t += STABILITY_THRESHOLD;
         }
         previousImage = bufferedImage;
       }
+
+      if (luckyPunchRecovery) {
+        buf = bufferQueue.poll();
+        luckyPunchRecovery = !bufferQueue.isEmpty();
+      } else
+        buf = dsh.getBuffer();
     }
 
     // Finish off the last segment
@@ -471,6 +524,31 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     segments.add(contentSegment);
 
     return segments;
+  }
+
+  /**
+   * Fills the look ahead buffer with the next <code>STABILITY_THRESHOLD</code> images.
+   * 
+   * @param queue
+   *          the buffer
+   * @param currentBuffer
+   *          the current buffer
+   * @param dsh
+   *          the data source handler
+   * @throws IOException
+   *           if reading from the data source fails
+   */
+  private void fillLookAheadBuffer(BlockingQueue<Buffer> queue, Buffer currentBuffer, FrameGrabber dsh)
+          throws IOException {
+    queue.clear();
+    queue.add(currentBuffer);
+    for (int i = 0; i < STABILITY_THRESHOLD - 1; i++) {
+      Buffer b = dsh.getBuffer();
+      if (b != null && !b.isEOM())
+        queue.add(b);
+      else
+        return;
+    }
   }
 
   /**
@@ -520,4 +598,5 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
     return composedTrack;
   }
+
 }

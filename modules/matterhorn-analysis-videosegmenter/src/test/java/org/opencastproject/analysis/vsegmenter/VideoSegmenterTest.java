@@ -85,11 +85,13 @@ public class VideoSegmenterTest {
     track = TrackImpl.fromURI(VideoSegmenterTest.class.getResource(mediaResource).toURI());
     track.setFlavor(MediaPackageElements.PRESENTATION_SOURCE);
     track.setMimeType(MimeTypes.MJPEG);
+    System.setProperty("java.awt.headless", "true");
+    System.setProperty("awt.toolkit", "sun.awt.HeadlessToolkit");
   }
 
   static String collection;
   static String filename;
-  
+
   /**
    * Setup for the video segmenter service, including creation of a mock workspace.
    * 
@@ -99,31 +101,32 @@ public class VideoSegmenterTest {
   @Before
   public void setUp() throws Exception {
     WorkingFileRepository fileRepo = EasyMock.createNiceMock(WorkingFileRepository.class);
-    EasyMock.expect(fileRepo.putInCollection((String)EasyMock.anyObject(), (String)EasyMock.anyObject(),
-            (InputStream)EasyMock.anyObject())).andAnswer(new IAnswer<URI>() {
-              public URI answer() throws Throwable {
-                Object[] args = EasyMock.getCurrentArguments();
-                collection = (String)args[0];
-                filename = (String)args[1] + ".xml";
-                InputStream in = (InputStream)args[2];
-                File file = new File("target", filename);
-                FileOutputStream out = new FileOutputStream(file);
-                IOUtils.copy(in, out);
-                IOUtils.closeQuietly(out);
-                IOUtils.closeQuietly(in);
-                return file.toURI();
-              }
-            });
+    EasyMock.expect(
+            fileRepo.putInCollection((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andAnswer(new IAnswer<URI>() {
+      public URI answer() throws Throwable {
+        Object[] args = EasyMock.getCurrentArguments();
+        collection = (String) args[0];
+        filename = (String) args[1] + ".xml";
+        InputStream in = (InputStream) args[2];
+        File file = new File("target", filename);
+        FileOutputStream out = new FileOutputStream(file);
+        IOUtils.copy(in, out);
+        IOUtils.closeQuietly(out);
+        IOUtils.closeQuietly(in);
+        return file.toURI();
+      }
+    });
     EasyMock.replay(fileRepo);
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
-    EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(track.getURI()));
+    EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andReturn(new File(track.getURI()));
     EasyMock.replay(workspace);
     Receipt receipt = new ReceiptStub();
-    
+
     ReceiptService receiptService = EasyMock.createNiceMock(ReceiptService.class);
-    EasyMock.expect(receiptService.createReceipt((String)EasyMock.anyObject())).andReturn(receipt).anyTimes();
+    EasyMock.expect(receiptService.createReceipt((String) EasyMock.anyObject())).andReturn(receipt).anyTimes();
     EasyMock.replay(receiptService);
-    
+
     vsegmenter = new VideoSegmenter();
     vsegmenter.setFileRepository(fileRepo);
     vsegmenter.setWorkspace(workspace);
@@ -133,7 +136,7 @@ public class VideoSegmenterTest {
   public void tearDown() throws Exception {
     FileUtils.deleteQuietly(new File("target", filename));
   }
-  
+
   @Test
   public void testImageExtraction() {
     // int undefined = -16777216;
@@ -179,31 +182,41 @@ public class VideoSegmenterTest {
   class ReceiptStub implements Receipt {
     MediaPackageElement element;
     Status status;
+
     public MediaPackageElement getElement() {
       return element;
     }
+
     public String getHost() {
       return null;
     }
+
     public String getId() {
       return null;
     }
+
     public Status getStatus() {
       return status;
     }
+
     public String getType() {
       return "analysis-test";
     }
+
     public void setElement(MediaPackageElement element) {
       this.element = element;
     }
+
     public void setHost(String host) {
     }
+
     public void setId(String id) {
     }
+
     public void setStatus(Status status) {
       this.status = status;
     }
+
     public void setType(String type) {
     }
   }
