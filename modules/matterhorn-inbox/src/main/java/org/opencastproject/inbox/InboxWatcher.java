@@ -31,10 +31,6 @@ import org.slf4j.LoggerFactory;
 public class InboxWatcher extends Thread {
   
   /**
-   * Default directory refresh time  
-   */
-  public static final int INBOX_REFRESH_TIME_SEC = 10;
-  /**
    * Default value for WorkingFileRepository Collection ID
    */
   public static final String INBOX_WFR_COLLECTION_ID = "inbox";
@@ -145,6 +141,19 @@ public class InboxWatcher extends Thread {
   }
   
   /**
+   * Get directry refresh time (in sec) from properties. If properties does not contain 'dirRefreshTime' key, then return DEFAULT_DIR_REFRESH_TIME
+   * @return file refresh time 
+   */
+  protected Integer getDirRefreshTime() {
+    try {
+      return (Integer) this.properties.get("dirRefreshTime");
+    } catch (NullPointerException ex) {
+      logger.info("Can not get 'refreshTime' property. Use default value: " + InboxService.DEFAULT_DIR_REFRESH_TIME_SEC);
+      return InboxService.DEFAULT_DIR_REFRESH_TIME_SEC;
+    }
+  }
+  
+  /**
    * Thread run method. 
    * Creates and starts FileWatchingThreads for each new founded file in the inbox.
    * {@inheritDoc}
@@ -167,7 +176,7 @@ public class InboxWatcher extends Thread {
             }
           }
         }
-        sleep(INBOX_REFRESH_TIME_SEC * 1000);
+        sleep(getDirRefreshTime() * 1000);
       }
     } catch (Exception ex) {
       if (ex instanceof NullPointerException) {

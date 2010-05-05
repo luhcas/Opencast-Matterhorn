@@ -36,6 +36,10 @@ public class InboxService implements ManagedService {
    * Default file refresh time in sec
    */
   public static final Integer DEFAULT_FILE_REFRESH_TIME_SEC = 30;
+  /**
+   * Default path refresh time in sec
+   */
+  public static final Integer DEFAULT_DIR_REFRESH_TIME_SEC = 10;
   
   /**
    * Matterhorn Logger
@@ -103,11 +107,21 @@ public class InboxService implements ManagedService {
           inboxPath = componentContext.getBundleContext().getProperty("org.opencastproject.storage.dir")+"/inbox";
         }
         
+        String dirRefreshTimeStr = componentContext.getBundleContext().getProperty("org.opencastproject.inbox.dirRefreshTime");
+        Integer dirRefreshTime = InboxService.DEFAULT_DIR_REFRESH_TIME_SEC;
+        try {
+          dirRefreshTime = Integer.parseInt(dirRefreshTimeStr);
+        } catch (NumberFormatException ex) {
+          logger.info("Can not parse 'inbox.dirRefreshTime' property. Setting default value: " + InboxService.DEFAULT_DIR_REFRESH_TIME_SEC);
+        }
+        
         this.properties.put("inboxPath", inboxPath);
         this.properties.put("refreshTime", Integer.parseInt(refreshTimeStr));
+        this.properties.put("dirRefreshTime", dirRefreshTime);
+        this.logger.info("Inbox path is now "+this.properties.get("inboxPath"));
       } catch (Exception ex) {
         if (ex instanceof SecurityException) {
-          logger.error("failed to read properties ('inbox.inboxPath' and 'inbox.refreshTime'), maybe do not have read permissions!");
+          logger.error("failed to read properties ('inbox.inboxPath', 'inbox.refreshTime' and 'inbox.dirRefreshTime'), maybe do not have read permission!");
           this.properties = getDefautltProperties();
         }
       }
@@ -145,6 +159,7 @@ public class InboxService implements ManagedService {
     Dictionary properties = new Hashtable();
     properties.put("inboxPath", InboxService.DEFAULT_INBOX_PATH);
     properties.put("refreshTime", InboxService.DEFAULT_FILE_REFRESH_TIME_SEC);
+    properties.put("dirRefreshTime", InboxService.DEFAULT_DIR_REFRESH_TIME_SEC);
     return properties;
   }
   
