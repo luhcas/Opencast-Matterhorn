@@ -48,6 +48,11 @@ public class WorkflowDefinitionLoader {
       workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(
               composeDistPublish));
 
+      InputStream reviewComposeDistPublish = WorkflowDefinitionLoader.class.getClassLoader().getResourceAsStream(
+              "/OSGI-INF/workflows/review-compose-distribute-publish.xml");
+      workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(
+              reviewComposeDistPublish));
+
       InputStream createDVD = WorkflowDefinitionLoader.class.getClassLoader().getResourceAsStream("/OSGI-INF/workflows/create-dvd.xml");
       workflowService.registerWorkflowDefinition(WorkflowBuilder.getInstance().parseWorkflowDefinition(createDVD));
     } catch (Exception e) {
