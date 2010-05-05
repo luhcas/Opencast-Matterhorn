@@ -15,22 +15,68 @@
  */
 package org.opencastproject.webconsole;
 
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.BrandingPlugin;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 /**
  *
  */
 public class WebConsole extends OsgiManager {
   private static final long serialVersionUID = 1L;
+  private static final Logger logger = LoggerFactory.getLogger(WebConsole.class);
   
   public WebConsole(BundleContext bundleContext) {
     super(bundleContext);
+    AbstractWebConsolePlugin.setBrandingPlugin(new MatterhornBrandingPlugin());
   }
-  
+
+  public void service( ServletRequest req, ServletResponse res ) throws ServletException, IOException {
+    logger.info("Handling request with {} branding plugin", AbstractWebConsolePlugin.getBrandingPlugin());
+    super.service(req, res);
+  }
+
   /** Override the http service binding methods, since declarative services will handle binding and unbinding for us */
   protected synchronized void bindHttpService(HttpService httpService) {}
   protected synchronized void unbindHttpService(HttpService httpService) {}
 
+  static class MatterhornBrandingPlugin implements BrandingPlugin {
+    public String getBrandName() {
+      return "Opencast Matterhorn";
+    }
+    public String getFavIcon() {
+      return "/res/imgs/favicon.ico";
+    }
+    public String getMainStyleSheet() {
+      return "/res/ui/webconsole.css";
+    }
+    public String getProductImage() {
+      return "/res/imgs/logo.png";
+    }
+    public String getProductName() {
+      return "Matterhorn";
+    }
+    public String getProductURL() {
+      return "http://www.opencastproject.org/matterhorn";
+    }
+    public String getVendorImage() {
+      return "/res/imgs/logo.png";
+    }
+    public String getVendorName() {
+      return "The Opencast Project";
+    }
+    public String getVendorURL() {
+      return "http://www.opencastproject.org";
+    }
+  }
 }
