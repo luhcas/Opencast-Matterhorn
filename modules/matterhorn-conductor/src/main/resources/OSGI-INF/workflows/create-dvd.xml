@@ -53,6 +53,20 @@
       </configurations>
     </operation>
 
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode presenter (camera) to mpeg2 for DVD">
+      <configurations>
+        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="source-audio-flavor">presentation/source</configuration>
+        <configuration key="target-flavor">presenter/dvd</configuration>
+        <configuration key="target-tags">dvd</configuration>
+        <configuration key="encoding-profile">dvd-${dvd.format}.http</configuration>
+      </configurations>
+    </operation>
+
     <!-- hold for download of DVD image -->
     <operation
       id="download-dvd"
