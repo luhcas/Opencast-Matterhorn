@@ -103,6 +103,9 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
    */
   String[] getTags();
 
+  /** Removes all tags associated with this element */
+  void clearTags();
+  
   /**
    * Returns the media package if the element has been added, <code>null</code> otherwise.
    * 

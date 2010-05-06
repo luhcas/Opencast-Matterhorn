@@ -86,6 +86,7 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
           MediaPackageElement clone = (MediaPackageElement) element.clone();
           clone.setURI(getDistributionUri(element));
           clone.setIdentifier(null);
+          clone.clearTags();
           mediaPackage.addDerived(clone, element);
         }
       }

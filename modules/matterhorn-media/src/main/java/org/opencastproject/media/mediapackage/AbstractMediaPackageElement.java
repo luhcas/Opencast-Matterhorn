@@ -227,6 +227,15 @@ public abstract class AbstractMediaPackageElement implements
   }
 
   /**
+   * {@inheritDoc}
+   * @see org.opencastproject.media.mediapackage.MediaPackageElement#clearTags()
+   */
+  @Override
+  public void clearTags() {
+    if(tags != null) tags.clear();
+  }
+  
+  /**
    * @see org.opencastproject.media.mediapackage.MediaPackageElement#getMediaPackage()
    */
   public MediaPackage getMediaPackage() {

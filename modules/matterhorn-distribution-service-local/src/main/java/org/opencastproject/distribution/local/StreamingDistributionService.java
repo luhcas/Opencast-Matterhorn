@@ -15,7 +15,10 @@
  */
 package org.opencastproject.distribution.local;
 
+import org.opencastproject.distribution.api.DistributionException;
+import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
 
@@ -27,6 +30,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Distributes media to the local media delivery directory.
@@ -68,6 +73,21 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
     logger.info("streaming url is {}", serverUrl);
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage, java.lang.String[])
+   */
+  @Override
+  public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException {
+    // The streaming distribution service should only copy tracks, not catalogs or attachments
+    List<String> trackIds = new ArrayList<String>();
+    for(String elementId : elementIds) {
+      MediaPackageElement element = mediaPackage.getElementById(elementId);
+      if(element instanceof Track) trackIds.add(elementId);
+    }
+    return super.distribute(mediaPackage, trackIds.toArray(new String[trackIds.size()]));
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#getDistributionFile(org.opencastproject.media.mediapackage.MediaPackageElement)
