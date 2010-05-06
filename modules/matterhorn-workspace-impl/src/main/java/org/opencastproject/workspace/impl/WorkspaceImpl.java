@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -43,6 +44,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.Map.Entry;
 
@@ -59,6 +62,9 @@ public class WorkspaceImpl implements Workspace {
   protected TrustedHttpClient trustedHttpClient;
   protected String rootDirectory = null;
   protected Map<String, String> filesystemMappings;
+  protected long maxAgeInSeconds = -1;
+  protected long garbageCollectionPeriodInSeconds = -1;
+  protected Timer garbageFileCollector;
 
   public WorkspaceImpl() {
     this(null);
@@ -99,6 +105,51 @@ public class WorkspaceImpl implements Workspace {
     }
     logger.info("Workspace filesystem mapping " + filesUrl + " => " + repoRoot);
     filesystemMappings.put(filesUrl, repoRoot);
+
+    // Set up the garbage file collection timer
+    if (cc != null && cc.getBundleContext().getProperty("org.opencastproject.workspace.gc.period") != null) {
+      String period = cc.getBundleContext().getProperty("org.opencastproject.workspace.gc.period");
+      if (period != null) {
+        try {
+          garbageCollectionPeriodInSeconds = Long.parseLong(period);
+        } catch (NumberFormatException e) {
+          logger.warn("Workspace garbage collection period can not be set to {}. Please choose a valid number "
+                  + "for the 'org.opencastproject.workspace.gc.period' setting", period);
+        }
+      }
+    }
+
+    if (cc != null && cc.getBundleContext().getProperty("org.opencastproject.workspace.gc.max.age") != null) {
+      String age = cc.getBundleContext().getProperty("org.opencastproject.workspace.gc.max.age");
+      if (age != null) {
+        try {
+          maxAgeInSeconds = Long.parseLong(age);
+        } catch (NumberFormatException e) {
+          logger.warn("Workspace garbage collection max age can not be set to {}. Please choose a valid number "
+                  + "for the 'org.opencastproject.workspace.gc.max.age' setting", age);
+        }
+      }
+    }
+    activateGarbageFileCollectionTimer();
+  }
+
+  /**
+   * Activate the garbage collection timer
+   * @param cc The component context
+   */
+  protected void activateGarbageFileCollectionTimer() {
+    if (garbageCollectionPeriodInSeconds > 0 && maxAgeInSeconds > 0) {
+      logger.info("Workspace garbage collection policy: delete files older than {} seconds, scan every {} seconds.",
+              maxAgeInSeconds, garbageCollectionPeriodInSeconds);
+      garbageFileCollector = new Timer("Workspace Garbage File Collector");
+      garbageFileCollector.schedule(new GarbageCollectionTimer(), 0, garbageCollectionPeriodInSeconds * 1000);
+    }
+  }
+
+  public void deactivate() {
+    if(garbageFileCollector != null) {
+      garbageFileCollector.cancel();
+    }
   }
 
   /**
@@ -109,11 +160,13 @@ public class WorkspaceImpl implements Workspace {
    * @return The file, or null if the file is not on a configured mount.
    */
   protected File getLocallyMountedFile(String urlString) {
-    if(urlString.startsWith("file")) {
+    if (urlString.startsWith("file")) {
       try {
         File f = new File(new URI(urlString));
-        if(f.exists() && f.canRead()) return f;
-      } catch(URISyntaxException e) {}
+        if (f.exists() && f.canRead())
+          return f;
+      } catch (URISyntaxException e) {
+      }
     }
     for (Entry<String, String> entry : filesystemMappings.entrySet()) {
       String baseUrl = entry.getKey();
@@ -147,10 +200,10 @@ public class WorkspaceImpl implements Workspace {
     } else {
       logger.info("Copying {} to {}", urlString, f.getAbsolutePath());
       HttpGet get = new HttpGet(urlString);
-      HttpResponse response = trustedHttpClient.execute(get);
       InputStream in = null;
       OutputStream out = null;
       try {
+        HttpResponse response = trustedHttpClient.execute(get);
         in = response.getEntity().getContent();
         out = new FileOutputStream(f);
         IOUtils.copyLarge(in, out);
@@ -265,5 +318,34 @@ public class WorkspaceImpl implements Workspace {
     if (uri == null)
       throw new NotFoundException();
     return uri;
+  }
+
+  class GarbageCollectionTimer extends TimerTask {
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.util.TimerTask#run()
+     */
+    @Override
+    public void run() {
+      logger.info("Running workspace garbage file collection");
+      // Remove any file that was created more than maxAge seconds ago
+      File root = new File(rootDirectory);
+      File[] oldFiles = root.listFiles(new FileFilter() {
+        public boolean accept(File pathname) {
+          long ageInSeconds = (System.currentTimeMillis() - pathname.lastModified()) / 1000;
+          return ageInSeconds > maxAgeInSeconds;
+        }
+      });
+      for (File oldFile : oldFiles) {
+        long ageInSeconds = (System.currentTimeMillis() - oldFile.lastModified()) / 1000;
+        Object[] loggingArgs = new Object[] { oldFile, ageInSeconds - maxAgeInSeconds, maxAgeInSeconds };
+        if (oldFile.delete()) {
+          logger.info("Deleted {}, since its age was {} seconds older than the maximum age, {}", loggingArgs);
+        } else {
+          logger.warn("Can not delete {}, even though it is {} seconds older than the maximum age, {}", loggingArgs);
+        }
+      }
+    }
   }
 }

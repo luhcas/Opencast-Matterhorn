@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workspace.impl;
 
+import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryImpl;
 import org.opencastproject.workspace.api.NotFoundException;
 
@@ -22,12 +23,16 @@ import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 
 public class WorkspaceImplTest {
@@ -46,6 +51,7 @@ public class WorkspaceImplTest {
   public void tearDown() throws Exception {
     FileUtils.deleteDirectory(new File(workspaceRoot));
     FileUtils.deleteDirectory(new File(repoRoot));
+    workspace.deactivate();
   }
 
   @Test
@@ -124,5 +130,38 @@ public class WorkspaceImplTest {
     // Ensure that the file was cached in the workspace (since there is no configured filesystem mapping)
     File file = new File(workspaceRoot, "httplocalhost8080filesfoobarheader.gif");
     Assert.assertTrue(file.exists());
+  }
+  
+  @Test
+  public void testGarbageCollection() throws Exception {
+    // First, mock up the collaborating working file repository
+    WorkingFileRepositoryImpl repo = new WorkingFileRepositoryImpl(repoRoot, "http://localhost:8080");
+    workspace.setRepository(repo);
+    TrustedHttpClient httpClient = EasyMock.createNiceMock(TrustedHttpClient.class);
+    EasyMock.expect(httpClient.execute((HttpUriRequest)EasyMock.anyObject())).andThrow(new RuntimeException()); // Simulate not finding the file
+    EasyMock.replay(httpClient);
+    workspace.trustedHttpClient = httpClient;
+    workspace.filesystemMappings.clear();
+
+    // Put a file in the workspace
+    ByteArrayInputStream in = new ByteArrayInputStream("sample".getBytes());
+    URI uri = workspace.put("mediapackage", "element", "sample.txt", in);
+    File file = workspace.get(uri);
+    Assert.assertNotNull(file);
+    Assert.assertTrue(file.exists());
+
+    // Activate garbage collection
+    workspace.garbageCollectionPeriodInSeconds = 1;
+    workspace.maxAgeInSeconds = 1;
+    workspace.activateGarbageFileCollectionTimer();
+
+    // Wait for the garbage collector to delete the file
+    Thread.sleep(3000);
+    
+    // The file should have been deleted
+    try {
+      workspace.get(uri);
+      Assert.fail("The file at " + uri + " should have been deleted");
+    } catch(NotFoundException e) {}
   }
 }
