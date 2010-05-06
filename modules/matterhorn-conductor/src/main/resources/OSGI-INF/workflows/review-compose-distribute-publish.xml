@@ -21,8 +21,21 @@
       exception-handler-workflow="error"
       description="Encode video to Flash preview">
       <configurations>
-        <configuration key="source-video-flavor">*/source</configuration>
-        <configuration key="source-audio-flavor">*/source</configuration>
+        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="target-tags">preview</configuration>
+        <configuration key="encoding-profile">flash-preview.http</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode video to Flash preview">
+      <configurations>
+        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="source-audio-flavor">presentation/source</configuration>
         <configuration key="target-tags">preview</configuration>
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
