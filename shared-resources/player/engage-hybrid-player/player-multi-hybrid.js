@@ -993,7 +993,7 @@ Opencast.Player = (function () {
     {
         Videodisplay.videoSizeControl(0, 100);
         $("#oc_btn-dropdown").attr("className", "oc_btn-singleDisplay");
-    }
+   }
 
     /**
         @memberOf Opencast.Player
@@ -1021,7 +1021,7 @@ Opencast.Player = (function () {
      */
     function videoSizeControlMultiDisplay()
     {
-        Videodisplay.videoSizeControl(50, 50);
+        Videodisplay.videoSizeControl(100, 100);
         $("#oc_btn-dropdown").attr("className", "oc_btn-centerDisplay");
     }
     

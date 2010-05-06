@@ -181,14 +181,14 @@ Opencast.ariaSlider = (function ()
             if (intval === "")
             {
                 decrement(target, false);
-                intval = window.setInterval("Opencast.ariaSlider.decrement()", 50);
+                intval = window.setInterval("Opencast.ariaSlider.decrement()", 10);
             }
             break;
         case 39: //right arrow
             if (intval === "")
             {
             	increment(target, false);
-                intval = window.setInterval("Opencast.ariaSlider.increment()", 50);
+                intval = window.setInterval("Opencast.ariaSlider.increment()", 10);
             }
             break;
         case 33: // page up
