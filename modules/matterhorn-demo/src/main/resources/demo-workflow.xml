@@ -44,7 +44,7 @@
     
   <!-- Generate slide previews -->
     <operation
-      id="slide-previews"
+      id="segmentpreviews"
       fail-on-error="true"
       exception-handler-workflow="error"
       description="Encode presentation (screen) to cover image">
