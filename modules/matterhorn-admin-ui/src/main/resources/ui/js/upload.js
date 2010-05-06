@@ -176,7 +176,8 @@ Upload.showHelpBox = function(help,top,left) {
  *
  */
 Upload.showProgressStage = function() {
-  $('#gray-out').fadeIn('fast');
+  //$('#gray-out').fadeIn('fast');
+  $('#gray-out').css('display','block');
   $('#progress-stage').fadeIn('normal');
 }
 
