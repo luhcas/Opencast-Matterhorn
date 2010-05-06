@@ -67,10 +67,12 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
       serverUrl = UrlSupport.DEFAULT_BASE_URL + "/streaming";
     } else {
       serverUrl = cc.getBundleContext().getProperty("org.opencastproject.streaming.url");
+      distributionDirectory = new File(cc.getBundleContext().getProperty("org.opencastproject.streaming.directory"));
       if (serverUrl == null)
         throw new IllegalStateException("Streaming url is not configured");
     }
     logger.info("streaming url is {}", serverUrl);
+    logger.info("distributionDirectory is {}", distributionDirectory);
   }
 
   /**
