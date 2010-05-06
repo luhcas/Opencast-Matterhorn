@@ -34,6 +34,7 @@ import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,10 +94,7 @@ public class IngestServiceImpl implements IngestService {
     File tempDir = createDirectory(tempPath);
     File f = new File(tempPath + fs + UUID.randomUUID().toString() + ".zip");
     OutputStream out = new FileOutputStream(f);
-    int len;
-    byte[] buffer = new byte[1024];
-    while ((len = zipStream.read(buffer)) > 0)
-      out.write(buffer, 0, len);
+    IOUtils.copyLarge(zipStream, out);
     out.close();
     zipStream.close();
     // unpack
