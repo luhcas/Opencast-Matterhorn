@@ -59,7 +59,7 @@ Opencast.Watch = (function ()
 
             mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
             mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
-
+            
             Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
             //
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')
@@ -95,14 +95,22 @@ Opencast.Watch = (function ()
 
             $('#scrubber').bind('keydown', 'left', function(evt) 
             {
-                var newPosition = Math.round((($("#draggable").position().left - 20 ) / $("#scubber-channel").width()) * Opencast.Player.getDuration());
-                Videodisplay.seek(newPosition);
+                Opencast.Player.doRewind();
+            });
+            
+            $('#scrubber').bind('keyup', 'left', function(evt) 
+            {
+                Opencast.Player.stopRewind();
             });
             
             $('#scrubber').bind('keydown', 'right', function(evt)
             {
-                var newPosition = Math.round((($("#draggable").position().left + 20 ) / $("#scubber-channel").width()) * Opencast.Player.getDuration());
-                Videodisplay.seek(newPosition);            
+                Opencast.Player.doFastForward();
+            });
+            
+            $('#scrubber').bind('keyup', 'right', function(evt)
+            {
+                Opencast.Player.stopFastForward();
             });
           
       

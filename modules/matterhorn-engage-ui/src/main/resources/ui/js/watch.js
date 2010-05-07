@@ -14,7 +14,13 @@ Opencast.Watch = (function ()
 	        SINGLEPLAYERWITHSLIDES = "SingleplayerWithSlides",
 	        AUDIOPLAYER			   = "Audioplayer",
 	        ADVANCEDPLAYER         = "advancedPlayer",
-	        EMBEDPLAYER            = "embedPlayer";
+	        EMBEDPLAYER            = "embedPlayer",
+	        mediaOneHeight         = 0,
+	        mediaOneWidth          = 0,
+	        mediaOneFormat         = 0,
+	        mediaTwoHeight         = 0,
+	        mediaTwoWidth          = 0,
+	        mediaTwoFormat         = 0;
 	  
         var mediaPackageId = Opencast.engage.getMediaPackageId();
 
@@ -49,7 +55,8 @@ Opencast.Watch = (function ()
         // set the media URLs
             var mediaUrlOne = $('#oc-video-presenter-source').html();
             var mediaUrlTwo = $('#oc-video-presentation-source').html();
-
+            
+            
             // legacy support for any engage tagged track
             var engageUrl = $('#oc-video-engage').html();
             if(mediaUrlOne === null)
@@ -57,12 +64,24 @@ Opencast.Watch = (function ()
 
             mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
             mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
-            
+           
             Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
-
+            
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')
             {
                 Opencast.Player.setVideoSizeList(MULTIPLAYER);
+                
+                //
+                mediaOneWidth = 720;
+                mediaOneHeight = 480;
+                mediaTwoWidth = 1024;
+                mediaTwoHeight = 768;
+                
+                //
+                mediaOneFormat = mediaOneWidth / mediaOneHeight;
+                mediaTwoFormat = mediaTwoWidth / mediaTwoHeight;
+                
+                
             }
             else if (mediaUrlOne !== '' && mediaUrlTwo === '')
             {
@@ -90,15 +109,22 @@ Opencast.Watch = (function ()
                        
             $('#scrubber').bind('keydown', 'left', function(evt) 
             {
-                var newPosition = Math.round((($("#draggable").position().left - 20 ) / $("#scubber-channel").width()) * Opencast.Player.getDuration());
-                Videodisplay.seek(newPosition);
+                Opencast.Player.doRewind();
+            });
+            
+            $('#scrubber').bind('keyup', 'left', function(evt) 
+            {
+                Opencast.Player.stopRewind();
             });
             
             $('#scrubber').bind('keydown', 'right', function(evt)
             {
-                var newPosition = Math.round((($("#draggable").position().left + 20 ) / $("#scubber-channel").width()) * Opencast.Player.getDuration());
-                Videodisplay.seek(newPosition);            
-                
+                Opencast.Player.doFastForward();
+            });
+            
+            $('#scrubber').bind('keyup', 'right', function(evt)
+            {
+                Opencast.Player.stopFastForward();
             });
             
        });
