@@ -41,11 +41,11 @@ public class AudioVisualElementSelector extends AbstractMediaPackageElementSelec
   /** The resulting video track */
   protected Track videoTrack = null;
 
-  /** Make this selector require an audio track */
-  protected boolean requireAudio = true;
+  /** Flag to indicate whether an audio track is required */
+  protected boolean requireAudio = false;
 
-  /** Make this selector require a video track */
-  protected boolean requireVideo = true;
+  /** Flag to indicate whether a video track is required */
+  protected boolean requireVideo = false;
 
   /**
    * Creates a new selector.
@@ -85,7 +85,6 @@ public class AudioVisualElementSelector extends AbstractMediaPackageElementSelec
     } else {
       setAudioFlavor(MediaPackageElementFlavor.parseFlavor(flavor));
     }
-    setRequireAudioTrack(flavor != null);
   }
 
   /**
@@ -142,7 +141,6 @@ public class AudioVisualElementSelector extends AbstractMediaPackageElementSelec
     } else {
       setVideoFlavor(MediaPackageElementFlavor.parseFlavor(flavor));
     }
-    setRequireVideoTrack(flavor != null);
   }
 
   /**

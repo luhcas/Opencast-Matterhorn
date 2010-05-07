@@ -176,7 +176,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
     // Did we get the set of tracks that we need?
     if (tracks.size() == 0) {
-      logger.debug("Skipping encoding of media package to '{}': no suitable input tracks found", profile);
+      logger.info("Skipping encoding of media package to '{}': no suitable input tracks found", profile);
       return mediaPackage;
     } else {
       if (avSelector.getAudioTrack() != null)

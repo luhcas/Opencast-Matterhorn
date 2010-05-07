@@ -22,7 +22,7 @@
       description="Encode video to Flash preview">
       <configurations>
         <configuration key="source-video-flavor">presenter/source</configuration>
-        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="target-tags">preview</configuration>
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
@@ -35,7 +35,7 @@
       description="Encode video to Flash preview">
       <configurations>
         <configuration key="source-video-flavor">presentation/source</configuration>
-        <configuration key="source-audio-flavor">presentation/source</configuration>
+        <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="target-tags">preview</configuration>
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
@@ -47,6 +47,9 @@
       fail-on-error="true"
       exception-handler-workflow="error"
       description="Wait for a user to review the media">
+      <configurations>
+        <configuration key="source-tag">preview</configuration>
+      </configurations>
     </operation>
 
     <!-- run the videosegmentation -->

@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
+import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -43,9 +44,13 @@ public class ReviewWorkflowOperationHandler extends AbstractResumableWorkflowOpe
 
   /** Path to the hold ui resources */
   private static final String HOLD_UI_PATH = "/ui/operation/review/index.html";
+  
+  /** Name of the configuration option that provides the tags we are looking for */
+  private static final String PREVIEW_TAG_NAME = "source-tag";
 
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
+    CONFIG_OPTIONS.put(PREVIEW_TAG_NAME, "The tag identifying the preview media");
   }
 
   /**
@@ -71,6 +76,16 @@ public class ReviewWorkflowOperationHandler extends AbstractResumableWorkflowOpe
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.info("Holding for review...");
+    
+    // What are we looking for?
+    String tag = workflowInstance.getCurrentOperation().getConfiguration(PREVIEW_TAG_NAME);
+    
+    // Let's see if there is preview media available
+    MediaPackage mp = workflowInstance.getMediaPackage();
+    if (mp.getTracksByTag(tag).length == 0) {
+      logger.warn("No media with tag '{}' found to preview", tag);
+    }
+    
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
   }
 
