@@ -207,7 +207,11 @@ public class OpencapsRestService {
   private LinkedHashMap<String, Object> cmiToMap(OpencapsMediaItem cmi) {
     LinkedHashMap<String, Object> item = new LinkedHashMap<String, Object>();
     item.put("id", cmi.getWorkflowId());
-    item.put("timestamp", new Date().getTime()); // TODO MP created date?
+    Date date = cmi.getMediaPackage().getDate();
+    if(date != null) {
+      item.put("timestamp", date);
+    }
+    item.put("episode", cmi.getMediaPackage().getIdentifier().toString());
     item.put("title", cmi.getTitle());
     item.put("mediaURL", cmi.getMediaURI() != null ? cmi.getMediaURI().toString() : null);
     item.put("captionable", true);
