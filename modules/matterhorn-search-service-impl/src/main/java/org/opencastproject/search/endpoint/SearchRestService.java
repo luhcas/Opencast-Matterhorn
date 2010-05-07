@@ -126,7 +126,7 @@ public class SearchRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, addEndpoint);    
 
     // clear
-    RestEndpoint clearEndpoint = new RestEndpoint("clear", RestEndpoint.Method.POST, "/clear", "Clears the entiresearch index");
+    RestEndpoint clearEndpoint = new RestEndpoint("clear", RestEndpoint.Method.POST, "/clear", "Clears the entire search index");
     clearEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, clearEndpoint);    
 
