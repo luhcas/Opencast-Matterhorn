@@ -50,7 +50,7 @@ public class InboxService implements ManagedService {
    */
   protected WorkingFileRepository wfrService;
   /**
-   * Properties dictinary
+   * Properties dictionary
    */
   protected Dictionary properties;
   /**
@@ -93,8 +93,8 @@ public class InboxService implements ManagedService {
     } else {
       this.properties = new Hashtable();
       try {
-        String inboxPath = componentContext.getBundleContext().getProperty("org.opencastproject.inbox.inboxPath");
-        String refreshTimeStr = componentContext.getBundleContext().getProperty("org.opencastproject.inbox.refreshTime");
+        String inboxPath = componentContext.getBundleContext().getProperty("org.opencastproject.inbox.inbox.path");
+        String refreshTimeStr = componentContext.getBundleContext().getProperty("org.opencastproject.inbox.refresh");
         Integer refreshTime = InboxService.DEFAULT_FILE_REFRESH_TIME_SEC;
         try {
           refreshTime = Integer.parseInt(refreshTimeStr);
@@ -107,7 +107,7 @@ public class InboxService implements ManagedService {
           inboxPath = componentContext.getBundleContext().getProperty("org.opencastproject.storage.dir")+"/inbox";
         }
         
-        String dirRefreshTimeStr = componentContext.getBundleContext().getProperty("org.opencastproject.inbox.dirRefreshTime");
+        String dirRefreshTimeStr = componentContext.getBundleContext().getProperty("org.opencastproject.inbox.directory.refresh");
         Integer dirRefreshTime = InboxService.DEFAULT_DIR_REFRESH_TIME_SEC;
         try {
           dirRefreshTime = Integer.parseInt(dirRefreshTimeStr);
