@@ -14,6 +14,7 @@
     <sec:openid-login />
     <sec:custom-filter position="BASIC_AUTH_FILTER" ref="digestFilter" />
     <sec:anonymous />
+    <sec:remember-me key="matterhorn" />
   </sec:http>
 
   <sec:user-service id="userDetailsService">
