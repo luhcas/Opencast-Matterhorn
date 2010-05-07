@@ -146,6 +146,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
    */
   public VideoSegmenter() {
     super(MediaPackageElements.SEGMENTS_FLAVOR);
+    super.requireVideo(true);
     executor = Executors.newFixedThreadPool(4);
   }
 

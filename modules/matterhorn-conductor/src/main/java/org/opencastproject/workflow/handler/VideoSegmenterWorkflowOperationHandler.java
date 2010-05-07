@@ -39,6 +39,10 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -94,23 +98,37 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
 
     // Find movie track to analyze
     String trackFlavor = StringUtils.trimToNull(operation.getConfiguration(PROP_ANALYSIS_TRACK_FLAVOR));
-    Track[] candidates = null;
+    List<Track> candidates = new ArrayList<Track>();
     if (trackFlavor != null)
-      candidates = mediaPackage.getTracks(MediaPackageElementFlavor.parseFlavor(trackFlavor));
+      candidates.addAll(Arrays.asList(mediaPackage.getTracks(MediaPackageElementFlavor.parseFlavor(trackFlavor))));
     else
-      candidates = mediaPackage.getTracks(MediaPackageElements.PRESENTATION_SOURCE);
-    if (candidates.length == 0) {
+      candidates.addAll(Arrays.asList(mediaPackage.getTracks(MediaPackageElements.PRESENTATION_SOURCE)));
+    if (candidates.size() == 0) {
       logger.info("No matching tracks available for video segmentation in workflow {}", workflowInstance);
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
-    } else if (candidates.length > 1) {
-      logger.info("Found more than one track to segment, choosing the first one ({})", candidates[0]);
     }
-    Track track = candidates[0];    
+
+    // Remove unsupported tracks (only those containing video can be segmented)
+    Iterator<Track> ti = candidates.iterator();
+    while (ti.hasNext()) {
+      Track t = ti.next();
+      if (!t.hasVideo())
+        ti.remove();
+    }
+
+    // More than one left? Let's be pragmatic...
+    if (candidates.size() > 1) {
+      logger.info("Found more than one track to segment, choosing the first one ({})", candidates.get(0));
+    }
+    Track track = candidates.get(0);
     
     // Segment the media package
     Mpeg7Catalog mpeg7 = null;
     try {
       Receipt receipt = videosegmenter.analyze(track, true);
+      if (receipt.getStatus().equals(Receipt.Status.FAILED)) {
+        throw new WorkflowOperationException("Videosegmentation on " + track + " failed");
+      }
       mpeg7 = (Mpeg7Catalog)receipt.getElement();
       mediaPackage.add(mpeg7);
     } catch (Exception e) {

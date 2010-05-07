@@ -17,6 +17,7 @@ package org.opencastproject.analysis.api;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.media.mediapackage.Track;
 
 /**
  * Convencience implementation that can be used to easily build media analysis service implementations.
@@ -28,6 +29,12 @@ public abstract class MediaAnalysisServiceSupport implements MediaAnalysisServic
 
   /** The flavors that are required by this media analysis */
   protected MediaPackageElementFlavor[] requiredFlavors = new MediaPackageElementFlavor[] {};
+
+  /** Flag to indicate audio track as a requirement */
+  protected boolean requiresAudio = false;
+
+  /** Flag to indicate video track as a requirement */
+  protected boolean requiresVideo = false;
 
   /**
    * Creates a new media analysis support object with the given resulting flavor and requirements.
@@ -85,6 +92,26 @@ public abstract class MediaAnalysisServiceSupport implements MediaAnalysisServic
   }
 
   /**
+   * Sets the requirement for audio.
+   * 
+   * @param requireAudio
+   *          <code>true</code> to require audio
+   */
+  public void requireAudio(boolean requireAudio) {
+    this.requiresAudio = requireAudio;
+  }
+
+  /**
+   * Sets the requirement for video.
+   * 
+   * @param requireVideo
+   *          <code>true</code> to require video
+   */
+  public void requireVideo(boolean requireVideo) {
+    this.requiresVideo = requireVideo;
+  }
+
+  /**
    * Returns <code>true</code> if the requirements that this media analysis service defines are met.
    * 
    * @return <code>true</code> if all requirements are met
@@ -94,14 +121,25 @@ public abstract class MediaAnalysisServiceSupport implements MediaAnalysisServic
   protected boolean isSupported(MediaPackageElement element) throws IllegalArgumentException {
     if (element == null)
       throw new IllegalArgumentException("Media package cannot be null");
-    
+
+    // Test for audio/video support in case this is required
+    if (requiresAudio || requiresVideo) {
+      if (!MediaPackageElement.Type.Track.equals(element.getElementType()))
+        return false;
+      Track t = (Track) element;
+      if ((requiresAudio && !t.hasAudio()) || (requiresVideo && !t.hasVideo()))
+        return false;
+    }
+
+    // Test flavor requirements
     if (requires().length == 0)
       return true;
-    
     for (MediaPackageElementFlavor flavor : requires()) {
-      if (flavor.equals(element.getFlavor()))
+      if (flavor.equals(element.getFlavor())) {
         return true;
+      }
     }
+    
     return false;
   }
 
