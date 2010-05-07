@@ -30,8 +30,11 @@ var helpTexts = {
 "flavor" :
   ["Media file content", "Specify the main type of content that is contained in the media file. Select 'other' if your answer isn't listed."],
 
-"track" :
+"filechooser-ajax" :
 ["Media File", "Browse to the media file you would like to upload. Video files may include video content captured by a video camera, screen capture device, or document camera. At this time, only one media file may be uploaded. If you would like to submit multiple, synchronized media files for a single recording, please merge them outside Matterhorn and upload a single file."],
+
+"workflow-selector" :
+["Workflow selection", "Select to workflow with which this recording should be processed."],
 
 "test" : ["TEST TITLE", "TEST TEXT"]
 }

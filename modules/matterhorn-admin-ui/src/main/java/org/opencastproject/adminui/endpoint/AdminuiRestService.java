@@ -152,9 +152,8 @@ public class AdminuiRestService {
         item.setTitle(mediapackage.getTitle());
         //item.setPresenter(formatMultipleString(mediapackage.getContributors()));
         item.setPresenter(formatMultipleString(mediapackage.getCreators()));
-        item.setSeriesTitle(mediapackage.getSeriesTitle());
+        item.setSeriesTitle(mediapackage.getSeries());
         item.setSeriesId(mediapackage.getSeries());
-        item.setSeriesTitle(mediapackage.getSeriesTitle());
         Date date = mediapackage.getDate();
         if (date != null) {
           //item.setStartTime(sdf.format(date));
@@ -188,6 +187,7 @@ public class AdminuiRestService {
         } else {
           out.add(item);
         }
+        logger.info("Recording:" + item.getTitle() + " " + item.getPresenter() + " " + item.getSeriesTitle());
       }
     } else {
       logger.warn("WorkflowService not present, returning empty list");

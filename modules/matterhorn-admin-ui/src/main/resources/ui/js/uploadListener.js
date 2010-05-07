@@ -54,14 +54,21 @@ UploadListener.getProgress = function() {
 }
 
 UploadListener.uploadProgress = function(total, transfered) {
+  var MEGABYTE = 1024 * 1024;
   var percentage = 0;
+  var megaBytes = 0;
+  var totalMB = 0;
   if (transfered > 0) {
     percentage = transfered / total * 100;
     percentage = percentage.toFixed(2);
     percentage = percentage + '%';
+    megaBytes = transfered / MEGABYTE;
+    megaBytes = megaBytes.toFixed(2);
+    totalMB = total / MEGABYTE;
+    totalMB = totalMB.toFixed(2);
   }
   Upload.log("transfered: " + transfered + " of " + total + " bytes, " + percentage + "%");
-  Upload.setProgress(percentage,percentage,'Total: '+total+' bytes',transfered+' bytes send');
+  Upload.setProgress(percentage,percentage,'Total: '+totalMB+' bytes',megaBytes+' MB send');
 }
 
 UploadListener.uploadComplete = function() {

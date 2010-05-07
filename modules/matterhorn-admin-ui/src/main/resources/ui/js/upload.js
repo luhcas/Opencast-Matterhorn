@@ -87,13 +87,15 @@ Upload.init = function() {
     dataType: 'json',
     success: function(data) {
       for (i in data.workflow_definitions) {
-        var option = document.createElement("option");
-        option.setAttribute("value", data.workflow_definitions[i].title);
-        option.innerHTML = data.workflow_definitions[i].title;
-        if (data.workflow_definitions[i].title == "full") {
-          option.setAttribute("selected", "true");
+        if (data.workflow_definitions[i].title != 'error') {
+          var option = document.createElement("option");
+          option.setAttribute("value", data.workflow_definitions[i].title);
+          option.innerHTML = data.workflow_definitions[i].title;
+          if (data.workflow_definitions[i].title == "full") {
+            option.setAttribute("selected", "true");
+          }
+          $('#workflow-selector').append(option);
         }
-        $('#workflow-selector').append(option);
       }
       Upload.workflowSelected($('#workflow-selector').val());
     }
