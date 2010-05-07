@@ -28,7 +28,7 @@ if [[ $var -eq 0 ]]; then
 	    break
 	elif [ $i -eq $MAX_PASSWD_ATTEMPTS ]; then
 	    echo "Error. Too many password attempts. Aborting."
-	    exit 1
+	    return 1
 	fi
    done
 elif [[ $var -ne 9 ]]; then

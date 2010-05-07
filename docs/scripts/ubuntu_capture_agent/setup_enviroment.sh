@@ -38,8 +38,8 @@ echo
 
 # Prompt for core hostname. Default to localhost:8080
 read -p "Please enter Matterhorn Core hostname ($DEFAULT_CORE_URL): " core
-core=$(echo ${core:-$DEFAULT_CORE_URL} | sed 's/\([\/\.]\)/\\\1/g')
-sed -i "s/\(org\.opencastproject\.server\.url=\).*$/\1$core/" $GEN_PROPS
+#core=$(echo ${core:-$DEFAULT_CORE_URL} | sed 's/\([\/\.]\)/\\\1/g')
+sed -i "s#\(org\.opencastproject\.server\.url=\).*\$#\1$core#" $GEN_PROPS
 
 # Set up maven and felix enviroment variables in the user session
 echo -n "Setting up maven and felix enviroment for $USERNAME... "
@@ -69,43 +69,39 @@ chown -R $USERNAME:$USERNAME $CA_DIR
 echo "Done"
 
 # Set up the deinstallation script
-# The syntax ${varname//\//\\/} escapes the possible /'s that might be in the variable's value
 echo -n "Creating the cleanup script... "
 SRC_LIST_BKP=$SRC_LIST.$BKP_SUFFIX
-sed -i "s/^USER=[^\ ]*\?\(.*\)$/USER=${USERNAME//\//\\/}\1/" "$CLEANUP"
-sed -i "s/^SRC_LIST=[^\ ]*\?\(.*\)$/SRC_LIST=${SRC_LIST//\//\\/}\1/" "$CLEANUP"
-sed -i "s/^SRC_LIST_BKP=[^\ ]*\?\(.*\)$/SRC_LIST_BKP=${SRC_LIST_BKP//\//\\/}\1/" "$CLEANUP"
-sed -i "s/^OC_DIR=[^\ ]*\?\(.*\)$/OC_DIR=${OC_DIR//\//\\/}\1/" "$CLEANUP"
-sed -i "s/^CA_DIR=[^\ ]*\?\(.*\)$/CA_DIR=${CA_DIR//\//\\/}\1/" "$CLEANUP"
-sed -i "s/^RULES_FILE=[^\ ]*\?\(.*\)$/RULES_FILE=${DEV_RULES//\//\\/}\1/" "$CLEANUP"
-sed -i "s/^CA_DIR=[^\ ]*\?\(.*\)$/CA_DIR=${CA_DIR//\//\\/}\1/" "$CLEANUP"
-sed -i "s/^STARTUP_SCRIPT=[^\ ]*\?\(.*\)$/STARTUP_SCRIPT=${STARTUP_SCRIPT//\//\\/}\1/" "$CLEANUP"
+sed -i "s#^USER=[^\ ]*\?\(.*\)\$#USER=$USERNAME\1#" "$CLEANUP"
+sed -i "s#^SRC_LIST=[^\ ]*\?\(.*\)\$#SRC_LIST=$SRC_LIST\1#" "$CLEANUP"
+sed -i "s#^SRC_LIST_BKP=[^\ ]*\?\(.*\)\$#SRC_LIST_BKP=$SRC_LIST_BKP\1#" "$CLEANUP"
+sed -i "s#^OC_DIR=[^\ ]*\?\(.*\)\$#OC_DIR=$OC_DIR\1#" "$CLEANUP"
+sed -i "s#^CA_DIR=[^\ ]*\?\(.*\)\$#CA_DIR=$CA_DIR\1#" "$CLEANUP"
+sed -i "s#^RULES_FILE=[^\ ]*\?\(.*\)\$#RULES_FILE=$DEV_RULES\1#" "$CLEANUP"
+sed -i "s#^CA_DIR=[^\ ]*\?\(.*\)\$#CA_DIR=$CA_DIR\1#" "$CLEANUP"
+sed -i "s#^STARTUP_SCRIPT=[^\ ]*\?\(.*\)\$#STARTUP_SCRIPT=$STARTUP_SCRIPT\1#" "$CLEANUP"
 
 # Write the uninstalled package list to the cleanup.sh template
-if [[ ${#PKG_LIST[@]} -gt 0 ]]; then
-    sed -i "s/^PKG_LIST=.*$/PKG_LIST=( ${PKG_LIST[@]} )/" $CLEANUP
-else
-    sed -i "s/^PKG_LIST=.*$/PKG_LIST=/" $CLEANUP
-fi
+sed -i "s/^PKG_LIST=([^)]*)\(.*\)$/PKG_LIST=( `echo -n ${PKG_LIST[@]}` )\1/" $CLEANUP
 
 echo "Done"
 
 # Prompt for the location of the cleanup script
-unset location
-
-while [[ true  ]]; do
+echo
+while [[ true ]]; do
     read -p "Please enter the location to store the cleanup script ($START_PATH): " location
     if [[ -d "${location:=$START_PATH}" ]]; then
-	if [[ -e $location ]]; then
-	    read -p "File $location/$CLEANUP already exists. Do you wish to overwrite it (y/N)? " response
-	    if [[ -n "$(echo ${response:-N} | grep -i '^y')" ]]; then
-		break;
-	    fi
-	fi
+        if [[ ! -e $location/$CLEANUP ]]; then
+            break;
+        fi
+        read -p "File $location/$CLEANUP already exists. Do you wish to overwrite it (y/N)? " response
+        if [[ -n "$(echo ${response:-N} | grep -i '^y')" ]]; then
+            break;
+        fi
     else
-	echo "Invalid location. $location is not a directory."
+        echo "Invalid location. $location is not a directory."
     fi
 done
+
 
 cp $CLEANUP ${location:=$START_PATH}
 chown --reference=$location $location/$CLEANUP

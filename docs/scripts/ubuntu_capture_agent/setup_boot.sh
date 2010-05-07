@@ -10,7 +10,7 @@ if [[ ! $INSTALL_RUN ]]; then
     exit 1
 fi
 
-echo "# Start the matterhorn capture agent" >> $STARTUP_SCRIPT
+echo "# Start the matterhorn capture agent" > $STARTUP_SCRIPT
 
 # This section sets up some enviroment variables
 echo "env FELIX_HOME=${FELIX_HOME}" >> $STARTUP_SCRIPT

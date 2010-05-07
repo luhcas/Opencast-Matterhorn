@@ -11,7 +11,7 @@ OC_DIR=                                                  # Location of matterhor
 CA_DIR=                                                  # The directory where the capture agent files live
 STARTUP_SCRIPT=                                          # Path to the matterhorn startup script
 RULES_FILE=                                              # Path to the file specifying rules for the installed devices
-PKG_LIST=                                                # List of packages to be uninstalled
+PKG_LIST=( )                                             # List of packages to be uninstalled
 
 # Checks if this script is being run with root privileges, exiting if it doesn't
 if [[ `id -u` -ne 0 ]]; then
@@ -70,3 +70,19 @@ fi
 kill -9 $(ps U matterhorn 2> /dev/null | grep java | cut -d ' ' -f 2) 2> /dev/null
 
 echo -e "\n\nDone uninstalling Matterhorn Capture Agent.\n\n" 
+
+# Prompts the user to reboot or not
+read -p "Some matterhorn settings won't be completely removed until the system reboots. Do you wish to do it now (Y/n)? " response
+
+while [[ -z "$(echo ${response:-Y} | grep -i '^[yn]')" ]]; do
+    read -p "Please enter (Y)es or (n)o: " response
+done
+
+if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
+    echo -e "\n\nRebooting... "
+    reboot > /dev/null
+else
+    echo
+    read -n 1 -s -p "Hit any key to exit..."
+    clear
+fi

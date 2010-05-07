@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 ###################################################
 # Configure capture agent for use with Matterhorn #
@@ -39,13 +39,20 @@ export FELIX_GENCONF_SUFFIX=conf/config.properties                       # Path 
 export FELIX_PROPS_SUFFIX=conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties
                                                                          # Path under FELIX_HOME where the capture agent properties are
 export JAVA_PREFIX=/usr/lib/jvm                                          # Path to where the installed jvm's are
-export JAVA_PATTERN=java-6-sun-1                                         # A regexp to filter the right jvm directory from among all the installed ones
+export JAVA_PATTERN=java-6-sun                                           # A regexp to filter the right jvm directory from among all the installed ones
                                                                          # The chosen JAVA_HOME will be $JAVA_PREFIX/`ls $JAVA_PREFIX | grep $JAVA_PATTERN`
 
 export M2_SUFFIX=.m2/repository                                          # Path to the maven2 repository, under the user home
 
 export DEFAULT_NTP_SERVER=ntp.ubuntu.com                                 # Default ntp server
 export NTP_CONF=/etc/ntp.conf                                            # Location for the ntp configuration files
+
+export JV4LINFO_URL=http://luniks.net/luniksnet/download/java/jv4linfo   # Location of the jv4linfo jar
+export JV4LINFO_JAR=jv4linfo-0.2.1-src.jar                               # Name of the jv4linfo file
+export JV4LINFO_LIB=libjv4linfo.so                                       # Shared object required by the jv4linfo jar to function
+export JV4LINFO_PATH=/usr/lib                                            # Location where the shared object will be copied so that jvm can find it
+                                                                         # In other words, it must be in the java.library.path
+
 
 # Required scripts for installation
 SETUP_USER=./setup_user.sh
@@ -55,7 +62,7 @@ INSTALL_DEPENDENCIES=./install_dependencies.sh
 SETUP_SOURCE=./setup_source.sh
 SETUP_ENVIROMENT=./setup_enviroment.sh
 SETUP_BOOT=./setup_boot.sh
-export CLEANUP=./cleanup.sh
+export CLEANUP=./cleanup.sh                # This variable is exported because the script is modified by another
 
 SCRIPTS=( "$SETUP_USER" "$INSTALL_VGA2USB" "$SETUP_DEVICES" "$INSTALL_DEPENDENCIES" "$SETUP_ENVIROMENT" "$SETUP_SOURCE" "$SETUP_BOOT" "$CLEANUP" )
 SCRIPTS_URL=http://opencast.jira.com/svn/MH/trunk/docs/scripts/ubuntu_capture_agent
@@ -77,7 +84,7 @@ cd $WORKING_DIR
 # If wget isn't installed, get it from the ubuntu software repo
 wget foo &> /dev/null
 if [ $? -eq 127 ]; then
-    apt-get -y --force-yes install wget
+    apt-get -y --force-yes install wget &>/dev/null
     if [ $? -ne 0 ]; then
 	echo "Couldn't install the necessary command 'wget'. Please try to install it manually and re-run this script"
 	exit 1
@@ -146,10 +153,13 @@ if [[ "$?" -ne 0 ]]; then
 fi
 
 # Build matterhorn
+echo -e "\n\nProceeding to build the capture agent source. This may take a long time. Press any key to continue...\n\n"
+read -n 1 -s
+
 cd $TRUNK
 su matterhorn -c "mvn clean install -Pcapture -DdeployTo=\${FELIX_HOME}/load"
 if [[ "$?" -ne 0 ]]; then
-    echo "Error building the matterhorn code. Contact matterhorn@opencastproject.org for assistance."
+    echo -e "\nError building the matterhorn code. Contact matterhorn@opencastproject.org for assistance."
     exit 1
 fi
 cd $WORKING_DIR
@@ -159,7 +169,6 @@ ${SETUP_BOOT}
 
 echo -e "\n\n\nCapture Agent succesfully installed\n\n\n"
 
-unset response
 read -p "It is recommended to reboot the system after installation. Do you wish to do it now (Y/n)? " response
 
 while [[ -z "$(echo ${response:-Y} | grep -i '^[yn]')" ]]; do

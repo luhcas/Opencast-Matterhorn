@@ -38,40 +38,66 @@ for (( i = 0; i < ${#PKG_LIST[@]}; i++ )); do
 done
 
 # Install the required 3rd party packages
-echo -n  "Installing third party packages from Ubuntu repository... "
-apt-get update > /dev/null
-apt-get -y --force-yes install ${noinst[@]}  &> /dev/null
+echo -n "Installing third party packages from Ubuntu repository... "
+apt-get -qq update
+apt-get -qq -y --force-yes install ${noinst[@]}
+echo "Done"
+
+# Set up java-6-sun as the default alternative
+echo -n "Setting up java-6-sun as the default jvm... "
+update-java-alternatives -s $JAVA_PATTERN 2> /dev/null
 echo "Done"
 
 # Define some enviroment variables
-export JAVA_HOME=$JAVA_PREFIX/`ls $JAVA_PREFIX | grep $JAVA_PATTERN`
+export JAVA_HOME=$JAVA_PREFIX/`ls $JAVA_PREFIX | grep ^$JAVA_PATTERN$`
 export PKG_LIST=${noinst[@]}
 
 cd $CA_DIR
 
 # Setup felix
-echo -n "Setting up Felix... "
-curl -s ${FELIX_URL} | tar xz
-mkdir -p ${FELIX_HOME}/load
-echo "Done"
+echo -n "Downloading Felix... "
+while [[ true ]]; do 
+    if [[ ! -s ${FELIX_FILENAME} ]]; then
+	wget -q ${FELIX_URL}
+    fi
+    # On success, uncompress the felix files in their location
+    if [[ $? -eq 0 ]]; then
+	echo -n "Uncompressing... "
+	tar xzf ${FELIX_FILENAME}
+	mkdir -p ${FELIX_HOME}/load
+	echo "Done"
+	break
+    fi
+    # Else, ask for the actions to take
+    echo
+    read -p "Error retrieving the Felix files from the web. Retry (Y/n)?" answer
+    if [[ -n "$(echo ${answer:-Y} | grep -i "^n")" ]]; then
+	echo "You must download Felix manually and install it under $CA_DIR, in order for matterhorn to work"
+	break;
+    else
+	echo -n "Retrying... "
+    fi
+done
 
 # Setup jv4linfo
-if [[ ! -e /usr/lib/libjv4linfo.so ]]; then
+if [[ ! -e "$JV4LINFO_PATH/$JV4LINFO_LIB" ]]; then
     echo -n "Installing jv4linfo... "
-    wget -q http://luniks.net/luniksnet/download/java/jv4linfo/jv4linfo-0.2.1-src.jar 
-    jar xf jv4linfo-0.2.1-src.jar
+    if [[ ! -e "$JV4LINFO_JAR" ]]; then
+	wget -q $JV4LINFO_URL/$JV4LINFO_JAR
+    fi
+    jar xf $JV4LINFO_JAR
     cd jv4linfo/src
     # The ant build script has a hardcoded path to the openjdk, this sed line will
     # switch it to be whatever is defined in JAVA_HOME
     sed -i '74i\\t<arg value="-fPIC"/>' build.xml
-    sed -i "s#\"\/usr\/lib\/jvm\/java-6-openjdk\/include\"#\"$JAVA_HOME\/include\"#g" build.xml
+    sed -i "s#\"/usr/lib/jvm/java-6-openjdk/include\"#\"$JAVA_HOME/include\"#g" build.xml
     
     ant -lib ${JAVA_HOME}/lib &> /dev/null
     if [[ "$?" -ne 0 ]]; then
 	echo "Error building libjv4linfo.so"
 	exit 1
     fi
-    cp ../lib/libjv4linfo.so /usr/lib
+    cp ../lib/$JV4LINFO_LIB $JV4LINFO_PATH
     
     cd ../..
     echo "Done"
