@@ -244,8 +244,15 @@ public class AdminuiRestService {
 
     // get number of upcoming recordings if scheduler is present
     if (schedulerService != null) {
+      int upcoming = 0;
       SchedulerEvent[] events = schedulerService.getUpcomingEvents();
-      out.put("upcoming", new Integer(events.length));
+      Date current = new Date(System.currentTimeMillis());
+      for (SchedulerEvent event : events) {
+        if (current.before(event.getStartdate())) {
+          upcoming++;
+        }
+      }
+      out.put("upcoming", new Integer(upcoming));
       logMessage += "scheduler-service";
       total += events.length;
     } else {
@@ -254,14 +261,15 @@ public class AdminuiRestService {
 
     // get statistics from capture admin if present
     if (captureAdminService != null) {
-      Map<String, Recording> recordings = captureAdminService.getKnownRecordings();
+      Map<String, Recording> recordings = new HashMap<String, Recording>(captureAdminService.getKnownRecordings());
       Iterator<String> i = recordings.keySet().iterator();
       int capturing = 0;
       while (i.hasNext()) {
-        //if (recordings.get(i.next()).getState().equals(RecordingState.CAPTURING)) {  // deactivating this since I think we want to count all recordings active on an agent (all states)
-          i.next();      // FIXME remvoe if the above if gets re-activated
+        Recording r = recordings.get(i.next());
+        if ( (r.getState().equals(RecordingState.CAPTURING)) ||
+             (r.getState().equals(RecordingState.UPLOADING)) ) {   // FIXME also take into account RecordingState.UNKNOWN ??
           capturing++;
-        //}
+        }
       }
       out.put("capturing", new Integer(capturing));
       total += capturing;

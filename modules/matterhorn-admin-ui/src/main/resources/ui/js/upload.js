@@ -12,6 +12,12 @@ Upload.init = function() {
     $('#console').show();
   }
 
+  // Event: File location selector clicked
+  $(".file-location").change(function() {
+    var location = $(this).val();
+    $('#filechooser-ajax').attr('src', '../ingest/rest/filechooser-' + location + '.html');
+  });
+
   // Event: Add form filed button clicked
   $('.addFormFieldBtn').click(function() {
     var toClone = $(this).parent().children('.formField');
