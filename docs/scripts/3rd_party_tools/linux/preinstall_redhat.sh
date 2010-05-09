@@ -34,7 +34,9 @@ if
 	# installing required libraries
 	su -c "yum -y install libjpeg-devel libpng-devel libtiff-devel" &&
 	# checking for jam package
-	jam_check
+	jam_check &&
+	# installing gstreamer
+	su -c "yum -y install gstreamer gstreamer-plugins-*"
 then
 	echo
 	echo "Required libraries were installed. Executing main script..."

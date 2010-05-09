@@ -47,9 +47,6 @@ tesseract_lang_version="2.00.eng"
 # ocropus
 ocropus_revision="r644"
 
-# videosegmenter
-videosegmenter_version="0.1.1"
-
 # ---- 3rd party tools properties ----
 
 libpng_url="${thirdparty_repository}/libpng${libpng_version}.tar.gz"
@@ -71,8 +68,6 @@ tesseract_url="${thirdparty_repository}/tesseract${tesseract_version}.tar.gz"
 tesseract_lang_url="${thirdparty_repository}/tesseract${tesseract_lang_version}.tar.gz"
 
 ocropus_url="${thirdparty_repository}/ocropus${ocropus_revision}.tar.gz"
-
-videosegmenter_url="${thirdparty_repository}/vsegmenter${videosegmenter_version}.tar.gz"
 
 ########################################################
 ######## 3rd party tools installation script ###########
@@ -135,7 +130,7 @@ setup_libjpeg ()
 	cd ${working_dir}/libjpeg
 	if ! [ -f ./jpeg-${libjpeg_version}/jpeglib.h ]
 	then
-		cp ${base_dir}/libjpeg-6b.patch . &&
+		cp ${base_dir}/patches/libjpeg-6b.patch . &&
 		curl --remote-name $libjpeg_url &&
 		tar zxfv jpegsrc.v${libjpeg_version}.tar.gz
 		if ! [ $? -eq 0 ]
@@ -364,7 +359,7 @@ setup_opencv ()
 	cd ${working_dir}/opencv
 	if ! [ -f opencv-$opencv_version/configure.in ]
 	then
-		cp ${base_dir}/opencv-1.0.0.patch . &&
+		cp ${base_dir}/patches/opencv-1.0.0.patch . &&
 		curl --remote-name $opencv_url &&
 		tar zxfv opencv${opencv_version}.tar.gz &&
 		patch -p0 -N  opencv-${opencv_version}/cxcore/include/cxmisc.h opencv-1.0.0.patch
@@ -378,14 +373,23 @@ setup_opencv ()
 	cd opencv-$opencv_version
 	if ! [ -f ./cv/src/cvaccum.lo ]
 	then
-		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib --disable-apps --without-swig --without-python --without-gtk --without-quicktime &&
-		#./configure CXXFLAGS="-I/opt/local/include -march=nocona -mtune=generic" LDFLAGS=-L/opt/local/lib --disable-apps --without-swig --without-python --without-gtk --without-quicktime &&
+		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib --disable-apps --without-swig --without-python --without-gtk --without-quicktime --without-carbon &&
 		make
 		if ! [ $? -eq 0 ]
 		then
 			make clean
-			cd $working_dir
-			return 1
+			echo
+			echo "Trying to build with alternate configuration..."
+			echo
+			# fix that enables to build opencv on OSX 10.6
+			./configure CXXFLAGS="-I/opt/local/include -march=nocona -mtune=generic" LDFLAGS=-L/opt/local/lib --disable-apps --without-swig --without-python --without-gtk --without-quicktime --without-carbon &&
+			make
+			if ! [ $? -eq 0 ]
+			then
+				make clean
+				cd $working_dir
+				return 1
+			fi
 		fi
 	fi 
 	if make install
@@ -499,51 +503,6 @@ setup_ocropus ()
 	fi	
 }
 
-# videosegmenter
-
-setup_videosegmenter ()
-{
-	echo
-	echo "Installing videosegmenter $videosegmenter_version"
-	echo
-	mkdir -p ${working_dir}/videosegmenter
-	cd ${working_dir}/videosegmenter
-	if ! [ -f vsegmenter-$videosegmenter_version/videosegmenter.c ]
-	then
-		curl --remote-name $videosegmenter_url &&
-		tar zxfv vsegmenter${videosegmenter_version}.tar.gz
-		if ! [ $? -eq 0 ]
-		then
-			cd $working_dir
-			rm -rf videosegmenter
-			return 1
-		fi
-	fi
-	cd vsegmenter-$videosegmenter_version
-	if ! [ -f videosegmenter ]
-	then
-		make
-		if ! [ $? -eq 0 ]
-		then
-			make clean
-			cd $working_dir
-			return 1
-		fi
-	fi
-	if make install
-	then
-		echo
-		echo "Videosegmenter installed successfully."
-		cd $working_dir
-		return 0
-	else
-		echo
-		echo "Videosegmenter installation failed."
-		cd $working_dir
-		return 1
-	fi
-}
-
 ########################################################
 ############# Script execution starts here #############
 ########################################################
@@ -569,16 +528,25 @@ do
 		echo "3rd party tools installation failed."
 		exit 1
 	fi
+done
+for arg in "$@"
+do	
 	if [ $arg = "jpeg" ] && ! setup_libjpeg
 	then
 		echo "3rd party tools installation failed."
 		exit 1
 	fi
+done
+for arg in "$@"
+do	
 	if [ $arg = "tiff" ] && ! setup_libtiff
 	then
 		echo "3rd party tools installation failed."
 		exit 1
 	fi
+done
+for arg in "$@"
+do	
 	if [ $arg = "jam" ] && ! setup_jam
 	then
 		echo "3rd party tools installation failed."
@@ -593,11 +561,10 @@ setup_mediainfo &&
 setup_ffmpeg &&
 
 
-# Uncomment to use media analyzer
+# Media analyzer
 setup_opencv &&
 setup_tesseract &&
-setup_ocropus &&
-setup_videosegmenter
+setup_ocropus
 
 # --- Cleaning ---
 
