@@ -126,11 +126,22 @@
     <button type="button" onclick="Recordings.displayHoldActionPanel('http://outstack.virtuos.uos.de:8080/org.opencastproject.workflow.handler.downloaddvdworkflowoperationhandler/index.html?9cc8c5bf-ce45-493d-974a-e9ec9eb6ead3','9cc8c5bf-ce45-493d-974a-e9ec9eb6ead3');">Display Example of Hold UI</button>
     </p -->
     <div id="holdActionPanel-container">
+      <table id="holdStateHead" style="background: silver;margin:0px;" width="100%" style="float:left;">
+        <tr>
+          <td width="25%">Title</td>
+          <td width="10%">Presenter</td>
+          <td width="20%">Course/Series</td>
+          <td width="15%">Recording Date &amp; Time</td>
+          <td width="15%">Status</td>
+          <td width="15%">
+            <input type="hidden" id="holdWorkflowId" value="">
+            <button type="button" id="continueBtn" onclick="Recordings.continueWorkflow();" style="float:right;margin-right:16px;margin-bottom:10px;">Continue</button>
+            <button type="button" onclick="$('#holdActionPanel-container').fadeOut('fast');" style="float:right;margin-right:4px;">Cancel</button>
+          </td>
+        </tr>
+      </table>
       <iframe id="holdActionPanel-iframe" src="">
       </iframe>
-      <input type="hidden" id="holdWorkflowId" value="">
-      <button type="button" id="continueBtn" onclick="Recordings.continueWorkflow();" style="float:right;margin-right:16px;margin-bottom:10px;">Continue</button>
-      <button type="button" onclick="$('#holdActionPanel-container').fadeOut('fast');" style="float:right;margin-right:4px;">Cancel</button>
     </div>
   </body>
 </html>

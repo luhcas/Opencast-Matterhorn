@@ -15,10 +15,10 @@
     <table id="recordingsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
       <thead>
         <tr>
-          <th width="30%" class="sortable">Title</th>
-          <th width="15%" class="sortable">Presenter</th>
+          <th width="25%" class="sortable">Title</th>
+          <th width="10%" class="sortable">Presenter</th>
           <th width="20%" class="sortable">Course/Series</th>
-          <th width="20%" class="sortable date-column">Recording Date &amp; Time</th>
+          <th width="15%" class="sortable date-column">Recording Date &amp; Time</th>
           <th width="15%" class="sortable">Status</th>
           <th width="15%" class="sortable">Action</th>
         </tr>
@@ -52,9 +52,11 @@
         <xsl:value-of select="holdOperationTitle" />
       </td>
       <td>
+        <input type="hidden">
+        </input>
         <a>
-          <xsl:attribute name="href">
-            <xsl:text>javascript:Recordings.displayHoldActionPanel('</xsl:text><xsl:value-of select="holdActionPanelURL" /><xsl:text>','</xsl:text><xsl:value-of select="id" /><xsl:text>');</xsl:text>
+          <xsl:attribute name="onclick">
+            <xsl:text>Recordings.displayHoldActionPanel('</xsl:text><xsl:value-of select="holdActionPanelURL" /><xsl:text>','</xsl:text><xsl:value-of select="id" /><xsl:text>', this);</xsl:text>
           </xsl:attribute>
           <xsl:value-of select="holdActionTitle" />
         </a>

@@ -29,9 +29,9 @@ Recordings.lastCount = null;
  */
 Recordings.init = function() {
   // Event: clicked somewhere
-  $('body').click( function() {
-    $('#holdActionPanel-container').fadeOut('fast');
-  });
+//  $('body').click( function() {
+//    $('#holdActionPanel-container').fadeOut('fast');
+//  });
 
   /* Event: Scheduler button clicked */
   $('#button_schedule').click( function() {
@@ -67,7 +67,7 @@ Recordings.init = function() {
   
   $.tablesorter.addParser({
     id: 'lastname',
-    is: function(){ return false; },
+    is: function(){return false;},
     format: function(s) {
       var ln = s.split(' ');
       if(ln.length != 0){
@@ -201,8 +201,8 @@ Recordings.displayRecordings = function(state, reload) {
         cssDesc: 'sortable-desc',
         sortList: [[3,0]],
         headers: {
-          1: { sorter: 'lastname' },
-          3: { sorter: 'date' }
+          1: {sorter: 'lastname'},
+          3: {sorter: 'date'}
         }
       });
     } else {  // if no date/time column is present, init tablesorter the default way
@@ -210,7 +210,7 @@ Recordings.displayRecordings = function(state, reload) {
         cssAsc: 'sortable-asc',
         cssDesc: 'sortable-desc',
         headers: {
-          1: { sorter: 'lastname' }
+          1: {sorter: 'lastname'}
         }
       });
     }
@@ -258,10 +258,13 @@ Recordings.getURLParam = function(name) {
     return results[1];
 }
 
-Recordings.displayHoldActionPanel = function(URL, wfId) {
+Recordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
   $('#holdActionPanel-container iframe').attr('src', URL);
   $('#holdWorkflowId').val(wfId);
+  var parentRow = $(callerElm).parent().parent();
   $('#holdActionPanel-container').fadeIn('fast');
+  $('#holdActionPanel-container').offset($(parentRow).offset());
+  $('#holdActionPanel-container').width($(parentRow).outerWidth()-2);
 }
 
 Recordings.continueWorkflow = function() {
