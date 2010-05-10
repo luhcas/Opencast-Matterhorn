@@ -450,7 +450,7 @@ public class IngestRestService {
    * @return HTML form ready for uploading the file
    */
   @GET
-  @Path("uploadform.html")
+  @Path("filechooser-local.html")
   @Produces(MediaType.TEXT_HTML)
   public Response createUploadJobHtml() {
     try {
@@ -462,6 +462,19 @@ public class IngestRestService {
       html = html.replaceAll("\\{jobId\\}", job.getId());
       logger.info("New upload job created: " + job.getId());
       jobs.put(job.getId(), job);
+      return Response.ok(html).build();
+    } catch (Exception ex) {
+      logger.warn(ex.getMessage(), ex);
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  @GET
+  @Path("filechooser-inbox.html")
+  @Produces(MediaType.TEXT_HTML)
+  public Response createInboxHtml() {
+    try {
+      String html = IOUtils.toString(getClass().getResourceAsStream("/templates/inboxform.html"));
       return Response.ok(html).build();
     } catch (Exception ex) {
       logger.warn(ex.getMessage(), ex);
@@ -600,8 +613,8 @@ public class IngestRestService {
    */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("getProgress/{JobId}")
-  public Response getProgress(@PathParam("JobId") String jobId) {
+  @Path("getProgress/{jobId}")
+  public Response getProgress(@PathParam("jobId") String jobId) {
     EntityManager em = emf.createEntityManager();
     try {
       UploadJob job = null;
@@ -898,6 +911,50 @@ public class IngestRestService {
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
+    // createUploadJobHtml
+    endpoint = new RestEndpoint(
+            "createUploadJobHtml",
+            RestEndpoint.Method.GET,
+            "/filechooser",
+            "Creates an upload job and returns an html form ready to submit the selected file to /addTrackMonitored with the newly created upload job Id.");
+    endpoint.addFormat(new Format("HTML", "HTML form for submitting the file with the newly created upload job", null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+
+    // addTrackMonitored
+    endpoint = new RestEndpoint(
+            "addTrackMonitored",
+            RestEndpoint.Method.POST,
+            "/addTrackMonitored/{jobId}",
+            "Adds a track to the specified MediaPackage while counting the bytes received during the upload of the file. POSTs to this method must be of type multipart/form-data.");
+    endpoint.addFormat(new Format("HTML", "HTML that triggers a javascript function in the parent site (upload form lives in an iframe) to indicate the POST to this method was successfully finished.", null));
+    endpoint.addPathParam(new Param("jobId", Param.Type.STRING, null, "Upload job id"));
+    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null, "Id of the MediaPackage to which the file should be added"));
+    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The flavor of the file in the MediaPackage (eg. presenter/source, presentation/source etc)"));
+    endpoint.addBodyParam(false, "presenter/source", "flavor : ");
+    endpoint.addBodyParam(true, null, "file : binary content of the uploaded file");
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // getUploadProgress
+    endpoint = new RestEndpoint(
+            "getUploadProgress",
+            RestEndpoint.Method.GET,
+            "/getUploadProgress/{jobId}",
+            "Returns a JSON object reporting the status of the upload with the provided upload job id.");
+    endpoint.addFormat(new Format("JSON", "JSON object reporting the status of the upload with the provided upload job id.", null));
+    endpoint.addPathParam(new Param("jobId", Param.Type.STRING, null, "Upload job id."));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+    
     // TODO: v v v --- check the documentation and implementation of the existing methods --- v v v
 
     // // addTrackMonitored (InputStream)
