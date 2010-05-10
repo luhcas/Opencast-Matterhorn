@@ -917,7 +917,12 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     String[] friendlyNames = devices.split(",");
     LinkedList<String> deviceList = new LinkedList<String>();
     for (String name : friendlyNames) {
-      deviceList.add(name);
+      String srcName = configService.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE);
+      if (srcName.contains("hw:")) {
+        deviceList.add(name + ",audio");
+      } else {
+        deviceList.add(name + ",video");
+      }
     }
     return deviceList;
   }

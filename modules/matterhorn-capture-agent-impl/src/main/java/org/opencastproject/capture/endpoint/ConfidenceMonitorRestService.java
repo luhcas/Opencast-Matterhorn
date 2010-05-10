@@ -109,7 +109,8 @@ public class ConfidenceMonitorRestService {
     LinkedList<AgentDevice> devices = new LinkedList<AgentDevice>();
     List<String> names = service.getFriendlyNames();
     for (String name : names) {
-      devices.add(new AgentDevice(name));
+      String nameType[] = name.split(",");
+      devices.add(new AgentDevice(nameType[0], nameType[1]));
     }
     return devices;
   }

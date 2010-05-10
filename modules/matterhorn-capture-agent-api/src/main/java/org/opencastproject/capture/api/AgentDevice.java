@@ -35,14 +35,22 @@ public class AgentDevice {
   @XmlElement(name="name")
   private String name;
   
+  @XmlElement(name="type")
+  private String type;
+  
   public AgentDevice() {}
 
-  public AgentDevice(String device) {
+  public AgentDevice(String device, String type) {
     this.name = device;
+    this.type = type;
   }
   
   public String getDevice() {
     return this.name;
+  }
+  
+  public String getType() {
+    return this.type;
   }
   
 
