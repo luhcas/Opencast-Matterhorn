@@ -262,9 +262,14 @@ Recordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
   $('#holdActionPanel-container iframe').attr('src', URL);
   $('#holdWorkflowId').val(wfId);
   var parentRow = $(callerElm).parent().parent();
-  $('#holdActionPanel-container').fadeIn('fast');
+  $('#holdStateHeadRow-title').html($($(parentRow).children().get(0)).html());        // not putting any more time into doing this iteratively
+  $('#holdStateHeadRow-presenter').html($($(parentRow).children().get(1)).html());
+  $('#holdStateHeadRow-series').html($($(parentRow).children().get(2)).html());
+  $('#holdStateHeadRow-date').html($($(parentRow).children().get(3)).html());
+  $('#holdStateHeadRow-status').html($($(parentRow).children().get(4)).html());
   $('#holdActionPanel-container').offset($(parentRow).offset());
   $('#holdActionPanel-container').width($(parentRow).outerWidth()-2);
+  $('#holdActionPanel-container').fadeIn('fast');
 }
 
 Recordings.continueWorkflow = function() {

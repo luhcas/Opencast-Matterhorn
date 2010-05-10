@@ -127,12 +127,12 @@
     </p -->
     <div id="holdActionPanel-container">
       <table id="holdStateHead" style="background: silver;margin:0px;" width="100%" style="float:left;">
-        <tr>
-          <td width="25%">Title</td>
-          <td width="10%">Presenter</td>
-          <td width="20%">Course/Series</td>
-          <td width="15%">Recording Date &amp; Time</td>
-          <td width="15%">Status</td>
+        <tr id="holdStateHeadRow">
+          <td id="holdStateHeadRow-title" width="25%">Title</td>
+          <td id="holdStateHeadRow-presenter" width="10%">Presenter</td>
+          <td id="holdStateHeadRow-series" width="20%">Course/Series</td>
+          <td id="holdStateHeadRow-date" width="15%">Recording Date &amp; Time</td>
+          <td id="holdStateHeadRow-status" width="15%">Status</td>
           <td width="15%">
             <input type="hidden" id="holdWorkflowId" value="">
             <button type="button" id="continueBtn" onclick="Recordings.continueWorkflow();" style="float:right;margin-right:16px;margin-bottom:10px;">Continue</button>
