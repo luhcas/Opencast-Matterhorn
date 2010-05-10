@@ -6,6 +6,9 @@
   <title>${meta.title} REST Documentation</title>
   <style type="text/css">
   /* styles for the page */
+  HTML {
+    font: 13px/1.231 arial,helvetica,clean,sans-serif;
+  }
   FIELDSET {
     margin-bottom: 2em;
     margin-top: 0.5em;
@@ -44,9 +47,7 @@
     font-weight: bold;
   }
   .method_header TH {
-    background: #CCFF00 none repeat scroll 0 0;
-    border-bottom: 3px solid #333;
-    color: #669;
+    background: #F6921E none repeat scroll 0 0;
     font-size: 1.2em;
     font-weight: bold;
     padding: 0.6em 0.3em;
@@ -58,9 +59,6 @@
     padding: 0.6em 1em;
   }
   TR.method TH {
-    border-bottom: 1px solid #CCC;
-    color: #663;
-    font-size: 84%;
     font-family: sans-serif;
     font-weight: normal;
     padding: 0.5em 1.0em;
@@ -72,17 +70,14 @@
   }
   TR.method TD {
     border-bottom: 1px solid #CCC;
-    font-size: 136%;
     padding-bottom: 6px;
     padding-left: 4px;
     padding-top: 6px;
     vertical-align: middle;
   }
   TR.testform TD {
-    font-size: 110%;
   }
   TR.testform A {
-    font-size: 120%;
   }
   DIV.hidden {
     display: none;
@@ -108,7 +103,13 @@
   </style>
 </head>
 <body>
-<h1>${meta.title} REST Documentation</h1>
+<div style="margin-top: .5em">
+	<a href="../../../welcome.html">
+		<h1 style="color: rgb(246, 146, 30); font-size:138.5%;"><img src="../../../shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn" border=0>&nbsp;&nbsp;Opencast Matterhorn</h1>
+	</a>
+</div>
+
+<h2>${meta.title} REST Documentation</h2>
 <span class="meta_url">${meta.url}</span>
 <#if meta.abstract??>
 <div class="meta_abstract">${meta.abstract}</div>
