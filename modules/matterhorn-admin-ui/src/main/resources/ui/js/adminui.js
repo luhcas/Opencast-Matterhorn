@@ -13,10 +13,8 @@ AdminUI.internationalize = function(obj, prefix){
   }
 }
 
-AdminUI.log = function(msg){
-  if(console){
-    console.log(msg);
-  }else{
-    alert(msg);
+AdminUI.log = function(){
+  if(typeof console != 'undefined'){
+    console.log.apply(this, arguments);
   }
 }
