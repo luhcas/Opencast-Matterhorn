@@ -52,31 +52,31 @@ Opencast.Watch = (function ()
             // set the abstract
             $('#oc_description-sections').html($('#oc-abstract').html());
 
-        // set the media URLs
-            var mediaUrlOne = $('#oc-video-presenter-source').html();
-            var mediaUrlTwo = $('#oc-video-presentation-source').html();
-            
-            
-            // legacy support for any engage tagged track
-            var engageUrl = $('#oc-video-engage').html();
+            // set the media URLs
+            var mediaUrlOne = $('#oc-video-presenter-source-streaming').html();
+            var mediaUrlTwo = $('#oc-video-presentation-source-streaming').html();
+
             if(mediaUrlOne === null)
-              mediaUrlOne = engageUrl;
+              mediaUrlOne = $('#oc-video-presenter-source').html();
+
+            if(mediaUrlTwo === null)
+              mediaUrlTwo = $('#oc-video-presentation-source').html();
 
             mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
             mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
-           
+
             Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
-            
+
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')
             {
                 Opencast.Player.setVideoSizeList(MULTIPLAYER);
-                
+
                 //
                 mediaOneWidth = 720;
                 mediaOneHeight = 480;
                 mediaTwoWidth = 1024;
                 mediaTwoHeight = 768;
-                
+
                 //
                 mediaOneFormat = mediaOneWidth / mediaOneHeight;
                 mediaTwoFormat = mediaTwoWidth / mediaTwoHeight;
