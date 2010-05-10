@@ -38,6 +38,7 @@ apt-get autoremove &> /dev/null
 
 # Restore appropriate sources.list
 mv $SRC_LIST.$SRC_LIST_BKP $SRC_LIST &> /dev/null
+apt-get update
 
 # Remove the configuration that starts matterhorn on boot
 rm -f $STARTUP_SCRIPT

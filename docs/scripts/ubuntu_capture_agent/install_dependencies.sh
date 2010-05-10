@@ -11,7 +11,7 @@ if [[ ! $INSTALL_RUN ]]; then
 fi
 
 # Create a backup of the sources.list file and create its own (preserves any existing sources.list.backup)
-mv $SRC_LIST $SRC_LIST.$BKP_SUFFIX
+mv -n $SRC_LIST $SRC_LIST.$BKP_SUFFIX
 echo "deb http://us.archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse" >> $SRC_LIST
 echo "deb http://us.archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse" >> $SRC_LIST
 echo "deb http://security.ubuntu.com/ubuntu karmic-security main restricted universe multiverse" >> $SRC_LIST
