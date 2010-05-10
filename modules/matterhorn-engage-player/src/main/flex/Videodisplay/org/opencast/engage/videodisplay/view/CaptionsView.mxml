@@ -58,7 +58,14 @@
 
                 txt_captions.filters = myfilters;
             }
-        ]]>
+            
+            private function copyToClipboard():void
+            {
+            	System.setClipboard(txt_captions.text);
+            	
+            	
+            }
+         ]]>
     </mx:Script>
 
     <mx:VBox 
@@ -75,6 +82,8 @@
             htmlText = "{ model.currentSubtitle }"
             styleName = "captions"
             focusOut = "{ txt_captions.setFocus() }"
+            click="{ copyToClipboard() }"
+            toolTip="Click to copy the text."
             />
     </mx:VBox>
 </mx:VBox>

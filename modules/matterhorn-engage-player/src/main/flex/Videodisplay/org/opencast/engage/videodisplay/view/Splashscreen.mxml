@@ -27,6 +27,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import org.osmf.layout.VerticalAlign;
         	import bridge.ExternalFunction;
             import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
             import org.opencast.engage.videodisplay.state.PlayerState;
@@ -40,7 +41,7 @@
             [Bindable]
             public var model:VideodisplayModel;
 
-            /**
+                        /**
              * showButton
              *
              * Show the Button in the middle of the video
@@ -78,31 +79,16 @@
             }
 
             /**
-             * toggleFullScreen
+             * fullscreen
              *
              * Toggle between normal screen and full screen mode
              *
              **/
-            private function toggleFullScreen():void
+            private function fullscreen():void
             {
-                try
-                {
-                    switch ( Application.application.stage.displayState )
-                    {
-                        case StageDisplayState.FULL_SCREEN:
-                            /* If already in full screen mode, switch to normal mode. */
-                            Application.application.stage.displayState = StageDisplayState.NORMAL;
-                            break;
-                        default:
-                            /* If not in full screen mode, switch to full screen mode. */
-                            Application.application.stage.displayState = StageDisplayState.FULL_SCREEN;
-                            break;
-                    }
-                }
-                catch ( err:SecurityError )
-                {
-                    // ignore
-                }
+                Application.application.stage.displayState = StageDisplayState.FULL_SCREEN;
+                model.fullscreenMode = true;
+                model.layoutMetadataParallelElement.verticalAlign = VerticalAlign.MIDDLE;
             }
         ]]>
     </mx:Script>
@@ -212,20 +198,41 @@
         rollOut = "{ hideButton(); }"
         toolTip = "Pause"
         />
-
-	
-
-    <mx:HBox 
-        width = "100%"
-        height = "100%"
-        left = "5"
-        right = "5"
-        top = "5"
-        bottom = "0"
-        verticalAlign = "bottom"
-        verticalScrollPolicy = "off"
-        horizontalScrollPolicy = "off"
-        >
+        
+       
+    <mx:SWFLoader 
+    	source="@Embed(source='../../../../../style/oc_logo_loader.swf')" 
+        scaleContent="true" 
+        autoLoad="true"
+        verticalCenter = "0"
+        horizontalCenter = "0"
+        visible="{ model.loader }"
+        includeInLayout="{ model.loader }"
+        />
+       
+    
+    <mx:VBox
+    	width="100%"
+    	height="100%"
+    	>
+    	
+    	<mx:HBox 
+    		width="100%"
+    		horizontalAlign="right"
+    		>
+    		
+    	<mx:Button 
+            styleName="Fullscreen"
+            visible = "{!model.fullscreenMode}"
+            includeInLayout = "{!model.fullscreenMode}"
+            click = "{ fullscreen() }"
+            />
+    		
+    	</mx:HBox>
+   
+        <mx:Spacer 
+	       height="100%"
+	       />
 
         <mx:VBox 
             width = "100%"
@@ -233,7 +240,28 @@
             horizontalScrollPolicy = "off"
             bottom="10"
             >
-
+             
+        <mx:Label 
+            text="Total: { model.bytesTotal.toString() }"
+            color="#ffffff"
+            />
+            
+        <mx:Label 
+            text="Laoded: { model.bytesLoaded.toString() }"
+            color="#ffffff"
+            />
+            
+            
+             <mx:Label 
+            text="font: { model.fontSizeCaptions.toString() }"
+            color="#ffffff"
+            />
+            
+             <mx:Label 
+            text="progress: { model.progress.toString() }"
+            color="#ffffff"
+            />
+        
             <view:CaptionsView 
                 id = "captionsView"
                 width = "100%"
@@ -245,31 +273,17 @@
                 visible = "{model.fullscreenMode}"
                 includeInLayout = "{model.fullscreenMode}"
                 />
-
-            <view:VideocontrollerView 
+                
+            <view:FullscreenVideoControlsView 
                 id = "videocontrollerView"
                 width = "100%"
                 height = "100%"
                 visible = "{model.fullscreenMode}"
                 includeInLayout = "{model.fullscreenMode}"
                 />
-        </mx:VBox>
+	     
+	     </mx:VBox>
+     
+    </mx:VBox>
 
-        <mx:VBox 
-            horizontalGap = "0"
-            verticalGap = "0"
-            >
-
-            <mx:Button 
-                id = "btn_fullscreen"
-                styleName = "{ model.fullscreenMode == false ? 'Fullscreen' : 'Normalscreen' }"
-                click = "{ toggleFullScreen() }"
-                toolTip = "{ model.fullscreenMode == false ? 'Fullscreen' : 'Normalscreen' }"
-                />
-
-            <mx:Spacer 
-                height = "5"
-                />
-        </mx:VBox>
-    </mx:HBox>
 </mx:Canvas>

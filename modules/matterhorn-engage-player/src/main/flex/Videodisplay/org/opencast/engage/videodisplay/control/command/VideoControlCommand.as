@@ -50,6 +50,7 @@ package org.opencast.engage.videodisplay.control.command
             var percent:int = 100;
             var skipVolume:Number = 0.1;
             var playState:Boolean = false;
+           
 
             switch ( event.videoControlType )
             {

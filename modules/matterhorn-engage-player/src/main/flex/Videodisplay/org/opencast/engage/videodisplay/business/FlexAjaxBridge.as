@@ -5,17 +5,15 @@ package org.opencast.engage.videodisplay.business
     import flash.events.KeyboardEvent;
     import flash.external.ExternalInterface;
     
+    import mx.controls.Alert;
+    
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.control.event.InitMediaPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
     import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
     import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
-    import org.osmf.layout.HorizontalAlign;
-    import org.osmf.layout.LayoutMetadata;
     import org.osmf.layout.LayoutMode;
-    import org.osmf.layout.ScaleMode;
-    import org.osmf.layout.VerticalAlign;
     import org.swizframework.Swiz;
 
     public class FlexAjaxBridge
@@ -156,8 +154,14 @@ package org.opencast.engage.videodisplay.business
         {
             if ( captionsURL != model.captionsURL )
             {
-                model.captionsURL = captionsURL;
-                Swiz.dispatchEvent( new LoadDFXPXMLEvent( model.captionsURL ) );
+                var pos:int = model.url.lastIndexOf( "/" );
+                var fileType:String = model.url.substring( pos +1 );
+                
+                if( fileType == 'matterhorn.mp4' )
+                {
+                    model.captionsURL = captionsURL;
+                    Swiz.dispatchEvent( new LoadDFXPXMLEvent( model.captionsURL ) );
+                }
             }
         }
         
@@ -169,6 +173,8 @@ package org.opencast.engage.videodisplay.business
         public function setMediaURL( mediaURLOne:String, mediaURLTwo:String ):void
         {
             Swiz.dispatchEvent( new InitMediaPlayerEvent( mediaURLOne, mediaURLTwo ) );
+            model.url = mediaURLOne;
+            
         }
         
         /**
@@ -176,33 +182,24 @@ package org.opencast.engage.videodisplay.business
          *
          * When the learner press the video size control button.
          */
+        
         public function videoSizeControl( sizeLeft:Number, sizeRight:Number ):void
         {
-			if( sizeLeft == 100 )
-            {
-                model.layoutMetadataOne.percentWidth = sizeLeft;
-                model.layoutMetadataTwo.percentWidth = sizeRight;
-                model.layoutMetadataOne.horizontalAlign = HorizontalAlign.CENTER;
-                model.layoutMetadataParallelElement.layoutMode = LayoutMode.NONE;
-            }
-            else if(sizeRight == 100)
-            {
-                model.layoutMetadataOne.percentWidth = sizeLeft;
-                model.layoutMetadataTwo.percentWidth = sizeRight;
-                model.layoutMetadataTwo.horizontalAlign = HorizontalAlign.CENTER;
-                model.layoutMetadataParallelElement.layoutMode = LayoutMode.NONE;
-            }
-            else 
-            {               
-            	model.layoutMetadataParallelElement.layoutMode = LayoutMode.HORIZONTAL;
-            	model.layoutMetadataOne.percentWidth = sizeLeft;
-                model.layoutMetadataTwo.percentWidth = sizeRight;
-                model.layoutMetadataOne.horizontalAlign = HorizontalAlign.CENTER;
-                model.layoutMetadataTwo.horizontalAlign = HorizontalAlign.CENTER;
-            }
+			
+			if( sizeLeft == 0 && sizeRight == 100 || sizeLeft == 100 && sizeRight == 0 )
+			{
+			    model.layoutMetadataParallelElement.layoutMode = LayoutMode.NONE;
+			}
+			else
+			{
+		        model.layoutMetadataParallelElement.layoutMode = LayoutMode.HORIZONTAL;
+			    
+			}
+			model.layoutMetadataOne.percentWidth = sizeLeft;
+            model.layoutMetadataTwo.percentWidth = sizeRight;
 		}
         
-         /**
+        /**
          * getViewState
          *
          * The return value is available in the calling javascript.
@@ -211,6 +208,17 @@ package org.opencast.engage.videodisplay.business
         {
         	return model.mediaState;
         }
+        
+        /**
+         * getViewState
+         *
+         * The return value is available in the calling javascript.
+         */
+        public function getMediaHeight():Number
+        {
+          return model.mediaContainer.measuredHeight;
+        }
+        
         
         /**
          * reportKeyDown
@@ -338,13 +346,23 @@ package org.opencast.engage.videodisplay.business
             // rewind
             if( charCode == 82 || charCode == 114 ) // R or r
             {
+                var playRewind:Boolean = model.mediaPlayer.playing;
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.REWIND ) );
+                if(playRewind)
+                {
+                    model.mediaPlayer.play();
+                }
             }
 
             // Fast forward
             if( charCode == 70 || charCode == 102 ) // F or f
             {
+                var playForward:Boolean = model.mediaPlayer.playing;
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.FASTFORWARD ) );
+                if(playForward)
+                {
+                    model.mediaPlayer.play();
+                }
             }
 
             // time

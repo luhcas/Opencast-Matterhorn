@@ -21,6 +21,7 @@ package org.opencast.engage.videodisplay.model
     
     import org.opencast.engage.videodisplay.control.util.TimeCode;
     import org.opencast.engage.videodisplay.state.MediaState;
+    import org.opencast.engage.videodisplay.state.SoundState;
     import org.opencast.engage.videodisplay.state.VideoSizeState;
     import org.opencast.engage.videodisplay.vo.LanguageVO;
     import org.osmf.containers.MediaContainer;
@@ -83,12 +84,18 @@ package org.opencast.engage.videodisplay.model
 
         // The current Subtitle
         public var currentSubtitle:String = '';
-
-        // error 
-        public var error:Error;
-
+        
+        // errorId
+        public var errorId:String = ''
+        
+        // errorMessage
+        public var errorMessage:String = '';
+        
+        // errorDetail
+        public var errorDetail:String = '';
+       
         // Skip Fast Forward -change time
-        public var fastForwardTime:Number = 10;
+        public var fastForwardTime:Number = 0;
 
         // Captions font size
         public var fontSizeCaptions:int = 12;
@@ -117,6 +124,9 @@ package org.opencast.engage.videodisplay.model
         // MediaContainer
         public var mediaContainer:MediaContainer;
         
+        // mediaContainerVisible
+        public var mediaContainerVisible:Boolean = false;
+        
         // layoutMetadata
         public var layoutMetadata:LayoutMetadata;
         
@@ -129,27 +139,6 @@ package org.opencast.engage.videodisplay.model
         // layoutMetadataTwo
         public var layoutMetadataTwo:LayoutMetadata;
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    
-        
-        
-        
-        
-        
-        
-        
-        
         // player volume
         public var playerVolume:Number = 1.0;
 
@@ -157,7 +146,7 @@ package org.opencast.engage.videodisplay.model
         public var progressBar:ProgressBar = new ProgressBar();
 
         // Rewind Time
-        public var rewindTime:Number = 10;
+        public var rewindTime:Number = 0;
 
         // Time Code
         public var timeCode:TimeCode = new TimeCode();
@@ -170,5 +159,20 @@ package org.opencast.engage.videodisplay.model
         
         // bytesTotal
         public var bytesTotal:Number = 0;
+        
+        // bytesLoaded
+        public var bytesLoaded:Number = 0;
+        
+        // progress
+        public var progress:Number = 0;
+        
+        // soundState
+        public var soundState:String = SoundState.VOLUMEMAX;
+        
+        // url
+        public var url:String = '';
+        
+        // loader
+        public var loader:Boolean = true;
     }
 }

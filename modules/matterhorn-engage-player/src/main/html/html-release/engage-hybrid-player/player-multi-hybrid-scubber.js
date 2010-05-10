@@ -35,8 +35,8 @@ Opencast.Scrubber = (function ()
    
         });
 
-        $('#draggable').bind('dragstop', function (event, ui) 
-        {
+        $('#draggable').bind('dragstop', function (event, ui)         {
+
             Opencast.Player.setDragging(false);
             $("#scrubber").css("left", $(this).css("left"));
             $("#play-progress").css("width", $(this).css("left"));
@@ -51,6 +51,24 @@ Opencast.Scrubber = (function ()
 
         $("#scubber-channel").click(function (e)
         {
+           var x = e.pageX - this.offsetLeft;
+        x = Math.max(4, x - 8);
+        var sc_x = $("#scrubber").position().left;
+
+        if (x < (sc_x - 8) || (sc_x + 8) < x)
+        {
+            $("#draggable").css("left", x);
+            $("#scrubber").css("left", x);
+            $("#play-progress").css("width", x);
+
+            var newPosition = Math.round((x / $("#scubber-channel").width()) * Opencast.Player.getDuration());
+            Videodisplay.seek(newPosition);
+        }
+
+        }); 
+        
+        $("#segment-holder-empty").click(function (e)
+        {
             var x = e.pageX - this.offsetLeft;
             x = Math.max(4, x - 8);
             var sc_x = $("#scrubber").position().left;
@@ -60,19 +78,21 @@ Opencast.Scrubber = (function ()
                 $("#draggable").css("left", x);
                 $("#scrubber").css("left", x);
                 $("#play-progress").css("width", x);
-
-                var newPosition = Math.round((x / $("#scubber-channel").width()) * Opencast.Player.getDuration());
+    
+                var newPosition = Math.round((x / $("#segment-holder-empty").width()) * Opencast.Player.getDuration());
                 Videodisplay.seek(newPosition);
             }
+
         }); 
+
 
         $("#draggable").click(function (e)
         {
             $("#scrubber").focus();
         }); 
     }
+    
     return {
         init: init
     };
 }());
-

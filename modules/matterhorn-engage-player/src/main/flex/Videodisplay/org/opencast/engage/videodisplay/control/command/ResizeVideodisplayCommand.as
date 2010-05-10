@@ -15,8 +15,9 @@
  */
 package org.opencast.engage.videodisplay.control.command
 {
+    import mx.controls.Alert;
     import mx.core.Application;
-
+    
     import org.opencast.engage.videodisplay.control.event.ResizeVideodisplayEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
     import org.swizframework.Swiz;
@@ -45,23 +46,28 @@ package org.opencast.engage.videodisplay.control.command
              * Application min widht: 231px, min Font Size ?, 231/33 = 7px
              *
              * */
-            var divisor:int = 33;
-
+            var divisor:int = 50;
+            
             if ( Application.application.width == 400 )
             {
                 model.fontSizeCaptions = 12;
             }
             else
             {
-                if ( Application.application.width / divisor < 20 )
+                if ( Application.application.width / divisor < 14 )
                 {
-                    model.fontSizeCaptions = Application.application.width / divisor;
+                    model.fontSizeCaptions = 14;
                 }
-                else
+                else if( Application.application.width / divisor >= 14 && Application.application.width / divisor <= 20 )
                 {
-                    model.fontSizeCaptions = 20;
+                    model.fontSizeCaptions = (Application.application.width / divisor ) -1;
+                }
+                else if( Application.application.width / divisor > 20 )
+                {
+                	model.fontSizeCaptions = 20;
                 }
             }
+            
         }
     }
 }

@@ -65,7 +65,6 @@ package bridge
         public static const SETCCICONON:String            = 'Opencast.Player.setCCIconOn'; 
           
         public static const SETCCICONOFF:String           = 'Opencast.Player.setCCIconOff'; 
-        
-        public static const SETVIDEOSIZELIST:String		  = 'Opencast.Player.setVideoSizeList';
+                
     }
 }

@@ -27,7 +27,6 @@
     right="5"
     >
 
-    
     <view:MediaContainerView
         id = "mediaContainerView"
         width = "100%"

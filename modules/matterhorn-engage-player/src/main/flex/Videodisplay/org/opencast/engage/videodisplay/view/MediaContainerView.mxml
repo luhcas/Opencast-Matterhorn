@@ -53,12 +53,13 @@
                 model.mediaPlayer = new MediaPlayer();
                 model.mediaPlayer.autoRewind = true;
                 model.mediaPlayer.autoPlay = true;
+                model.mediaPlayer.volume = 0;
                
                 // Set up the container
                 model.mediaContainer = new MediaContainer();
-                model.mediaContainer.layoutMetadata.scaleMode = ScaleMode.LETTERBOX;
                 
                 this.mediaContainerUIComponent.container = model.mediaContainer;
+                
             }
 
             /**
@@ -73,12 +74,14 @@
             }
         ]]>
     </mx:Script>
-   
-     <osmf:MediaContainerUIComponent
+    
+    <osmf:MediaContainerUIComponent
         id = "mediaContainerUIComponent"
+        addedToStage = "initPlayer()"
         width="100%"
         height="100%"
-        addedToStage = "initPlayer()"
-        />   
+        visible="{ model.mediaContainerVisible }"
+       />   
+      
         
 </mx:Canvas>

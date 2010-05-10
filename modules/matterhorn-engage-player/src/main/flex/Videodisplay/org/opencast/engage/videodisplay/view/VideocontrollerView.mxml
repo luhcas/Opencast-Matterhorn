@@ -255,7 +255,7 @@
             height = "40"
             toolTip = "{ model.playerVolume == 0 ? 'Mute' : 'Unmute'}"
             click = "{ toggleMute() }"
-            styleName = "{ model.playerVolume == 0 ? 'volumeMuteBig' : 'volumeHighBig' }"
+            styleName = "{ model.playerVolume == 0 ? 'volumeMute' : 'volumeMax' }"
             />
 
         <mx:Spacer 

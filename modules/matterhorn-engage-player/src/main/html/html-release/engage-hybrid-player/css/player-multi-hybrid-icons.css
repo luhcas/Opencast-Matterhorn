@@ -14,11 +14,6 @@
  *
  */
  
-:focus 
-{    
-   outline: 2px solid #FA6E23 !important;
-}
-
 input
 {
   margin:                   0;
@@ -238,55 +233,59 @@ input:hover
 #oc_btn-dropdown
 {
   width:                    48px;
-  height:                   36px;
   text-align:               center;
-  background:               transparent;
-  margin-top:               6px;
+  margin-right:             5px;
+  margin-top:               4px;
 }
 
 .oc_btn-singleDisplay
 {
-  background:               url(../icons/monitor.png) no-repeat center top;
-  width:                    24px;
-  height:                   24px;
-  margin-left:              8px;
-  margin-right:             8px;
+  background:               transparent url("../img/icons.png");
+  background-position:      -76px -466px;
+  width:                    30px;
+  height:                   36px;
+  margin-right:             5px;
+  margin-left:              5px;
 }
 
 .oc_btn-bigLeftDisplay
 {
-  background:               url(../icons/monitor_left.png) no-repeat center top;
-  width:                    36px;
-  height:                   24px;
-  margin-left:              8px;
-  margin-right:             8px;
+  background:               transparent url("../img/icons.png");
+  background-position:      -120px -466px;
+  width:                    40px;
+  height:                   36px;
+  margin-right:             5px;
+  margin-left:              5px;
 }
 
 .oc_btn-centerDisplay
 {
-  background:               url(../icons/monitor_center.png) no-repeat center top;
-  width:                    48px;
-  height:                   24px;
-  margin-left:              8px;
-  margin-right:             8px;
+  background:               transparent url("../img/icons.png");
+  background-position:      -18px -466px;
+  width:                    46px;
+  height:                   36px;
+  margin-right:             5px;
+  margin-left:              5px;
 }
 
 .oc_btn-bigRightDisplay
 {
-  background:               url(../icons/monitor_right.png) no-repeat center top;
-  width:                    36px;
-  height:                   24px;
-  margin-left:              8px;
-  margin-right:             8px;
+  background:               transparent url("../img/icons.png");
+  background-position:      -180px -466px;
+  width:                    40px;
+  height:                   36px;
+  margin-right:             5px;
+  margin-left:              5px;
 }
 
 .oc_btn-audioDisplay
 {
-  background:               url(../icons/audio.png) no-repeat center top;
-  width:                    24px;
-  height:                   24px;
-  margin-left:              8px;
-  margin-right:             8px;
+  background:               transparent url("../img/icons.png");
+  background-position:      -260px -466px;
+  width:                    28px;
+  height:                   36px;
+  margin-right:             5px;
+  margin-left:              5px; 
 }
 
 .oc_embed-720x545

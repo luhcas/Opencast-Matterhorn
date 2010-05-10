@@ -16,31 +16,288 @@
      *
      */
 -->
-<mx:Canvas 
+<mx:VBox 
     xmlns:mx = "http://www.adobe.com/2006/mxml"
-    width = "100%"
-    height = "40"
-    backgroundAlpha = "1.0"
+    
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
+    horizontalAlign="center"
+    horizontalGap="0"
     >
 
     <mx:Script>
         <![CDATA[
-           
-           
-            
+        	import org.osmf.layout.VerticalAlign;
+        	import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
+            import bridge.ExternalFunction;
+            import org.opencast.engage.videodisplay.state.PlayerState;
+            import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
+            import org.swizframework.Swiz;
             import org.opencast.engage.videodisplay.model.VideodisplayModel;
-           
+            import mx.core.Application;
+            import mx.controls.Alert;
+            import flash.external.ExternalInterface;
 
             [Autowire]
             [Bindable]
             public var model:VideodisplayModel;
 
-
+            /**
+             * normalscreen
+             *
+             * Toggle between normal screen and full screen mode
+             *
+             **/
+            private function normalscreen():void
+            {
+                Application.application.stage.displayState = StageDisplayState.NORMAL;
+            }
             
+            /**
+             * onSeek
+             *
+             * Seek the video
+             *
+             * */
+            private function onSeek():void
+            {
+                model.mediaPlayer.seek(hs_seek.value);
+            }
+            
+            /**
+             * seekDataTipFunc
+             *
+             * Generate the string for the tool tip of the Seek Slider.
+             *
+             * */
+            private function seekDataTipFunc( val:String ):String
+            {
+                var value:int = int( val );
+                return model.timeCode.getTC( value );
+            }
+            
+            /**
+             * toggleMute
+             *
+             * Toggle between mute or unmute
+             *
+             * */
+            private function toggleMute():void
+            {
+                ExternalInterface.call( ExternalFunction.MUTE, '' );
+            }
+            
+            /**
+             * changeVolume
+             *
+             * Change the volume of the video
+             *
+             * */
+            private function changeVolume():void
+            {
+               model.mediaPlayer.volume = hs_volume.value;
+            }
+            
+            /**
+             * volumeDataTipFunc
+             *
+             * Generate the string for the tool tip of the Seek Slider.
+             *
+             * */
+            private function volumeDataTipFunc( val:String ):String
+            {
+                var numb:Number = new Number( val );
+                return ( numb * 100 ).toFixed( 0 ) + ' %';
+            }
+            
+            /**
+             * jumpForward
+             *
+             * Jump forward in the video
+             *
+             * */
+            private function jumpForward():void
+            {
+               if( !model.mediaPlayer.seeking )
+               {
+                model.mediaPlayer.seek( model.currentPlayhead + ( model.currentDuration * 0.2 ) );
+               }
+            }
+            
+            /**
+             * jumpBack
+             *
+             * Jump back in the video
+             *
+             * */
+            private function jumpBack():void
+            {
+               if( !model.mediaPlayer.seeking )
+               {
+                model.mediaPlayer.seek( model.currentPlayhead - ( model.currentDuration * 0.2 ) );
+               }
+            }
+           
         ]]>
     </mx:Script>
-
-   
+    
+    <mx:HBox
+    	width = "100%"
+        height = "32"
+    	horizontalAlign="center"
+        horizontalGap="0"
+    	>
+    	
+    	<mx:Canvas
+        	width="128"
+        	height="32"
+        	styleName="timeBackground"
+        	>
+        	
+        	<mx:HBox
+        		width="100%"
+        		height="100%"
+        		horizontalAlign="center"
+        		verticalAlign="middle"
+        		verticalGap="0"
+        		horizontalGap="0"
+        		>
+        		
+        		<mx:Label 
+		            id = "lb_currentTime"
+		            textAlign = "center"
+		            text = "{ model.timeCode.getTC(model.currentPlayhead) }"
+		            styleName = "videocontrollerLabel"
+		            toolTip = "Current Time {model.timeCode.getTC(model.currentPlayhead) } "
+		            />
+		
+		        <mx:Label 
+		            textAlign = "center"
+		            text = "of"
+		            styleName = "videocontrollerLabel"
+		            />
+		
+		        <mx:Label 
+		            id = "lb_durationTime"
+		            textAlign = "center"
+		            text = "{ model.timeCode.getTC(model.currentDuration) }"
+		            styleName = "videocontrollerLabel"
+		            toolTip = "Duration {model.timeCode.getTC(model.currentDuration) } "
+		            />
+        		
+            </mx:HBox>
+            
+        </mx:Canvas>
+                
+        <mx:Canvas
+            width="138"
+            height="32"
+            styleName="controlsBackground"
+            >
+            
+            <mx:HBox
+                width="100%"
+                height="100%"
+                horizontalAlign="center"
+                verticalAlign="middle"
+                >
+                
+               <mx:Button 
+               	    id="btn_skipBackward"
+                    toolTip = "Jump To The Back Slide"
+                    styleName = "SkipBackward"
+                    />
+                    
+               <mx:Button 
+               	    id="btn_rewind"
+                    toolTip = "Jump Back"
+                    styleName = "Rewind"
+                    click="{ jumpBack() }"
+                    />
+                
+               <mx:Button 
+               	    id="btn_playpause"
+                    toolTip = "{ model.currentPlayerState == PlayerState.PAUSING ? 'Play Button' : 'Pause Button' }"
+                    styleName = "{ model.currentPlayerState == PlayerState.PAUSING ? 'Play' : 'Pause' }"
+                    click = "{ ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' ) }"
+                    />
+                    
+               <mx:Button 
+               	    id="btn_fastforward"
+                    toolTip = "Jump Forward"
+                    styleName = "FastForward"
+                    click="{ jumpForward() }"
+                    />
+               
+               <mx:Button 
+               	    id="btn_skipforward"
+                    toolTip = "Jump To The Next Slide"
+                    styleName = "SkipForward"
+                    />
+                    
+            </mx:HBox>
+            
+        </mx:Canvas>
+     
+        <mx:Canvas
+            width="100"
+            height="32"
+            styleName="volumeBackground"
+            >
+            <mx:HBox
+                width="100%"
+                height="100%"
+                verticalGap="0"
+                verticalAlign="middle"
+                horizontalAlign="right"
+                right="6"
+                >
+                
+               <mx:Button 
+               	    id="btn_volume"
+               	    toolTip = "{ model.soundState}"
+                    styleName = "{ model.soundState}"
+                    click = "{ toggleMute() }"
+                    />
+                    
+               
+               <mx:HSlider 
+               	    id = "hs_volume"
+                    width = "58"
+                    maximum = "1"
+                    change = "{ changeVolume() }"
+                    value = "{ model.playerVolume }"
+                    toolTip = "Volume:  { (model.playerVolume * 100).toFixed(0) } %"
+                    styleName = "HSliderVolume"
+                    dataTipFormatFunction = "volumeDataTipFunc"
+                    />
+                    
+            </mx:HBox>
+            
+        </mx:Canvas>
+        
+        <mx:Button 
+			toolTip = "{ model.ccButtonBoolean == true ? 'Closed Caption Off' : 'Closed Caption Off'} "
+			styleName = "{ model.captionsURL == '' ? 'ccOff' : 'ccOn' }"
+			click="{ Swiz.dispatchEvent( new ClosedCaptionsEvent() ) }"
+			/>
+			
+        <mx:Button 
+			toolTip = "Back To The Player"
+			styleName = "FullscreenOut"
+			click="{ normalscreen() }"
+			/>
+    
+    </mx:HBox>
+    
+    <mx:HSlider 
+        id = "hs_seek"
+        width = "442"
+        maximum = "{ model.currentDuration }"
+        value = "{ model.currentPlayhead }"
+        change = "{ onSeek() }"
+        toolTip = "Current Time {model.timeCode.getTC(model.currentPlayhead) } "
+        dataTipFormatFunction = "seekDataTipFunc"
+        styleName = "HSliderSeek"
         />
-</mx:Canvas>
+  
+</mx:VBox>

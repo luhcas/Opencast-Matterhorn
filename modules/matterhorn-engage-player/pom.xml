@@ -135,9 +135,9 @@
 			</build>
 		</profile>
 
-<!-- mvn -P production , copies only files needed for engage-ui  -->
+<!-- mvn -P shared-resources , copies only files needed for engage-ui  -->
 		<profile>
-			<id>production</id>
+			<id>shared-resources</id>
 			<build>
 				<plugins>
 					<plugin>

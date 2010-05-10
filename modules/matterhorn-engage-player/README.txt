@@ -5,17 +5,6 @@ FlexBuilder + maven:
 
 Project uses flexmojos in order to build and maintain the code with maven. (http://code.google.com/p/flex-mojos/)
 
-(Optional:
-
-<mirror>
-      <!--This sends everything else to /public -->
-      <id>nexus</id>
-      <mirrorOf>*</mirrorOf>
-      <url>http://repository.sonatype.org/content/groups/public</url>
-</mirror>
-
-in your maven settings.xml
-)
 
 After checkout please run
 
@@ -27,13 +16,10 @@ in your matterhorn-engage-player folder.
 After this you should be able to include the project in Eclipse.
 
 
-(Optional IMPORTANT: Remove the settings.xml again. Matterhorn won´t build in case you set the repository url.)
-
 -------------------
 
 
 If you use maven for testing instead of FlexBuilder:
-
 
 Make sure that Flash Player is available on your clathpath; 
 Important to run the FlexUnitTests
@@ -44,8 +30,6 @@ export PATH=$PATH:/pathtoflashplayer/Flash\ Player.app/Contents/MacOS
 
 
 ---------------------------
-
-
 IF MAVEN ISN`T YOUR CHOICE FOR WORKING WITH FLEX/AJAX/HTML
 
 
@@ -55,7 +39,7 @@ IF MAVEN ISN`T YOUR CHOICE FOR WORKING WITH FLEX/AJAX/HTML
 
 2. Properties --> Flex Build Path --> Main source folder: "src/main/flex/Videodisplay"
 
-3. .actionScriptProperties --> 2x "main.mxml" in "Videodisplay.mxml" umbenennen
+3. .actionScriptProperties --> 2x "main.mxml" in "Videodisplay.mxml"
 
 4. Properties --> Flex Build Path --> Add Folder --> "src/main/resources"
 
@@ -71,10 +55,11 @@ IF MAVEN ISN`T YOUR CHOICE FOR WORKING WITH FLEX/AJAX/HTML
 
 10. Properties --> Flex Build Path --> Output folder: --> <the_localhost_url_your_server_points_to>
 
+11. Update your Flex Build Path and add modules/shared-resources and modules/matterhorn-engage-ui/src/main/resources/ui
+
+
 
 ------
-
-
 CODE DOCUMENTATION:
 
 Maven will create the docs for this project
@@ -85,19 +70,17 @@ creates the 'site' folder in the /target directory
 
 
 ------
-
 CODE FORMATING:
-FlexCode Formater
+FlexCode formater
+http://sourceforge.net/projects/flexformatter/
 
 ------
-
 RUN JavaScript Tests:
 
 mvn -P jstests test
 
 
 ------
-
 CODECOVERAGE report for Javascript
 
 <config filename>-coverage.dat will be created inside the folder /src/test/resources

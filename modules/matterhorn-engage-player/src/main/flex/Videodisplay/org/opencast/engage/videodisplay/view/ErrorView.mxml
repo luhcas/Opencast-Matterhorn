@@ -26,11 +26,14 @@
 
     <mx:Script>
         <![CDATA[
+        	import org.swizframework.Swiz;
             import org.opencast.engage.videodisplay.model.VideodisplayModel;
 
             [Autowire]
             [Bindable]
             public var model:VideodisplayModel;
+            
+            
         ]]>
     </mx:Script>
 
@@ -42,9 +45,23 @@
         >
 
         <mx:Label 
-            id = "lb_name"
-            text = "{ model.error.toString() }"
+            id = "lb_errorId"
+            text = "Error Id: { model.errorId }"
             styleName = "errorLabel"
             />
+            
+        <mx:Label 
+            id = "lb_message"
+            text = "Error Message: { model.errorMessage }"
+            styleName = "errorLabel"
+            />
+            
+        <mx:Label 
+            id = "lb_detail"
+            text = "Error Detail: { model.errorDetail }"
+            styleName = "errorLabel"
+            />
+            
     </mx:VBox>
+    
 </mx:Canvas>

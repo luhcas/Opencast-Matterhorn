@@ -41,6 +41,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import org.osmf.layout.VerticalAlign;
         	import org.opencast.engage.videodisplay.business.FlexAjaxBridge;
             import bridge.ExternalFunction;
             import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
@@ -86,6 +87,7 @@
                 else
                 {
                     model.fullscreenMode = false;
+                    model.layoutMetadataParallelElement.verticalAlign = VerticalAlign.BOTTOM;
                 }
             }
 

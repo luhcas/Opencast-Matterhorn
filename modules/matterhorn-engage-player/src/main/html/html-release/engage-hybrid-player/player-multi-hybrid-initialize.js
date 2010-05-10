@@ -13,7 +13,20 @@ Opencast.Initialize = (function ()
 {
     
     var myWidth           = 0,
-    myHeight = 0;
+    myHeight = 0,
+    VOLUME = 'volume',
+    VIDEOSIZE = 'videosize',
+    divId = '';
+    
+    function setDivId(id)
+    {
+    	divId = id;
+    }
+    
+    function getDivId()
+    {
+    	return divId;
+    }
     
     /**
         @memberOf Opencast.Player
@@ -43,8 +56,6 @@ Opencast.Initialize = (function ()
     var closetimer		= 0;
     var ddmenuitem      = 0;
 
-    
-
     function dropdown_close()
     {
         if (ddmenuitem)
@@ -71,12 +82,33 @@ Opencast.Initialize = (function ()
     {
         dropdown_canceltimer();
         dropdown_close();
-        ddmenuitem = $(this).find('ul').eq(0).css('visibility', 'visible');
+       
+	    if(getDivId() === VOLUME)
+        {
+            ddmenuitem = $('#oc_volume-menue').css('visibility', 'visible');
+
+        }
+	    else if(getDivId() === VIDEOSIZE)
+	    {
+            ddmenuitem = $('#oc_video-size-menue').css('visibility', 'visible');
+        }
+        else
+        {
+            ddmenuitem = $(this).find('ul').eq(0).css('visibility', 'visible');
+        }
+	    setDivId('');
     }
     
-    $(document).ready(function () {
+    function dropdownVideo_open()
+    {
+    	setDivId(VIDEOSIZE);
+        dropdown_open();
+    }
+    
+    
+    $(document).ready(function () 
+    {
         keyboardListener();
-        init();
        
         $('#wysiwyg').wysiwyg({
             controls: 
@@ -124,11 +156,48 @@ Opencast.Initialize = (function ()
         $('#oc_video-size-dropdown > li').bind('mouseover', dropdown_open);
         //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
         $('#oc_video-size-dropdown > li').bind('mouseout',  dropdown_timer);
- 
+        
+        // Handler focus
+        $('#oc_btn-dropdown').focus(function () 
+        {	
+        	setDivId(VIDEOSIZE);
+        	dropdown_open();
+        });
+        
+        // Handler blur
+        $('#oc_btn-dropdown').blur(function () 
+        {	
+            dropdown_timer();
+        });
+        
         $('#oc_volume-dropdown > li').bind('mouseover', dropdown_open);
         //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
         $('#oc_volume-dropdown > li').bind('mouseout',  dropdown_timer);
 
+        // Handler focus
+        $('#oc_btn-volume').focus(function () 
+        {	
+        	setDivId(VOLUME);
+        	dropdown_open();
+        })
+        
+        $('#slider_volume_Thumb').focus(function () 
+        {
+        	setDivId(VOLUME);
+        	dropdown_open();
+        })
+        
+        // Handler blur
+        $('#oc_btn-volume').blur(function () 
+        {	
+            dropdown_timer();
+        })
+        
+        $('#slider_volume_Thumb').blur(function () 
+        {
+            dropdown_timer();
+        })
+     
         // init the aria slider for the volume
         Opencast.ariaSlider.init();
        
@@ -162,7 +231,6 @@ Opencast.Initialize = (function ()
         
         $("#oc_btn-slides").attr('role', 'button');
         $("#oc_btn-slides").attr('aria-pressed', 'false'); 
-        
         
         // Handler for .click()
         $('#oc_btn-skip-backward').click(function () 
@@ -246,7 +314,6 @@ Opencast.Initialize = (function ()
             {
                 this.className = 'oc_btn-cc-off';
             }
- 
         });
         
         // Handler for .mousedown()
@@ -274,7 +341,7 @@ Opencast.Initialize = (function ()
         {
             this.className = 'oc_btn-skip-forward-clicked';
         });
-                               
+        
         // Handler for .mouseup()
         $('#oc_btn-skip-backward').mouseup(function () 
         {
@@ -285,6 +352,7 @@ Opencast.Initialize = (function ()
             this.className = 'oc_btn-rewind-over';
             Opencast.Player.stopRewind();
         });
+        
         $('#oc_btn-play-pause').mouseup(function () 
         {
             Opencast.Player.PlayPauseMouseOver();
@@ -308,13 +376,82 @@ Opencast.Initialize = (function ()
         // Handler keypress
         $('#oc_edit-time').keypress(function (event) 
         {
-            if (event.keyCode === '13') 
+            if (event.keyCode === 13) 
             {
                 Opencast.Player.editTime();
             }
+        })
+        
+        // Handler keydown
+        $('#oc_btn-rewind').keydown(function (event) 
+        {
+           
+            if (event.keyCode === 13 || event.keyCode === 32) 
+            {
+                this.className = 'oc_btn-rewind-clicked';
+                Opencast.Player.doRewind();
+            }
+            else if(event.keyCode === 9)
+            {
+                this.className = 'oc_btn-rewind-over';
+                Opencast.Player.stopRewind();
+            }
+        });
+        $('#oc_btn-fast-forward').keydown(function (event) 
+        {
+            if (event.keyCode === 13 || event.keyCode === 32) 
+            {
+                this.className = 'oc_btn-fast-forward-clicked';
+                Opencast.Player.doFastForward();
+            }
+            else if(event.keyCode === 9)
+            {
+                this.className = 'oc_btn-fast-forward-over';
+                Opencast.Player.stopFastForward();
+            }
+        });
+        $('#oc_current-time').keydown(function (event) 
+        {
+        	if (event.keyCode === 37) 
+            {
+        		Opencast.Player.doRewind();
+            }
+        	else if(event.keyCode === 39)
+        	{
+        		Opencast.Player.doFastForward();
+        	}
+        });
+        
+        // Handler keyup
+        $('#oc_btn-rewind').keyup(function (event) 
+        {
+            if (event.keyCode === 13 || event.keyCode === 32) 
+            {
+                this.className = 'oc_btn-rewind-over';
+                Opencast.Player.stopRewind();
+            }
+        });
+       
+        $('#oc_btn-fast-forward').keyup(function (event) 
+        {
+            if (event.keyCode === 13 || event.keyCode === 32) 
+            {
+                this.className = 'oc_btn-fast-forward-over';
+                Opencast.Player.stopFastForward();
+            } 
+        });  
+        $('#oc_current-time').keyup(function (event) 
+        {
+            if (event.keyCode === 37) 
+    	    {
+    	        Opencast.Player.stopRewind();
+    	    }
+    	    else if(event.keyCode === 39)
+    	    {
+    	        Opencast.Player.stopFastForward();
+    	    }
         });
     });
-    
     
     /*
      * 
@@ -355,20 +492,16 @@ Opencast.Initialize = (function ()
     
     function doTest()
     {
-      
         reportSize();
-        if (myHeight > 600)
+        if (myHeight > 500)
         {
-            //$('#oc_body').css("height", (myHeight - 50 + "px"));
-            //$('#oc_flash-player').css("height", (myHeight - 180 + "px"));
- 
             if (Opencast.Player.getShowSections() === false)
             {
-                $('#oc_flash-player').css("height", (myHeight - 180 + "px"));
+                $('#oc_flash-player').css("height", (myHeight - 196 + "px"));
             }
             else
             {
-                $('#oc_flash-player').css("height", (myHeight - 288 + "px"));
+                $('#oc_flash-player').css("height", (myHeight - 310 + "px"));
             }
         }
         //
@@ -382,9 +515,13 @@ Opencast.Initialize = (function ()
     {
         window.onresize = doTest;
         doTest();
+       
     }
     return {
-        doTest : doTest
+        doTest : doTest,
+        dropdownVideo_open : dropdownVideo_open,
+        dropdown_timer : dropdown_timer,
+        init : init
     };
 }());
 

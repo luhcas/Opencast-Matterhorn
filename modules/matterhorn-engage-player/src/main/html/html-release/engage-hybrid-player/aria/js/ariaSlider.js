@@ -16,7 +16,9 @@ Opencast.ariaSlider = (function ()
         sliderSeek   = 'slider_seek_Thumb',
         EMBED        = 'embed',
         ADVANCED     = 'advanced',
-        playerView   = '';
+        playerView   = '',
+        intval       = '',
+        	newTarget = '';
     
     /**
         @memberOf Opencast.ariaSlider
@@ -146,10 +148,10 @@ Opencast.ariaSlider = (function ()
         @description Change the position of the slider.
         @param Target target, Number value 
     */
-    function increment(target, byChunk) 
+    function increment() 
     {
-    	var newValue = parseFloat(target.getAttribute('aria-valuenow')) + (byChunk ? 10 : 1); 
-        changeValue(target, newValue);
+    	var newValue = parseFloat(newTarget.getAttribute('aria-valuenow')) + (false ? 10 : 1); 
+        changeValue(newTarget, newValue);
     }
 
     /**
@@ -157,10 +159,10 @@ Opencast.ariaSlider = (function ()
         @description Change the position of the slider.
         @param Target target, Number value 
     */
-    function decrement(target, byChunk) 
+    function decrement() 
     {
-    	var newValue = parseFloat(target.getAttribute('aria-valuenow')) - (byChunk ? 10 : 1); 
-        changeValue(target, newValue);
+    	var newValue = parseFloat(newTarget.getAttribute('aria-valuenow')) - (false ? 10 : 1); 
+        changeValue(newTarget, newValue);
     }
 
     /**
@@ -172,13 +174,22 @@ Opencast.ariaSlider = (function ()
         var event = event || window.event;
         var keyCode = event.keyCode || event.charCode;
         var target = event.target || event.srcElement; 
+        newTarget = event.target || event.srcElement; 
         
         switch (keyCode) {
         case 37: // left arrow
-            decrement(target, false);
+            if (intval === "")
+            {
+                decrement(target, false);
+                intval = window.setInterval("Opencast.ariaSlider.decrement()", 10);
+            }
             break;
         case 39: //right arrow
-            increment(target, false);
+            if (intval === "")
+            {
+            	increment(target, false);
+                intval = window.setInterval("Opencast.ariaSlider.increment()", 10);
+            }
             break;
         case 33: // page up
             increment(target, true);
@@ -200,6 +211,38 @@ Opencast.ariaSlider = (function ()
             break;
         }
     }
+    
+    
+    /**
+    @memberOf Opencast.ariaSlider
+    @description Key listener.
+    @param Event event 
+*/
+function handlerKeyUp(event) {
+    var event = event || window.event;
+    var keyCode = event.keyCode || event.charCode;
+    var target = event.target || event.srcElement; 
+    
+    switch (keyCode) {
+    case 37: // left arrow
+    	if (intval !== "")
+        {
+            window.clearInterval(intval);
+            intval = "";
+        }
+        break;
+    case 39: //right arrow
+    	if (intval !== "")
+        {
+            window.clearInterval(intval);
+            intval = "";
+        }
+        break;
+    default:
+        passThrough = true;
+        break;
+    }
+}
 
     /**
         @memberOf Opencast.ariaSlider
@@ -310,6 +353,7 @@ Opencast.ariaSlider = (function ()
         slider.parentNode.onmousedown = handleRailMouseDown;
         slider.onmousedown = handleThumbMouseDown;
         slider.onkeydown = handleKeyDown;
+        slider.onkeyup = handlerKeyUp;
         slider.parentNode.onfocus = 
         function (event) { //temp IE fix
             event = event || window.event;
@@ -374,6 +418,7 @@ Opencast.ariaSlider = (function ()
         setVolumeHandlers: setVolumeHandlers,
         cancelEvent : cancelEvent,
         init : init
+      
     };
 }());
 
