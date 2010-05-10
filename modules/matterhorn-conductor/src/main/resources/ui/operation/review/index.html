@@ -18,8 +18,9 @@
                 for (j in tags) {
                   if (tags[j].firstChild.data.match(/preview/)) {
                     var videoUrl = elms[i].getElementsByTagName("url")[0].firstChild.data;
-                    //alert("Video URL: " + videoUrl);
-                    window.location.href = '../../../engage/ui/preview.html?videoUrl=' + videoUrl;
+                    var url = '../../../engage/ui/preview.html?videoUrl=' + videoUrl;
+                    //alert(url);
+                    window.location.href = url;
                   }
                 }
               }

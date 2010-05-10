@@ -18,13 +18,13 @@
                     <input id="distribution" type="checkbox" checked="checked" disabled="disabled" class="configField" value="Matterhorn Media Module" style="width: inherit !important;">
                     <span id="i18n_dist_mmm">&nbsp;Matterhorn Media Module</span>
                   </span>
-                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                  <!-- span class="helpIcon" title="Click for help">&nbsp;</span -->
                 </li>
                 <!-- field: License -->
                 <li class="ui-helper-clearfix">
                   <label class="fl-label"><span id="i18n_license_label">License</span>:</label>
-                  <input type="text" class="configField" id="license" name="license">
-                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                  <input type="text" class="configField" id="license" name="license" style="float:left;">
+                  <!-- span class="helpIcon" title="Click for help">&nbsp;</span -->
                 </li>
               </ul>
     </fieldset>
