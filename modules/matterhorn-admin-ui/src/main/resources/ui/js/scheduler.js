@@ -370,45 +370,32 @@ SchedulerForm.setFormFields = function(fields) {
  *  Serialize the form into an XML file for consumption by the
  *  scheduler service: addEvent
  *  @return {document object}
+ *
+ *  xml structure:
+ *  <Event>
+ *    <eventId></eventId>
+ *    <metadata-list>
+ *      <
  */
 SchedulerForm.serialize = function() {
   if(this.validate()) {
     var doc = this.createDoc();
     var mdlist = doc.createElement('metadata-list');
     for(var e in this.formFields) {
-      metadata = doc.createElement('metadata');
-      key = doc.createElement('key');
-      value = doc.createElement('value');
-      key.appendChild(doc.createTextNode(e));
-      value.appendChild(doc.createTextNode(this.formFields[e].getValue()));
-      metadata.appendChild(key);
-      metadata.appendChild(value);
-      mdlist.appendChild(metadata);
-      /*
-      if(e == 'startdate' || e == 'duration' || (e == 'id' && this.formFields[e].getValue() != "") ) {
-        el = doc.createElement(e);
+      if(e == 'id' && this.formFields[e].getValue() != "") {
+        el = doc.createElement('eventId');
         el.appendChild(doc.createTextNode(this.formFields[e].getValue()));
         doc.documentElement.appendChild(el);
-      } else if (e == 'resources') {
-        el = doc.createElement('resource');
-        el.appendChild(doc.createTextNode(this.formFields[e].getValue()));
-        p = doc.createElement('resources');
-        p.appendChild(el);
-        doc.documentElement.appendChild(p);
-      } else if (e == 'attendees'){
-        el = doc.createElement('attendee');
-        el.appendChild(doc.createTextNode(this.formFields[e].getValue()));
-        p = doc.createElement('attendees');
-        p.appendChild(el);
-        doc.documentElement.appendChild(p);
       } else {
-        var val = doc.createElement('value');
-        val.appendChild(doc.createTextNode(this.formFields[e].getValue()));
-        var item = doc.createElement('item');
-        item.setAttribute('key', e);
-        item.appendChild(val);
-        metadata.appendChild(item);
-      }*/
+        metadata = doc.createElement('metadata');
+        key = doc.createElement('key');
+        value = doc.createElement('value');
+        key.appendChild(doc.createTextNode(e));
+        value.appendChild(doc.createTextNode(this.formFields[e].getValue()));
+        metadata.appendChild(key);
+        metadata.appendChild(value);
+        mdlist.appendChild(metadata);
+      }
     }
     doc.documentElement.appendChild(mdlist);
     if(typeof XMLSerializer != 'undefined') {
