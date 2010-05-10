@@ -6,33 +6,25 @@
     <!-- styles -->
     <style>
       #audio_preview {
-        height: 500px;
+        height: 400px;
       }
-
+      .meter_mask {
+        vertical-align: top;
+        width: 40px;
+        height: 0px;
+      }
+      .audio_meter {
+        height: 400px;
+        width: 40px;
+        display: inline-block;
+        background-image: url('img/meter.png');
+      }
+    </style>
     <!-- scripts -->
-    <script type="text/javascript" src="jquery/jquery-1.4.min.js"></script>
-    <script type="text/javascript">
-    </script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="js/confidence.js"></script>
   </head>
   <body>
-    <!-- notification that javaScript is disabled -->
-    <noscript>
-      <center>
-        <div style="border:1px solid red;width:530px;margin:20px;">
-          <div style="text-align: left;background:red; color:white;padding-top:2px;padding-bottom:2px;">
-            <div class="icon icon-error" style="margin-left:5px;margin-right:5px;">&nbsp;</div>
-            JavaScript is disabled
-          </div>
-          <div style="padding:10px;">
-            JavaScript is turned off in your web browser, so this site won't work properly! <br />
-            <strong>
-              Please turn JavaScript on to use this site, then refresh the page.
-            </strong>
-          </div>
-        </div>
-      </center>
-    </noscript>  d 
-
     <!-- fl-centered doesn't work in winXP-IE8 -->
     <div>
       <div id="page_tabs">
@@ -47,8 +39,8 @@
         <div>
           <div id="image_preview"></div>
           <div id="audio_preview">
-            <div id="meter_mask"></div>
-            <img id="audio_meter" src="http://localhost/~msutton/audiobar.png"></img>
+            <div id="left_channel" class="audio_meter"><img id="left_mask" class="meter_mask" src="img/mask.png"></img></div>
+            <div id="right_channel" class="audio_meter"><img id="right_mask" class="meter_mask" src="img/mask.png"></img></div>
           </div>
         </div>
       </div>
