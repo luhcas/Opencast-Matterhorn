@@ -23,6 +23,8 @@ var SchedulerForm     = SchedulerForm || {};
 var SchedulerUI       = SchedulerUI || {};
 var Agent             = Agent || {};
 
+Agent.tzDiff          = 0;
+
 function init() {
   //Do internationalization of text
   jQuery.i18n.properties({name:'scheduler',path:'i18n/'});
@@ -287,6 +289,7 @@ SchedulerUI.handleAgentChange = function(elm){
           if(capabilities.length){
             SchedulerUI.displayCapabilities(capabilities);
           }else{
+            Agent.tzDiff = 0; //No agent timezone could be found, assume local time.
             $('#input-list').append('Agent defaults will be used.');
             //SchedulerForm.formFields.resources = new FormField('agentDefaults', false, {getValue: getInputs, setValue: setInputs, checkValue: checkInputs});
           }
@@ -303,10 +306,10 @@ SchedulerUI.displayCapabilities = function(capa){
 SchedulerUI.handleAgentTZ = function(tz){
   var localTZ = -(new Date()).getTimezoneOffset(); //offsets in minutes
   Agent.tzDiff = 0;
-  if(tz != localTZ && tz.length > 0){
+  AdminUI.log(tz, localTZ, tz != localTZ);
+  if(tz && tz != localTZ){
     //Display note of agent TZ difference, all times local to capture agent.
     //update time picker to agent time
-    //console.log('Agent TZ is different from user\'s local tz', tz, localTZ);
     Agent.tzDiff = tz - localTZ;
   }
 }
@@ -371,8 +374,17 @@ SchedulerForm.setFormFields = function(fields) {
 SchedulerForm.serialize = function() {
   if(this.validate()) {
     var doc = this.createDoc();
-    var metadata = doc.createElement('metadata');
+    var mdlist = doc.createElement('metadata-list');
     for(var e in this.formFields) {
+      metadata = doc.createElement('metadata');
+      key = doc.createElement('key');
+      value = doc.createElement('value');
+      key.appendChild(doc.createTextNode(e));
+      value.appendChild(doc.createTextNode(this.formFields[e].getValue()));
+      metadata.appendChild(key);
+      metadata.appendChild(value);
+      mdlist.appendChild(metadata);
+      /*
       if(e == 'startdate' || e == 'duration' || (e == 'id' && this.formFields[e].getValue() != "") ) {
         el = doc.createElement(e);
         el.appendChild(doc.createTextNode(this.formFields[e].getValue()));
@@ -396,9 +408,9 @@ SchedulerForm.serialize = function() {
         item.setAttribute('key', e);
         item.appendChild(val);
         metadata.appendChild(item);
-      }
+      }*/
     }
-    doc.documentElement.appendChild(metadata);
+    doc.documentElement.appendChild(mdlist);
     if(typeof XMLSerializer != 'undefined') {
       return (new XMLSerializer()).serializeToString(doc);
     } else if(doc.xml) {

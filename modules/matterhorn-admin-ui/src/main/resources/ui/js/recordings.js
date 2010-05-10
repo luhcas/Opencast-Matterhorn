@@ -28,6 +28,10 @@ Recordings.lastCount = null;
  *  Display the recordings specified by the URL param show or upcoming recordings otherwise.
  */
 Recordings.init = function() {
+  //Do internationalization of text
+  jQuery.i18n.properties({name:'recordings',path:'i18n/'});
+  AdminUI.internationalize(i18n, 'i18n');
+  
   // Event: clicked somewhere
 //  $('body').click( function() {
 //    $('#holdActionPanel-container').fadeOut('fast');
