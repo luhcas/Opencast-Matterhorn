@@ -91,6 +91,7 @@
       <modules>
         <module>modules/matterhorn-build-tools</module>
         <module>modules/matterhorn-runtime-tools</module>
+				<module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-dublincore</module>
         <module>modules/matterhorn-util</module>
