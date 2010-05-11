@@ -19,7 +19,7 @@
                   if (tags[j].firstChild.data.match(/preview/)) {
                     var videoUrl = elms[i].getElementsByTagName("url")[0].firstChild.data;
                     var url = '../../../engage/ui/preview.html?videoUrl=' + videoUrl;
-                    //alert(url);
+                    //alert('videoUrl = ' + videoUrl);
                     window.location.href = url;
                   }
                 }
