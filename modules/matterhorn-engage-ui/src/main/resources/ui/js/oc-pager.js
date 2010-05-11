@@ -166,8 +166,11 @@ Opencast.pager = ( function() {
   function getMaxPageID() {
     
     var total =  $('#oc-episodes-total').html()
-    var maxPage = parseInt(total / 10) + 1;
-    
+    var maxPage = Math.max(1, parseInt(total / 10));
+
+    if(total % 10 != 0)
+      maxPage += 1;
+
     return maxPage;
   }
 
