@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+  name="org.opencastproject.analysis.dictionary.DictionaryServiceRemoteImpl"
+  immediate="true"  activate="activate">
+  <implementation
+    class="org.opencastproject.analysis.dictionary.DictionaryServiceRemoteImpl" />
+  <property name="service.description" value="DictionaryService Remote Service Proxy" />
+  <service>
+    <provide interface="org.opencastproject.analysis.dictionary.DictionaryServiceRemoteImpl" />
+  </service>
+  <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"
+    cardinality="1..1" policy="static" bind="setTrustedHttpClient" />
+  <reference name="receiptService" interface="org.opencastproject.receipt.api.ReceiptService"
+    cardinality="1..1" policy="static" bind="setReceiptService" />
+</scr:component>

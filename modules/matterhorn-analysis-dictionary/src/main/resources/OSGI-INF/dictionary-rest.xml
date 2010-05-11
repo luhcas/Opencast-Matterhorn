@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.analysis.dictionary.endpoint.DictionaryServiceRestEndpoint"
+  immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.analysis.dictionary.endpoint.DictionaryServiceRestEndpoint" />
+  <property name="service.description" value="Dictionary REST Endpoint" />
+  <property name="opencast.rest.url" value="/dictionary/rest" />
+  <service>
+    <provide interface="org.opencastproject.analysis.dictionary.endpoint.DictionaryServiceRestEndpoint" />
+  </service>
+  <reference name="DictionaryService" interface="org.opencastproject.analysis.dictionary.DictionaryServiceDelegatingImpl"
+    cardinality="1..1" policy="static" bind="setDictionaryService" />
+</component>
