@@ -29,22 +29,34 @@ ocIngest.createMediaPackage = function() {
 ocIngest.createDublinCoreCatalog = function(data) {
   var dc = ocUtils.createDoc('dublincore','http://www.opencastproject.org/xsd/1.0/dublincore/');
   dc.documentElement.setAttribute('xmlns:dcterms','http://purl.org/dc/terms/');
+  var key = '';
   for (key in data) {
-    var elm = dc.createElement('dcterms:' + key);
-    elm.appendChild(dc.createTextNode(data[key]));    // FIXME get rid of xmlns="" attribute
-    dc.documentElement.appendChild(elm);
+    if (data[key] instanceof Array) {
+      jQuery.each(data[key], function(k,val) {
+        var elm = dc.createElement('dcterms:' + key);
+        elm.appendChild(dc.createTextNode(val));    // FIXME get rid of xmlns="" attribute
+        dc.documentElement.appendChild(elm);  
+      });
+    } else {
+      var elm = dc.createElement('dcterms:' + key);
+      elm.appendChild(dc.createTextNode(data[key]));    // FIXME get rid of xmlns="" attribute
+      dc.documentElement.appendChild(elm);
+    }
   }
   return dc;
 }
 
 ocIngest.addCatalog = function(mediaPackage, dcCatalog) {
-   Upload.log("Creating DublinCore catalog");
-   Upload.setProgress('100%','adding Metadata',' ', ' ');
-    $.ajax({
+  Upload.log("Creating DublinCore catalog");
+  Upload.setProgress('100%','adding Metadata',' ', ' ');
+  $.ajax({
     url        : '../ingest/rest/addDCCatalog',
     type       : 'POST',
     dataType   : 'xml',
-    data       : {mediaPackage: mediaPackage, dublinCore: ocUtils.xmlToString(dcCatalog)},
+    data       : {
+      mediaPackage: mediaPackage,
+      dublinCore: ocUtils.xmlToString(dcCatalog)
+    },
     error      : function(XHR,status,e){
       showFailedScreen('Could not add DublinCore catalog to MediaPackage.');
     },
@@ -78,11 +90,11 @@ ocIngest.addTrack = function(mediaPackage, jobId, flavor) {
 */
 
 ocIngest.startIngest = function(mediaPackage) {
-    Upload.log("Starting Ingest on MediaPackage with Workflow " + $('#workflow-selector').val());
-    Upload.setProgress('100%','starting Ingest',' ', ' ');
-    var data = Upload.collectWorkflowConfig();
-    data['mediaPackage'] = ocUtils.xmlToString(mediaPackage);
-    $.ajax({
+  Upload.log("Starting Ingest on MediaPackage with Workflow " + $('#workflow-selector').val());
+  Upload.setProgress('100%','starting Ingest',' ', ' ');
+  var data = Upload.collectWorkflowConfig();
+  data['mediaPackage'] = ocUtils.xmlToString(mediaPackage);
+  $.ajax({
     url        : '../ingest/rest/ingest/' + $('#workflow-selector').val(),
     type       : 'POST',
     dataType   : 'text',

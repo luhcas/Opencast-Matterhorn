@@ -41,13 +41,13 @@ Upload.init = function() {
         if (($(this).attr('id') != 'flavor') && ($(this).attr('id') != 'distribution')) {
           //log("adding metadata " + $(this).attr('id') + ' ' + $(this).val());
           if ($(this).hasClass('multiValueField')) {
-            if (Upload.metadata[$(this).attr('id')] == undefined) {
-              Upload.metadata[$(this).attr('id')] = $(this).val();
+            if (Upload.metadata[$(this).attr('name')] == undefined) {
+              Upload.metadata[$(this).attr('name')] = new Array($(this).val());
             } else {
-
+              Upload.metadata[$(this).attr('name')].push($(this).val());
             }
           } else {
-            Upload.metadata[$(this).attr('id')] = $(this).val();
+            Upload.metadata[$(this).attr('name')] = $(this).val();
           }
         }
       });
@@ -95,11 +95,11 @@ Upload.init = function() {
     dataType: 'json',
     success: function(data) {
       for (i in data.workflow_definitions) {
-        if (data.workflow_definitions[i].title != 'error') {
+        if (data.workflow_definitions[i].id != 'error') {
           var option = document.createElement("option");
-          option.setAttribute("value", data.workflow_definitions[i].title);
+          option.setAttribute("value", data.workflow_definitions[i].id);
           option.innerHTML = data.workflow_definitions[i].title;
-          if (data.workflow_definitions[i].title == "full") {
+          if (data.workflow_definitions[i].id == "full") {
             option.setAttribute("selected", "true");
           }
           $('#workflow-selector').append(option);
