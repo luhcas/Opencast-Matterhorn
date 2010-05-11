@@ -88,20 +88,19 @@ public class Event extends AbstractEvent {
   @Transient 
   RecurringEvent recurringEvent = null;
   
-  @XmlElementWrapper(name="metadata-list")
+  @XmlElementWrapper(name="metadata_list")
   @XmlElement(name="metadata")
   @OneToMany (fetch=FetchType.EAGER, cascade=CascadeType.ALL)
   @MapKey(name="metadata")
   protected List<Metadata> metadata = new LinkedList<Metadata>();  
   
   public String getRecurringEventId() {
-    if (! containsKey("recurrence.id")) return null;
-    try {
-      return getValue("recurrence.id");
-    } catch (NumberFormatException e) {
-      logger.warn("Could not parse value for recurrence position: {}", getValue("recurrence.position"));
+    Metadata m = findMetadata("recurrence.id");
+    if (m == null) {
+      logger.debug("recurring event for event {} not found", getEventId());
       return null;
     }
+    return m.getValue();
   }
 
   public void setRecurringEventId(String recurringEventId) {
@@ -149,8 +148,10 @@ public class Event extends AbstractEvent {
   }
 
   public RecurringEvent getRecurringEvent() {
-    if (getRecurringEventId()!= null && recurringEvent == null)
+    if (getRecurringEventId()!= null && recurringEvent == null) {
       recurringEvent = RecurringEvent.find(getRecurringEventId(), emf);
+      metadataTable = null;
+    }
     return recurringEvent;
   }
 
@@ -160,7 +161,7 @@ public class Event extends AbstractEvent {
       setRecurringEventId(recurringEvent.getRecurringEventId());
   }
 
-  @XmlElementWrapper(name="complete-metadata")
+  @XmlElementWrapper(name="complete_metadata")
   @XmlElement(name="metadata")
   public List<Metadata> getCompleteMetadata() {
     Hashtable<String, Metadata> m = new Hashtable<String, Metadata>();
@@ -168,6 +169,8 @@ public class Event extends AbstractEvent {
       for (Metadata data : getRecurringEvent().getMetadata()) {
         m.put(data.getKey(), data);
       }
+      m.put("time.start", new Metadata("time.start", ""+getEnddate().getTime()));
+      m.put("time.end", new Metadata("time.end", ""+getEnddate().getTime()));
       for (Metadata data : getMetadata()) {
         m.put(data.getKey(), data);
       }
@@ -185,9 +188,14 @@ public class Event extends AbstractEvent {
   }
   
   protected void buildMetadataTable () {
+    RecurringEvent rEvent = getRecurringEvent(); // if recurring event is not yet set, this method has the sideeffect that the metadata table is nulled
     if (metadataTable == null) metadataTable = new Hashtable<String, String>();
-    if (getRecurringEvent() != null )
-      for (Metadata data : getRecurringEvent().getMetadata()) metadataTable.put(data.getKey(), data.getValue()); // Inherit values
+    if (rEvent != null ) {
+      for (Metadata data : rEvent.getMetadata()) {
+        if (data != null && data.getKey() != null && data.getValue() != null) 
+          metadataTable.put(data.getKey(), data.getValue()); // Inherit values
+      }
+    }
     super.buildMetadataTable(metadata);
   }
   
@@ -242,7 +250,17 @@ public class Event extends AbstractEvent {
     } catch (IncompleteDataException e) {
       logger.warn("MetadataTable could not be build");
       return false;
+    } catch (NullPointerException e) {
+      logger.warn("could not find key {}", key);
+      return false;
     }
+  }
+  
+  public Metadata findMetadata (String key) {
+    for (Metadata m : metadata) {
+      if (m.getKey().equals(key)) return m;
+    }
+    return null;
   }
   
   public void update(Event e) {

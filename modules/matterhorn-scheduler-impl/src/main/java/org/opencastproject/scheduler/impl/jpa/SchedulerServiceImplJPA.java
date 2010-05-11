@@ -257,13 +257,13 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     
     // filter for later Dates
     if (filter.getStart() != null && filter.getStart().getTime() > 0) {
-      events = filterEventsForAfterDate(events, "time.end", filter.getStart());
+      events = filterEventsForAfterDate(events, filter.getStart());
       logger.debug("Setting start date. {} events left.", events.size());
     }
     
     // filter for later Dates
     if (filter.getEnd() != null && filter.getEnd().getTime() > 0) {
-      events = filterEventsForBeforeDate(events, "time.start", filter.getEnd());
+      events = filterEventsForBeforeDate(events, filter.getEnd());
       logger.debug("Setting end date. {} events left.", events.size());
     }
     
@@ -292,11 +292,11 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     return list;
   }
   
-  private List<Event> filterEventsForBeforeDate (List<Event> list, String key, Date time) {
+  private List<Event> filterEventsForBeforeDate (List<Event> list, Date time) {
+    if (time == null) return list;
     LinkedList<Event> marked = new LinkedList<Event>(); //needed because loop will not terminate correctly, if list is modified
     for (Event e: list) {
-      if (! e.containsKey(key)) marked.add(e);
-      else if (! e.getValueAsDate(key).before(time)) marked.add(e);
+      if (e.getStartdate() == null || (! e.getStartdate().before(time))) marked.add(e);
     }
     for (Event e: marked) list.remove(e);
     
@@ -314,11 +314,11 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     return list;
   }  
   
-  private List<Event> filterEventsForAfterDate (List<Event> list, String key, Date time) {
+  private List<Event> filterEventsForAfterDate (List<Event> list, Date time) {
+    if (time == null) return list;
     LinkedList<Event> marked = new LinkedList<Event>(); //needed because loop will not terminate correctly, if list is modified
     for (Event e: list) {
-      if (! e.containsKey(key)) marked.add(e);
-      else if (! e.getValueAsDate(key).after(time)) marked.add(e);    
+      if (e.getEnddate() == null || (! e.getEnddate().after(time))) marked.add(e);    
     }
     for (Event e: marked) list.remove(e);
     

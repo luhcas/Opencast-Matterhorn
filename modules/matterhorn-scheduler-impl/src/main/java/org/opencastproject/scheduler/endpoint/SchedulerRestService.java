@@ -768,6 +768,7 @@ public class SchedulerRestService {
     metadata.add(new Metadata("contributor", "demo contributor"));
     metadata.add(new Metadata("time.start", "1262631892201"));
     metadata.add(new Metadata("time.end", "1262644114423"));
+    metadata.add(new Metadata("device", "demo"));
     metadata.add(new Metadata("resources", "vga, audio"));
     metadata.add(new Metadata("series-id", "demo series"));
     e.setMetadata(metadata); 
@@ -800,6 +801,8 @@ public class SchedulerRestService {
     metadata.add(new Metadata("contributor", "demo contributor"));
     metadata.add(new Metadata("recurrence.start", "1262631892201"));
     metadata.add(new Metadata("recurrence.end", "1264644114423"));
+    metadata.add(new Metadata("recurrence.duration", "3600000"));
+    metadata.add(new Metadata("device", "demo"));
     metadata.add(new Metadata("resources", "vga, audio"));
     metadata.add(new Metadata("series-id", "demo series"));
     e.setMetadata(metadata); 

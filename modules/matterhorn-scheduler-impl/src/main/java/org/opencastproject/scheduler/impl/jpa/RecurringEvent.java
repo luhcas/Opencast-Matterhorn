@@ -74,7 +74,7 @@ public class RecurringEvent extends AbstractEvent{
   @Column(name="recurrence")
   protected String recurrence;
   
-  @XmlElementWrapper(name="MetadataList")
+  @XmlElementWrapper(name="metadata_list")
   @XmlElement(name="metadata")
   @OneToMany (fetch=FetchType.EAGER, cascade=CascadeType.ALL)
   @MapKey(name="metadata")
@@ -340,5 +340,12 @@ public class RecurringEvent extends AbstractEvent{
     metadataTable = null;
     return metadata.remove(e);
   }
+  
+  public void setEntityManagerFactory (EntityManagerFactory emf) {
+    this.emf = emf;
+    for (Event e : generatedEvents) {
+      e.setEntityManagerFactory(emf);
+    }
+  }  
   
 }
