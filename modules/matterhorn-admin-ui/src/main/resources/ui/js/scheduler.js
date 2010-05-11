@@ -49,31 +49,12 @@ function init() {
       return false;
     });
   
-  /**
-   *  eventFields is an array of EventFields and EventFieldGroups, keyed on <item>'s key attribute described in scheduler
-   *  service contract for the addEvent rest endpoint.
-   *  @see https://wiki.opencastproject.org/confluence/display/open/Scheduler+Service
-   */
-  
-  var fields = {
-    'id':           new FormField('eventID'),
-    'title':        new FormField('title', true),
-    'creator':      new FormField('creator'),
-    'contributor':  new FormField('contributor'),
-    'series-id':    new FormField('series'),
-    'subject':      new FormField('subject'),
-    'language':     new FormField('language'),
-    'abstract':     new FormField('description'),
-    'channel-id':   new FormField('distMatterhornMM', true, {label:'label-distribution',errorField:'missing-distribution'}),
-    'license':      new FormField('license'),
-    'startdate':    new FormField(['startDate', 'startTimeHour', 'startTimeMin'], true, {'getValue':getStartDate,'setValue':setStartDate,'checkValue':checkStartDate,'dispValue':getStartDateDisplay,label:'label-startdate',errorField:'missing-startdate'}),
-    'duration':     new FormField(['durationHour', 'durationMin'], true, {'getValue':getDuration,'setValue':setDuration,'checkValue':checkDuration,'dispValue':getDurationDisplay,'label':'label-duration','errorField':'missing-duration'}), //returns a date incremented by duration.
-    'attendees':    new FormField('attendees', true, {'getValue':getAgent,'setValue':setAgent,'checkValue':checkAgent}),
-    'device':       new FormField('attendees')
-  };
-  
-  //Form Manager, handles saving, loading, de/serialization, and validation
-  SchedulerForm.setFormFields(fields);
+  //set single/multiple recording event handler
+  if(!SchedulerForm.formFields){
+    SchedulerUI.selectRecordingType('single'); //Initialize as a single recording.
+  }
+  $('#singleRecording').click(function(){ SchedulerUI.selectRecordingType('single'); });
+  $('#multipleRecordings').click(function(){ SchedulerUI.selectRecordingType('multiple'); });
   
   $('.icon-help').click(
     function(event) {
@@ -348,9 +329,42 @@ SchedulerUI.showDaySelect = function(selection){
   }
 }
 
+SchedulerUI.selectRecordingType = function(recType){
+  /**
+   *  eventFields is an array of EventFields and EventFieldGroups, keyed on <item>'s key attribute described in scheduler
+   *  service contract for the addEvent rest endpoint.
+   *  @see https://wiki.opencastproject.org/confluence/display/open/Scheduler+Service
+   */
+  var fields = {
+    'id':           new FormField('eventID'),
+    'title':        new FormField('title', true),
+    'creator':      new FormField('creator'),
+    'contributor':  new FormField('contributor'),
+    'series-id':    new FormField('series'),
+    'subject':      new FormField('subject'),
+    'language':     new FormField('language'),
+    'abstract':     new FormField('description'),
+    'channel-id':   new FormField('distMatterhornMM', true, {label:'label-distribution',errorField:'missing-distribution'}),
+    'license':      new FormField('license'),
+    'startdate':    new FormField(['startDate', 'startTimeHour', 'startTimeMin'], true, { getValue:getStartDate, setValue:setStartDate, checkValue:checkStartDate, dispValue:getStartDateDisplay, label:label-startdate, errorField:missing-startdate }),
+    'duration':     new FormField(['durationHour', 'durationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-duration', errorField:'missing-duration' }), //returns a date incremented by duration.
+    'attendees':    new FormField('attendees', true, { getValue:getAgent, setValue:setAgent, checkValue:checkAgent }),
+    'device':       new FormField('attendees')
+  };
+  
+  if(recType == 'multiple'){ // Multiple recordings have some differnt fields and different behaviors
+    //series is required
+    //repeats
+    //rrule days
+    //rrule start and end date
+  }
+  //Form Manager, handles saving, loading, de/serialization, and validation
+  SchedulerForm.setFormFields(fields);
+}
+
 /* ======================== SchedulerForm ======================== */
 
-SchedulerForm.formFields    = {};
+SchedulerForm.formFields    = false;
 SchedulerForm.rootEl        = 'scheduler-event';
 SchedulerForm.rootNS        = 'http://scheduler.opencastproject.org';
 
