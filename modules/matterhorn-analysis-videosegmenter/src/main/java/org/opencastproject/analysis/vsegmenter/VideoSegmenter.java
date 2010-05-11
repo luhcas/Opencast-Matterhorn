@@ -439,13 +439,10 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     // TODO: Turn off to improve performance
     icomp.setStatistics(true);
     icomp.saveImagesTo(new File(PathSupport.concat(new String[] {
-      System.getProperty("java.io.tmpdir"),
-      "videosegments",
-      video.getMediaLocator().getMediaURI().toString().replaceAll("\\W", "-")
+      System.getProperty("java.io.tmpdir"), "videosegments", video.getMediaLocator().getMediaURI().toString().replaceAll("\\W", "-")
     })));
 
     Buffer buf = dsh.getBuffer();
-
     while (t < durationInSeconds && buf != null && !buf.isEOM()) {
       BufferedImage bufferedImage = ImageUtils.createImage(buf);
       if (bufferedImage == null)
