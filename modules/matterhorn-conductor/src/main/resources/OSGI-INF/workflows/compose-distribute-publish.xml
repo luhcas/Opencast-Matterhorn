@@ -282,7 +282,7 @@
       description="Distribute media to the local distribution channel">
       <configurations>
         <configuration key="source-tags">engage,atom,rss</configuration>
-        <configuration key="target-tags">publish</configuration>
+        <configuration key="target-tags">publish,engage</configuration>
       </configurations>
     </operation>
 
