@@ -15,6 +15,7 @@ mv -n $SRC_LIST $SRC_LIST.$BKP_SUFFIX
 echo "deb http://us.archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse" >> $SRC_LIST
 echo "deb http://us.archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse" >> $SRC_LIST
 echo "deb http://security.ubuntu.com/ubuntu karmic-security main restricted universe multiverse" >> $SRC_LIST
+apt-get -qq update
 
 # Auto set selections when installing postfix and jdk packages
 # The <<EOF tag indicates an input with several lines, ending with an EOF line (this is bash syntax)
@@ -39,8 +40,7 @@ done
 
 # Install the required 3rd party packages
 echo -n "Installing third party packages from Ubuntu repository... "
-apt-get -qq update
-apt-get -qq -y --force-yes install ${noinst[@]}
+apt-get -y --force-yes install ${noinst[@]} > /dev/null
 echo "Done"
 
 # Set up java-6-sun as the default alternative

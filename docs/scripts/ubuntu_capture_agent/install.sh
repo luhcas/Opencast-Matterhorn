@@ -21,7 +21,7 @@ export OC_DIR=/opencast                                  # Opencast configuratio
 export DEV_RULES=/etc/udev/rules.d/matterhorn.rules      # File containing the rules to be applied by udev to the configured devices -- not a pun!
 export CONFIG_SCRIPT=device_config.sh                    # File name for the bash script under HOME containing the device configuration routine
 export DEFAULT_CORE_URL=http://localhost:8080            # Default value for the core url
-export VGA2USB_DRV=epiphan_driver                        # Subdirectory under HOME where the epiphan driver will be downloaded to
+export VGA2USB_DIR=epiphan_driver                        # Subdirectory under HOME where the epiphan driver will be downloaded to
 export SRC_LIST=/etc/apt/sources.list                    # Location of the file 'sources.list'
 export BKP_SUFFIX=backup                                 # Suffix to be appended to the backup file for sources.list
 export STARTUP_SCRIPT=/etc/init/matterhorn.conf          # Path of the script which is set up to configure and run felix upon startup
@@ -30,7 +30,9 @@ export INSTALL_RUN=true                                  # The subsidiary script
 
 
 # Third-party dependencies variables
-export PKG_LIST=(alsa-utils v4l-conf ivtv-utils curl maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg ntp)
+export PKG_LIST=(alsa-utils v4l-conf ivtv-utils curl maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg ntp acpid)
+
+export EPIPHAN_URL=http://www.epiphan.com/downloads/linux/               # URL to download the epiphan driver
                                                                          # List of required packages
 export FELIX_FILENAME=org.apache.felix.main.distribution-2.0.4.tar.gz
 export FELIX_URL=http://apache.mirror.iweb.ca/felix/$FELIX_FILENAME

@@ -10,100 +10,121 @@ if [[ ! $INSTALL_RUN ]]; then
     exit 1
 fi
 
-# List of common drivers
-drivers[0]="vga2usb-3.23.7.2-2.6.31-16-generic-i386.tbz"
-drivers[1]="vga2usb-3.23.7.2-2.6.31-14-generic-pae.tbz"
-drivers[2]="vga2usb-3.23.6.0000-2.6.31-14-generic-i386.tbz"
-drivers[3]="vga2usb-3.23.6.0000-2.6.31-14-generic-x86_64.tbz"
-drivers[4]="vga2usb-3.22.2.0000-2.6.28-15-generic_i386.tbz"
-drivers[5]="vga2usb-3.22.2.0000-2.6.28-13-server_i386.tbz"
-drivers[6]="vga2usb-3.22.2.0000-2.6.28-13-server_amd64.tbz"
-drivers[7]="vga2usb-3.22.2.0000-2.6.28-13-generic_i386.tbz"
-drivers[8]="vga2usb-3.22.2.0000-2.6.28-13-generic_amd64.tbz"
-drivers[9]="Not listed here"
-drivers[10]="Do not need driver"
 
-# List of kernel versions using `uname -r`;`uname -m`
-# These are mapped to drivers above
-kernels[0]="2.6.31-16-generic;i686|2.6.31-16-generic;i386"
-kernels[1]=""
-kernels[2]="2.6.31-14-generic;i686|2.6.31-14-generic;i386"
-kernels[3]="2.6.31-14-generic;x86_64"
-
-lsmod | grep -e "^vga2usb" &> /dev/null
-if [[ "$?" -ne 0 ]]; then
+if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
   
+    # List the most recent drivers
+    DRIVER_NR=20
+    FILE_NAME=driver_list
+    
+    wget -q -O $FILE_NAME $EPIPHAN_URL
+    #FIXME: Add some sort of retry system
+    if [[ $? -ne 0 ]]; then
+	echo "Error. The list of available vga2usb drivers could not be retrieved. Aborting..."
+	exit 1
+    fi
+    
+    # Gets the first $DRIVER_NR lines -- the first $DRIVER_NR links to driver files
+    drivers=( $(grep -m $DRIVER_NR "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#') )
+
+
+##### FIXME: Default choice detection temporarily disabled. We need to make it more "intelligent" to allow small kernel differences#################
     # Determine which vga2usb driver to load for this kernel
-    # If this variable remains 0, we attempt to load the driver
-    LOAD_DRIVER=0
-    EPIPHAN=""
-    KERNEL=`uname -r`
-    ARCH=`uname -m`
-    EPIPHAN_HW="$KERNEL;$ARCH"
-    EPIPHAN_DEFAULT=9
-    
+    #EPIPHAN=""
+    #KERNEL=`uname -r`
+    #ARCH=`uname -m`
+    #EPIPHAN_DEFAULT=
+  
+
+  
     # If current kernel matches common driver, suggest it
-    for ((i = 0; i < ${#kernels[@]}; i++ )); do
-	test="$(echo ${kernel[$i]} | grep $EPIPHAN_HW)"
-	if [ "$test" != "" ]; then
-            EPIPHAN_DEFAULT=$i
-	fi
-    done
-    
+    #for ((i = 0; i < ${#kernels[@]}; i++ )); do
+#	test="$(echo ${kernel[$i]} | grep $EPIPHAN_HW)"
+#	if [ "$test" != "" ]; then
+ #           EPIPHAN_DEFAULT=$i
+#	fi
+ #   done
+####################################################################################################################################################
+
     # Let user choose driver
     echo "System information: `uname -mors`"
-    echo "Here is a list of supported Epiphan VGA2USB drivers:"
+    echo "Here is a list of the most recent Epiphan VGA2USB drivers:"
     for ((i = 0; i < ${#drivers[@]}; i++ )); do
 	echo -e "\t($i)\t${drivers[$i]}"
     done
+    echo -e "\t($i)\tNot listed here"
+    (( i+=1 ))
+    echo -e "\t($i)\tDo not need driver"
 
-    read -p "Choose an option: ($EPIPHAN_DEFAULT) " opt
-    until [[ $(echo "${opt:-$EPIPHAN_DEFAULT}" | grep -o '^[0-9][0-9]*$') && $opt -ge 0 && $chosen_input -lt ${#drivers[@]} ]]; do 
-	read -p "Invalid value. Please enter a value from the list: " opt
-    done
+    read -p "Choose an option from the list: " opt
 
-    # If opt is null or empty, assigns the value $EPIPHAN_DEFAULT to it
-    : ${opt:=$EPIPHAN_DEFAULT}
+    while [[ true ]]; do
 
-    if [[ $opt -ge 0 && $opt -lt 9 ]]; then
-        # Downloads the driver from the epiphan page
-  	DRIVER_URL="http://www.epiphan.com/downloads/linux/${drivers[$opt]}"
-  	EPIPHAN="${drivers[$opt]}"
-    elif [[ $opt -eq 9 ]]; then
-  	echo -n "Please input the URL of the driver you would like to load: "
-  	read url
-  	DRIVER_URL="$url"
-  	EPIPHAN=${DRIVER_URL##*/}
-    else
-	LOAD_DRIVER=1    
-    fi
-    
-    # Attempt to load the vga2usb driver
-    FAILURE=0
-
-    if [[ $LOAD_DRIVER -eq 0 ]]; then
-	echo "Loading driver $EPIPHAN"
-
-	mkdir -p $CA_DIR/$VGA2USB_DRV
-  	wget -P $CA_DIR/$VGA2USB_DRV $DRIVER_URL
+	until [[ -n "$(echo "${opt:-$EPIPHAN_DEFAULT}" | grep -o '^[0-9][0-9]*$')" && $opt -ge 0 && $opt -lt $(( ${#drivers[@]} + 2 )) ]]; do 
+	    read -p "Invalid value. Please enter a value from the list: " opt
+	done
 	
-  	if [[ $? -ne 0 ]]; then
-    	    FAILURE=1
-  	else
-  	    cd $CA_DIR/$VGA2USB_DRV
-  	    tar jxf $EPIPHAN
-  	    sed -i '/sudo \/sbin\/insmod/s|$| num_frame_buffers=2|' Makefile
-  	    make load
-  	    if [[ $? -ne 0 ]]; then
-    		FAILURE=1
-  	    fi
+        # If opt is null or empty, assigns the value $EPIPHAN_DEFAULT to it
+        #: ${opt:=$EPIPHAN_DEFAULT}
+	if [[ $opt -ge 0 && $opt -le ${#drivers[@]} ]]; then
+ 	    if [[ $opt -eq ${#drivers[@]} ]]; then
+	        # Ask the user for the driver url
+		echo -n "Please input the URL of the driver you would like to load: "
+  	        read url
+  	        DRIVER_URL="$url"
+  	        EPIPHAN=${DRIVER_URL##*/}
+	    else
+		# Download the driver from the epiphan page
+  		DRIVER_URL="$EPIPHAN_URL/${drivers[$opt]}"
+  		EPIPHAN="${drivers[$opt]}"
+	    fi
+	    
+	    # Attempt to load the vga2usb driver
+	    echo -n "Downloading driver $EPIPHAN... "
+	    
+	    mkdir -p $CA_DIR/$VGA2USB_DIR
+  	    wget -q -P $CA_DIR/$VGA2USB_DIR $DRIVER_URL
+	    
+  	    if [[ $? -eq 0 ]]; then
+		echo -n "Loading driver... "
+  		cd $CA_DIR/$VGA2USB_DIR
+  		tar jxf $EPIPHAN
+  		sed -i '/sudo \/sbin\/insmod/s|$| num_frame_buffers=2|' Makefile
+  		make load &> /dev/null
+  		if [[ $? -ne 0 ]]; then
+    		    echo "Error!"
+		    echo "Failed to load Epiphan driver. Maybe your machine kernel or architecture were not compatible?"
+		    rm -r $(tar jtf $EPIPHAN 2> /dev/null) 2> /dev/null
+		    rm $EPIPHAN
+  		else
+		    echo "Done."
+		    # Exit the loop
+		    break;
+		fi
+		cd $WORKING_DIR
+  	    else
+		echo "Error!"
+		echo "Failed to retrieve the driver from the URL. Please check it is correct and try again."
+	    fi
+	    
+	else
+	    # Skip driver installation
+	    echo "Skipping the vga2usb driver installation. Please note that if no driver is present, the vga2usb card(s) will not be detected."
+	    read -p "Are you sure you want to proceed (y|N)? " answer
+	    while [[ -z "$(echo ${answer:-N} | grep -i '^[yn]')" ]]; do
+		read -p "Please enter (y)es or (N)o: " answer
+		break;
+	    done
+	    if [[ -n "$(echo ${answer:-N} | grep -i '^y')" ]]; then
+		break
+	    fi
 	fi
-    fi
+		
+	echo
+	read -p "Please try another option: " opt
+    done
     
-    if [[ $FAILURE -ne 0 ]]; then
-  	echo "Failed to load Epiphan driver. Try to do it manually."
-	exit 1
-    fi
+    cd $WORKING_DIR
 else
     echo "VGA2USB driver already installed."
 fi
