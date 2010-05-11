@@ -8,6 +8,9 @@
        http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
   <sec:http create-session="ifRequired" servlet-api-provision="true" realm="Opencast Matterhorn" entry-point-ref="matterhornEntryPoint">
+    <sec:intercept-url pattern='/style.css' access='ROLE_ANONYMOUS, ROLE_USER, ROLE_ADMIN'/>
+    <sec:intercept-url pattern='/images/**' access='ROLE_ANONYMOUS, ROLE_USER, ROLE_ADMIN '/>
+    <sec:intercept-url pattern='/login.html' access='ROLE_ANONYMOUS'/>
     <sec:intercept-url pattern='/**' access='ROLE_USER, ROLE_ADMIN'/>
     <sec:x509 subject-principal-regex="CN=(.*?)," user-service-ref="userDetailsService"/>
     <sec:form-login />
@@ -33,7 +36,7 @@
   </bean>
   
   <bean id="userEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
-   <property name="loginFormUrl" value="/spring_security_login" />
+   <property name="loginFormUrl" value="/login.html" />
   </bean>
 
   <bean id="digestEntryPoint" class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
