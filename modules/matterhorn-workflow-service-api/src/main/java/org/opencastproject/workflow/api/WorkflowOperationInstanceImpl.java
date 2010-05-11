@@ -34,34 +34,35 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * A JAXB-annotated implementation of {@link WorkflowOperationInstance}
  */
-@XmlType(name="operation-instance", namespace="http://workflow.opencastproject.org/")
-@XmlRootElement(name="operation-instance", namespace="http://workflow.opencastproject.org/")
+@XmlType(name = "operation-instance", namespace = "http://workflow.opencastproject.org/")
+@XmlRootElement(name = "operation-instance", namespace = "http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.NONE)
 public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance {
 
-  @XmlAttribute(name="id")
+  @XmlAttribute(name = "id")
   protected String id;
 
-  @XmlAttribute(name="state")
+  @XmlAttribute(name = "state")
   protected OperationState state;
 
-  @XmlAttribute(name="description")
+  @XmlAttribute(name = "description")
   protected String description;
-  
-  @XmlElement(name="configuration")
-  @XmlElementWrapper(name="configurations")
+
+  @XmlElement(name = "configuration")
+  @XmlElementWrapper(name = "configurations")
   protected Set<WorkflowConfiguration> configurations;
 
-  @XmlElement(name="holdurl")
+  @XmlElement(name = "holdurl")
   protected URL holdStateUserInterfaceUrl;
 
-  @XmlElement(name="hold-action-title")
+  @XmlElement(name = "hold-action-title")
   protected String holdActionTitle;
 
   /**
    * No-arg constructor needed for JAXB serialization
    */
-  public WorkflowOperationInstanceImpl() {}
+  public WorkflowOperationInstanceImpl() {
+  }
 
   /**
    * Builds a new workflow operation instance based on another workflow operation.
@@ -72,13 +73,13 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
     this.description = def.getDescription();
     Set<String> defConfigs = def.getConfigurationKeys();
     this.configurations = new TreeSet<WorkflowConfiguration>();
-    if(defConfigs != null) {
-      for(String key : defConfigs) {
+    if (defConfigs != null) {
+      for (String key : defConfigs) {
         configurations.add(new WorkflowConfigurationImpl(key, def.getConfiguration(key)));
       }
     }
   }
-  
+
   public String getId() {
     return id;
   }
@@ -96,12 +97,18 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   }
 
   static class Adapter extends XmlAdapter<WorkflowOperationInstanceImpl, WorkflowOperationInstance> {
-    public WorkflowOperationInstanceImpl marshal(WorkflowOperationInstance op) throws Exception {return (WorkflowOperationInstanceImpl)op;}
-    public WorkflowOperationInstance unmarshal(WorkflowOperationInstanceImpl op) throws Exception {return op;}
+    public WorkflowOperationInstanceImpl marshal(WorkflowOperationInstance op) throws Exception {
+      return (WorkflowOperationInstanceImpl) op;
+    }
+
+    public WorkflowOperationInstance unmarshal(WorkflowOperationInstanceImpl op) throws Exception {
+      return op;
+    }
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getOutput()
    */
   public MediaPackage getOutput() {
@@ -111,12 +118,13 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getState()
    */
   public OperationState getState() {
     return state;
   }
-  
+
   public void setState(OperationState state) {
     this.state = state;
   }
@@ -128,28 +136,33 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   public void setConfiguration(Set<WorkflowConfiguration> configurations) {
     this.configurations = configurations;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowInstance#getConfiguration(java.lang.String)
    */
   public String getConfiguration(String key) {
-    if(key == null || configurations == null) return null;
-    for(WorkflowConfiguration config : configurations) {
-      if(config.getKey().equals(key)) return config.getValue();
+    if (key == null || configurations == null)
+      return null;
+    for (WorkflowConfiguration config : configurations) {
+      if (config.getKey().equals(key))
+        return config.getValue();
     }
     return null;
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowInstance#removeConfiguration(java.lang.String)
    */
   public void removeConfiguration(String key) {
-    if(key == null || configurations == null) return;
-    for(Iterator<WorkflowConfiguration> configIter = configurations.iterator(); configIter.hasNext();) {
+    if (key == null || configurations == null)
+      return;
+    for (Iterator<WorkflowConfiguration> configIter = configurations.iterator(); configIter.hasNext();) {
       WorkflowConfiguration config = configIter.next();
-      if(config.getKey().equals(key)) {
+      if (config.getKey().equals(key)) {
         configIter.remove();
         return;
       }
@@ -158,13 +171,18 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowInstance#setConfiguration(java.lang.String, java.lang.String)
    */
   public void setConfiguration(String key, String value) {
-    if(key == null || configurations == null) return;
-    for(WorkflowConfiguration config : configurations) {
-      if(config.getKey().equals(key)) {
-        ((WorkflowConfigurationImpl)config).setValue(value);
+    if (key == null)
+      return;
+    if (configurations == null)
+      configurations = new TreeSet<WorkflowConfiguration>();
+
+    for (WorkflowConfiguration config : configurations) {
+      if (config.getKey().equals(key)) {
+        ((WorkflowConfigurationImpl) config).setValue(value);
         return;
       }
     }
@@ -174,13 +192,14 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getConfigurationKeys()
    */
   @Override
   public Set<String> getConfigurationKeys() {
     Set<String> keys = new TreeSet<String>();
-    if(configurations != null && ! configurations.isEmpty()) {
-      for(WorkflowConfiguration config : configurations) {
+    if (configurations != null && !configurations.isEmpty()) {
+      for (WorkflowConfiguration config : configurations) {
         keys.add(config.getKey());
       }
     }
@@ -195,24 +214,25 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   }
 
   /**
-   * @param holdStateUserInterfaceUrl the holdStateUserInterfaceUrl to set
+   * @param holdStateUserInterfaceUrl
+   *          the holdStateUserInterfaceUrl to set
    */
   public void setHoldStateUserInterfaceUrl(URL holdStateUserInterfaceUrl) {
     this.holdStateUserInterfaceUrl = holdStateUserInterfaceUrl;
   }
 
-  /** Set the title for the link to this operations hold state UI,
-   *  a default String if no title is set.
-   *
+  /**
+   * Set the title for the link to this operations hold state UI, a default String if no title is set.
+   * 
    * @return title to be displayed
    */
   public void setHoldActionTitle(String title) {
     this.holdActionTitle = title;
   }
 
-  /** Returns the title for the link to this operations hold state UI,
-   *  a default String if no title is set.
-   *
+  /**
+   * Returns the title for the link to this operations hold state UI, a default String if no title is set.
+   * 
    * @return title to be displayed
    */
   public String getHoldActionTitle() {
