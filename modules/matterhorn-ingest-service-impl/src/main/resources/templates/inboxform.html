@@ -1,0 +1,25 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>AJAX file upload</title>
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" src="../../admin/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $.getJSON('../../collections/inbox', function(data) {   // get list of files in collection inbox from working file repository
+          for (i in data) {
+            var elm = document.createElement('option');
+            elm.innerHTML = data[i].name;
+            $(elm).attr('value', data[i].name);
+            $('#file').append(elm);
+          }
+        });
+      });
+    </script>
+  </head>
+  <body style="margin:0;padding:0;border:0;outline:0;vertical-align:baseline;background: transparent">
+  <select id="file" onchange="parent.UploadListener.fileSelectedAjax(this.value,'');" style="width:250px;">
+  </select>
+  </body>
+</html>
