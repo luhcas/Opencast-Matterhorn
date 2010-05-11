@@ -30,7 +30,10 @@ export INSTALL_RUN=true                                  # The subsidiary script
 
 
 # Third-party dependencies variables
-export PKG_LIST=(alsa-utils v4l-conf ivtv-utils curl maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg ntp acpid)
+export PKG_LIST=( alsa-utils v4l-conf ivtv-utils curl maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg ntp acpid )
+
+export FLAVORS="presenter/source presentation/source audience/source indefinite/source"
+                                                                         # Lists of flavors the user can choose from to assign to a certain device
 
 export EPIPHAN_URL=http://www.epiphan.com/downloads/linux                # URL to download the epiphan driver
                                                                          # List of required packages
@@ -54,7 +57,6 @@ export JV4LINFO_JAR=jv4linfo-0.2.1-src.jar                               # Name 
 export JV4LINFO_LIB=libjv4linfo.so                                       # Shared object required by the jv4linfo jar to function
 export JV4LINFO_PATH=/usr/lib                                            # Location where the shared object will be copied so that jvm can find it
                                                                          # In other words, it must be in the java.library.path
-
 
 # Required scripts for installation
 SETUP_USER=./setup_user.sh
@@ -140,6 +142,7 @@ if [[ "$?" -ne 0 ]]; then
     exit 1
 fi
 
+echo "${#FLAVORS[@]}"
 # Setup properties of the devices
 ${SETUP_DEVICES}
 if [[ "$?" -ne 0 ]]; then

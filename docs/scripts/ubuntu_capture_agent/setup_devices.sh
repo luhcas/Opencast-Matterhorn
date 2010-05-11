@@ -51,6 +51,9 @@ rules=tmp.rules
 rm -f $rules
 rm -f $CONFIG_SCRIPT
 
+# This converts the "$FLAVORS" string in an array, for convenience
+flavors=($FLAVORS)
+
 unset allDevices
 unset cleanName
 for (( i = 0; i < ${#device[@]}; i++ )); do
@@ -95,11 +98,30 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     echo "KERNEL==\"video[0-9]*\", ATTR{name}==\"$sysName\", GROUP=\"video\", SYMLINK+=\"$symlinkName\"" >> $rules
 
     # Prompt for the flavor for this device
-    read -p "Please enter the flavor assigned to ${cleanName[$i]}: " flavor
-    # Grep matches anything that has two fields consisting of any characters but slashes, separated by a single slash '/'
-    while [[ -z $(echo $flavor | grep '^[^/][^/]*/[^/][^/]*$') ]]; do
-	read -p "Invalid syntax. The flavors follow the pattern <prefix>/<suffix>: " flavor
-    done
+    if [[ $[${#flavors[@]} -eq 0 ]]; then
+	flavor=0
+    else
+	echo "Please choose the flavor assigned to ${cleanName[$i]}: "
+	for (( j = 0; j < ${#flavors[@]}; j++ )); do
+	    echo -e "\t$j) ${flavors[$j]}"
+	done
+	echo -e "\t$j) User-defined"
+	read -p "Selection: " flavor
+	
+	until [[ -n "$(echo $flavor | grep -o '^[0-9][0-9]*$')" && $flavor -ge 0 && $flavor -le ${#flavors[@]} ]]; do 
+	    read -p "Please choose one of the numbers in the list: " flavor
+	done
+    fi
+    
+    if [[ $flavor -eq ${#flavors[@]} ]]; then
+        # Grep matches anything that has two fields consisting of any characters but slashes, separated by a single slash '/'
+	read -p "Please enter the flavor for ${cleanName[$i]}: " flavor
+	while [[ -z $(echo $flavor | grep '^[^/ ][^/ ]*/[^/ ][^/ ]*$') ]]; do
+	    read -p "Invalid syntax. The flavors follow the pattern <prefix>/<suffix>: " flavor
+	done
+    else
+	flavor=${flavors[$flavor]}
+    fi
     echo
 
     # Prompt for choosing the video standard
@@ -113,7 +135,7 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
 	unset std
 	echo "Please choose the output standard for the device ${devName[$i]}:"
 	for (( j = 0; j < ${#standards[@]}; j++ )); do
-	    echo "   $j) ${standards[$j]}"
+	    echo -e "\t$j) ${standards[$j]}"
 	done
 	read -p "Selection: " std
 	
@@ -140,7 +162,7 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     if [[ ${#inputs[@]} -gt 1 ]]; then 
 	echo "Please select the input number to be used with the ${devName[$i]}"
 	for (( j = 0; j < ${#inputs[@]}; j++ )); do
-	    echo "   $j) ${inputs[$j]}"
+	    echo -e "\t$j) ${inputs[$j]}"
 	done
 	read -p "Selection: " chosen_input
 	
