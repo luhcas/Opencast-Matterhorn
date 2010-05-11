@@ -223,7 +223,11 @@ Upload.showSuccessScreen = function() {
     for (key in Upload.metadata) {
       if (Upload.metadata[key] != "") {
         $('#field-'+key).css('display','block');
-        $('#field-'+key).children('.fieldValue').text(Upload.metadata[key]);
+        if (Upload.metadata[key] instanceof Array) {
+          $('#field-'+key).children('.fieldValue').text(Upload.metadata[key].join(', '));
+        } else {
+          $('#field-'+key).children('.fieldValue').text(Upload.metadata[key]);
+        }
       }
     }
   });
