@@ -126,6 +126,42 @@
           </xsl:if>
         </xsl:for-each>
       </xsl:if>
+      
+       <xsl:if test="@type='presenter/delivery'">
+        <xsl:for-each select="tags/tag">
+          <xsl:if test=".='engage'">
+             <xsl:if test="../tag='streaming'">
+              <div id="oc-video-presenter-source-streaming" style="display: none">
+                <xsl:value-of select="../../url" />
+             </div>
+            </xsl:if>
+            <xsl:if test="../tag!='streaming'">
+              <div id="oc-video-presenter-source" style="display: none">
+                <xsl:value-of select="../../url" />
+             </div>
+            </xsl:if>
+          </xsl:if>
+        </xsl:for-each>
+      </xsl:if>
+
+      <xsl:if test="@type='presentation/delivery'">
+        <xsl:for-each select="tags/tag">
+          <xsl:if test=".='engage'">
+            <xsl:if test="../tag='streaming'">
+              <div id="oc-video-presentation-source-streaming" style="display: none">
+                <xsl:value-of select="../../url" />
+              </div>
+             </xsl:if>
+             <xsl:if test="../tag!='streaming'">
+              <div id="oc-video-presentation-source" style="display: none">
+                <xsl:value-of select="../../url" />
+              </div>
+            </xsl:if>
+          </xsl:if>
+        </xsl:for-each>
+      </xsl:if>
+      
+      
     </xsl:for-each>
 
 		<div id="oc-title" style="display: none">
