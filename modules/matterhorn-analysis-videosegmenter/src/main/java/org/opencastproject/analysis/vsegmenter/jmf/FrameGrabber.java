@@ -53,7 +53,7 @@ public class FrameGrabber implements DataSink, BufferTransferHandler {
   private Buffer readBuffer = null;
 
   /** Flag to indicate whether there is more input to come */
-  private boolean done = false;
+  private boolean endOfStream = false;
 
   /**
    * {@inheritDoc}
@@ -179,25 +179,27 @@ public class FrameGrabber implements DataSink, BufferTransferHandler {
   public void transferData(PushBufferStream stream) {
     try {
       synchronized (this) {
-        while (!done && !stream.endOfStream()) {
+        while (!endOfStream && !stream.endOfStream()) {
           try {
             readBuffer = new Buffer();
             stream.read(readBuffer);
             if (stream.endOfStream() || readBuffer.isEOM()) {
               sendEvent(new EndOfStreamEvent(this));
               readBuffer = null;
-              done = true;
+              endOfStream = true;
             }
-            this.notify();
-            if (!done) {
+            this.notifyAll();
+            if (!endOfStream) {
               logger.debug("Found buffer {} at {} s ({} bytes)", new Object[] { readBuffer.getSequenceNumber(),
                       readBuffer.getTimeStamp() / 100000000, readBuffer.getLength() });
               this.wait();
             }
           } catch (InterruptedException e) {
+            logger.warn("Interrupted!");
             // Finally!
           }
         }
+        this.notifyAll();
       }
     } catch (IOException e) {
       sendEvent(new DataSinkErrorEvent(this, e.getMessage()));
@@ -214,14 +216,15 @@ public class FrameGrabber implements DataSink, BufferTransferHandler {
   public Buffer getBuffer() throws IOException {
     Buffer currentBuffer = null;
     synchronized (this) {
-      if (done) {
-        this.notify();
+      if (endOfStream) {
+        this.notifyAll();
         return null;
       }
       while (readBuffer == null) {
         try {
           this.wait();
         } catch (InterruptedException e) {
+          logger.warn("Interrupted!");
           // Finally!
         }
       }

@@ -44,7 +44,6 @@ import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -54,7 +53,6 @@ import java.util.Iterator;
 /**
  * Test class for video segmentation.
  */
-@Ignore
 public class VideoSegmenterTest {
 
   /** Video file to test. Contains a new scene at 00:12 */
