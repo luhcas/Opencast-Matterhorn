@@ -24,7 +24,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 
@@ -47,9 +46,10 @@ public class ConfigurationManagerTest {
   }
 
   @Before
-  public void setUp() throws ConfigurationException {
+  public void setUp() throws ConfigurationException, IOException {
     configManager = new ConfigurationManager();
     Assert.assertNotNull(configManager);
+    configManager.activate(null);
 
     //Checks on the basic operations before updated() has been called
     Assert.assertNull(configManager.getItem("nothing"));
@@ -60,6 +60,12 @@ public class ConfigurationManagerTest {
     Assert.assertEquals(1, configManager.getAllProperties().size());
 
     Properties p = new Properties();
+    InputStream is = getClass().getClassLoader().getResourceAsStream("config/capture.properties");
+    if (is == null) {
+      Assert.fail();
+    }
+    p.load(is);
+    IOUtils.closeQuietly(is);
     p.put("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
 
     configManager.updated(p);
@@ -181,6 +187,8 @@ public class ConfigurationManagerTest {
 
     sourceProps.remove("capture.device.MOCK_PRESENTER.src");
     sourceProps.remove("capture.device.MOCK_PRESENTER.outputfile");
+    configManager.setItem("capture.device.MOCK_PRESENTER.src", null);
+    configManager.setItem("capture.device.MOCK_PRESENTER.outputfile", null);
     configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.updated(sourceProps);

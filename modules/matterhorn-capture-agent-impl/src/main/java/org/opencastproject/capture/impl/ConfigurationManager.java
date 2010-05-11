@@ -62,7 +62,9 @@ public class ConfigurationManager implements ManagedService {
   private Timer timer;
 
   public void activate(ComponentContext ctx) {
-    properties.setBundleContext(ctx.getBundleContext());
+    if (ctx != null) {
+      properties.setBundleContext(ctx.getBundleContext());
+    }
   }
 
   public void deactivate() {
@@ -319,8 +321,8 @@ public class ConfigurationManager implements ManagedService {
 
     //Check to make sure the counts are all correct, otherwise return null/error
     for (String name : friendlyNames) {
-      //TODO:  make this a constant?
-      if (propertyCounts.get(name) != 3) {
+      //TODO:  This is a stupid check, how else can we do this?  They might have three properties, but none of the right ones...
+      if (propertyCounts.get(name) < 3) {
         logger.error("Invalid configuration data for device {}, agent capabilities are null!", name);
         return null;
       }

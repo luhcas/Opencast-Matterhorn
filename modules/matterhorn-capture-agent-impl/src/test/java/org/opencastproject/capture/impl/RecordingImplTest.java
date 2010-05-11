@@ -7,6 +7,7 @@ import org.opencastproject.util.ConfigurationException;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -22,6 +23,8 @@ public class RecordingImplTest {
   RecordingImpl rec = null;
   ConfigurationManager configManager = null;
 
+  File testDir = null;
+
   @Before
   public void setup() throws org.osgi.service.cm.ConfigurationException, IOException {
     //Setup the configuration manager
@@ -34,7 +37,8 @@ public class RecordingImplTest {
     sourceProps.load(is);
     IOUtils.closeQuietly(is);
 
-    configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "recording-test").getAbsolutePath());
+    testDir = new File(System.getProperty("java.io.tmpdir"), "recording-test");
+    configManager.setItem("org.opencastproject.storage.dir", testDir.getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.updated(sourceProps);
   }
@@ -42,6 +46,7 @@ public class RecordingImplTest {
   @After
   public void teardown() {
     rec = null;
+    FileUtils.deleteQuietly(testDir);
   }
 
   @Test
@@ -52,6 +57,7 @@ public class RecordingImplTest {
     Assert.assertEquals(System.getProperty("java.io.tmpdir"), rec.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
     Assert.assertNull(rec.setProperty("test", "foo"));
     Assert.assertEquals("foo", rec.setProperty("test", "bar"));
+    FileUtils.deleteQuietly(rec.getDir());
   }
 
   @Test
