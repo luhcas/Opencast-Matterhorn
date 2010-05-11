@@ -20,6 +20,9 @@ import java.util.Arrays;
 
 /**
  * This is an implementation of Canny's edge detection algorithm.
+ * <p>
+ * Original version of the code released to the public domain at
+ * {@link "http://www.tomgibara.com/computer-vision/canny-edge-detector"}.
  */
 public class EdgeDetector {
 
@@ -37,7 +40,6 @@ public class EdgeDetector {
   private int picsize;
   private int[] data;
   private int[] magnitude;
-  private BufferedImage sourceImage;
   private BufferedImage edgesImage;
 
   private float gaussianKernelRadius;
@@ -60,26 +62,6 @@ public class EdgeDetector {
     gaussianKernelRadius = 2f;
     gaussianKernelWidth = 16;
     contrastNormalized = false;
-  }
-
-  /**
-   * The image that provides the luminance data used by this detector to generate edges.
-   * 
-   * @return the source image, or null
-   */
-  public BufferedImage getSourceImage() {
-    return sourceImage;
-  }
-
-  /**
-   * Specifies the image that will provide the luminance data in which edges will be detected. A source image must be
-   * set before the process method is called.
-   * 
-   * @param image
-   *          a source of luminance data
-   */
-  public void setSourceImage(BufferedImage image) {
-    sourceImage = image;
   }
 
   /**
@@ -213,10 +195,10 @@ public class EdgeDetector {
   /**
    * Processes the input image and returns the resulting edge image.
    */
-  public BufferedImage process() {
+  public BufferedImage process(BufferedImage sourceImage) {
     if (sourceImage == null)
       throw new IllegalStateException("No source image has been set");
-    
+
     width = sourceImage.getWidth();
     height = sourceImage.getHeight();
     picsize = width * height;
@@ -230,18 +212,22 @@ public class EdgeDetector {
     yGradient = new float[picsize];
 
     // Create the luminance values
-    readLuminance();
-    
+    readLuminance(sourceImage);
+
     // Adjust contrast if needed
     if (contrastNormalized)
       normalizeContrast();
-    
+
     computeGradients(gaussianKernelRadius, gaussianKernelWidth);
     int low = Math.round(lowThreshold * MAGNITUDE_SCALE);
     int high = Math.round(highThreshold * MAGNITUDE_SCALE);
     performHysteresis(low, high);
     thresholdEdges();
-    return writeEdges(data);    
+
+    BufferedImage edgesImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    edgesImage.getWritableTile(0, 0).setDataElements(0, 0, width, height, data);
+
+    return edgesImage;
   }
 
   // NOTE: The elements of the method below (specifically the technique for
@@ -452,7 +438,13 @@ public class EdgeDetector {
     return Math.round(0.299f * r + 0.587f * g + 0.114f * b);
   }
 
-  private void readLuminance() {
+  /**
+   * Reads the luminance values from the image.
+   * 
+   * @param sourceImage
+   *          the source image
+   */
+  private void readLuminance(BufferedImage sourceImage) {
     int type = sourceImage.getType();
     if (type == BufferedImage.TYPE_INT_RGB || type == BufferedImage.TYPE_INT_ARGB) {
       int[] pixels = (int[]) sourceImage.getData().getDataElements(0, 0, width, height, null);
@@ -507,17 +499,6 @@ public class EdgeDetector {
     for (int i = 0; i < data.length; i++) {
       data[i] = remap[data[i]];
     }
-  }
-
-  private BufferedImage writeEdges(int pixels[]) {
-    // NOTE: There is currently no mechanism for obtaining the edge data
-    // in any other format other than an INT_ARGB type BufferedImage.
-    // This may be easily remedied by providing alternative accessors.
-    if (edgesImage == null) {
-      edgesImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-    }
-    edgesImage.getWritableTile(0, 0).setDataElements(0, 0, width, height, pixels);
-    return edgesImage;
   }
 
 }

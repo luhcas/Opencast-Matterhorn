@@ -22,8 +22,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.track.TrackImpl;
+import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
 import org.opencastproject.metadata.mpeg7.ContentSegment;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
@@ -73,7 +73,7 @@ public class VideoSegmenterTest {
   protected VideoSegmenter vsegmenter = null;
 
   /** The media url */
-  protected static Track track = null;
+  protected static TrackImpl track = null;
 
   /**
    * Copies test files to the local file system, since jmf is not able to access movies from the resource section of a
@@ -87,6 +87,7 @@ public class VideoSegmenterTest {
     track = TrackImpl.fromURI(VideoSegmenterTest.class.getResource(mediaResource).toURI());
     track.setFlavor(MediaPackageElements.PRESENTATION_SOURCE);
     track.setMimeType(MimeTypes.MJPEG);
+    track.addStream(new VideoStreamImpl());
     System.setProperty("java.awt.headless", "true");
     System.setProperty("awt.toolkit", "sun.awt.HeadlessToolkit");
   }

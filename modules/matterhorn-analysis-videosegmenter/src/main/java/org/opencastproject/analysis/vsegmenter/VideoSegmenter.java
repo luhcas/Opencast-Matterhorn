@@ -18,6 +18,7 @@ package org.opencastproject.analysis.vsegmenter;
 import org.opencastproject.analysis.api.MediaAnalysisException;
 import org.opencastproject.analysis.api.MediaAnalysisServiceSupport;
 import org.opencastproject.analysis.vsegmenter.jmf.FrameGrabber;
+import org.opencastproject.analysis.vsegmenter.jmf.ImageComparator;
 import org.opencastproject.analysis.vsegmenter.jmf.ImageUtils;
 import org.opencastproject.analysis.vsegmenter.jmf.PlayerListener;
 import org.opencastproject.composer.api.ComposerService;
@@ -42,9 +43,11 @@ import org.opencastproject.receipt.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
+import org.opencastproject.util.PathSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +59,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -115,7 +119,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   public static final int STABILITY_THRESHOLD = 5;
 
   /** Number of pixels that may change between two frames without considering them different */
-  public static final float CHANGES_THRESHOLD = 0.75f; // 75% change
+  public static final float CHANGES_THRESHOLD = 0.05f; // 5% change
 
   /** The expected mimetype of the resulting preview encoding */
   public static final MimeType MJPEG_MIMETYPE = MimeTypes.MJPEG;
@@ -312,9 +316,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
           MediaLocator contentLocator = new MediaLocatorImpl(mediaUrl.toURI());
           Video videoContent = mpeg7.addVideoContent("videosegment", contentTime, contentLocator);
 
-          // EdgeDetector edgeDetector = new EdgeDetector();
-          // TODO: configure edge detector
-
           logger.info("Starting video segmentation of {}", mediaUrl);
 
           processor.setRate(1.0f);
@@ -424,14 +425,24 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     int t = 1;
     int lastStableImageTime = 0;
     long startOfSegment = 0;
-    int currentSceneStabilityCount = 0;
-    boolean sceneChangeImminent = false;
+    int currentSceneStabilityCount = 1;
+    boolean sceneChangeImminent = true;
     boolean luckyPunchRecovery = false;
     int segmentCount = 1;
     BufferedImage previousImage = null;
+    BufferedImage lastStableImage = null;
     BlockingQueue<Buffer> bufferQueue = new ArrayBlockingQueue<Buffer>(STABILITY_THRESHOLD + 1);
     long durationInSeconds = video.getMediaTime().getMediaDuration().getDurationInMilliseconds() / 1000;
     ContentSegment contentSegment = video.getTemporalDecomposition().createSegment("segment-" + segmentCount);
+    ImageComparator icomp = new ImageComparator(CHANGES_THRESHOLD);
+    
+    // TODO: Turn off to improve performance
+    icomp.setStatistics(true);
+    icomp.saveImagesTo(new File(PathSupport.concat(new String[] {
+      System.getProperty("java.io.tmpdir"),
+      "videosegments",
+      video.getMediaLocator().getMediaURI().toString().replaceAll("\\W", "-")
+    })));
 
     Buffer buf = dsh.getBuffer();
 
@@ -443,7 +454,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
       logger.trace("Analyzing video at {} s", t);
 
       // Compare the new image with our previous sample
-      boolean differsFromPreviousImage = ImageUtils.isDifferent(previousImage, bufferedImage, CHANGES_THRESHOLD);
+      boolean differsFromPreviousImage = icomp.isDifferent(previousImage, bufferedImage, t);
 
       // We found an image that is different compared to the previous one. Let's see if this image remains stable
       // for some time (STABILITY_THRESHOLD) so we can declare a new scene
@@ -454,60 +465,82 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
         // really start over an make sure we get the correct beginning of the new scene
         if (!sceneChangeImminent && t - lastStableImageTime > 1) {
           luckyPunchRecovery = true;
+          previousImage = lastStableImage;
           bufferQueue.add(buf);
           t = lastStableImageTime;
         } else {
           lastStableImageTime = t - 1;
+          lastStableImage = previousImage;
           previousImage = bufferedImage;
+          currentSceneStabilityCount = 1;
           t++;
         }
 
-        currentSceneStabilityCount = 0;
         sceneChangeImminent = true;
+      }
+      
+      // We are looking ahead and everyhting seems to be fine.
+      else if (!sceneChangeImminent) {
+        fillLookAheadBuffer(bufferQueue, buf, dsh);
+        lastStableImageTime = t;
+        t += STABILITY_THRESHOLD;
+        previousImage = bufferedImage;
+        lastStableImage = bufferedImage;
       }
 
       // Seems to be the same image. If we have just recently detected a new scene, let's see if we are able to
       // confirm that this is scene is stable (>= STABILITY_THRESHOLD)
-      else {
-        if (currentSceneStabilityCount < STABILITY_THRESHOLD) {
-          currentSceneStabilityCount++;
+      else if (currentSceneStabilityCount < STABILITY_THRESHOLD) {
+        currentSceneStabilityCount++;
+        previousImage = bufferedImage;
+        t++;
+      } 
+      
+      // Did we find a new scene?
+      else if (currentSceneStabilityCount == STABILITY_THRESHOLD) {
+        lastStableImageTime = t;
 
-          // Did we find a new scene?
-          if (currentSceneStabilityCount == STABILITY_THRESHOLD) {
-            lastStableImageTime = t;
+        long endOfSegment = t - STABILITY_THRESHOLD;
+        long durationms = (endOfSegment - startOfSegment) * 1000L;
 
-            long endOfSegment = t - STABILITY_THRESHOLD;
-            long durationms = (endOfSegment - startOfSegment) * 1000L;
-
-            // Create a new segment if this wasn't the first one
-            if (endOfSegment > 1) {
-              contentSegment.setMediaTime(new MediaRelTimeImpl(startOfSegment * 1000L, durationms));
-              contentSegment = video.getTemporalDecomposition().createSegment("segment-" + ++segmentCount);
-              segments.add(contentSegment);
-              startOfSegment = endOfSegment;
-            }
-
-            // After finding a new segment, likelihood of a stable image is good, let's take a look ahead. Since
-            // a processor can't seek, we need to store the buffers in between, in case we need to come back.
-            fillLookAheadBuffer(bufferQueue, buf, dsh);
-            t += STABILITY_THRESHOLD;
-            sceneChangeImminent = false;
-
-            logger.debug("Found new scene at {} s", startOfSegment);
-          } else {
-            t++;
-          }
-        } else if (sceneChangeImminent) {
-          // We found a scene change by looking ahead. Now we want to get to the exact position
-          lastStableImageTime = t;
-          t++;
-        } else {
-          // If things look stable, then let's look ahead as much as possible without loosing information (which is
-          // equal to looking ahead STABILITY_THRESHOLD seconds.
-          lastStableImageTime = t;
-          fillLookAheadBuffer(bufferQueue, buf, dsh);
-          t += STABILITY_THRESHOLD;
+        // Create a new segment if this wasn't the first one
+        if (endOfSegment > STABILITY_THRESHOLD) {
+          contentSegment.setMediaTime(new MediaRelTimeImpl(startOfSegment * 1000L, durationms));
+          contentSegment = video.getTemporalDecomposition().createSegment("segment-" + ++segmentCount);
+          segments.add(contentSegment);
+          startOfSegment = endOfSegment;
         }
+
+        // After finding a new segment, likelihood of a stable image is good, let's take a look ahead. Since
+        // a processor can't seek, we need to store the buffers in between, in case we need to come back.
+        fillLookAheadBuffer(bufferQueue, buf, dsh);
+        t += STABILITY_THRESHOLD;
+        previousImage = bufferedImage;
+        lastStableImage = bufferedImage;
+        currentSceneStabilityCount++;
+        sceneChangeImminent = false;
+
+        logger.debug("Found new scene at {} s", startOfSegment);
+      } 
+  
+      // Did we find a new scene by looking ahead?
+      else if (sceneChangeImminent) {
+        // We found a scene change by looking ahead. Now we want to get to the exact position
+        lastStableImageTime = t;
+        previousImage = bufferedImage;
+        lastStableImage = bufferedImage;
+        currentSceneStabilityCount++;
+        t++;
+      } 
+      
+      // Nothing special, business as usual
+      else {
+        // If things look stable, then let's look ahead as much as possible without loosing information (which is
+        // equal to looking ahead STABILITY_THRESHOLD seconds.
+        lastStableImageTime = t;
+        fillLookAheadBuffer(bufferQueue, buf, dsh);
+        t += STABILITY_THRESHOLD;
+        lastStableImage = bufferedImage;
         previousImage = bufferedImage;
       }
 
@@ -523,6 +556,18 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     long durationms = ((long) durationInSeconds - startOfSegment) * 1000;
     contentSegment.setMediaTime(new MediaRelTimeImpl(startOfSegmentms, durationms));
     segments.add(contentSegment);
+    
+    // Print summary
+    if (icomp.hasStatistics()) {
+      NumberFormat nf = NumberFormat.getNumberInstance();
+      nf.setMaximumFractionDigits(2);
+      logger.info("Image comparison finished with an average change of {}% in {} comparisons", nf.format(icomp.getAvgChange()), icomp.getComparisons());
+    }
+
+    // Cleanup
+    if (icomp.getSavedImagesDirectory() != null) {
+      FileUtils.deleteQuietly(icomp.getSavedImagesDirectory());
+    }
 
     return segments;
   }
