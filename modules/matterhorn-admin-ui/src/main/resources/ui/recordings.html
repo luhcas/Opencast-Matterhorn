@@ -137,8 +137,10 @@
           <td id="holdStateHeadRow-status" width="15%">Status</td>
           <td width="15%">
             <input type="hidden" id="holdWorkflowId" value="">
-            <button type="button" onclick="$('#holdActionPanel-container').fadeOut('fast');" style="float:right;margin-right:16px;margin-bottom:6px;width:160px;">Remain on hold</button><br>
-            <button type="button" id="continueBtn" onclick="Recordings.continueWorkflow();" style="float:right;margin-right:16px;width:160px;">Continue processing</button>
+            <a onclick="$('#holdActionPanel-container').fadeOut('fast');" style="position:absolute; top:3px; right:3px;"><img src="shared_img/icons/close.png" alt="close" title="close"></a>
+            <button type="button" onclick="$('#holdActionPanel-container').fadeOut('fast');" style="float:left;margin-right:16px;margin-bottom:6px;width:160px;">Remain on hold</button>
+            <br>
+            <button type="button" id="continueBtn" onclick="Recordings.continueWorkflow();" style="float:left;margin-right:16px;width:160px;">Continue processing</button>
           </td>
         </tr>
       </table>
