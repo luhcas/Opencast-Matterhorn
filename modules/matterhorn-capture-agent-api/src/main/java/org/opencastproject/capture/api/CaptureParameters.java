@@ -113,6 +113,12 @@ public interface CaptureParameters {
    * This is to catch user input errors in the scheduler, and also to stop infinite captures from an unscheduled capture.  
    */
   String CAPTURE_MAX_LENGTH = "capture.max.length";
+  
+  /**
+   * The maximum amount of time to wait for our gstreamer pipeline to start capturing
+   * before we decide to kill the process and report a failure. Set in seconds.
+   */
+  String CAPTURE_START_WAIT = "capture.start.wait";
 
   /** A comma delimited list of the friendly names for capturing devices */
   String CAPTURE_DEVICE_NAMES = "capture.device.names";

@@ -338,10 +338,11 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         stopCapture();
       }
     });
-
+    
+    // Grab time to wait for pipeline to start
+    int wait = Integer.parseInt(newRec.getProperty(CaptureParameters.CAPTURE_START_WAIT), 5);
     pipe.play();
-    //5 second timeout.  If it's longer than that then the pipeline is pooched according to the gStreamer devs
-    if (pipe.getState(5 * GST_SECOND) != State.PLAYING) {
+    if (pipe.getState(wait * GST_SECOND) != State.PLAYING) {
       logger.error("Unable to start pipeline after 5 seconds.  Aborting!");
       return null;
     }
