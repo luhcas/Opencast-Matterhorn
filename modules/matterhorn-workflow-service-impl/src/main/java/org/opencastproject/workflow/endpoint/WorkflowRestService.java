@@ -303,7 +303,8 @@ public class WorkflowRestService {
   @SuppressWarnings("unchecked")
   protected JSONObject getWorkflowDefinitionAsJson(WorkflowDefinition definition) {
     JSONObject json = new JSONObject();
-    json.put("title", definition.getId());
+    json.put("id", definition.getId());
+    json.put("title", definition.getTitle());
     json.put("description", definition.getDescription());
     List<JSONObject> opList = new ArrayList<JSONObject>();
     for(WorkflowOperationDefinition operationDefinition : definition.getOperations()) {
