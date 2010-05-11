@@ -32,7 +32,7 @@ export INSTALL_RUN=true                                  # The subsidiary script
 # Third-party dependencies variables
 export PKG_LIST=(alsa-utils v4l-conf ivtv-utils curl maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg ntp acpid)
 
-export EPIPHAN_URL=http://www.epiphan.com/downloads/linux/               # URL to download the epiphan driver
+export EPIPHAN_URL=http://www.epiphan.com/downloads/linux                # URL to download the epiphan driver
                                                                          # List of required packages
 export FELIX_FILENAME=org.apache.felix.main.distribution-2.0.4.tar.gz
 export FELIX_URL=http://apache.mirror.iweb.ca/felix/$FELIX_FILENAME

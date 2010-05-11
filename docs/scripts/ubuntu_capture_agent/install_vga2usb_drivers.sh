@@ -56,8 +56,10 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
     (( i+=1 ))
     echo -e "\t($i)\tDo not need driver"
 
+    # Prompts for an option
     read -p "Choose an option from the list: " opt
 
+    # Main loop: if some error happens, the user will be prompted again for another option
     while [[ true ]]; do
 
 	until [[ -n "$(echo "${opt:-$EPIPHAN_DEFAULT}" | grep -o '^[0-9][0-9]*$')" && $opt -ge 0 && $opt -lt $(( ${#drivers[@]} + 2 )) ]]; do 
@@ -69,9 +71,8 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
 	if [[ $opt -ge 0 && $opt -le ${#drivers[@]} ]]; then
  	    if [[ $opt -eq ${#drivers[@]} ]]; then
 	        # Ask the user for the driver url
-		echo -n "Please input the URL of the driver you would like to load: "
-  	        read url
-  	        DRIVER_URL="$url"
+		echo "You might want to check $EPIPHAN_URL to see a complete list of the available drivers."
+		read -p "Please input the URL of the driver you would like to load: " DRIVER_URL
   	        EPIPHAN=${DRIVER_URL##*/}
 	    else
 		# Download the driver from the epiphan page
