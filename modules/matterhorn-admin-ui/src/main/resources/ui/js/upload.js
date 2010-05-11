@@ -40,7 +40,15 @@ Upload.init = function() {
       $('.formField').each( function() {
         if (($(this).attr('id') != 'flavor') && ($(this).attr('id') != 'distribution')) {
           //log("adding metadata " + $(this).attr('id') + ' ' + $(this).val());
-          Upload.metadata[$(this).attr('id')] = $(this).val();
+          if ($(this).hasClass('multiValueField')) {
+            if (Upload.metadata[$(this).attr('id')] == undefined) {
+              Upload.metadata[$(this).attr('id')] = $(this).val();
+            } else {
+
+            }
+          } else {
+            Upload.metadata[$(this).attr('id')] = $(this).val();
+          }
         }
       });
       UploadListener.uploadStarted();

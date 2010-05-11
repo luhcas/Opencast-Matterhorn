@@ -68,6 +68,7 @@
 
     <xsl:choose>
       <xsl:when test="string-length(startdate) &gt; 0">
+      <xsl:if test="string-length(agent) &gt; 0">
         <div class="fl-container-800" id="captureform">
           <div class="fl-widget">
             <div class="fl-widget-titlebar form-box-title">
@@ -99,6 +100,7 @@
             </div>
           </div>
         </div>
+      </xsl:if>
       </xsl:when>
       <xsl:otherwise>
         <div class="fl-container-800">
