@@ -7,8 +7,11 @@
     <script type="text/javascript" src="js/state.js"></script>
 </head>
 <body>
-	<div id="state"></div>
-	<a href="http://localhost:8080/capture/rest/startCapture">Start Capture</a>
-	<a href="http://localhost:8080/capture/rest/stopCapture">Stop Capture</a>
+	<script type="text/javascript" language="javascript">
+	var start = "<a href='http://" + window.location.hostname + ":8080/capture/rest/startCapture'>Start Capture</a><br>";
+	var end = "<a href='http://" + window.location.hostname + ":8080/capture/rest/stopCapture'>Stop Capture</a>";
+	document.write(start);
+	document.write(end);
+	</script>
 </body>
 </html>	
