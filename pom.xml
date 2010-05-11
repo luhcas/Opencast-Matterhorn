@@ -28,6 +28,7 @@
         <module>modules/matterhorn-build-tools</module>
         <module>modules/matterhorn-runtime-tools</module>
         <module>modules/matterhorn-analysis-api</module>
+        <module>modules/matterhorn-analysis-dictionary</module>
         <module>modules/matterhorn-analysis-videosegmenter</module>
         <module>modules/matterhorn-capture-agent-api</module>
         <module>modules/matterhorn-capture-agent-impl</module>
