@@ -215,7 +215,7 @@ select { font-size:1.15em; }
   display: none !important;
 }
 
-#category-selector-container {float:left;width:650px;margin:10px 0px 10px 10px;}
+#category-selector-container {float:left;width:auto;margin:10px 0px 10px 10px;}
 .category-selector {margin:0px;margin-bottom:10px;}
 .category-selector li {float:left;list-style:none;}
 .category-selector-item {}
