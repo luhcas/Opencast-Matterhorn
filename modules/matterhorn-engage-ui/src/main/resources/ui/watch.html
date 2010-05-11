@@ -67,7 +67,7 @@
       
       <div id="oc_video-time">
         <div id="simpleEdit">    
-          <input id="oc_current-time" class="oc_current-time" type="submit" name="Current Time" title="Current Time" value="00:00:00" tabIndex="0"></input>
+          <input id="oc_current-time" class="oc_current-time" type="text" name="Current Time" title="Current Time" value="00:00:00" tabIndex="0"></input>
           <input id="oc_edit-time" class="oc_edit-time-hide" type="text" maxlength="8" size="8" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="00:00:00"></input> 
           of
           <span id="oc_duration" class="oc_duration" name="Duration" title="Duration" tabIndex="0">00:00:00</span>
@@ -119,18 +119,59 @@
      
     <div id="data"></div>
     
-    
+    <div >
+      <div id="oc_tabs" class="oc_tabs-input">
+        <input id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Slides" value="Hide Slides" alt="Hide Slides" title="Hide Slides"></input>
+        <input id="oc_btn-bookmarks" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleBookmarks()" name="Bookmarks" value="Bookmarks" alt="Bookmarks" title="Bookmarks"></input>
+        <input id="oc_btn-embed" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleEmbed()" name="Embed" value="Embed" alt="Embed" title="Embed"></input>
+      </div>
+      
+      <div class="clear"></div>
+      
+      
+      <div id="oc_slides" class="oc_DisplayBlock">
+        <div id="segments-holder" class="oc-segments-holder">
+          <div id="oc_segment-table" class="oc-segments">
+          </div>
+        </div>
+      </div>
+      
+      <div id="oc_bookmarks" class="oc_DisplayNone fl-fix">
+        <input id="oc_addBookmark" class="oc_addBookmark"  type="text" value="Add a bookmark..."></input>
+        <input id="oc_btn-addBookmark" type="submit" name="Add Bookmark" alt="Add Bookmark" title="Add Bookmark" value="+"> </input>
+      </div>
+      
+      <div id="oc_embed" class="oc_DisplayNone fl-fix">
+        <input id="oc_embed-720x545" class="oc_embed-720x545" type="submit" name="720 x 545" alt="720 x 545" title="720 x 545" value="720x545" onclick="Opencast.Player.embedIFrame(720,545);"> </input>
+        <input id="oc_embed-640x500" class="oc_embed-640x500" type="submit" name="640 x 500" alt="640 x 500" title="640 x 500" value="640x500" onclick="Opencast.Player.embedIFrame(640,500);"> </input>
+        <input id="oc_embed-560x455" class="oc_embed-560x455" type="submit" name="560 x 455" alt="560 x 455" title="560 x 455" value="560x455" onclick="Opencast.Player.embedIFrame(560,455);"> </input>
+        <input id="oc_embed-480x410" class="oc_embed-480x410" type="submit" name="480 x 410" alt="480 x 410" title="480 x 410" value="480x410" onclick="Opencast.Player.embedIFrame(480,410);"> </input>
+        <div class="clear"></div>
+        Choose your embed size. Copy the text and paste it in your html page. 
+        <textarea id="oc_embed-textarea" class="oc_embed-textarea" rows="2" cols="1"></textarea>
+      </div>
+      
+    </div>
  
     
-    <div id="oc_slidetext-sections" class="oc_DisplayNone fl-fix">slide text</div>
-    <div id="oc_notes-sections" class="oc_DisplayNone fl-fix">
-      <textarea name="wysiwyg" id="wysiwyg" rows="5" cols="103"></textarea>
     
-    
-    
-    </div>
-    <div id="oc_shortcuts-sections" class="oc_DisplayNone fl-fix">
-      <div id=oc_shortcuts class="oc_shortcuts" >
+    <div>
+      
+      <div class="oc_tabTableLeft">
+      
+        <input id="oc_btn-description" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleDescription()" name="Description" value="Description" alt="Description" title="Description"></input>
+        <input id="oc_btn-notes" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleNotes()" name="Notes" value="Notes" alt="Notes" title="Notes"></input>
+        <input id="oc_btn-shortcuts" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts"></input>
+        
+        <div class="clear"></div>
+        
+        <div id="oc_description" class="oc_DisplayNone fl-fix">description</div>
+        
+        <div id="oc_notes" class="oc_DisplayNone fl-fix">
+          <textarea name="wysiwyg" id="wysiwyg" rows="5" cols="60"></textarea>
+        </div>
+        
+        <div id=oc_shortcuts class="oc_DisplayNone fl-fix" >
           Press Control + Alt + I   = Toggle the keyboard shortcuts information between show or hide.<br>
           Press Control + Alt + P   = Toggle the video between pause or play.<br>
           Press Control + Alt + S   = Stop the video.<br>
@@ -146,8 +187,54 @@
           Press on Mac cmd -        = to minimize the player<br>
           Press on Windows strg +   = to zoom in the player<br>
           Press on Windows strg -   = to minimize the player<br>
+        </div>
+        
       </div>
-    </div> 
+      
+      <div class="oc_tabTableRight">
+      
+        <input id="oc_btn-slidetext" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Slide Text" value="Slide Text" alt="Slide Text" title="Slide Text"></input>
+        <input id="oc_btn-transcript" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleTranscript()" name="Transcript" value="Transcript" alt="Transcript" title="Transcript"></input>
+        
+        <div id="oc_tabs-search">
+          <input class="oc_search-Field" type="text"></input>
+        </div>
+        
+        <div class="clear"></div>
+        
+        <div id="oc_slidetext" class="oc_DisplayNone fl-fix">slide text</div>
+        
+        <div id="oc_transcript" class="oc_DisplayNone fl-fix">transcript</div>
+        
+      </div>
+    
+     
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <!--  
+    <div id="oc_slidetext-sections" class="oc_DisplayNone fl-fix">slide text</div>
+    <div id="oc_notes-sections" class="oc_DisplayNone fl-fix">
+      <textarea name="wysiwyg" id="wysiwyg" rows="5" cols="103"></textarea>
+    
+    
+    
+    </div>
+    
     
     <div id="oc_embed-sections" class="oc_DisplayNone fl-fix">
       <input id="oc_embed-720x545" class="oc_embed-720x545" type="submit" name="720 x 545" alt="720 x 545" title="720 x 545" value="720x545" onclick="Opencast.Player.embedIFrame(720,545);"> </input>
@@ -165,9 +252,29 @@
     <div id="oc_bookmark-sections" class="oc_DisplayNone fl-fix">bookmark</div>
     
     <div id="oc_description-sections" class="oc_DisplayNone fl-fix">description</div>
-    
   </div>  
-             
+  
+   <div id="oc_shortcuts-sections" class="oc_DisplayNone fl-fix">
+        <div id=oc_shortcuts class="oc_shortcuts" >
+          Press Control + Alt + I   = Toggle the keyboard shortcuts information between show or hide.<br>
+          Press Control + Alt + P   = Toggle the video between pause or play.<br>
+          Press Control + Alt + S   = Stop the video.<br>
+          Press Control + Alt + M   = Toggle between mute or unmute the video.<br>
+          Press Control + Alt + U   = Volume up<br>
+          Press Control + Alt + D   = Volume down<br>
+          Press Control + Alt 0 - 9 = Seek the time slider<br>
+          Press Control + Alt + C   = Toggle between captions on or off.<br>
+          Press Control + Alt + F   = Forward the video.<br>
+          Press Control + Alt + R   = Rewind the video.<br>
+          Press Control + Alt + T   = the current time for the screen reader<br>
+          Press on Mac cmd +        = to zoom in the player<br>
+          Press on Mac cmd -        = to minimize the player<br>
+          Press on Windows strg +   = to zoom in the player<br>
+          Press on Windows strg -   = to minimize the player<br>
+        </div>
+      </div> 
+  
+             -->
   
   </body>
   

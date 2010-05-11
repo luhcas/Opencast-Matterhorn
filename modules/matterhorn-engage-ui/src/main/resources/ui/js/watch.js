@@ -50,7 +50,12 @@ Opencast.Watch = (function ()
                 $('#oc_title_from').html(" by " + $('#oc-creator').html() + " (" + $('#oc-date').html() + ")");
             }
             // set the abstract
-            $('#oc_description-sections').html($('#oc-abstract').html());
+            $('#oc_description').html($('#oc-abstract').html());
+            
+            $('#oc_segment-table').html($('#oc-segments').html());
+           
+            
+           
 
             // set the media URLs
             var mediaUrlOne = $('#oc-video-presenter-source-streaming').html();
@@ -64,8 +69,9 @@ Opencast.Watch = (function ()
 
             mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
             mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
-
+            
             Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
+
 
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')
             {

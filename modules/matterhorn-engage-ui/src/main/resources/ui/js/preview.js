@@ -25,6 +25,10 @@ Opencast.Watch = (function ()
             // set the media URLs
             var mediaUrlOne = Opencast.engage.getVideoUrl();
             var mediaUrlTwo = '';
+            
+            var mediaUrlTwo = 'http://xserve1-1.et.fh-osnabrueck.de/opencast/videos/httpopencastjiracomwikidownloadattachments17105009presentation25fps.flv';
+            var mediaUrlOne = 'http://xserve1-1.et.fh-osnabrueck.de/opencast/videos/httpopencastjiracomwikidownloadattachments17105009presenter25fps.flv';
+           
 
             mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
             mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
