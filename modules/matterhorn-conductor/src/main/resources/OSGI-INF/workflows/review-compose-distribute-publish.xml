@@ -1,6 +1,6 @@
 <definition>
   <id>review-full</id>
-  <title>A workflow containing most of the default Matterhorn operations</title>
+  <title>Full workflow, hold for review before processing</title>
   <description>
     A simple workflow that hold to review, transcodes the media into distribution formats, then sends the resulting distribution files,
     along with their associated metadata, to the distribution channels.

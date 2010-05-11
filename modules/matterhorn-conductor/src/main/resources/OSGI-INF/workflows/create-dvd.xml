@@ -1,5 +1,6 @@
 <definition>
   <id>create-dvd</id>
+  <title>Encode suitable for standalone DVD players</title>
   <description>
     A workflow that encodes the source media to a format suitable for a
     video DVD depending on the TV norm selected (NTSC or PAL). The encoded

@@ -1,6 +1,6 @@
 <definition>
   <id>full</id>
-  <title>A workflow containing most of the default Matterhorn operations</title>
+  <title>Full encoding and distribution workflow (default)</title>
   <description>
     A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
     along with their associated metadata, to the distribution channels.
