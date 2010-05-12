@@ -172,7 +172,7 @@ public class SchedulerRestService {
       if (event == null) return Response.status(Status.BAD_REQUEST).build();
       return Response.ok(service.updateRecurringEvent(event)).build();
     } catch (Exception e) {
-      logger.warn("could not update recurring event: {}", event);
+      logger.warn("could not update recurring event {}: ", event, e.getMessage());
       return Response.status(Status.SERVICE_UNAVAILABLE).build();
     }
   }  
@@ -609,7 +609,7 @@ public class SchedulerRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, updateEventEndpoint);       
     
     // Scheduler updateRecurringEvent 
-    RestEndpoint updateREventEndpoint = new RestEndpoint("updateREvent", RestEndpoint.Method.POST, "/reccurence", "Updates an existing recurrence event in the database. The recurringEventId has to be stored in the database already. Will return true, if the event was found and could be updated.");
+    RestEndpoint updateREventEndpoint = new RestEndpoint("updateREvent", RestEndpoint.Method.POST, "/recurrence", "Updates an existing recurrence event in the database. The recurringEventId has to be stored in the database already. Will return true, if the event was found and could be updated.");
     updateREventEndpoint.addFormat(new Format("boolean", null, null));
     updateREventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, boolean returned"));
     updateREventEndpoint.addRequiredParam(new Param("recurringEvent", Type.TEXT, generateRecurringEvent(), "The RecurringEvent that should be updated."));
@@ -766,8 +766,8 @@ public class SchedulerRestService {
     metadata.add(new Metadata("abstract", "demo abstract"));
     metadata.add(new Metadata("creator", "demo creator"));
     metadata.add(new Metadata("contributor", "demo contributor"));
-    metadata.add(new Metadata("time.start", "1262631892201"));
-    metadata.add(new Metadata("time.end", "1262644114423"));
+    metadata.add(new Metadata("time.start", "1317499200000"));
+    metadata.add(new Metadata("time.end", "1317507300000"));
     metadata.add(new Metadata("device", "demo"));
     metadata.add(new Metadata("resources", "vga, audio"));
     metadata.add(new Metadata("series-id", "demo series"));
@@ -799,15 +799,15 @@ public class SchedulerRestService {
     metadata.add(new Metadata("abstract", "demo abstract"));
     metadata.add(new Metadata("creator", "demo creator"));
     metadata.add(new Metadata("contributor", "demo contributor"));
-    metadata.add(new Metadata("recurrence.start", "1262631892201"));
-    metadata.add(new Metadata("recurrence.end", "1264644114423"));
+    metadata.add(new Metadata("recurrence.start", "1317499200000"));
+    metadata.add(new Metadata("recurrence.end", "1329350400000"));
     metadata.add(new Metadata("recurrence.duration", "3600000"));
     metadata.add(new Metadata("device", "demo"));
     metadata.add(new Metadata("resources", "vga, audio"));
     metadata.add(new Metadata("series-id", "demo series"));
     e.setMetadata(metadata); 
     
-    e.setRecurrence("FREQ=WEEKLY;BYDAY=TU");
+    e.setRecurrence("FREQ=WEEKLY;BYDAY=TU;BYHOUR=9;BYMINUTE=15");
     
     SchedulerBuilder builder = SchedulerBuilder.getInstance();
     try {

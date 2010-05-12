@@ -169,7 +169,7 @@ public class Event extends AbstractEvent {
       for (Metadata data : getRecurringEvent().getMetadata()) {
         m.put(data.getKey(), data);
       }
-      m.put("time.start", new Metadata("time.start", ""+getEnddate().getTime()));
+      m.put("time.start", new Metadata("time.start", ""+getStartdate().getTime()));
       m.put("time.end", new Metadata("time.end", ""+getEnddate().getTime()));
       for (Metadata data : getMetadata()) {
         m.put(data.getKey(), data);
@@ -226,10 +226,16 @@ public class Event extends AbstractEvent {
     e.setID(eventId);
     e.setStartdate(getStartdate()); 
     e.setEnddate(getEnddate());
-    StringTokenizer attendees =  new StringTokenizer(metadataTable.get("attendees"),",");
-    while (attendees.hasMoreTokens()) e.addAttendee(attendees.nextToken());
-    StringTokenizer resources =  new StringTokenizer(metadataTable.get("resources"),",");
-    while (resources.hasMoreTokens()) e.addResource(resources.nextToken());  
+    String attendeeString = metadataTable.get("attendees");
+    if (attendeeString != null) {
+      StringTokenizer attendees =  new StringTokenizer(attendeeString,",");
+      while (attendees.hasMoreTokens()) e.addAttendee(attendees.nextToken());     
+    }
+    String resourcesString = metadataTable.get("resources");
+    if (resourcesString != null) {
+      StringTokenizer resources =  new StringTokenizer(resourcesString,",");
+      while (resources.hasMoreTokens()) e.addResource(resources.nextToken());
+    }
     return e;
   }
   
@@ -265,28 +271,19 @@ public class Event extends AbstractEvent {
   
   public void update(Event e) {
     //eliminate removed keys
-    for (String key : getKeySet()) {
-      if (! e.containsKey(key)) {
-        for (int i = 0; i < getCompleteMetadata().size(); i++) {
-          if (getCompleteMetadata().get(i).getKey().equals(key)) {
-            getCompleteMetadata().remove(i);
-            break; //skip rest of the loop if found
-          }
-        }
+    for (Metadata m: getMetadata()) {
+      if (e.findMetadata(m.getKey()) == null) {
+          getMetadata().remove(m);
       }
     }
     
     //update the list
-    for (Metadata data : e.getCompleteMetadata()) {
-      if (containsKey(data.getKey())) {
-        for (Metadata dataOld : getCompleteMetadata()) {
-          if (dataOld.getKey().equals(data.getKey()) && ! dataOld.equals(data)) { 
-            dataOld.setValue(data.getValue());
-            break;
-          }
-        }
+    for (Metadata data : e.getMetadata()) {
+      Metadata found = findMetadata(data.getKey());
+      if (found != null) {
+        found.setValue(data.getValue());
       } else {
-        getCompleteMetadata().add(data);
+        getMetadata().add(data);
       }
     }
     //metadata = e.getMetadata(); 

@@ -435,6 +435,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
       em.getTransaction().begin();
       Event storedEvent =  getEventJPA(e.getEventId());
       if (storedEvent == null) return false; //nothing found to update
+      storedEvent.setEntityManagerFactory(emf);
       storedEvent.update(e);
       em.merge(storedEvent);
       em.getTransaction().commit();
@@ -452,13 +453,15 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     try {
       em.getTransaction().begin();
       RecurringEvent storedEvent =  getRecurringEvent(e.getRecurringEventId());
-      storedEvent.update(e);
+      if (storedEvent == null) return false;
+      storedEvent.setEntityManagerFactory(emf);
+      storedEvent.update(e);      
       em.merge(storedEvent);
       em.getTransaction().commit();
     } finally {
       em.close();
     }
-    return false;
+    return true;
   }  
 
   /**

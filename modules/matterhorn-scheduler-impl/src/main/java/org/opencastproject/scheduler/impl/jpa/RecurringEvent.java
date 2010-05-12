@@ -255,6 +255,23 @@ public class RecurringEvent extends AbstractEvent{
           }
         }
       }
+      metadataTable = null;
+      
+      generateDates();
+      List<Date> oldDates = generatedDates;
+      if (!getRecurrence().equals(e.getRecurrence())) {        
+        setRecurrence(e.getRecurrence());
+      }
+      generateDates();
+      if (oldDates != null && generatedDates != null && oldDates.size() != generatedDates.size()) {
+        //TODO What happens when recurrence pattern changed??
+        logger.info("adding / deleting events by changing pattern currently not implemented");
+      }
+        
+      for (Event event : generatedEvents) {
+        event.metadataTable = null; //cached metadata needs to be resetted
+      }
+      
     } catch (IncompleteDataException e1) {
       logger.warn("Metadata could not be processed for recurring event {}. Recurring event could not be updated.", getRecurringEventId());
       return; 
