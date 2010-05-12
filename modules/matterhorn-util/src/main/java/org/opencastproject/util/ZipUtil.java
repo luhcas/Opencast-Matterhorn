@@ -158,6 +158,10 @@ public class ZipUtil {
       ZipEntry entry;
       while ((entry = in.getNextEntry()) != null) {
         File file = new File(destination, entry.getName());
+        if (entry.isDirectory()) {
+          file.mkdirs();
+          continue;
+        }
         file.getParentFile().mkdirs();
         OutputStream out = outputStream(file);
         try {
