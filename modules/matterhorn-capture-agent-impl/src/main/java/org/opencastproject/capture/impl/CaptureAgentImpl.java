@@ -529,7 +529,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       
       File manifestFile = new File(recording.getDir(), CaptureParameters.MANIFEST_NAME);
       fos = new FileOutputStream(manifestFile);
-      recording.getMediaPackage().toXml(fos, false);
+      recording.getMediaPackage().toXml(fos, true);
 
     } catch (MediaPackageException e) {
       logger.error("MediaPackage Exception: {}.", e.getMessage());
