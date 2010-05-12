@@ -55,7 +55,7 @@ public class WorkflowInstanceTest {
     Map<String, String> props = new HashMap<String, String>();
     props.put("key1", "value1");
     WorkflowInstance instance = new WorkflowInstanceImpl(def, null, null, props);
-    Assert.assertEquals(def.getId(), instance.getTitle());
+    Assert.assertEquals(def.getId(), instance.getTemplate());
     Assert.assertEquals("value1", instance.getConfiguration("key1"));
     def.setTitle("a title");
     instance = new WorkflowInstanceImpl(def, null, null, null);

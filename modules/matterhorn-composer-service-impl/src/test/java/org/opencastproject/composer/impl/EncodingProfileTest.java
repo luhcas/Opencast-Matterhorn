@@ -59,7 +59,7 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl}.
+   * Test method for {@link org.opencastproject.composer.api.EncodingProfileImpl}.
    */
   @Test
   public void testMediaTypes() {
@@ -79,7 +79,7 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl}.
+   * Test method for {@link org.opencastproject.composer.api.EncodingProfileImpl}.
    */
   @Test
   public void testInitializationFromProperties() {
@@ -88,7 +88,7 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getIdentifier()}.
+   * Test method for {@link org.opencastproject.composer.api.EncodingProfileImpl#getIdentifier()}.
    */
   @Test
   public void testGetIdentifier() {
@@ -97,7 +97,7 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getName()}.
+   * Test method for {@link org.opencastproject.composer.api.EncodingProfileImpl#getName()}.
    */
   @Test
   public void testGetName() {
@@ -106,7 +106,7 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getOutputType()}.
+   * Test method for {@link org.opencastproject.composer.api.EncodingProfileImpl#getOutputType()}.
    */
   @Test
   public void testGetType() {
@@ -115,7 +115,7 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getSuffix()}.
+   * Test method for {@link org.opencastproject.composer.api.EncodingProfileImpl#getSuffix()}.
    */
   @Test
   public void testGetSuffix() {
@@ -124,7 +124,7 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getApplicableMediaTypes()}.
+   * Test method for {@link org.opencastproject.composer.api.EncodingProfileImpl#getApplicableMediaTypes()}.
    */
   @Test
   public void testGetApplicableMediaTypes() {
@@ -135,7 +135,7 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getApplicableMediaTypes()}.
+   * Test method for {@link org.opencastproject.composer.api.EncodingProfileImpl#getApplicableMediaTypes()}.
    */
   @Test
   public void testApplicableTo() {
@@ -145,7 +145,7 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getMimeType()}.
+   * Test method for {@link org.opencastproject.composer.api.EncodingProfileImpl#getMimeType()}.
    */
   @Test
   public void testGetMimeType() {
@@ -154,7 +154,7 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getExtension(java.lang.String)}.
+   * Test method for {@link org.opencastproject.composer.api.EncodingProfileImpl#getExtension(java.lang.String)}.
    */
   @Test
   public void testGetExtension() {
@@ -168,7 +168,7 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#getExtensions()}.
+   * Test method for {@link org.opencastproject.composer.api.EncodingProfileImpl#getExtensions()}.
    */
   @Test
   public void testGetExtensions() {
@@ -182,7 +182,7 @@ public class EncodingProfileTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.EncodingProfileImpl#hasExtensions()}.
+   * Test method for {@link org.opencastproject.composer.api.EncodingProfileImpl#hasExtensions()}.
    */
   @Test
   public void testHasExtensions() {

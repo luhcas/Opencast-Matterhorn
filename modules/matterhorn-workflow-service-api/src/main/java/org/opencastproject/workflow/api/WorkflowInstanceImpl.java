@@ -49,7 +49,8 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   public WorkflowInstanceImpl() {}
   
   public WorkflowInstanceImpl(WorkflowDefinition def, MediaPackage mediaPackage, String parentWorkflowId, Map<String, String> properties) {
-    this.title = def.getTitle() == null ? def.getId() : def.getTitle();
+    this.title = def.getTitle();
+    this.template = def.getId();
     this.description = def.getDescription();
     this.parentId = parentWorkflowId;
     this.state = WorkflowState.INSTANTIATED;
@@ -74,8 +75,11 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   private WorkflowState state;
 
   @XmlElement(name="template")
-  private String title;
+  private String template;
 
+  @XmlElement(name="title")
+  private String title;
+  
   @XmlElement(name="description")
   private String description;
 
@@ -122,7 +126,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
 
   /**
    * Sets the title of this workflow instance
-   * @param title
+   * @param template
    */
   public void setTitle(String title) {
     this.title = title;
@@ -319,7 +323,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * @see java.lang.Object#toString()
    */
   public String toString() {
-    return new ToStringBuilder("workflow instance").append(this.id).append(this.title).toString();
+    return new ToStringBuilder("workflow instance").append(this.id).append(this.template).toString();
   }
 
   /**
@@ -384,5 +388,19 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       }
     }
     logger.debug("workflow instance initialized with operation={}", currentOperation);
+  }
+
+  /**
+   * @return the template
+   */
+  public String getTemplate() {
+    return template;
+  }
+
+  /**
+   * @param template the template to set
+   */
+  public void setTemplate(String template) {
+    this.template = template;
   }
 }

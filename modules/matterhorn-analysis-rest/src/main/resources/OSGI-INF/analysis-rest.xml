@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.analysis.rest.MediaAnalysisRestEndpoint"
+  immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.analysis.rest.MediaAnalysisRestEndpoint" />
+  <property name="service.description" value="Media Analysis REST Endpoint" />
+  <property name="opencast.rest.url" value="/analysis/rest" />
+  <service>
+    <provide interface="org.opencastproject.analysis.rest.MediaAnalysisRestEndpoint" />
+  </service>
+</component>

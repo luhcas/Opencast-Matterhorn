@@ -54,21 +54,21 @@ public class DistributionDownloadRestEndpointTest {
 
   @Test
   public void testDocs() throws Exception {
-    HttpGet get = new HttpGet(BASE_URL + "/distribution/download/rest/docs");
+    HttpGet get = new HttpGet(BASE_URL + "/distribution/rest/docs");
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
 
   @Test
   public void testWadl() throws Exception {
-    HttpGet get = new HttpGet(BASE_URL + "/distribution/download/rest/?_wadl");
+    HttpGet get = new HttpGet(BASE_URL + "/distribution/rest/?_wadl");
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
 
   @Test
   public void testDistribute() throws Exception {
-    HttpPost post = new HttpPost(BASE_URL + "/distribution/download/rest/");
+    HttpPost post = new HttpPost(BASE_URL + "/distribution/rest/download");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
     formParams.add(new BasicNameValuePair("mediapackage", getSampleMediaPackage()));

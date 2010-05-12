@@ -7,6 +7,6 @@
   <service>
     <provide interface="org.opencastproject.analysis.dictionary.endpoint.DictionaryServiceRestEndpoint" />
   </service>
-  <reference name="DictionaryService" interface="org.opencastproject.analysis.dictionary.DictionaryServiceDelegatingImpl"
+  <reference name="DictionaryService" interface="org.opencastproject.analysis.dictionary.DictionaryService"
     cardinality="1..1" policy="static" bind="setDictionaryService" />
 </component>

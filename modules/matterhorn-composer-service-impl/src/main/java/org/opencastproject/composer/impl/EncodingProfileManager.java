@@ -16,6 +16,7 @@
 package org.opencastproject.composer.impl;
 
 import org.opencastproject.composer.api.EncodingProfile;
+import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfile.MediaType;
 import org.opencastproject.util.ConfigurationException;
 
@@ -181,7 +182,7 @@ public class EncodingProfileManager {
     if (type == null || "".equals(type.toString().trim()))
       throw new ConfigurationException("Type of profile '" + profile + "' is missing");
     try {
-      df.outputType = MediaType.parseString(type.toString().trim());
+      df.setOutputType(MediaType.parseString(type.toString().trim()));
     } catch (IllegalArgumentException e) {
       throw new ConfigurationException("Type '" + type + "' of profile '" + profile + "' is unknwon");
     }
@@ -190,19 +191,19 @@ public class EncodingProfileManager {
     Object suffixObj = getDefaultProperty(profile, PROP_SUFFIX, properties, defaultProperties);
     if (suffixObj == null || "".equals(suffixObj.toString().trim()))
       throw new ConfigurationException("Suffix of profile '" + profile + "' is missing");
-    df.suffix = suffixObj.toString();
+    df.setSuffix(suffixObj.toString());
 
     // Mimetype
     Object mimeTypeObj = getDefaultProperty(profile, PROP_MIMETYPE, properties, defaultProperties);
     if (mimeTypeObj == null || "".equals(mimeTypeObj.toString().trim()))
       throw new ConfigurationException("Mime type of profile '" + profile + "' is missing");
-    df.mimeType = mimeTypeObj.toString();
+    df.setMimeType(mimeTypeObj.toString());
 
     // Applicable to the following track categories
     Object applicableObj = getDefaultProperty(profile, PROP_APPLICABLE, properties, defaultProperties);
     if (applicableObj == null || "".equals(applicableObj.toString().trim()))
       throw new ConfigurationException("Input type of profile '" + profile + "' is missing");
-    df.applicableType = MediaType.parseString(applicableObj.toString().trim());
+    df.setApplicableType(MediaType.parseString(applicableObj.toString().trim()));
 
     // Look for extensions
     String extensionKey = PROP_PREFIX + profile + ".";

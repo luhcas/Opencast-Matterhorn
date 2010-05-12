@@ -57,8 +57,38 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Private-Package>org.opencastproject.rest</Private-Package>
-            <Import-Package>META-INF.cxf, META-INF.cxf.osgi, *</Import-Package>
+            <Export-Package>org.opencastproject.rest</Export-Package>
+            <Import-Package>
+              javax.servlet,
+              javax.servlet.http,
+              META-INF.cxf,
+              META-INF.cxf.osgi,
+              org.apache.cxf,
+              org.apache.cxf.resource,
+              org.apache.cxf.bus,
+              org.apache.cxf.bus.extension,
+              org.apache.cxf.phase,
+              org.apache.cxf.workqueue,
+              org.apache.cxf.buslifecycle,
+              org.apache.cxf.endpoint,
+              org.apache.cxf.transport,
+              org.apache.cxf.transport.http,
+              org.apache.cxf.transports.http,
+              org.apache.cxf.transport.http_jetty,
+              org.apache.cxf.transport.servlet,
+              org.apache.cxf.transport.jms,
+              org.apache.cxf.management,
+              org.apache.cxf.management.jmx,
+              org.apache.cxf.binding,
+              org.apache.cxf.binding.soap,
+              org.apache.cxf.binding.xml,
+              org.apache.cxf.headers,
+              org.apache.cxf.catalog,
+              org.apache.cxf.jaxrs,
+              org.apache.cxf.wsdl,
+              org.apache.cxf.wsdl11,
+              *
+            </Import-Package>
             <Service-Component>
               OSGI-INF/rest.xml
             </Service-Component>

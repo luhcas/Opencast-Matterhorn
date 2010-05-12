@@ -103,8 +103,7 @@
               flexjson;inline=true
             </Embed-Dependency>
             <Service-Component>
-              OSGI-INF/distribution-service-itunesu.xml,
-              OSGI-INF/distribution-service-itunesu-rest.xml
+              OSGI-INF/distribution-service-itunesu.xml
             </Service-Component>
 			      <JPA-PersistenceUnits>
 			        ITunesUDistributionPersistenceUnit

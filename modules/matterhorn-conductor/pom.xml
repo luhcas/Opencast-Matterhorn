@@ -89,26 +89,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-
-    <!-- Database Drivers and Connection Pooling -->
-    <dependency>
-      <groupId>c3p0</groupId>
-      <artifactId>c3p0</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>5.1.9</version>
-    </dependency>
-    <dependency>
-      <groupId>postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>8.4-701.jdbc4</version>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -120,16 +100,8 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator>org.opencastproject.db.Activator</Bundle-Activator>
-            <Embed-Dependency>
-              c3p0;inline=true,
-              h2;inline=true,
-              mysql-connector-java;inline=true,
-              postgresql;inline=true
-            </Embed-Dependency>
             <Import-Package>
               org.osgi.service.component.*,
-              org.opencastproject.feed.impl,
               org.opencastproject.media.mediapackage,
               org.opencastproject.media.mediapackage.attachment,
               org.opencastproject.media.mediapackage.dublincore,
@@ -139,7 +111,6 @@
               *;resolution:=optional
             </Import-Package>
             <Export-Package>
-              org.opencastproject.db,
               org.opencastproject.scanner,
               org.opencastproject.workflow.handler
             </Export-Package>
@@ -156,11 +127,7 @@
               OSGI-INF/operations/publish.xml,
               OSGI-INF/operations/review.xml,
               OSGI-INF/operations/segment.xml,
-              OSGI-INF/operations/segmentpreviews.xml,
-              OSGI-INF/feeds/aggregation-feed.xml,
-              OSGI-INF/feeds/custom-feed.xml,
-              OSGI-INF/feeds/latest-feed.xml,
-              OSGI-INF/feeds/series-feed.xml
+              OSGI-INF/operations/segmentpreviews.xml
             </Service-Component>
           </instructions>
         </configuration>

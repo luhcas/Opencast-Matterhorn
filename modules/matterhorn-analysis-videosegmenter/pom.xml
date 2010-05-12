@@ -115,10 +115,7 @@
               *;resolution:=optional
             </Import-Package>
             <Service-Component>
-              OSGI-INF/segmenter-service-delegating.xml,
-              OSGI-INF/segmenter-service-local.xml,
-              OSGI-INF/segmenter-service-remote.xml,
-              OSGI-INF/segmenter-rest.xml
+              OSGI-INF/segmenter.xml
             </Service-Component>
           </instructions>
         </configuration>

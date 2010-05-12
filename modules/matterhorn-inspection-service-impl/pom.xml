@@ -102,9 +102,7 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.inspection.impl.* </Export-Package>
             <Service-Component>
-              OSGI-INF/inspection-service-delegating.xml,
-              OSGI-INF/inspection-service-local.xml,
-              OSGI-INF/inspection-service-remote.xml,
+              OSGI-INF/inspection-service.xml,
               OSGI-INF/inspection-service-rest.xml
             </Service-Component>
           </instructions>

@@ -117,9 +117,7 @@
             <Export-Package>org.opencastproject.composer.impl.*</Export-Package>
             <Embed-Dependency>xmlrpc-client;inline=true</Embed-Dependency>
             <Service-Component>
-              OSGI-INF/composer-service-local.xml,
-              OSGI-INF/composer-service-remote.xml,
-              OSGI-INF/composer-service-delegating.xml,
+              OSGI-INF/composer-service.xml,
               OSGI-INF/composer-service-rest.xml
             </Service-Component>
           </instructions>

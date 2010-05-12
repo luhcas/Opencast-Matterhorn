@@ -198,130 +198,117 @@ public class SearchServiceImpl implements SearchService {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getEpisodeAndSeriesById(java.lang.String)
-   */
-  public SearchResult getEpisodeAndSeriesById(String seriesId) throws SearchException {
-    try {
-      log_.debug("Searching index for episodes and series details of series " + seriesId);
-      return solrRequester.getEpisodeAndSeriesById(seriesId);
-    } catch (SolrServerException e) {
-      throw new SearchException(e);
-    }
-  }
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getEpisodeAndSeriesById(java.lang.String)
+//   */
+//  public SearchResult getEpisodeAndSeriesById(String seriesId) throws SearchException {
+//    try {
+//      log_.debug("Searching index for episodes and series details of series " + seriesId);
+//      return solrRequester.getEpisodeAndSeriesById(seriesId);
+//    } catch (SolrServerException e) {
+//      throw new SearchException(e);
+//    }
+//  }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getEpisodeById(java.lang.String)
-   */
-  public SearchResult getEpisodeById(String episodeId) throws SearchException {
-    try {
-      log_.debug("Searching index for episode " + episodeId);
-      return solrRequester.getEpisodeById(episodeId);
-    } catch (SolrServerException e) {
-      throw new SearchException(e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesByText(java.lang.String, int, int)
-   */
-  public SearchResult getEpisodesAndSeriesByText(String text, int limit, int offset) throws SearchException {
-    try {
-      log_.debug("Searching index for episodes and series matching '" + text + "'");
-      return solrRequester.getEpisodesAndSeriesByText(text, limit, offset);
-    } catch (SolrServerException e) {
-      throw new SearchException(e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getEpisodesByDate(int, int)
-   */
-  public SearchResult getEpisodesByDate(int limit, int offset) throws SearchException {
-    try {
-      log_.debug("Asking index for episodes by date");
-      return solrRequester.getEpisodesByDate(limit, offset);
-    } catch (SolrServerException e) {
-      throw new SearchException(e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getEpisodesBySeries(java.lang.String)
-   */
-  public SearchResult getEpisodesBySeries(String seriesId) throws SearchException {
-    try {
-      log_.debug("Searching index for episodes in series " + seriesId);
-      return solrRequester.getEpisodesBySeries(seriesId);
-    } catch (SolrServerException e) {
-      throw new SearchException(e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getEpisodesByText(java.lang.String, int, int)
-   */
-  public SearchResult getEpisodesByText(String text, int limit, int offset) throws SearchException {
-    try {
-      return solrRequester.getEpisodesByText(text, limit, offset);
-    } catch (SolrServerException e) {
-      throw new SearchException(e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getSeriesByDate(int, int)
-   */
-  public SearchResult getSeriesByDate(int limit, int offset) throws SearchException {
-    try {
-      log_.debug("Asking index for series by date");
-      return solrRequester.getSeriesByDate(limit, offset);
-    } catch (SolrServerException e) {
-      throw new SearchException(e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getSeriesById(java.lang.String)
-   */
-  public SearchResult getSeriesById(String seriesId) throws SearchException {
-    try {
-      log_.debug("Searching index for series " + seriesId);
-      return solrRequester.getSeriesById(seriesId);
-    } catch (SolrServerException e) {
-      throw new SearchException(e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getSeriesByText(java.lang.String, int, int)
-   */
-  public SearchResult getSeriesByText(String text, int limit, int offset) throws SearchException {
-    try {
-      log_.debug("Searching index for series matching '" + text + "'");
-      return solrRequester.getSeriesByText(text, limit, offset);
-    } catch (SolrServerException e) {
-      throw new SearchException(e);
-    }
-  }
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getEpisodeById(java.lang.String)
+//   */
+//  public SearchResult getEpisodeById(String episodeId) throws SearchException {
+//    try {
+//      log_.debug("Searching index for episode " + episodeId);
+//      return solrRequester.getEpisodeById(episodeId);
+//    } catch (SolrServerException e) {
+//      throw new SearchException(e);
+//    }
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesByText(java.lang.String, int, int)
+//   */
+//  public SearchResult getEpisodesAndSeriesByText(String text, int limit, int offset) throws SearchException {
+//    try {
+//      log_.debug("Searching index for episodes and series matching '" + text + "'");
+//      return solrRequester.getEpisodesAndSeriesByText(text, limit, offset);
+//    } catch (SolrServerException e) {
+//      throw new SearchException(e);
+//    }
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getEpisodesByDate(int, int)
+//   */
+//  public SearchResult getEpisodesByDate(int limit, int offset) throws SearchException {
+//    try {
+//      log_.debug("Asking index for episodes by date");
+//      return solrRequester.getEpisodesByDate(limit, offset);
+//    } catch (SolrServerException e) {
+//      throw new SearchException(e);
+//    }
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getEpisodesBySeries(java.lang.String)
+//   */
+//  public SearchResult getEpisodesBySeries(String seriesId) throws SearchException {
+//    try {
+//      log_.debug("Searching index for episodes in series " + seriesId);
+//      return solrRequester.getEpisodesBySeries(seriesId);
+//    } catch (SolrServerException e) {
+//      throw new SearchException(e);
+//    }
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getSeriesByDate(int, int)
+//   */
+//  public SearchResult getSeriesByDate(int limit, int offset) throws SearchException {
+//    try {
+//      log_.debug("Asking index for series by date");
+//      return solrRequester.getSeriesByDate(limit, offset);
+//    } catch (SolrServerException e) {
+//      throw new SearchException(e);
+//    }
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getSeriesById(java.lang.String)
+//   */
+//  public SearchResult getSeriesById(String seriesId) throws SearchException {
+//    try {
+//      log_.debug("Searching index for series " + seriesId);
+//      return solrRequester.getSeriesById(seriesId);
+//    } catch (SolrServerException e) {
+//      throw new SearchException(e);
+//    }
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getSeriesByText(java.lang.String, int, int)
+//   */
+//  public SearchResult getSeriesByText(String text, int limit, int offset) throws SearchException {
+//    try {
+//      log_.debug("Searching index for series matching '" + text + "'");
+//      return solrRequester.getSeriesByText(text, limit, offset);
+//    } catch (SolrServerException e) {
+//      throw new SearchException(e);
+//    }
+//  }
 
   /**
    * {@inheritDoc}

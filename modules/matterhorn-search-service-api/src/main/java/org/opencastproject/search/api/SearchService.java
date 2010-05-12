@@ -54,117 +54,13 @@ public interface SearchService {
   void clear() throws SearchException;
 
   /**
-   * Processes a regular search for a given user query, creates and returns a regular search result.
-   * 
-   * @param text
-   *          The user query.
-   * @param offset
-   *          the offset
-   * @param limit
-   *          the limit
-   * @return the search result
-   * @throws SearchException
-   */
-  SearchResult getEpisodesAndSeriesByText(String text, int offset, int limit) throws SearchException;
-
-  SearchResult getByQuery(SearchQuery q) throws SearchException;
-  
-  /**
-   * Processes a series search for a given series id, creates and returns a regular search result.
-   * 
-   * @param seriesId
-   *          The series id.
-   * @return the search result
-   * @throws SearchException
-   */
-  SearchResult getEpisodesBySeries(String seriesId) throws SearchException;
-
-  /**
-   * Processes a series search for a given series id, creates and returns a regular search result.
-   * 
-   * @param offset
-   *          the offset
-   * @param limit
-   *          the limit
-   * @return the search result
-   * @throws SearchException
-   */
-  SearchResult getSeriesByDate(int offset, int limit) throws SearchException;
-
-  /**
-   * Processes a series search for a given series id, creates and returns the series metadata.
-   * 
-   * @param id
-   *          of the series to search for
-   * @param offset
-   *          the offset
-   * @param limit
-   *          the limit
-   * @return the search result
-   * @throws SearchException
-   */
-  SearchResult getSeriesById(String seriesId) throws SearchException;
-
-  /**
-   * Processes a regular search for a given user query, returning all series that match the given query.
-   * 
-   * @param text
-   *          The user query.
-   * @param offset
-   *          the offset
-   * @param limit
-   *          the limit
+   * Find search results based on the specified query object
+   * @param q The {@link SearchQuery} containing the details of the desired results
    * @return The search result
    * @throws SearchException
+   *           if an error occurs while searching for media packages
    */
-  SearchResult getSeriesByText(String text, int limit, int offset) throws SearchException;
-
-  /**
-   * Processes a series search for a given series id, creates and returns a regular search result. The result contains
-   * the series metadata as well as all the episodes that are part of that series.
-   * 
-   * @param seriesId
-   *          The series id.
-   * @return The series result.
-   * @throws SearchException
-   */
-  SearchResult getEpisodeAndSeriesById(String seriesId) throws SearchException;
-
-  /**
-   * Processes a series search for a given series id, creates and returns the series metadata.
-   * 
-   * @param id
-   *          of the series to search for
-   * @return the search result
-   * @throws SearchException
-   */
-  SearchResult getEpisodeById(String episodeId) throws SearchException;
-
-  /**
-   * Processes a recent items search. Lists all items descending ordered by last modification date.
-   * 
-   * @param offset
-   *          the offset
-   * @param limit
-   *          the limit
-   * @return the search result
-   * @throws SearchException
-   */
-  SearchResult getEpisodesByDate(int limit, int offset) throws SearchException;
-
-  /**
-   * Processes a regular search for a given user query, creates and returns a regular search result.
-   * 
-   * @param text
-   *          The user query.
-   * @param offset
-   *          the offset
-   * @param limit
-   *          the limit
-   * @return the search result
-   * @throws SearchException
-   */
-  SearchResult getEpisodesByText(String text, int limit, int offset) throws SearchException;
+  SearchResult getByQuery(SearchQuery q) throws SearchException;
 
   /**
    * Sends a query to the search service. Depending on the service implementation, the query might be an sql statement a
@@ -180,5 +76,4 @@ public interface SearchService {
    * @throws SearchException
    */
   SearchResult getByQuery(String query, int limit, int offset) throws SearchException;
-
 }

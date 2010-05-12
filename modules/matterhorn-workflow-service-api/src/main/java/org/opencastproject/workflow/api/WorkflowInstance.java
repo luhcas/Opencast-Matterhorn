@@ -35,12 +35,17 @@ public interface WorkflowInstance extends Configurable {
   String getId();
 
   /**
-   * The short title of this {@link WorkflowInstance}
+   * The short title of the workflow definition used to create this workflow instance
    */
   String getTitle();
 
   /**
-   * The longer description of this {@link WorkflowInstance}
+   * The identifier of the workflow definition used to create this workflow instance
+   */
+  String getTemplate();
+
+  /**
+   * The longer description of the workflow definition used to create this workflow instance
    */
   String getDescription();
 

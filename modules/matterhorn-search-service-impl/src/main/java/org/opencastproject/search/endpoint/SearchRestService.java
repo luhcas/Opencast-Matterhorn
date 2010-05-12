@@ -18,9 +18,9 @@ package org.opencastproject.search.endpoint;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageImpl;
 import org.opencastproject.search.api.SearchException;
+import org.opencastproject.search.api.SearchResultImpl;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.SearchQueryImpl;
-import org.opencastproject.search.impl.SearchResultImpl;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -113,13 +113,14 @@ public class SearchRestService {
     
     // remove
     RestEndpoint removeEndpoint = new RestEndpoint("remove", RestEndpoint.Method.DELETE, "/{id}", "Removes a mediapackage from the search index");
+    removeEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("The mediapackage was removed, no content to return"));
     removeEndpoint.addPathParam(new Param("id", Type.STRING, "", "The media package ID to remove from the search index"));
     removeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, removeEndpoint);    
     
     // add
     RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.POST, "/add", "Adds a mediapackage to the search index");
-    addEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containing the search results"));
+    addEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("The mediapackage was added, no content to return"));
     addEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(), "The media package to add to the search index"));
     addEndpoint.addFormat(new Format("XML", null, null));
     addEndpoint.setTestForm(RestTestForm.auto());
@@ -127,6 +128,7 @@ public class SearchRestService {
 
     // clear
     RestEndpoint clearEndpoint = new RestEndpoint("clear", RestEndpoint.Method.POST, "/clear", "Clears the entire search index");
+    clearEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("The search index was cleared, no content to return"));
     clearEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, clearEndpoint);    
 
@@ -154,22 +156,38 @@ public class SearchRestService {
   
   @POST
   @Path("add")
-  public void add(@FormParam("mediapackage") MediaPackageImpl mediaPackage) throws SearchException {
-    searchService.add(mediaPackage);
+  public Response add(@FormParam("mediapackage") MediaPackageImpl mediaPackage) throws SearchException {
+    try {
+      searchService.add(mediaPackage);
+      return Response.noContent().build();
+    } catch (Exception e) {
+      logger.warn(e.getMessage(), e);
+      return Response.serverError().build();
+    }
   }
 
   @DELETE
   @Path("{id}")
   public Response remove(@PathParam("id") String mediaPackageId) throws SearchException {
-    searchService.delete(mediaPackageId);
-    return Response.ok().build();
+    try {
+      searchService.delete(mediaPackageId);
+      return Response.noContent().build();
+    } catch (Exception e) {
+      logger.warn(e.getMessage(), e);
+      return Response.serverError().build();
+    }
   }
 
   @POST
   @Path("clear")
   public Response clear() throws SearchException {
-    searchService.clear();
-    return Response.ok().build();
+    try {
+      searchService.clear();
+      return Response.noContent().build();
+    } catch (Exception e) {
+      logger.warn(e.getMessage(), e);
+      return Response.serverError().build();
+    }
   }
   
   @GET
@@ -181,17 +199,17 @@ public class SearchRestService {
           @QueryParam("episodes") boolean includeEpisodes,
           @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
+    SearchQueryImpl query = new SearchQueryImpl();
     // If id is specified, do a search based on id
     if(!StringUtils.isEmpty(id)) {
-      return includeEpisodes ? (SearchResultImpl) searchService.getEpisodeAndSeriesById(id) :
-        (SearchResultImpl) searchService.getSeriesById(id);
+      query.includeEpisodes(includeEpisodes);
+      query.withId(id);
+    } else if ( ! StringUtils.isEmpty(text)) {
+      query.withText(text);
     }
-    // If text is specified, do a free text search.  Otherwise, just return the most recent series
-    if(StringUtils.isEmpty(text)) {
-      return (SearchResultImpl) searchService.getSeriesByDate(limit, offset);
-    } else {
-      return (SearchResultImpl) searchService.getSeriesByText(text, limit, offset);
-    }
+    query.withLimit(limit);
+    query.withOffset(offset);
+    return (SearchResultImpl) searchService.getByQuery(query);
   }
 
   @GET
@@ -225,6 +243,26 @@ public class SearchRestService {
           @QueryParam("q") String text,
           @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
-    return (SearchResultImpl) searchService.getEpisodesAndSeriesByText(text, limit, offset);
+    SearchQueryImpl query = new SearchQueryImpl();
+    query.includeEpisodes(true);
+    query.includeSeries(true);
+    query.withLimit(limit);
+    query.withOffset(offset);
+    return (SearchResultImpl) searchService.getByQuery(query);
   }
+  
+  @GET
+  @Path("lucene")
+  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_JSON})
+  public SearchResultImpl getByLuceneQuery(
+          @QueryParam("q") String q,
+          @QueryParam("limit") int limit,
+          @QueryParam("offset") int offset) {
+    SearchQueryImpl query = new SearchQueryImpl();
+    query.withQuery(q);
+    query.withLimit(limit);
+    query.withOffset(offset);
+    return (SearchResultImpl) searchService.getByQuery(query);
+  }
+  
 }

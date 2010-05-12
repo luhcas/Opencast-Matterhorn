@@ -25,8 +25,11 @@ import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Param.Type;
 
 import org.apache.commons.io.IOUtils;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -50,21 +54,46 @@ import javax.ws.rs.core.Response.Status;
 public class DistributionRestService {
   private static final Logger logger = LoggerFactory.getLogger(DistributionRestService.class);
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
-  private DistributionService service;
-  public void setService(DistributionService service) {
-    this.service = service;
+  protected ComponentContext componentContext;
+
+  /**
+   * Gets the distribution service that is registered with the specified "distribution.channel" property
+   * 
+   * @param id
+   * @return
+   */
+  protected DistributionService getService(String distributionChannel) {
+    ServiceReference[] refs = null;
+    try {
+      refs = componentContext.getBundleContext().getAllServiceReferences(DistributionService.class.getName(),
+              "(distribution.channel=" + distributionChannel + ")");
+    } catch (InvalidSyntaxException e) {
+      throw new IllegalArgumentException("Unable to find a distribution service with id = " + distributionChannel);
+    }
+    switch (refs.length) {
+    case 0:
+      throw new IllegalArgumentException("Unable to find a distribution service with id = " + distributionChannel);
+    case 1:
+      return (DistributionService) componentContext.getBundleContext().getService(refs[0]);
+    default:
+      throw new IllegalStateException("more than one distribution service is registered with a channel id="
+              + distributionChannel);
+    }
   }
 
   /** The base URL for this rest endpoint */
   protected String alias;
-  
+
   @POST
-  @Path("")
+  @Path("/{distChannel}")
   @Produces(MediaType.TEXT_XML)
-  public Response distribute(@FormParam("mediapackage") MediaPackageImpl mediaPackage, @FormParam("elementId") List<String> elementIds) throws Exception {
+  public Response distribute(@PathParam("distChannel") String distChannel,
+          @FormParam("mediapackage") MediaPackageImpl mediaPackage, @FormParam("elementId") List<String> elementIds)
+          throws Exception {
     MediaPackage result = null;
     String[] elements = elementIds == null ? new String[0] : elementIds.toArray(new String[elementIds.size()]);
     try {
+      DistributionService service = getService(distChannel);
       result = service.distribute(mediaPackage, elements);
     } catch (Exception e) {
       e.printStackTrace();
@@ -72,7 +101,21 @@ public class DistributionRestService {
     }
     return Response.ok(result).build();
   }
-  
+
+  @POST
+  @Path("/retract/{distChannel}")
+  @Produces(MediaType.TEXT_XML)
+  public Response retract(@PathParam("distChannel") String distChannel,
+          @FormParam("mediapackage") MediaPackageImpl mediaPackage) throws Exception {
+    try {
+      getService(distChannel).retract(mediaPackage);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+    return Response.noContent().build();
+  }
+
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
@@ -82,15 +125,16 @@ public class DistributionRestService {
 
   protected String docs;
   private String[] notes = {
-    "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-    "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
-  
+          "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+          "If the service is down or not working it will return a status 503, this means the the underlying service " +
+          "is not working and is either restarting or has failed. A status code 500 means a general failure has " +
+          "occurred which is not recoverable and was not anticipated. In other words, there is a bug!" };
+
   private String generateMediaPackage() {
     try {
       String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("manifest.xml"));
       return template.replaceAll("@SAMPLES_URL@", serverUrl + "/workflow/samples");
-    } catch(IOException e) {
+    } catch (IOException e) {
       logger.warn("Unable to load the sample mediapackage");
       return null;
     }
@@ -101,16 +145,16 @@ public class DistributionRestService {
 
     // abstract
     data.setAbstract("This service distributes media packages to the Matterhorn feed and engage services.");
-    
+
     // distribute
-    RestEndpoint endpoint = new RestEndpoint("distribute", RestEndpoint.Method.POST,
-        "/",
-        "Distribute a media package");
+    RestEndpoint endpoint = new RestEndpoint("distribute", RestEndpoint.Method.POST, "/{distChannel}",
+            "Distribute a media package to a distribution channel");
     endpoint.addFormat(new Format("XML", null, null));
+    endpoint.addPathParam(new Param("distChannel", Type.STRING, "download",
+            "The distribution channel identifier (e.g. download, streaming, youtube, etc.)"));
     endpoint.addRequiredParam(new Param("mediapackage", Param.Type.TEXT, generateMediaPackage(),
-        "The media package as XML"));
-    endpoint.addRequiredParam(new Param("elementId", Param.Type.STRING, "track-1",
-        "A media package element ID"));
+            "The media package as XML"));
+    endpoint.addRequiredParam(new Param("elementId", Param.Type.STRING, "track-1", "A media package element ID"));
     endpoint.addNote("Accepts additional elementId fields");
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
@@ -121,14 +165,15 @@ public class DistributionRestService {
   }
 
   public void activate(ComponentContext cc) {
+    this.componentContext = cc;
     // Get the configured server URL
-    if(cc == null) {
+    if (cc == null) {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
       String ccServerUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
       logger.info("configured server url is {}", ccServerUrl);
-      alias = (String)cc.getProperties().get("opencast.rest.url");
-      if(ccServerUrl == null) {
+      alias = (String) cc.getProperties().get("opencast.rest.url");
+      if (ccServerUrl == null) {
         serverUrl = UrlSupport.DEFAULT_BASE_URL;
       } else {
         serverUrl = ccServerUrl;

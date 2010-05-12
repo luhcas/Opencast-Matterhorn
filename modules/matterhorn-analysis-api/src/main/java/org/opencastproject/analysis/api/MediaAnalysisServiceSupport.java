@@ -37,6 +37,13 @@ public abstract class MediaAnalysisServiceSupport implements MediaAnalysisServic
   protected boolean requiresVideo = false;
 
   /**
+   * Creates a new media analysis support object with no resulting flavor and no requirements.
+   */
+  protected MediaAnalysisServiceSupport() {
+    this(null, new MediaPackageElementFlavor[] {});
+  }
+
+  /**
    * Creates a new media analysis support object with the given resulting flavor and requirements.
    * 
    * @param resultingFlavor

@@ -168,8 +168,7 @@
               google-collections;inline=true
             </Embed-Dependency>
             <Service-Component>
-              OSGI-INF/distribution-service-youtube.xml,
-              OSGI-INF/distribution-service-youtube-rest.xml
+              OSGI-INF/distribution-service-youtube.xml
             </Service-Component>
 			      <JPA-PersistenceUnits>
 			        YoutubeDistributionPersistenceUnit

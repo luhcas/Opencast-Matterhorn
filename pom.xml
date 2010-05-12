@@ -20,6 +20,137 @@
 
   <profiles>
     <profile>
+      <id>worker</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>modules/matterhorn-build-tools</module>
+        <module>modules/matterhorn-runtime-tools</module>
+        <module>modules/matterhorn-db</module>
+        <module>modules/matterhorn-analysis-api</module>
+        <module>modules/matterhorn-analysis-rest</module>
+        <module>modules/matterhorn-analysis-dictionary</module>
+        <module>modules/matterhorn-analysis-videosegmenter</module>
+        <module>modules/matterhorn-composer-service-api</module>
+        <module>modules/matterhorn-composer-service-impl</module>
+        <module>modules/matterhorn-http</module>
+        <module>modules/matterhorn-rest</module>
+        <module>modules/matterhorn-inspection-service-api</module>
+        <module>modules/matterhorn-inspection-service-impl</module>
+        <module>modules/matterhorn-media</module>
+        <module>modules/matterhorn-metadata-api</module>
+        <module>modules/matterhorn-dublincore</module>
+        <module>modules/matterhorn-mpeg7</module>
+        <module>modules/matterhorn-runtime-info-ui</module>
+        <module>modules/matterhorn-security-api</module>
+        <module>modules/matterhorn-security-impl</module>
+        <module>modules/matterhorn-util</module>
+        <module>modules/matterhorn-receipt-api</module>
+        <module>modules/matterhorn-receipt-impl</module>
+        <module>modules/matterhorn-working-file-repository-service-api</module>
+        <module>modules/matterhorn-working-file-repository-service-impl</module>
+        <module>modules/matterhorn-workspace-api</module>
+        <module>modules/matterhorn-workspace-impl</module>
+        <module>modules/matterhorn-caption-api</module>
+        <module>modules/matterhorn-caption-impl</module>
+        <module>modules/matterhorn-webconsole</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>admin</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>modules/matterhorn-build-tools</module>
+        <module>modules/matterhorn-runtime-tools</module>
+        <module>modules/matterhorn-db</module>
+        <module>modules/matterhorn-analysis-api</module>
+        <module>modules/matterhorn-analysis-remote</module>
+        <module>modules/matterhorn-capture-admin-service-api</module>
+        <module>modules/matterhorn-capture-admin-service-impl</module>
+        <module>modules/matterhorn-composer-service-api</module>
+        <module>modules/matterhorn-composer-service-remote</module>
+        <module>modules/matterhorn-conductor</module>
+        <module>modules/matterhorn-demo</module>
+        <module>modules/matterhorn-distribution-service-api</module>
+        <module>modules/matterhorn-distribution-service-remote</module>
+        <module>modules/matterhorn-http</module>
+        <module>modules/matterhorn-rest</module>
+        <module>modules/matterhorn-ingest-service-api</module>
+        <module>modules/matterhorn-ingest-service-impl</module>
+        <module>modules/matterhorn-inspection-service-api</module>
+        <module>modules/matterhorn-inspection-service-remote</module>
+        <module>modules/matterhorn-media</module>
+        <module>modules/matterhorn-metadata-api</module>
+        <module>modules/matterhorn-dublincore</module>
+        <module>modules/matterhorn-mpeg7</module>
+        <module>modules/matterhorn-runtime-info-ui</module>
+        <module>modules/matterhorn-search-service-api</module>
+        <module>modules/matterhorn-search-service-remote</module>
+        <module>modules/matterhorn-security-api</module>
+        <module>modules/matterhorn-security-impl</module>
+        <module>modules/matterhorn-util</module>
+        <module>modules/matterhorn-receipt-api</module>
+        <module>modules/matterhorn-receipt-impl</module>
+        <module>modules/matterhorn-workflow-service-api</module>
+        <module>modules/matterhorn-workflow-service-impl</module>
+        <module>modules/matterhorn-workflow-ui</module>
+        <module>modules/matterhorn-working-file-repository-service-api</module>
+        <module>modules/matterhorn-working-file-repository-service-impl</module>
+        <module>modules/matterhorn-workspace-api</module>
+        <module>modules/matterhorn-workspace-impl</module>
+        <module>modules/matterhorn-scheduler-api</module>
+        <module>modules/matterhorn-scheduler-impl</module>
+        <module>modules/matterhorn-test-harness</module>
+        <module>modules/matterhorn-opencaps-service</module>
+        <module>modules/matterhorn-caption-api</module>
+        <module>modules/matterhorn-caption-impl</module> <!-- TODO: change to remote -->
+        <module>modules/matterhorn-admin-ui</module>
+        <module>modules/matterhorn-inbox</module>
+        <module>modules/matterhorn-webconsole</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>engage</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>modules/matterhorn-build-tools</module>
+        <module>modules/matterhorn-runtime-tools</module>
+        <module>modules/matterhorn-runtime-info-ui</module>
+        <module>modules/matterhorn-db</module>
+        <module>modules/matterhorn-http</module>
+        <module>modules/matterhorn-rest</module>
+        <module>modules/matterhorn-media</module>
+        <module>modules/matterhorn-metadata-api</module>
+        <module>modules/matterhorn-dublincore</module>
+        <module>modules/matterhorn-mpeg7</module>
+        <module>modules/matterhorn-security-api</module>
+        <module>modules/matterhorn-security-impl</module>
+        <module>modules/matterhorn-util</module>
+        <module>modules/matterhorn-distribution-service-api</module>
+        <module>modules/matterhorn-distribution-service-local</module>
+        <module>modules/matterhorn-distribution-service-common</module>
+        <module>modules/matterhorn-distribution-service-youtube</module>
+        <module>modules/matterhorn-distribution-service-itunesu</module>
+        <module>modules/matterhorn-engage-ui</module>
+        <module>modules/matterhorn-static</module>
+        <module>modules/matterhorn-search-service-api</module>
+        <module>modules/matterhorn-search-service-impl</module>
+        <module>modules/matterhorn-search-service-feeds</module>
+        <module>modules/matterhorn-feedback-service-api</module>
+        <module>modules/matterhorn-feedback-service-impl</module> 
+        <module>modules/matterhorn-workspace-api</module>
+        <module>modules/matterhorn-workspace-impl</module>
+        <module>modules/matterhorn-working-file-repository-service-api</module>
+        <module>modules/matterhorn-working-file-repository-service-impl</module>
+        <module>modules/matterhorn-webconsole</module>
+      </modules>
+    </profile>
+    <profile>
       <id>server</id>
       <activation>
         <activeByDefault>true</activeByDefault>
@@ -27,7 +158,9 @@
       <modules>
         <module>modules/matterhorn-build-tools</module>
         <module>modules/matterhorn-runtime-tools</module>
+        <module>modules/matterhorn-db</module>
         <module>modules/matterhorn-analysis-api</module>
+        <module>modules/matterhorn-analysis-rest</module>
         <module>modules/matterhorn-analysis-dictionary</module>
         <module>modules/matterhorn-analysis-videosegmenter</module>
         <module>modules/matterhorn-capture-agent-api</module>
@@ -43,12 +176,12 @@
         <module>modules/matterhorn-distribution-service-common</module>
         <module>modules/matterhorn-distribution-service-youtube</module>
         <module>modules/matterhorn-distribution-service-itunesu</module>
-        <!-- module>modules/matterhorn-engage-player</module --> <!-- FIXME: this module breaks the javadoc goal -->
         <module>modules/matterhorn-engage-ui</module>
         <module>modules/matterhorn-feedback-service-api</module>
         <module>modules/matterhorn-feedback-service-impl</module> 
         <module>modules/matterhorn-http</module>
         <module>modules/matterhorn-rest</module>
+        <module>modules/matterhorn-static</module>
         <module>modules/matterhorn-ingest-service-api</module>
         <module>modules/matterhorn-ingest-service-impl</module>
         <module>modules/matterhorn-inspection-service-api</module>
@@ -62,7 +195,6 @@
         <module>modules/matterhorn-search-service-impl</module>
         <module>modules/matterhorn-security-api</module>
         <module>modules/matterhorn-security-impl</module>
-        <!-- <module>modules/matterhorn-stream</module> --> <!-- Streaming server must be implemented in a separate JVM -->
         <module>modules/matterhorn-util</module>
         <module>modules/matterhorn-receipt-api</module>
         <module>modules/matterhorn-receipt-impl</module>

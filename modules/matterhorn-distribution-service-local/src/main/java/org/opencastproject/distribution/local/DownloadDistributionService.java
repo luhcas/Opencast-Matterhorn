@@ -68,6 +68,11 @@ public class DownloadDistributionService extends AbstractLocalDistributionServic
       } else {
         serverUrl = ccServerUrl + "/static";
       }
+      String ccDistributionDirectory = cc.getBundleContext().getProperty("org.opencastproject.download.directory");
+      logger.info("configured download directory is {}", ccDistributionDirectory);
+      if(ccDistributionDirectory != null) {
+        this.distributionDirectory = new File(ccDistributionDirectory);
+      }
     }
   }
 

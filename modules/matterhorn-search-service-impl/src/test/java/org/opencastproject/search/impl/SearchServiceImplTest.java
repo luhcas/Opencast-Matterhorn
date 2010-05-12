@@ -72,7 +72,7 @@ public class SearchServiceImplTest {
    */
   @Test
   public void testEmptySearchIndex() {
-    SearchResult result = service.getEpisodeAndSeriesById("foo");
+    SearchResult result = service.getByQuery(new SearchQueryImpl().withId("foo"));
     assertEquals(0, result.size());
   }
   
@@ -95,11 +95,24 @@ public class SearchServiceImplTest {
     service.add(mediaPackage);
     
     // Make sure it's properly indexed and returned
-    assertEquals(1, service.getEpisodeById("10.0000/1").size());
-    assertEquals(1, service.getEpisodesByDate(Integer.MAX_VALUE, 0).size());
+    SearchQueryImpl q = new SearchQueryImpl();
+    q.includeEpisodes(true);
+    q.includeSeries(false);
+    q.withId("10.0000/1");
+    assertEquals(1, service.getByQuery(q).size());
+    
+    q = new SearchQueryImpl();
+    q.includeEpisodes(true);
+    q.includeSeries(false);
+    
+    assertEquals(1, service.getByQuery(q).size());
     
     // Test for various fields
-    SearchResult result = service.getEpisodeById("10.0000/1");
+    q = new SearchQueryImpl();
+    q.includeEpisodes(true);
+    q.includeSeries(false);
+    q.withId("10.0000/1");
+    SearchResult result = service.getByQuery(q);
     assertEquals(1, result.getTotalSize());
     SearchResultItem resultItem = result.getItems()[0];
     assertNotNull(resultItem.getMediaPackage());
@@ -129,8 +142,13 @@ public class SearchServiceImplTest {
     service.add(mediaPackage);
     
     // Make sure it's properly indexed and returned
-    assertEquals(1, service.getEpisodeById("10.0000/2").size());
-    assertEquals(1, service.getEpisodesByDate(Integer.MAX_VALUE, 0).size());
+    SearchQueryImpl q = new SearchQueryImpl();
+    q.includeEpisodes(true);
+    q.includeSeries(false);
+    q.withId("10.0000/2");
+    assertEquals(1, service.getByQuery(q).size());
+    q.withId(null); // Clear the ID requirement
+    assertEquals(1, service.getByQuery(q).size());
   }
   
   /**
@@ -155,8 +173,14 @@ public class SearchServiceImplTest {
     // Add the media package to the search index
     service.add(mediaPackage);
     service.delete(mediaPackage.getIdentifier().toString());
-    assertEquals(0, service.getEpisodeById("10.0000/1").size());
-    assertEquals(0, service.getEpisodesByDate(Integer.MAX_VALUE, 0).size());
+
+    SearchQueryImpl q = new SearchQueryImpl();
+    q.includeEpisodes(true);
+    q.includeSeries(false);
+    q.withId("10.0000/1");
+    assertEquals(0, service.getByQuery(q).size());
+    q.withId(null); // Clear the ID requirement
+    assertEquals(0, service.getByQuery(q).size());
   }
 
 }

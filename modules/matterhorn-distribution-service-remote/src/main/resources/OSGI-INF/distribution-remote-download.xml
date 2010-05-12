@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+  name="org.opencastproject.distribution.remote.DistributionServiceDownloadRemoteImpl" immediate="true" activate="activate">
+  <implementation
+    class="org.opencastproject.distribution.remote.DistributionServiceRemoteImpl" />
+  <property name="service.description" value="Distribution (Download) Remote Service Proxy" />
+  <property name="distribution.channel" value="download" />
+  <service>
+    <provide interface="org.opencastproject.distribution.api.DistributionService" />
+  </service>
+  <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"
+    cardinality="1..1" policy="static" bind="setTrustedHttpClient" />
+</scr:component>

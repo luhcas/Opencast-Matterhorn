@@ -35,7 +35,9 @@ import org.w3c.dom.Document;
 
 import java.net.URI;
 
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -80,18 +82,18 @@ public class MediaInspectionRestEndpoint {
     }
   }
 
-  @GET
+  @POST
   @Produces(MediaType.TEXT_XML)
   @Path("enrich")
-  public Response enrichTrack(@QueryParam("mediaPackageElement") String mediaPackageElement,
-          @QueryParam("override") boolean override) {
+  public Response enrichTrack(@FormParam("mediaPackageElement") String mediaPackageElement,
+          @FormParam("override") boolean override) {
     checkNotNull(service);
     try {
       MediaPackageElement mpe = getElement(mediaPackageElement);
       Receipt r = service.enrich(mpe, override, false);
       return Response.ok(r).build();
     } catch (Exception e) {
-      logger.info(e.getMessage());
+      logger.info(e.getMessage(), e);
       return Response.serverError().status(400).build();
     }
   }
@@ -141,12 +143,12 @@ public class MediaInspectionRestEndpoint {
     // enrich
     RestEndpoint enrichEndpoint = new RestEndpoint(
             "enrich",
-            RestEndpoint.Method.GET,
+            RestEndpoint.Method.POST,
             "/enrich",
             "Analyze and add missing metadata of a given media file, returning a receipt to check on the status and outcome of the job");
-    enrichEndpoint.addOptionalParam(new Param("mediaPackageElement", Param.Type.STRING, null,
+    enrichEndpoint.addRequiredParam(new Param("mediaPackageElement", Param.Type.STRING, null,
             "MediaPackage Element, that should be enriched with metadata"));
-    enrichEndpoint.addOptionalParam(new Param("override", Param.Type.BOOLEAN, null,
+    enrichEndpoint.addRequiredParam(new Param("override", Param.Type.BOOLEAN, null,
             "Should the existing metadata values remain"));
     enrichEndpoint.addFormat(Format.xml());
     enrichEndpoint.addStatus(Status.OK("XML encoded receipt is returned"));

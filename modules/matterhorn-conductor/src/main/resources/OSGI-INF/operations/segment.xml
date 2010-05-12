@@ -6,8 +6,8 @@
   <service>
     <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
   </service>
-  <reference cardinality="1..1" interface="org.opencastproject.analysis.vsegmenter.VideoSegmenter"
-    name="VideoSegmenterService" policy="static" bind="setVideoSegmenter"/>
+  <reference cardinality="1..1" interface="org.opencastproject.analysis.api.MediaAnalysisService"
+    name="VideoSegmenterService" policy="static" bind="setVideoSegmenter" target="(analysis.type=video.segmenter)"/>
   <reference cardinality="1..1" interface="org.opencastproject.workspace.api.Workspace"
     name="Workspace" policy="static" bind="setWorkspace"/>
 </component>

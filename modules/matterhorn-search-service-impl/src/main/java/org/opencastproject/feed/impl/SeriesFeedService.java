@@ -19,6 +19,7 @@ package org.opencastproject.feed.impl;
 import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.feed.api.Feed.Type;
 import org.opencastproject.search.api.SearchResult;
+import org.opencastproject.search.impl.SearchQueryImpl;
 
 /**
  * This feed generator implements a feed for series. The series argument is taken from the first url parameter after the
@@ -56,7 +57,11 @@ public class SeriesFeedService extends AbstractFeedService implements FeedGenera
 
     try {
       // To check if we can accept the query it is enough to query for just one result
-      SearchResult result = searchService.getEpisodeAndSeriesById(id.toString());
+      SearchQueryImpl q = new SearchQueryImpl();
+      q.includeEpisodes(true);
+      q.includeSeries(true);
+      q.withId(id.toString());
+      SearchResult result = searchService.getByQuery(q);
       if (result != null && result.size() > 0) {
         series.set(id.toString());
         seriesData.set(result);

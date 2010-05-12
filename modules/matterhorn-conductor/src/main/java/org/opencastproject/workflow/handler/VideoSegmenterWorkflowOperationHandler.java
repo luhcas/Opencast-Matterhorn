@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.analysis.vsegmenter.VideoSegmenter;
+import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
@@ -74,7 +74,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
   private Workspace workspace = null;
 
   /** The composer service */
-  private VideoSegmenter videosegmenter = null;
+  private MediaAnalysisService videosegmenter = null;
 
   /**
    * {@inheritDoc}
@@ -175,7 +175,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
    * @param videosegmenter
    *          the video segmenter
    */
-  protected void setVideoSegmenter(VideoSegmenter videosegmenter) {
+  protected void setVideoSegmenter(MediaAnalysisService videosegmenter) {
     this.videosegmenter = videosegmenter;
   }
 

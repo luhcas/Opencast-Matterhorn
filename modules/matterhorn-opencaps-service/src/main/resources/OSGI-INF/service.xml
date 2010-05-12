@@ -6,9 +6,9 @@
     <property name="workflow.operation" value="caption" />
     <!-- service I use -->
     <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
-        cardinality="1..1" policy="static" bind="setWorkspace" unbind="unsetWorkspace" />
+        cardinality="1..1" policy="static" bind="setWorkspace" />
     <reference name="workflow" interface="org.opencastproject.workflow.api.WorkflowService"
-        cardinality="1..1" policy="static" bind="setWorkflowService" unbind="unsetWorkflowService" />
+        cardinality="1..1" policy="static" bind="setWorkflowService" />
     <!-- services I provide -->
     <service>
         <provide interface="org.opencastproject.opencaps.OpencapsService" />

@@ -19,13 +19,13 @@ package org.opencastproject.search.impl.solr;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.search.api.MediaSegmentImpl;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
+import org.opencastproject.search.api.SearchResultImpl;
+import org.opencastproject.search.api.SearchResultItemImpl;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
-import org.opencastproject.search.impl.MediaSegmentImpl;
 import org.opencastproject.search.impl.SearchQueryImpl;
-import org.opencastproject.search.impl.SearchResultImpl;
-import org.opencastproject.search.impl.SearchResultItemImpl;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -64,107 +64,96 @@ public class SolrRequester {
     this.solrConnection = connection;
   }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesByText(java.lang.String, int, int)
-   */
-  public SearchResult getEpisodesAndSeriesByText(String text, int limit, int offset) throws SolrServerException {
-    SearchQueryImpl q1 = new SearchQueryImpl();
-    q1.withText(text).withLimit(limit).withOffset(offset).includeSeries(true);
-    return getByQuery(q1);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getEpisodesBySeries(java.lang.String)
-   */
-  public SearchResult getEpisodesBySeries(String seriesId) throws SolrServerException {
-    SearchQueryImpl q1 = new SearchQueryImpl();
-    q1.withId(seriesId).includeSeries(false).includeEpisodes(true);
-    
-    return getByQuery(q1);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getSeriesByDate(int, int)
-   */
-  public SearchResult getSeriesByDate(int limit, int offset) throws SolrServerException {
-    SearchQueryImpl q1 = new SearchQueryImpl();
-    q1.withLimit(limit).withOffset(offset).includeSeries(true).includeEpisodes(false);
-    q1.withCreationDateSort(true);
-    return getByQuery(q1);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getSeriesById(java.lang.String, int, int)
-   */
-  public SearchResult getSeriesById(String seriesId) throws SolrServerException {
-    SearchQueryImpl q1 = new SearchQueryImpl();
-    q1.withId(seriesId).includeSeries(true).includeEpisodes(false);
-    return getByQuery(q1);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getSeriesByText(java.lang.String, int, int)
-   */
-  public SearchResult getSeriesByText(String text, int limit, int offset) throws SolrServerException {
-    SearchQueryImpl q1 = new SearchQueryImpl();
-    q1.withText(text).withLimit(limit).withOffset(offset).includeSeries(true).includeEpisodes(false);
-    return getByQuery(q1);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesById(java.lang.String)
-   */
-  public SearchResult getEpisodeAndSeriesById(String seriesId) throws SolrServerException {
-    SearchQueryImpl q1 = new SearchQueryImpl();
-    q1.withId(seriesId).includeEpisodes(true).includeSeries(true);
-    return getByQuery(q1);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getEpisodeById(java.lang.String)
-   */
-  public SearchResult getEpisodeById(String episodeId) throws SolrServerException {
-    SearchQueryImpl q1 = new SearchQueryImpl();
-    q1.withId(episodeId).includeEpisodes(true);
-    return getByQuery(q1);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getEpisodesByDate(int, int)
-   */
-  public SearchResult getEpisodesByDate(int limit, int offset) throws SolrServerException {
-    SearchQueryImpl q1 = new SearchQueryImpl();
-    q1.withLimit(limit).withOffset(offset);
-    q1.withCreationDateSort(true);
-    return getByQuery(q1);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getEpisodesByText(java.lang.String, int, int)
-   */
-  public SearchResult getEpisodesByText(String text, int limit, int offset) throws SolrServerException {
-    SearchQueryImpl q1 = new SearchQueryImpl();
-    q1.withText(text).withLimit(limit).withOffset(offset);
-    return getByQuery(q1);
-  }
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesByText(java.lang.String, int, int)
+//   */
+//  public SearchResult getEpisodesAndSeriesByText(String text, int limit, int offset) throws SolrServerException {
+//    SearchQueryImpl q1 = new SearchQueryImpl();
+//    q1.withText(text).withLimit(limit).withOffset(offset).includeSeries(true);
+//    return getByQuery(q1);
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getEpisodesBySeries(java.lang.String)
+//   */
+//  public SearchResult getEpisodesBySeries(String seriesId) throws SolrServerException {
+//    SearchQueryImpl q1 = new SearchQueryImpl();
+//    q1.withId(seriesId).includeSeries(false).includeEpisodes(true);
+//    
+//    return getByQuery(q1);
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getSeriesByDate(int, int)
+//   */
+//  public SearchResult getSeriesByDate(int limit, int offset) throws SolrServerException {
+//    SearchQueryImpl q1 = new SearchQueryImpl();
+//    q1.withLimit(limit).withOffset(offset).includeSeries(true).includeEpisodes(false);
+//    q1.withCreationDateSort(true);
+//    return getByQuery(q1);
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getSeriesById(java.lang.String, int, int)
+//   */
+//  public SearchResult getSeriesById(String seriesId) throws SolrServerException {
+//    SearchQueryImpl q1 = new SearchQueryImpl();
+//    q1.withId(seriesId).includeSeries(true).includeEpisodes(false);
+//    return getByQuery(q1);
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getSeriesByText(java.lang.String, int, int)
+//   */
+//  public SearchResult getSeriesByText(String text, int limit, int offset) throws SolrServerException {
+//    SearchQueryImpl q1 = new SearchQueryImpl();
+//    q1.withText(text).withLimit(limit).withOffset(offset).includeSeries(true).includeEpisodes(false);
+//    return getByQuery(q1);
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesById(java.lang.String)
+//   */
+//  public SearchResult getEpisodeAndSeriesById(String seriesId) throws SolrServerException {
+//    SearchQueryImpl q1 = new SearchQueryImpl();
+//    q1.withId(seriesId).includeEpisodes(true).includeSeries(true);
+//    return getByQuery(q1);
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getEpisodeById(java.lang.String)
+//   */
+//  public SearchResult getEpisodeById(String episodeId) throws SolrServerException {
+//    SearchQueryImpl q1 = new SearchQueryImpl();
+//    q1.withId(episodeId).includeEpisodes(true);
+//    return getByQuery(q1);
+//  }
+//
+//  /**
+//   * {@inheritDoc}
+//   * 
+//   * @see org.opencastproject.search.api.SearchService#getEpisodesByDate(int, int)
+//   */
+//  public SearchResult getEpisodesByDate(int limit, int offset) throws SolrServerException {
+//    SearchQueryImpl q1 = new SearchQueryImpl();
+//    q1.withLimit(limit).withOffset(offset);
+//    q1.withCreationDateSort(true);
+//    return getByQuery(q1);
+//  }
 
   /**
    * {@inheritDoc}
