@@ -184,34 +184,34 @@
             <div id="heading-additionalData" class="fl-widget-titlebar titlebar"><span id="i18n_upload_title">File Upload</span></div>
             <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
               <ul class="no-bullets formField-list fl-controls-right">
-                <!-- field: Media file content -->
-                <li class="ui-helper-clearfix">
-                  <label class="fl-label"><span class="color-red">* </span><span id="i18n_upload.content">Media file content</span>:</label>
-                  <select name="flavor" id="flavor" class="requiredField" style="float:left;margin:3px;">
-                    <option value="">Choose one:</option>
-                    <option value="presenter/source">Presenter</option>
-                    <option value="presentation/source">Presentation</option>
-                    <option value="indefinite/source">Other/Mixed/Unknown</option>
-                  </select>
-                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                <li id="retry-file" class="ui-helper-clearfix" style="display:none;">
+                  <label class="fl-label"><span id="i18n_upload.content">File</span>:</label>
+                  <div style="display:table-cell;">
+                    <input type="radio" name="use-file" id="use-file-previous" checked="true">Use previously uploaded/captured file:&nbsp;<a id="previous-file-link"></a><br>
+                    <input type="radio" name="use-file" id="use-file-replace">Upload replacement file
+                  </div>
                 </li>
-                <li class="ui-helper-clearfix">
+                <!-- li class="ui-helper-clearfix" id="regular-file-selection">
                   <label class="fl-label"><span id="i18n_file_location">File Location</span>:</label>
                   <input type="radio" name="file-location" class="file-location" value="local" checked="true">Local hard drive
                   &nbsp;&nbsp;
-                  <!-- <input type="radio" name="file-location" class="file-location" value="inbox">Designated inbox on server -->
-                </li>
+                  <<input type="radio" name="file-location" class="file-location" value="inbox">Designated inbox on server
+                </li-->
                 <!-- field: Media File -->
-                <li class="ui-helper-clearfix">
+                <li class="ui-helper-clearfix" id="regular-file-chooser">
                   <label class="fl-label"><span class="color-red">* </span><span id="i18n_upload_file">Media File</span>:</label>
-                  <input type="hidden" name="track" id="track" class="requiredField" value="">
-                  <iframe name="filechooserAjax" id="filechooser-ajax" frameborder="0" scrolling="no" src="../ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
-                  </iframe>
-                  <span class="helpIcon"  title="Click for help">&nbsp;</span>
-                </li>
-                <li class="ui-helper-clearfix">
-                  <label class="fl-label">&nbsp;</label>
-                  <span style="float:left;" title="Click for help" class="instruction-text" id="i18n_upload_instr">File must be 2GB or less</span>
+                  <div style="display:table-cell;">
+                    <iframe name="filechooserAjax" id="filechooser-ajax" frameborder="0" scrolling="no" src="../ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
+                    </iframe>
+                    <span class="helpIcon" title="Click for help">&nbsp;</span>
+                    <select name="flavor" id="flavor" class="requiredField" style="float:left;margin:3px;">
+                      <option value="">Choose one:</option>
+                      <option value="presenter/source">Presenter</option>
+                      <option value="presentation/source">Presentation</option>
+                      <option value="indefinite/source">Other/Mixed/Unknown</option>
+                    </select>
+                    <span class="helpIcon" title="Click for help">&nbsp;</span>
+                  </div><input type="hidden" name="track" id="track" class="requiredField" value="">
                 </li>
               </ul>
             </div>

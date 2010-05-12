@@ -1,6 +1,7 @@
 var Upload = Upload || {};
 
 Upload.metadata = {};
+Upload.retryId = "";
 
 /** Init the upload page. Init events.
  *
@@ -11,6 +12,22 @@ Upload.init = function() {
   if (Upload.getURLParam("debug")) {
     $('#console').show();
   }
+
+  // Event: Retry: use already uploaded file clicked
+  $('#use-file-previous').click(function() {
+    if ($(this).val()) {
+    //$('#regular-file-selection').fadeIn();
+    $('#regular-file-chooser').fadeOut('fast');
+    }
+  });
+
+  // Event: Retry: use replacement file clicked
+  $('#use-file-replace').click(function() {
+    if ($(this).val()) {
+    //$('#regular-file-selection').toggle();
+    $('#regular-file-chooser').fadeIn('fast');
+    }
+  });
 
   // Event: File location selector clicked
   $(".file-location").change(function() {
@@ -91,6 +108,7 @@ Upload.init = function() {
 
   // get workflow definitions
   $.ajax({
+    method: 'GET',
     url: '../workflow/rest/definitions.json',
     dataType: 'json',
     success: function(data) {
@@ -108,6 +126,50 @@ Upload.init = function() {
       Upload.workflowSelected($('#workflow-selector').val());
     }
   });
+
+  // test if we upload a new recording or want to retry a workflow
+  Upload.retryId = Upload.getURLParam("retry");
+  if (Upload.retryId != "") {
+    // display current file element / hide file chooser
+    $('#retry-file').css('display', 'block');
+    $('#regular-file-selection').css('display', 'none');
+    $('#regular-file-chooser').css('display', 'none');
+    $('#i18n_page_title').text("Edit Recording for Retry");
+    // get failed Workflow
+    $.ajax({
+      method: 'GET',
+      url: '../workflow/rest/instance/'+ Upload.retryId +'.xml',
+      dataType: 'xml',
+      success: function(data) {
+        var catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
+        Upload.loadDublinCore(catalogUrl);
+        $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
+          if ($(elm).attr('type').split(/\//)[1] == 'source') {
+            var filename = $(elm).find('url').text();
+            $('#previous-file-link').attr('href', filename);
+            filename = filename.split(/\//);
+            filename = filename[filename.length-1];
+            $('#previous-file-link').text(filename);
+          }
+        });
+      }
+    });
+  }
+}
+
+Upload.loadDublinCore = function(url) {
+  $.ajax({
+      method: 'GET',
+      url: url,
+      dataType: 'xml',
+      success: function(data) {
+        var url = $(data.documentElement).children().each(function(index, elm) {
+          var tagName = elm.tagName.split(/:/)[1];
+          //alert(tagName);
+          $('#'+tagName).val($(elm).text());
+        });
+      }
+    });
 }
 
 /** invoked when a workflow is selected. display configuration panel for

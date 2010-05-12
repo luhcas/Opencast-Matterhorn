@@ -60,24 +60,16 @@
       </td>
       <td class="td-Action">
         <a>
-          <xsl:attribute name="href">
-            <xsl:text>javascript:Recordings.retryRecording('</xsl:text>
+          <xsl:attribute name="onclick">
+            <xsl:text>Recordings.retryRecording('</xsl:text>
             <xsl:value-of select="id" />
             <xsl:text>');</xsl:text>
           </xsl:attribute>
           Re-try
         </a>
         <a>
-          <xsl:attribute name="href">
-            <xsl:text>javascript:Recordings.editRetryRecording('</xsl:text>
-            <xsl:value-of select="id" />
-            <xsl:text>');</xsl:text>
-          </xsl:attribute>
-          Edit and Re-try
-        </a>
-        <a>
-          <xsl:attribute name="href">
-            <xsl:text>javascript:Recordings.removeRecording('</xsl:text>
+          <xsl:attribute name="onclick">
+            <xsl:text>Recordings.removeRecording('</xsl:text>
             <xsl:value-of select="id" />
             <xsl:text>');</xsl:text>
           </xsl:attribute>
