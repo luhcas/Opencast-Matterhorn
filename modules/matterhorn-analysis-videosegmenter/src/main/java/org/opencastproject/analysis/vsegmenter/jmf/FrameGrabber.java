@@ -220,7 +220,7 @@ public class FrameGrabber implements DataSink, BufferTransferHandler {
         this.notifyAll();
         return null;
       }
-      while (readBuffer == null) {
+      while (readBuffer == null && !endOfStream) {
         try {
           this.wait();
         } catch (InterruptedException e) {
@@ -230,7 +230,7 @@ public class FrameGrabber implements DataSink, BufferTransferHandler {
       }
       currentBuffer = readBuffer;
       readBuffer = null;
-      this.notify();
+      this.notifyAll();
     }
 
     return currentBuffer;
