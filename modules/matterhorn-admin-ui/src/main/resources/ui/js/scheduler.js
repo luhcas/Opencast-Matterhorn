@@ -31,6 +31,7 @@ function init() {
   AdminUI.internationalize(i18n, 'i18n');
   //Handle special cases like the window title.
   document.title = i18n.window.prefix + " " + i18n.window.schedule;
+  $('#i18n_page_title').text(i18n.page.title.sched);
   
   var d = new Date();
   d.setHours(d.getHours() + 1); //increment an hour.
@@ -81,7 +82,6 @@ function init() {
   
   var eventID = SchedulerUI.getURLParams('eventID');
   if(eventID && SchedulerUI.getURLParams('edit')){
-    $('#page-title').text('Edit Recording');
     document.title = i18n.window.prefix + " " + i18n.window.edit;
     $('#i18n_page_title').text(i18n.page.title.edit);
     $('#deleteButton').click(SchedulerUI.deleteForm);
@@ -112,8 +112,11 @@ SchedulerUI.submitForm = function() {
   var eventXML = null;
   eventXML = SchedulerForm.serialize();
   if(eventXML){
-    var method  = SchedulerUI.getURLParams('edit') ? '/updateEvent' : '/addEvent';
-    $.post( SCHEDULER_URL + method, {event: eventXML}, SchedulerUI.eventSubmitComplete );
+    if(SchedulerUI.getURLParams('edit')){
+      $.post( SCHEDULER_URL + '/event', {event: eventXML}, SchedulerUI.eventSubmitComplete );
+    }else{
+      $.ajax({ type: "PUT", url: SCHEDULER_URL + '/event', data: {event: eventXML}, success: SchedulerUI.eventSubmitComplete });
+    }
   }
   return true;
 };
@@ -331,41 +334,67 @@ SchedulerUI.showDaySelect = function(selection){
 
 SchedulerUI.selectRecordingType = function(recType){
   /**
-   *  eventFields is an array of EventFields and EventFieldGroups, keyed on <item>'s key attribute described in scheduler
+   *  fields is an array of EventFields and EventFieldGroups, keyed on <item>'s key attribute described in scheduler
    *  service contract for the addEvent rest endpoint.
    *  @see https://wiki.opencastproject.org/confluence/display/open/Scheduler+Service
    */
-  var fields = {
-    'id':           new FormField('eventID'),
-    'title':        new FormField('title', true),
-    'creator':      new FormField('creator'),
-    'contributor':  new FormField('contributor'),
-    'series-id':    new FormField('series'),
-    'subject':      new FormField('subject'),
-    'language':     new FormField('language'),
-    'abstract':     new FormField('description'),
-    'channel-id':   new FormField('distMatterhornMM', true, {label:'label-distribution',errorField:'missing-distribution'}),
-    'license':      new FormField('license'),
-    'startdate':    new FormField(['startDate', 'startTimeHour', 'startTimeMin'], true, { getValue:getStartDate, setValue:setStartDate, checkValue:checkStartDate, dispValue:getStartDateDisplay, label:label-startdate, errorField:missing-startdate }),
-    'duration':     new FormField(['durationHour', 'durationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-duration', errorField:'missing-duration' }), //returns a date incremented by duration.
-    'attendees':    new FormField('attendees', true, { getValue:getAgent, setValue:setAgent, checkValue:checkAgent }),
-    'device':       new FormField('attendees')
-  };
-  
+  var fields = {};
+
   if(recType == 'multiple'){ // Multiple recordings have some differnt fields and different behaviors
+    //show recurring_recording panel, hide single.
+    $('#recurring_recording').show();
+    $('#single_recording').hide();
     //series is required
     //repeats
     //rrule days
     //rrule start and end date
+    fields = {
+      'eventid':              new FormField('eventID'),
+      'title':                new FormField('title', true),
+      'creator':              new FormField('creator'),
+      'contributor':          new FormField('contributor'),
+      'series-id':            new FormField('series', true),
+      'subject':              new FormField('subject'),
+      'language':             new FormField('language'),
+      'abstract':             new FormField('description'),
+      'channel-id':           new FormField('distMatterhornMM', true, {label:'label-distribution',errorField:'missing-distribution'}),
+      'license':              new FormField('license'),
+      'recurrence.start':     new FormField(['recurStart'], true, { getValue:getRecurStartDate, setValue:setRecurStart, checkValue:checkRecurStart, dispValue:getRecurStartDisplay, label:'label-recurstart', errorField:'missing-recurstart' }),
+      'recurrence.duration':  new FormField(['recurDurationHour', 'recurDurationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-recurduration', errorField:'missing-recurduration' }), //returns a date incremented by duration.
+      'recurrence.end':       new FormField(['recurEnd'], true, {getValue:getRecurEnd, setValue:setRecurEnd, checkValue:checkRecurEnd, dispValue:getRecurEndDisplay}),
+      'attendees':            new FormField('attendees', true, { getValue:getAgent, setValue:setAgent, checkValue:checkAgent }),
+      'device':               new FormField('attendees')
+    };
+  }else{
+    //hide recurring_recording panel, show single.
+    $('#recurring_recording').hide();
+    $('#single_recording').show();
+    fields = {
+      'recurringeventid': new FormField('eventID'),
+      'title':            new FormField('title', true),
+      'creator':          new FormField('creator'),
+      'contributor':      new FormField('contributor'),
+      'series-id':        new FormField('series'),
+      'subject':          new FormField('subject'),
+      'language':         new FormField('language'),
+      'abstract':         new FormField('description'),
+      'channel-id':       new FormField('distMatterhornMM', true, {label:'label-distribution',errorField:'missing-distribution'}),
+      'license':          new FormField('license'),
+      'time.start':       new FormField(['startDate', 'startTimeHour', 'startTimeMin'], true, { getValue:getStartDate, setValue:setStartDate, checkValue:checkStartDate, dispValue:getStartDateDisplay, label:'label-startdate', errorField:'missing-startdate' }),
+      'time.end':         new FormField(['durationHour', 'durationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-duration', errorField:'missing-duration' }), //returns a date incremented by duration.
+      'attendees':        new FormField('attendees', true, { getValue:getAgent, setValue:setAgent, checkValue:checkAgent }),
+      'device':           new FormField('attendees')
+    };
   }
   //Form Manager, handles saving, loading, de/serialization, and validation
   SchedulerForm.setFormFields(fields);
+  
 }
 
 /* ======================== SchedulerForm ======================== */
 
 SchedulerForm.formFields    = false;
-SchedulerForm.rootEl        = 'scheduler-event';
+SchedulerForm.rootEl        = 'event';
 SchedulerForm.rootNS        = 'http://scheduler.opencastproject.org';
 
 /**
@@ -394,10 +423,10 @@ SchedulerForm.setFormFields = function(fields) {
 SchedulerForm.serialize = function() {
   if(this.validate()) {
     var doc = this.createDoc();
-    var mdlist = doc.createElement('metadata-list');
+    var mdlist = doc.createElement('metadata_list');
     for(var e in this.formFields) {
-      if(e == 'id' && this.formFields[e].getValue() != "") {
-        el = doc.createElement('eventId');
+      if(e == 'eventid' || e == 'recurringeventid' || e == 'recurrence') {
+        el = doc.createElement('eventid');
         el.appendChild(doc.createTextNode(this.formFields[e].getValue()));
         doc.documentElement.appendChild(el);
       } else {

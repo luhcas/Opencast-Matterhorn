@@ -472,7 +472,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
           currentSceneStabilityCount = 1;
           t++;
         }
-
         sceneChangeImminent = true;
       }
       
@@ -516,7 +515,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
         lastStableImage = bufferedImage;
         currentSceneStabilityCount++;
         sceneChangeImminent = false;
-
         logger.debug("Found new scene at {} s", startOfSegment);
       } 
   
